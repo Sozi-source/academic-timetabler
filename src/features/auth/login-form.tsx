@@ -48,7 +48,7 @@ export function LoginForm({
       {state.message ? (
         <div
           role="alert"
-          className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+          className="flex items-start gap-3 rounded-xl border border-danger-border bg-danger-surface px-4 py-3 text-sm text-danger"
         >
           <AlertCircle
             className="mt-0.5 size-4 shrink-0"
@@ -62,14 +62,14 @@ export function LoginForm({
       <div className="space-y-2">
         <label
           htmlFor="email"
-          className="block text-sm font-medium text-slate-800"
+          className="block text-sm font-medium text-text-primary"
         >
           Email address
         </label>
 
         <div className="relative">
           <Mail
-            className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+            className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-text-muted"
             aria-hidden="true"
           />
 
@@ -88,14 +88,14 @@ export function LoginForm({
                 : undefined
             }
             placeholder="name@college.ac.ke"
-            className="h-12 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-600 focus:ring-4 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100 aria-invalid:border-red-400 aria-invalid:focus:border-red-500 aria-invalid:focus:ring-red-100"
+            className="h-12 w-full rounded-xl border border-border-strong bg-surface pl-10 pr-4 text-sm text-text-primary outline-none transition placeholder:text-text-subtle hover:border-[#b8c7c4] focus:border-focus-border focus:ring-4 focus:ring-focus-ring/25 disabled:cursor-not-allowed disabled:bg-surface-muted aria-invalid:border-danger aria-invalid:focus:ring-danger-border/40"
           />
         </div>
 
         {emailError ? (
           <p
             id="email-error"
-            className="text-xs font-medium text-red-700"
+            className="text-xs font-medium text-danger"
           >
             {emailError}
           </p>
@@ -105,14 +105,14 @@ export function LoginForm({
       <div className="space-y-2">
         <label
           htmlFor="password"
-          className="block text-sm font-medium text-slate-800"
+          className="block text-sm font-medium text-text-primary"
         >
           Password
         </label>
 
         <div className="relative">
           <LockKeyhole
-            className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+            className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-text-muted"
             aria-hidden="true"
           />
 
@@ -129,14 +129,14 @@ export function LoginForm({
                 ? 'password-error'
                 : undefined
             }
-            className="h-12 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-4 text-sm text-slate-950 outline-none transition focus:border-slate-600 focus:ring-4 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100 aria-invalid:border-red-400 aria-invalid:focus:border-red-500 aria-invalid:focus:ring-red-100"
+            className="h-12 w-full rounded-xl border border-border-strong bg-surface pl-10 pr-4 text-sm text-text-primary outline-none transition hover:border-[#b8c7c4] focus:border-focus-border focus:ring-4 focus:ring-focus-ring/25 disabled:cursor-not-allowed disabled:bg-surface-muted aria-invalid:border-danger aria-invalid:focus:ring-danger-border/40"
           />
         </div>
 
         {passwordError ? (
           <p
             id="password-error"
-            className="text-xs font-medium text-red-700"
+            className="text-xs font-medium text-danger"
           >
             {passwordError}
           </p>
@@ -146,7 +146,7 @@ export function LoginForm({
       <button
         type="submit"
         disabled={pending}
-        className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#1e293b] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0f172a] focus:outline-none focus:ring-4 focus:ring-slate-300 disabled:cursor-not-allowed disabled:opacity-70"
+        className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary-hover focus:outline-none focus:ring-4 focus:ring-focus-ring/40 disabled:cursor-not-allowed disabled:opacity-65"
       >
         {pending ? (
           <>

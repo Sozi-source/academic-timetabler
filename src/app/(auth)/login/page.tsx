@@ -19,6 +19,12 @@ interface LoginPageProps {
   }>;
 }
 
+const platformFeatures = [
+  'Structured academic-period planning',
+  'Reliable timetable preparation',
+  'Secure departmental administration',
+];
+
 export default async function LoginPage({
   searchParams,
 }: LoginPageProps) {
@@ -30,105 +36,93 @@ export default async function LoginPage({
       : undefined;
 
   return (
-    <main className="min-h-screen bg-slate-50 lg:grid lg:grid-cols-[1.08fr_0.92fr]">
-      <section className="relative hidden overflow-hidden bg-[#0f172a] px-12 py-14 text-white lg:flex lg:flex-col lg:justify-between">
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-1.5 bg-slate-700"
-          aria-hidden="true"
-        />
-
+    <main className="min-h-screen bg-background lg:grid lg:grid-cols-[1fr_0.92fr]">
+      <section className="relative hidden border-r border-border bg-surface-subtle px-12 py-14 lg:flex lg:flex-col lg:justify-between">
         <div>
-          <div className="flex size-12 items-center justify-center rounded-2xl bg-white/5 text-slate-300 ring-1 ring-inset ring-white/10">
+          <div className="flex size-12 items-center justify-center rounded-2xl border border-border bg-surface text-primary shadow-sm">
             <CalendarDays
               className="size-6"
               aria-hidden="true"
             />
           </div>
 
-          <p className="mt-8 text-xs font-semibold uppercase tracking-[0.24em] text-slate-300">
+          <p className="mt-8 text-xs font-semibold uppercase tracking-[0.22em] text-primary">
             HND App
           </p>
 
-          <h1 className="mt-4 max-w-xl text-4xl font-semibold leading-tight tracking-tight">
-            Intelligent academic planning for the
-            Nutrition and Dietetics department.
+          <h1 className="mt-4 max-w-xl text-4xl font-semibold leading-tight tracking-tight text-text-primary">
+            Academic operations designed for clarity,
+            accuracy and control.
           </h1>
 
-          <p className="mt-5 max-w-xl text-base leading-7 text-slate-300">
-            Manage academic periods, cohorts, trainers,
-            teaching rooms and timetable preparation
-            from one secure platform.
+          <p className="mt-5 max-w-xl text-base leading-7 text-text-secondary">
+            Prepare academic periods, teaching resources,
+            cohort schedules and departmental timetables
+            through one structured workspace.
           </p>
 
-          <div className="mt-10 grid max-w-xl gap-4">
-            {[
-              'Secure role-based departmental access',
-              'Reliable timetable preparation',
-              'Designed for future academic modules',
-            ].map((item) => (
+          <div className="mt-10 grid max-w-xl gap-3">
+            {platformFeatures.map((item) => (
               <div
                 key={item}
-                className="flex items-center gap-3 text-sm text-slate-300"
+                className="flex items-center gap-3 rounded-xl border border-border-soft bg-surface px-4 py-3 text-sm text-text-secondary shadow-sm"
               >
                 <CheckCircle2
-                  className="size-4 shrink-0 text-slate-300"
+                  className="size-4 shrink-0 text-primary"
                   aria-hidden="true"
                 />
+
                 <span>{item}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="flex items-center gap-3 border-t border-white/10 pt-6 text-sm text-slate-400">
+        <div className="flex items-center gap-3 border-t border-border pt-6 text-sm text-text-muted">
           <ShieldCheck
-            className="size-5 text-slate-300"
+            className="size-5 text-primary"
             aria-hidden="true"
           />
+
           Protected departmental access
         </div>
       </section>
 
-      <section className="relative flex min-h-screen items-center justify-center px-5 py-10 sm:px-8 lg:min-h-0">
-        <div
-          className="absolute inset-x-0 top-0 h-1.5 bg-slate-700 lg:hidden"
-          aria-hidden="true"
-        />
-
+      <section className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-8 lg:min-h-0">
         <div className="w-full max-w-md">
           <div className="mb-7 lg:hidden">
-            <div className="flex size-11 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
+            <div className="flex size-11 items-center justify-center rounded-xl border border-border bg-surface text-primary shadow-sm">
               <CalendarDays
                 className="size-5"
                 aria-hidden="true"
               />
             </div>
 
-            <p className="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">
+            <p className="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
               HND App
             </p>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/60 sm:p-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-600">
-              Department access
-            </p>
+          <div className="rounded-[1.35rem] border border-border bg-surface p-6 shadow-[var(--shadow-md)] sm:p-8">
+            <div className="mb-7">
+              <div className="inline-flex rounded-full border border-border bg-primary-subtle px-3 py-1 text-xs font-semibold text-primary">
+                Department access
+              </div>
 
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
-              Sign in to continue
-            </h2>
+              <h2 className="mt-4 text-2xl font-semibold tracking-tight text-text-primary">
+                Sign in to continue
+              </h2>
 
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              Use your authorized departmental email
-              address and password.
-            </p>
-
-            <div className="mt-7">
-              <LoginForm nextPath={nextPath} />
+              <p className="mt-2 text-sm leading-6 text-text-secondary">
+                Enter your authorized departmental
+                credentials.
+              </p>
             </div>
+
+            <LoginForm nextPath={nextPath} />
           </div>
 
-          <p className="mt-5 text-center text-xs leading-5 text-slate-500">
+          <p className="mt-5 text-center text-xs leading-5 text-text-muted">
             Human Nutrition and Dietetics Academic
             Management Platform
           </p>

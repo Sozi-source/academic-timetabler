@@ -1,0 +1,241 @@
+'use client';
+
+import {
+  ChevronDown,
+  ChevronUp,
+  ChevronsUpDown,
+  type LucideIcon,
+} from 'lucide-react';
+import type { ReactNode } from 'react';
+import { useState } from 'react';
+import {
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  type ColumnDef,
+  type SortingState,
+  useReactTable,
+} from '@tanstack/react-table';
+
+import { cn } from '@/lib/utils/cn';
+
+import { EmptyState } from './empty-state';
+import { Pagination } from './pagination';
+import { TableToolbar } from './table-toolbar';
+
+interface DataTableProps<TData, TValue> {
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+  searchPlaceholder?: string;
+  toolbarFilters?: ReactNode;
+  toolbarActions?: ReactNode;
+  emptyIcon: LucideIcon;
+  emptyTitle?: string;
+  emptyDescription?: string;
+  initialPageSize?: number;
+  getRowId?: (row: TData) => string;
+}
+
+export function DataTable<TData, TValue>({
+  columns,
+  data,
+  searchPlaceholder = 'Search records',
+  toolbarFilters,
+  toolbarActions,
+  emptyIcon,
+  emptyTitle = 'No records found',
+  emptyDescription =
+    'Create the first record or adjust the current filters.',
+  initialPageSize = 10,
+  getRowId,
+}: DataTableProps<TData, TValue>) {
+  const [sorting, setSorting] =
+    useState<SortingState>([]);
+
+  const [globalFilter, setGlobalFilter] =
+    useState('');
+
+  /*
+   * TanStack Table intentionally returns non-memoizable
+   * functions. React Compiler should skip this hook call.
+   */
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const table = useReactTable({
+    data,
+    columns,
+    state: {
+      sorting,
+      globalFilter,
+    },
+    initialState: {
+      pagination: {
+        pageSize: initialPageSize,
+      },
+    },
+    getRowId,
+    onSortingChange: setSorting,
+    onGlobalFilterChange: setGlobalFilter,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel:
+      getPaginationRowModel(),
+  });
+
+  const rows = table.getRowModel().rows;
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-[var(--shadow-sm)]">
+      <TableToolbar
+        searchValue={globalFilter}
+        onSearchChange={setGlobalFilter}
+        searchPlaceholder={searchPlaceholder}
+        filters={toolbarFilters}
+        actions={toolbarActions}
+      />
+
+      {rows.length === 0 ? (
+        <div className="p-4">
+          <EmptyState
+            icon={emptyIcon}
+            title={emptyTitle}
+            description={emptyDescription}
+          />
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-left">
+            <thead className="bg-surface-subtle">
+              {table
+                .getHeaderGroups()
+                .map((headerGroup) => (
+                  <tr
+                    key={headerGroup.id}
+                    className="border-b border-border"
+                  >
+                    {headerGroup.headers.map(
+                      (header) => {
+                        const canSort =
+                          header.column.getCanSort();
+
+                        const sorted =
+                          header.column.getIsSorted();
+
+                        return (
+                          <th
+                            key={header.id}
+                            colSpan={header.colSpan}
+                            className="whitespace-nowrap px-5 py-3.5 text-xs font-semibold uppercase tracking-[0.11em] text-text-muted"
+                          >
+                            {header.isPlaceholder ? null : (
+                              <button
+                                type="button"
+                                disabled={!canSort}
+                                onClick={
+                                  canSort
+                                    ? header.column.getToggleSortingHandler()
+                                    : undefined
+                                }
+                                className={cn(
+                                  'inline-flex items-center gap-1.5 text-left',
+                                  canSort &&
+                                    'cursor-pointer transition hover:text-text-primary',
+                                )}
+                              >
+                                {flexRender(
+                                  header.column
+                                    .columnDef.header,
+                                  header.getContext(),
+                                )}
+
+                                {canSort ? (
+                                  sorted === 'asc' ? (
+                                    <ChevronUp
+                                      className="size-3.5"
+                                      aria-hidden="true"
+                                    />
+                                  ) : sorted ===
+                                    'desc' ? (
+                                    <ChevronDown
+                                      className="size-3.5"
+                                      aria-hidden="true"
+                                    />
+                                  ) : (
+                                    <ChevronsUpDown
+                                      className="size-3.5 text-text-subtle"
+                                      aria-hidden="true"
+                                    />
+                                  )
+                                ) : null}
+                              </button>
+                            )}
+                          </th>
+                        );
+                      },
+                    )}
+                  </tr>
+                ))}
+            </thead>
+
+            <tbody>
+              {rows.map((row) => (
+                <tr
+                  key={row.id}
+                  className="border-b border-border-soft transition last:border-b-0 hover:bg-surface-subtle/70"
+                >
+                  {row
+                    .getVisibleCells()
+                    .map((cell) => (
+                      <td
+                        key={cell.id}
+                        className="px-5 py-4 text-sm text-text-secondary"
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </td>
+                    ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <Pagination
+        pageIndex={
+          table.getState().pagination.pageIndex
+        }
+        pageCount={table.getPageCount()}
+        pageSize={
+          table.getState().pagination.pageSize
+        }
+        totalRows={
+          table.getFilteredRowModel().rows.length
+        }
+        canPreviousPage={
+          table.getCanPreviousPage()
+        }
+        canNextPage={table.getCanNextPage()}
+        onFirstPage={() => {
+          table.firstPage();
+        }}
+        onPreviousPage={() => {
+          table.previousPage();
+        }}
+        onNextPage={() => {
+          table.nextPage();
+        }}
+        onLastPage={() => {
+          table.lastPage();
+        }}
+        onPageSizeChange={(pageSize) => {
+          table.setPageSize(pageSize);
+        }}
+      />
+    </div>
+  );
+}

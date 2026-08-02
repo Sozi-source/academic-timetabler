@@ -27,6 +27,11 @@ export const dashboardNavigation = [
     label: 'Academic setup',
     items: [
       {
+        label: 'Academic years',
+        href: '/timetable/academic-years',
+        icon: CalendarDays,
+      },
+      {
         label: 'Academic periods',
         href: '/timetable/academic-periods',
         icon: CalendarDays,

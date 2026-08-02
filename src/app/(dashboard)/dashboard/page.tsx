@@ -1,52 +1,93 @@
 import {
   BookOpen,
   Building2,
+  CalendarClock,
   CalendarDays,
   CheckCircle2,
+  GraduationCap,
+  Plus,
   School,
+  Sparkles,
   UserRound,
 } from 'lucide-react';
+import Link from 'next/link';
 
+import { Badge } from '@/components/ui/badge';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+} from '@/components/ui/card';
+import { MetricCard } from '@/components/ui/metric-card';
+import { PageHeader } from '@/components/ui/page-header';
 import { requireHodAccess } from '@/features/auth/authorization';
 
-const summaryCards = [
+const metrics = [
   {
     label: 'Academic period',
-    value: 'Not configured',
-    detail: 'Create the first teaching period',
+    value: 'Not set',
+    description: 'Create the active teaching period',
     icon: CalendarDays,
+    status: 'Required',
   },
   {
     label: 'Active cohorts',
     value: '0',
-    detail: 'No cohorts registered',
+    description: 'No cohorts configured yet',
     icon: School,
+    status: 'Setup',
   },
   {
-    label: 'Units offered',
+    label: 'Units running',
     value: '0',
-    detail: 'No units configured',
+    description: 'Across active programmes',
     icon: BookOpen,
+    status: 'Setup',
   },
   {
     label: 'Trainers',
     value: '0',
-    detail: 'No trainers registered',
+    description: 'Available teaching staff',
     icon: UserRound,
+    status: 'Setup',
   },
   {
-    label: 'Rooms',
+    label: 'Teaching rooms',
     value: '0',
-    detail: 'No rooms registered',
+    description: 'Available scheduling resources',
     icon: Building2,
+    status: 'Setup',
+  },
+];
+
+const quickActions = [
+  {
+    label: 'Academic period',
+    href: '/timetable/academic-periods',
+    icon: CalendarDays,
+  },
+  {
+    label: 'Programme',
+    href: '/timetable/programmes',
+    icon: GraduationCap,
+  },
+  {
+    label: 'Cohort',
+    href: '/timetable/cohorts',
+    icon: School,
+  },
+  {
+    label: 'Trainer',
+    href: '/timetable/trainers',
+    icon: UserRound,
   },
 ];
 
 const setupSteps = [
-  'Create an academic period',
-  'Configure working days and time slots',
+  'Create the active academic period',
+  'Configure working days and lesson times',
   'Register teaching rooms',
-  'Add programmes and active cohorts',
+  'Add programmes and cohorts',
   'Register units and trainers',
   'Create teaching allocations',
 ];
@@ -56,124 +97,191 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <header className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-            Department overview
-          </p>
+      <PageHeader
+        eyebrow="Department overview"
+        title="Academic operations"
+        description="Prepare the academic structure and departmental resources required to produce a reliable timetable."
+        context={
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="primary">
+              Human Nutrition and Dietetics
+            </Badge>
 
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-text-primary sm:text-3xl">
-            Welcome, {profile.fullName}
-          </h1>
+            <Badge variant="warning" dot>
+              Academic period not configured
+            </Badge>
 
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-text-secondary">
-            Complete the core timetable configuration
-            before generating the department schedule.
-          </p>
-        </div>
-
-        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-success-border bg-success-surface px-3 py-1.5 text-xs font-semibold text-success">
-          <span className="size-1.5 rounded-full bg-success" />
-          Secure session active
-        </div>
-      </header>
+            <Badge variant="success" dot>
+              Secure session
+            </Badge>
+          </div>
+        }
+      />
 
       <section
-        aria-label="Timetable overview"
+        aria-label="Department metrics"
         className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5"
       >
-        {summaryCards.map((card) => {
-          const Icon = card.icon;
-
-          return (
-            <article
-              key={card.label}
-              className="rounded-2xl border border-border bg-surface p-5 shadow-[var(--shadow-sm)]"
-            >
-              <div className="flex size-10 items-center justify-center rounded-xl bg-primary-soft text-primary">
-                <Icon
-                  className="size-5"
-                  aria-hidden="true"
-                />
-              </div>
-
-              <p className="mt-5 text-2xl font-semibold tracking-tight text-text-primary">
-                {card.value}
-              </p>
-
-              <p className="mt-1 text-sm font-medium text-text-primary">
-                {card.label}
-              </p>
-
-              <p className="mt-1 text-xs leading-5 text-text-muted">
-                {card.detail}
-              </p>
-            </article>
-          );
-        })}
+        {metrics.map((metric) => (
+          <MetricCard
+            key={metric.label}
+            {...metric}
+          />
+        ))}
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
-        <article className="rounded-2xl border border-border bg-surface p-6 shadow-[var(--shadow-sm)]">
-          <div>
+        <Card>
+          <CardHeader>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-text-muted">
               Setup progress
             </p>
 
             <h2 className="mt-2 text-lg font-semibold text-text-primary">
-              Timetable preparation checklist
+              Timetable readiness
             </h2>
 
-            <p className="mt-1 text-sm leading-6 text-text-secondary">
-              Complete these foundations in sequence.
+            <p className="mt-1 text-sm text-text-secondary">
+              Complete these steps before generating the
+              first departmental timetable.
             </p>
-          </div>
+          </CardHeader>
 
-          <ol className="mt-6 grid gap-3 sm:grid-cols-2">
-            {setupSteps.map((step, index) => (
-              <li
-                key={step}
-                className="flex items-start gap-3 rounded-xl border border-border-soft bg-surface-subtle px-4 py-3"
-              >
-                <span className="flex size-7 shrink-0 items-center justify-center rounded-full border border-border-strong bg-surface text-xs font-semibold text-text-secondary">
-                  {index + 1}
-                </span>
+          <CardContent>
+            <ol className="grid gap-3 sm:grid-cols-2">
+              {setupSteps.map((step, index) => (
+                <li
+                  key={step}
+                  className="flex items-start gap-3 rounded-xl border border-border-soft bg-surface-subtle px-4 py-3"
+                >
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-full border border-border-strong bg-surface text-xs font-semibold text-text-secondary">
+                    {index + 1}
+                  </span>
 
-                <span className="pt-1 text-sm text-text-secondary">
-                  {step}
-                </span>
-              </li>
-            ))}
-          </ol>
-        </article>
+                  <span className="pt-1 text-sm text-text-secondary">
+                    {step}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </CardContent>
+        </Card>
 
-        <article className="rounded-2xl border border-border bg-surface p-6 shadow-[var(--shadow-sm)]">
-          <div className="flex size-10 items-center justify-center rounded-xl bg-success-surface text-success">
-            <CheckCircle2
-              className="size-5"
-              aria-hidden="true"
-            />
-          </div>
-
-          <h2 className="mt-5 text-lg font-semibold text-text-primary">
-            Platform foundation
-          </h2>
-
-          <p className="mt-2 text-sm leading-6 text-text-secondary">
-            Authentication, secure session refresh and
-            role-based HOD access are operational.
-          </p>
-
-          <div className="mt-6 border-t border-border pt-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.15em] text-text-muted">
-              Next component
+        <Card>
+          <CardHeader>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-text-muted">
+              Quick actions
             </p>
 
-            <p className="mt-2 text-sm font-semibold text-primary">
-              Academic period management
-            </p>
-          </div>
-        </article>
+            <h2 className="mt-2 text-lg font-semibold text-text-primary">
+              Start configuration
+            </h2>
+          </CardHeader>
+
+          <CardContent className="space-y-2">
+            {quickActions.map((action) => {
+              const Icon = action.icon;
+
+              return (
+                <Link
+                  key={action.href}
+                  href={action.href}
+                  className="group flex min-h-11 items-center justify-between rounded-xl border border-border-soft px-3.5 text-sm font-medium text-text-secondary transition hover:border-border-strong hover:bg-surface-subtle hover:text-text-primary"
+                >
+                  <span className="flex items-center gap-3">
+                    <Icon
+                      className="size-4 text-primary"
+                      aria-hidden="true"
+                    />
+                    Add {action.label}
+                  </span>
+
+                  <Plus
+                    className="size-4 text-text-subtle transition group-hover:text-primary"
+                    aria-hidden="true"
+                  />
+                </Link>
+              );
+            })}
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-text-muted">
+                  Recent activity
+                </p>
+
+                <h2 className="mt-2 text-lg font-semibold text-text-primary">
+                  Department changes
+                </h2>
+              </div>
+
+              <CalendarClock
+                className="size-5 text-text-muted"
+                aria-hidden="true"
+              />
+            </div>
+          </CardHeader>
+
+          <CardContent>
+            <div className="rounded-xl border border-dashed border-border-strong bg-surface-subtle px-5 py-8 text-center">
+              <p className="text-sm font-medium text-text-primary">
+                No recent activity
+              </p>
+
+              <p className="mt-1 text-xs leading-5 text-text-muted">
+                Configuration changes will appear here.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-text-muted">
+                  System insights
+                </p>
+
+                <h2 className="mt-2 text-lg font-semibold text-text-primary">
+                  Readiness guidance
+                </h2>
+              </div>
+
+              <Sparkles
+                className="size-5 text-primary"
+                aria-hidden="true"
+              />
+            </div>
+          </CardHeader>
+
+          <CardContent>
+            <div className="flex items-start gap-3 rounded-xl border border-info-border bg-info-surface px-4 py-4">
+              <CheckCircle2
+                className="mt-0.5 size-5 shrink-0 text-info"
+                aria-hidden="true"
+              />
+
+              <div>
+                <p className="text-sm font-semibold text-text-primary">
+                  Authentication is operational
+                </p>
+
+                <p className="mt-1 text-xs leading-5 text-text-secondary">
+                  Welcome, {profile.fullName}. The next
+                  required component is Academic Period
+                  Management.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </section>
     </div>
   );

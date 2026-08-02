@@ -1,13 +1,14 @@
 'use client';
 
 import {
+  Bell,
   LogOut,
   Menu,
-  UserRound,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 
+import { Button } from '@/components/ui/button';
 import { logoutAction } from '@/features/auth/actions';
 import type { AuthenticatedProfile } from '@/features/auth/types';
 
@@ -49,33 +50,46 @@ export function DashboardShell({
       <div className="lg:pl-[var(--sidebar-width)]">
         <header className="sticky top-0 z-20 flex min-h-[var(--header-height)] items-center justify-between gap-4 border-b border-border bg-surface/95 px-4 backdrop-blur sm:px-6 lg:px-8">
           <div className="flex min-w-0 items-center gap-3">
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="Open navigation"
               onClick={() => {
                 setMobileOpen(true);
               }}
-              aria-label="Open navigation"
-              className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary lg:hidden"
+              className="lg:hidden"
             >
               <Menu
                 className="size-5"
                 aria-hidden="true"
               />
-            </button>
+            </Button>
 
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-text-primary">
-                Department workspace
+                Human Nutrition and Dietetics
               </p>
 
               <p className="hidden truncate text-xs text-text-muted sm:block">
-                Academic planning and timetable management
+                Academic Operations Platform
               </p>
             </div>
           </div>
 
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="hidden min-w-0 text-right md:block">
+          <div className="flex min-w-0 items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Notifications"
+              title="Notifications"
+            >
+              <Bell
+                className="size-4"
+                aria-hidden="true"
+              />
+            </Button>
+
+            <div className="hidden min-w-0 border-l border-border pl-4 text-right md:block">
               <p className="truncate text-sm font-semibold text-text-primary">
                 {profile.fullName}
               </p>
@@ -89,26 +103,22 @@ export function DashboardShell({
               title={profile.fullName}
               className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border bg-primary-soft text-xs font-semibold text-primary"
             >
-              {initials || (
-                <UserRound
-                  className="size-4"
-                  aria-hidden="true"
-                />
-              )}
+              {initials}
             </div>
 
             <form action={logoutAction}>
-              <button
+              <Button
                 type="submit"
+                variant="ghost"
+                size="icon"
                 aria-label="Sign out"
                 title="Sign out"
-                className="flex size-10 items-center justify-center rounded-xl border border-border bg-surface text-text-muted transition hover:bg-surface-subtle hover:text-text-primary"
               >
                 <LogOut
                   className="size-4"
                   aria-hidden="true"
                 />
-              </button>
+              </Button>
             </form>
           </div>
         </header>

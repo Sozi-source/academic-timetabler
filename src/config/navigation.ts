@@ -3,6 +3,7 @@ import {
   Building2,
   CalendarDays,
   Clock3,
+  FileChartColumn,
   GraduationCap,
   LayoutDashboard,
   Presentation,
@@ -13,53 +14,78 @@ import {
 
 export const dashboardNavigation = [
   {
-    label: 'Dashboard',
-    href: '/dashboard',
-    icon: LayoutDashboard,
+    label: 'Overview',
+    items: [
+      {
+        label: 'Dashboard',
+        href: '/dashboard',
+        icon: LayoutDashboard,
+      },
+    ],
   },
   {
-    label: 'Academic periods',
-    href: '/timetable/academic-periods',
-    icon: CalendarDays,
+    label: 'Academic setup',
+    items: [
+      {
+        label: 'Academic periods',
+        href: '/timetable/academic-periods',
+        icon: CalendarDays,
+      },
+      {
+        label: 'Programmes',
+        href: '/timetable/programmes',
+        icon: GraduationCap,
+      },
+      {
+        label: 'Cohorts',
+        href: '/timetable/cohorts',
+        icon: School,
+      },
+      {
+        label: 'Units',
+        href: '/timetable/units',
+        icon: BookOpen,
+      },
+    ],
   },
   {
-    label: 'Time slots',
-    href: '/timetable/time-slots',
-    icon: Clock3,
+    label: 'Resources',
+    items: [
+      {
+        label: 'Trainers',
+        href: '/timetable/trainers',
+        icon: UserRound,
+      },
+      {
+        label: 'Rooms',
+        href: '/timetable/rooms',
+        icon: Building2,
+      },
+      {
+        label: 'Time slots',
+        href: '/timetable/time-slots',
+        icon: Clock3,
+      },
+    ],
   },
   {
-    label: 'Rooms',
-    href: '/timetable/rooms',
-    icon: Building2,
-  },
-  {
-    label: 'Programmes',
-    href: '/timetable/programmes',
-    icon: GraduationCap,
-  },
-  {
-    label: 'Cohorts',
-    href: '/timetable/cohorts',
-    icon: School,
-  },
-  {
-    label: 'Units',
-    href: '/timetable/units',
-    icon: BookOpen,
-  },
-  {
-    label: 'Trainers',
-    href: '/timetable/trainers',
-    icon: UserRound,
-  },
-  {
-    label: 'Teaching allocations',
-    href: '/timetable/teaching-allocations',
-    icon: Presentation,
-  },
-  {
-    label: 'Generate timetable',
-    href: '/timetable/generator',
-    icon: Sparkles,
+    label: 'Scheduling',
+    items: [
+      {
+        label: 'Teaching allocations',
+        href: '/timetable/teaching-allocations',
+        icon: Presentation,
+      },
+      {
+        label: 'Generate timetable',
+        href: '/timetable/generator',
+        icon: Sparkles,
+      },
+      {
+        label: 'Published timetables',
+        href: '/timetable/published',
+        icon: FileChartColumn,
+      },
+    ],
   },
 ] as const;

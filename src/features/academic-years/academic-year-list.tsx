@@ -1,6 +1,8 @@
 import {
   CalendarDays,
+  Pencil,
 } from 'lucide-react';
+import Link from 'next/link';
 
 import { EmptyState } from '@/components/ui/empty-state';
 
@@ -63,8 +65,10 @@ export function AcademicYearList({
 
                 <p className="mt-1 text-xs text-text-muted">
                   {formatDate(academicYear.startsOn)}
-                  {' — '}
-                  {formatDate(academicYear.endsOn)}
+                    <span className="mx-2 text-text-subtle">
+                      to
+                    </span>
+                    {formatDate(academicYear.endsOn)}
                 </p>
               </div>
 
@@ -83,7 +87,18 @@ export function AcademicYearList({
               </p>
             )}
 
-            <div className="mt-5 border-t border-border-soft pt-4">
+            <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-border-soft pt-4">
+              <Link
+                href={`/timetable/academic-years/${academicYear.id}/edit`}
+                className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+              >
+                <Pencil
+                  className="size-3.5"
+                  aria-hidden="true"
+                />
+                Edit
+              </Link>
+
               <AcademicYearActions
                 academicYear={academicYear}
               />
@@ -150,7 +165,7 @@ export function AcademicYearList({
                   <td className="px-5 py-4 text-sm text-text-secondary">
                     {formatDate(academicYear.startsOn)}
                     <span className="mx-2 text-text-subtle">
-                      →
+                      to
                     </span>
                     {formatDate(academicYear.endsOn)}
                   </td>
@@ -169,7 +184,18 @@ export function AcademicYearList({
                   </td>
 
                   <td className="px-5 py-4">
-                    <div className="flex justify-end">
+                    <div className="flex justify-end gap-2">
+                      <Link
+                        href={`/timetable/academic-years/${academicYear.id}/edit`}
+                        className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+                      >
+                        <Pencil
+                          className="size-3.5"
+                          aria-hidden="true"
+                        />
+                        Edit
+                      </Link>
+
                       <AcademicYearActions
                         academicYear={academicYear}
                       />

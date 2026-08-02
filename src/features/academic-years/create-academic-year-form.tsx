@@ -13,6 +13,12 @@ import {
 } from 'react';
 
 import { Button } from '@/components/ui/button';
+import {
+  FormField,
+  getFormFieldDescriptionId,
+} from '@/components/ui/form-field';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 import {
   createAcademicYearAction,
@@ -85,152 +91,101 @@ export function CreateAcademicYearForm() {
         </div>
       ) : null}
 
-      <div className="space-y-2">
-        <label
-          htmlFor="academic-year-name"
-          className="block text-sm font-medium text-text-primary"
-        >
-          Academic year name
-        </label>
-
-        <input
+      <FormField
+        id="academic-year-name"
+        label="Academic year name"
+        required
+        error={nameError}
+        description="Use a clear institutional name such as 2026 Academic Year."
+      >
+        <Input
           id="academic-year-name"
           name="name"
           type="text"
           required
           disabled={pending}
+          hasError={Boolean(nameError)}
+          aria-describedby={getFormFieldDescriptionId(
+            'academic-year-name',
+            {
+              hasDescription: true,
+              hasError: Boolean(nameError),
+            },
+          )}
           placeholder="Example: 2026 Academic Year"
-          aria-invalid={Boolean(nameError)}
-          aria-describedby={
-            nameError
-              ? 'academic-year-name-error'
-              : 'academic-year-name-help'
-          }
-          className="h-11 w-full rounded-xl border border-border-strong bg-surface px-3.5 text-sm text-text-primary outline-none transition placeholder:text-text-subtle hover:border-[#b8c7c4] focus:border-focus-border focus:ring-4 focus:ring-focus-ring/25 disabled:cursor-not-allowed disabled:bg-surface-muted aria-invalid:border-danger"
         />
-
-        {nameError ? (
-          <p
-            id="academic-year-name-error"
-            className="text-xs font-medium text-danger"
-          >
-            {nameError}
-          </p>
-        ) : (
-          <p
-            id="academic-year-name-help"
-            className="text-xs text-text-muted"
-          >
-            Use a clear institutional name such as
-            “2026 Academic Year”.
-          </p>
-        )}
-      </div>
+      </FormField>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <label
-            htmlFor="academic-year-start"
-            className="block text-sm font-medium text-text-primary"
-          >
-            Start date
-          </label>
-
-          <input
+        <FormField
+          id="academic-year-start"
+          label="Start date"
+          required
+          error={startsOnError}
+        >
+          <Input
             id="academic-year-start"
             name="startsOn"
             type="date"
             required
             disabled={pending}
-            aria-invalid={Boolean(startsOnError)}
-            aria-describedby={
-              startsOnError
-                ? 'academic-year-start-error'
-                : undefined
-            }
-            className="h-11 w-full rounded-xl border border-border-strong bg-surface px-3.5 text-sm text-text-primary outline-none transition hover:border-[#b8c7c4] focus:border-focus-border focus:ring-4 focus:ring-focus-ring/25 disabled:cursor-not-allowed disabled:bg-surface-muted aria-invalid:border-danger"
+            hasError={Boolean(startsOnError)}
+            aria-describedby={getFormFieldDescriptionId(
+              'academic-year-start',
+              {
+                hasError: Boolean(startsOnError),
+              },
+            )}
           />
+        </FormField>
 
-          {startsOnError ? (
-            <p
-              id="academic-year-start-error"
-              className="text-xs font-medium text-danger"
-            >
-              {startsOnError}
-            </p>
-          ) : null}
-        </div>
-
-        <div className="space-y-2">
-          <label
-            htmlFor="academic-year-end"
-            className="block text-sm font-medium text-text-primary"
-          >
-            End date
-          </label>
-
-          <input
+        <FormField
+          id="academic-year-end"
+          label="End date"
+          required
+          error={endsOnError}
+        >
+          <Input
             id="academic-year-end"
             name="endsOn"
             type="date"
             required
             disabled={pending}
-            aria-invalid={Boolean(endsOnError)}
-            aria-describedby={
-              endsOnError
-                ? 'academic-year-end-error'
-                : undefined
-            }
-            className="h-11 w-full rounded-xl border border-border-strong bg-surface px-3.5 text-sm text-text-primary outline-none transition hover:border-[#b8c7c4] focus:border-focus-border focus:ring-4 focus:ring-focus-ring/25 disabled:cursor-not-allowed disabled:bg-surface-muted aria-invalid:border-danger"
+            hasError={Boolean(endsOnError)}
+            aria-describedby={getFormFieldDescriptionId(
+              'academic-year-end',
+              {
+                hasError: Boolean(endsOnError),
+              },
+            )}
           />
-
-          {endsOnError ? (
-            <p
-              id="academic-year-end-error"
-              className="text-xs font-medium text-danger"
-            >
-              {endsOnError}
-            </p>
-          ) : null}
-        </div>
+        </FormField>
       </div>
 
-      <div className="space-y-2">
-        <label
-          htmlFor="academic-year-notes"
-          className="block text-sm font-medium text-text-primary"
-        >
-          Notes
-          <span className="ml-1 font-normal text-text-muted">
-            Optional
-          </span>
-        </label>
-
-        <textarea
+      <FormField
+        id="academic-year-notes"
+        label="Notes"
+        optional
+        error={notesError}
+        description="Add relevant institutional planning information."
+      >
+        <Textarea
           id="academic-year-notes"
           name="notes"
           rows={4}
           maxLength={1000}
           disabled={pending}
-          aria-invalid={Boolean(notesError)}
-          aria-describedby={
-            notesError
-              ? 'academic-year-notes-error'
-              : undefined
-          }
+          hasError={Boolean(notesError)}
+          aria-describedby={getFormFieldDescriptionId(
+            'academic-year-notes',
+            {
+              hasDescription: true,
+              hasError: Boolean(notesError),
+            },
+          )}
           placeholder="Add relevant planning information."
-          className="w-full resize-y rounded-xl border border-border-strong bg-surface px-3.5 py-3 text-sm leading-6 text-text-primary outline-none transition placeholder:text-text-subtle hover:border-[#b8c7c4] focus:border-focus-border focus:ring-4 focus:ring-focus-ring/25 disabled:cursor-not-allowed disabled:bg-surface-muted aria-invalid:border-danger"
         />
-
-        {notesError ? (
-          <p
-            id="academic-year-notes-error"
-            className="text-xs font-medium text-danger"
-          >
-            {notesError}
-          </p>
-        ) : null}
-      </div>
+      </FormField>
 
       <div className="flex justify-end border-t border-border-soft pt-5">
         <Button

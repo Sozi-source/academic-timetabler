@@ -18,7 +18,7 @@ export function Card({
   return (
     <article
       className={cn(
-        'rounded-2xl border border-border bg-surface shadow-[var(--shadow-sm)]',
+        'rounded-2xl border border-border bg-surface shadow-sm',
         className,
       )}
       {...props}

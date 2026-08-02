@@ -11,25 +11,6 @@ import type {
   RoomImportStagedRow,
 } from './types';
 
-interface ImportBatchRow {
-  id: string;
-  entity_type: 'rooms';
-  template_version: string;
-  original_file_name: string;
-  file_size_bytes: number | null;
-  status: RoomImportBatch['status'];
-  total_rows: number;
-  valid_rows: number;
-  invalid_rows: number;
-  duplicate_rows: number;
-  imported_rows: number;
-  skipped_rows: number;
-  failed_rows: number;
-  failure_message: string | null;
-  created_at: string;
-  completed_at: string | null;
-}
-
 interface ImportStagedRow {
   id: string;
   source_row_number: number;

@@ -62,6 +62,16 @@ export function DashboardSidebar({
         ) : null}
       </div>
 
+      <div className="border-b border-navigation-border bg-surface-subtle/70 px-5 py-3">
+        <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-primary">
+          Timetable management
+        </p>
+
+        <p className="mt-1 text-[0.6875rem] text-text-muted">
+          Academic planning and scheduling
+        </p>
+      </div>
+
       <nav
         aria-label="Main navigation"
         className="flex-1 overflow-y-auto px-3 py-5"
@@ -152,7 +162,7 @@ export function DashboardSidebar({
             className="absolute inset-0 bg-black/20 backdrop-blur-[1px]"
           />
 
-          <aside className="relative h-full w-[min(19rem,86vw)] border-r border-navigation-border bg-navigation-background shadow-[var(--shadow-lg)]">
+          <aside className="relative h-full w-[min(19rem,86vw)] border-r border-navigation-border bg-navigation-background shadow-lg">
             {sidebarContent}
           </aside>
         </div>

@@ -87,7 +87,7 @@ export function DataTable<TData, TValue>({
   const rows = table.getRowModel().rows;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-[var(--shadow-sm)]">
+    <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
       <TableToolbar
         searchValue={globalFilter}
         onSearchChange={setGlobalFilter}

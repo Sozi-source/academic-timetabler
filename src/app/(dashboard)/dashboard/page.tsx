@@ -62,9 +62,19 @@ const metrics = [
 
 const quickActions = [
   {
+    label: 'Academic year',
+    href: '/timetable/academic-years',
+    icon: CalendarDays,
+  },
+  {
     label: 'Academic period',
     href: '/timetable/academic-periods',
     icon: CalendarDays,
+  },
+  {
+    label: 'Working days and time slots',
+    href: '/timetable/time-slots',
+    icon: CalendarClock,
   },
   {
     label: 'Programme',
@@ -77,9 +87,19 @@ const quickActions = [
     icon: School,
   },
   {
+    label: 'Unit',
+    href: '/timetable/units',
+    icon: BookOpen,
+  },
+  {
     label: 'Trainer',
     href: '/timetable/trainers',
     icon: UserRound,
+  },
+  {
+    label: 'Room',
+    href: '/timetable/rooms',
+    icon: Building2,
   },
 ];
 
@@ -193,7 +213,7 @@ export default async function DashboardPage() {
                       className="size-4 text-primary"
                       aria-hidden="true"
                     />
-                    Add {action.label}
+                    {action.label}
                   </span>
 
                   <Plus

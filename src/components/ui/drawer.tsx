@@ -43,7 +43,7 @@ export const DrawerContent = forwardRef<
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
-          'fixed inset-y-0 right-0 z-50 w-[min(34rem,100vw)] border-l border-border bg-surface shadow-[var(--shadow-lg)]',
+          'fixed inset-y-0 right-0 z-50 w-[min(34rem,100vw)] border-l border-border bg-surface shadow-lg',
           'data-[state=open]:animate-in data-[state=closed]:animate-out',
           'data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right',
           className,

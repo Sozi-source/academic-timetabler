@@ -12,6 +12,7 @@ import {
   programmesImportTemplate,
   roomsImportTemplate,
   trainersImportTemplate,
+  unitsImportTemplate,
 } from '@/features/imports/templates';
 
 describe('generateImportTemplate', () => {
@@ -19,6 +20,7 @@ describe('generateImportTemplate', () => {
     trainersImportTemplate,
     roomsImportTemplate,
     programmesImportTemplate,
+    unitsImportTemplate,
   ])(
     'generates the $displayName template',
     async (definition) => {
@@ -79,5 +81,6 @@ describe('generateImportTemplate', () => {
         definition.columns.length,
       );
     },
+    15000,
   );
 });

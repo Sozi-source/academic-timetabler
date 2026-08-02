@@ -34,7 +34,7 @@ export const Textarea = forwardRef<
           : props['aria-invalid']
       }
       className={cn(
-        'w-full resize-y rounded-xl border border-border-strong bg-surface px-3.5 py-3 text-sm leading-6 text-text-primary shadow-[var(--shadow-sm)] outline-none transition',
+        'w-full resize-y rounded-xl border border-border-strong bg-surface px-3.5 py-3 text-sm leading-6 text-text-primary shadow-sm outline-none transition',
         'placeholder:text-text-subtle',
         'hover:border-[#b8c7c4]',
         'focus:border-focus-border focus:ring-4 focus:ring-focus-ring/25',

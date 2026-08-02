@@ -44,7 +44,7 @@ export const Input = forwardRef<
             : props['aria-invalid']
         }
         className={cn(
-          'h-11 w-full rounded-xl border border-border-strong bg-surface px-3.5 text-sm text-text-primary shadow-[var(--shadow-sm)] outline-none transition',
+          'h-11 w-full rounded-xl border border-border-strong bg-surface px-3.5 text-sm text-text-primary shadow-sm outline-none transition',
           'placeholder:text-text-subtle',
           'hover:border-[#b8c7c4]',
           'focus:border-focus-border focus:ring-4 focus:ring-focus-ring/25',

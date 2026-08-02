@@ -103,7 +103,7 @@ export default async function LoginPage({
             </p>
           </div>
 
-          <div className="rounded-[1.35rem] border border-border bg-surface p-6 shadow-[var(--shadow-md)] sm:p-8">
+          <div className="rounded-[1.35rem] border border-border bg-surface p-6 shadow-md sm:p-8">
             <div className="mb-7">
               <div className="inline-flex rounded-full border border-border bg-primary-subtle px-3 py-1 text-xs font-semibold text-primary">
                 Department access

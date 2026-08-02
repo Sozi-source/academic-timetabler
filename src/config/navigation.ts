@@ -2,6 +2,7 @@ import {
   BookOpen,
   Building2,
   CalendarDays,
+  CalendarRange,
   Clock3,
   FileChartColumn,
   GraduationCap,
@@ -9,6 +10,7 @@ import {
   Presentation,
   School,
   Sparkles,
+  ClipboardList,
   UserRound,
 } from 'lucide-react';
 
@@ -24,7 +26,7 @@ export const dashboardNavigation = [
     ],
   },
   {
-    label: 'Academic setup',
+    label: 'Academic calendar',
     items: [
       {
         label: 'Academic years',
@@ -34,8 +36,18 @@ export const dashboardNavigation = [
       {
         label: 'Academic periods',
         href: '/timetable/academic-periods',
-        icon: CalendarDays,
+        icon: CalendarRange,
       },
+      {
+        label: 'Working days & time slots',
+        href: '/timetable/time-slots',
+        icon: Clock3,
+      },
+    ],
+  },
+  {
+    label: 'Academic structure',
+    items: [
       {
         label: 'Programmes',
         href: '/timetable/programmes',
@@ -66,16 +78,16 @@ export const dashboardNavigation = [
         href: '/timetable/rooms',
         icon: Building2,
       },
-      {
-        label: 'Time slots',
-        href: '/timetable/time-slots',
-        icon: Clock3,
-      },
     ],
   },
   {
     label: 'Scheduling',
     items: [
+      {
+        label: 'Units on Offer',
+        href: '/timetable/unit-offerings',
+        icon: ClipboardList,
+      },
       {
         label: 'Teaching allocations',
         href: '/timetable/teaching-allocations',

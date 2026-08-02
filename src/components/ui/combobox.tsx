@@ -80,7 +80,7 @@ export function Combobox({
         <PopoverPrimitive.Trigger
           disabled={disabled}
           className={cn(
-            'flex h-11 w-full items-center justify-between gap-3 rounded-xl border border-border-strong bg-surface px-3.5 text-sm shadow-[var(--shadow-sm)] outline-none transition',
+            'flex h-11 w-full items-center justify-between gap-3 rounded-xl border border-border-strong bg-surface px-3.5 text-sm shadow-sm outline-none transition',
             'hover:border-focus-border',
             'focus-visible:border-focus-border focus-visible:ring-4 focus-visible:ring-focus-ring/25',
             'disabled:cursor-not-allowed disabled:bg-surface-muted disabled:text-text-muted',
@@ -107,7 +107,7 @@ export function Combobox({
           <PopoverPrimitive.Content
             align="start"
             sideOffset={6}
-            className="z-50 w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-xl border border-border bg-surface shadow-[var(--shadow-md)]"
+            className="z-50 w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-xl border border-border bg-surface shadow-md"
           >
             <div className="flex items-center gap-2 border-b border-border px-3">
               <Search

@@ -1,4 +1,5 @@
-@import "tailwindcss";
+@import "tailwindcss" source(none);
+@source "../";
 
 /* ============================================================
    HND App Design System
@@ -75,15 +76,6 @@
   --radius-lg: 1rem;
   --radius-xl: 1.25rem;
 
-  /* Elevation */
-  --shadow-sm:
-    0 1px 2px rgb(31 41 55 / 0.04);
-
-  --shadow-md:
-    0 8px 24px rgb(31 41 55 / 0.07);
-
-  --shadow-lg:
-    0 20px 50px rgb(31 41 55 / 0.1);
 
   /* Layout */
   --content-max-width: 100rem;
@@ -153,6 +145,16 @@
   --color-info: var(--info);
   --color-info-surface: var(--info-surface);
   --color-info-border: var(--info-border);
+
+  /* Elevation */
+  --shadow-sm:
+    0 1px 2px rgb(31 41 55 / 0.04);
+
+  --shadow-md:
+    0 8px 24px rgb(31 41 55 / 0.07);
+
+  --shadow-lg:
+    0 20px 50px rgb(31 41 55 / 0.1);
 }
 
 * {

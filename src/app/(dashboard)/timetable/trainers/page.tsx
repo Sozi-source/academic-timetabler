@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import {
   CalendarCheck2,
   Clock3,
   Plus,
+  Upload,
   UserRound,
   Users,
 } from 'lucide-react';
@@ -82,7 +84,19 @@ export default async function TrainersPage() {
           </div>
         }
         actions={
-          <Drawer>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/timetable/trainers/import"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+            >
+              <Upload
+                className="size-4"
+                aria-hidden="true"
+              />
+              Import trainers
+            </Link>
+
+            <Drawer>
             <DrawerTrigger asChild>
               <Button
                 leadingIcon={
@@ -123,7 +137,8 @@ export default async function TrainersPage() {
                 <CreateTrainerForm />
               </DrawerBody>
             </DrawerContent>
-          </Drawer>
+            </Drawer>
+          </div>
         }
       />
 

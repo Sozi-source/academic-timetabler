@@ -35,7 +35,7 @@ export function Toaster() {
       toastOptions={{
         classNames: {
           toast:
-            'border border-border bg-surface text-text-primary shadow-[var(--shadow-md)]',
+            'border border-border bg-surface text-text-primary shadow-md',
           title:
             'text-sm font-semibold text-text-primary',
           description:

@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 
 export default function ImportRoomsPage() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="Bulk data import"
         title="Import rooms"

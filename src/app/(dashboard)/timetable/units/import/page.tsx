@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 
 export default function ImportUnitsPage() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="Bulk data import"
         title="Import units"

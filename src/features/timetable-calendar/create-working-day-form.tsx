@@ -13,7 +13,6 @@ import {
 import { Button } from '@/components/ui/button';
 import {
   FormField,
-  getFormFieldDescriptionId,
 } from '@/components/ui/form-field';
 import { FormStatusMessage } from '@/components/ui/form-status-message';
 import { Input } from '@/components/ui/input';
@@ -67,7 +66,7 @@ export function CreateWorkingDayForm({
     <form
       ref={formRef}
       action={formAction}
-      className="space-y-5"
+      className="space-y-4"
       noValidate
     >
       <input
@@ -131,7 +130,6 @@ export function CreateWorkingDayForm({
             label="Display order"
             required
             error={sequenceError}
-            description="Use 1 for Monday, 2 for Tuesday and so on."
           >
             <Input
               id="working-day-sequence"
@@ -142,14 +140,6 @@ export function CreateWorkingDayForm({
               required
               disabled={pending}
               hasError={Boolean(sequenceError)}
-              aria-describedby={getFormFieldDescriptionId(
-                'working-day-sequence',
-                {
-                  hasDescription: true,
-                  hasError: Boolean(sequenceError),
-                },
-              )}
-              placeholder="6"
             />
           </FormField>
 
@@ -166,11 +156,10 @@ export function CreateWorkingDayForm({
               maxLength={500}
               disabled={pending}
               hasError={Boolean(notesError)}
-              placeholder="Optional scheduling information."
             />
           </FormField>
 
-          <div className="flex justify-end border-t border-border-soft pt-5">
+          <div className="flex justify-end border-t border-border-soft pt-4">
             <Button
               type="submit"
               disabled={pending}

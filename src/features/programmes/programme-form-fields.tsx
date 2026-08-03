@@ -1,6 +1,5 @@
 import {
   FormField,
-  getFormFieldDescriptionId,
 } from '@/components/ui/form-field';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
@@ -62,7 +61,6 @@ export function ProgrammeFormFields({
           label="Programme code"
           required
           error={codeError}
-          description="Use the institution's official programme identifier."
         >
           <Input
             id="programme-code"
@@ -71,14 +69,6 @@ export function ProgrammeFormFields({
             disabled={pending}
             defaultValue={programme?.code ?? ''}
             hasError={Boolean(codeError)}
-            aria-describedby={getFormFieldDescriptionId(
-              'programme-code',
-              {
-                hasDescription: true,
-                hasError: Boolean(codeError),
-              },
-            )}
-            placeholder="DHN"
           />
         </FormField>
 
@@ -96,7 +86,6 @@ export function ProgrammeFormFields({
               programme?.shortName ?? ''
             }
             hasError={Boolean(shortNameError)}
-            placeholder="Diploma HND"
           />
         </FormField>
       </div>
@@ -114,7 +103,6 @@ export function ProgrammeFormFields({
           disabled={pending}
           defaultValue={programme?.name ?? ''}
           hasError={Boolean(nameError)}
-          placeholder="Diploma in Human Nutrition and Dietetics"
         />
       </FormField>
 
@@ -163,7 +151,6 @@ export function ProgrammeFormFields({
               programme?.awardingBody ?? ''
             }
             hasError={Boolean(awardingBodyError)}
-            placeholder="TVET CDACC"
           />
         </FormField>
       </div>
@@ -173,11 +160,6 @@ export function ProgrammeFormFields({
           <h3 className="text-sm font-semibold text-text-primary">
             Programme duration
           </h3>
-
-          <p className="mt-1 text-xs leading-5 text-text-muted">
-            Define the official programme duration and
-            expected number of Academic Periods.
-          </p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -244,7 +226,6 @@ export function ProgrammeFormFields({
             label="Total Academic Periods"
             required
             error={totalAcademicPeriodsError}
-            description="The expected number of terms, semesters or other configured periods."
           >
             <Input
               id="programme-periods"
@@ -261,15 +242,6 @@ export function ProgrammeFormFields({
               hasError={Boolean(
                 totalAcademicPeriodsError,
               )}
-              aria-describedby={getFormFieldDescriptionId(
-                'programme-periods',
-                {
-                  hasDescription: true,
-                  hasError: Boolean(
-                    totalAcademicPeriodsError,
-                  ),
-                },
-              )}
             />
           </FormField>
 
@@ -278,7 +250,6 @@ export function ProgrammeFormFields({
             label="Maximum cohort size"
             optional
             error={maximumCohortSizeError}
-            description="Optional planning limit for one cohort."
           >
             <Input
               id="programme-cohort-size"
@@ -294,16 +265,6 @@ export function ProgrammeFormFields({
               hasError={Boolean(
                 maximumCohortSizeError,
               )}
-              aria-describedby={getFormFieldDescriptionId(
-                'programme-cohort-size',
-                {
-                  hasDescription: true,
-                  hasError: Boolean(
-                    maximumCohortSizeError,
-                  ),
-                },
-              )}
-              placeholder="50"
             />
           </FormField>
         </div>
@@ -323,7 +284,6 @@ export function ProgrammeFormFields({
           disabled={pending}
           defaultValue={programme?.notes ?? ''}
           hasError={Boolean(notesError)}
-          placeholder="Add optional curriculum, accreditation or planning information."
         />
       </FormField>
     </>

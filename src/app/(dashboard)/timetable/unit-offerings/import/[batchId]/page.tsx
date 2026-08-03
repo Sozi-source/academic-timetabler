@@ -34,7 +34,7 @@ import {
 
 export const metadata: Metadata = {
   title:
-    'Review Units on Offer Import',
+    'Units on Offer Import',
 };
 
 interface UnitOfferingImportBatchPageProps {
@@ -102,11 +102,11 @@ export default async function UnitOfferingImportBatchPage({
     }).length;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="Bulk data import"
-        title="Review Units on Offer"
-        description="Review curriculum matching, duplicate detection, shared-class grouping and existing semester decisions before confirmation."
+        title="Units on Offer"
+        description="Review import rows."
         context={
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="neutral">
@@ -134,7 +134,7 @@ export default async function UnitOfferingImportBatchPage({
               className="size-4"
               aria-hidden="true"
             />
-            Upload another workbook
+            Upload
           </Link>
         }
       />

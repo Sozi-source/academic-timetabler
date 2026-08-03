@@ -14,7 +14,6 @@ import { Button } from '@/components/ui/button';
 import { DateRangeField } from '@/components/ui/date-range-field';
 import {
   FormField,
-  getFormFieldDescriptionId,
 } from '@/components/ui/form-field';
 import { FormStatusMessage } from '@/components/ui/form-status-message';
 import { Input } from '@/components/ui/input';
@@ -84,7 +83,7 @@ export function CreateAcademicPeriodForm({
     <form
       ref={formRef}
       action={formAction}
-      className="space-y-5"
+      className="space-y-4"
       noValidate
     >
       {state.message ? (
@@ -103,7 +102,6 @@ export function CreateAcademicPeriodForm({
         label="Academic Year"
         required
         error={academicYearError}
-        description="Select the parent Academic Year for this period."
       >
         <Select
           id="academic-period-year"
@@ -112,15 +110,6 @@ export function CreateAcademicPeriodForm({
           disabled={pending}
           defaultValue=""
           hasError={Boolean(academicYearError)}
-          aria-describedby={getFormFieldDescriptionId(
-            'academic-period-year',
-            {
-              hasDescription: true,
-              hasError: Boolean(
-                academicYearError,
-              ),
-            },
-          )}
         >
           <option value="" disabled>
             Select Academic Year
@@ -145,7 +134,6 @@ export function CreateAcademicPeriodForm({
         label="Period name"
         required
         error={nameError}
-        description="Example: January to April 2027."
       >
         <Input
           id="academic-period-name"
@@ -153,14 +141,6 @@ export function CreateAcademicPeriodForm({
           required
           disabled={pending}
           hasError={Boolean(nameError)}
-          aria-describedby={getFormFieldDescriptionId(
-            'academic-period-name',
-            {
-              hasDescription: true,
-              hasError: Boolean(nameError),
-            },
-          )}
-          placeholder="January to April 2027"
         />
       </FormField>
 
@@ -170,7 +150,6 @@ export function CreateAcademicPeriodForm({
           label="Period code"
           required
           error={codeError}
-          description="Use letters, numbers and hyphens."
         >
           <Input
             id="academic-period-code"
@@ -178,14 +157,6 @@ export function CreateAcademicPeriodForm({
             required
             disabled={pending}
             hasError={Boolean(codeError)}
-            aria-describedby={getFormFieldDescriptionId(
-              'academic-period-code',
-              {
-                hasDescription: true,
-                hasError: Boolean(codeError),
-              },
-            )}
-            placeholder="JAN-APR"
           />
         </FormField>
 
@@ -194,7 +165,6 @@ export function CreateAcademicPeriodForm({
           label="Sequence"
           required
           error={sequenceError}
-          description="Order within the Academic Year."
         >
           <Input
             id="academic-period-sequence"
@@ -205,14 +175,6 @@ export function CreateAcademicPeriodForm({
             required
             disabled={pending}
             hasError={Boolean(sequenceError)}
-            aria-describedby={getFormFieldDescriptionId(
-              'academic-period-sequence',
-              {
-                hasDescription: true,
-                hasError: Boolean(sequenceError),
-              },
-            )}
-            placeholder="1"
           />
         </FormField>
       </div>
@@ -222,12 +184,6 @@ export function CreateAcademicPeriodForm({
           <h3 className="text-sm font-semibold text-text-primary">
             Academic Period dates
           </h3>
-
-          <p className="mt-1 text-xs leading-5 text-text-muted">
-            These dates define the complete period,
-            including registration, teaching, assessment
-            and closure activities.
-          </p>
         </div>
 
         <DateRangeField
@@ -247,11 +203,6 @@ export function CreateAcademicPeriodForm({
           <h3 className="text-sm font-semibold text-text-primary">
             Teaching dates
           </h3>
-
-          <p className="mt-1 text-xs leading-5 text-text-muted">
-            Timetable sessions may only be scheduled
-            within this teaching window.
-          </p>
         </div>
 
         <DateRangeField
@@ -273,7 +224,6 @@ export function CreateAcademicPeriodForm({
         label="Notes"
         optional
         error={notesError}
-        description="Add calendar, examination or planning information."
       >
         <Textarea
           id="academic-period-notes"
@@ -282,18 +232,10 @@ export function CreateAcademicPeriodForm({
           maxLength={1000}
           disabled={pending}
           hasError={Boolean(notesError)}
-          aria-describedby={getFormFieldDescriptionId(
-            'academic-period-notes',
-            {
-              hasDescription: true,
-              hasError: Boolean(notesError),
-            },
-          )}
-          placeholder="Add optional planning information."
         />
       </FormField>
 
-      <div className="flex justify-end border-t border-border-soft pt-5">
+      <div className="flex justify-end border-t border-border-soft pt-4">
         <Button
           type="submit"
           size="lg"
@@ -316,8 +258,8 @@ export function CreateAcademicPeriodForm({
           }
         >
           {pending
-            ? 'Creating Academic Period'
-            : 'Create Academic Period'}
+            ? 'Saving'
+            : 'Save'}
         </Button>
       </div>
     </form>

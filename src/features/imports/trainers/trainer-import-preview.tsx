@@ -173,7 +173,7 @@ export function TrainerImportPreview({
                   <td className="whitespace-nowrap px-4 py-4 text-text-secondary">
                     {'maximumWeeklyHours' in trainer
                       ? `${trainer.maximumWeeklyHours} weekly / ${trainer.maximumDailyHours} daily`
-                      : 'â€”'}
+                      : '—'}
                   </td>
 
                   <td className="whitespace-nowrap px-4 py-4">

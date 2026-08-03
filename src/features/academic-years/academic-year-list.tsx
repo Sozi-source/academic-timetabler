@@ -44,7 +44,7 @@ export function AcademicYearList({
       <EmptyState
         icon={CalendarDays}
         title="No Academic Years created"
-        description="Create the first Academic Year to establish the parent calendar for academic periods, cohorts, timetables and reports."
+        description="No academic years."
       />
     );
   }

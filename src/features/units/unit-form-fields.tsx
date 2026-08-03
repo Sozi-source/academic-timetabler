@@ -1,6 +1,5 @@
 import {
   FormField,
-  getFormFieldDescriptionId,
 } from '@/components/ui/form-field';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
@@ -71,7 +70,6 @@ export function UnitFormFields({
         label="Programme"
         required
         error={programmeError}
-        description="Select the programme that owns this curriculum unit."
       >
         <Select
           id="unit-programme"
@@ -82,13 +80,6 @@ export function UnitFormFields({
             unit?.programmeId ?? ''
           }
           hasError={Boolean(programmeError)}
-          aria-describedby={getFormFieldDescriptionId(
-            'unit-programme',
-            {
-              hasDescription: true,
-              hasError: Boolean(programmeError),
-            },
-          )}
         >
           <option value="" disabled>
             Select programme
@@ -111,7 +102,6 @@ export function UnitFormFields({
           label="Unit code"
           required
           error={codeError}
-          description="Use the official curriculum unit code."
         >
           <Input
             id="unit-code"
@@ -120,14 +110,6 @@ export function UnitFormFields({
             disabled={pending}
             defaultValue={unit?.code ?? ''}
             hasError={Boolean(codeError)}
-            aria-describedby={getFormFieldDescriptionId(
-              'unit-code',
-              {
-                hasDescription: true,
-                hasError: Boolean(codeError),
-              },
-            )}
-            placeholder="NUT-101"
           />
         </FormField>
 
@@ -143,7 +125,6 @@ export function UnitFormFields({
             disabled={pending}
             defaultValue={unit?.shortName ?? ''}
             hasError={Boolean(shortNameError)}
-            placeholder="Human Nutrition I"
           />
         </FormField>
       </div>
@@ -161,7 +142,6 @@ export function UnitFormFields({
           disabled={pending}
           defaultValue={unit?.name ?? ''}
           hasError={Boolean(nameError)}
-          placeholder="Introduction to Human Nutrition"
         />
       </FormField>
 
@@ -196,7 +176,6 @@ export function UnitFormFields({
           label="Academic Period number"
           required
           error={periodError}
-          description="Programme period in which the unit is normally taught."
         >
           <Input
             id="unit-period"
@@ -210,13 +189,6 @@ export function UnitFormFields({
               unit?.academicPeriodNumber ?? 1
             }
             hasError={Boolean(periodError)}
-            aria-describedby={getFormFieldDescriptionId(
-              'unit-period',
-              {
-                hasDescription: true,
-                hasError: Boolean(periodError),
-              },
-            )}
           />
         </FormField>
       </div>
@@ -226,11 +198,6 @@ export function UnitFormFields({
           <h3 className="text-sm font-semibold text-text-primary">
             Contact hours and scheduling
           </h3>
-
-          <p className="mt-1 text-xs leading-5 text-text-muted">
-            Define the unit contact-hour structure and
-            expected timetable frequency.
-          </p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
@@ -309,7 +276,6 @@ export function UnitFormFields({
           label="Preferred room type"
           optional
           error={preferredRoomTypeError}
-          description="Used as a scheduling preference during timetable generation."
         >
           <Select
             id="unit-preferred-room"
@@ -320,15 +286,6 @@ export function UnitFormFields({
             }
             hasError={Boolean(
               preferredRoomTypeError,
-            )}
-            aria-describedby={getFormFieldDescriptionId(
-              'unit-preferred-room',
-              {
-                hasDescription: true,
-                hasError: Boolean(
-                  preferredRoomTypeError,
-                ),
-              },
             )}
           >
             <option value="">
@@ -361,7 +318,6 @@ export function UnitFormFields({
           disabled={pending}
           defaultValue={unit?.notes ?? ''}
           hasError={Boolean(notesError)}
-          placeholder="Add optional curriculum, laboratory or scheduling information."
         />
       </FormField>
     </>

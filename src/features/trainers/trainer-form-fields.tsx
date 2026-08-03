@@ -1,6 +1,5 @@
 import {
   FormField,
-  getFormFieldDescriptionId,
 } from '@/components/ui/form-field';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
@@ -61,7 +60,6 @@ export function TrainerFormFields({
           label="Staff number"
           required
           error={staffNumberError}
-          description="Use the institution's official staff identifier."
         >
           <Input
             id="trainer-staff-number"
@@ -72,16 +70,6 @@ export function TrainerFormFields({
               trainer?.staffNumber ?? ''
             }
             hasError={Boolean(staffNumberError)}
-            aria-describedby={getFormFieldDescriptionId(
-              'trainer-staff-number',
-              {
-                hasDescription: true,
-                hasError: Boolean(
-                  staffNumberError,
-                ),
-              },
-            )}
-            placeholder="TR-001"
           />
         </FormField>
 
@@ -131,7 +119,6 @@ export function TrainerFormFields({
           disabled={pending}
           defaultValue={trainer?.fullName ?? ''}
           hasError={Boolean(fullNameError)}
-          placeholder="Jane Waithera"
         />
       </FormField>
 
@@ -149,7 +136,6 @@ export function TrainerFormFields({
             disabled={pending}
             defaultValue={trainer?.email ?? ''}
             hasError={Boolean(emailError)}
-            placeholder="trainer@example.com"
           />
         </FormField>
 
@@ -168,7 +154,6 @@ export function TrainerFormFields({
               trainer?.phoneNumber ?? ''
             }
             hasError={Boolean(phoneNumberError)}
-            placeholder="+254 700 000 000"
           />
         </FormField>
       </div>
@@ -189,7 +174,6 @@ export function TrainerFormFields({
           hasError={Boolean(
             specializationError,
           )}
-          placeholder="Clinical Nutrition and Dietetics"
         />
       </FormField>
 
@@ -211,7 +195,6 @@ export function TrainerFormFields({
           hasError={Boolean(
             qualificationsError,
           )}
-          placeholder="List the trainer's highest and relevant qualifications."
         />
       </FormField>
 
@@ -221,7 +204,6 @@ export function TrainerFormFields({
           label="Maximum weekly hours"
           required
           error={maximumWeeklyHoursError}
-          description="Maximum total teaching load in one week."
         >
           <Input
             id="trainer-weekly-hours"
@@ -238,15 +220,6 @@ export function TrainerFormFields({
             hasError={Boolean(
               maximumWeeklyHoursError,
             )}
-            aria-describedby={getFormFieldDescriptionId(
-              'trainer-weekly-hours',
-              {
-                hasDescription: true,
-                hasError: Boolean(
-                  maximumWeeklyHoursError,
-                ),
-              },
-            )}
           />
         </FormField>
 
@@ -255,7 +228,6 @@ export function TrainerFormFields({
           label="Maximum daily hours"
           required
           error={maximumDailyHoursError}
-          description="Maximum teaching load in one day."
         >
           <Input
             id="trainer-daily-hours"
@@ -271,15 +243,6 @@ export function TrainerFormFields({
             }
             hasError={Boolean(
               maximumDailyHoursError,
-            )}
-            aria-describedby={getFormFieldDescriptionId(
-              'trainer-daily-hours',
-              {
-                hasDescription: true,
-                hasError: Boolean(
-                  maximumDailyHoursError,
-                ),
-              },
             )}
           />
         </FormField>
@@ -299,7 +262,6 @@ export function TrainerFormFields({
           disabled={pending}
           defaultValue={trainer?.notes ?? ''}
           hasError={Boolean(notesError)}
-          placeholder="Add optional scheduling or availability notes."
         />
       </FormField>
     </>

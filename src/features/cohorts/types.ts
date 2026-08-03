@@ -83,8 +83,6 @@ export interface CohortActionState {
     name?: string[];
     intakeDate?: string[];
     expectedCompletionDate?: string[];
-    currentAcademicPeriodNumber?: string[];
-    plannedSize?: string[];
     actualSize?: string[];
     status?: string[];
     notes?: string[];

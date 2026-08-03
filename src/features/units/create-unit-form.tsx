@@ -50,7 +50,7 @@ export function CreateUnitForm({
     <form
       ref={formRef}
       action={formAction}
-      className="space-y-5"
+      className="space-y-4"
       noValidate
     >
       {state.message ? (
@@ -70,7 +70,7 @@ export function CreateUnitForm({
         pending={pending}
       />
 
-      <div className="flex justify-end border-t border-border-soft pt-5">
+      <div className="flex justify-end border-t border-border-soft pt-4">
         <Button
           type="submit"
           size="lg"
@@ -90,8 +90,8 @@ export function CreateUnitForm({
           }
         >
           {pending
-            ? 'Creating unit'
-            : 'Create unit'}
+            ? 'Saving'
+            : 'Save'}
         </Button>
       </div>
     </form>

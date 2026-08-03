@@ -26,9 +26,10 @@ export const unitOfferingsImportTemplate = {
     'Programme Name must match the programme registered in the system.',
     'Unit matching uses Programme Name and Unit Name. Unit Code is optional and is used only to confirm or disambiguate a match.',
     'The cohort must belong to the selected programme.',
-    'Use the same Shared Class Key for units that should be taught together at the same day and time.',
-    'A Shared Class Key does not merge curriculum records. Every cohort retains its official programme-specific unit and code.',
-    'Leave Shared Class Key blank when the class should be scheduled independently.',
+    'Leave Shared Class Key blank to let the system automatically combine similar units across cohorts when the unit name, delivery type, weekly sessions and duration agree.',
+    'Enter the same custom Shared Class Key only when you want to force specific rows into one class.',
+    'Enter INDEPENDENT when a row must remain separate even if another cohort has a similar unit.',
+    'Shared classes do not merge curriculum records. Every cohort retains its official programme-specific unit and code.',
     'Attachment, clinical rotation and examination rows must use No under Include in Timetable.',
     'Preferred Trainer and Preferred Room are optional. Their names or registered codes may be supplied.',
     'The importer validates every row and shows a preview before anything is committed.',
@@ -162,9 +163,9 @@ export const unitOfferingsImportTemplate = {
       required: false,
       width: 28,
       description:
-        'Use the same key across cohort rows that must be taught as one class.',
+        'Optional override. Leave blank for automatic matching, enter a custom key to force sharing, or enter INDEPENDENT to keep the row separate.',
       example:
-        'COMMUNICATION-SEP26',
+        '',
     },
     {
       key: 'preferredTrainer',

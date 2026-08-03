@@ -8,6 +8,9 @@ import { useActionState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { FormStatusMessage } from '@/components/ui/form-status-message';
+import type {
+  AcademicPeriod,
+} from '@/features/academic-periods/types';
 import type { Programme } from '@/features/programmes/types';
 
 import { updateCohortAction } from './actions';
@@ -20,11 +23,13 @@ import {
 interface EditCohortFormProps {
   cohort: Cohort;
   programmes: Programme[];
+  academicPeriods: AcademicPeriod[];
 }
 
 export function EditCohortForm({
   cohort,
   programmes,
+  academicPeriods,
 }: EditCohortFormProps) {
   const [state, formAction, pending] =
     useActionState(
@@ -35,7 +40,7 @@ export function EditCohortForm({
   return (
     <form
       action={formAction}
-      className="space-y-5"
+      className="space-y-4"
       noValidate
     >
       <input
@@ -66,11 +71,12 @@ export function EditCohortForm({
       <CohortFormFields
         state={state}
         programmes={programmes}
+        academicPeriods={academicPeriods}
         cohort={cohort}
         pending={pending}
       />
 
-      <div className="flex justify-end border-t border-border-soft pt-5">
+      <div className="flex justify-end border-t border-border-soft pt-4">
         <Button
           type="submit"
           size="lg"

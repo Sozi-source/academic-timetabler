@@ -15,7 +15,6 @@ import {
   Drawer,
   DrawerBody,
   DrawerContent,
-  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
@@ -64,7 +63,7 @@ export default async function RoomsPage() {
   );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="Scheduling resources"
         title="Rooms"
@@ -123,11 +122,6 @@ export default async function RoomsPage() {
                     <DrawerTitle>
                       Register room
                     </DrawerTitle>
-
-                    <DrawerDescription>
-                      Add a teaching or institutional
-                      space to the timetable resources.
-                    </DrawerDescription>
                   </div>
                 </div>
               </DrawerHeader>

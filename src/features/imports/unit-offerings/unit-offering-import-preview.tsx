@@ -260,11 +260,7 @@ export function UnitOfferingImportPreview({
               </h2>
 
               <p className="mt-1 text-sm leading-6 text-text-muted">
-                Rows sharing these keys will
-                later be grouped into one
-                Teaching Offering while
-                retaining each cohort&apos;s
-                official programme unit.
+                Similar valid units are grouped automatically when their normalized names, delivery type, weekly sessions and duration agree. Every cohort still retains its official programme unit and code.
               </p>
 
               <div className="mt-3 flex flex-wrap gap-2">
@@ -287,7 +283,7 @@ export function UnitOfferingImportPreview({
       <section className="overflow-hidden rounded-2xl border border-border bg-surface">
         <div className="border-b border-border px-5 py-4">
           <h2 className="font-semibold text-text-primary">
-            Staged workbook rows
+            Workbook rows
           </h2>
 
           <p className="mt-1 text-sm text-text-muted">
@@ -420,15 +416,33 @@ export function UnitOfferingImportPreview({
 
                     <td className="px-4 py-4">
                       {normalized.sharedClassKey ? (
-                        <span className="rounded-full border border-primary/20 bg-primary-subtle px-2.5 py-1 font-mono text-xs font-semibold text-primary">
-                          {
-                            normalized.sharedClassKey
-                          }
-                        </span>
+                        <div className="space-y-1.5">
+                          <span className="inline-flex rounded-full border border-primary/20 bg-primary-subtle px-2.5 py-1 font-mono text-xs font-semibold text-primary">
+                            {
+                              normalized.sharedClassKey
+                            }
+                          </span>
+
+                          <p className="text-xs text-text-muted">
+                            {normalized.sharedClassSource ===
+                            'automatic'
+                              ? 'Automatically detected'
+                              : 'Workbook override'}
+                          </p>
+                        </div>
                       ) : (
-                        <span className="text-text-muted">
-                          Independent
-                        </span>
+                        <div>
+                          <span className="text-text-muted">
+                            Independent
+                          </span>
+
+                          {normalized.sharedClassSource ===
+                          'independent' ? (
+                            <p className="mt-1 text-xs text-warning">
+                              Forced separate in workbook
+                            </p>
+                          ) : null}
+                        </div>
                       )}
                     </td>
 

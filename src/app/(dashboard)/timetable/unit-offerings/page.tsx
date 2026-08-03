@@ -46,11 +46,11 @@ export default async function UnitOfferingsPage() {
   ).size;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="Semester planning"
         title="Units on Offer"
-        description="Review the exact programme units offered to each cohort for an Academic Period before trainer allocation and timetable generation."
+        description="Manage semester units."
         context={
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="neutral">

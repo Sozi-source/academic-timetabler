@@ -26,6 +26,14 @@ export interface NormalizedUnitOfferingImportRow {
 
   sharedClassKey?: string;
 
+  sharedClassSource?:
+    | 'automatic'
+    | 'manual'
+    | 'independent'
+    | 'none';
+
+  sharedClassMatchName?: string;
+
   preferredTrainer?: string;
   preferredTrainerId?: string;
 

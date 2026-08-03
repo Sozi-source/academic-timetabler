@@ -1,23 +1,15 @@
 'use client';
 
 import {
-  Archive,
-  CheckCircle2,
-  CircleStop,
-  type LucideIcon,
-} from 'lucide-react';
+  useActionState,
+} from 'react';
 
-import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+  Button,
+} from '@/components/ui/button';
+import {
+  Select,
+} from '@/components/ui/select';
 
 import {
   setAcademicPeriodStatusAction,
@@ -27,167 +19,137 @@ import type {
   AcademicPeriodStatus,
 } from './types';
 
-interface LifecycleConfiguration {
-  label: string;
-  title: string;
-  description: string;
-  icon: LucideIcon;
-  buttonVariant:
-    | 'primary'
-    | 'outline'
-    | 'ghost'
-    | 'danger';
-}
-
-const configurations: Record<
-  'active' | 'closed' | 'archived',
-  LifecycleConfiguration
-> = {
-  active: {
-    label: 'Activate',
-    title: 'Activate Academic Period?',
-    description:
-      'Any currently active Academic Period will be closed automatically.',
-    icon: CheckCircle2,
-    buttonVariant: 'primary',
-  },
-  closed: {
-    label: 'Close',
-    title: 'Close Academic Period?',
-    description:
-      'Closing the period prevents it from remaining the active timetable period.',
-    icon: CircleStop,
-    buttonVariant: 'outline',
-  },
-  archived: {
-    label: 'Archive',
-    title: 'Archive Academic Period?',
-    description:
-      'Archived periods remain available for historical records but cannot be modified.',
-    icon: Archive,
-    buttonVariant: 'danger',
-  },
-};
-
 interface AcademicPeriodLifecycleActionProps {
   academicPeriod: AcademicPeriod;
-  status:
-    | 'active'
-    | 'closed'
-    | 'archived';
 }
+
+const statusOptions: ReadonlyArray<{
+  value: AcademicPeriodStatus;
+  label: string;
+}> = [
+  {
+    value: 'planned',
+    label: 'Planned',
+  },
+  {
+    value: 'active',
+    label: 'Active',
+  },
+  {
+    value: 'closed',
+    label: 'Closed',
+  },
+  {
+    value: 'archived',
+    label: 'Archived',
+  },
+];
+
+interface StatusActionState {
+  status:
+    | 'idle'
+    | 'success'
+    | 'error';
+  message: string | null;
+}
+
+const initialState:
+StatusActionState = {
+  status: 'idle',
+  message: null,
+};
 
 export function AcademicPeriodLifecycleAction({
   academicPeriod,
-  status,
 }: AcademicPeriodLifecycleActionProps) {
-  const configuration =
-    configurations[status];
+  async function changeStatus(
+    _previousState: StatusActionState,
+    formData: FormData,
+  ): Promise<StatusActionState> {
+    try {
+      await setAcademicPeriodStatusAction(
+        formData,
+      );
 
-  const Icon = configuration.icon;
+      return {
+        status: 'success',
+        message: 'Status updated.',
+      };
+    }
+    catch (error) {
+      return {
+        status: 'error',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Unable to update status.',
+      };
+    }
+  }
+
+  const [
+    state,
+    formAction,
+    pending,
+  ] = useActionState(
+    changeStatus,
+    initialState,
+  );
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button
-          variant={configuration.buttonVariant}
-          size="sm"
-          leadingIcon={
-            <Icon
-              className="size-3.5"
-              aria-hidden="true"
-            />
+    <div className="min-w-48">
+      <form
+        action={formAction}
+        className="flex items-center gap-2"
+      >
+        <input
+          type="hidden"
+          name="id"
+          value={academicPeriod.id}
+        />
+
+        <Select
+          name="status"
+          defaultValue={
+            academicPeriod.status
           }
+          disabled={pending}
+          aria-label={`Status for ${academicPeriod.name}`}
+          className="h-9 min-w-28 text-xs"
         >
-          {configuration.label}
+          {statusOptions.map(
+            (option) => (
+              <option
+                key={option.value}
+                value={option.value}
+              >
+                {option.label}
+              </option>
+            ),
+          )}
+        </Select>
+
+        <Button
+          type="submit"
+          variant="outline"
+          size="sm"
+          disabled={pending}
+        >
+          {pending
+            ? 'Saving...'
+            : 'Set'}
         </Button>
-      </DialogTrigger>
+      </form>
 
-      <DialogContent hideCloseButton>
-        <DialogHeader className="border-b-0 pb-2 pr-6">
-          <div className="flex size-11 items-center justify-center rounded-xl bg-primary-soft text-primary">
-            <Icon
-              className="size-5"
-              aria-hidden="true"
-            />
-          </div>
-
-          <DialogTitle className="mt-4">
-            {configuration.title}
-          </DialogTitle>
-
-          <DialogDescription>
-            {configuration.description}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="mx-6 mb-5 rounded-xl border border-border-soft bg-surface-subtle px-4 py-3">
-          <p className="text-sm font-semibold text-text-primary">
-            {academicPeriod.name}
-          </p>
-
-          <p className="mt-1 text-xs text-text-muted">
-            {academicPeriod.academicYear.name}
-          </p>
-        </div>
-
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline">
-              Cancel
-            </Button>
-          </DialogClose>
-
-          <form
-            action={setAcademicPeriodStatusAction}
-          >
-            <input
-              type="hidden"
-              name="id"
-              value={academicPeriod.id}
-            />
-
-            <input
-              type="hidden"
-              name="status"
-              value={status}
-            />
-
-            <Button
-              type="submit"
-              variant={configuration.buttonVariant}
-            >
-              {configuration.label}
-            </Button>
-          </form>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      {state.status === 'error' ? (
+        <p className="mt-1 text-xs text-danger">
+          {state.message}
+        </p>
+      ) : null}
+    </div>
   );
 }
 
-export function getAcademicPeriodLifecycleActions(
-  academicPeriod: AcademicPeriod,
-) {
-  const actions: AcademicPeriodStatus[] = [];
-
-  if (
-    academicPeriod.status === 'planned' ||
-    academicPeriod.status === 'closed'
-  ) {
-    actions.push('active');
-  }
-
-  if (academicPeriod.status === 'active') {
-    actions.push('closed');
-  }
-
-  if (
-    academicPeriod.status !== 'active' &&
-    academicPeriod.status !== 'archived'
-  ) {
-    actions.push('archived');
-  }
-
-  return actions;
+export function getAcademicPeriodLifecycleActions() {
+  return [];
 }

@@ -47,7 +47,7 @@ export default async function TimetableGeneratorPage() {
     );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="Intelligent scheduling"
         title="Timetable generator"

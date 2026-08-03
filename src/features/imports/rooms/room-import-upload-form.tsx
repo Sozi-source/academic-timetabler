@@ -60,7 +60,7 @@ export function RoomImportUploadForm() {
   return (
     <form
       action={formAction}
-      className="space-y-6"
+      className="space-y-4"
     >
       {state.message ? (
         <FormStatusMessage
@@ -115,18 +115,13 @@ export function RoomImportUploadForm() {
       <section className="space-y-4 rounded-2xl border border-border bg-surface p-5">
         <div>
           <h2 className="font-semibold text-text-primary">
-            Upload completed workbook
+            Upload workbook
           </h2>
-
-          <p className="mt-1 text-sm text-text-muted">
-            Only current standardized .xlsx templates
-            are accepted. Maximum file size: 50 MB.
-          </p>
         </div>
 
         <label
           htmlFor="room-import-workbook"
-          className="flex min-h-44 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-surface-subtle px-6 py-8 text-center transition hover:border-primary hover:bg-primary-subtle"
+          className="flex min-h-44 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-surface-subtle px-5 py-6 text-center transition hover:border-primary hover:bg-primary-subtle"
         >
           <Upload
             className="size-7 text-primary"
@@ -174,7 +169,7 @@ export function RoomImportUploadForm() {
         >
           {pending
             ? 'Validating workbook'
-            : 'Upload and validate'}
+            : 'Validate'}
         </Button>
       </div>
     </form>

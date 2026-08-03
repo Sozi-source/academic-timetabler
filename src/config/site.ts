@@ -1,4 +1,4 @@
-﻿export const siteConfig = {
+export const siteConfig = {
   name: 'Human Nutrition and Dietetics Management System',
   shortName: 'HND App',
   description:

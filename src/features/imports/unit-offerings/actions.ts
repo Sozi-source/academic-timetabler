@@ -22,6 +22,9 @@ import {
 } from '@/lib/supabase/server';
 
 import {
+  applyAutomaticSharedClassKeys,
+} from './shared-class-detection';
+import {
   unitOfferingsImportTemplate,
 } from './template';
 import type {
@@ -759,6 +762,10 @@ export async function stageUnitOfferingImportAction(
 
     row.status = 'valid';
   }
+
+  applyAutomaticSharedClassKeys(
+    validationResults,
+  );
 
   const totalRows =
     validationResults.length;

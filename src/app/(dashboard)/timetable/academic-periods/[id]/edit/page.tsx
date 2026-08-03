@@ -62,7 +62,7 @@ export default async function EditAcademicPeriodPage({
     );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="Academic calendar"
         title={`Edit ${academicPeriod.name}`}

@@ -20,7 +20,6 @@ import { Select } from '@/components/ui/select';
 
 import {
   AcademicPeriodLifecycleAction,
-  getAcademicPeriodLifecycleActions,
 } from './academic-period-lifecycle-action';
 import {
   AcademicPeriodStatusBadge,
@@ -131,40 +130,24 @@ const columns: ColumnDef<AcademicPeriod>[] = [
     id: 'actions',
     enableSorting: false,
     header: 'Actions',
-    cell: ({ row }) => {
-      const lifecycleActions =
-        getAcademicPeriodLifecycleActions(
-          row.original,
-        );
+    cell: ({ row }) => (
+      <div className="flex min-w-max flex-wrap justify-end gap-2">
+        <Link
+          href={`/timetable/academic-periods/${row.original.id}/edit`}
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+        >
+          <Pencil
+            className="size-3.5"
+            aria-hidden="true"
+          />
+          Edit
+        </Link>
 
-      return (
-        <div className="flex min-w-max flex-wrap justify-end gap-2">
-          <Link
-            href={`/timetable/academic-periods/${row.original.id}/edit`}
-            className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
-          >
-            <Pencil
-              className="size-3.5"
-              aria-hidden="true"
-            />
-            Edit
-          </Link>
-
-          {lifecycleActions.map((status) => (
-            <AcademicPeriodLifecycleAction
-              key={status}
-              academicPeriod={row.original}
-              status={
-                status as
-                  | 'active'
-                  | 'closed'
-                  | 'archived'
-              }
-            />
-          ))}
-        </div>
-      );
-    },
+        <AcademicPeriodLifecycleAction
+          academicPeriod={row.original}
+        />
+      </div>
+    ),
   },
 ];
 

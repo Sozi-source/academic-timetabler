@@ -72,7 +72,7 @@ export default async function TeachingAllocationsPage() {
     totalWeeklyMinutes / 60;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="Timetable preparation"
         title="Teaching allocations"

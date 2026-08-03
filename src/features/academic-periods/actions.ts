@@ -301,8 +301,8 @@ export async function setAcademicPeriodStatusAction(
   const { error } = await supabase.rpc(
     'set_academic_period_status',
     {
-      period_id: idResult.data,
-      new_status: statusResult.data,
+      p_period_id: idResult.data,
+      p_status: statusResult.data,
     },
   );
 

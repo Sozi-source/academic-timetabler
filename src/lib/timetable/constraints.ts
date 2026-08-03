@@ -1,4 +1,4 @@
-﻿export const hardConstraintCodes = [
+export const hardConstraintCodes = [
   'TRAINER_DOUBLE_BOOKED',
   'COHORT_DOUBLE_BOOKED',
   'ROOM_DOUBLE_BOOKED',

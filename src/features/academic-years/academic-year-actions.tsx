@@ -1,118 +1,97 @@
 import {
-  Archive,
-  CheckCircle2,
-  CircleStop,
+  Save,
 } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import {
+  Button,
+} from '@/components/ui/button';
+import {
+  Select,
+} from '@/components/ui/select';
 
 import {
   setAcademicYearStatusAction,
 } from './actions';
 import type {
   AcademicYear,
+  AcademicYearStatus,
 } from './types';
 
 interface AcademicYearActionsProps {
   academicYear: AcademicYear;
 }
 
+const statusOptions: ReadonlyArray<{
+  value: AcademicYearStatus;
+  label: string;
+}> = [
+  {
+    value: 'planned',
+    label: 'Planned',
+  },
+  {
+    value: 'active',
+    label: 'Active',
+  },
+  {
+    value: 'closed',
+    label: 'Closed',
+  },
+  {
+    value: 'archived',
+    label: 'Archived',
+  },
+];
+
 export function AcademicYearActions({
   academicYear,
 }: AcademicYearActionsProps) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      {academicYear.status === 'planned' ||
-      academicYear.status === 'closed' ? (
-        <form action={setAcademicYearStatusAction}>
-          <input
-            type="hidden"
-            name="id"
-            value={academicYear.id}
+    <form
+      action={
+        setAcademicYearStatusAction
+      }
+      className="flex items-center gap-2"
+    >
+      <input
+        type="hidden"
+        name="id"
+        value={academicYear.id}
+      />
+
+      <Select
+        name="status"
+        defaultValue={
+          academicYear.status
+        }
+        aria-label={`Status for ${academicYear.name}`}
+        className="h-9 min-w-28 text-xs"
+      >
+        {statusOptions.map(
+          (option) => (
+            <option
+              key={option.value}
+              value={option.value}
+            >
+              {option.label}
+            </option>
+          ),
+        )}
+      </Select>
+
+      <Button
+        type="submit"
+        variant="outline"
+        size="sm"
+        leadingIcon={
+          <Save
+            className="size-3.5"
+            aria-hidden="true"
           />
-
-          <input
-            type="hidden"
-            name="status"
-            value="active"
-          />
-
-          <Button
-            type="submit"
-            variant="outline"
-            size="sm"
-            leadingIcon={
-              <CheckCircle2
-                className="size-3.5"
-                aria-hidden="true"
-              />
-            }
-          >
-            Activate
-          </Button>
-        </form>
-      ) : null}
-
-      {academicYear.status === 'active' ? (
-        <form action={setAcademicYearStatusAction}>
-          <input
-            type="hidden"
-            name="id"
-            value={academicYear.id}
-          />
-
-          <input
-            type="hidden"
-            name="status"
-            value="closed"
-          />
-
-          <Button
-            type="submit"
-            variant="outline"
-            size="sm"
-            leadingIcon={
-              <CircleStop
-                className="size-3.5"
-                aria-hidden="true"
-              />
-            }
-          >
-            Close
-          </Button>
-        </form>
-      ) : null}
-
-      {academicYear.status !== 'active' &&
-      academicYear.status !== 'archived' ? (
-        <form action={setAcademicYearStatusAction}>
-          <input
-            type="hidden"
-            name="id"
-            value={academicYear.id}
-          />
-
-          <input
-            type="hidden"
-            name="status"
-            value="archived"
-          />
-
-          <Button
-            type="submit"
-            variant="ghost"
-            size="sm"
-            leadingIcon={
-              <Archive
-                className="size-3.5"
-                aria-hidden="true"
-              />
-            }
-          >
-            Archive
-          </Button>
-        </form>
-      ) : null}
-    </div>
+        }
+      >
+        Set
+      </Button>
+    </form>
   );
 }

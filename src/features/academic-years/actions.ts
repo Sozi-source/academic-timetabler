@@ -1,13 +1,18 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import {
+  revalidatePath,
+} from 'next/cache';
 
-import { requireHodAccess } from '@/features/auth/authorization';
-import { createClient } from '@/lib/supabase/server';
+import {
+  requireHodAccess,
+} from '@/features/auth/authorization';
+import {
+  createClient,
+} from '@/lib/supabase/server';
 
 import type {
   AcademicYearActionState,
-  AcademicYearStatus,
 } from './types';
 import {
   academicYearFormSchema,
@@ -17,66 +22,113 @@ import {
 
 function revalidateAcademicYearPages() {
   revalidatePath('/dashboard');
-  revalidatePath('/timetable/academic-years');
+
+  revalidatePath(
+    '/timetable/academic-years',
+  );
+
+  revalidatePath(
+    '/timetable/academic-periods',
+  );
+
+  revalidatePath(
+    '/timetable/cohorts',
+  );
 }
 
-function getDatabaseErrorMessage(code?: string) {
+function getDatabaseErrorMessage(
+  code?: string,
+  message?: string,
+) {
   switch (code) {
     case '23505':
-      return 'An Academic Year with this name already exists, or another Academic Year is already active.';
+      return 'An Academic Year with this name already exists.';
 
     case '23P01':
-      return 'The dates overlap with another Academic Year. Academic Years must have separate date ranges.';
+      return 'The dates overlap another Academic Year.';
 
     case '23514':
-      return 'The Academic Year does not satisfy the required date or content rules.';
+      return 'The Academic Year does not satisfy the required rules.';
 
     case '42501':
       return 'You are not authorized to perform this operation.';
 
+    case 'P0002':
+      return 'The Academic Year was not found.';
+
+    case '22023':
+      return 'The selected status is invalid.';
+
     default:
-      return 'The Academic Year could not be saved. Please try again.';
+      return (
+        message ??
+        'The Academic Year could not be saved.'
+      );
   }
 }
 
 export async function createAcademicYearAction(
-  _previousState: AcademicYearActionState,
+  _previousState:
+    AcademicYearActionState,
   formData: FormData,
 ): Promise<AcademicYearActionState> {
   await requireHodAccess();
 
-  const parsed = academicYearFormSchema.safeParse({
-    name: formData.get('name'),
-    startsOn: formData.get('startsOn'),
-    endsOn: formData.get('endsOn'),
-    notes: formData.get('notes') || undefined,
-  });
+  const parsed =
+    academicYearFormSchema.safeParse({
+      name: formData.get('name'),
+
+      startsOn:
+        formData.get('startsOn'),
+
+      endsOn:
+        formData.get('endsOn'),
+
+      notes:
+        formData.get('notes') ||
+        undefined,
+    });
 
   if (!parsed.success) {
     return {
       status: 'error',
-      message: 'Review the highlighted fields.',
+      message:
+        'Review the highlighted fields.',
       fieldErrors:
-        parsed.error.flatten().fieldErrors,
+        parsed.error.flatten()
+          .fieldErrors,
     };
   }
 
-  const supabase = await createClient();
+  const supabase =
+    await createClient();
 
   const { error } = await supabase
     .from('academic_years')
     .insert({
       name: parsed.data.name,
-      starts_on: parsed.data.startsOn,
-      ends_on: parsed.data.endsOn,
-      notes: parsed.data.notes || null,
+
+      starts_on:
+        parsed.data.startsOn,
+
+      ends_on:
+        parsed.data.endsOn,
+
+      notes:
+        parsed.data.notes || null,
+
       status: 'planned',
     });
 
   if (error) {
     return {
       status: 'error',
-      message: getDatabaseErrorMessage(error.code),
+
+      message:
+        getDatabaseErrorMessage(
+          error.code,
+          error.message,
+        ),
     };
   }
 
@@ -84,60 +136,86 @@ export async function createAcademicYearAction(
 
   return {
     status: 'success',
-    message: 'Academic Year created successfully.',
+    message:
+      'Academic Year created.',
   };
 }
 
 export async function updateAcademicYearAction(
-  _previousState: AcademicYearActionState,
+  _previousState:
+    AcademicYearActionState,
   formData: FormData,
 ): Promise<AcademicYearActionState> {
   await requireHodAccess();
 
-  const idResult = academicYearIdSchema.safeParse(
-    formData.get('id'),
-  );
+  const idResult =
+    academicYearIdSchema.safeParse(
+      formData.get('id'),
+    );
 
   const formResult =
     academicYearFormSchema.safeParse({
       name: formData.get('name'),
-      startsOn: formData.get('startsOn'),
-      endsOn: formData.get('endsOn'),
-      notes: formData.get('notes') || undefined,
+
+      startsOn:
+        formData.get('startsOn'),
+
+      endsOn:
+        formData.get('endsOn'),
+
+      notes:
+        formData.get('notes') ||
+        undefined,
     });
 
   if (!idResult.success) {
     return {
       status: 'error',
-      message: 'The Academic Year identifier is invalid.',
+      message:
+        'Invalid Academic Year.',
     };
   }
 
   if (!formResult.success) {
     return {
       status: 'error',
-      message: 'Review the highlighted fields.',
+      message:
+        'Review the highlighted fields.',
       fieldErrors:
-        formResult.error.flatten().fieldErrors,
+        formResult.error.flatten()
+          .fieldErrors,
     };
   }
 
-  const supabase = await createClient();
+  const supabase =
+    await createClient();
 
   const { error } = await supabase
     .from('academic_years')
     .update({
       name: formResult.data.name,
-      starts_on: formResult.data.startsOn,
-      ends_on: formResult.data.endsOn,
-      notes: formResult.data.notes || null,
+
+      starts_on:
+        formResult.data.startsOn,
+
+      ends_on:
+        formResult.data.endsOn,
+
+      notes:
+        formResult.data.notes ||
+        null,
     })
     .eq('id', idResult.data);
 
   if (error) {
     return {
       status: 'error',
-      message: getDatabaseErrorMessage(error.code),
+
+      message:
+        getDatabaseErrorMessage(
+          error.code,
+          error.message,
+        ),
     };
   }
 
@@ -145,7 +223,8 @@ export async function updateAcademicYearAction(
 
   return {
     status: 'success',
-    message: 'Academic Year updated successfully.',
+    message:
+      'Academic Year updated.',
   };
 }
 
@@ -154,56 +233,46 @@ export async function setAcademicYearStatusAction(
 ): Promise<void> {
   await requireHodAccess();
 
-  const idResult = academicYearIdSchema.safeParse(
-    formData.get('id'),
-  );
+  const idResult =
+    academicYearIdSchema.safeParse(
+      formData.get('id'),
+    );
 
   const statusResult =
     academicYearStatusSchema.safeParse(
       formData.get('status'),
     );
 
-  if (!idResult.success || !statusResult.success) {
+  if (
+    !idResult.success ||
+    !statusResult.success
+  ) {
     throw new Error(
       'Invalid Academic Year status request.',
     );
   }
 
-  const status: AcademicYearStatus =
-    statusResult.data;
+  const supabase =
+    await createClient();
 
-  const supabase = await createClient();
+  const { error } =
+    await supabase.rpc(
+      'set_academic_year_status',
+      {
+        p_academic_year_id:
+          idResult.data,
 
-  /*
-   * Activating a year is performed in two controlled steps.
-   * The database unique index remains the final safeguard.
-   */
-  if (status === 'active') {
-    const { error: resetError } = await supabase
-      .from('academic_years')
-      .update({
-        status: 'closed',
-      })
-      .eq('status', 'active')
-      .neq('id', idResult.data);
-
-    if (resetError) {
-      throw new Error(
-        getDatabaseErrorMessage(resetError.code),
-      );
-    }
-  }
-
-  const { error } = await supabase
-    .from('academic_years')
-    .update({
-      status,
-    })
-    .eq('id', idResult.data);
+        p_status:
+          statusResult.data,
+      },
+    );
 
   if (error) {
     throw new Error(
-      getDatabaseErrorMessage(error.code),
+      getDatabaseErrorMessage(
+        error.code,
+        error.message,
+      ),
     );
   }
 

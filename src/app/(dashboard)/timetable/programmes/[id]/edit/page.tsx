@@ -53,7 +53,7 @@ export default async function EditProgrammePage({
     )?.label ?? programme.awardLevel;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="Academic structure"
         title={`Edit ${programme.code}`}

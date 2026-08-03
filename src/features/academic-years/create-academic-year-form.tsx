@@ -15,7 +15,6 @@ import {
 import { Button } from '@/components/ui/button';
 import {
   FormField,
-  getFormFieldDescriptionId,
 } from '@/components/ui/form-field';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -59,7 +58,7 @@ export function CreateAcademicYearForm() {
     <form
       ref={formRef}
       action={formAction}
-      className="space-y-5"
+      className="space-y-4"
       noValidate
     >
       {state.message ? (
@@ -96,7 +95,6 @@ export function CreateAcademicYearForm() {
         label="Academic year name"
         required
         error={nameError}
-        description="Use a clear institutional name such as 2026 Academic Year."
       >
         <Input
           id="academic-year-name"
@@ -105,14 +103,6 @@ export function CreateAcademicYearForm() {
           required
           disabled={pending}
           hasError={Boolean(nameError)}
-          aria-describedby={getFormFieldDescriptionId(
-            'academic-year-name',
-            {
-              hasDescription: true,
-              hasError: Boolean(nameError),
-            },
-          )}
-          placeholder="Example: 2026 Academic Year"
         />
       </FormField>
 
@@ -130,12 +120,6 @@ export function CreateAcademicYearForm() {
             required
             disabled={pending}
             hasError={Boolean(startsOnError)}
-            aria-describedby={getFormFieldDescriptionId(
-              'academic-year-start',
-              {
-                hasError: Boolean(startsOnError),
-              },
-            )}
           />
         </FormField>
 
@@ -152,12 +136,6 @@ export function CreateAcademicYearForm() {
             required
             disabled={pending}
             hasError={Boolean(endsOnError)}
-            aria-describedby={getFormFieldDescriptionId(
-              'academic-year-end',
-              {
-                hasError: Boolean(endsOnError),
-              },
-            )}
           />
         </FormField>
       </div>
@@ -167,7 +145,6 @@ export function CreateAcademicYearForm() {
         label="Notes"
         optional
         error={notesError}
-        description="Add relevant institutional planning information."
       >
         <Textarea
           id="academic-year-notes"
@@ -176,18 +153,10 @@ export function CreateAcademicYearForm() {
           maxLength={1000}
           disabled={pending}
           hasError={Boolean(notesError)}
-          aria-describedby={getFormFieldDescriptionId(
-            'academic-year-notes',
-            {
-              hasDescription: true,
-              hasError: Boolean(notesError),
-            },
-          )}
-          placeholder="Add relevant planning information."
         />
       </FormField>
 
-      <div className="flex justify-end border-t border-border-soft pt-5">
+      <div className="flex justify-end border-t border-border-soft pt-4">
         <Button
           type="submit"
           variant="primary"

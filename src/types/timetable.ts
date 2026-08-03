@@ -1,4 +1,4 @@
-﻿export type RecordStatus =
+export type RecordStatus =
   | 'active'
   | 'inactive'
   | 'archived';

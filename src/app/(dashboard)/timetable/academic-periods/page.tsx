@@ -10,7 +10,6 @@ import {
   Drawer,
   DrawerBody,
   DrawerContent,
-  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
@@ -56,7 +55,7 @@ export default async function AcademicPeriodsPage() {
     );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="Academic calendar"
         title="Academic Periods"
@@ -109,11 +108,6 @@ export default async function AcademicPeriodsPage() {
                     <DrawerTitle>
                       Create Academic Period
                     </DrawerTitle>
-
-                    <DrawerDescription>
-                      Add a teaching period to an
-                      Academic Year.
-                    </DrawerDescription>
                   </div>
                 </div>
               </DrawerHeader>

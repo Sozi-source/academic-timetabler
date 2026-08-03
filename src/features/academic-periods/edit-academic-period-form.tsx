@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { DateRangeField } from '@/components/ui/date-range-field';
 import {
   FormField,
-  getFormFieldDescriptionId,
 } from '@/components/ui/form-field';
 import { FormStatusMessage } from '@/components/ui/form-status-message';
 import { Input } from '@/components/ui/input';
@@ -76,7 +75,7 @@ export function EditAcademicPeriodForm({
   return (
     <form
       action={formAction}
-      className="space-y-5"
+      className="space-y-4"
       noValidate
     >
       <input
@@ -153,7 +152,6 @@ export function EditAcademicPeriodForm({
           label="Period code"
           required
           error={codeError}
-          description="Use letters, numbers and hyphens."
         >
           <Input
             id="edit-academic-period-code"
@@ -162,13 +160,6 @@ export function EditAcademicPeriodForm({
             disabled={pending || archived}
             defaultValue={academicPeriod.code}
             hasError={Boolean(codeError)}
-            aria-describedby={getFormFieldDescriptionId(
-              'edit-academic-period-code',
-              {
-                hasDescription: true,
-                hasError: Boolean(codeError),
-              },
-            )}
           />
         </FormField>
 
@@ -199,11 +190,6 @@ export function EditAcademicPeriodForm({
           <h3 className="text-sm font-semibold text-text-primary">
             Academic Period dates
           </h3>
-
-          <p className="mt-1 text-xs leading-5 text-text-muted">
-            The complete operational date range for
-            this period.
-          </p>
         </div>
 
         <DateRangeField
@@ -225,11 +211,6 @@ export function EditAcademicPeriodForm({
           <h3 className="text-sm font-semibold text-text-primary">
             Teaching window
           </h3>
-
-          <p className="mt-1 text-xs leading-5 text-text-muted">
-            Timetable sessions will be scheduled
-            within this range.
-          </p>
         </div>
 
         <DateRangeField
@@ -272,7 +253,7 @@ export function EditAcademicPeriodForm({
       </FormField>
 
       {!archived ? (
-        <div className="flex justify-end border-t border-border-soft pt-5">
+        <div className="flex justify-end border-t border-border-soft pt-4">
           <Button
             type="submit"
             size="lg"

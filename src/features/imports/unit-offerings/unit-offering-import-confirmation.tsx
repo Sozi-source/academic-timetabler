@@ -83,7 +83,7 @@ export function UnitOfferingImportConfirmation({
 
         <div className="min-w-0 flex-1">
           <h2 className="font-semibold text-text-primary">
-            Import confirmation
+            Import
           </h2>
 
           <p className="mt-1 text-sm leading-6 text-text-muted">
@@ -116,7 +116,7 @@ export function UnitOfferingImportConfirmation({
 
             <div className="rounded-xl border border-border bg-surface-subtle p-3">
               <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
-                Reviewed decisions
+                Reviewed
               </p>
 
               <p className="mt-1 text-xl font-bold text-text-primary">
@@ -262,8 +262,8 @@ export function UnitOfferingImportConfirmation({
                 )}
 
                 {pending
-                  ? 'Confirming import...'
-                  : 'Confirm import'}
+                  ? 'Importing...'
+                  : 'Import'}
               </button>
             </form>
           )}

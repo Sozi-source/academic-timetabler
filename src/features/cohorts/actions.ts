@@ -5,6 +5,10 @@ import { revalidatePath } from 'next/cache';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { createClient } from '@/lib/supabase/server';
 
+import {
+  calculateCohortProgression,
+} from './calculations';
+
 import type {
   CohortActionState,
 } from './types';
@@ -127,19 +131,6 @@ function parseCohortForm(
     intakeDate:
       formData.get('intakeDate'),
 
-    expectedCompletionDate:
-      formData.get(
-        'expectedCompletionDate',
-      ),
-
-    currentAcademicPeriodNumber:
-      formData.get(
-        'currentAcademicPeriodNumber',
-      ),
-
-    plannedSize:
-      formData.get('plannedSize') || undefined,
-
     actualSize:
       formData.get('actualSize'),
 
@@ -152,6 +143,143 @@ function parseCohortForm(
         'notes',
       ),
   });
+}
+
+
+async function deriveCohortProgression(
+  supabase: Awaited<
+    ReturnType<typeof createClient>
+  >,
+  programmeId: string,
+  intakeDate: string,
+) {
+  const [
+    programmeResult,
+    academicPeriodResult,
+  ] = await Promise.all([
+    supabase
+      .from('programmes')
+      .select(`
+        id,
+        total_academic_periods
+      `)
+      .eq('id', programmeId)
+      .maybeSingle(),
+
+    supabase
+      .from('academic_periods')
+      .select(`
+        id,
+        name,
+        sequence_number,
+        starts_on,
+        ends_on,
+        status,
+        academic_years (
+          starts_on
+        )
+      `)
+      .order('starts_on', {
+        ascending: true,
+      }),
+  ]);
+
+  if (programmeResult.error) {
+    return {
+      status: 'error' as const,
+      message:
+        getCohortDatabaseErrorMessage(
+          programmeResult.error.code,
+          programmeResult.error.message,
+        ),
+    };
+  }
+
+  if (!programmeResult.data) {
+    return {
+      status: 'error' as const,
+      message:
+        'The selected programme was not found.',
+    };
+  }
+
+  if (academicPeriodResult.error) {
+    return {
+      status: 'error' as const,
+      message:
+        `Unable to calculate progression: ${academicPeriodResult.error.message}`,
+    };
+  }
+
+  const periodRows =
+    academicPeriodResult.data ?? [];
+
+  const academicPeriods =
+    periodRows.map((period) => {
+      const academicYear =
+        Array.isArray(
+          period.academic_years,
+        )
+          ? period.academic_years[0]
+          : period.academic_years;
+
+      return {
+        id: period.id,
+        name: period.name,
+        sequenceNumber:
+          period.sequence_number,
+        startsOn:
+          period.starts_on,
+        endsOn:
+          period.ends_on,
+        academicYearStartsOn:
+          academicYear?.starts_on ??
+          period.starts_on,
+      };
+    });
+
+  const progressionResult =
+    calculateCohortProgression({
+      intakeDate,
+      totalAcademicPeriods:
+        programmeResult.data
+          .total_academic_periods,
+      academicPeriods,
+      activeAcademicPeriodIds:
+        periodRows
+          .filter(
+            (period) =>
+              period.status ===
+              'active',
+          )
+          .map(
+            (period) =>
+              period.id,
+          ),
+    });
+
+  if (
+    progressionResult.status ===
+    'error'
+  ) {
+    return progressionResult;
+  }
+
+  return {
+    status: 'success' as const,
+
+    expectedCompletionDate:
+      progressionResult.calculation
+        .expectedCompletionDate,
+
+    currentAcademicPeriodNumber:
+      progressionResult.calculation
+        .persistedAcademicPeriodNumber,
+
+    progressionState:
+      progressionResult.calculation
+        .progressionState,
+  };
 }
 
 export async function createCohortAction(
@@ -179,6 +307,26 @@ export async function createCohortAction(
 
   const supabase = await createClient();
 
+  const completionResult =
+    await deriveCohortProgression(
+      supabase,
+      parsed.data.programmeId,
+      parsed.data.intakeDate,
+    );
+
+  if (completionResult.status === 'error') {
+    return {
+      status: 'error',
+      message:
+        completionResult.message,
+      fieldErrors: {
+        intakeDate: [
+          completionResult.message,
+        ],
+      },
+    };
+  }
+
   const { error } = await supabase
     .from('cohorts')
     .insert({
@@ -191,11 +339,10 @@ export async function createCohortAction(
       intake_date:
         parsed.data.intakeDate,
       expected_completion_date:
-        parsed.data.expectedCompletionDate,
+        completionResult.expectedCompletionDate,
       current_academic_period_number:
-        parsed.data.currentAcademicPeriodNumber,
-      planned_size:
-        parsed.data.plannedSize ?? null,
+        completionResult.currentAcademicPeriodNumber,
+      planned_size: null,
       actual_size:
         parsed.data.actualSize,
       status:
@@ -264,6 +411,26 @@ export async function updateCohortAction(
 
   const supabase = await createClient();
 
+  const completionResult =
+    await deriveCohortProgression(
+      supabase,
+      parsed.data.programmeId,
+      parsed.data.intakeDate,
+    );
+
+  if (completionResult.status === 'error') {
+    return {
+      status: 'error',
+      message:
+        completionResult.message,
+      fieldErrors: {
+        intakeDate: [
+          completionResult.message,
+        ],
+      },
+    };
+  }
+
   const { error } = await supabase
     .from('cohorts')
     .update({
@@ -276,11 +443,10 @@ export async function updateCohortAction(
       intake_date:
         parsed.data.intakeDate,
       expected_completion_date:
-        parsed.data.expectedCompletionDate,
+        completionResult.expectedCompletionDate,
       current_academic_period_number:
-        parsed.data.currentAcademicPeriodNumber,
-      planned_size:
-        parsed.data.plannedSize ?? null,
+        completionResult.currentAcademicPeriodNumber,
+      planned_size: null,
       actual_size:
         parsed.data.actualSize,
       status:

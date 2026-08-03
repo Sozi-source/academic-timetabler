@@ -10,6 +10,9 @@ import { notFound } from 'next/navigation';
 
 import { Badge } from '@/components/ui/badge';
 import {
+  getAcademicPeriods,
+} from '@/features/academic-periods/queries';
+import {
   Card,
   CardContent,
   CardHeader,
@@ -43,11 +46,15 @@ export default async function EditCohortPage({
 }: EditCohortPageProps) {
   const { id } = await params;
 
-  const [cohort, programmes] =
-    await Promise.all([
-      getCohortById(id),
-      getProgrammes(),
-    ]);
+  const [
+    cohort,
+    programmes,
+    academicPeriods,
+  ] = await Promise.all([
+    getCohortById(id),
+    getProgrammes(),
+    getAcademicPeriods(),
+  ]);
 
   if (!cohort) {
     notFound();
@@ -67,7 +74,7 @@ export default async function EditCohortPage({
     )?.label ?? cohort.status;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="Academic structure"
         title={`Edit ${cohort.code}`}
@@ -162,6 +169,7 @@ export default async function EditCohortPage({
             <EditCohortForm
               cohort={cohort}
               programmes={editableProgrammes}
+              academicPeriods={academicPeriods}
             />
           </CardContent>
         </Card>

@@ -37,7 +37,7 @@ export default async function AcademicYearsPage() {
     );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="Academic calendar"
         title="Academic Years"

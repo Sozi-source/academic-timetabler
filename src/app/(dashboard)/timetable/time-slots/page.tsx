@@ -16,7 +16,6 @@ import {
   Drawer,
   DrawerBody,
   DrawerContent,
-  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
@@ -278,11 +277,6 @@ export default async function TimetableCalendarPage({
                           <DrawerTitle>
                             Add Working Day
                           </DrawerTitle>
-
-                          <DrawerDescription>
-                            Add a teaching day to{' '}
-                            {selectedPeriod.name}.
-                          </DrawerDescription>
                         </DrawerHeader>
 
                         <DrawerBody>
@@ -377,11 +371,6 @@ export default async function TimetableCalendarPage({
                             <DrawerTitle>
                               Create Time Slot
                             </DrawerTitle>
-
-                            <DrawerDescription>
-                              Add a daily timetable slot
-                              to {selectedPeriod.name}.
-                            </DrawerDescription>
                           </div>
                         </div>
                       </DrawerHeader>

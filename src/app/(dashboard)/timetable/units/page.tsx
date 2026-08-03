@@ -15,7 +15,6 @@ import {
   Drawer,
   DrawerBody,
   DrawerContent,
-  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
@@ -81,7 +80,7 @@ export default async function UnitsPage() {
     );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="Academic structure"
         title="Units"
@@ -141,11 +140,6 @@ export default async function UnitsPage() {
                       <DrawerTitle>
                         Register unit
                       </DrawerTitle>
-
-                      <DrawerDescription>
-                        Add a programme unit and its
-                        timetable requirements.
-                      </DrawerDescription>
                     </div>
                   </div>
                 </DrawerHeader>

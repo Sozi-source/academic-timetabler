@@ -1,7 +1,6 @@
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   FormField,
-  getFormFieldDescriptionId,
 } from '@/components/ui/form-field';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
@@ -53,7 +52,6 @@ export function RoomFormFields({
           label="Room code"
           required
           error={codeError}
-          description="Example: DCM-1 or LAB-02."
         >
           <Input
             id="room-code"
@@ -62,14 +60,6 @@ export function RoomFormFields({
             disabled={pending}
             defaultValue={room?.code ?? ''}
             hasError={Boolean(codeError)}
-            aria-describedby={getFormFieldDescriptionId(
-              'room-code',
-              {
-                hasDescription: true,
-                hasError: Boolean(codeError),
-              },
-            )}
-            placeholder="DCM-1"
           />
         </FormField>
 
@@ -115,7 +105,6 @@ export function RoomFormFields({
           disabled={pending}
           defaultValue={room?.name ?? ''}
           hasError={Boolean(nameError)}
-          placeholder="Diploma Classroom 1"
         />
       </FormField>
 
@@ -132,7 +121,6 @@ export function RoomFormFields({
             disabled={pending}
             defaultValue={room?.building ?? ''}
             hasError={Boolean(buildingError)}
-            placeholder="Main Academic Block"
           />
         </FormField>
 
@@ -148,7 +136,6 @@ export function RoomFormFields({
             disabled={pending}
             defaultValue={room?.floorLabel ?? ''}
             hasError={Boolean(floorLabelError)}
-            placeholder="First Floor"
           />
         </FormField>
       </div>
@@ -158,7 +145,6 @@ export function RoomFormFields({
         label="Seating capacity"
         required
         error={capacityError}
-        description="Enter the maximum safe learner capacity."
       >
         <Input
           id="room-capacity"
@@ -170,14 +156,6 @@ export function RoomFormFields({
           disabled={pending}
           defaultValue={room?.capacity ?? ''}
           hasError={Boolean(capacityError)}
-          aria-describedby={getFormFieldDescriptionId(
-            'room-capacity',
-            {
-              hasDescription: true,
-              hasError: Boolean(capacityError),
-            },
-          )}
-          placeholder="45"
         />
       </FormField>
 
@@ -240,7 +218,6 @@ export function RoomFormFields({
           disabled={pending}
           defaultValue={room?.notes ?? ''}
           hasError={Boolean(notesError)}
-          placeholder="Add optional room facilities or scheduling notes."
         />
       </FormField>
     </>

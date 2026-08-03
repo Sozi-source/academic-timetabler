@@ -51,51 +51,6 @@ export const cohortFormSchema = z
         'Enter a valid intake date.',
       ),
 
-    expectedCompletionDate: z
-      .string()
-      .refine(
-        isValidDate,
-        'Enter a valid expected completion date.',
-      ),
-
-    currentAcademicPeriodNumber: z.coerce
-      .number()
-      .int(
-        'The current Academic Period must be a whole number.',
-      )
-      .min(
-        1,
-        'The current Academic Period must be at least 1.',
-      )
-      .max(
-        60,
-        'The current Academic Period cannot exceed 60.',
-      ),
-
-    plannedSize: z
-      .union([
-        z.coerce
-          .number()
-          .int(
-            'Planned size must be a whole number.',
-          )
-          .min(
-            1,
-            'Planned size must be at least 1.',
-          )
-          .max(
-            5000,
-            'Planned size cannot exceed 5,000 learners.',
-          ),
-        z.literal(''),
-        z.undefined(),
-      ])
-      .transform((value) =>
-        value === '' || value === undefined
-          ? undefined
-          : value,
-      ),
-
     actualSize: z.coerce
       .number()
       .int(
@@ -128,34 +83,6 @@ export const cohortFormSchema = z
       .optional(),
   })
   .superRefine((value, context) => {
-    if (
-      isValidDate(value.intakeDate) &&
-      isValidDate(
-        value.expectedCompletionDate,
-      ) &&
-      value.expectedCompletionDate <=
-        value.intakeDate
-    ) {
-      context.addIssue({
-        code: 'custom',
-        path: ['expectedCompletionDate'],
-        message:
-          'The expected completion date must be after the intake date.',
-      });
-    }
-
-    if (
-      value.plannedSize !== undefined &&
-      value.actualSize > value.plannedSize
-    ) {
-      context.addIssue({
-        code: 'custom',
-        path: ['actualSize'],
-        message:
-          'Actual size cannot exceed the planned size.',
-      });
-    }
-
     if (
       value.status === 'planned' &&
       value.actualSize > 0

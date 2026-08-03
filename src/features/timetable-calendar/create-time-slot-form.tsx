@@ -13,7 +13,6 @@ import {
 import { Button } from '@/components/ui/button';
 import {
   FormField,
-  getFormFieldDescriptionId,
 } from '@/components/ui/form-field';
 import { FormStatusMessage } from '@/components/ui/form-status-message';
 import { Input } from '@/components/ui/input';
@@ -73,7 +72,7 @@ export function CreateTimeSlotForm({
     <form
       ref={formRef}
       action={formAction}
-      className="space-y-5"
+      className="space-y-4"
       noValidate
     >
       <input
@@ -98,7 +97,6 @@ export function CreateTimeSlotForm({
         label="Slot name"
         required
         error={nameError}
-        description="Example: Lesson 1 or Morning Break."
       >
         <Input
           id="time-slot-name"
@@ -106,14 +104,6 @@ export function CreateTimeSlotForm({
           required
           disabled={pending}
           hasError={Boolean(nameError)}
-          aria-describedby={getFormFieldDescriptionId(
-            'time-slot-name',
-            {
-              hasDescription: true,
-              hasError: Boolean(nameError),
-            },
-          )}
-          placeholder="Lesson 1"
         />
       </FormField>
 
@@ -130,7 +120,6 @@ export function CreateTimeSlotForm({
             required
             disabled={pending}
             hasError={Boolean(codeError)}
-            placeholder="L1"
           />
         </FormField>
 
@@ -199,7 +188,6 @@ export function CreateTimeSlotForm({
         label="Display order"
         required
         error={sequenceError}
-        description="Controls the order of slots in the timetable grid."
       >
         <Input
           id="time-slot-sequence"
@@ -210,14 +198,6 @@ export function CreateTimeSlotForm({
           required
           disabled={pending}
           hasError={Boolean(sequenceError)}
-          aria-describedby={getFormFieldDescriptionId(
-            'time-slot-sequence',
-            {
-              hasDescription: true,
-              hasError: Boolean(sequenceError),
-            },
-          )}
-          placeholder="1"
         />
       </FormField>
 
@@ -234,11 +214,10 @@ export function CreateTimeSlotForm({
           maxLength={500}
           disabled={pending}
           hasError={Boolean(notesError)}
-          placeholder="Optional scheduling information."
         />
       </FormField>
 
-      <div className="flex justify-end border-t border-border-soft pt-5">
+      <div className="flex justify-end border-t border-border-soft pt-4">
         <Button
           type="submit"
           disabled={pending}

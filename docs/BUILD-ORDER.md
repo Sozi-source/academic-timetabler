@@ -1,4 +1,4 @@
-﻿# HND App Timetable Build Order
+# HND App Timetable Build Order
 
 The system is developed as complete vertical slices.
 

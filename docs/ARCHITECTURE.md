@@ -1,4 +1,4 @@
-﻿# HND App Architecture
+# HND App Architecture
 
 ## Current scope
 

@@ -44,7 +44,7 @@ export function EditAcademicYearForm({
   return (
     <form
       action={formAction}
-      className="space-y-5"
+      className="space-y-4"
       noValidate
     >
       <input
@@ -188,7 +188,7 @@ export function EditAcademicYearForm({
         ) : null}
       </div>
 
-      <div className="flex justify-end border-t border-border-soft pt-5">
+      <div className="flex justify-end border-t border-border-soft pt-4">
         <Button
           type="submit"
           size="lg"

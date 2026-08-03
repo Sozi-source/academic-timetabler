@@ -1,12 +1,35 @@
+'use client';
+
+import {
+  CalendarCheck2,
+} from 'lucide-react';
+import {
+  useMemo,
+  useState,
+} from 'react';
+
 import {
   FormField,
-  getFormFieldDescriptionId,
 } from '@/components/ui/form-field';
-import { Input } from '@/components/ui/input';
-import { Select } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import type { Programme } from '@/features/programmes/types';
+import {
+  Input,
+} from '@/components/ui/input';
+import {
+  Select,
+} from '@/components/ui/select';
+import {
+  Textarea,
+} from '@/components/ui/textarea';
+import type {
+  AcademicPeriod,
+} from '@/features/academic-periods/types';
+import type {
+  Programme,
+} from '@/features/programmes/types';
 
+import {
+  calculateCohortProgression,
+} from './calculations';
 import {
   cohortStatusOptions,
   type Cohort,
@@ -16,36 +39,191 @@ import {
 interface CohortFormFieldsProps {
   state: CohortActionState;
   programmes: Programme[];
+  academicPeriods: AcademicPeriod[];
   cohort?: Cohort;
   pending: boolean;
+}
+
+function generateCohortCode(
+  programmeCode: string,
+  intakeDate: string,
+) {
+  if (
+    !programmeCode ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(
+      intakeDate,
+    )
+  ) {
+    return '';
+  }
+
+  const monthLabels = [
+    'JAN',
+    'FEB',
+    'MAR',
+    'APR',
+    'MAY',
+    'JUN',
+    'JUL',
+    'AUG',
+    'SEP',
+    'OCT',
+    'NOV',
+    'DEC',
+  ] as const;
+
+  const [year, month] =
+    intakeDate.split('-');
+
+  const monthIndex =
+    Number(month) - 1;
+
+  const monthLabel =
+    monthLabels[monthIndex];
+
+  if (!monthLabel) {
+    return '';
+  }
+
+  return `${programmeCode
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, '-')}-${monthLabel}-${year}`;
+}
+function formatDate(
+  value: string,
+) {
+  return new Intl.DateTimeFormat(
+    'en-KE',
+    {
+      dateStyle: 'long',
+      timeZone: 'UTC',
+    },
+  ).format(
+    new Date(
+      `${value}T00:00:00Z`,
+    ),
+  );
+}
+
+function getProgressionLabel(
+  progressionState:
+    | 'not_started'
+    | 'in_progress'
+    | 'completed',
+  currentPeriod:
+    number | null,
+) {
+  switch (progressionState) {
+    case 'not_started':
+      return 'Not started';
+
+    case 'completed':
+      return 'Completed';
+
+    case 'in_progress':
+      return currentPeriod
+        ? `Period ${currentPeriod}`
+        : '—';
+  }
 }
 
 export function CohortFormFields({
   state,
   programmes,
+  academicPeriods,
   cohort,
   pending,
 }: CohortFormFieldsProps) {
+  const [
+    selectedProgrammeId,
+    setSelectedProgrammeId,
+  ] = useState(
+    cohort?.programmeId ?? '',
+  );
+
+  const [
+    intakeDate,
+    setIntakeDate,
+  ] = useState(
+    cohort?.intakeDate ?? '',
+  );
+
+  const selectedProgramme =
+    programmes.find(
+      (programme) =>
+        programme.id ===
+        selectedProgrammeId,
+    );
+
+  const generatedCohortCode =
+    selectedProgramme
+      ? generateCohortCode(
+          selectedProgramme.code,
+          intakeDate,
+        )
+      : '';
+
+  const progressionResult =
+    useMemo(() => {
+      if (
+        !selectedProgramme ||
+        !intakeDate
+      ) {
+        return null;
+      }
+
+      return calculateCohortProgression({
+        intakeDate,
+
+        totalAcademicPeriods:
+          selectedProgramme
+            .totalAcademicPeriods,
+
+        academicPeriods:
+          academicPeriods.map(
+            (period) => ({
+              id: period.id,
+              name: period.name,
+              sequenceNumber:
+                period.sequenceNumber,
+              startsOn:
+                period.startsOn,
+              endsOn:
+                period.endsOn,
+              academicYearStartsOn:
+                period.academicYear
+                  .startsOn,
+            }),
+          ),
+
+        activeAcademicPeriodIds:
+          academicPeriods
+            .filter(
+              (period) =>
+                period.status ===
+                'active',
+            )
+            .map(
+              (period) =>
+                period.id,
+            ),
+      });
+    }, [
+      academicPeriods,
+      intakeDate,
+      selectedProgramme,
+    ]);
+
   const programmeError =
     state.fieldErrors?.programmeId?.[0];
 
-  const codeError =
-    state.fieldErrors?.code?.[0];
 
   const nameError =
     state.fieldErrors?.name?.[0];
 
   const intakeDateError =
     state.fieldErrors?.intakeDate?.[0];
-
-  const completionDateError =
-    state.fieldErrors?.expectedCompletionDate?.[0];
-
-  const currentPeriodError =
-    state.fieldErrors?.currentAcademicPeriodNumber?.[0];
-
-  const plannedSizeError =
-    state.fieldErrors?.plannedSize?.[0];
 
   const actualSizeError =
     state.fieldErrors?.actualSize?.[0];
@@ -63,93 +241,84 @@ export function CohortFormFields({
         label="Programme"
         required
         error={programmeError}
-        description="Select the parent programme for this cohort."
       >
         <Select
           id="cohort-programme"
           name="programmeId"
           required
           disabled={pending}
-          defaultValue={
-            cohort?.programmeId ?? ''
+          value={selectedProgrammeId}
+          onChange={(event) =>
+            setSelectedProgrammeId(
+              event.target.value,
+            )
           }
-          hasError={Boolean(programmeError)}
-          aria-describedby={getFormFieldDescriptionId(
-            'cohort-programme',
-            {
-              hasDescription: true,
-              hasError: Boolean(programmeError),
-            },
-          )}
+          hasError={
+            Boolean(programmeError)
+          }
         >
-          <option value="" disabled>
+          <option
+            value=""
+            disabled
+          >
             Select programme
           </option>
 
-          {programmes.map((programme) => (
-            <option
-              key={programme.id}
-              value={programme.id}
-            >
-              {programme.code} - {programme.name}
-            </option>
-          ))}
+          {programmes.map(
+            (programme) => (
+              <option
+                key={programme.id}
+                value={programme.id}
+              >
+                {programme.code} -{' '}
+                {programme.name}
+              </option>
+            ),
+          )}
         </Select>
       </FormField>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <FormField
-          id="cohort-code"
-          label="Cohort code"
-          required
-          error={codeError}
-          description="Example: DHN-SEP-2026."
-        >
-          <Input
-            id="cohort-code"
-            name="code"
-            required
-            disabled={pending}
-            defaultValue={cohort?.code ?? ''}
-            hasError={Boolean(codeError)}
-            aria-describedby={getFormFieldDescriptionId(
-              'cohort-code',
-              {
-                hasDescription: true,
-                hasError: Boolean(codeError),
-              },
-            )}
-            placeholder="DHN-SEP-2026"
-          />
-        </FormField>
+      <input
+        type="hidden"
+        name="code"
+        value={
+          generatedCohortCode ||
+          cohort?.code ||
+          ''
+        }
+      />
 
-        <FormField
+      <FormField
+        id="cohort-status"
+        label="Status"
+        required
+        error={statusError}
+      >
+        <Select
           id="cohort-status"
-          label="Lifecycle status"
+          name="status"
           required
-          error={statusError}
+          disabled={pending}
+          defaultValue={
+            cohort?.status ??
+            'planned'
+          }
+          hasError={
+            Boolean(statusError)
+          }
         >
-          <Select
-            id="cohort-status"
-            name="status"
-            required
-            disabled={pending}
-            defaultValue={
-              cohort?.status ?? 'planned'
-            }
-            hasError={Boolean(statusError)}
-          >
-            {cohortStatusOptions.map((option) => (
+          {cohortStatusOptions.map(
+            (option) => (
               <option
                 key={option.value}
                 value={option.value}
               >
                 {option.label}
               </option>
-            ))}
-          </Select>
-        </FormField>
-      </div>
+            ),
+          )}
+        </Select>
+      </FormField>
 
       <FormField
         id="cohort-name"
@@ -162,9 +331,12 @@ export function CohortFormFields({
           name="name"
           required
           disabled={pending}
-          defaultValue={cohort?.name ?? ''}
-          hasError={Boolean(nameError)}
-          placeholder="DHN September 2026"
+          defaultValue={
+            cohort?.name ?? ''
+          }
+          hasError={
+            Boolean(nameError)
+          }
         />
       </FormField>
 
@@ -181,125 +353,101 @@ export function CohortFormFields({
             type="date"
             required
             disabled={pending}
-            defaultValue={cohort?.intakeDate ?? ''}
-            hasError={Boolean(intakeDateError)}
+            value={intakeDate}
+            onChange={(event) =>
+              setIntakeDate(
+                event.target.value,
+              )
+            }
+            hasError={
+              Boolean(
+                intakeDateError,
+              )
+            }
           />
         </FormField>
 
         <FormField
           id="cohort-completion-date"
-          label="Expected completion date"
-          required
-          error={completionDateError}
+          label="Expected completion"
+          error={
+            progressionResult
+              ?.status === 'error'
+              ? progressionResult.message
+              : undefined
+          }
         >
-          <Input
-            id="cohort-completion-date"
-            name="expectedCompletionDate"
-            type="date"
-            required
-            disabled={pending}
-            defaultValue={
-              cohort?.expectedCompletionDate ?? ''
-            }
-            hasError={Boolean(
-              completionDateError,
+          <div className="flex min-h-11 items-center rounded-xl border border-border-strong bg-surface-subtle px-3 text-sm">
+            {progressionResult
+              ?.status ===
+            'success' ? (
+              <span className="flex items-center gap-2 font-semibold text-text-primary">
+                <CalendarCheck2
+                  className="size-4 text-success"
+                  aria-hidden="true"
+                />
+
+                {formatDate(
+                  progressionResult
+                    .calculation
+                    .expectedCompletionDate,
+                )}
+              </span>
+            ) : (
+              <span className="text-text-muted">
+                —
+              </span>
             )}
-          />
+          </div>
         </FormField>
       </div>
 
-      <section className="space-y-4 rounded-xl border border-border-soft bg-surface-subtle p-4">
-        <div>
-          <h3 className="text-sm font-semibold text-text-primary">
-            Academic progress and enrolment
-          </h3>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <FormField
+          id="cohort-current-period"
+          label="Current period"
+        >
+          <div className="flex min-h-11 items-center rounded-xl border border-border-strong bg-surface-subtle px-3 text-sm font-semibold text-text-primary">
+            {progressionResult
+              ?.status ===
+            'success'
+              ? getProgressionLabel(
+                  progressionResult
+                    .calculation
+                    .progressionState,
+                  progressionResult
+                    .calculation
+                    .currentAcademicPeriodNumber,
+                )
+              : '—'}
+          </div>
+        </FormField>
 
-          <p className="mt-1 text-xs leading-5 text-text-muted">
-            Define the current programme period and
-            learner numbers used during timetable planning.
-          </p>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-3">
-          <FormField
-            id="cohort-current-period"
-            label="Current period"
-            required
-            error={currentPeriodError}
-            description="The cohort's current programme period number."
-          >
-            <Input
-              id="cohort-current-period"
-              name="currentAcademicPeriodNumber"
-              type="number"
-              min={1}
-              max={60}
-              required
-              disabled={pending}
-              defaultValue={
-                cohort?.currentAcademicPeriodNumber ??
-                1
-              }
-              hasError={Boolean(
-                currentPeriodError,
-              )}
-              aria-describedby={getFormFieldDescriptionId(
-                'cohort-current-period',
-                {
-                  hasDescription: true,
-                  hasError: Boolean(
-                    currentPeriodError,
-                  ),
-                },
-              )}
-            />
-          </FormField>
-
-          <FormField
-            id="cohort-planned-size"
-            label="Planned size"
-            optional
-            error={plannedSizeError}
-          >
-            <Input
-              id="cohort-planned-size"
-              name="plannedSize"
-              type="number"
-              min={1}
-              max={5000}
-              disabled={pending}
-              defaultValue={
-                cohort?.plannedSize ?? ''
-              }
-              hasError={Boolean(
-                plannedSizeError,
-              )}
-              placeholder="50"
-            />
-          </FormField>
-
-          <FormField
+        <FormField
+          id="cohort-actual-size"
+          label="Actual size"
+          required
+          error={actualSizeError}
+        >
+          <Input
             id="cohort-actual-size"
-            label="Actual size"
+            name="actualSize"
+            type="number"
+            min={0}
+            max={5000}
             required
-            error={actualSizeError}
-          >
-            <Input
-              id="cohort-actual-size"
-              name="actualSize"
-              type="number"
-              min={0}
-              max={5000}
-              required
-              disabled={pending}
-              defaultValue={
-                cohort?.actualSize ?? 0
-              }
-              hasError={Boolean(actualSizeError)}
-            />
-          </FormField>
-        </div>
-      </section>
+            disabled={pending}
+            defaultValue={
+              cohort?.actualSize ?? 0
+            }
+            hasError={
+              Boolean(
+                actualSizeError,
+              )
+            }
+          />
+        </FormField>
+      </div>
 
       <FormField
         id="cohort-notes"
@@ -310,12 +458,15 @@ export function CohortFormFields({
         <Textarea
           id="cohort-notes"
           name="notes"
-          rows={4}
+          rows={3}
           maxLength={1500}
           disabled={pending}
-          defaultValue={cohort?.notes ?? ''}
-          hasError={Boolean(notesError)}
-          placeholder="Add optional intake, enrolment or scheduling information."
+          defaultValue={
+            cohort?.notes ?? ''
+          }
+          hasError={
+            Boolean(notesError)
+          }
         />
       </FormField>
     </>

@@ -39,7 +39,7 @@ export function CreateRoomForm() {
     <form
       ref={formRef}
       action={formAction}
-      className="space-y-5"
+      className="space-y-4"
       noValidate
     >
       {state.message ? (
@@ -58,7 +58,7 @@ export function CreateRoomForm() {
         pending={pending}
       />
 
-      <div className="flex justify-end border-t border-border-soft pt-5">
+      <div className="flex justify-end border-t border-border-soft pt-4">
         <Button
           type="submit"
           size="lg"
@@ -78,8 +78,8 @@ export function CreateRoomForm() {
           }
         >
           {pending
-            ? 'Creating room'
-            : 'Create room'}
+            ? 'Saving'
+            : 'Save'}
         </Button>
       </div>
     </form>

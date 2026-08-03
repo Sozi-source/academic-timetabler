@@ -13,13 +13,15 @@ import {
   Drawer,
   DrawerBody,
   DrawerContent,
-  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer';
 import { MetricCard } from '@/components/ui/metric-card';
 import { PageHeader } from '@/components/ui/page-header';
+import {
+  getAcademicPeriods,
+} from '@/features/academic-periods/queries';
 import {
   CohortTable,
 } from '@/features/cohorts/cohort-table';
@@ -36,15 +38,19 @@ import {
 export const metadata: Metadata = {
   title: 'Cohorts',
   description:
-    'Register and manage programme cohorts, enrolment and timetable availability.',
+    'Manage cohorts.',
 };
 
 export default async function CohortsPage() {
-  const [cohorts, programmes] =
-    await Promise.all([
-      getCohorts(),
-      getProgrammes(),
-    ]);
+  const [
+    cohorts,
+    programmes,
+    academicPeriods,
+  ] = await Promise.all([
+    getCohorts(),
+    getProgrammes(),
+    getAcademicPeriods(),
+  ]);
 
   const availableProgrammes =
     programmes.filter(
@@ -79,11 +85,11 @@ export default async function CohortsPage() {
     );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="Academic structure"
         title="Cohorts"
-        description="Manage programme intakes, enrolment numbers, academic progress and timetable availability."
+        description="Manage cohorts."
         context={
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="neutral">
@@ -127,11 +133,6 @@ export default async function CohortsPage() {
                       <DrawerTitle>
                         Register cohort
                       </DrawerTitle>
-
-                      <DrawerDescription>
-                        Add a programme intake and its
-                        learner-planning information.
-                      </DrawerDescription>
                     </div>
                   </div>
                 </DrawerHeader>
@@ -140,6 +141,9 @@ export default async function CohortsPage() {
                   <CreateCohortForm
                     programmes={
                       availableProgrammes
+                    }
+                    academicPeriods={
+                      academicPeriods
                     }
                   />
                 </DrawerBody>

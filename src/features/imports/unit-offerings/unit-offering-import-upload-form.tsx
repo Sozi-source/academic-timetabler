@@ -51,19 +51,12 @@ export function UnitOfferingImportUploadForm() {
   return (
     <form
       action={formAction}
-      className="space-y-5 rounded-2xl border border-border bg-surface p-5 shadow-sm"
+      className="space-y-4 rounded-2xl border border-border bg-surface p-5 shadow-sm"
     >
       <div>
         <h2 className="font-semibold text-text-primary">
-          Upload completed workbook
+          Upload workbook
         </h2>
-
-        <p className="mt-1 text-sm leading-6 text-text-muted">
-          The workbook will be validated against
-          your registered Academic Periods,
-          programmes, cohorts, units, trainers and
-          rooms before anything is saved.
-        </p>
       </div>
 
       {state.status === 'error' ? (
@@ -108,7 +101,7 @@ export function UnitOfferingImportUploadForm() {
 
       <label
         htmlFor="unit-offering-import-workbook"
-        className="flex min-h-48 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-surface-subtle px-6 py-8 text-center transition hover:border-primary hover:bg-primary-subtle"
+        className="flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-surface-subtle px-5 py-6 text-center transition hover:border-primary hover:bg-primary-subtle"
       >
         <Upload
           className="size-8 text-primary"
@@ -116,11 +109,11 @@ export function UnitOfferingImportUploadForm() {
         />
 
         <span className="mt-3 text-sm font-semibold text-text-primary">
-          Select Units on Offer workbook
+          Select workbook
         </span>
 
         <span className="mt-1 text-xs text-text-muted">
-          Excel .xlsx format, maximum 50 MB
+          Excel (.xlsx), max 50 MB
         </span>
 
         <input
@@ -132,20 +125,6 @@ export function UnitOfferingImportUploadForm() {
           className="sr-only"
         />
       </label>
-
-      <div className="rounded-xl border border-border bg-surface-subtle p-4 text-sm leading-6 text-text-muted">
-        <p className="font-semibold text-text-secondary">
-          Validation rules
-        </p>
-
-        <p className="mt-1">
-          Unit matching is restricted to the selected
-          programme. Exact unit names are preferred,
-          while codes are used only for confirmation
-          or disambiguation. Unknown and ambiguous
-          records are never guessed.
-        </p>
-      </div>
 
       <button
         type="submit"
@@ -165,8 +144,8 @@ export function UnitOfferingImportUploadForm() {
         )}
 
         {pending
-          ? 'Validating workbook...'
-          : 'Upload and validate'}
+          ? 'Validating...'
+          : 'Validate'}
       </button>
     </form>
   );

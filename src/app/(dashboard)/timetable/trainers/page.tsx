@@ -15,7 +15,6 @@ import {
   Drawer,
   DrawerBody,
   DrawerContent,
-  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
@@ -65,7 +64,7 @@ export default async function TrainersPage() {
     );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="Scheduling resources"
         title="Trainers"
@@ -124,11 +123,6 @@ export default async function TrainersPage() {
                     <DrawerTitle>
                       Register trainer
                     </DrawerTitle>
-
-                    <DrawerDescription>
-                      Add teaching staff and workload
-                      limits for timetable planning.
-                    </DrawerDescription>
                   </div>
                 </div>
               </DrawerHeader>

@@ -13,7 +13,6 @@ import {
   Drawer,
   DrawerBody,
   DrawerContent,
-  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
@@ -68,7 +67,7 @@ export default async function ProgrammesPage() {
     );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="Academic structure"
         title="Programmes"
@@ -115,11 +114,6 @@ export default async function ProgrammesPage() {
                     <DrawerTitle>
                       Register programme
                     </DrawerTitle>
-
-                    <DrawerDescription>
-                      Add an academic programme and
-                      its planning structure.
-                    </DrawerDescription>
                   </div>
                 </div>
               </DrawerHeader>

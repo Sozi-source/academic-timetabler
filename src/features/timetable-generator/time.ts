@@ -89,7 +89,7 @@ export function resolveMinuteInterval(
 
   if (endMinutes <= startMinutes) {
     throw new TimetableTimeError(
-      `Timetable interval must end after it starts: ${interval.startsAt}â€“${interval.endsAt}.`,
+      `Timetable interval must end after it starts: ${interval.startsAt}–${interval.endsAt}.`,
     );
   }
 

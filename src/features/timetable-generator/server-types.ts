@@ -29,6 +29,27 @@ export interface GeneratorActionState {
   preview?: GeneratorPreview;
 }
 
+export interface TimetableGenerationRunSummary {
+  id: string;
+  academicPeriodId: string;
+  status: 'draft' | 'completed' | 'completed_with_issues' | 'failed';
+  requestedSessionCount: number;
+  scheduledSessionCount: number;
+  unscheduledSessionCount: number;
+  conflictCount: number;
+  lockedSessionCount: number;
+  createdAt: string;
+}
+
+export interface GeneratorPersistActionState {
+  status: GeneratorActionStatus;
+  message: string | null;
+  generationRunId?: string;
+  savedSessionCount?: number;
+  lockedSessionCount?: number;
+  unscheduledSessionCount?: number;
+}
+
 export interface GeneratorRequest {
   academicPeriodId: string;
   overwriteExisting: boolean;
@@ -230,6 +251,10 @@ export interface GeneratorPlanningData {
 
 export const initialGeneratorActionState:
 GeneratorActionState = {
+  status: 'idle',
+  message: null,
+};
+export const initialGeneratorPersistActionState: GeneratorPersistActionState = {
   status: 'idle',
   message: null,
 };

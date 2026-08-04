@@ -1,0 +1,516 @@
+begin;
+
+create table if not exists public.timetable_generation_runs (
+  id uuid primary key default gen_random_uuid(),
+  academic_period_id uuid not null references public.academic_periods(id) on delete restrict,
+  status text not null default 'draft',
+  generation_strategy text not null default 'balanced',
+  overwrite_existing boolean not null default true,
+  requested_session_count integer not null default 0,
+  scheduled_session_count integer not null default 0,
+  unscheduled_session_count integer not null default 0,
+  conflict_count integer not null default 0,
+  locked_session_count integer not null default 0,
+  summary jsonb not null default '{}'::jsonb,
+  created_by uuid references auth.users(id) on delete set null default auth.uid(),
+  created_at timestamptz not null default now(),
+  constraint timetable_generation_runs_status_check check (status in ('draft','completed','completed_with_issues','failed')),
+  constraint timetable_generation_runs_counts_check check (
+    requested_session_count >= 0 and scheduled_session_count >= 0 and
+    unscheduled_session_count >= 0 and conflict_count >= 0 and locked_session_count >= 0
+  )
+);
+
+create index if not exists timetable_generation_runs_period_created_idx
+  on public.timetable_generation_runs (academic_period_id, created_at desc);
+
+alter table public.timetable_generation_runs enable row level security;
+
+create policy "Authorized users can view timetable generation runs"
+on public.timetable_generation_runs for select
+to authenticated
+using (public.current_user_has_role(array['hod','system_admin']::public.app_role[]));
+
+create policy "Authorized users can create timetable generation runs"
+on public.timetable_generation_runs for insert
+to authenticated
+with check (public.current_user_has_role(array['hod','system_admin']::public.app_role[]));
+
+create or replace function public.save_generated_timetable_draft(
+  target_academic_period_id uuid,
+  generated_sessions jsonb,
+  generation_summary jsonb default '{}'::jsonb
+)
+returns table (
+  generation_run_id uuid,
+  saved_session_count integer,
+  locked_session_count integer,
+  unscheduled_session_count integer
+)
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  session_item jsonb;
+  run_id uuid;
+  saved_total integer := 0;
+  locked_total integer := 0;
+  unscheduled_total integer := coalesce((generation_summary ->> 'unscheduledSessionCount')::integer, 0);
+  requested_total integer := coalesce((generation_summary ->> 'requestedSessionCount')::integer, 0);
+  conflict_total integer := coalesce((generation_summary ->> 'conflictCount')::integer, 0);
+begin
+  if auth.uid() is null then
+    raise exception using errcode = '42501', message = 'Authentication is required.';
+  end if;
+
+  if not public.current_user_has_role(array['hod','system_admin']::public.app_role[]) then
+    raise exception using errcode = '42501', message = 'You are not authorized to save a generated timetable.';
+  end if;
+
+  if jsonb_typeof(generated_sessions) <> 'array' then
+    raise exception using errcode = '22023', message = 'Generated sessions must be supplied as a JSON array.';
+  end if;
+
+  perform pg_advisory_xact_lock(hashtextextended('timetable-generation:' || target_academic_period_id::text, 0));
+
+  select count(*) into locked_total
+  from public.scheduled_sessions
+  where academic_period_id = target_academic_period_id
+    and (is_locked = true or status = 'locked');
+
+  delete from public.scheduled_sessions
+  where academic_period_id = target_academic_period_id
+    and is_locked = false
+    and status in ('draft','confirmed');
+
+  for session_item in select value from jsonb_array_elements(generated_sessions)
+  loop
+    if coalesce((session_item ->> 'isLocked')::boolean, false) then
+      continue;
+    end if;
+
+    insert into public.scheduled_sessions (
+      academic_period_id,
+      teaching_allocation_id,
+      cohort_id,
+      unit_id,
+      trainer_id,
+      working_day_id,
+      start_time_slot_id,
+      end_time_slot_id,
+      room_id,
+      session_number,
+      delivery_mode,
+      status,
+      source,
+      conflict_state,
+      is_locked,
+      notes,
+      created_by,
+      updated_by
+    ) values (
+      target_academic_period_id,
+      (session_item ->> 'teachingAllocationId')::uuid,
+      (session_item ->> 'cohortId')::uuid,
+      (session_item ->> 'unitId')::uuid,
+      (session_item ->> 'trainerId')::uuid,
+      (session_item ->> 'workingDayId')::uuid,
+      (session_item ->> 'startTimeSlotId')::uuid,
+      (session_item ->> 'endTimeSlotId')::uuid,
+      (session_item ->> 'roomId')::uuid,
+      (session_item ->> 'sessionNumber')::smallint,
+      (session_item ->> 'deliveryMode')::public.teaching_delivery_mode,
+      'draft'::public.scheduled_session_status,
+      'generator'::public.scheduled_session_source,
+      'clear'::public.scheduled_session_conflict_state,
+      false,
+      'Generated by APA Timetabler Enterprise Phase 1B.',
+      auth.uid(),
+      auth.uid()
+    );
+
+    saved_total := saved_total + 1;
+  end loop;
+
+  insert into public.timetable_generation_runs (
+    academic_period_id,
+    status,
+    generation_strategy,
+    overwrite_existing,
+    requested_session_count,
+    scheduled_session_count,
+    unscheduled_session_count,
+    conflict_count,
+    locked_session_count,
+    summary,
+    created_by
+  ) values (
+    target_academic_period_id,
+    case when unscheduled_total > 0 or conflict_total > 0 then 'completed_with_issues' else 'completed' end,
+    'balanced',
+    true,
+    requested_total,
+    saved_total + locked_total,
+    unscheduled_total,
+    conflict_total,
+    locked_total,
+    generation_summary,
+    auth.uid()
+  ) returning id into run_id;
+
+  return query select run_id, saved_total, locked_total, unscheduled_total;
+end;
+$$;
+
+revoke all on function public.save_generated_timetable_draft(uuid, jsonb, jsonb) from public;
+grant execute on function public.save_generated_timetable_draft(uuid, jsonb, jsonb) to authenticated;
+
+comment on table public.timetable_generation_runs is
+  'Immutable audit records for timetable generation and draft persistence operations.';
+
+comment on function public.save_generated_timetable_draft(uuid, jsonb, jsonb) is
+  'Atomically replaces editable draft sessions while preserving locked sessions and recording a generation run.';
+
+
+-- Align scheduled-session validation with the current Academic Period lifecycle.
+create or replace function
+  public.validate_scheduled_session_relationships()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  selected_period public.academic_periods%rowtype;
+  selected_allocation public.teaching_allocations%rowtype;
+  selected_working_day public.working_days%rowtype;
+  selected_start_slot public.time_slots%rowtype;
+  selected_end_slot public.time_slots%rowtype;
+  selected_cohort public.cohorts%rowtype;
+  selected_unit public.units%rowtype;
+  selected_trainer public.trainers%rowtype;
+  selected_room public.rooms%rowtype;
+
+  included_slot_count integer;
+  included_teaching_slot_count integer;
+  scheduled_duration_minutes integer;
+  active_session_count integer;
+begin
+  select *
+  into selected_period
+  from public.academic_periods
+  where id = new.academic_period_id;
+
+  if selected_period.id is null then
+    raise exception using
+      errcode = 'P0002',
+      message = 'Academic Period not found';
+  end if;
+
+  if selected_period.status <> 'active' then
+    raise exception using
+      errcode = 'P0001',
+      message =
+        'Scheduled sessions require an active Academic Period';
+  end if;
+
+  select *
+  into selected_allocation
+  from public.teaching_allocations
+  where id = new.teaching_allocation_id;
+
+  if selected_allocation.id is null then
+    raise exception using
+      errcode = 'P0002',
+      message = 'Teaching allocation not found';
+  end if;
+
+  if selected_allocation.academic_period_id <>
+     new.academic_period_id then
+    raise exception using
+      errcode = 'P0001',
+      message =
+        'The teaching allocation belongs to a different Academic Period';
+  end if;
+
+  if selected_allocation.status not in (
+    'draft',
+    'active'
+  ) then
+    raise exception using
+      errcode = 'P0001',
+      message =
+        'Only draft or active teaching allocations may be scheduled';
+  end if;
+
+  if selected_allocation.is_timetable_enabled = false then
+    raise exception using
+      errcode = 'P0001',
+      message =
+        'The teaching allocation is not enabled for timetabling';
+  end if;
+
+  -- Allocation-owned fields are authoritative.
+  new.cohort_id = selected_allocation.cohort_id;
+  new.unit_id = selected_allocation.unit_id;
+  new.trainer_id = selected_allocation.trainer_id;
+  new.delivery_mode = selected_allocation.delivery_mode;
+
+  if new.session_number >
+     selected_allocation.weekly_sessions then
+    raise exception using
+      errcode = 'P0001',
+      message =
+        'The session number exceeds the allocation weekly session requirement';
+  end if;
+
+  select *
+  into selected_working_day
+  from public.working_days
+  where id = new.working_day_id;
+
+  if selected_working_day.id is null then
+    raise exception using
+      errcode = 'P0002',
+      message = 'Working day not found';
+  end if;
+
+  if selected_working_day.academic_period_id <>
+     new.academic_period_id then
+    raise exception using
+      errcode = 'P0001',
+      message =
+        'The working day belongs to a different Academic Period';
+  end if;
+
+  if selected_working_day.is_enabled = false then
+    raise exception using
+      errcode = 'P0001',
+      message =
+        'The selected working day is disabled';
+  end if;
+
+  select *
+  into selected_start_slot
+  from public.time_slots
+  where id = new.start_time_slot_id;
+
+  if selected_start_slot.id is null then
+    raise exception using
+      errcode = 'P0002',
+      message = 'Start time slot not found';
+  end if;
+
+  select *
+  into selected_end_slot
+  from public.time_slots
+  where id = new.end_time_slot_id;
+
+  if selected_end_slot.id is null then
+    raise exception using
+      errcode = 'P0002',
+      message = 'End time slot not found';
+  end if;
+
+  if selected_start_slot.academic_period_id <>
+       new.academic_period_id
+     or selected_end_slot.academic_period_id <>
+       new.academic_period_id then
+    raise exception using
+      errcode = 'P0001',
+      message =
+        'The selected time slots belong to a different Academic Period';
+  end if;
+
+  if selected_start_slot.is_enabled = false
+     or selected_end_slot.is_enabled = false then
+    raise exception using
+      errcode = 'P0001',
+      message =
+        'Disabled time slots cannot be used for scheduling';
+  end if;
+
+  if selected_start_slot.slot_type <> 'teaching'
+     or selected_end_slot.slot_type <> 'teaching' then
+    raise exception using
+      errcode = 'P0001',
+      message =
+        'Scheduled sessions must begin and end in teaching slots';
+  end if;
+
+  if selected_end_slot.sequence_number <
+     selected_start_slot.sequence_number then
+    raise exception using
+      errcode = 'P0001',
+      message =
+        'The end time slot cannot precede the start time slot';
+  end if;
+
+  select
+    count(*),
+    count(*) filter (
+      where is_enabled = true
+      and slot_type = 'teaching'
+    )
+  into
+    included_slot_count,
+    included_teaching_slot_count
+  from public.time_slots
+  where academic_period_id = new.academic_period_id
+    and sequence_number between
+      selected_start_slot.sequence_number
+      and selected_end_slot.sequence_number;
+
+  if included_slot_count = 0
+     or included_slot_count <>
+       included_teaching_slot_count then
+    raise exception using
+      errcode = 'P0001',
+      message =
+        'A scheduled session cannot span a break, lunch, assembly or disabled slot';
+  end if;
+
+  scheduled_duration_minutes =
+    extract(
+      epoch from (
+        selected_end_slot.ends_at -
+        selected_start_slot.starts_at
+      )
+    )::integer / 60;
+
+  if scheduled_duration_minutes <>
+     selected_allocation.session_duration_minutes then
+    raise exception using
+      errcode = 'P0001',
+      message = format(
+        'The selected slot range is %s minutes but the teaching allocation requires %s minutes',
+        scheduled_duration_minutes,
+        selected_allocation.session_duration_minutes
+      );
+  end if;
+
+  select *
+  into selected_cohort
+  from public.cohorts
+  where id = new.cohort_id;
+
+  if selected_cohort.id is null then
+    raise exception using
+      errcode = 'P0002',
+      message = 'Cohort not found';
+  end if;
+
+  if selected_cohort.status not in (
+    'planned',
+    'active'
+  )
+     or selected_cohort.is_timetable_available = false then
+    raise exception using
+      errcode = 'P0001',
+      message =
+        'The cohort is not available for timetabling';
+  end if;
+
+  select *
+  into selected_unit
+  from public.units
+  where id = new.unit_id;
+
+  if selected_unit.id is null then
+    raise exception using
+      errcode = 'P0002',
+      message = 'Unit not found';
+  end if;
+
+  if selected_unit.is_active = false
+     or selected_unit.is_timetable_available = false then
+    raise exception using
+      errcode = 'P0001',
+      message =
+        'The unit is not available for timetabling';
+  end if;
+
+  select *
+  into selected_trainer
+  from public.trainers
+  where id = new.trainer_id;
+
+  if selected_trainer.id is null then
+    raise exception using
+      errcode = 'P0002',
+      message = 'Trainer not found';
+  end if;
+
+  if selected_trainer.is_active = false
+     or selected_trainer.is_timetable_available = false then
+    raise exception using
+      errcode = 'P0001',
+      message =
+        'The trainer is not available for timetabling';
+  end if;
+
+  select *
+  into selected_room
+  from public.rooms
+  where id = new.room_id;
+
+  if selected_room.id is null then
+    raise exception using
+      errcode = 'P0002',
+      message = 'Room not found';
+  end if;
+
+  if selected_room.is_active = false
+     or selected_room.is_timetable_available = false then
+    raise exception using
+      errcode = 'P0001',
+      message =
+        'The room is not available for timetabling';
+  end if;
+
+  if selected_cohort.actual_size > 0
+     and selected_room.capacity <
+       selected_cohort.actual_size then
+    raise exception using
+      errcode = 'P0001',
+      message =
+        'The selected room capacity is below the cohort enrolment';
+  end if;
+
+  if selected_unit.preferred_room_type is not null
+     and selected_room.room_type <>
+       selected_unit.preferred_room_type then
+    raise exception using
+      errcode = 'P0001',
+      message = format(
+        'The unit requires a %s room but %s was selected',
+        selected_unit.preferred_room_type,
+        selected_room.room_type
+      );
+  end if;
+
+  select count(*)
+  into active_session_count
+  from public.scheduled_sessions
+  where teaching_allocation_id =
+        new.teaching_allocation_id
+    and status not in (
+      'cancelled',
+      'archived'
+    )
+    and id <> new.id;
+
+  if active_session_count >=
+     selected_allocation.weekly_sessions then
+    raise exception using
+      errcode = 'P0001',
+      message =
+        'The teaching allocation already has all required weekly sessions scheduled';
+  end if;
+
+  return new;
+end;
+$$;
+
+commit;

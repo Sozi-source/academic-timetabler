@@ -1,4 +1,5 @@
 import {
+  BarChart3,
   BookOpen,
   Building2,
   CalendarDays,
@@ -10,8 +11,12 @@ import {
   Presentation,
   School,
   Sparkles,
+  PencilRuler,
   ClipboardList,
+  ClipboardCheck,
   UserRound,
+  ShieldCheck,
+  ShieldAlert,
 } from 'lucide-react';
 
 export const dashboardNavigation = [
@@ -94,9 +99,34 @@ export const dashboardNavigation = [
         icon: Presentation,
       },
       {
+        label: 'Timetable readiness',
+        href: '/timetable/readiness',
+        icon: ClipboardCheck,
+      },
+      {
+        label: 'Availability & constraints',
+        href: '/timetable/constraints',
+        icon: ShieldCheck,
+      },
+      {
+        label: 'Conflict centre',
+        href: '/timetable/conflicts',
+        icon: ShieldAlert,
+      },
+      {
         label: 'Generate timetable',
         href: '/timetable/generator',
         icon: Sparkles,
+      },
+      {
+        label: 'Timetable editor',
+        href: '/timetable/editor',
+        icon: PencilRuler,
+      },
+      {
+        label: 'Timetable reports',
+        href: '/timetable/reports',
+        icon: BarChart3,
       },
       {
         label: 'Published timetables',

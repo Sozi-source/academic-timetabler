@@ -1,0 +1,20 @@
+APA Timetabler Enterprise — Phase 1A
+
+NEW
+- src/app/(dashboard)/timetable/readiness/page.tsx
+- src/features/scheduling-readiness/actions.ts
+- src/features/scheduling-readiness/assessment.ts
+- src/features/scheduling-readiness/queries.ts
+- src/features/scheduling-readiness/readiness-dashboard.tsx
+- src/features/scheduling-readiness/types.ts
+- src/tests/scheduling-readiness/assessment.test.ts
+
+UPDATED
+- src/config/navigation.ts
+
+DATABASE
+- No migration in Phase 1A.
+- Existing teaching_offerings and teaching_offering_participants are used as the authoritative scheduling scope.
+
+NOTE
+- Phase 1B will update the generator to schedule directly from Teaching Offerings and persist draft timetable versions.

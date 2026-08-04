@@ -4,6 +4,7 @@ import {
   CalendarCheck2,
   LoaderCircle,
   RefreshCw,
+  Save,
   Sparkles,
 } from 'lucide-react';
 import {
@@ -19,6 +20,7 @@ import {
 
 import {
   generateTimetablePreviewAction,
+  saveGeneratedTimetableDraftAction,
 } from './actions';
 import {
   GeneratorConflictList,
@@ -35,6 +37,8 @@ import {
 } from './generator-statistics';
 import {
   initialGeneratorActionState,
+  initialGeneratorPersistActionState,
+  type TimetableGenerationRunSummary,
 } from './server-types';
 
 export interface GeneratorAcademicPeriodOption {
@@ -47,11 +51,13 @@ export interface GeneratorAcademicPeriodOption {
 export function GeneratorWorkspace({
   academicPeriods,
   defaultAcademicPeriodId,
+  latestRun = null,
 }: {
   academicPeriods:
     GeneratorAcademicPeriodOption[];
   defaultAcademicPeriodId:
     string | null;
+  latestRun?: TimetableGenerationRunSummary | null;
 }) {
   const [
     state,
@@ -62,10 +68,36 @@ export function GeneratorWorkspace({
     initialGeneratorActionState,
   );
 
+  const [
+    persistState,
+    persistAction,
+    persistPending,
+  ] = useActionState(
+    saveGeneratedTimetableDraftAction,
+    initialGeneratorPersistActionState,
+  );
+
   const preview = state.preview;
 
   return (
     <div className="space-y-8">
+      {latestRun ? (
+        <section className="rounded-2xl border border-border bg-surface px-5 py-4 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-text-muted">Latest saved generation</p>
+              <p className="mt-1 text-sm font-semibold text-text-primary">
+                {latestRun.scheduledSessionCount} sessions · {latestRun.lockedSessionCount} locked · {latestRun.unscheduledSessionCount} unresolved
+              </p>
+            </div>
+            <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold capitalize text-primary">
+              {latestRun.status.replaceAll('_', ' ')}
+            </span>
+          </div>
+          <p className="mt-2 text-xs text-text-muted">Saved {new Date(latestRun.createdAt).toLocaleString()}.</p>
+        </section>
+      ) : null}
+
       <form
         action={formAction}
         className="rounded-2xl border border-border bg-surface p-5 shadow-sm"
@@ -190,6 +222,14 @@ export function GeneratorWorkspace({
         />
       ) : null}
 
+
+      {persistState.message ? (
+        <FormStatusMessage
+          status={persistState.status === 'success' ? 'success' : 'error'}
+          message={persistState.message}
+        />
+      ) : null}
+
       {!preview ? (
         <section className="rounded-2xl border border-dashed border-border-strong bg-surface px-6 py-14 text-center">
           <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-primary-soft text-primary">
@@ -252,12 +292,37 @@ export function GeneratorWorkspace({
             />
           </section>
 
-          <div className="rounded-2xl border border-primary-soft bg-primary-subtle px-5 py-4 text-sm leading-6 text-text-secondary">
-            This is a read-only preview. Publishing to
-            the scheduled sessions register will be
-            added in the next phase after the preview
-            workflow is verified.
-          </div>
+          <section className="rounded-2xl border border-primary-soft bg-primary-subtle p-5">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <h2 className="font-semibold text-text-primary">Save enterprise draft</h2>
+                <p className="mt-1 max-w-2xl text-sm leading-6 text-text-secondary">
+                  Saving regenerates from current authoritative data, replaces editable draft sessions, preserves locked sessions and records an auditable generation run.
+                </p>
+              </div>
+              <form action={persistAction}>
+                <input type="hidden" name="academicPeriodId" value={preview.academicPeriod.id} />
+                <input type="hidden" name="overwriteExisting" value="true" />
+                <Button
+                  type="submit"
+                  size="lg"
+                  disabled={
+                    persistPending ||
+                    !preview.readiness.isReady ||
+                    preview.statistics.unscheduledSessionCount > 0 ||
+                    preview.statistics.blockedConflictCount > 0
+                  }
+                  leadingIcon={persistPending ? (
+                    <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Save className="size-4" aria-hidden="true" />
+                  )}
+                >
+                  {persistPending ? 'Saving draft' : 'Save draft timetable'}
+                </Button>
+              </form>
+            </div>
+          </section>
         </div>
       )}
     </div>

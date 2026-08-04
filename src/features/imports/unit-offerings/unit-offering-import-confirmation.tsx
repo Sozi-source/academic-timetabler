@@ -61,6 +61,21 @@ export function UnitOfferingImportConfirmation({
       );
     });
 
+  const masterUnitsToCreate =
+    validRows.filter((row) => {
+      const normalized =
+        row.normalizedData as {
+          masterUnitOperation?: string;
+        };
+
+      return (
+        normalized.masterUnitOperation ===
+          'create' ||
+        normalized.masterUnitOperation ===
+          'reactivate'
+      );
+    }).length;
+
   const batchAlreadyCompleted =
     batch.status === 'completed' ||
     batch.status ===
@@ -92,7 +107,7 @@ export function UnitOfferingImportConfirmation({
             remain in the import audit history.
           </p>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div className="rounded-xl border border-border bg-surface-subtle p-3">
               <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
                 Eligible
@@ -121,6 +136,16 @@ export function UnitOfferingImportConfirmation({
 
               <p className="mt-1 text-xl font-bold text-text-primary">
                 {reviewedRows.length}
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-border bg-surface-subtle p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+                Master Units
+              </p>
+
+              <p className="mt-1 text-xl font-bold text-text-primary">
+                {masterUnitsToCreate}
               </p>
             </div>
           </div>

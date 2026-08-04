@@ -58,13 +58,6 @@ export function UnitOfferingTemplateDownloadPanel({
       ],
     );
 
-  const prefilledHref =
-    academicPeriodId
-      ? `/api/import-templates/unit_offerings/prefilled?academicPeriodId=${encodeURIComponent(
-          academicPeriodId,
-        )}`
-      : null;
-
   return (
     <div className="grid gap-5 lg:grid-cols-2">
       <section className="rounded-2xl border border-border bg-surface p-5 shadow-sm">
@@ -152,18 +145,30 @@ export function UnitOfferingTemplateDownloadPanel({
               )}
             </select>
 
-            {prefilledHref ? (
-              <a
-                href={prefilledHref}
-                download
-                className="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-white transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            {academicPeriodId ? (
+              <form
+                action="/api/import-templates/unit_offerings/prefilled"
+                method="get"
+                className="mt-4"
               >
-                <Download
-                  className="size-4"
-                  aria-hidden="true"
+                <input
+                  type="hidden"
+                  name="academicPeriodId"
+                  value={academicPeriodId}
                 />
-                Download prefilled template
-              </a>
+
+                <button
+                  type="submit"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-white transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                >
+                  <Download
+                    className="size-4"
+                    aria-hidden="true"
+                  />
+
+                  Download prefilled template
+                </button>
+              </form>
             ) : (
               <button
                 type="button"

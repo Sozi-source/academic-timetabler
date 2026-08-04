@@ -17,6 +17,24 @@ export interface NormalizedUnitOfferingImportRow {
   unitCode?: string;
   unitId?: string;
 
+  masterUnitOperation?:
+    | 'existing'
+    | 'create'
+    | 'reactivate';
+
+  masterUnitAcademicPeriodNumber?: number;
+  masterUnitCategory?:
+    | 'core'
+    | 'common'
+    | 'elective'
+    | 'practical'
+    | 'clinical'
+    | 'project'
+    | 'other';
+  masterUnitTheoryHours?: number;
+  masterUnitPracticalHours?: number;
+  masterUnitWeeklySessions?: number;
+
   offeringType: UnitOfferingType;
   weeklySessions: number;
   sessionDurationMinutes: number;
@@ -48,7 +66,9 @@ export interface NormalizedUnitOfferingImportRow {
   matchStrategy?:
     | 'exact-name'
     | 'name-and-code'
-    | 'code-disambiguation';
+    | 'code-disambiguation'
+    | 'code-first'
+    | 'create-master-unit';
 
   importOperation?:
     | 'insert'

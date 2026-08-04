@@ -53,6 +53,7 @@ interface CohortLookupRow {
   code: string;
   name: string;
   status: string;
+  current_academic_period_number: number;
 }
 
 interface UnitLookupRow {
@@ -61,6 +62,7 @@ interface UnitLookupRow {
   code: string;
   name: string;
   is_active: boolean;
+  is_timetable_available: boolean;
 }
 
 interface TrainerLookupRow {
@@ -146,6 +148,52 @@ function findExactMatches<T>(
           ) === normalized,
       ),
   );
+}
+
+function getMasterUnitCategory(
+  offeringType:
+    NormalizedUnitOfferingImportRow['offeringType'],
+) {
+  switch (offeringType) {
+    case 'practical':
+      return 'practical' as const;
+
+    case 'clinical_rotation':
+      return 'clinical' as const;
+
+    case 'project':
+      return 'project' as const;
+
+    case 'attachment':
+    case 'examination':
+    case 'other':
+      return 'other' as const;
+
+    default:
+      return 'core' as const;
+  }
+}
+
+function getMasterUnitHours(
+  row: NormalizedUnitOfferingImportRow,
+) {
+  const totalHours =
+    (
+      row.weeklySessions *
+      row.sessionDurationMinutes
+    ) / 60;
+
+  if (row.offeringType === 'practical') {
+    return {
+      theoryHours: 0,
+      practicalHours: totalHours,
+    };
+  }
+
+  return {
+    theoryHours: totalHours,
+    practicalHours: 0,
+  };
 }
 
 function getDuplicateKey(
@@ -298,7 +346,8 @@ export async function stageUnitOfferingImportAction(
         programme_id,
         code,
         name,
-        status
+        status,
+        current_academic_period_number
       `),
 
     supabase
@@ -308,7 +357,8 @@ export async function stageUnitOfferingImportAction(
         programme_id,
         code,
         name,
-        is_active
+        is_active,
+        is_timetable_available
       `),
 
     supabase
@@ -538,72 +588,90 @@ export async function stageUnitOfferingImportAction(
 
     const programmeUnits =
       units.filter(
-        (unit) =>
-          unit.programme_id ===
-            programme.id &&
-          unit.is_active,
+        (candidate) =>
+          candidate.programme_id ===
+          programme.id,
       );
+
+    const suppliedUnitCode =
+      normalizeOptionalValue(
+        normalized.unitCode,
+      );
+
+    const codeMatches =
+      suppliedUnitCode
+        ? findExactMatches(
+            programmeUnits,
+            [
+              (candidate) =>
+                candidate.code,
+            ],
+            suppliedUnitCode,
+          )
+        : [];
+
+    if (codeMatches.length > 1) {
+      addFieldError(
+        row,
+        'unitCode',
+        'The programme contains more than one unit with this code.',
+      );
+
+      continue;
+    }
 
     const nameMatches =
       findExactMatches(
         programmeUnits,
         [
-          (unit) => unit.name,
+          (candidate) =>
+            candidate.name,
         ],
         normalized.unitName,
       );
 
     let unit:
-      UnitLookupRow | undefined;
+      UnitLookupRow | undefined =
+        codeMatches[0];
 
-    if (nameMatches.length === 1) {
+    if (
+      unit &&
+      normalizeLookupValue(unit.name) !==
+        normalizeLookupValue(
+          normalized.unitName,
+        )
+    ) {
+      addFieldError(
+        row,
+        'unitName',
+        `Unit code ${unit.code} already belongs to “${unit.name}” under this programme.`,
+      );
+
+      continue;
+    }
+
+    if (!unit && nameMatches.length === 1) {
       unit = nameMatches[0];
     }
-    else if (
-      nameMatches.length > 1 &&
-      normalized.unitCode
+
+    if (
+      !unit &&
+      nameMatches.length > 1
     ) {
-      const normalizedCode =
-        normalizeLookupValue(
-          normalized.unitCode,
-        );
-
-      const codeMatches =
-        nameMatches.filter(
-          (candidate) =>
-            normalizeLookupValue(
-              candidate.code,
-            ) === normalizedCode,
-        );
-
-      if (codeMatches.length === 1) {
-        unit = codeMatches[0];
-      }
-    }
-
-    if (!unit) {
-      if (nameMatches.length === 0) {
-        addFieldError(
-          row,
-          'unitName',
-          'No active unit with this name was found within the selected programme.',
-        );
-      }
-      else {
-        addFieldError(
-          row,
-          'unitCode',
-          'The unit name is ambiguous. Supply the exact programme-specific unit code.',
-        );
-      }
+      addFieldError(
+        row,
+        'unitCode',
+        'The unit name is ambiguous. Supply the exact programme-specific unit code.',
+      );
 
       continue;
     }
 
     if (
-      normalized.unitCode &&
+      unit &&
+      suppliedUnitCode &&
       normalizeLookupValue(
-        normalized.unitCode,
+        suppliedUnitCode,
       ) !==
         normalizeLookupValue(
           unit.code,
@@ -612,11 +680,32 @@ export async function stageUnitOfferingImportAction(
       addFieldError(
         row,
         'unitCode',
-        'The supplied unit code does not match the selected programme unit.',
+        'The supplied unit code does not match the existing programme unit.',
       );
 
       continue;
     }
+
+    if (!unit && !suppliedUnitCode) {
+      addFieldError(
+        row,
+        'unitCode',
+        'A unit code is required because this Master Unit will be created during confirmation.',
+      );
+
+      continue;
+    }
+
+    const masterUnitHours =
+      getMasterUnitHours(normalized);
+
+    const masterUnitOperation =
+      unit
+        ? unit.is_active &&
+          unit.is_timetable_available
+          ? 'existing'
+          : 'reactivate'
+        : 'create';
 
     let preferredTrainerId:
       string | undefined;
@@ -713,6 +802,7 @@ export async function stageUnitOfferingImportAction(
             academicPeriod.id &&
           offering.cohort_id ===
             cohort.id &&
+          unit &&
           offering.unit_id ===
             unit.id,
       );
@@ -730,10 +820,30 @@ export async function stageUnitOfferingImportAction(
         cohort.id,
 
       unitId:
-        unit.id,
+        unit?.id,
 
       unitCode:
-        unit.code,
+        unit?.code ??
+        suppliedUnitCode,
+
+      masterUnitOperation,
+
+      masterUnitAcademicPeriodNumber:
+        cohort.current_academic_period_number,
+
+      masterUnitCategory:
+        getMasterUnitCategory(
+          normalized.offeringType,
+        ),
+
+      masterUnitTheoryHours:
+        masterUnitHours.theoryHours,
+
+      masterUnitPracticalHours:
+        masterUnitHours.practicalHours,
+
+      masterUnitWeeklySessions:
+        normalized.weeklySessions,
 
       preferredTrainerId,
       preferredRoomId,
@@ -747,9 +857,11 @@ export async function stageUnitOfferingImportAction(
         false,
 
       matchStrategy:
-        normalized.unitCode
-          ? 'name-and-code'
-          : 'exact-name',
+        unit
+          ? suppliedUnitCode
+            ? 'code-first'
+            : 'exact-name'
+          : 'create-master-unit',
 
       importOperation:
         existingOffering
@@ -953,7 +1065,7 @@ export async function confirmUnitOfferingImportAction(
     data,
     error,
   } = await supabase.rpc(
-    'import_valid_unit_offering_rows',
+    'prepare_and_import_valid_unit_offering_rows',
     {
       target_batch_id: batchId,
     },

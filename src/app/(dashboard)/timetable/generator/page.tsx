@@ -18,6 +18,9 @@ import {
 import {
   GeneratorWorkspace,
 } from '@/features/timetable-generator/generator-workspace';
+import {
+  getLatestTimetableGenerationRun,
+} from '@/features/timetable-generator/queries';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,6 +48,15 @@ export default async function TimetableGeneratorPage() {
       (period) =>
         period.status === 'active',
     );
+
+  const defaultPeriodId =
+    activePeriod?.id ??
+    selectablePeriods[0]?.id ??
+    null;
+
+  const latestRun = defaultPeriodId
+    ? await getLatestTimetableGenerationRun(defaultPeriodId)
+    : null;
 
   return (
     <div className="space-y-6">
@@ -86,11 +98,8 @@ export default async function TimetableGeneratorPage() {
             status: period.status,
           }),
         )}
-        defaultAcademicPeriodId={
-          activePeriod?.id ??
-          selectablePeriods[0]?.id ??
-          null
-        }
+        defaultAcademicPeriodId={defaultPeriodId}
+        latestRun={latestRun}
       />
     </div>
   );

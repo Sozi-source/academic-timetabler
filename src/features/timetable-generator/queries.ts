@@ -54,6 +54,7 @@ import {
 
 import type {
   ExistingScheduledSessionRow,
+  TimetableGenerationRunSummary,
 } from './server-types';
 
 export interface GeneratorSourceData {
@@ -193,3 +194,47 @@ export const getGeneratorSourceData =
       };
     },
   );
+
+export const getLatestTimetableGenerationRun = cache(
+  async (
+    academicPeriodId: string,
+  ): Promise<TimetableGenerationRunSummary | null> => {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from('timetable_generation_runs')
+      .select(`
+        id,
+        academic_period_id,
+        status,
+        requested_session_count,
+        scheduled_session_count,
+        unscheduled_session_count,
+        conflict_count,
+        locked_session_count,
+        created_at
+      `)
+      .eq('academic_period_id', academicPeriodId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      if (error.code === '42P01') return null;
+      throw new Error(`Unable to load the latest generation run: ${error.message}`);
+    }
+
+    if (!data) return null;
+
+    return {
+      id: data.id,
+      academicPeriodId: data.academic_period_id,
+      status: data.status,
+      requestedSessionCount: data.requested_session_count,
+      scheduledSessionCount: data.scheduled_session_count,
+      unscheduledSessionCount: data.unscheduled_session_count,
+      conflictCount: data.conflict_count,
+      lockedSessionCount: data.locked_session_count,
+      createdAt: data.created_at,
+    } as TimetableGenerationRunSummary;
+  },
+);

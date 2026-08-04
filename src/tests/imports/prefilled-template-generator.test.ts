@@ -26,18 +26,18 @@ describe(
               rows: [
                 {
                   academicPeriod:
-                    'September\u2013December 2026',
+                    'September-December 2026',
                   programmeName:
                     'Diploma in Nutrition and Dietetics',
                   cohortName:
-                    'DND September 2026',
+                    'DND SEPT 26',
                   unitName:
                     'Communication Skills',
                   unitCode:
                     'DND 105',
                   offeringType:
                     'classroom',
-                  weeklySessions: 2,
+                  weeklySessions: 1,
                   sessionDurationMinutes:
                     120,
                   timetableEnabled:
@@ -76,7 +76,7 @@ describe(
           worksheet?.getCell('A2')
             .value,
         ).toBe(
-          'September\u2013December 2026',
+          'September-December 2026',
         );
 
         expect(
@@ -96,7 +96,7 @@ describe(
         expect(
           worksheet?.getCell('G2')
             .value,
-        ).toBe(2);
+        ).toBe(1);
 
         expect(
           worksheet?.getCell('A3')
@@ -131,7 +131,7 @@ describe(
           worksheet?.getCell('A2')
             .value,
         ).toBe(
-          'September\u2013December 2026',
+          'September-December 2026',
         );
       },
     );

@@ -392,6 +392,18 @@ export function UnitOfferingImportPreview({
                           {normalized.unitCode}
                         </p>
                       ) : null}
+
+                      {normalized.masterUnitOperation ===
+                      'create' ? (
+                        <p className="mt-1 text-xs font-semibold text-primary">
+                          Master Unit will be created
+                        </p>
+                      ) : normalized.masterUnitOperation ===
+                        'reactivate' ? (
+                        <p className="mt-1 text-xs font-semibold text-warning">
+                          Master Unit will be reactivated
+                        </p>
+                      ) : null}
                     </td>
 
                     <td className="px-4 py-4 text-text-secondary">

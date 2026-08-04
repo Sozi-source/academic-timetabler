@@ -5,10 +5,10 @@ import type {
 export const unitOfferingsImportTemplate = {
   key: 'unit-offerings-import',
   entityType: 'unit_offerings',
-  version: '1.0',
+  version: '1.1',
 
   displayName:
-    'Semester Units on Offer',
+    'Units on Offer',
 
   instructionsWorksheetName:
     'Instructions',
@@ -23,18 +23,18 @@ export const unitOfferingsImportTemplate = {
 
   instructions: [
     'Use one row for each unit offered to one cohort in the selected Academic Period.',
-    'Programme Name must match the programme registered in the system.',
-    'Unit matching uses Programme Name and Unit Name. Unit Code is optional and is used only to confirm or disambiguate a match.',
+    'Use the exact Academic Period, Programme and Cohort names or codes registered in the system.',
+    'Unit matching uses the programme and unit. Unit Code confirms or disambiguates the match.',
     'The cohort must belong to the selected programme.',
-    'Leave Shared Class Key blank to let the system automatically combine similar units across cohorts when the unit name, delivery type, weekly sessions and duration agree.',
-    'Enter the same custom Shared Class Key only when you want to force specific rows into one class.',
-    'Enter INDEPENDENT when a row must remain separate even if another cohort has a similar unit.',
-    'Shared classes do not merge curriculum records. Every cohort retains its official programme-specific unit and code.',
-    'Attachment, clinical rotation and examination rows must use No under Include in Timetable.',
-    'Preferred Trainer and Preferred Room are optional. Their names or registered codes may be supplied.',
-    'The importer validates every row and shows a preview before anything is committed.',
-    'Existing manually reviewed exclusions are preserved unless overwrite is deliberately enabled during confirmation.',
-    'Do not rename worksheet names, headings or hidden metadata.',
+    'For a shared unit, enter one row for every participating cohort.',
+    'Leave Shared Class Key blank when the unit name, Offering Type, Weekly Sessions and Session Duration match. The system will combine those rows automatically.',
+    'Use the same custom Shared Class Key only when you need to force rows into one shared class.',
+    'Enter INDEPENDENT when a unit must remain separate.',
+    'Shared teaching does not merge curriculum records. Every cohort retains its official unit and programme-specific unit code.',
+    'Attachment, clinical rotation and examination rows should use No under Include in Timetable.',
+    'Preferred Trainer and Preferred Room are optional.',
+    'Review all staged rows before confirming the import.',
+    'Do not rename worksheets, headings or the hidden metadata sheet.',
   ],
 
   columns: [
@@ -42,11 +42,11 @@ export const unitOfferingsImportTemplate = {
       key: 'academicPeriod',
       header: 'Academic Period',
       required: true,
-      width: 28,
+      width: 30,
       description:
-        'Academic Period name or registered code.',
+        'Exact registered Academic Period name or code.',
       example:
-        'September\u2013December 2026',
+        'September-December 2026',
     },
     {
       key: 'programmeName',
@@ -54,7 +54,7 @@ export const unitOfferingsImportTemplate = {
       required: true,
       width: 42,
       description:
-        'Full registered programme name.',
+        'Exact registered programme name or programme code.',
       example:
         'Diploma in Nutrition and Dietetics',
     },
@@ -64,9 +64,9 @@ export const unitOfferingsImportTemplate = {
       required: true,
       width: 30,
       description:
-        'Registered cohort name or cohort code.',
+        'Exact registered cohort name or cohort code.',
       example:
-        'DND September 2026',
+        'DND SEPT 26',
     },
     {
       key: 'unitName',
@@ -84,7 +84,7 @@ export const unitOfferingsImportTemplate = {
       required: false,
       width: 18,
       description:
-        'Optional programme-specific unit code used for confirmation or disambiguation.',
+        'Programme-specific unit code.',
       example:
         'DND 105',
     },
@@ -113,9 +113,10 @@ export const unitOfferingsImportTemplate = {
       required: true,
       width: 18,
       description:
-        'Number of sessions required each week.',
+        'Number of sessions each week. A 2-hour unit uses 1 session; a 4-hour unit normally uses 2 sessions.',
+      cellType: 'integer',
       numberFormat: '0',
-      example: 2,
+      example: 1,
     },
     {
       key:
@@ -125,7 +126,8 @@ export const unitOfferingsImportTemplate = {
       required: true,
       width: 24,
       description:
-        'Duration of one session. Use 15-minute increments.',
+        'Duration of one session in minutes.',
+      cellType: 'integer',
       numberFormat: '0',
       example: 120,
     },
@@ -135,7 +137,7 @@ export const unitOfferingsImportTemplate = {
       required: true,
       width: 22,
       description:
-        'Whether the unit should enter ordinary timetable generation.',
+        'Whether the unit enters ordinary timetable generation.',
       acceptedValues: [
         'Yes',
         'No',
@@ -148,7 +150,7 @@ export const unitOfferingsImportTemplate = {
       required: true,
       width: 16,
       description:
-        'Semester offering status.',
+        'Units on Offer status.',
       acceptedValues: [
         'draft',
         'active',
@@ -161,9 +163,9 @@ export const unitOfferingsImportTemplate = {
       key: 'sharedClassKey',
       header: 'Shared Class Key',
       required: false,
-      width: 28,
+      width: 32,
       description:
-        'Optional override. Leave blank for automatic matching, enter a custom key to force sharing, or enter INDEPENDENT to keep the row separate.',
+        'Leave blank for automatic shared-unit detection. Use the same custom value to force sharing, or INDEPENDENT to prevent sharing.',
       example:
         '',
     },
@@ -171,11 +173,11 @@ export const unitOfferingsImportTemplate = {
       key: 'preferredTrainer',
       header: 'Preferred Trainer',
       required: false,
-      width: 30,
+      width: 28,
       description:
-        'Optional registered trainer full name or staff number.',
+        'Optional registered trainer name or staff number.',
       example:
-        'Jane Waithera',
+        '',
     },
     {
       key: 'preferredRoom',
@@ -183,19 +185,19 @@ export const unitOfferingsImportTemplate = {
       required: false,
       width: 24,
       description:
-        'Optional registered room name or code.',
+        'Optional registered room name or room code.',
       example:
-        'Lecture Room 2',
+        '',
     },
     {
       key: 'notes',
       header: 'Notes',
       required: false,
-      width: 42,
+      width: 38,
       description:
-        'Optional semester-specific remarks.',
+        'Optional short note.',
       example:
-        'Shared with certificate group.',
+        '',
     },
   ],
 } satisfies ImportTemplateDefinition;

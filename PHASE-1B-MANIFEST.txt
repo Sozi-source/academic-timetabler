@@ -1,0 +1,13 @@
+APA Timetabler Enterprise Phase 1B
+
+Changed source files: 5
+New migrations: 1
+
+Capabilities:
+- deterministic preview persistence
+- atomic editable-session replacement
+- locked-session preservation
+- generation audit runs
+- readiness/conflict save gates
+- latest generation summary
+- Academic Period lifecycle correction for scheduled sessions

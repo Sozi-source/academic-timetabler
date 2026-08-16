@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { MetricCard } from '@/components/ui/metric-card';
 import { Select } from '@/components/ui/select';
 
-import { updateTeachingOfferingReadinessAction } from './actions';
+import { includeAllUnassignedOfferingsAction, updateTeachingOfferingReadinessAction } from './actions';
 import type { SchedulingReadiness } from './types';
 
 function percentage(value: number) {
@@ -23,6 +23,8 @@ function percentage(value: number) {
 }
 
 export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadiness }) {
+  const hasMissingTrainerBlocker = readiness.issues.some((issue) => issue.id === 'missing-trainers');
+
   return (
     <div className="space-y-6">
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -71,6 +73,12 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
               <p className="mt-1 text-sm leading-6 text-text-secondary">
                 {readiness.academicPeriodName} ({readiness.academicPeriodCode}) has {readiness.workingDayCount} enabled working days and {readiness.teachingSlotCount} teaching slots.
               </p>
+              {hasMissingTrainerBlocker ? (
+                <form action={includeAllUnassignedOfferingsAction} className="mt-3">
+                  <input type="hidden" name="academicPeriodId" value={readiness.academicPeriodId} />
+                  <Button type="submit" size="sm" variant="outline">Include all unassigned units</Button>
+                </form>
+              ) : null}
             </div>
           </div>
           <div className="w-full max-w-xs">
@@ -99,7 +107,7 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="font-semibold text-text-primary">{entry.title}</h3>
-                      <Badge variant={entry.severity === 'blocker' ? 'danger' : 'warning'}>{entry.severity === 'blocker' ? 'Blocker' : 'Warning'}</Badge>
+                      <Badge variant={entry.severity === 'blocker' ? 'danger' : entry.severity === 'warning' ? 'warning' : 'neutral'}>{entry.severity === 'blocker' ? 'Blocker' : entry.severity === 'warning' ? 'Warning' : 'Notice'}</Badge>
                     </div>
                     <p className="mt-1 text-sm leading-6 text-text-secondary">{entry.description}</p>
                     {entry.actionHref && entry.actionLabel ? (
@@ -116,7 +124,7 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
       <section className="space-y-4" aria-labelledby="offering-readiness-title">
         <div>
           <h2 id="offering-readiness-title" className="text-lg font-semibold text-text-primary">Teaching offering allocation workspace</h2>
-          <p className="mt-1 text-sm text-text-muted">Assign trainers, preferred rooms and lifecycle status. Shared offerings remain one schedulable class with several cohort participants.</p>
+          <p className="mt-1 text-sm text-text-muted">Assign trainers and lifecycle status. Rooms are optional and can remain pending. Shared offerings remain one schedulable class with several cohort participants.</p>
         </div>
 
         <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
@@ -172,7 +180,7 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
                             {readiness.trainerOptions.map((trainer) => <option key={trainer.id} value={trainer.id}>{trainer.label}</option>)}
                           </Select>
                           <Select name="preferredRoomId" defaultValue={offering.preferredRoomId ?? ''} aria-label={`Preferred room for ${offering.title}`} className="h-9 text-xs">
-                            <option value="">Automatic room</option>
+                            <option value="">No room assigned</option>
                             {readiness.roomOptions.filter((room) => room.capacity >= requiredCapacity).map((room) => <option key={room.id} value={room.id}>{room.label}</option>)}
                           </Select>
                           <Select name="status" defaultValue={offering.status} aria-label={`Status for ${offering.title}`} className="h-9 text-xs">
@@ -189,7 +197,8 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
                         <div className="flex flex-col items-start gap-2">
                           <Badge variant={offering.isTimetableEnabled ? 'success' : 'neutral'}>{offering.isTimetableEnabled ? 'Enabled' : 'Excluded'}</Badge>
                           <Badge variant={offering.status === 'active' ? 'success' : offering.status === 'draft' ? 'warning' : 'neutral'}>{offering.status}</Badge>
-                          {!offering.trainerId ? <Badge variant="danger">Trainer missing</Badge> : null}
+                          {!offering.trainerId ? <Badge variant={offering.isProvisionalReservation ? 'warning' : 'danger'}>{offering.isProvisionalReservation ? 'Unassigned trainer' : 'Trainer missing'}</Badge> : null}
+                          {!offering.preferredRoomId ? <Badge variant="neutral">No room assigned</Badge> : null}
                           {roomTooSmall ? <Badge variant="danger">Room capacity</Badge> : null}
                         </div>
                       </td>
@@ -208,8 +217,9 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
           <div className="mt-4 space-y-3">
             {readiness.trainerWorkloads.map((workload) => (
               <div key={workload.trainerId} className="rounded-xl border border-border p-3">
-                <div className="flex items-center justify-between gap-3"><div><p className="font-medium text-text-primary">{workload.trainerName}</p><p className="text-xs text-text-muted">{workload.staffNumber}</p></div><Badge variant={workload.overloaded ? 'danger' : workload.utilizationPercentage > 85 ? 'warning' : 'success'}>{workload.utilizationPercentage}%</Badge></div>
-                <p className="mt-2 text-xs text-text-muted">{workload.allocatedWeeklyHours} of {workload.maximumWeeklyHours} hours allocated</p>
+                <div className="flex items-center justify-between gap-3"><div><p className="font-medium text-text-primary">{workload.trainerName}</p><p className="text-xs text-text-muted">{workload.staffNumber}</p></div><Badge variant={workload.overloaded ? 'warning' : workload.utilizationPercentage > 85 ? 'warning' : 'success'}>{workload.utilizationPercentage}%</Badge></div>
+                <p className="mt-2 text-xs text-text-muted">{workload.allocatedWeeklyHours} hours allocated · {workload.maximumWeeklyHours}h target</p>
+                {workload.extraWeeklyHours > 0 ? <p className="mt-1 text-xs font-semibold text-amber-700">Extra +{workload.extraWeeklyHours}h</p> : null}
               </div>
             ))}
             {readiness.trainerWorkloads.length === 0 ? <p className="text-sm text-text-muted">Trainer workloads will appear after assignments are made.</p> : null}

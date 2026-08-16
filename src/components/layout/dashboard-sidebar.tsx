@@ -38,11 +38,11 @@ export function DashboardSidebar({
 
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-text-primary">
-              HND App
+              Institutional Timetabler
             </p>
 
             <p className="truncate text-xs text-text-muted">
-              Academic Operations
+              Simple scheduling
             </p>
           </div>
         </Link>
@@ -68,7 +68,7 @@ export function DashboardSidebar({
         </p>
 
         <p className="mt-1 text-[0.6875rem] text-text-muted">
-          Academic planning and scheduling
+          Setup · Generate · Review · Publish
         </p>
       </div>
 
@@ -137,11 +137,11 @@ export function DashboardSidebar({
 
       <div className="border-t border-navigation-border px-5 py-4">
         <p className="text-xs font-medium text-text-secondary">
-          Nutrition and Dietetics
+          Department timetable
         </p>
 
         <p className="mt-1 text-[0.6875rem] text-text-muted">
-          Department workspace
+          Shared institutional trainer pool
         </p>
       </div>
     </div>

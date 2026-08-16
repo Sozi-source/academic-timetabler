@@ -1,6 +1,6 @@
 'use client';
 
-import { Lock, LockOpen, MoveRight, LoaderCircle } from 'lucide-react';
+import { AlertTriangle, Lock, LockOpen, MoveRight, LoaderCircle } from 'lucide-react';
 import { useActionState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -21,15 +21,25 @@ export function SessionEditorCard({
     moveScheduledSessionAction,
     initialEditorActionState,
   );
+  const trainerUnassigned = !session.trainerId;
+  const roomUnassigned = !session.roomId;
 
   return (
-    <article className="rounded-xl border border-border bg-surface p-3 shadow-sm">
+    <article className={`rounded-xl border p-3 shadow-sm ${trainerUnassigned || roomUnassigned ? 'border-amber-300 bg-amber-50' : 'border-border bg-surface'}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold text-text-primary">{session.unitCode} · {session.unitName}</p>
-          <p className="mt-1 text-xs text-text-muted">{session.cohortName} · {session.trainerName}</p>
+          <p className="mt-1 text-xs text-text-muted">{session.cohortName}</p>
+          {trainerUnassigned ? (
+            <p className="mt-2 flex items-center gap-1 text-xs font-semibold text-amber-800">
+              <AlertTriangle className="size-3.5" />
+              Unassigned trainer · assign before publication
+            </p>
+          ) : (
+            <p className="mt-1 text-xs text-text-muted">{session.trainerName}</p>
+          )}
         </div>
-        <form action={toggleScheduledSessionLockAction}>
+        {!trainerUnassigned ? <form action={toggleScheduledSessionLockAction}>
           <input type="hidden" name="sessionId" value={session.id} />
           <Button
             type="submit"
@@ -40,10 +50,10 @@ export function SessionEditorCard({
           >
             {session.isLocked ? <Lock className="size-4" /> : <LockOpen className="size-4" />}
           </Button>
-        </form>
+        </form> : null}
       </div>
 
-      <p className="mt-2 text-xs font-medium text-text-secondary">{session.roomCode} · {session.roomName}</p>
+      <p className={`mt-2 text-xs font-medium ${roomUnassigned ? 'text-amber-800' : 'text-text-secondary'}`}>{session.roomCode ? `${session.roomCode} · ${session.roomName}` : 'No room assigned · assign later if required'}</p>
 
       {!session.isLocked ? (
         <form action={action} className="mt-3 grid gap-2">
@@ -59,7 +69,8 @@ export function SessionEditorCard({
               {data.timeSlots.map((slot) => <option key={slot.id} value={slot.id}>{slot.label}</option>)}
             </Select>
           </div>
-          <Select name="roomId" defaultValue={session.roomId} aria-label="Room">
+          <Select name="roomId" defaultValue={session.roomId ?? ''} aria-label="Room">
+            <option value="">No room assigned</option>
             {data.rooms.map((room) => <option key={room.id} value={room.id} disabled={room.capacity < session.cohortSize}>{room.label}</option>)}
           </Select>
           <input

@@ -12,6 +12,7 @@ import type {
   TimetableReportRow,
   TimetableReportsData,
 } from './types';
+import { getMasterSessionPresentation } from './master-presentation';
 
 Font.registerHyphenationCallback((word) => [word]);
 
@@ -53,10 +54,6 @@ function rowsForCohort(
     row.day.toLowerCase() === day.toLowerCase()
     && cohortCodes(row).includes(cohortCode)
   ));
-}
-
-function trainerLabel(row: TimetableReportRow) {
-  return row.trainerId ? row.trainer : 'Unassigned';
 }
 
 function departmentHeading(departmentName: string) {
@@ -165,12 +162,19 @@ const masterStyles = StyleSheet.create({
   },
   unit: {
     fontFamily: 'Times-Bold',
-    fontSize: 5.8,
-    lineHeight: 1.05,
+    fontSize: 6.8,
+    lineHeight: 1.1,
   },
   trainer: {
+    marginTop: 1.5,
+    fontSize: 5.6,
+    lineHeight: 1.1,
+  },
+  venue: {
     marginTop: 1,
-    fontSize: 5.5,
+    color: '#475569',
+    fontFamily: 'Times-Italic',
+    fontSize: 5.2,
     lineHeight: 1.05,
   },
   unassigned: {
@@ -267,6 +271,17 @@ const personalStyles = StyleSheet.create({
     fontSize: 8,
     textTransform: 'uppercase',
   },
+  department: {
+    marginTop: 2,
+    color: '#8A001C',
+    fontSize: 6.6,
+  },
+  personalVenue: {
+    marginTop: 1.5,
+    color: '#475569',
+    fontFamily: 'Helvetica-Oblique',
+    fontSize: 6.4,
+  },
   sessionCell: {
     minHeight: 101,
     justifyContent: 'center',
@@ -308,15 +323,20 @@ function MasterSessionCell({
 
   return (
     <View style={[masterStyles.cell, masterStyles.sessionCell, { width, height: rowHeight }]}>
-      {rows.map((row, index) => (
-        <View key={row.sessionId} style={{ alignItems: 'center', width: '100%' }}>
-          {index > 0 ? <View style={masterStyles.separator} /> : null}
-          <Text style={masterStyles.unit}>{row.unitCode} - {row.unitName}</Text>
-          <Text style={row.trainerId ? masterStyles.trainer : masterStyles.unassigned}>
-            Trainer: {trainerLabel(row)}
-          </Text>
-        </View>
-      ))}
+      {rows.map((row, index) => {
+        const presentation = getMasterSessionPresentation(row);
+
+        return (
+          <View key={row.sessionId} style={{ alignItems: 'center', width: '100%' }}>
+            {index > 0 ? <View style={masterStyles.separator} /> : null}
+            <Text style={masterStyles.unit}>{presentation.unitName}</Text>
+            <Text style={row.trainerId ? masterStyles.trainer : masterStyles.unassigned}>
+              Trainer: {presentation.trainer}
+            </Text>
+            <Text style={masterStyles.venue}>Venue: {presentation.venue}</Text>
+          </View>
+        );
+      })}
     </View>
   );
 }
@@ -412,6 +432,14 @@ function PersonalSessionCell({ rows }: { rows: TimetableReportRow[] }) {
           {index > 0 ? <View style={personalStyles.separator} /> : null}
           <Text>{row.unitCode} - {row.unitName}</Text>
           <Text>({cohortCodes(row).join(' + ')})</Text>
+          {row.departmentName ? (
+            <Text style={personalStyles.department}>
+              {row.departmentCode ? `${row.departmentCode} - ` : ''}{row.departmentName}
+            </Text>
+          ) : null}
+          <Text style={personalStyles.personalVenue}>
+            Venue: {row.roomCode ? row.roomName || row.roomCode : 'Unallocated'}
+          </Text>
         </View>
       ))}
     </View>

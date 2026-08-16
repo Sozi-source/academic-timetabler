@@ -87,7 +87,7 @@ export function GeneratorSessionTable({
               (session) => (
                 <tr
                   key={session.id}
-                  className="align-top transition hover:bg-surface-subtle"
+                  className={`align-top transition ${session.trainerId && session.roomId ? 'hover:bg-surface-subtle' : 'bg-amber-50 hover:bg-amber-100/70'}`}
                 >
                   <td className="min-w-44 px-5 py-4">
                     <div className="flex items-start gap-2">
@@ -159,18 +159,24 @@ export function GeneratorSessionTable({
                   <td className="min-w-48 px-5 py-4">
                     <div className="flex items-start gap-2">
                       <UserRound
-                        className="mt-0.5 size-4 shrink-0 text-text-subtle"
+                        className={`mt-0.5 size-4 shrink-0 ${session.trainerId ? 'text-text-subtle' : 'text-amber-700'}`}
                         aria-hidden="true"
                       />
 
                       <div>
-                        <p className="font-medium text-text-primary">
-                          {session.trainerName}
-                        </p>
+                        {session.trainerId ? (
+                          <p className="font-medium text-text-primary">
+                            {session.trainerName}
+                          </p>
+                        ) : (
+                          <Badge variant="warning">
+                            Unassigned trainer
+                          </Badge>
+                        )}
 
                         <p className="mt-1 text-xs text-text-muted">
                           {
-                            session.trainerStaffNumber
+                            session.trainerStaffNumber ?? 'Assign before publication'
                           }
                         </p>
                       </div>
@@ -180,17 +186,15 @@ export function GeneratorSessionTable({
                   <td className="min-w-44 px-5 py-4">
                     <div className="flex items-start gap-2">
                       <Building2
-                        className="mt-0.5 size-4 shrink-0 text-text-subtle"
+                        className={`mt-0.5 size-4 shrink-0 ${session.roomId ? 'text-text-subtle' : 'text-amber-700'}`}
                         aria-hidden="true"
                       />
 
                       <div>
-                        <p className="font-medium text-text-primary">
-                          {session.roomName}
-                        </p>
+                        {session.roomId ? <p className="font-medium text-text-primary">{session.roomName}</p> : <Badge variant="warning">No room assigned</Badge>}
 
                         <p className="mt-1 text-xs text-text-muted">
-                          {session.roomCode}
+                          {session.roomCode ?? 'Assign later'}
                         </p>
                       </div>
                     </div>

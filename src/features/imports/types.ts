@@ -45,6 +45,12 @@ export interface ImportColumnDefinition {
 
   required: boolean;
 
+  /**
+   * Value applied when an optional cell is blank. Headers remain fixed even
+   * when their values are optional.
+   */
+  defaultValue?: ImportCellValue;
+
   description?: string;
 
   example?: ImportCellValue;

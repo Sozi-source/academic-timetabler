@@ -23,6 +23,7 @@ import {
 import {
   programmeAwardLevelOptions,
 } from '@/features/programmes/types';
+import { getWorkingDepartments } from '@/features/organization/queries';
 
 export const metadata: Metadata = {
   title: 'Edit Programme',
@@ -39,8 +40,11 @@ export default async function EditProgrammePage({
 }: EditProgrammePageProps) {
   const { id } = await params;
 
-  const programme =
-    await getProgrammeById(id);
+  const [programme, departments] =
+    await Promise.all([
+      getProgrammeById(id),
+      getWorkingDepartments(),
+    ]);
 
   if (!programme) {
     notFound();
@@ -139,6 +143,7 @@ export default async function EditProgrammePage({
           <CardContent>
             <EditProgrammeForm
               programme={programme}
+              departments={departments}
             />
           </CardContent>
         </Card>

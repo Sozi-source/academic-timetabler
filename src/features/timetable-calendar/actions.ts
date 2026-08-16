@@ -20,6 +20,17 @@ function revalidateCalendarPages() {
   revalidatePath('/dashboard');
   revalidatePath('/timetable/time-slots');
   revalidatePath('/timetable/working-days');
+  revalidatePath('/timetable/trainers/availability');
+}
+
+export async function initializeStandardCalendarAction(formData: FormData): Promise<void> {
+  await requireHodAccess();
+  const periodResult=academicPeriodIdSchema.safeParse(formData.get('academicPeriodId'));
+  if(!periodResult.success) throw new Error('Invalid Academic Period.');
+  const supabase=await createClient();
+  const {error}=await supabase.rpc('initialize_standard_timetable_calendar',{p_academic_period_id:periodResult.data});
+  if(error) throw new Error(getDatabaseErrorMessage(error.code,error.message));
+  revalidateCalendarPages();
 }
 
 function getDatabaseErrorMessage(

@@ -33,12 +33,13 @@ PlanningSession[] {
           session.academicPeriodId,
     );
 
-  const availableRooms =
-    rooms.filter(
-      (room) =>
-        room.isActive &&
-        room.isTimetableAvailable,
-    );
+  const availableRooms: Array<PlanningRoom | null> = session.roomId
+    ? rooms.filter(
+        (room) =>
+          room.isActive &&
+          room.isTimetableAvailable,
+      )
+    : [null];
 
   const availableTrainers =
     trainers?.filter(
@@ -67,7 +68,7 @@ PlanningSession[] {
             day.id,
             range.startTimeSlotId,
             range.endTimeSlotId,
-            room.id,
+            room?.id ?? 'unassigned-room',
             trainer.id,
           ].join(':');
 
@@ -79,7 +80,7 @@ PlanningSession[] {
               range.startTimeSlotId,
             endTimeSlotId:
               range.endTimeSlotId,
-            roomId: room.id,
+            roomId: room?.id ?? null,
             trainerId: trainer.id,
             source: 'reschedule',
             conflictState:

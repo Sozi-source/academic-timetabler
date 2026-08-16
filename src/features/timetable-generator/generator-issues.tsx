@@ -1,12 +1,18 @@
 import {
   AlertCircle,
   AlertTriangle,
+  ArrowRightLeft,
+  LoaderCircle,
+  Sparkles,
   UserRound,
 } from 'lucide-react';
 
 import {
   Badge,
 } from '@/components/ui/badge';
+import {
+  Button,
+} from '@/components/ui/button';
 
 import type {
   GeneratorConflictSummary,
@@ -15,9 +21,17 @@ import type {
 
 export function GeneratorUnscheduledList({
   sessions,
+  academicPeriodId,
+  exchangeAction,
+  exchangePending,
+  exchangeSuggestionsEvaluated,
 }: {
   sessions:
     GeneratorUnscheduledSession[];
+  academicPeriodId: string;
+  exchangeAction: (formData: FormData) => void;
+  exchangePending: boolean;
+  exchangeSuggestionsEvaluated: boolean;
 }) {
   if (sessions.length === 0) {
     return null;
@@ -35,6 +49,12 @@ export function GeneratorUnscheduledList({
           automatically and require configuration or
           manual review.
         </p>
+
+        {!exchangeSuggestionsEvaluated ? (
+          <p className="mt-2 text-xs leading-5 text-text-muted">
+            This fast post-exchange preview has not scanned for additional exchanges yet. Use Scan remaining smart repairs above when needed.
+          </p>
+        ) : null}
       </div>
 
       <div className="grid gap-3">
@@ -114,6 +134,74 @@ export function GeneratorUnscheduledList({
                       ),
                     )}
                   </div>
+                ) : null}
+
+                {session.exchangeSuggestions.length > 0 ? (
+                  <section className="mt-4 rounded-xl border border-primary-soft bg-surface p-4">
+                    <div className="flex items-start gap-2">
+                      <Sparkles
+                        className="mt-0.5 size-4 shrink-0 text-primary"
+                        aria-hidden="true"
+                      />
+                      <div>
+                        <h4 className="text-sm font-semibold text-text-primary">
+                          Smart exchange repairs
+                        </h4>
+                        <p className="mt-1 text-xs leading-5 text-text-muted">
+                          These equal-duration exchanges were simulated against the complete timetable. Only trainers in this department are considered.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 grid gap-2">
+                      {session.exchangeSuggestions.map((suggestion, index) => (
+                        <article
+                          key={suggestion.id}
+                          className="rounded-lg border border-border bg-surface-subtle p-3"
+                        >
+                          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                            <div className="min-w-0 text-xs leading-5 text-text-secondary">
+                              <p className="font-semibold text-text-primary">
+                                {index === 0 ? 'Recommended: ' : ''}
+                                exchange with {suggestion.partnerTrainerName}
+                              </p>
+                              <p className="mt-1">
+                                {suggestion.partnerTrainerName} takes {session.unitCode ?? 'this unit'}; {suggestion.targetTrainerName} takes {suggestion.partnerUnitCode} — {suggestion.partnerUnitName} ({suggestion.partnerCohortCode}).
+                              </p>
+                              <p className="mt-1 text-text-muted">
+                                {suggestion.durationMinutes} minutes · resolves {suggestion.resolvedSessionCount} session{suggestion.resolvedSessionCount === 1 ? '' : 's'} · {suggestion.remainingUnscheduledCount} unresolved remain · {suggestion.warningCount} warning{suggestion.warningCount === 1 ? '' : 's'}
+                              </p>
+                            </div>
+
+                            <form action={exchangeAction}>
+                              <input type="hidden" name="academicPeriodId" value={academicPeriodId} />
+                              <input type="hidden" name="targetTeachingAllocationId" value={suggestion.targetTeachingAllocationId} />
+                              <input type="hidden" name="targetSessionNumber" value={suggestion.targetSessionNumber} />
+                              <input type="hidden" name="partnerTeachingAllocationId" value={suggestion.partnerTeachingAllocationId} />
+                              <Button
+                                type="submit"
+                                size="sm"
+                                variant={index === 0 ? 'primary' : 'outline'}
+                                disabled={exchangePending}
+                                leadingIcon={exchangePending ? (
+                                  <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
+                                ) : (
+                                  <ArrowRightLeft className="size-4" aria-hidden="true" />
+                                )}
+                              >
+                                {exchangePending ? 'Rechecking exchange' : 'Apply exchange'}
+                              </Button>
+                            </form>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </section>
+                ) : session.reason === 'no_valid_placement' &&
+                exchangeSuggestionsEvaluated ? (
+                  <p className="mt-4 rounded-xl border border-border bg-surface px-4 py-3 text-xs leading-5 text-text-muted">
+                    No safe equal-duration trainer exchange was found in this department. Adjust availability, unlock an affected session, or review the fixed schedule before regenerating.
+                  </p>
                 ) : null}
               </div>
             </div>

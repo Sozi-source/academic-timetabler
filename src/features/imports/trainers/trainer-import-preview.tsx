@@ -113,6 +113,9 @@ export function TrainerImportPreview({
                 Trainer
               </th>
               <th className="px-4 py-3">
+                School / Department
+              </th>
+              <th className="px-4 py-3">
                 Employment
               </th>
               <th className="px-4 py-3">
@@ -161,6 +164,16 @@ export function TrainerImportPreview({
                   </td>
 
                   <td className="whitespace-nowrap px-4 py-4 text-text-secondary">
+                    {'departmentCode' in trainer
+                      ? trainer.departmentCode
+                      : String(
+                          row.sourceData[
+                            'School / Department Code'
+                          ] ?? '—',
+                        )}
+                  </td>
+
+                  <td className="whitespace-nowrap px-4 py-4 text-text-secondary">
                     {'employmentType' in trainer
                       ? trainer.employmentType
                       : String(
@@ -171,8 +184,8 @@ export function TrainerImportPreview({
                   </td>
 
                   <td className="whitespace-nowrap px-4 py-4 text-text-secondary">
-                    {'maximumWeeklyHours' in trainer
-                      ? `${trainer.maximumWeeklyHours} weekly / ${trainer.maximumDailyHours} daily`
+                    {'normalWeeklyHours' in trainer
+                      ? `${trainer.normalWeeklyHours}h target / ${trainer.maximumDailyHours}h daily limit`
                       : '—'}
                   </td>
 

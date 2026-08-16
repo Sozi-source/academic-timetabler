@@ -54,8 +54,12 @@ import {
 
 import type {
   ExistingScheduledSessionRow,
+  GeneratorProtectedTimetableSummary,
   TimetableGenerationRunSummary,
 } from './server-types';
+import type {
+  PlanningConstraint,
+} from './types';
 
 export interface GeneratorSourceData {
   academicPeriod: AcademicPeriod;
@@ -64,12 +68,86 @@ export interface GeneratorSourceData {
   timeSlots: TimeSlot[];
   trainers: Trainer[];
   trainerAvailability: GeneratorTrainerAvailability[];
+  constraints: PlanningConstraint[];
   cohorts: Cohort[];
   rooms: Room[];
   units: Unit[];
   existingSessions:
     ExistingScheduledSessionRow[];
+  protectedTimetable?:
+    GeneratorProtectedTimetableSummary | null;
 }
+
+export const getGeneratorProtectedTimetable = cache(async (
+  academicPeriodId: string,
+): Promise<GeneratorProtectedTimetableSummary | null> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('timetable_versions')
+    .select('id, version_number, status')
+    .eq('academic_period_id', academicPeriodId)
+    .in('status', ['under_review', 'approved', 'published'])
+    .order('version_number', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(
+      `Unable to load timetable editing status: ${error.message}`,
+    );
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  return {
+    id: data.id,
+    versionNumber: data.version_number,
+    status: data.status as GeneratorProtectedTimetableSummary['status'],
+  };
+});
+
+export const getGeneratorSchedulingConstraints = cache(async (
+  academicPeriodId: string,
+): Promise<PlanningConstraint[]> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('scheduling_constraints')
+    .select(`
+      id,
+      academic_period_id,
+      subject_type,
+      subject_id,
+      constraint_type,
+      working_day_id,
+      starts_at,
+      ends_at,
+      priority,
+      reason,
+      is_active
+    `)
+    .eq('academic_period_id', academicPeriodId)
+    .eq('is_active', true);
+
+  if (error) {
+    throw new Error(`Unable to load scheduling constraints: ${error.message}`);
+  }
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    academicPeriodId: row.academic_period_id,
+    subjectType: row.subject_type,
+    subjectId: row.subject_id,
+    constraintType: row.constraint_type,
+    workingDayId: row.working_day_id,
+    startsAt: row.starts_at,
+    endsAt: row.ends_at,
+    priority: row.priority,
+    reason: row.reason,
+    isActive: row.is_active,
+  })) as PlanningConstraint[];
+});
 
 export interface GeneratorTrainerAvailability {
   trainerId: string;
@@ -111,7 +189,7 @@ export const getExistingScheduledSessions =
         data,
         error,
       } = await supabase.rpc(
-        'get_institutional_resource_bookings',
+        'get_scheduler_resource_bookings',
         {
           target_academic_period_id:
             academicPeriodId,
@@ -152,10 +230,12 @@ export const getGeneratorSourceData =
         timeSlots,
         trainers,
         trainerAvailability,
+        constraints,
         cohorts,
         rooms,
         units,
         existingSessions,
+        protectedTimetable,
       ] = await Promise.all([
         getTimetableEnabledAllocations(
           academicPeriodId,
@@ -168,10 +248,14 @@ export const getGeneratorSourceData =
         ),
         getTimetableAvailableTrainers(),
         getGeneratorTrainerAvailability(academicPeriodId),
+        getGeneratorSchedulingConstraints(academicPeriodId),
         getTimetableAvailableCohorts(),
         getTimetableAvailableRooms(),
         getTimetableAvailableUnits(),
         getExistingScheduledSessions(
+          academicPeriodId,
+        ),
+        getGeneratorProtectedTimetable(
           academicPeriodId,
         ),
       ]);
@@ -183,10 +267,12 @@ export const getGeneratorSourceData =
         timeSlots,
         trainers,
         trainerAvailability,
+        constraints,
         cohorts,
         rooms,
         units,
         existingSessions,
+        protectedTimetable,
       };
     },
   );

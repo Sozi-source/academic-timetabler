@@ -8,8 +8,18 @@ import {
 import { createClient } from '@/lib/supabase/server';
 
 import {
+  createAutomaticPlannerInput,
   createGeneratorPreview,
 } from './data-adapter';
+import {
+  evaluateTrainerExchangeSuggestion,
+} from './exchange-repair';
+import {
+  isProtectedTimetableExchangeError,
+} from './exchange-action-validation';
+import {
+  generateTimetablePlan,
+} from './planner';
 import {
   getGeneratorSourceData,
 } from './queries';
@@ -18,8 +28,31 @@ import {
 } from './request-validation';
 import type {
   GeneratorActionState,
+  GeneratorDraftLifecycleActionState,
+  GeneratorExchangeActionState,
   GeneratorPersistActionState,
 } from './server-types';
+
+function readExchangeRequest(formData: FormData) {
+  return {
+    academicPeriodId: String(formData.get('academicPeriodId') ?? ''),
+    targetTeachingAllocationId: String(
+      formData.get('targetTeachingAllocationId') ?? '',
+    ),
+    targetSessionNumber: Number(
+      formData.get('targetSessionNumber') ?? 0,
+    ),
+    partnerTeachingAllocationId: String(
+      formData.get('partnerTeachingAllocationId') ?? '',
+    ),
+  };
+}
+
+function isUuid(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value,
+  );
+}
 
 export async function generateTimetablePreviewAction(
   _previousState: GeneratorActionState,
@@ -32,7 +65,7 @@ export async function generateTimetablePreviewAction(
       formData,
     );
 
-  if (!parsed.success) {
+  if (parsed.success === false) {
     return {
       status: 'error',
       message:
@@ -89,6 +122,25 @@ export async function generateTimetablePreviewAction(
     const blockedCount =
       preview.statistics
         .blockedConflictCount;
+
+    if (
+      !parsed.data.overwriteExisting &&
+      scheduledCount === 0 &&
+      unscheduledCount === 0 &&
+      preview.readiness
+        .existingSessionCount > 0
+    ) {
+      return {
+        status: 'success',
+        message:
+          `All ${preview.readiness.existingSessionCount} existing session${
+            preview.readiness.existingSessionCount === 1
+              ? ''
+              : 's'
+          } already satisfy the timetable requirements. Select Replace existing editable sessions to build a fresh preview.`,
+        preview,
+      };
+    }
 
     if (
       scheduledCount === 0 &&
@@ -149,6 +201,259 @@ export async function generateTimetablePreviewAction(
         error instanceof Error
           ? error.message
           : 'The timetable preview could not be generated.',
+    };
+  }
+}
+
+export async function applyTrainerExchangeAction(
+  _previousState: GeneratorExchangeActionState,
+  formData: FormData,
+): Promise<GeneratorExchangeActionState> {
+  await requireHodAccess();
+
+  const request = readExchangeRequest(formData);
+  const exchangeAttempt = {
+    academicPeriodId:
+      request.academicPeriodId,
+    targetTeachingAllocationId:
+      request.targetTeachingAllocationId,
+    targetSessionNumber:
+      request.targetSessionNumber,
+    partnerTeachingAllocationId:
+      request.partnerTeachingAllocationId,
+  };
+  if (
+    !isUuid(request.academicPeriodId) ||
+    !isUuid(request.targetTeachingAllocationId) ||
+    !isUuid(request.partnerTeachingAllocationId) ||
+    !Number.isInteger(request.targetSessionNumber) ||
+    request.targetSessionNumber < 1
+  ) {
+    return {
+      status: 'error',
+      message: 'The selected trainer exchange is incomplete. Regenerate the preview and try again.',
+      ...exchangeAttempt,
+    };
+  }
+
+  try {
+    const sourceData = await getGeneratorSourceData(
+      request.academicPeriodId,
+    );
+    if (!sourceData) {
+      return {
+        status: 'error',
+        message: 'The selected Academic Period could not be found.',
+        ...exchangeAttempt,
+      };
+    }
+
+    const plannerInput = createAutomaticPlannerInput({
+      sourceData,
+      overwriteExisting: true,
+    });
+    const baseline = generateTimetablePlan(plannerInput);
+    const suggestion = evaluateTrainerExchangeSuggestion({
+      input: plannerInput,
+      baseline,
+      targetTeachingAllocationId:
+        request.targetTeachingAllocationId,
+      targetSessionNumber:
+        request.targetSessionNumber,
+      partnerTeachingAllocationId:
+        request.partnerTeachingAllocationId,
+    });
+
+    if (!suggestion) {
+      return {
+        status: 'error',
+        message: 'That exchange is no longer a valid repair. Regenerate the preview to see the current options.',
+        ...exchangeAttempt,
+      };
+    }
+
+    const targetTrainerName = sourceData.trainers.find((trainer) =>
+      trainer.id === suggestion.targetTrainerId,
+    )?.fullName ?? 'The original trainer';
+    const partnerTrainerName = sourceData.trainers.find((trainer) =>
+      trainer.id === suggestion.partnerTrainerId,
+    )?.fullName ?? 'The exchange trainer';
+    const partnerAllocation = sourceData.allocations.find((allocation) =>
+      allocation.id === suggestion.partnerTeachingAllocationId,
+    );
+    const partnerUnitCode = sourceData.units.find((unit) =>
+      unit.id === partnerAllocation?.unitId,
+    )?.code ?? 'the exchanged unit';
+
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc(
+      'apply_same_department_trainer_exchange',
+      {
+        target_allocation_id:
+          suggestion.targetTeachingAllocationId,
+        partner_allocation_id:
+          suggestion.partnerTeachingAllocationId,
+        // The RPC still blocks any review, approved or published version.
+        // Once the dedicated lifecycle action has made the timetable
+        // editable, this permits replacement of its affected locked sessions.
+        allow_protected_reopen:
+          true,
+      },
+    );
+
+    if (error) {
+      const requiresTimetableReopen =
+        isProtectedTimetableExchangeError(error.message);
+
+      return {
+        status: 'error',
+        message: requiresTimetableReopen
+          ? 'This timetable is protected. Select Return timetable to draft, then apply the exchange again.'
+            : `The exchange was not applied: ${error.message}`,
+        requiresTimetableReopen,
+        ...exchangeAttempt,
+      };
+    }
+
+    const exchangeResult = data as {
+      reopenedVersionCount?: number;
+      archivedPublishedVersionCount?: number;
+    } | null;
+    const reopenedVersionCount =
+      exchangeResult?.reopenedVersionCount ?? 0;
+    const archivedPublishedVersionCount =
+      exchangeResult?.archivedPublishedVersionCount ?? 0;
+    const reopenSummary = archivedPublishedVersionCount > 0
+      ? ' The previous published snapshot was archived safely and remains in timetable history.'
+      : reopenedVersionCount > 0
+        ? ' The protected timetable was returned to draft automatically and the transition was recorded.'
+        : '';
+
+    const updatedSourceData = {
+      ...sourceData,
+      allocations: sourceData.allocations.map((allocation) => {
+        if (allocation.id === suggestion.targetTeachingAllocationId) {
+          return {
+            ...allocation,
+            trainerId: suggestion.partnerTrainerId,
+          };
+        }
+
+        if (allocation.id === suggestion.partnerTeachingAllocationId) {
+          return {
+            ...allocation,
+            trainerId: suggestion.targetTrainerId,
+          };
+        }
+
+        return allocation;
+      }),
+    };
+    const preview = createGeneratorPreview({
+      sourceData: updatedSourceData,
+      overwriteExisting: true,
+      includeExchangeSuggestions: false,
+    });
+
+    revalidatePath('/timetable/generator');
+    revalidatePath('/timetable/teaching-allocations');
+    revalidatePath('/timetable/editor');
+    revalidatePath('/timetable/conflicts');
+    revalidatePath('/timetable/readiness');
+
+    return {
+      status: 'success',
+      message:
+        `${partnerTrainerName} now takes the unresolved unit and ${targetTrainerName} takes ${partnerUnitCode}.${reopenSummary} Review the regenerated preview, then select Save draft timetable to save the new placements.`,
+      preview,
+      requiresTimetableReopen: false,
+      ...exchangeAttempt,
+    };
+  }
+  catch (error) {
+    console.error('Smart trainer exchange failed.', error);
+    return {
+      status: 'error',
+      message:
+        error instanceof Error
+          ? error.message
+          : 'The trainer exchange could not be applied.',
+      ...exchangeAttempt,
+    };
+  }
+}
+
+export async function returnTimetableToEditableDraftAction(
+  _previousState: GeneratorDraftLifecycleActionState,
+  formData: FormData,
+): Promise<GeneratorDraftLifecycleActionState> {
+  await requireHodAccess();
+
+  const academicPeriodId = String(
+    formData.get('academicPeriodId') ?? '',
+  );
+  if (!isUuid(academicPeriodId)) {
+    return {
+      status: 'error',
+      message: 'Select a valid Academic Period before returning the timetable to draft.',
+      academicPeriodId,
+    };
+  }
+
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc(
+      'return_timetable_to_editable_draft',
+      {
+        target_academic_period_id: academicPeriodId,
+      },
+    );
+
+    if (error) {
+      return {
+        status: 'error',
+        message: `The timetable could not be returned to draft: ${error.message}`,
+        academicPeriodId,
+      };
+    }
+
+    const result = data as {
+      reopenedVersionCount?: number;
+      archivedPublishedVersionCount?: number;
+    } | null;
+    const reopenedVersionCount =
+      result?.reopenedVersionCount ?? 0;
+    const archivedPublishedVersionCount =
+      result?.archivedPublishedVersionCount ?? 0;
+
+    revalidatePath('/timetable/generator');
+    revalidatePath('/timetable/published');
+    revalidatePath('/timetable/editor');
+    revalidatePath('/timetable/conflicts');
+
+    const message = archivedPublishedVersionCount > 0
+      ? 'The published snapshot was archived safely and remains in history. The live timetable is now editable; apply the exchange again.'
+      : reopenedVersionCount > 0
+        ? 'The timetable was returned to draft and the audit history was updated. Apply the exchange again.'
+        : 'The timetable is already editable. Apply the exchange again.';
+
+    return {
+      status: 'success',
+      message,
+      academicPeriodId,
+      reopenedVersionCount,
+      archivedPublishedVersionCount,
+    };
+  }
+  catch (error) {
+    console.error('Return timetable to draft failed.', error);
+    return {
+      status: 'error',
+      message:
+        error instanceof Error
+          ? error.message
+          : 'The timetable could not be returned to draft.',
+      academicPeriodId,
     };
   }
 }

@@ -58,7 +58,7 @@ export async function stageTrainerImportAction(
   _previousState: TrainerImportActionState,
   formData: FormData,
 ): Promise<TrainerImportActionState> {
-  await requireHodAccess();
+  const profile = await requireHodAccess();
 
   const uploadedFile =
     formData.get('workbook');
@@ -121,7 +121,7 @@ export async function stageTrainerImportAction(
   }
 
   const validationResults =
-    markDuplicateImportRows(
+    markDuplicateImportRows<NormalizedTrainerImportRow>(
       workbook.rows.map((row) =>
         validateParsedImportRow<
           NormalizedTrainerImportRow
@@ -178,6 +178,64 @@ export async function stageTrainerImportAction(
   }
 
   const supabase = await createClient();
+
+  const {
+    data: departments,
+    error: departmentLookupError,
+  } = await supabase
+    .from('departments')
+    .select('id,code,name')
+    .eq('is_active', true);
+
+  if (departmentLookupError) {
+    return {
+      status: 'error',
+      message:
+        `School / department codes could not be checked: ${departmentLookupError.message}`,
+    };
+  }
+
+  const permittedDepartments =
+    new Map(
+      (departments ?? [])
+        .filter(
+          (department) =>
+            profile.role === 'system_admin' ||
+            department.id ===
+              profile.activeDepartmentId,
+        )
+        .map((department) => [
+          department.code
+            .trim()
+            .toUpperCase(),
+          department,
+        ]),
+    );
+
+  for (const result of validationResults) {
+    if (
+      result.status !== 'valid' ||
+      !result.normalizedData
+    ) {
+      continue;
+    }
+
+    const department =
+      permittedDepartments.get(
+        result.normalizedData.departmentCode,
+      );
+
+    if (department) {
+      continue;
+    }
+
+    result.status = 'invalid';
+    result.fieldErrors.departmentCode = [
+      profile.role === 'system_admin'
+        ? 'No active school / department uses this code.'
+        : 'Use the code of your active school / department, or switch workspace before importing.',
+    ];
+  }
 
   const {
     data: existingTrainers,

@@ -132,7 +132,7 @@ export async function stageTeachingAllocationImportAction(
   }
 
   const validationResults =
-    markDuplicateImportRows(
+    markDuplicateImportRows<NormalizedTeachingAllocationImportRow>(
       workbook.rows.map((row) =>
         validateParsedImportRow<
           NormalizedTeachingAllocationImportRow

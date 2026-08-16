@@ -4,6 +4,8 @@ export type TrainerEmploymentType =
   | 'visiting'
   | 'contract'
   | 'other';
+export type TrainerWorkloadRole = 'hod' | 'course_coordinator' | 'full_time_trainer' | 'part_time' | 'external';
+export type TrainerAvailabilityMode = 'generally_available' | 'selected_slots_only';
 
 export interface Trainer {
   id: string;
@@ -13,10 +15,15 @@ export interface Trainer {
   email: string | null;
   phoneNumber: string | null;
   employmentType: TrainerEmploymentType;
+  departmentId: string;
   specialization: string | null;
   qualifications: string | null;
   maximumWeeklyHours: number;
   maximumDailyHours: number;
+  workloadRole: TrainerWorkloadRole;
+  homeDepartment: string | null;
+  normalWeeklyHours: number;
+  availabilityMode: TrainerAvailabilityMode;
   isActive: boolean;
   isTimetableAvailable: boolean;
   notes: string | null;
@@ -34,10 +41,15 @@ export interface TrainerRow {
   email: string | null;
   phone_number: string | null;
   employment_type: TrainerEmploymentType;
+  department_id: string;
   specialization: string | null;
   qualifications: string | null;
   maximum_weekly_hours: number | string;
   maximum_daily_hours: number | string;
+  workload_role: TrainerWorkloadRole;
+  home_department: string | null;
+  normal_weekly_hours: number | string;
+  availability_mode: TrainerAvailabilityMode;
   is_active: boolean;
   is_timetable_available: boolean;
   notes: string | null;
@@ -56,10 +68,15 @@ export interface TrainerActionState {
     email?: string[];
     phoneNumber?: string[];
     employmentType?: string[];
+    departmentId?: string[];
     specialization?: string[];
     qualifications?: string[];
     maximumWeeklyHours?: string[];
     maximumDailyHours?: string[];
+    workloadRole?: string[];
+    homeDepartment?: string[];
+    normalWeeklyHours?: string[];
+    availabilityMode?: string[];
     notes?: string[];
   };
 }

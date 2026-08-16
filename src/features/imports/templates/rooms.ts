@@ -9,7 +9,7 @@ export const roomsImportTemplate =
   assertValidTemplateDefinition({
     key: 'hnd-rooms',
     entityType: 'rooms',
-    version: '1.0',
+    version: '2.0',
     displayName: 'Rooms',
     instructionsWorksheetName:
       IMPORT_WORKSHEET_NAMES.instructions,
@@ -42,7 +42,8 @@ export const roomsImportTemplate =
       {
         key: 'roomType',
         header: 'Room Type',
-        required: true,
+        required: false,
+        defaultValue: 'lecture_room',
         description:
           'Select the room category that best describes the space.',
         example: 'laboratory',
@@ -92,7 +93,8 @@ export const roomsImportTemplate =
       {
         key: 'timetableAvailable',
         header: 'Timetable Available',
-        required: true,
+        required: false,
+        defaultValue: 'Yes',
         description:
           'Whether the room should be available for scheduling.',
         example: 'Yes',

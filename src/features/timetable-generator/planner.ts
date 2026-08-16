@@ -12,6 +12,7 @@ import {
 import type {
   PlanningAllocation,
   PlanningCohort,
+  PlanningConstraint,
   PlanningResult,
   PlanningRoom,
   PlanningSession,
@@ -49,6 +50,7 @@ export interface AutomaticPlannerInput {
   existingSessions?: PlanningSession[];
   workingDays: PlanningWorkingDay[];
   timeSlots: PlanningTimeSlot[];
+  constraints?: PlanningConstraint[];
   trainers: PlanningTrainer[];
   cohorts: PlanningCohort[];
   rooms: PlanningRoom[];
@@ -64,6 +66,7 @@ export interface AutomaticPlannerResult
 interface SessionRequest {
   allocation: PlanningAllocation;
   sessionNumber: number;
+  constraintPriority: number;
   difficultyScore: number;
 }
 
@@ -124,7 +127,7 @@ function createCandidateId({
   workingDayId: string;
   startTimeSlotId: string;
   endTimeSlotId: string;
-  roomId: string;
+  roomId: string | null;
 }) {
   return [
     'candidate',
@@ -133,7 +136,7 @@ function createCandidateId({
     workingDayId,
     startTimeSlotId,
     endTimeSlotId,
-    roomId,
+    roomId ?? 'unassigned-room',
   ].join(':');
 }
 
@@ -239,6 +242,57 @@ function buildContiguousTimeRanges({
   return ranges;
 }
 
+function buildFullDayTimeRange({
+  timeSlots,
+  startTimeSlotId,
+  endTimeSlotId,
+  durationMinutes,
+}: {
+  timeSlots: PlanningTimeSlot[];
+  startTimeSlotId: string | null | undefined;
+  endTimeSlotId: string | null | undefined;
+  durationMinutes: number;
+}): TimeSlotRange[] {
+  if (!startTimeSlotId || !endTimeSlotId) {
+    return [];
+  }
+
+  const startSlot = timeSlots.find(
+    (slot) => slot.id === startTimeSlotId,
+  );
+  const endSlot = timeSlots.find(
+    (slot) => slot.id === endTimeSlotId,
+  );
+
+  if (
+    !startSlot ||
+    !endSlot ||
+    endSlot.sequenceNumber < startSlot.sequenceNumber
+  ) {
+    return [];
+  }
+
+  const rangeDuration =
+    getIntervalDurationMinutes({
+      startsAt: startSlot.startsAt,
+      endsAt: endSlot.endsAt,
+    });
+
+  if (rangeDuration !== durationMinutes) {
+    return [];
+  }
+
+  return [
+    {
+      startTimeSlotId: startSlot.id,
+      endTimeSlotId: endSlot.id,
+      startsAt: startSlot.startsAt,
+      endsAt: endSlot.endsAt,
+      durationMinutes: rangeDuration,
+    },
+  ];
+}
+
 function countEligibleRooms({
   allocation,
   cohort,
@@ -250,6 +304,10 @@ function countEligibleRooms({
   unit?: PlanningUnit;
   rooms: PlanningRoom[];
 }) {
+  if (!allocation.preferredRoomId) {
+    return 1;
+  }
+
   return rooms.filter((room) => {
     if (
       !room.isActive ||
@@ -260,9 +318,9 @@ function countEligibleRooms({
 
     if (
       cohort &&
-      cohort.actualSize > 0 &&
+      (allocation.combinedCohortSize ?? cohort.actualSize) > 0 &&
       room.capacity <
-        cohort.actualSize
+        (allocation.combinedCohortSize ?? cohort.actualSize)
     ) {
       return false;
     }
@@ -336,6 +394,41 @@ function calculateDifficultyScore({
   return score;
 }
 
+function calculateConstraintPriority({
+  allocation,
+  sessionNumber,
+}: {
+  allocation: PlanningAllocation;
+  sessionNumber: number;
+}) {
+  const fixedTimeSlotId =
+    allocation.fixedTimeSlotIds?.[
+      sessionNumber - 1
+    ];
+
+  const fixedWorkingDayId =
+    allocation.fixedWorkingDayIds?.[
+      sessionNumber - 1
+    ] ?? allocation.fixedWorkingDayId;
+
+  if (
+    allocation.isFullDaySession &&
+    fixedTimeSlotId &&
+    fixedWorkingDayId
+  ) {
+    return 2;
+  }
+
+  if (
+    fixedTimeSlotId &&
+    fixedWorkingDayId
+  ) {
+    return 1;
+  }
+
+  return 0;
+}
+
 function createSessionRequests({
   allocations,
   cohorts,
@@ -395,12 +488,19 @@ function createSessionRequests({
           allocation,
           sessionNumber:
             index + 1,
+          constraintPriority:
+            calculateConstraintPriority({
+              allocation,
+              sessionNumber: index + 1,
+            }),
           difficultyScore,
         }),
       );
     })
     .sort(
       (first, second) =>
+        second.constraintPriority -
+          first.constraintPriority ||
         second.difficultyScore -
           first.difficultyScore ||
         first.allocation.id.localeCompare(
@@ -436,7 +536,7 @@ function getEligibleRooms({
 }: {
   allocation: PlanningAllocation;
   rooms: PlanningRoom[];
-}) {
+}): Array<PlanningRoom | null> {
   const availableRooms =
     rooms.filter(
       (room) =>
@@ -447,7 +547,7 @@ function getEligibleRooms({
   if (
     !allocation.preferredRoomId
   ) {
-    return availableRooms;
+    return [null];
   }
 
   return availableRooms.filter(
@@ -468,7 +568,7 @@ function createCandidateSessions({
   request: SessionRequest;
   workingDays: PlanningWorkingDay[];
   timeRanges: TimeSlotRange[];
-  rooms: PlanningRoom[];
+  rooms: Array<PlanningRoom | null>;
   selectedSessions: PlanningSession[];
   allowSameAllocationMultipleSessionsPerDay: boolean;
 }): PlanningSession[] {
@@ -480,9 +580,61 @@ function createCandidateSessions({
   const candidates:
   PlanningSession[] = [];
 
+  const fixedTimeSlotIds =
+    allocation.fixedTimeSlotIds ?? [];
+
+  const fixedTimeSlotId =
+    fixedTimeSlotIds[sessionNumber - 1] ?? null;
+
+  const fixedWorkingDayIds =
+    allocation.fixedWorkingDayIds ?? [];
+
+  const fixedWorkingDayId = fixedTimeSlotId
+    ? fixedWorkingDayIds[sessionNumber - 1] ??
+      allocation.fixedWorkingDayId ??
+      null
+    : null;
+
+  const configuredFixedDays = fixedTimeSlotIds.map(
+    (_, index) =>
+      fixedWorkingDayIds[index] ??
+      allocation.fixedWorkingDayId ??
+      null,
+  );
+
+  const isLinkedFixedSession =
+    Boolean(fixedWorkingDayId && fixedTimeSlotId) &&
+    fixedTimeSlotIds.length > 1 &&
+    new Set(configuredFixedDays).size === 1;
+
+  const linkedSession =
+    isLinkedFixedSession
+      ? selectedSessions.find(
+          (session) =>
+            isActiveSession(session) &&
+            session.teachingAllocationId === allocation.id,
+        )
+      : undefined;
+
+  const candidateRooms = linkedSession
+    ? linkedSession.roomId
+      ? rooms.filter(
+          (room) => room?.id === linkedSession.roomId,
+        )
+      : [null]
+    : rooms;
+
   for (const workingDay of workingDays) {
     if (
+      fixedWorkingDayId &&
+      workingDay.id !== fixedWorkingDayId
+    ) {
+      continue;
+    }
+
+    if (
       !allowSameAllocationMultipleSessionsPerDay &&
+      !isLinkedFixedSession &&
       hasAllocationOnDay({
         sessions:
           selectedSessions,
@@ -496,7 +648,14 @@ function createCandidateSessions({
     }
 
     for (const range of timeRanges) {
-      for (const room of rooms) {
+      if (
+        fixedTimeSlotId &&
+        range.startTimeSlotId !== fixedTimeSlotId
+      ) {
+        continue;
+      }
+
+      for (const room of candidateRooms) {
         candidates.push({
           id: createCandidateId({
             allocationId:
@@ -508,7 +667,7 @@ function createCandidateSessions({
               range.startTimeSlotId,
             endTimeSlotId:
               range.endTimeSlotId,
-            roomId: room.id,
+            roomId: room?.id ?? null,
           }),
           academicPeriodId:
             allocation.academicPeriodId,
@@ -526,7 +685,7 @@ function createCandidateSessions({
             range.startTimeSlotId,
           endTimeSlotId:
             range.endTimeSlotId,
-          roomId: room.id,
+          roomId: room?.id ?? null,
           sessionNumber,
           deliveryMode:
             allocation.deliveryMode,
@@ -535,6 +694,8 @@ function createCandidateSessions({
           conflictState:
             'unchecked',
           isLocked: false,
+          participantCohortIds: allocation.participantCohortIds,
+          combinedCohortSize: allocation.combinedCohortSize,
         });
       }
     }
@@ -665,7 +826,7 @@ function calculateStatistics({
         total +
         Math.max(
           0,
-          trainer.maximumWeeklyHours,
+          trainer.normalWeeklyHours,
         ) *
           60,
       0,
@@ -766,6 +927,14 @@ export function generateTimetablePlan(
       []
     ).filter(isActiveSession);
 
+  const satisfiedRequestKeys =
+    new Set(
+      existingSessions.map(
+        (session) =>
+          `${session.teachingAllocationId}:${session.sessionNumber}`,
+      ),
+    );
+
   const workingDays =
     input.workingDays
       .filter(
@@ -805,7 +974,12 @@ export function generateTimetablePlan(
       cohorts: input.cohorts,
       units: input.units,
       rooms: input.rooms,
-    });
+    }).filter(
+      (request) =>
+        !satisfiedRequestKeys.has(
+          `${request.allocation.id}:${request.sessionNumber}`,
+        ),
+    );
 
   const selectedSessions:
   PlanningSession[] = [];
@@ -838,15 +1012,55 @@ export function generateTimetablePlan(
       sessionNumber,
     } = request;
 
+    const fixedTimeSlotIds =
+      allocation.fixedTimeSlotIds ?? [];
+    const fixedWorkingDayIds =
+      allocation.fixedWorkingDayIds ?? [];
+    const configuredFixedDays = fixedTimeSlotIds.map(
+      (_, index) =>
+        fixedWorkingDayIds[index] ??
+        allocation.fixedWorkingDayId ??
+        null,
+    );
+    const linkedFixedSessionCount =
+      fixedTimeSlotIds.length > 1 &&
+      new Set(configuredFixedDays).size === 1 &&
+      configuredFixedDays[0]
+        ? fixedTimeSlotIds.length
+        : 0;
+
+    if (
+      linkedFixedSessionCount > 1 &&
+      sessionNumber <= linkedFixedSessionCount &&
+      unscheduled.some(
+        (item) =>
+          item.teachingAllocationId === allocation.id &&
+          item.sessionNumber < sessionNumber,
+      )
+    ) {
+      unscheduled.push({
+        teachingAllocationId: allocation.id,
+        sessionNumber,
+        reason: 'no_valid_placement',
+        message:
+          'The linked fixed session was not scheduled because the complete double session could not be placed.',
+        attemptedCandidateCount: 0,
+        conflictTypes: ['linked_fixed_session'],
+      });
+
+      continue;
+    }
+
     const cohort =
       cohortLookup.get(
         allocation.cohortId,
       );
 
-    const trainer =
-      trainerLookup.get(
-        allocation.trainerId,
-      );
+    const trainer = allocation.trainerId
+      ? trainerLookup.get(
+          allocation.trainerId,
+        )
+      : undefined;
 
     const unit =
       unitLookup.get(
@@ -855,8 +1069,8 @@ export function generateTimetablePlan(
 
     if (
       !cohort ||
-      !trainer ||
-      !unit
+      !unit ||
+      (Boolean(allocation.trainerId) && !trainer)
     ) {
       unscheduled.push({
         teachingAllocationId:
@@ -888,13 +1102,21 @@ export function generateTimetablePlan(
       continue;
     }
 
-    const timeRanges =
-      buildContiguousTimeRanges({
-        timeSlots,
-        durationMinutes:
-          allocation
-            .sessionDurationMinutes,
-      });
+    const timeRanges = allocation.isFullDaySession
+      ? buildFullDayTimeRange({
+          timeSlots,
+          startTimeSlotId:
+            allocation.fixedTimeSlotIds?.[0],
+          endTimeSlotId:
+            allocation.fixedEndTimeSlotId,
+          durationMinutes:
+            allocation.sessionDurationMinutes,
+        })
+      : buildContiguousTimeRanges({
+          timeSlots,
+          durationMinutes:
+            allocation.sessionDurationMinutes,
+        });
 
     if (timeRanges.length === 0) {
       unscheduled.push({
@@ -902,8 +1124,9 @@ export function generateTimetablePlan(
           allocation.id,
         sessionNumber,
         reason: 'no_time_range',
-        message:
-          `No contiguous teaching-slot range matches ${allocation.sessionDurationMinutes} minutes.`,
+        message: allocation.isFullDaySession
+          ? 'The full-day session is incomplete. Save its fixed day and 08:00–16:00 range again.'
+          : `No contiguous teaching-slot range matches ${allocation.sessionDurationMinutes} minutes.`,
         attemptedCandidateCount: 0,
         conflictTypes: [],
       });
@@ -968,6 +1191,8 @@ export function generateTimetablePlan(
           input.rooms,
         units:
           input.units,
+        constraints:
+          input.constraints,
       });
 
     const bestPlacement =
@@ -981,6 +1206,37 @@ export function generateTimetablePlan(
         getUnscheduledConflictTypes(
           scores,
         );
+
+      if (
+        linkedFixedSessionCount > 1 &&
+        sessionNumber <= linkedFixedSessionCount
+      ) {
+        const linkedSelectedSessions = selectedSessions.filter(
+          (session) =>
+            session.teachingAllocationId === allocation.id &&
+            session.sessionNumber <= linkedFixedSessionCount,
+        );
+
+        for (const linkedSession of linkedSelectedSessions) {
+          const selectedIndex = selectedSessions.findIndex(
+            (session) => session.id === linkedSession.id,
+          );
+
+          if (selectedIndex >= 0) {
+            selectedSessions.splice(selectedIndex, 1);
+          }
+
+          unscheduled.push({
+            teachingAllocationId: allocation.id,
+            sessionNumber: linkedSession.sessionNumber,
+            reason: 'no_valid_placement',
+            message:
+              'The linked fixed session was removed because the complete double session could not be placed.',
+            attemptedCandidateCount: scores.length,
+            conflictTypes,
+          });
+        }
+      }
 
       unscheduled.push({
         teachingAllocationId:
@@ -1027,6 +1283,8 @@ export function generateTimetablePlan(
         input.rooms,
       units:
         input.units,
+      constraints:
+        input.constraints,
     });
 
   const suggestions:

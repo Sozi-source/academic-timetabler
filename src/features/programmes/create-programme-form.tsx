@@ -12,6 +12,7 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { FormStatusMessage } from '@/components/ui/form-status-message';
+import type { AccessibleDepartment } from '@/features/organization/queries';
 
 import { createProgrammeAction } from './actions';
 import { ProgrammeFormFields } from './programme-form-fields';
@@ -19,7 +20,11 @@ import {
   initialProgrammeActionState,
 } from './types';
 
-export function CreateProgrammeForm() {
+export function CreateProgrammeForm({
+  departments,
+}: {
+  departments: AccessibleDepartment[];
+}) {
   const formRef =
     useRef<HTMLFormElement>(null);
 
@@ -56,6 +61,7 @@ export function CreateProgrammeForm() {
       <ProgrammeFormFields
         state={state}
         pending={pending}
+        departments={departments}
       />
 
       <div className="flex justify-end border-t border-border-soft pt-4">

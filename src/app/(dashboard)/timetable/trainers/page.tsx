@@ -30,6 +30,7 @@ import {
 import {
   TrainerTable,
 } from '@/features/trainers/trainer-table';
+import { getWorkingDepartments } from '@/features/organization/queries';
 
 export const metadata: Metadata = {
   title: 'Trainers',
@@ -38,7 +39,11 @@ export const metadata: Metadata = {
 };
 
 export default async function TrainersPage() {
-  const trainers = await getTrainers();
+  const [trainers, departments] =
+    await Promise.all([
+      getTrainers(),
+      getWorkingDepartments(),
+    ]);
 
   const activeTrainers = trainers.filter(
     (trainer) => trainer.isActive,
@@ -56,10 +61,10 @@ export default async function TrainersPage() {
       trainer.employmentType === 'full_time',
   );
 
-  const totalWeeklyCapacity =
+  const totalWeeklyTarget =
     availableTrainers.reduce(
       (total, trainer) =>
-        total + trainer.maximumWeeklyHours,
+        total + trainer.normalWeeklyHours,
       0,
     );
 
@@ -68,9 +73,10 @@ export default async function TrainersPage() {
       <PageHeader
         eyebrow="Scheduling resources"
         title="Trainers"
-        description="Register teaching staff, define workload limits and control availability for unit allocation and timetable generation."
+        description="Register teaching staff, define weekly workload targets and control availability for unit allocation and timetable generation."
         context={
           <div className="flex flex-wrap items-center gap-2">
+            <Link href="/timetable/trainers/availability" className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary">Set availability</Link>
             <Badge variant="neutral">
               {trainers.length === 1
                 ? '1 trainer'
@@ -128,7 +134,7 @@ export default async function TrainersPage() {
               </DrawerHeader>
 
               <DrawerBody className="pb-10">
-                <CreateTrainerForm />
+                <CreateTrainerForm departments={departments} />
               </DrawerBody>
             </DrawerContent>
             </Drawer>
@@ -165,9 +171,9 @@ export default async function TrainersPage() {
         />
 
         <MetricCard
-          label="Weekly capacity"
-          value={String(totalWeeklyCapacity)}
-          description="Available trainer-hours per week"
+          label="Weekly targets"
+          value={String(totalWeeklyTarget)}
+          description="Combined standard teaching targets"
           icon={Clock3}
           status="Hours"
         />

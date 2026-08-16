@@ -80,7 +80,7 @@ describe('trainer workload conflicts', () => {
       ]);
 
     input.trainers[0]
-      .maximumWeeklyHours = 3;
+      .normalWeeklyHours = 3;
 
     const conflicts =
       detectTrainerWorkloadConflicts({
@@ -100,6 +100,14 @@ describe('trainer workload conflicts', () => {
     ).toContain(
       'trainer_weekly_workload',
     );
+
+    expect(
+      conflicts.find(
+        (conflict) =>
+          conflict.type ===
+          'trainer_weekly_workload',
+      )?.severity,
+    ).toBe('warning');
   });
 
   it('does not double-count overlap for workload limits', () => {

@@ -9,11 +9,13 @@ import { Badge } from '@/components/ui/badge';
 import { MetricCard } from '@/components/ui/metric-card';
 
 import {
-  CreateTimetableVersionForm,
-  TimetableTransitionForm,
+  PublishCurrentTimetableForm,
 } from './publication-action-forms';
 import type { TimetableVersion, TimetableVersionStatus } from './types';
-import { getAllowedTimetableTransitions } from './workflow';
+import {
+  getAutomaticTimetableVersionTitle,
+  getNextTimetableVersionNumber,
+} from './workflow';
 
 function statusBadge(status: TimetableVersionStatus) {
   const variant = status === 'published' || status === 'approved'
@@ -28,46 +30,56 @@ function statusBadge(status: TimetableVersionStatus) {
 
 export function TimetablePublicationWorkspace({
   academicPeriodId,
+  academicPeriodName,
+  canPublish,
   versions,
 }: {
   academicPeriodId: string;
+  academicPeriodName: string;
+  canPublish: boolean;
   versions: TimetableVersion[];
 }) {
   const published = versions.find((version) => version.status === 'published');
   const latest = versions[0];
+  const nextVersionNumber = getNextTimetableVersionNumber(
+    versions.map((version) => version.versionNumber),
+  );
+  const nextVersionTitle = getAutomaticTimetableVersionTitle(
+    academicPeriodName,
+    nextVersionNumber,
+  );
 
   return <div className="space-y-6">
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <MetricCard label="Versions" value={String(versions.length)} description="Immutable timetable snapshots." icon={FileClock}/>
-      <MetricCard label="Latest version" value={latest ? `v${latest.versionNumber}` : '—'} description={latest?.title ?? 'No version created.'} icon={Clock3}/>
+      <MetricCard label="Next version" value={`v${nextVersionNumber}`} description={nextVersionTitle} icon={Clock3}/>
       <MetricCard label="Published sessions" value={String(published?.sessionCount ?? 0)} description={published ? `Published as v${published.versionNumber}.` : 'No published timetable.'} icon={CalendarCheck2}/>
-      <MetricCard label="Workflow state" value={latest?.status.replace('_', ' ') ?? 'Not started'} description="Current approval position." icon={CheckCircle2}/>
+      <MetricCard label="Publishing" value="Direct" description={latest ? `Latest snapshot: ${latest.status.replace('_', ' ')}.` : 'No review or approval queue.'} icon={CheckCircle2}/>
     </div>
 
-    <CreateTimetableVersionForm academicPeriodId={academicPeriodId} />
+    {canPublish ? (
+      <PublishCurrentTimetableForm
+        academicPeriodId={academicPeriodId}
+        nextVersionTitle={nextVersionTitle}
+      />
+    ) : (
+      <div className="rounded-2xl border border-border bg-surface p-5 text-sm text-text-muted shadow-sm">
+        This Academic Period is archived. Its timetable history remains available, but it cannot receive a new published version.
+      </div>
+    )}
 
     <div className="space-y-4">
       {versions.map((version) => {
-        const transitions = getAllowedTimetableTransitions(version.status);
         return <article key={version.id} className="rounded-2xl border border-border bg-surface p-5 shadow-sm">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <div className="flex flex-wrap items-center gap-2">{statusBadge(version.status)}<span className="text-xs font-semibold text-text-muted">VERSION {version.versionNumber}</span></div>
               <h2 className="mt-3 text-lg font-semibold text-text-primary">{version.title}</h2>
-              <p className="mt-1 text-sm text-text-secondary">{version.changeSummary ?? 'No change summary supplied.'}</p>
+              <p className="mt-1 text-sm text-text-secondary">{version.changeSummary ?? 'Published from the validated live timetable.'}</p>
               <div className="mt-3 flex flex-wrap gap-4 text-xs text-text-muted"><span>{version.sessionCount} sessions</span><span>{version.conflictCount} blocking conflicts</span><span>Created {new Date(version.createdAt).toLocaleString()}</span></div>
             </div>
             {version.status === 'published' ? <div className="rounded-xl bg-success-surface px-4 py-3 text-sm font-semibold text-success">Current published timetable</div> : null}
           </div>
-
-          {transitions.length > 0 ? (
-            <TimetableTransitionForm
-              academicPeriodId={academicPeriodId}
-              versionId={version.id}
-              currentStatus={version.status}
-              transitions={transitions}
-            />
-          ) : null}
 
           <details className="mt-4 border-t border-border pt-4">
             <summary className="cursor-pointer text-sm font-semibold text-text-primary">View snapshot and audit history</summary>

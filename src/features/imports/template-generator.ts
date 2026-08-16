@@ -17,6 +17,7 @@ export interface GenerateImportTemplateOptions {
   includeExampleRow?: boolean;
 }
 const HEADER_FILL = 'FF2F706B';
+const OPTIONAL_HEADER_FILL = 'FF667085';
 
 const OPTIONAL_FILL = 'FFF5F7F8';
 const BORDER_COLOR = 'FFD5E0DE';
@@ -221,9 +222,10 @@ function createInstructionsSheet(
 
   const defaultInstructions = [
     'Enter records only in the Data worksheet.',
-    'Do not rename worksheets or column headings.',
+    'Keep every fixed column heading in its original position. Do not rename, move or delete columns.',
     'Do not delete the hidden metadata worksheet.',
-    'Required columns are marked in the Data worksheet.',
+    'Teal headings are required. Grey headings are optional and their cells may be left blank.',
+    'Blank optional cells use the default shown in the column guide, where a default is provided.',
     'Use the provided dropdown values exactly as shown.',
     'Remove the example row before uploading, or replace it with real data.',
     'Save the completed workbook in .xlsx format.',
@@ -298,14 +300,17 @@ function createInstructionsSheet(
       row.values = [
         `${column.header}${
           column.required
-            ? ' *'
-            : ''
+            ? ' * Required'
+            : ' (Optional)'
         }`,
         column.description ?? '',
         column.acceptedValues?.join(
           ', ',
-        ) ??
-          String(column.example ?? ''),
+        ) ?? String(
+          column.defaultValue ??
+            column.example ??
+            '',
+        ),
       ];
 
       row.eachCell((cell) => {
@@ -427,7 +432,9 @@ function createDataSheet(
         type: 'pattern',
         pattern: 'solid',
         fgColor: {
-          argb: HEADER_FILL,
+          argb: column.required
+            ? HEADER_FILL
+            : OPTIONAL_HEADER_FILL,
         },
       };
 
@@ -628,9 +635,10 @@ export async function generateImportTemplate(
   const workbook =
     new ExcelJS.Workbook();
 
-  workbook.creator = 'HND App';
+  workbook.creator =
+    'Institutional Timetabler';
   workbook.company =
-    'Nutrition Department Management System';
+    'Institutional Academic Operations';
   workbook.subject =
     `${definition.displayName} import template`;
   workbook.title =

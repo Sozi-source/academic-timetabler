@@ -17,6 +17,9 @@ const base: ConflictSession = {
   trainerId: 't1',
   trainerName: 'Trainer 1',
   trainerAvailabilityMode: 'generally_available',
+  trainerNormalWeeklyHours: 20,
+  trainerMaximumWeeklyHours: 24,
+  trainerMaximumDailyHours: 6,
   roomId: 'r1',
   roomCode: 'R1',
   roomName: 'Room 1',
@@ -30,6 +33,7 @@ const base: ConflictSession = {
   status: 'draft',
   conflictState: 'clear',
   isLocked: false,
+  isFullDaySession: false,
 };
 
 describe('conflict centre detector', () => {
@@ -128,6 +132,81 @@ describe('conflict centre detector', () => {
 
     expect(conflicts.some((item) => item.kind === 'room_capacity')).toBe(true);
     expect(conflicts.some((item) => item.kind === 'hard_constraint')).toBe(true);
+  });
+
+  it('treats multiple required windows as alternatives', () => {
+    const constraints = [
+      {
+        id: 'required-monday',
+        subjectType: 'trainer' as const,
+        subjectId: 't1',
+        constraintType: 'required' as const,
+        workingDayId: 'd1',
+        startsAt: '08:00:00',
+        endsAt: '10:00:00',
+        priority: 'hard' as const,
+        reason: 'Monday morning',
+      },
+      {
+        id: 'required-friday',
+        subjectType: 'trainer' as const,
+        subjectId: 't1',
+        constraintType: 'required' as const,
+        workingDayId: 'd5',
+        startsAt: '08:00:00',
+        endsAt: '10:00:00',
+        priority: 'hard' as const,
+        reason: 'Friday morning',
+      },
+    ];
+
+    expect(
+      detectTimetableConflictCenter([base], constraints, []).some(
+        (item) => item.kind === 'hard_constraint',
+      ),
+    ).toBe(false);
+  });
+
+  it('reports a soft preferred-window violation without blocking', () => {
+    const conflicts = detectTimetableConflictCenter(
+      [base],
+      [{
+        id: 'preferred-friday',
+        subjectType: 'trainer',
+        subjectId: 't1',
+        constraintType: 'preferred',
+        workingDayId: 'd5',
+        startsAt: null,
+        endsAt: null,
+        priority: 'soft',
+        reason: 'Trainer prefers Friday',
+      }],
+      [],
+    );
+
+    expect(conflicts.some(
+      (item) => item.kind === 'soft_constraint' && item.severity === 'warning',
+    )).toBe(true);
+  });
+
+  it('blocks a trainer workload above the absolute weekly maximum', () => {
+    const overloaded: ConflictSession = {
+      ...base,
+      trainerNormalWeeklyHours: 1,
+      trainerMaximumWeeklyHours: 1,
+    };
+
+    const conflicts = detectTimetableConflictCenter(
+      [overloaded],
+      [],
+      [],
+    );
+
+    expect(conflicts.some(
+      (item) =>
+        item.kind === 'trainer_weekly_workload' &&
+        item.severity === 'blocked',
+    )).toBe(true);
   });
 
   it('blocks an existing session outside a selected-time trainer availability', () => {

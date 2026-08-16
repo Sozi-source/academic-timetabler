@@ -14,11 +14,20 @@ export interface TimetableReportRow {
   durationMinutes: number;
   cohort: string;
   cohortSize: number;
+  participantCohorts: Array<{
+    id: string;
+    code: string;
+    name: string;
+  }>;
   unitCode: string;
   unitName: string;
+  trainerId: string | null;
   trainer: string;
-  roomCode: string;
+  trainerTargetHours: number;
+  roomCode: string | null;
   roomName: string;
+  departmentCode?: string;
+  departmentName?: string;
   status: string;
   isLocked: boolean;
 }
@@ -38,6 +47,8 @@ export interface TimetableReportGroup {
   secondaryLabel?: string;
   sessionCount: number;
   contactHours: number;
+  targetHours?: number;
+  extraHours?: number;
   rows: TimetableReportRow[];
 }
 

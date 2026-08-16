@@ -20,6 +20,7 @@ import {
 import {
   getTrainerById,
 } from '@/features/trainers/queries';
+import { getWorkingDepartments } from '@/features/organization/queries';
 
 export const metadata: Metadata = {
   title: 'Edit Trainer',
@@ -36,7 +37,11 @@ export default async function EditTrainerPage({
 }: EditTrainerPageProps) {
   const { id } = await params;
 
-  const trainer = await getTrainerById(id);
+  const [trainer, departments] =
+    await Promise.all([
+      getTrainerById(id),
+      getWorkingDepartments(),
+    ]);
 
   if (!trainer) {
     notFound();
@@ -80,7 +85,7 @@ export default async function EditTrainerPage({
                 className="mr-1 size-3.5"
                 aria-hidden="true"
               />
-              {trainer.maximumWeeklyHours} hrs/week
+              {trainer.normalWeeklyHours} hrs/week target
             </Badge>
           </div>
         }
@@ -124,6 +129,7 @@ export default async function EditTrainerPage({
           <CardContent>
             <EditTrainerForm
               trainer={trainer}
+              departments={departments}
             />
           </CardContent>
         </Card>

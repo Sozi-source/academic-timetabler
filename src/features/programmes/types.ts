@@ -14,6 +14,7 @@ export type ProgrammeDurationUnit =
 
 export interface Programme {
   id: string;
+  departmentId: string;
   code: string;
   name: string;
   shortName: string | null;
@@ -34,6 +35,7 @@ export interface Programme {
 
 export interface ProgrammeRow {
   id: string;
+  department_id: string;
   code: string;
   name: string;
   short_name: string | null;
@@ -56,6 +58,7 @@ export interface ProgrammeActionState {
   status: 'idle' | 'success' | 'error';
   message: string | null;
   fieldErrors?: {
+    departmentId?: string[];
     code?: string[];
     name?: string[];
     shortName?: string[];

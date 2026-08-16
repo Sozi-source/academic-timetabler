@@ -28,6 +28,10 @@ import {
   type AutomaticPlannerInput,
   type AutomaticPlannerResult,
 } from './planner';
+import {
+  findTrainerExchangeSuggestions,
+  type PlanningTrainerExchangeSuggestion,
+} from './exchange-repair';
 import type {
   GeneratorAcademicPeriodSummary,
   GeneratorConflictSummary,
@@ -61,6 +65,8 @@ import type {
 
 export interface CreateGeneratorPreviewOptions {
   overwriteExisting?: boolean;
+  includeExchangeSuggestions?: boolean;
+  generatedAt?: string;
 }
 
 function buildLookup<T extends {
@@ -283,6 +289,8 @@ function mapExistingSession(
       row.conflict_state,
     isLocked:
       row.is_locked,
+    isExternal:
+      row.is_external ?? false,
     participantCohortIds:
       normalizeParticipantCohortIds({
         cohortId: row.cohort_id,
@@ -330,6 +338,8 @@ export function createAutomaticPlannerInput({
       sourceData.timeSlots.map(
         mapTimeSlot,
       ),
+    constraints:
+      sourceData.constraints ?? [],
     trainers:
       sourceData.trainers.map((trainer) =>
         mapTrainer(trainer, sourceData.trainerAvailability),
@@ -503,6 +513,10 @@ function getConflictTitle(
       'Room unavailable',
     unit_unavailable:
       'Unit unavailable',
+    hard_constraint:
+      'Hard scheduling constraint',
+    soft_constraint:
+      'Scheduling preference',
   };
 
   return titles[conflict.type];
@@ -702,11 +716,14 @@ function mapPreviewSessions({
 function mapUnscheduledSessions({
   plannerResult,
   sourceData,
+  exchangeSuggestions,
 }: {
   plannerResult:
     AutomaticPlannerResult;
   sourceData:
     GeneratorSourceData;
+  exchangeSuggestions:
+    PlanningTrainerExchangeSuggestion[];
 }): GeneratorUnscheduledSession[] {
   const allocations =
     buildLookup(
@@ -790,6 +807,58 @@ function mapUnscheduledSessions({
             .attemptedCandidateCount,
         conflictTypes:
           unscheduled.conflictTypes,
+        exchangeSuggestions:
+          exchangeSuggestions
+            .filter((suggestion) =>
+              suggestion.targetTeachingAllocationId === allocation?.id &&
+              suggestion.targetSessionNumber === unscheduled.sessionNumber,
+            )
+            .map((suggestion) => {
+              const partnerAllocation = allocations.get(
+                suggestion.partnerTeachingAllocationId,
+              );
+              const partnerTrainer = partnerAllocation?.trainerId
+                ? trainers.get(partnerAllocation.trainerId)
+                : undefined;
+              const partnerUnit = partnerAllocation
+                ? units.get(partnerAllocation.unitId)
+                : undefined;
+              const partnerCohort = partnerAllocation
+                ? cohorts.get(partnerAllocation.cohortId)
+                : undefined;
+
+              return {
+                id: suggestion.id,
+                targetTeachingAllocationId:
+                  suggestion.targetTeachingAllocationId,
+                targetSessionNumber:
+                  suggestion.targetSessionNumber,
+                partnerTeachingAllocationId:
+                  suggestion.partnerTeachingAllocationId,
+                targetTrainerId:
+                  suggestion.targetTrainerId,
+                targetTrainerName:
+                  trainer?.fullName ?? 'Current trainer',
+                partnerTrainerId:
+                  suggestion.partnerTrainerId,
+                partnerTrainerName:
+                  partnerTrainer?.fullName ?? 'Exchange trainer',
+                partnerUnitCode:
+                  partnerUnit?.code ?? 'Unit',
+                partnerUnitName:
+                  partnerUnit?.name ?? 'Unknown unit',
+                partnerCohortCode:
+                  partnerCohort?.code ?? 'Unknown cohort',
+                durationMinutes:
+                  suggestion.durationMinutes,
+                resolvedSessionCount:
+                  suggestion.resolvedSessionCount,
+                remainingUnscheduledCount:
+                  suggestion.remainingUnscheduledCount,
+                warningCount:
+                  suggestion.warningCount,
+              };
+            }),
       };
     },
   );
@@ -798,11 +867,13 @@ function mapUnscheduledSessions({
 export function createGeneratorPreview({
   sourceData,
   overwriteExisting = false,
+  includeExchangeSuggestions = true,
   generatedAt =
     new Date().toISOString(),
 }: {
   sourceData: GeneratorSourceData;
   overwriteExisting?: boolean;
+  includeExchangeSuggestions?: boolean;
   generatedAt?: string;
 }): GeneratorPreview {
   const readiness =
@@ -845,6 +916,13 @@ export function createGeneratorPreview({
           },
         };
 
+  const exchangeSuggestions = readiness.isReady && includeExchangeSuggestions
+    ? findTrainerExchangeSuggestions({
+        input: plannerInput,
+        baseline: plannerResult,
+      })
+    : [];
+
   return {
     academicPeriod:
       mapAcademicPeriod(
@@ -863,6 +941,7 @@ export function createGeneratorPreview({
       mapUnscheduledSessions({
         plannerResult,
         sourceData,
+        exchangeSuggestions,
       }),
 
     conflicts:
@@ -872,6 +951,12 @@ export function createGeneratorPreview({
 
     statistics:
       plannerResult.statistics,
+
+    exchangeSuggestionsEvaluated:
+      includeExchangeSuggestions,
+
+    protectedTimetable:
+      sourceData.protectedTimetable ?? null,
 
     generatedAt,
   };

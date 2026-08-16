@@ -5,7 +5,7 @@ import type {
 export const unitOfferingsImportTemplate = {
   key: 'unit-offerings-import',
   entityType: 'unit_offerings',
-  version: '1.1',
+  version: '2.0',
 
   displayName:
     'Units on Offer',
@@ -91,7 +91,8 @@ export const unitOfferingsImportTemplate = {
     {
       key: 'offeringType',
       header: 'Offering Type',
-      required: true,
+      required: false,
+      defaultValue: 'classroom',
       width: 22,
       description:
         'Academic delivery context.',
@@ -110,7 +111,8 @@ export const unitOfferingsImportTemplate = {
     {
       key: 'weeklySessions',
       header: 'Weekly Sessions',
-      required: true,
+      required: false,
+      defaultValue: 1,
       width: 18,
       description:
         'Number of sessions each week. A 2-hour unit uses 1 session; a 4-hour unit normally uses 2 sessions.',
@@ -123,7 +125,8 @@ export const unitOfferingsImportTemplate = {
         'sessionDurationMinutes',
       header:
         'Session Duration Minutes',
-      required: true,
+      required: false,
+      defaultValue: 120,
       width: 24,
       description:
         'Duration of one session in minutes.',
@@ -134,7 +137,8 @@ export const unitOfferingsImportTemplate = {
     {
       key: 'timetableEnabled',
       header: 'Include in Timetable',
-      required: true,
+      required: false,
+      defaultValue: 'Yes',
       width: 22,
       description:
         'Whether the unit enters ordinary timetable generation.',
@@ -147,7 +151,8 @@ export const unitOfferingsImportTemplate = {
     {
       key: 'status',
       header: 'Status',
-      required: true,
+      required: false,
+      defaultValue: 'draft',
       width: 16,
       description:
         'Units on Offer status.',

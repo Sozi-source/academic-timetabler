@@ -90,6 +90,7 @@ function getCandidateConflicts({
   cohorts,
   rooms,
   units,
+  constraints,
 }: ScorePlacementInput) {
   return detectTimetableConflicts({
     sessions: [
@@ -102,6 +103,7 @@ function getCandidateConflicts({
     cohorts,
     rooms,
     units,
+    constraints,
   }).filter((conflict) =>
     conflict.sessionIds.includes(
       candidate.id,
@@ -145,8 +147,12 @@ function getRoomCapacityAdjustment({
     };
   }
 
+  const requiredCapacity =
+    candidate.combinedCohortSize ??
+    cohort.actualSize;
+
   const utilization =
-    cohort.actualSize /
+    requiredCapacity /
     room.capacity;
 
   if (utilization >= 0.7) {
@@ -239,6 +245,15 @@ function getTrainerCompactnessAdjustment({
   | 'existingSessions'
   | 'timeSlots'
 >): PlacementScoreAdjustment {
+  if (!candidate.trainerId) {
+    return {
+      factor: 'trainer_compactness',
+      points: 0,
+      message:
+        'Trainer timetable compactness will be calculated after assignment.',
+    };
+  }
+
   const timeSlotLookup =
     buildLookup(timeSlots);
 
@@ -409,7 +424,7 @@ function getTrainerWorkloadAdjustment({
 
   if (
     !analysis ||
-    analysis.maximumWeeklyHours <= 0
+    analysis.normalWeeklyHours <= 0
   ) {
     return {
       factor:
@@ -422,7 +437,7 @@ function getTrainerWorkloadAdjustment({
 
   const utilization =
     analysis.weeklyTeachingHours /
-    analysis.maximumWeeklyHours;
+    analysis.normalWeeklyHours;
 
   if (utilization <= 0.7) {
     return {
@@ -430,7 +445,7 @@ function getTrainerWorkloadAdjustment({
         'trainer_workload',
       points: 6,
       message:
-        'The trainer remains comfortably within the weekly workload limit.',
+        'The trainer remains comfortably within the weekly workload target.',
     };
   }
 
@@ -450,7 +465,7 @@ function getTrainerWorkloadAdjustment({
         'trainer_workload',
       points: -2,
       message:
-        'The trainer is approaching the weekly workload limit.',
+        'The trainer is approaching the weekly workload target.',
     };
   }
 
@@ -459,7 +474,7 @@ function getTrainerWorkloadAdjustment({
       'trainer_workload',
     points: -15,
     message:
-      'The placement exceeds the trainer weekly workload limit.',
+      'The placement adds extra hours above the trainer weekly target.',
   };
 }
 
@@ -631,6 +646,7 @@ export function scorePlacements({
   cohorts,
   rooms,
   units,
+  constraints,
 }: Omit<
   ScorePlacementInput,
   'candidate'
@@ -648,6 +664,7 @@ export function scorePlacements({
         cohorts,
         rooms,
         units,
+        constraints,
       }),
     )
     .sort(

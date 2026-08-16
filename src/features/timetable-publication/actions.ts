@@ -4,17 +4,17 @@ import { revalidatePath } from 'next/cache';
 
 import { requireHodAccess } from '@/features/auth/authorization';
 import { createClient } from '@/lib/supabase/server';
+import {
+  getTimetableConflictCenterData,
+} from '@/features/timetable-conflicts/queries';
 
-import type {
-  PublicationActionState,
-  TimetableVersionStatus,
-} from './types';
-import { getAllowedTimetableTransitions } from './workflow';
+import type { PublicationActionState } from './types';
 
 function refresh() {
   revalidatePath('/timetable/published');
   revalidatePath('/timetable/editor');
   revalidatePath('/timetable/generator');
+  revalidatePath('/timetable/conflicts');
 }
 
 function friendlyPublicationError({
@@ -44,9 +44,9 @@ function friendlyPublicationError({
   if (normalized.includes('incomplete snapshot')) {
     return {
       status: 'error',
-      title: 'Create an updated version',
+      title: 'Refresh the timetable draft',
       message:
-        'This version no longer matches the current timetable. Create a new version from the latest timetable, then continue with approval.',
+        'The current timetable snapshot is incomplete. Refresh the timetable and try publishing again.',
     };
   }
 
@@ -55,9 +55,9 @@ function friendlyPublicationError({
       status: 'error',
       title: 'Resolve timetable conflicts first',
       message:
-        'The timetable still contains a blocking conflict. Open Conflict review, correct the highlighted session, then try again.',
+        'The timetable still contains a blocking conflict. Correct the highlighted session, then publish again.',
       actionHref: `/timetable/conflicts?academicPeriodId=${encodeURIComponent(academicPeriodId)}`,
-      actionLabel: 'Open Conflict review',
+      actionLabel: 'Review issues',
     };
   }
 
@@ -69,72 +69,69 @@ function friendlyPublicationError({
   };
 }
 
-export async function createTimetableVersionAction(
-  _previousState: PublicationActionState,
-  formData: FormData,
-): Promise<PublicationActionState> {
-  await requireHodAccess();
-  const academicPeriodId = String(formData.get('academicPeriodId') ?? '');
-  const title = String(formData.get('title') ?? '').trim();
-  const changeSummary = String(formData.get('changeSummary') ?? '').trim();
-  if (!academicPeriodId || title.length < 3) {
+async function getPublicationBlocker(
+  academicPeriodId: string,
+): Promise<PublicationActionState | null> {
+  let conflictData: Awaited<
+    ReturnType<typeof getTimetableConflictCenterData>
+  >;
+  try {
+    conflictData = await getTimetableConflictCenterData(
+      academicPeriodId,
+    );
+  }
+  catch (error) {
+    console.error('Publication validation failed.', error);
     return {
       status: 'error',
-      title: 'Add a version title',
-      message: 'Select an Academic Period and enter a clear title of at least three characters.',
+      title: 'Timetable validation is temporarily unavailable',
+      message:
+        'The system could not complete the final conflict check. Refresh the page and try publishing again.',
     };
   }
 
-  const supabase = await createClient();
-  const { error } = await supabase.rpc('create_timetable_version', {
-    target_academic_period_id: academicPeriodId,
-    version_title: title,
-    version_change_summary: changeSummary || null,
-  });
-  if (error) {
-    return friendlyPublicationError({
-      message: error.message,
-      academicPeriodId,
-    });
+  const blockingCount = conflictData.conflicts.filter(
+    (conflict) => conflict.severity === 'blocked',
+  ).length;
+
+  if (blockingCount === 0) {
+    return null;
   }
-  refresh();
+
   return {
-    status: 'success',
-    title: 'Version created',
-    message: 'The current timetable has been saved as a new controlled version.',
+    status: 'error',
+    title: 'Resolve timetable conflicts first',
+    message:
+      `${blockingCount} blocking conflict${
+        blockingCount === 1 ? '' : 's'
+      } remain. Unassigned trainers and rooms are allowed as warnings, but availability, workload, overlap and hard scheduling constraints must be corrected first.`,
+    actionHref: `/timetable/conflicts?academicPeriodId=${encodeURIComponent(academicPeriodId)}`,
+    actionLabel: 'Review issues',
   };
 }
 
-export async function transitionTimetableVersionAction(
+export async function publishCurrentTimetableAction(
   _previousState: PublicationActionState,
   formData: FormData,
 ): Promise<PublicationActionState> {
   await requireHodAccess();
-  const versionId = String(formData.get('versionId') ?? '');
-  const academicPeriodId = String(formData.get('academicPeriodId') ?? '');
-  const currentStatus = String(formData.get('currentStatus') ?? '') as TimetableVersionStatus;
-  const targetStatus = String(formData.get('targetStatus') ?? '') as TimetableVersionStatus;
-  const note = String(formData.get('note') ?? '').trim();
-  if (!versionId || !getAllowedTimetableTransitions(currentStatus).includes(targetStatus)) {
+  const academicPeriodId = String(
+    formData.get('academicPeriodId') ?? '',
+  );
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(academicPeriodId)) {
     return {
       status: 'error',
-      title: 'Refresh this timetable version',
-      message: 'The version status has changed or this action is no longer available. Refresh the page and try again.',
-    };
-  }
-  if (['approved', 'published', 'archived'].includes(targetStatus) && note.length < 3) {
-    return {
-      status: 'error',
-      title: 'Add a short note',
-      message: 'Enter a brief approval or publication note before continuing.',
+      title: 'Select an Academic Period',
+      message: 'Choose the timetable that should be published and try again.',
     };
   }
 
+  const blocker = await getPublicationBlocker(academicPeriodId);
+  if (blocker) return blocker;
+
   const supabase = await createClient();
-  const { error } = await supabase.rpc('transition_timetable_version', {
-    target_version_id: versionId,
-    target_status: targetStatus,
-    transition_note: note || null,
+  const { data, error } = await supabase.rpc('publish_current_timetable', {
+    target_academic_period_id: academicPeriodId,
   });
   if (error) {
     return friendlyPublicationError({
@@ -142,18 +139,22 @@ export async function transitionTimetableVersionAction(
       academicPeriodId,
     });
   }
-  refresh();
-  const successMessages: Record<TimetableVersionStatus, string> = {
-    draft: 'The timetable has been returned to draft.',
-    under_review: 'The timetable has been submitted for review.',
-    approved: 'The timetable has been approved.',
-    published: 'The timetable has been published successfully.',
-    archived: 'The timetable has been archived.',
-  };
 
+  const result = data as {
+    title?: string;
+    versionNumber?: number;
+    sessionCount?: number;
+    archivedVersionCount?: number;
+  } | null;
+  const title = result?.title ?? 'The new timetable version';
+  const archivedVersionCount = result?.archivedVersionCount ?? 0;
+
+  refresh();
   return {
     status: 'success',
-    title: 'Timetable updated',
-    message: successMessages[targetStatus],
+    title: 'Timetable published',
+    message: archivedVersionCount > 0
+      ? `${title} is now public. The former published version was archived automatically.`
+      : `${title} is now public.`,
   };
 }

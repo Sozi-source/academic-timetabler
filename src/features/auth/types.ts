@@ -8,5 +8,6 @@ export interface AuthenticatedProfile {
   email: string;
   role: AppRole;
   departmentName: string;
+  activeDepartmentId: string | null;
   isActive: boolean;
 }

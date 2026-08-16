@@ -4,7 +4,10 @@ import { BarChart3 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/page-header';
 import { getAcademicPeriods } from '@/features/academic-periods/queries';
 import { requireHodAccess } from '@/features/auth/authorization';
-import { getTimetableReportsData } from '@/features/timetable-reports/queries';
+import {
+  getInstitutionTrainerTimetableReportsData,
+  getTimetableReportsData,
+} from '@/features/timetable-reports/queries';
 import { TimetableReportsWorkspace } from '@/features/timetable-reports/report-workspace';
 import type { TimetableReportKind } from '@/features/timetable-reports/types';
 
@@ -43,7 +46,11 @@ export default async function TimetableReportsPage({
   const report: TimetableReportKind = isReportKind(params.report)
     ? params.report
     : 'master';
-  const data = selectedId ? await getTimetableReportsData(selectedId) : null;
+  const data = selectedId
+    ? report === 'trainer' || report === 'workload'
+      ? await getInstitutionTrainerTimetableReportsData(selectedId)
+      : await getTimetableReportsData(selectedId)
+    : null;
 
   return (
     <div className="space-y-6">

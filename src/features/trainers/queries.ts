@@ -1,6 +1,7 @@
 import { cache } from 'react';
 
 import { createClient } from '@/lib/supabase/server';
+import { getAuthenticatedProfile } from '@/features/auth/queries';
 
 import type {
   Trainer,
@@ -15,10 +16,15 @@ const trainerSelection = `
   email,
   phone_number,
   employment_type,
+  department_id,
   specialization,
   qualifications,
   maximum_weekly_hours,
   maximum_daily_hours,
+  workload_role,
+  home_department,
+  normal_weekly_hours,
+  availability_mode,
   is_active,
   is_timetable_available,
   notes,
@@ -39,6 +45,7 @@ function mapTrainer(
     email: row.email,
     phoneNumber: row.phone_number,
     employmentType: row.employment_type,
+    departmentId: row.department_id,
     specialization: row.specialization,
     qualifications: row.qualifications,
     maximumWeeklyHours: Number(
@@ -47,6 +54,10 @@ function mapTrainer(
     maximumDailyHours: Number(
       row.maximum_daily_hours,
     ),
+    workloadRole: row.workload_role,
+    homeDepartment: row.home_department,
+    normalWeeklyHours: Number(row.normal_weekly_hours),
+    availabilityMode: row.availability_mode,
     isActive: row.is_active,
     isTimetableAvailable:
       row.is_timetable_available,
@@ -61,10 +72,19 @@ function mapTrainer(
 export const getTrainers = cache(
   async (): Promise<Trainer[]> => {
     const supabase = await createClient();
+    const profile = await getAuthenticatedProfile();
+
+    if (!profile?.activeDepartmentId) {
+      return [];
+    }
 
     const { data, error } = await supabase
       .from('trainers')
       .select(trainerSelection)
+      .eq(
+        'department_id',
+        profile.activeDepartmentId,
+      )
       .order('is_active', {
         ascending: false,
       })
@@ -89,11 +109,20 @@ export const getTrainerById = cache(
     id: string,
   ): Promise<Trainer | null> => {
     const supabase = await createClient();
+    const profile = await getAuthenticatedProfile();
+
+    if (!profile?.activeDepartmentId) {
+      return null;
+    }
 
     const { data, error } = await supabase
       .from('trainers')
       .select(trainerSelection)
       .eq('id', id)
+      .eq(
+        'department_id',
+        profile.activeDepartmentId,
+      )
       .maybeSingle();
 
     if (error) {

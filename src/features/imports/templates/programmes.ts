@@ -9,7 +9,7 @@ export const programmesImportTemplate =
   assertValidTemplateDefinition({
     key: 'hnd-programmes',
     entityType: 'programmes',
-    version: '1.0',
+    version: '2.0',
     displayName: 'Programmes',
     instructionsWorksheetName:
       IMPORT_WORKSHEET_NAMES.instructions,
@@ -53,7 +53,8 @@ export const programmesImportTemplate =
       {
         key: 'awardLevel',
         header: 'Award Level',
-        required: true,
+        required: false,
+        defaultValue: 'diploma',
         description:
           'Select the official programme award level.',
         example: 'diploma',
@@ -83,7 +84,8 @@ export const programmesImportTemplate =
       {
         key: 'durationValue',
         header: 'Duration Value',
-        required: true,
+        required: false,
+        defaultValue: 3,
         description:
           'Numeric programme duration.',
         example: 3,
@@ -94,7 +96,8 @@ export const programmesImportTemplate =
       {
         key: 'durationUnit',
         header: 'Duration Unit',
-        required: true,
+        required: false,
+        defaultValue: 'years',
         description:
           'Whether the duration is expressed in months or years.',
         example: 'years',
@@ -108,7 +111,8 @@ export const programmesImportTemplate =
       {
         key: 'totalAcademicPeriods',
         header: 'Total Academic Periods',
-        required: true,
+        required: false,
+        defaultValue: 9,
         description:
           'Total terms, semesters or configured periods required.',
         example: 9,
@@ -130,7 +134,8 @@ export const programmesImportTemplate =
       {
         key: 'timetableAvailable',
         header: 'Timetable Available',
-        required: true,
+        required: false,
+        defaultValue: 'Yes',
         description:
           'Whether the programme should be available for scheduling.',
         example: 'Yes',

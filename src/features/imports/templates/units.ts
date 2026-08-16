@@ -9,7 +9,7 @@ export const unitsImportTemplate =
   assertValidTemplateDefinition({
     key: 'hnd-units',
     entityType: 'units',
-    version: '1.0',
+    version: '2.0',
     displayName: 'Units',
     instructionsWorksheetName:
       IMPORT_WORKSHEET_NAMES.instructions,
@@ -63,7 +63,8 @@ export const unitsImportTemplate =
       {
         key: 'category',
         header: 'Category',
-        required: true,
+        required: false,
+        defaultValue: 'core',
         description:
           'Official curriculum-unit category.',
         example: 'core',
@@ -93,7 +94,8 @@ export const unitsImportTemplate =
       {
         key: 'theoryHours',
         header: 'Theory Hours',
-        required: true,
+        required: false,
+        defaultValue: 2,
         description:
           'Expected theory contact hours.',
         example: 30,
@@ -104,7 +106,8 @@ export const unitsImportTemplate =
       {
         key: 'practicalHours',
         header: 'Practical Hours',
-        required: true,
+        required: false,
+        defaultValue: 0,
         description:
           'Expected practical, laboratory or clinical contact hours.',
         example: 15,
@@ -115,7 +118,8 @@ export const unitsImportTemplate =
       {
         key: 'weeklySessions',
         header: 'Weekly Sessions',
-        required: true,
+        required: false,
+        defaultValue: 1,
         description:
           'Expected number of timetable sessions each week.',
         example: 3,
@@ -145,7 +149,8 @@ export const unitsImportTemplate =
       {
         key: 'timetableAvailable',
         header: 'Timetable Available',
-        required: true,
+        required: false,
+        defaultValue: 'Yes',
         description:
           'Whether the unit should be available for timetable allocation.',
         example: 'Yes',

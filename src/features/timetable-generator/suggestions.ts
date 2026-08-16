@@ -4,6 +4,7 @@ import {
 } from './scorer';
 import type {
   PlanningCohort,
+  PlanningConstraint,
   PlanningRoom,
   PlanningSession,
   PlanningSuggestion,
@@ -24,6 +25,7 @@ export interface SuggestAlternativePlacementsInput {
   cohorts: PlanningCohort[];
   rooms: PlanningRoom[];
   units: PlanningUnit[];
+  constraints?: PlanningConstraint[];
   limit?: number;
   minimumScore?: number;
 }
@@ -200,11 +202,12 @@ function describeChanges({
   }
 
   if (changes.includes('room')) {
-    const room =
-      rooms.get(candidate.roomId);
+    const room = candidate.roomId
+      ? rooms.get(candidate.roomId)
+      : undefined;
 
     parts.push(
-      `use ${room?.name ?? 'another room'}`,
+      `use ${room?.name ?? 'no assigned room'}`,
     );
   }
 
@@ -283,6 +286,7 @@ function scoreRecoveryCandidates({
   cohorts,
   rooms,
   units,
+  constraints,
 }: Omit<
   SuggestAlternativePlacementsInput,
   | 'conflictId'
@@ -311,6 +315,7 @@ function scoreRecoveryCandidates({
     cohorts,
     rooms,
     units,
+    constraints,
   });
 }
 
@@ -325,6 +330,7 @@ export function suggestAlternativePlacements({
   cohorts,
   rooms,
   units,
+  constraints,
   limit = 5,
   minimumScore = 1,
 }: SuggestAlternativePlacementsInput):
@@ -371,6 +377,7 @@ PlacementRecoverySuggestion[] {
     cohorts,
     rooms,
     units,
+    constraints,
   })
     .filter(
       (result) =>

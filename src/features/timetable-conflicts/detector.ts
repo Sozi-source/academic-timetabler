@@ -77,8 +77,7 @@ function pairConflict(
   };
 }
 
-function constraintApplies(session: ConflictSession, constraint: ConflictConstraint) {
-  if (constraint.workingDayId && constraint.workingDayId !== session.workingDayId) return false;
+function constraintSubjectMatches(session: ConflictSession, constraint: ConflictConstraint) {
   if (constraint.subjectType === 'trainer' && constraint.subjectId !== session.trainerId) return false;
   if (constraint.subjectType === 'room' && constraint.subjectId !== session.roomId) return false;
   if (
@@ -90,9 +89,192 @@ function constraintApplies(session: ConflictSession, constraint: ConflictConstra
       )
     )
   ) return false;
+  return true;
+}
+
+function constraintWindowOverlaps(session: ConflictSession, constraint: ConflictConstraint) {
+  if (constraint.workingDayId && constraint.workingDayId !== session.workingDayId) return false;
   if (!constraint.startsAt || !constraint.endsAt) return true;
   return minutes(session.startTime) < minutes(constraint.endsAt) &&
     minutes(constraint.startsAt) < minutes(session.endTime);
+}
+
+function constraintWindowContains(session: ConflictSession, constraint: ConflictConstraint) {
+  if (constraint.workingDayId && constraint.workingDayId !== session.workingDayId) return false;
+  if (!constraint.startsAt || !constraint.endsAt) return true;
+  return minutes(session.startTime) >= minutes(constraint.startsAt) &&
+    minutes(session.endTime) <= minutes(constraint.endsAt);
+}
+
+function constraintConflict(
+  session: ConflictSession,
+  constraints: ConflictConstraint[],
+  reviews: Map<string, ConflictReview>,
+) {
+  const first = constraints[0];
+  const kind = first.priority === 'hard' ? 'hard_constraint' : 'soft_constraint';
+  const reasons = Array.from(new Set(
+    constraints.map((constraint) => constraint.reason.trim()),
+  )).filter(Boolean);
+  const key = stableKey(kind, [session.id], constraints.map((constraint) => constraint.id).sort().join(','));
+  const positive = ['preferred', 'required'].includes(first.constraintType);
+  return {
+    key,
+    kind,
+    severity: first.priority === 'hard' ? 'blocked' : 'warning',
+    title: first.priority === 'hard' ? 'Hard constraint violated' : 'Scheduling preference violated',
+    message: positive
+      ? `The session is outside the configured ${first.constraintType} window: ${reasons.join('; ')}.`
+      : `The session violates a configured ${first.constraintType} rule: ${reasons.join('; ')}.`,
+    sessionIds: [session.id],
+    resourceLabel: session.unitName,
+    workingDayLabel: session.workingDayLabel,
+    timeLabel: `${session.startTime.slice(0, 5)}–${session.endTime.slice(0, 5)}`,
+    isLocked: session.isLocked,
+    review: reviewFor(key, reviews),
+  } satisfies TimetableConflict;
+}
+
+function workloadConflict({
+  kind,
+  severity,
+  title,
+  message,
+  sessions,
+  suffix,
+  reviews,
+}: {
+  kind: 'trainer_daily_workload' | 'trainer_weekly_workload';
+  severity: 'blocked' | 'warning';
+  title: string;
+  message: string;
+  sessions: ConflictSession[];
+  suffix: string;
+  reviews: Map<string, ConflictReview>;
+}): TimetableConflict {
+  const sessionIds = sessions.map((session) => session.id);
+  const key = stableKey(kind, sessionIds, suffix);
+  const first = sessions[0];
+  const totalMinutes = sessions.reduce(
+    (total, session) => total + minutes(session.endTime) - minutes(session.startTime),
+    0,
+  );
+
+  return {
+    key,
+    kind,
+    severity,
+    title,
+    message,
+    sessionIds,
+    resourceLabel: first.trainerName,
+    workingDayLabel: kind === 'trainer_daily_workload'
+      ? first.workingDayLabel
+      : 'Weekly total',
+    timeLabel: `${(totalMinutes / 60).toFixed(1)} hours`,
+    isLocked: sessions.some((session) => session.isLocked),
+    review: reviewFor(key, reviews),
+  };
+}
+
+function detectWorkloadConflicts(
+  sessions: ConflictSession[],
+  reviews: Map<string, ConflictReview>,
+) {
+  const conflicts: TimetableConflict[] = [];
+  const trainerGroups = new Map<string, ConflictSession[]>();
+  const uniqueSessions = new Map<string, ConflictSession>();
+
+  for (const session of sessions) {
+    const key = [
+      session.trainerId ?? 'unassigned',
+      session.workingDayId,
+      session.startTime,
+      session.endTime,
+      session.unitName.trim().toLowerCase(),
+      session.roomId ?? 'unassigned-room',
+    ].join('|');
+    if (!uniqueSessions.has(key)) uniqueSessions.set(key, session);
+  }
+
+  for (const session of uniqueSessions.values()) {
+    if (!session.trainerId) continue;
+    const group = trainerGroups.get(session.trainerId) ?? [];
+    group.push(session);
+    trainerGroups.set(session.trainerId, group);
+  }
+
+  for (const trainerSessions of trainerGroups.values()) {
+    const first = trainerSessions[0];
+    const dayGroups = new Map<string, ConflictSession[]>();
+
+    for (const session of trainerSessions) {
+      const group = dayGroups.get(session.workingDayId) ?? [];
+      group.push(session);
+      dayGroups.set(session.workingDayId, group);
+    }
+
+    for (const daySessions of dayGroups.values()) {
+      const dailyMinutes = daySessions.reduce(
+        (total, session) => total + minutes(session.endTime) - minutes(session.startTime),
+        0,
+      );
+      const approvedFullDayOnly = daySessions.length === 1 &&
+        daySessions[0].isFullDaySession;
+
+      if (
+        !approvedFullDayOnly &&
+        first.trainerMaximumDailyHours > 0 &&
+        dailyMinutes > first.trainerMaximumDailyHours * 60
+      ) {
+        conflicts.push(workloadConflict({
+          kind: 'trainer_daily_workload',
+          severity: 'blocked',
+          title: 'Trainer daily workload exceeded',
+          message: `${first.trainerName} has ${(dailyMinutes / 60).toFixed(1)} teaching hours on ${daySessions[0].workingDayLabel}, above the daily maximum of ${first.trainerMaximumDailyHours} hours.`,
+          sessions: daySessions,
+          suffix: daySessions[0].workingDayId,
+          reviews,
+        }));
+      }
+    }
+
+    const weeklyMinutes = trainerSessions.reduce(
+      (total, session) => total + minutes(session.endTime) - minutes(session.startTime),
+      0,
+    );
+
+    if (
+      first.trainerMaximumWeeklyHours > 0 &&
+      weeklyMinutes > first.trainerMaximumWeeklyHours * 60
+    ) {
+      conflicts.push(workloadConflict({
+        kind: 'trainer_weekly_workload',
+        severity: 'blocked',
+        title: 'Trainer weekly maximum exceeded',
+        message: `${first.trainerName} has ${(weeklyMinutes / 60).toFixed(1)} weekly teaching hours, above the absolute maximum of ${first.trainerMaximumWeeklyHours} hours.`,
+        sessions: trainerSessions,
+        suffix: first.trainerId ?? 'trainer',
+        reviews,
+      }));
+    }
+    else if (
+      first.trainerNormalWeeklyHours > 0 &&
+      weeklyMinutes > first.trainerNormalWeeklyHours * 60
+    ) {
+      conflicts.push(workloadConflict({
+        kind: 'trainer_weekly_workload',
+        severity: 'warning',
+        title: 'Trainer has extra weekly hours',
+        message: `${first.trainerName} has ${(weeklyMinutes / 60).toFixed(1)} weekly teaching hours, above the normal target of ${first.trainerNormalWeeklyHours} hours but within the permitted maximum.`,
+        sessions: trainerSessions,
+        suffix: first.trainerId ?? 'trainer',
+        reviews,
+      }));
+    }
+  }
+
+  return conflicts;
 }
 
 export function detectTimetableConflictCenter(
@@ -125,7 +307,7 @@ export function detectTimetableConflictCenter(
         kind: 'trainer_pending',
         severity: 'warning',
         title: 'Trainer assignment pending',
-        message: `${session.unitCode} · ${session.unitName} is reserved in the timetable but still needs a trainer before publication.`,
+        message: `${session.unitCode} · ${session.unitName} is reserved and will be published as UNASSIGNED unless a trainer is assigned.`,
         sessionIds: [session.id],
         resourceLabel: session.unitName,
         workingDayLabel: session.workingDayLabel,
@@ -223,24 +405,39 @@ export function detectTimetableConflictCenter(
       });
     }
 
-    for (const constraint of constraints) {
-      if (!constraintApplies(session, constraint)) continue;
-      if (!['unavailable', 'protected_day'].includes(constraint.constraintType)) continue;
-      const kind = constraint.priority === 'hard' ? 'hard_constraint' : 'soft_constraint';
-      const key = stableKey(kind, [session.id], constraint.id);
-      conflicts.push({
-        key,
-        kind,
-        severity: constraint.priority === 'hard' ? 'blocked' : 'warning',
-        title: constraint.priority === 'hard' ? 'Hard constraint violated' : 'Scheduling preference violated',
-        message: constraint.reason,
-        sessionIds: [session.id],
-        resourceLabel: session.unitName,
-        workingDayLabel: session.workingDayLabel,
-        timeLabel: `${session.startTime.slice(0, 5)}–${session.endTime.slice(0, 5)}`,
-        isLocked: session.isLocked,
-        review: reviewFor(key, reviews),
-      });
+    const relevantConstraints = constraints.filter((constraint) =>
+      constraintSubjectMatches(session, constraint),
+    );
+
+    for (const constraint of relevantConstraints.filter((item) =>
+      ['unavailable', 'protected_day'].includes(item.constraintType),
+    )) {
+      if (constraintWindowOverlaps(session, constraint)) {
+        conflicts.push(constraintConflict(session, [constraint], reviews));
+      }
+    }
+
+    const positiveGroups = new Map<string, ConflictConstraint[]>();
+    for (const constraint of relevantConstraints.filter((item) =>
+      ['preferred', 'required'].includes(item.constraintType),
+    )) {
+      const key = [
+        constraint.subjectType,
+        constraint.subjectId ?? 'institution',
+        constraint.constraintType,
+        constraint.priority,
+      ].join('|');
+      const group = positiveGroups.get(key) ?? [];
+      group.push(constraint);
+      positiveGroups.set(key, group);
+    }
+
+    for (const group of positiveGroups.values()) {
+      if (!group.some((constraint) =>
+        constraintWindowContains(session, constraint),
+      )) {
+        conflicts.push(constraintConflict(session, group, reviews));
+      }
     }
 
     for (let secondIndex = index + 1; secondIndex < sessions.length; secondIndex += 1) {
@@ -286,6 +483,8 @@ export function detectTimetableConflictCenter(
       }
     }
   }
+
+  conflicts.push(...detectWorkloadConflicts(sessions, reviews));
 
   const unique = new Map<string, TimetableConflict>();
   for (const conflict of conflicts) unique.set(conflict.key, conflict);

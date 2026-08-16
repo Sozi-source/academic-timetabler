@@ -297,7 +297,7 @@ export async function stageUnitOfferingImportAction(
   }
 
   const validationResults =
-    markDuplicateImportRows(
+    markDuplicateImportRows<NormalizedUnitOfferingImportRow>(
       workbook.rows.map((row) =>
         validateParsedImportRow<
           NormalizedUnitOfferingImportRow

@@ -3,6 +3,8 @@ export type ConflictKind =
   | 'trainer_overlap'
   | 'trainer_availability'
   | 'trainer_pending'
+  | 'trainer_daily_workload'
+  | 'trainer_weekly_workload'
   | 'cohort_overlap'
   | 'room_overlap'
   | 'room_pending'
@@ -25,6 +27,9 @@ export interface ConflictSession {
   trainerId: string | null;
   trainerName: string;
   trainerAvailabilityMode: 'generally_available' | 'selected_slots_only';
+  trainerNormalWeeklyHours: number;
+  trainerMaximumWeeklyHours: number;
+  trainerMaximumDailyHours: number;
   roomId: string | null;
   roomCode: string | null;
   roomName: string;
@@ -38,6 +43,7 @@ export interface ConflictSession {
   status: string;
   conflictState: string;
   isLocked: boolean;
+  isFullDaySession: boolean;
 }
 
 export interface ConflictConstraint {

@@ -1,6 +1,9 @@
 import { cache } from 'react';
 
 import { createClient } from '@/lib/supabase/server';
+import {
+  normalizeParticipantCohortIds,
+} from '@/features/timetable-generator/participant-cohorts';
 
 import type {
   AllocationAcademicPeriodSummary,
@@ -20,9 +23,16 @@ const teachingAllocationSelection = `
   unit_id,
   trainer_id,
   preferred_room_id,
+  participant_cohort_ids,
+  combined_cohort_size,
   delivery_mode,
   weekly_sessions,
   session_duration_minutes,
+  fixed_working_day_id,
+  fixed_working_day_ids,
+  fixed_time_slot_ids,
+  is_full_day_session,
+  fixed_end_time_slot_id,
   status,
   is_timetable_enabled,
   notes,
@@ -230,11 +240,28 @@ function mapTeachingAllocation(
     trainerId: row.trainer_id,
     preferredRoomId:
       row.preferred_room_id,
+    participantCohortIds:
+      normalizeParticipantCohortIds({
+        cohortId: row.cohort_id,
+        participantCohortIds:
+          row.participant_cohort_ids,
+      }),
+    combinedCohortSize: row.combined_cohort_size ?? 0,
     deliveryMode: row.delivery_mode,
     weeklySessions:
       row.weekly_sessions,
     sessionDurationMinutes:
       row.session_duration_minutes,
+    fixedWorkingDayId:
+      row.fixed_working_day_id,
+    fixedWorkingDayIds:
+      row.fixed_working_day_ids ?? [],
+    fixedTimeSlotIds:
+      row.fixed_time_slot_ids ?? [],
+    isFullDaySession:
+      row.is_full_day_session ?? false,
+    fixedEndTimeSlotId:
+      row.fixed_end_time_slot_id,
     status: row.status,
     isTimetableEnabled:
       row.is_timetable_enabled,

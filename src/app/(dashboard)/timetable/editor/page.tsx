@@ -27,10 +27,10 @@ export default async function TimetableEditorPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Enterprise scheduling"
-        title="Timetable editor"
-        description="Move sessions, change rooms, lock approved placements and undo the most recent edit without introducing timetable clashes."
-        actions={<div className="inline-flex items-center gap-2 rounded-xl bg-primary-soft px-3 py-2 text-sm font-semibold text-primary"><PencilRuler className="size-4" /> Controlled editing</div>}
+        eyebrow="Step 3 of 4"
+        title="Review and edit"
+        description="Review the timetable. Move a lesson or change its room only when needed; the system will warn you about clashes."
+        actions={<div className="inline-flex items-center gap-2 rounded-xl bg-primary-soft px-3 py-2 text-sm font-semibold text-primary"><PencilRuler className="size-4" /> Safe editing</div>}
       />
 
       <form method="get" className="rounded-2xl border border-border bg-surface p-4 shadow-sm">

@@ -28,19 +28,23 @@ export interface TrainerDailyWorkload {
   longestContinuousBlockMinutes: number;
   utilizationPercentage: number;
   exceedsDailyLimit: boolean;
+  hasFullDaySession: boolean;
 }
 
 export interface TrainerWorkloadAnalysis {
   trainerId: string;
   trainerName: string;
   maximumDailyHours: number;
+  normalWeeklyHours: number;
   maximumWeeklyHours: number;
   daily: TrainerDailyWorkload[];
   weeklyTeachingMinutes: number;
   weeklyTeachingHours: number;
+  extraWeeklyHours: number;
   weeklyIdleMinutes: number;
   weeklyUtilizationPercentage: number;
   exceedsWeeklyLimit: boolean;
+  exceedsMaximumWeeklyLimit: boolean;
 }
 
 export interface WorkloadAnalysisOptions {
@@ -249,6 +253,10 @@ export function analyzeTrainerWorkloads({
     const session of
     sessions.filter(isActiveSession)
   ) {
+    if (!session.trainerId) {
+      continue;
+    }
+
     const trainer =
       trainerLookup.get(
         session.trainerId,
@@ -352,6 +360,14 @@ export function analyzeTrainerWorkloads({
             mergedIntervals,
           );
 
+        const hasFullDaySession =
+          day.intervals.some(
+            ({ interval }) =>
+              interval.endMinutes -
+                interval.startMinutes >=
+              480,
+          );
+
         return {
           workingDayId:
             day.workingDay.id,
@@ -374,9 +390,11 @@ export function analyzeTrainerWorkloads({
               idleMinutes,
             }),
           exceedsDailyLimit:
+            !hasFullDaySession &&
             teachingMinutes >
-            trainer.maximumDailyHours *
-              60,
+              trainer.maximumDailyHours *
+                60,
+          hasFullDaySession,
         };
       });
 
@@ -402,12 +420,20 @@ export function analyzeTrainerWorkloads({
         trainer.fullName,
       maximumDailyHours:
         trainer.maximumDailyHours,
+      normalWeeklyHours:
+        trainer.normalWeeklyHours,
       maximumWeeklyHours:
         trainer.maximumWeeklyHours,
       daily,
       weeklyTeachingMinutes,
       weeklyTeachingHours:
         weeklyTeachingMinutes / 60,
+      extraWeeklyHours:
+        Math.max(
+          0,
+          weeklyTeachingMinutes / 60 -
+            trainer.normalWeeklyHours,
+        ),
       weeklyIdleMinutes,
       weeklyUtilizationPercentage:
         calculateUtilizationPercentage({
@@ -417,6 +443,10 @@ export function analyzeTrainerWorkloads({
             weeklyIdleMinutes,
         }),
       exceedsWeeklyLimit:
+        weeklyTeachingMinutes >
+        trainer.normalWeeklyHours *
+          60,
+      exceedsMaximumWeeklyLimit:
         weeklyTeachingMinutes >
         trainer.maximumWeeklyHours *
           60,
@@ -536,6 +566,7 @@ export function detectTrainerWorkloadConflicts({
         );
       }
       else if (
+        !day.hasFullDaySession &&
         day.longestContinuousBlockMinutes >
         fatigueWarningMinutes
       ) {
@@ -563,7 +594,7 @@ export function detectTrainerWorkloadConflicts({
       }
     }
 
-    if (analysis.exceedsWeeklyLimit) {
+    if (analysis.exceedsMaximumWeeklyLimit) {
       conflicts.push(
         createWorkloadConflict({
           type:
@@ -577,13 +608,43 @@ export function detectTrainerWorkloadConflicts({
           message:
             `${trainer.fullName} has ${analysis.weeklyTeachingHours.toFixed(
               1,
-            )} weekly teaching hours, exceeding the limit of ${trainer.maximumWeeklyHours} hours.`,
+            )} weekly teaching hours, exceeding the absolute maximum of ${trainer.maximumWeeklyHours} hours.`,
           metadata: {
             teachingMinutes:
               analysis.weeklyTeachingMinutes,
             maximumMinutes:
               trainer.maximumWeeklyHours *
               60,
+          },
+        }),
+      );
+    }
+    else if (analysis.exceedsWeeklyLimit) {
+      conflicts.push(
+        createWorkloadConflict({
+          type:
+            'trainer_weekly_workload',
+          severity: 'warning',
+          trainer,
+          sessionIds:
+            analysis.daily.flatMap(
+              (day) =>
+                day.sessionIds,
+            ),
+          message:
+            `${trainer.fullName} has ${analysis.weeklyTeachingHours.toFixed(
+              1,
+            )} weekly teaching hours, ${analysis.extraWeeklyHours.toFixed(
+              1,
+            )} hours above the target of ${trainer.normalWeeklyHours} hours.`,
+          metadata: {
+            teachingMinutes:
+              analysis.weeklyTeachingMinutes,
+            targetMinutes:
+              trainer.normalWeeklyHours *
+              60,
+            extraMinutes:
+              analysis.extraWeeklyHours * 60,
           },
         }),
       );

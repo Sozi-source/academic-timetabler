@@ -12,7 +12,7 @@ function refresh() {
 }
 
 export async function setConflictReviewAction(formData: FormData): Promise<void> {
-  await requireHodAccess();
+  const profile = await requireHodAccess();
   const academicPeriodId = String(formData.get('academicPeriodId') ?? '');
   const conflictKey = String(formData.get('conflictKey') ?? '');
   const status = String(formData.get('status') ?? '');
@@ -25,12 +25,16 @@ export async function setConflictReviewAction(formData: FormData): Promise<void>
   }
 
   const supabase = await createClient();
+  if (!profile.activeDepartmentId) {
+    throw new Error('Select a working department first.');
+  }
   const { error } = await supabase.from('timetable_conflict_reviews').upsert({
+    department_id: profile.activeDepartmentId,
     academic_period_id: academicPeriodId,
     conflict_key: conflictKey,
     status,
     resolution_note: note || null,
-  }, { onConflict: 'academic_period_id,conflict_key' });
+  }, { onConflict: 'department_id,academic_period_id,conflict_key' });
   if (error) throw new Error(error.message);
   refresh();
 }

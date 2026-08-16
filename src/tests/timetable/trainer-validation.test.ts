@@ -10,11 +10,18 @@ import {
 } from '@/features/trainers/validation';
 
 const validTrainer = {
+  departmentId:
+    '550e8400-e29b-41d4-a716-446655440000',
   staffNumber: 'TR-001',
   fullName: 'Jane Waithera',
   email: 'jane.waithera@example.com',
   phoneNumber: '+254 712 345 678',
   employmentType: 'full_time',
+  workloadRole: 'full_time_trainer',
+  availabilityMode: 'generally_available',
+  homeDepartment:
+    'Human Nutrition and Dietetics',
+  normalWeeklyHours: 20,
   specialization:
     'Clinical Nutrition and Dietetics',
   qualifications:
@@ -71,7 +78,7 @@ describe('trainerFormSchema', () => {
     }
   });
 
-  it('rejects daily hours above weekly hours', () => {
+  it('keeps the daily scheduling limit independent from the weekly target', () => {
     const result =
       trainerFormSchema.safeParse({
         ...validTrainer,
@@ -79,7 +86,7 @@ describe('trainerFormSchema', () => {
         maximumDailyHours: 6,
       });
 
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
   it('rejects an invalid email address', () => {

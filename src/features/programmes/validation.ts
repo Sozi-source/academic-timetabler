@@ -1,6 +1,10 @@
 import { z } from 'zod';
 
 export const programmeFormSchema = z.object({
+  departmentId: z.uuid(
+    'Select the programme department.',
+  ),
+
   code: z
     .string()
     .trim()

@@ -34,7 +34,15 @@ export const getTimetableConflictCenterData = cache(async (
       working_day_id, start_time_slot_id, end_time_slot_id,
       status, conflict_state, is_locked,
       participant_cohort_ids, combined_cohort_size,
-      cohorts ( name, actual_size ), units ( code, name ), trainers ( full_name, availability_mode ),
+      cohorts ( name, actual_size ), units ( code, name ),
+      trainers (
+        full_name,
+        availability_mode,
+        normal_weekly_hours,
+        maximum_weekly_hours,
+        maximum_daily_hours
+      ),
+      teaching_allocations ( is_full_day_session ),
       rooms ( code, name, capacity ), working_days ( day_of_week, sequence_number ),
       start_slot:time_slots!scheduled_sessions_start_time_slot_id_fkey ( starts_at ),
       end_slot:time_slots!scheduled_sessions_end_time_slot_id_fkey ( ends_at )
@@ -67,6 +75,12 @@ export const getTimetableConflictCenterData = cache(async (
     const trainer = first(row.trainers as Relation<{
       full_name: string;
       availability_mode: 'generally_available' | 'selected_slots_only';
+      normal_weekly_hours: number | string;
+      maximum_weekly_hours: number | string;
+      maximum_daily_hours: number | string;
+    }>);
+    const allocation = first(row.teaching_allocations as Relation<{
+      is_full_day_session: boolean;
     }>);
     const room = first(row.rooms as Relation<{ code: string; name: string; capacity: number }>);
     const day = first(row.working_days as Relation<{ day_of_week: string; sequence_number: number }>);
@@ -94,6 +108,9 @@ export const getTimetableConflictCenterData = cache(async (
       trainerId: row.trainer_id,
       trainerName: trainer?.full_name ?? 'Unassigned trainer',
       trainerAvailabilityMode: trainer?.availability_mode ?? 'generally_available',
+      trainerNormalWeeklyHours: Number(trainer?.normal_weekly_hours ?? 0),
+      trainerMaximumWeeklyHours: Number(trainer?.maximum_weekly_hours ?? 0),
+      trainerMaximumDailyHours: Number(trainer?.maximum_daily_hours ?? 0),
       roomId: row.room_id,
       roomCode: room?.code ?? null,
       roomName: room?.name ?? 'No room assigned',
@@ -107,6 +124,7 @@ export const getTimetableConflictCenterData = cache(async (
       status: row.status,
       conflictState: row.conflict_state,
       isLocked: row.is_locked,
+      isFullDaySession: allocation?.is_full_day_session ?? false,
     };
   });
 

@@ -1,17 +1,23 @@
 import type {
+  TrainerAvailabilityMode,
   TrainerEmploymentType,
+  TrainerWorkloadRole,
 } from '@/features/trainers/types';
 
 export interface NormalizedTrainerImportRow {
   staffNumber: string;
   fullName: string;
+  departmentCode: string;
   email?: string;
   phoneNumber?: string;
   employmentType: TrainerEmploymentType;
+  workloadRole: TrainerWorkloadRole;
   specialization?: string;
   qualifications?: string;
+  normalWeeklyHours: number;
   maximumWeeklyHours: number;
   maximumDailyHours: number;
+  availabilityMode: TrainerAvailabilityMode;
   timetableAvailable: boolean;
   notes?: string;
 }

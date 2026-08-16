@@ -18,10 +18,12 @@ import {
 
 interface EditTrainerFormProps {
   trainer: Trainer;
+  departments: Array<{id:string;name:string;schoolName:string}>;
 }
 
 export function EditTrainerForm({
   trainer,
+  departments,
 }: EditTrainerFormProps) {
   const [state, formAction, pending] =
     useActionState(
@@ -64,6 +66,7 @@ export function EditTrainerForm({
         state={state}
         trainer={trainer}
         pending={pending}
+        departments={departments}
       />
 
       <div className="flex justify-end border-t border-border-soft pt-4">

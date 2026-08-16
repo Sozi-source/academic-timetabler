@@ -11,6 +11,7 @@ import type {
 import {
   trainerFormSchema,
   trainerIdSchema,
+  trainerWorkloadRoleSchema,
 } from './validation';
 
 function revalidateTrainerPages(
@@ -111,6 +112,11 @@ function parseTrainerForm(
 
     employmentType:
       formData.get('employmentType'),
+    departmentId: formData.get('departmentId'),
+    workloadRole: formData.get('workloadRole'),
+    availabilityMode: formData.get('availabilityMode'),
+    homeDepartment: normalizeOptionalValue(formData,'homeDepartment'),
+    normalWeeklyHours: formData.get('normalWeeklyHours'),
 
     specialization:
       normalizeOptionalValue(
@@ -176,6 +182,11 @@ export async function createTrainerAction(
 
       employment_type:
         parsed.data.employmentType,
+      department_id: parsed.data.departmentId,
+      workload_role: parsed.data.workloadRole,
+      availability_mode: parsed.data.availabilityMode,
+      home_department: parsed.data.homeDepartment || null,
+      normal_weekly_hours: parsed.data.normalWeeklyHours,
 
       specialization:
         parsed.data.specialization || null,
@@ -268,6 +279,11 @@ export async function updateTrainerAction(
 
       employment_type:
         parsed.data.employmentType,
+      department_id: parsed.data.departmentId,
+      workload_role: parsed.data.workloadRole,
+      availability_mode: parsed.data.availabilityMode,
+      home_department: parsed.data.homeDepartment || null,
+      normal_weekly_hours: parsed.data.normalWeeklyHours,
 
       specialization:
         parsed.data.specialization || null,
@@ -356,6 +372,39 @@ export async function setTrainerActiveAction(
   revalidateTrainerPages(
     idResult.data,
   );
+}
+
+export async function setTrainerWorkloadRoleAction(
+  formData: FormData,
+): Promise<void> {
+  await requireHodAccess();
+
+  const idResult = trainerIdSchema.safeParse(formData.get('id'));
+  const roleResult = trainerWorkloadRoleSchema.safeParse(
+    formData.get('workloadRole'),
+  );
+
+  if (!idResult.success || !roleResult.success) {
+    throw new Error('Select a valid trainer workload role.');
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('trainers')
+    .update({ workload_role: roleResult.data })
+    .eq('id', idResult.data);
+
+  if (error) {
+    throw new Error(
+      getTrainerDatabaseErrorMessage(error.code, error.message),
+    );
+  }
+
+  revalidateTrainerPages(idResult.data);
+  revalidatePath('/timetable/teaching-allocations');
+  revalidatePath('/timetable/readiness');
+  revalidatePath('/timetable/generator');
+  revalidatePath('/timetable/reports');
 }
 
 export async function setTrainerTimetableAvailabilityAction(

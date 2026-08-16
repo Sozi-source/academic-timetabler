@@ -26,6 +26,7 @@ function revalidateAllocationPages(
     '/timetable/teaching-allocations',
   );
   revalidatePath('/timetable/generator');
+  revalidatePath('/timetable/reports');
 
   if (id) {
     revalidatePath(
@@ -237,33 +238,16 @@ async function validateTrainerWorkload({
     );
   }
 
-  let allocationQuery = supabase
-    .from('teaching_allocations')
-    .select(
-      'id, weekly_sessions, session_duration_minutes',
-    )
-    .eq('trainer_id', trainerId)
-    .eq(
-      'academic_period_id',
-      academicPeriodId,
-    )
-    .in('status', [
-      'draft',
-      'active',
-    ]);
-
-  if (excludedAllocationId) {
-    allocationQuery =
-      allocationQuery.neq(
-        'id',
-        excludedAllocationId,
-      );
-  }
-
   const {
-    data: existingAllocations,
+    data: institutionalWorkloads,
     error: allocationError,
-  } = await allocationQuery;
+  } = await supabase.rpc(
+    'get_institution_trainer_workloads',
+    {
+      target_academic_period_id:
+        academicPeriodId,
+    },
+  );
 
   if (allocationError) {
     throw new Error(
@@ -274,14 +258,54 @@ async function validateTrainerWorkload({
     );
   }
 
-  const existingMinutes = (
-    existingAllocations ?? []
-  ).reduce(
-    (total, allocation) =>
-      total +
-      allocation.weekly_sessions *
-        allocation.session_duration_minutes,
+  const trainerWorkload = (
+    institutionalWorkloads ?? []
+  ).find(
+    (workload) =>
+      workload.trainer_id === trainerId,
+  );
+
+  let existingMinutes =
+    Number(
+      trainerWorkload?.allocated_hours ?? 0,
+    ) * 60;
+
+  if (excludedAllocationId) {
+    const {
+      data: excludedAllocation,
+      error: excludedAllocationError,
+    } = await supabase
+      .from('teaching_allocations')
+      .select(
+        'trainer_id, weekly_sessions, session_duration_minutes, status',
+      )
+      .eq('id', excludedAllocationId)
+      .maybeSingle();
+
+    if (excludedAllocationError) {
+      throw new Error(
+        getAllocationDatabaseErrorMessage(
+          excludedAllocationError.code,
+          excludedAllocationError.message,
+        ),
+      );
+    }
+
+    if (
+      excludedAllocation?.trainer_id === trainerId &&
+      ['draft', 'active'].includes(
+        excludedAllocation.status,
+      )
+    ) {
+      existingMinutes -=
+        excludedAllocation.weekly_sessions *
+        excludedAllocation.session_duration_minutes;
+    }
+  }
+
+  existingMinutes = Math.max(
     0,
+    existingMinutes,
   );
 
   const proposedMinutes =

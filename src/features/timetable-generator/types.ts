@@ -51,7 +51,35 @@ export type PlanningConflictType =
   | 'trainer_pending'
   | 'cohort_unavailable'
   | 'room_unavailable'
-  | 'unit_unavailable';
+  | 'unit_unavailable'
+  | 'hard_constraint'
+  | 'soft_constraint';
+
+export type PlanningConstraintSubjectType =
+  | 'trainer'
+  | 'room'
+  | 'cohort'
+  | 'institution';
+
+export type PlanningConstraintType =
+  | 'unavailable'
+  | 'preferred'
+  | 'required'
+  | 'protected_day';
+
+export interface PlanningConstraint {
+  id: string;
+  academicPeriodId: string;
+  subjectType: PlanningConstraintSubjectType;
+  subjectId: string | null;
+  constraintType: PlanningConstraintType;
+  workingDayId: string | null;
+  startsAt: string | null;
+  endsAt: string | null;
+  priority: 'hard' | 'soft';
+  reason: string;
+  isActive: boolean;
+}
 
 export interface PlanningWorkingDay {
   id: string;
@@ -153,6 +181,7 @@ export interface PlanningSession {
   source: ScheduledSessionSource;
   conflictState: ScheduledSessionConflictState;
   isLocked: boolean;
+  isExternal?: boolean;
   participantCohortIds?: string[];
   combinedCohortSize?: number;
 }

@@ -27,6 +27,7 @@ function offering(overrides: Partial<ReadinessOffering> = {}): ReadinessOffering
     sessionDurationMinutes: 120,
     status: 'active',
     isTimetableEnabled: true,
+    isProvisionalReservation: false,
     participants: [
       {
         id: 'participant-1',
@@ -89,7 +90,77 @@ describe('assessSchedulingReadiness', () => {
     expect(result.issues.some((entry) => entry.id === 'undersized-rooms')).toBe(true);
   });
 
-  it('detects trainer weekly overload', () => {
+  it('allows generation without a room and reports the assignment as pending', () => {
+    const result = assessSchedulingReadiness({
+      academicPeriodStatus: 'active',
+      offerings: [offering({
+        preferredRoomId: null,
+        preferredRoomName: null,
+        preferredRoomCode: null,
+        preferredRoomType: null,
+        preferredRoomCapacity: null,
+        preferredRoomActive: null,
+        preferredRoomTimetableAvailable: null,
+      })],
+      workingDayCount: 5,
+      teachingSlotCount: 4,
+      availableTrainerCount: 2,
+      availableRoomCount: 0,
+    });
+
+    expect(result.isReady).toBe(true);
+    expect(result.issues.find(
+      (entry) => entry.id === 'no-preferred-room',
+    )).toMatchObject({
+      severity: 'info',
+      title: '1 offering has no room assigned',
+    });
+  });
+
+  it('allows an included unassigned unit while warning that its trainer is pending', () => {
+    const result = assessSchedulingReadiness({
+      academicPeriodStatus: 'active',
+      offerings: [offering({
+        trainerId: null,
+        trainerName: null,
+        isProvisionalReservation: true,
+      })],
+      workingDayCount: 5,
+      teachingSlotCount: 4,
+      availableTrainerCount: 2,
+      availableRoomCount: 3,
+    });
+
+    expect(result.isReady).toBe(true);
+    expect(result.issues.find(
+      (entry) => entry.id === 'reserved-trainers-pending',
+    )?.severity).toBe('warning');
+  });
+
+  it('allows an unassigned-only timetable even when no trainers are active yet', () => {
+    const result = assessSchedulingReadiness({
+      academicPeriodStatus: 'active',
+      offerings: [offering({
+        trainerId: null,
+        trainerName: null,
+        isProvisionalReservation: true,
+      })],
+      workingDayCount: 5,
+      teachingSlotCount: 4,
+      availableTrainerCount: 0,
+      availableRoomCount: 3,
+    });
+
+    expect(result.isReady).toBe(true);
+    expect(result.issues.some(
+      (entry) => entry.id === 'no-trainers',
+    )).toBe(false);
+    expect(result.issues.find(
+      (entry) => entry.id === 'reserved-trainers-pending',
+    )?.severity).toBe('warning');
+  });
+
+  it('reports extra weekly hours as a non-blocking warning', () => {
     const result = assessSchedulingReadiness({
       academicPeriodStatus: 'active',
       offerings: [offering({ weeklySessions: 6, trainerMaximumWeeklyHours: 8 })],
@@ -100,5 +171,8 @@ describe('assessSchedulingReadiness', () => {
     });
 
     expect(result.issues.some((entry) => entry.id === 'trainer-overload')).toBe(true);
+    expect(result.issues.find((entry) => entry.id === 'trainer-overload')?.severity).toBe('warning');
+    expect(result.isReady).toBe(true);
+    expect(result.workloads[0].extraWeeklyHours).toBe(4);
   });
 });

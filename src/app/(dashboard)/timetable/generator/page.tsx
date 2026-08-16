@@ -13,6 +13,9 @@ import {
   getAcademicPeriods,
 } from '@/features/academic-periods/queries';
 import {
+  prioritizeActiveAcademicPeriods,
+} from '@/features/academic-periods/selection';
+import {
   requireHodAccess,
 } from '@/features/auth/authorization';
 import {
@@ -37,11 +40,11 @@ export default async function TimetableGeneratorPage() {
     await getAcademicPeriods();
 
   const selectablePeriods =
-    academicPeriods.filter(
+    prioritizeActiveAcademicPeriods(academicPeriods.filter(
       (period) =>
         period.status === 'planned' ||
         period.status === 'active',
-    );
+    ));
 
   const activePeriod =
     selectablePeriods.find(
@@ -61,9 +64,9 @@ export default async function TimetableGeneratorPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Intelligent scheduling"
-        title="Timetable generator"
-        description="Generate a conflict-aware timetable preview using teaching allocations, trainer workload limits, rooms, working days and configured teaching slots."
+        eyebrow="Step 2 of 4"
+        title="Generate timetable"
+        description="Choose a teaching period, then let the system create a timetable without trainer, class or room clashes."
         context={
           <div className="inline-flex items-center gap-2 text-sm text-text-muted">
             <CalendarCheck2
@@ -84,7 +87,7 @@ export default async function TimetableGeneratorPage() {
               className="size-4"
               aria-hidden="true"
             />
-            Automatic planning
+            Automatic timetable
           </div>
         }
       />

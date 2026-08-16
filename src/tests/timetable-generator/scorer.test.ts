@@ -180,6 +180,29 @@ describe('scorePlacement', () => {
       )?.points,
     ).toBe(3);
   });
+
+  it('keeps a placement valid when it creates extra weekly hours', () => {
+    const input = createConflictInput();
+    input.trainers[0].normalWeeklyHours = 1;
+
+    const result = scorePlacement({
+      candidate: baseSession,
+      existingSessions: [],
+      workingDays: input.workingDays,
+      timeSlots: input.timeSlots,
+      trainers: input.trainers,
+      cohorts: input.cohorts,
+      rooms: input.rooms,
+      units: input.units,
+    });
+
+    expect(result.isValid).toBe(true);
+    expect(
+      result.conflicts.find(
+        (conflict) => conflict.type === 'trainer_weekly_workload',
+      )?.severity,
+    ).toBe('warning');
+  });
 });
 
 describe('scorePlacements', () => {

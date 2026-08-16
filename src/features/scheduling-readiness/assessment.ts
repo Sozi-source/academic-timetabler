@@ -50,12 +50,14 @@ export function calculateTrainerWorkloads(
       maximumWeeklyHours: maximum,
       allocatedWeeklyHours: 0,
       remainingWeeklyHours: maximum,
+      extraWeeklyHours: 0,
       utilizationPercentage: 0,
       overloaded: false,
     };
 
     existing.allocatedWeeklyHours += hours;
-    existing.remainingWeeklyHours = maximum - existing.allocatedWeeklyHours;
+    existing.remainingWeeklyHours = Math.max(0, maximum - existing.allocatedWeeklyHours);
+    existing.extraWeeklyHours = Math.max(0, existing.allocatedWeeklyHours - maximum);
     existing.utilizationPercentage = maximum > 0
       ? Number((existing.allocatedWeeklyHours / maximum * 100).toFixed(1))
       : 0;
@@ -103,17 +105,32 @@ export function assessSchedulingReadiness(input: AssessReadinessInput) {
     issues.push(issue('no-slots', 'blocker', 'No enabled teaching slots', 'Create at least one enabled teaching time slot.', '/timetable/time-slots', 'Configure time slots'));
   }
 
-  if (input.availableTrainerCount === 0) {
+  if (
+    input.availableTrainerCount === 0 &&
+    enabled.some((offering) => Boolean(offering.trainerId))
+  ) {
     issues.push(issue('no-trainers', 'blocker', 'No timetable-available trainers', 'Activate at least one trainer for timetable allocation.', '/timetable/trainers', 'Manage trainers'));
   }
 
-  if (input.availableRoomCount === 0) {
-    issues.push(issue('no-rooms', 'blocker', 'No timetable-available rooms', 'Activate at least one room for timetable allocation.', '/timetable/rooms', 'Manage rooms'));
+  const missingTrainer = enabled.filter(
+    (offering) => !offering.trainerId && !offering.isProvisionalReservation,
+  );
+  if (missingTrainer.length > 0) {
+    issues.push(issue('missing-trainers', 'blocker', `${missingTrainer.length} offering${missingTrainer.length === 1 ? '' : 's'} without a trainer`, 'Assign trainers, or include these units as unassigned so draft generation can continue.', '/timetable/teaching-allocations', 'Review allocations'));
   }
 
-  const missingTrainer = enabled.filter((offering) => !offering.trainerId);
-  if (missingTrainer.length > 0) {
-    issues.push(issue('missing-trainers', 'blocker', `${missingTrainer.length} offering${missingTrainer.length === 1 ? '' : 's'} without a trainer`, 'Assign a trainer to every timetable-enabled teaching offering.', '/timetable/readiness', 'Complete allocations'));
+  const reservedWithoutTrainer = enabled.filter(
+    (offering) => !offering.trainerId && offering.isProvisionalReservation,
+  );
+  if (reservedWithoutTrainer.length > 0) {
+    issues.push(issue(
+      'reserved-trainers-pending',
+      'warning',
+      `${reservedWithoutTrainer.length} included offering${reservedWithoutTrainer.length === 1 ? '' : 's'} with an unassigned trainer`,
+      'These sessions can be generated and saved as a draft. Assign trainers before publication.',
+      '/timetable/teaching-allocations',
+      'Assign trainers',
+    ));
   }
 
   const inactiveTrainer = enabled.filter((offering) => offering.trainerId && (!offering.trainerActive || !offering.trainerTimetableAvailable));
@@ -152,7 +169,7 @@ export function assessSchedulingReadiness(input: AssessReadinessInput) {
 
   const noPreferredRoom = enabled.filter((offering) => !offering.preferredRoomId);
   if (noPreferredRoom.length > 0) {
-    issues.push(issue('no-preferred-room', 'warning', `${noPreferredRoom.length} offering${noPreferredRoom.length === 1 ? '' : 's'} have no preferred room`, 'The generator may assign suitable rooms automatically, but preferred rooms improve predictability.'));
+    issues.push(issue('no-preferred-room', 'info', `${noPreferredRoom.length} offering${noPreferredRoom.length === 1 ? ' has' : 's have'} no room assigned`, 'Room assignment is optional. These sessions can be generated and saved with the room marked as pending.'));
   }
 
   const draft = enabled.filter((offering) => offering.status === 'draft');
@@ -163,7 +180,7 @@ export function assessSchedulingReadiness(input: AssessReadinessInput) {
   const workloads = calculateTrainerWorkloads(enabled);
   const overloaded = workloads.filter((workload) => workload.overloaded);
   if (overloaded.length > 0) {
-    issues.push(issue('trainer-overload', 'blocker', `${overloaded.length} trainer${overloaded.length === 1 ? '' : 's'} exceed weekly workload limits`, 'Reallocate offerings or adjust approved trainer workload limits.', '/timetable/trainers', 'Review workloads'));
+    issues.push(issue('trainer-overload', 'warning', `${overloaded.length} trainer${overloaded.length === 1 ? '' : 's'} have extra weekly hours`, 'Allocation may continue. Review and confirm the extra hours shown on each trainer timetable.', '/timetable/reports?report=workload', 'Review extra hours'));
   }
 
   const blockerCount = issues.filter((entry) => entry.severity === 'blocker').length;

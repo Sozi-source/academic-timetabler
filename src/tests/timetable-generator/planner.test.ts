@@ -95,6 +95,64 @@ describe('generateTimetablePlan', () => {
     expect(result.sessions[0].endTimeSlotId).toBe('slot-2');
   });
 
+  it('obeys hard institutional unavailability during generation', () => {
+    const input = createPlannerInput();
+    input.constraints = [{
+      id: 'constraint-1',
+      academicPeriodId: 'period-1',
+      subjectType: 'institution',
+      subjectId: null,
+      constraintType: 'unavailable',
+      workingDayId: 'day-1',
+      startsAt: null,
+      endsAt: null,
+      priority: 'hard',
+      reason: 'Protected institutional day',
+      isActive: true,
+    }];
+
+    const result = generateTimetablePlan(input);
+
+    expect(result.unscheduled).toHaveLength(0);
+    expect(result.sessions[0].workingDayId).toBe('day-2');
+  });
+
+  it('uses a soft preferred window when a valid preferred placement exists', () => {
+    const input = createPlannerInput();
+    input.constraints = [{
+      id: 'constraint-1',
+      academicPeriodId: 'period-1',
+      subjectType: 'trainer',
+      subjectId: 'trainer-1',
+      constraintType: 'preferred',
+      workingDayId: 'day-2',
+      startsAt: null,
+      endsAt: null,
+      priority: 'soft',
+      reason: 'Trainer prefers Tuesday',
+      isActive: true,
+    }];
+
+    const result = generateTimetablePlan(input);
+
+    expect(result.unscheduled).toHaveLength(0);
+    expect(result.sessions[0].workingDayId).toBe('day-2');
+  });
+
+  it('rejects a placement above the trainer absolute weekly maximum', () => {
+    const input = createPlannerInput();
+    input.trainers[0].normalWeeklyHours = 1;
+    input.trainers[0].maximumWeeklyHours = 1;
+
+    const result = generateTimetablePlan(input);
+
+    expect(result.sessions).toHaveLength(0);
+    expect(result.unscheduled).toHaveLength(1);
+    expect(result.unscheduled[0].conflictTypes).toContain(
+      'trainer_weekly_workload',
+    );
+  });
+
   it('places a fixed Friday double session in the same room', () => {
     const input = createPlannerInput({
       allocations: [

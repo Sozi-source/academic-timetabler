@@ -50,6 +50,31 @@ export interface GeneratorPersistActionState {
   unscheduledSessionCount?: number;
 }
 
+export interface GeneratorExchangeActionState {
+  status: GeneratorActionStatus;
+  message: string | null;
+  preview?: GeneratorPreview;
+  academicPeriodId?: string;
+  targetTeachingAllocationId?: string;
+  targetSessionNumber?: number;
+  partnerTeachingAllocationId?: string;
+  requiresTimetableReopen?: boolean;
+}
+
+export interface GeneratorDraftLifecycleActionState {
+  status: GeneratorActionStatus;
+  message: string | null;
+  academicPeriodId?: string;
+  reopenedVersionCount?: number;
+  archivedPublishedVersionCount?: number;
+}
+
+export interface GeneratorProtectedTimetableSummary {
+  id: string;
+  versionNumber: number;
+  status: 'under_review' | 'approved' | 'published';
+}
+
 export interface GeneratorRequest {
   academicPeriodId: string;
   overwriteExisting: boolean;
@@ -83,12 +108,12 @@ export interface GeneratorPreviewSession {
   unitCode: string;
   unitName: string;
 
-  trainerId: string;
-  trainerStaffNumber: string;
+  trainerId: string | null;
+  trainerStaffNumber: string | null;
   trainerName: string;
 
-  roomId: string;
-  roomCode: string;
+  roomId: string | null;
+  roomCode: string | null;
   roomName: string;
 
   workingDayId: string;
@@ -157,6 +182,27 @@ export interface GeneratorUnscheduledSession {
   attemptedCandidateCount: number;
 
   conflictTypes: string[];
+
+  exchangeSuggestions:
+    GeneratorExchangeSuggestion[];
+}
+
+export interface GeneratorExchangeSuggestion {
+  id: string;
+  targetTeachingAllocationId: string;
+  targetSessionNumber: number;
+  partnerTeachingAllocationId: string;
+  targetTrainerId: string;
+  targetTrainerName: string;
+  partnerTrainerId: string;
+  partnerTrainerName: string;
+  partnerUnitCode: string;
+  partnerUnitName: string;
+  partnerCohortCode: string;
+  durationMinutes: number;
+  resolvedSessionCount: number;
+  remainingUnscheduledCount: number;
+  warningCount: number;
 }
 
 export interface GeneratorStatistics {
@@ -207,6 +253,11 @@ export interface GeneratorPreview {
 
   statistics: GeneratorStatistics;
 
+  exchangeSuggestionsEvaluated?: boolean;
+
+  protectedTimetable?:
+    GeneratorProtectedTimetableSummary | null;
+
   generatedAt: string;
 }
 
@@ -220,11 +271,11 @@ export interface ExistingScheduledSessionRow {
   teaching_allocation_id: string;
   cohort_id: string;
   unit_id: string;
-  trainer_id: string;
+  trainer_id: string | null;
   working_day_id: string;
   start_time_slot_id: string;
   end_time_slot_id: string;
-  room_id: string;
+  room_id: string | null;
   session_number: number;
   delivery_mode:
     PlanningSession['deliveryMode'];
@@ -233,6 +284,9 @@ export interface ExistingScheduledSessionRow {
   conflict_state:
     ScheduledSessionConflictState;
   is_locked: boolean;
+  is_external?: boolean;
+  participant_cohort_ids: string[];
+  combined_cohort_size: number;
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -255,6 +309,17 @@ GeneratorActionState = {
   message: null,
 };
 export const initialGeneratorPersistActionState: GeneratorPersistActionState = {
+  status: 'idle',
+  message: null,
+};
+
+export const initialGeneratorExchangeActionState: GeneratorExchangeActionState = {
+  status: 'idle',
+  message: null,
+};
+
+export const initialGeneratorDraftLifecycleActionState:
+GeneratorDraftLifecycleActionState = {
   status: 'idle',
   message: null,
 };

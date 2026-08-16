@@ -19,7 +19,7 @@ import {
   initialTrainerActionState,
 } from './types';
 
-export function CreateTrainerForm() {
+export function CreateTrainerForm({departments}:{departments:Array<{id:string;name:string;schoolName:string}>}) {
   const formRef =
     useRef<HTMLFormElement>(null);
 
@@ -56,6 +56,7 @@ export function CreateTrainerForm() {
       <TrainerFormFields
         state={state}
         pending={pending}
+        departments={departments}
       />
 
       <div className="flex justify-end border-t border-border-soft pt-4">

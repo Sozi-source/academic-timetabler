@@ -9,7 +9,7 @@ export const trainersImportTemplate =
   assertValidTemplateDefinition({
     key: 'hnd-trainers',
     entityType: 'trainers',
-    version: '1.0',
+    version: '2.2',
     displayName: 'Trainers',
     instructionsWorksheetName:
       IMPORT_WORKSHEET_NAMES.instructions,
@@ -40,6 +40,16 @@ export const trainersImportTemplate =
         cellType: 'text',
       },
       {
+        key: 'departmentCode',
+        header: 'School / Department Code',
+        required: true,
+        description:
+          'Exact code of the trainer home school / department as registered in the system.',
+        example: 'HND',
+        width: 28,
+        cellType: 'text',
+      },
+      {
         key: 'email',
         header: 'Email',
         required: false,
@@ -62,7 +72,8 @@ export const trainersImportTemplate =
       {
         key: 'employmentType',
         header: 'Employment Type',
-        required: true,
+        required: false,
+        defaultValue: 'full_time',
         description:
           'Select one accepted employment category.',
         example: 'full_time',
@@ -74,6 +85,23 @@ export const trainersImportTemplate =
           'other',
         ],
         width: 20,
+        cellType: 'enum',
+      },
+      {
+        key: 'workloadRole',
+        header: 'Workload Role',
+        required: false,
+        description:
+          'Workload category. Change this for HODs, coordinators, part-time or external trainers.',
+        example: 'full_time_trainer',
+        acceptedValues: [
+          'hod',
+          'course_coordinator',
+          'full_time_trainer',
+          'part_time',
+          'external',
+        ],
+        width: 23,
         cellType: 'enum',
       },
       {
@@ -99,12 +127,23 @@ export const trainersImportTemplate =
         cellType: 'text',
       },
       {
+        key: 'normalWeeklyHours',
+        header: 'Normal Weekly Hours',
+        required: false,
+        description:
+          'Weekly target before extra hours begin. HOD, coordinator and full-time targets are standardized to 10, 16 and 20 hours.',
+        example: 20,
+        width: 22,
+        cellType: 'number',
+        numberFormat: '0.0',
+      },
+      {
         key: 'maximumWeeklyHours',
         header: 'Maximum Weekly Hours',
-        required: true,
+        required: false,
         description:
-          'Maximum permitted weekly teaching load.',
-        example: 24,
+          'Legacy compatibility field. Leave blank; weekly extra hours are allowed.',
+        example: '',
         width: 22,
         cellType: 'number',
         numberFormat: '0.0',
@@ -112,18 +151,34 @@ export const trainersImportTemplate =
       {
         key: 'maximumDailyHours',
         header: 'Maximum Daily Hours',
-        required: true,
+        required: false,
+        defaultValue: 6,
         description:
-          'Maximum permitted teaching load in one day.',
+          'Hard scheduling limit for teaching in one day.',
         example: 6,
         width: 21,
         cellType: 'number',
         numberFormat: '0.0',
       },
       {
+        key: 'availabilityMode',
+        header: 'Availability Rule',
+        required: false,
+        description:
+          'Use selected_slots_only for part-time or external trainers with fixed free periods.',
+        example: 'generally_available',
+        acceptedValues: [
+          'generally_available',
+          'selected_slots_only',
+        ],
+        width: 24,
+        cellType: 'enum',
+      },
+      {
         key: 'timetableAvailable',
         header: 'Timetable Available',
-        required: true,
+        required: false,
+        defaultValue: 'Yes',
         description:
           'Whether the trainer should be available for scheduling.',
         example: 'Yes',

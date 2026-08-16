@@ -47,6 +47,7 @@ export interface ReadinessOffering {
   sessionDurationMinutes: number;
   status: string;
   isTimetableEnabled: boolean;
+  isProvisionalReservation: boolean;
   participants: ReadinessParticipant[];
 }
 
@@ -70,6 +71,7 @@ export interface TrainerReadinessWorkload {
   maximumWeeklyHours: number;
   allocatedWeeklyHours: number;
   remainingWeeklyHours: number;
+  extraWeeklyHours: number;
   utilizationPercentage: number;
   overloaded: boolean;
 }

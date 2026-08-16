@@ -58,24 +58,42 @@ export function buildHeaderMap(
     },
   );
 
-  const missingRequiredHeaders =
-    columns
-      .filter(
-        (column) =>
-          column.required &&
-          !seenHeaders.has(
-            normalizeImportHeader(
-              column.header,
-            ),
+  const missingHeaders = columns
+    .filter(
+      (column) =>
+        !seenHeaders.has(
+          normalizeImportHeader(
+            column.header,
           ),
-      )
-      .map((column) => column.header);
+        ),
+    )
+    .map((column) => column.header);
+
+  const normalizedActualHeaders =
+    actualHeaders.map(normalizeImportHeader);
+
+  const normalizedExpectedHeaders =
+    columns.map((column) =>
+      normalizeImportHeader(column.header),
+    );
+
+  const headersOutOfOrder =
+    missingHeaders.length === 0 &&
+    unknownHeaders.length === 0 &&
+    duplicateHeaders.length === 0 &&
+    (normalizedActualHeaders.length !==
+      normalizedExpectedHeaders.length ||
+      normalizedExpectedHeaders.some(
+        (header, index) =>
+          normalizedActualHeaders[index] !==
+          header,
+      ));
 
   const details: string[] = [];
 
-  if (missingRequiredHeaders.length > 0) {
+  if (missingHeaders.length > 0) {
     details.push(
-      `Missing required columns: ${missingRequiredHeaders.join(', ')}.`,
+      `Missing fixed columns: ${missingHeaders.join(', ')}.`,
     );
   }
 
@@ -88,6 +106,12 @@ export function buildHeaderMap(
   if (unknownHeaders.length > 0) {
     details.push(
       `Unrecognized columns: ${unknownHeaders.join(', ')}.`,
+    );
+  }
+
+  if (headersOutOfOrder) {
+    details.push(
+      'Keep every column in the original template order. Optional columns may be blank but must not be deleted or moved.',
     );
   }
 

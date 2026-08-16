@@ -1,6 +1,7 @@
 import { cache } from 'react';
 
 import { createClient } from '@/lib/supabase/server';
+import { allocationMatchesOffering } from '@/features/teaching-allocations/allocation-reconciliation';
 
 import { assessSchedulingReadiness } from './assessment';
 import type {
@@ -9,7 +10,7 @@ import type {
   SchedulingReadiness,
 } from './types';
 
-type Relation<T> = T[];
+type Relation<T> = T | T[] | null;
 
 interface OfferingRow {
   id: string;
@@ -27,6 +28,7 @@ interface OfferingRow {
     id: string;
     staff_number: string;
     full_name: string;
+    normal_weekly_hours: number | string;
     maximum_weekly_hours: number | string;
     is_active: boolean;
     is_timetable_available: boolean;
@@ -88,36 +90,105 @@ function mapParticipant(row: OfferingRow['teaching_offering_participants'][numbe
   };
 }
 
-function mapOffering(row: OfferingRow): ReadinessOffering {
-  const trainer = first(row.trainers);
-  const room = first(row.rooms);
+interface AllocationContextRow {
+  cohort_id: string;
+  unit_id: string;
+  teaching_offering_id: string | null;
+  participant_cohort_ids: string[] | null;
+  trainer_id: string | null;
+  preferred_room_id: string | null;
+  delivery_mode: string;
+  weekly_sessions: number;
+  session_duration_minutes: number;
+  status: string;
+  is_timetable_enabled: boolean;
+  trainers: Relation<{
+    id: string;
+    staff_number: string;
+    full_name: string;
+    normal_weekly_hours: number | string;
+    maximum_weekly_hours: number | string;
+    is_active: boolean;
+    is_timetable_available: boolean;
+  }>;
+  rooms: Relation<{
+    id: string;
+    code: string;
+    name: string;
+    room_type: string;
+    capacity: number;
+    is_active: boolean;
+    is_timetable_available: boolean;
+  }>;
+  units: Relation<{
+    name: string;
+  }>;
+}
+
+function mapOffering(
+  row: OfferingRow,
+  allocations: AllocationContextRow[],
+): ReadinessOffering {
+  const participants = row.teaching_offering_participants
+    .map(mapParticipant)
+    .filter((participant): participant is ReadinessParticipant => participant !== null);
+  const matchingAllocations = allocations.filter((allocation) =>
+    allocationMatchesOffering({
+      teachingOfferingId: row.id,
+      participants: participants.map((participant) => ({
+        cohortId: participant.cohortId,
+        unitId: participant.unitId,
+      })),
+      title: row.title,
+      sessionDurationMinutes: row.session_duration_minutes,
+    }, {
+      teachingOfferingId: allocation.teaching_offering_id,
+      cohortId: allocation.cohort_id,
+      unitId: allocation.unit_id,
+      participantCohortIds: allocation.participant_cohort_ids ?? [allocation.cohort_id],
+      unitTitle: first(allocation.units)?.name ?? null,
+      sessionDurationMinutes: allocation.session_duration_minutes,
+    }),
+  );
+  const allocation = matchingAllocations.find((item) => item.teaching_offering_id === row.id)
+    ?? matchingAllocations.find((item) => item.trainer_id !== null)
+    ?? matchingAllocations[0]
+    ?? null;
+  const trainer = allocation ? first(allocation.trainers) : first(row.trainers);
+  const room = allocation ? first(allocation.rooms) : first(row.rooms);
+  // Once an allocation-register record exists it is authoritative, including
+  // an intentional null trainer/room on a trainer-pending draft allocation.
+  const trainerId = allocation ? allocation.trainer_id : row.trainer_id;
+  const preferredRoomId = allocation
+    ? allocation.preferred_room_id
+    : row.preferred_room_id;
+  const isProvisionalReservation = Boolean(allocation && !allocation.trainer_id);
 
   return {
     id: row.id,
     academicPeriodId: row.academic_period_id,
     title: row.title,
     sharedClassKey: row.shared_class_key,
-    trainerId: row.trainer_id,
+    trainerId,
     trainerName: trainer?.full_name ?? null,
     trainerStaffNumber: trainer?.staff_number ?? null,
     trainerActive: trainer?.is_active ?? null,
     trainerTimetableAvailable: trainer?.is_timetable_available ?? null,
-    trainerMaximumWeeklyHours: trainer ? Number(trainer.maximum_weekly_hours) : null,
-    preferredRoomId: row.preferred_room_id,
+    trainerMaximumWeeklyHours: trainer ? Number(trainer.normal_weekly_hours) : null,
+    preferredRoomId,
     preferredRoomName: room?.name ?? null,
     preferredRoomCode: room?.code ?? null,
     preferredRoomType: room?.room_type ?? null,
     preferredRoomCapacity: room?.capacity ?? null,
     preferredRoomActive: room?.is_active ?? null,
     preferredRoomTimetableAvailable: room?.is_timetable_available ?? null,
-    deliveryMode: row.delivery_mode,
-    weeklySessions: row.weekly_sessions,
-    sessionDurationMinutes: row.session_duration_minutes,
-    status: row.status,
-    isTimetableEnabled: row.is_timetable_enabled,
-    participants: row.teaching_offering_participants
-      .map(mapParticipant)
-      .filter((participant): participant is ReadinessParticipant => participant !== null),
+    deliveryMode: allocation?.delivery_mode ?? row.delivery_mode,
+    weeklySessions: allocation?.weekly_sessions ?? row.weekly_sessions,
+    sessionDurationMinutes: allocation?.session_duration_minutes ?? row.session_duration_minutes,
+    status: allocation?.status ?? row.status,
+    isTimetableEnabled: allocation?.is_timetable_enabled ?? row.is_timetable_enabled,
+    isProvisionalReservation,
+    participants,
   };
 }
 
@@ -126,7 +197,7 @@ export const getSchedulingReadiness = cache(async (
 ): Promise<SchedulingReadiness | null> => {
   const supabase = await createClient();
 
-  const [periodResult, offeringsResult, daysResult, slotsResult, trainersResult, roomsResult] = await Promise.all([
+  const [periodResult, offeringsResult, daysResult, slotsResult, trainersResult, roomsResult, allocationsResult] = await Promise.all([
     supabase.from('academic_periods').select('id, code, name, status').eq('id', academicPeriodId).maybeSingle(),
     supabase.from('teaching_offerings').select(`
       id,
@@ -140,7 +211,7 @@ export const getSchedulingReadiness = cache(async (
       session_duration_minutes,
       status,
       is_timetable_enabled,
-      trainers (id, staff_number, full_name, maximum_weekly_hours, is_active, is_timetable_available),
+      trainers (id, staff_number, full_name, normal_weekly_hours, maximum_weekly_hours, is_active, is_timetable_available),
       rooms (id, code, name, room_type, capacity, is_active, is_timetable_available),
       teaching_offering_participants (
         id,
@@ -152,18 +223,37 @@ export const getSchedulingReadiness = cache(async (
     `).eq('academic_period_id', academicPeriodId).order('title'),
     supabase.from('working_days').select('id', { count: 'exact', head: true }).eq('academic_period_id', academicPeriodId).eq('is_enabled', true),
     supabase.from('time_slots').select('id', { count: 'exact', head: true }).eq('academic_period_id', academicPeriodId).eq('is_enabled', true).eq('slot_type', 'teaching'),
-    supabase.from('trainers').select('id, staff_number, full_name, maximum_weekly_hours').eq('is_active', true).eq('is_timetable_available', true).order('full_name'),
+    supabase.from('trainers').select('id, staff_number, full_name, normal_weekly_hours').eq('is_active', true).eq('is_timetable_available', true).order('full_name'),
     supabase.from('rooms').select('id, code, name, room_type, capacity').eq('is_active', true).eq('is_timetable_available', true).order('capacity').order('code'),
+    supabase.from('teaching_allocations').select(`
+      cohort_id,
+      unit_id,
+      teaching_offering_id,
+      participant_cohort_ids,
+      trainer_id,
+      preferred_room_id,
+      delivery_mode,
+      weekly_sessions,
+      session_duration_minutes,
+      status,
+      is_timetable_enabled,
+      trainers (id, staff_number, full_name, normal_weekly_hours, maximum_weekly_hours, is_active, is_timetable_available),
+      rooms (id, code, name, room_type, capacity, is_active, is_timetable_available)
+      ,
+      units (name)
+    `).eq('academic_period_id', academicPeriodId).eq('is_timetable_enabled', true).in('status', ['draft', 'active']),
   ]);
 
-  const firstError = periodResult.error ?? offeringsResult.error ?? daysResult.error ?? slotsResult.error ?? trainersResult.error ?? roomsResult.error;
+  const firstError = periodResult.error ?? offeringsResult.error ?? daysResult.error ?? slotsResult.error ?? trainersResult.error ?? roomsResult.error ?? allocationsResult.error;
   if (firstError) {
     throw new Error(`Unable to assess timetable readiness: ${firstError.message}`);
   }
 
   if (!periodResult.data) return null;
 
-  const offerings = ((offeringsResult.data ?? []) as unknown as OfferingRow[]).map(mapOffering);
+  const allocations = (allocationsResult.data ?? []) as unknown as AllocationContextRow[];
+  const offerings = ((offeringsResult.data ?? []) as unknown as OfferingRow[])
+    .map((offering) => mapOffering(offering, allocations));
   const assessment = assessSchedulingReadiness({
     academicPeriodStatus: periodResult.data.status,
     offerings,
@@ -203,7 +293,7 @@ export const getSchedulingReadiness = cache(async (
     trainerOptions: (trainersResult.data ?? []).map((trainer) => ({
       id: trainer.id,
       label: `${trainer.full_name} (${trainer.staff_number})`,
-      maximumWeeklyHours: Number(trainer.maximum_weekly_hours),
+      maximumWeeklyHours: Number(trainer.normal_weekly_hours),
     })),
     roomOptions: (roomsResult.data ?? []).map((room) => ({
       id: room.id,

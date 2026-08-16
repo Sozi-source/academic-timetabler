@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { MetricCard } from '@/components/ui/metric-card';
 
 import { TimetableReportActions } from './report-actions';
+import { getMasterSessionPresentation } from './master-presentation';
 import type {
   TimetableReportGroup,
   TimetableReportKind,
@@ -18,7 +19,13 @@ import type {
   TimetableReportsData,
 } from './types';
 
-function SessionTable({ rows }: { rows: TimetableReportRow[] }) {
+function SessionTable({
+  rows,
+  master = false,
+}: {
+  rows: TimetableReportRow[];
+  master?: boolean;
+}) {
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full border-collapse text-left text-sm">
@@ -28,13 +35,16 @@ function SessionTable({ rows }: { rows: TimetableReportRow[] }) {
             <th className="px-4 py-3">Unit</th>
             <th className="px-4 py-3">Cohort</th>
             <th className="px-4 py-3">Trainer</th>
-            <th className="px-4 py-3">Room</th>
+            <th className="px-4 py-3">{master ? 'Venue' : 'Room'}</th>
             <th className="px-4 py-3">Status</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
-          {rows.map((row) => (
-            <tr key={row.sessionId} className="align-top">
+          {rows.map((row) => {
+            const presentation = getMasterSessionPresentation(row);
+
+            return (
+              <tr key={row.sessionId} className={master ? 'align-middle' : 'align-top'}>
               <td className="px-4 py-3 font-medium text-text-primary">
                 {row.day}
                 <div className="mt-0.5 text-xs font-normal text-text-muted">
@@ -42,21 +52,33 @@ function SessionTable({ rows }: { rows: TimetableReportRow[] }) {
                 </div>
               </td>
               <td className="px-4 py-3">
-                <div className="font-semibold text-text-primary">{row.unitName}</div>
-                <div className="text-xs text-text-muted">{row.unitCode}</div>
+                <div className={master ? 'text-base font-bold leading-snug text-text-primary' : 'font-semibold text-text-primary'}>{row.unitName}</div>
+                {!master ? <div className="text-xs text-text-muted">{row.unitCode}</div> : null}
+                {!master && row.departmentName ? (
+                  <div className="mt-1 text-xs font-medium text-primary">
+                    {row.departmentCode ? `${row.departmentCode} · ` : ''}{row.departmentName}
+                  </div>
+                ) : null}
               </td>
               <td className="px-4 py-3 text-text-secondary">{row.cohort}</td>
-              <td className="px-4 py-3 text-text-secondary">{row.trainer}</td>
               <td className="px-4 py-3 text-text-secondary">
-                {row.roomCode} · {row.roomName}
+                {row.trainerId ? <span className={master ? 'text-sm font-medium' : undefined}>{row.trainer}</span> : (
+                  <span className="rounded bg-amber-200 px-2 py-1 font-bold uppercase text-amber-950">
+                    Unassigned
+                  </span>
+                )}
+              </td>
+              <td className={master ? 'px-4 py-3 text-xs italic text-text-muted' : 'px-4 py-3 text-text-secondary'}>
+                {master ? presentation.venue : row.roomCode ? `${row.roomCode} · ${row.roomName}` : 'No room assigned'}
               </td>
               <td className="px-4 py-3">
                 <Badge variant={row.isLocked ? 'warning' : 'neutral'}>
                   {row.isLocked ? 'Locked' : row.status}
                 </Badge>
               </td>
-            </tr>
-          ))}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
@@ -86,6 +108,8 @@ function GroupedReport({ groups }: { groups: TimetableReportGroup[] }) {
             <div className="flex items-center gap-2 text-xs font-semibold text-text-muted">
               <span className="rounded-full bg-surface-subtle px-2.5 py-1">{group.sessionCount} sessions</span>
               <span className="rounded-full bg-primary-soft px-2.5 py-1 text-primary">{group.contactHours} hrs</span>
+              {group.targetHours !== undefined ? <span className="rounded-full bg-surface-subtle px-2.5 py-1">Target {group.targetHours} hrs</span> : null}
+              {(group.extraHours ?? 0) > 0 ? <span className="rounded-full bg-amber-100 px-2.5 py-1 text-amber-800">Extra +{group.extraHours} hrs</span> : null}
             </div>
           </div>
           <SessionTable rows={group.rows} />
@@ -104,7 +128,10 @@ function WorkloadReport({ groups }: { groups: TimetableReportGroup[] }) {
             <tr>
               <th className="px-5 py-3">Trainer</th>
               <th className="px-5 py-3">Sessions</th>
-              <th className="px-5 py-3">Contact hours</th>
+              <th className="px-5 py-3">Target hours</th>
+              <th className="px-5 py-3">Scheduled hours</th>
+              <th className="px-5 py-3">Extra hours</th>
+              <th className="px-5 py-3">Status</th>
               <th className="px-5 py-3">Cohorts</th>
               <th className="px-5 py-3">Units</th>
             </tr>
@@ -114,7 +141,10 @@ function WorkloadReport({ groups }: { groups: TimetableReportGroup[] }) {
               <tr key={group.key}>
                 <td className="px-5 py-4 font-semibold text-text-primary">{group.label}</td>
                 <td className="px-5 py-4 text-text-secondary">{group.sessionCount}</td>
+                <td className="px-5 py-4 text-text-secondary">{group.targetHours ?? 0}</td>
                 <td className="px-5 py-4 font-semibold text-primary">{group.contactHours}</td>
+                <td className={`px-5 py-4 font-semibold ${(group.extraHours ?? 0) > 0 ? 'text-amber-700' : 'text-text-muted'}`}>{(group.extraHours ?? 0) > 0 ? `+${group.extraHours}` : '0'}</td>
+                <td className="px-5 py-4"><Badge variant={(group.extraHours ?? 0) > 0 ? 'warning' : 'success'}>{(group.extraHours ?? 0) > 0 ? 'Extra hours' : 'Within target'}</Badge></td>
                 <td className="px-5 py-4 text-text-secondary">
                   {new Set(group.rows.map((row) => row.cohort)).size}
                 </td>
@@ -153,14 +183,20 @@ export function TimetableReportsWorkspace({
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-4 shadow-sm">
         <div>
           <p className="text-sm font-semibold text-text-primary">Report output</p>
-          <p className="mt-1 text-xs text-text-muted">Print the current view or export the selected report as CSV.</p>
+          <p className="mt-1 text-xs text-text-muted">
+            {report === 'trainer'
+              ? 'Export complete institution-wide personal trainer timetables as editable Word or PDF.'
+              : report === 'master'
+                ? 'Export the department master timetable as editable Word, PDF or CSV.'
+                : 'Print this report or download its CSV data.'}
+          </p>
         </div>
         <TimetableReportActions academicPeriodId={academicPeriodId} report={report} />
       </div>
 
       {report === 'master' ? (
         <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
-          <SessionTable rows={data.rows} />
+          <SessionTable rows={data.rows} master />
         </div>
       ) : null}
       {report === 'cohort' ? <GroupedReport groups={data.byCohort} /> : null}

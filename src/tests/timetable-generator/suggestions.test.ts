@@ -309,6 +309,50 @@ describe(
       ).toBeLessThanOrEqual(2);
     });
 
+    it('never recommends a placement that violates a hard scheduling rule', () => {
+      const {
+        input,
+        existingConflict,
+        candidates,
+      } = createSuggestionScenario();
+
+      const suggestions =
+        suggestAlternativePlacements({
+          conflictId: 'trainer-conflict-1',
+          session: baseSession,
+          candidates,
+          existingSessions: [
+            existingConflict,
+            baseSession,
+          ],
+          workingDays: input.workingDays,
+          timeSlots: input.timeSlots,
+          trainers: input.trainers,
+          cohorts: input.cohorts,
+          rooms: input.rooms,
+          units: input.units,
+          constraints: [{
+            id: 'constraint-1',
+            academicPeriodId: 'period-1',
+            subjectType: 'institution',
+            subjectId: null,
+            constraintType: 'protected_day',
+            workingDayId: 'day-1',
+            startsAt: null,
+            endsAt: null,
+            priority: 'hard',
+            reason: 'No teaching on Monday',
+            isActive: true,
+          }],
+          limit: 20,
+        });
+
+      expect(suggestions.length).toBeGreaterThan(0);
+      expect(suggestions.every(
+        (suggestion) => suggestion.candidate.workingDayId !== 'day-1',
+      )).toBe(true);
+    });
+
     it('returns deterministic recommendations', () => {
       const {
         input,

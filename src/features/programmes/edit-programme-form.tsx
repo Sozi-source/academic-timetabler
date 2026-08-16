@@ -8,6 +8,7 @@ import { useActionState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { FormStatusMessage } from '@/components/ui/form-status-message';
+import type { AccessibleDepartment } from '@/features/organization/queries';
 
 import { updateProgrammeAction } from './actions';
 import { ProgrammeFormFields } from './programme-form-fields';
@@ -18,10 +19,12 @@ import {
 
 interface EditProgrammeFormProps {
   programme: Programme;
+  departments: AccessibleDepartment[];
 }
 
 export function EditProgrammeForm({
   programme,
+  departments,
 }: EditProgrammeFormProps) {
   const [state, formAction, pending] =
     useActionState(
@@ -64,6 +67,7 @@ export function EditProgrammeForm({
         state={state}
         programme={programme}
         pending={pending}
+        departments={departments}
       />
 
       <div className="flex justify-end border-t border-border-soft pt-4">

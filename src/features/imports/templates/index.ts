@@ -1,3 +1,4 @@
+export * from './cohorts';
 export * from './programmes';
 export * from './registry';
 export * from './rooms';

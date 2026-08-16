@@ -4,6 +4,10 @@ import type {
 } from '../types';
 
 import {
+  cohortsImportTemplate,
+} from './cohorts';
+
+import {
   programmesImportTemplate,
 } from './programmes';
 import {
@@ -29,6 +33,7 @@ Partial<
     ImportTemplateDefinition
   >
 > = {
+  cohorts: cohortsImportTemplate,
   trainers: trainersImportTemplate,
   rooms: roomsImportTemplate,
   programmes: programmesImportTemplate,

@@ -30,7 +30,7 @@ export async function moveScheduledSessionAction(
   });
 
   if (!parsed.success) {
-    return { status: 'error', message: 'Review the selected day, time and room.' };
+    return { status: 'error', message: 'Review the selected day and time.' };
   }
 
   const supabase = await createClient();
@@ -39,7 +39,7 @@ export async function moveScheduledSessionAction(
     target_working_day_id: parsed.data.workingDayId,
     target_start_time_slot_id: parsed.data.startTimeSlotId,
     target_end_time_slot_id: parsed.data.endTimeSlotId,
-    target_room_id: parsed.data.roomId,
+    target_room_id: parsed.data.roomId || null,
     target_notes: parsed.data.notes ?? null,
   });
 

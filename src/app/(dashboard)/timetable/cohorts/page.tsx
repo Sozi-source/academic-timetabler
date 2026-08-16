@@ -3,9 +3,11 @@ import {
   CalendarCheck2,
   GraduationCap,
   Plus,
+  Upload,
   Users,
   UsersRound,
 } from 'lucide-react';
+import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -104,7 +106,16 @@ export default async function CohortsPage() {
           </div>
         }
         actions={
-          availableProgrammes.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/timetable/cohorts/import"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+            >
+              <Upload className="size-4" aria-hidden="true" />
+              Import cohorts
+            </Link>
+
+          {availableProgrammes.length > 0 ? (
             <Drawer>
               <DrawerTrigger asChild>
                 <Button
@@ -149,7 +160,8 @@ export default async function CohortsPage() {
                 </DrawerBody>
               </DrawerContent>
             </Drawer>
-          ) : null
+          ) : null}
+          </div>
         }
       />
 

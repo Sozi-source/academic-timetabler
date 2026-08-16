@@ -105,7 +105,7 @@ export async function stageRoomImportAction(
   }
 
   const validationResults =
-    markDuplicateImportRows(
+    markDuplicateImportRows<NormalizedRoomImportRow>(
       workbook.rows.map((row) =>
         validateParsedImportRow<
           NormalizedRoomImportRow

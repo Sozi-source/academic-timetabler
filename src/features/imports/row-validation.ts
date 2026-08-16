@@ -48,7 +48,7 @@ export function validateParsedImportRow<
   duplicateKey,
 }: {
   row: ParsedImportRow;
-  schema: ZodType<TNormalized>;
+  schema: ZodType;
   duplicateKey?: (
     normalized: TNormalized,
   ) => string;
@@ -74,6 +74,8 @@ export function validateParsedImportRow<
     };
   }
 
+  const normalized = parsed.data as TNormalized;
+
   return {
     sourceRowNumber:
       row.sourceRowNumber,
@@ -83,11 +85,11 @@ export function validateParsedImportRow<
         string,
         ImportCellValue
       >,
-    normalizedData: parsed.data,
+    normalizedData: normalized,
     fieldErrors: {},
     rowErrors: [],
     duplicateKey:
-      duplicateKey?.(parsed.data) ??
+      duplicateKey?.(normalized) ??
       null,
   };
 }

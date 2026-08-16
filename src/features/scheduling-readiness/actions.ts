@@ -52,3 +52,25 @@ export async function updateTeachingOfferingReadinessAction(formData: FormData):
   revalidatePath('/timetable/generator');
   revalidatePath('/timetable/teaching-allocations');
 }
+
+export async function includeAllUnassignedOfferingsAction(formData: FormData): Promise<void> {
+  await requireHodAccess();
+  const academicPeriodId = z.string().uuid().parse(formData.get('academicPeriodId'));
+  const supabase = await createClient();
+  const { error } = await supabase.rpc('include_all_unassigned_unit_offerings', {
+    p_academic_period_id: academicPeriodId,
+  });
+
+  if (error) throw new Error(error.message);
+
+  const { error: reconciliationError } = await supabase.rpc(
+    'reconcile_previous_trainer_assignments',
+    { p_academic_period_id: academicPeriodId },
+  );
+
+  if (reconciliationError) throw new Error(reconciliationError.message);
+
+  revalidatePath('/timetable/readiness');
+  revalidatePath('/timetable/teaching-allocations');
+  revalidatePath('/timetable/generator');
+}

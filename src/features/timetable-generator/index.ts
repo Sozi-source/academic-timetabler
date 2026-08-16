@@ -8,4 +8,6 @@ export * from './scorer';
 export * from './planner';
 export * from './candidate-factory';
 export * from './suggestions';
+export * from './exchange-repair';
+export * from './exchange-action-validation';
 export * from './server-types';

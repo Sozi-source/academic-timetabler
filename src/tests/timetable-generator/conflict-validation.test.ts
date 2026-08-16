@@ -121,6 +121,21 @@ describe('resource validation conflicts', () => {
     );
   });
 
+  it('detects an unavailable participating cohort in a shared class', () => {
+    const input = createConflictInput([
+      {
+        ...baseSession,
+        participantCohortIds: ['cohort-1', 'cohort-2'],
+      },
+    ]);
+
+    input.cohorts[1].isTimetableAvailable = false;
+
+    expect(getTypes(input)).toContain(
+      'cohort_unavailable',
+    );
+  });
+
   it('detects an unavailable room', () => {
     const input =
       createConflictInput();
@@ -167,6 +182,92 @@ describe('resource validation conflicts', () => {
     expect(getTypes(input)).toContain(
       'incompatible_room_type',
     );
+  });
+});
+
+describe('configured scheduling constraints', () => {
+  it('blocks a placement inside a hard unavailable window', () => {
+    const input = createConflictInput();
+    input.constraints = [{
+      id: 'constraint-1',
+      academicPeriodId: 'period-1',
+      subjectType: 'institution',
+      subjectId: null,
+      constraintType: 'unavailable',
+      workingDayId: 'day-1',
+      startsAt: '08:00',
+      endsAt: '10:00',
+      priority: 'hard',
+      reason: 'Institutional meeting',
+      isActive: true,
+    }];
+
+    const conflict = detectTimetableConflicts(input).find(
+      (item) => item.type === 'hard_constraint',
+    );
+
+    expect(conflict?.severity).toBe('blocked');
+  });
+
+  it('warns when a placement is outside all soft preferred windows', () => {
+    const input = createConflictInput();
+    input.constraints = [
+      {
+        id: 'constraint-1',
+        academicPeriodId: 'period-1',
+        subjectType: 'trainer',
+        subjectId: 'trainer-1',
+        constraintType: 'preferred',
+        workingDayId: 'day-2',
+        startsAt: null,
+        endsAt: null,
+        priority: 'soft',
+        reason: 'Trainer prefers Tuesday',
+        isActive: true,
+      },
+      {
+        id: 'constraint-2',
+        academicPeriodId: 'period-1',
+        subjectType: 'trainer',
+        subjectId: 'trainer-1',
+        constraintType: 'preferred',
+        workingDayId: 'day-1',
+        startsAt: '10:00',
+        endsAt: '12:00',
+        priority: 'soft',
+        reason: 'Or late Monday',
+        isActive: true,
+      },
+    ];
+
+    const conflicts = detectTimetableConflicts(input);
+
+    expect(conflicts.some(
+      (item) => item.type === 'soft_constraint' && item.severity === 'warning',
+    )).toBe(true);
+  });
+
+  it('does not apply the current department rules to external occupancy records', () => {
+    const input = createConflictInput([{
+      ...baseSession,
+      isExternal: true,
+      isLocked: true,
+    }]);
+    input.constraints = [{
+      id: 'constraint-1',
+      academicPeriodId: 'period-1',
+      subjectType: 'institution',
+      subjectId: null,
+      constraintType: 'unavailable',
+      workingDayId: 'day-1',
+      startsAt: '08:00',
+      endsAt: '10:00',
+      priority: 'hard',
+      reason: 'Current department meeting',
+      isActive: true,
+    }];
+
+    expect(getTypes(input)).not.toContain('hard_constraint');
   });
 });
 

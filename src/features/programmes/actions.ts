@@ -83,6 +83,9 @@ function parseProgrammeForm(
   formData: FormData,
 ) {
   return programmeFormSchema.safeParse({
+    departmentId:
+      formData.get('departmentId'),
+
     code: formData.get('code'),
 
     name: formData.get('name'),
@@ -150,6 +153,8 @@ export async function createProgrammeAction(
   const { error } = await supabase
     .from('programmes')
     .insert({
+      department_id:
+        parsed.data.departmentId,
       code: parsed.data.code,
       name: parsed.data.name,
       short_name:
@@ -230,6 +235,8 @@ export async function updateProgrammeAction(
   const { error } = await supabase
     .from('programmes')
     .update({
+      department_id:
+        parsed.data.departmentId,
       code: parsed.data.code,
       name: parsed.data.name,
       short_name:

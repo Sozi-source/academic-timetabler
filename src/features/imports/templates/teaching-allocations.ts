@@ -9,7 +9,7 @@ export const teachingAllocationsImportTemplate =
   assertValidTemplateDefinition({
     key: 'hnd-teaching-allocations',
     entityType: 'teaching_allocations',
-    version: '1.0',
+    version: '2.0',
     displayName: 'Teaching Allocations',
     instructionsWorksheetName:
       IMPORT_WORKSHEET_NAMES.instructions,
@@ -72,7 +72,8 @@ export const teachingAllocationsImportTemplate =
       {
         key: 'deliveryMode',
         header: 'Delivery Mode',
-        required: true,
+        required: false,
+        defaultValue: 'theory',
         description:
           'Primary mode used to deliver the allocation.',
         example: 'theory',
@@ -90,7 +91,8 @@ export const teachingAllocationsImportTemplate =
       {
         key: 'weeklySessions',
         header: 'Weekly Sessions',
-        required: true,
+        required: false,
+        defaultValue: 1,
         description:
           'Number of sessions required each week.',
         example: 3,
@@ -101,7 +103,8 @@ export const teachingAllocationsImportTemplate =
       {
         key: 'sessionDurationMinutes',
         header: 'Session Duration Minutes',
-        required: true,
+        required: false,
+        defaultValue: 120,
         description:
           'Duration of one session in minutes, using 15-minute increments.',
         example: 120,
@@ -112,7 +115,8 @@ export const teachingAllocationsImportTemplate =
       {
         key: 'status',
         header: 'Status',
-        required: true,
+        required: false,
+        defaultValue: 'active',
         description:
           'Lifecycle status for the allocation.',
         example: 'draft',
@@ -129,7 +133,8 @@ export const teachingAllocationsImportTemplate =
       {
         key: 'timetableEnabled',
         header: 'Timetable Enabled',
-        required: true,
+        required: false,
+        defaultValue: 'Yes',
         description:
           'Whether the allocation should be considered by the generator.',
         example: 'Yes',

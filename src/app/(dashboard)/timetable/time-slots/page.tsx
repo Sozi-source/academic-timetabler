@@ -32,6 +32,7 @@ import {
 } from '@/features/academic-periods/queries';
 import {
   initializeDefaultWorkingDaysAction,
+  initializeStandardCalendarAction,
 } from '@/features/timetable-calendar/actions';
 import {
   CreateTimeSlotForm,
@@ -214,10 +215,13 @@ export default async function TimetableCalendarPage({
             </form>
 
             {selectedPeriod ? (
-              <div className="text-xs text-text-muted">
+              <div className="flex flex-wrap items-center gap-3 text-xs text-text-muted">
+                <form action={initializeStandardCalendarAction}><input type="hidden" name="academicPeriodId" value={selectedPeriod.id}/><Button type="submit" variant="outline" leadingIcon={<CalendarPlus className="size-4" aria-hidden="true"/>}>Use standard calendar</Button></form>
+                <span>
                 Configuration applies only to{' '}
                 <span className="font-semibold text-text-secondary">
                   {selectedPeriod.name}
+                </span>
                 </span>
               </div>
             ) : null}

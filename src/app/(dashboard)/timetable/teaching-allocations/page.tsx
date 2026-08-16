@@ -1,199 +1,81 @@
-import type {
-  Metadata,
-} from 'next';
-import {
-  BookOpen,
-  CalendarCheck2,
-  CheckCircle2,
-  Clock3,
-  Upload,
-} from 'lucide-react';
-import Link from 'next/link';
-
-import {
-  MetricCard,
-} from '@/components/ui/metric-card';
-import {
-  PageHeader,
-} from '@/components/ui/page-header';
-import {
-  TeachingAllocationTable,
-} from '@/features/teaching-allocations/teaching-allocation-table';
-import {
-  getTeachingAllocations,
-} from '@/features/teaching-allocations/queries';
+import type { Metadata } from 'next';
+import { AlertTriangle, BookOpenCheck, CheckCircle2, Users } from 'lucide-react';
+import { PageHeader } from '@/components/ui/page-header';
+import { createClient } from '@/lib/supabase/server';
+import { assignOfferingAction, confirmSharedOfferingAction, generateCurrentOfferingsAction, reconcilePreviousAssignmentsAction, reserveOfferingWithoutTrainerAction } from '@/features/teaching-allocations/simple-allocation-actions';
+import { FixedScheduleForm } from '@/features/teaching-allocations/fixed-schedule-form';
+import { allocationMatchesOffering } from '@/features/teaching-allocations/allocation-reconciliation';
+import { buildSharedClassMatchKey } from '@/features/teaching-allocations/shared-class-matching';
+import { UnassignAllocationForm } from '@/features/teaching-allocations/unassign-allocation-form';
+import { filterTrainersWithAllocations } from '@/features/teaching-allocations/trainer-allocation-filter';
+import { prioritizeActiveAcademicPeriods, resolveAcademicPeriodId } from '@/features/academic-periods/selection';
 
 export const dynamic = 'force-dynamic';
+export const metadata: Metadata = { title: 'Simple teaching allocation' };
+type Period={id:string;name:string;code:string;status:'planned'|'active'};
+type Trainer={id:string;full_name:string;staff_number:string;home_department:string|null;normal_weekly_hours:number;workload_role:'hod'|'course_coordinator'|'full_time_trainer'|'part_time'|'external';availability_mode:'generally_available'|'selected_slots_only'};
+type TrainerWorkload={trainer_id:string;allocated_hours:number|string;department_count:number|string};
+type Offering={id:string;cohort_id:string;unit_id:string;allocation_status:string;is_provisionally_reserved:boolean;confirmed_shared_offering_id:string|null;fixed_working_day_id:string|null;fixed_time_slot_id:string|null;weekly_sessions:number|null;session_duration_minutes:number|null;is_full_day_session:boolean;unit_offering_fixed_slots:{working_day_id:string;time_slot_id:string;sequence_number:number}[]|null;cohorts:{code:string;name:string;actual_size:number}|null;units:{code:string;name:string}|null};
+type Day={id:string;day_of_week:string}; type Slot={id:string;name:string;starts_at:string;ends_at:string;sequence_number:number};
+type Allocation={id:string;cohort_id:string;unit_id:string;trainer_id:string|null;teaching_offering_id:string|null;participant_cohort_ids:string[]|null;weekly_sessions:number;session_duration_minutes:number;status:'draft'|'active';trainers:{full_name:string;staff_number:string}|null;units:{code:string;name:string}|null;cohorts:{code:string;name:string}|null;scheduled_sessions:{id:string;status:string;is_locked:boolean}[]|null};
+const fmt=(n:number)=>Number.isInteger(n)?String(n):n.toFixed(1);
+const isClinicalRotationTitle=(value:string)=>/^clinical rotations?(?: (?:[ivx]+|\d+))?$/.test(value.toLowerCase().replace(/[^a-z0-9]+/g,' ').trim());
 
-export const metadata: Metadata = {
-  title: 'Teaching Allocations',
-  description:
-    'Manage trainer, unit, cohort, room and Academic Period teaching assignments.',
-};
-
-export default async function TeachingAllocationsPage() {
-  const allocations =
-    await getTeachingAllocations();
-
-  const activeAllocations =
-    allocations.filter(
-      (allocation) =>
-        allocation.status === 'active',
-    ).length;
-
-  const draftAllocations =
-    allocations.filter(
-      (allocation) =>
-        allocation.status === 'draft',
-    ).length;
-
-  const timetableEnabled =
-    allocations.filter(
-      (allocation) =>
-        allocation.isTimetableEnabled,
-    ).length;
-
-  const totalWeeklyMinutes =
-    allocations
-      .filter(
-        (allocation) =>
-          allocation.status === 'draft' ||
-          allocation.status === 'active',
-      )
-      .reduce(
-        (total, allocation) =>
-          total +
-          allocation.weeklySessions *
-            allocation.sessionDurationMinutes,
-        0,
-      );
-
-  const totalWeeklyHours =
-    totalWeeklyMinutes / 60;
-
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        eyebrow="Timetable preparation"
-        title="Teaching allocations"
-        description="Assign curriculum units to cohorts, trainers and preferred rooms before generating the institutional timetable."
-        context={
-          <div className="inline-flex items-center gap-2 text-sm text-text-muted">
-            <CalendarCheck2
-              className="size-4"
-              aria-hidden="true"
-            />
-
-            {allocations.length}{' '}
-            allocation
-            {allocations.length === 1
-              ? ''
-              : 's'}{' '}
-            registered
-          </div>
-        }
-        actions={
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              href="/timetable/teaching-allocations/import"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
-            >
-              <Upload
-                className="size-4"
-                aria-hidden="true"
-              />
-              Import allocations
-            </Link>
-          </div>
-        }
-      />
-
-      <section
-        aria-label="Teaching Allocation metrics"
-        className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
-      >
-        <MetricCard
-          label="All allocations"
-          value={String(
-            allocations.length,
-          )}
-          description="Registered teaching requirements"
-          icon={BookOpen}
-          status="Total"
-        />
-
-        <MetricCard
-          label="Active"
-          value={String(
-            activeAllocations,
-          )}
-          description="Confirmed for timetable generation"
-          icon={CheckCircle2}
-          status="Active"
-        />
-
-        <MetricCard
-          label="Draft"
-          value={String(
-            draftAllocations,
-          )}
-          description="Awaiting final confirmation"
-          icon={CalendarCheck2}
-          status="Draft"
-        />
-
-        <MetricCard
-          label="Weekly contact hours"
-          value={
-            Number.isInteger(
-              totalWeeklyHours,
-            )
-              ? String(totalWeeklyHours)
-              : totalWeeklyHours.toFixed(1)
-          }
-          description={`${timetableEnabled} timetable-enabled allocation${
-            timetableEnabled === 1
-              ? ''
-              : 's'
-          }`}
-          icon={Clock3}
-          status="Workload"
-        />
-      </section>
-
-      {allocations.length > 0 &&
-      timetableEnabled === 0 ? (
-        <div className="rounded-2xl border border-warning-border bg-warning-surface px-5 py-4 text-sm leading-6 text-text-secondary">
-          No teaching allocation is currently enabled
-          for timetable generation. Activate or enable
-          the required allocations before running the
-          generator.
-        </div>
-      ) : null}
-
-      <section
-        aria-labelledby="allocation-register-title"
-        className="space-y-4"
-      >
-        <div>
-          <h2
-            id="allocation-register-title"
-            className="text-lg font-semibold text-text-primary"
-          >
-            Allocation register
-          </h2>
-
-          <p className="mt-1 text-sm text-text-muted">
-            Review unit ownership, trainer workload,
-            delivery requirements and timetable
-            readiness.
-          </p>
-        </div>
-
-        <TeachingAllocationTable
-          allocations={allocations}
-        />
-      </section>
-    </div>
-  );
+export default async function Page({searchParams}:{searchParams:Promise<{period?:string;q?:string;allocationTrainer?:string;allocationQ?:string;allocationError?:string;availabilityTrainer?:string;availabilityPeriod?:string;availabilitySaved?:string;reservationSaved?:string;unassigned?:string;unassignError?:string;reconciled?:string;merged?:string;restored?:string;review?:string;reconciliationError?:string;generated?:string;created?:string;autoMerged?:string;mergedUnits?:string;mergeSkipped?:string}>}) {
+ const db=await createClient(); const params=await searchParams;
+ const [{data:periods},{data:trainers}]=await Promise.all([
+  db.from('academic_periods').select('id,name,code,status').in('status',['planned','active']).order('starts_on',{ascending:false}),
+  db.from('trainers').select('id,full_name,staff_number,home_department,normal_weekly_hours,workload_role,availability_mode').eq('is_active',true).eq('is_timetable_available',true).order('full_name')]);
+ const selectablePeriods=prioritizeActiveAcademicPeriods((periods??[]) as Period[]);
+ const period=resolveAcademicPeriodId(selectablePeriods,params.period);
+ const empty=Promise.resolve({data:[]});
+ const [{data:offerings},{data:days},{data:slots},{data:allocations},{data:institutionWorkloads}]=await Promise.all([
+  period?db.from('unit_offerings').select('id,cohort_id,unit_id,allocation_status,is_provisionally_reserved,confirmed_shared_offering_id,fixed_working_day_id,fixed_time_slot_id,weekly_sessions,session_duration_minutes,is_full_day_session,unit_offering_fixed_slots(working_day_id,time_slot_id,sequence_number),cohorts(code,name,actual_size),units(code,name)').eq('academic_period_id',period).eq('is_timetable_enabled',true).order('allocation_status'):empty,
+  period?db.from('working_days').select('id,day_of_week').eq('academic_period_id',period).eq('is_enabled',true).order('sequence_number'):empty,
+  period?db.from('time_slots').select('id,name,starts_at,ends_at,sequence_number').eq('academic_period_id',period).eq('is_enabled',true).eq('slot_type','teaching').order('sequence_number'):empty,
+  period?db.from('teaching_allocations').select('id,cohort_id,unit_id,trainer_id,teaching_offering_id,participant_cohort_ids,weekly_sessions,session_duration_minutes,status,trainers(full_name,staff_number),units(code,name),cohorts(code,name),scheduled_sessions(id,status,is_locked)').eq('academic_period_id',period).in('status',['draft','active']).order('created_at',{ascending:false}):empty,
+  period?db.rpc('get_institution_trainer_workloads',{target_academic_period_id:period}):empty]);
+ const currentAllocations=(allocations??[]) as unknown as Allocation[]; const allTrainers=(trainers??[]) as Trainer[]; const trainersWithAllocations=filterTrainersWithAllocations(allTrainers,currentAllocations); const globalWorkloads=(institutionWorkloads??[]) as TrainerWorkload[]; const loads=new Map(globalWorkloads.map(item=>[item.trainer_id,Number(item.allocated_hours)])); const departmentCounts=new Map(globalWorkloads.map(item=>[item.trainer_id,Number(item.department_count)]));
+ const all=(offerings??[]) as unknown as Offering[];
+ const hasAssignedTrainer=(offering:Offering)=>currentAllocations.some(allocation=>Boolean(allocation.trainer_id)&&allocationMatchesOffering({teachingOfferingId:offering.confirmed_shared_offering_id,participants:[{cohortId:offering.cohort_id,unitId:offering.unit_id}],title:offering.units?.name??'',sessionDurationMinutes:offering.session_duration_minutes??120},{teachingOfferingId:allocation.teaching_offering_id,cohortId:allocation.cohort_id,unitId:allocation.unit_id,participantCohortIds:allocation.participant_cohort_ids??[allocation.cohort_id],unitTitle:allocation.units?.name??null,sessionDurationMinutes:allocation.session_duration_minutes}));
+ const open=all.filter(o=>o.allocation_status==='unallocated'&&!hasAssignedTrainer(o)); const searchTerm=(params.q??'').trim(); const searchText=searchTerm.toLowerCase();
+ const suggestionMap=new Map<string,Offering[]>();
+ for(const item of open){const key=buildSharedClassMatchKey({title:item.units?.name??'',sessionDurationMinutes:item.session_duration_minutes??120});const group=suggestionMap.get(key)??[];group.push(item);suggestionMap.set(key,group);}
+ const suggestions=[...suggestionMap.values()].filter(group=>{const classKeys=new Set(group.map(item=>item.confirmed_shared_offering_id??item.id));const confirmedGroups=new Set(group.map(item=>item.confirmed_shared_offering_id).filter((value):value is string=>Boolean(value)));return group.every(item=>!item.is_provisionally_reserved)&&classKeys.size>1&&confirmedGroups.size<=1;});
+ const representatives=open.filter((o,index)=>!o.confirmed_shared_offering_id||open.findIndex(x=>x.confirmed_shared_offering_id===o.confirmed_shared_offering_id)===index);
+ const matchesSearch=(offering:Offering)=>[offering.units?.code,offering.units?.name,offering.cohorts?.code,offering.cohorts?.name].some(value=>value?.toLowerCase().includes(searchText));
+ const visibleOpen=searchText?representatives.filter(offering=>{const members=offering.confirmed_shared_offering_id?open.filter(item=>item.confirmed_shared_offering_id===offering.confirmed_shared_offering_id):[offering];return members.some(matchesSearch);}):representatives;
+ const allocationTrainer=params.allocationTrainer??''; const allocationQuery=(params.allocationQ??'').trim(); const allocationSearch=allocationQuery.toLowerCase(); const visibleAllocations=currentAllocations.filter(allocation=>(!allocationTrainer||allocation.trainer_id===allocationTrainer)&&(!allocationSearch||[allocation.trainers?.full_name,allocation.trainers?.staff_number,allocation.units?.code,allocation.units?.name,allocation.cohorts?.code,allocation.cohorts?.name].some(value=>value?.toLowerCase().includes(allocationSearch))));
+ const returnParams=new URLSearchParams(); if(period)returnParams.set('period',period); if(searchTerm)returnParams.set('q',searchTerm); const returnTo=`/timetable/teaching-allocations?${returnParams.toString()}`;
+ return <div className="space-y-6">
+  <PageHeader eyebrow="Timetable preparation" title="Simple teaching allocation" description="Generate the current units, automatically combine same-name classes across cohorts, then assign a trainer. Different unit codes do not prevent sharing."/>
+  {params.generated==='1'?<div role="status" className="flex items-start gap-3 rounded-2xl border border-emerald-300 bg-emerald-50 p-4 text-sm text-emerald-900"><CheckCircle2 className="mt-0.5 size-4 shrink-0"/><div><p className="font-semibold">Units generated and matching classes merged</p><p className="mt-1">{params.created??'0'} new unit offering(s) created. {params.autoMerged??'0'} same-name group(s), covering {params.mergedUnits??'0'} unit offering(s), were combined automatically.</p>{Number(params.mergeSkipped??0)>0?<p className="mt-1 font-medium text-amber-800">{params.mergeSkipped} matching group(s) stayed separate because their saved scheduling conditions need review.</p>:null}</div></div>:null}
+  {params.allocationError?<div role="alert" className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"><AlertTriangle className="mt-0.5 size-4 shrink-0"/><div><p className="font-semibold">The timetable change was not saved</p><p className="mt-1">{params.allocationError}</p>{params.availabilityTrainer&&params.availabilityPeriod?<a href={`/timetable/trainers/availability?trainer=${encodeURIComponent(params.availabilityTrainer)}&period=${encodeURIComponent(params.availabilityPeriod)}&returnTo=${encodeURIComponent(returnTo)}`} className="mt-3 inline-flex h-9 items-center rounded-xl border border-red-300 bg-white px-3 font-semibold text-red-800">Set trainer availability</a>:null}</div></div>:null}
+  {params.availabilitySaved==='1'?<div role="status" className="flex items-center gap-2 rounded-2xl border border-emerald-300 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800"><CheckCircle2 className="size-4"/>Trainer availability saved. Select the trainer and assign the unit again.</div>:null}
+  {params.reservationSaved==='1'?<div role="status" className="flex items-center gap-2 rounded-2xl border border-emerald-300 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800"><CheckCircle2 className="size-4"/>Unit included in timetable generation. The trainer remains unassigned.</div>:null}
+  {params.unassigned==='1'?<div role="status" className="flex items-center gap-2 rounded-2xl border border-emerald-300 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800"><CheckCircle2 className="size-4"/>Trainer unassigned from the live draft. The unit is available for allocation again, and the published timetable remains unchanged until the next version is published.</div>:null}
+  {params.reconciled==='1'?<div role="status" className="flex items-start gap-3 rounded-2xl border border-emerald-300 bg-emerald-50 p-4 text-sm text-emerald-900"><CheckCircle2 className="mt-0.5 size-4 shrink-0"/><div><p className="font-semibold">Separated and previous assignments checked</p><p className="mt-1">{params.merged??'0'} pending duplicate(s) rejoined to their assigned shared class. {params.restored??'0'} historical assignment(s) restored. {params.review??'0'} unit(s) remain for manual review.</p>{Number(params.merged??0)>0?<p className="mt-1 font-medium">Generate the draft timetable again so repaired shared classes receive a conflict-free placement.</p>:null}</div></div>:null}
+  {params.reconciliationError?<div role="alert" className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"><AlertTriangle className="mt-0.5 size-4 shrink-0"/><div><p className="font-semibold">Previous assignments were not reconciled</p><p className="mt-1">{params.reconciliationError}</p></div></div>:null}
+  {params.unassignError?<div role="alert" className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"><AlertTriangle className="mt-0.5 size-4 shrink-0"/><div><p className="font-semibold">The trainer was not unassigned</p><p className="mt-1">{params.unassignError}</p></div></div>:null}
+  <section className="rounded-2xl border border-border bg-surface p-5"><div className="flex flex-wrap items-end gap-3">
+   <form method="get" className="flex items-end gap-2"><label className="text-sm font-medium">Academic Period<select name="period" defaultValue={period} className="mt-1 block h-10 rounded-xl border border-border px-3">{selectablePeriods.map(p=><option key={p.id} value={p.id}>{p.code} — {p.name} ({p.status==='active'?'Active':'Planned'})</option>)}</select></label><button className="h-10 rounded-xl border border-border px-4 text-sm font-semibold">Load</button></form>
+   <form action={generateCurrentOfferingsAction}><input type="hidden" name="academicPeriodId" value={period}/><button disabled={!period} className="h-10 rounded-xl bg-primary px-4 text-sm font-semibold text-white disabled:opacity-50">Generate and merge matching units</button></form>
+   <form action={reconcilePreviousAssignmentsAction}><input type="hidden" name="academicPeriodId" value={period}/><button disabled={!period} className="h-10 rounded-xl border border-primary bg-surface px-4 text-sm font-semibold text-primary disabled:opacity-50">Repair separated allocations</button></form>
+  </div></section>
+  <section className="grid gap-4 sm:grid-cols-3">
+   <div className="rounded-2xl border border-border bg-surface p-5"><BookOpenCheck className="size-5"/><p className="mt-3 text-2xl font-bold">{open.length}</p><p className="text-sm text-text-muted">Units awaiting trainer</p></div>
+   <div className="rounded-2xl border border-border bg-surface p-5"><Users className="size-5"/><p className="mt-3 text-2xl font-bold">{(trainers??[]).length}</p><p className="text-sm text-text-muted">Available trainers</p></div>
+   <div className="rounded-2xl border border-border bg-surface p-5"><BookOpenCheck className="size-5"/><p className="mt-3 text-2xl font-bold">{all.length-open.length}</p><p className="text-sm text-text-muted">Allocated and blocked</p></div>
+  </section>
+  <section className="space-y-3"><div className="flex flex-wrap items-end justify-between gap-3"><div><h2 className="text-lg font-semibold">Current trainer allocations</h2><p className="text-sm text-text-muted">Review every active unit allocation and return incorrect assignments to the queue.</p></div><form method="get" className="flex flex-wrap items-end gap-2"><input type="hidden" name="period" value={period}/><input type="hidden" name="q" value={searchTerm}/><label className="text-sm font-medium">Trainer<select name="allocationTrainer" defaultValue={allocationTrainer} className="mt-1 block h-10 rounded-xl border border-border bg-surface px-3"><option value="">All allocated trainers</option>{trainersWithAllocations.map(trainer=><option key={trainer.id} value={trainer.id}>{trainer.full_name}</option>)}</select></label><label className="text-sm font-medium">Find allocation<input name="allocationQ" type="search" defaultValue={allocationQuery} placeholder="Unit, code or cohort" className="mt-1 block h-10 rounded-xl border border-border bg-surface px-3"/></label><button className="h-10 rounded-xl border border-border px-4 text-sm font-semibold">View</button>{allocationTrainer||allocationQuery?<a href={`/timetable/teaching-allocations?period=${encodeURIComponent(period)}`} className="h-10 rounded-xl border border-border px-4 py-2 text-sm font-semibold">Clear</a>:null}</form></div>
+  {visibleAllocations.length===0?<div className="rounded-2xl border border-border bg-surface p-8 text-center text-sm text-text-muted">No current allocations found for this selection.</div>:<div className="overflow-x-auto rounded-2xl border border-border bg-surface"><table className="min-w-full text-left text-sm"><thead className="border-b border-border bg-surface-subtle text-xs uppercase tracking-wide text-text-muted"><tr><th className="px-4 py-3">Trainer</th><th className="px-4 py-3">Unit</th><th className="px-4 py-3">Cohort</th><th className="px-4 py-3">Weekly load</th><th className="px-4 py-3">Timetable</th><th className="px-4 py-3 text-right">Action</th></tr></thead><tbody className="divide-y divide-border">{visibleAllocations.map(allocation=>{const hours=allocation.weekly_sessions*allocation.session_duration_minutes/60;const activeSessions=(allocation.scheduled_sessions??[]).filter(session=>!['cancelled','archived'].includes(session.status));const unitLabel=`${allocation.units?.code??'Unit'} — ${allocation.units?.name??'Untitled unit'}`;return <tr key={allocation.id} className={allocation.trainer_id?'':'bg-amber-50'}><td className="px-4 py-3"><p className={`font-semibold ${allocation.trainer_id?'':'text-amber-800'}`}>{allocation.trainers?.full_name??'Unassigned trainer'}</p><p className="text-xs text-text-muted">{allocation.trainers?.staff_number??'Assign before publication'}</p></td><td className="px-4 py-3"><p className="font-medium">{unitLabel}</p>{allocation.teaching_offering_id?<p className="mt-1 text-xs text-primary">Shared class · {allocation.participant_cohort_ids?.length??1} cohorts</p>:null}</td><td className="px-4 py-3"><p>{allocation.cohorts?.code??'—'}</p><p className="text-xs text-text-muted">{allocation.cohorts?.name??''}</p></td><td className="px-4 py-3"><p className="font-medium">{fmt(hours)}h</p><p className="text-xs text-text-muted">{allocation.weekly_sessions} × {allocation.session_duration_minutes} min</p></td><td className="px-4 py-3"><p>{activeSessions.length>0?`${activeSessions.length} session${activeSessions.length===1?'':'s'}`:'Not generated'}</p>{activeSessions.some(session=>session.is_locked||session.status==='locked')?<p className="text-xs font-medium text-amber-700">Locked</p>:null}</td><td className="px-4 py-3 text-right"><UnassignAllocationForm allocationId={allocation.id} academicPeriodId={period} allocationTrainer={allocationTrainer} allocationQuery={allocationQuery} unitLabel={unitLabel}/></td></tr>})}</tbody></table></div>}
+  </section>
+  {suggestions.length>0?<section className="space-y-3"><div><h2 className="text-lg font-semibold">Matching classes needing attention</h2><p className="text-sm text-text-muted">These same-name units were not merged automatically. Align any fixed schedules or reservations, then combine them. If weekly counts differ, the highest requirement is used.</p></div>{suggestions.map(group=>{const sessionCounts=group.map(x=>x.weekly_sessions??1);const highestSessions=Math.max(...sessionCounts);const countsDiffer=new Set(sessionCounts).size>1;return <form key={group.map(x=>x.id).join(':')} action={confirmSharedOfferingAction} className="rounded-2xl border border-amber-300 bg-amber-50 p-5"><input type="hidden" name="academicPeriodId" value={period}/><input type="hidden" name="searchQuery" value={searchTerm}/><div className="flex flex-wrap items-center justify-between gap-4"><div><p className="font-semibold text-text-primary">{group.map(x=>x.units?.name).filter((value,index,values)=>value&&values.indexOf(value)===index).join(' / ')}</p><p className="mt-1 text-sm text-text-muted">{group.map(x=>x.cohorts?.code).join(' + ')} · Combined learners {group.reduce((sum,x)=>sum+(x.cohorts?.actual_size??0),0)} · {highestSessions} shared session(s){countsDiffer?' · highest requirement used':''}</p>{group.map(x=><input key={x.id} type="hidden" name="offeringId" value={x.id}/>)}</div><button className="h-10 rounded-xl bg-primary px-4 text-sm font-semibold text-white">Combine shared class</button></div></form>})}</section>:null}
+  <section className="space-y-3"><div><h2 className="text-lg font-semibold">Allocated trainer workload</h2><p className="text-sm text-text-muted">Only trainers allocated by this department are shown here. Their hours include allocations from every department in the Academic Period.</p></div>{trainersWithAllocations.length===0?<div className="rounded-2xl border border-border bg-surface p-8 text-center text-sm text-text-muted">No trainers have allocations for this Academic Period.</div>:<div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{trainersWithAllocations.map(t=>{const load=loads.get(t.id)??0,target=Number(t.normal_weekly_hours),extra=Math.max(0,load-target),remaining=Math.max(0,target-load),departmentCount=departmentCounts.get(t.id)??0,role={hod:'HOD',course_coordinator:'Course coordinator',full_time_trainer:'Full-time trainer',part_time:'Part-time trainer',external:'External/service trainer'}[t.workload_role];return <div key={t.id} className="rounded-2xl border border-border bg-surface p-4"><div className="flex justify-between gap-3"><div><p className="font-semibold">{t.full_name}</p><p className="text-xs text-text-muted">{t.staff_number} · {role}</p><p className="mt-1 text-xs text-primary">Institutional load · {departmentCount} department{departmentCount===1?'':'s'}</p></div><span className="text-sm font-semibold">{fmt(load)} / {fmt(target)}h target</span></div><div className="mt-3 h-2 overflow-hidden rounded bg-surface-subtle"><div className={`h-full ${extra>0?'bg-amber-500':'bg-primary'}`} style={{width:`${Math.min(100,target>0?load/target*100:0)}%`}}/></div>{extra>0?<p className="mt-2 flex items-center gap-1 text-xs font-medium text-amber-700"><AlertTriangle className="size-3"/>Extra +{fmt(extra)}h</p>:<p className="mt-2 text-xs text-text-muted">Target remaining {fmt(remaining)}h</p>}</div>})}</div>}</section>
+  <section className="space-y-3"><div className="flex flex-wrap items-end justify-between gap-3"><div><h2 className="text-lg font-semibold">Units awaiting allocation</h2><p className="text-sm text-text-muted">Assign a trainer now, or include the unit as unassigned and complete the trainer later.</p></div><form method="get" className="flex w-full max-w-xl items-center gap-2"><input type="hidden" name="period" value={period}/><label htmlFor="allocation-unit-search" className="sr-only">Search units awaiting allocation</label><input id="allocation-unit-search" name="q" type="search" defaultValue={searchTerm} placeholder="Search unit code, name or cohort" className="h-10 min-w-0 flex-1 rounded-xl border border-border bg-surface px-3 text-sm"/><button className="h-10 rounded-xl bg-primary px-4 text-sm font-semibold text-white">Search</button>{searchTerm?<a href={`/timetable/teaching-allocations?period=${encodeURIComponent(period)}`} className="h-10 rounded-xl border border-border px-4 py-2 text-sm font-semibold">Clear</a>:null}</form></div>{searchTerm?<p className="text-sm text-text-muted">{visibleOpen.length} result(s) for “{searchTerm}”</p>:null}
+  {open.length===0?<div className="rounded-2xl border border-border bg-surface p-8 text-center text-sm text-text-muted">No unallocated units. Generate units from active cohorts or select another period.</div>:visibleOpen.length===0?<div className="rounded-2xl border border-border bg-surface p-8 text-center text-sm text-text-muted">No units match “{searchTerm}”. Try a unit code, unit name, or cohort.</div>:visibleOpen.map(o=>{const members=o.confirmed_shared_offering_id?open.filter(x=>x.confirmed_shared_offering_id===o.confirmed_shared_offering_id):[o];const fixedPatterns=(o.unit_offering_fixed_slots??[]).slice().sort((first,second)=>first.sequence_number-second.sequence_number);const fixedSlotIds=fixedPatterns.map(item=>item.time_slot_id);const fixedWorkingDayIds=fixedPatterns.map(item=>item.working_day_id);if(fixedSlotIds.length===0&&o.fixed_time_slot_id){fixedSlotIds.push(o.fixed_time_slot_id);if(o.fixed_working_day_id)fixedWorkingDayIds.push(o.fixed_working_day_id);}return <article key={o.id} className={`rounded-2xl border p-5 ${o.is_provisionally_reserved?'border-amber-300 bg-amber-50':'border-border bg-surface'}`}><div className="grid gap-4 lg:grid-cols-[1fr_1.3fr]"><div><p className="font-semibold">{o.units?.code} — {o.units?.name}</p><p className="mt-1 text-sm text-text-muted">{members.map(x=>x.cohorts?.code).join(' + ')} · {members.length>1?'Shared class · ':''}{o.weekly_sessions??1} session(s)</p>{o.is_provisionally_reserved?<p className="mt-2 text-xs font-semibold text-amber-800">Included in generation · unassigned trainer</p>:null}</div><div className="space-y-3">
+   <FixedScheduleForm key={`${o.id}:${o.fixed_working_day_id??''}:${fixedWorkingDayIds.join(':')}:${fixedSlotIds.join(':')}`} offeringId={o.id} academicPeriodId={period} searchQuery={searchTerm} weeklySessions={o.weekly_sessions??1} days={(days??[]) as Day[]} slots={(slots??[]) as Slot[]} fixedDayId={o.fixed_working_day_id} fixedWorkingDayIds={fixedWorkingDayIds} fixedSlotIds={fixedSlotIds} isFullDaySession={o.is_full_day_session||isClinicalRotationTitle(o.units?.name??'')}/>
+   <div className="grid gap-2 sm:grid-cols-[1fr_auto]"><form action={assignOfferingAction} className="flex gap-2"><input type="hidden" name="offeringId" value={o.id}/><input type="hidden" name="academicPeriodId" value={period}/><input type="hidden" name="searchQuery" value={searchTerm}/><select name="trainerId" className="h-10 min-w-0 flex-1 rounded-xl border border-border px-2" required><option value="">Select trainer from institution pool</option>{allTrainers.map(t=>{const load=loads.get(t.id)??0,target=Number(t.normal_weekly_hours),extra=Math.max(0,load-target),home=t.home_department?` · ${t.home_department}`:'',availability=t.availability_mode==='selected_slots_only'?' · selected times':'';return <option key={t.id} value={t.id}>{t.full_name}{home} — {fmt(load)}/{fmt(target)}h{extra>0?` (+${fmt(extra)}h extra)`:''}{availability}</option>})}</select><button className="h-10 rounded-xl bg-primary px-4 text-sm font-semibold text-white">Assign</button></form><form action={reserveOfferingWithoutTrainerAction}><input type="hidden" name="offeringId" value={o.id}/><input type="hidden" name="academicPeriodId" value={period}/><input type="hidden" name="searchQuery" value={searchTerm}/><button disabled={o.is_provisionally_reserved} className="h-10 w-full rounded-xl border border-amber-300 bg-amber-50 px-4 text-sm font-semibold text-amber-900 disabled:cursor-not-allowed disabled:opacity-60">{o.is_provisionally_reserved?'Included unassigned':'Include unassigned'}</button></form></div>
+  </div></div></article>})}</section>
+ </div>;
 }

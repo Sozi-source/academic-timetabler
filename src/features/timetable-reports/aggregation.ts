@@ -62,11 +62,22 @@ export function buildTimetableReports(
     0,
   );
 
-  const byTrainer = groupRows(
-    rows,
-    (row) => row.trainer,
-    (row) => row.trainer,
+  const assignedRows = rows.filter(
+    (row): row is TimetableReportRow & { trainerId: string } => Boolean(row.trainerId),
   );
+
+  const byTrainer = groupRows(
+    assignedRows,
+    (row) => row.trainerId,
+    (row) => row.trainer,
+  ).map((group) => {
+    const targetHours = group.rows[0]?.trainerTargetHours ?? 0;
+    return {
+      ...group,
+      targetHours,
+      extraHours: Math.max(0, roundHours((group.contactHours - targetHours) * 60)),
+    };
+  });
 
   return {
     rows: sortedRows,
@@ -74,8 +85,8 @@ export function buildTimetableReports(
       totalSessions: rows.length,
       totalContactHours: roundHours(totalMinutes),
       distinctCohorts: new Set(rows.map((row) => row.cohort)).size,
-      distinctTrainers: new Set(rows.map((row) => row.trainer)).size,
-      distinctRooms: new Set(rows.map((row) => row.roomCode)).size,
+      distinctTrainers: new Set(assignedRows.map((row) => row.trainerId)).size,
+      distinctRooms: new Set(rows.map((row) => row.roomCode).filter(Boolean)).size,
       lockedSessions: rows.filter((row) => row.isLocked).length,
     },
     byCohort: groupRows(
@@ -87,8 +98,8 @@ export function buildTimetableReports(
     byTrainer,
     byRoom: groupRows(
       rows,
-      (row) => row.roomCode,
-      (row) => `${row.roomCode} · ${row.roomName}`,
+      (row) => row.roomCode ?? 'UNASSIGNED',
+      (row) => row.roomCode ? `${row.roomCode} · ${row.roomName}` : 'No room assigned',
     ),
     workload: [...byTrainer].sort((left, right) => {
       if (right.contactHours !== left.contactHours) {

@@ -2,8 +2,6 @@
 
 import Link from 'next/link';
 import {
-  Archive,
-  CheckCircle2,
   LoaderCircle,
   Send,
 } from 'lucide-react';
@@ -13,14 +11,11 @@ import { Button } from '@/components/ui/button';
 import { FormStatusMessage } from '@/components/ui/form-status-message';
 
 import {
-  createTimetableVersionAction,
-  transitionTimetableVersionAction,
+  publishCurrentTimetableAction,
 } from './actions';
 import {
   initialPublicationActionState,
-  type TimetableVersionStatus,
 } from './types';
-import { getTransitionLabel } from './workflow';
 
 function ActionFeedback({
   state,
@@ -48,98 +43,43 @@ function ActionFeedback({
   );
 }
 
-export function CreateTimetableVersionForm({
+export function PublishCurrentTimetableForm({
   academicPeriodId,
+  nextVersionTitle,
 }: {
   academicPeriodId: string;
+  nextVersionTitle: string;
 }) {
   const [state, action, pending] = useActionState(
-    createTimetableVersionAction,
+    publishCurrentTimetableAction,
     initialPublicationActionState,
   );
 
   return (
     <form action={action} className="rounded-2xl border border-border bg-surface p-5 shadow-sm">
       <input type="hidden" name="academicPeriodId" value={academicPeriodId} />
-      <h2 className="font-semibold text-text-primary">Create a controlled timetable version</h2>
+      <h2 className="font-semibold text-text-primary">Publish the current timetable</h2>
       <p className="mt-1 text-sm text-text-muted">
-        Capture the current timetable as an immutable working snapshot. A version may be published with a few unassigned sessions; they remain clearly marked for follow-up.
+        The system will run every final check, publish the timetable as <strong>{nextVersionTitle}</strong>, and archive the former published version automatically.
       </p>
-      <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_1.4fr_auto]">
-        <input
-          name="title"
-          required
-          minLength={3}
-          placeholder="e.g. September–December 2026 master timetable"
-          className="h-11 rounded-xl border border-border-strong bg-surface px-3 text-sm"
-        />
-        <input
-          name="changeSummary"
-          placeholder="What changed in this version?"
-          className="h-11 rounded-xl border border-border-strong bg-surface px-3 text-sm"
-        />
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-xs leading-5 text-text-muted">
+          No title, comment, review or separate approval step is required.
+        </p>
         <Button
           type="submit"
           size="lg"
           disabled={pending}
-          leadingIcon={pending ? <LoaderCircle className="size-4 animate-spin" /> : undefined}
+          leadingIcon={pending
+            ? <LoaderCircle className="size-4 animate-spin" />
+            : <Send className="size-4" />}
         >
-          {pending ? 'Creating version' : 'Create version'}
+          {pending ? 'Checking and publishing' : 'Publish current timetable'}
         </Button>
+      </div>
+      <div className="mt-4">
         <ActionFeedback state={state} />
       </div>
-    </form>
-  );
-}
-
-export function TimetableTransitionForm({
-  academicPeriodId,
-  versionId,
-  currentStatus,
-  transitions,
-}: {
-  academicPeriodId: string;
-  versionId: string;
-  currentStatus: TimetableVersionStatus;
-  transitions: TimetableVersionStatus[];
-}) {
-  const [state, action, pending] = useActionState(
-    transitionTimetableVersionAction,
-    initialPublicationActionState,
-  );
-
-  return (
-    <form action={action} className="mt-5 grid gap-3 border-t border-border pt-4 md:grid-cols-[1fr_auto]">
-      <input type="hidden" name="academicPeriodId" value={academicPeriodId} />
-      <input type="hidden" name="versionId" value={versionId} />
-      <input type="hidden" name="currentStatus" value={currentStatus} />
-      <input
-        name="note"
-        placeholder="Review, approval or publication note"
-        className="h-10 rounded-xl border border-border-strong bg-surface px-3 text-sm"
-      />
-      <div className="flex flex-wrap gap-2">
-        {transitions.map((target) => (
-          <Button
-            key={target}
-            type="submit"
-            name="targetStatus"
-            value={target}
-            variant="outline"
-            disabled={pending}
-            leadingIcon={pending
-              ? <LoaderCircle className="size-4 animate-spin" />
-              : target === 'published'
-                ? <Send className="size-4" />
-                : target === 'archived'
-                  ? <Archive className="size-4" />
-                  : <CheckCircle2 className="size-4" />}
-          >
-            {pending ? 'Checking timetable' : getTransitionLabel(target)}
-          </Button>
-        ))}
-      </div>
-      <ActionFeedback state={state} />
     </form>
   );
 }

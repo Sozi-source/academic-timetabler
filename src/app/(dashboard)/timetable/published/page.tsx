@@ -10,7 +10,7 @@ import { getTimetableVersions } from '@/features/timetable-publication/queries';
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Published Timetables',
-  description: 'Version, approve, publish and archive institutional timetables.',
+  description: 'Validate and publish incrementally versioned institutional timetables.',
 };
 
 export default async function PublishedTimetablesPage({
@@ -22,14 +22,15 @@ export default async function PublishedTimetablesPage({
   const periods = (await getAcademicPeriods()).filter((period) => period.status === 'active' || period.status === 'planned' || period.status === 'archived');
   const params = await searchParams;
   const selectedId = params.academicPeriodId ?? periods.find((period) => period.status === 'active')?.id ?? periods[0]?.id ?? null;
+  const selectedPeriod = periods.find((period) => period.id === selectedId) ?? null;
   const versions = selectedId ? await getTimetableVersions(selectedId) : [];
 
   return <div className="space-y-6">
     <PageHeader
-      eyebrow="Enterprise governance"
+      eyebrow="Step 4 of 4"
       title="Timetable publication"
-      description="Capture immutable versions, submit them for review, approve publication and retain a complete audit history."
-      actions={<div className="inline-flex items-center gap-2 rounded-xl bg-primary-soft px-3 py-2 text-sm font-semibold text-primary"><FileChartColumn className="size-4"/> Controlled publication</div>}
+      description="Run the final checks and publish the current timetable in one step. Every replacement remains available in version history."
+      actions={<div className="inline-flex items-center gap-2 rounded-xl bg-primary-soft px-3 py-2 text-sm font-semibold text-primary"><FileChartColumn className="size-4"/> Direct publishing</div>}
     />
 
     <form method="get" className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
@@ -42,6 +43,6 @@ export default async function PublishedTimetablesPage({
       </div>
     </form>
 
-    {selectedId ? <TimetablePublicationWorkspace academicPeriodId={selectedId} versions={versions}/> : <div className="rounded-2xl border border-dashed border-border p-10 text-center text-sm text-text-muted">No Academic Period is available.</div>}
+    {selectedId && selectedPeriod ? <TimetablePublicationWorkspace academicPeriodId={selectedId} academicPeriodName={selectedPeriod.name} canPublish={selectedPeriod.status === 'active' || selectedPeriod.status === 'planned'} versions={versions}/> : <div className="rounded-2xl border border-dashed border-border p-10 text-center text-sm text-text-muted">No Academic Period is available.</div>}
   </div>;
 }

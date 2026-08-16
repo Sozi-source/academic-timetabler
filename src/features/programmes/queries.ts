@@ -9,6 +9,7 @@ import type {
 
 const programmeSelection = `
   id,
+  department_id,
   code,
   name,
   short_name,
@@ -32,6 +33,7 @@ function mapProgramme(
 ): Programme {
   return {
     id: row.id,
+    departmentId: row.department_id,
     code: row.code,
     name: row.name,
     shortName: row.short_name,

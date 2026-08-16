@@ -13,6 +13,7 @@ interface ProfileRow {
   email: string;
   role: AppRole;
   department_name: string;
+  active_department_id: string | null;
   is_active: boolean;
 }
 
@@ -38,6 +39,7 @@ export const getAuthenticatedProfile = cache(
           email,
           role,
           department_name,
+          active_department_id,
           is_active
         `,
       )
@@ -54,6 +56,8 @@ export const getAuthenticatedProfile = cache(
       email: data.email,
       role: data.role,
       departmentName: data.department_name,
+      activeDepartmentId:
+        data.active_department_id,
       isActive: data.is_active,
     };
   },

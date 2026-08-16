@@ -30,7 +30,7 @@ describe(
         );
 
         expect(template?.version).toBe(
-          '1.1',
+          '2.0',
         );
 
         expect(

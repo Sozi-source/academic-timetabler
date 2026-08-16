@@ -4,8 +4,10 @@ import {
   CalendarCheck2,
   GraduationCap,
   Plus,
+  Upload,
   Users,
 } from 'lucide-react';
+import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -22,6 +24,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import {
   CreateProgrammeForm,
 } from '@/features/programmes/create-programme-form';
+import { getWorkingDepartments } from '@/features/organization/queries';
 import {
   getProgrammes,
 } from '@/features/programmes/queries';
@@ -36,7 +39,11 @@ export const metadata: Metadata = {
 };
 
 export default async function ProgrammesPage() {
-  const programmes = await getProgrammes();
+  const [programmes, departments] =
+    await Promise.all([
+      getProgrammes(),
+      getWorkingDepartments(),
+    ]);
 
   const activeProgrammes =
     programmes.filter(
@@ -86,6 +93,15 @@ export default async function ProgrammesPage() {
           </div>
         }
         actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/timetable/programmes/import"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+            >
+              <Upload className="size-4" aria-hidden="true" />
+              Import programmes
+            </Link>
+
           <Drawer>
             <DrawerTrigger asChild>
               <Button
@@ -119,10 +135,13 @@ export default async function ProgrammesPage() {
               </DrawerHeader>
 
               <DrawerBody className="pb-10">
-                <CreateProgrammeForm />
+                <CreateProgrammeForm
+                  departments={departments}
+                />
               </DrawerBody>
             </DrawerContent>
           </Drawer>
+          </div>
         }
       />
 

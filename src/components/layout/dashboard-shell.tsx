@@ -1,10 +1,6 @@
 'use client';
 
-import {
-  Bell,
-  LogOut,
-  Menu,
-} from 'lucide-react';
+import { LogOut, Menu } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 
@@ -37,7 +33,6 @@ export function DashboardShell({
 
   const initials =
     getInitials(profile.fullName) || 'HD';
-
   return (
     <div className="min-h-screen bg-background">
       <DashboardSidebar
@@ -67,35 +62,25 @@ export function DashboardShell({
 
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-text-primary">
-                Human Nutrition and Dietetics
+                Academic Operations Platform
               </p>
 
               <p className="hidden truncate text-xs text-text-muted sm:block">
-                Academic Operations Platform
+                {profile.departmentName || 'No department assigned'}
               </p>
             </div>
           </div>
 
           <div className="flex min-w-0 items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Notifications"
-              title="Notifications"
-            >
-              <Bell
-                className="size-4"
-                aria-hidden="true"
-              />
-            </Button>
-
             <div className="hidden min-w-0 border-l border-border pl-4 text-right md:block">
               <p className="truncate text-sm font-semibold text-text-primary">
                 {profile.fullName}
               </p>
 
               <p className="truncate text-xs text-text-muted">
-                Head of Department
+                {profile.role === 'system_admin'
+                  ? 'System administrator'
+                  : 'Department timetable administrator'}
               </p>
             </div>
 

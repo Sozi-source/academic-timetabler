@@ -200,6 +200,8 @@ GeneratorSourceData {
       },
     ],
 
+    constraints: [],
+
     cohorts: [
       {
         id: 'cohort-1',
@@ -406,6 +408,54 @@ describe(
         ).toBe(
           '2026-08-02T18:00:00.000Z',
         );
+
+        expect(
+          preview.exchangeSuggestionsEvaluated,
+        ).toBe(true);
+      },
+    );
+
+    it(
+      'can build a fast preview without rescanning every trainer exchange',
+      () => {
+        const preview =
+          createGeneratorPreview({
+            sourceData:
+              createSourceData(),
+            includeExchangeSuggestions:
+              false,
+          });
+
+        expect(
+          preview.exchangeSuggestionsEvaluated,
+        ).toBe(false);
+      },
+    );
+
+    it(
+      'exposes a protected timetable before generator changes are applied',
+      () => {
+        const sourceData =
+          createSourceData();
+
+        sourceData.protectedTimetable = {
+          id: 'version-2',
+          versionNumber: 2,
+          status: 'published',
+        };
+
+        const preview =
+          createGeneratorPreview({
+            sourceData,
+          });
+
+        expect(
+          preview.protectedTimetable,
+        ).toEqual({
+          id: 'version-2',
+          versionNumber: 2,
+          status: 'published',
+        });
       },
     );
 

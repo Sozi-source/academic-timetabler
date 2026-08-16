@@ -4,6 +4,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import type { AccessibleDepartment } from '@/features/organization/queries';
 
 import {
   programmeAwardLevelOptions,
@@ -16,13 +17,17 @@ interface ProgrammeFormFieldsProps {
   state: ProgrammeActionState;
   programme?: Programme;
   pending: boolean;
+  departments: AccessibleDepartment[];
 }
 
 export function ProgrammeFormFields({
   state,
   programme,
   pending,
+  departments,
 }: ProgrammeFormFieldsProps) {
+  const departmentError =
+    state.fieldErrors?.departmentId?.[0];
   const codeError =
     state.fieldErrors?.code?.[0];
 
@@ -55,6 +60,33 @@ export function ProgrammeFormFields({
 
   return (
     <>
+      <FormField
+        id="programme-department"
+        label="School / department"
+        required
+        error={departmentError}
+      >
+        <Select
+          id="programme-department"
+          name="departmentId"
+          required
+          disabled={pending}
+          defaultValue={
+            programme?.departmentId ??
+            departments[0]?.id ??
+            ''
+          }
+          hasError={Boolean(departmentError)}
+        >
+          <option value="">Select workspace</option>
+          {departments.map((department) => (
+            <option key={department.id} value={department.id}>
+              {department.name}
+            </option>
+          ))}
+        </Select>
+      </FormField>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <FormField
           id="programme-code"

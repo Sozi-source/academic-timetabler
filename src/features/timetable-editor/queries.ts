@@ -16,7 +16,7 @@ export const getTimetableEditorData = cache(async (
 ): Promise<EditorData> => {
   const supabase = await createClient();
 
-  const [sessionResult, dayResult, slotResult, roomResult] = await Promise.all([
+  const [sessionResult, dayResult, slotResult, roomResult, cohortResult] = await Promise.all([
     supabase
       .from('scheduled_sessions')
       .select(`
@@ -32,9 +32,11 @@ export const getTimetableEditorData = cache(async (
         is_locked,
         notes,
         session_number,
-        cohorts ( name, actual_size ),
+        participant_cohort_ids,
+        combined_cohort_size,
+        cohorts ( id, code, name, actual_size ),
         units ( name, code ),
-        trainers ( full_name ),
+        trainers ( id, full_name, normal_weekly_hours ),
         rooms ( name, code )
       `)
       .eq('academic_period_id', academicPeriodId)
@@ -59,18 +61,53 @@ export const getTimetableEditorData = cache(async (
       .eq('is_active', true)
       .eq('is_timetable_available', true)
       .order('code'),
+    supabase
+      .from('cohorts')
+      .select('id, code, name, actual_size')
+      .order('code'),
   ]);
 
-  const failure = sessionResult.error ?? dayResult.error ?? slotResult.error ?? roomResult.error;
+  const failure = sessionResult.error
+    ?? dayResult.error
+    ?? slotResult.error
+    ?? roomResult.error
+    ?? cohortResult.error;
   if (failure) {
     throw new Error(`Unable to load the timetable editor: ${failure.message}`);
   }
 
+  const cohortDirectory = new Map(
+    (cohortResult.data ?? []).map((cohort) => [cohort.id, cohort]),
+  );
+
   const sessions: EditorSession[] = (sessionResult.data ?? []).map((row) => {
-    const cohort = first(row.cohorts as Relation<{ name: string; actual_size: number }>);
+    const cohort = first(row.cohorts as Relation<{
+      id: string;
+      code: string;
+      name: string;
+      actual_size: number;
+    }>);
     const unit = first(row.units as Relation<{ name: string; code: string }>);
-    const trainer = first(row.trainers as Relation<{ full_name: string }>);
+    const trainer = first(row.trainers as Relation<{ id: string; full_name: string; normal_weekly_hours: number | string }>);
     const room = first(row.rooms as Relation<{ name: string; code: string }>);
+
+    const participantIds = Array.from(new Set([
+      ...((row.participant_cohort_ids as string[] | null) ?? []),
+      ...(cohort?.id ? [cohort.id] : []),
+    ]));
+    const participantCohorts = participantIds
+      .map((id) => cohortDirectory.get(id))
+      .filter((participant): participant is {
+        id: string;
+        code: string;
+        name: string;
+        actual_size: number;
+      } => Boolean(participant))
+      .map((participant) => ({
+        id: participant.id,
+        code: participant.code,
+        name: participant.name,
+      }));
 
     return {
       id: row.id,
@@ -85,13 +122,17 @@ export const getTimetableEditorData = cache(async (
       isLocked: row.is_locked,
       notes: row.notes,
       sessionNumber: row.session_number,
+      cohortCode: cohort?.code ?? 'Unknown cohort',
       cohortName: cohort?.name ?? 'Unknown cohort',
-      cohortSize: cohort?.actual_size ?? 0,
+      cohortSize: Number(row.combined_cohort_size) || cohort?.actual_size || 0,
+      participantCohorts,
       unitName: unit?.name ?? 'Unknown unit',
       unitCode: unit?.code ?? '—',
+      trainerId: trainer?.id ?? null,
       trainerName: trainer?.full_name ?? 'Unassigned trainer',
-      roomName: room?.name ?? 'Unknown room',
-      roomCode: room?.code ?? '—',
+      trainerTargetHours: trainer ? Number(trainer.normal_weekly_hours) : 0,
+      roomName: room?.name ?? 'No room assigned',
+      roomCode: room?.code ?? null,
     };
   });
 

@@ -8,13 +8,18 @@ import {
   detectTrainerWorkloadConflicts,
 } from './workload';
 import {
+  parseTimeToMinutes,
+} from './time';
+import {
   findOverlappingParticipantCohortId,
+  normalizeParticipantCohortIds,
 } from './participant-cohorts';
 import type {
   PlanningCohort,
   PlanningConflict,
   PlanningConflictSeverity,
   PlanningConflictType,
+  PlanningConstraint,
   PlanningRoom,
   PlanningSession,
   PlanningTimeSlot,
@@ -32,6 +37,7 @@ export interface DetectTimetableConflictsInput {
   cohorts: PlanningCohort[];
   rooms: PlanningRoom[];
   units: PlanningUnit[];
+  constraints?: PlanningConstraint[];
 }
 
 interface SessionContext {
@@ -43,6 +49,8 @@ interface SessionContext {
   cohort?: PlanningCohort;
   room?: PlanningRoom;
   unit?: PlanningUnit;
+  participantCohortIds: string[];
+  unavailableParticipantCohortIds: string[];
   interval?: TimeInterval;
   requiredTimeSlotIds: string[];
 }
@@ -148,6 +156,13 @@ function resolveContexts(
   return input.sessions
     .filter(isActiveSession)
     .map((session) => {
+      const participantCohortIds =
+        normalizeParticipantCohortIds({
+          cohortId: session.cohortId,
+          participantCohortIds:
+            session.participantCohortIds,
+        });
+
       const context: SessionContext = {
         session,
         workingDay:
@@ -178,6 +193,12 @@ function resolveContexts(
           units.get(
             session.unitId,
           ),
+        participantCohortIds,
+        unavailableParticipantCohortIds:
+          participantCohortIds.filter((cohortId) => {
+            const participant = cohorts.get(cohortId);
+            return !participant || !participant.isTimetableAvailable;
+          }),
         requiredTimeSlotIds: [],
       };
 
@@ -373,6 +394,10 @@ function detectCalendarConflicts(
 function detectResourceAvailabilityConflicts(
   context: SessionContext,
 ): PlanningConflict[] {
+  if (context.session.isExternal) {
+    return [];
+  }
+
   const conflicts: PlanningConflict[] = [];
 
   const {
@@ -382,6 +407,7 @@ function detectResourceAvailabilityConflicts(
     room,
     unit,
     requiredTimeSlotIds,
+    unavailableParticipantCohortIds,
   } = context;
 
   if (!session.trainerId) {
@@ -390,7 +416,7 @@ function detectResourceAvailabilityConflicts(
         type: 'trainer_pending',
         severity: 'warning',
         message:
-          'This timetable session is unassigned and needs a trainer before publication.',
+          'This timetable session has no assigned trainer and will be marked UNASSIGNED in the master timetable.',
         sessionIds: [session.id],
         workingDayId:
           session.workingDayId,
@@ -449,23 +475,24 @@ function detectResourceAvailabilityConflicts(
     }
   }
 
-  if (
-    !cohort ||
-    !cohort.isTimetableAvailable
-  ) {
+  for (const cohortId of unavailableParticipantCohortIds) {
     conflicts.push(
       createConflict({
         type: 'cohort_unavailable',
         severity: 'blocked',
         message:
-          'The cohort is not available for timetabling.',
+          'A participating cohort is not available for timetabling.',
         sessionIds: [session.id],
-        resourceId:
-          session.cohortId,
+        resourceId: cohortId,
         resourceLabel:
-          cohort?.name,
+          cohortId === session.cohortId
+            ? cohort?.name
+            : undefined,
         workingDayId:
           session.workingDayId,
+        metadata: {
+          participantCohortId: cohortId,
+        },
       }),
     );
   }
@@ -526,6 +553,10 @@ function detectRoomSuitabilityConflicts(
     unit,
   } = context;
 
+  if (session.isExternal) {
+    return [];
+  }
+
   if (!room) {
     return [];
   }
@@ -584,6 +615,199 @@ function detectRoomSuitabilityConflicts(
         },
       }),
     );
+  }
+
+  return conflicts;
+}
+
+function constraintSubjectMatches(
+  context: SessionContext,
+  constraint: PlanningConstraint,
+) {
+  switch (constraint.subjectType) {
+    case 'institution':
+      return true;
+    case 'trainer':
+      return Boolean(
+        constraint.subjectId &&
+        constraint.subjectId === context.session.trainerId,
+      );
+    case 'room':
+      return Boolean(
+        constraint.subjectId &&
+        constraint.subjectId === context.session.roomId,
+      );
+    case 'cohort':
+      return Boolean(
+        constraint.subjectId &&
+        context.participantCohortIds.includes(constraint.subjectId),
+      );
+  }
+}
+
+function constraintDayMatches(
+  context: SessionContext,
+  constraint: PlanningConstraint,
+) {
+  return !constraint.workingDayId ||
+    constraint.workingDayId === context.session.workingDayId;
+}
+
+function constraintWindowOverlaps(
+  context: SessionContext,
+  constraint: PlanningConstraint,
+) {
+  if (!constraintDayMatches(context, constraint)) {
+    return false;
+  }
+
+  if (!constraint.startsAt || !constraint.endsAt) {
+    return true;
+  }
+
+  if (!context.interval) {
+    return false;
+  }
+
+  return parseTimeToMinutes(context.interval.startsAt) <
+      parseTimeToMinutes(constraint.endsAt) &&
+    parseTimeToMinutes(constraint.startsAt) <
+      parseTimeToMinutes(context.interval.endsAt);
+}
+
+function constraintWindowContains(
+  context: SessionContext,
+  constraint: PlanningConstraint,
+) {
+  if (!constraintDayMatches(context, constraint)) {
+    return false;
+  }
+
+  if (!constraint.startsAt || !constraint.endsAt) {
+    return true;
+  }
+
+  if (!context.interval) {
+    return false;
+  }
+
+  return parseTimeToMinutes(context.interval.startsAt) >=
+      parseTimeToMinutes(constraint.startsAt) &&
+    parseTimeToMinutes(context.interval.endsAt) <=
+      parseTimeToMinutes(constraint.endsAt);
+}
+
+function getConstraintResourceLabel(
+  context: SessionContext,
+  constraint: PlanningConstraint,
+) {
+  switch (constraint.subjectType) {
+    case 'institution':
+      return 'Institution';
+    case 'trainer':
+      return context.trainer?.fullName;
+    case 'room':
+      return context.room?.name;
+    case 'cohort':
+      return constraint.subjectId === context.session.cohortId
+        ? context.cohort?.name
+        : 'Participating cohort';
+  }
+}
+
+function createSchedulingConstraintConflict({
+  context,
+  constraints,
+}: {
+  context: SessionContext;
+  constraints: PlanningConstraint[];
+}) {
+  const first = constraints[0];
+  const severity = first.priority === 'hard'
+    ? 'blocked' as const
+    : 'warning' as const;
+  const type = first.priority === 'hard'
+    ? 'hard_constraint' as const
+    : 'soft_constraint' as const;
+  const reasons = Array.from(new Set(
+    constraints.map((constraint) => constraint.reason.trim()),
+  )).filter(Boolean);
+  const isPositive = [
+    'preferred',
+    'required',
+  ].includes(first.constraintType);
+
+  return createConflict({
+    type,
+    severity,
+    message: isPositive
+      ? `The placement is outside the configured ${first.constraintType} window: ${reasons.join('; ')}.`
+      : `The placement violates a configured ${first.constraintType} rule: ${reasons.join('; ')}.`,
+    sessionIds: [context.session.id],
+    resourceId: first.id,
+    resourceLabel:
+      getConstraintResourceLabel(context, first),
+    workingDayId:
+      context.session.workingDayId,
+    metadata: {
+      constraintId: constraints.map((constraint) => constraint.id).join(','),
+      constraintType: first.constraintType,
+      constraintSubjectType: first.subjectType,
+      constraintSubjectId: first.subjectId,
+    },
+  });
+}
+
+function detectSchedulingConstraintConflicts(
+  context: SessionContext,
+  constraints: PlanningConstraint[],
+) {
+  if (context.session.isExternal) {
+    return [];
+  }
+
+  const relevant = constraints.filter((constraint) =>
+    constraint.isActive &&
+    constraint.academicPeriodId === context.session.academicPeriodId &&
+    constraintSubjectMatches(context, constraint),
+  );
+  const conflicts: PlanningConflict[] = [];
+
+  for (const constraint of relevant.filter((item) =>
+    ['unavailable', 'protected_day'].includes(item.constraintType),
+  )) {
+    if (constraintWindowOverlaps(context, constraint)) {
+      conflicts.push(createSchedulingConstraintConflict({
+        context,
+        constraints: [constraint],
+      }));
+    }
+  }
+
+  const positiveGroups = new Map<string, PlanningConstraint[]>();
+  for (const constraint of relevant.filter((item) =>
+    ['preferred', 'required'].includes(item.constraintType),
+  )) {
+    const key = [
+      constraint.subjectType,
+      constraint.subjectId ?? 'institution',
+      constraint.constraintType,
+      constraint.priority,
+    ].join('|');
+    const group = positiveGroups.get(key) ?? [];
+    group.push(constraint);
+    positiveGroups.set(key, group);
+  }
+
+  for (const group of positiveGroups.values()) {
+    if (!group.some((constraint) =>
+      constraintWindowContains(context, constraint),
+    )) {
+      conflicts.push(createSchedulingConstraintConflict({
+        context,
+        constraints: group,
+      }));
+    }
   }
 
   return conflicts;
@@ -824,6 +1048,12 @@ export function detectTimetableConflicts(
     ),
     ...contexts.flatMap(
       detectRoomSuitabilityConflicts,
+    ),
+    ...contexts.flatMap((context) =>
+      detectSchedulingConstraintConflicts(
+        context,
+        input.constraints ?? [],
+      ),
     ),
     ...detectDuplicateConflicts(
       contexts,

@@ -28,12 +28,26 @@ import { Select } from '@/components/ui/select';
 import {
   setTrainerActiveAction,
   setTrainerTimetableAvailabilityAction,
+  setTrainerWorkloadRoleAction,
 } from './actions';
 import {
   trainerEmploymentTypeOptions,
   type Trainer,
   type TrainerEmploymentType,
+  type TrainerWorkloadRole,
 } from './types';
+
+const workloadRoleOptions: Array<{
+  value: TrainerWorkloadRole;
+  label: string;
+  target: number | null;
+}> = [
+  { value: 'hod', label: 'HOD', target: 10 },
+  { value: 'course_coordinator', label: 'Course coordinator', target: 16 },
+  { value: 'full_time_trainer', label: 'Full-time trainer', target: 20 },
+  { value: 'part_time', label: 'Part-time trainer', target: null },
+  { value: 'external', label: 'External/service trainer', target: null },
+];
 
 function getEmploymentTypeLabel(
   employmentType: TrainerEmploymentType,
@@ -58,6 +72,9 @@ const columns: ColumnDef<Trainer>[] = [
 
         <p className="mt-1 text-xs text-text-muted">
           {row.original.staffNumber}
+          {row.original.homeDepartment
+            ? ` · ${row.original.homeDepartment}`
+            : ''}
         </p>
       </div>
     ),
@@ -100,20 +117,37 @@ const columns: ColumnDef<Trainer>[] = [
   {
     id: 'workload',
     accessorFn: (row) =>
-      row.maximumWeeklyHours,
-    header: 'Teaching load',
+      row.workloadRole,
+    header: 'Role & target',
     cell: ({ row }) => (
-      <div className="min-w-36">
-        <p className="inline-flex items-center gap-2 font-medium text-text-primary">
+      <div className="min-w-64">
+        <form action={setTrainerWorkloadRoleAction} className="flex items-center gap-2">
+          <input type="hidden" name="id" value={row.original.id} />
+          <Select
+            name="workloadRole"
+            aria-label={`Workload role for ${row.original.fullName}`}
+            defaultValue={row.original.workloadRole}
+            className="h-9 min-w-44 text-xs"
+          >
+            {workloadRoleOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}{option.target === null ? '' : ` — ${option.target}h`}
+              </option>
+            ))}
+          </Select>
+          <Button type="submit" variant="outline" size="sm">Set</Button>
+        </form>
+
+        <p className="mt-2 inline-flex items-center gap-2 font-medium text-text-primary">
           <Clock3
             className="size-4 text-text-muted"
             aria-hidden="true"
           />
-          {row.original.maximumWeeklyHours} hrs/week
+          {row.original.normalWeeklyHours}h weekly target
         </p>
 
         <p className="mt-1 text-xs text-text-muted">
-          {row.original.maximumDailyHours} hrs/day
+          {row.original.maximumDailyHours}h daily scheduling limit
         </p>
       </div>
     ),

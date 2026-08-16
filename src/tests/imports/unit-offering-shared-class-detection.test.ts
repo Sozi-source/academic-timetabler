@@ -61,6 +61,36 @@ describe(
         ).toBe(
           'hiv and aids management',
         );
+
+        expect(
+          normalizeUnitNameForSharing(
+            'Introduction to Nutrition Assessment and Surveillance',
+          ),
+        ).toBe(
+          normalizeUnitNameForSharing(
+            'Nutrition Assessment and Surveillance',
+          ),
+        );
+
+        expect(
+          normalizeUnitNameForSharing(
+            'Applied Physical Science II (Physics)',
+          ),
+        ).toBe(
+          normalizeUnitNameForSharing(
+            'Applied Physical Sciences II (Physics)',
+          ),
+        );
+
+        expect(
+          normalizeUnitNameForSharing(
+            'Non-Communicable Disease',
+          ),
+        ).toBe(
+          normalizeUnitNameForSharing(
+            'Non-communicable Diseases',
+          ),
+        );
       },
     );
 

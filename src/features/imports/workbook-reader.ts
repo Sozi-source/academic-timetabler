@@ -373,6 +373,27 @@ export async function readImportWorkbook({
         return;
       }
 
+      headerMap.forEach(
+        (columnDefinition) => {
+          const value =
+            normalizedData[
+              columnDefinition.key
+            ];
+
+          if (
+            (value === null ||
+              value === '') &&
+            columnDefinition.defaultValue !==
+              undefined
+          ) {
+            normalizedData[
+              columnDefinition.key
+            ] =
+              columnDefinition.defaultValue;
+          }
+        },
+      );
+
       rows.push({
         sourceRowNumber: rowNumber,
         sourceData,

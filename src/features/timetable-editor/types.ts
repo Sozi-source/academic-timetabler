@@ -14,20 +14,28 @@ export interface EditorSession {
   workingDayId: string;
   startTimeSlotId: string;
   endTimeSlotId: string;
-  roomId: string;
+  roomId: string | null;
   status: 'draft' | 'confirmed' | 'locked';
   source: 'manual' | 'generator' | 'import' | 'reschedule';
   conflictState: 'unchecked' | 'clear' | 'warning' | 'blocked';
   isLocked: boolean;
   notes: string | null;
   sessionNumber: number;
+  cohortCode: string;
   cohortName: string;
   cohortSize: number;
+  participantCohorts: Array<{
+    id: string;
+    code: string;
+    name: string;
+  }>;
   unitName: string;
   unitCode: string;
+  trainerId: string | null;
   trainerName: string;
+  trainerTargetHours: number;
   roomName: string;
-  roomCode: string;
+  roomCode: string | null;
 }
 
 export interface EditorOption {

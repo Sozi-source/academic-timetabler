@@ -1,5 +1,13 @@
 import { z } from 'zod';
 
+export const trainerWorkloadRoleSchema = z.enum([
+  'hod',
+  'course_coordinator',
+  'full_time_trainer',
+  'part_time',
+  'external',
+]);
+
 const optionalEmailSchema = z
   .string()
   .trim()
@@ -66,6 +74,11 @@ export const trainerFormSchema = z
       'contract',
       'other',
     ]),
+    departmentId: z.uuid('Select the trainer home department.'),
+    workloadRole: trainerWorkloadRoleSchema,
+    availabilityMode: z.enum(['generally_available','selected_slots_only']),
+    homeDepartment: z.string().trim().max(150).optional(),
+    normalWeeklyHours: z.coerce.number().positive().max(80),
 
     specialization: z
       .string()
@@ -113,19 +126,6 @@ export const trainerFormSchema = z
         'Notes cannot exceed 1,000 characters.',
       )
       .optional(),
-  })
-  .superRefine((value, context) => {
-    if (
-      value.maximumDailyHours >
-      value.maximumWeeklyHours
-    ) {
-      context.addIssue({
-        code: 'custom',
-        path: ['maximumDailyHours'],
-        message:
-          'Maximum daily hours cannot exceed maximum weekly hours.',
-      });
-    }
   });
 
 export const trainerIdSchema = z.uuid(

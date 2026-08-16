@@ -5,7 +5,7 @@ export const moveSessionSchema = z.object({
   workingDayId: z.string().uuid(),
   startTimeSlotId: z.string().uuid(),
   endTimeSlotId: z.string().uuid(),
-  roomId: z.string().uuid(),
+  roomId: z.union([z.string().uuid(), z.literal('')]),
   notes: z.string().trim().max(1000).optional(),
 });
 

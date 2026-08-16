@@ -29,7 +29,7 @@ export function DashboardSidebar({
           onClick={onMobileClose}
           className="flex min-w-0 items-center gap-3"
         >
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-institutional-accent-border bg-institutional-gold-soft text-institutional-maroon">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-institutional-accent-border bg-institutional-gold text-institutional-maroon">
             <CalendarRange
               className="size-5"
               aria-hidden="true"
@@ -117,7 +117,7 @@ export function DashboardSidebar({
                         className={cn(
                           'size-[1.05rem] shrink-0',
                           active
-                            ? 'text-primary'
+                            ? 'text-institutional-gold'
                             : 'text-text-muted group-hover:text-primary',
                         )}
                         aria-hidden="true"

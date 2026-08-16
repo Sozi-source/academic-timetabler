@@ -24,12 +24,12 @@
   --primary-subtle: #f3f8f7;
   --primary-foreground: #ffffff;
 
-  /* Muted institutional accent — secondary identity only */
-  --institutional-maroon: #6f4149;
-  --institutional-maroon-soft: #f4edef;
-  --institutional-gold: #8a7448;
-  --institutional-gold-soft: #f5f1e8;
-  --institutional-accent-border: #ddd2bc;
+  /* Institutional accent — gold is intentionally visible while teal remains primary */
+  --institutional-maroon: #7b1421;
+  --institutional-maroon-soft: #f7eef0;
+  --institutional-gold: #f5bd22;
+  --institutional-gold-soft: #fff8df;
+  --institutional-accent-border: #ead28a;
 
   /* Navigation */
   --navigation-background: #ffffff;

@@ -35,7 +35,7 @@ export function DashboardShell({
     getInitials(profile.fullName) || 'HD';
   return (
     <div className="min-h-screen bg-background">
-      <div className="fixed inset-x-0 top-0 z-50 h-0.5 bg-gradient-to-r from-institutional-maroon via-institutional-gold to-primary" aria-hidden="true" />
+      <div className="fixed inset-x-0 top-0 z-50 h-1 bg-institutional-gold" aria-hidden="true" />
       <DashboardSidebar
         mobileOpen={mobileOpen}
         onMobileClose={() => {

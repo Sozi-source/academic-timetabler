@@ -78,7 +78,7 @@ export default async function ProgrammesPage() {
       <PageHeader
         eyebrow="Academic structure"
         title="Programmes"
-        description="Register academic programmes, award levels, duration structures and cohort-planning limits."
+        description="Register programmes, award levels and cohort-planning limits."
         context={
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="neutral">

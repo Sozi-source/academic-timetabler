@@ -18,7 +18,7 @@ const setupLinks = [
 export default async function DashboardPage() {
   await requireHodAccess();
   return <div className="space-y-6">
-    <PageHeader eyebrow="Department timetabler" title="Create your timetable" description="Follow four simple steps. Start by checking that the required information is ready." context={<div className="flex flex-wrap items-center gap-2"><Badge variant="primary">Human Nutrition and Dietetics</Badge><Badge variant="success" dot>Signed in</Badge></div>} />
+    <PageHeader eyebrow="Department timetabler" title="Create your timetable" description="Follow four steps to build your timetable." context={<div className="flex flex-wrap items-center gap-2"><Badge variant="primary">Human Nutrition and Dietetics</Badge><Badge variant="success" dot>Signed in</Badge></div>} />
     <section aria-label="Timetable steps" className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
       {steps.map((step) => { const Icon = step.icon; return <Card key={step.number} className="relative overflow-hidden"><CardHeader><div className="flex items-center justify-between"><span className="flex size-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">{step.number}</span><Icon className="size-4 text-primary" aria-hidden="true" /></div><h2 className="mt-3 text-sm font-semibold text-text-primary">{step.title}</h2><p className="mt-1.5 text-xs leading-5 text-text-secondary">{step.description}</p></CardHeader><CardContent><Link href={step.href} className="inline-flex h-10 w-full items-center justify-between rounded-xl bg-primary px-4 text-sm font-semibold text-white transition hover:bg-primary-hover">{step.action}<ArrowRight className="size-4" /></Link></CardContent></Card> })}
     </section>

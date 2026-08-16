@@ -67,7 +67,7 @@ export default async function Page({
       <PageHeader
         eyebrow="Trainer constraints"
         title="Available teaching times"
-        description="For part-time and external trainers, tick each session when they are available to teach."
+        description="Tick each session this trainer is available to teach."
       />
 
       {params.saved === '1' ? (

@@ -75,7 +75,7 @@ export default function BulkImportsPage() {
       <PageHeader
         eyebrow="Teaching setup"
         title="Standardized bulk imports"
-        description="Download fixed-header Excel templates, complete only the minimum required columns, then validate and review every row before import."
+        description="Download a template, fill in the required columns, then validate before import."
         context={
           <div className="inline-flex items-center gap-2 text-sm text-text-muted">
             <FileSpreadsheet className="size-4" aria-hidden="true" />

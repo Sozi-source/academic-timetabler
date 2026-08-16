@@ -33,7 +33,7 @@ export default async function TimetableReadinessPage({ searchParams }: { searchP
       <PageHeader
         eyebrow="Step 1 of 4"
         title="Check your setup"
-        description="Check that the teaching period, classes, units, trainers, rooms and lesson times are ready. Fix only the items marked as missing."
+        description="Fix only the items marked as missing before generating the timetable."
         context={<div className="inline-flex items-center gap-2 text-sm text-text-muted"><ClipboardCheck className="size-4" aria-hidden="true" />{readiness.academicPeriodName}</div>}
         actions={<form method="get"><label className="sr-only" htmlFor="academicPeriodId">Academic Period</label><select id="academicPeriodId" name="academicPeriodId" defaultValue={selectedId} className="h-10 rounded-xl border border-border-strong bg-surface px-3 text-sm text-text-primary"><option value={selectedId}>{readiness.academicPeriodName}</option>{selectable.filter((period) => period.id !== selectedId).map((period) => <option key={period.id} value={period.id}>{period.name}</option>)}</select><button type="submit" className="ml-2 inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"><Sparkles className="size-4" aria-hidden="true" />Assess</button></form>}
       />

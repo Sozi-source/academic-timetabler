@@ -61,7 +61,7 @@ export default async function EditProgrammePage({
       <PageHeader
         eyebrow="Academic structure"
         title={`Edit ${programme.code}`}
-        description="Update programme identity, award level, duration, Academic Period structure and cohort-planning limits."
+        description="Update programme details, award level, duration and planning limits."
         context={
           <div className="flex flex-wrap items-center gap-2">
             <Badge

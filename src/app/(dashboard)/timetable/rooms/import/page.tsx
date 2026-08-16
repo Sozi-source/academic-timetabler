@@ -26,7 +26,7 @@ export default function ImportRoomsPage() {
       <PageHeader
         eyebrow="Bulk data import"
         title="Import rooms"
-        description="Upload the standardized Rooms workbook, validate all records and review issues before inserting them into the database."
+        description="Upload the Rooms workbook, then validate and review before import."
         context={
           <div className="inline-flex items-center gap-2 text-sm text-text-muted">
             <Building2

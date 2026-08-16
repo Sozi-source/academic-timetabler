@@ -64,7 +64,7 @@ export async function MasterDataImportReviewPage({
             ? `${label} import results`
             : `Review ${label} import`
         }
-        description="Review validated rows before confirming the database import."
+        description="Review validated rows before confirming import."
         context={
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="neutral">

@@ -22,7 +22,7 @@ export default function ImportProgrammesPage() {
       <PageHeader
         eyebrow="Bulk data import"
         title="Import programmes"
-        description="Upload the fixed-header Programmes workbook. Programme Code and Programme Name are the only required values."
+        description="Upload the Programmes workbook. Only Programme Code and Name are required."
         context={
           <div className="inline-flex items-center gap-2 text-sm text-text-muted">
             <FileSpreadsheet className="size-4" aria-hidden="true" />

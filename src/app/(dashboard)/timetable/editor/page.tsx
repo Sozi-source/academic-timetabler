@@ -34,7 +34,7 @@ export default async function TimetableEditorPage({
       <PageHeader
         eyebrow="Step 3 of 4"
         title="Review and edit"
-        description="Review the timetable. Move a lesson or change its room only when needed; the system will warn you about clashes."
+        description="Move a lesson or room only when needed — clashes are flagged automatically."
         actions={<Badge variant="primary"><PencilRuler className="size-3.5" /> Safe editing</Badge>}
       />
 

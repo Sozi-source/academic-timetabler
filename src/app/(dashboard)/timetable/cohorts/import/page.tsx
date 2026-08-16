@@ -22,7 +22,7 @@ export default function ImportCohortsPage() {
       <PageHeader
         eyebrow="Bulk data import"
         title="Import cohorts"
-        description="Upload the fixed-header Cohorts workbook. Programme Code, Cohort Name and Intake Date are the only required values."
+        description="Upload the Cohorts workbook. Only Programme Code, Cohort Name and Intake Date are required."
         context={
           <div className="inline-flex items-center gap-2 text-sm text-text-muted">
             <FileSpreadsheet className="size-4" aria-hidden="true" />

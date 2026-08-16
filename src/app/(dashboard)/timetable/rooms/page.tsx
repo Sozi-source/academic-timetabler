@@ -67,7 +67,7 @@ export default async function RoomsPage() {
       <PageHeader
         eyebrow="Scheduling resources"
         title="Rooms"
-        description="Register classrooms, laboratories, kitchens and other spaces available for teaching and timetable scheduling."
+        description="Register classrooms, labs and other teaching spaces."
         context={
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="neutral">

@@ -34,7 +34,7 @@ export default async function PublishedTimetablesPage({
     <PageHeader
       eyebrow="Step 4 of 4"
       title="Timetable publication"
-      description="Run the final checks and publish the current timetable in one step. Every replacement remains available in version history."
+      description="Publish the current timetable in one step. Every version stays in history."
       actions={<Badge variant="primary"><FileChartColumn className="size-3.5"/> Direct publishing</Badge>}
     />
 

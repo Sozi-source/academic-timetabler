@@ -73,7 +73,7 @@ export default async function TrainersPage() {
       <PageHeader
         eyebrow="Scheduling resources"
         title="Trainers"
-        description="Register teaching staff, define weekly workload targets and control availability for unit allocation and timetable generation."
+        description="Register trainers, set workload targets and control availability."
         context={
           <div className="flex flex-wrap items-center gap-2">
             <Link href="/timetable/trainers/availability" className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary">Set availability</Link>

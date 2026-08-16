@@ -42,7 +42,7 @@ export default async function EditAcademicYearPage({
       <PageHeader
         eyebrow="Academic calendar"
         title={`Edit ${academicYear.name}`}
-        description="Update the institutional name, date range and planning notes for this Academic Year."
+        description="Update the name, date range and notes for this Academic Year."
         actions={
           <Link
             href="/timetable/academic-years"

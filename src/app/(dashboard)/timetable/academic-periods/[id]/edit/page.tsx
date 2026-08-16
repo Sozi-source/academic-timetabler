@@ -66,7 +66,7 @@ export default async function EditAcademicPeriodPage({
       <PageHeader
         eyebrow="Academic calendar"
         title={`Edit ${academicPeriod.name}`}
-        description="Update the period identity, parent Academic Year, operational dates and teaching window."
+        description="Update the period's name, Academic Year, dates and teaching window."
         context={
           <div className="flex flex-wrap items-center gap-2">
             <AcademicPeriodStatusBadge

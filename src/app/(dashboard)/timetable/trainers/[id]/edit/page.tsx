@@ -52,7 +52,7 @@ export default async function EditTrainerPage({
       <PageHeader
         eyebrow="Scheduling resources"
         title={`Edit ${trainer.fullName}`}
-        description="Update trainer identity, contacts, employment category, specialization and teaching-load limits."
+        description="Update trainer details, contacts and workload limits."
         context={
           <div className="flex flex-wrap items-center gap-2">
             <Badge

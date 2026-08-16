@@ -20,7 +20,7 @@ export default async function ConstraintsPage({ searchParams }: { searchParams: 
   const params = await searchParams;
   const selectedId = params.academicPeriodId ?? periods.find((period) => period.status === 'active')?.id ?? periods[0]?.id ?? null;
   const data = selectedId ? await getSchedulingConstraintData(selectedId) : null;
-  return <div className="space-y-5"><PageHeader eyebrow="Enterprise scheduling" title="Availability and constraints" description="Define hard restrictions and soft preferences used during readiness assessment, timetable generation and manual editing." actions={<Badge variant="primary"><ShieldCheck className="size-3.5"/> Constraint control</Badge>}/>
+  return <div className="space-y-5"><PageHeader eyebrow="Enterprise scheduling" title="Availability and constraints" description="Define hard restrictions and soft preferences for scheduling." actions={<Badge variant="primary"><ShieldCheck className="size-3.5"/> Constraint control</Badge>}/>
     <Card className="p-4"><form method="get" className="flex flex-col gap-3 sm:flex-row sm:items-end"><label className="flex-1 space-y-1.5"><span className="text-sm font-medium text-text-primary">Academic Period</span><Select id="academicPeriodId" name="academicPeriodId" defaultValue={selectedId ?? ''}>{periods.map((period)=><option key={period.id} value={period.id}>{period.code} — {period.name}</option>)}</Select></label><Button type="submit">Load</Button></form></Card>
     {selectedId && data ? <ConstraintWorkspace academicPeriodId={selectedId} data={data}/> : <EmptyState icon={ShieldCheck} title="No constraints to show" description="No active or planned Academic Period is available." />}
   </div>;

@@ -57,7 +57,7 @@ export default async function TimetableReportsPage({
       <PageHeader
         eyebrow="Enterprise reporting"
         title="Timetable reports"
-        description="Review the master timetable, cohort schedules, trainer workloads and room usage from one controlled reporting workspace."
+        description="Review the master timetable, cohort schedules, workloads and room usage."
         actions={(
           <div className="inline-flex items-center gap-2 rounded-xl bg-primary-soft px-3 py-2 text-sm font-semibold text-primary">
             <BarChart3 className="size-4" aria-hidden="true" />

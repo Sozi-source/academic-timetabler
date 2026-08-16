@@ -41,7 +41,7 @@ export default async function AcademicYearsPage() {
       <PageHeader
         eyebrow="Academic calendar"
         title="Academic Years"
-        description="Define the institution-wide calendar years that contain academic periods, timetables, cohort activity and reporting cycles."
+        description="Define the calendar years that group academic periods and timetables."
         context={
           activeYear ? (
             <div className="inline-flex items-center gap-2 rounded-full border border-success-border bg-success-surface px-3 py-1.5 text-xs font-semibold text-success">

@@ -78,7 +78,7 @@ export default async function EditCohortPage({
       <PageHeader
         eyebrow="Academic structure"
         title={`Edit ${cohort.code}`}
-        description="Update cohort identity, programme, dates, academic progress, enrolment and lifecycle status."
+        description="Update cohort details, programme, dates and status."
         context={
           <div className="flex flex-wrap items-center gap-2">
             <Badge

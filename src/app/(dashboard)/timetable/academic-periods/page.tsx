@@ -59,7 +59,7 @@ export default async function AcademicPeriodsPage() {
       <PageHeader
         eyebrow="Academic calendar"
         title="Academic Periods"
-        description="Define ordered teaching periods within each Academic Year, including full period dates and the timetable teaching window."
+        description="Define ordered teaching periods and their teaching windows within each Academic Year."
         context={
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="neutral">

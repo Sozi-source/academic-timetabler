@@ -43,7 +43,7 @@ export default async function TimetableConflictsPage({
       <PageHeader
         eyebrow="Enterprise scheduling"
         title="Conflict resolution centre"
-        description="Detect trainer, cohort and room clashes, capacity problems and scheduling-constraint violations before approval or publication."
+        description="Detect trainer, cohort and room clashes before approval or publication."
         actions={<Badge variant="danger"><ShieldAlert className="size-3.5" /> Live validation</Badge>}
       />
 

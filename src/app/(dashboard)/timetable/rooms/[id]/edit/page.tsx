@@ -47,7 +47,7 @@ export default async function EditRoomPage({
       <PageHeader
         eyebrow="Scheduling resources"
         title={`Edit ${room.code}`}
-        description="Update room details, location, capacity, accessibility and timetable availability."
+        description="Update room details, capacity, accessibility and availability."
         context={
           <div className="flex flex-wrap items-center gap-2">
             <Badge

@@ -450,13 +450,16 @@ export function personalSessionParagraphs(
     return [
       new Paragraph({
         style: 'PersonalUnit',
-        spacing: { before: index === 0 ? 0 : 120, after: 30, line: 250 },
-        children: [new TextRun(`${row.unitCode} - ${row.unitName}`)],
+        spacing: { before: index === 0 ? 0 : 120, after: 15, line: 250 },
+        children: [new TextRun(row.unitName)],
+      }),
+      new Paragraph({
+        style: 'PersonalUnitCode',
+        children: [new TextRun(row.unitCode)],
       }),
       new Paragraph({
         style: 'PersonalDetail',
         children: [
-          new TextRun({ bold: true, text: 'Cohort: ' }),
           new TextRun(cohort),
         ],
       }),
@@ -629,16 +632,24 @@ export async function buildPersonalTimetablesDocx({
           id: 'PersonalUnit',
           name: 'Personal Unit',
           basedOn: 'Normal',
+          next: 'PersonalUnitCode',
+          run: { font: 'Calibri', size: 20, bold: true, color: '0B2545' },
+          paragraph: { alignment: AlignmentType.CENTER, spacing: { before: 0, after: 15, line: 250 } },
+        },
+        {
+          id: 'PersonalUnitCode',
+          name: 'Personal Unit Code',
+          basedOn: 'Normal',
           next: 'PersonalDetail',
-          run: { font: 'Calibri', size: 19, bold: true, color: '0B2545' },
-          paragraph: { alignment: AlignmentType.CENTER, spacing: { before: 0, after: 30, line: 250 } },
+          run: { font: 'Calibri', size: 14, color: '64748B' },
+          paragraph: { alignment: AlignmentType.CENTER, spacing: { before: 0, after: 30, line: 220 } },
         },
         {
           id: 'PersonalDetail',
           name: 'Personal Cohort Detail',
           basedOn: 'Normal',
           next: 'PersonalDepartment',
-          run: { font: 'Calibri', size: 16, color: '334155' },
+          run: { font: 'Calibri', size: 16, bold: true, color: '334155' },
           paragraph: { alignment: AlignmentType.CENTER, spacing: { before: 0, after: 20, line: 230 } },
         },
         {

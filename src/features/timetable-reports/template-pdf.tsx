@@ -282,6 +282,27 @@ const personalStyles = StyleSheet.create({
     fontFamily: 'Helvetica-Oblique',
     fontSize: 6.4,
   },
+  personalUnitName: {
+    fontFamily: 'Helvetica-Bold',
+    fontSize: 9,
+    lineHeight: 1.25,
+    textAlign: 'center',
+    textTransform: 'uppercase',
+  },
+  personalUnitCode: {
+    marginTop: 1,
+    fontFamily: 'Helvetica',
+    fontSize: 6.6,
+    color: '#475569',
+    textAlign: 'center',
+  },
+  personalCohort: {
+    marginTop: 3,
+    fontFamily: 'Helvetica-Bold',
+    fontSize: 7,
+    textAlign: 'center',
+    textTransform: 'uppercase',
+  },
   sessionCell: {
     minHeight: 101,
     justifyContent: 'center',
@@ -430,8 +451,9 @@ function PersonalSessionCell({ rows }: { rows: TimetableReportRow[] }) {
       {rows.map((row, index) => (
         <View key={row.sessionId} style={{ alignItems: 'center', width: '100%' }}>
           {index > 0 ? <View style={personalStyles.separator} /> : null}
-          <Text>{row.unitCode} - {row.unitName}</Text>
-          <Text>({cohortCodes(row).join(' + ')})</Text>
+          <Text style={personalStyles.personalUnitName}>{row.unitName}</Text>
+          <Text style={personalStyles.personalUnitCode}>{row.unitCode}</Text>
+          <Text style={personalStyles.personalCohort}>{cohortCodes(row).join(' + ')}</Text>
           {row.departmentName ? (
             <Text style={personalStyles.department}>
               {row.departmentCode ? `${row.departmentCode} - ` : ''}{row.departmentName}

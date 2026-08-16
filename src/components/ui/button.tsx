@@ -1,3 +1,4 @@
+import { Slot } from '@radix-ui/react-slot';
 import type {
   ButtonHTMLAttributes,
   ReactNode,
@@ -24,6 +25,7 @@ interface ButtonProps
   size?: ButtonSize;
   leadingIcon?: ReactNode;
   trailingIcon?: ReactNode;
+  asChild?: boolean;
 }
 
 const variantClasses: Record<
@@ -57,17 +59,28 @@ export function Button({
   className,
   children,
   type = 'button',
+  asChild = false,
   ...props
 }: ButtonProps) {
+  const classes = cn(
+    'inline-flex shrink-0 items-center justify-center gap-2 border font-semibold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-focus-ring/35 disabled:pointer-events-none disabled:opacity-55',
+    variantClasses[variant],
+    sizeClasses[size],
+    className,
+  );
+
+  if (asChild) {
+    return (
+      <Slot className={classes} {...props}>
+        {children}
+      </Slot>
+    );
+  }
+
   return (
     <button
       type={type}
-      className={cn(
-        'inline-flex shrink-0 items-center justify-center gap-2 border font-semibold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-focus-ring/35 disabled:pointer-events-none disabled:opacity-55',
-        variantClasses[variant],
-        sizeClasses[size],
-        className,
-      )}
+      className={classes}
       {...props}
     >
       {leadingIcon}

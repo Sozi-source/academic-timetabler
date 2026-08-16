@@ -9,9 +9,12 @@ import {
   XCircle,
 } from 'lucide-react';
 
+import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { MetricCard } from '@/components/ui/metric-card';
 import { PageHeader } from '@/components/ui/page-header';
+import { SectionHeader } from '@/components/ui/section-header';
 import { getUnitOfferings } from '@/features/unit-offerings/queries';
 import { UnitOfferingTable } from '@/features/unit-offerings/unit-offering-table';
 
@@ -46,7 +49,7 @@ export default async function UnitOfferingsPage() {
   ).size;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <PageHeader
         eyebrow="Semester planning"
         title="Units on Offer"
@@ -64,19 +67,18 @@ export default async function UnitOfferingsPage() {
           </div>
         }
         actions={
-          <Link
-            href="/timetable/unit-offerings/import"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
-          >
-            <Upload className="size-4" aria-hidden="true" />
-            Import Units on Offer
-          </Link>
+          <Button asChild variant="outline">
+            <Link href="/timetable/unit-offerings/import">
+              <Upload className="size-4" aria-hidden="true" />
+              Import Units on Offer
+            </Link>
+          </Button>
         }
       />
 
       <section
         aria-label="Units on Offer metrics"
-        className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
       >
         <MetricCard
           label="All offerings"
@@ -109,44 +111,24 @@ export default async function UnitOfferingsPage() {
       </section>
 
       {offerings.length === 0 ? (
-        <section className="rounded-2xl border border-warning-border bg-warning-surface px-5 py-5">
-          <div className="flex items-start gap-3">
-            <CalendarCheck2
-              className="mt-0.5 size-5 shrink-0 text-warning"
-              aria-hidden="true"
-            />
-            <div>
-              <h2 className="font-semibold text-text-primary">
-                No Units on Offer registered
-              </h2>
-              <p className="mt-1 text-sm leading-6 text-text-secondary">
-                Download the semester template, enter or review your real programme units,
-                then upload and confirm the workbook.
-              </p>
-              <Link
-                href="/timetable/unit-offerings/import"
-                className="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-white transition hover:opacity-90"
-              >
-                <Upload className="size-4" aria-hidden="true" />
-                Open import workflow
-              </Link>
-            </div>
-          </div>
-        </section>
+        <Alert variant="warning" icon={CalendarCheck2} title="No Units on Offer registered">
+          <p>
+            Download the semester template, enter or review your real programme units,
+            then upload and confirm the workbook.
+          </p>
+          <Button asChild variant="primary" className="mt-3">
+            <Link href="/timetable/unit-offerings/import">
+              <Upload className="size-4" aria-hidden="true" />
+              Open import workflow
+            </Link>
+          </Button>
+        </Alert>
       ) : (
-        <section aria-labelledby="unit-offering-register-title" className="space-y-4">
-          <div>
-            <h2
-              id="unit-offering-register-title"
-              className="text-lg font-semibold text-text-primary"
-            >
-              Semester offering register
-            </h2>
-            <p className="mt-1 text-sm text-text-muted">
-              Review the programme, cohort, Academic Period, inclusion decision and
-              timetable readiness of every Unit on Offer.
-            </p>
-          </div>
+        <section aria-labelledby="unit-offering-register-title" className="space-y-3">
+          <SectionHeader
+            title="Semester offering register"
+            description="Review the programme, cohort, Academic Period, inclusion decision and timetable readiness of every Unit on Offer."
+          />
           <UnitOfferingTable offerings={offerings} />
         </section>
       )}

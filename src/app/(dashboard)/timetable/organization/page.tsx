@@ -6,9 +6,13 @@ import {
 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
-import {
-  PageHeader,
-} from '@/components/ui/page-header';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Input } from '@/components/ui/input';
+import { PageHeader } from '@/components/ui/page-header';
+import { Select } from '@/components/ui/select';
 import {
   requireHodAccess,
 } from '@/features/auth/authorization';
@@ -23,9 +27,6 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-const controlClassName =
-  'h-10 w-full rounded-xl border border-border bg-surface px-3 text-sm text-text-primary outline-none focus:border-primary';
-
 export default async function OrganizationPage() {
   const profile = await requireHodAccess();
   const isSystemAdministrator =
@@ -39,7 +40,7 @@ export default async function OrganizationPage() {
     ]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <PageHeader
         eyebrow="Institution setup"
         title="Schools / Departments"
@@ -66,179 +67,155 @@ export default async function OrganizationPage() {
       />
 
       {isSystemAdministrator ? (
-        <section className="grid gap-4 xl:grid-cols-2">
-          <form
-            action={createAcademicWorkspaceAction}
-            className="rounded-2xl border border-border bg-surface p-5"
-          >
-            <h2 className="font-semibold text-text-primary">
-              Add school / department
-            </h2>
-            <p className="mt-1 text-xs leading-5 text-text-muted">
-              Enter the name once. The system creates the matching internal records automatically.
-            </p>
-            <div className="mt-4 space-y-3">
-              <input
-                name="code"
-                required
-                placeholder="Code, for example HND"
-                className={controlClassName}
-              />
-              <input
-                name="name"
-                required
-                placeholder="Official school / department name"
-                className={controlClassName}
-              />
-              <button
-                type="submit"
-                className="inline-flex h-10 items-center rounded-xl bg-primary px-4 text-sm font-semibold text-white"
+        <section className="grid gap-3 xl:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <h2 className="text-sm font-semibold text-text-primary">
+                Add school / department
+              </h2>
+              <p className="mt-1 text-xs leading-5 text-text-muted">
+                Enter the name once. The system creates the matching internal records automatically.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <form
+                action={createAcademicWorkspaceAction}
+                className="space-y-3"
               >
-                <Plus
-                  className="mr-2 size-4"
-                  aria-hidden="true"
+                <Input
+                  name="code"
+                  required
+                  placeholder="Code, for example HND"
                 />
-                Add workspace
-              </button>
-            </div>
-          </form>
+                <Input
+                  name="name"
+                  required
+                  placeholder="Official school / department name"
+                />
+                <Button type="submit" leadingIcon={<Plus className="size-4" aria-hidden="true" />}>
+                  Add workspace
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
 
-          <form
-            action={assignDepartmentMemberAction}
-            className="rounded-2xl border border-border bg-surface p-5"
-          >
-            <h2 className="font-semibold text-text-primary">
-              Workspace access
-            </h2>
-            <p className="mt-1 text-xs leading-5 text-text-muted">
-              Choose which school or department a user may manage.
-            </p>
-            <div className="mt-4 space-y-3">
-              <select
-                name="profileId"
-                required
-                className={controlClassName}
+          <Card>
+            <CardHeader>
+              <h2 className="text-sm font-semibold text-text-primary">
+                Workspace access
+              </h2>
+              <p className="mt-1 text-xs leading-5 text-text-muted">
+                Choose which school or department a user may manage.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <form
+                action={assignDepartmentMemberAction}
+                className="space-y-3"
               >
-                <option value="">Select user</option>
-                {profiles.map((user) => (
-                  <option
-                    key={user.id}
-                    value={user.id}
-                  >
-                    {user.fullName} — {user.email}
+                <Select name="profileId" required defaultValue="">
+                  <option value="">Select user</option>
+                  {profiles.map((user) => (
+                    <option
+                      key={user.id}
+                      value={user.id}
+                    >
+                      {user.fullName} — {user.email}
+                    </option>
+                  ))}
+                </Select>
+                <Select name="departmentId" required defaultValue="">
+                  <option value="">
+                    Select school / department
                   </option>
-                ))}
-              </select>
-              <select
-                name="departmentId"
-                required
-                className={controlClassName}
-              >
-                <option value="">
-                  Select school / department
-                </option>
-                {workspaces.map((workspace) => (
-                  <option
-                    key={workspace.id}
-                    value={workspace.id}
-                  >
-                    {workspace.name}
+                  {workspaces.map((workspace) => (
+                    <option
+                      key={workspace.id}
+                      value={workspace.id}
+                    >
+                      {workspace.name}
+                    </option>
+                  ))}
+                </Select>
+                <Select name="membershipRole" required defaultValue="hod">
+                  <option value="hod">
+                    Head of Department
                   </option>
-                ))}
-              </select>
-              <select
-                name="membershipRole"
-                required
-                className={controlClassName}
-              >
-                <option value="hod">
-                  Head of Department
-                </option>
-                <option value="timetable_officer">
-                  Timetable officer
-                </option>
-                <option value="school_admin">
-                  Workspace administrator
-                </option>
-                <option value="staff">
-                  View-only staff
-                </option>
-              </select>
-              <label className="flex items-center gap-2 text-sm text-text-secondary">
-                <input
-                  name="isPrimary"
-                  type="checkbox"
-                />
-                Make this the user&apos;s primary workspace
-              </label>
-              <button
-                type="submit"
-                className="inline-flex h-10 items-center rounded-xl bg-primary px-4 text-sm font-semibold text-white"
-              >
-                <ShieldCheck
-                  className="mr-2 size-4"
-                  aria-hidden="true"
-                />
-                Save access
-              </button>
-            </div>
-          </form>
+                  <option value="timetable_officer">
+                    Timetable officer
+                  </option>
+                  <option value="school_admin">
+                    Workspace administrator
+                  </option>
+                  <option value="staff">
+                    View-only staff
+                  </option>
+                </Select>
+                <label className="flex items-center gap-2 text-sm text-text-secondary">
+                  <Checkbox name="isPrimary" />
+                  Make this the user&apos;s primary workspace
+                </label>
+                <Button type="submit" leadingIcon={<ShieldCheck className="size-4" aria-hidden="true" />}>
+                  Save access
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
         </section>
       ) : (
-        <div className="rounded-2xl border border-border bg-surface-subtle p-4 text-sm text-text-secondary">
+        <Card className="p-4 text-sm text-text-secondary">
           You can view your authorized school or department workspace. A system administrator creates workspaces and assigns access.
-        </div>
+        </Card>
       )}
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        {workspaces.map((workspace) => (
-          <article
-            key={workspace.id}
-            className="rounded-2xl border border-border bg-surface p-5"
-          >
-            <div className="flex items-start gap-3">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
-                <Building2
-                  className="size-5"
+      {workspaces.length > 0 ? (
+        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {workspaces.map((workspace) => (
+            <Card key={workspace.id} className="p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+                  <Building2
+                    className="size-4"
+                    aria-hidden="true"
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-sm font-semibold text-text-primary">
+                    {workspace.name}
+                  </h2>
+                  <p className="mt-0.5 text-xs text-text-muted">
+                    {workspace.code}
+                  </p>
+                </div>
+                <Badge
+                  variant={
+                    workspace.is_active
+                      ? 'success'
+                      : 'neutral'
+                  }
+                >
+                  {workspace.is_active
+                    ? 'Active'
+                    : 'Inactive'}
+                </Badge>
+              </div>
+              <div className="mt-3 flex items-center gap-2 text-xs text-text-muted">
+                <Users
+                  className="size-3.5 text-primary"
                   aria-hidden="true"
                 />
+                Independent timetable workspace
               </div>
-              <div className="min-w-0 flex-1">
-                <h2 className="font-semibold text-text-primary">
-                  {workspace.name}
-                </h2>
-                <p className="mt-1 text-xs text-text-muted">
-                  {workspace.code}
-                </p>
-              </div>
-              <Badge
-                variant={
-                  workspace.is_active
-                    ? 'success'
-                    : 'neutral'
-                }
-              >
-                {workspace.is_active
-                  ? 'Active'
-                  : 'Inactive'}
-              </Badge>
-            </div>
-            <div className="mt-4 flex items-center gap-2 text-xs text-text-muted">
-              <Users
-                className="size-4 text-primary"
-                aria-hidden="true"
-              />
-              Independent timetable workspace
-            </div>
-          </article>
-        ))}
-      </section>
-
-      {workspaces.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border-strong bg-surface-subtle p-8 text-center text-sm text-text-muted">
-          No school or department workspace has been registered.
-        </div>
-      ) : null}
+            </Card>
+          ))}
+        </section>
+      ) : (
+        <EmptyState
+          icon={Building2}
+          title="No workspace registered"
+          description="No school or department workspace has been registered."
+        />
+      )}
     </div>
   );
 }

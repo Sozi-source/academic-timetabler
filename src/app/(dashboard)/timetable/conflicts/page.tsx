@@ -1,7 +1,12 @@
 import type { Metadata } from 'next';
 import { ShieldAlert } from 'lucide-react';
 
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/ui/page-header';
+import { Select } from '@/components/ui/select';
 import { getAcademicPeriods } from '@/features/academic-periods/queries';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { TimetableConflictCenter } from '@/features/timetable-conflicts/conflict-center';
@@ -34,48 +39,34 @@ export default async function TimetableConflictsPage({
     : null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <PageHeader
         eyebrow="Enterprise scheduling"
         title="Conflict resolution centre"
         description="Detect trainer, cohort and room clashes, capacity problems and scheduling-constraint violations before approval or publication."
-        actions={(
-          <div className="inline-flex items-center gap-2 rounded-xl bg-danger-surface px-3 py-2 text-sm font-semibold text-danger">
-            <ShieldAlert className="size-4" />
-            Live validation
-          </div>
-        )}
+        actions={<Badge variant="danger"><ShieldAlert className="size-3.5" /> Live validation</Badge>}
       />
 
-      <form method="get" className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
-        <label className="text-sm font-semibold text-text-primary" htmlFor="academicPeriodId">
-          Academic Period
-        </label>
-        <div className="mt-2 flex gap-2">
-          <select
-            id="academicPeriodId"
-            name="academicPeriodId"
-            defaultValue={selectedId ?? ''}
-            className="h-11 flex-1 rounded-xl border border-border-strong bg-surface px-3 text-sm"
-          >
-            {periods.map((period) => (
-              <option key={period.id} value={period.id}>
-                {period.code} — {period.name}
-              </option>
-            ))}
-          </select>
-          <button className="h-11 rounded-xl bg-primary px-4 text-sm font-semibold text-white">
-            Load
-          </button>
-        </div>
-      </form>
+      <Card className="p-4">
+        <form method="get" className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <label className="flex-1 space-y-1.5">
+            <span className="text-sm font-medium text-text-primary">Academic Period</span>
+            <Select id="academicPeriodId" name="academicPeriodId" defaultValue={selectedId ?? ''}>
+              {periods.map((period) => (
+                <option key={period.id} value={period.id}>
+                  {period.code} — {period.name}
+                </option>
+              ))}
+            </Select>
+          </label>
+          <Button type="submit">Load</Button>
+        </form>
+      </Card>
 
       {selectedId && data ? (
         <TimetableConflictCenter academicPeriodId={selectedId} data={data} />
       ) : (
-        <div className="rounded-2xl border border-dashed border-border p-10 text-center text-sm text-text-muted">
-          No active or planned Academic Period is available.
-        </div>
+        <EmptyState icon={ShieldAlert} title="No conflicts to review" description="No active or planned Academic Period is available." />
       )}
     </div>
   );

@@ -10,6 +10,9 @@ import {
   useState,
 } from 'react';
 
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Select } from '@/components/ui/select';
 import {
   TemplateDownloadLink,
 } from '@/features/imports/template-download-link';
@@ -59,22 +62,22 @@ export function UnitOfferingTemplateDownloadPanel({
     );
 
   return (
-    <div className="grid gap-5 lg:grid-cols-2">
-      <section className="rounded-2xl border border-border bg-surface p-5 shadow-sm">
-        <div className="flex items-start gap-4">
-          <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-surface-subtle text-text-secondary">
+    <div className="grid gap-4 lg:grid-cols-2">
+      <Card className="p-4">
+        <div className="flex items-start gap-3">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-surface-subtle text-text-secondary">
             <FileSpreadsheet
-              className="size-5"
+              className="size-4"
               aria-hidden="true"
             />
           </div>
 
           <div className="min-w-0 flex-1">
-            <h2 className="font-semibold text-text-primary">
+            <h2 className="text-sm font-semibold text-text-primary">
               Blank template
             </h2>
 
-            <p className="mt-1 text-sm leading-6 text-text-muted">
+            <p className="mt-1 text-xs leading-5 text-text-muted">
               Download an empty standardized workbook
               and enter the Semester Units on Offer
               manually.
@@ -83,27 +86,27 @@ export function UnitOfferingTemplateDownloadPanel({
             <TemplateDownloadLink
               entityType="unit_offerings"
               label="Download blank template"
-              className="mt-4"
+              className="mt-3"
             />
           </div>
         </div>
-      </section>
+      </Card>
 
-      <section className="rounded-2xl border border-primary/20 bg-primary-subtle p-5 shadow-sm">
-        <div className="flex items-start gap-4">
-          <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+      <Card className="border-primary/20 bg-primary-subtle p-4">
+        <div className="flex items-start gap-3">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
             <Sparkles
-              className="size-5"
+              className="size-4"
               aria-hidden="true"
             />
           </div>
 
           <div className="min-w-0 flex-1">
-            <h2 className="font-semibold text-text-primary">
+            <h2 className="text-sm font-semibold text-text-primary">
               Prefilled semester template
             </h2>
 
-            <p className="mt-1 text-sm leading-6 text-text-muted">
+            <p className="mt-1 text-xs leading-5 text-text-muted">
               Generate a workbook from the programme
               units you registered for each active
               cohort&apos;s current stage.
@@ -111,12 +114,12 @@ export function UnitOfferingTemplateDownloadPanel({
 
             <label
               htmlFor="unit-offering-academic-period"
-              className="mt-4 block text-sm font-semibold text-text-secondary"
+              className="mt-3 block text-sm font-medium text-text-secondary"
             >
               Academic Period
             </label>
 
-            <select
+            <Select
               id="unit-offering-academic-period"
               value={academicPeriodId}
               onChange={(event) =>
@@ -124,7 +127,7 @@ export function UnitOfferingTemplateDownloadPanel({
                   event.target.value,
                 )
               }
-              className="mt-2 h-11 w-full rounded-xl border border-border-strong bg-surface px-3 text-sm text-text-primary outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="mt-1.5"
             >
               {academicPeriods.length ===
               0 ? (
@@ -143,13 +146,13 @@ export function UnitOfferingTemplateDownloadPanel({
                   </option>
                 ),
               )}
-            </select>
+            </Select>
 
             {academicPeriodId ? (
               <form
                 action="/api/import-templates/unit_offerings/prefilled"
                 method="get"
-                className="mt-4"
+                className="mt-3"
               >
                 <input
                   type="hidden"
@@ -157,34 +160,26 @@ export function UnitOfferingTemplateDownloadPanel({
                   value={academicPeriodId}
                 />
 
-                <button
+                <Button
                   type="submit"
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-white transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  leadingIcon={<Download className="size-4" aria-hidden="true" />}
                 >
-                  <Download
-                    className="size-4"
-                    aria-hidden="true"
-                  />
-
                   Download prefilled template
-                </button>
+                </Button>
               </form>
             ) : (
-              <button
+              <Button
                 type="button"
                 disabled
-                className="mt-4 inline-flex h-10 cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-surface-muted px-4 text-sm font-semibold text-text-muted opacity-70"
+                className="mt-3"
+                leadingIcon={<Download className="size-4" aria-hidden="true" />}
               >
-                <Download
-                  className="size-4"
-                  aria-hidden="true"
-                />
                 Download prefilled template
-              </button>
+              </Button>
             )}
 
             {selectedPeriod ? (
-              <p className="mt-3 text-xs leading-5 text-text-muted">
+              <p className="mt-2.5 text-xs leading-5 text-text-muted">
                 The workbook will use only database
                 records eligible for{' '}
                 <span className="font-semibold text-text-secondary">
@@ -195,7 +190,7 @@ export function UnitOfferingTemplateDownloadPanel({
             ) : null}
           </div>
         </div>
-      </section>
+      </Card>
     </div>
   );
 }

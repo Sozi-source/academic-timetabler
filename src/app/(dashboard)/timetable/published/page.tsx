@@ -1,7 +1,12 @@
 import type { Metadata } from 'next';
 import { FileChartColumn } from 'lucide-react';
 
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/ui/page-header';
+import { Select } from '@/components/ui/select';
 import { getAcademicPeriods } from '@/features/academic-periods/queries';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { TimetablePublicationWorkspace } from '@/features/timetable-publication/publication-workspace';
@@ -25,24 +30,26 @@ export default async function PublishedTimetablesPage({
   const selectedPeriod = periods.find((period) => period.id === selectedId) ?? null;
   const versions = selectedId ? await getTimetableVersions(selectedId) : [];
 
-  return <div className="space-y-6">
+  return <div className="space-y-5">
     <PageHeader
       eyebrow="Step 4 of 4"
       title="Timetable publication"
       description="Run the final checks and publish the current timetable in one step. Every replacement remains available in version history."
-      actions={<div className="inline-flex items-center gap-2 rounded-xl bg-primary-soft px-3 py-2 text-sm font-semibold text-primary"><FileChartColumn className="size-4"/> Direct publishing</div>}
+      actions={<Badge variant="primary"><FileChartColumn className="size-3.5"/> Direct publishing</Badge>}
     />
 
-    <form method="get" className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
-      <label className="text-sm font-semibold text-text-primary" htmlFor="academicPeriodId">Academic Period</label>
-      <div className="mt-2 flex gap-2">
-        <select id="academicPeriodId" name="academicPeriodId" defaultValue={selectedId ?? ''} className="h-11 flex-1 rounded-xl border border-border-strong bg-surface px-3 text-sm">
-          {periods.map((period) => <option key={period.id} value={period.id}>{period.code} — {period.name}</option>)}
-        </select>
-        <button className="h-11 rounded-xl bg-primary px-4 text-sm font-semibold text-white" type="submit">Load versions</button>
-      </div>
-    </form>
+    <Card className="p-4">
+      <form method="get" className="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <label className="flex-1 space-y-1.5">
+          <span className="text-sm font-medium text-text-primary">Academic Period</span>
+          <Select id="academicPeriodId" name="academicPeriodId" defaultValue={selectedId ?? ''}>
+            {periods.map((period) => <option key={period.id} value={period.id}>{period.code} — {period.name}</option>)}
+          </Select>
+        </label>
+        <Button type="submit">Load versions</Button>
+      </form>
+    </Card>
 
-    {selectedId && selectedPeriod ? <TimetablePublicationWorkspace academicPeriodId={selectedId} academicPeriodName={selectedPeriod.name} canPublish={selectedPeriod.status === 'active' || selectedPeriod.status === 'planned'} versions={versions}/> : <div className="rounded-2xl border border-dashed border-border p-10 text-center text-sm text-text-muted">No Academic Period is available.</div>}
+    {selectedId && selectedPeriod ? <TimetablePublicationWorkspace academicPeriodId={selectedId} academicPeriodName={selectedPeriod.name} canPublish={selectedPeriod.status === 'active' || selectedPeriod.status === 'planned'} versions={versions}/> : <EmptyState icon={FileChartColumn} title="No timetable to publish" description="No Academic Period is available." />}
   </div>;
 }

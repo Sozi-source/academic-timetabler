@@ -1,8 +1,11 @@
 export type ConflictSeverity = 'blocked' | 'error' | 'warning';
 export type ConflictKind =
   | 'trainer_overlap'
+  | 'trainer_availability'
+  | 'trainer_pending'
   | 'cohort_overlap'
   | 'room_overlap'
+  | 'room_pending'
   | 'room_capacity'
   | 'hard_constraint'
   | 'soft_constraint'
@@ -14,13 +17,16 @@ export interface ConflictSession {
   cohortId: string;
   cohortName: string;
   cohortSize: number;
+  participantCohortIds: string[];
+  combinedCohortSize: number;
   unitId: string;
   unitCode: string;
   unitName: string;
-  trainerId: string;
+  trainerId: string | null;
   trainerName: string;
-  roomId: string;
-  roomCode: string;
+  trainerAvailabilityMode: 'generally_available' | 'selected_slots_only';
+  roomId: string | null;
+  roomCode: string | null;
   roomName: string;
   roomCapacity: number;
   workingDayId: string;
@@ -51,6 +57,24 @@ export interface ConflictReview {
   status: 'acknowledged' | 'resolved' | 'reopened';
   resolutionNote: string | null;
   updatedAt: string;
+}
+
+export interface ConflictTrainerAvailability {
+  trainerId: string;
+  workingDayId: string;
+  timeSlotId: string;
+}
+
+export interface ConflictTimeSlot {
+  id: string;
+  sequenceNumber: number;
+  slotType: string;
+  isEnabled: boolean;
+}
+
+export interface ConflictAvailabilityContext {
+  availableSlots: ConflictTrainerAvailability[];
+  timeSlots: ConflictTimeSlot[];
 }
 
 export interface TimetableConflict {

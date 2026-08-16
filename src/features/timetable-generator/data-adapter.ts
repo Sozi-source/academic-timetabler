@@ -38,6 +38,9 @@ import type {
   ExistingScheduledSessionRow,
 } from './server-types';
 import {
+  normalizeParticipantCohortIds,
+} from './participant-cohorts';
+import {
   getIntervalDurationMinutes,
 } from './time';
 import type {
@@ -53,6 +56,7 @@ import type {
 } from './types';
 import type {
   GeneratorSourceData,
+  GeneratorTrainerAvailability,
 } from './queries';
 
 export interface CreateGeneratorPreviewOptions {
@@ -112,11 +116,24 @@ function mapAllocation(
       allocation.sessionDurationMinutes,
     isTimetableEnabled:
       allocation.isTimetableEnabled,
+    fixedWorkingDayId:
+      allocation.fixedWorkingDayId,
+    fixedWorkingDayIds:
+      allocation.fixedWorkingDayIds,
+    fixedTimeSlotIds:
+      allocation.fixedTimeSlotIds,
+    isFullDaySession:
+      allocation.isFullDaySession,
+    fixedEndTimeSlotId:
+      allocation.fixedEndTimeSlotId,
+    participantCohortIds: allocation.participantCohortIds,
+    combinedCohortSize: allocation.combinedCohortSize,
   };
 }
 
 function mapTrainer(
   trainer: Trainer,
+  availability: GeneratorTrainerAvailability[],
 ): PlanningTrainer {
   return {
     id: trainer.id,
@@ -124,6 +141,8 @@ function mapTrainer(
       trainer.staffNumber,
     fullName:
       trainer.fullName,
+    normalWeeklyHours:
+      trainer.normalWeeklyHours,
     maximumWeeklyHours:
       trainer.maximumWeeklyHours,
     maximumDailyHours:
@@ -132,6 +151,14 @@ function mapTrainer(
       trainer.isActive,
     isTimetableAvailable:
       trainer.isTimetableAvailable,
+    availabilityMode:
+      trainer.availabilityMode,
+    availableSlots: availability
+      .filter((slot) => slot.trainerId === trainer.id)
+      .map((slot) => ({
+        workingDayId: slot.workingDayId,
+        timeSlotId: slot.timeSlotId,
+      })),
   };
 }
 
@@ -256,6 +283,13 @@ function mapExistingSession(
       row.conflict_state,
     isLocked:
       row.is_locked,
+    participantCohortIds:
+      normalizeParticipantCohortIds({
+        cohortId: row.cohort_id,
+        participantCohortIds:
+          row.participant_cohort_ids,
+      }),
+    combinedCohortSize: row.combined_cohort_size,
   };
 }
 
@@ -297,8 +331,8 @@ export function createAutomaticPlannerInput({
         mapTimeSlot,
       ),
     trainers:
-      sourceData.trainers.map(
-        mapTrainer,
+      sourceData.trainers.map((trainer) =>
+        mapTrainer(trainer, sourceData.trainerAvailability),
       ),
     cohorts:
       sourceData.cohorts.map(
@@ -376,7 +410,10 @@ export function createGeneratorReadiness(
   }
 
   if (
-    sourceData.trainers.length === 0
+    sourceData.trainers.length === 0 &&
+    sourceData.allocations.some(
+      (allocation) => Boolean(allocation.trainerId),
+    )
   ) {
     issues.push(
       'No timetable-available trainers are configured.',
@@ -388,14 +425,6 @@ export function createGeneratorReadiness(
   ) {
     issues.push(
       'No timetable-available cohorts are configured.',
-    );
-  }
-
-  if (
-    sourceData.rooms.length === 0
-  ) {
-    issues.push(
-      'No timetable-available rooms are configured.',
     );
   }
 
@@ -466,6 +495,8 @@ function getConflictTitle(
       'Weekly trainer workload',
     trainer_unavailable:
       'Trainer unavailable',
+    trainer_pending:
+      'Unassigned trainer',
     cohort_unavailable:
       'Cohort unavailable',
     room_unavailable:
@@ -553,10 +584,9 @@ function mapPreviewSessions({
           session.cohortId,
         );
 
-      const room =
-        rooms.get(
-          session.roomId,
-        );
+      const room = session.roomId
+        ? rooms.get(session.roomId)
+        : null;
 
       const unit =
         units.get(
@@ -579,9 +609,7 @@ function mapPreviewSessions({
         );
 
       if (
-        !trainer ||
         !cohort ||
-        !room ||
         !unit ||
         !workingDay ||
         !startSlot ||
@@ -616,18 +644,18 @@ function mapPreviewSessions({
           unit.name,
 
         trainerId:
-          trainer.id,
+          trainer?.id ?? null,
         trainerStaffNumber:
-          trainer.staffNumber,
+          trainer?.staffNumber ?? null,
         trainerName:
-          trainer.fullName,
+          trainer?.fullName ?? 'Unassigned trainer',
 
         roomId:
-          room.id,
+          room?.id ?? null,
         roomCode:
-          room.code,
+          room?.code ?? null,
         roomName:
-          room.name,
+          room?.name ?? 'No room assigned',
 
         workingDayId:
           workingDay.id,

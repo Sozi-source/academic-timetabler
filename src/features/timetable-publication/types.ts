@@ -5,13 +5,28 @@ export type TimetableVersionStatus =
   | 'published'
   | 'archived';
 
+export interface PublicationActionState {
+  status: 'idle' | 'success' | 'error';
+  title: string;
+  message: string;
+  actionHref?: string;
+  actionLabel?: string;
+}
+
+export const initialPublicationActionState: PublicationActionState = {
+  status: 'idle',
+  title: '',
+  message: '',
+};
+
 export interface PublishedSessionSnapshot {
   id: string;
+  trainerId: string | null;
   cohortName: string;
   unitCode: string;
   unitName: string;
   trainerName: string;
-  roomCode: string;
+  roomCode: string | null;
   roomName: string;
   day: string;
   daySequence: number;

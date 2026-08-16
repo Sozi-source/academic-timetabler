@@ -85,6 +85,29 @@ describe('resource validation conflicts', () => {
     );
   });
 
+  it('requires every teaching period covered by a selected-time trainer session', () => {
+    const input = createConflictInput([
+      {
+        ...baseSession,
+        endTimeSlotId: 'slot-3',
+      },
+    ]);
+
+    input.trainers[0].availabilityMode = 'selected_slots_only';
+    input.trainers[0].availableSlots = [
+      {
+        workingDayId: 'day-1',
+        timeSlotId: 'slot-1',
+      },
+      {
+        workingDayId: 'day-1',
+        timeSlotId: 'slot-3',
+      },
+    ];
+
+    expect(getTypes(input)).toContain('trainer_unavailable');
+  });
+
   it('detects an unavailable cohort', () => {
     const input =
       createConflictInput();

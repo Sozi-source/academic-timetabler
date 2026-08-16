@@ -5,6 +5,9 @@ import type {
   TimeSlotType,
   WeekdayCode,
 } from '@/features/timetable-calendar/types';
+import type {
+  TrainerAvailabilityMode,
+} from '@/features/trainers/types';
 
 export type ScheduledSessionStatus =
   | 'draft'
@@ -45,6 +48,7 @@ export type PlanningConflictType =
   | 'trainer_daily_workload'
   | 'trainer_weekly_workload'
   | 'trainer_unavailable'
+  | 'trainer_pending'
   | 'cohort_unavailable'
   | 'room_unavailable'
   | 'unit_unavailable';
@@ -73,10 +77,16 @@ export interface PlanningTrainer {
   id: string;
   staffNumber: string;
   fullName: string;
+  normalWeeklyHours: number;
   maximumWeeklyHours: number;
   maximumDailyHours: number;
   isActive: boolean;
   isTimetableAvailable: boolean;
+  availabilityMode?: TrainerAvailabilityMode;
+  availableSlots?: Array<{
+    workingDayId: string;
+    timeSlotId: string;
+  }>;
 }
 
 export interface PlanningRoom {
@@ -111,12 +121,19 @@ export interface PlanningAllocation {
   academicPeriodId: string;
   cohortId: string;
   unitId: string;
-  trainerId: string;
+  trainerId: string | null;
   preferredRoomId: string | null;
   deliveryMode: TeachingDeliveryMode;
   weeklySessions: number;
   sessionDurationMinutes: number;
   isTimetableEnabled: boolean;
+  fixedWorkingDayId?: string | null;
+  fixedWorkingDayIds?: string[];
+  fixedTimeSlotIds?: string[];
+  isFullDaySession?: boolean;
+  fixedEndTimeSlotId?: string | null;
+  participantCohortIds?: string[];
+  combinedCohortSize?: number;
 }
 
 export interface PlanningSession {
@@ -125,17 +142,19 @@ export interface PlanningSession {
   teachingAllocationId: string;
   cohortId: string;
   unitId: string;
-  trainerId: string;
+  trainerId: string | null;
   workingDayId: string;
   startTimeSlotId: string;
   endTimeSlotId: string;
-  roomId: string;
+  roomId: string | null;
   sessionNumber: number;
   deliveryMode: TeachingDeliveryMode;
   status: ScheduledSessionStatus;
   source: ScheduledSessionSource;
   conflictState: ScheduledSessionConflictState;
   isLocked: boolean;
+  participantCohortIds?: string[];
+  combinedCohortSize?: number;
 }
 
 export interface ResolvedPlanningSession
@@ -145,7 +164,7 @@ export interface ResolvedPlanningSession
   endTimeSlot: PlanningTimeSlot;
   trainer: PlanningTrainer;
   cohort: PlanningCohort;
-  room: PlanningRoom;
+  room: PlanningRoom | null;
   unit: PlanningUnit;
 }
 

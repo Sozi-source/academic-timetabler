@@ -1,9 +1,14 @@
 import type {
+  ConflictAvailabilityContext,
   ConflictConstraint,
   ConflictReview,
   ConflictSession,
   TimetableConflict,
 } from './types';
+import {
+  findOverlappingParticipantCohortId,
+  normalizeParticipantCohortIds,
+} from '@/features/timetable-generator/participant-cohorts';
 
 function minutes(value: string) {
   const [hour = '0', minute = '0'] = value.slice(0, 5).split(':');
@@ -21,10 +26,21 @@ function samePlacement(a: ConflictSession, b: ConflictSession) {
 
 function compatibleSharedClass(a: ConflictSession, b: ConflictSession) {
   return a.unitName.trim().toLowerCase() === b.unitName.trim().toLowerCase() &&
+    a.trainerId !== null &&
     a.trainerId === b.trainerId &&
     a.roomId === b.roomId &&
     a.startTimeSlotId === b.startTimeSlotId &&
     a.endTimeSlotId === b.endTimeSlotId;
+}
+
+function participantCohorts(
+  session: ConflictSession,
+) {
+  return normalizeParticipantCohortIds({
+    cohortId: session.cohortId,
+    participantCohortIds:
+      session.participantCohortIds,
+  });
 }
 
 function stableKey(kind: string, sessionIds: string[], suffix = '') {
@@ -65,7 +81,15 @@ function constraintApplies(session: ConflictSession, constraint: ConflictConstra
   if (constraint.workingDayId && constraint.workingDayId !== session.workingDayId) return false;
   if (constraint.subjectType === 'trainer' && constraint.subjectId !== session.trainerId) return false;
   if (constraint.subjectType === 'room' && constraint.subjectId !== session.roomId) return false;
-  if (constraint.subjectType === 'cohort' && constraint.subjectId !== session.cohortId) return false;
+  if (
+    constraint.subjectType === 'cohort' &&
+    (
+      !constraint.subjectId ||
+      !participantCohorts(session).includes(
+        constraint.subjectId,
+      )
+    )
+  ) return false;
   if (!constraint.startsAt || !constraint.endsAt) return true;
   return minutes(session.startTime) < minutes(constraint.endsAt) &&
     minutes(constraint.startsAt) < minutes(session.endTime);
@@ -75,21 +99,104 @@ export function detectTimetableConflictCenter(
   sessions: ConflictSession[],
   constraints: ConflictConstraint[],
   reviewRows: ConflictReview[],
+  availabilityContext: ConflictAvailabilityContext = {
+    availableSlots: [],
+    timeSlots: [],
+  },
 ): TimetableConflict[] {
   const reviews = new Map(reviewRows.map((review) => [review.conflictKey, review]));
   const conflicts: TimetableConflict[] = [];
+  const availability = new Set(
+    availabilityContext.availableSlots.map((slot) =>
+      `${slot.trainerId}:${slot.workingDayId}:${slot.timeSlotId}`,
+    ),
+  );
+  const timeSlotDirectory = new Map(
+    availabilityContext.timeSlots.map((slot) => [slot.id, slot]),
+  );
 
   for (let index = 0; index < sessions.length; index += 1) {
     const session = sessions[index];
 
-    if (session.roomCapacity < session.cohortSize) {
+    if (!session.trainerId) {
+      const key = stableKey('trainer_pending', [session.id]);
+      conflicts.push({
+        key,
+        kind: 'trainer_pending',
+        severity: 'warning',
+        title: 'Trainer assignment pending',
+        message: `${session.unitCode} · ${session.unitName} is reserved in the timetable but still needs a trainer before publication.`,
+        sessionIds: [session.id],
+        resourceLabel: session.unitName,
+        workingDayLabel: session.workingDayLabel,
+        timeLabel: `${session.startTime.slice(0, 5)}–${session.endTime.slice(0, 5)}`,
+        isLocked: session.isLocked,
+        review: reviewFor(key, reviews),
+      });
+    }
+    else if (session.trainerAvailabilityMode === 'selected_slots_only') {
+      const startSlot = timeSlotDirectory.get(session.startTimeSlotId);
+      const endSlot = timeSlotDirectory.get(session.endTimeSlotId);
+      const requiredSlots = startSlot && endSlot
+        ? availabilityContext.timeSlots.filter((slot) => (
+            slot.isEnabled
+            && slot.slotType === 'teaching'
+            && slot.sequenceNumber >= startSlot.sequenceNumber
+            && slot.sequenceNumber <= endSlot.sequenceNumber
+          ))
+        : [];
+      const unavailable = requiredSlots.some((slot) => !availability.has(
+        `${session.trainerId}:${session.workingDayId}:${slot.id}`,
+      ));
+
+      if (unavailable) {
+        const key = stableKey('trainer_availability', [session.id], session.trainerId);
+        conflicts.push({
+          key,
+          kind: 'trainer_availability',
+          severity: 'blocked',
+          title: 'Trainer is outside selected availability',
+          message: `${session.trainerName} is not available for every required teaching period on ${session.workingDayLabel}.`,
+          sessionIds: [session.id],
+          resourceLabel: session.trainerName,
+          workingDayLabel: session.workingDayLabel,
+          timeLabel: `${session.startTime.slice(0, 5)}–${session.endTime.slice(0, 5)}`,
+          isLocked: session.isLocked,
+          review: reviewFor(key, reviews),
+        });
+      }
+    }
+
+    if (!session.roomId) {
+      const key = stableKey('room_pending', [session.id]);
+      conflicts.push({
+        key,
+        kind: 'room_pending',
+        severity: 'warning',
+        title: 'Room assignment pending',
+        message: `${session.unitCode} · ${session.unitName} has no room assigned. This does not block the timetable.`,
+        sessionIds: [session.id],
+        resourceLabel: session.unitName,
+        workingDayLabel: session.workingDayLabel,
+        timeLabel: `${session.startTime.slice(0, 5)}–${session.endTime.slice(0, 5)}`,
+        isLocked: session.isLocked,
+        review: reviewFor(key, reviews),
+      });
+    }
+
+    const requiredRoomCapacity =
+      session.combinedCohortSize > 0
+        ? session.combinedCohortSize
+        : session.cohortSize;
+
+    if (session.roomId && session.roomCapacity < requiredRoomCapacity) {
       const key = stableKey('room_capacity', [session.id], session.roomId);
       conflicts.push({
         key,
         kind: 'room_capacity',
         severity: 'blocked',
         title: 'Room capacity is insufficient',
-        message: `${session.roomName} holds ${session.roomCapacity}, but ${session.cohortName} has ${session.cohortSize} learners.`,
+        message: `${session.roomName} holds ${session.roomCapacity}, but ${session.cohortName} requires capacity for ${requiredRoomCapacity} learners.`,
         sessionIds: [session.id],
         resourceLabel: session.roomName,
         workingDayLabel: session.workingDayLabel,
@@ -140,21 +247,37 @@ export function detectTimetableConflictCenter(
       const other = sessions[secondIndex];
       if (!samePlacement(session, other) || compatibleSharedClass(session, other)) continue;
 
-      if (session.trainerId === other.trainerId) {
+      if (session.trainerId !== null && session.trainerId === other.trainerId) {
         conflicts.push(pairConflict(
           'trainer_overlap', 'blocked', 'Trainer double-booking',
           `${session.trainerName} is assigned to ${session.unitCode} and ${other.unitCode} at the same time.`,
           session, other, session.trainerName, reviews,
         ));
       }
-      if (session.cohortId === other.cohortId) {
+      const overlappingCohortId =
+        findOverlappingParticipantCohortId({
+          firstCohortId:
+            session.cohortId,
+          firstParticipantCohortIds:
+            session.participantCohortIds,
+          secondCohortId:
+            other.cohortId,
+          secondParticipantCohortIds:
+            other.participantCohortIds,
+        });
+
+      if (overlappingCohortId) {
         conflicts.push(pairConflict(
           'cohort_overlap', 'blocked', 'Cohort double-booking',
           `${session.cohortName} has two sessions at the same time.`,
-          session, other, session.cohortName, reviews,
+          session, other,
+          overlappingCohortId === session.cohortId
+            ? session.cohortName
+            : 'Shared cohort',
+          reviews,
         ));
       }
-      if (session.roomId === other.roomId) {
+      if (session.roomId !== null && session.roomId === other.roomId) {
         conflicts.push(pairConflict(
           'room_overlap', 'blocked', 'Room double-booking',
           `${session.roomName} is assigned to two different classes at the same time.`,

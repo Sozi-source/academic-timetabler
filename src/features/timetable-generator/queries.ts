@@ -63,12 +63,39 @@ export interface GeneratorSourceData {
   workingDays: WorkingDay[];
   timeSlots: TimeSlot[];
   trainers: Trainer[];
+  trainerAvailability: GeneratorTrainerAvailability[];
   cohorts: Cohort[];
   rooms: Room[];
   units: Unit[];
   existingSessions:
     ExistingScheduledSessionRow[];
 }
+
+export interface GeneratorTrainerAvailability {
+  trainerId: string;
+  workingDayId: string;
+  timeSlotId: string;
+}
+
+export const getGeneratorTrainerAvailability = cache(async (
+  academicPeriodId: string,
+): Promise<GeneratorTrainerAvailability[]> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('trainer_availability')
+    .select('trainer_id, working_day_id, time_slot_id')
+    .eq('academic_period_id', academicPeriodId);
+
+  if (error) {
+    throw new Error(`Unable to load trainer availability: ${error.message}`);
+  }
+
+  return (data ?? []).map((row) => ({
+    trainerId: row.trainer_id,
+    workingDayId: row.working_day_id,
+    timeSlotId: row.time_slot_id,
+  }));
+});
 
 export const getExistingScheduledSessions =
   cache(
@@ -83,47 +110,13 @@ export const getExistingScheduledSessions =
       const {
         data,
         error,
-      } = await supabase
-        .from('scheduled_sessions')
-        .select(`
-          id,
-          academic_period_id,
-          teaching_allocation_id,
-          cohort_id,
-          unit_id,
-          trainer_id,
-          working_day_id,
-          start_time_slot_id,
-          end_time_slot_id,
-          room_id,
-          session_number,
-          delivery_mode,
-          status,
-          source,
-          conflict_state,
-          is_locked,
-          notes,
-          created_at,
-          updated_at
-        `)
-        .eq(
-          'academic_period_id',
-          academicPeriodId,
-        )
-        .in('status', [
-          'draft',
-          'confirmed',
-          'locked',
-        ])
-        .order('working_day_id', {
-          ascending: true,
-        })
-        .order('start_time_slot_id', {
-          ascending: true,
-        })
-        .order('session_number', {
-          ascending: true,
-        });
+      } = await supabase.rpc(
+        'get_institutional_resource_bookings',
+        {
+          target_academic_period_id:
+            academicPeriodId,
+        },
+      );
 
       if (error) {
         throw new Error(
@@ -158,6 +151,7 @@ export const getGeneratorSourceData =
         workingDays,
         timeSlots,
         trainers,
+        trainerAvailability,
         cohorts,
         rooms,
         units,
@@ -173,6 +167,7 @@ export const getGeneratorSourceData =
           academicPeriodId,
         ),
         getTimetableAvailableTrainers(),
+        getGeneratorTrainerAvailability(academicPeriodId),
         getTimetableAvailableCohorts(),
         getTimetableAvailableRooms(),
         getTimetableAvailableUnits(),
@@ -187,6 +182,7 @@ export const getGeneratorSourceData =
         workingDays,
         timeSlots,
         trainers,
+        trainerAvailability,
         cohorts,
         rooms,
         units,

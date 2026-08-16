@@ -168,8 +168,11 @@ GeneratorSourceData {
         phoneNumber: null,
         employmentType:
           'full_time',
+        availabilityMode:
+          'selected_slots_only',
         specialization: null,
         qualifications: null,
+        normalWeeklyHours: 20,
         maximumWeeklyHours: 24,
         maximumDailyHours: 6,
         isActive: true,
@@ -181,6 +184,19 @@ GeneratorSourceData {
           '2026-05-01T00:00:00.000Z',
         updatedAt:
           '2026-05-01T00:00:00.000Z',
+      },
+    ],
+
+    trainerAvailability: [
+      {
+        trainerId: 'trainer-1',
+        workingDayId: 'day-1',
+        timeSlotId: 'slot-1',
+      },
+      {
+        trainerId: 'trainer-1',
+        workingDayId: 'day-1',
+        timeSlotId: 'slot-2',
       },
     ],
 
@@ -286,6 +302,30 @@ describe(
           input.trainers[0]
             .maximumWeeklyHours,
         ).toBe(24);
+
+        expect(
+          input.trainers[0]
+            .normalWeeklyHours,
+        ).toBe(20);
+
+        expect(
+          input.trainers[0]
+            .availabilityMode,
+        ).toBe('selected_slots_only');
+
+        expect(
+          input.trainers[0]
+            .availableSlots,
+        ).toEqual([
+          {
+            workingDayId: 'day-1',
+            timeSlotId: 'slot-1',
+          },
+          {
+            workingDayId: 'day-1',
+            timeSlotId: 'slot-2',
+          },
+        ]);
 
         expect(
           input.rooms[0].roomType,

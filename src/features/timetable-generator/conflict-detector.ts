@@ -7,6 +7,9 @@ import {
 import {
   detectTrainerWorkloadConflicts,
 } from './workload';
+import {
+  findOverlappingParticipantCohortId,
+} from './participant-cohorts';
 import type {
   PlanningCohort,
   PlanningConflict,
@@ -41,6 +44,7 @@ interface SessionContext {
   room?: PlanningRoom;
   unit?: PlanningUnit;
   interval?: TimeInterval;
+  requiredTimeSlotIds: string[];
 }
 
 function isActiveSession(
@@ -158,28 +162,39 @@ function resolveContexts(
           timeSlots.get(
             session.endTimeSlotId,
           ),
-        trainer:
-          trainers.get(
-            session.trainerId,
-          ),
+        trainer: session.trainerId
+          ? trainers.get(
+              session.trainerId,
+            )
+          : undefined,
         cohort:
           cohorts.get(
             session.cohortId,
           ),
-        room:
-          rooms.get(
-            session.roomId,
-          ),
+        room: session.roomId
+          ? rooms.get(session.roomId)
+          : undefined,
         unit:
           units.get(
             session.unitId,
           ),
+        requiredTimeSlotIds: [],
       };
 
       if (
         context.startTimeSlot &&
         context.endTimeSlot
       ) {
+        context.requiredTimeSlotIds = input.timeSlots
+          .filter((slot) => (
+            slot.academicPeriodId === session.academicPeriodId
+            && slot.isEnabled
+            && slot.slotType === 'teaching'
+            && slot.sequenceNumber >= context.startTimeSlot!.sequenceNumber
+            && slot.sequenceNumber <= context.endTimeSlot!.sequenceNumber
+          ))
+          .map((slot) => slot.id);
+
         try {
           context.interval =
             resolveSessionInterval({
@@ -366,9 +381,23 @@ function detectResourceAvailabilityConflicts(
     cohort,
     room,
     unit,
+    requiredTimeSlotIds,
   } = context;
 
-  if (
+  if (!session.trainerId) {
+    conflicts.push(
+      createConflict({
+        type: 'trainer_pending',
+        severity: 'warning',
+        message:
+          'This timetable session is unassigned and needs a trainer before publication.',
+        sessionIds: [session.id],
+        workingDayId:
+          session.workingDayId,
+      }),
+    );
+  }
+  else if (
     !trainer ||
     !trainer.isActive ||
     !trainer.isTimetableAvailable
@@ -388,6 +417,36 @@ function detectResourceAvailabilityConflicts(
           session.workingDayId,
       }),
     );
+  }
+  else if (trainer.availabilityMode === 'selected_slots_only') {
+    const availableSlots = new Set(
+      (trainer.availableSlots ?? []).map(
+        (slot) => `${slot.workingDayId}:${slot.timeSlotId}`,
+      ),
+    );
+    const missingAvailability = requiredTimeSlotIds.some(
+      (timeSlotId) => !availableSlots.has(
+        `${session.workingDayId}:${timeSlotId}`,
+      ),
+    );
+
+    if (missingAvailability) {
+      conflicts.push(
+        createConflict({
+          type: 'trainer_unavailable',
+          severity: 'blocked',
+          message:
+            'The trainer is unavailable during one or more required teaching periods.',
+          sessionIds: [session.id],
+          resourceId: trainer.id,
+          resourceLabel: trainer.fullName,
+          workingDayId: session.workingDayId,
+          metadata: {
+            availabilityMode: trainer.availabilityMode,
+          },
+        }),
+      );
+    }
   }
 
   if (
@@ -412,9 +471,8 @@ function detectResourceAvailabilityConflicts(
   }
 
   if (
-    !room ||
-    !room.isActive ||
-    !room.isTimetableAvailable
+    session.roomId &&
+    (!room || !room.isActive || !room.isTimetableAvailable)
   ) {
     conflicts.push(
       createConflict({
@@ -476,8 +534,8 @@ function detectRoomSuitabilityConflicts(
 
   if (
     cohort &&
-    cohort.actualSize > 0 &&
-    room.capacity < cohort.actualSize
+    (session.combinedCohortSize ?? cohort.actualSize) > 0 &&
+    room.capacity < (session.combinedCohortSize ?? cohort.actualSize)
   ) {
     conflicts.push(
       createConflict({
@@ -485,7 +543,7 @@ function detectRoomSuitabilityConflicts(
           'insufficient_room_capacity',
         severity: 'blocked',
         message:
-          `Room ${room.code} has capacity ${room.capacity}, below the cohort size of ${cohort.actualSize}.`,
+          `Room ${room.code} has capacity ${room.capacity}, below the combined class size of ${session.combinedCohortSize ?? cohort.actualSize}.`,
         sessionIds: [session.id],
         resourceId: room.id,
         resourceLabel: room.name,
@@ -495,7 +553,7 @@ function detectRoomSuitabilityConflicts(
           roomCapacity:
             room.capacity,
           cohortSize:
-            cohort.actualSize,
+            session.combinedCohortSize ?? cohort.actualSize,
         },
       }),
     );
@@ -656,6 +714,7 @@ function detectOverlapConflicts(
       ];
 
       if (
+        first.session.trainerId !== null &&
         first.session.trainerId ===
         second.session.trainerId
       ) {
@@ -677,10 +736,20 @@ function detectOverlapConflicts(
         );
       }
 
-      if (
-        first.session.cohortId ===
-        second.session.cohortId
-      ) {
+      const overlappingCohort =
+        findOverlappingParticipantCohortId({
+          firstCohortId:
+            first.session.cohortId,
+          firstParticipantCohortIds:
+            first.session
+              .participantCohortIds,
+          secondCohortId:
+            second.session.cohortId,
+          secondParticipantCohortIds:
+            second.session
+              .participantCohortIds,
+        });
+      if (overlappingCohort) {
         conflicts.push(
           createConflict({
             type: 'cohort_overlap',
@@ -689,7 +758,7 @@ function detectOverlapConflicts(
               'The cohort has overlapping sessions.',
             sessionIds,
             resourceId:
-              first.session.cohortId,
+              overlappingCohort,
             resourceLabel:
               first.cohort?.name,
             workingDayId:
@@ -700,6 +769,7 @@ function detectOverlapConflicts(
       }
 
       if (
+        first.session.roomId !== null &&
         first.session.roomId ===
         second.session.roomId
       ) {

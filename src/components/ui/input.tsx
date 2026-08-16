@@ -46,7 +46,7 @@ export const Input = forwardRef<
         className={cn(
           'h-11 w-full rounded-xl border border-border-strong bg-surface px-3.5 text-sm text-text-primary shadow-sm outline-none transition',
           'placeholder:text-text-subtle',
-          'hover:border-[#b8c7c4]',
+          'hover:border-focus-border',
           'focus:border-focus-border focus:ring-4 focus:ring-focus-ring/25',
           'disabled:cursor-not-allowed disabled:bg-surface-muted disabled:text-text-muted',
           'aria-invalid:border-danger aria-invalid:focus:border-danger aria-invalid:focus:ring-danger-border/40',

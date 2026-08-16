@@ -1,5 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
 
+import { Badge } from './badge';
 import { Card } from './card';
 
 interface MetricCardProps {
@@ -18,23 +19,21 @@ export function MetricCard({
   status,
 }: MetricCardProps) {
   return (
-    <Card className="p-5">
+    <Card className="p-4">
       <div className="flex items-start justify-between gap-4">
-        <div className="flex size-10 items-center justify-center rounded-xl bg-primary-soft text-primary">
+        <div className="flex size-9 items-center justify-center rounded-lg bg-primary-soft text-primary">
           <Icon
-            className="size-5"
+            className="size-4"
             aria-hidden="true"
           />
         </div>
 
         {status ? (
-          <span className="rounded-full bg-surface-subtle px-2.5 py-1 text-[0.6875rem] font-semibold text-text-muted">
-            {status}
-          </span>
+          <Badge variant="neutral">{status}</Badge>
         ) : null}
       </div>
 
-      <p className="mt-5 text-2xl font-semibold tracking-tight text-text-primary">
+      <p className="mt-4 text-2xl font-semibold tracking-tight text-text-primary">
         {value}
       </p>
 

@@ -21,19 +21,19 @@ export function PageHeader({
   context,
 }: PageHeaderProps) {
   return (
-    <header className="relative overflow-hidden rounded-2xl border border-border bg-surface px-5 py-5 shadow-sm sm:px-6 sm:py-6">
+    <header className="relative overflow-hidden rounded-xl border border-border bg-surface px-4 py-4 shadow-sm sm:px-5">
       <div
-        className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-primary via-primary to-primary/25"
+        className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-institutional-maroon via-institutional-gold to-primary"
         aria-hidden="true"
       />
 
-      {context ? <div className="mb-4">{context}</div> : null}
+      {context ? <div className="mb-3">{context}</div> : null}
 
-      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-        <div className="flex min-w-0 items-start gap-3.5">
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div className="flex min-w-0 items-start gap-3">
           {Icon ? (
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
-              <Icon className="size-5" aria-hidden="true" />
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary">
+              <Icon className="size-4" aria-hidden="true" />
             </span>
           ) : null}
 
@@ -48,14 +48,14 @@ export function PageHeader({
             <h1
               className={cn(
                 'text-xl font-bold tracking-tight text-text-primary sm:text-2xl',
-                eyebrow && 'mt-1.5',
+                eyebrow && 'mt-1',
               )}
             >
               {title}
             </h1>
 
             {description ? (
-              <p className="mt-1.5 max-w-2xl text-sm leading-6 text-text-secondary">
+              <p className="mt-1 max-w-2xl text-sm leading-5 text-text-secondary">
                 {description}
               </p>
             ) : null}

@@ -165,7 +165,7 @@ const columns: ColumnDef<Unit>[] = [
       row.preferredRoomType ?? '',
     header: 'Room preference',
     cell: ({ row }) => (
-      <span className="inline-flex min-w-36 items-center gap-2 text-sm text-text-primary">
+      <span className="inline-flex items-center gap-2 text-sm text-text-primary">
         {row.original.practicalHours > 0 ? (
           <FlaskConical
             className="size-4 text-text-muted"
@@ -235,7 +235,7 @@ const columns: ColumnDef<Unit>[] = [
     enableSorting: false,
     header: 'Actions',
     cell: ({ row }) => (
-      <div className="flex min-w-max flex-wrap justify-end gap-2">
+      <div className="flex flex-wrap justify-end gap-2">
         <Link
           href={`/timetable/units/${row.original.id}/edit`}
           className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
@@ -476,7 +476,7 @@ export function UnitTable({
               );
               setPeriodNumber('all');
             }}
-            className="h-11 min-w-56"
+            className="h-11"
           >
             <option value="all">
               All programmes
@@ -502,7 +502,7 @@ export function UnitTable({
                 event.target.value,
               );
             }}
-            className="h-11 min-w-36"
+            className="h-11"
           >
             <option value="all">
               All periods
@@ -528,7 +528,7 @@ export function UnitTable({
                   | UnitCategory,
               );
             }}
-            className="h-11 min-w-40"
+            className="h-11"
           >
             <option value="all">
               All categories
@@ -557,7 +557,7 @@ export function UnitTable({
                   | 'inactive',
               );
             }}
-            className="h-11 min-w-36"
+            className="h-11"
           >
             <option value="all">
               All statuses
@@ -581,7 +581,7 @@ export function UnitTable({
                   | 'unavailable',
               );
             }}
-            className="h-11 min-w-44"
+            className="h-11"
           >
             <option value="all">
               All availability

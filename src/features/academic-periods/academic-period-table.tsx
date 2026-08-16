@@ -131,7 +131,7 @@ const columns: ColumnDef<AcademicPeriod>[] = [
     enableSorting: false,
     header: 'Actions',
     cell: ({ row }) => (
-      <div className="flex min-w-max flex-wrap justify-end gap-2">
+      <div className="flex flex-wrap justify-end gap-2">
         <Link
           href={`/timetable/academic-periods/${row.original.id}/edit`}
           className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
@@ -239,7 +239,7 @@ export function AcademicPeriodTable({
                 event.target.value,
               );
             }}
-            className="h-11 min-w-48"
+            className="h-11"
           >
             <option value="all">
               All Academic Years
@@ -267,7 +267,7 @@ export function AcademicPeriodTable({
                   | AcademicPeriodStatus,
               );
             }}
-            className="h-11 min-w-36"
+            className="h-11"
           >
             <option value="all">
               All statuses

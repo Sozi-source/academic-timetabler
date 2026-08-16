@@ -92,8 +92,8 @@ describe(
           false,
         );
 
-        if (result.success) {
-          return;
+        if (!('fieldErrors' in result)) {
+          throw new Error('Expected generator validation to fail.');
         }
 
         expect(

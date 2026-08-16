@@ -44,7 +44,7 @@ function createRow(
 describe('validateParsedImportRow', () => {
   it('returns normalized valid data', () => {
     const result =
-      validateParsedImportRow({
+      validateParsedImportRow<z.infer<typeof schema>>({
         row: createRow(
           2,
           'tr-001',
@@ -71,7 +71,7 @@ describe('validateParsedImportRow', () => {
 
   it('returns field-level errors', () => {
     const result =
-      validateParsedImportRow({
+      validateParsedImportRow<z.infer<typeof schema>>({
         row: createRow(
           2,
           '',
@@ -97,7 +97,7 @@ describe('validateParsedImportRow', () => {
 describe('markDuplicateImportRows', () => {
   it('marks duplicate workbook rows', () => {
     const results = [
-      validateParsedImportRow({
+      validateParsedImportRow<z.infer<typeof schema>>({
         row: createRow(
           2,
           'TR-001',
@@ -107,7 +107,7 @@ describe('markDuplicateImportRows', () => {
         duplicateKey: (value) =>
           value.staffNumber,
       }),
-      validateParsedImportRow({
+      validateParsedImportRow<z.infer<typeof schema>>({
         row: createRow(
           3,
           'TR-001',

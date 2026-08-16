@@ -281,7 +281,7 @@ export function UnitOfferingImportPreview({
       ) : null}
 
       <section className="overflow-hidden rounded-2xl border border-border bg-surface">
-        <div className="border-b border-border px-5 py-4">
+        <div className="border-b border-border px-3 py-2.5">
           <h2 className="font-semibold text-text-primary">
             Workbook rows
           </h2>
@@ -293,38 +293,38 @@ export function UnitOfferingImportPreview({
           </p>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="w-full overflow-hidden">
           <table className="min-w-[1180px] w-full border-collapse text-left text-sm">
             <thead className="bg-surface-subtle text-xs uppercase tracking-wide text-text-muted">
               <tr>
-                <th className="px-4 py-3">
+                <th className="px-3 py-2.5">
                   Row
                 </th>
-                <th className="px-4 py-3">
+                <th className="px-3 py-2.5">
                   Status
                 </th>
-                <th className="px-4 py-3">
+                <th className="px-3 py-2.5">
                   Academic Period
                 </th>
-                <th className="px-4 py-3">
+                <th className="px-3 py-2.5">
                   Programme
                 </th>
-                <th className="px-4 py-3">
+                <th className="px-3 py-2.5">
                   Cohort
                 </th>
-                <th className="px-4 py-3">
+                <th className="px-3 py-2.5">
                   Unit
                 </th>
-                <th className="px-4 py-3">
+                <th className="px-3 py-2.5">
                   Delivery
                 </th>
-                <th className="px-4 py-3">
+                <th className="px-3 py-2.5">
                   Shared class
                 </th>
-                <th className="px-4 py-3">
+                <th className="px-3 py-2.5">
                   Operation
                 </th>
-                <th className="px-4 py-3">
+                <th className="px-3 py-2.5">
                   Validation
                 </th>
               </tr>

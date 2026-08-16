@@ -38,6 +38,8 @@ describe(
           source: 'manual',
           conflict_state: 'clear',
           is_locked: true,
+          participant_cohort_ids: ['cohort-1'],
+          combined_cohort_size: 30,
           notes: null,
           created_at:
             '2026-08-02T08:00:00.000Z',

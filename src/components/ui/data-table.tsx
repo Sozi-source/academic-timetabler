@@ -87,7 +87,7 @@ export function DataTable<TData, TValue>({
   const rows = table.getRowModel().rows;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
+    <div className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
       <TableToolbar
         searchValue={globalFilter}
         onSearchChange={setGlobalFilter}
@@ -105,8 +105,8 @@ export function DataTable<TData, TValue>({
           />
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left">
+        <div className="w-full overflow-hidden">
+          <table className="w-full table-fixed border-collapse text-left">
             <thead className="bg-surface-subtle">
               {table
                 .getHeaderGroups()
@@ -127,7 +127,7 @@ export function DataTable<TData, TValue>({
                           <th
                             key={header.id}
                             colSpan={header.colSpan}
-                            className="whitespace-nowrap px-5 py-3.5 text-xs font-semibold uppercase tracking-[0.11em] text-text-muted"
+                            className="px-3.5 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-text-muted"
                           >
                             {header.isPlaceholder ? null : (
                               <button
@@ -139,7 +139,7 @@ export function DataTable<TData, TValue>({
                                     : undefined
                                 }
                                 className={cn(
-                                  'inline-flex items-center gap-1.5 text-left',
+                                  'inline-flex max-w-full items-center gap-1 text-left',
                                   canSort &&
                                     'cursor-pointer transition hover:text-text-primary',
                                 )}
@@ -190,7 +190,7 @@ export function DataTable<TData, TValue>({
                     .map((cell) => (
                       <td
                         key={cell.id}
-                        className="px-5 py-4 text-sm text-text-secondary"
+                        className="break-words px-3.5 py-2.5 align-top text-sm leading-5 text-text-secondary"
                       >
                         {flexRender(
                           cell.column.columnDef.cell,

@@ -10,7 +10,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="h-9 rounded-xl border border-red-200 bg-white px-3 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:cursor-wait disabled:opacity-60"
+      className="h-9 rounded-xl border border-danger-border bg-surface px-3 text-xs font-semibold text-danger hover:bg-danger-surface disabled:cursor-wait disabled:opacity-60"
     >
       {pending ? 'Unassigning…' : 'Unassign'}
     </button>

@@ -84,10 +84,17 @@ GeneratorSourceData {
         unitId: 'unit-1',
         trainerId: 'trainer-1',
         preferredRoomId: null,
+        participantCohortIds: ['cohort-1'],
+        combinedCohortSize: 30,
         deliveryMode: 'theory',
         weeklySessions: 1,
         sessionDurationMinutes:
           120,
+        fixedWorkingDayId: null,
+        fixedWorkingDayIds: [],
+        fixedTimeSlotIds: [],
+        isFullDaySession: false,
+        fixedEndTimeSlotId: null,
         status: 'active',
         isTimetableEnabled: true,
         notes: null,
@@ -168,6 +175,7 @@ GeneratorSourceData {
         phoneNumber: null,
         employmentType:
           'full_time',
+        departmentId: 'department-1',
         availabilityMode:
           'selected_slots_only',
         specialization: null,
@@ -175,6 +183,8 @@ GeneratorSourceData {
         normalWeeklyHours: 20,
         maximumWeeklyHours: 24,
         maximumDailyHours: 6,
+        workloadRole: 'full_time_trainer',
+        homeDepartment: 'Nutrition and Dietetics',
         isActive: true,
         isTimetableAvailable: true,
         notes: null,
@@ -487,6 +497,8 @@ describe(
             source: 'manual',
             conflict_state: 'clear',
             is_locked: false,
+            participant_cohort_ids: ['cohort-1'],
+            combined_cohort_size: 30,
             notes: null,
             created_at:
               '2026-05-01T00:00:00.000Z',
@@ -514,6 +526,8 @@ describe(
             source: 'manual',
             conflict_state: 'clear',
             is_locked: true,
+            participant_cohort_ids: ['cohort-1'],
+            combined_cohort_size: 30,
             notes: null,
             created_at:
               '2026-05-01T00:00:00.000Z',

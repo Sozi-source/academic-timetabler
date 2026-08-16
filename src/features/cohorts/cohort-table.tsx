@@ -229,7 +229,7 @@ const columns: ColumnDef<Cohort>[] = [
         row.original.status === 'active';
 
       return (
-        <div className="flex min-w-max flex-wrap justify-end gap-2">
+        <div className="flex flex-wrap justify-end gap-2">
           <Link
             href={`/timetable/cohorts/${row.original.id}/edit`}
             className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
@@ -299,7 +299,7 @@ const columns: ColumnDef<Cohort>[] = [
               name="status"
               aria-label={`Change status for ${row.original.name}`}
               defaultValue={row.original.status}
-              className="h-9 min-w-32 text-xs"
+              className="h-9 text-xs"
               onChange={(event) => {
                 event.currentTarget.form?.requestSubmit();
               }}
@@ -411,7 +411,7 @@ export function CohortTable({
                 event.target.value,
               );
             }}
-            className="h-11 min-w-56"
+            className="h-11"
           >
             <option value="all">
               All programmes
@@ -439,7 +439,7 @@ export function CohortTable({
                   | CohortStatus,
               );
             }}
-            className="h-11 min-w-40"
+            className="h-11"
           >
             <option value="all">
               All statuses
@@ -468,7 +468,7 @@ export function CohortTable({
                   | 'unavailable',
               );
             }}
-            className="h-11 min-w-44"
+            className="h-11"
           >
             <option value="all">
               All availability

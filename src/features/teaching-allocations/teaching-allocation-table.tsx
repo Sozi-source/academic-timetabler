@@ -112,35 +112,35 @@ export function TeachingAllocationTable({
 
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-      <div className="overflow-x-auto">
-        <table className="min-w-full border-collapse text-left text-sm">
+      <div className="w-full overflow-hidden">
+        <table className="w-full table-fixed border-collapse text-left text-sm">
           <thead className="bg-surface-subtle text-xs uppercase tracking-[0.08em] text-text-muted">
             <tr>
-              <th className="px-5 py-3">
+              <th className="px-3 py-2.5">
                 Allocation
               </th>
 
-              <th className="px-5 py-3">
+              <th className="px-3 py-2.5">
                 Academic Period
               </th>
 
-              <th className="px-5 py-3">
+              <th className="px-3 py-2.5">
                 Cohort
               </th>
 
-              <th className="px-5 py-3">
+              <th className="px-3 py-2.5">
                 Trainer
               </th>
 
-              <th className="px-5 py-3">
+              <th className="px-3 py-2.5">
                 Delivery
               </th>
 
-              <th className="px-5 py-3">
+              <th className="px-3 py-2.5">
                 Room
               </th>
 
-              <th className="px-5 py-3">
+              <th className="px-3 py-2.5">
                 Status
               </th>
             </tr>
@@ -152,7 +152,7 @@ export function TeachingAllocationTable({
                 key={allocation.id}
                 className="align-top transition hover:bg-surface-subtle"
               >
-                <td className="min-w-64 px-5 py-4">
+                <td className="min-w-64 px-3 py-2.5">
                   <div className="flex items-start gap-3">
                     <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
                       <BookOpen
@@ -191,7 +191,7 @@ export function TeachingAllocationTable({
                   </div>
                 </td>
 
-                <td className="min-w-52 px-5 py-4">
+                <td className="min-w-52 px-3 py-2.5">
                   <div className="flex items-start gap-2">
                     <CalendarDays
                       className="mt-0.5 size-4 shrink-0 text-text-subtle"
@@ -213,7 +213,7 @@ export function TeachingAllocationTable({
                   </div>
                 </td>
 
-                <td className="min-w-52 px-5 py-4">
+                <td className="min-w-52 px-3 py-2.5">
                   <div className="flex items-start gap-2">
                     <GraduationCap
                       className="mt-0.5 size-4 shrink-0 text-text-subtle"
@@ -244,7 +244,7 @@ export function TeachingAllocationTable({
                   </div>
                 </td>
 
-                <td className="min-w-52 px-5 py-4">
+                <td className="min-w-52 px-3 py-2.5">
                   <div className="flex items-start gap-2">
                     <UserRound
                       className="mt-0.5 size-4 shrink-0 text-text-subtle"
@@ -267,7 +267,7 @@ export function TeachingAllocationTable({
                   </div>
                 </td>
 
-                <td className="min-w-44 px-5 py-4">
+                <td className="min-w-44 px-3 py-2.5">
                   <div className="flex items-start gap-2">
                     <Clock3
                       className="mt-0.5 size-4 shrink-0 text-text-subtle"
@@ -291,7 +291,7 @@ export function TeachingAllocationTable({
                   </div>
                 </td>
 
-                <td className="min-w-48 px-5 py-4">
+                <td className="min-w-48 px-3 py-2.5">
                   <div className="flex items-start gap-2">
                     <Building2
                       className="mt-0.5 size-4 shrink-0 text-text-subtle"
@@ -314,7 +314,7 @@ export function TeachingAllocationTable({
                   </div>
                 </td>
 
-                <td className="min-w-36 px-5 py-4">
+                <td className="min-w-36 px-3 py-2.5">
                   <div className="flex flex-col items-start gap-2">
                     <Badge
                       variant={getStatusVariant(

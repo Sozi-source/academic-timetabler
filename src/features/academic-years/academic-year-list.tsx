@@ -108,27 +108,27 @@ export function AcademicYearList({
       </div>
 
       <div className="hidden overflow-hidden rounded-2xl border border-border bg-surface shadow-sm md:block">
-        <div className="overflow-x-auto">
+        <div className="w-full overflow-hidden">
           <table className="w-full min-w-[780px] border-collapse text-left">
             <thead className="bg-surface-subtle">
               <tr className="border-b border-border">
-                <th className="px-5 py-3.5 text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">
+                <th className="px-3 py-2.5.5 text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">
                   Academic Year
                 </th>
 
-                <th className="px-5 py-3.5 text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">
+                <th className="px-3 py-2.5.5 text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">
                   Date range
                 </th>
 
-                <th className="px-5 py-3.5 text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">
+                <th className="px-3 py-2.5.5 text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">
                   Status
                 </th>
 
-                <th className="px-5 py-3.5 text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">
+                <th className="px-3 py-2.5.5 text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">
                   Notes
                 </th>
 
-                <th className="px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">
+                <th className="px-3 py-2.5.5 text-right text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">
                   Actions
                 </th>
               </tr>
@@ -140,7 +140,7 @@ export function AcademicYearList({
                   key={academicYear.id}
                   className="border-b border-border-soft last:border-b-0 hover:bg-surface-subtle/70"
                 >
-                  <td className="px-5 py-4">
+                  <td className="px-3 py-2.5">
                     <p className="font-semibold text-text-primary">
                       {academicYear.name}
                     </p>
@@ -162,7 +162,7 @@ export function AcademicYearList({
                     </p>
                   </td>
 
-                  <td className="px-5 py-4 text-sm text-text-secondary">
+                  <td className="px-3 py-2.5 text-sm text-text-secondary">
                     {formatDate(academicYear.startsOn)}
                     <span className="mx-2 text-text-subtle">
                       to
@@ -170,20 +170,20 @@ export function AcademicYearList({
                     {formatDate(academicYear.endsOn)}
                   </td>
 
-                  <td className="px-5 py-4">
+                  <td className="px-3 py-2.5">
                     <AcademicYearStatusBadge
                       status={academicYear.status}
                     />
                   </td>
 
-                  <td className="max-w-xs px-5 py-4 text-sm leading-6 text-text-secondary">
+                  <td className="max-w-xs px-3 py-2.5 text-sm leading-6 text-text-secondary">
                     <span className="line-clamp-2">
                       {academicYear.notes ??
                         'No notes recorded.'}
                     </span>
                   </td>
 
-                  <td className="px-5 py-4">
+                  <td className="px-3 py-2.5">
                     <div className="flex justify-end gap-2">
                       <Link
                         href={`/timetable/academic-years/${academicYear.id}/edit`}

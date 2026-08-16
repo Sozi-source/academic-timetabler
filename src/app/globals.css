@@ -24,6 +24,13 @@
   --primary-subtle: #f3f8f7;
   --primary-foreground: #ffffff;
 
+  /* Muted institutional accent — secondary identity only */
+  --institutional-maroon: #6f4149;
+  --institutional-maroon-soft: #f4edef;
+  --institutional-gold: #8a7448;
+  --institutional-gold-soft: #f5f1e8;
+  --institutional-accent-border: #ddd2bc;
+
   /* Navigation */
   --navigation-background: #ffffff;
   --navigation-border: #dce5e3;
@@ -98,6 +105,12 @@
   --color-primary-soft: var(--primary-soft);
   --color-primary-subtle: var(--primary-subtle);
   --color-primary-foreground: var(--primary-foreground);
+
+  --color-institutional-maroon: var(--institutional-maroon);
+  --color-institutional-maroon-soft: var(--institutional-maroon-soft);
+  --color-institutional-gold: var(--institutional-gold);
+  --color-institutional-gold-soft: var(--institutional-gold-soft);
+  --color-institutional-accent-border: var(--institutional-accent-border);
 
   --color-navigation-background:
     var(--navigation-background);

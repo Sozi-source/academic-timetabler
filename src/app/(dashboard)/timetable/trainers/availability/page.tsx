@@ -71,7 +71,7 @@ export default async function Page({
       />
 
       {params.saved === '1' ? (
-        <div className="flex items-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
+        <div className="flex items-center gap-2 rounded-xl border border-success-border bg-success-surface px-3 py-2.5 text-sm font-semibold text-success">
           <CheckCircle2 className="size-4" aria-hidden="true" />
           Teaching availability saved successfully.
         </div>
@@ -94,7 +94,7 @@ export default async function Page({
       </form>
 
       {!calendarReady ? (
-        <form action={initializeStandardCalendarAction} className="rounded-2xl border border-amber-300 bg-amber-50 p-5">
+        <form action={initializeStandardCalendarAction} className="rounded-2xl border border-warning-border bg-warning-surface p-5">
           <input type="hidden" name="academicPeriodId" value={periodId} />
           <p className="font-semibold">Standard calendar not initialized</p>
           <p className="mt-1 text-sm text-text-muted">Apply the unchanged institutional days and teaching sessions to this Academic Period.</p>
@@ -105,10 +105,10 @@ export default async function Page({
           <input type="hidden" name="trainerId" value={trainerId} />
           <input type="hidden" name="academicPeriodId" value={periodId} />
           <input type="hidden" name="returnTo" value={params.returnTo ?? ''} />
-          <div className="mb-4 rounded-xl border border-border bg-surface-subtle px-4 py-3 text-sm text-text-secondary">
+          <div className="mb-4 rounded-xl border border-border bg-surface-subtle px-3 py-2.5 text-sm text-text-secondary">
             <span className="font-semibold">Checked:</span> available to teach · <span className="font-semibold">Unchecked:</span> unavailable or engaged
           </div>
-          <div className="overflow-x-auto">
+          <div className="w-full overflow-hidden">
             <table className="w-full text-sm">
               <thead><tr><th className="p-3 text-left">Day</th>{((slots ?? []) as Item[]).map((slot) => <th key={slot.id} className="p-3 text-left">{slot.name}</th>)}</tr></thead>
               <tbody>{((days ?? []) as Item[]).map((day) => (

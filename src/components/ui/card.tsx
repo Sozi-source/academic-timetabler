@@ -18,7 +18,7 @@ export function Card({
   return (
     <article
       className={cn(
-        'rounded-2xl border border-border bg-surface shadow-sm',
+        'rounded-xl border border-border bg-surface shadow-sm',
         className,
       )}
       {...props}
@@ -38,7 +38,7 @@ export function CardHeader({
   return (
     <div
       className={cn(
-        'border-b border-border-soft px-5 py-4 sm:px-6',
+        'border-b border-border-soft px-4 py-3.5',
         className,
       )}
     >
@@ -57,7 +57,7 @@ export function CardContent({
   return (
     <div
       className={cn(
-        'px-5 py-5 sm:px-6',
+        'px-4 py-4',
         className,
       )}
     >

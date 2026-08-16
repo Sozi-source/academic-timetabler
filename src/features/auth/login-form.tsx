@@ -88,7 +88,7 @@ export function LoginForm({
                 : undefined
             }
             placeholder="name@college.ac.ke"
-            className="h-12 w-full rounded-xl border border-border-strong bg-surface pl-10 pr-4 text-sm text-text-primary outline-none transition placeholder:text-text-subtle hover:border-[#b8c7c4] focus:border-focus-border focus:ring-4 focus:ring-focus-ring/25 disabled:cursor-not-allowed disabled:bg-surface-muted aria-invalid:border-danger aria-invalid:focus:ring-danger-border/40"
+            className="h-12 w-full rounded-xl border border-border-strong bg-surface pl-10 pr-4 text-sm text-text-primary outline-none transition placeholder:text-text-subtle hover:border-focus-border focus:border-focus-border focus:ring-4 focus:ring-focus-ring/25 disabled:cursor-not-allowed disabled:bg-surface-muted aria-invalid:border-danger aria-invalid:focus:ring-danger-border/40"
           />
         </div>
 
@@ -129,7 +129,7 @@ export function LoginForm({
                 ? 'password-error'
                 : undefined
             }
-            className="h-12 w-full rounded-xl border border-border-strong bg-surface pl-10 pr-4 text-sm text-text-primary outline-none transition hover:border-[#b8c7c4] focus:border-focus-border focus:ring-4 focus:ring-focus-ring/25 disabled:cursor-not-allowed disabled:bg-surface-muted aria-invalid:border-danger aria-invalid:focus:ring-danger-border/40"
+            className="h-12 w-full rounded-xl border border-border-strong bg-surface pl-10 pr-4 text-sm text-text-primary outline-none transition hover:border-focus-border focus:border-focus-border focus:ring-4 focus:ring-focus-ring/25 disabled:cursor-not-allowed disabled:bg-surface-muted aria-invalid:border-danger aria-invalid:focus:ring-danger-border/40"
           />
         </div>
 

@@ -20,7 +20,7 @@ export function SectionHeader({
   return (
     <header
       className={cn(
-        'flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between',
+        'flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between',
         className,
       )}
     >
@@ -31,12 +31,12 @@ export function SectionHeader({
           </p>
         ) : null}
 
-        <h2 className="mt-1 text-lg font-semibold text-text-primary">
+        <h2 className="mt-1 text-sm font-semibold text-text-primary">
           {title}
         </h2>
 
         {description ? (
-          <p className="mt-1 max-w-2xl text-sm leading-6 text-text-secondary">
+          <p className="mt-1 max-w-2xl text-sm leading-5 text-text-secondary">
             {description}
           </p>
         ) : null}

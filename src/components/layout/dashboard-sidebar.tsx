@@ -29,7 +29,7 @@ export function DashboardSidebar({
           onClick={onMobileClose}
           className="flex min-w-0 items-center gap-3"
         >
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-institutional-accent-border bg-institutional-gold-soft text-institutional-maroon">
             <CalendarRange
               className="size-5"
               aria-hidden="true"
@@ -63,7 +63,7 @@ export function DashboardSidebar({
       </div>
 
       <div className="border-b border-navigation-border bg-surface-subtle/70 px-5 py-3">
-        <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-primary">
+        <p className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-institutional-maroon">
           Timetable management
         </p>
 

@@ -125,43 +125,43 @@ export function UnitImportPreview({
 }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-      <div className="overflow-x-auto">
-        <table className="min-w-full border-collapse text-left text-sm">
+      <div className="w-full overflow-hidden">
+        <table className="w-full table-fixed border-collapse text-left text-sm">
           <thead className="bg-surface-subtle text-xs uppercase tracking-wide text-text-muted">
             <tr>
-              <th className="px-4 py-3">
+              <th className="px-3 py-2.5">
                 Row
               </th>
 
-              <th className="px-4 py-3">
+              <th className="px-3 py-2.5">
                 Unit
               </th>
 
-              <th className="px-4 py-3">
+              <th className="px-3 py-2.5">
                 Programme
               </th>
 
-              <th className="px-4 py-3">
+              <th className="px-3 py-2.5">
                 Category
               </th>
 
-              <th className="px-4 py-3">
+              <th className="px-3 py-2.5">
                 Period
               </th>
 
-              <th className="px-4 py-3">
+              <th className="px-3 py-2.5">
                 Contact hours
               </th>
 
-              <th className="px-4 py-3">
+              <th className="px-3 py-2.5">
                 Room preference
               </th>
 
-              <th className="px-4 py-3">
+              <th className="px-3 py-2.5">
                 Status
               </th>
 
-              <th className="px-4 py-3">
+              <th className="px-3 py-2.5">
                 Validation result
               </th>
             </tr>

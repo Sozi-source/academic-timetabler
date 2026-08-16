@@ -127,7 +127,7 @@ const columns: ColumnDef<Trainer>[] = [
             name="workloadRole"
             aria-label={`Workload role for ${row.original.fullName}`}
             defaultValue={row.original.workloadRole}
-            className="h-9 min-w-44 text-xs"
+            className="h-9 text-xs"
           >
             {workloadRoleOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -203,7 +203,7 @@ const columns: ColumnDef<Trainer>[] = [
     enableSorting: false,
     header: 'Actions',
     cell: ({ row }) => (
-      <div className="flex min-w-max flex-wrap justify-end gap-2">
+      <div className="flex flex-wrap justify-end gap-2">
         <Link
           href={`/timetable/trainers/${row.original.id}/edit`}
           className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
@@ -403,7 +403,7 @@ export function TrainerTable({
                   | TrainerEmploymentType,
               );
             }}
-            className="h-11 min-w-44"
+            className="h-11"
           >
             <option value="all">
               All employment types
@@ -432,7 +432,7 @@ export function TrainerTable({
                   | 'inactive',
               );
             }}
-            className="h-11 min-w-36"
+            className="h-11"
           >
             <option value="all">
               All statuses
@@ -456,7 +456,7 @@ export function TrainerTable({
                   | 'unavailable',
               );
             }}
-            className="h-11 min-w-44"
+            className="h-11"
           >
             <option value="all">
               All availability

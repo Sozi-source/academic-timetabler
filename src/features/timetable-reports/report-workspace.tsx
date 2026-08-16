@@ -27,16 +27,16 @@ function SessionTable({
   master?: boolean;
 }) {
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full border-collapse text-left text-sm">
+    <div className="w-full overflow-hidden">
+      <table className="w-full table-fixed border-collapse text-left text-sm">
         <thead className="bg-surface-subtle text-xs uppercase tracking-wide text-text-muted">
           <tr>
-            <th className="px-4 py-3">Day & time</th>
-            <th className="px-4 py-3">Unit</th>
-            <th className="px-4 py-3">Cohort</th>
-            <th className="px-4 py-3">Trainer</th>
-            <th className="px-4 py-3">{master ? 'Venue' : 'Room'}</th>
-            <th className="px-4 py-3">Status</th>
+            <th className="px-3 py-2.5">Day & time</th>
+            <th className="px-3 py-2.5">Unit</th>
+            <th className="px-3 py-2.5">Cohort</th>
+            <th className="px-3 py-2.5">Trainer</th>
+            <th className="px-3 py-2.5">{master ? 'Venue' : 'Room'}</th>
+            <th className="px-3 py-2.5">Status</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
@@ -51,7 +51,7 @@ function SessionTable({
                   {row.startsAt}–{row.endsAt}
                 </div>
               </td>
-              <td className="px-4 py-3">
+              <td className="px-3 py-2.5">
                 <div className={master ? 'text-base font-bold leading-snug text-text-primary' : 'font-semibold text-text-primary'}>{row.unitName}</div>
                 {!master ? <div className="text-xs text-text-muted">{row.unitCode}</div> : null}
                 {!master && row.departmentName ? (
@@ -63,15 +63,13 @@ function SessionTable({
               <td className="px-4 py-3 text-text-secondary">{row.cohort}</td>
               <td className="px-4 py-3 text-text-secondary">
                 {row.trainerId ? <span className={master ? 'text-sm font-medium' : undefined}>{row.trainer}</span> : (
-                  <span className="rounded bg-amber-200 px-2 py-1 font-bold uppercase text-amber-950">
-                    Unassigned
-                  </span>
+                  <Badge variant="warning">Unassigned</Badge>
                 )}
               </td>
-              <td className={master ? 'px-4 py-3 text-xs italic text-text-muted' : 'px-4 py-3 text-text-secondary'}>
+              <td className={master ? 'px-3 py-2.5 text-xs italic text-text-muted' : 'px-3 py-2.5 text-text-secondary'}>
                 {master ? presentation.venue : row.roomCode ? `${row.roomCode} · ${row.roomName}` : 'No room assigned'}
               </td>
-              <td className="px-4 py-3">
+              <td className="px-3 py-2.5">
                 <Badge variant={row.isLocked ? 'warning' : 'neutral'}>
                   {row.isLocked ? 'Locked' : row.status}
                 </Badge>
@@ -97,19 +95,19 @@ function GroupedReport({ groups }: { groups: TimetableReportGroup[] }) {
   return (
     <div className="space-y-5">
       {groups.map((group) => (
-        <section key={group.key} className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
+        <section key={group.key} className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
             <div>
               <h2 className="font-semibold text-text-primary">{group.label}</h2>
               {group.secondaryLabel ? (
                 <p className="mt-1 text-xs text-text-muted">{group.secondaryLabel}</p>
               ) : null}
             </div>
-            <div className="flex items-center gap-2 text-xs font-semibold text-text-muted">
-              <span className="rounded-full bg-surface-subtle px-2.5 py-1">{group.sessionCount} sessions</span>
-              <span className="rounded-full bg-primary-soft px-2.5 py-1 text-primary">{group.contactHours} hrs</span>
-              {group.targetHours !== undefined ? <span className="rounded-full bg-surface-subtle px-2.5 py-1">Target {group.targetHours} hrs</span> : null}
-              {(group.extraHours ?? 0) > 0 ? <span className="rounded-full bg-amber-100 px-2.5 py-1 text-amber-800">Extra +{group.extraHours} hrs</span> : null}
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Badge variant="neutral">{group.sessionCount} sessions</Badge>
+              <Badge variant="primary">{group.contactHours} hrs</Badge>
+              {group.targetHours !== undefined ? <Badge variant="neutral">Target {group.targetHours} hrs</Badge> : null}
+              {(group.extraHours ?? 0) > 0 ? <Badge variant="warning">Extra +{group.extraHours} hrs</Badge> : null}
             </div>
           </div>
           <SessionTable rows={group.rows} />
@@ -121,35 +119,31 @@ function GroupedReport({ groups }: { groups: TimetableReportGroup[] }) {
 
 function WorkloadReport({ groups }: { groups: TimetableReportGroup[] }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
-      <div className="overflow-x-auto">
-        <table className="min-w-full border-collapse text-left text-sm">
+    <div className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
+      <div className="w-full overflow-hidden">
+        <table className="w-full table-fixed border-collapse text-left text-sm">
           <thead className="bg-surface-subtle text-xs uppercase tracking-wide text-text-muted">
             <tr>
-              <th className="px-5 py-3">Trainer</th>
-              <th className="px-5 py-3">Sessions</th>
-              <th className="px-5 py-3">Target hours</th>
-              <th className="px-5 py-3">Scheduled hours</th>
-              <th className="px-5 py-3">Extra hours</th>
-              <th className="px-5 py-3">Status</th>
-              <th className="px-5 py-3">Cohorts</th>
-              <th className="px-5 py-3">Units</th>
+              <th className="px-3 py-2.5">Trainer</th>
+              <th className="px-3 py-2.5">Sessions</th>
+              <th className="px-3 py-2.5">Target</th>
+              <th className="px-3 py-2.5">Scheduled</th>
+              <th className="px-3 py-2.5">Extra</th>
+              <th className="px-3 py-2.5">Status</th>
+              <th className="px-3 py-2.5">Coverage</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {groups.map((group) => (
               <tr key={group.key}>
-                <td className="px-5 py-4 font-semibold text-text-primary">{group.label}</td>
-                <td className="px-5 py-4 text-text-secondary">{group.sessionCount}</td>
-                <td className="px-5 py-4 text-text-secondary">{group.targetHours ?? 0}</td>
-                <td className="px-5 py-4 font-semibold text-primary">{group.contactHours}</td>
-                <td className={`px-5 py-4 font-semibold ${(group.extraHours ?? 0) > 0 ? 'text-amber-700' : 'text-text-muted'}`}>{(group.extraHours ?? 0) > 0 ? `+${group.extraHours}` : '0'}</td>
-                <td className="px-5 py-4"><Badge variant={(group.extraHours ?? 0) > 0 ? 'warning' : 'success'}>{(group.extraHours ?? 0) > 0 ? 'Extra hours' : 'Within target'}</Badge></td>
-                <td className="px-5 py-4 text-text-secondary">
-                  {new Set(group.rows.map((row) => row.cohort)).size}
-                </td>
-                <td className="px-5 py-4 text-text-secondary">
-                  {new Set(group.rows.map((row) => row.unitCode)).size}
+                <td className="break-words px-3 py-2.5 font-semibold text-text-primary">{group.label}</td>
+                <td className="px-3 py-2.5 text-text-secondary">{group.sessionCount}</td>
+                <td className="px-3 py-2.5 text-text-secondary">{group.targetHours ?? 0}h</td>
+                <td className="px-3 py-2.5 font-semibold text-primary">{group.contactHours}h</td>
+                <td className={`px-3 py-2.5 font-semibold ${(group.extraHours ?? 0) > 0 ? 'text-warning' : 'text-text-muted'}`}>{(group.extraHours ?? 0) > 0 ? `+${group.extraHours}h` : '0'}</td>
+                <td className="px-3 py-2.5"><Badge variant={(group.extraHours ?? 0) > 0 ? 'warning' : 'success'}>{(group.extraHours ?? 0) > 0 ? 'Extra hours' : 'Within target'}</Badge></td>
+                <td className="px-3 py-2.5 text-xs text-text-secondary">
+                  {new Set(group.rows.map((row) => row.cohort)).size} cohorts · {new Set(group.rows.map((row) => row.unitCode)).size} units
                 </td>
               </tr>
             ))}
@@ -195,7 +189,7 @@ export function TimetableReportsWorkspace({
       </div>
 
       {report === 'master' ? (
-        <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
           <SessionTable rows={data.rows} master />
         </div>
       ) : null}

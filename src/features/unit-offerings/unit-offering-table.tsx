@@ -276,20 +276,20 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="w-full overflow-hidden">
             <table className="w-full min-w-[1240px] border-collapse text-left text-sm">
               <thead className="bg-surface-subtle text-xs uppercase tracking-wide text-text-muted">
                 <tr>
-                  <th className="px-4 py-3">Academic Period</th>
-                  <th className="px-4 py-3">Programme and cohort</th>
-                  <th className="px-4 py-3">Unit</th>
-                  <th className="px-4 py-3">Delivery</th>
-                  <th className="px-4 py-3">Sessions</th>
-                  <th className="px-4 py-3">Selection</th>
-                  <th className="px-4 py-3">Timetable</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Origin</th>
-                  <th className="px-4 py-3">Review</th>
+                  <th className="px-3 py-2.5">Academic Period</th>
+                  <th className="px-3 py-2.5">Programme and cohort</th>
+                  <th className="px-3 py-2.5">Unit</th>
+                  <th className="px-3 py-2.5">Delivery</th>
+                  <th className="px-3 py-2.5">Sessions</th>
+                  <th className="px-3 py-2.5">Selection</th>
+                  <th className="px-3 py-2.5">Timetable</th>
+                  <th className="px-3 py-2.5">Status</th>
+                  <th className="px-3 py-2.5">Origin</th>
+                  <th className="px-3 py-2.5">Review</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">

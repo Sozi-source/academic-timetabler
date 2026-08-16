@@ -54,29 +54,29 @@ export function GeneratorSessionTable({
     <div className="overflow-hidden rounded-2xl border border-border bg-surface">
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse text-left text-sm">
-          <thead className="bg-surface-subtle text-xs uppercase tracking-[0.08em] text-text-muted">
+          <thead className="bg-surface-subtle text-xs font-semibold uppercase tracking-wide text-text-muted">
             <tr>
-              <th className="px-5 py-3">
+              <th className="px-3.5 py-2.5">
                 Day and time
               </th>
 
-              <th className="px-5 py-3">
+              <th className="px-3.5 py-2.5">
                 Unit
               </th>
 
-              <th className="px-5 py-3">
+              <th className="px-3.5 py-2.5">
                 Cohort
               </th>
 
-              <th className="px-5 py-3">
+              <th className="px-3.5 py-2.5">
                 Trainer
               </th>
 
-              <th className="px-5 py-3">
+              <th className="px-3.5 py-2.5">
                 Room
               </th>
 
-              <th className="px-5 py-3">
+              <th className="px-3.5 py-2.5">
                 Session
               </th>
             </tr>
@@ -87,94 +87,94 @@ export function GeneratorSessionTable({
               (session) => (
                 <tr
                   key={session.id}
-                  className={`align-top transition ${session.trainerId && session.roomId ? 'hover:bg-surface-subtle' : 'bg-amber-50 hover:bg-amber-100/70'}`}
+                  className={`align-top transition ${session.trainerId && session.roomId ? 'hover:bg-surface-subtle' : 'bg-warning-surface hover:bg-warning-surface/70'}`}
                 >
-                  <td className="min-w-44 px-5 py-4">
-                    <div className="flex items-start gap-2">
+                  <td className="min-w-36 px-3.5 py-3">
+                    <div className="flex items-start gap-1.5">
                       <Clock3
-                        className="mt-0.5 size-4 shrink-0 text-text-subtle"
+                        className="mt-0.5 size-3.5 shrink-0 text-text-subtle"
                         aria-hidden="true"
                       />
 
                       <div>
-                        <p className="font-semibold text-text-primary">
+                        <p className="text-sm font-semibold text-text-primary">
                           {formatDay(
                             session.workingDayName,
                           )}
                         </p>
 
-                        <p className="mt-1 text-xs text-text-muted">
+                        <p className="mt-0.5 text-xs text-text-muted">
                           {session.startsAt}–
                           {session.endsAt}
                         </p>
 
-                        <p className="mt-1 text-xs text-text-muted">
+                        <p className="mt-0.5 text-xs text-text-muted">
                           {
                             session.durationMinutes
                           }{' '}
-                          minutes
+                          min
                         </p>
                       </div>
                     </div>
                   </td>
 
-                  <td className="min-w-56 px-5 py-4">
-                    <div className="flex items-start gap-2">
+                  <td className="min-w-48 px-3.5 py-3">
+                    <div className="flex items-start gap-1.5">
                       <BookOpen
-                        className="mt-0.5 size-4 shrink-0 text-text-subtle"
+                        className="mt-0.5 size-3.5 shrink-0 text-text-subtle"
                         aria-hidden="true"
                       />
 
                       <div>
-                        <p className="font-semibold text-text-primary">
+                        <p className="text-sm font-semibold text-text-primary">
                           {session.unitName}
                         </p>
 
-                        <p className="mt-1 text-xs text-text-muted">
+                        <p className="mt-0.5 text-xs text-text-muted">
                           {session.unitCode}
                         </p>
                       </div>
                     </div>
                   </td>
 
-                  <td className="min-w-48 px-5 py-4">
-                    <div className="flex items-start gap-2">
+                  <td className="min-w-36 px-3.5 py-3">
+                    <div className="flex items-start gap-1.5">
                       <GraduationCap
-                        className="mt-0.5 size-4 shrink-0 text-text-subtle"
+                        className="mt-0.5 size-3.5 shrink-0 text-text-subtle"
                         aria-hidden="true"
                       />
 
                       <div>
-                        <p className="font-medium text-text-primary">
+                        <p className="text-sm font-medium text-text-primary">
                           {session.cohortName}
                         </p>
 
-                        <p className="mt-1 text-xs text-text-muted">
+                        <p className="mt-0.5 text-xs text-text-muted">
                           {session.cohortCode}
                         </p>
                       </div>
                     </div>
                   </td>
 
-                  <td className="min-w-48 px-5 py-4">
-                    <div className="flex items-start gap-2">
+                  <td className="min-w-36 px-3.5 py-3">
+                    <div className="flex items-start gap-1.5">
                       <UserRound
-                        className={`mt-0.5 size-4 shrink-0 ${session.trainerId ? 'text-text-subtle' : 'text-amber-700'}`}
+                        className={`mt-0.5 size-3.5 shrink-0 ${session.trainerId ? 'text-text-subtle' : 'text-warning'}`}
                         aria-hidden="true"
                       />
 
                       <div>
                         {session.trainerId ? (
-                          <p className="font-medium text-text-primary">
+                          <p className="text-sm font-medium text-text-primary">
                             {session.trainerName}
                           </p>
                         ) : (
                           <Badge variant="warning">
-                            Unassigned trainer
+                            Unassigned
                           </Badge>
                         )}
 
-                        <p className="mt-1 text-xs text-text-muted">
+                        <p className="mt-0.5 text-xs text-text-muted">
                           {
                             session.trainerStaffNumber ?? 'Assign before publication'
                           }
@@ -183,25 +183,25 @@ export function GeneratorSessionTable({
                     </div>
                   </td>
 
-                  <td className="min-w-44 px-5 py-4">
-                    <div className="flex items-start gap-2">
+                  <td className="min-w-32 px-3.5 py-3">
+                    <div className="flex items-start gap-1.5">
                       <Building2
-                        className={`mt-0.5 size-4 shrink-0 ${session.roomId ? 'text-text-subtle' : 'text-amber-700'}`}
+                        className={`mt-0.5 size-3.5 shrink-0 ${session.roomId ? 'text-text-subtle' : 'text-warning'}`}
                         aria-hidden="true"
                       />
 
                       <div>
-                        {session.roomId ? <p className="font-medium text-text-primary">{session.roomName}</p> : <Badge variant="warning">No room assigned</Badge>}
+                        {session.roomId ? <p className="text-sm font-medium text-text-primary">{session.roomName}</p> : <Badge variant="warning">No room</Badge>}
 
-                        <p className="mt-1 text-xs text-text-muted">
+                        <p className="mt-0.5 text-xs text-text-muted">
                           {session.roomCode ?? 'Assign later'}
                         </p>
                       </div>
                     </div>
                   </td>
 
-                  <td className="min-w-36 px-5 py-4">
-                    <div className="flex flex-col items-start gap-2">
+                  <td className="min-w-28 px-3.5 py-3">
+                    <div className="flex flex-col items-start gap-1.5">
                       <Badge variant="neutral">
                         Session{' '}
                         {session.sessionNumber}

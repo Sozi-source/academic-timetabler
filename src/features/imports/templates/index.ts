@@ -8,3 +8,5 @@ export * from './teaching-allocations';
 export {
   unitOfferingsImportTemplate,
 } from '../unit-offerings/template';
+
+export * from './students';

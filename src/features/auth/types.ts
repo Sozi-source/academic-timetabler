@@ -1,6 +1,7 @@
 export type AppRole =
   | 'system_admin'
-  | 'hod';
+  | 'hod'
+  | 'trainer';
 
 export interface AuthenticatedProfile {
   id: string;

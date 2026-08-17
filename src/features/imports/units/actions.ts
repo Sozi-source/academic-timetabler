@@ -383,6 +383,23 @@ export async function stageUnitImportAction(
     };
   }
 
+  const {
+    error: duplicateReconciliationError,
+  } = await supabase.rpc(
+    'reconcile_unit_import_duplicates',
+    {
+      target_batch_id: batch.id,
+    },
+  );
+
+  if (duplicateReconciliationError) {
+    return {
+      status: 'error',
+      message:
+        `Units database duplicate reconciliation failed: ${duplicateReconciliationError.message}`,
+    };
+  }
+
   revalidatePath(
     `/timetable/units/import/${batch.id}`,
   );
@@ -421,7 +438,7 @@ export async function confirmUnitImportAction(
     data,
     error,
   } = await supabase.rpc(
-    'import_valid_unit_rows',
+    'safe_import_valid_unit_rows',
     {
       target_batch_id: batchId,
     },
@@ -445,6 +462,35 @@ export async function confirmUnitImportAction(
       status: 'error',
       message:
         'The Units import completed without returning a result.',
+    };
+  }
+
+  const reclassifiedCount =
+    Number(
+      (
+        result as {
+          reclassified_count?: number;
+        }
+      ).reclassified_count ?? 0,
+    );
+
+  if (reclassifiedCount > 0) {
+    revalidatePath(
+      `/timetable/units/import/${batchId}`,
+    );
+
+    return {
+      status: 'error',
+      message:
+        `${reclassifiedCount} row${
+          reclassifiedCount === 1 ? '' : 's'
+        } matched an existing Unit Code or Unit Name and ${
+          reclassifiedCount === 1 ? 'has' : 'have'
+        } been moved to Duplicates. Review the updated batch, then confirm the remaining Ready rows.`,
+      batchId,
+      importedCount: 0,
+      skippedCount: reclassifiedCount,
+      failedCount: 0,
     };
   }
 

@@ -4,7 +4,8 @@ import type {
   ColumnDef,
 } from '@tanstack/react-table';
 import {
-  CalendarCheck2,
+  MoreVertical,
+CalendarCheck2,
   CalendarX2,
   Pencil,
   RotateCcw,
@@ -84,7 +85,7 @@ const columns: ColumnDef<Cohort>[] = [
     accessorKey: 'name',
     header: 'Cohort',
     cell: ({ row }) => (
-      <div className="min-w-56">
+      <div className="w-[150px] min-w-[150px]">
         <p className="font-semibold text-text-primary">
           {row.original.name}
         </p>
@@ -98,20 +99,12 @@ const columns: ColumnDef<Cohort>[] = [
   {
     id: 'programme',
     accessorFn: (row) =>
-      row.programme?.name ?? '',
+      row.programme?.code ?? '',
     header: 'Programme',
     cell: ({ row }) => (
-      <div className="min-w-60">
-        <p className="font-medium text-text-primary">
-          {row.original.programme?.name ??
-            'Programme unavailable'}
-        </p>
-
-        <p className="mt-1 text-xs text-text-muted">
-          {row.original.programme?.code ??
-            row.original.programmeId}
-        </p>
-      </div>
+      <span className="inline-flex min-w-[72px] font-semibold text-text-primary">
+        {row.original.programme?.code ?? 'Ã¢â‚¬â€'}
+      </span>
     ),
   },
   {
@@ -120,7 +113,7 @@ const columns: ColumnDef<Cohort>[] = [
       row.intakeDate,
     header: 'Dates',
     cell: ({ row }) => (
-      <div className="min-w-44 text-sm text-text-primary">
+      <div className="w-[150px] min-w-[150px] text-xs leading-5 text-text-primary">
         <p>
           Intake: {formatDate(row.original.intakeDate)}
         </p>
@@ -140,7 +133,7 @@ const columns: ColumnDef<Cohort>[] = [
       row.currentAcademicPeriodNumber,
     header: 'Progress',
     cell: ({ row }) => (
-      <div className="min-w-32">
+      <div className="w-[90px] min-w-[90px]">
         <p className="font-medium text-text-primary">
           Period{' '}
           {row.original.currentAcademicPeriodNumber}
@@ -164,7 +157,7 @@ const columns: ColumnDef<Cohort>[] = [
       row.actualSize,
     header: 'Enrolment',
     cell: ({ row }) => (
-      <div className="min-w-36">
+      <div className="w-[110px] min-w-[110px]">
         <p className="inline-flex items-center gap-2 font-medium text-text-primary">
           <Users
             className="size-4 text-text-muted"
@@ -229,7 +222,18 @@ const columns: ColumnDef<Cohort>[] = [
         row.original.status === 'active';
 
       return (
-        <div className="flex flex-wrap justify-end gap-2">
+        <details className="relative">
+          <summary
+            className="inline-flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-lg border border-border-strong bg-surface text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+            aria-label={`Actions for ${row.original.name}`}
+          >
+            <MoreVertical
+              className="size-4"
+              aria-hidden="true"
+            />
+          </summary>
+
+          <div className="absolute right-0 z-40 mt-1 min-w-[210px] rounded-xl border border-border bg-surface p-2 shadow-xl [&_a]:w-full [&_a]:justify-start [&_button]:w-full [&_button]:justify-start [&_form]:w-full [&_select]:w-full">
           <Link
             href={`/timetable/cohorts/${row.original.id}/edit`}
             className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
@@ -316,7 +320,8 @@ const columns: ColumnDef<Cohort>[] = [
               )}
             </Select>
           </form>
-        </div>
+                  </div>
+        </details>
       );
     },
   },

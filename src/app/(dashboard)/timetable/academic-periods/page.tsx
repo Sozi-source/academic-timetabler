@@ -1,3 +1,4 @@
+import { CrudModal } from '@/components/ui/crud-modal';
 import type { Metadata } from 'next';
 import {
   CalendarDays,
@@ -115,11 +116,18 @@ export default async function AcademicPeriodsPage() {
               <DrawerBody className="pb-10">
                 {availableAcademicYears.length >
                 0 ? (
-                  <CreateAcademicPeriodForm
+                  <CrudModal
+          title="Create Academic Period"
+          description="Add a teaching period to the academic calendar."
+          triggerLabel="Create Academic Period"
+          widthClassName="max-w-2xl"
+        >
+          <CreateAcademicPeriodForm
                     academicYears={
                       availableAcademicYears
                     }
                   />
+        </CrudModal>
                 ) : (
                   <div className="rounded-xl border border-warning-border bg-warning-surface px-4 py-4 text-sm text-warning">
                     Create an Academic Year before

@@ -37,3 +37,20 @@ Promise<AuthenticatedProfile> {
     'system_admin',
   ]);
 }
+
+/**
+ * Trainer workspace access is capability-based.
+ *
+ * HODs and system administrators are often also trainers, so they must not
+ * lose their management role merely to use the trainer portal. The trainer
+ * workspace subsequently verifies that the authenticated profile is linked
+ * to an active trainer record and allocated to the requested unit.
+ */
+export async function requireTrainerAccess():
+Promise<AuthenticatedProfile> {
+  return requireRole([
+    'trainer',
+    'hod',
+    'system_admin',
+  ]);
+}

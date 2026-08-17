@@ -26,6 +26,8 @@ import {
 import {
   unitOfferingsImportTemplate,
 } from '../unit-offerings/template';
+import { studentsImportTemplate } from './students';
+import { curriculumImportTemplate } from './curriculum';
 export const importTemplateRegistry:
 Partial<
   Record<
@@ -41,6 +43,8 @@ Partial<
   teaching_allocations:
     teachingAllocationsImportTemplate,
   unit_offerings: unitOfferingsImportTemplate,
+  students: studentsImportTemplate,
+  curriculum: curriculumImportTemplate,
 };
 
 export function getImportTemplateDefinition(

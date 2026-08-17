@@ -5,6 +5,7 @@ import type {
 } from '@tanstack/react-table';
 import {
   CalendarDays,
+  MoreVertical,
   Pencil,
   RotateCcw,
 } from 'lucide-react';
@@ -59,7 +60,7 @@ const columns: ColumnDef<AcademicPeriod>[] = [
     accessorKey: 'name',
     header: 'Academic Period',
     cell: ({ row }) => (
-      <div className="min-w-52">
+      <div className="w-[190px] min-w-[190px] max-w-[220px]">
         <p className="font-semibold text-text-primary">
           {row.original.name}
         </p>
@@ -76,7 +77,7 @@ const columns: ColumnDef<AcademicPeriod>[] = [
       row.academicYear.name,
     header: 'Academic Year',
     cell: ({ row }) => (
-      <div className="min-w-40">
+      <div className="w-[110px] min-w-[110px]">
         <p className="font-medium text-text-primary">
           {row.original.academicYear.name}
         </p>
@@ -129,24 +130,42 @@ const columns: ColumnDef<AcademicPeriod>[] = [
   {
     id: 'actions',
     enableSorting: false,
-    header: 'Actions',
+    header: '',
+    size: 52,
+    minSize: 52,
+    maxSize: 52,
     cell: ({ row }) => (
-      <div className="flex flex-wrap justify-end gap-2">
-        <Link
-          href={`/timetable/academic-periods/${row.original.id}/edit`}
-          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+      <details className="relative">
+        <summary
+          className="inline-flex size-8 cursor-pointer list-none items-center justify-center rounded-lg border border-border-strong bg-surface text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+          aria-label={`Actions for ${row.original.name}`}
+          title="Actions"
         >
-          <Pencil
-            className="size-3.5"
+          <MoreVertical
+            className="size-4"
             aria-hidden="true"
           />
-          Edit
-        </Link>
+        </summary>
 
-        <AcademicPeriodLifecycleAction
-          academicPeriod={row.original}
-        />
-      </div>
+        <div className="absolute right-0 z-50 mt-1 w-56 rounded-xl border border-border bg-surface p-2 shadow-xl">
+          <Link
+            href={`/timetable/academic-periods/${row.original.id}/edit`}
+            className="flex h-9 w-full items-center gap-2 rounded-lg px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+          >
+            <Pencil
+              className="size-3.5"
+              aria-hidden="true"
+            />
+            Edit Academic Period
+          </Link>
+
+          <div className="mt-1 border-t border-border pt-2 [&_button]:w-full [&_button]:justify-start [&_form]:w-full [&_select]:w-full">
+            <AcademicPeriodLifecycleAction
+              academicPeriod={row.original}
+            />
+          </div>
+        </div>
+      </details>
     ),
   },
 ];
@@ -230,7 +249,7 @@ export function AcademicPeriodTable({
       }
       initialPageSize={10}
       toolbarFilters={
-        <div className="flex flex-1 flex-wrap items-center gap-2">
+        <div className="grid w-full gap-2 sm:grid-cols-2 lg:flex lg:w-auto lg:flex-1 lg:flex-wrap lg:items-center">
           <Select
             aria-label="Filter by Academic Year"
             value={academicYearId}
@@ -239,7 +258,7 @@ export function AcademicPeriodTable({
                 event.target.value,
               );
             }}
-            className="h-11"
+            className="h-10 w-full lg:w-56"
           >
             <option value="all">
               All Academic Years
@@ -267,7 +286,7 @@ export function AcademicPeriodTable({
                   | AcademicPeriodStatus,
               );
             }}
-            className="h-11"
+            className="h-10 w-full lg:w-44"
           >
             <option value="all">
               All statuses

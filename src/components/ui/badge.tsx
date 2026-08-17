@@ -8,7 +8,8 @@ type BadgeVariant =
   | 'success'
   | 'warning'
   | 'danger'
-  | 'info';
+  | 'info'
+  | 'institutional';
 
 interface BadgeProps {
   children: ReactNode;
@@ -33,6 +34,8 @@ const variantClasses: Record<
     'border-danger-border bg-danger-surface text-danger',
   info:
     'border-info-border bg-info-surface text-info',
+  institutional:
+    'border-institutional-accent-border bg-institutional-yellow text-institutional-yellow-ink',
 };
 
 export function Badge({

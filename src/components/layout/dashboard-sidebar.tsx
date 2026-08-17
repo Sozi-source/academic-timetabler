@@ -22,27 +22,28 @@ export function DashboardSidebar({
   const pathname = usePathname();
 
   const sidebarContent = (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col bg-navigation-background text-white">
       <div className="flex min-h-[var(--header-height)] items-center justify-between border-b border-navigation-border px-5">
         <Link
           href="/dashboard"
           onClick={onMobileClose}
           className="flex min-w-0 items-center gap-3"
         >
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-institutional-accent-border bg-institutional-gold text-institutional-maroon">
+          <div className="relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-institutional-yellow text-primary-deeper shadow-sm ring-1 ring-white/10">
             <CalendarRange
               className="size-5"
               aria-hidden="true"
             />
+            <span className="absolute -right-1 -top-1 size-2.5 rounded-full border-2 border-navigation-background bg-white" aria-hidden="true" />
           </div>
 
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-text-primary">
-              Institutional Timetabler
+            <p className="truncate text-sm font-semibold tracking-tight text-white">
+              Academic Planning & Timetabling
             </p>
 
-            <p className="truncate text-xs text-text-muted">
-              Simple scheduling
+            <p className="truncate text-xs text-navigation-text/75">
+              Timetable workspace
             </p>
           </div>
         </Link>
@@ -52,7 +53,7 @@ export function DashboardSidebar({
             type="button"
             onClick={onMobileClose}
             aria-label="Close navigation"
-            className="flex size-9 items-center justify-center rounded-lg text-text-muted transition hover:bg-navigation-hover hover:text-text-primary lg:hidden"
+            className="flex size-9 items-center justify-center rounded-lg text-navigation-text transition hover:bg-navigation-hover hover:text-white lg:hidden"
           >
             <X
               className="size-5"
@@ -62,26 +63,33 @@ export function DashboardSidebar({
         ) : null}
       </div>
 
-      <div className="border-b border-navigation-border bg-surface-subtle/70 px-5 py-3">
-        <p className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-institutional-maroon">
-          Timetable management
-        </p>
-
-        <p className="mt-1 text-[0.6875rem] text-text-muted">
-          Setup · Generate · Review · Publish
-        </p>
+      <div className="border-b border-navigation-border bg-primary-deep/55 px-4 py-3">
+        <div className="flex items-center gap-2">
+          <span className="h-5 w-1 rounded-full bg-institutional-yellow" aria-hidden="true" />
+          <div>
+            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-institutional-yellow">
+              Active module
+            </p>
+            <p className="mt-0.5 text-[0.6875rem] text-navigation-text/75">
+              Academic Planning & Timetabling
+            </p>
+          </div>
+        </div>
       </div>
 
       <nav
         aria-label="Main navigation"
-        className="flex-1 overflow-y-auto px-3 py-5"
+        className="flex-1 overflow-y-auto px-3 py-4"
       >
-        <div className="space-y-6">
+        <div className="space-y-5">
           {dashboardNavigation.map((section) => (
             <section key={section.label}>
-              <p className="px-3 text-[0.65rem] font-semibold uppercase tracking-[0.17em] text-text-subtle">
-                {section.label}
-              </p>
+              <div className="flex items-center gap-2 px-3">
+                <span className="h-px w-4 bg-institutional-yellow" aria-hidden="true" />
+                <p className="text-[0.65rem] font-semibold uppercase tracking-[0.17em] text-navigation-text/60">
+                  {section.label}
+                </p>
+              </div>
 
               <div className="mt-2 space-y-1">
                 {section.items.map((item) => {
@@ -101,27 +109,27 @@ export function DashboardSidebar({
                       key={item.href}
                       href={item.href}
                       onClick={onMobileClose}
-                      aria-current={
-                        active
-                          ? 'page'
-                          : undefined
-                      }
+                      aria-current={active ? 'page' : undefined}
                       className={cn(
-                        'group flex min-h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition',
+                        'group relative flex min-h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition',
                         active
-                          ? 'bg-navigation-active text-navigation-active-text'
-                          : 'text-navigation-text hover:bg-navigation-hover hover:text-text-primary',
+                          ? 'bg-navigation-active text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] before:absolute before:inset-y-2 before:left-0 before:w-1 before:rounded-r-full before:bg-institutional-yellow'
+                          : 'text-navigation-text hover:bg-navigation-hover hover:text-white',
                       )}
                     >
-                      <Icon
+                      <span
                         className={cn(
-                          'size-[1.05rem] shrink-0',
+                          'flex size-7 shrink-0 items-center justify-center rounded-md transition',
                           active
-                            ? 'text-institutional-gold'
-                            : 'text-text-muted group-hover:text-primary',
+                            ? 'bg-institutional-yellow text-primary-deeper'
+                            : 'text-navigation-text/75 group-hover:bg-white/10 group-hover:text-institutional-yellow',
                         )}
-                        aria-hidden="true"
-                      />
+                      >
+                        <Icon
+                          className="size-[1.05rem]"
+                          aria-hidden="true"
+                        />
+                      </span>
 
                       <span className="truncate">
                         {item.label}
@@ -136,20 +144,24 @@ export function DashboardSidebar({
       </nav>
 
       <div className="border-t border-navigation-border px-5 py-4">
-        <p className="text-xs font-medium text-text-secondary">
-          Department timetable
-        </p>
-
-        <p className="mt-1 text-[0.6875rem] text-text-muted">
-          Shared institutional trainer pool
-        </p>
+        <div className="flex items-center gap-2.5">
+          <span className="size-2 rounded-full bg-institutional-yellow shadow-[0_0_0_4px_rgba(245,196,0,0.12)]" aria-hidden="true" />
+          <div>
+            <p className="text-xs font-medium text-white">
+              Timetabling workspace
+            </p>
+            <p className="mt-0.5 text-[0.6875rem] text-navigation-text/65">
+              Academic scheduling operations
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
 
   return (
     <>
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[var(--sidebar-width)] border-r border-navigation-border bg-navigation-background lg:block">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[var(--sidebar-width)] border-r border-navigation-border bg-navigation-background shadow-[8px_0_28px_rgba(16,60,57,0.08)] lg:block">
         {sidebarContent}
       </aside>
 
@@ -159,7 +171,7 @@ export function DashboardSidebar({
             type="button"
             aria-label="Close navigation"
             onClick={onMobileClose}
-            className="absolute inset-0 bg-black/20 backdrop-blur-[1px]"
+            className="absolute inset-0 bg-black/30 backdrop-blur-[1px]"
           />
 
           <aside className="relative h-full w-[min(19rem,86vw)] border-r border-navigation-border bg-navigation-background shadow-lg">

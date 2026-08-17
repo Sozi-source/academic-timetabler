@@ -1,3 +1,4 @@
+import { CrudModal } from '@/components/ui/crud-modal';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
@@ -127,7 +128,14 @@ export default async function RoomsPage() {
               </DrawerHeader>
 
               <DrawerBody className="pb-10">
-                <CreateRoomForm />
+                <CrudModal
+          title="Create Room"
+          description="Register a teaching venue."
+          triggerLabel="Create Room"
+          widthClassName="max-w-2xl"
+        >
+          <CreateRoomForm />
+        </CrudModal>
               </DrawerBody>
             </DrawerContent>
           </Drawer>

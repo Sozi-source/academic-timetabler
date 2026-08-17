@@ -24,22 +24,28 @@ export function SectionHeader({
         className,
       )}
     >
-      <div className="min-w-0">
-        {eyebrow ? (
-          <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-text-muted">
-            {eyebrow}
-          </p>
-        ) : null}
+      <div className="flex min-w-0 items-start gap-3">
+        <span className="mt-0.5 flex h-9 w-1.5 shrink-0 overflow-hidden rounded-full bg-primary" aria-hidden="true">
+          <span className="mt-auto h-3 w-full bg-institutional-yellow" />
+        </span>
 
-        <h2 className="mt-1 text-sm font-semibold text-text-primary">
-          {title}
-        </h2>
+        <div className="min-w-0">
+          {eyebrow ? (
+            <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-primary">
+              {eyebrow}
+            </p>
+          ) : null}
 
-        {description ? (
-          <p className="mt-1 max-w-2xl text-sm leading-5 text-text-secondary">
-            {description}
-          </p>
-        ) : null}
+          <h2 className="mt-0.5 text-base font-semibold text-text-primary">
+            {title}
+          </h2>
+
+          {description ? (
+            <p className="mt-1 max-w-2xl text-sm leading-5 text-text-secondary">
+              {description}
+            </p>
+          ) : null}
+        </div>
       </div>
 
       {actions ? (

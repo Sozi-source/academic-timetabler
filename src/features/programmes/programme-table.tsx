@@ -4,7 +4,8 @@ import type {
   ColumnDef,
 } from '@tanstack/react-table';
 import {
-  CalendarCheck2,
+  MoreVertical,
+CalendarCheck2,
   CalendarX2,
   CheckCircle2,
   CircleOff,
@@ -70,7 +71,7 @@ const columns: ColumnDef<Programme>[] = [
     header: 'Programme',
     cell: ({ row }) => (
       <div className="min-w-64">
-        <p className="font-semibold text-text-primary">
+        <p className="font-semibold leading-5 text-text-primary [overflow-wrap:normal] break-normal">
           {row.original.name}
         </p>
 
@@ -190,7 +191,18 @@ const columns: ColumnDef<Programme>[] = [
     enableSorting: false,
     header: 'Actions',
     cell: ({ row }) => (
-      <div className="flex flex-wrap justify-end gap-2">
+      <details className="relative">
+          <summary
+            className="inline-flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-lg border border-border-strong bg-surface text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+            aria-label={`Actions for ${row.original.name}`}
+          >
+            <MoreVertical
+              className="size-4"
+              aria-hidden="true"
+            />
+          </summary>
+
+          <div className="absolute right-0 z-40 mt-1 min-w-[210px] rounded-xl border border-border bg-surface p-2 shadow-xl [&_a]:w-full [&_a]:justify-start [&_button]:w-full [&_button]:justify-start [&_form]:w-full [&_select]:w-full">
         <Link
           href={`/timetable/programmes/${row.original.id}/edit`}
           className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
@@ -293,7 +305,8 @@ const columns: ColumnDef<Programme>[] = [
               : 'Activate'}
           </Button>
         </form>
-      </div>
+                </div>
+        </details>
     ),
   },
 ];

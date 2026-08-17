@@ -5,8 +5,7 @@ import type {
 
 import { cn } from '@/lib/utils/cn';
 
-interface CardProps
-  extends HTMLAttributes<HTMLElement> {
+interface CardProps extends HTMLAttributes<HTMLElement> {
   children: ReactNode;
 }
 
@@ -18,7 +17,7 @@ export function Card({
   return (
     <article
       className={cn(
-        'rounded-xl border border-border bg-surface shadow-sm',
+        'relative overflow-hidden rounded-xl border border-border bg-surface shadow-sm',
         className,
       )}
       {...props}
@@ -38,7 +37,7 @@ export function CardHeader({
   return (
     <div
       className={cn(
-        'border-b border-border-soft px-4 py-3.5',
+        'border-b border-border-soft bg-surface-subtle/70 px-4 py-3.5',
         className,
       )}
     >
@@ -55,12 +54,7 @@ export function CardContent({
   className?: string;
 }) {
   return (
-    <div
-      className={cn(
-        'px-4 py-4',
-        className,
-      )}
-    >
+    <div className={cn('px-4 py-4', className)}>
       {children}
     </div>
   );

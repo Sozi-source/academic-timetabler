@@ -63,7 +63,7 @@ export function Button({
   ...props
 }: ButtonProps) {
   const classes = cn(
-    'inline-flex shrink-0 items-center justify-center gap-2 border font-semibold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-focus-ring/35 disabled:pointer-events-none disabled:opacity-55',
+    'inline-flex shrink-0 items-center justify-center gap-2 border font-semibold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-institutional-yellow/30 focus-visible:ring-offset-1 focus-visible:ring-offset-surface disabled:pointer-events-none disabled:opacity-55',
     variantClasses[variant],
     sizeClasses[size],
     className,

@@ -36,17 +36,13 @@ export async function loginAction(
 
   const supabase = await createClient();
 
-  const { error } =
+  const { data: authData, error } =
     await supabase.auth.signInWithPassword({
       email: parsed.data.email,
       password: parsed.data.password,
     });
 
   if (error) {
-    /*
-     * Use one neutral message so the interface does not reveal
-     * whether a particular email address exists.
-     */
     return {
       status: 'error',
       message:
@@ -54,11 +50,17 @@ export async function loginAction(
     };
   }
 
-  const destination = getSafeInternalPath(
-    parsed.data.nextPath,
-  );
+  if (parsed.data.nextPath) {
+    redirect(getSafeInternalPath(parsed.data.nextPath));
+  }
 
-  redirect(destination);
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', authData.user.id)
+    .maybeSingle<{ role: 'system_admin' | 'hod' | 'trainer' }>();
+
+  redirect(profile?.role === 'trainer' ? '/trainer/exam-attendance' : '/dashboard');
 }
 
 export async function logoutAction(): Promise<void> {

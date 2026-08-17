@@ -8,7 +8,7 @@
 
 :root {
   /* Application surfaces */
-  --background: #f5f7f8;
+  --background: #f3f6f5;
   --foreground: #1f2937;
 
   --surface: #ffffff;
@@ -20,24 +20,27 @@
   --primary: #2f706b;
   --primary-hover: #285f5b;
   --primary-active: #214f4c;
+  --primary-deep: #184f4b;
+  --primary-deeper: #103c39;
   --primary-soft: #e8f2f1;
   --primary-subtle: #f3f8f7;
   --primary-foreground: #ffffff;
 
-  /* Institutional accent — gold is intentionally visible while teal remains primary */
-  --institutional-maroon: #7b1421;
-  --institutional-maroon-soft: #f7eef0;
-  --institutional-gold: #f5bd22;
-  --institutional-gold-soft: #fff8df;
-  --institutional-accent-border: #ead28a;
+  /* Institutional accent — bright yellow complements teal; no maroon */
+  --institutional-yellow: #f5c400;
+  --institutional-yellow-hover: #e4b500;
+  --institutional-yellow-soft: #fff2a4;
+  --institutional-yellow-subtle: #fff9dc;
+  --institutional-yellow-ink: #3f3500;
+  --institutional-accent-border: #d4aa00;
 
   /* Navigation */
-  --navigation-background: #ffffff;
-  --navigation-border: #dce5e3;
-  --navigation-text: #52615f;
-  --navigation-hover: #f1f6f5;
-  --navigation-active: #e5f0ee;
-  --navigation-active-text: #245b57;
+  --navigation-background: #103c39;
+  --navigation-border: #275a56;
+  --navigation-text: #d7e4e2;
+  --navigation-hover: #184f4b;
+  --navigation-active: #245f5a;
+  --navigation-active-text: #ffffff;
 
   /* Text */
   --text-primary: #1f2937;
@@ -105,11 +108,14 @@
   --color-primary-soft: var(--primary-soft);
   --color-primary-subtle: var(--primary-subtle);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-deep: var(--primary-deep);
+  --color-primary-deeper: var(--primary-deeper);
 
-  --color-institutional-maroon: var(--institutional-maroon);
-  --color-institutional-maroon-soft: var(--institutional-maroon-soft);
-  --color-institutional-gold: var(--institutional-gold);
-  --color-institutional-gold-soft: var(--institutional-gold-soft);
+  --color-institutional-yellow: var(--institutional-yellow);
+  --color-institutional-yellow-hover: var(--institutional-yellow-hover);
+  --color-institutional-yellow-soft: var(--institutional-yellow-soft);
+  --color-institutional-yellow-subtle: var(--institutional-yellow-subtle);
+  --color-institutional-yellow-ink: var(--institutional-yellow-ink);
   --color-institutional-accent-border: var(--institutional-accent-border);
 
   --color-navigation-background:

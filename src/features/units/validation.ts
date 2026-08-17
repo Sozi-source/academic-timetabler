@@ -1,42 +1,69 @@
 import { z } from 'zod';
 
+function normaliseUnitCode(value: unknown) {
+  return String(value ?? '')
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, ' ');
+}
+
+const preferredRoomTypeSchema = z.enum([
+  'lecture_room',
+  'laboratory',
+  'skills_room',
+  'computer_lab',
+  'kitchen',
+  'conference_room',
+  'other',
+]);
+
 export const unitFormSchema = z
   .object({
-    programmeId: z.uuid(
-      'Select a valid programme.',
+    programmeId: z
+      .string()
+      .uuid('Select a valid programme.'),
+
+    code: z.preprocess(
+      normaliseUnitCode,
+      z
+        .string()
+        .min(
+          1,
+          'Enter the Unit Code.',
+        )
+        .max(
+          60,
+          'Unit Code must be 60 characters or fewer.',
+        )
+        .regex(
+          /^[A-Z0-9][A-Z0-9 _/-]*$/,
+          'Use letters, numbers, spaces, slashes, underscores and hyphens only.',
+        ),
     ),
 
-    code: z
-      .string()
-      .trim()
-      .toUpperCase()
-      .min(1, 'Enter the unit code.')
-      .max(
-        50,
-        'The unit code cannot exceed 50 characters.',
-      )
-      .regex(
-        /^[A-Z0-9/_-]+$/,
-        'Use letters, numbers, slashes, underscores and hyphens only.',
-      ),
+    name: z.preprocess(
+      (value) =>
+        String(value ?? '')
+          .trim()
+          .replace(/\s+/g, ' '),
+      z
+        .string()
+        .min(
+          2,
+          'Enter the Unit Name.',
+        )
+        .max(180),
+    ),
 
-    name: z
-      .string()
-      .trim()
-      .min(2, 'Enter the official unit name.')
-      .max(
-        180,
-        'The unit name cannot exceed 180 characters.',
-      ),
-
-    shortName: z
-      .string()
-      .trim()
-      .max(
-        80,
-        'The short name cannot exceed 80 characters.',
-      )
-      .optional(),
+    shortName: z.preprocess(
+      (value) => {
+        const text = String(value ?? '')
+          .trim()
+          .replace(/\s+/g, ' ');
+        return text || undefined;
+      },
+      z.string().max(80).optional(),
+    ),
 
     category: z.enum([
       'core',
@@ -50,115 +77,86 @@ export const unitFormSchema = z
 
     academicPeriodNumber: z.coerce
       .number()
-      .int(
-        'The Academic Period number must be a whole number.',
-      )
-      .min(
-        1,
-        'The Academic Period number must be at least 1.',
-      )
-      .max(
-        60,
-        'The Academic Period number cannot exceed 60.',
-      ),
+      .int()
+      .min(1)
+      .max(60),
 
     theoryHours: z.coerce
       .number()
-      .min(
-        0,
-        'Theory hours cannot be negative.',
-      )
-      .max(
-        100,
-        'Theory hours cannot exceed 100.',
-      ),
+      .min(0)
+      .max(80),
 
     practicalHours: z.coerce
       .number()
-      .min(
-        0,
-        'Practical hours cannot be negative.',
-      )
-      .max(
-        100,
-        'Practical hours cannot exceed 100.',
-      ),
+      .min(0)
+      .max(80),
 
     weeklySessions: z.coerce
       .number()
-      .int(
-        'Weekly sessions must be a whole number.',
-      )
-      .min(
-        1,
-        'At least one weekly session is required.',
-      )
-      .max(
-        20,
-        'Weekly sessions cannot exceed 20.',
-      ),
+      .int()
+      .min(1)
+      .max(20),
 
-    preferredRoomType: z
-      .enum([
-        'lecture_room',
-        'laboratory',
-        'skills_room',
-        'computer_lab',
-        'kitchen',
-        'conference_room',
-        'other',
-      ])
-      .optional(),
+    preferredRoomType: z.preprocess(
+      (value) => {
+        const text = String(value ?? '')
+          .trim()
+          .toLowerCase();
+        return text || undefined;
+      },
+      preferredRoomTypeSchema.optional(),
+    ),
 
-    notes: z
-      .string()
-      .trim()
-      .max(
-        1500,
-        'Notes cannot exceed 1,500 characters.',
-      )
-      .optional(),
+    notes: z.preprocess(
+      (value) => {
+        const text = String(value ?? '')
+          .trim();
+        return text || undefined;
+      },
+      z.string().max(1500).optional(),
+    ),
   })
   .superRefine((value, context) => {
     if (
-      value.theoryHours +
-        value.practicalHours <=
-      0
+      value.theoryHours === 0 &&
+      value.practicalHours === 0
     ) {
       context.addIssue({
         code: 'custom',
         path: ['theoryHours'],
         message:
-          'The unit must contain theory or practical contact hours.',
-      });
-
-      context.addIssue({
-        code: 'custom',
-        path: ['practicalHours'],
-        message:
-          'The unit must contain theory or practical contact hours.',
+          'A unit must have at least one contact hour per week.',
       });
     }
 
     if (
-      (
-        value.category === 'practical' ||
-        value.category === 'clinical'
-      ) &&
+      value.category === 'practical' &&
       value.practicalHours <= 0
     ) {
       context.addIssue({
         code: 'custom',
         path: ['practicalHours'],
         message:
-          'Practical or clinical units must include practical contact hours.',
+          'Practical units must have practical contact hours.',
+      });
+    }
+
+    if (
+      value.category === 'clinical' &&
+      value.practicalHours <= 0
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: ['practicalHours'],
+        message:
+          'Clinical units must have practical or clinical contact hours.',
       });
     }
   });
 
-export const unitIdSchema = z.uuid(
-  'The unit identifier is invalid.',
-);
+export const unitIdSchema = z
+  .string()
+  .uuid('Invalid unit identifier.');
 
 export type UnitFormInput =
   z.infer<typeof unitFormSchema>;

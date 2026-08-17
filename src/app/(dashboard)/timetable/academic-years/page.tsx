@@ -1,3 +1,4 @@
+import { CrudModal } from '@/components/ui/crud-modal';
 import type { Metadata } from 'next';
 import {
   CalendarRange,
@@ -60,7 +61,7 @@ export default async function AcademicYearsPage() {
         }
       />
 
-      <section className="grid items-start gap-6 xl:grid-cols-[0.72fr_1.28fr]">
+      <section className="space-y-4">
         <Card>
           <CardHeader>
             <div className="flex items-center gap-3">
@@ -84,7 +85,14 @@ export default async function AcademicYearsPage() {
           </CardHeader>
 
           <CardContent>
-            <CreateAcademicYearForm />
+            <CrudModal
+          title="Create Academic Year"
+          description="Add a new institutional academic year."
+          triggerLabel="Create Academic Year"
+          widthClassName="max-w-xl"
+        >
+          <CreateAcademicYearForm />
+        </CrudModal>
           </CardContent>
         </Card>
 

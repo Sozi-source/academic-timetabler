@@ -5,7 +5,9 @@ export type ImportEntityType =
   | 'cohorts'
   | 'units'
   | 'teaching_allocations'
-  | 'unit_offerings';
+  | 'unit_offerings'
+  | 'students'
+  | 'curriculum';
 
 export type ImportBatchStatus =
   | 'uploaded'

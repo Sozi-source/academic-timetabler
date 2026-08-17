@@ -1,3 +1,4 @@
+import { CrudModal } from '@/components/ui/crud-modal';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
@@ -145,11 +146,18 @@ export default async function UnitsPage() {
                 </DrawerHeader>
 
                 <DrawerBody className="pb-10">
-                  <CreateUnitForm
+                  <CrudModal
+          title="Create Curriculum Unit"
+          description="Register a curriculum unit."
+          triggerLabel="Create Unit"
+          widthClassName="max-w-3xl"
+        >
+          <CreateUnitForm
                     programmes={
                       availableProgrammes
                     }
                   />
+        </CrudModal>
                 </DrawerBody>
               </DrawerContent>
               </Drawer>

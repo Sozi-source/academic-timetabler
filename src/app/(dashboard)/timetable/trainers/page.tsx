@@ -1,3 +1,4 @@
+import { CrudModal } from '@/components/ui/crud-modal';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
@@ -134,7 +135,14 @@ export default async function TrainersPage() {
               </DrawerHeader>
 
               <DrawerBody className="pb-10">
-                <CreateTrainerForm departments={departments} />
+                <CrudModal
+          title="Create Trainer"
+          description="Add a trainer to the shared trainer pool."
+          triggerLabel="Create Trainer"
+          widthClassName="max-w-2xl"
+        >
+          <CreateTrainerForm departments={departments} />
+        </CrudModal>
               </DrawerBody>
             </DrawerContent>
             </Drawer>

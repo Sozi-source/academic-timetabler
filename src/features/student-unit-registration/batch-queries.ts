@@ -1,0 +1,234 @@
+import { requireHodAccess } from '@/features/auth/authorization';
+import { createClient } from '@/lib/supabase/server';
+
+import type {
+  BatchRegistrationContext,
+} from './batch-types';
+
+export async function getBatchRegistrationContext(): Promise<BatchRegistrationContext> {
+  const profile = await requireHodAccess();
+
+  if (!profile.activeDepartmentId) {
+    return {
+      period: null,
+      cohorts: [],
+      students: [],
+    };
+  }
+
+  const supabase = await createClient();
+
+  const { data: period, error: periodError } = await supabase
+    .from('academic_periods')
+    .select('id, code, name')
+    .eq('status', 'active')
+    .maybeSingle();
+
+  if (periodError) {
+    throw new Error(
+      `Unable to load active academic period: ${periodError.message}`,
+    );
+  }
+
+  const { data: programmes, error: programmeError } = await supabase
+    .from('programmes')
+    .select('id, code')
+    .eq('department_id', profile.activeDepartmentId)
+    .eq('is_active', true);
+
+  if (programmeError) {
+    throw new Error(
+      `Unable to load programmes: ${programmeError.message}`,
+    );
+  }
+
+  const programmeIds = (programmes ?? []).map((programme) => programme.id);
+  const programmeCode = new Map(
+    (programmes ?? []).map((programme) => [
+      programme.id,
+      programme.code,
+    ]),
+  );
+
+  if (programmeIds.length === 0) {
+    return {
+      period: period
+        ? { id: period.id, code: period.code, name: period.name }
+        : null,
+      cohorts: [],
+      students: [],
+    };
+  }
+
+  const { data: students, error: studentError } = await supabase
+    .from('students')
+    .select(`
+      id,
+      admission_number,
+      full_name,
+      programme_id,
+      current_cohort_id,
+      current_stage_id,
+      lifecycle_status,
+      current_cohort:cohorts!students_current_cohort_id_fkey(id, name),
+      current_stage:programme_stages!students_current_stage_id_fkey(id, code, name, sequence_number)
+    `)
+    .in('programme_id', programmeIds)
+    .in('lifecycle_status', ['admitted', 'active'])
+    .order('full_name', { ascending: true });
+
+  if (studentError) {
+    throw new Error(
+      `Unable to load students: ${studentError.message}`,
+    );
+  }
+
+  const stageIds = [
+    ...new Set(
+      (students ?? [])
+        .map((student) => student.current_stage_id)
+        .filter((value): value is string => Boolean(value)),
+    ),
+  ];
+
+  const cohortIds = [
+    ...new Set(
+      (students ?? [])
+        .map((student) => student.current_cohort_id)
+        .filter((value): value is string => Boolean(value)),
+    ),
+  ];
+
+  const [stageUnitResult, offeringResult] = await Promise.all([
+    stageIds.length > 0
+      ? supabase
+          .from('programme_stage_units')
+          .select('stage_id, unit_id')
+          .in('stage_id', stageIds)
+      : Promise.resolve({ data: [], error: null }),
+    period && cohortIds.length > 0
+      ? supabase
+          .from('unit_offerings')
+          .select('cohort_id, unit_id')
+          .eq('academic_period_id', period.id)
+          .eq('selection_state', 'included')
+          .neq('status', 'cancelled')
+          .in('cohort_id', cohortIds)
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+
+  if (stageUnitResult.error) {
+    throw new Error(
+      `Unable to load stage units: ${stageUnitResult.error.message}`,
+    );
+  }
+
+  if (offeringResult.error) {
+    throw new Error(
+      `Unable to load units on offer: ${offeringResult.error.message}`,
+    );
+  }
+
+  const unitsByStage = new Map<string, Set<string>>();
+
+  for (const row of stageUnitResult.data ?? []) {
+    const set = unitsByStage.get(row.stage_id) ?? new Set<string>();
+    set.add(row.unit_id);
+    unitsByStage.set(row.stage_id, set);
+  }
+
+  const unitsByCohort = new Map<string, Set<string>>();
+
+  for (const row of offeringResult.data ?? []) {
+    const set = unitsByCohort.get(row.cohort_id) ?? new Set<string>();
+    set.add(row.unit_id);
+    unitsByCohort.set(row.cohort_id, set);
+  }
+
+  const mappedStudents = (students ?? []).map((student) => {
+    const cohort = Array.isArray(student.current_cohort)
+      ? student.current_cohort[0]
+      : student.current_cohort;
+
+    const stage = Array.isArray(student.current_stage)
+      ? student.current_stage[0]
+      : student.current_stage;
+
+    const stageUnits = student.current_stage_id
+      ? unitsByStage.get(student.current_stage_id) ?? new Set<string>()
+      : new Set<string>();
+
+    const offeredUnits = student.current_cohort_id
+      ? unitsByCohort.get(student.current_cohort_id) ?? new Set<string>()
+      : new Set<string>();
+
+    const expectedUnits = [...stageUnits].filter((unitId) =>
+      offeredUnits.has(unitId),
+    ).length;
+
+    const hasStage = Boolean(student.current_stage_id);
+    const hasStageUnits = stageUnits.size > 0;
+    const hasMatchingOfferings = expectedUnits > 0;
+
+    const eligibilityReason:
+      | 'ready'
+      | 'no_stage'
+      | 'no_stage_units'
+      | 'no_units_on_offer' =
+      !hasStage
+        ? 'no_stage'
+        : !hasStageUnits
+          ? 'no_stage_units'
+          : !hasMatchingOfferings
+            ? 'no_units_on_offer'
+            : 'ready';
+
+    return {
+      id: student.id,
+      admissionNumber: student.admission_number,
+      fullName: student.full_name,
+      programmeCode:
+        programmeCode.get(student.programme_id) ?? '-',
+      cohortId: student.current_cohort_id,
+      cohortName: cohort?.name ?? null,
+      stageId: student.current_stage_id,
+      stageCode: stage?.code ?? null,
+      expectedUnits,
+      eligible:
+        Boolean(student.current_cohort_id) &&
+        eligibilityReason === 'ready',
+      eligibilityReason,
+    };
+  });
+
+  const cohortMap = new Map<
+    string,
+    {
+      id: string;
+      name: string;
+      studentCount: number;
+    }
+  >();
+
+  for (const student of mappedStudents) {
+    if (!student.cohortId || !student.cohortName) continue;
+
+    const current = cohortMap.get(student.cohortId);
+
+    cohortMap.set(student.cohortId, {
+      id: student.cohortId,
+      name: student.cohortName,
+      studentCount: (current?.studentCount ?? 0) + 1,
+    });
+  }
+
+  return {
+    period: period
+      ? { id: period.id, code: period.code, name: period.name }
+      : null,
+    cohorts: [...cohortMap.values()].sort((a, b) =>
+      a.name.localeCompare(b.name),
+    ),
+    students: mappedStudents,
+  };
+}

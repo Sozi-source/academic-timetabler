@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
 import { requireHodAccess } from '@/features/auth/authorization';
+import type { AppRole } from '@/features/auth/types';
 import { createClient } from '@/lib/supabase/server';
 
 const codeSchema = z
@@ -17,7 +18,7 @@ const nameSchema = z.string().trim().min(2).max(160);
 const idSchema = z.uuid();
 
 function requireSystemAdministrator(
-  role: 'system_admin' | 'hod',
+  role: AppRole,
 ) {
   if (role !== 'system_admin') {
     throw new Error(

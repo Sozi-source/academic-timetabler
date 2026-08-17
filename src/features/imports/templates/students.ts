@@ -1,0 +1,43 @@
+import { IMPORT_WORKSHEET_NAMES } from '../constants';
+import { assertValidTemplateDefinition } from '../template-definition';
+
+export const studentsImportTemplate = assertValidTemplateDefinition({
+  key: 'institutional-students',
+  entityType: 'students',
+  version: '1.2',
+  displayName: 'Students',
+  instructionsWorksheetName: IMPORT_WORKSHEET_NAMES.instructions,
+  dataWorksheetName: IMPORT_WORKSHEET_NAMES.data,
+  metadataWorksheetName: IMPORT_WORKSHEET_NAMES.metadata,
+  maximumRows: 10000,
+  instructions: [
+    'Enter one student per row in the Data worksheet.',
+    'Admission Number, Full Name and Lifecycle Status are required.',
+    'Lifecycle Status must be active, deferred, dropped_out, completed or graduated.',
+    'Active students may be in_class, clinical_rotation or attachment.',
+    'Programme and admission cohort may be left blank only when the admission number can be matched safely.',
+    'Use Current Cohort only when the student now studies with a different cohort.',
+    'KCSE Index Number and National ID are optional. Leave them blank when uncertain; students will verify them in the portal.',
+    'Do not enter placeholder or guessed identity numbers.',
+    'Use dates in YYYY-MM-DD format.',
+    'Rows that cannot be matched safely are flagged and are never imported automatically.',
+    'Use this Excel template only. CSV imports are not supported.',
+  ],
+  columns: [
+    { key: 'admissionNumber', header: 'Admission Number', required: true, description: 'Official admission number.', example: 'CND/J-5678/IC/26', width: 24, cellType: 'text' },
+    { key: 'fullName', header: 'Full Name', required: true, description: 'Student name.', example: 'JANE WANJIRU DOE', width: 34, cellType: 'text' },
+    { key: 'programmeCode', header: 'Programme Code', required: false, description: 'Optional when admission number identifies the programme.', example: 'CND', width: 18, cellType: 'text' },
+    { key: 'admissionCohortCode', header: 'Admission Cohort', required: false, description: 'Admission cohort code or name.', example: 'CND JAN 26', width: 24, cellType: 'text' },
+    { key: 'currentCohortCode', header: 'Current Cohort', required: false, description: 'Only needed when different from admission cohort.', example: '', width: 24, cellType: 'text' },
+    { key: 'currentCohortEffectiveDate', header: 'Current Cohort Effective Date', required: false, description: 'Required when Current Cohort differs.', example: '', width: 25, cellType: 'date', numberFormat: 'yyyy-mm-dd' },
+    { key: 'lifecycleStatus', header: 'Lifecycle Status', required: true, description: 'Department student category.', acceptedValues: ['active','deferred','dropped_out','completed','graduated'], example: 'active', width: 20, cellType: 'enum' },
+    { key: 'academicPhase', header: 'Academic Phase', required: false, defaultValue: 'in_class', description: 'Current phase for active students.', acceptedValues: ['in_class','clinical_rotation','attachment','deferred','dropped_out','awaiting_graduation','graduated'], example: 'in_class', width: 22, cellType: 'enum' },
+    { key: 'statusEffectiveDate', header: 'Status Effective Date', required: false, description: 'Optional known date for deferred, dropped out, completed or graduated status.', example: '', width: 22, cellType: 'date', numberFormat: 'yyyy-mm-dd' },
+    { key: 'statusReason', header: 'Status Reason', required: false, description: 'Brief reason where relevant.', example: '', width: 32, cellType: 'text' },
+    { key: 'admissionDate', header: 'Admission Date', required: false, description: 'Official admission date when known.', example: '', width: 18, cellType: 'date', numberFormat: 'yyyy-mm-dd' },
+    { key: 'projectedCompletionDate', header: 'Projected Completion Date', required: false, description: 'Optional projected completion date.', example: '', width: 24, cellType: 'date', numberFormat: 'yyyy-mm-dd' },
+    { key: 'kcseIndexNumber', header: 'KCSE Index Number', required: false, description: 'Valid KCSE index only, e.g. 12345678/001.', example: '12345678/001', width: 22, cellType: 'text' },
+    { key: 'nationalIdNumber', header: 'National ID Number', required: false, description: 'Valid 7 or 8 digit National ID only.', example: '12345678', width: 20, cellType: 'text' },
+    { key: 'notes', header: 'Notes', required: false, description: 'Short departmental note.', example: '', width: 38, cellType: 'text' },
+  ],
+});

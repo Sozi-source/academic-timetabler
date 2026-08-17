@@ -1,3 +1,4 @@
+import { CrudModal } from '@/components/ui/crud-modal';
 import type { Metadata } from 'next';
 import {
   CalendarCheck2,
@@ -149,7 +150,13 @@ export default async function CohortsPage() {
                 </DrawerHeader>
 
                 <DrawerBody className="pb-10">
-                  <CreateCohortForm
+                  <CrudModal
+          title="Create Cohort"
+          description="Create a class or cohort and keep the register full width."
+          triggerLabel="Create Cohort"
+          widthClassName="max-w-3xl"
+        >
+          <CreateCohortForm
                     programmes={
                       availableProgrammes
                     }
@@ -157,6 +164,7 @@ export default async function CohortsPage() {
                       academicPeriods
                     }
                   />
+        </CrudModal>
                 </DrawerBody>
               </DrawerContent>
             </Drawer>

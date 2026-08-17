@@ -1,3 +1,4 @@
+import { CrudModal } from '@/components/ui/crud-modal';
 import type { Metadata } from 'next';
 import {
   BookOpenCheck,
@@ -135,9 +136,16 @@ export default async function ProgrammesPage() {
               </DrawerHeader>
 
               <DrawerBody className="pb-10">
-                <CreateProgrammeForm
+                <CrudModal
+          title="Create Programme"
+          description="Register a programme without reducing the records workspace."
+          triggerLabel="Create Programme"
+          widthClassName="max-w-2xl"
+        >
+          <CreateProgrammeForm
                   departments={departments}
                 />
+        </CrudModal>
               </DrawerBody>
             </DrawerContent>
           </Drawer>

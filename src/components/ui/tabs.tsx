@@ -53,7 +53,7 @@ export const TabsTrigger = forwardRef<
       className={cn(
         'inline-flex min-h-8 items-center justify-center rounded-lg px-3 text-sm font-medium text-text-muted transition',
         'hover:text-text-primary',
-        'data-[state=active]:bg-surface data-[state=active]:text-primary data-[state=active]:shadow-sm',
+        'data-[state=active]:border-b-2 data-[state=active]:border-institutional-yellow data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-sm',
         'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-focus-ring/35',
         'disabled:pointer-events-none disabled:opacity-50',
         className,

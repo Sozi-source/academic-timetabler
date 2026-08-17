@@ -1,5 +1,6 @@
 import {
   AlarmClock,
+  ArrowLeft,
   BookOpen,
   Building2,
   CalendarDays,
@@ -8,7 +9,6 @@ import {
   FileChartColumn,
   FileSpreadsheet,
   GraduationCap,
-  LayoutDashboard,
   ListChecks,
   PencilRuler,
   Presentation,
@@ -24,13 +24,13 @@ import {
 // navigation remains complete without becoming difficult to scan.
 export const dashboardNavigation = [
   {
-    label: 'Home',
+    label: 'Platform',
     items: [
-      { label: 'Timetable home', href: '/dashboard', icon: LayoutDashboard },
+      { label: 'Back to module hub', href: '/dashboard', icon: ArrowLeft },
     ],
   },
   {
-    label: 'Create timetable',
+    label: 'Academic planning & timetabling',
     items: [
       { label: '1. Check readiness', href: '/timetable/readiness', icon: ClipboardCheck },
       { label: '2. Generate', href: '/timetable/generator', icon: Sparkles },

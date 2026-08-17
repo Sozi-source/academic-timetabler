@@ -4,6 +4,7 @@ import type {
   ColumnDef,
 } from '@tanstack/react-table';
 import {
+  MoreVertical,
   BookOpen,
   CalendarCheck2,
   CalendarX2,
@@ -55,7 +56,7 @@ function getRoomTypeLabel(
   roomType: RoomType | null,
 ) {
   if (!roomType) {
-    return 'No preference';
+    return 'None';
   }
 
   return (
@@ -70,119 +71,79 @@ const columns: ColumnDef<Unit>[] = [
   {
     accessorKey: 'name',
     header: 'Unit',
+    size: 220,
+    minSize: 190,
+    maxSize: 240,
     cell: ({ row }) => (
-      <div className="min-w-64">
-        <p className="font-semibold text-text-primary">
+      <div className="w-[220px] min-w-[190px] max-w-[240px] pr-3">
+        <p className="max-w-[220px] whitespace-normal break-words font-semibold leading-5 text-text-primary">
           {row.original.name}
         </p>
 
-        <p className="mt-1 text-xs text-text-muted">
+        <p className="mt-1 text-[10px] leading-4 text-text-muted">
           {row.original.code}
           {row.original.shortName
-            ? ` · ${row.original.shortName}`
+            ? ` ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· ${row.original.shortName}`
             : ''}
         </p>
       </div>
     ),
   },
+  
   {
     id: 'programme',
     accessorFn: (row) =>
-      row.programme?.name ?? '',
+      row.programme?.code ?? '',
     header: 'Programme',
+    size: 92,
+    minSize: 84,
+    maxSize: 104,
     cell: ({ row }) => (
-      <div className="min-w-56">
-        <p className="font-medium text-text-primary">
-          {row.original.programme?.name ??
-            'Programme unavailable'}
-        </p>
-
-        <p className="mt-1 text-xs text-text-muted">
-          {row.original.programme?.code ??
-            row.original.programmeId}
-        </p>
-      </div>
+      <span className="whitespace-nowrap text-sm font-semibold text-text-primary">
+        {row.original.programme?.code ?? '-'}
+      </span>
     ),
   },
   {
     accessorKey: 'category',
     header: 'Category',
+    size: 96,
+    minSize: 88,
+    maxSize: 108,
     cell: ({ row }) => (
       <Badge variant="neutral">
-        {getCategoryLabel(
-          row.original.category,
-        )}
+        {getCategoryLabel(row.original.category)}
       </Badge>
     ),
   },
   {
     accessorKey: 'academicPeriodNumber',
     header: 'Period',
+    size: 88,
+    minSize: 82,
+    maxSize: 96,
     cell: ({ row }) => (
-      <span className="font-medium text-text-primary">
-        Period{' '}
-        {row.original.academicPeriodNumber}
+      <span className="whitespace-nowrap text-sm font-medium text-text-primary">
+        Period {row.original.academicPeriodNumber}
       </span>
     ),
   },
   {
-    id: 'hours',
-    accessorFn: (row) =>
-      row.theoryHours + row.practicalHours,
     header: 'Contact hours',
-    cell: ({ row }) => (
-      <div className="min-w-40">
-        <p className="inline-flex items-center gap-2 font-medium text-text-primary">
-          <Clock3
-            className="size-4 text-text-muted"
-            aria-hidden="true"
-          />
-          {row.original.theoryHours +
-            row.original.practicalHours}{' '}
-          total
-        </p>
+    size: 108,
+    minSize: 96,
+    maxSize: 118,
+    cell: ({ row }) => {
+      const hours =
+        row.original.theoryHours +
+        row.original.practicalHours;
 
-        <p className="mt-1 text-xs text-text-muted">
-          Theory {row.original.theoryHours}
-          {' · '}
-          Practical {row.original.practicalHours}
-        </p>
-
-        <p className="mt-1 text-xs text-text-muted">
-          {row.original.weeklySessions}{' '}
-          session
-          {row.original.weeklySessions === 1
-            ? ''
-            : 's'}
-          /week
-        </p>
-      </div>
-    ),
-  },
-  {
-    id: 'roomPreference',
-    accessorFn: (row) =>
-      row.preferredRoomType ?? '',
-    header: 'Room preference',
-    cell: ({ row }) => (
-      <span className="inline-flex items-center gap-2 text-sm text-text-primary">
-        {row.original.practicalHours > 0 ? (
-          <FlaskConical
-            className="size-4 text-text-muted"
-            aria-hidden="true"
-          />
-        ) : (
-          <DoorOpen
-            className="size-4 text-text-muted"
-            aria-hidden="true"
-          />
-        )}
-
-        {getRoomTypeLabel(
-          row.original.preferredRoomType,
-        )}
-      </span>
-    ),
+      return (
+        <span className="whitespace-nowrap text-sm font-medium text-text-primary">
+          {hours} {hours === 1 ? 'hr' : 'hrs'}
+        </span>
+      );
+    },
   },
   {
     id: 'availability',
@@ -191,6 +152,9 @@ const columns: ColumnDef<Unit>[] = [
         ? 'available'
         : 'unavailable',
     header: 'Timetable',
+    size: 118,
+    minSize: 108,
+    maxSize: 128,
     cell: ({ row }) => (
       <Badge
         variant={
@@ -215,6 +179,9 @@ const columns: ColumnDef<Unit>[] = [
         ? 'active'
         : 'inactive',
     header: 'Status',
+    size: 96,
+    minSize: 88,
+    maxSize: 108,
     cell: ({ row }) => (
       <Badge
         variant={
@@ -233,12 +200,26 @@ const columns: ColumnDef<Unit>[] = [
   {
     id: 'actions',
     enableSorting: false,
-    header: 'Actions',
+    header: '',
+    size: 52,
+    minSize: 52,
+    maxSize: 52,
     cell: ({ row }) => (
-      <div className="flex flex-wrap justify-end gap-2">
+      <details className="relative">
+          <summary
+            className="inline-flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-lg border border-border-strong bg-surface text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+            aria-label={`Actions for ${row.original.name}`}
+          >
+            <MoreVertical
+              className="size-4"
+              aria-hidden="true"
+            />
+          </summary>
+
+          <div className="absolute right-0 z-40 mt-1 min-w-[190px] rounded-xl border border-border bg-surface p-2 shadow-xl [&_a]:w-full [&_a]:justify-start [&_button]:w-full [&_button]:justify-start [&_form]:w-full [&_select]:w-full">
         <Link
           href={`/timetable/units/${row.original.id}/edit`}
-          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+          className="flex h-9 w-full items-center gap-2 rounded-lg px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
         >
           <Pencil
             className="size-3.5"
@@ -288,8 +269,8 @@ const columns: ColumnDef<Unit>[] = [
               }
             >
               {row.original.isTimetableAvailable
-                ? 'Remove availability'
-                : 'Make available'}
+                ? 'Unavailable'
+                : 'Available'}
             </Button>
           </form>
         ) : null}
@@ -338,7 +319,8 @@ const columns: ColumnDef<Unit>[] = [
               : 'Activate'}
           </Button>
         </form>
-      </div>
+                </div>
+        </details>
     ),
   },
 ];
@@ -452,7 +434,7 @@ export function UnitTable({
       columns={columns}
       data={filteredUnits}
       getRowId={(row) => row.id}
-      searchPlaceholder="Search unit names, codes, programmes or room preferences"
+      searchPlaceholder="Search unit names, codes, programmes or categories..."
       emptyIcon={BookOpen}
       emptyTitle={
         filtersActive
@@ -464,37 +446,10 @@ export function UnitTable({
           ? 'Adjust or clear the filters to view other curriculum units.'
           : 'Register curriculum units before creating teaching allocations.'
       }
-      initialPageSize={20}
+      initialPageSize={10}
       toolbarFilters={
-        <div className="flex flex-1 flex-wrap items-center gap-2">
-          <Select
-            aria-label="Filter by programme"
-            value={programmeId}
-            onChange={(event) => {
-              setProgrammeId(
-                event.target.value,
-              );
-              setPeriodNumber('all');
-            }}
-            className="h-11"
-          >
-            <option value="all">
-              All programmes
-            </option>
-
-            {programmeOptions.map(
-              (programme) => (
-                <option
-                  key={programme.id}
-                  value={programme.id}
-                >
-                  {programme.code} - {programme.name}
-                </option>
-              ),
-            )}
-          </Select>
-
-          <Select
+        <div className="flex w-full flex-wrap items-center gap-2 lg:w-auto lg:flex-1 lg:flex-nowrap">
+<Select
             aria-label="Filter by Academic Period"
             value={periodNumber}
             onChange={(event) => {
@@ -581,7 +536,7 @@ export function UnitTable({
                   | 'unavailable',
               );
             }}
-            className="h-11"
+            className="h-10 w-full sm:w-auto lg:w-40"
           >
             <option value="all">
               All availability

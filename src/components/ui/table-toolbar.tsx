@@ -18,7 +18,7 @@ export function TableToolbar({
   actions,
 }: TableToolbarProps) {
   return (
-    <div className="flex flex-col gap-2.5 border-b border-border px-3.5 py-3 lg:flex-row lg:items-center lg:justify-between">
+    <div className="relative flex flex-col gap-3 border-b border-border bg-surface px-4 py-3.5 lg:flex-row lg:items-center lg:justify-between before:absolute before:inset-y-3 before:left-0 before:w-1 before:rounded-r-full before:bg-institutional-yellow">
       <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-center">
         <SearchBar
           value={searchValue}

@@ -12,8 +12,6 @@ interface SectionHeaderProps {
 
 export function SectionHeader({
   title,
-  description,
-  eyebrow,
   actions,
   className,
 }: SectionHeaderProps) {
@@ -30,21 +28,9 @@ export function SectionHeader({
         </span>
 
         <div className="min-w-0">
-          {eyebrow ? (
-            <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-primary">
-              {eyebrow}
-            </p>
-          ) : null}
-
-          <h2 className="mt-0.5 text-base font-semibold text-text-primary">
+          <h2 className="text-base font-semibold text-text-primary">
             {title}
           </h2>
-
-          {description ? (
-            <p className="mt-1 max-w-2xl text-sm leading-5 text-text-secondary">
-              {description}
-            </p>
-          ) : null}
         </div>
       </div>
 

@@ -37,15 +37,9 @@ export function DashboardSidebar({
             <span className="absolute -right-1 -top-1 size-2.5 rounded-full border-2 border-navigation-background bg-white" aria-hidden="true" />
           </div>
 
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold tracking-tight text-white">
-              Academic Planning
-            </p>
-
-            <p className="truncate text-xs text-navigation-text/75">
-              Management system
-            </p>
-          </div>
+          <p className="truncate text-sm font-semibold tracking-tight text-white">
+            Academic Planning
+          </p>
         </Link>
 
         {onMobileClose ? (
@@ -129,19 +123,6 @@ export function DashboardSidebar({
         </div>
       </nav>
 
-      <div className="border-t border-navigation-border px-5 py-4">
-        <div className="flex items-center gap-2.5">
-          <span className="size-2 rounded-full bg-institutional-yellow shadow-[0_0_0_4px_rgba(245,196,0,0.12)]" aria-hidden="true" />
-          <div>
-            <p className="text-xs font-medium text-white">
-              Timetabling workspace
-            </p>
-            <p className="mt-0.5 text-[0.6875rem] text-navigation-text/65">
-              Academic scheduling operations
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 

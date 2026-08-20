@@ -19,17 +19,13 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <span className="flex size-10 items-center justify-center rounded-lg bg-primary-deeper text-white shadow-sm ring-1 ring-black/10">
           <CalendarDays className="size-5" aria-hidden="true" />
         </span>
-        <div>
-          <p className="text-sm font-bold tracking-tight text-primary-deeper">Academic Planning System</p>
-          <p className="text-xs font-medium text-institutional-yellow-ink">Institutional academic management</p>
-        </div>
+        <p className="text-sm font-bold tracking-tight text-primary-deeper">Academic Planning System</p>
       </div>
 
       <div className="p-6">
         <div className="mb-6 h-1 w-10 rounded-full bg-primary" aria-hidden="true" />
         <h1 id="login-title" className="text-2xl font-semibold tracking-tight text-text-primary">Sign in</h1>
-        <p className="mt-2 text-sm leading-6 text-text-secondary">Use your institutional account to continue.</p>
-        <div className="mt-7"><LoginForm nextPath={nextPath} /></div>
+        <div className="mt-6"><LoginForm nextPath={nextPath} /></div>
       </div>
     </section>
   </main>;

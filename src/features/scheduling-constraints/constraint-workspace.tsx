@@ -24,9 +24,9 @@ const subjectLabels = {
 
 const typeLabels = {
   unavailable: 'Unavailable',
-  preferred: 'Preferred',
-  required: 'Required',
-  protected_day: 'Protected day',
+  preferred: 'Advisory (legacy)',
+  required: 'Fixed session (legacy)',
+  protected_day: 'Unavailable',
 } as const;
 
 export function ConstraintWorkspace({
@@ -44,7 +44,7 @@ export function ConstraintWorkspace({
             Add constraint
           </h2>
           <p className="mt-1 text-xs text-text-muted xl:text-sm">
-            Use constraints for exceptions. Normal weekly trainer availability is managed separately.
+            Block exceptional days or teaching sessions. Normal trainer availability is managed separately.
           </p>
         </div>
 
@@ -107,7 +107,7 @@ export function ConstraintWorkspace({
                       </span>
                     </Td>
                     <Td className="max-w-[16rem] text-text-secondary">
-                      {item.reason}
+                      {formatReason(item)}
                     </Td>
                     <Td>
                       <div className="flex items-center gap-1.5">
@@ -158,6 +158,22 @@ export function ConstraintWorkspace({
       </Card>
     </div>
   );
+}
+
+
+function formatReason(item: SchedulingConstraint) {
+  const reason = item.reason?.trim();
+
+  if (!reason) return '-';
+  if (
+    reason === 'Preferred scheduling time' ||
+    reason === 'Required scheduling time' ||
+    reason === 'Protected day'
+  ) {
+    return '-';
+  }
+
+  return reason;
 }
 
 function formatWhen(

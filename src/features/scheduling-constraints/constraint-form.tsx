@@ -59,6 +59,8 @@ export function ConstraintForm({
         name="academicPeriodId"
         value={academicPeriodId}
       />
+      <input type="hidden" name="constraintType" value="unavailable" />
+      <input type="hidden" name="priority" value="hard" />
 
       <Field label="Applies to">
         <Select
@@ -93,21 +95,6 @@ export function ConstraintForm({
             ))}
           </Select>
         )}
-      </Field>
-
-      <Field label="Constraint">
-        <Select name="constraintType" defaultValue="unavailable">
-          <option value="unavailable">Unavailable</option>
-          <option value="preferred">Preferred</option>
-          <option value="required">Required</option>
-        </Select>
-      </Field>
-
-      <Field label="Priority">
-        <Select name="priority" defaultValue="hard">
-          <option value="hard">Hard - must obey</option>
-          <option value="soft">Soft - preference</option>
-        </Select>
       </Field>
 
       <Field label="Working day">

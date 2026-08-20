@@ -70,7 +70,7 @@ const columns: ColumnDef<Programme>[] = [
     accessorKey: 'name',
     header: 'Programme',
     cell: ({ row }) => (
-      <div className="min-w-64">
+      <div className="min-w-0">
         <p className="font-semibold leading-5 text-text-primary [overflow-wrap:normal] break-normal">
           {row.original.name}
         </p>
@@ -88,7 +88,7 @@ const columns: ColumnDef<Programme>[] = [
     accessorKey: 'awardLevel',
     header: 'Award',
     cell: ({ row }) => (
-      <div className="min-w-40">
+      <div className="min-w-0">
         <Badge variant="neutral">
           {getAwardLevelLabel(
             row.original.awardLevel,
@@ -109,7 +109,7 @@ const columns: ColumnDef<Programme>[] = [
       row.durationValue,
     header: 'Duration',
     cell: ({ row }) => (
-      <div className="min-w-36">
+      <div className="min-w-0">
         <p className="inline-flex items-center gap-2 font-medium text-text-primary">
           <Timer
             className="size-4 text-text-muted"

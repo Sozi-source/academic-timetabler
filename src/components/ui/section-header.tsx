@@ -18,7 +18,7 @@ export function SectionHeader({
   return (
     <header
       className={cn(
-        'flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between',
+        'flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between',
         className,
       )}
     >
@@ -35,7 +35,7 @@ export function SectionHeader({
       </div>
 
       {actions ? (
-        <div className="flex shrink-0 flex-wrap items-center gap-2">
+        <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
           {actions}
         </div>
       ) : null}

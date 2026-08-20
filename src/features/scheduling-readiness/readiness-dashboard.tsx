@@ -129,7 +129,7 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
 
         <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
           <div className="w-full overflow-hidden">
-            <table className="min-w-[1180px] w-full border-collapse text-left text-sm">
+            <table className="w-full table-fixed border-collapse text-left text-sm">
               <thead className="bg-surface-subtle text-xs uppercase tracking-wide text-text-muted">
                 <tr>
                   <th className="px-3 py-2.5">Offering</th>
@@ -145,7 +145,7 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
                   const roomTooSmall = offering.preferredRoomCapacity !== null && offering.preferredRoomCapacity < requiredCapacity;
                   return (
                     <tr key={offering.id} className="align-top">
-                      <td className="min-w-64 px-3 py-2.5">
+                      <td className="min-w-0 px-3 py-2.5">
                         <div className="flex items-start gap-3">
                           <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"><GraduationCap className="size-4" aria-hidden="true" /></div>
                           <div>
@@ -155,7 +155,7 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
                           </div>
                         </div>
                       </td>
-                      <td className="min-w-72 px-3 py-2.5">
+                      <td className="min-w-0 px-3 py-2.5">
                         <div className="space-y-2">
                           {offering.participants.map((participant) => (
                             <div key={participant.id} className="rounded-xl bg-surface-subtle px-3 py-2">
@@ -166,12 +166,12 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
                           {offering.participants.length === 0 ? <span className="text-sm text-danger">No participants</span> : null}
                         </div>
                       </td>
-                      <td className="min-w-40 px-3 py-2.5">
+                      <td className="min-w-0 px-3 py-2.5">
                         <p className="font-semibold text-text-primary">{offering.weeklySessions} × {offering.sessionDurationMinutes} min</p>
                         <p className="mt-1 text-xs text-text-muted">{offering.weeklySessions * offering.sessionDurationMinutes / 60} hours/week</p>
                         <p className="mt-2 text-xs text-text-muted">Capacity needed: {requiredCapacity}</p>
                       </td>
-                      <td className="min-w-[360px] px-3 py-2.5">
+                      <td className="min-w-0 break-words px-3 py-2.5">
                         <form action={updateTeachingOfferingReadinessAction} className="grid gap-2 sm:grid-cols-2">
                           <input type="hidden" name="offeringId" value={offering.id} />
                           <input type="hidden" name="academicPeriodId" value={readiness.academicPeriodId} />
@@ -193,7 +193,7 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
                         </form>
                         {roomTooSmall ? <p className="mt-2 text-xs font-medium text-danger">Current preferred room is below required capacity.</p> : null}
                       </td>
-                      <td className="min-w-40 px-3 py-2.5">
+                      <td className="min-w-0 px-3 py-2.5">
                         <div className="flex flex-col items-start gap-2">
                           <Badge variant={offering.isTimetableEnabled ? 'success' : 'neutral'}>{offering.isTimetableEnabled ? 'Enabled' : 'Excluded'}</Badge>
                           <Badge variant={offering.status === 'active' ? 'success' : offering.status === 'draft' ? 'warning' : 'neutral'}>{offering.status}</Badge>

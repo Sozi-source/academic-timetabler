@@ -28,13 +28,13 @@ export function PageHeader({
             </span>
           ) : null}
 
-          <h1 className="truncate text-xl font-semibold tracking-tight text-text-primary sm:text-2xl">
+          <h1 className="min-w-0 break-words text-xl font-semibold tracking-tight text-text-primary sm:text-2xl">
             {title}
           </h1>
         </div>
 
         {actions ? (
-          <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <div className="flex w-full min-w-0 flex-wrap items-center gap-2 md:w-auto md:justify-end">
             {actions}
           </div>
         ) : null}

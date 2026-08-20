@@ -63,7 +63,7 @@ const columns: ColumnDef<TimeSlot>[] = [
     accessorKey: 'name',
     header: 'Time Slot',
     cell: ({ row }) => (
-      <div className="min-w-44">
+      <div className="min-w-0">
         <p className="font-semibold text-text-primary">
           {row.original.name}
         </p>
@@ -95,7 +95,7 @@ const columns: ColumnDef<TimeSlot>[] = [
       `${row.startsAt} ${row.endsAt}`,
     header: 'Time',
     cell: ({ row }) => (
-      <span className="whitespace-nowrap font-medium text-text-primary">
+      <span className="whitespace-normal break-words font-medium text-text-primary">
         {formatTime(row.original.startsAt)}
         {' to '}
         {formatTime(row.original.endsAt)}

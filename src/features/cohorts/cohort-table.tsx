@@ -85,7 +85,7 @@ const columns: ColumnDef<Cohort>[] = [
     accessorKey: 'name',
     header: 'Cohort',
     cell: ({ row }) => (
-      <div className="w-[150px] min-w-[150px]">
+      <div className="min-w-0 max-w-full">
         <p className="font-semibold text-text-primary">
           {row.original.name}
         </p>
@@ -102,7 +102,7 @@ const columns: ColumnDef<Cohort>[] = [
       row.programme?.code ?? '',
     header: 'Programme',
     cell: ({ row }) => (
-      <span className="inline-flex min-w-[72px] font-semibold text-text-primary">
+      <span className="inline-flex min-w-0 break-words font-semibold text-text-primary">
         {row.original.programme?.code ?? 'Ã¢â‚¬â€'}
       </span>
     ),
@@ -113,7 +113,7 @@ const columns: ColumnDef<Cohort>[] = [
       row.intakeDate,
     header: 'Dates',
     cell: ({ row }) => (
-      <div className="w-[150px] min-w-[150px] text-xs leading-5 text-text-primary">
+      <div className="min-w-0 max-w-full text-xs leading-5 text-text-primary">
         <p>
           Intake: {formatDate(row.original.intakeDate)}
         </p>
@@ -133,7 +133,7 @@ const columns: ColumnDef<Cohort>[] = [
       row.currentAcademicPeriodNumber,
     header: 'Progress',
     cell: ({ row }) => (
-      <div className="w-[90px] min-w-[90px]">
+      <div className="min-w-0 max-w-full">
         <p className="font-medium text-text-primary">
           Period{' '}
           {row.original.currentAcademicPeriodNumber}
@@ -157,7 +157,7 @@ const columns: ColumnDef<Cohort>[] = [
       row.actualSize,
     header: 'Enrolment',
     cell: ({ row }) => (
-      <div className="w-[110px] min-w-[110px]">
+      <div className="min-w-0 max-w-full">
         <p className="inline-flex items-center gap-2 font-medium text-text-primary">
           <Users
             className="size-4 text-text-muted"

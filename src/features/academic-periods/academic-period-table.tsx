@@ -60,7 +60,7 @@ const columns: ColumnDef<AcademicPeriod>[] = [
     accessorKey: 'name',
     header: 'Academic Period',
     cell: ({ row }) => (
-      <div className="w-[190px] min-w-[190px] max-w-[220px]">
+      <div className="min-w-0 max-w-full">
         <p className="font-semibold text-text-primary">
           {row.original.name}
         </p>
@@ -77,7 +77,7 @@ const columns: ColumnDef<AcademicPeriod>[] = [
       row.academicYear.name,
     header: 'Academic Year',
     cell: ({ row }) => (
-      <div className="w-[110px] min-w-[110px]">
+      <div className="min-w-0 max-w-full">
         <p className="font-medium text-text-primary">
           {row.original.academicYear.name}
         </p>
@@ -94,7 +94,7 @@ const columns: ColumnDef<AcademicPeriod>[] = [
       `${row.startsOn} ${row.endsOn}`,
     header: 'Period dates',
     cell: ({ row }) => (
-      <span className="whitespace-nowrap">
+      <span className="whitespace-normal break-words">
         {formatDate(row.original.startsOn)}
         {' to '}
         {formatDate(row.original.endsOn)}
@@ -107,7 +107,7 @@ const columns: ColumnDef<AcademicPeriod>[] = [
       `${row.teachingStartsOn} ${row.teachingEndsOn}`,
     header: 'Teaching window',
     cell: ({ row }) => (
-      <span className="whitespace-nowrap">
+      <span className="whitespace-normal break-words">
         {formatDate(
           row.original.teachingStartsOn,
         )}

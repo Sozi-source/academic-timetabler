@@ -51,7 +51,7 @@ const columns: ColumnDef<Room>[] = [
     accessorKey: 'code',
     header: 'Room',
     cell: ({ row }) => (
-      <div className="min-w-48">
+      <div className="min-w-0">
         <p className="font-semibold text-text-primary">
           {row.original.code}
         </p>
@@ -79,7 +79,7 @@ const columns: ColumnDef<Room>[] = [
       `${row.building ?? ''} ${row.floorLabel ?? ''}`,
     header: 'Location',
     cell: ({ row }) => (
-      <div className="min-w-40">
+      <div className="min-w-0">
         <p className="font-medium text-text-primary">
           {row.original.building ??
             'Not specified'}

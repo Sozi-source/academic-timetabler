@@ -75,7 +75,7 @@ const columns: ColumnDef<Unit>[] = [
     minSize: 190,
     maxSize: 240,
     cell: ({ row }) => (
-      <div className="w-[220px] min-w-[190px] max-w-[240px] pr-3">
+      <div className="min-w-0 max-w-full pr-3">
         <p className="max-w-[220px] whitespace-normal break-words font-semibold leading-5 text-text-primary">
           {row.original.name}
         </p>
@@ -99,7 +99,7 @@ const columns: ColumnDef<Unit>[] = [
     minSize: 84,
     maxSize: 104,
     cell: ({ row }) => (
-      <span className="whitespace-nowrap text-sm font-semibold text-text-primary">
+      <span className="whitespace-normal break-words text-sm font-semibold text-text-primary">
         {row.original.programme?.code ?? '-'}
       </span>
     ),
@@ -123,7 +123,7 @@ const columns: ColumnDef<Unit>[] = [
     minSize: 82,
     maxSize: 96,
     cell: ({ row }) => (
-      <span className="whitespace-nowrap text-sm font-medium text-text-primary">
+      <span className="whitespace-normal break-words text-sm font-medium text-text-primary">
         Period {row.original.academicPeriodNumber}
       </span>
     ),
@@ -139,7 +139,7 @@ const columns: ColumnDef<Unit>[] = [
         row.original.practicalHours;
 
       return (
-        <span className="whitespace-nowrap text-sm font-medium text-text-primary">
+        <span className="whitespace-normal break-words text-sm font-medium text-text-primary">
           {hours} {hours === 1 ? 'hr' : 'hrs'}
         </span>
       );

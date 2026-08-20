@@ -89,7 +89,7 @@ export function GeneratorSessionTable({
                   key={session.id}
                   className={`align-top transition ${session.trainerId && session.roomId ? 'hover:bg-surface-subtle' : 'bg-warning-surface hover:bg-warning-surface/70'}`}
                 >
-                  <td className="min-w-36 px-3 py-2.5">
+                  <td className="min-w-0 px-3 py-2.5">
                     <div className="flex items-start gap-1.5">
                       <Clock3
                         className="mt-0.5 size-3.5 shrink-0 text-text-subtle"
@@ -118,7 +118,7 @@ export function GeneratorSessionTable({
                     </div>
                   </td>
 
-                  <td className="min-w-48 px-3 py-2.5">
+                  <td className="min-w-0 px-3 py-2.5">
                     <div className="flex items-start gap-1.5">
                       <BookOpen
                         className="mt-0.5 size-3.5 shrink-0 text-text-subtle"
@@ -137,7 +137,7 @@ export function GeneratorSessionTable({
                     </div>
                   </td>
 
-                  <td className="min-w-36 px-3 py-2.5">
+                  <td className="min-w-0 px-3 py-2.5">
                     <div className="flex items-start gap-1.5">
                       <GraduationCap
                         className="mt-0.5 size-3.5 shrink-0 text-text-subtle"
@@ -156,7 +156,7 @@ export function GeneratorSessionTable({
                     </div>
                   </td>
 
-                  <td className="min-w-36 px-3 py-2.5">
+                  <td className="min-w-0 px-3 py-2.5">
                     <div className="flex items-start gap-1.5">
                       <UserRound
                         className={`mt-0.5 size-3.5 shrink-0 ${session.trainerId ? 'text-text-subtle' : 'text-warning'}`}
@@ -183,7 +183,7 @@ export function GeneratorSessionTable({
                     </div>
                   </td>
 
-                  <td className="min-w-32 px-3 py-2.5">
+                  <td className="min-w-0 px-3 py-2.5">
                     <div className="flex items-start gap-1.5">
                       <Building2
                         className={`mt-0.5 size-3.5 shrink-0 ${session.roomId ? 'text-text-subtle' : 'text-warning'}`}
@@ -200,7 +200,7 @@ export function GeneratorSessionTable({
                     </div>
                   </td>
 
-                  <td className="min-w-28 px-3 py-2.5">
+                  <td className="min-w-0 px-3 py-2.5">
                     <div className="flex flex-col items-start gap-1.5">
                       <Badge variant="neutral">
                         Session{' '}

@@ -65,7 +65,7 @@ const columns: ColumnDef<Trainer>[] = [
     accessorKey: 'fullName',
     header: 'Trainer',
     cell: ({ row }) => (
-      <div className="min-w-52">
+      <div className="min-w-0 max-w-full">
         <p className="font-semibold text-text-primary">
           {row.original.fullName}
         </p>
@@ -96,7 +96,7 @@ const columns: ColumnDef<Trainer>[] = [
       row.specialization ?? '',
     header: 'Specialization',
     cell: ({ row }) => (
-      <div className="min-w-52">
+      <div className="min-w-0 max-w-full">
         <p className="text-sm text-text-primary">
           {row.original.specialization ??
             'Not specified'}
@@ -120,8 +120,8 @@ const columns: ColumnDef<Trainer>[] = [
       row.workloadRole,
     header: 'Role & target',
     cell: ({ row }) => (
-      <div className="min-w-64">
-        <form action={setTrainerWorkloadRoleAction} className="flex items-center gap-2">
+      <div className="min-w-0">
+        <form action={setTrainerWorkloadRoleAction} className="flex min-w-0 flex-wrap items-center gap-2">
           <input type="hidden" name="id" value={row.original.id} />
           <Select
             name="workloadRole"

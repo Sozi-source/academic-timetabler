@@ -167,7 +167,7 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
   return (
     <div className="space-y-4">
       <section className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
           <SlidersHorizontal className="size-4 text-text-muted" aria-hidden="true" />
           <h2 className="font-semibold text-text-primary">Filter register</h2>
         </div>
@@ -277,7 +277,7 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
           </div>
         ) : (
           <div className="w-full overflow-hidden">
-            <table className="w-full min-w-[1240px] border-collapse text-left text-sm">
+            <table className="w-full table-fixed border-collapse text-left text-sm">
               <thead className="bg-surface-subtle text-xs uppercase tracking-wide text-text-muted">
                 <tr>
                   <th className="px-3 py-2.5">Academic Period</th>

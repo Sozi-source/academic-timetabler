@@ -77,16 +77,16 @@ export default async function Page({
         </div>
       ) : null}
 
-      <form method="get" className="flex flex-wrap items-end gap-2 rounded-2xl border border-border bg-surface p-5">
+      <form method="get" className="grid min-w-0 gap-3 rounded-2xl border border-border bg-surface p-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
         <label className="text-sm font-medium">
           Trainer
-          <select name="trainer" defaultValue={trainerId} className="mt-1 block h-10 rounded-xl border border-border px-3">
+          <select name="trainer" defaultValue={trainerId} className="mt-1 block h-10 w-full min-w-0 rounded-xl border border-border px-3">
             {(trainers ?? []).map((trainer) => <option key={trainer.id} value={trainer.id}>{trainer.full_name}</option>)}
           </select>
         </label>
         <label className="text-sm font-medium">
           Academic Period
-          <select name="period" defaultValue={periodId} className="mt-1 block h-10 rounded-xl border border-border px-3">
+          <select name="period" defaultValue={periodId} className="mt-1 block h-10 w-full min-w-0 rounded-xl border border-border px-3">
             {selectablePeriods.map((period) => <option key={period.id} value={period.id}>{period.code} — {period.name} ({period.status === 'active' ? 'Active' : 'Planned'})</option>)}
           </select>
         </label>
@@ -108,15 +108,15 @@ export default async function Page({
           <div className="mb-4 rounded-xl border border-border bg-surface-subtle px-3 py-2.5 text-sm text-text-secondary">
             <span className="font-semibold">Checked:</span> available to teach · <span className="font-semibold">Unchecked:</span> unavailable or engaged
           </div>
-          <div className="w-full overflow-hidden">
-            <table className="w-full text-sm">
-              <thead><tr><th className="p-3 text-left">Day</th>{((slots ?? []) as Item[]).map((slot) => <th key={slot.id} className="p-3 text-left">{slot.name}</th>)}</tr></thead>
+          <div className="w-full overflow-hidden rounded-xl border border-border">
+            <table className="w-full table-fixed text-sm">
+              <thead><tr><th className="break-words p-2 text-left sm:p-3">Day</th>{((slots ?? []) as Item[]).map((slot) => <th key={slot.id} className="break-words p-2 text-left sm:p-3">{slot.name}</th>)}</tr></thead>
               <tbody>{((days ?? []) as Item[]).map((day) => (
                 <tr key={day.id} className="border-t border-border">
                   <th className="p-3 text-left capitalize">{day.day_of_week}</th>
                   {((slots ?? []) as Item[]).map((slot) => {
                     const value = `${day.id}:${slot.id}`;
-                    return <td key={slot.id} className="p-3"><label className="inline-flex items-center gap-2"><input type="checkbox" name="availableSlot" value={value} defaultChecked={selected.has(value)} /> Available</label></td>;
+                    return <td key={slot.id} className="break-words p-2 sm:p-3"><label className="flex min-w-0 flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-2"><input type="checkbox" name="availableSlot" value={value} defaultChecked={selected.has(value)} /> Available</label></td>;
                   })}
                 </tr>
               ))}</tbody>

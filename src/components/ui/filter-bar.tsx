@@ -39,7 +39,7 @@ export function FilterBar({
       </div>
 
       {actions ? (
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
           {actions}
         </div>
       ) : null}

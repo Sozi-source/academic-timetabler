@@ -97,10 +97,10 @@ export function AcademicPeriodLifecycleAction({
   );
 
   return (
-    <div className="min-w-48">
+    <div className="min-w-0 max-w-full">
       <form
         action={formAction}
-        className="flex items-center gap-2"
+        className="flex min-w-0 flex-wrap items-center gap-2"
       >
         <input
           type="hidden"
@@ -115,7 +115,7 @@ export function AcademicPeriodLifecycleAction({
           }
           disabled={pending}
           aria-label={`Status for ${academicPeriod.name}`}
-          className="h-9 min-w-28 text-xs"
+          className="min-h-9 max-w-full text-xs"
         >
           {statusOptions.map(
             (option) => (

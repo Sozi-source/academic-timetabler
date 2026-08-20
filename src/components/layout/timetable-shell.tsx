@@ -39,7 +39,7 @@ export function TimetableShell({ profile, children }: TimetableShellProps) {
         }}
       />
 
-      <div className="lg:pl-[var(--sidebar-width)]">
+      <div className="min-w-0 overflow-x-clip lg:pl-[var(--sidebar-width)]">
         <header className="sticky top-0 z-20 flex min-h-[var(--header-height)] items-center justify-between gap-4 border-b border-border bg-surface/95 px-4 shadow-[0_1px_0_rgba(31,41,55,0.03)] backdrop-blur sm:px-6 lg:px-8">
           <div className="flex min-w-0 items-center gap-3">
             <Button
@@ -89,7 +89,7 @@ export function TimetableShell({ profile, children }: TimetableShellProps) {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-[var(--content-max-width)] px-4 py-5 sm:px-5 lg:px-6 lg:py-6">
+        <main className="mx-auto min-w-0 w-full max-w-[var(--content-max-width)] overflow-x-clip px-3 py-5 sm:px-5 lg:px-6 lg:py-6">
           {children}
         </main>
       </div>

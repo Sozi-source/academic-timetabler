@@ -54,7 +54,7 @@ export function CardContent({
   className?: string;
 }) {
   return (
-    <div className={cn('px-4 py-4', className)}>
+    <div className={cn('px-3 py-3 xl:px-4 xl:py-4 2xl:px-5 2xl:py-5', className)}>
       {children}
     </div>
   );

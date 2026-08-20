@@ -292,7 +292,7 @@ export const getSchedulingReadiness = cache(async (
     trainerWorkloads: assessment.workloads,
     trainerOptions: (trainersResult.data ?? []).map((trainer) => ({
       id: trainer.id,
-      label: `${trainer.full_name} (${trainer.staff_number})`,
+      label: trainer.full_name,
       maximumWeeklyHours: Number(trainer.normal_weekly_hours),
     })),
     roomOptions: (roomsResult.data ?? []).map((room) => ({

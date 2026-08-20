@@ -258,7 +258,11 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
                         <span className="text-xs font-medium text-text-secondary">Trainer</span>
                         <Select name="trainerId" defaultValue={offering.trainerId ?? ''} aria-label={`Trainer for ${offering.title}`} className="h-10 w-full min-w-0 text-sm">
                           <option value="">Select trainer</option>
-                          {readiness.trainerOptions.map((trainer) => <option key={trainer.id} value={trainer.id}>{trainer.label}</option>)}
+                          {readiness.trainerOptions.map((trainer) => (
+  <option key={trainer.id} value={trainer.id}>
+    {trainer.label.replace(/\s*\(TR-[^)]+\)\s*$/, '')}
+  </option>
+))}
                         </Select>
                       </label>
 

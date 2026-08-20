@@ -40,7 +40,7 @@ export function TimetableShell({ profile, children }: TimetableShellProps) {
       />
 
       <div className="min-w-0 overflow-x-clip lg:pl-[var(--sidebar-width)]">
-        <header className="sticky top-0 z-20 flex min-h-[var(--header-height)] items-center justify-between gap-4 border-b border-border bg-surface/95 px-4 shadow-[0_1px_0_rgba(31,41,55,0.03)] backdrop-blur sm:px-6 lg:px-8">
+        <header className="sticky top-0 z-20 flex min-h-[var(--header-height)] items-center justify-between gap-2 border-b border-border xl:gap-3 2xl:gap-4 bg-surface/95 px-3 shadow-[0_1px_0_rgba(31,41,55,0.03)] backdrop-blur sm:px-4 xl:px-6 2xl:px-8">
           <div className="flex min-w-0 items-center gap-3">
             <Button
               variant="outline"
@@ -58,7 +58,7 @@ export function TimetableShell({ profile, children }: TimetableShellProps) {
 
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <p className="truncate text-sm font-semibold text-text-primary">Timetabling</p>
+                <p className="truncate text-[12px] font-semibold text-text-primary xl:text-sm 2xl:text-[15px] min-[1920px]:text-base">Timetabling</p>
               </div>
               <p className="hidden truncate text-xs text-text-muted sm:block">
                 {profile.departmentName || 'No department assigned'}
@@ -68,7 +68,7 @@ export function TimetableShell({ profile, children }: TimetableShellProps) {
 
           <div className="flex min-w-0 items-center gap-2">
             <div className="hidden min-w-0 border-l border-border pl-4 text-right md:block">
-              <p className="truncate text-sm font-semibold text-text-primary">{profile.fullName}</p>
+              <p className="truncate text-[12px] font-semibold text-text-primary xl:text-sm 2xl:text-[15px] min-[1920px]:text-base">{profile.fullName}</p>
               <p className="truncate text-xs text-text-muted">
                 {profile.role === 'system_admin' ? 'System administrator' : 'Timetable administrator'}
               </p>
@@ -89,7 +89,7 @@ export function TimetableShell({ profile, children }: TimetableShellProps) {
           </div>
         </header>
 
-        <main className="mx-auto min-w-0 w-full max-w-[var(--content-max-width)] overflow-x-clip px-3 py-5 sm:px-5 lg:px-6 lg:py-6">
+        <main className="mx-auto min-w-0 w-full max-w-[var(--content-max-width)] overflow-x-clip px-3 py-4 xl:px-5 xl:py-5 2xl:px-6 2xl:py-6 min-[1920px]:px-8">
           {children}
         </main>
       </div>

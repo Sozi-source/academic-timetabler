@@ -127,7 +127,7 @@ export function DataTable<TData, TValue>({
                           <th
                             key={header.id}
                             colSpan={header.colSpan}
-                            className="min-w-0 break-words px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.06em] text-white/85"
+                            className="min-w-0 break-words px-2.5 py-2 text-[10px] font-semibold uppercase xl:px-3 xl:py-2.5 xl:text-[11px] 2xl:text-xs min-[1920px]:text-[13px] tracking-[0.06em] text-white/85"
                           >
                             {header.isPlaceholder ? null : (
                               <button
@@ -190,7 +190,7 @@ export function DataTable<TData, TValue>({
                     .map((cell) => (
                       <td
                         key={cell.id}
-                        className="min-w-0 break-words px-3 py-2.5 align-top text-sm leading-5 text-text-secondary"
+                        className="min-w-0 break-words px-2.5 py-2 align-top text-[12px] leading-5 xl:px-3 xl:py-2.5 xl:text-[13px] 2xl:text-sm min-[1920px]:text-[15px] text-text-secondary"
                       >
                         {flexRender(
                           cell.column.columnDef.cell,

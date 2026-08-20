@@ -50,7 +50,7 @@ export function Pagination({
   );
 
   return (
-    <div className="flex flex-col gap-4 border-t border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 border-t border-border px-3 py-2.5 xl:px-4 xl:py-3 2xl:gap-4 sm:flex-row sm:items-center sm:justify-between">
       <p className="text-xs text-text-muted">
         Showing {firstRow} to {lastRow} of{' '}
         {totalRows} records

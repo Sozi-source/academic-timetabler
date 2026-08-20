@@ -45,10 +45,10 @@ const variantClasses: Record<
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
-  sm: 'min-h-9 rounded-lg px-3 py-2 text-xs',
-  md: 'min-h-10 rounded-xl px-4 py-2 text-sm',
-  lg: 'min-h-12 rounded-xl px-5 py-2.5 text-sm',
-  icon: 'size-10 rounded-xl',
+  sm: 'min-h-8 rounded-lg px-2.5 py-1.5 text-[11px] xl:min-h-9 xl:px-3 xl:py-2 xl:text-xs 2xl:text-[13px] min-[1920px]:text-sm',
+  md: 'min-h-9 rounded-xl px-3 py-1.5 text-[12px] xl:min-h-10 xl:px-4 xl:py-2 xl:text-sm 2xl:text-[15px] min-[1920px]:text-base',
+  lg: 'min-h-10 rounded-xl px-4 py-2 text-[13px] xl:min-h-11 xl:px-5 xl:text-sm 2xl:min-h-12 2xl:text-[15px] min-[1920px]:text-base',
+  icon: 'size-9 rounded-xl xl:size-10 2xl:size-11 min-[1920px]:size-12',
 };
 
 export function Button({

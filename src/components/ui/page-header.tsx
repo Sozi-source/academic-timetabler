@@ -17,7 +17,7 @@ export function PageHeader({
   context,
 }: PageHeaderProps) {
   return (
-    <header className="rounded-xl border border-border bg-surface px-4 py-4 shadow-sm sm:px-5">
+    <header className="rounded-xl border border-border bg-surface px-3 py-3 shadow-sm xl:px-4 xl:py-3.5 2xl:px-5 2xl:py-4">
       {context ? <div className="mb-3">{context}</div> : null}
 
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -28,7 +28,7 @@ export function PageHeader({
             </span>
           ) : null}
 
-          <h1 className="min-w-0 break-words text-xl font-semibold tracking-tight text-text-primary sm:text-2xl">
+          <h1 className="min-w-0 break-words text-lg font-semibold tracking-tight xl:text-xl 2xl:text-[22px] min-[1920px]:text-2xl text-text-primary sm:text-2xl">
             {title}
           </h1>
         </div>

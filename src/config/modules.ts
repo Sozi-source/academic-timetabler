@@ -22,10 +22,9 @@ export interface PlatformModule {
 export const platformModules: readonly PlatformModule[] = [
   {
     key: 'timetabling',
-    title: 'Academic Planning & Timetabling',
+    title: 'Timetabling',
     shortTitle: 'Timetabling',
-    description:
-      'Plan teaching periods, allocate trainers, generate conflict-aware timetables and publish approved schedules.',
+    description: 'Plan and publish teaching schedules.',
     href: '/timetable/readiness',
     status: 'active',
     icon: CalendarRange,
@@ -33,10 +32,9 @@ export const platformModules: readonly PlatformModule[] = [
   },
   {
     key: 'students',
-    title: 'Student Lifecycle & Registration',
+    title: 'Students',
     shortTitle: 'Students',
-    description:
-      'Maintain the authoritative student registry, academic progression, cohort movement and unit registration.',
+    description: 'Manage students, progression and registration.',
     href: '/students',
     status: 'active',
     icon: GraduationCap,
@@ -44,10 +42,9 @@ export const platformModules: readonly PlatformModule[] = [
   },
   {
     key: 'assessment',
-    title: 'Assessment & Academic Performance',
+    title: 'Assessment',
     shortTitle: 'Assessment',
-    description:
-      'Manage CAT and examination populations, results, absences, analysis and academic performance reporting.',
+    description: 'Manage assessments, marks and performance.',
     href: '/assessment',
     status: 'active',
     icon: ClipboardList,
@@ -55,10 +52,9 @@ export const platformModules: readonly PlatformModule[] = [
   },
   {
     key: 'attendance',
-    title: 'Attendance, Clinical Training & Progression',
+    title: 'Attendance & Clinical',
     shortTitle: 'Attendance & Clinical',
-    description:
-      'Connect class attendance with clinical rotations, attachment readiness and programme completion milestones.',
+    description: 'Manage attendance and clinical progression.',
     href: '/attendance-clinical',
     status: 'coming_soon',
     icon: Stethoscope,

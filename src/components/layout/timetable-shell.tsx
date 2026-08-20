@@ -58,10 +58,7 @@ export function TimetableShell({ profile, children }: TimetableShellProps) {
 
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <p className="truncate text-sm font-semibold text-text-primary">Academic Planning & Timetabling</p>
-                <span className="hidden rounded-md bg-institutional-yellow-subtle px-1.5 py-0.5 text-[0.625rem] font-bold uppercase tracking-[0.12em] text-institutional-yellow-ink md:inline-flex">
-                  Active module
-                </span>
+                <p className="truncate text-sm font-semibold text-text-primary">Timetabling</p>
               </div>
               <p className="hidden truncate text-xs text-text-muted sm:block">
                 {profile.departmentName || 'No department assigned'}
@@ -73,7 +70,7 @@ export function TimetableShell({ profile, children }: TimetableShellProps) {
             <div className="hidden min-w-0 border-l border-border pl-4 text-right md:block">
               <p className="truncate text-sm font-semibold text-text-primary">{profile.fullName}</p>
               <p className="truncate text-xs text-text-muted">
-                {profile.role === 'system_admin' ? 'System administrator' : 'Department timetable administrator'}
+                {profile.role === 'system_admin' ? 'System administrator' : 'Timetable administrator'}
               </p>
             </div>
 

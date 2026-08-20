@@ -21,7 +21,7 @@ export default function UnauthorizedPage() {
 
         <p className="mt-2 text-sm leading-6 text-text-secondary">
           Your account does not have permission to access
-          this area of HND App.
+          this area of the Academic Planning System.
         </p>
 
         <Link

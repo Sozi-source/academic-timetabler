@@ -23,7 +23,7 @@ export async function GET() {
   if (error) return NextResponse.json({ message: 'Unable to export students.' }, { status: 500 });
 
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = 'Academic Management System';
+  workbook.creator = 'Academic Planning System';
   const sheet = workbook.addWorksheet('Students', { views: [{ state: 'frozen', ySplit: 1 }] });
   sheet.columns = [
     { header: 'Admission Number', width: 24 },

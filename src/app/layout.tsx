@@ -4,10 +4,10 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'HND Timetabler',
-    template: '%s | HND Timetabler',
+    default: 'Academic Planning System',
+    template: '%s | Academic Planning System',
   },
-  description: 'Simple departmental timetable creation and management.',
+  description: 'Academic planning, timetabling, student management and assessment.',
 };
 
 export default function RootLayout({

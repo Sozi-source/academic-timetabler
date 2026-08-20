@@ -24,7 +24,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ ass
   if (!analysis) return NextResponse.json({ error: 'Assessment not found.' }, { status: 404 });
 
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = 'Academic Management System';
+  workbook.creator = 'Academic Planning System';
   workbook.created = new Date();
 
   const summary = workbook.addWorksheet('Summary');

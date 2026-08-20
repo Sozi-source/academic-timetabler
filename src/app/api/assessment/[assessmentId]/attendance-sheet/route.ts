@@ -35,7 +35,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ ass
   }
 
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = 'Academic Management System';
+  workbook.creator = 'Academic Planning System';
   const grouped = new Map<string, typeof data.students>();
   for (const student of data.students) {
     const list = grouped.get(student.cohortId) ?? [];

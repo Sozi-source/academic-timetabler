@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, Clock3, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Clock3 } from 'lucide-react';
 import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
@@ -29,7 +29,7 @@ export default async function DashboardPage() {
       />
 
       <section aria-label="Platform modules" className="grid gap-4 md:grid-cols-2">
-        {platformModules.map((module, index) => {
+        {platformModules.map((module) => {
           const Icon = module.icon;
           const active = module.status === 'active';
 
@@ -43,10 +43,7 @@ export default async function DashboardPage() {
                       <Icon className="size-5" aria-hidden="true" />
                     </span>
                     <div className="min-w-0">
-                      <p className="text-[0.65rem] font-bold uppercase tracking-[0.16em] text-primary">
-                        Module {String(index + 1).padStart(2, '0')}
-                      </p>
-                      <h2 className="mt-1 text-base font-semibold tracking-tight text-text-primary">
+                      <h2 className="text-base font-semibold tracking-tight text-text-primary">
                         {module.title}
                       </h2>
                     </div>
@@ -55,19 +52,9 @@ export default async function DashboardPage() {
                     {active ? 'Active' : 'Coming soon'}
                   </Badge>
                 </div>
-                <p className="mt-2 text-xs leading-5 text-text-secondary">{module.description}</p>
               </CardHeader>
 
               <CardContent>
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {module.capabilities.map((capability) => (
-                    <div key={capability} className="flex items-center gap-2 text-xs text-text-secondary">
-                      <CheckCircle2 className="size-3.5 shrink-0 text-primary" aria-hidden="true" />
-                      <span>{capability}</span>
-                    </div>
-                  ))}
-                </div>
-
                 <div className="mt-4 border-t border-border-soft pt-3">
                   <Link
                     href={module.href}
@@ -85,15 +72,6 @@ export default async function DashboardPage() {
         })}
       </section>
 
-      <section className="flex items-start gap-3 rounded-xl border border-border bg-surface px-4 py-3.5 shadow-sm">
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-institutional-yellow text-institutional-yellow-ink">
-          <ShieldCheck className="size-4" aria-hidden="true" />
-        </span>
-        <div>
-          <h2 className="text-sm font-semibold text-text-primary">Shared academic records</h2>
-          <p className="mt-0.5 text-xs text-text-secondary">All modules use the same verified data.</p>
-        </div>
-      </section>
     </div>
   );
 }

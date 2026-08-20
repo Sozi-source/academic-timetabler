@@ -33,7 +33,7 @@ export default async function StudentUnitRegistrationPage() {
       <div className="border-t-4 border-accent bg-white shadow-sm">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-3">
           <div>
-            <p className="text-sm font-bold text-text-primary">Academic Management System</p>
+            <p className="text-sm font-bold text-text-primary">Academic Planning System</p>
             <p className="text-[0.6875rem] text-text-muted">Student registration</p>
           </div>
           <form action={studentPortalLogout}>

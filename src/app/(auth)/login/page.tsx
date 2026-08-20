@@ -3,8 +3,8 @@ import { CalendarDays } from 'lucide-react';
 import { LoginForm } from '@/features/auth/login-form';
 
 export const metadata: Metadata = {
-  title: 'Sign in | HND Timetabler',
-  description: 'Sign in to create and manage the department timetable.',
+  title: 'Sign in | Academic Planning System',
+  description: 'Sign in to the Academic Planning System.',
 };
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string | string[] }> }) {
@@ -20,15 +20,15 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <CalendarDays className="size-5" aria-hidden="true" />
         </span>
         <div>
-          <p className="text-sm font-bold tracking-tight text-primary-deeper">HND Timetabler</p>
-          <p className="text-xs font-medium text-institutional-yellow-ink">Human Nutrition and Dietetics</p>
+          <p className="text-sm font-bold tracking-tight text-primary-deeper">Academic Planning System</p>
+          <p className="text-xs font-medium text-institutional-yellow-ink">Institutional academic management</p>
         </div>
       </div>
 
       <div className="p-6">
         <div className="mb-6 h-1 w-10 rounded-full bg-primary" aria-hidden="true" />
         <h1 id="login-title" className="text-2xl font-semibold tracking-tight text-text-primary">Sign in</h1>
-        <p className="mt-2 text-sm leading-6 text-text-secondary">Enter your department account details to continue.</p>
+        <p className="mt-2 text-sm leading-6 text-text-secondary">Use your institutional account to continue.</p>
         <div className="mt-7"><LoginForm nextPath={nextPath} /></div>
       </div>
     </section>

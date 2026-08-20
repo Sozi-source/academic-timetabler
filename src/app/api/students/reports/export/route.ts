@@ -79,7 +79,7 @@ export async function GET() {
   }
 
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = 'Academic Management System';
+  workbook.creator = 'Academic Planning System';
   workbook.created = new Date();
 
   const summary = workbook.addWorksheet('Summary');

@@ -26,7 +26,6 @@ export function TrainerShell({
             </span>
             <div>
               <p className="text-sm font-bold text-text-primary">Trainer Portal</p>
-              <p className="text-xs text-text-muted">Exam attendance</p>
             </div>
           </Link>
 

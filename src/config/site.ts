@@ -1,7 +1,7 @@
 export const siteConfig = {
-  name: 'Human Nutrition and Dietetics Management System',
-  shortName: 'HND App',
+  name: 'Academic Planning System',
+  shortName: 'Academic Planning',
   description:
-    'Departmental academic planning and timetable management system.',
-  timetableModuleName: 'Department Timetabler',
+    'Institution-wide academic planning, student management and assessment system.',
+  timetableModuleName: 'Timetabling',
 } as const;

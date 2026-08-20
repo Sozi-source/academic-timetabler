@@ -90,7 +90,6 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
 
         <div className="mt-auto pt-6">
           <div className="mx-1 h-px bg-white/10" />
-          <p className="px-2.5 pt-3 text-[0.625rem] font-bold uppercase tracking-[0.16em] text-white/40">Module 03</p>
           <p className="px-2.5 pt-1 text-[0.6875rem] leading-4 text-white/55">Attendance, Excel marks and analysis-ready results.</p>
         </div>
       </nav>
@@ -120,9 +119,9 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
           <header className="sticky top-0 z-30 flex min-h-[var(--header-height)] items-center justify-between border-b border-border bg-surface/95 px-4 backdrop-blur sm:px-6">
             <div className="flex items-center gap-3">
               <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open navigation"><Menu className="size-4" /></Button>
-              <div><p className="text-sm font-bold text-text-primary">Assessment & Academic Performance</p><p className="text-xs text-text-muted">Academic performance</p></div>
+              <div><p className="text-sm font-bold text-text-primary">Assessment</p></div>
             </div>
-            <span className="hidden rounded-md bg-institutional-yellow-subtle px-2 py-1 text-[0.625rem] font-bold uppercase tracking-[0.12em] text-institutional-yellow-ink sm:inline-flex">Module 03</span>
+
           </header>
           <main className="mx-auto w-full max-w-[var(--content-max-width)] px-4 py-5 sm:px-6 lg:px-8 lg:py-6">{children}</main>
         </div>

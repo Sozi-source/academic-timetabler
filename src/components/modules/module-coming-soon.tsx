@@ -16,7 +16,7 @@ export function ModuleComingSoon({ title, description, icon: Icon, capabilities 
   return (
     <div className="space-y-5">
       <PageHeader
-        eyebrow="Academic operations platform"
+        eyebrow="Coming soon"
         title={title}
         description={description}
         context={<Badge variant="neutral">Coming soon</Badge>}
@@ -48,7 +48,7 @@ export function ModuleComingSoon({ title, description, icon: Icon, capabilities 
           </div>
           <div className="mt-4 flex items-center justify-between border-t border-border-soft pt-3">
             <div className="flex items-center gap-2 text-xs text-text-muted"><Clock3 className="size-3.5" />Planned</div>
-            <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm font-semibold text-primary"><ArrowLeft className="size-3.5" />Module hub</Link>
+            <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm font-semibold text-primary"><ArrowLeft className="size-3.5" />Dashboard</Link>
           </div>
         </CardContent>
       </Card>

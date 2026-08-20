@@ -125,7 +125,6 @@ export function StudentShell({ profile, children }: StudentShellProps) {
 
         <div className="mt-auto pt-6">
           <div className="mx-1 h-px bg-white/10" />
-          <p className="px-2.5 pt-3 text-[0.625rem] font-bold uppercase tracking-[0.16em] text-white/40">Module 02</p>
           <p className="px-2.5 pt-1 text-[0.6875rem] leading-4 text-white/55">Student records, progression and registration.</p>
         </div>
       </nav>
@@ -169,11 +168,10 @@ export function StudentShell({ profile, children }: StudentShellProps) {
                 <Menu className="size-4" />
               </Button>
               <div>
-                <p className="text-sm font-bold text-text-primary">Student Lifecycle & Registration</p>
-                <p className="text-xs text-text-muted">Student management</p>
+                <p className="text-sm font-bold text-text-primary">Students</p>
               </div>
             </div>
-            <span className="hidden rounded-md bg-institutional-yellow-subtle px-2 py-1 text-[0.625rem] font-bold uppercase tracking-[0.12em] text-institutional-yellow-ink sm:inline-flex">Module 02</span>
+
           </header>
 
           <main className="mx-auto w-full max-w-[var(--content-max-width)] px-4 py-5 sm:px-6 lg:px-8 lg:py-6">

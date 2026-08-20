@@ -276,7 +276,7 @@ function protectIdentityAndFormulaCells(sheet: ExcelJS.Worksheet, firstRow: numb
 
 export async function buildAssessmentMarksWorkbook(context: WorkbookAssessmentContext, students: WorkbookPopulationStudent[]) {
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = 'Academic Management System';
+  workbook.creator = 'Academic Planning System';
   workbook.created = new Date();
   workbook.calcProperties.fullCalcOnLoad = true;
 

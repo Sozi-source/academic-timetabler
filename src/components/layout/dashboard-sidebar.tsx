@@ -39,11 +39,11 @@ export function DashboardSidebar({
 
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold tracking-tight text-white">
-              Academic Planning & Timetabling
+              Academic Planning
             </p>
 
             <p className="truncate text-xs text-navigation-text/75">
-              Timetable workspace
+              Management system
             </p>
           </div>
         </Link>
@@ -61,20 +61,6 @@ export function DashboardSidebar({
             />
           </button>
         ) : null}
-      </div>
-
-      <div className="border-b border-navigation-border bg-primary-deep/55 px-4 py-3">
-        <div className="flex items-center gap-2">
-          <span className="h-5 w-1 rounded-full bg-institutional-yellow" aria-hidden="true" />
-          <div>
-            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-institutional-yellow">
-              Active module
-            </p>
-            <p className="mt-0.5 text-[0.6875rem] text-navigation-text/75">
-              Academic Planning & Timetabling
-            </p>
-          </div>
-        </div>
       </div>
 
       <nav

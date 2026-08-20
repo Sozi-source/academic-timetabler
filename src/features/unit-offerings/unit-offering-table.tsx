@@ -1,7 +1,10 @@
 'use client';
 
-import { Search, SlidersHorizontal } from 'lucide-react';
+import { RotateCcw, Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
+
+import { Button } from '@/components/ui/button';
+import { Select } from '@/components/ui/select';
 
 import type { UnitOffering } from './types';
 
@@ -9,8 +12,13 @@ interface UnitOfferingTableProps {
   offerings: UnitOffering[];
 }
 
-type SelectionFilter = 'all' | 'included' | 'excluded';
-type TimetableFilter = 'all' | 'enabled' | 'disabled';
+type StateFilter =
+  | 'all'
+  | 'included'
+  | 'excluded'
+  | 'draft'
+  | 'active'
+  | 'disabled';
 
 function normalize(value: string | null | undefined) {
   return value?.trim().toLocaleLowerCase() ?? '';
@@ -22,75 +30,44 @@ function titleCase(value: string) {
     .replace(/\b\w/g, (character) => character.toUpperCase());
 }
 
-function selectionClass(value: string) {
-  return value === 'included'
-    ? 'border-success/20 bg-success-subtle text-success'
-    : 'border-danger/20 bg-danger-subtle text-danger';
+function stateLabel(offering: UnitOffering) {
+  if (offering.selectionState === 'excluded') return 'Excluded';
+  if (!offering.isTimetableEnabled) return 'Disabled';
+  if (offering.status === 'draft') return 'Draft';
+  if (offering.status === 'active') return 'Active';
+  return titleCase(offering.status);
 }
 
-function statusClass(value: string) {
-  if (value === 'active') {
+function stateClass(offering: UnitOffering) {
+  const label = stateLabel(offering);
+
+  if (label === 'Active') {
     return 'border-success/20 bg-success-subtle text-success';
   }
 
-  if (value === 'draft') {
+  if (label === 'Draft') {
     return 'border-warning/20 bg-warning-subtle text-warning';
   }
 
-  if (value === 'cancelled') {
-    return 'border-danger/20 bg-danger-subtle text-danger';
+  if (label === 'Excluded' || label === 'Disabled') {
+    return 'border-border bg-surface-subtle text-text-muted';
   }
 
-  return 'border-border bg-surface-subtle text-text-muted';
-}
-
-function originClass(value: string) {
-  if (value === 'curriculum') {
-    return 'border-primary/20 bg-primary-subtle text-primary';
-  }
-
-  if (value === 'import') {
-    return 'border-success/20 bg-success-subtle text-success';
-  }
-
-  if (value === 'special') {
-    return 'border-warning/20 bg-warning-subtle text-warning';
-  }
-
-  return 'border-border bg-surface-subtle text-text-muted';
+  return 'border-border bg-surface-subtle text-text-secondary';
 }
 
 export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
   const [search, setSearch] = useState('');
-  const [periodId, setPeriodId] = useState('all');
   const [programmeId, setProgrammeId] = useState('all');
   const [cohortId, setCohortId] = useState('all');
-  const [selection, setSelection] = useState<SelectionFilter>('all');
-  const [timetable, setTimetable] = useState<TimetableFilter>('all');
-
-  const periods = useMemo(() => {
-    const values = new Map<string, string>();
-
-    for (const offering of offerings) {
-      if (offering.academicPeriod) {
-        values.set(offering.academicPeriod.id, offering.academicPeriod.name);
-      }
-    }
-
-    return [...values.entries()].sort((first, second) =>
-      first[1].localeCompare(second[1]),
-    );
-  }, [offerings]);
+  const [state, setState] = useState<StateFilter>('all');
 
   const programmes = useMemo(() => {
     const values = new Map<string, string>();
 
     for (const offering of offerings) {
       const programme = offering.cohort?.programme ?? offering.unit?.programme;
-
-      if (programme) {
-        values.set(programme.id, programme.name);
-      }
+      if (programme) values.set(programme.id, programme.name);
     }
 
     return [...values.entries()].sort((first, second) =>
@@ -99,10 +76,7 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
   }, [offerings]);
 
   const cohorts = useMemo(() => {
-    const values = new Map<
-      string,
-      { name: string; programmeId: string }
-    >();
+    const values = new Map<string, { name: string; programmeId: string }>();
 
     for (const offering of offerings) {
       if (offering.cohort) {
@@ -134,47 +108,44 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
           offering.cohort?.code,
           programme?.name,
           programme?.code,
-          offering.academicPeriod?.name,
-          offering.academicPeriod?.code,
-          offering.offeringType,
-          offering.status,
-          offering.origin,
         ].some((value) => normalize(value).includes(query));
+
+      const matchesState =
+        state === 'all' ||
+        (state === 'included' && offering.selectionState === 'included') ||
+        (state === 'excluded' && offering.selectionState === 'excluded') ||
+        (state === 'draft' && offering.status === 'draft') ||
+        (state === 'active' && offering.status === 'active') ||
+        (state === 'disabled' && !offering.isTimetableEnabled);
 
       return (
         matchesSearch &&
-        (periodId === 'all' || offering.academicPeriodId === periodId) &&
         (programmeId === 'all' || programme?.id === programmeId) &&
         (cohortId === 'all' || offering.cohortId === cohortId) &&
-        (selection === 'all' || offering.selectionState === selection) &&
-        (timetable === 'all' ||
-          (timetable === 'enabled'
-            ? offering.isTimetableEnabled
-            : !offering.isTimetableEnabled))
+        matchesState
       );
     });
-  }, [cohortId, offerings, periodId, programmeId, search, selection, timetable]);
+  }, [cohortId, offerings, programmeId, search, state]);
+
+  const filtersActive =
+    Boolean(search) ||
+    programmeId !== 'all' ||
+    cohortId !== 'all' ||
+    state !== 'all';
 
   function clearFilters() {
     setSearch('');
-    setPeriodId('all');
     setProgrammeId('all');
     setCohortId('all');
-    setSelection('all');
-    setTimetable('all');
+    setState('all');
   }
 
   return (
-    <div className="space-y-4">
-      <section className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
-        <div className="flex min-w-0 flex-wrap items-center gap-2">
-          <SlidersHorizontal className="size-4 text-text-muted" aria-hidden="true" />
-          <h2 className="font-semibold text-text-primary">Filter register</h2>
-        </div>
-
-        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-6">
-          <label className="relative xl:col-span-2">
-            <span className="sr-only">Search Units on Offer</span>
+    <div className="space-y-3">
+      <section className="rounded-xl border border-border bg-surface p-3 shadow-sm">
+        <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-[minmax(16rem,1fr)_12rem_12rem_10rem_auto]">
+          <label className="relative min-w-0">
+            <span className="sr-only">Search units</span>
             <Search
               className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-muted"
               aria-hidden="true"
@@ -183,192 +154,121 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search unit, cohort or programme"
-              className="h-11 w-full rounded-xl border border-border-strong bg-surface pl-10 pr-3 text-sm text-text-primary outline-none transition placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
+              placeholder="Search units"
+              className="h-9 w-full rounded-lg border border-border-strong bg-surface pl-9 pr-3 text-[12px] text-text-primary outline-none transition placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/20 xl:text-sm"
             />
           </label>
 
-          <select
-            aria-label="Filter by Academic Period"
-            value={periodId}
-            onChange={(event) => setPeriodId(event.target.value)}
-            className="h-11 rounded-xl border border-border-strong bg-surface px-3 text-sm text-text-primary outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-          >
-            <option value="all">All Academic Periods</option>
-            {periods.map(([id, name]) => (
-              <option key={id} value={id}>{name}</option>
-            ))}
-          </select>
-
-          <select
+          <Select
             aria-label="Filter by programme"
             value={programmeId}
             onChange={(event) => {
               setProgrammeId(event.target.value);
               setCohortId('all');
             }}
-            className="h-11 rounded-xl border border-border-strong bg-surface px-3 text-sm text-text-primary outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+            className="h-9 w-full text-[12px] xl:text-sm"
           >
             <option value="all">All programmes</option>
             {programmes.map(([id, name]) => (
               <option key={id} value={id}>{name}</option>
             ))}
-          </select>
+          </Select>
 
-          <select
+          <Select
             aria-label="Filter by cohort"
             value={cohortId}
             onChange={(event) => setCohortId(event.target.value)}
-            className="h-11 rounded-xl border border-border-strong bg-surface px-3 text-sm text-text-primary outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+            className="h-9 w-full text-[12px] xl:text-sm"
           >
             <option value="all">All cohorts</option>
             {cohorts.map(([id, cohort]) => (
               <option key={id} value={id}>{cohort.name}</option>
             ))}
-          </select>
+          </Select>
 
-          <select
-            aria-label="Filter by inclusion"
-            value={selection}
-            onChange={(event) => setSelection(event.target.value as SelectionFilter)}
-            className="h-11 rounded-xl border border-border-strong bg-surface px-3 text-sm text-text-primary outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+          <Select
+            aria-label="Filter by state"
+            value={state}
+            onChange={(event) => setState(event.target.value as StateFilter)}
+            className="h-9 w-full text-[12px] xl:text-sm"
           >
-            <option value="all">Included and excluded</option>
-            <option value="included">Included only</option>
-            <option value="excluded">Excluded only</option>
-          </select>
-        </div>
+            <option value="all">All states</option>
+            <option value="included">Included</option>
+            <option value="active">Active</option>
+            <option value="draft">Draft</option>
+            <option value="disabled">Disabled</option>
+            <option value="excluded">Excluded</option>
+          </Select>
 
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-          <select
-            aria-label="Filter by timetable availability"
-            value={timetable}
-            onChange={(event) => setTimetable(event.target.value as TimetableFilter)}
-            className="h-10 rounded-xl border border-border-strong bg-surface px-3 text-sm text-text-primary outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-          >
-            <option value="all">All timetable states</option>
-            <option value="enabled">Timetable enabled</option>
-            <option value="disabled">Timetable disabled</option>
-          </select>
-
-          <div className="flex items-center gap-3">
-            <p className="text-sm text-text-muted">
-              Showing <span className="font-semibold text-text-secondary">{filtered.length}</span>{' '}
-              of <span className="font-semibold text-text-secondary">{offerings.length}</span>
-            </p>
-            <button
+          {filtersActive ? (
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
+              leadingIcon={<RotateCcw className="size-3.5" aria-hidden="true" />}
               onClick={clearFilters}
-              className="h-10 rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
             >
-              Clear filters
-            </button>
-          </div>
+              Clear
+            </Button>
+          ) : null}
         </div>
+
+        <p className="mt-2 text-[11px] text-text-muted xl:text-xs">
+          {filtered.length} of {offerings.length} units
+        </p>
       </section>
 
-      <section className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
+      <section className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
         {filtered.length === 0 ? (
-          <div className="px-6 py-16 text-center">
-            <p className="font-semibold text-text-primary">No Units on Offer found</p>
-            <p className="mt-2 text-sm text-text-muted">
-              Adjust the filters or import the semester Units on Offer.
-            </p>
+          <div className="px-4 py-10 text-center">
+            <p className="font-semibold text-text-primary">No matching units</p>
+            <p className="mt-1 text-xs text-text-muted">Adjust the filters.</p>
           </div>
         ) : (
           <div className="w-full overflow-hidden">
-            <table className="w-full table-fixed border-collapse text-left text-sm">
-              <thead className="bg-surface-subtle text-xs uppercase tracking-wide text-text-muted">
+            <table className="w-full table-fixed border-collapse text-left">
+              <thead className="border-t-[3px] border-institutional-yellow bg-primary text-[10px] uppercase tracking-wide text-white/85 xl:text-xs">
                 <tr>
-                  <th className="px-3 py-2.5">Academic Period</th>
-                  <th className="px-3 py-2.5">Programme and cohort</th>
-                  <th className="px-3 py-2.5">Unit</th>
-                  <th className="px-3 py-2.5">Delivery</th>
-                  <th className="px-3 py-2.5">Sessions</th>
-                  <th className="px-3 py-2.5">Selection</th>
-                  <th className="px-3 py-2.5">Timetable</th>
-                  <th className="px-3 py-2.5">Status</th>
-                  <th className="px-3 py-2.5">Origin</th>
-                  <th className="px-3 py-2.5">Review</th>
+                  <th className="w-[34%] px-3 py-2">Unit</th>
+                  <th className="w-[31%] px-3 py-2">Class</th>
+                  <th className="w-[20%] px-3 py-2">Sessions</th>
+                  <th className="w-[15%] px-3 py-2">State</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-border-soft">
                 {filtered.map((offering) => {
                   const programme = offering.cohort?.programme ?? offering.unit?.programme;
 
                   return (
                     <tr key={offering.id} className="align-top transition hover:bg-surface-subtle/60">
-                      <td className="px-4 py-4">
-                        <p className="font-medium text-text-primary">{offering.academicPeriod?.name ?? '—'}</p>
-                        <p className="mt-1 font-mono text-xs text-text-muted">{offering.academicPeriod?.code ?? '—'}</p>
-                      </td>
-                      <td className="px-4 py-4">
-                        <p className="font-medium text-text-primary">{programme?.name ?? '—'}</p>
-                        <p className="mt-1 text-xs text-text-muted">{offering.cohort?.name ?? '—'}</p>
-                        {offering.cohort?.currentAcademicPeriodNumber ? (
-                          <p className="mt-1 text-xs text-text-muted">
-                            Current stage {offering.cohort.currentAcademicPeriodNumber}
-                          </p>
-                        ) : null}
-                      </td>
-                      <td className="px-4 py-4">
-                        <p className="font-semibold text-text-primary">{offering.unit?.name ?? '—'}</p>
-                        <p className="mt-1 font-mono text-xs text-text-muted">{offering.unit?.code ?? '—'}</p>
-                        {offering.recommendedStageNumber ? (
-                          <p className="mt-1 text-xs text-text-muted">
-                            Recommended stage {offering.recommendedStageNumber}
-                          </p>
-                        ) : null}
-                      </td>
-                      <td className="px-4 py-4">
-                        <span className="inline-flex rounded-full border border-border bg-surface-subtle px-2.5 py-1 text-xs font-semibold text-text-secondary">
-                          {titleCase(offering.offeringType)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 text-text-secondary">
-                        <p>{offering.weeklySessions ?? '—'} per week</p>
-                        <p className="mt-1 text-xs text-text-muted">
-                          {offering.sessionDurationMinutes ?? '—'} minutes
+                      <td className="px-3 py-2.5">
+                        <p className="break-words text-[12px] font-semibold leading-5 text-text-primary xl:text-sm">
+                          {offering.unit?.name ?? '—'}
+                        </p>
+                        <p className="mt-0.5 text-[10px] text-text-muted xl:text-xs">
+                          {offering.unit?.code ?? '—'} · {titleCase(offering.offeringType)}
                         </p>
                       </td>
-                      <td className="px-4 py-4">
-                        <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${selectionClass(offering.selectionState)}`}>
-                          {offering.selectionState}
-                        </span>
-                        {offering.exceptionReason ? (
-                          <p className="mt-2 max-w-48 text-xs leading-5 text-text-muted">{offering.exceptionReason}</p>
-                        ) : null}
+
+                      <td className="px-3 py-2.5">
+                        <p className="break-words text-[12px] font-medium leading-5 text-text-primary xl:text-sm">
+                          {offering.cohort?.name ?? '—'}
+                        </p>
+                        <p className="mt-0.5 break-words text-[10px] text-text-muted xl:text-xs">
+                          {programme?.shortName ?? programme?.name ?? '—'}
+                        </p>
                       </td>
-                      <td className="px-4 py-4">
-                        <span className={offering.isTimetableEnabled ? 'font-semibold text-success' : 'text-text-muted'}>
-                          {offering.isTimetableEnabled ? 'Enabled' : 'Disabled'}
-                        </span>
+
+                      <td className="px-3 py-2.5 text-[12px] text-text-secondary xl:text-sm">
+                        <p>
+                          {offering.weeklySessions ?? '—'} × {offering.sessionDurationMinutes ?? '—'} min
+                        </p>
                       </td>
-                      <td className="px-4 py-4">
-                        <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${statusClass(offering.status)}`}>
-                          {offering.status}
+
+                      <td className="px-3 py-2.5">
+                        <span className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold xl:text-xs ${stateClass(offering)}`}>
+                          {stateLabel(offering)}
                         </span>
-                      </td>
-                      <td className="px-4 py-4">
-                        <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${originClass(offering.origin)}`}>
-                          {offering.origin}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4">
-                        {offering.manuallyReviewed ? (
-                          <div>
-                            <p className="font-semibold text-warning">Manually reviewed</p>
-                            {offering.reviewedAt ? (
-                              <p className="mt-1 text-xs text-text-muted">
-                                {new Intl.DateTimeFormat('en-KE', { dateStyle: 'medium' }).format(
-                                  new Date(offering.reviewedAt),
-                                )}
-                              </p>
-                            ) : null}
-                          </div>
-                        ) : (
-                          <span className="text-text-muted">Not reviewed</span>
-                        )}
                       </td>
                     </tr>
                   );

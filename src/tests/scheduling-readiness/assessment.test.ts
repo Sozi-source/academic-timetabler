@@ -113,7 +113,7 @@ describe('assessSchedulingReadiness', () => {
       (entry) => entry.id === 'no-preferred-room',
     )).toMatchObject({
       severity: 'info',
-      title: '1 offering has no room assigned',
+      title: '1 unit needs a room',
     });
   });
 

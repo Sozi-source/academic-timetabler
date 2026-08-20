@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Timetable Readiness',
-  description: 'Validate teaching offerings, allocations, rooms, workloads and scheduling resources before timetable generation.',
+  description: 'Validate units, allocations, rooms and workloads before timetable generation.',
 };
 
 export default async function TimetableReadinessPage({ searchParams }: { searchParams: Promise<{ academicPeriodId?: string }> }) {

@@ -93,7 +93,7 @@ function getOperationDisplay(
   ) {
     case 'insert':
       return {
-        label: 'New offering',
+        label: 'New unit',
         icon: CheckCircle2,
         className:
           'text-success',

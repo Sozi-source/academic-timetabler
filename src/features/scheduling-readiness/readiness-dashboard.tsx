@@ -138,7 +138,7 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
             <h2 id="offering-readiness-title" className="text-lg font-semibold text-text-primary">Teaching allocations</h2>
 
           </div>
-          <span className="text-sm font-medium text-text-muted">{readiness.offerings.length} offerings</span>
+          <span className="text-sm font-medium text-text-muted">{readiness.offerings.length} units</span>
         </div>
 
         <div className="space-y-3">

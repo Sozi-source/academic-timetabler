@@ -155,7 +155,7 @@ export default async function UnitOfferingImportBatchPage({
         />
 
         <MetricCard
-          label="New offerings"
+          label="New units"
           value={String(insertCount)}
           description="Valid rows that will create new Semester Units on Offer."
           icon={CheckCircle2}
@@ -164,7 +164,7 @@ export default async function UnitOfferingImportBatchPage({
         <MetricCard
           label="Updates"
           value={String(updateCount)}
-          description="Existing unreviewed offerings that are eligible for updating."
+          description="Existing unreviewed units eligible for updating."
           icon={Copy}
         />
 

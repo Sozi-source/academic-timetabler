@@ -90,7 +90,7 @@ export function assessSchedulingReadiness(input: AssessReadinessInput) {
     issues.push(issue(
       'no-offerings',
       'blocker',
-      'No timetable-enabled teaching offerings',
+      'No timetable-enabled units',
       'Import or enable Units on Offer before preparing allocations.',
       '/timetable/unit-offerings',
       'Open Units on Offer',
@@ -116,7 +116,14 @@ export function assessSchedulingReadiness(input: AssessReadinessInput) {
     (offering) => !offering.trainerId && !offering.isProvisionalReservation,
   );
   if (missingTrainer.length > 0) {
-    issues.push(issue('missing-trainers', 'blocker', `${missingTrainer.length} offering${missingTrainer.length === 1 ? '' : 's'} without a trainer`, 'Assign trainers, or include these units as unassigned so draft generation can continue.', '/timetable/teaching-allocations', 'Review allocations'));
+    issues.push(issue(
+      'missing-trainers',
+      'blocker',
+      `${missingTrainer.length} unit${missingTrainer.length === 1 ? '' : 's'} ${missingTrainer.length === 1 ? 'needs a trainer' : 'need trainers'}`,
+      'Assign trainers or include units as unassigned.',
+      '/timetable/teaching-allocations',
+      'Assign trainers',
+    ));
   }
 
   const reservedWithoutTrainer = enabled.filter(
@@ -126,8 +133,8 @@ export function assessSchedulingReadiness(input: AssessReadinessInput) {
     issues.push(issue(
       'reserved-trainers-pending',
       'warning',
-      `${reservedWithoutTrainer.length} included offering${reservedWithoutTrainer.length === 1 ? '' : 's'} with an unassigned trainer`,
-      'These sessions can be generated and saved as a draft. Assign trainers before publication.',
+      `${reservedWithoutTrainer.length} unit${reservedWithoutTrainer.length === 1 ? '' : 's'} ${reservedWithoutTrainer.length === 1 ? 'needs a trainer' : 'need trainers'}`,
+      'Assign trainers before publishing.',
       '/timetable/teaching-allocations',
       'Assign trainers',
     ));
@@ -135,12 +142,24 @@ export function assessSchedulingReadiness(input: AssessReadinessInput) {
 
   const inactiveTrainer = enabled.filter((offering) => offering.trainerId && (!offering.trainerActive || !offering.trainerTimetableAvailable));
   if (inactiveTrainer.length > 0) {
-    issues.push(issue('unavailable-trainers', 'blocker', `${inactiveTrainer.length} offering${inactiveTrainer.length === 1 ? '' : 's'} use unavailable trainers`, 'Replace inactive or timetable-disabled trainers.', '/timetable/trainers', 'Review trainers'));
+    issues.push(issue(
+      'unavailable-trainers',
+      'blocker',
+      `${inactiveTrainer.length} unit${inactiveTrainer.length === 1 ? '' : 's'} ${inactiveTrainer.length === 1 ? 'uses an unavailable trainer' : 'use unavailable trainers'}`,
+      'Replace unavailable trainers.',
+      '/timetable/trainers',
+      'Review trainers',
+    ));
   }
 
   const missingParticipants = enabled.filter((offering) => offering.participants.length === 0);
   if (missingParticipants.length > 0) {
-    issues.push(issue('missing-participants', 'blocker', `${missingParticipants.length} offering${missingParticipants.length === 1 ? '' : 's'} without cohort participants`, 'Every teaching offering must contain at least one cohort and unit participant.'));
+    issues.push(issue(
+      'missing-participants',
+      'blocker',
+      `${missingParticipants.length} unit${missingParticipants.length === 1 ? '' : 's'} ${missingParticipants.length === 1 ? 'needs participants' : 'need participants'}`,
+      'Add at least one cohort to each unit.',
+    ));
   }
 
   const unavailableParticipants = enabled.flatMap((offering) => offering.participants).filter((participant) =>
@@ -169,18 +188,35 @@ export function assessSchedulingReadiness(input: AssessReadinessInput) {
 
   const noPreferredRoom = enabled.filter((offering) => !offering.preferredRoomId);
   if (noPreferredRoom.length > 0) {
-    issues.push(issue('no-preferred-room', 'info', `${noPreferredRoom.length} offering${noPreferredRoom.length === 1 ? ' has' : 's have'} no room assigned`, 'Room assignment is optional. These sessions can be generated and saved with the room marked as pending.'));
+    issues.push(issue(
+      'no-preferred-room',
+      'info',
+      `${noPreferredRoom.length} unit${noPreferredRoom.length === 1 ? '' : 's'} ${noPreferredRoom.length === 1 ? 'needs a room' : 'need rooms'}`,
+      'Rooms are optional and can remain pending.',
+    ));
   }
 
   const draft = enabled.filter((offering) => offering.status === 'draft');
   if (draft.length > 0) {
-    issues.push(issue('draft-offerings', 'warning', `${draft.length} offering${draft.length === 1 ? '' : 's'} remain in draft`, 'Review and activate confirmed teaching requirements before final generation.'));
+    issues.push(issue(
+      'draft-offerings',
+      'warning',
+      `${draft.length} unit${draft.length === 1 ? '' : 's'} ${draft.length === 1 ? 'is' : 'are'} in draft`,
+      'Activate confirmed units before generating.',
+    ));
   }
 
   const workloads = calculateTrainerWorkloads(enabled);
   const overloaded = workloads.filter((workload) => workload.overloaded);
   if (overloaded.length > 0) {
-    issues.push(issue('trainer-overload', 'warning', `${overloaded.length} trainer${overloaded.length === 1 ? '' : 's'} have extra weekly hours`, 'Allocation may continue. Review and confirm the extra hours shown on each trainer timetable.', '/timetable/reports?report=workload', 'Review extra hours'));
+    issues.push(issue(
+      'trainer-overload',
+      'warning',
+      `${overloaded.length} trainer${overloaded.length === 1 ? '' : 's'} ${overloaded.length === 1 ? 'exceeds' : 'exceed'} target hours`,
+      'Review extra hours before publishing.',
+      '/timetable/reports?report=workload',
+      'Review hours',
+    ));
   }
 
   const blockerCount = issues.filter((entry) => entry.severity === 'blocker').length;

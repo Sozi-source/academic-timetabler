@@ -269,7 +269,7 @@ export const unitOfferingImportRowSchema =
               'timetableEnabled',
             ],
             message:
-              'Attachment, clinical rotation and examination offerings cannot enter the ordinary classroom timetable.',
+              'Attachment, clinical rotation and examination units cannot enter the ordinary classroom timetable.',
           });
         }
 
@@ -284,7 +284,7 @@ export const unitOfferingImportRowSchema =
             code: 'custom',
             path: ['status'],
             message:
-              'Only draft or active offerings can be timetable-enabled.',
+              'Only draft or active units can be timetable-enabled.',
           });
         }
 
@@ -298,7 +298,7 @@ export const unitOfferingImportRowSchema =
               'sharedClassKey',
             ],
             message:
-              'A shared class key may only be used for a timetable-enabled offering.',
+              'A shared class key may only be used for a timetable-enabled unit.',
           });
         }
       },

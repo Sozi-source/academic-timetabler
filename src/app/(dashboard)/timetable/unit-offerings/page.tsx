@@ -58,8 +58,8 @@ export default async function UnitOfferingsPage() {
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="neutral">
               {offerings.length === 1
-                ? '1 semester offering'
-                : `${offerings.length} semester offerings`}
+                ? '1 unit'
+                : `${offerings.length} units`}
             </Badge>
             <Badge variant="success" dot>
               {schedulable.length} schedulable
@@ -81,7 +81,7 @@ export default async function UnitOfferingsPage() {
         className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
       >
         <MetricCard
-          label="All offerings"
+          label="Units"
           value={String(offerings.length)}
           description={`${representedPeriods} Academic Period${representedPeriods === 1 ? '' : 's'} represented`}
           icon={ClipboardList}
@@ -104,7 +104,7 @@ export default async function UnitOfferingsPage() {
         <MetricCard
           label="Weekly contact hours"
           value={Number.isInteger(weeklyHours) ? String(weeklyHours) : weeklyHours.toFixed(1)}
-          description={`${schedulable.length} schedulable offering${schedulable.length === 1 ? '' : 's'}`}
+          description={`${schedulable.length} schedulable unit${schedulable.length === 1 ? '' : 's'}`}
           icon={Clock3}
           status="Workload"
         />
@@ -126,7 +126,7 @@ export default async function UnitOfferingsPage() {
       ) : (
         <section aria-labelledby="unit-offering-register-title" className="space-y-3">
           <SectionHeader
-            title="Semester offering register"
+            title="Semester units"
             description="Review the programme, cohort, Academic Period, inclusion decision and timetable readiness of every Unit on Offer."
           />
           <UnitOfferingTable offerings={offerings} />

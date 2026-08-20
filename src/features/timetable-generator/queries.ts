@@ -248,7 +248,7 @@ export const getGeneratorSourceData =
         ),
         getTimetableAvailableTrainers(),
         getGeneratorTrainerAvailability(academicPeriodId),
-        getGeneratorSchedulingConstraints(academicPeriodId),
+        Promise.resolve([] as PlanningConstraint[]),
         getTimetableAvailableCohorts(),
         getTimetableAvailableRooms(),
         getTimetableAvailableUnits(),

@@ -13,8 +13,6 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
 
   return <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-5 py-10">
     <div className="absolute inset-x-0 top-0 h-1.5 bg-institutional-yellow" aria-hidden="true" />
-    <div className="absolute inset-y-0 left-0 hidden w-[28%] bg-primary-deeper lg:block" aria-hidden="true" />
-    <div className="absolute left-[28%] top-0 hidden h-full w-1 bg-institutional-yellow lg:block" aria-hidden="true" />
 
     <section className="relative z-10 w-full max-w-md overflow-hidden rounded-xl border border-border bg-surface shadow-lg" aria-labelledby="login-title">
       <div className="flex h-[4.75rem] items-center gap-3 border-b border-primary/20 bg-institutional-yellow px-6">

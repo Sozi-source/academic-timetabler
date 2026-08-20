@@ -13,6 +13,7 @@ import {
   trainerEmploymentTypeOptions,
   type Trainer,
   type TrainerActionState,
+  type TrainerEmploymentType,
   type TrainerWorkloadRole,
 } from './types';
 
@@ -43,6 +44,18 @@ export function TrainerFormFields({
 
   const [workloadRole, setWorkloadRole] =
     useState<TrainerWorkloadRole>(initialRole);
+
+  const initialEmploymentType =
+    trainer?.employmentType ?? 'full_time';
+
+  const [employmentType, setEmploymentType] =
+    useState<TrainerEmploymentType>(initialEmploymentType);
+
+  const availabilityMode = trainer?.availabilityMode ?? (
+    ['part_time', 'visiting', 'contract'].includes(employmentType)
+      ? 'selected_slots_only'
+      : 'generally_available'
+  );
 
   const initialTarget =
     fixedWorkloadTargets[initialRole] === undefined
@@ -125,9 +138,11 @@ export function TrainerFormFields({
             name="employmentType"
             required
             disabled={pending}
-            defaultValue={
-              trainer?.employmentType ??
-              'full_time'
+            value={employmentType}
+            onChange={(event) =>
+              setEmploymentType(
+                event.target.value as TrainerEmploymentType,
+              )
             }
             hasError={Boolean(
               employmentTypeError,
@@ -171,9 +186,11 @@ export function TrainerFormFields({
         </FormField>
         <input type="hidden" name="homeDepartment" value={trainer?.homeDepartment ?? ''}/>
       </div>
-      <FormField id="trainer-availability-mode" label="Availability rule" required error={state.fieldErrors?.availabilityMode?.[0]}>
-        <Select id="trainer-availability-mode" name="availabilityMode" required disabled={pending} defaultValue={trainer?.availabilityMode ?? 'generally_available'}><option value="generally_available">Generally available</option><option value="selected_slots_only">Selected free times only</option></Select>
-      </FormField>
+      <input
+        type="hidden"
+        name="availabilityMode"
+        value={availabilityMode}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <FormField

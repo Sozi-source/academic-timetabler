@@ -1,19 +1,39 @@
 import { CheckCircle2 } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
-import { prioritizeActiveAcademicPeriods, resolveAcademicPeriodId } from '@/features/academic-periods/selection';
-import { saveTrainerAvailabilityAction } from '@/features/trainers/availability-actions';
+import { Select } from '@/components/ui/select';
+import {
+  prioritizeActiveAcademicPeriods,
+  resolveAcademicPeriodId,
+} from '@/features/academic-periods/selection';
+import {
+  resetTrainerAvailabilityAction,
+  saveTrainerAvailabilityAction,
+} from '@/features/trainers/availability-actions';
 import { initializeStandardCalendarAction } from '@/features/timetable-calendar/actions';
 import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
-type Item = {
+type TrainerItem = {
   id: string;
-  full_name?: string;
-  code?: string;
-  name?: string;
-  day_of_week?: string;
+  full_name: string;
+  employment_type: string;
+  availability_mode: 'generally_available' | 'selected_slots_only';
+};
+
+type DayItem = {
+  id: string;
+  day_of_week: string;
+};
+
+type SlotItem = {
+  id: string;
+  name: string;
+  starts_at: string;
+  ends_at: string;
 };
 
 type Period = {
@@ -30,6 +50,7 @@ export default async function Page({
     trainer?: string;
     period?: string;
     saved?: string;
+    mode?: string;
     returnTo?: string;
   }>;
 }) {
@@ -37,94 +58,228 @@ export default async function Page({
   const params = await searchParams;
 
   const [{ data: trainers }, { data: periods }] = await Promise.all([
-    db.from('trainers').select('id,full_name').eq('is_active', true).order('full_name'),
-    db.from('academic_periods').select('id,code,name,status').in('status', ['planned', 'active']).order('starts_on', { ascending: false }),
+    db
+      .from('trainers')
+      .select('id,full_name,employment_type,availability_mode')
+      .eq('is_active', true)
+      .order('full_name'),
+    db
+      .from('academic_periods')
+      .select('id,code,name,status')
+      .in('status', ['planned', 'active'])
+      .order('starts_on', { ascending: false }),
   ]);
 
-  const trainerId = params.trainer ?? trainers?.[0]?.id ?? '';
+  const trainerList = (trainers ?? []) as TrainerItem[];
+  const trainerId = params.trainer ?? trainerList[0]?.id ?? '';
+  const trainer = trainerList.find((item) => item.id === trainerId) ?? null;
+
   const selectablePeriods = prioritizeActiveAcademicPeriods(
     (periods ?? []) as Period[],
   );
-  const periodId = resolveAcademicPeriodId(
-    selectablePeriods,
-    params.period,
-  );
+  const periodId = resolveAcademicPeriodId(selectablePeriods, params.period);
+  const selectedPeriod = selectablePeriods.find((item) => item.id === periodId);
 
   const empty = Promise.resolve({ data: [] });
   const [{ data: days }, { data: slots }, { data: saved }] = await Promise.all([
-    periodId ? db.from('working_days').select('id,day_of_week').eq('academic_period_id', periodId).eq('is_enabled', true).order('sequence_number') : empty,
-    periodId ? db.from('time_slots').select('id,name').eq('academic_period_id', periodId).eq('is_enabled', true).eq('slot_type', 'teaching').order('sequence_number') : empty,
-    trainerId && periodId ? db.from('trainer_availability').select('working_day_id,time_slot_id').eq('trainer_id', trainerId).eq('academic_period_id', periodId) : empty,
+    periodId
+      ? db
+          .from('working_days')
+          .select('id,day_of_week')
+          .eq('academic_period_id', periodId)
+          .eq('is_enabled', true)
+          .order('sequence_number')
+      : empty,
+    periodId
+      ? db
+          .from('time_slots')
+          .select('id,name,starts_at,ends_at')
+          .eq('academic_period_id', periodId)
+          .eq('is_enabled', true)
+          .eq('slot_type', 'teaching')
+          .order('sequence_number')
+      : empty,
+    trainerId && periodId
+      ? db
+          .from('trainer_availability')
+          .select('working_day_id,time_slot_id')
+          .eq('trainer_id', trainerId)
+          .eq('academic_period_id', periodId)
+      : empty,
   ]);
 
+  const dayList = (days ?? []) as DayItem[];
+  const slotList = (slots ?? []) as SlotItem[];
   const selected = new Set(
-    (saved ?? []).map((item) => `${item.working_day_id}:${item.time_slot_id}`),
+    (saved ?? []).map(
+      (item) => `${item.working_day_id}:${item.time_slot_id}`,
+    ),
   );
-  const calendarReady = Boolean((days ?? []).length && (slots ?? []).length);
+  const usesStandardWeek = trainer?.availability_mode === 'generally_available';
+  const calendarReady = Boolean(dayList.length && slotList.length);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <PageHeader
-        eyebrow="Trainer constraints"
-        title="Available teaching times"
-        description="Tick each session this trainer is available to teach."
+        eyebrow="Trainers"
+        title="Trainer availability"
+        description="Tick the sessions the trainer can teach."
+        context={
+          selectedPeriod ? (
+            <span className="text-xs font-medium text-text-muted xl:text-sm">
+              {selectedPeriod.name}
+            </span>
+          ) : undefined
+        }
       />
 
       {params.saved === '1' ? (
-        <div className="flex items-center gap-2 rounded-xl border border-success-border bg-success-surface px-3 py-2.5 text-sm font-semibold text-success">
+        <div className="flex items-center gap-2 rounded-xl border border-success-border bg-success-surface px-3 py-2.5 text-xs font-semibold text-success xl:text-sm">
           <CheckCircle2 className="size-4" aria-hidden="true" />
-          Teaching availability saved successfully.
+          Availability saved.
         </div>
       ) : null}
 
-      <form method="get" className="grid min-w-0 gap-3 rounded-2xl border border-border bg-surface p-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
-        <label className="text-sm font-medium">
-          Trainer
-          <select name="trainer" defaultValue={trainerId} className="mt-1 block h-10 w-full min-w-0 rounded-xl border border-border px-3">
-            {(trainers ?? []).map((trainer) => <option key={trainer.id} value={trainer.id}>{trainer.full_name}</option>)}
-          </select>
-        </label>
-        <label className="text-sm font-medium">
-          Academic Period
-          <select name="period" defaultValue={periodId} className="mt-1 block h-10 w-full min-w-0 rounded-xl border border-border px-3">
-            {selectablePeriods.map((period) => <option key={period.id} value={period.id}>{period.code} — {period.name} ({period.status === 'active' ? 'Active' : 'Planned'})</option>)}
-          </select>
-        </label>
-        <button type="submit" className="h-10 rounded-xl border border-border px-4 font-semibold">Load</button>
-      </form>
+      <Card className="p-3 xl:p-4">
+        <form
+          method="get"
+          className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end"
+        >
+          <label className="text-xs font-semibold text-text-primary xl:text-sm">
+            Trainer
+            <Select
+              name="trainer"
+              defaultValue={trainerId}
+              className="mt-1.5"
+            >
+              {trainerList.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.full_name}
+                </option>
+              ))}
+            </Select>
+          </label>
+
+          <label className="text-xs font-semibold text-text-primary xl:text-sm">
+            Academic Period
+            <Select
+              name="period"
+              defaultValue={periodId}
+              className="mt-1.5"
+            >
+              {selectablePeriods.map((period) => (
+                <option key={period.id} value={period.id}>
+                  {period.code} - {period.name}
+                  {period.status === 'active' ? ' (active)' : ''}
+                </option>
+              ))}
+            </Select>
+          </label>
+
+          <Button type="submit" variant="outline">
+            Load
+          </Button>
+        </form>
+      </Card>
 
       {!calendarReady ? (
-        <form action={initializeStandardCalendarAction} className="rounded-2xl border border-warning-border bg-warning-surface p-5">
-          <input type="hidden" name="academicPeriodId" value={periodId} />
-          <p className="font-semibold">Standard calendar not initialized</p>
-          <p className="mt-1 text-sm text-text-muted">Apply the unchanged institutional days and teaching sessions to this Academic Period.</p>
-          <button type="submit" className="mt-4 h-10 rounded-xl bg-primary px-4 font-semibold text-white">Initialize standard calendar</button>
-        </form>
+        <Card className="border-warning-border bg-warning-surface p-4">
+          <form action={initializeStandardCalendarAction}>
+            <input type="hidden" name="academicPeriodId" value={periodId} />
+            <p className="text-sm font-semibold text-text-primary">
+              Teaching calendar is not ready.
+            </p>
+            <Button type="submit" className="mt-3">
+              Initialize calendar
+            </Button>
+          </form>
+        </Card>
       ) : (
-        <form action={saveTrainerAvailabilityAction} className="rounded-2xl border border-border bg-surface p-5">
-          <input type="hidden" name="trainerId" value={trainerId} />
-          <input type="hidden" name="academicPeriodId" value={periodId} />
-          <input type="hidden" name="returnTo" value={params.returnTo ?? ''} />
-          <div className="mb-4 rounded-xl border border-border bg-surface-subtle px-3 py-2.5 text-sm text-text-secondary">
-            <span className="font-semibold">Checked:</span> available to teach · <span className="font-semibold">Unchecked:</span> unavailable or engaged
+        <Card className="p-4">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 className="text-sm font-semibold text-text-primary xl:text-base">
+                {trainer?.full_name ?? 'Trainer'}
+              </h2>
+              <p className="mt-0.5 text-[11px] text-text-muted xl:text-xs">
+                {usesStandardWeek
+                  ? 'Standard week - all teaching sessions available'
+                  : 'Custom availability - unchecked sessions are unavailable'}
+              </p>
+            </div>
+
+            {!usesStandardWeek ? (
+              <form action={resetTrainerAvailabilityAction}>
+                <input type="hidden" name="trainerId" value={trainerId} />
+                <input type="hidden" name="academicPeriodId" value={periodId} />
+                <Button type="submit" variant="outline" size="sm">
+                  Use standard week
+                </Button>
+              </form>
+            ) : null}
           </div>
-          <div className="w-full overflow-hidden rounded-xl border border-border">
-            <table className="w-full table-fixed text-sm">
-              <thead><tr><th className="break-words p-2 text-left sm:p-3">Day</th>{((slots ?? []) as Item[]).map((slot) => <th key={slot.id} className="break-words p-2 text-left sm:p-3">{slot.name}</th>)}</tr></thead>
-              <tbody>{((days ?? []) as Item[]).map((day) => (
-                <tr key={day.id} className="border-t border-border">
-                  <th className="p-3 text-left capitalize">{day.day_of_week}</th>
-                  {((slots ?? []) as Item[]).map((slot) => {
-                    const value = `${day.id}:${slot.id}`;
-                    return <td key={slot.id} className="break-words p-2 sm:p-3"><label className="flex min-w-0 flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-2"><input type="checkbox" name="availableSlot" value={value} defaultChecked={selected.has(value)} /> Available</label></td>;
-                  })}
-                </tr>
-              ))}</tbody>
-            </table>
-          </div>
-          <button type="submit" className="mt-4 h-10 rounded-xl bg-primary px-4 font-semibold text-white">Save teaching availability</button>
-          {params.returnTo ? <p className="mt-2 text-xs text-text-muted">After saving, you will return to teaching allocations.</p> : null}
-        </form>
+
+          <form action={saveTrainerAvailabilityAction}>
+            <input type="hidden" name="trainerId" value={trainerId} />
+            <input type="hidden" name="academicPeriodId" value={periodId} />
+            <input type="hidden" name="returnTo" value={params.returnTo ?? ''} />
+
+            <div className="overflow-x-auto rounded-xl border border-border">
+              <table className="w-full min-w-[620px] text-xs xl:text-sm">
+                <thead className="bg-surface-subtle text-text-secondary">
+                  <tr>
+                    <th className="px-3 py-2.5 text-left font-semibold">Day</th>
+                    {slotList.map((slot) => (
+                      <th
+                        key={slot.id}
+                        className="px-3 py-2.5 text-center font-semibold"
+                      >
+                        <div>{slot.name}</div>
+                        <div className="mt-0.5 text-[10px] font-normal text-text-muted xl:text-[11px]">
+                          {slot.starts_at.slice(0, 5)}-{slot.ends_at.slice(0, 5)}
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {dayList.map((day) => (
+                    <tr key={day.id} className="border-t border-border">
+                      <th className="px-3 py-3 text-left font-semibold capitalize text-text-primary">
+                        {day.day_of_week}
+                      </th>
+                      {slotList.map((slot) => {
+                        const value = `${day.id}:${slot.id}`;
+                        const checked = usesStandardWeek || selected.has(value);
+
+                        return (
+                          <td key={slot.id} className="px-3 py-3 text-center">
+                            <label className="inline-flex cursor-pointer items-center justify-center">
+                              <input
+                                type="checkbox"
+                                name="availableSlot"
+                                value={value}
+                                defaultChecked={checked}
+                                className="size-4 rounded border-border-strong"
+                              />
+                              <span className="sr-only">
+                                {day.day_of_week} {slot.name} available
+                              </span>
+                            </label>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mt-3 flex justify-end">
+              <Button type="submit">Save availability</Button>
+            </div>
+          </form>
+        </Card>
       )}
     </div>
   );

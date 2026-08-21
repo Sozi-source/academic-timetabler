@@ -1,6 +1,6 @@
 import {
   ArrowLeft,
-  BarChart3,
+  ClipboardCheck,
 } from 'lucide-react';
 import Link from 'next/link';
 import {
@@ -17,17 +17,17 @@ import {
   PageHeader,
 } from '@/components/ui/page-header';
 import {
-  formatAssessmentMetric,
-} from '@/features/assessment/analysis-engine';
-import {
-  getAssessmentAnalysisDetail,
-} from '@/features/assessment/analysis-queries';
+  getAssessmentPopulationWorkspace,
+} from '@/features/assessment/population-workspace';
 import {
   requireTrainerAccess,
 } from '@/features/auth/authorization';
 import {
   requireStaffAssessment,
 } from '@/features/staff-assessment/queries';
+import {
+  StaffAssessmentWorkflow,
+} from '@/features/staff-assessment/staff-assessment-workflow';
 
 interface PageProps {
   params: Promise<{
@@ -59,17 +59,16 @@ export default async function StaffAssessmentPage({
     notFound();
   }
 
-  const analysis =
-    await getAssessmentAnalysisDetail(
+  const population =
+    await getAssessmentPopulationWorkspace(
       assessmentId,
     );
 
-  if (!analysis) {
-    notFound();
-  }
+  const assessment =
+    access.assessment;
 
   const typeLabel =
-    analysis.assessmentType ===
+    assessment.type ===
     'cat'
       ? 'CAT'
       : 'Exam';
@@ -79,10 +78,10 @@ export default async function StaffAssessmentPage({
       <PageHeader
         eyebrow={`My Units · ${typeLabel}`}
         title={
-          analysis.unitName
+          access.allocation.unitName
         }
-        description={`${access.allocation.cohortName} · ${analysis.academicPeriodName}`}
-        icon={BarChart3}
+        description={`${access.allocation.cohortName} · ${access.allocation.academicPeriodName}`}
+        icon={ClipboardCheck}
         actions={
           <Link
             href={`/staff/units/${allocationId}`}
@@ -101,108 +100,118 @@ export default async function StaffAssessmentPage({
         <MetricCard
           label="Registered"
           value={String(
-            analysis.summary.registered,
+            population.registeredPopulation,
           )}
-          description="Locked assessment population"
-          icon={BarChart3}
-          status="Population"
+          description="Assessment population"
+          icon={ClipboardCheck}
+          status="Roster"
         />
 
         <MetricCard
-          label="Sat"
+          label="Expected"
           value={String(
-            analysis.summary.sat,
+            population.expectedToSit,
           )}
-          description="Numeric marks recorded"
-          icon={BarChart3}
-          status="Results"
+          description="Expected to sit"
+          icon={ClipboardCheck}
+          status="Attendance"
         />
 
         <MetricCard
           label="Absent"
           value={String(
-            analysis.summary.absent,
+            population.markedAbsent,
           )}
-          description={`${analysis.summary.missing} missing`}
-          icon={BarChart3}
+          description="Marked before download"
+          icon={ClipboardCheck}
           status="Attendance"
         />
 
         <MetricCard
-          label="Mean"
-          value={formatAssessmentMetric(
-            analysis.summary.mean,
-          )}
-          description={
-            analysis.summary.passRate ===
+          label="Maximum"
+          value={
+            assessment.maximumMark ===
             null
-              ? 'Pass rule not configured'
-              : `${formatAssessmentMetric(
-                  analysis.summary.passRate,
-                )}% pass rate`
+              ? '—'
+              : String(
+                  assessment.maximumMark,
+                )
           }
-          icon={BarChart3}
-          status="Performance"
+          description={
+            assessment.passMark ===
+            null
+              ? 'Rule not configured'
+              : `Pass ${assessment.passMark}`
+          }
+          icon={ClipboardCheck}
+          status="Rule"
         />
       </section>
 
-      <section className="space-y-1.5">
-        {analysis.students.map(
-          (
-            student,
-          ) => (
-            <div
-              key={
-                student.studentId
-              }
-              className="grid gap-2 rounded-lg border border-border bg-white px-3.5 py-3 sm:grid-cols-[minmax(0,1.4fr)_minmax(7rem,.7fr)_auto_minmax(4rem,.35fr)] sm:items-center"
-            >
-              <div className="min-w-0">
-                <p className="truncate text-xs font-semibold text-text-primary">
-                  {
-                    student.fullName
-                  }
-                </p>
+      <div className="flex flex-wrap gap-2">
+        <Badge variant="neutral">
+          {
+            assessment.workflowStatus
+          }
+        </Badge>
 
-                <p className="mt-0.5 text-[10px] text-text-muted">
-                  {
-                    student.admissionNumber
-                  }
-                </p>
-              </div>
+        {assessment.rosterLocked ? (
+          <Badge variant="success">
+            Roster locked
+          </Badge>
+        ) : null}
 
-              <p className="truncate text-[11px] text-text-secondary">
-                {
-                  student.cohortName
-                }
-              </p>
+        {assessment.published ? (
+          <Badge variant="success">
+            Published
+          </Badge>
+        ) : null}
+      </div>
 
-              <Badge
-                variant={
-                  student.status ===
-                  'sat'
-                    ? 'success'
-                    : 'neutral'
-                }
-              >
-                {student.status ===
-                'missing_mark'
-                  ? 'Missing'
-                  : student.status}
-              </Badge>
-
-              <p className="text-sm font-semibold text-text-primary sm:text-right">
-                {student.status ===
-                'absent'
-                  ? 'AB'
-                  : formatAssessmentMetric(
-                      student.mark,
-                    )}
-              </p>
-            </div>
-          ),
-        )}
-      </section>
+      <StaffAssessmentWorkflow
+        allocationId={
+          allocationId
+        }
+        assessmentId={
+          assessmentId
+        }
+        unitName={
+          access.allocation.unitName
+        }
+        assessmentType={
+          assessment.type
+        }
+        workflowStatus={
+          population.workflowStatus
+        }
+        populationLocked={
+          Boolean(
+            population.populationLockedAt,
+          )
+        }
+        maximumMark={
+          assessment.maximumMark
+        }
+        passMark={
+          assessment.passMark
+        }
+        students={
+          population.students.map(
+            (
+              student,
+            ) => ({
+              studentId:
+                student.studentId,
+              admissionNumber:
+                student.admissionNumber,
+              fullName:
+                student.fullName,
+              attendanceStatus:
+                student.attendanceStatus,
+            }),
+          )
+        }
+      />
     </div>
   );
 }

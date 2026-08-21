@@ -20,6 +20,12 @@ import {
 import {
   getStagedAssessmentMarkbook,
 } from '@/features/assessment/markbook-staging-query';
+import {
+  getAssessmentMarkbookCommitState,
+} from '@/features/assessment/markbook-commit';
+import {
+  CommitAssessmentResultsButton,
+} from '@/features/assessment/markbook-commit-control';
 
 interface PageProps {
   params: Promise<{
@@ -81,6 +87,16 @@ export default async function StagedAssessmentMarkbookPage({
 
     throw error;
   }
+
+  const commitState =
+    getAssessmentMarkbookCommitState({
+      status:
+        batch.status,
+      missingMarks:
+        batch.missingMarks,
+      totalRows:
+        batch.totalRows,
+    });
 
   const grouped =
     new Map<
@@ -144,8 +160,18 @@ export default async function StagedAssessmentMarkbookPage({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="success">
-              Ready
+            <Badge
+              variant={
+                batch.status ===
+                'committed'
+                  ? 'success'
+                  : 'neutral'
+              }
+            >
+              {batch.status ===
+              'committed'
+                ? 'Committed'
+                : 'Ready'}
             </Badge>
 
             <Badge variant="neutral">
@@ -171,6 +197,40 @@ export default async function StagedAssessmentMarkbookPage({
                 batch.missingMarks
               } missing
             </Badge>
+          </div>
+
+          <div className="flex flex-col items-start gap-1.5 lg:items-end">
+            {commitState.canCommit ? (
+              <CommitAssessmentResultsButton
+                batchId={
+                  batch.id
+                }
+                resultCount={
+                  batch.totalRows
+                }
+              />
+            ) : (
+              <Badge
+                variant={
+                  batch.status ===
+                  'committed'
+                    ? 'success'
+                    : 'neutral'
+                }
+              >
+                {
+                  commitState.label
+                }
+              </Badge>
+            )}
+
+            {commitState.message ? (
+              <p className="max-w-sm text-[10px] leading-4 text-text-muted lg:text-right">
+                {
+                  commitState.message
+                }
+              </p>
+            ) : null}
           </div>
         </div>
       </Card>
@@ -281,10 +341,9 @@ export default async function StagedAssessmentMarkbookPage({
       )}
 
       <p className="text-[11px] leading-5 text-text-muted">
-        No academic result has been
-        written yet. This batch is an
-        auditable staging record awaiting
-        final import.
+        {batch.status === 'committed'
+          ? 'Results are committed and the batch is retained as an immutable import audit.'
+          : 'No academic result has been written yet. This batch is an auditable staging record awaiting final import.'}
       </p>
     </div>
   );

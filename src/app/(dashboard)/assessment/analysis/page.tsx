@@ -1,73 +1,308 @@
-import { BarChart3 } from 'lucide-react';
+import type {
+  Metadata,
+} from 'next';
 import Link from 'next/link';
+import {
+  BarChart3,
+  CheckCircle2,
+  ClipboardCheck,
+  UsersRound,
+} from 'lucide-react';
 
-import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
-import { PageHeader } from '@/components/ui/page-header';
-import { getAssessments } from '@/features/assessment/queries';
-import { requireHodAccess } from '@/features/auth/authorization';
+import {
+  Badge,
+} from '@/components/ui/badge';
+import {
+  MetricCard,
+} from '@/components/ui/metric-card';
+import {
+  PageHeader,
+} from '@/components/ui/page-header';
+import {
+  requireHodAccess,
+} from '@/features/auth/authorization';
+import {
+  formatAssessmentMetric,
+} from '@/features/assessment/analysis-engine';
+import {
+  getAssessmentAnalysisBundles,
+} from '@/features/assessment/analysis-queries';
+
+export const metadata: Metadata = {
+  title:
+    'Assessment Analysis',
+  description:
+    'Review CAT and Exam participation and performance from committed assessment results.',
+};
+
+function typeLabel(
+  type:
+    | 'cat'
+    | 'exam',
+): string {
+  return type ===
+    'cat'
+    ? 'CAT'
+    : 'Exam';
+}
+
+function statusLabel(
+  value: string,
+): string {
+  return value
+    .replace(
+      /_/g,
+      ' ',
+    )
+    .replace(
+      /^./,
+      (character) =>
+        character.toUpperCase(),
+    );
+}
 
 export default async function AssessmentAnalysisPage() {
   await requireHodAccess();
-  const markbooks = await getAssessments();
-  const ready = markbooks.filter((assessment) => assessment.cat_marks_finalized_at || assessment.exam_marks_finalized_at);
+
+  const bundles =
+    await getAssessmentAnalysisBundles();
+
+  const totalRegistered =
+    bundles.reduce(
+      (
+        total,
+        bundle,
+      ) =>
+        total +
+        bundle.summary.registered,
+      0,
+    );
+
+  const totalSat =
+    bundles.reduce(
+      (
+        total,
+        bundle,
+      ) =>
+        total +
+        bundle.summary.sat,
+      0,
+    );
+
+  const totalAbsent =
+    bundles.reduce(
+      (
+        total,
+        bundle,
+      ) =>
+        total +
+        bundle.summary.absent,
+      0,
+    );
+
+  const analysed =
+    bundles.filter(
+      (bundle) =>
+        bundle.summary.sat >
+        0,
+    ).length;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="Assessment"
-        title="Analysis"
-        description="CAT and final exam performance from each unit markbook."
+        title="CAT & Exam analysis"
+        description="Participation and performance from committed assessment results."
         icon={BarChart3}
-        context={<Badge variant="neutral">{ready.length} ready</Badge>}
       />
 
-      <Card className="overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-left text-xs">
-            <thead className="bg-surface-subtle text-text-muted">
-              <tr>
-                <th className="px-4 py-2.5 font-semibold">Unit</th>
-                <th className="px-3 py-2.5 font-semibold">Period</th>
-                <th className="px-3 py-2.5 font-semibold">Population</th>
-                <th className="px-3 py-2.5 font-semibold">Available analysis</th>
-                <th className="px-3 py-2.5" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {markbooks.map((assessment) => {
-                const catReady = Boolean(assessment.cat_marks_finalized_at);
-                const examReady = Boolean(assessment.exam_marks_finalized_at);
-                const canAnalyse = catReady || examReady;
-                return (
-                  <tr key={assessment.id}>
-                    <td className="px-4 py-2.5">
-                      <p className="font-bold text-text-primary">{assessment.unit?.code ?? 'Unit'} · {assessment.unit?.name ?? 'Unit markbook'}</p>
-                      <p className="mt-0.5 text-[0.625rem] text-text-muted">Unit Markbook</p>
-                    </td>
-                    <td className="px-3 py-2.5 text-text-secondary">{assessment.academic_period?.name ?? '—'}</td>
-                    <td className="px-3 py-2.5 font-semibold text-text-primary">{assessment.population?.[0]?.count ?? 0}</td>
-                    <td className="px-3 py-2.5">
-                      <div className="flex flex-wrap gap-1.5">
-                        <Badge variant={catReady ? 'institutional' : 'neutral'}>{catReady ? 'CAT ready' : 'CAT pending'}</Badge>
-                        <Badge variant={examReady ? 'success' : 'neutral'}>{examReady ? 'Exam ready' : 'Exam pending'}</Badge>
-                      </div>
-                    </td>
-                    <td className="px-3 py-2.5 text-right">
-                      {canAnalyse ? (
-                        <Link href={`/assessment/analysis/${assessment.id}`} className="inline-flex h-8 items-center rounded-lg border border-border-strong bg-surface px-3 font-semibold text-text-secondary hover:border-primary hover:text-primary">Analyse</Link>
-                      ) : (
-                        <span className="text-[0.625rem] font-semibold text-text-muted">Marks pending</span>
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricCard
+          label="Assessment sets"
+          value={String(
+            bundles.length,
+          )}
+          description="Unit-level CAT and Exam groups"
+          icon={ClipboardCheck}
+          status="Total"
+        />
+
+        <MetricCard
+          label="Analysed"
+          value={String(
+            analysed,
+          )}
+          description="Assessment sets with numeric marks"
+          icon={BarChart3}
+          status="Results"
+        />
+
+        <MetricCard
+          label="Registered"
+          value={String(
+            totalRegistered,
+          )}
+          description="Locked assessment population"
+          icon={UsersRound}
+          status="Population"
+        />
+
+        <MetricCard
+          label="Sat"
+          value={String(
+            totalSat,
+          )}
+          description={`${totalAbsent} explicit absence${totalAbsent === 1 ? '' : 's'}`}
+          icon={CheckCircle2}
+          status="Participation"
+        />
+      </section>
+
+      {bundles.length ===
+      0 ? (
+        <section className="rounded-2xl border border-border bg-white px-5 py-12 text-center">
+          <p className="text-sm font-semibold text-text-primary">
+            No committed assessment
+            analysis yet
+          </p>
+
+          <p className="mx-auto mt-1 max-w-xl text-xs leading-5 text-text-muted">
+            CAT and Exam analysis appears
+            after validated markbooks are
+            committed.
+          </p>
+        </section>
+      ) : (
+        <section className="space-y-2">
+          {bundles.map(
+            (
+              bundle,
+            ) => (
+              <Link
+                key={
+                  [
+                    bundle.academicPeriodId,
+                    bundle.unitId,
+                    bundle.assessmentType,
+                  ].join(
+                    ':',
+                  )
+                }
+                href={`/assessment/analysis/${bundle.rootAssessmentId}`}
+                className="block rounded-xl border border-border bg-white px-4 py-3 transition hover:border-border-strong hover:bg-surface-subtle/40"
+              >
+                <div className="grid gap-3 lg:grid-cols-[minmax(0,1.6fr)_minmax(8rem,.7fr)_repeat(4,minmax(5rem,.55fr))] lg:items-center">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="truncate text-sm font-semibold text-text-primary">
+                        {
+                          bundle.unitName
+                        }
+                      </p>
+
+                      <Badge
+                        variant="neutral"
+                      >
+                        {typeLabel(
+                          bundle.assessmentType,
+                        )}
+                      </Badge>
+                    </div>
+
+                    <p className="mt-1 text-[11px] text-text-muted">
+                      {
+                        bundle.academicPeriodName
+                      }
+                      {' Â· '}
+                      {
+                        bundle.cohortCount
+                      } cohort{
+                        bundle.cohortCount ===
+                        1
+                          ? ''
+                          : 's'
+                      }
+                      {' Â· '}
+                      {statusLabel(
+                        bundle.status,
                       )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-        {markbooks.length === 0 ? <div className="px-4 py-8 text-center text-xs text-text-muted">No unit markbooks configured.</div> : null}
-      </Card>
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-text-muted">
+                      Registered
+                    </p>
+
+                    <p className="mt-0.5 text-sm font-semibold text-text-primary">
+                      {
+                        bundle.summary.registered
+                      }
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-text-muted">
+                      Sat
+                    </p>
+
+                    <p className="mt-0.5 text-sm font-semibold text-text-primary">
+                      {
+                        bundle.summary.sat
+                      }
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-text-muted">
+                      Absent
+                    </p>
+
+                    <p className="mt-0.5 text-sm font-semibold text-text-primary">
+                      {
+                        bundle.summary.absent
+                      }
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-text-muted">
+                      Missing
+                    </p>
+
+                    <p className="mt-0.5 text-sm font-semibold text-text-primary">
+                      {
+                        bundle.summary.missing
+                      }
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-text-muted">
+                      Mean
+                    </p>
+
+                    <p className="mt-0.5 text-sm font-semibold text-text-primary">
+                      {formatAssessmentMetric(
+                        bundle.summary.mean,
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            ),
+          )}
+        </section>
+      )}
+
+      <p className="text-[11px] leading-5 text-text-muted">
+        Means use numeric marks only.
+        Explicit absences and unresolved
+        marks are excluded. Pass-rate
+        analysis is intentionally not
+        calculated until assessment
+        thresholds are configured.
+      </p>
     </div>
   );
 }

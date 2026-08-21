@@ -81,22 +81,29 @@ function formatDate(value: string) {
 }
 
 const columns: ColumnDef<Cohort>[] = [
-  {
+    {
     accessorKey: 'name',
     header: 'Cohort',
+    size: 190,
+    minSize: 160,
     cell: ({ row }) => (
-      <div className="min-w-0 max-w-full">
-        <p className="truncate whitespace-nowrap text-sm font-semibold leading-5 text-text-primary sm:text-[15px]">
+      <div className="w-max min-w-[10rem] sm:min-w-[10.5rem] lg:min-w-[11.5rem] xl:min-w-[12.5rem] 2xl:min-w-[13.5rem]">
+        <p
+          className="whitespace-nowrap text-[10.5px] font-semibold leading-4 text-text-primary sm:text-[11px] md:text-xs lg:text-[12.5px] xl:text-[13px] 2xl:text-sm"
+          title={row.original.name}
+        >
           {row.original.name}
         </p>
 
-        <p className="mt-1 text-xs text-text-muted">
+        <p
+          className="mt-0.5 whitespace-nowrap text-[9.5px] leading-4 text-text-muted sm:text-[10px] md:text-[11px] lg:text-xs"
+          title={row.original.code}
+        >
           {row.original.code}
         </p>
       </div>
     ),
-  },
-  {
+  },{
     id: 'programme',
     accessorFn: (row) =>
       row.programme?.code ?? '',

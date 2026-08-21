@@ -199,10 +199,20 @@ begin
     is_primary = true,
     updated_at = now()
   where candidate.id in (
-    select min(p.id)
+    select distinct on (p.teaching_offering_id)
+      p.id
     from public.teaching_offering_participants p
-    group by p.teaching_offering_id
-    having bool_or(p.is_primary) = false
+    where not exists (
+      select 1
+      from public.teaching_offering_participants primary_participant
+      where primary_participant.teaching_offering_id =
+            p.teaching_offering_id
+        and primary_participant.is_primary = true
+    )
+    order by
+      p.teaching_offering_id,
+      p.created_at,
+      p.id
   );
 
   -- Unit offerings
@@ -513,6 +523,258 @@ begin
     using p_keeper;
   end if;
 
+  -- ----------------------------------------------------------
+  -- Student admission cohort references.
+  --
+  -- Students admitted under the duplicate JAN/MAR cohort retain
+  -- their records and are reassigned to the canonical cohort UUID.
+  -- ----------------------------------------------------------
+
+  if to_regclass('public.students') is not null
+     and exists (
+       select 1
+       from information_schema.columns
+       where table_schema = 'public'
+         and table_name = 'students'
+         and column_name = 'admission_cohort_id'
+     )
+  then
+    update public.students
+    set admission_cohort_id = p_keeper
+    where admission_cohort_id = p_duplicate;
+  end if;
+
+  -- ----------------------------------------------------------
+  -- Remaining academic-history cohort references.
+  --
+  -- These rows are retained. Only their cohort reference is
+  -- redirected to the canonical JAN/MAR cohort UUID.
+  -- ----------------------------------------------------------
+
+  declare
+    cohort_reference record;
+  begin
+    for cohort_reference in
+      select *
+      from (
+        values
+          ('assessment_events', 'cohort_id'),
+          ('assessment_mark_import_rows', 'cohort_id'),
+          ('assessment_population', 'cohort_id'),
+          ('assessment_results', 'cohort_id'),
+          ('student_academic_period_enrolments', 'cohort_id'),
+          ('student_cohort_assignments', 'cohort_id'),
+          ('student_lifecycle_events', 'from_cohort_id'),
+          ('student_lifecycle_events', 'to_cohort_id'),
+          ('student_stage_progression_events', 'cohort_id'),
+          ('student_unit_registration_submissions', 'cohort_id'),
+          ('student_unit_registrations', 'cohort_id'),
+          ('students', 'current_cohort_id')
+      ) as refs(table_name, column_name)
+    loop
+      if to_regclass(
+           format(
+             'public.%I',
+             cohort_reference.table_name
+           )
+         ) is not null
+         and exists (
+           select 1
+           from information_schema.columns c
+           where c.table_schema = 'public'
+             and c.table_name =
+                 cohort_reference.table_name
+             and c.column_name =
+                 cohort_reference.column_name
+         )
+      then
+        execute format(
+          'update public.%I set %I = $1 where %I = $2',
+          cohort_reference.table_name,
+          cohort_reference.column_name,
+          cohort_reference.column_name
+        )
+        using p_keeper, p_duplicate;
+      end if;
+    end loop;
+  end;
+  -- Verify the known direct references were fully redirected.
+  declare
+    remaining_reference record;
+    remaining_count bigint;
+  begin
+    for remaining_reference in
+      select *
+      from (
+        values
+          ('students', 'admission_cohort_id'),
+          ('students', 'current_cohort_id'),
+          ('assessment_events', 'cohort_id'),
+          ('assessment_mark_import_rows', 'cohort_id'),
+          ('assessment_population', 'cohort_id'),
+          ('assessment_results', 'cohort_id'),
+          ('student_academic_period_enrolments', 'cohort_id'),
+          ('student_cohort_assignments', 'cohort_id'),
+          ('student_lifecycle_events', 'from_cohort_id'),
+          ('student_lifecycle_events', 'to_cohort_id'),
+          ('student_stage_progression_events', 'cohort_id'),
+          ('student_unit_registration_submissions', 'cohort_id'),
+          ('student_unit_registrations', 'cohort_id'),
+          ('unit_offerings', 'cohort_id'),
+          ('teaching_allocations', 'cohort_id'),
+          ('scheduled_sessions', 'cohort_id'),
+          ('teaching_offering_participants', 'cohort_id')
+      ) as refs(table_name, column_name)
+    loop
+      if to_regclass(
+           format(
+             'public.%I',
+             remaining_reference.table_name
+           )
+         ) is not null
+         and exists (
+           select 1
+           from information_schema.columns c
+           where c.table_schema = 'public'
+             and c.table_name =
+                 remaining_reference.table_name
+             and c.column_name =
+                 remaining_reference.column_name
+         )
+      then
+        execute format(
+          'select count(*) from public.%I where %I = $1',
+          remaining_reference.table_name,
+          remaining_reference.column_name
+        )
+        into remaining_count
+        using p_duplicate;
+
+        if remaining_count > 0 then
+          raise exception
+            'Cohort merge left % reference(s) in %.%',
+            remaining_count,
+            remaining_reference.table_name,
+            remaining_reference.column_name;
+        end if;
+      end if;
+    end loop;
+  end;
+  -- ----------------------------------------------------------
+  -- Dependency audit before deleting the duplicate cohort.
+  --
+  -- Every direct foreign key to public.cohorts(id) must either
+  -- have been explicitly migrated above or be listed here.
+  -- This reports ALL unknown FK dependencies in one error rather
+  -- than discovering them one at a time through DELETE failures.
+  -- ----------------------------------------------------------
+
+  declare
+    unhandled_cohort_fks text;
+  begin
+    select string_agg(
+      format(
+        '%I.%I(%I) [%s]',
+        source_schema.nspname,
+        source_table.relname,
+        source_column.attname,
+        fk.conname
+      ),
+      ', '
+      order by
+        source_schema.nspname,
+        source_table.relname,
+        source_column.attname
+    )
+    into unhandled_cohort_fks
+    from pg_constraint fk
+    join pg_class source_table
+      on source_table.oid = fk.conrelid
+    join pg_namespace source_schema
+      on source_schema.oid = source_table.relnamespace
+    join pg_class target_table
+      on target_table.oid = fk.confrelid
+    join pg_namespace target_schema
+      on target_schema.oid = target_table.relnamespace
+    join unnest(fk.conkey) with ordinality
+      as source_key(attnum, ordinality)
+      on true
+    join unnest(fk.confkey) with ordinality
+      as target_key(attnum, ordinality)
+      on target_key.ordinality = source_key.ordinality
+    join pg_attribute source_column
+      on source_column.attrelid = source_table.oid
+     and source_column.attnum = source_key.attnum
+    join pg_attribute target_column
+      on target_column.attrelid = target_table.oid
+     and target_column.attnum = target_key.attnum
+    where fk.contype = 'f'
+      and target_schema.nspname = 'public'
+      and target_table.relname = 'cohorts'
+      and target_column.attname = 'id'
+      and not (
+        source_schema.nspname = 'public'
+        and (
+          (source_table.relname = 'unit_offerings'
+             and source_column.attname = 'cohort_id')
+          or
+          (source_table.relname = 'teaching_allocations'
+             and source_column.attname = 'cohort_id')
+          or
+          (source_table.relname = 'scheduled_sessions'
+             and source_column.attname = 'cohort_id')
+          or
+          (source_table.relname = 'teaching_offering_participants'
+             and source_column.attname = 'cohort_id')
+          or
+          (source_table.relname = 'students'
+             and source_column.attname in (
+               'admission_cohort_id',
+               'current_cohort_id'
+             ))
+          or
+          (source_table.relname = 'assessment_events'
+             and source_column.attname = 'cohort_id')
+          or
+          (source_table.relname = 'assessment_mark_import_rows'
+             and source_column.attname = 'cohort_id')
+          or
+          (source_table.relname = 'assessment_population'
+             and source_column.attname = 'cohort_id')
+          or
+          (source_table.relname = 'assessment_results'
+             and source_column.attname = 'cohort_id')
+          or
+          (source_table.relname = 'student_academic_period_enrolments'
+             and source_column.attname = 'cohort_id')
+          or
+          (source_table.relname = 'student_cohort_assignments'
+             and source_column.attname = 'cohort_id')
+          or
+          (source_table.relname = 'student_lifecycle_events'
+             and source_column.attname in (
+               'from_cohort_id',
+               'to_cohort_id'
+             ))
+          or
+          (source_table.relname = 'student_stage_progression_events'
+             and source_column.attname = 'cohort_id')
+          or
+          (source_table.relname = 'student_unit_registration_submissions'
+             and source_column.attname = 'cohort_id')
+          or
+          (source_table.relname = 'student_unit_registrations'
+             and source_column.attname = 'cohort_id')
+        )
+      );
+
+    if unhandled_cohort_fks is not null then
+      raise exception
+        'Unhandled direct cohort foreign keys: %',
+        unhandled_cohort_fks;
+    end if;
+  end;
+
   delete from public.cohorts
   where id = p_duplicate;
 end;
@@ -753,6 +1015,11 @@ begin
   where c.programme_id = new.programme_id
     and extract(year from c.intake_date) = cohort_year
     and c.id <> coalesce(new.id, '00000000-0000-0000-0000-000000000000'::uuid)
+    and (
+      extract(month from c.intake_date) in (1, 3)
+      or lower(trim(c.code)) = lower(trim(canonical_code))
+      or lower(trim(c.name)) = lower(trim(canonical_name))
+    )
   order by
     case
       when lower(trim(c.code)) = lower(trim(canonical_code)) then 0

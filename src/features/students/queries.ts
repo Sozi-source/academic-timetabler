@@ -28,7 +28,7 @@ const studentSelection = `
   details_verified_at,
   programme:programmes!students_programme_id_fkey(id, code, name),
   admission_cohort:cohorts!students_admission_cohort_id_fkey(id, code, name),
-  current_cohort:cohorts!students_current_cohort_id_fkey(id, code, name, current_academic_period_number),
+  current_cohort:cohorts!students_current_cohort_id_fkey(id, code, name, current_academic_period_number)
 `;
 
 export const getStudentSummary = cache(async (): Promise<StudentSummary> => {

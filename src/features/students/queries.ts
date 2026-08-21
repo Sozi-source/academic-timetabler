@@ -16,6 +16,7 @@ const studentSelection = `
   full_name,
   lifecycle_status,
   academic_phase,
+  current_stage_id,
   completion_date,
   graduation_date,
   admission_date,
@@ -27,7 +28,8 @@ const studentSelection = `
   details_verified_at,
   programme:programmes!students_programme_id_fkey(id, code, name),
   admission_cohort:cohorts!students_admission_cohort_id_fkey(id, code, name),
-  current_cohort:cohorts!students_current_cohort_id_fkey(id, code, name)
+  current_cohort:cohorts!students_current_cohort_id_fkey(id, code, name, current_academic_period_number),
+  current_stage:programme_stages!students_current_stage_id_fkey(id, code, name, sequence_number),
 `;
 
 export const getStudentSummary = cache(async (): Promise<StudentSummary> => {

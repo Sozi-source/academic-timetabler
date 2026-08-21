@@ -1,3 +1,4 @@
+import { StudentStatusStage } from '@/features/students/student-status-stage';
 import { ChevronRight, Database, Download, FileUp, UsersRound } from 'lucide-react';
 import Link from 'next/link';
 
@@ -57,7 +58,9 @@ export default async function StudentRegistryPage({ searchParams }: { searchPara
                 </div>
                 <div>
                   <p className="font-medium text-text-primary">Current: {student.current_cohort?.name ?? 'Not assigned'}</p>
-                  <p className="mt-0.5 text-text-muted">{student.lifecycle_status === 'active' ? student.academic_phase.replaceAll('_', ' ') : student.lifecycle_status.replaceAll('_', ' ')}</p>
+                  <p className="mt-0.5 text-text-muted">
+          <StudentStatusStage student={student} />
+        </p>
                 </div>
                 <Badge variant={student.lifecycle_status === 'active' ? 'success' : 'neutral'}>{student.lifecycle_status.replaceAll('_', ' ')}</Badge>
                 <ChevronRight className="size-3.5 text-text-muted" />

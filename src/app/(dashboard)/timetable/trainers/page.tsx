@@ -62,6 +62,15 @@ export default async function TrainersPage() {
         }
       />
 
+      <div className="flex justify-end">
+        <Link
+          href="/timetable/trainers/access"
+          className="inline-flex h-9 items-center justify-center rounded-lg border border-border-strong bg-white px-3.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
+        >
+          Staff access
+        </Link>
+      </div>
+
       <TrainerTable trainers={trainers} />
     </div>
   );

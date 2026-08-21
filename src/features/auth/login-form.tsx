@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import {
   AlertCircle,
   LoaderCircle,
@@ -166,6 +168,16 @@ export function LoginForm({
           </>
         )}
       </button>
+      <p className="text-center text-[11px] text-text-muted">
+        Trainer without an account?{' '}
+        <Link
+          href="/staff/register"
+          className="font-semibold text-header-blue hover:underline"
+        >
+          Create staff account
+        </Link>
+      </p>
+
     </form>
   );
 }

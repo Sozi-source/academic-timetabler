@@ -5,10 +5,21 @@ import type {
 export function getHomePathForRole(
   role: AppRole,
 ): string {
-  return role ===
+  if (
+    role ===
     'trainer'
-    ? '/staff'
-    : '/dashboard';
+  ) {
+    return '/staff';
+  }
+
+  if (
+    role ===
+    'pending'
+  ) {
+    return '/unauthorized';
+  }
+
+  return '/dashboard';
 }
 
 export function canUsePostLoginPath(
@@ -16,6 +27,8 @@ export function canUsePostLoginPath(
   path: string | null | undefined,
 ): boolean {
   if (
+    role ===
+    'pending' ||
     !path ||
     !path.startsWith(
       '/',

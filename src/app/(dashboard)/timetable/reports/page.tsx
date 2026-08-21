@@ -35,8 +35,10 @@ export default async function TimetableReportsPage({
   searchParams: Promise<{ academicPeriodId?: string; report?: string }>;
 }) {
   await requireHodAccess();
-  const periods = (await getAcademicPeriods()).filter((period) =>
-    ['active', 'planned', 'archived'].includes(period.status),
+  const periods = (await getAcademicPeriods()).filter(
+    (period) =>
+      period.academicYear.status === 'active' &&
+      ['active', 'planned', 'closed'].includes(period.status),
   );
   const params = await searchParams;
   const selectedId = params.academicPeriodId

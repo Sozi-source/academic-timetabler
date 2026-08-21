@@ -74,7 +74,9 @@ export default async function TimetableCalendarPage({
   const configurablePeriods =
     academicPeriods.filter(
       (academicPeriod) =>
-        academicPeriod.status !== 'archived',
+        academicPeriod.academicYear.status === 'active' &&
+        (academicPeriod.status === 'active' ||
+          academicPeriod.status === 'planned'),
     );
 
   const selectedPeriod =

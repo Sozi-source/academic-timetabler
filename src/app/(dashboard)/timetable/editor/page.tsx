@@ -24,7 +24,11 @@ export default async function TimetableEditorPage({
   searchParams: Promise<{ academicPeriodId?: string }>;
 }) {
   await requireHodAccess();
-  const periods = (await getAcademicPeriods()).filter((period) => period.status === 'active' || period.status === 'planned');
+  const periods = (await getAcademicPeriods()).filter(
+    (period) =>
+      period.academicYear.status === 'active' &&
+      (period.status === 'active' || period.status === 'planned'),
+  );
   const params = await searchParams;
   const selectedId = params.academicPeriodId ?? periods.find((period) => period.status === 'active')?.id ?? periods[0]?.id ?? null;
   const data = selectedId ? await getTimetableEditorData(selectedId) : null;

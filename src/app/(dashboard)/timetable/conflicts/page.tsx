@@ -26,7 +26,9 @@ export default async function TimetableConflictsPage({
   await requireHodAccess();
 
   const periods = (await getAcademicPeriods()).filter(
-    (period) => period.status === 'active' || period.status === 'planned',
+    (period) =>
+      period.academicYear.status === 'active' &&
+      (period.status === 'active' || period.status === 'planned'),
   );
   const params = await searchParams;
   const selectedId =

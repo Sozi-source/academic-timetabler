@@ -40,11 +40,14 @@ export default async function TimetableGeneratorPage() {
     await getAcademicPeriods();
 
   const selectablePeriods =
-    prioritizeActiveAcademicPeriods(academicPeriods.filter(
-      (period) =>
-        period.status === 'planned' ||
-        period.status === 'active',
-    ));
+    prioritizeActiveAcademicPeriods(
+      academicPeriods.filter(
+        (period) =>
+          period.academicYear.status === 'active' &&
+          (period.status === 'planned' ||
+            period.status === 'active'),
+      ),
+    );
 
   const activePeriod =
     selectablePeriods.find(

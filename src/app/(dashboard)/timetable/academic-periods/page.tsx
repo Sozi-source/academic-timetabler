@@ -47,7 +47,7 @@ export default async function AcademicPeriodsPage() {
   const availableAcademicYears =
     academicYears.filter(
       (academicYear) =>
-        academicYear.status !== 'archived',
+        academicYear.status === 'active',
     );
 
   const activePeriod =

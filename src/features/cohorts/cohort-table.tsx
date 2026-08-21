@@ -86,7 +86,7 @@ const columns: ColumnDef<Cohort>[] = [
     header: 'Cohort',
     cell: ({ row }) => (
       <div className="min-w-0 max-w-full">
-        <p className="font-semibold text-text-primary">
+        <p className="truncate whitespace-nowrap text-sm font-semibold leading-5 text-text-primary sm:text-[15px]">
           {row.original.name}
         </p>
 

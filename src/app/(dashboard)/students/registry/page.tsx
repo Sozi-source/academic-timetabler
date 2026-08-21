@@ -61,7 +61,6 @@ export default async function StudentRegistryPage({ searchParams }: { searchPara
                 </div>
                 <div>
                   <p className="font-medium text-text-primary">{student.programme?.code ?? 'Programme unavailable'}</p>
-                  <p className="mt-0.5 text-text-muted">Admission: {student.admission_cohort?.name ?? '—'}</p>
                 </div>
                 <div>
                   <p className="font-medium text-text-primary">{student.current_cohort?.name ?? 'Not assigned'}</p>

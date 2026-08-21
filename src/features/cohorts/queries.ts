@@ -2,6 +2,8 @@ import { cache } from 'react';
 
 import { createClient } from '@/lib/supabase/server';
 
+import { getEffectiveCohortLifecycle } from './lifecycle';
+
 import type {
   Cohort,
   CohortProgrammeSummary,
@@ -72,6 +74,14 @@ function mapProgramme(
 function mapCohort(
   row: CohortRow,
 ): Cohort {
+  const lifecycle = getEffectiveCohortLifecycle({
+    status: row.status,
+    intakeDate: row.intake_date,
+    expectedCompletionDate:
+      row.expected_completion_date,
+    isTimetableAvailable:
+      row.is_timetable_available,
+  });
   return {
     id: row.id,
     programmeId: row.programme_id,
@@ -84,9 +94,9 @@ function mapCohort(
       row.current_academic_period_number,
     plannedSize: row.planned_size,
     actualSize: row.actual_size,
-    status: row.status,
+    status: lifecycle.status,
     isTimetableAvailable:
-      row.is_timetable_available,
+      lifecycle.isTimetableAvailable,
     notes: row.notes,
     createdBy: row.created_by,
     updatedBy: row.updated_by,
@@ -212,6 +222,10 @@ export const getTimetableAvailableCohorts =
 
       return (
         (data ?? []) as CohortRow[]
-      ).map(mapCohort);
+      ).map(mapCohort).filter(
+        (cohort) =>
+          cohort.status === 'active' &&
+          cohort.isTimetableAvailable,
+      );
     },
   );

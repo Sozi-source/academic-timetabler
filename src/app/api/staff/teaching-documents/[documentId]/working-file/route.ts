@@ -9,11 +9,10 @@ import {
   requireTrainerAccess,
 } from '@/features/auth/authorization';
 import {
-  teachingDocumentKinds,
-  type TeachingDocumentType,
+  teachingTemplateMimeType,
+  validateTeachingDocumentWorkingFile,
 } from '@/features/teaching-documents/domain';
 import {
-  readVerifiedTeachingDocumentStorageObject,
   removeTeachingDocumentStorageObject,
   uploadTeachingDocumentRevision,
 } from '@/features/teaching-documents/storage';
@@ -24,52 +23,47 @@ import {
   createClient,
 } from '@/lib/supabase/server';
 
-interface RequestPayload {
-  allocationId?: unknown;
-  documentType?: unknown;
-}
-
-function isDocumentType(
-  value: unknown,
-): value is TeachingDocumentType {
-  return (
-    typeof value ===
-      'string' &&
-    teachingDocumentKinds.some(
-      (item) =>
-        item.value ===
-        value,
-    )
-  );
-}
+export const runtime =
+  'nodejs';
 
 export async function POST(
   request:
     Request,
+  {
+    params,
+  }: {
+    params:
+      Promise<{
+        documentId:
+          string;
+      }>;
+  },
 ) {
   await requireTrainerAccess();
 
-  const payload =
-    await request
-      .json()
-      .catch(
-        () => null,
-      ) as
-        | RequestPayload
-        | null;
+  const {
+    documentId,
+  } =
+    await params;
+
+  const formData =
+    await request.formData();
+
+  const file =
+    formData.get(
+      'file',
+    );
 
   if (
-    !payload ||
-    typeof payload.allocationId !==
-      'string' ||
-    !isDocumentType(
-      payload.documentType,
+    !(
+      file instanceof
+      File
     )
   ) {
     return NextResponse.json(
       {
         message:
-          'A valid Teaching Allocation and document type are required.',
+          'Choose the completed working file.',
       },
       {
         status:
@@ -86,64 +80,6 @@ export async function POST(
 
   const {
     data:
-      createResult,
-    error:
-      createError,
-  } =
-    await supabase.rpc(
-      'create_teaching_document_record',
-      {
-        target_allocation_id:
-          payload.allocationId,
-        target_document_type:
-          payload.documentType,
-      },
-    );
-
-  if (
-    createError
-  ) {
-    return NextResponse.json(
-      {
-        message:
-          createError.message,
-      },
-      {
-        status:
-          createError.code ===
-          '42501'
-            ? 403
-            : 409,
-      },
-    );
-  }
-
-  const documentId =
-    typeof createResult ===
-      'object' &&
-    createResult &&
-    'id' in
-      createResult &&
-    typeof createResult.id ===
-      'string'
-      ? createResult.id
-      : null;
-
-  if (!documentId) {
-    return NextResponse.json(
-      {
-        message:
-          'Teaching-document record could not be resolved.',
-      },
-      {
-        status:
-          409,
-      },
-    );
-  }
-
-  const {
-    data:
       document,
     error:
       documentError,
@@ -153,7 +89,7 @@ export async function POST(
         'teaching_documents',
       )
       .select(
-        'id, status, template_id, storage_path',
+        'id, status, template_id',
       )
       .eq(
         'id',
@@ -168,7 +104,7 @@ export async function POST(
     return NextResponse.json(
       {
         message:
-          'Teaching-document record is outside your access.',
+          'Teaching document is outside your access.',
       },
       {
         status:
@@ -179,15 +115,20 @@ export async function POST(
 
   if (
     document.status !==
-      'draft' ||
-    document.storage_path
+      'generated' &&
+    document.status !==
+      'returned'
   ) {
-    return NextResponse.json({
-      success:
-        true,
-      document:
-        createResult,
-    });
+    return NextResponse.json(
+      {
+        message:
+          'This teaching document is not open for editing.',
+      },
+      {
+        status:
+          409,
+      },
+    );
   }
 
   const admin =
@@ -204,7 +145,7 @@ export async function POST(
         'teaching_document_templates',
       )
       .select(
-        'storage_bucket, storage_path, original_filename, mime_type, sha256',
+        'mime_type',
       )
       .eq(
         'id',
@@ -214,16 +155,12 @@ export async function POST(
 
   if (
     templateError ||
-    !template ||
-    !template.storage_path ||
-    !template.original_filename ||
-    !template.mime_type ||
-    !template.sha256
+    !template?.mime_type
   ) {
     return NextResponse.json(
       {
         message:
-          'The exact institutional template file is unavailable.',
+          'The source institutional template could not be resolved.',
       },
       {
         status:
@@ -231,6 +168,59 @@ export async function POST(
       },
     );
   }
+
+  const validationError =
+    validateTeachingDocumentWorkingFile({
+      fileName:
+        file.name,
+      mimeType:
+        file.type ||
+        null,
+      sizeBytes:
+        file.size,
+      templateMimeType:
+        template.mime_type,
+    });
+
+  if (
+    validationError
+  ) {
+    return NextResponse.json(
+      {
+        message:
+          validationError,
+      },
+      {
+        status:
+          400,
+      },
+    );
+  }
+
+  const canonicalMime =
+    teachingTemplateMimeType(
+      file.name,
+      file.type ||
+      null,
+    );
+
+  if (!canonicalMime) {
+    return NextResponse.json(
+      {
+        message:
+          'Unsupported working file.',
+      },
+      {
+        status:
+          400,
+      },
+    );
+  }
+
+  const bytes =
+    new Uint8Array(
+      await file.arrayBuffer(),
+    );
 
   let stored:
     Awaited<
@@ -242,37 +232,19 @@ export async function POST(
       null;
 
   try {
-    const templateBuffer =
-      await readVerifiedTeachingDocumentStorageObject({
-        storageBucket:
-          template.storage_bucket,
-        storagePath:
-          template.storage_path,
-        expectedSha256:
-          template.sha256,
-      });
-
-    const templateBytes =
-      new Uint8Array(
-        templateBuffer,
-      );
-
     stored =
       await uploadTeachingDocumentRevision({
         documentId,
         fileName:
-          template.original_filename,
+          file.name,
         mimeType:
-          template.mime_type,
-        bytes:
-          templateBytes,
+          canonicalMime,
+        bytes,
       });
 
     const {
-      data:
-        revisionResult,
-      error:
-        revisionError,
+      data,
+      error,
     } =
       await supabase.rpc(
         'record_teaching_document_revision',
@@ -280,13 +252,13 @@ export async function POST(
           target_document_id:
             documentId,
           target_source:
-            'template_copy',
+            'trainer_upload',
           target_storage_bucket:
             stored.storageBucket,
           target_storage_path:
             stored.storagePath,
           target_original_filename:
-            template.original_filename,
+            file.name,
           target_mime_type:
             stored.mimeType,
           target_file_size_bytes:
@@ -296,9 +268,7 @@ export async function POST(
         },
       );
 
-    if (
-      revisionError
-    ) {
+    if (error) {
       await removeTeachingDocumentStorageObject({
         storageBucket:
           stored.storageBucket,
@@ -309,11 +279,11 @@ export async function POST(
       return NextResponse.json(
         {
           message:
-            revisionError.message,
+            error.message,
         },
         {
           status:
-            revisionError.code ===
+            error.code ===
             '42501'
               ? 403
               : 409,
@@ -324,10 +294,8 @@ export async function POST(
     return NextResponse.json({
       success:
         true,
-      document:
-        createResult,
       revision:
-        revisionResult,
+        data,
     });
   } catch (
     error
@@ -347,7 +315,7 @@ export async function POST(
           error instanceof
           Error
             ? error.message
-            : 'Teaching-document working copy could not be prepared.',
+            : 'Working file could not be uploaded.',
       },
       {
         status:

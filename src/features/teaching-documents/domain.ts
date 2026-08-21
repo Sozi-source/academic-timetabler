@@ -40,6 +40,7 @@ export type TeachingDocumentStatus =
   | 'draft'
   | 'generated'
   | 'submitted'
+  | 'returned'
   | 'approved'
   | 'archived';
 
@@ -47,6 +48,10 @@ export type TeachingDocumentTemplateStatus =
   | 'draft'
   | 'active'
   | 'retired';
+
+export type TeachingDocumentReviewDecision =
+  | 'approved'
+  | 'returned';
 
 export const teachingDocumentStorageBucket =
   'teaching-documents-private';
@@ -93,6 +98,13 @@ export function teachingDocumentLabel(
 export function teachingDocumentStatusLabel(
   status: TeachingDocumentStatus,
 ): string {
+  if (
+    status ===
+    'generated'
+  ) {
+    return 'In progress';
+  }
+
   return status
     .replaceAll(
       '_',
@@ -115,6 +127,46 @@ export function teachingTemplateStatusLabel(
       (value) =>
         value.toUpperCase(),
     );
+}
+
+export function teachingDocumentStatusVariant(
+  status:
+    TeachingDocumentStatus,
+):
+  | 'neutral'
+  | 'success'
+  | 'warning'
+  | 'info'
+  | 'institutional' {
+  if (
+    status ===
+    'approved'
+  ) {
+    return 'success';
+  }
+
+  if (
+    status ===
+    'returned'
+  ) {
+    return 'warning';
+  }
+
+  if (
+    status ===
+    'submitted'
+  ) {
+    return 'info';
+  }
+
+  if (
+    status ===
+    'generated'
+  ) {
+    return 'institutional';
+  }
+
+  return 'neutral';
 }
 
 export function isTeachingDocumentReady(
@@ -221,6 +273,79 @@ export function validateTeachingTemplateFile({
   }
 
   return null;
+}
+
+export function validateTeachingDocumentWorkingFile({
+  fileName,
+  mimeType,
+  sizeBytes,
+  templateMimeType,
+}: {
+  fileName:
+    string;
+  mimeType:
+    string | null;
+  sizeBytes:
+    number;
+  templateMimeType:
+    string | null;
+}): string | null {
+  const basicError =
+    validateTeachingTemplateFile({
+      fileName,
+      mimeType,
+      sizeBytes,
+    });
+
+  if (
+    basicError
+  ) {
+    return basicError;
+  }
+
+  const canonicalMime =
+    teachingTemplateMimeType(
+      fileName,
+      mimeType,
+    );
+
+  if (
+    !templateMimeType ||
+    canonicalMime !==
+      templateMimeType
+  ) {
+    return 'Upload the same file type as the official template.';
+  }
+
+  return null;
+}
+
+export function canEditTeachingDocument(
+  status:
+    TeachingDocumentStatus,
+): boolean {
+  return (
+    status ===
+      'generated' ||
+    status ===
+      'returned'
+  );
+}
+
+export function canSubmitTeachingDocument(
+  status:
+    TeachingDocumentStatus,
+  storagePath:
+    string | null,
+): boolean {
+  return (
+    canEditTeachingDocument(
+      status,
+    ) &&
+    Boolean(
+      storagePath?.trim(),
+    )
+  );
 }
 
 export function formatTeachingDocumentFileSize(

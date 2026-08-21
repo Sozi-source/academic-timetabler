@@ -71,7 +71,7 @@ describe('teaching documents domain', () => {
         'generated',
       ),
     ).toBe(
-      'Generated',
+      'In progress',
     );
 
     expect(

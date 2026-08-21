@@ -1,5 +1,5 @@
 import { StudentStatusStage } from '@/features/students/student-status-stage';
-import { ChevronRight, Database, Download, FileUp, UsersRound } from 'lucide-react';
+import { ChevronRight, Database, Download, FileUp, KeyRound, UsersRound } from 'lucide-react';
 import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
@@ -24,7 +24,22 @@ export default async function StudentRegistryPage({ searchParams }: { searchPara
         description="Current and historical students."
         icon={UsersRound}
         context={<Badge variant="neutral">{students.length} records</Badge>}
-        actions={<div className="flex gap-2"><Link href="/api/students/export" className="inline-flex h-9 items-center gap-2 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"><Download className="size-3.5"/>Export Excel</Link><Link href="/students/registry/import" className="inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-3 text-xs font-semibold text-white hover:bg-primary-hover"><FileUp className="size-3.5"/>Import students</Link></div>}
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Link href="/students/access" className="inline-flex h-9 items-center gap-2 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle">
+              <KeyRound className="size-3.5" />
+              Student access
+            </Link>
+            <Link href="/api/students/export" className="inline-flex h-9 items-center gap-2 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle">
+              <Download className="size-3.5" />
+              Export Excel
+            </Link>
+            <Link href="/students/registry/import" className="inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-3 text-xs font-semibold text-white hover:bg-primary-hover">
+              <FileUp className="size-3.5" />
+              Import students
+            </Link>
+          </div>
+        }
       />
 
       <div className="flex flex-wrap gap-2">

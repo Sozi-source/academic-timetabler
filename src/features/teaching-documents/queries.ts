@@ -13,8 +13,12 @@ import type {
 } from './domain';
 import type {
   TeachingDocumentRecord,
+  TeachingDocumentReviewItem,
   TeachingDocumentTemplateSummary,
 } from './types';
+
+type UnknownRow =
+  Record<string, unknown>;
 
 interface TemplateRow {
   id: string;
@@ -72,6 +76,7 @@ interface DocumentRow {
     | 'draft'
     | 'generated'
     | 'submitted'
+    | 'returned'
     | 'approved'
     | 'archived';
   storage_bucket: string;
@@ -91,6 +96,33 @@ interface DocumentRow {
   sha256:
     | string
     | null;
+  current_revision_number:
+    | number
+    | string
+    | null;
+  submitted_revision_number:
+    | number
+    | string
+    | null;
+  approved_revision_number:
+    | number
+    | string
+    | null;
+  review_note:
+    | string
+    | null;
+  generated_at:
+    | string
+    | null;
+  submitted_at:
+    | string
+    | null;
+  returned_at:
+    | string
+    | null;
+  approved_at:
+    | string
+    | null;
   updated_at: string;
 }
 
@@ -102,15 +134,28 @@ Promise<SupabaseClient> {
     SupabaseClient;
 }
 
+function asString(
+  value:
+    unknown,
+): string | null {
+  return typeof value ===
+    'string'
+    ? value
+    : null;
+}
+
 function numberOrNull(
   value:
     | number
     | string
-    | null,
+    | null
+    | unknown,
 ): number | null {
   if (
     value ===
-    null
+    null ||
+    value ===
+    undefined
   ) {
     return null;
   }
@@ -204,9 +249,113 @@ function mapDocument(
       ),
     sha256:
       row.sha256,
+    currentRevisionNumber:
+      numberOrNull(
+        row.current_revision_number,
+      ),
+    submittedRevisionNumber:
+      numberOrNull(
+        row.submitted_revision_number,
+      ),
+    approvedRevisionNumber:
+      numberOrNull(
+        row.approved_revision_number,
+      ),
+    reviewNote:
+      row.review_note,
+    generatedAt:
+      row.generated_at,
+    submittedAt:
+      row.submitted_at,
+    returnedAt:
+      row.returned_at,
+    approvedAt:
+      row.approved_at,
     updatedAt:
       row.updated_at,
   };
+}
+
+async function rowsByIds(
+  supabase:
+    SupabaseClient,
+  table:
+    string,
+  ids:
+    string[],
+): Promise<UnknownRow[]> {
+  const uniqueIds =
+    [
+      ...new Set(
+        ids.filter(
+          Boolean,
+        ),
+      ),
+    ];
+
+  if (
+    uniqueIds.length ===
+    0
+  ) {
+    return [];
+  }
+
+  const {
+    data,
+    error,
+  } =
+    await supabase
+      .from(
+        table,
+      )
+      .select(
+        '*',
+      )
+      .in(
+        'id',
+        uniqueIds,
+      );
+
+  if (error) {
+    throw new Error(
+      `Unable to load ${table}: ${error.message}`,
+    );
+  }
+
+  return (
+    data ??
+    []
+  ) as UnknownRow[];
+}
+
+function mapRowsById(
+  rows:
+    UnknownRow[],
+) {
+  const result =
+    new Map<
+      string,
+      UnknownRow
+    >();
+
+  for (
+    const row of
+      rows
+  ) {
+    const id =
+      asString(
+        row.id,
+      );
+
+    if (id) {
+      result.set(
+        id,
+        row,
+      );
+    }
+  }
+
+  return result;
 }
 
 export async function getTeachingDocumentTemplates():
@@ -319,6 +468,14 @@ export async function getTeachingDocumentsByAllocationIds(
         mime_type,
         file_size_bytes,
         sha256,
+        current_revision_number,
+        submitted_revision_number,
+        approved_revision_number,
+        review_note,
+        generated_at,
+        submitted_at,
+        returned_at,
+        approved_at,
         updated_at
       `,
     )
@@ -350,6 +507,289 @@ export async function getTeachingDocumentsByAllocationIds(
   );
 }
 
+export async function getTeachingDocumentReviewQueue():
+Promise<TeachingDocumentReviewItem[]> {
+  const supabase =
+    await untypedClient();
+
+  const {
+    data,
+    error,
+  } =
+    await supabase
+      .from(
+        'teaching_documents',
+      )
+      .select(
+        `
+          id,
+          document_type,
+          version_number,
+          current_revision_number,
+          submitted_revision_number,
+          original_filename,
+          file_size_bytes,
+          submitted_at,
+          academic_period_id,
+          cohort_id,
+          unit_id,
+          trainer_id
+        `,
+      )
+      .eq(
+        'status',
+        'submitted',
+      )
+      .order(
+        'submitted_at',
+        {
+          ascending:
+            true,
+        },
+      );
+
+  if (error) {
+    throw new Error(
+      `Unable to load teaching-document review queue: ${error.message}`,
+    );
+  }
+
+  const documents =
+    (
+      data ??
+      []
+    ) as UnknownRow[];
+
+  if (
+    documents.length ===
+    0
+  ) {
+    return [];
+  }
+
+  const [
+    units,
+    cohorts,
+    periods,
+    trainers,
+  ] =
+    await Promise.all([
+      rowsByIds(
+        supabase,
+        'units',
+        documents
+          .map(
+            (row) =>
+              asString(
+                row.unit_id,
+              ),
+          )
+          .filter(
+            (
+              value,
+            ): value is string =>
+              Boolean(
+                value,
+              ),
+          ),
+      ),
+      rowsByIds(
+        supabase,
+        'cohorts',
+        documents
+          .map(
+            (row) =>
+              asString(
+                row.cohort_id,
+              ),
+          )
+          .filter(
+            (
+              value,
+            ): value is string =>
+              Boolean(
+                value,
+              ),
+          ),
+      ),
+      rowsByIds(
+        supabase,
+        'academic_periods',
+        documents
+          .map(
+            (row) =>
+              asString(
+                row.academic_period_id,
+              ),
+          )
+          .filter(
+            (
+              value,
+            ): value is string =>
+              Boolean(
+                value,
+              ),
+          ),
+      ),
+      rowsByIds(
+        supabase,
+        'trainers',
+        documents
+          .map(
+            (row) =>
+              asString(
+                row.trainer_id,
+              ),
+          )
+          .filter(
+            (
+              value,
+            ): value is string =>
+              Boolean(
+                value,
+              ),
+          ),
+      ),
+    ]);
+
+  const unitById =
+    mapRowsById(
+      units,
+    );
+
+  const cohortById =
+    mapRowsById(
+      cohorts,
+    );
+
+  const periodById =
+    mapRowsById(
+      periods,
+    );
+
+  const trainerById =
+    mapRowsById(
+      trainers,
+    );
+
+  return documents
+    .map(
+      (
+        row,
+      ): TeachingDocumentReviewItem | null => {
+        const id =
+          asString(
+            row.id,
+          );
+
+        const documentType =
+          asString(
+            row.document_type,
+          ) as
+            | TeachingDocumentType
+            | null;
+
+        if (
+          !id ||
+          !documentType
+        ) {
+          return null;
+        }
+
+        const unit =
+          unitById.get(
+            asString(
+              row.unit_id,
+            ) ??
+              '',
+          );
+
+        const cohort =
+          cohortById.get(
+            asString(
+              row.cohort_id,
+            ) ??
+              '',
+          );
+
+        const period =
+          periodById.get(
+            asString(
+              row.academic_period_id,
+            ) ??
+              '',
+          );
+
+        const trainer =
+          trainerById.get(
+            asString(
+              row.trainer_id,
+            ) ??
+              '',
+          );
+
+        return {
+          id,
+          documentType,
+          versionNumber:
+            numberOrNull(
+              row.version_number,
+            ) ??
+            1,
+          currentRevisionNumber:
+            numberOrNull(
+              row.current_revision_number,
+            ),
+          submittedRevisionNumber:
+            numberOrNull(
+              row.submitted_revision_number,
+            ),
+          originalFilename:
+            asString(
+              row.original_filename,
+            ),
+          fileSizeBytes:
+            numberOrNull(
+              row.file_size_bytes,
+            ),
+          submittedAt:
+            asString(
+              row.submitted_at,
+            ),
+          unitName:
+            asString(
+              unit?.name,
+            ) ??
+            'Unit',
+          cohortName:
+            asString(
+              cohort?.name,
+            ) ??
+            'Cohort',
+          academicPeriodName:
+            asString(
+              period?.name,
+            ) ??
+            'Academic Period',
+          trainerName:
+            asString(
+              trainer?.full_name,
+            ) ??
+            'Trainer',
+        };
+      },
+    )
+    .filter(
+      (
+        item,
+      ): item is
+        TeachingDocumentReviewItem =>
+        Boolean(
+          item,
+        ),
+    );
+}
+
 export async function getTeachingDocumentAdminCounts() {
   const supabase =
     await untypedClient();
@@ -357,6 +797,7 @@ export async function getTeachingDocumentAdminCounts() {
   const [
     templateResult,
     documentResult,
+    submittedResult,
   ] =
     await Promise.all([
       supabase
@@ -390,11 +831,30 @@ export async function getTeachingDocumentAdminCounts() {
               true,
           },
         ),
+
+      supabase
+        .from(
+          'teaching_documents',
+        )
+        .select(
+          'id',
+          {
+            count:
+              'exact',
+            head:
+              true,
+          },
+        )
+        .eq(
+          'status',
+          'submitted',
+        ),
     ]);
 
   const error =
     templateResult.error ??
-    documentResult.error;
+    documentResult.error ??
+    submittedResult.error;
 
   if (error) {
     throw new Error(
@@ -408,6 +868,9 @@ export async function getTeachingDocumentAdminCounts() {
       0,
     documents:
       documentResult.count ??
+      0,
+    submitted:
+      submittedResult.count ??
       0,
   };
 }

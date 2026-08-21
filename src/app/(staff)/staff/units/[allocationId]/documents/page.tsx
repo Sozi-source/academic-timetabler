@@ -21,8 +21,13 @@ import {
   requireStaffAllocation,
 } from '@/features/staff-assessment/queries';
 import {
+  TeachingDocumentWorkflowControls,
+} from '@/features/teaching-documents/document-workflow-controls';
+import {
   isTeachingDocumentReady,
   teachingDocumentKinds,
+  teachingDocumentStatusLabel,
+  teachingDocumentStatusVariant,
 } from '@/features/teaching-documents/domain';
 import {
   getActiveTeachingDocumentTemplates,
@@ -167,15 +172,14 @@ export default async function StaffUnitDocumentsPage({
                   {current ? (
                     <Badge
                       variant={
-                        current.status ===
-                        'approved'
-                          ? 'success'
-                          : 'neutral'
+                        teachingDocumentStatusVariant(
+                          current.status,
+                        )
                       }
                     >
-                      {
-                        current.status
-                      }
+                      {teachingDocumentStatusLabel(
+                        current.status,
+                      )}
                     </Badge>
                   ) : (
                     <Badge
@@ -192,43 +196,15 @@ export default async function StaffUnitDocumentsPage({
                   )}
                 </div>
 
-                <div className="mt-4 flex flex-wrap items-end justify-between gap-3 border-t border-border pt-3">
-                  <p className="text-[10px] text-text-muted">
-                    {current
-                      ? `Document v${current.versionNumber}`
-                      : templateReady
-                        ? 'Ready to start'
-                        : 'Official template not connected'}
-                  </p>
+                <div className="mt-4 border-t border-border pt-3">
+                  {!current ? (
+                    <div className="flex flex-wrap items-end justify-between gap-3">
+                      <p className="text-[10px] text-text-muted">
+                        {templateReady
+                          ? 'Creates an exact private working copy.'
+                          : 'Official template not connected.'}
+                      </p>
 
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    {current ? (
-                      <a
-                        href={`/api/staff/teaching-documents/${current.id}/template`}
-                        className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-2.5 text-[11px] font-semibold text-text-secondary transition hover:bg-surface-subtle"
-                      >
-                        <Download
-                          className="size-3"
-                          aria-hidden="true"
-                        />
-                        Template
-                      </a>
-                    ) : null}
-
-                    {current?.storagePath ? (
-                      <a
-                        href={`/api/staff/teaching-documents/${current.id}/download`}
-                        className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-2.5 text-[11px] font-semibold text-text-secondary transition hover:bg-surface-subtle"
-                      >
-                        <Download
-                          className="size-3"
-                          aria-hidden="true"
-                        />
-                        Document
-                      </a>
-                    ) : null}
-
-                    {!current ? (
                       <StartTeachingDocumentButton
                         allocationId={
                           allocationId
@@ -240,8 +216,67 @@ export default async function StaffUnitDocumentsPage({
                           !templateReady
                         }
                       />
-                    ) : null}
-                  </div>
+                    </div>
+                  ) : current.status ===
+                    'draft' ? (
+                    <div className="flex flex-wrap items-end justify-between gap-3">
+                      <p className="text-[10px] text-text-muted">
+                        Prepare the exact template working copy.
+                      </p>
+
+                      <StartTeachingDocumentButton
+                        allocationId={
+                          allocationId
+                        }
+                        documentType={
+                          kind.value
+                        }
+                        disabled={
+                          !templateReady
+                        }
+                        label="Prepare"
+                      />
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-[10px] text-text-muted">
+                          Document v{
+                            current.versionNumber
+                          }
+                          {current.currentRevisionNumber
+                            ? ` · revision ${current.currentRevisionNumber}`
+                            : ''}
+                        </p>
+
+                        <a
+                          href={`/api/staff/teaching-documents/${current.id}/template`}
+                          className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-2.5 text-[11px] font-semibold text-text-secondary transition hover:bg-surface-subtle"
+                        >
+                          <Download
+                            className="size-3"
+                            aria-hidden="true"
+                          />
+                          Source template
+                        </a>
+                      </div>
+
+                      <TeachingDocumentWorkflowControls
+                        documentId={
+                          current.id
+                        }
+                        status={
+                          current.status
+                        }
+                        storagePath={
+                          current.storagePath
+                        }
+                        reviewNote={
+                          current.reviewNote
+                        }
+                      />
+                    </div>
+                  )}
                 </div>
               </article>
             );

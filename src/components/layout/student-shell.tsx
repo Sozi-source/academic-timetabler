@@ -6,6 +6,7 @@ import {
   BookOpenCheck,
   GraduationCap,
   History,
+  KeyRound,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -39,6 +40,7 @@ const navigation: readonly StudentNavigationItem[] = [
   { label: 'Overview', href: '/students', icon: LayoutDashboard },
   { label: 'Student registry', href: '/students/registry', icon: UsersRound },
   { label: 'Student onboarding', href: '/students/registry/import', icon: FileUp },
+  { label: 'Portal access', href: '/students/access', icon: KeyRound },
   { label: 'Status & progression', href: '/students/progression', icon: History },
   { label: 'Unit registration', href: '/students/unit-registration', icon: BookOpenCheck },
   { label: 'Reports', href: '/students/reports', icon: BarChart3 },
@@ -171,7 +173,6 @@ export function StudentShell({ profile, children }: StudentShellProps) {
                 <p className="text-sm font-bold text-text-primary">Students</p>
               </div>
             </div>
-
           </header>
 
           <main className="mx-auto w-full max-w-[var(--content-max-width)] px-4 py-5 sm:px-6 lg:px-8 lg:py-6">

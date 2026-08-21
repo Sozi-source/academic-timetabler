@@ -1,4 +1,5 @@
 import type {
+  TeachingDocumentReviewDecision,
   TeachingDocumentStatus,
   TeachingDocumentTemplateStatus,
   TeachingDocumentType,
@@ -37,5 +38,37 @@ export interface TeachingDocumentRecord {
   mimeType: string | null;
   fileSizeBytes: number | null;
   sha256: string | null;
+  currentRevisionNumber: number | null;
+  submittedRevisionNumber: number | null;
+  approvedRevisionNumber: number | null;
+  reviewNote: string | null;
+  generatedAt: string | null;
+  submittedAt: string | null;
+  returnedAt: string | null;
+  approvedAt: string | null;
   updatedAt: string;
+}
+
+export interface TeachingDocumentReviewItem {
+  id: string;
+  documentType: TeachingDocumentType;
+  versionNumber: number;
+  currentRevisionNumber: number | null;
+  submittedRevisionNumber: number | null;
+  originalFilename: string | null;
+  fileSizeBytes: number | null;
+  submittedAt: string | null;
+  unitName: string;
+  cohortName: string;
+  academicPeriodName: string;
+  trainerName: string;
+}
+
+export interface TeachingDocumentReviewHistoryItem {
+  id: string;
+  documentId: string;
+  revisionNumber: number;
+  decision: TeachingDocumentReviewDecision;
+  note: string | null;
+  reviewedAt: string;
 }

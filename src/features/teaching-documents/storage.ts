@@ -71,6 +71,26 @@ export function teachingTemplateStoragePath(
   return `templates/${documentType}/${randomUUID()}${extension}`;
 }
 
+export function teachingDocumentRevisionStoragePath(
+  documentId:
+    string,
+  fileName:
+    string,
+): string {
+  const extension =
+    extensionFor(
+      fileName,
+    );
+
+  if (!extension) {
+    throw new Error(
+      'Unsupported teaching-document file type.',
+    );
+  }
+
+  return `documents/${documentId}/${randomUUID()}${extension}`;
+}
+
 export function teachingFileSha256(
   bytes:
     Uint8Array,
@@ -201,6 +221,70 @@ export async function uploadOfficialTeachingTemplate({
     storagePath,
     mimeType:
       canonicalMime,
+    sha256:
+      teachingFileSha256(
+        bytes,
+      ),
+    fileSizeBytes:
+      bytes.byteLength,
+  };
+}
+
+export async function uploadTeachingDocumentRevision({
+  documentId,
+  fileName,
+  mimeType,
+  bytes,
+}: {
+  documentId:
+    string;
+  fileName:
+    string;
+  mimeType:
+    string;
+  bytes:
+    Uint8Array;
+}) {
+  const storagePath =
+    teachingDocumentRevisionStoragePath(
+      documentId,
+      fileName,
+    );
+
+  const admin =
+    createAdminClient();
+
+  const {
+    error,
+  } =
+    await admin.storage
+      .from(
+        teachingDocumentStorageBucket,
+      )
+      .upload(
+        storagePath,
+        bytes,
+        {
+          contentType:
+            mimeType,
+          upsert:
+            false,
+          cacheControl:
+            '3600',
+        },
+      );
+
+  if (error) {
+    throw new Error(
+      `Unable to store teaching-document revision: ${error.message}`,
+    );
+  }
+
+  return {
+    storageBucket:
+      teachingDocumentStorageBucket,
+    storagePath,
+    mimeType,
     sha256:
       teachingFileSha256(
         bytes,

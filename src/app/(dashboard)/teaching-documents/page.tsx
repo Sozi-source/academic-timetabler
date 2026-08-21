@@ -1,8 +1,10 @@
 import {
+  FileCheck2,
   FileText,
   Layers3,
   ShieldCheck,
 } from 'lucide-react';
+import Link from 'next/link';
 
 import {
   MetricCard,
@@ -43,9 +45,29 @@ export default async function TeachingDocumentsPage() {
         title="Teaching Documents"
         description="Official templates and controlled document records."
         icon={FileText}
+        actions={
+          <Link
+            href="/teaching-documents/review"
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
+          >
+            <FileCheck2
+              className="size-3.5"
+              aria-hidden="true"
+            />
+            Review
+            {counts.submitted >
+            0 ? (
+              <span className="rounded-full bg-warning-surface px-1.5 py-0.5 text-[9px] font-bold text-warning">
+                {
+                  counts.submitted
+                }
+              </span>
+            ) : null}
+          </Link>
+        }
       />
 
-      <section className="grid gap-3 sm:grid-cols-3">
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           label="Document types"
           value={String(
@@ -74,6 +96,21 @@ export default async function TeachingDocumentsPage() {
           description="Allocation-linked versions"
           icon={ShieldCheck}
           status="Controlled"
+        />
+
+        <MetricCard
+          label="Awaiting review"
+          value={String(
+            counts.submitted,
+          )}
+          description="Submitted by trainers"
+          icon={FileCheck2}
+          status={
+            counts.submitted >
+            0
+              ? 'Action'
+              : 'Clear'
+          }
         />
       </section>
 

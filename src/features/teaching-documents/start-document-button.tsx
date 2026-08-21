@@ -1,15 +1,15 @@
 'use client';
 
 import {
-  useState,
-} from 'react';
+  FilePlus2,
+  LoaderCircle,
+} from 'lucide-react';
 import {
   useRouter,
 } from 'next/navigation';
 import {
-  FilePlus2,
-  LoaderCircle,
-} from 'lucide-react';
+  useState,
+} from 'react';
 
 import type {
   TeachingDocumentType,
@@ -19,10 +19,12 @@ export function StartTeachingDocumentButton({
   allocationId,
   documentType,
   disabled,
+  label = 'Start',
 }: {
   allocationId: string;
   documentType: TeachingDocumentType;
   disabled: boolean;
+  label?: string;
 }) {
   const router =
     useRouter();
@@ -81,7 +83,7 @@ export function StartTeachingDocumentButton({
       if (!response.ok) {
         setMessage(
           payload?.message ??
-          'Document could not be started.',
+          'Document could not be prepared.',
         );
 
         return;
@@ -120,7 +122,9 @@ export function StartTeachingDocumentButton({
           />
         )}
 
-        Start
+        {busy
+          ? 'Preparing'
+          : label}
       </button>
 
       {message ? (

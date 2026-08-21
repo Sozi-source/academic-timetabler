@@ -116,6 +116,7 @@ function numericValue(
 export async function validateAssessmentMarkbook(
   input: Buffer,
   expectedRootAssessmentId?: string,
+  maximumMark?: number | null,
 ): Promise<AssessmentWorkbookValidationResult> {
   const workbook =
     new ExcelJS.Workbook();
@@ -507,6 +508,24 @@ export async function validateAssessmentMarkbook(
               'invalid_mark',
             message:
               'Marks cannot be negative.',
+            sheetName,
+            workbookRow,
+            admissionNumber,
+          });
+        } else if (
+          typeof maximumMark ===
+            'number' &&
+          Number.isFinite(
+            maximumMark,
+          ) &&
+          numeric >
+            maximumMark
+        ) {
+          issues.push({
+            code:
+              'invalid_mark',
+            message:
+              `Mark exceeds the configured maximum of ${maximumMark}.`,
             sheetName,
             workbookRow,
             admissionNumber,

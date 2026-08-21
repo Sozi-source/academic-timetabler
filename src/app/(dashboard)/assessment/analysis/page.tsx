@@ -191,7 +191,7 @@ export default async function AssessmentAnalysisPage() {
                 href={`/assessment/analysis/${bundle.rootAssessmentId}`}
                 className="block rounded-xl border border-border bg-white px-4 py-3 transition hover:border-border-strong hover:bg-surface-subtle/40"
               >
-                <div className="grid gap-3 lg:grid-cols-[minmax(0,1.6fr)_minmax(8rem,.7fr)_repeat(4,minmax(5rem,.55fr))] lg:items-center">
+                <div className="grid gap-3 lg:grid-cols-[minmax(0,1.6fr)_minmax(8rem,.7fr)_repeat(5,minmax(5rem,.55fr))] lg:items-center">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="truncate text-sm font-semibold text-text-primary">
@@ -207,13 +207,19 @@ export default async function AssessmentAnalysisPage() {
                           bundle.assessmentType,
                         )}
                       </Badge>
+
+                      {bundle.published ? (
+                        <Badge variant="success">
+                          Published
+                        </Badge>
+                      ) : null}
                     </div>
 
                     <p className="mt-1 text-[11px] text-text-muted">
                       {
                         bundle.academicPeriodName
                       }
-                      {' Â· '}
+                      {' · '}
                       {
                         bundle.cohortCount
                       } cohort{
@@ -222,7 +228,7 @@ export default async function AssessmentAnalysisPage() {
                           ? ''
                           : 's'
                       }
-                      {' Â· '}
+                      {' · '}
                       {statusLabel(
                         bundle.status,
                       )}
@@ -288,6 +294,21 @@ export default async function AssessmentAnalysisPage() {
                       )}
                     </p>
                   </div>
+
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-text-muted">
+                      Pass rate
+                    </p>
+
+                    <p className="mt-0.5 text-sm font-semibold text-text-primary">
+                      {bundle.summary.passRate ===
+                      null
+                        ? '—'
+                        : `${formatAssessmentMetric(
+                            bundle.summary.passRate,
+                          )}%`}
+                    </p>
+                  </div>
                 </div>
               </Link>
             ),
@@ -296,12 +317,12 @@ export default async function AssessmentAnalysisPage() {
       )}
 
       <p className="text-[11px] leading-5 text-text-muted">
-        Means use numeric marks only.
-        Explicit absences and unresolved
-        marks are excluded. Pass-rate
-        analysis is intentionally not
-        calculated until assessment
-        thresholds are configured.
+        Means and pass rates use numeric
+        marks only. Explicit absences and
+        unresolved marks are excluded.
+        Pass rate appears only when the
+        assessment maximum and pass mark
+        are configured.
       </p>
     </div>
   );

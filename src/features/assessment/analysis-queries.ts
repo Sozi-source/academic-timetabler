@@ -72,6 +72,9 @@ export interface AssessmentAnalysisBundleListItem {
     | 'exam';
   cohortCount: number;
   status: string;
+  published: boolean;
+  maximumMark: number | null;
+  passMark: number | null;
   summary: AssessmentAnalysisSummary;
 }
 
@@ -103,6 +106,9 @@ export interface AssessmentAnalysisDetail {
     | 'cat'
     | 'exam';
   status: string;
+  published: boolean;
+  maximumMark: number | null;
+  passMark: number | null;
   assessmentIds: string[];
   summary: AssessmentAnalysisSummary;
   cohorts: AssessmentAnalysisCohortRow[];
@@ -181,6 +187,26 @@ function bundleKey(
     event.academicPeriodId,
     event.unitId,
     event.assessmentType,
+  ].join(
+    ':',
+  );
+}
+
+function ruleKey({
+  academicPeriodId,
+  unitId,
+  assessmentType,
+}: {
+  academicPeriodId: string;
+  unitId: string;
+  assessmentType:
+    | 'cat'
+    | 'exam';
+}): string {
+  return [
+    academicPeriodId,
+    unitId,
+    assessmentType,
   ].join(
     ':',
   );
@@ -467,6 +493,104 @@ export const getAssessmentAnalysisBundles =
     const data =
       await loadOperationalAnalysisData();
 
+    const supabase =
+      await createClient();
+
+    const eventIds =
+      data.events.map(
+        (event) =>
+          event.id,
+      );
+
+    const [
+      ruleResult,
+      releaseResult,
+    ] =
+      await Promise.all([
+        supabase
+          .from(
+            'assessment_rules',
+          )
+          .select(
+            'academic_period_id, unit_id, assessment_type, maximum_mark, pass_mark',
+          ),
+
+        eventIds.length >
+        0
+          ? supabase
+              .from(
+                'assessment_events',
+              )
+              .select(
+                'id, published_at',
+              )
+              .in(
+                'id',
+                eventIds,
+              )
+          : Promise.resolve({
+              data:
+                [],
+              error:
+                null,
+            }),
+      ]);
+
+    const supportingError =
+      ruleResult.error ??
+      releaseResult.error;
+
+    if (
+      supportingError
+    ) {
+      throw new Error(
+        `Unable to load assessment rules: ${supportingError.message}`,
+      );
+    }
+
+    const ruleByKey =
+      new Map(
+        (
+          ruleResult.data ??
+          []
+        ).map(
+          (rule) => [
+            [
+              rule.academic_period_id,
+              rule.unit_id,
+              rule.assessment_type,
+            ].join(
+              ':',
+            ),
+            {
+              maximumMark:
+                asNumber(
+                  rule.maximum_mark,
+                ),
+              passMark:
+                asNumber(
+                  rule.pass_mark,
+                ),
+            },
+          ],
+        ),
+      );
+
+    const publishedByAssessment =
+      new Map(
+        (
+          releaseResult.data ??
+          []
+        ).map(
+          (event) => [
+            event.id,
+            Boolean(
+              event.published_at,
+            ),
+          ],
+        ),
+      );
+
     const periodById =
       new Map(
         data.periods.map(
@@ -653,6 +777,34 @@ export const getAssessmentAnalysisBundles =
             [],
         );
 
+      const rule =
+        ruleByKey.get(
+          ruleKey({
+            academicPeriodId:
+              first.academicPeriodId,
+            unitId:
+              first.unitId,
+            assessmentType:
+              first.assessmentType,
+          }),
+        ) ?? {
+          maximumMark:
+            null,
+          passMark:
+            null,
+        };
+
+      const published =
+        assessmentIds.length >
+          0 &&
+        assessmentIds.every(
+          (assessmentId) =>
+            publishedByAssessment.get(
+              assessmentId,
+            ) ===
+            true,
+        );
+
       bundles.push({
         rootAssessmentId:
           first.id,
@@ -687,11 +839,20 @@ export const getAssessmentAnalysisBundles =
                 event.workflowStatus,
             ),
           ),
+        published,
+        maximumMark:
+          rule.maximumMark,
+        passMark:
+          rule.passMark,
         summary:
           calculateAssessmentAnalysis({
             registeredPopulation,
             rows:
               resultRows,
+            maximumMark:
+              rule.maximumMark,
+            passMark:
+              rule.passMark,
           }),
       });
     }
@@ -827,6 +988,8 @@ export const getAssessmentAnalysisDetail =
       resultResult,
       periodResult,
       unitResult,
+      ruleResult,
+      releaseResult,
     ] =
       await Promise.all([
         supabase
@@ -883,13 +1046,48 @@ export const getAssessmentAnalysisDetail =
             rootEvent.unitId,
           )
           .maybeSingle(),
+
+        supabase
+          .from(
+            'assessment_rules',
+          )
+          .select(
+            'maximum_mark, pass_mark',
+          )
+          .eq(
+            'academic_period_id',
+            rootEvent.academicPeriodId,
+          )
+          .eq(
+            'unit_id',
+            rootEvent.unitId,
+          )
+          .eq(
+            'assessment_type',
+            rootEvent.assessmentType,
+          )
+          .maybeSingle(),
+
+        supabase
+          .from(
+            'assessment_events',
+          )
+          .select(
+            'id, published_at',
+          )
+          .in(
+            'id',
+            assessmentIds,
+          ),
       ]);
 
     const firstError =
       rosterResult.error ??
       resultResult.error ??
       periodResult.error ??
-      unitResult.error;
+      unitResult.error ??
+      ruleResult.error ??
+      releaseResult.error;
 
     if (
       firstError
@@ -907,6 +1105,36 @@ export const getAssessmentAnalysisDetail =
         'Assessment reference data is incomplete.',
       );
     }
+
+    const maximumMark =
+      asNumber(
+        ruleResult.data
+          ?.maximum_mark,
+      );
+
+    const passMark =
+      asNumber(
+        ruleResult.data
+          ?.pass_mark,
+      );
+
+    const published =
+      assessmentIds.length >
+        0 &&
+      (
+        releaseResult.data ??
+        []
+      ).length ===
+        assessmentIds.length &&
+      (
+        releaseResult.data ??
+        []
+      ).every(
+        (event) =>
+          Boolean(
+            event.published_at,
+          ),
+      );
 
     const rosterRows =
       (
@@ -1082,12 +1310,11 @@ export const getAssessmentAnalysisDetail =
           .map(
             (
               raw,
-              index,
             ) => {
               const mapped =
-                resultRows[
-                  index
-                ];
+                mapAnalysisResult(
+                  raw,
+                );
 
               return mapped
                 ? [
@@ -1176,7 +1403,7 @@ export const getAssessmentAnalysisDetail =
                 admissionNumber:
                   student
                     ?.admission_number ??
-                  'â€”',
+                  '—',
                 fullName:
                   student
                     ?.full_name ??
@@ -1346,6 +1573,8 @@ export const getAssessmentAnalysisDetail =
                   group.rosterStudentIds.size,
                 rows:
                   group.resultRows,
+                maximumMark,
+                passMark,
               }),
           }),
         )
@@ -1378,6 +1607,9 @@ export const getAssessmentAnalysisDetail =
               event.workflowStatus,
           ),
         ),
+      published,
+      maximumMark,
+      passMark,
       assessmentIds,
       summary:
         calculateAssessmentAnalysis({
@@ -1387,6 +1619,8 @@ export const getAssessmentAnalysisDetail =
             ).size,
           rows:
             resultRows,
+          maximumMark,
+          passMark,
         }),
       cohorts,
       students,

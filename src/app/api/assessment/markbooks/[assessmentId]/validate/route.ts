@@ -7,6 +7,9 @@ import {
   requireHodAccess,
 } from '@/features/auth/authorization';
 import {
+  getAssessmentRuleForAssessment,
+} from '@/features/assessment/assessment-rule-query';
+import {
   validateAssessmentMarkbook,
 } from '@/features/assessment/markbook-validator';
 
@@ -97,10 +100,17 @@ export async function POST(
         await file.arrayBuffer(),
       );
 
+    const rule =
+      await getAssessmentRuleForAssessment(
+        assessmentId,
+      );
+
     const result =
       await validateAssessmentMarkbook(
         buffer,
         assessmentId,
+        rule?.maximumMark ??
+          null,
       );
 
     return NextResponse.json({

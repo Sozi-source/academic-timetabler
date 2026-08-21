@@ -189,7 +189,7 @@ describe('assessment analysis engine', () => {
         null,
       ),
     ).toBe(
-      'â€”',
+      '\u2014',
     );
 
     expect(

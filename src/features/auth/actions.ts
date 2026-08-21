@@ -9,6 +9,10 @@ import {
   getSafeInternalPath,
   loginSchema,
 } from './validation';
+import {
+  canUsePostLoginPath,
+  getHomePathForRole,
+} from './routing';
 
 export async function loginAction(
   _previousState: LoginActionState,
@@ -60,7 +64,59 @@ export async function loginAction(
     .eq('id', authData.user.id)
     .maybeSingle<{ role: 'system_admin' | 'hod' | 'trainer' }>();
 
-  redirect(profile?.role === 'trainer' ? '/trainer/exam-attendance' : '/dashboard');
+  const trainerRouteRequestedDestinationV9 =
+    profile?.role === 'trainer' ? '/trainer/exam-attendance' : '/dashboard';
+
+  const {
+    data: trainerRouteAuthDataV9,
+  } =
+    await supabase.auth.getUser();
+
+  const trainerRouteUserIdV9 =
+    trainerRouteAuthDataV9.user
+      ?.id ??
+    null;
+
+  const trainerRouteProfileResultV9 =
+    trainerRouteUserIdV9
+      ? await supabase
+          .from('profiles')
+          .select('role')
+          .eq(
+            'id',
+            trainerRouteUserIdV9,
+          )
+          .maybeSingle()
+      : {
+          data:
+            null,
+        };
+
+  const trainerRouteRoleV9 =
+    trainerRouteProfileResultV9
+      .data
+      ?.role ??
+    null;
+
+  const trainerRouteDefaultV9 =
+    trainerRouteRoleV9
+      ? getHomePathForRole(
+          trainerRouteRoleV9,
+        )
+      : trainerRouteRequestedDestinationV9;
+
+  const trainerRouteDestinationV9 =
+    trainerRouteRoleV9 &&
+    canUsePostLoginPath(
+      trainerRouteRoleV9,
+      trainerRouteRequestedDestinationV9,
+    )
+      ? trainerRouteRequestedDestinationV9
+      : trainerRouteDefaultV9;
+
+  redirect(
+    trainerRouteDestinationV9,
+  );
 }
 
 export async function logoutAction(): Promise<void> {

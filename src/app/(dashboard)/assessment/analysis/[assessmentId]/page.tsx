@@ -27,6 +27,9 @@ import {
   requireHodAccess,
 } from '@/features/auth/authorization';
 import {
+  AssessmentRuleReleaseControls,
+} from '@/features/assessment/assessment-rule-release-controls';
+import {
   formatAssessmentMetric,
 } from '@/features/assessment/analysis-engine';
 import {
@@ -102,7 +105,7 @@ export default async function AssessmentAnalysisDetailPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow={`Assessment Â· ${typeLabel}`}
+        eyebrow={`Assessment · ${typeLabel}`}
         title={
           analysis.unitName
         }
@@ -122,7 +125,7 @@ export default async function AssessmentAnalysisDetailPage({
         }
       />
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         <MetricCard
           label="Registered"
           value={String(
@@ -158,11 +161,58 @@ export default async function AssessmentAnalysisDetailPage({
           value={formatAssessmentMetric(
             analysis.summary.mean,
           )}
-          description="Absent and missing excluded"
+          description={
+            analysis.maximumMark ===
+            null
+              ? 'Absent and missing excluded'
+              : `Out of ${formatAssessmentMetric(
+                  analysis.maximumMark,
+                )}`
+          }
           icon={Sigma}
           status="Performance"
         />
+
+        <MetricCard
+          label="Pass rate"
+          value={
+            analysis.summary.passRate ===
+            null
+              ? '—'
+              : `${formatAssessmentMetric(
+                  analysis.summary.passRate,
+                )}%`
+          }
+          description={
+            analysis.passMark ===
+            null
+              ? 'Configure assessment rule'
+              : `Pass mark ${formatAssessmentMetric(
+                  analysis.passMark,
+                )}`
+          }
+          icon={BarChart3}
+          status="Threshold"
+        />
       </section>
+
+      <AssessmentRuleReleaseControls
+        assessmentId={
+          analysis.rootAssessmentId
+        }
+        maximumMark={
+          analysis.maximumMark
+        }
+        passMark={
+          analysis.passMark
+        }
+        workflowStatus={
+          analysis.status
+        }
+        published={
+          analysis.published
+        }
+      />
 
       <section className="rounded-xl border border-border bg-white px-4 py-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -183,7 +233,7 @@ export default async function AssessmentAnalysisDetailPage({
           </Badge>
         </div>
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
           <div className="rounded-lg border border-border bg-surface-subtle/40 px-3 py-3">
             <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-text-muted">
               Lowest
@@ -217,6 +267,28 @@ export default async function AssessmentAnalysisDetailPage({
               {formatAssessmentMetric(
                 analysis.summary.maximum,
               )}
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-border bg-surface-subtle/40 px-3 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-text-muted">
+              Passed
+            </p>
+
+            <p className="mt-1 text-lg font-semibold text-text-primary">
+              {analysis.summary.passed ??
+                '—'}
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-border bg-surface-subtle/40 px-3 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-text-muted">
+              Failed
+            </p>
+
+            <p className="mt-1 text-lg font-semibold text-text-primary">
+              {analysis.summary.failed ??
+                '—'}
             </p>
           </div>
         </div>
@@ -381,7 +453,7 @@ export default async function AssessmentAnalysisDetailPage({
                         'missing_mark' ||
                       student.status ===
                         'pending'
-                      ? 'â€”'
+                      ? '—'
                       : 'Mark'}
                 </p>
 
@@ -400,11 +472,12 @@ export default async function AssessmentAnalysisDetailPage({
       </section>
 
       <p className="text-[11px] leading-5 text-text-muted">
-        Pass/fail and percentage-based
-        analysis are not inferred from
-        raw marks. They will activate only
-        after the assessment maximum and
-        pass threshold are configured.
+        Pass/fail uses the configured
+        assessment rule and numeric marks
+        only. Publishing is separate from
+        finalisation so results remain
+        controlled until explicitly
+        released.
       </p>
     </div>
   );

@@ -23,6 +23,10 @@ export interface AssessmentAnalysisSummary {
   median: number | null;
   minimum: number | null;
   maximum: number | null;
+  passed: number | null;
+  failed: number | null;
+  passRate: number | null;
+  meanPercentage: number | null;
 }
 
 function round(
@@ -83,9 +87,13 @@ function median(
 export function calculateAssessmentAnalysis({
   registeredPopulation,
   rows,
+  maximumMark = null,
+  passMark = null,
 }: {
   registeredPopulation: number;
   rows: AssessmentAnalysisResultRow[];
+  maximumMark?: number | null;
+  passMark?: number | null;
 }): AssessmentAnalysisSummary {
   const normalizedRegistered =
     Math.max(
@@ -171,6 +179,69 @@ export function calculateAssessmentAnalysis({
         )
       : null;
 
+  const ruleReady =
+    typeof maximumMark ===
+      'number' &&
+    Number.isFinite(
+      maximumMark,
+    ) &&
+    maximumMark >
+      0 &&
+    typeof passMark ===
+      'number' &&
+    Number.isFinite(
+      passMark,
+    ) &&
+    passMark >=
+      0 &&
+    passMark <=
+      maximumMark;
+
+  const passed =
+    ruleReady
+      ? numericMarks.filter(
+          (mark) =>
+            mark >=
+            passMark,
+        ).length
+      : null;
+
+  const failed =
+    ruleReady &&
+    passed !==
+      null
+      ? numericMarks.length -
+        passed
+      : null;
+
+  const passRate =
+    ruleReady &&
+    passed !==
+      null &&
+    numericMarks.length >
+      0
+      ? round(
+          (
+            passed /
+            numericMarks.length
+          ) *
+            100,
+        )
+      : null;
+
+  const meanPercentage =
+    ruleReady &&
+    mean !==
+      null
+      ? round(
+          (
+            mean /
+            maximumMark
+          ) *
+            100,
+        )
+      : null;
+
   return {
     registered:
       normalizedRegistered,
@@ -198,6 +269,10 @@ export function calculateAssessmentAnalysis({
             ...numericMarks,
           )
         : null,
+    passed,
+    failed,
+    passRate,
+    meanPercentage,
   };
 }
 
@@ -289,7 +364,7 @@ export function formatAssessmentMetric(
     value ===
     null
   ) {
-    return 'â€”';
+    return '—';
   }
 
   return Number.isInteger(

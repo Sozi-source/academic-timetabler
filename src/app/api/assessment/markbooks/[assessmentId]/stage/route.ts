@@ -12,6 +12,9 @@ import {
   requireHodAccess,
 } from '@/features/auth/authorization';
 import {
+  getAssessmentRuleForAssessment,
+} from '@/features/assessment/assessment-rule-query';
+import {
   buildAssessmentMarkbookStagePayload,
 } from '@/features/assessment/markbook-staging';
 import {
@@ -108,10 +111,28 @@ export async function POST(
         await file.arrayBuffer(),
       );
 
+    const rule =
+      await getAssessmentRuleForAssessment(
+        assessmentId,
+      );
+
+    if (!rule) {
+      return NextResponse.json(
+        {
+          message:
+            'Configure the assessment maximum and pass mark before staging.',
+        },
+        {
+          status: 409,
+        },
+      );
+    }
+
     const validation =
       await validateAssessmentMarkbook(
         buffer,
         assessmentId,
+        rule.maximumMark,
       );
 
     if (

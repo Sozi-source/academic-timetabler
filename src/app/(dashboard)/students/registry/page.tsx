@@ -46,6 +46,13 @@ export default async function StudentRegistryPage({ searchParams }: { searchPara
             <p className="mt-0.5 text-xs text-text-muted">Current department students.</p>
           </div>
           <div className="divide-y divide-border">
+            <div className="hidden border-b border-border bg-surface-subtle px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted md:grid md:grid-cols-[minmax(0,1.35fr)_minmax(0,0.9fr)_minmax(0,1fr)_minmax(7rem,0.8fr)_1rem] md:items-center md:gap-3">
+              <span>Student</span>
+              <span>Programme</span>
+              <span>Cohort</span>
+              <span>Status / Stage</span>
+              <span aria-hidden="true" />
+            </div>
             {students.slice(0, 100).map((student) => (
               <Link key={student.id} href={`/students/registry/${student.id}`} className="grid gap-2 px-4 py-3 text-xs transition hover:bg-surface-subtle md:grid-cols-[1.4fr_1fr_1fr_auto_auto] md:items-center">
                 <div>
@@ -57,7 +64,7 @@ export default async function StudentRegistryPage({ searchParams }: { searchPara
                   <p className="mt-0.5 text-text-muted">Admission: {student.admission_cohort?.name ?? '—'}</p>
                 </div>
                 <div>
-                  <p className="font-medium text-text-primary">Current: {student.current_cohort?.name ?? 'Not assigned'}</p>
+                  <p className="font-medium text-text-primary">{student.current_cohort?.name ?? 'Not assigned'}</p>
                 </div>
                 <StudentStatusStage student={student} />
                 <ChevronRight className="size-3.5 text-text-muted" />

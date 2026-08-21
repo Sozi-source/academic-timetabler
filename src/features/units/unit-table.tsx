@@ -1,5 +1,7 @@
 'use client';
 
+import { formatStudyPeriod } from '@/lib/study-period-label';
+
 import type {
   ColumnDef,
 } from '@tanstack/react-table';
@@ -118,7 +120,7 @@ const columns: ColumnDef<Unit>[] = [
   },
   {
     accessorKey: 'academicPeriodNumber',
-    header: 'Period',
+    header: 'Y/S',
     size: 88,
     minSize: 82,
     maxSize: 96,
@@ -450,7 +452,7 @@ export function UnitTable({
       toolbarFilters={
         <div className="flex w-full flex-wrap items-center gap-2 lg:w-auto lg:flex-1 lg:flex-nowrap">
 <Select
-            aria-label="Filter by Academic Period"
+            aria-label="Filter by year and semester"
             value={periodNumber}
             onChange={(event) => {
               setPeriodNumber(
@@ -460,7 +462,7 @@ export function UnitTable({
             className="h-9 w-full text-xs sm:w-auto sm:min-w-36"
           >
             <option value="all">
-              All periods
+              All Y/S
             </option>
 
             {periodOptions.map((period) => (
@@ -468,7 +470,7 @@ export function UnitTable({
                 key={period}
                 value={period}
               >
-                Period {period}
+                {formatStudyPeriod(period)}
               </option>
             ))}
           </Select>

@@ -1,5 +1,7 @@
 'use client';
 
+import { formatStudyPeriod } from '@/lib/study-period-label';
+
 import type {
   ColumnDef,
 } from '@tanstack/react-table';
@@ -138,27 +140,15 @@ const columns: ColumnDef<Cohort>[] = [
     id: 'progress',
     accessorFn: (row) =>
       row.currentAcademicPeriodNumber,
-    header: 'Progress',
+    header: 'Y/S',
     cell: ({ row }) => (
-      <div className="min-w-0 max-w-full">
-        <p className="font-medium text-text-primary">
-          Period{' '}
-          {row.original.currentAcademicPeriodNumber}
-        </p>
-
-        {row.original.programme ? (
-          <p className="mt-1 text-xs text-text-muted">
-            of{' '}
-            {
-              row.original.programme
-                .totalAcademicPeriods
-            }
-          </p>
-        ) : null}
-      </div>
+      <span className="whitespace-nowrap text-xs font-semibold text-text-primary sm:text-[13px] xl:text-sm">
+        {formatStudyPeriod(
+          row.original.currentAcademicPeriodNumber,
+        )}
+      </span>
     ),
-  },
-  {
+  },{
     id: 'enrolment',
     accessorFn: (row) =>
       row.actualSize,

@@ -2,6 +2,7 @@ import {
   CalendarRange,
   ClipboardList,
   GraduationCap,
+  FlaskConical,
   Stethoscope,
   type LucideIcon,
 } from 'lucide-react';
@@ -53,11 +54,21 @@ export const platformModules: readonly PlatformModule[] = [
   {
     key: 'attendance',
     title: 'Attendance & Clinical',
-    shortTitle: 'Attendance & Clinical',
-    description: 'Manage attendance and clinical progression.',
+    shortTitle: 'Attendance',
+    description: 'Monitor class attendance; clinical workflows remain staged.',
     href: '/attendance-clinical',
-    status: 'coming_soon',
+    status: 'active',
     icon: Stethoscope,
-    capabilities: ['Class attendance', 'Clinical rotations', 'Attachment readiness', 'Completion tracking'],
+    capabilities: ['Class attendance', 'Present / absent', 'Trainer history', 'HOD oversight'],
+  },
+  {
+    key: 'testing',
+    title: 'System Testing',
+    shortTitle: 'Testing',
+    description: 'Launch structured end-to-end testing before production.',
+    href: '/testing',
+    status: 'active',
+    icon: FlaskConical,
+    capabilities: ['Module readiness', 'Test launchpad', 'Operational counts', 'Pre-production review'],
   },
 ] as const;

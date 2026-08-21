@@ -1,4 +1,5 @@
 import {
+  CalendarCheck2,
   FileClock,
   FileSpreadsheet,
   FileText,
@@ -36,6 +37,13 @@ function iconFor(
     'teaching_document'
   ) {
     return FileText;
+  }
+
+  if (
+    kind ===
+    'attendance'
+  ) {
+    return CalendarCheck2;
   }
 
   return FileClock;
@@ -88,7 +96,7 @@ export default async function StaffHistoryPage() {
       <PageHeader
         eyebrow="Staff"
         title="History"
-        description="Your assessment and teaching-document activity."
+        description="Your assessment, teaching-document and attendance activity."
         icon={History}
       />
 

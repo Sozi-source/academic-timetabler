@@ -78,6 +78,35 @@ export function canStageStaffMarkbook(
   );
 }
 
+
+export function canUseStaffOnlineMarks({
+  state,
+  assessmentType,
+  maximumMark,
+}: {
+  state:
+    StaffAssessmentWorkflowState;
+  assessmentType:
+    'cat' |
+    'exam';
+  maximumMark:
+    number |
+    null;
+}): boolean {
+  return (
+    assessmentType ===
+      'exam' &&
+    maximumMark ===
+      100 &&
+    state.populationCount >
+      0 &&
+    state.ruleConfigured &&
+    !terminal(
+      state.workflowStatus,
+    )
+  );
+}
+
 export function canCommitStaffBatch({
   status,
   totalRows,

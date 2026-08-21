@@ -10,8 +10,8 @@ import {
   teachingDocumentContentDisposition,
 } from '@/features/teaching-documents/storage';
 import {
-  createAdminClient,
-} from '@/lib/supabase/admin';
+  createClient,
+} from '@/lib/supabase/server';
 
 export const runtime =
   'nodejs';
@@ -36,15 +36,15 @@ export async function GET(
   } =
     await params;
 
-  const admin =
-    createAdminClient();
+  const supabase =
+    await createClient();
 
   const {
     data:
       document,
     error,
   } =
-    await admin
+    await supabase
       .from(
         'teaching_documents',
       )

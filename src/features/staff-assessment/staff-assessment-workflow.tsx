@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   Download,
   FileCheck2,
+  Keyboard,
   LoaderCircle,
   Upload,
   UserX,
@@ -26,6 +27,7 @@ import {
   canEditStaffAttendance,
   canGenerateStaffPopulation,
   canStageStaffMarkbook,
+  canUseStaffOnlineMarks,
 } from './workflow-domain';
 
 interface StaffAssessmentStudent {
@@ -181,6 +183,14 @@ export function StaffAssessmentWorkflow({
       state,
     );
 
+
+  const canOnline =
+    canUseStaffOnlineMarks({
+      state,
+      assessmentType,
+      maximumMark,
+    });
+
   async function generatePopulation() {
     setBusy(
       'population',
@@ -266,6 +276,46 @@ export function StaffAssessmentWorkflow({
       }
 
       router.refresh();
+    } finally {
+      setBusy(
+        null,
+      );
+    }
+  }
+
+  async function openOnlineMarks() {
+    setBusy(
+      'online',
+    );
+
+    setMessage(
+      null,
+    );
+
+    try {
+      const response =
+        await fetch(
+          `/api/staff/assessment/${assessmentId}/online/prepare`,
+          {
+            method:
+              'POST',
+          },
+        );
+
+      if (!response.ok) {
+        setMessage(
+          await messageFromResponse(
+            response,
+            'Online marks could not be opened.',
+          ),
+        );
+
+        return;
+      }
+
+      router.push(
+        `/staff/units/${allocationId}/assessment/${assessmentId}/marks`,
+      );
     } finally {
       setBusy(
         null,
@@ -536,6 +586,36 @@ export function StaffAssessmentWorkflow({
               />
               Signing sheet
             </button>
+
+            {assessmentType ===
+            'exam' ? (
+              <button
+                type="button"
+                disabled={
+                  !canOnline ||
+                  busy !==
+                    null
+                }
+                onClick={() =>
+                  void openOnlineMarks()
+                }
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {busy ===
+                'online' ? (
+                  <LoaderCircle
+                    className="size-3.5 animate-spin"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <Keyboard
+                    className="size-3.5"
+                    aria-hidden="true"
+                  />
+                )}
+                Online marks
+              </button>
+            ) : null}
 
             <input
               ref={

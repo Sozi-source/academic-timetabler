@@ -203,6 +203,20 @@ export default async function StaffUnitPage({
       </section>
 
       <Link
+        href={`/staff/attendance?allocationId=${allocation.allocationId}`}
+        className="block rounded-xl border border-border bg-white px-4 py-4 transition hover:border-border-strong hover:bg-surface-subtle/40"
+      >
+        <p className="text-sm font-semibold text-text-primary">
+          Class Attendance
+        </p>
+
+        <p className="mt-1 text-[11px] leading-5 text-text-muted">
+          Present or absent attendance
+          from the published timetable.
+        </p>
+      </Link>
+
+      <Link
         href={`/staff/units/${allocation.allocationId}/documents`}
         className="block rounded-xl border border-border bg-white px-4 py-4 transition hover:border-border-strong hover:bg-surface-subtle/40"
       >

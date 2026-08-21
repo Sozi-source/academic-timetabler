@@ -107,6 +107,13 @@ export function StaffShell({
           </Link>
 
           <Link
+            href="/staff/attendance"
+            className="whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
+          >
+            Attendance
+          </Link>
+
+          <Link
             href="/staff/documents"
             className="whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
           >

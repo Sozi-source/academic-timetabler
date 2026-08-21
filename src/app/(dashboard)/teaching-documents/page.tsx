@@ -1,4 +1,5 @@
 import {
+  Eye,
   FileCheck2,
   FileText,
   Layers3,
@@ -46,24 +47,37 @@ export default async function TeachingDocumentsPage() {
         description="Official templates and controlled document records."
         icon={FileText}
         actions={
-          <Link
-            href="/teaching-documents/review"
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
-          >
-            <FileCheck2
-              className="size-3.5"
-              aria-hidden="true"
-            />
-            Review
-            {counts.submitted >
-            0 ? (
-              <span className="rounded-full bg-warning-surface px-1.5 py-0.5 text-[9px] font-bold text-warning">
-                {
-                  counts.submitted
-                }
-              </span>
-            ) : null}
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/teaching-documents/published"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
+            >
+              <Eye
+                className="size-3.5"
+                aria-hidden="true"
+              />
+              Student publication
+            </Link>
+
+            <Link
+              href="/teaching-documents/review"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
+            >
+              <FileCheck2
+                className="size-3.5"
+                aria-hidden="true"
+              />
+              Review
+              {counts.submitted >
+              0 ? (
+                <span className="rounded-full bg-warning-surface px-1.5 py-0.5 text-[9px] font-bold text-warning">
+                  {
+                    counts.submitted
+                  }
+                </span>
+              ) : null}
+            </Link>
+          </div>
         }
       />
 

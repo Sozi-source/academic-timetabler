@@ -11,6 +11,7 @@ import {
   canEditStaffAttendance,
   canGenerateStaffPopulation,
   canStageStaffMarkbook,
+  canUseStaffOnlineMarks,
 } from '@/features/staff-assessment/workflow-domain';
 
 describe('trainer assessment workflow domain', () => {
@@ -85,6 +86,33 @@ describe('trainer assessment workflow domain', () => {
       ),
     ).toBe(
       true,
+    );
+
+
+    expect(
+      canUseStaffOnlineMarks({
+        state:
+          locked,
+        assessmentType:
+          'exam',
+        maximumMark:
+          100,
+      }),
+    ).toBe(
+      true,
+    );
+
+    expect(
+      canUseStaffOnlineMarks({
+        state:
+          locked,
+        assessmentType:
+          'cat',
+        maximumMark:
+          15,
+      }),
+    ).toBe(
+      false,
     );
   });
 

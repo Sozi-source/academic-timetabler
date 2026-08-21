@@ -25,7 +25,8 @@ export interface StaffPublishedTimetable {
 export type StaffHistoryKind =
   | 'markbook'
   | 'marks_import'
-  | 'teaching_document';
+  | 'teaching_document'
+  | 'attendance';
 
 export interface StaffHistoryItem {
   id: string;

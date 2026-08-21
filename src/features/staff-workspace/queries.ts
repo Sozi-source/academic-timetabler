@@ -638,6 +638,7 @@ export async function getStaffHistory(
     generationResult,
     importResult,
     documentResult,
+    attendanceResult,
   ] =
     await Promise.all([
       supabase
@@ -684,12 +685,36 @@ export async function getStaffHistory(
             error:
               null,
           }),
+
+      allocationIds.length >
+      0
+        ? supabase
+            .from(
+              'class_sessions',
+            )
+            .select(
+              '*',
+            )
+            .in(
+              'teaching_allocation_id',
+              allocationIds,
+            )
+            .limit(
+              100,
+            )
+        : Promise.resolve({
+            data:
+              [],
+            error:
+              null,
+          }),
     ]);
 
   const error =
     generationResult.error ??
     importResult.error ??
-    documentResult.error;
+    documentResult.error ??
+    attendanceResult.error;
 
   if (error) {
     throw new Error(
@@ -859,6 +884,66 @@ export async function getStaffHistory(
       occurredAt:
         asString(
           raw.updated_at,
+        ) ??
+        asString(
+          raw.created_at,
+        ),
+    });
+  }
+
+
+  for (
+    const raw of
+      (
+        attendanceResult.data ??
+        []
+      ) as UnknownRow[]
+  ) {
+    const id =
+      asString(
+        raw.id,
+      );
+
+    if (!id) {
+      continue;
+    }
+
+    const status =
+      asString(
+        raw.status,
+      ) ??
+      'open';
+
+    const rosterCount =
+      asNumber(
+        raw.roster_count,
+      ) ??
+      0;
+
+    items.push({
+      id:
+        `attendance:${id}`,
+      kind:
+        'attendance',
+      title:
+        'Class attendance',
+      detail:
+        `${asString(
+          raw.session_date,
+        ) ?? 'Class date'} · ${rosterCount} students`,
+      status:
+        titleCase(
+          status,
+        ),
+      occurredAt:
+        asString(
+          raw.completed_at,
+        ) ??
+        asString(
+          raw.updated_at,
+        ) ??
+        asString(
+          raw.opened_at,
         ) ??
         asString(
           raw.created_at,

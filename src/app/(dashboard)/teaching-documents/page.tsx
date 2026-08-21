@@ -1,11 +1,9 @@
 import {
   FileText,
   Layers3,
+  ShieldCheck,
 } from 'lucide-react';
 
-import {
-  Badge,
-} from '@/components/ui/badge';
 import {
   MetricCard,
 } from '@/components/ui/metric-card';
@@ -22,6 +20,9 @@ import {
   getTeachingDocumentAdminCounts,
   getTeachingDocumentTemplates,
 } from '@/features/teaching-documents/queries';
+import {
+  TeachingDocumentTemplateManager,
+} from '@/features/teaching-documents/template-manager';
 
 export default async function TeachingDocumentsPage() {
   await requireHodAccess();
@@ -35,28 +36,12 @@ export default async function TeachingDocumentsPage() {
       getTeachingDocumentAdminCounts(),
     ]);
 
-  const activeByType =
-    new Map(
-      templates
-        .filter(
-          (template) =>
-            template.status ===
-            'active',
-        )
-        .map(
-          (template) => [
-            template.documentType,
-            template,
-          ],
-        ),
-    );
-
   return (
     <div className="space-y-5">
       <PageHeader
         eyebrow="Academic operations"
         title="Teaching Documents"
-        description="Controlled templates and document records."
+        description="Official templates and controlled document records."
         icon={FileText}
       />
 
@@ -68,7 +53,7 @@ export default async function TeachingDocumentsPage() {
           )}
           description="Controlled teaching records"
           icon={FileText}
-          status="Foundation"
+          status="Standard"
         />
 
         <MetricCard
@@ -87,67 +72,42 @@ export default async function TeachingDocumentsPage() {
             counts.documents,
           )}
           description="Allocation-linked versions"
-          icon={FileText}
-          status="History"
+          icon={ShieldCheck}
+          status="Controlled"
         />
       </section>
 
-      <section className="grid gap-3 md:grid-cols-2">
+      <section className="rounded-xl border border-border bg-surface-subtle/50 px-4 py-3">
+        <p className="text-[11px] leading-5 text-text-secondary">
+          Upload the college-issued file unchanged.
+          Every upload becomes a new draft version;
+          activate only the verified institutional copy.
+        </p>
+      </section>
+
+      <div className="space-y-3">
         {teachingDocumentKinds.map(
           (
             kind,
-          ) => {
-            const template =
-              activeByType.get(
-                kind.value,
-              );
-
-            return (
-              <article
-                key={
-                  kind.value
-                }
-                className="rounded-xl border border-border bg-white px-4 py-4"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h2 className="text-sm font-semibold text-text-primary">
-                      {
-                        kind.label
-                      }
-                    </h2>
-
-                    <p className="mt-1 text-[11px] text-text-muted">
-                      {
-                        kind.description
-                      }
-                    </p>
-                  </div>
-
-                  <Badge
-                    variant={
-                      template
-                        ? 'success'
-                        : 'neutral'
-                    }
-                  >
-                    {template
-                      ? `v${template.versionNumber}`
-                      : 'Not installed'}
-                  </Badge>
-                </div>
-
-                <p className="mt-4 border-t border-border pt-3 text-[10px] leading-5 text-text-muted">
-                  {template
-                    ? template.originalFilename ??
-                      template.name
-                    : 'Official template file will be connected in the template-ingestion stage.'}
-                </p>
-              </article>
-            );
-          },
+          ) => (
+            <TeachingDocumentTemplateManager
+              key={
+                kind.value
+              }
+              documentType={
+                kind.value
+              }
+              templates={
+                templates.filter(
+                  (template) =>
+                    template.documentType ===
+                    kind.value,
+                )
+              }
+            />
+          ),
         )}
-      </section>
+      </div>
     </div>
   );
 }

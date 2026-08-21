@@ -1,5 +1,6 @@
 import {
   ArrowLeft,
+  Download,
   FileText,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -191,7 +192,7 @@ export default async function StaffUnitDocumentsPage({
                   )}
                 </div>
 
-                <div className="mt-4 flex items-end justify-between gap-3 border-t border-border pt-3">
+                <div className="mt-4 flex flex-wrap items-end justify-between gap-3 border-t border-border pt-3">
                   <p className="text-[10px] text-text-muted">
                     {current
                       ? `Document v${current.versionNumber}`
@@ -200,19 +201,47 @@ export default async function StaffUnitDocumentsPage({
                         : 'Official template not connected'}
                   </p>
 
-                  {!current ? (
-                    <StartTeachingDocumentButton
-                      allocationId={
-                        allocationId
-                      }
-                      documentType={
-                        kind.value
-                      }
-                      disabled={
-                        !templateReady
-                      }
-                    />
-                  ) : null}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {current ? (
+                      <a
+                        href={`/api/staff/teaching-documents/${current.id}/template`}
+                        className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-2.5 text-[11px] font-semibold text-text-secondary transition hover:bg-surface-subtle"
+                      >
+                        <Download
+                          className="size-3"
+                          aria-hidden="true"
+                        />
+                        Template
+                      </a>
+                    ) : null}
+
+                    {current?.storagePath ? (
+                      <a
+                        href={`/api/staff/teaching-documents/${current.id}/download`}
+                        className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-2.5 text-[11px] font-semibold text-text-secondary transition hover:bg-surface-subtle"
+                      >
+                        <Download
+                          className="size-3"
+                          aria-hidden="true"
+                        />
+                        Document
+                      </a>
+                    ) : null}
+
+                    {!current ? (
+                      <StartTeachingDocumentButton
+                        allocationId={
+                          allocationId
+                        }
+                        documentType={
+                          kind.value
+                        }
+                        disabled={
+                          !templateReady
+                        }
+                      />
+                    ) : null}
+                  </div>
                 </div>
               </article>
             );

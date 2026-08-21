@@ -27,12 +27,36 @@ interface TemplateRow {
     | 'draft'
     | 'active'
     | 'retired';
+  storage_bucket: string;
   storage_path:
     | string
     | null;
   original_filename:
     | string
     | null;
+  mime_type:
+    | string
+    | null;
+  file_size_bytes:
+    | number
+    | string
+    | null;
+  sha256:
+    | string
+    | null;
+  notes:
+    | string
+    | null;
+  activated_at:
+    | string
+    | null;
+  retired_at:
+    | string
+    | null;
+  uploaded_at:
+    | string
+    | null;
+  created_at: string;
   updated_at: string;
 }
 
@@ -50,10 +74,21 @@ interface DocumentRow {
     | 'submitted'
     | 'approved'
     | 'archived';
+  storage_bucket: string;
   storage_path:
     | string
     | null;
   original_filename:
+    | string
+    | null;
+  mime_type:
+    | string
+    | null;
+  file_size_bytes:
+    | number
+    | string
+    | null;
+  sha256:
     | string
     | null;
   updated_at: string;
@@ -65,6 +100,31 @@ Promise<SupabaseClient> {
     await createClient()
   ) as unknown as
     SupabaseClient;
+}
+
+function numberOrNull(
+  value:
+    | number
+    | string
+    | null,
+): number | null {
+  if (
+    value ===
+    null
+  ) {
+    return null;
+  }
+
+  const parsed =
+    Number(
+      value,
+    );
+
+  return Number.isFinite(
+    parsed,
+  )
+    ? parsed
+    : null;
 }
 
 function mapTemplate(
@@ -83,10 +143,30 @@ function mapTemplate(
       ),
     status:
       row.status,
+    storageBucket:
+      row.storage_bucket,
     storagePath:
       row.storage_path,
     originalFilename:
       row.original_filename,
+    mimeType:
+      row.mime_type,
+    fileSizeBytes:
+      numberOrNull(
+        row.file_size_bytes,
+      ),
+    sha256:
+      row.sha256,
+    notes:
+      row.notes,
+    activatedAt:
+      row.activated_at,
+    retiredAt:
+      row.retired_at,
+    uploadedAt:
+      row.uploaded_at,
+    createdAt:
+      row.created_at,
     updatedAt:
       row.updated_at,
   };
@@ -110,10 +190,20 @@ function mapDocument(
       ),
     status:
       row.status,
+    storageBucket:
+      row.storage_bucket,
     storagePath:
       row.storage_path,
     originalFilename:
       row.original_filename,
+    mimeType:
+      row.mime_type,
+    fileSizeBytes:
+      numberOrNull(
+        row.file_size_bytes,
+      ),
+    sha256:
+      row.sha256,
     updatedAt:
       row.updated_at,
   };
@@ -138,8 +228,17 @@ Promise<TeachingDocumentTemplateSummary[]> {
         name,
         version_number,
         status,
+        storage_bucket,
         storage_path,
         original_filename,
+        mime_type,
+        file_size_bytes,
+        sha256,
+        notes,
+        activated_at,
+        retired_at,
+        uploaded_at,
+        created_at,
         updated_at
       `,
     )
@@ -214,8 +313,12 @@ export async function getTeachingDocumentsByAllocationIds(
         template_id,
         version_number,
         status,
+        storage_bucket,
         storage_path,
         original_filename,
+        mime_type,
+        file_size_bytes,
+        sha256,
         updated_at
       `,
     )

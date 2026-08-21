@@ -1,5 +1,6 @@
 import type {
   TeachingDocumentStatus,
+  TeachingDocumentTemplateStatus,
   TeachingDocumentType,
 } from './domain';
 
@@ -8,12 +9,18 @@ export interface TeachingDocumentTemplateSummary {
   documentType: TeachingDocumentType;
   name: string;
   versionNumber: number;
-  status:
-    | 'draft'
-    | 'active'
-    | 'retired';
+  status: TeachingDocumentTemplateStatus;
+  storageBucket: string;
   storagePath: string | null;
   originalFilename: string | null;
+  mimeType: string | null;
+  fileSizeBytes: number | null;
+  sha256: string | null;
+  notes: string | null;
+  activatedAt: string | null;
+  retiredAt: string | null;
+  uploadedAt: string | null;
+  createdAt: string;
   updatedAt: string;
 }
 
@@ -24,7 +31,11 @@ export interface TeachingDocumentRecord {
   templateId: string;
   versionNumber: number;
   status: TeachingDocumentStatus;
+  storageBucket: string;
   storagePath: string | null;
   originalFilename: string | null;
+  mimeType: string | null;
+  fileSizeBytes: number | null;
+  sha256: string | null;
   updatedAt: string;
 }

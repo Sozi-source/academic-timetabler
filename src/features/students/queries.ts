@@ -29,7 +29,6 @@ const studentSelection = `
   programme:programmes!students_programme_id_fkey(id, code, name),
   admission_cohort:cohorts!students_admission_cohort_id_fkey(id, code, name),
   current_cohort:cohorts!students_current_cohort_id_fkey(id, code, name, current_academic_period_number),
-  current_stage:programme_stages!students_current_stage_id_fkey(id, code, name, sequence_number),
 `;
 
 export const getStudentSummary = cache(async (): Promise<StudentSummary> => {
@@ -53,11 +52,74 @@ export const getStudents = cache(async (
   status?: 'active' | 'deferred' | 'dropped_out' | 'completed' | 'graduated',
 ): Promise<StudentRow[]> => {
   const supabase = await createClient();
-  let query = supabase.from('students').select(studentSelection).order('full_name', { ascending: true });
-  if (status) query = query.eq('lifecycle_status', status);
+
+  let query = supabase
+    .from('students')
+    .select(studentSelection)
+    .order('full_name', { ascending: true });
+
+  if (status) {
+    query = query.eq('lifecycle_status', status);
+  }
+
   const { data, error } = await query;
-  if (error) throw new Error(`Unable to load students: ${error.message}`);
-  return (data ?? []) as unknown as StudentRow[];
+
+  if (error) {
+    throw new Error(
+      `Unable to load students: ${error.message}`,
+    );
+  }
+
+  const rows = (data ?? []) as unknown as Array<
+    StudentRow & {
+      current_stage_id?: string | null;
+      current_stage_sequence_number?: number | null;
+    }
+  >;
+
+  const stageIds = [
+    ...new Set(
+      rows
+        .map((student) => student.current_stage_id)
+        .filter(
+          (value): value is string =>
+            typeof value === 'string' &&
+            value.length > 0,
+        ),
+    ),
+  ];
+
+  if (stageIds.length === 0) {
+    return rows;
+  }
+
+  const { data: stageRows, error: stageError } =
+    await supabase
+      .from('programme_stages')
+      .select('id, sequence_number')
+      .in('id', stageIds);
+
+  if (stageError) {
+    throw new Error(
+      `Unable to load student stages: ${stageError.message}`,
+    );
+  }
+
+  const stageById = new Map(
+    (stageRows ?? []).map((stage) => [
+      stage.id,
+      stage.sequence_number,
+    ]),
+  );
+
+  return rows.map((student) => ({
+    ...student,
+    current_stage_sequence_number:
+      student.current_stage_id
+        ? stageById.get(student.current_stage_id) ??
+          null
+        : null,
+  }));
 });
 
 export const getStudentById = cache(async (studentId: string): Promise<StudentDetail | null> => {

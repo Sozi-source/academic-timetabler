@@ -23,19 +23,13 @@ describe('student status and stage display', () => {
     },
   );
 
-  it('uses the academic activity as the visible status', () => {
+  it('uses the clear activity/lifecycle status', () => {
     expect(
-      getStudentStatusLabel(
-        'active',
-        'in_class',
-      ),
+      getStudentStatusLabel('active', 'in_class'),
     ).toBe('In class');
 
     expect(
-      getStudentStatusLabel(
-        'active',
-        'attachment',
-      ),
+      getStudentStatusLabel('active', 'attachment'),
     ).toBe('On attachment');
 
     expect(
@@ -53,10 +47,7 @@ describe('student status and stage display', () => {
     ).toBe('Awaiting graduation');
 
     expect(
-      getStudentStatusLabel(
-        'graduated',
-        'graduated',
-      ),
+      getStudentStatusLabel('graduated', 'graduated'),
     ).toBe('Graduated');
   });
 });

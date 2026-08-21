@@ -1,16 +1,11 @@
 import type { StudentRow } from './types';
 
-type StudentStageData = StudentRow & {
-  current_stage?: {
-    sequence_number?: number | null;
-  } | {
-    sequence_number?: number | null;
-  }[] | null;
-  current_cohort?: (
-    StudentRow['current_cohort'] extends infer T ? T : never
-  ) & {
-    current_academic_period_number?: number | null;
-  };
+type StageAwareStudent = StudentRow & {
+  current_stage_sequence_number?: number | null;
+};
+
+type CohortWithPeriod = {
+  current_academic_period_number?: number | null;
 };
 
 function relation<T>(
@@ -133,22 +128,17 @@ export function getStudentStatusLabel(
 export function getStudentStageLabel(
   student: StudentRow,
 ): string {
-  const value = student as StudentStageData;
+  const stageAware = student as StageAwareStudent;
 
-  const currentStage =
-    relation(value.current_stage);
-
-  const cohort =
-    relation(
-      value.current_cohort as
-        | StudentStageData['current_cohort']
-        | StudentStageData['current_cohort'][]
-        | null
-        | undefined,
-    );
+  const cohort = relation(
+    student.current_cohort as unknown as
+      | CohortWithPeriod
+      | CohortWithPeriod[]
+      | null,
+  );
 
   return formatStudentStage(
-    currentStage?.sequence_number ??
+    stageAware.current_stage_sequence_number ??
       cohort?.current_academic_period_number ??
       null,
   );
@@ -159,22 +149,16 @@ export function StudentStatusStage({
 }: {
   student: StudentRow;
 }) {
-  const statusLabel =
-    getStudentStatusLabel(
-      student.lifecycle_status,
-      student.academic_phase,
-    );
-
-  const stageLabel =
-    getStudentStageLabel(student);
-
   return (
     <span className="block min-w-24">
       <span className="block font-medium text-text-primary">
-        {statusLabel}
+        {getStudentStatusLabel(
+          student.lifecycle_status,
+          student.academic_phase,
+        )}
       </span>
       <span className="mt-0.5 block text-[10px] font-semibold tracking-wide text-text-muted sm:text-[11px]">
-        {stageLabel}
+        {getStudentStageLabel(student)}
       </span>
     </span>
   );

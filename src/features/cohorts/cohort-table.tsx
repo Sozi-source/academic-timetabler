@@ -414,7 +414,7 @@ export function CohortTable({
       }
       initialPageSize={20}
       toolbarFilters={
-        <div className="flex flex-1 flex-wrap items-center gap-2">
+        <div className="flex w-full flex-wrap items-center gap-2 md:w-auto md:flex-1 md:justify-end">
           <Select
             aria-label="Filter by programme"
             value={programmeId}
@@ -423,7 +423,7 @@ export function CohortTable({
                 event.target.value,
               );
             }}
-            className="h-11"
+            className="h-9 w-full text-xs sm:w-auto sm:min-w-36"
           >
             <option value="all">
               All programmes
@@ -451,7 +451,7 @@ export function CohortTable({
                   | CohortStatus,
               );
             }}
-            className="h-11"
+            className="h-9 w-full text-xs sm:w-auto sm:min-w-36"
           >
             <option value="all">
               All statuses
@@ -480,7 +480,7 @@ export function CohortTable({
                   | 'unavailable',
               );
             }}
-            className="h-11"
+            className="h-9 w-full text-xs sm:w-auto sm:min-w-36"
           >
             <option value="all">
               All availability

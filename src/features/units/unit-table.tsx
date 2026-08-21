@@ -457,7 +457,7 @@ export function UnitTable({
                 event.target.value,
               );
             }}
-            className="h-11"
+            className="h-9 w-full text-xs sm:w-auto sm:min-w-36"
           >
             <option value="all">
               All periods
@@ -483,7 +483,7 @@ export function UnitTable({
                   | UnitCategory,
               );
             }}
-            className="h-11"
+            className="h-9 w-full text-xs sm:w-auto sm:min-w-36"
           >
             <option value="all">
               All categories
@@ -512,7 +512,7 @@ export function UnitTable({
                   | 'inactive',
               );
             }}
-            className="h-11"
+            className="h-9 w-full text-xs sm:w-auto sm:min-w-36"
           >
             <option value="all">
               All statuses

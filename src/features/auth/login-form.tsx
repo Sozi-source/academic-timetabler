@@ -177,7 +177,6 @@ export function LoginForm({
           Create staff account
         </Link>
       </p>
-
     </form>
   );
 }

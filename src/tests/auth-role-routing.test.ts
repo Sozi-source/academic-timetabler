@@ -38,6 +38,34 @@ describe('role-based authentication routing', () => {
     );
   });
 
+  it('keeps pending accounts outside privileged workspaces', () => {
+    expect(
+      getHomePathForRole(
+        'pending',
+      ),
+    ).toBe(
+      '/unauthorized',
+    );
+
+    expect(
+      canUsePostLoginPath(
+        'pending',
+        '/dashboard',
+      ),
+    ).toBe(
+      false,
+    );
+
+    expect(
+      canUsePostLoginPath(
+        'pending',
+        '/staff',
+      ),
+    ).toBe(
+      false,
+    );
+  });
+
   it('does not honor cross-role post-login destinations', () => {
     expect(
       canUsePostLoginPath(

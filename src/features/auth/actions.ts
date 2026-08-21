@@ -6,13 +6,19 @@ import { createClient } from '@/lib/supabase/server';
 
 import type { LoginActionState } from './action-types';
 import {
-  getSafeInternalPath,
-  loginSchema,
-} from './validation';
-import {
   canUsePostLoginPath,
   getHomePathForRole,
 } from './routing';
+import type { AppRole } from './types';
+import {
+  getSafeInternalPath,
+  loginSchema,
+} from './validation';
+
+interface LoginProfileRow {
+  role: AppRole;
+  is_active: boolean;
+}
 
 export async function loginAction(
   _previousState: LoginActionState,
@@ -40,13 +46,15 @@ export async function loginAction(
 
   const supabase = await createClient();
 
-  const { data: authData, error } =
-    await supabase.auth.signInWithPassword({
-      email: parsed.data.email,
-      password: parsed.data.password,
-    });
+  const {
+    data: authData,
+    error: signInError,
+  } = await supabase.auth.signInWithPassword({
+    email: parsed.data.email,
+    password: parsed.data.password,
+  });
 
-  if (error) {
+  if (signInError) {
     return {
       status: 'error',
       message:
@@ -54,69 +62,48 @@ export async function loginAction(
     };
   }
 
-  if (parsed.data.nextPath) {
-    redirect(getSafeInternalPath(parsed.data.nextPath));
+  const {
+    data: profile,
+    error: profileError,
+  } = await supabase
+    .from('profiles')
+    .select('role, is_active')
+    .eq('id', authData.user.id)
+    .maybeSingle<LoginProfileRow>();
+
+  if (
+    profileError ||
+    !profile ||
+    !profile.is_active
+  ) {
+    await supabase.auth.signOut();
+
+    return {
+      status: 'error',
+      message:
+        'Your account is not active in Academic Planner.',
+    };
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', authData.user.id)
-    .maybeSingle<{ role: 'system_admin' | 'hod' | 'trainer' }>();
-
-  const trainerRouteRequestedDestinationV9 =
-    profile?.role === 'trainer' ? '/trainer/exam-attendance' : '/dashboard';
-
-  const {
-    data: trainerRouteAuthDataV9,
-  } =
-    await supabase.auth.getUser();
-
-  const trainerRouteUserIdV9 =
-    trainerRouteAuthDataV9.user
-      ?.id ??
-    null;
-
-  const trainerRouteProfileResultV9 =
-    trainerRouteUserIdV9
-      ? await supabase
-          .from('profiles')
-          .select('role')
-          .eq(
-            'id',
-            trainerRouteUserIdV9,
-          )
-          .maybeSingle()
-      : {
-          data:
-            null,
-        };
-
-  const trainerRouteRoleV9 =
-    trainerRouteProfileResultV9
-      .data
-      ?.role ??
-    null;
-
-  const trainerRouteDefaultV9 =
-    trainerRouteRoleV9
-      ? getHomePathForRole(
-          trainerRouteRoleV9,
+  const requestedDestination =
+    parsed.data.nextPath
+      ? getSafeInternalPath(
+          parsed.data.nextPath,
         )
-      : trainerRouteRequestedDestinationV9;
+      : null;
 
-  const trainerRouteDestinationV9 =
-    trainerRouteRoleV9 &&
+  const destination =
+    requestedDestination &&
     canUsePostLoginPath(
-      trainerRouteRoleV9,
-      trainerRouteRequestedDestinationV9,
+      profile.role,
+      requestedDestination,
     )
-      ? trainerRouteRequestedDestinationV9
-      : trainerRouteDefaultV9;
+      ? requestedDestination
+      : getHomePathForRole(
+          profile.role,
+        );
 
-  redirect(
-    trainerRouteDestinationV9,
-  );
+  redirect(destination);
 }
 
 export async function logoutAction(): Promise<void> {

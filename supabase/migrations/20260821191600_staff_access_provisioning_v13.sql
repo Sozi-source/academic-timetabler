@@ -112,7 +112,6 @@ begin
   do update set
     full_name = excluded.full_name,
     email = excluded.email,
-    role = excluded.role,
     updated_at = now();
 
   if matched_trainer_id is not null then
@@ -138,6 +137,48 @@ $$;
 
 comment on function public.handle_new_auth_user() is
   'Creates new profiles with least privilege. A trainer role is granted only when the signup email matches an active pre-registered unlinked trainer.';
+
+-- ----------------------------------------------------------------------------
+-- Capability-based trainer identity.
+--
+-- HODs/system administrators may also teach. Keep their administrative role
+-- while allowing a linked active trainer record to drive staff-workspace RLS.
+-- ----------------------------------------------------------------------------
+
+create or replace function public.current_trainer_id()
+returns uuid
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select trainer.id
+  from public.trainers as trainer
+  join public.profiles as profile
+    on profile.id =
+       trainer.profile_id
+  where trainer.profile_id =
+      auth.uid()
+    and trainer.is_active = true
+    and profile.is_active = true
+    and profile.role::text in (
+      'trainer',
+      'hod',
+      'system_admin'
+    )
+  limit 1;
+$$;
+
+revoke all
+on function public.current_trainer_id()
+from public;
+
+grant execute
+on function public.current_trainer_id()
+to authenticated;
+
+comment on function public.current_trainer_id() is
+  'Returns the active trainer linked to the authenticated trainer, HOD or system-admin profile.';
 
 -- ----------------------------------------------------------------------------
 -- Harden the V9 manual linking helper.
@@ -227,9 +268,13 @@ begin
         using errcode = 'P0002';
     end if;
 
-    if profile_row.role <> 'trainer' then
+    if profile_row.role not in (
+      'trainer',
+      'hod',
+      'system_admin'
+    ) then
       raise exception
-        'The linked profile does not have the trainer role. Review this account before continuing.'
+        'The linked profile cannot use the staff workspace. Review this account before continuing.'
         using errcode = '23514';
     end if;
 
@@ -277,15 +322,6 @@ begin
       using errcode = '23514';
   end if;
 
-  if profile_row.role in (
-    'hod',
-    'system_admin'
-  ) then
-    raise exception
-      'This email belongs to an administrative account and cannot be converted automatically.'
-      using errcode = '23514';
-  end if;
-
   if profile_row.role = 'pending' then
     update public.profiles
     set
@@ -294,7 +330,11 @@ begin
     where id = profile_row.id;
 
     profile_row.role := 'trainer';
-  elsif profile_row.role <> 'trainer' then
+  elsif profile_row.role not in (
+    'trainer',
+    'hod',
+    'system_admin'
+  ) then
     raise exception
       'The matching account has an unsupported role.'
       using errcode = '23514';
@@ -345,7 +385,7 @@ on function public.provision_trainer_access(uuid)
 to authenticated;
 
 comment on function public.provision_trainer_access(uuid) is
-  'Links an active trainer to a matching pending/trainer profile without silently demoting administrative accounts.';
+  'Links an active trainer to a matching profile. Pending profiles become trainers; HOD/system-admin roles are preserved.';
 
 -- ----------------------------------------------------------------------------
 -- Compact HOD/system-admin access register.
@@ -414,7 +454,11 @@ begin
         then 'review'
 
       when trainer.profile_id is not null
-        and linked_profile.role::text = 'trainer'
+        and linked_profile.role::text in (
+          'trainer',
+          'hod',
+          'system_admin'
+        )
         and linked_profile.is_active = true
         then 'linked'
 
@@ -424,18 +468,14 @@ begin
       when email_profile.id is null
         then 'account_required'
 
-      when email_profile.role::text in (
-        'hod',
-        'system_admin'
-      )
-        then 'administrative_profile'
-
       when email_profile.is_active = false
         then 'review'
 
       when email_profile.role::text in (
         'trainer',
-        'pending'
+        'pending',
+        'hod',
+        'system_admin'
       )
         then 'ready_to_link'
 

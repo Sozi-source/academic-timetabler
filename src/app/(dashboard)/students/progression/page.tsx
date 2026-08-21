@@ -25,7 +25,7 @@ export default async function StudentProgressionPage() {
     <div className="space-y-4">
       <PageHeader
         eyebrow="Student Lifecycle"
-        title="Lifecycle & progression"
+        title="Student status & progression"
         description="Track exceptions and completion."
         icon={History}
         context={<Badge variant="neutral">{students.length} tracked</Badge>}
@@ -42,6 +42,11 @@ export default async function StudentProgressionPage() {
       ) : (
         <Card className="overflow-hidden">
           <div className="divide-y divide-border">
+            <div className="sticky top-0 z-10 hidden border-b border-border bg-surface/95 px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted backdrop-blur md:grid md:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)_auto] md:items-center md:gap-4">
+              <span>Student</span>
+              <span>Cohort / programme</span>
+              <span className="min-w-24 text-right">Status</span>
+            </div>
             {students.map((student) => (
               <Link
                 key={student.id}

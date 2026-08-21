@@ -234,14 +234,14 @@ export default async function TimetableCalendarPage({
               <TabsList className="h-auto w-full justify-start gap-0 rounded-none border-0 border-b border-border bg-transparent p-0">
                 <TabsTrigger
                   value="working-days"
-                  className="relative min-h-11 rounded-none border-b-2 border-transparent bg-transparent px-4 shadow-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                  className="relative min-h-11 rounded-none border-b-2 border-transparent bg-transparent px-4 text-text-secondary shadow-none hover:text-text-primary data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
                 >
                   Working Days
                 </TabsTrigger>
 
                 <TabsTrigger
                   value="time-slots"
-                  className="relative min-h-11 rounded-none border-b-2 border-transparent bg-transparent px-4 shadow-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                  className="relative min-h-11 rounded-none border-b-2 border-transparent bg-transparent px-4 text-text-secondary shadow-none hover:text-text-primary data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
                 >
                   Time Slots
                 </TabsTrigger>

@@ -100,10 +100,31 @@ export function StaffShell({
           </Link>
 
           <Link
+            href="/staff/timetable"
+            className="whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
+          >
+            Timetable
+          </Link>
+
+          <Link
             href="/staff/documents"
             className="whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
           >
             Documents
+          </Link>
+
+          <Link
+            href="/staff/downloads"
+            className="whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
+          >
+            Downloads
+          </Link>
+
+          <Link
+            href="/staff/history"
+            className="whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
+          >
+            History
           </Link>
         </div>
       </nav>

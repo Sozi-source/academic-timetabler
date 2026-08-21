@@ -98,6 +98,13 @@ export function StaffShell({
           >
             My Units
           </Link>
+
+          <Link
+            href="/staff/documents"
+            className="whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
+          >
+            Documents
+          </Link>
         </div>
       </nav>
 

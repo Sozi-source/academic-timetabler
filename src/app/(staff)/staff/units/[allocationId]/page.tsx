@@ -202,14 +202,20 @@ export default async function StaffUnitPage({
         />
       </section>
 
-      <p className="text-[11px] leading-5 text-text-muted">
-        This first staff workspace is
-        allocation-scoped and read-only.
-        Assessment generation, absence
-        marking and markbook actions will
-        be enabled through guarded trainer
-        RPCs in the next stage.
-      </p>
+      <Link
+        href={`/staff/units/${allocation.allocationId}/documents`}
+        className="block rounded-xl border border-border bg-white px-4 py-4 transition hover:border-border-strong hover:bg-surface-subtle/40"
+      >
+        <p className="text-sm font-semibold text-text-primary">
+          Teaching Documents
+        </p>
+
+        <p className="mt-1 text-[11px] leading-5 text-text-muted">
+          Attendance sheet, course
+          outline, scheme of work and
+          record of work.
+        </p>
+      </Link>
     </div>
   );
 }

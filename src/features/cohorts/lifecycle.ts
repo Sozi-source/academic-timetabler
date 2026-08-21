@@ -10,7 +10,7 @@ export interface CohortLifecycleInput {
 export interface EffectiveCohortLifecycle {
   status: CohortStatus;
   isTimetableAvailable: boolean;
-  isExpired: boolean;
+  isPastExpectedCompletion: boolean;
 }
 
 function toDateOnly(value: Date | string): string {
@@ -21,23 +21,19 @@ function toDateOnly(value: Date | string): string {
   return value.slice(0, 10);
 }
 
+/**
+ * Expected completion is advisory only.
+ * Cohort lifecycle is controlled by academic progression/status.
+ */
 export function getEffectiveCohortLifecycle(
   cohort: CohortLifecycleInput,
   asOf: Date | string = new Date(),
 ): EffectiveCohortLifecycle {
   const today = toDateOnly(asOf);
 
-  const isExpired =
+  const isPastExpectedCompletion =
     cohort.expectedCompletionDate.length >= 10 &&
     cohort.expectedCompletionDate.slice(0, 10) < today;
-
-  if (cohort.status === 'active' && isExpired) {
-    return {
-      status: 'completed',
-      isTimetableAvailable: false,
-      isExpired: true,
-    };
-  }
 
   if (
     cohort.status === 'completed' ||
@@ -47,15 +43,14 @@ export function getEffectiveCohortLifecycle(
     return {
       status: cohort.status,
       isTimetableAvailable: false,
-      isExpired,
+      isPastExpectedCompletion,
     };
   }
 
   return {
     status: cohort.status,
-    isTimetableAvailable:
-      cohort.isTimetableAvailable && !isExpired,
-    isExpired,
+    isTimetableAvailable: cohort.isTimetableAvailable,
+    isPastExpectedCompletion,
   };
 }
 

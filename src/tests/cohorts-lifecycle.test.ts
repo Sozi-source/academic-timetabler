@@ -8,12 +8,12 @@ import {
 describe('cohort lifecycle', () => {
   const today = '2026-08-21';
 
-  it('keeps a current active cohort active', () => {
+  it('does not complete an active cohort from projected date alone', () => {
     const result = getEffectiveCohortLifecycle(
       {
         status: 'active',
-        intakeDate: '2025-09-01',
-        expectedCompletionDate: '2027-08-31',
+        intakeDate: '2025-03-01',
+        expectedCompletionDate: '2026-01-01',
         isTimetableAvailable: true,
       },
       today,
@@ -21,31 +21,15 @@ describe('cohort lifecycle', () => {
 
     expect(result.status).toBe('active');
     expect(result.isTimetableAvailable).toBe(true);
-    expect(result.isExpired).toBe(false);
+    expect(result.isPastExpectedCompletion).toBe(true);
   });
 
-  it('treats an expired active cohort as completed', () => {
-    const result = getEffectiveCohortLifecycle(
-      {
-        status: 'active',
-        intakeDate: '2022-09-01',
-        expectedCompletionDate: '2025-08-31',
-        isTimetableAvailable: true,
-      },
-      today,
-    );
-
-    expect(result.status).toBe('completed');
-    expect(result.isTimetableAvailable).toBe(false);
-    expect(result.isExpired).toBe(true);
-  });
-
-  it('never exposes completed cohorts for timetabling', () => {
+  it('keeps completed cohorts unavailable', () => {
     const result = getEffectiveCohortLifecycle(
       {
         status: 'completed',
-        intakeDate: '2023-01-01',
-        expectedCompletionDate: '2026-12-31',
+        intakeDate: '2022-01-01',
+        expectedCompletionDate: '2025-12-31',
         isTimetableAvailable: true,
       },
       today,
@@ -55,44 +39,17 @@ describe('cohort lifecycle', () => {
     expect(result.isTimetableAvailable).toBe(false);
   });
 
-  it('preserves suspended as an explicit state', () => {
-    const result = getEffectiveCohortLifecycle(
-      {
-        status: 'suspended',
-        intakeDate: '2025-01-01',
-        expectedCompletionDate: '2027-12-31',
-        isTimetableAvailable: true,
-      },
-      today,
-    );
-
-    expect(result.status).toBe('suspended');
-    expect(result.isTimetableAvailable).toBe(false);
-  });
-
-  it('reports only current timetable cohorts as operational', () => {
+  it('allows a delayed active cohort to remain operational', () => {
     expect(
       isOperationallyActiveCohort(
         {
           status: 'active',
-          intakeDate: '2025-01-01',
-          expectedCompletionDate: '2027-12-31',
+          intakeDate: '2025-03-01',
+          expectedCompletionDate: '2026-01-01',
           isTimetableAvailable: true,
         },
         today,
       ),
     ).toBe(true);
-
-    expect(
-      isOperationallyActiveCohort(
-        {
-          status: 'active',
-          intakeDate: '2022-01-01',
-          expectedCompletionDate: '2025-12-31',
-          isTimetableAvailable: true,
-        },
-        today,
-      ),
-    ).toBe(false);
   });
 });

@@ -13,6 +13,7 @@ import {
   PencilRuler,
   Presentation,
   School,
+  SlidersHorizontal,
   Sparkles,
   UserRound,
   UsersRound,
@@ -59,6 +60,7 @@ export const dashboardNavigation = [
       { label: 'Trainer availability', href: '/timetable/trainers/availability', icon: UsersRound },
       { label: 'Rooms', href: '/timetable/rooms', icon: Building2 },
       { label: 'Teaching allocations', href: '/timetable/teaching-allocations', icon: Presentation },
+      { label: 'Scheduling constraints', href: '/timetable/constraints', icon: SlidersHorizontal },
     ],
   },
 ] as const;

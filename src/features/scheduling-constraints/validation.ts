@@ -7,12 +7,12 @@ const optionalUuid = z.preprocess(
 
 export const schedulingConstraintSchema = z.object({
   academicPeriodId: z.string().uuid(),
-  subjectType: z.enum(['trainer', 'room', 'cohort', 'institution']),
+  subjectType: z.enum(['room', 'cohort', 'institution']),
   subjectId: optionalUuid,
-  constraintType: z.enum(['unavailable', 'preferred', 'required', 'protected_day']),
+  constraintType: z.literal('unavailable'),
   workingDayId: optionalUuid,
   timeSlotId: optionalUuid,
-  priority: z.enum(['hard', 'soft']),
+  priority: z.literal('hard'),
   reason: z.string().trim().max(500).optional(),
 }).superRefine((value, context) => {
   if (value.subjectType !== 'institution' && !value.subjectId) {

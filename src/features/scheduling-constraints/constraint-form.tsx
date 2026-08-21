@@ -8,46 +8,43 @@ import { Select } from '@/components/ui/select';
 import { createSchedulingConstraintAction } from './actions';
 import type {
   ConstraintOption,
-  ConstraintSubjectType,
   TimeSlotOption,
   WorkingDayOption,
 } from './types';
 
+type ConstraintTarget = 'room' | 'cohort' | 'institution';
+
 interface ConstraintFormProps {
   academicPeriodId: string;
-  trainers: ConstraintOption[];
   rooms: ConstraintOption[];
   cohorts: ConstraintOption[];
   workingDays: WorkingDayOption[];
   timeSlots: TimeSlotOption[];
 }
 
-const subjectLabels: Record<ConstraintSubjectType, string> = {
-  trainer: 'Trainer',
+const targetLabels: Record<ConstraintTarget, string> = {
   room: 'Room',
-  cohort: 'Cohort',
+  cohort: 'Class / cohort',
   institution: 'Institution',
 };
 
 export function ConstraintForm({
   academicPeriodId,
-  trainers,
   rooms,
   cohorts,
   workingDays,
   timeSlots,
 }: ConstraintFormProps) {
   const [subjectType, setSubjectType] =
-    useState<ConstraintSubjectType>('trainer');
+    useState<ConstraintTarget>('room');
 
   const records = useMemo(() => {
-    if (subjectType === 'trainer') return trainers;
     if (subjectType === 'room') return rooms;
     if (subjectType === 'cohort') return cohorts;
     return [];
-  }, [cohorts, rooms, subjectType, trainers]);
+  }, [cohorts, rooms, subjectType]);
 
-  const recordLabel = subjectLabels[subjectType];
+  const recordLabel = targetLabels[subjectType];
 
   return (
     <form
@@ -67,17 +64,16 @@ export function ConstraintForm({
           name="subjectType"
           value={subjectType}
           onChange={(event) =>
-            setSubjectType(event.target.value as ConstraintSubjectType)
+            setSubjectType(event.target.value as ConstraintTarget)
           }
         >
-          <option value="trainer">Trainer</option>
           <option value="room">Room</option>
-          <option value="cohort">Cohort</option>
+          <option value="cohort">Class / cohort</option>
           <option value="institution">Institution-wide</option>
         </Select>
       </Field>
 
-      <Field label={subjectType === 'institution' ? 'Record' : recordLabel}>
+      <Field label={subjectType === 'institution' ? 'Scope' : recordLabel}>
         {subjectType === 'institution' ? (
           <>
             <input type="hidden" name="subjectId" value="" />
@@ -87,7 +83,9 @@ export function ConstraintForm({
           </>
         ) : (
           <Select name="subjectId" defaultValue="" required>
-            <option value="">Select {recordLabel.toLowerCase()}</option>
+            <option value="">
+              Select {recordLabel.toLowerCase()}
+            </option>
             {records.map((item) => (
               <option key={item.id} value={item.id}>
                 {item.label}

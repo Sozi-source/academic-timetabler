@@ -7,13 +7,6 @@ import { createClient } from '@/lib/supabase/server';
 
 import { constraintIdSchema, schedulingConstraintSchema } from './validation';
 
-const defaultReasons = {
-  unavailable: 'Unavailable',
-  preferred: 'Preferred scheduling time',
-  required: 'Required scheduling time',
-  protected_day: 'Protected day',
-} as const;
-
 export async function createSchedulingConstraintAction(
   formData: FormData,
 ): Promise<void> {
@@ -78,15 +71,16 @@ export async function createSchedulingConstraintAction(
       timeSlot.slot_type !== 'teaching' ||
       !timeSlot.is_enabled
     ) {
-      throw new Error('Select a valid teaching session for this Academic Period.');
+      throw new Error(
+        'Select a valid teaching session for this Academic Period.',
+      );
     }
 
     startsAt = timeSlot.starts_at;
     endsAt = timeSlot.ends_at;
   }
 
-  const reason =
-    parsed.data.reason?.trim() || defaultReasons[parsed.data.constraintType];
+  const reason = parsed.data.reason?.trim() || 'Scheduling restriction';
 
   const { error } = await supabase.from('scheduling_constraints').insert({
     academic_period_id: parsed.data.academicPeriodId,
@@ -95,11 +89,11 @@ export async function createSchedulingConstraintAction(
       parsed.data.subjectType === 'institution'
         ? null
         : parsed.data.subjectId,
-    constraint_type: parsed.data.constraintType,
+    constraint_type: 'unavailable',
     working_day_id: parsed.data.workingDayId ?? null,
     starts_at: startsAt,
     ends_at: endsAt,
-    priority: parsed.data.priority,
+    priority: 'hard',
     reason,
   });
 
@@ -124,7 +118,9 @@ export async function toggleSchedulingConstraintAction(
   const { error } = await supabase
     .from('scheduling_constraints')
     .update({ is_active: isActive })
-    .eq('id', id);
+    .eq('id', id)
+    .neq('subject_type', 'trainer')
+    .eq('constraint_type', 'unavailable');
 
   if (error) {
     throw new Error(error.message);
@@ -146,7 +142,9 @@ export async function deleteSchedulingConstraintAction(
   const { error } = await supabase
     .from('scheduling_constraints')
     .delete()
-    .eq('id', id);
+    .eq('id', id)
+    .neq('subject_type', 'trainer')
+    .eq('constraint_type', 'unavailable');
 
   if (error) {
     throw new Error(error.message);

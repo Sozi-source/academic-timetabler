@@ -18,15 +18,8 @@ import type {
 const subjectLabels = {
   trainer: 'Trainer',
   room: 'Room',
-  cohort: 'Cohort',
+  cohort: 'Class / cohort',
   institution: 'Institution',
-} as const;
-
-const typeLabels = {
-  unavailable: 'Unavailable',
-  preferred: 'Advisory (legacy)',
-  required: 'Fixed session (legacy)',
-  protected_day: 'Unavailable',
 } as const;
 
 export function ConstraintWorkspace({
@@ -44,13 +37,12 @@ export function ConstraintWorkspace({
             Add constraint
           </h2>
           <p className="mt-1 text-xs text-text-muted xl:text-sm">
-            Block exceptional days or teaching sessions. Normal trainer availability is managed separately.
+            Block exceptional room, class or institution periods. Trainer availability is managed separately.
           </p>
         </div>
 
         <ConstraintForm
           academicPeriodId={academicPeriodId}
-          trainers={data.trainers}
           rooms={data.rooms}
           cohorts={data.cohorts}
           workingDays={data.workingDays}
@@ -71,17 +63,17 @@ export function ConstraintWorkspace({
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-left text-xs xl:text-sm">
+            <table className="w-full min-w-[640px] text-left text-xs xl:text-sm">
               <thead className="bg-surface-subtle text-text-secondary">
                 <tr>
                   <Th>Subject</Th>
-                  <Th>Rule</Th>
                   <Th>When</Th>
-                  <Th>Priority</Th>
                   <Th>Reason</Th>
+                  <Th>Status</Th>
                   <Th>Actions</Th>
                 </tr>
               </thead>
+
               <tbody>
                 {data.constraints.map((item) => (
                   <tr key={item.id} className="border-t border-border">
@@ -93,22 +85,19 @@ export function ConstraintWorkspace({
                         {subjectLabels[item.subjectType]}
                       </div>
                     </Td>
-                    <Td>{typeLabels[item.constraintType]}</Td>
+
                     <Td>{formatWhen(item, data.timeSlots)}</Td>
-                    <Td>
-                      <span
-                        className={`inline-flex rounded-full px-2 py-1 text-[11px] font-semibold xl:text-xs ${
-                          item.priority === 'hard'
-                            ? 'bg-danger-surface text-danger'
-                            : 'bg-warning-surface text-warning'
-                        }`}
-                      >
-                        {item.priority === 'hard' ? 'Hard' : 'Soft'}
-                      </span>
-                    </Td>
-                    <Td className="max-w-[16rem] text-text-secondary">
+
+                    <Td className="max-w-[18rem] text-text-secondary">
                       {formatReason(item)}
                     </Td>
+
+                    <Td>
+                      <span className="text-[11px] font-medium text-text-muted xl:text-xs">
+                        {item.isActive ? 'Active' : 'Disabled'}
+                      </span>
+                    </Td>
+
                     <Td>
                       <div className="flex items-center gap-1.5">
                         <form action={toggleSchedulingConstraintAction}>
@@ -160,16 +149,10 @@ export function ConstraintWorkspace({
   );
 }
 
-
 function formatReason(item: SchedulingConstraint) {
   const reason = item.reason?.trim();
 
-  if (!reason) return '-';
-  if (
-    reason === 'Preferred scheduling time' ||
-    reason === 'Required scheduling time' ||
-    reason === 'Protected day'
-  ) {
+  if (!reason || reason === 'Scheduling restriction') {
     return '-';
   }
 

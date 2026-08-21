@@ -12,7 +12,6 @@ export const getSchedulingConstraintData = cache(
 
     const [
       constraintResult,
-      trainerResult,
       roomResult,
       cohortResult,
       dayResult,
@@ -22,12 +21,9 @@ export const getSchedulingConstraintData = cache(
         .from('scheduling_constraints')
         .select('*')
         .eq('academic_period_id', academicPeriodId)
+        .neq('subject_type', 'trainer')
+        .eq('constraint_type', 'unavailable')
         .order('created_at', { ascending: false }),
-      supabase
-        .from('trainers')
-        .select('id, full_name')
-        .eq('is_active', true)
-        .order('full_name'),
       supabase
         .from('rooms')
         .select('id, code, name')
@@ -55,7 +51,6 @@ export const getSchedulingConstraintData = cache(
 
     const failure =
       constraintResult.error ??
-      trainerResult.error ??
       roomResult.error ??
       cohortResult.error ??
       dayResult.error ??
@@ -66,11 +61,6 @@ export const getSchedulingConstraintData = cache(
         `Unable to load scheduling constraints: ${failure.message}`,
       );
     }
-
-    const trainers = (trainerResult.data ?? []).map((item) => ({
-      id: item.id,
-      label: item.full_name,
-    }));
 
     const rooms = (roomResult.data ?? []).map((item) => ({
       id: item.id,
@@ -99,7 +89,7 @@ export const getSchedulingConstraintData = cache(
     }));
 
     const labels = new Map<string, string>(
-      [...trainers, ...rooms, ...cohorts].map((item) => [item.id, item.label]),
+      [...rooms, ...cohorts].map((item) => [item.id, item.label]),
     );
 
     const dayLabels = new Map(
@@ -107,7 +97,6 @@ export const getSchedulingConstraintData = cache(
     );
 
     return {
-      trainers,
       rooms,
       cohorts,
       workingDays,

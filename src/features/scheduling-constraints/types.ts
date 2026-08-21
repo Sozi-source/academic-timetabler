@@ -1,5 +1,15 @@
-export type ConstraintSubjectType = 'trainer' | 'room' | 'cohort' | 'institution';
-export type ConstraintType = 'unavailable' | 'preferred' | 'required' | 'protected_day';
+export type ConstraintSubjectType =
+  | 'trainer'
+  | 'room'
+  | 'cohort'
+  | 'institution';
+
+export type ConstraintType =
+  | 'unavailable'
+  | 'preferred'
+  | 'required'
+  | 'protected_day';
+
 export type ConstraintPriority = 'hard' | 'soft';
 
 export interface ConstraintOption {
@@ -35,7 +45,6 @@ export interface SchedulingConstraint {
 
 export interface SchedulingConstraintData {
   constraints: SchedulingConstraint[];
-  trainers: ConstraintOption[];
   rooms: ConstraintOption[];
   cohorts: ConstraintOption[];
   workingDays: WorkingDayOption[];

@@ -9,6 +9,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { registerStudentUnitsByDepartment, setStudentProgrammeStage } from '@/features/student-unit-registration/actions';
 import { getDepartmentRegistrationEditor } from '@/features/student-unit-registration/queries';
+import { UndoUnitRegistrationButton } from '@/features/student-unit-registration/undo-registration-button';
 
 interface PageProps {
   params: Promise<{ studentId: string }>;
@@ -100,7 +101,13 @@ export default async function DepartmentStudentUnitRegistrationPage({
             <Badge variant={context.existingStatus === 'verified' ? 'success' : 'neutral'}>
               {context.existingStatus === 'verified' ? 'Verified' : 'Not verified'}
             </Badge>
-          </div>
+                    {context.existingStatus !== 'not_submitted' ? (
+            <UndoUnitRegistrationButton
+              studentId={context.student.id}
+              academicPeriodId={context.period.id}
+            />
+          ) : null}
+</div>
         </div>
 
 {context.student.currentStageId ? (

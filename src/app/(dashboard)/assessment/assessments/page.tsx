@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { createAssessmentAction } from '@/features/assessment/actions';
 import { getAssessments, getAssessmentSetupOptions } from '@/features/assessment/queries';
 import { requireHodAccess } from '@/features/auth/authorization';
+import { MarkbookDeleteButton } from '@/features/assessment/markbook-delete-button';
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -37,7 +38,13 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
       </Card>
 
       <Card className="overflow-hidden">
-        <div className="overflow-x-auto"><table className="w-full min-w-[720px] text-left text-xs"><thead className="bg-surface-subtle text-text-muted"><tr><th className="px-4 py-2.5 font-semibold">Unit</th><th className="px-3 py-2.5 font-semibold">Period</th><th className="px-3 py-2.5 font-semibold">Population</th><th className="px-3 py-2.5 font-semibold">Stage</th><th className="px-3 py-2.5" /></tr></thead><tbody className="divide-y divide-border">{markbooks.map((assessment) => <tr key={assessment.id}><td className="px-4 py-2.5 font-semibold text-text-primary">{assessment.unit?.code ?? '—'}<div className="mt-0.5 text-[0.6875rem] font-normal text-text-muted">{assessment.unit?.name ?? ''}</div></td><td className="px-3 py-2.5 text-text-secondary">{assessment.academic_period?.name ?? '—'}</td><td className="px-3 py-2.5 font-semibold text-text-primary">{assessment.population?.[0]?.count ?? 0}</td><td className="px-3 py-2.5"><Badge variant={assessment.exam_marks_finalized_at ? 'success' : 'neutral'}>{assessment.exam_marks_finalized_at ? 'Final complete' : assessment.attendance_finalized_at ? 'Exam marking' : assessment.cat_marks_finalized_at ? 'CAT complete' : 'CAT marking'}</Badge></td><td className="px-3 py-2.5 text-right"><Link href={`/assessment/marks/${assessment.id}`} className="inline-flex h-8 items-center rounded-lg border border-border-strong bg-surface px-3 font-semibold text-text-secondary hover:border-primary hover:text-primary">Open workflow</Link></td></tr>)}</tbody></table></div>
+        <div className="overflow-x-auto"><table className="w-full min-w-[720px] text-left text-xs"><thead className="bg-surface-subtle text-text-muted"><tr><th className="px-4 py-2.5 font-semibold">Unit</th><th className="px-3 py-2.5 font-semibold">Period</th><th className="px-3 py-2.5 font-semibold">Population</th><th className="px-3 py-2.5 font-semibold">Stage</th><th className="px-3 py-2.5" />          <th className="px-4 py-3 text-right">Actions</th>
+</tr></thead><tbody className="divide-y divide-border">{markbooks.map((assessment) => <tr key={assessment.id}><td className="px-4 py-2.5 font-semibold text-text-primary">{assessment.unit?.code ?? '—'}<div className="mt-0.5 text-[0.6875rem] font-normal text-text-muted">{assessment.unit?.name ?? ''}</div></td><td className="px-3 py-2.5 text-text-secondary">{assessment.academic_period?.name ?? '—'}</td><td className="px-3 py-2.5 font-semibold text-text-primary">{assessment.population?.[0]?.count ?? 0}</td><td className="px-3 py-2.5"><Badge variant={assessment.exam_marks_finalized_at ? 'success' : 'neutral'}>{assessment.exam_marks_finalized_at ? 'Final complete' : assessment.attendance_finalized_at ? 'Exam marking' : assessment.cat_marks_finalized_at ? 'CAT complete' : 'CAT marking'}</Badge></td><td className="px-3 py-2.5 text-right"><Link href={`/assessment/marks/${assessment.id}`} className="inline-flex h-8 items-center rounded-lg border border-border-strong bg-surface px-3 font-semibold text-text-secondary hover:border-primary hover:text-primary">Open workflow</Link></td>          <td className="px-4 py-3 text-right">
+            <MarkbookDeleteButton
+              assessmentId={assessment.id}
+            />
+          </td>
+</tr>)}</tbody></table></div>
         {markbooks.length === 0 ? <div className="px-4 py-8 text-center text-xs text-text-muted">No unit markbooks configured.</div> : null}
       </Card>
     </div>

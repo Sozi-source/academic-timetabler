@@ -18,6 +18,17 @@ import {
   requireHodAccess,
 } from '@/features/auth/authorization';
 import {
+  AssessmentTypeControl,
+  DownloadAssessmentMarkbookButton,
+} from '@/features/assessment/markbook-controls';
+import {
+  AssessmentWorkbookValidationControl,
+  DownloadAssessmentSigningSheetButton,
+} from '@/features/assessment/assessment-document-controls';
+import {
+  StageAssessmentMarkbookControl,
+} from '@/features/assessment/markbook-stage-control';
+import {
   AssessmentAbsenceButton,
   GenerateAssessmentPopulationButton,
 } from '@/features/assessment/population-workspace-controls';
@@ -85,23 +96,35 @@ export default async function AssessmentPopulationPage({
       'finalised',
       'archived',
     ].includes(
-      workspace.workflowStatus ?? '',
+      workspace.workflowStatus ??
+        '',
     );
+
+  const hasPopulation =
+    workspace.registeredPopulation >
+    0;
+
+  const canDownload =
+    hasPopulation &&
+    workspace.assessmentType !==
+      null;
 
   return (
     <div className="space-y-4">
       <PageHeader
         eyebrow="Assessment"
         title="Assessment population"
-        description="Generate the registered student snapshot and record only students who are absent before producing the markbook and signing sheet."
+        description="Confirm the registered roster, record assessment absences, then download the CAT or Exam markbook."
         icon={UsersRound}
       />
 
       <Card className="overflow-hidden">
-        <div className="flex flex-col gap-3 border-b border-border px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-3 border-b border-border px-4 py-4 xl:flex-row xl:items-center xl:justify-between">
           <div className="min-w-0">
             <p className="font-semibold text-text-primary">
-              {workspace.unit.name}
+              {
+                workspace.unit.name
+              }
             </p>
 
             <p className="mt-1 text-xs text-text-muted">
@@ -109,10 +132,15 @@ export default async function AssessmentPopulationPage({
                 workspace.assessmentType,
               )}
               {' Â· '}
-              {workspace.cohort?.name ??
+              {workspace.cohort
+                ?.name ??
                 'All participating cohorts'}
               {' Â· '}
-              {workspace.academicPeriod.name}
+              {
+                workspace
+                  .academicPeriod
+                  .name
+              }
             </p>
           </div>
 
@@ -131,7 +159,8 @@ export default async function AssessmentPopulationPage({
 
             <Badge
               variant={
-                workspace.markedAbsent > 0
+                workspace.markedAbsent >
+                0
                   ? 'neutral'
                   : 'success'
               }
@@ -141,23 +170,93 @@ export default async function AssessmentPopulationPage({
               } absent
             </Badge>
 
+            {locked ? (
+              <Badge variant="neutral">
+                Roster locked
+              </Badge>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3 border-b border-border bg-surface-subtle/40 px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[11px] font-semibold text-text-muted">
+              Type
+            </span>
+
+            <AssessmentTypeControl
+              assessmentId={
+                workspace.assessmentId
+              }
+              value={
+                workspace.assessmentType
+              }
+              disabled={
+                locked
+              }
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
             {!locked ? (
               <GenerateAssessmentPopulationButton
                 assessmentId={
                   workspace.assessmentId
                 }
                 hasPopulation={
-                  workspace
-                    .registeredPopulation >
-                  0
+                  hasPopulation
                 }
               />
             ) : null}
+
+            <DownloadAssessmentMarkbookButton
+              assessmentId={
+                workspace.assessmentId
+              }
+              unitName={
+                workspace.unit.name
+              }
+              disabled={
+                !canDownload
+              }
+            />
+
+            <DownloadAssessmentSigningSheetButton
+              assessmentId={
+                workspace.assessmentId
+              }
+              unitName={
+                workspace.unit.name
+              }
+              assessmentType={
+                workspace.assessmentType
+              }
+              disabled={
+                !canDownload
+              }
+            />
+
+            <AssessmentWorkbookValidationControl
+              assessmentId={
+                workspace.assessmentId
+              }
+              disabled={
+                !locked
+              }
+            />
+
+            <StageAssessmentMarkbookControl
+              assessmentId={
+                workspace.assessmentId
+              }
+              disabled={
+                !locked
+              }
+            />
           </div>
         </div>
 
-        {workspace.students.length ===
-        0 ? (
+        {!hasPopulation ? (
           <div className="px-4 py-10 text-center">
             <p className="text-sm font-semibold text-text-primary">
               Population not generated
@@ -177,12 +276,15 @@ export default async function AssessmentPopulationPage({
                   <th className="px-4 py-2.5">
                     Student
                   </th>
+
                   <th className="px-4 py-2.5">
                     Admission No.
                   </th>
+
                   <th className="px-4 py-2.5">
                     Status
                   </th>
+
                   <th className="px-4 py-2.5 text-right">
                     Action
                   </th>
@@ -191,7 +293,9 @@ export default async function AssessmentPopulationPage({
 
               <tbody className="divide-y divide-border">
                 {workspace.students.map(
-                  (student) => (
+                  (
+                    student,
+                  ) => (
                     <tr
                       key={
                         student.populationId
@@ -259,10 +363,11 @@ export default async function AssessmentPopulationPage({
 
       <p className="text-[11px] leading-5 text-text-muted">
         Everyone is expected by default.
-        Record only confirmed assessment
-        absences. Blank marks will remain
-        separate from absence during later
-        Excel import and analysis.
+        Record only confirmed absences.
+        The first markbook download locks
+        this roster so later registration
+        changes cannot silently alter the
+        assessment record.
       </p>
     </div>
   );

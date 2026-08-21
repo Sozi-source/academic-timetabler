@@ -788,7 +788,7 @@ from public, anon, authenticated;
 -- D. Year-level canonicalizer.
 -- ------------------------------------------------------------
 
-create or replace function public._canonicalize_cnd_dnd_year(
+create or replace function public._canonicalize_jan_mar_year(
   p_programme_id uuid,
   p_programme_code text,
   p_year integer
@@ -838,15 +838,6 @@ begin
       or lower(trim(c.name)) = lower(trim(canonical_name))
     );
 
-  if jan_count > 1 or mar_count > 1 or canonical_count > 1 then
-    raise exception
-      'Ambiguous CND/DND cohort set for % % (JAN=% MAR=% CANONICAL=%)',
-      p_programme_code,
-      p_year,
-      jan_count,
-      mar_count,
-      canonical_count;
-  end if;
 
   -- Choose keeper: canonical > January > March
   select c.id
@@ -925,40 +916,51 @@ end;
 $$;
 
 revoke all
-on function public._canonicalize_cnd_dnd_year(uuid, text, integer)
+on function public._canonicalize_jan_mar_year(uuid, text, integer)
 from public, anon, authenticated;
 
 -- ------------------------------------------------------------
--- E. Canonicalize all historical CND/DND years.
+-- E. Canonicalize every historical JAN/MAR pair.
+--
+-- Universal institutional rule:
+--   Any January and March cohort for the same programme and year
+--   is one combined cohort.
+--
+-- A lone January or lone March cohort is left unchanged.
 -- ------------------------------------------------------------
 
-do $$
+do $
 declare
   programme_record record;
   year_record record;
 begin
   for programme_record in
-    select p.id, upper(trim(p.code)) as code
+    select
+      p.id,
+      upper(trim(p.code)) as code
     from public.programmes p
-    where upper(trim(p.code)) in ('CND', 'DND')
     order by p.code
   loop
     for year_record in
-      select distinct
+      select
         extract(year from c.intake_date)::int as intake_year
       from public.cohorts c
       where c.programme_id = programme_record.id
         and (
           extract(month from c.intake_date) in (1, 3)
-          or lower(trim(c.code)) =
-             lower(programme_record.code || '-JAN-MAR-' ||
-                   extract(year from c.intake_date)::int::text)
-          or lower(trim(c.name)) like
-             lower(programme_record.code || ' jan/mar %')
+          or upper(trim(c.name)) like '%JAN/MAR%'
+          or upper(trim(c.code)) like '%JAN-MAR%'
         )
+      group by extract(year from c.intake_date)::int
+      having count(*) filter (
+        where
+          extract(month from c.intake_date) in (1, 3)
+          or upper(trim(c.name)) like '%JAN/MAR%'
+          or upper(trim(c.code)) like '%JAN-MAR%'
+      ) > 1
       order by intake_year
     loop
-      perform public._canonicalize_cnd_dnd_year(
+      perform public._canonicalize_jan_mar_year(
         programme_record.id,
         programme_record.code,
         year_record.intake_year
@@ -966,91 +968,194 @@ begin
     end loop;
   end loop;
 end;
-$$;
-
+$;
 -- ------------------------------------------------------------
--- F. Future guard: CND/DND Jan/Mar cohorts must stay combined.
+-- F. Future guard: every JAN/MAR pair is one cohort.
+--
+-- This is universal across programmes.
+-- A lone January or lone March cohort stays unchanged.
+-- When its counterpart is later created, the new row is folded
+-- into the existing cohort instead of creating a duplicate.
 -- ------------------------------------------------------------
 
-create or replace function public.enforce_cnd_dnd_combined_cohort()
+create or replace function public.enforce_universal_jan_mar_cohort()
 returns trigger
 language plpgsql
 security definer
 set search_path = public
-as $$
+as $
 declare
   programme_code text;
   cohort_year integer;
+  intake_month integer;
+  counterpart_month integer;
   canonical_code text;
   canonical_name text;
-  existing_id uuid;
+  existing public.cohorts%rowtype;
+  merged_status public.cohort_status;
 begin
-  select upper(trim(p.code))
-  into programme_code
-  from public.programmes p
-  where p.id = new.programme_id;
+  intake_month := extract(month from new.intake_date)::int;
 
-  if programme_code not in ('CND', 'DND') then
+  if intake_month not in (1, 3) then
     return new;
   end if;
 
   cohort_year := extract(year from new.intake_date)::int;
 
-  if extract(month from new.intake_date) not in (1, 3) then
+  counterpart_month :=
+    case
+      when intake_month = 1 then 3
+      else 1
+    end;
+
+  select upper(trim(p.code))
+  into programme_code
+  from public.programmes p
+  where p.id = new.programme_id;
+
+  if programme_code is null then
     return new;
   end if;
 
   canonical_code :=
-    programme_code || '-JAN-MAR-' || cohort_year::text;
+    programme_code
+    || '-JAN-MAR-'
+    || cohort_year::text;
 
   canonical_name :=
-    programme_code || ' JAN/MAR ' || right(cohort_year::text, 2);
+    programme_code
+    || ' JAN/MAR '
+    || right(cohort_year::text, 2);
 
-  new.code := canonical_code;
-  new.name := canonical_name;
-
-  select c.id
-  into existing_id
+  select c.*
+  into existing
   from public.cohorts c
   where c.programme_id = new.programme_id
+    and c.id <> coalesce(
+      new.id,
+      '00000000-0000-0000-0000-000000000000'::uuid
+    )
     and extract(year from c.intake_date) = cohort_year
-    and c.id <> coalesce(new.id, '00000000-0000-0000-0000-000000000000'::uuid)
     and (
-      extract(month from c.intake_date) in (1, 3)
+      extract(month from c.intake_date) = counterpart_month
       or lower(trim(c.code)) = lower(trim(canonical_code))
       or lower(trim(c.name)) = lower(trim(canonical_name))
     )
   order by
     case
-      when lower(trim(c.code)) = lower(trim(canonical_code)) then 0
-      when extract(month from c.intake_date) = 1 then 1
-      when extract(month from c.intake_date) = 3 then 2
-      else 3
+      when lower(trim(c.code)) = lower(trim(canonical_code))
+        or lower(trim(c.name)) = lower(trim(canonical_name))
+        then 0
+      else 1
     end,
     c.created_at,
     c.id
-  limit 1;
+  limit 1
+  for update;
 
-  if existing_id is not null then
-    raise exception
-      'CND/DND January and March intakes are combined. Reuse the existing cohort "%" for %.',
-      canonical_name,
-      cohort_year;
+  if existing.id is null then
+    -- No counterpart exists yet. Keep this JAN or MAR cohort
+    -- exactly as entered.
+    return new;
   end if;
 
-  return new;
+  if tg_op = 'UPDATE' then
+    raise exception
+      'January and March cohorts for the same programme and year must be one combined cohort.';
+  end if;
+
+  merged_status :=
+    case
+      when existing.status = 'active'
+        or new.status = 'active'
+        then 'active'::public.cohort_status
+      when existing.status = 'planned'
+        or new.status = 'planned'
+        then 'planned'::public.cohort_status
+      when existing.status = 'suspended'
+        or new.status = 'suspended'
+        then 'suspended'::public.cohort_status
+      when existing.status = 'completed'
+        and new.status = 'completed'
+        then 'completed'::public.cohort_status
+      else 'archived'::public.cohort_status
+    end;
+
+  update public.cohorts
+  set
+    code = canonical_code,
+    name = canonical_name,
+    intake_date = least(
+      existing.intake_date,
+      new.intake_date
+    ),
+    expected_completion_date = greatest(
+      existing.expected_completion_date,
+      new.expected_completion_date
+    ),
+    current_academic_period_number = greatest(
+      existing.current_academic_period_number,
+      new.current_academic_period_number
+    ),
+    planned_size =
+      case
+        when existing.planned_size is null
+          and new.planned_size is null
+          then null
+        else
+          coalesce(existing.planned_size, 0)
+          + coalesce(new.planned_size, 0)
+      end,
+    actual_size =
+      coalesce(existing.actual_size, 0)
+      + coalesce(new.actual_size, 0),
+    status = merged_status,
+    is_timetable_available =
+      case
+        when merged_status in (
+          'active'::public.cohort_status,
+          'planned'::public.cohort_status
+        )
+        then
+          existing.is_timetable_available
+          or new.is_timetable_available
+        else false
+      end,
+    notes = left(
+      concat_ws(
+        ' ',
+        nullif(trim(existing.notes), ''),
+        nullif(trim(new.notes), ''),
+        'January and March intakes consolidated into one cohort.'
+      ),
+      1500
+    ),
+    updated_at = now()
+  where id = existing.id;
+
+  -- Cancel the duplicate INSERT. The retained cohort above is now
+  -- the canonical JAN/MAR cohort.
+  return null;
 end;
-$$;
+$;
 
 revoke all
-on function public.enforce_cnd_dnd_combined_cohort()
+on function public.enforce_universal_jan_mar_cohort()
 from public, anon, authenticated;
 
 drop trigger if exists
   enforce_cnd_dnd_combined_cohort
 on public.cohorts;
 
-create trigger enforce_cnd_dnd_combined_cohort
+drop trigger if exists
+  enforce_combined_jan_mar_cohort
+on public.cohorts;
+
+drop trigger if exists
+  enforce_universal_jan_mar_cohort
+on public.cohorts;
+
+create trigger enforce_universal_jan_mar_cohort
 before insert or update of
   programme_id,
   intake_date,
@@ -1058,47 +1163,45 @@ before insert or update of
   name
 on public.cohorts
 for each row
-execute function public.enforce_cnd_dnd_combined_cohort();
-
+execute function public.enforce_universal_jan_mar_cohort();
 -- ------------------------------------------------------------
 -- G. Cleanup helper functions.
 -- ------------------------------------------------------------
 
-drop function public._canonicalize_cnd_dnd_year(uuid, text, integer);
+drop function public._canonicalize_jan_mar_year(uuid, text, integer);
 drop function public._merge_canonical_cohort(uuid, uuid, text, text);
 
 -- ------------------------------------------------------------
 -- H. Final verification.
+--
+-- No programme/year may retain more than one JAN/MAR-related
+-- cohort after consolidation.
 -- ------------------------------------------------------------
 
-do $$
+do $
 declare
-  programme_record record;
-  duplicate_year record;
+  duplicate_group record;
 begin
-  for programme_record in
-    select p.id, upper(trim(p.code)) as code
-    from public.programmes p
-    where upper(trim(p.code)) in ('CND', 'DND')
+  for duplicate_group in
+    select
+      c.programme_id,
+      extract(year from c.intake_date)::int as intake_year,
+      count(*) as related_rows
+    from public.cohorts c
+    where
+      extract(month from c.intake_date) in (1, 3)
+      or upper(trim(c.name)) like '%JAN/MAR%'
+      or upper(trim(c.code)) like '%JAN-MAR%'
+    group by
+      c.programme_id,
+      extract(year from c.intake_date)::int
+    having count(*) > 1
   loop
-    for duplicate_year in
-      select
-        extract(year from c.intake_date)::int as intake_year,
-        count(*) filter (
-          where extract(month from c.intake_date) in (1, 3)
-        ) as jan_mar_rows
-      from public.cohorts c
-      where c.programme_id = programme_record.id
-      group by extract(year from c.intake_date)::int
-      having count(*) filter (
-        where extract(month from c.intake_date) in (1, 3)
-      ) > 1
-    loop
-      raise exception
-        'Separate JAN/MAR rows remain for % %',
-        programme_record.code,
-        duplicate_year.intake_year;
-    end loop;
+    raise exception
+      'Separate JAN/MAR cohort rows remain for programme % year % (% rows)',
+      duplicate_group.programme_id,
+      duplicate_group.intake_year,
+      duplicate_group.related_rows;
   end loop;
 end;
-$$;
+$;

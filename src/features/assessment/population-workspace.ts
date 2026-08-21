@@ -1,0 +1,364 @@
+import { cache } from 'react';
+
+import { createClient } from '@/lib/supabase/server';
+
+type UnknownRow = Record<string, unknown>;
+
+function asString(
+  value: unknown,
+): string | null {
+  return typeof value === 'string'
+    ? value
+    : null;
+}
+
+function asNumber(
+  value: unknown,
+): number | null {
+  return typeof value === 'number'
+    ? value
+    : null;
+}
+
+function relationRow(
+  value: unknown,
+): UnknownRow | null {
+  if (
+    value &&
+    typeof value === 'object' &&
+    !Array.isArray(value)
+  ) {
+    return value as UnknownRow;
+  }
+
+  if (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value[0] &&
+    typeof value[0] === 'object'
+  ) {
+    return value[0] as UnknownRow;
+  }
+
+  return null;
+}
+
+export interface AssessmentPopulationStudent {
+  populationId: string;
+  studentId: string;
+  admissionNumber: string;
+  fullName: string;
+  attendanceStatus:
+    | 'expected'
+    | 'absent';
+  registrationStatus: string | null;
+}
+
+export interface AssessmentPopulationWorkspace {
+  assessmentId: string;
+  assessmentType:
+    | 'cat'
+    | 'exam'
+    | null;
+  workflowStatus: string | null;
+  populationGeneratedAt: string | null;
+  populationLockedAt: string | null;
+  unit: {
+    id: string;
+    code: string | null;
+    name: string;
+  };
+  cohort: {
+    id: string;
+    name: string;
+  } | null;
+  academicPeriod: {
+    id: string;
+    code: string | null;
+    name: string;
+  };
+  registeredPopulation: number;
+  expectedToSit: number;
+  markedAbsent: number;
+  students: AssessmentPopulationStudent[];
+}
+
+export const getAssessmentPopulationWorkspace =
+  cache(async (
+    assessmentId: string,
+  ): Promise<AssessmentPopulationWorkspace> => {
+    const supabase = await createClient();
+
+    const {
+      data: eventData,
+      error: eventError,
+    } = await supabase
+      .from('assessment_event_workspace')
+      .select('*')
+      .eq('id', assessmentId)
+      .maybeSingle();
+
+    if (eventError) {
+      throw new Error(
+        `Unable to load assessment: ${eventError.message}`,
+      );
+    }
+
+    if (!eventData) {
+      throw new Error(
+        'Assessment was not found.',
+      );
+    }
+
+    const event =
+      eventData as UnknownRow;
+
+    const periodId =
+      asString(event.academic_period_id);
+
+    const unitId =
+      asString(event.unit_id);
+
+    const cohortId =
+      asString(event.cohort_id);
+
+    if (!periodId || !unitId) {
+      throw new Error(
+        'Assessment is missing its Academic Period or unit.',
+      );
+    }
+
+    const [
+      periodResult,
+      unitResult,
+      cohortResult,
+      populationResult,
+    ] = await Promise.all([
+      supabase
+        .from('academic_periods')
+        .select('id, code, name')
+        .eq('id', periodId)
+        .maybeSingle(),
+
+      supabase
+        .from('units')
+        .select('id, code, name')
+        .eq('id', unitId)
+        .maybeSingle(),
+
+      cohortId
+        ? supabase
+            .from('cohorts')
+            .select('id, name')
+            .eq('id', cohortId)
+            .maybeSingle()
+        : Promise.resolve({
+            data: null,
+            error: null,
+          }),
+
+      supabase
+        .from(
+          'assessment_population_workspace_rows',
+        )
+        .select('*')
+        .eq('assessment_id', assessmentId),
+    ]);
+
+    const error =
+      periodResult.error ??
+      unitResult.error ??
+      cohortResult.error ??
+      populationResult.error;
+
+    if (error) {
+      throw new Error(
+        `Unable to load assessment population: ${error.message}`,
+      );
+    }
+
+    if (
+      !periodResult.data ||
+      !unitResult.data
+    ) {
+      throw new Error(
+        'Assessment reference data is incomplete.',
+      );
+    }
+
+    const populationRows =
+      (populationResult.data ??
+        []) as UnknownRow[];
+
+    const studentIds = [
+      ...new Set(
+        populationRows
+          .map((row) =>
+            asString(row.student_id),
+          )
+          .filter(
+            (value): value is string =>
+              Boolean(value),
+          ),
+      ),
+    ];
+
+    let studentRows: UnknownRow[] = [];
+
+    if (studentIds.length > 0) {
+      const {
+        data,
+        error: studentsError,
+      } = await supabase
+        .from('students')
+        .select(
+          'id, admission_number, full_name',
+        )
+        .in('id', studentIds);
+
+      if (studentsError) {
+        throw new Error(
+          `Unable to load assessment students: ${studentsError.message}`,
+        );
+      }
+
+      studentRows =
+        (data ?? []) as UnknownRow[];
+    }
+
+    const studentById = new Map(
+      studentRows.map((student) => [
+        asString(student.id) ?? '',
+        student,
+      ]),
+    );
+
+    const students =
+      populationRows
+        .map((population) => {
+          const studentId =
+            asString(
+              population.student_id,
+            );
+
+          if (!studentId) {
+            return null;
+          }
+
+          const student =
+            studentById.get(studentId);
+
+          if (!student) {
+            return null;
+          }
+
+          const attendance =
+            asString(
+              population.attendance_status,
+            ) === 'absent'
+              ? 'absent'
+              : 'expected';
+
+          return {
+            populationId:
+              asString(population.id) ??
+              studentId,
+            studentId,
+            admissionNumber:
+              asString(
+                student.admission_number,
+              ) ?? 'â€”',
+            fullName:
+              asString(
+                student.full_name,
+              ) ?? 'Student',
+            attendanceStatus:
+              attendance,
+            registrationStatus:
+              asString(
+                population
+                  .snapshot_registration_status,
+              ),
+          } satisfies
+            AssessmentPopulationStudent;
+        })
+        .filter(
+          (
+            student,
+          ): student is
+            AssessmentPopulationStudent =>
+            student !== null,
+        )
+        .sort((first, second) =>
+          first.fullName.localeCompare(
+            second.fullName,
+          ),
+        );
+
+    const markedAbsent =
+      students.filter(
+        (student) =>
+          student.attendanceStatus ===
+          'absent',
+      ).length;
+
+    const registeredPopulation =
+      students.length;
+
+    return {
+      assessmentId,
+      assessmentType:
+        asString(
+          event.assessment_type,
+        ) === 'cat'
+          ? 'cat'
+          : asString(
+                event.assessment_type,
+              ) === 'exam'
+            ? 'exam'
+            : null,
+      workflowStatus:
+        asString(
+          event.workflow_status,
+        ),
+      populationGeneratedAt:
+        asString(
+          event.population_generated_at,
+        ),
+      populationLockedAt:
+        asString(
+          event.population_locked_at,
+        ),
+      unit: {
+        id: unitResult.data.id,
+        code:
+          unitResult.data.code ??
+          null,
+        name:
+          unitResult.data.name,
+      },
+      cohort:
+        cohortResult.data
+          ? {
+              id:
+                cohortResult.data.id,
+              name:
+                cohortResult.data.name,
+            }
+          : null,
+      academicPeriod: {
+        id: periodResult.data.id,
+        code:
+          periodResult.data.code ??
+          null,
+        name:
+          periodResult.data.name,
+      },
+      registeredPopulation,
+      expectedToSit:
+        registeredPopulation -
+        markedAbsent,
+      markedAbsent,
+      students,
+    };
+  });

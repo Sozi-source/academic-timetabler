@@ -61,7 +61,7 @@ export function MarkbookDeleteButton({
         className="size-3.5"
         aria-hidden="true"
       />
-      {busy ? 'Deletingâ€¦' : 'Delete'}
+      {busy ? 'Deleting...' : 'Delete'}
     </button>
   );
 }

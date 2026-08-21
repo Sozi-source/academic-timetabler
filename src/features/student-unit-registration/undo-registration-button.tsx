@@ -63,7 +63,7 @@ export function UndoUnitRegistrationButton({
       disabled={busy}
       className="inline-flex h-8 items-center justify-center rounded-lg border border-border-strong bg-white px-3 text-[11px] font-semibold text-text-secondary transition hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-60"
     >
-      {busy ? 'Undoingâ€¦' : 'Undo registration'}
+      {busy ? 'Undoing...' : 'Undo registration'}
     </button>
   );
 }

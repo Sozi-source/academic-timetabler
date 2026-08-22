@@ -568,7 +568,7 @@ export function StudentPortalAccessManager({
             )
           }
         >
-          Issue missing access
+          Issue all missing PINs
         </Button>
       </section>
 

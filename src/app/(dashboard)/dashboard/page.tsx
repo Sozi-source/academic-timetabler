@@ -90,8 +90,11 @@ export default async function DashboardPage() {
       icon: FileText,
       color: 'bg-purple-500/10 text-purple-600 border-purple-500/20',
       links: [
-        { label: 'Bulk ZIP Curriculum Ingest', href: '/teaching-documents', icon: FileText, badge: 'ZIP Bulk' },
+        { label: 'Teaching Documents', href: '/teaching-documents', icon: FileText, badge: 'Documents' },
+        { label: 'Curriculum Content', href: '/teaching-documents/curriculum', icon: BookOpen, badge: '14 Weeks' },
+        { label: 'Import Curriculum', href: '/teaching-documents/curriculum/import', icon: FileSpreadsheet, badge: 'Excel' },
         { label: 'Trainer Document Review', href: '/teaching-documents/review', icon: FileCheck2 },
+        { label: 'Published Documents', href: '/teaching-documents/published', icon: ShieldCheck },
         { label: 'Student Released Documents', href: '/teaching-documents/releases', icon: ShieldCheck },
       ],
     },

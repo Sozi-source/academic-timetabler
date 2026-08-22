@@ -12,9 +12,5 @@ export default async function HomePage() {
     redirect('/staff');
   }
 
-  if (profile.role === 'student') {
-    redirect('/student');
-  }
-
   redirect('/dashboard');
 }

@@ -14,9 +14,13 @@ export interface SeedWeeklyTopic {
   learningActivities?: string;
   resourcesAndReferences?: string;
   assessmentAndRemarks?: string;
+  specificLearningOutcomes?: string;
 }
 
+
 export interface UnitCurriculumDefinition {
+  /** Legacy ingestion tag retained for ZIP/import compatibility. */
+  documentType?: 'course_outline' | 'scheme_of_work';
   unitCode: string;
   unitName: string;
   unitDescription?: string;
@@ -25,13 +29,10 @@ export interface UnitCurriculumDefinition {
   weeklySchedule?: SeedWeeklyTopic[];
   references?: string[];
   instructionalEquipment?: string[];
-  /**
-   * Which institutional document this definition was sourced from / belongs to.
-   * Required from the ZIP ingestion path onward — must match a valid
-   * public.teaching_document_templates.document_type value in Postgres.
-   */
-  documentType?: 'scheme_of_work' | 'course_outline';
+  teachingLearningApproaches?: string;
+  assessmentApproaches?: string;
 }
+
 
 /**
  * Normalizes a unit code for robust lookup (e.g. "CND 1101" -> "cnd1101")
@@ -570,28 +571,15 @@ function generateProgressiveWeeklySchedule(
 }
 
 /**
- * Finds or synthesizes a unit curriculum definition by matching code or name.
- *
- * documentType is now checked FIRST against a composite key so a custom
- * scheme_of_work upload and a custom course_outline upload for the same unit
- * resolve to their own distinct content instead of sharing one slot.
- * Falls back to the plain unit-code entry (built-in seed content, which is
- * intentionally shared baseline framework across both document types) if no
- * document-type-specific custom entry exists.
+ * Finds or synthesizes a unit curriculum definition by matching code or name
  */
 export function getUnitCurriculum(
   unitCode: string,
-  unitName: string,
-  documentType?: 'scheme_of_work' | 'course_outline'
+  unitName: string
 ): UnitCurriculumDefinition {
   const codeKey = normalizeUnitCodeKey(unitCode);
 
-  // 1. Document-type-specific custom entry (from ZIP ingestion / manual seed)
-  if (documentType && TVET_CURRICULUM_REGISTRY[`${codeKey}:${documentType}`]) {
-    return TVET_CURRICULUM_REGISTRY[`${codeKey}:${documentType}`];
-  }
-
-  // 2. Plain code lookup — built-in shared seed content
+  // 1. Direct code lookup
   if (TVET_CURRICULUM_REGISTRY[codeKey]) {
     return TVET_CURRICULUM_REGISTRY[codeKey];
   }
@@ -646,58 +634,29 @@ export function registerUnitCurriculum(def: UnitCurriculumDefinition) {
 }
 
 /**
- * Persists an ingested unit curriculum definition into Supabase.
- *
- * IMPORTANT: document_type is now read from def.documentType, not hardcoded.
- * A missing documentType is a caller bug (it must be assigned during ingestion
- * or confirmed by the HOD in the preview step) — we refuse to guess here,
- * since guessing wrong is exactly how scheme-of-work and course-outline
- * content got mixed up previously.
+ * Persists an ingested unit curriculum definition into Supabase
  */
 export async function persistUnitCurriculumToDatabase(def: UnitCurriculumDefinition): Promise<void> {
-  if (!def.documentType) {
-    throw new Error(
-      `Cannot persist "${def.unitCode}": documentType is missing. ` +
-      `Every unit must be tagged scheme_of_work or course_outline before it is committed.`
-    );
-  }
-
   const codeKey = normalizeUnitCodeKey(def.unitCode);
-  const registryKey = `${codeKey}:${def.documentType}`;
-  TVET_CURRICULUM_REGISTRY[registryKey] = def;
-
-  // Composite id so scheme_of_work and course_outline for the same unit
-  // get separate template rows instead of clobbering one shared row.
-  const templateId = `tpl-tvet-${codeKey}-${def.documentType}`;
+  TVET_CURRICULUM_REGISTRY[codeKey] = def;
 
   try {
     const { createAdminClient } = await import('@/lib/supabase/admin');
     const admin = createAdminClient();
-
-    // Bump version instead of always pinning version_number: 1, so re-uploads
-    // are auditable and create_teaching_document_record's
-    // "order by version_number desc limit 1" picks the latest intentionally.
-    const { data: existing } = await admin
-      .from('teaching_document_templates')
-      .select('version_number')
-      .eq('id', templateId)
-      .maybeSingle();
-
     await admin.from('teaching_document_templates').upsert({
-      id: templateId,
-      document_type: def.documentType,
+      id: `tpl-tvet-${codeKey}`,
+      document_type: 'course_outline',
       name: def.unitCode,
-      version_number: (existing?.version_number ?? 0) + 1,
+      version_number: 1,
       status: 'active',
       storage_bucket: 'teaching-documents',
-      storage_path: `curriculum/${codeKey}-${def.documentType}.json`,
+      storage_path: `curriculum/${codeKey}.json`,
       original_filename: JSON.stringify(def),
       notes: def.unitName,
       updated_at: new Date().toISOString(),
     });
   } catch (err) {
     console.error('Failed to persist curriculum definition to DB:', err);
-    throw err;
   }
 }
 
@@ -707,32 +666,27 @@ export async function persistUnitCurriculumToDatabase(def: UnitCurriculumDefinit
 export async function loadPersistedUnitCurriculum(
   unitCode: string,
   unitName: string,
-  documentType?: 'scheme_of_work' | 'course_outline'
+  _documentType?: 'course_outline' | 'scheme_of_work',
 ): Promise<UnitCurriculumDefinition> {
   const codeKey = normalizeUnitCodeKey(unitCode);
-  const registryKey = documentType ? `${codeKey}:${documentType}` : codeKey;
 
-  if (TVET_CURRICULUM_REGISTRY[registryKey]) {
-    return TVET_CURRICULUM_REGISTRY[registryKey];
+  if (TVET_CURRICULUM_REGISTRY[codeKey]) {
+    return TVET_CURRICULUM_REGISTRY[codeKey];
   }
 
   try {
     const { createAdminClient } = await import('@/lib/supabase/admin');
     const admin = createAdminClient();
-    const templateId = documentType
-      ? `tpl-tvet-${codeKey}-${documentType}`
-      : `tpl-tvet-${codeKey}`; // legacy id, pre-fix rows only
-
     const { data: row } = await admin
       .from('teaching_document_templates')
       .select('original_filename')
-      .eq('id', templateId)
+      .eq('id', `tpl-tvet-${codeKey}`)
       .maybeSingle();
 
     if (row?.original_filename) {
       const parsed = JSON.parse(row.original_filename) as UnitCurriculumDefinition;
       if (parsed && parsed.unitCode) {
-        TVET_CURRICULUM_REGISTRY[registryKey] = parsed;
+        TVET_CURRICULUM_REGISTRY[codeKey] = parsed;
         return parsed;
       }
     }
@@ -740,5 +694,5 @@ export async function loadPersistedUnitCurriculum(
     // Fallback to sync getUnitCurriculum
   }
 
-  return getUnitCurriculum(unitCode, unitName, documentType);
+  return getUnitCurriculum(unitCode, unitName);
 }

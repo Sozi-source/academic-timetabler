@@ -74,9 +74,6 @@ export function TVETDocumentViewer({
       <div className="mx-auto max-w-4xl rounded-2xl border border-border bg-white p-8 shadow-sm print:m-0 print:max-w-none print:border-none print:p-0 print:shadow-none">
         {/* Official Header Block */}
         <div className="border-b-2 border-text-primary pb-4 text-center">
-          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-text-muted">
-            REPUBLIC OF KENYA · IMPERIAL COLLEGE ACADEMIC & EXAMINATION STANDARDS
-          </p>
           <h1 className="mt-1 text-lg font-black tracking-wide text-text-primary uppercase sm:text-xl">
             {header.institutionName}
           </h1>
@@ -178,37 +175,27 @@ export function TVETDocumentViewer({
               </table>
             </section>
 
-            <section>
-              <h2 className="border-b border-border pb-1 font-bold uppercase tracking-wider text-text-primary">
-                4. Assessment Matrix & Weighting Breakdown
-              </h2>
-              <div className="mt-2 border border-text-primary p-3 bg-surface-subtle">
-                <div className="grid grid-cols-2 gap-4">
+            {(courseOutline.teachingLearningApproaches || courseOutline.assessmentApproaches) ? (
+              <section>
+                <h2 className="border-b border-border pb-1 font-bold uppercase tracking-wider text-text-primary">
+                  4. Teaching / Learning and Assessment Approaches
+                </h2>
+                <div className="mt-2 grid gap-4 sm:grid-cols-2 text-text-secondary">
                   <div>
-                    <p className="font-bold text-text-primary uppercase text-[11px]">Continuous Assessment Tests (Coursework: 30%):</p>
-                    <ul className="mt-1 space-y-1 text-[11px] text-text-secondary">
-                      <li>• Continuous Assessment Test (CAT): <strong>15%</strong></li>
-                      <li>• Readiness Assessment Test (RAT): <strong>15%</strong> (Averaged with CAT into 15%)</li>
-                      <li>• Practical / Presentation Demonstration: <strong>10%</strong></li>
-                      <li>• Standard Assignment / Case Study: <strong>5%</strong></li>
-                    </ul>
+                    <p className="font-bold text-text-primary text-[11px]">Teaching / Learning Approaches</p>
+                    <p className="mt-1 leading-relaxed">{courseOutline.teachingLearningApproaches || '—'}</p>
                   </div>
                   <div>
-                    <p className="font-bold text-text-primary uppercase text-[11px]">Final Summative Assessment (70%):</p>
-                    <ul className="mt-1 space-y-1 text-[11px] text-text-secondary">
-                      <li>• End-Term Theory & Practical Exam: <strong>70%</strong></li>
-                      <li className="mt-2 pt-2 border-t border-border font-bold text-text-primary">
-                        • Total Comprehensive Score: <strong>100%</strong>
-                      </li>
-                    </ul>
+                    <p className="font-bold text-text-primary text-[11px]">Assessment Approaches</p>
+                    <p className="mt-1 leading-relaxed">{courseOutline.assessmentApproaches || '—'}</p>
                   </div>
                 </div>
-              </div>
-            </section>
+              </section>
+            ) : null}
 
             <section>
               <h2 className="border-b border-border pb-1 font-bold uppercase tracking-wider text-text-primary">
-                5. Instructional Equipment & Prescribed References
+                5. Instructional Resources & References
               </h2>
               <div className="mt-2 grid grid-cols-2 gap-4 text-text-secondary">
                 <div>
@@ -243,7 +230,7 @@ export function TVETDocumentViewer({
                   <th className="border-r border-text-primary p-2">Specific Learning Outcomes (SLOs)</th>
                   <th className="border-r border-text-primary p-2 w-40">Activities & Methodology</th>
                   <th className="border-r border-text-primary p-2 w-36">Resources & References</th>
-                  <th className="p-2 w-32">Assessment & Remarks</th>
+                  <th className="p-2 w-32">Assessment / Learning Check</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">

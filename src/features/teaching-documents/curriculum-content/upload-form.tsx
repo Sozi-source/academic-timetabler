@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Download, FileSpreadsheet, LoaderCircle, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FormStatusMessage } from '@/components/ui/form-status-message';
-import { initialCurriculumContentImportState, stageCurriculumContentImportAction } from './actions';
+import { stageCurriculumContentImportAction } from './actions';
+import { initialCurriculumContentImportState } from './state';
 
 const templateLinkClass = 'inline-flex h-10 items-center gap-2 rounded-lg border border-border-strong bg-white px-3.5 text-sm font-semibold text-text-secondary hover:bg-surface-subtle';
 

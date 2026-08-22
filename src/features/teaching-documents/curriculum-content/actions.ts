@@ -5,14 +5,7 @@ import { requireHodAccess } from '@/features/auth/authorization';
 import { createClient } from '@/lib/supabase/server';
 import { parseCurriculumContentWorkbook } from './workbook';
 
-export interface CurriculumContentImportState {
-  status: 'idle' | 'error' | 'success';
-  message: string | null;
-  details?: string[];
-  batchId?: string;
-}
-
-export const initialCurriculumContentImportState: CurriculumContentImportState = { status: 'idle', message: null };
+import type { CurriculumContentImportState } from './state';
 
 function normalizeCode(value: string) {
   return value.trim().toUpperCase().replace(/\s+/g,' ');

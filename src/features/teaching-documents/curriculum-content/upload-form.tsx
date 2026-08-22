@@ -2,18 +2,20 @@
 
 import { useActionState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Download, LoaderCircle, Upload } from 'lucide-react';
+import { Download, FileSpreadsheet, LoaderCircle, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FormStatusMessage } from '@/components/ui/form-status-message';
-import { initialCurriculumContentImportState } from './types';
-import { stageCurriculumContentImportAction } from './actions';
+import { initialCurriculumContentImportState, stageCurriculumContentImportAction } from './actions';
+
+const templateLinkClass = 'inline-flex h-10 items-center gap-2 rounded-lg border border-border-strong bg-white px-3.5 text-sm font-semibold text-text-secondary hover:bg-surface-subtle';
 
 export function CurriculumContentUploadForm() {
   const router = useRouter();
   const [state, action, pending] = useActionState(stageCurriculumContentImportAction, initialCurriculumContentImportState);
+
   useEffect(() => {
     if (state.status === 'success' && state.batchId) router.push(`/teaching-documents/curriculum/import/${state.batchId}`);
-  }, [router,state.status,state.batchId]);
+  }, [router, state.status, state.batchId]);
 
   return (
     <form action={action} className="space-y-4">
@@ -25,17 +27,34 @@ export function CurriculumContentUploadForm() {
       ) : null}
 
       <section className="rounded-2xl border border-border bg-surface p-5">
-        <h2 className="font-semibold text-text-primary">Curriculum content template</h2>
-        <p className="mt-1 text-sm text-text-muted">Download the current system template, complete it, then upload the same .xlsx structure.</p>
-        <a href="/api/teaching-documents/curriculum/import-template" className="mt-3 inline-flex h-9 items-center gap-2 rounded-lg border border-border-strong bg-white px-3.5 text-xs font-semibold text-text-secondary hover:bg-surface-subtle">
-          <Download className="size-4" /> Download Excel template
-        </a>
+        <div className="flex items-start gap-3">
+          <FileSpreadsheet className="mt-0.5 size-5 text-primary" />
+          <div>
+            <h2 className="font-semibold text-text-primary">Download Excel template</h2>
+            <p className="mt-1 text-sm text-text-muted">Choose the document you want to prepare. Both templates use fixed headers.</p>
+          </div>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <a href="/api/teaching-documents/curriculum/templates/course-outline" className={templateLinkClass}>
+            <Download className="size-4" /> Course Outline template
+          </a>
+          <a href="/api/teaching-documents/curriculum/templates/scheme-of-work" className={templateLinkClass}>
+            <Download className="size-4" /> Scheme of Work template
+          </a>
+        </div>
       </section>
 
       <section className="rounded-2xl border border-border bg-surface p-5">
         <h2 className="font-semibold text-text-primary">Upload completed workbook</h2>
-        <p className="mt-1 text-sm text-text-muted">The system validates unit codes, shared curriculum families and all 14 teaching weeks before import.</p>
-        <input name="workbook" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required disabled={pending} className="mt-4 block w-full text-sm text-text-muted" />
+        <p className="mt-1 text-sm text-text-muted">Upload either completed system template. Academic Planner detects the document type and validates all 14 teaching weeks before import.</p>
+        <input
+          name="workbook"
+          type="file"
+          accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          required
+          disabled={pending}
+          className="mt-4 block w-full text-sm text-text-muted"
+        />
       </section>
 
       <div className="flex justify-end">

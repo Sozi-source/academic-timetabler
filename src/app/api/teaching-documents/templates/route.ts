@@ -107,6 +107,25 @@ export async function POST(
     );
   }
 
+  const lowerFileName =
+    file.name.toLowerCase();
+
+  if (
+    (documentType === 'course_outline' || documentType === 'scheme_of_work') &&
+    lowerFileName.endsWith('.xlsx')
+  ) {
+    return NextResponse.json(
+      {
+        message:
+          'Excel curriculum files must be uploaded from Teaching Documents → Curriculum Content → Import Excel.',
+      },
+      {
+        status:
+          400,
+      },
+    );
+  }
+
   const validationError =
     validateTeachingTemplateFile({
       fileName:

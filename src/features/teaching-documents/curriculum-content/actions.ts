@@ -5,7 +5,14 @@ import { requireHodAccess } from '@/features/auth/authorization';
 import { createClient } from '@/lib/supabase/server';
 import { parseCurriculumContentWorkbook } from './workbook';
 
-import type { CurriculumContentImportState } from './types';
+export interface CurriculumContentImportState {
+  status: 'idle' | 'error' | 'success';
+  message: string | null;
+  details?: string[];
+  batchId?: string;
+}
+
+export const initialCurriculumContentImportState: CurriculumContentImportState = { status: 'idle', message: null };
 
 function normalizeCode(value: string) {
   return value.trim().toUpperCase().replace(/\s+/g,' ');
@@ -49,6 +56,7 @@ export async function stageCurriculumContentImportAction(
     parsed.curriculum.map((r): [string, Record<string,string>] => [r.content_family_key, r]),
   );
   const families = [...metadataByFamily.entries()].map(([familyKey,meta]) => ({
+    documentType: parsed.documentType,
     familyKey,
     familyName: meta.content_family_name || familyKey,
     version: Number(meta.curriculum_version || 1),
@@ -82,8 +90,9 @@ export async function stageCurriculumContentImportAction(
       original_file_name:file.name,
       template_version:parsed.templateVersion,
       status:'validated',
-      payload:{ families },
+      payload:{ documentType: parsed.documentType, families },
       validation_summary:{
+        documentType:parsed.documentType,
         families:families.length,
         units:parsed.unitMappings.length,
         weeks:parsed.weeks.length,

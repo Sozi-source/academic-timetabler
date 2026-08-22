@@ -70,6 +70,10 @@ export function TeachingDocumentTemplateManager({
   const router =
     useRouter();
 
+  const curriculumPresentationTemplate =
+    documentType === 'course_outline' ||
+    documentType === 'scheme_of_work';
+
   const [
     busy,
     setBusy,
@@ -142,6 +146,16 @@ export function TeachingDocumentTemplateManager({
     ) {
       setError(
         'Choose an official template file.',
+      );
+      return;
+    }
+
+    if (
+      curriculumPresentationTemplate &&
+      file.name.toLowerCase().endsWith('.xlsx')
+    ) {
+      setError(
+        'Excel curriculum files belong in Curriculum Content → Import Excel. Upload only the presentation template here.',
       );
       return;
     }
@@ -269,10 +283,15 @@ export function TeachingDocumentTemplateManager({
               {teachingDocumentLabel(
                 documentType,
               )}
+              {curriculumPresentationTemplate
+                ? ' document template'
+                : ''}
             </h2>
 
             <p className="mt-1 text-[11px] text-text-muted">
-              Official institutional template.
+              {curriculumPresentationTemplate
+                ? 'Presentation only. Curriculum content is managed separately.'
+                : 'Official institutional template.'}
             </p>
           </div>
 
@@ -297,6 +316,20 @@ export function TeachingDocumentTemplateManager({
           </Badge>
         </div>
 
+        {curriculumPresentationTemplate ? (
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-surface-subtle/60 px-3 py-2.5">
+            <p className="text-[11px] leading-4 text-text-secondary">
+              Excel curriculum data is not uploaded here.
+            </p>
+            <a
+              href="/teaching-documents/curriculum/import"
+              className="text-[11px] font-semibold text-primary hover:underline"
+            >
+              Open Curriculum Content
+            </a>
+          </div>
+        ) : null}
+
         <form
           onSubmit={
             upload
@@ -308,7 +341,7 @@ export function TeachingDocumentTemplateManager({
             <input
               name="file"
               type="file"
-              accept=".docx,.xlsx,.pdf"
+              accept={curriculumPresentationTemplate ? ".docx,.pdf" : ".docx,.xlsx,.pdf"}
               required
               disabled={
                 busy !==
@@ -355,7 +388,7 @@ export function TeachingDocumentTemplateManager({
               )
             }
           >
-            Upload
+            Upload template
           </Button>
 
           <label className="text-[11px] font-semibold text-text-secondary md:col-span-2">

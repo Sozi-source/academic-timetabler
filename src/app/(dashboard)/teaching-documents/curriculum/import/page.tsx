@@ -9,19 +9,11 @@ export default async function CurriculumContentImportPage() {
   return (
     <div className="space-y-4">
       <PageHeader
-        eyebrow="Curriculum content"
-        title="Import Curriculum"
-        description="Upload the official Excel template, validate it, then review before import."
+        eyebrow="Teaching documents"
+        title="Import Excel curriculum"
+        description="Download the fixed Course Outline or Scheme of Work Excel template, complete it, validate, then import."
         icon={BookOpenCheck}
-        actions={
-          <Link
-            href="/teaching-documents/curriculum"
-            className="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-surface px-4 text-sm font-semibold text-text-secondary"
-          >
-            <ArrowLeft className="size-4" aria-hidden="true" />
-            Curriculum content
-          </Link>
-        }
+        actions={<Link href="/teaching-documents" className="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-surface px-4 text-sm font-semibold text-text-secondary"><ArrowLeft className="size-4" /> Teaching documents</Link>}
       />
       <div className="max-w-5xl"><CurriculumContentUploadForm /></div>
     </div>

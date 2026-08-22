@@ -55,7 +55,7 @@ export function ReopenAttendanceButton({
     try {
       const response =
         await fetch(
-          `/api/attendance-clinical/class-attendance/${sessionId}/reopen`,
+          `/api/attendance/${sessionId}/reopen`,
           {
             method:
               'POST',

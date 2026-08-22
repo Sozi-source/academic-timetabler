@@ -57,9 +57,18 @@ Promise<SupabaseClient> {
     SupabaseClient;
 }
 
+export interface AttendanceFilters {
+  academicPeriodName?: string;
+  unitName?: string;
+  cohortName?: string;
+  trainerName?: string;
+  sessionDate?: string;
+  status?: ClassSessionStatus;
+  limit?: number;
+}
+
 export async function getDepartmentAttendanceSessions(
-  limit =
-    100,
+  filters: AttendanceFilters = {}
 ): Promise<DepartmentAttendanceSession[]> {
   const supabase =
     await client();
@@ -72,7 +81,7 @@ export async function getDepartmentAttendanceSessions(
       'get_department_class_attendance_overview',
       {
         target_limit:
-          limit,
+          filters.limit ?? 100,
       },
     );
 
@@ -82,7 +91,7 @@ export async function getDepartmentAttendanceSessions(
     );
   }
 
-  return (
+  let results = (
     (
       data ??
       []
@@ -186,6 +195,36 @@ export async function getDepartmentAttendanceSessions(
           row,
         ),
     );
+
+  if (filters.academicPeriodName) {
+    const q = filters.academicPeriodName.toLowerCase();
+    results = results.filter((r) => r.academicPeriodName.toLowerCase().includes(q));
+  }
+
+  if (filters.unitName) {
+    const q = filters.unitName.toLowerCase();
+    results = results.filter((r) => r.unitName.toLowerCase().includes(q));
+  }
+
+  if (filters.cohortName) {
+    const q = filters.cohortName.toLowerCase();
+    results = results.filter((r) => r.cohortNames.toLowerCase().includes(q));
+  }
+
+  if (filters.trainerName) {
+    const q = filters.trainerName.toLowerCase();
+    results = results.filter((r) => r.trainerName.toLowerCase().includes(q));
+  }
+
+  if (filters.sessionDate) {
+    results = results.filter((r) => r.sessionDate === filters.sessionDate);
+  }
+
+  if (filters.status) {
+    results = results.filter((r) => r.sessionStatus === filters.status);
+  }
+
+  return results;
 }
 
 export async function getDepartmentAttendanceWorkspace(

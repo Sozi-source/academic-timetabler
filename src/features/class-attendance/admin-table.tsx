@@ -23,14 +23,14 @@ import {
   shortTime,
 } from './domain';
 import type {
-  HodClassAttendanceItem,
+  DepartmentAttendanceSession,
 } from './admin-types';
 
 export function AttendanceAdminTable({
   items,
 }: {
   items:
-    HodClassAttendanceItem[];
+    DepartmentAttendanceSession[];
 }) {
   const router =
     useRouter();
@@ -152,7 +152,7 @@ export function AttendanceAdminTable({
               >
                 <div className="min-w-0">
                   <Link
-                    href={`/attendance-clinical/${item.classSessionId}`}
+                    href={`/attendance/${item.classSessionId}`}
                     className="truncate text-xs font-semibold text-text-primary hover:text-primary"
                   >
                     {
@@ -162,7 +162,7 @@ export function AttendanceAdminTable({
 
                   <p className="mt-0.5 text-[10px] text-text-muted">
                     {
-                      item.cohortName
+                      item.cohortNames
                     }
                     {' · '}
                     {
@@ -187,13 +187,13 @@ export function AttendanceAdminTable({
 
                 <Badge
                   variant={
-                    item.status ===
+                    item.sessionStatus ===
                     'completed'
                       ? 'success'
                       : 'warning'
                   }
                 >
-                  {item.status ===
+                  {item.sessionStatus ===
                   'completed'
                     ? 'Completed'
                     : 'Open'}
@@ -205,7 +205,7 @@ export function AttendanceAdminTable({
                   }
                   <span className="ml-1 text-[10px] font-normal text-text-muted">
                     / {
-                      item.rosterCount
+                      item.studentCount
                     }
                   </span>
                 </p>
@@ -226,13 +226,13 @@ export function AttendanceAdminTable({
 
                 <div className="flex justify-end gap-1.5">
                   <Link
-                    href={`/attendance-clinical/${item.classSessionId}`}
+                    href={`/attendance/${item.classSessionId}`}
                     className="inline-flex h-8 items-center justify-center rounded-lg border border-border-strong bg-white px-2.5 text-[10px] font-semibold text-text-secondary transition hover:bg-surface-subtle"
                   >
                     View
                   </Link>
 
-                  {item.status ===
+                  {item.sessionStatus ===
                   'completed' ? (
                     <Button
                       type="button"

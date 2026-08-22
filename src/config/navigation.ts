@@ -1,6 +1,7 @@
 import {
   AlarmClock,
   ArrowLeft,
+  BarChart3,
   BookOpen,
   Building2,
   CalendarDays,
@@ -47,9 +48,10 @@ export const dashboardNavigation = [
     label: 'Oversight & QA',
     items: [
       { label: 'Operations', href: '/operations', icon: ShieldCheck },
+      { label: 'Executive reports', href: '/reports', icon: BarChart3 },
       { label: 'Action Center', href: '/operations/action-center', icon: ListChecks },
       { label: 'Operational incidents', href: '/operations/incidents', icon: ShieldCheck },
-      { label: 'Class attendance', href: '/attendance-clinical/class-attendance', icon: Stethoscope },
+      { label: 'Class attendance', href: '/attendance', icon: Stethoscope },
       { label: 'Readiness checks', href: '/operations/readiness', icon: ClipboardCheck },
       { label: 'Operational audit', href: '/operations/audit', icon: History },
       { label: 'Testing Center', href: '/testing', icon: FlaskConical },

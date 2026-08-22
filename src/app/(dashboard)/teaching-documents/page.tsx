@@ -26,6 +26,9 @@ import {
 import {
   TeachingDocumentTemplateManager,
 } from '@/features/teaching-documents/template-manager';
+import {
+  CurriculumZipUploadDialog,
+} from '@/features/teaching-documents/curriculum-zip-upload-dialog';
 
 export default async function TeachingDocumentsPage() {
   await requireHodAccess();
@@ -48,6 +51,8 @@ export default async function TeachingDocumentsPage() {
         icon={FileText}
         actions={
           <div className="flex flex-wrap gap-2">
+            <CurriculumZipUploadDialog />
+
             <Link
               href="/teaching-documents/releases"
               className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"

@@ -673,6 +673,8 @@ export const getStaffWorkspace =
                 cohortName:
                   cohort.name,
                 unitId,
+                unitCode:
+                  unit.code,
                 unitName:
                   unit.name,
                 allocationStatus:

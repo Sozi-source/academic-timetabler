@@ -103,7 +103,9 @@ export default async function StaffDocumentsPage() {
                       <p className="truncate text-sm font-bold text-text-primary">
                         {allocation.unitName}
                       </p>
-                      <Badge variant="neutral">{allocation.unitCode}</Badge>
+                      {allocation.unitCode ? (
+                        <Badge variant="neutral">{allocation.unitCode}</Badge>
+                      ) : null}
                     </div>
 
                     <p className="mt-1 text-[11px] text-text-muted">

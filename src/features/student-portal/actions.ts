@@ -15,6 +15,10 @@ import {
   studentProfileSchema,
 } from './profile';
 import {
+  checkRateLimit,
+  clearRateLimit,
+} from '@/lib/security/rate-limit';
+import {
   createStudentPortalSession,
   getStudentPortalSession,
   revokeStudentPortalSession,
@@ -71,6 +75,19 @@ export async function studentPortalLogin(
     };
   }
 
+  const rateCheck = checkRateLimit(
+    `student-login:${parsed.data.admissionNumber.toUpperCase()}`,
+    5,
+    15 * 60 * 1000,
+  );
+
+  if (!rateCheck.success) {
+    const minutes = Math.ceil((rateCheck.retryAfterSec ?? 60) / 60);
+    return {
+      error: `Too many unsuccessful login attempts. Please try again in ${minutes} minute${minutes > 1 ? 's' : ''}.`,
+    };
+  }
+
   const admin =
     createAdminClient();
 
@@ -98,6 +115,8 @@ export async function studentPortalLogin(
         'Admission number or PIN is incorrect.',
     };
   }
+
+  clearRateLimit(`student-login:${parsed.data.admissionNumber.toUpperCase()}`);
 
   await createStudentPortalSession(
     data as

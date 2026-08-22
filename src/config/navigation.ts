@@ -18,6 +18,10 @@ import {
   UserRound,
   UsersRound,
   Network,
+  ShieldCheck,
+  Stethoscope,
+  History,
+  FlaskConical,
 } from 'lucide-react';
 
 // Keep import and edit screens inside their parent registers so the main
@@ -37,6 +41,18 @@ export const dashboardNavigation = [
       { label: '3. Review and edit', href: '/timetable/editor', icon: PencilRuler },
       { label: '4. Publish', href: '/timetable/published', icon: FileChartColumn },
       { label: 'Reports', href: '/timetable/reports', icon: ListChecks },
+    ],
+  },
+  {
+    label: 'Oversight & QA',
+    items: [
+      { label: 'Operations', href: '/operations', icon: ShieldCheck },
+      { label: 'Action Center', href: '/operations/action-center', icon: ListChecks },
+      { label: 'Operational incidents', href: '/operations/incidents', icon: ShieldCheck },
+      { label: 'Class attendance', href: '/attendance-clinical/class-attendance', icon: Stethoscope },
+      { label: 'Readiness checks', href: '/operations/readiness', icon: ClipboardCheck },
+      { label: 'Operational audit', href: '/operations/audit', icon: History },
+      { label: 'Testing Center', href: '/testing', icon: FlaskConical },
     ],
   },
   {

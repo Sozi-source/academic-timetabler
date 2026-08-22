@@ -1,6 +1,6 @@
 import {
-  Eye,
   FileCheck2,
+  FileOutput,
   FileText,
   Layers3,
   ShieldCheck,
@@ -49,14 +49,14 @@ export default async function TeachingDocumentsPage() {
         actions={
           <div className="flex flex-wrap gap-2">
             <Link
-              href="/teaching-documents/published"
+              href="/teaching-documents/releases"
               className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
             >
-              <Eye
+              <FileOutput
                 className="size-3.5"
                 aria-hidden="true"
               />
-              Student publication
+              Student releases
             </Link>
 
             <Link

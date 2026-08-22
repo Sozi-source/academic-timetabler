@@ -17,28 +17,25 @@ import {
   requireHodAccess,
 } from '@/features/auth/authorization';
 import {
-  getDepartmentAttendanceWorkspace,
-} from '@/features/class-attendance/admin-queries';
-import {
   classAttendanceStatusVariant,
-  classAttendanceSummary,
   shortTime,
 } from '@/features/class-attendance/domain';
 import {
+  getClassAttendanceWorkspace,
+} from '@/features/class-attendance/queries';
+import {
   ReopenAttendanceButton,
-} from '@/features/class-attendance/reopen-attendance-button';
+} from '@/features/operations/reopen-attendance-button';
 
-interface PageProps {
+export default async function AttendanceReviewPage({
+  params,
+}: {
   params:
     Promise<{
       sessionId:
         string;
     }>;
-}
-
-export default async function DepartmentAttendanceSessionPage({
-  params,
-}: PageProps) {
+}) {
   await requireHodAccess();
 
   const {
@@ -47,7 +44,7 @@ export default async function DepartmentAttendanceSessionPage({
     await params;
 
   const workspace =
-    await getDepartmentAttendanceWorkspace(
+    await getClassAttendanceWorkspace(
       sessionId,
     );
 
@@ -55,47 +52,39 @@ export default async function DepartmentAttendanceSessionPage({
     notFound();
   }
 
-  const summary =
-    classAttendanceSummary(
-      workspace.students.map(
-        (student) =>
-          student.attendanceStatus,
-      ),
-    );
-
   return (
     <div className="space-y-5">
       <PageHeader
-        eyebrow="Class Attendance"
+        eyebrow="Class attendance"
         title={
           workspace.unitName
         }
-        description={`${workspace.cohortNames} · ${workspace.sessionDate} · ${shortTime(
+        description={`${workspace.cohortName} · ${workspace.sessionDate} · ${shortTime(
           workspace.startsAt,
         )}–${shortTime(
           workspace.endsAt,
         )}`}
         icon={CalendarCheck2}
         actions={
-          <div className="flex flex-wrap gap-2">
+          <div className="flex gap-2">
             {workspace.sessionStatus ===
             'completed' ? (
               <ReopenAttendanceButton
                 sessionId={
-                  sessionId
+                  workspace.classSessionId
                 }
               />
             ) : null}
 
             <Link
               href="/attendance-clinical/class-attendance"
-              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
             >
               <ArrowLeft
                 className="size-3.5"
                 aria-hidden="true"
               />
-              Attendance
+              Back
             </Link>
           </div>
         }
@@ -110,56 +99,27 @@ export default async function DepartmentAttendanceSessionPage({
               : 'warning'
           }
         >
-          {workspace.sessionStatus ===
-          'completed'
-            ? 'Completed'
-            : 'Open'}
-        </Badge>
-
-        <Badge variant="neutral">
-          Trainer: {
-            workspace.trainerName
+          {
+            workspace.sessionStatus
           }
         </Badge>
 
         <Badge variant="neutral">
-          Present {
-            summary.present
-          }
+          {
+            workspace.rosterCount
+          } students
         </Badge>
 
         <Badge variant="neutral">
-          Absent {
-            summary.absent
+          {
+            workspace.academicPeriodName
           }
         </Badge>
-
-        {summary.unmarked >
-        0 ? (
-          <Badge variant="warning">
-            Unmarked {
-              summary.unmarked
-            }
-          </Badge>
-        ) : null}
       </div>
 
-      {workspace.sessionStatus ===
-      'completed' ? (
-        <section className="rounded-xl border border-border bg-surface-subtle/50 px-4 py-3">
-          <p className="text-[11px] leading-5 text-text-secondary">
-            Reopening makes the session
-            editable again for the assigned
-            trainer. The reopen action is
-            recorded in attendance history.
-          </p>
-        </section>
-      ) : null}
-
       <section className="overflow-hidden rounded-xl border border-border bg-white">
-        <div className="hidden border-b border-border bg-surface-subtle px-4 py-2.5 text-[10px] font-bold uppercase tracking-wide text-text-muted md:grid md:grid-cols-[minmax(0,1.2fr)_minmax(8rem,.7fr)_8rem_minmax(8rem,.8fr)] md:gap-3">
+        <div className="hidden border-b border-border bg-surface-subtle px-4 py-2.5 text-[10px] font-bold uppercase tracking-wide text-text-muted sm:grid sm:grid-cols-[minmax(0,1fr)_8rem_minmax(0,.8fr)] sm:gap-3">
           <span>Student</span>
-          <span>Cohort</span>
           <span>Status</span>
           <span>Note</span>
         </div>
@@ -173,7 +133,7 @@ export default async function DepartmentAttendanceSessionPage({
                 key={
                   student.studentId
                 }
-                className="grid gap-2 px-4 py-3 md:grid-cols-[minmax(0,1.2fr)_minmax(8rem,.7fr)_8rem_minmax(8rem,.8fr)] md:items-center md:gap-3"
+                className="grid gap-2 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_8rem_minmax(0,.8fr)] sm:items-center sm:gap-3"
               >
                 <div className="min-w-0">
                   <p className="truncate text-xs font-semibold text-text-primary">
@@ -189,12 +149,6 @@ export default async function DepartmentAttendanceSessionPage({
                   </p>
                 </div>
 
-                <p className="text-[10px] text-text-secondary">
-                  {
-                    student.cohortName
-                  }
-                </p>
-
                 <Badge
                   variant={
                     classAttendanceStatusVariant(
@@ -202,13 +156,15 @@ export default async function DepartmentAttendanceSessionPage({
                     )
                   }
                 >
-                  {student.attendanceStatus ===
-                  'present'
-                    ? 'Present'
-                    : student.attendanceStatus ===
-                        'absent'
-                      ? 'Absent'
-                      : 'Unmarked'}
+                  {
+                    student.attendanceStatus ===
+                    'present'
+                      ? 'Present'
+                      : student.attendanceStatus ===
+                          'absent'
+                        ? 'Absent'
+                        : 'Unmarked'
+                  }
                 </Badge>
 
                 <p className="text-[10px] leading-4 text-text-muted">

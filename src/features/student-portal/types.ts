@@ -70,6 +70,16 @@ export interface StudentPortalTimetableSession {
   deliveryMode: string;
 }
 
+export interface StudentPortalResultComponents {
+  assignment: number | null;
+  presentation: number | null;
+  rat: number | null;
+  cat: number | null;
+  ratCatAverage: number | null;
+  coursework: number | null;
+  exam: number | null;
+}
+
 export interface StudentPortalResult {
   id: string;
   assessmentId: string;
@@ -81,6 +91,7 @@ export interface StudentPortalResult {
   maximumMark: number | null;
   passMark: number | null;
   resultStatus: string;
+  componentMarks: StudentPortalResultComponents | null;
   publishedAt: string;
 }
 

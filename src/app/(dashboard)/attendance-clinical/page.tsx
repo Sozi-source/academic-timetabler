@@ -1,10 +1,17 @@
 import {
+  BarChart3,
   CalendarCheck2,
-  CheckCircle2,
-  ClipboardCheck,
-  UsersRound,
+  ClipboardList,
+  Stethoscope,
 } from 'lucide-react';
+import Link from 'next/link';
 
+import {
+  Badge,
+} from '@/components/ui/badge';
+import {
+  Card,
+} from '@/components/ui/card';
 import {
   MetricCard,
 } from '@/components/ui/metric-card';
@@ -15,120 +22,158 @@ import {
   requireHodAccess,
 } from '@/features/auth/authorization';
 import {
-  AttendanceAdminTable,
-} from '@/features/class-attendance/admin-table';
-import {
-  getHodClassAttendanceOverview,
-} from '@/features/class-attendance/admin-queries';
+  getDepartmentAttendanceOverview,
+} from '@/features/operations/queries';
 
-export default async function AttendanceClinicalModulePage() {
+export default async function AttendanceClinicalPage() {
   await requireHodAccess();
 
-  const items =
-    await getHodClassAttendanceOverview();
+  const sessions =
+    await getDepartmentAttendanceOverview(
+      100,
+    );
 
   const completed =
-    items.filter(
-      (item) =>
-        item.status ===
+    sessions.filter(
+      (session) =>
+        session.sessionStatus ===
         'completed',
     ).length;
 
   const open =
-    items.filter(
-      (item) =>
-        item.status ===
+    sessions.filter(
+      (session) =>
+        session.sessionStatus ===
         'open',
     ).length;
 
-  const students =
-    items.reduce(
+  const unmarked =
+    sessions.reduce(
       (
         total,
-        item,
+        session,
       ) =>
         total +
-        item.rosterCount,
-      0,
-    );
-
-  const absent =
-    items.reduce(
-      (
-        total,
-        item,
-      ) =>
-        total +
-        item.absentCount,
+        session.unmarkedCount,
       0,
     );
 
   return (
     <div className="space-y-5">
       <PageHeader
-        eyebrow="Academic operations"
-        title="Class Attendance"
-        description="Department oversight of trainer attendance."
-        icon={CalendarCheck2}
+        eyebrow="Department"
+        title="Attendance & Clinical"
+        description="Class attendance oversight and clinical workflow foundation."
+        icon={Stethoscope}
       />
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard
-          label="Sessions"
-          value={String(
-            items.length,
-          )}
-          description="Last 60 days"
-          icon={CalendarCheck2}
-        />
-
+      <section className="grid gap-3 sm:grid-cols-3">
         <MetricCard
           label="Completed"
           value={String(
             completed,
           )}
-          description={`${open} still open`}
-          icon={CheckCircle2}
+          description="Recent class sessions"
+          icon={CalendarCheck2}
         />
 
         <MetricCard
-          label="Student records"
+          label="Open"
           value={String(
-            students,
+            open,
           )}
-          description="Attendance entries"
-          icon={UsersRound}
+          description="Still editable"
+          icon={ClipboardList}
         />
 
         <MetricCard
-          label="Absences"
+          label="Unmarked"
           value={String(
-            absent,
+            unmarked,
           )}
-          description="Recorded absent"
-          icon={ClipboardCheck}
+          description="Across open sessions"
+          icon={ClipboardList}
         />
       </section>
 
-      <section className="rounded-xl border border-border bg-surface-subtle/50 px-4 py-3">
-        <p className="text-[11px] leading-5 text-text-secondary">
-          Trainers record Present or Absent only.
-          Completed attendance is locked; reopening
-          is an HOD-controlled correction and remains
-          in the audit history.
-        </p>
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <Link
+          href="/attendance-clinical/class-attendance"
+        >
+          <Card className="h-full p-5 transition hover:border-border-strong hover:bg-surface-subtle/40">
+            <div className="flex items-start justify-between gap-3">
+              <span className="flex size-10 items-center justify-center rounded-xl bg-primary text-white">
+                <CalendarCheck2
+                  className="size-5"
+                  aria-hidden="true"
+                />
+              </span>
+
+              <Badge variant="success">
+                Active
+              </Badge>
+            </div>
+
+            <h2 className="mt-4 text-sm font-bold text-text-primary">
+              Class attendance
+            </h2>
+
+            <p className="mt-1 text-xs leading-5 text-text-muted">
+              Review Present / Absent records, open sessions and controlled corrections.
+            </p>
+          </Card>
+        </Link>
+
+        <Link
+          href="/attendance-clinical/class-attendance/analytics"
+        >
+          <Card className="h-full p-5 transition hover:border-border-strong hover:bg-surface-subtle/40">
+            <div className="flex items-start justify-between gap-3">
+              <span className="flex size-10 items-center justify-center rounded-xl bg-primary text-white">
+                <BarChart3
+                  className="size-5"
+                  aria-hidden="true"
+                />
+              </span>
+
+              <Badge variant="success">
+                Active
+              </Badge>
+            </div>
+
+            <h2 className="mt-4 text-sm font-bold text-text-primary">
+              Attendance analytics
+            </h2>
+
+            <p className="mt-1 text-xs leading-5 text-text-muted">
+              Review active-period attendance rates and export student detail.
+            </p>
+          </Card>
+        </Link>
+
+        <Card className="h-full p-5">
+          <div className="flex items-start justify-between gap-3">
+            <span className="flex size-10 items-center justify-center rounded-xl bg-surface-subtle text-text-muted">
+              <Stethoscope
+                className="size-5"
+                aria-hidden="true"
+              />
+            </span>
+
+            <Badge variant="neutral">
+              Later
+            </Badge>
+          </div>
+
+          <h2 className="mt-4 text-sm font-bold text-text-primary">
+            Clinical progression
+          </h2>
+
+          <p className="mt-1 text-xs leading-5 text-text-muted">
+            Clinical rotations and progression remain outside the current production-testing scope.
+          </p>
+        </Card>
       </section>
-
-      <AttendanceAdminTable
-        items={
-          items
-        }
-      />
-
-      <p className="text-[10px] leading-4 text-text-muted">
-        Clinical rotation tracking remains separate and
-        will not be mixed into class attendance records.
-      </p>
     </div>
   );
 }

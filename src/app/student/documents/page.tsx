@@ -2,7 +2,6 @@ import {
   Download,
   FileText,
 } from 'lucide-react';
-import Link from 'next/link';
 import {
   redirect,
 } from 'next/navigation';
@@ -126,22 +125,16 @@ export default async function StudentDocumentsPage() {
                     }
                   </p>
 
-                  <div className="flex items-center justify-end gap-2">
-                    <Badge variant="success">
-                      Approved
-                    </Badge>
-
-                    <Link
-                      href={`/api/student/documents/${document.id}/download`}
-                      className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-2.5 text-[10px] font-semibold text-text-secondary transition hover:bg-surface-subtle"
-                    >
-                      <Download
-                        className="size-3"
-                        aria-hidden="true"
-                      />
-                      Download
-                    </Link>
-                  </div>
+                  <a
+                    href={`/api/student/documents/${document.id}`}
+                    className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-2.5 text-[11px] font-semibold text-text-secondary transition hover:bg-surface-subtle"
+                  >
+                    <Download
+                      className="size-3"
+                      aria-hidden="true"
+                    />
+                    Download
+                  </a>
                 </article>
               ),
             )}
@@ -149,8 +142,9 @@ export default async function StudentDocumentsPage() {
         )}
 
         <p className="text-[10px] leading-4 text-text-muted">
-          Only HOD-published approved revisions
-          for your registered units are available.
+          Only approved documents explicitly
+          published by the department are
+          available here.
         </p>
       </div>
     </StudentPortalShell>

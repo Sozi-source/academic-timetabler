@@ -2,6 +2,7 @@
 
 import {
   BookOpenCheck,
+  CalendarCheck2,
   CalendarDays,
   FileText,
   GraduationCap,
@@ -84,6 +85,14 @@ readonly NavigationItem[] = [
       '/student/results',
     icon:
       GraduationCap,
+  },
+  {
+    label:
+      'Attendance',
+    href:
+      '/student/attendance',
+    icon:
+      CalendarCheck2,
   },
   {
     label:

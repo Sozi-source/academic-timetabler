@@ -93,7 +93,7 @@ export function AttendanceScheduleList({
 
   const today =
     useMemo(
-      localDateValue,
+      () => localDateValue(),
       [],
     );
 
@@ -218,7 +218,7 @@ export function AttendanceScheduleList({
                     {
                       item.cohortName
                     }
-                    {' · '}
+                    {' Â· '}
                     {
                       item.academicPeriodName
                     }
@@ -233,7 +233,7 @@ export function AttendanceScheduleList({
                   {shortTime(
                     item.startsAt,
                   )}
-                  –
+                  â€“
                   {shortTime(
                     item.endsAt,
                   )}
@@ -325,7 +325,7 @@ export function AttendanceScheduleList({
                 >
                   Latest: {
                     item.latestSessionDate
-                  } · {
+                  } Â· {
                     item.latestStatus ===
                     'completed'
                       ? 'Completed'

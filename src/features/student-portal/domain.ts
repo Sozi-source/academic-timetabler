@@ -166,3 +166,14 @@ export function studentResultDisplay(
 
   return `${result.mark}/${result.maximumMark}`;
 }
+
+
+export function studentResultComponentDisplay(
+  value: number | null,
+  maximum: number,
+): string {
+  return value ===
+    null
+    ? '—'
+    : `${value}/${maximum}`;
+}

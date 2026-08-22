@@ -1,4 +1,4 @@
-import { ArrowRight, Clock3 } from 'lucide-react';
+import { Activity, ArrowRight, Clock3 } from 'lucide-react';
 import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +18,18 @@ export default async function DashboardPage() {
           <Badge variant="institutional">
             {profile.departmentName || 'Department'}
           </Badge>
+        }
+        actions={
+          <Link
+            href="/operations"
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
+          >
+            <Activity
+              className="size-3.5"
+              aria-hidden="true"
+            />
+            Action Centre
+          </Link>
         }
       />
 

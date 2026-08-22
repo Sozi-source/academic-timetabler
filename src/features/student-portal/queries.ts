@@ -1228,6 +1228,56 @@ export async function getStudentPortalResults(
             `${periodId}:${unitId}:${type}`,
           );
 
+        const rawComponents =
+          result.component_marks &&
+          typeof result.component_marks ===
+            'object' &&
+          !Array.isArray(
+            result.component_marks,
+          )
+            ? result.component_marks as
+                UnknownRow
+            : null;
+
+        const componentMarks =
+          type ===
+            'exam' &&
+          rawComponents
+            ? {
+                assignment:
+                  asNumber(
+                    rawComponents.assignment,
+                  ),
+                presentation:
+                  asNumber(
+                    rawComponents.presentation,
+                  ),
+                rat:
+                  asNumber(
+                    rawComponents.rat,
+                  ),
+                cat:
+                  asNumber(
+                    rawComponents.cat1,
+                  ) ??
+                  asNumber(
+                    rawComponents.cat,
+                  ),
+                ratCatAverage:
+                  asNumber(
+                    rawComponents.ratCatAverage,
+                  ),
+                coursework:
+                  asNumber(
+                    rawComponents.coursework,
+                  ),
+                exam:
+                  asNumber(
+                    rawComponents.exam,
+                  ),
+              }
+            : null;
+
         return {
           id,
           assessmentId,
@@ -1265,6 +1315,7 @@ export async function getStudentPortalResults(
               result.operational_result_status,
             ) ??
             'pending',
+          componentMarks,
           publishedAt,
         };
       },
@@ -1313,56 +1364,6 @@ export async function getStudentPortalDocuments(
     adminClient();
 
   const {
-    data:
-      registrationData,
-    error:
-      registrationError,
-  } =
-    await admin
-      .from(
-        'student_unit_registrations',
-      )
-      .select(
-        'academic_period_id, cohort_id, unit_id',
-      )
-      .eq(
-        'student_id',
-        studentId,
-      )
-      .eq(
-        'cohort_id',
-        student.cohortId,
-      )
-      .eq(
-        'registration_status',
-        'registered',
-      );
-
-  if (registrationError) {
-    throw new Error(
-      `Unable to load student document registrations: ${registrationError.message}`,
-    );
-  }
-
-  const registeredKeys =
-    new Set(
-      (
-        registrationData ??
-        []
-      ).map(
-        (registration) =>
-          `${registration.academic_period_id}:${registration.unit_id}`,
-      ),
-    );
-
-  if (
-    registeredKeys.size ===
-    0
-  ) {
-    return [];
-  }
-
-  const {
     data,
     error,
   } =
@@ -1371,7 +1372,7 @@ export async function getStudentPortalDocuments(
         'teaching_documents',
       )
       .select(
-        'id, academic_period_id, unit_id, document_type, version_number, approved_at, approved_revision_number, status, student_visible',
+        'id, unit_id, document_type, version_number, approved_at, student_published_at, status',
       )
       .eq(
         'cohort_id',
@@ -1381,9 +1382,10 @@ export async function getStudentPortalDocuments(
         'status',
         'approved',
       )
-      .eq(
-        'student_visible',
-        true,
+      .not(
+        'student_published_at',
+        'is',
+        null,
       );
 
   if (error) {
@@ -1444,26 +1446,10 @@ export async function getStudentPortalDocuments(
             row.document_type,
           );
 
-        const academicPeriodId =
-          asString(
-            row.academic_period_id,
-          );
-
-        const approvedRevisionNumber =
-          asNumber(
-            row.approved_revision_number,
-          );
-
         if (
           !id ||
           !unitId ||
-          !documentType ||
-          !academicPeriodId ||
-          approvedRevisionNumber ===
-            null ||
-          !registeredKeys.has(
-            `${academicPeriodId}:${unitId}`,
-          )
+          !documentType
         ) {
           return null;
         }

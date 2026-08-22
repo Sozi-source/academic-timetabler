@@ -18,6 +18,7 @@ import {
   EmptyState,
 } from '@/components/ui/empty-state';
 import {
+  studentResultComponentDisplay,
   studentResultDisplay,
 } from '@/features/student-portal/domain';
 import {
@@ -167,6 +168,81 @@ export default async function StudentResultsPage() {
                       }
                     </Badge>
                   </div>
+
+                  {result.assessmentType ===
+                    'exam' &&
+                  result.resultStatus ===
+                    'sat' &&
+                  result.componentMarks ? (
+                    <div className="sm:col-span-3 mt-1 grid grid-cols-2 gap-2 rounded-lg bg-surface-subtle px-3 py-2.5 sm:grid-cols-6">
+                      {[
+                        [
+                          'Assignment',
+                          studentResultComponentDisplay(
+                            result.componentMarks.assignment,
+                            5,
+                          ),
+                        ],
+                        [
+                          'Presentation',
+                          studentResultComponentDisplay(
+                            result.componentMarks.presentation,
+                            10,
+                          ),
+                        ],
+                        [
+                          'RAT',
+                          studentResultComponentDisplay(
+                            result.componentMarks.rat,
+                            15,
+                          ),
+                        ],
+                        [
+                          'CAT',
+                          studentResultComponentDisplay(
+                            result.componentMarks.cat,
+                            15,
+                          ),
+                        ],
+                        [
+                          'RAT/CAT',
+                          studentResultComponentDisplay(
+                            result.componentMarks.ratCatAverage,
+                            15,
+                          ),
+                        ],
+                        [
+                          'Exam',
+                          studentResultComponentDisplay(
+                            result.componentMarks.exam,
+                            70,
+                          ),
+                        ],
+                      ].map(
+                        ([
+                          label,
+                          value,
+                        ]) => (
+                          <div
+                            key={
+                              label
+                            }
+                          >
+                            <p className="text-[9px] font-bold uppercase tracking-wide text-text-muted">
+                              {
+                                label
+                              }
+                            </p>
+                            <p className="mt-0.5 text-[11px] font-semibold text-text-primary">
+                              {
+                                value
+                              }
+                            </p>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  ) : null}
                 </article>
               ),
             )}

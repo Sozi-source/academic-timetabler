@@ -2,13 +2,15 @@ import type {
   OperationsReadiness,
 } from './types';
 import type {
-  ReleaseDefect,
   ReleaseGoLiveStatus,
 } from '@/features/system-testing/release-controls-types';
 import type {
   ProductionIncident,
   ReleaseDeployment,
 } from '@/features/production-controls/types';
+import type {
+  ReleaseDefect,
+} from '@/features/system-testing/release-controls-types';
 import {
   incidentBlocksProduction,
 } from '@/features/production-controls/domain';
@@ -27,17 +29,11 @@ export interface ActionCenterItem {
   href: string;
 }
 
-function releaseDefectOpen(
-  defect: ReleaseDefect,
-): boolean {
-  return defect.status !== 'closed';
-}
-
 export function buildActionCenter({
   readiness,
-  goLive,
-  defects,
-  deployments,
+  goLive: _goLive,
+  defects: _defects,
+  deployments: _deployments,
   incidents,
 }: {
   readiness: OperationsReadiness;
@@ -96,26 +92,6 @@ export function buildActionCenter({
     });
   }
 
-  const blockerDefects = defects.filter(
-    (defect) =>
-      releaseDefectOpen(defect) &&
-      (
-        defect.severity === 'critical' ||
-        defect.severity === 'high'
-      ),
-  );
-
-  if (blockerDefects.length > 0) {
-    items.push({
-      id: 'release-defects',
-      severity: 'critical',
-      area: 'Release',
-      title: `${blockerDefects.length} release blocker${blockerDefects.length === 1 ? '' : 's'}`,
-      detail: 'Critical/High UAT defects must be closed before release approval.',
-      href: '/testing/defects',
-    });
-  }
-
   const blockerIncidents = incidents.filter(incidentBlocksProduction);
   if (blockerIncidents.length > 0) {
     items.push({
@@ -123,41 +99,8 @@ export function buildActionCenter({
       severity: 'critical',
       area: 'Operations',
       title: `${blockerIncidents.length} Critical/High operational incident${blockerIncidents.length === 1 ? '' : 's'}`,
-      detail: 'Resolve deployment incidents before recording another Production release.',
+      detail: 'Resolve operational incidents.',
       href: '/operations/incidents',
-    });
-  }
-
-  if (!goLive.signoffValid) {
-    items.push({
-      id: 'release-signoff',
-      severity: goLive.eligible ? 'warning' : 'critical',
-      area: 'Release',
-      title: goLive.eligible
-        ? 'Release awaiting go-live sign-off'
-        : 'Go-live gate is blocked',
-      detail: goLive.reasons[0] ?? 'Complete release controls before Production deployment.',
-      href: '/testing/sign-off',
-    });
-  }
-
-  const productionActive = deployments.some(
-    (deployment) =>
-      deployment.environment === 'production' &&
-      deployment.status === 'deployed',
-  );
-
-  if (
-    goLive.signoffValid &&
-    !productionActive
-  ) {
-    items.push({
-      id: 'production-deployment',
-      severity: 'info',
-      area: 'Release',
-      title: 'Approved release not recorded as Production deployed',
-      detail: 'Record deployment evidence when the approved build is released.',
-      href: '/testing/deployments',
     });
   }
 

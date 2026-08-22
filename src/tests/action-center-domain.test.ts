@@ -13,10 +13,8 @@ import type {
 } from '@/features/operations/types';
 import type {
   ProductionIncident,
-  ReleaseDeployment,
 } from '@/features/production-controls/types';
 import type {
-  ReleaseDefect,
   ReleaseGoLiveStatus,
 } from '@/features/system-testing/release-controls-types';
 
@@ -55,37 +53,9 @@ const goLive: ReleaseGoLiveStatus = {
   activeCatalogCaseCount: 10,
   passedRunCaseCount: 10,
   reasons: [],
-  latestPassedRun: {
-    id: 'run-1',
-    suiteVersion: '1',
-    completedAt: '2026-08-22T08:00:00.000Z',
-  },
-  activeSignoff: {
-    id: 'signoff-1',
-    verificationRef: 'RC-20260822-abc',
-    approvedAt: '2026-08-22T08:10:00.000Z',
-  },
+  latestPassedRun: null,
+  activeSignoff: null,
 };
-
-function defect(
-  overrides: Partial<ReleaseDefect> = {},
-): ReleaseDefect {
-  return {
-    id: 'defect-1',
-    defectNumber: 1,
-    runId: null,
-    caseKey: null,
-    suiteVersion: null,
-    severity: 'medium',
-    status: 'open',
-    title: 'Defect',
-    description: 'Description',
-    resolutionNote: null,
-    createdAt: '2026-08-22T08:00:00.000Z',
-    updatedAt: '2026-08-22T08:00:00.000Z',
-    ...overrides,
-  };
-}
 
 function incident(
   overrides: Partial<ProductionIncident> = {},
@@ -108,65 +78,30 @@ function incident(
   };
 }
 
-function productionDeployment(): ReleaseDeployment {
-  return {
-    id: 'deployment-1',
-    environment: 'production',
-    versionLabel: 'v1',
-    releaseSignoffId: 'signoff-1',
-    releaseTestRunId: 'run-1',
-    suiteVersion: '1',
-    verificationRef: 'RC-20260822-abc',
-    status: 'deployed',
-    note: null,
-    deployedAt: '2026-08-22T08:20:00.000Z',
-    deployedByName: null,
-    rolledBackAt: null,
-    rollbackReason: null,
-  };
-}
-
 describe('operations action center', () => {
-  it('is empty when operational and release controls are clear', () => {
+  it('is empty when operational controls are clear', () => {
     expect(
       buildActionCenter({
         readiness,
         goLive,
         defects: [],
-        deployments: [productionDeployment()],
+        deployments: [],
         incidents: [],
       }),
     ).toEqual([]);
   });
 
-  it('promotes release and production blockers to critical', () => {
-    const items = buildActionCenter({
-      readiness,
-      goLive,
-      defects: [defect({ severity: 'high' })],
-      deployments: [productionDeployment()],
-      incidents: [incident({ severity: 'critical' })],
-    });
-
-    expect(items.slice(0, 2).every((item) => item.severity === 'critical')).toBe(true);
-    expect(actionCenterCounts(items).critical).toBe(2);
-  });
-
-  it('adds a deployment follow-up after valid sign-off when Production is not recorded', () => {
+  it('promotes critical operational incidents to top severity', () => {
     const items = buildActionCenter({
       readiness,
       goLive,
       defects: [],
       deployments: [],
-      incidents: [],
+      incidents: [incident({ severity: 'critical' })],
     });
 
-    expect(items).toContainEqual(
-      expect.objectContaining({
-        id: 'production-deployment',
-        severity: 'info',
-      }),
-    );
+    expect(items[0]?.severity).toBe('critical');
+    expect(actionCenterCounts(items).critical).toBe(1);
   });
 
   it('includes existing operational gaps without duplicating data stores', () => {
@@ -180,7 +115,7 @@ describe('operations action center', () => {
       },
       goLive,
       defects: [],
-      deployments: [productionDeployment()],
+      deployments: [],
       incidents: [],
     });
 

@@ -22,7 +22,6 @@ import {
   ShieldCheck,
   Stethoscope,
   History,
-  FlaskConical,
 } from 'lucide-react';
 
 // Keep import and edit screens inside their parent registers so the main
@@ -54,7 +53,6 @@ export const dashboardNavigation = [
       { label: 'Class attendance', href: '/attendance', icon: Stethoscope },
       { label: 'Readiness checks', href: '/operations/readiness', icon: ClipboardCheck },
       { label: 'Operational audit', href: '/operations/audit', icon: History },
-      { label: 'Testing Center', href: '/testing', icon: FlaskConical },
     ],
   },
   {

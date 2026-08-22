@@ -167,6 +167,7 @@ export const getStaffWorkspace =
           ),
           units (
             id,
+            code,
             name
           )
         `,
@@ -632,10 +633,12 @@ export const getStaffWorkspace =
                   row.units as
                     | {
                         id: string;
+                        code: string;
                         name: string;
                       }
                     | Array<{
                         id: string;
+                        code: string;
                         name: string;
                       }>
                     | null,

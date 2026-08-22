@@ -349,11 +349,11 @@ export const getDepartmentExecutiveReport = cache(
     // ==========================================
     const assessmentItems: AssessmentCompletionReportItem[] = (assessmentEventsData ?? []).map((ev) => {
       const unit = one(ev.unit as Relation<{ id: string; code: string; name: string }>);
-      const popRows = (ev.population ?? []).filter((p: { population_status: string }) => p.population_status === 'expected');
-      const resRows = ev.results ?? [];
+      const popRows = ((ev.population as Array<{ student_id: string; population_status?: string; attendance_status?: string }>) ?? []).filter((p) => p.population_status === 'expected');
+      const resRows = (ev.results as Array<{ student_id: string; import_source?: string; operational_result_status?: string; total_mark?: number | null }>) ?? [];
 
       const totalPop = popRows.length;
-      const resultMap = new Map(resRows.map((r: { student_id: string }) => [r.student_id, r]));
+      const resultMap = new Map(resRows.map((r) => [r.student_id, r]));
 
       let satCount = 0;
       let absentCount = 0;
@@ -370,7 +370,7 @@ export const getDepartmentExecutiveReport = cache(
         }
       }
 
-      const sources = new Set(resRows.map((r: { import_source: string }) => r.import_source).filter(Boolean));
+      const sources = new Set(resRows.map((r) => r.import_source).filter(Boolean));
       let marksSource: 'excel' | 'online' | 'mixed' | 'pending' = 'pending';
       if (sources.has('excel') && sources.has('online')) marksSource = 'mixed';
       else if (sources.has('excel')) marksSource = 'excel';

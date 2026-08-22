@@ -20,7 +20,7 @@ export interface StaffUnitAllocation {
   cohortId: string;
   cohortName: string;
   unitId: string;
-  unitCode?: string;
+  unitCode: string;
   unitName: string;
   allocationStatus: string;
   cat: StaffAssessmentSummary | null;

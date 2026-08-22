@@ -65,7 +65,7 @@ function sessionRows(rows: TimetableReportRow[]) {
       row.departmentName ?? '',
       row.roomCode,
       row.roomName,
-      row.status,
+      row.status === 'draft' ? 'Scheduled' : row.status,
       row.isLocked,
     ]),
   ];

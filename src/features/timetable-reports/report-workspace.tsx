@@ -70,8 +70,8 @@ function SessionTable({
                 {master ? presentation.venue : row.roomCode ? `${row.roomCode} · ${row.roomName}` : 'No room assigned'}
               </td>
               <td className="px-3 py-2.5">
-                <Badge variant={row.isLocked ? 'warning' : 'neutral'}>
-                  {row.isLocked ? 'Locked' : row.status}
+                <Badge variant={row.isLocked ? 'warning' : row.status === 'confirmed' ? 'success' : 'neutral'}>
+                  {row.isLocked ? 'Locked' : row.status === 'confirmed' ? 'Confirmed' : row.status === 'draft' ? 'Scheduled' : row.status}
                 </Badge>
               </td>
               </tr>

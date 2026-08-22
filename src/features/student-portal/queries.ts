@@ -634,6 +634,18 @@ export async function getStudentPortalTimetable(
   const admin =
     adminClient();
 
+  const { data: publishedVersion } = await admin
+    .from('timetable_versions')
+    .select('id, status')
+    .eq('academic_period_id', period.id)
+    .eq('status', 'published')
+    .limit(1)
+    .maybeSingle();
+
+  if (!publishedVersion) {
+    return [];
+  }
+
   const {
     data,
     error,
@@ -649,13 +661,9 @@ export async function getStudentPortalTimetable(
         'academic_period_id',
         period.id,
       )
-      .eq(
-        'cohort_id',
-        student.cohortId,
-      )
-      .eq(
+      .neq(
         'status',
-        'locked',
+        'cancelled',
       );
 
   if (error) {
@@ -665,10 +673,16 @@ export async function getStudentPortalTimetable(
   }
 
   const sessions =
-    (
-      data ??
-      []
-    ) as UnknownRow[];
+    ((data ?? []) as UnknownRow[]).filter((row) => {
+      const primaryCohortId = asString(row.cohort_id);
+      const participantCohortIds = Array.isArray(row.participant_cohort_ids)
+        ? (row.participant_cohort_ids as string[])
+        : [];
+      return (
+        primaryCohortId === student.cohortId ||
+        participantCohortIds.includes(student.cohortId)
+      );
+    });
 
   if (
     sessions.length ===

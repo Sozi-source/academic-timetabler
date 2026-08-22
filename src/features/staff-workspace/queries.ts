@@ -185,6 +185,26 @@ export async function getStaffPublishedTimetable(
   const supabase =
     await untypedClient();
 
+  const { data: publishedVersions } = await supabase
+    .from('timetable_versions')
+    .select('academic_period_id')
+    .eq('status', 'published');
+
+  const publishedPeriodIds = new Set(
+    (publishedVersions ?? []).map((v: any) => String(v.academic_period_id)),
+  );
+
+  if (publishedPeriodIds.size === 0) {
+    return {
+      trainerId:
+        workspace.trainerId,
+      trainerName:
+        workspace.trainerName,
+      sessions:
+        [],
+    };
+  }
+
   const {
     data,
     error,
@@ -199,9 +219,9 @@ export async function getStaffPublishedTimetable(
       'trainer_id',
       workspace.trainerId,
     )
-    .eq(
+    .neq(
       'status',
-      'locked',
+      'cancelled',
     );
 
   if (error) {
@@ -210,11 +230,9 @@ export async function getStaffPublishedTimetable(
     );
   }
 
-  const rows =
-    (
-      data ??
-      []
-    ) as UnknownRow[];
+  const rows = ((data ?? []) as UnknownRow[]).filter((row) =>
+    publishedPeriodIds.has(String(row.academic_period_id)),
+  );
 
   if (
     rows.length ===

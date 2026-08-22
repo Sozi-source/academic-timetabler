@@ -1,5 +1,20 @@
 import { redirect } from 'next/navigation';
+import { getAuthenticatedProfile } from '@/features/auth/queries';
 
-export default function HomePage() {
+export default async function HomePage() {
+  const profile = await getAuthenticatedProfile();
+
+  if (!profile) {
+    redirect('/login');
+  }
+
+  if (profile.role === 'trainer') {
+    redirect('/staff');
+  }
+
+  if (profile.role === 'student') {
+    redirect('/student');
+  }
+
   redirect('/dashboard');
 }

@@ -25,14 +25,14 @@ export default function UnauthorizedPage() {
         </p>
 
         <Link
-          href="/dashboard"
+          href="/"
           className="mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover focus:outline-none focus:ring-4 focus:ring-focus-ring/40"
         >
           <ArrowLeft
             className="size-4"
             aria-hidden="true"
           />
-          Return to dashboard
+          Return to workspace
         </Link>
       </section>
     </main>

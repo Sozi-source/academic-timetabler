@@ -12,6 +12,7 @@ export default async function TVETRecordOfWorkPage({ params }: PageProps) {
   const { allocationId } = await params;
 
   const context = await getRecordOfWorkContext(allocationId);
+
   if (!context) {
     notFound();
   }

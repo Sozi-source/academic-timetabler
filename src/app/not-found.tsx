@@ -24,7 +24,7 @@ export default function NotFound() {
             <Link href="/">Back to Previous</Link>
           </Button>
           <Button asChild className="w-full sm:w-auto" leadingIcon={<Home className="h-4 w-4" />}>
-            <Link href="/dashboard">Dashboard</Link>
+            <Link href="/">Workspace</Link>
           </Button>
         </div>
       </div>

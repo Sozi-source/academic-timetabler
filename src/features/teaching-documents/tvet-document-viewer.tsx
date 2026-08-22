@@ -34,10 +34,10 @@ export function TVETDocumentViewer({
 
   const title =
     type === 'course_outline'
-      ? 'STANDARD TVET COURSE OUTLINE'
+      ? 'STANDARD COURSE OUTLINE'
       : type === 'scheme_of_work'
-        ? 'STANDARD TVET SCHEME OF WORK / LESSON PLAN'
-        : 'STANDARD TVET RECORD OF WORK COVERED';
+        ? 'STANDARD SCHEME OF WORK / LESSON PLAN'
+        : 'STANDARD RECORD OF WORK COVERED';
 
   const handlePrint = () => {
     window.print();
@@ -66,16 +66,16 @@ export function TVETDocumentViewer({
           className="inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-4 text-xs font-bold text-white shadow-sm transition hover:bg-primary-hover"
         >
           <Printer className="size-4" aria-hidden="true" />
-          Print / Export TVET Document
+          Print / Export Document
         </button>
       </div>
 
-      {/* Printable TVET Document Container */}
+      {/* Printable Document Container */}
       <div className="mx-auto max-w-4xl rounded-2xl border border-border bg-white p-8 shadow-sm print:m-0 print:max-w-none print:border-none print:p-0 print:shadow-none">
         {/* Official Header Block */}
         <div className="border-b-2 border-text-primary pb-4 text-center">
           <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-text-muted">
-            REPUBLIC OF KENYA · TVET CURRICULUM & ASSESSMENT STANDARDS
+            REPUBLIC OF KENYA · IMPERIAL COLLEGE ACADEMIC & EXAMINATION STANDARDS
           </p>
           <h1 className="mt-1 text-lg font-black tracking-wide text-text-primary uppercase sm:text-xl">
             {header.institutionName}
@@ -116,7 +116,7 @@ export function TVETDocumentViewer({
           </div>
           <div>
             <span className="font-bold text-text-muted uppercase text-[10px] block">Standard Status:</span>
-            <span className="font-bold text-success uppercase">TVET Approved</span>
+            <span className="font-bold text-success uppercase">APPROVED</span>
           </div>
           <div>
             <span className="font-bold text-text-muted uppercase text-[10px] block">Generated Date:</span>

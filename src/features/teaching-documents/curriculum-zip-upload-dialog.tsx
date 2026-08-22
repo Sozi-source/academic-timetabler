@@ -13,7 +13,6 @@ import { Card } from '@/components/ui/card';
 import type { UnitCurriculumDefinition } from './curriculum-registry';
 import {
   commitIngestedCurriculumAction,
-  previewCurriculumZipAction,
 } from './zip-ingestion-actions';
 
 export function CurriculumZipUploadDialog() {
@@ -33,16 +32,26 @@ export function CurriculumZipUploadDialog() {
     setSuccessMessage('');
     setExtractedUnits([]);
 
-    const formData = new FormData();
-    formData.append('zipFile', file);
-
     startTransition(async () => {
-      const res = await previewCurriculumZipAction(formData);
-      if (!res.ok) {
-        setErrorMessage(res.error || 'Failed to process ZIP archive.');
-      } else {
-        setExtractedUnits(res.extractedUnits || []);
-        setTotalFiles(res.totalFilesProcessed || 0);
+      try {
+        const response = await fetch('/api/teaching-documents/zip-preview', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/zip',
+          },
+          body: file,
+        });
+
+        const res = await response.json();
+        if (!response.ok || !res.ok) {
+          setErrorMessage(res.error || 'Failed to process ZIP archive.');
+        } else {
+          setExtractedUnits(res.extractedUnits || []);
+          setTotalFiles(res.totalFilesProcessed || 0);
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Network error';
+        setErrorMessage(`Failed to upload archive: ${msg}`);
       }
     });
   };

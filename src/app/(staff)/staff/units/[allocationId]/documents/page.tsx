@@ -88,18 +88,18 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
         }
       />
 
-      {/* SECTION 1: STANDARDISED TVET TEACHING DOCUMENTS */}
+      {/* SECTION 1: STANDARDISED IMPERIAL COLLEGE TEACHING DOCUMENTS */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-sm font-bold text-text-primary">
-              Standard TVET Teaching Documents
+              Standard Imperial College Teaching Documents
             </h2>
             <p className="text-xs text-text-muted">
               Standardized curriculum structures with dynamic trainer and semester details.
             </p>
           </div>
-          <Badge variant="success">TVET Approved</Badge>
+          <Badge variant="success">Imperial Standard</Badge>
         </div>
 
         <div className="grid gap-3 md:grid-cols-3">

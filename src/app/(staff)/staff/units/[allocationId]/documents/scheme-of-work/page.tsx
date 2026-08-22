@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { requireTrainerAccess } from '@/features/auth/authorization';
-import { getRecordOfWorkContext } from '@/features/teaching-documents/record-of-work-actions';
+import { getDocumentHeaderContext } from '@/features/teaching-documents/record-of-work-actions';
 import { generateTVETSchemeOfWork } from '@/features/teaching-documents/tvet-standards';
 import { TVETDocumentViewer } from '@/features/teaching-documents/tvet-document-viewer';
 
@@ -12,12 +12,13 @@ export default async function TVETSchemeOfWorkPage({ params }: PageProps) {
   await requireTrainerAccess();
   const { allocationId } = await params;
 
-  const context = await getRecordOfWorkContext(allocationId);
-  if (!context) {
+  const header = await getDocumentHeaderContext(allocationId);
+
+  if (!header) {
     notFound();
   }
 
-  const schemeOfWork = generateTVETSchemeOfWork(context.header);
+  const schemeOfWork = generateTVETSchemeOfWork(header);
 
   return (
     <TVETDocumentViewer

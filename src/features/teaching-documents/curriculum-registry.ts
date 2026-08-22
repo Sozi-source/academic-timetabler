@@ -25,6 +25,12 @@ export interface UnitCurriculumDefinition {
   weeklySchedule?: SeedWeeklyTopic[];
   references?: string[];
   instructionalEquipment?: string[];
+  /**
+   * Which institutional document this definition was sourced from / belongs to.
+   * Required from the ZIP ingestion path onward — must match a valid
+   * public.teaching_document_templates.document_type value in Postgres.
+   */
+  documentType?: 'scheme_of_work' | 'course_outline';
 }
 
 /**
@@ -232,18 +238,360 @@ export const TVET_CURRICULUM_REGISTRY: Record<string, UnitCurriculumDefinition> 
       'Therapeutic food models and enteral feeding tubes/pumps demonstration kit.',
     ],
   },
+
+  // 4. Agricultural Production & Agribusiness
+  chn2309: {
+    unitCode: 'CHN 2309',
+    unitName: 'Agricultural Production',
+    unitDescription:
+      'This unit equips trainees with competencies in sustainable agricultural crop production, livestock husbandry, agro-ecological systems, soil and water management, post-harvest technologies, and farm economics.',
+    overallCompetency:
+      'Manage small-to-commercial agricultural enterprises, implement sustainable crop and livestock husbandry practices, and ensure post-harvest food security compliant with national agricultural standards.',
+    learningOutcomes: [
+      'Apply agro-ecological principles, soil science, and fertility management techniques for crop production.',
+      'Implement good agronomic practices (GAP) for major food, horticultural, and industrial crops.',
+      'Demonstrate sound livestock husbandry, feeds formulation, and disease management protocols.',
+      'Design and operate farm water conservation, harvesting, and irrigation systems.',
+      'Apply post-harvest preservation techniques, agricultural economics, and farm record-keeping.',
+    ],
+    weeklySchedule: [
+      {
+        weekNumber: 1,
+        topicTitle: 'Introduction to Agricultural Production & Farming Systems in Kenya',
+        subTopics: ['Overview of agricultural sectors & contribution to food security', 'Agro-ecological zones of Kenya', 'Farming systems classification'],
+        learningActivities: 'Lectures, agro-ecological zone mapping, class discussion',
+        resourcesAndReferences: 'Ministry of Agriculture Manual, Agricultural Atlas of Kenya',
+        assessmentAndRemarks: 'Formative oral questions, assignment on local farming systems',
+      },
+      {
+        weekNumber: 2,
+        topicTitle: 'Soil Science, Land Preparation & Soil Fertility Management',
+        subTopics: ['Soil physical and chemical properties', 'Soil sampling and testing protocols', 'Organic and inorganic fertilizers, composting & soil conservation'],
+        learningActivities: 'Soil texture finger testing, compost heap preparation demonstration',
+        resourcesAndReferences: 'Soil testing kits, farm tillage implements, compost materials',
+        assessmentAndRemarks: 'Soil sampling practical report',
+      },
+      {
+        weekNumber: 3,
+        topicTitle: 'Crop Production Principles & Nursery Management',
+        subTopics: ['Seed selection, germination testing, and dormancy', 'Nursery establishment and seedling management', 'Transplanting and vegetative propagation'],
+        learningActivities: 'Seed germination assay, budding/grafting practicals',
+        resourcesAndReferences: 'Seed varieties, nursery beds, potting bags, grafting knives',
+        assessmentAndRemarks: 'Nursery establishment scorecard',
+      },
+      {
+        weekNumber: 4,
+        topicTitle: 'Plant Protection: Pests, Diseases & Weed Management',
+        subTopics: ['Major crop insect pests and economic injury levels', 'Fungal, bacterial, and viral plant pathogens', 'Integrated Pest Management (IPM) & safe pesticide use'],
+        learningActivities: 'Field pest scouting, sprayer calibration, weed specimen collection',
+        resourcesAndReferences: 'Knapsack sprayers, PPE, pest specimen jars, herbarium sheets',
+        assessmentAndRemarks: 'Pest identification practical quiz',
+      },
+      {
+        weekNumber: 5,
+        topicTitle: 'Continuous Assessment 1 (RAT 1 & Crop Science Review)',
+        subTopics: ['Readiness Assessment Test (RAT 1)', 'Review of Crop Science practical assignments', 'Debrief and feedback session'],
+        learningActivities: 'Administering RAT 1, interactive group review',
+        resourcesAndReferences: 'RAT question papers, marking guides',
+        assessmentAndRemarks: 'Written RAT (15 Marks) & Assignment 1 grading (5 Marks)',
+      },
+      {
+        weekNumber: 6,
+        topicTitle: 'Livestock Production & Animal Husbandry Principles',
+        subTopics: ['Major livestock species (dairy cattle, poultry, small ruminants, swine)', 'Housing design and animal welfare standards', 'Livestock breeding, selection, and reproduction'],
+        learningActivities: 'Farm unit walkthrough, housing dimension measurements',
+        resourcesAndReferences: 'Livestock unit housing, animal health reference handbooks',
+        assessmentAndRemarks: 'Housing design evaluation worksheet',
+      },
+      {
+        weekNumber: 7,
+        topicTitle: 'Animal Nutrition, Feeds Formulation & Pasture Management',
+        subTopics: ['Nutrient requirements of farm animals', 'Feed ingredients, feed formulation, and ration balancing', 'Pasture establishment, forage conservation (silage & hay)'],
+        learningActivities: 'Pearson square feed ration calculation, silage making demonstration',
+        resourcesAndReferences: 'Feed formulation tables, silage drums, forage choppers',
+        assessmentAndRemarks: 'Ration formulation calculation assignment',
+      },
+      {
+        weekNumber: 8,
+        topicTitle: 'Continuous Assessment 2 (Official Mid-Term CAT Examination)',
+        subTopics: ['Supervised Mid-Term Continuous Assessment Test (CAT)', 'Mid-term practical logbook verification'],
+        learningActivities: 'Supervised examination administration, logbook submission',
+        resourcesAndReferences: 'Official CAT booklets, institutional exam invigilation sheets',
+        assessmentAndRemarks: 'Official Mid-Term CAT (15 Marks)',
+      },
+      {
+        weekNumber: 9,
+        topicTitle: 'Agricultural Water Management & Irrigation Technologies',
+        subTopics: ['Water sources, quality, and irrigation requirements', 'Drip, sprinkler, and surface irrigation systems', 'Rainwater harvesting and storage structures'],
+        learningActivities: 'Drip kit assembly practical, discharge rate measurement',
+        resourcesAndReferences: 'Drip irrigation kits, water pumps, flow meters',
+        assessmentAndRemarks: 'Irrigation layout design project',
+      },
+      {
+        weekNumber: 10,
+        topicTitle: 'Post-Harvest Handling, Food Storage & Preservation',
+        subTopics: ['Post-harvest loss causes and prevention strategies', 'Harvesting maturity indices for grains and horticultural produce', 'Grain storage, hermetic bags, cold chain management & agro-processing'],
+        learningActivities: 'Moisture meter testing, hermetic storage demonstration',
+        resourcesAndReferences: 'Moisture meters, hermetic storage bags, produce crates',
+        assessmentAndRemarks: 'Post-harvest loss mitigation report',
+      },
+      {
+        weekNumber: 11,
+        topicTitle: 'Agricultural Economics, Farm Records & Agribusiness',
+        subTopics: ['Farm budgeting, gross margin analysis, and cash flow', 'Types of farm records (production, financial, inventory)', 'Agricultural marketing, value chain addition, and cooperatives'],
+        learningActivities: 'Gross margin spreadsheet modeling, farm record book setup',
+        resourcesAndReferences: 'Farm record books, financial calculator, agribusiness case studies',
+        assessmentAndRemarks: 'Trainee Agribusiness Plan Presentation (10 Marks)',
+      },
+      {
+        weekNumber: 12,
+        topicTitle: 'Integrated Farm Management & Field Competency Assessment',
+        subTopics: ['Multi-enterprise farm integration (crop-livestock synergy)', 'Occupational safety and health (OSH) in agriculture', 'Practical skills verification & final logbook sign-off'],
+        learningActivities: 'Comprehensive farm practical stations, logbook sign-off',
+        resourcesAndReferences: 'Farm enterprise units, practical evaluation rubrics',
+        assessmentAndRemarks: 'Final practical competency evaluation',
+      },
+      {
+        weekNumber: 13,
+        topicTitle: 'Course Synthesis, Comprehensive Revision & Examination Prep',
+        subTopics: ['Comprehensive syllabus review across all 12 modules', 'National and institutional past examination review', 'Examination guidelines, rubrics, and answering techniques'],
+        learningActivities: 'Revision seminar, Q&A interactive problem solving',
+        resourcesAndReferences: 'Past examination papers, revision booklets',
+        assessmentAndRemarks: 'Mock examination review',
+      },
+      {
+        weekNumber: 14,
+        topicTitle: 'Summative End-of-Term Final Examination',
+        subTopics: ['Summative Examination (70%)', 'Departmental mark compilation and moderation', 'Final markbook submission'],
+        learningActivities: 'Supervised final examination administration',
+        resourcesAndReferences: 'Institutional examination papers, official answer sheets',
+        assessmentAndRemarks: 'End-Term Final Examination (70 Marks) — Total 100%',
+      },
+    ],
+    references: [
+      'Ministry of Agriculture, Livestock and Fisheries (Kenya). Agricultural Training Handbook.',
+      'Food and Agriculture Organization (FAO). Good Agricultural Practices Guidelines.',
+      'Ngugi, D. N., et al. (2018). East African Agriculture: A Textbook for Colleges.',
+    ],
+    instructionalEquipment: [
+      'Agricultural demonstration farm, nursery sheds, and greenhouse.',
+      'Soil testing kits, moisture meters, and drip irrigation assemblies.',
+      'Knapsack sprayers, farm tools, and Personal Protective Equipment (PPE).',
+    ],
+  },
 };
 
 /**
- * Finds or synthesizes a unit curriculum definition by matching code or name
+ * Generates a structured, non-repetitive 14-week progressive curriculum
+ * when no pre-seeded or uploaded definition exists for a unit.
+ */
+function generateProgressiveWeeklySchedule(
+  unitCode: string,
+  unitName: string
+): SeedWeeklyTopic[] {
+  const weeklyFramework = [
+    {
+      week: 1,
+      title: `Introduction, Scope & Foundational Principles of ${unitName}`,
+      subs: [
+        `Historical background, definitions, and scope of ${unitName}`,
+        `Institutional and regulatory framework governing ${unitName}`,
+        `Professional roles, ethics, and workplace competencies`,
+      ],
+      activity: 'Orientation lecture, interactive discussion, syllabus review',
+      resources: `${unitName} Course Handbook, National Occupational Standards`,
+      remarks: 'Diagnostic assessment & concept baseline survey',
+    },
+    {
+      week: 2,
+      title: `Theoretical Frameworks & Core Concepts in ${unitName}`,
+      subs: [
+        `Fundamental theories and scientific principles underlying ${unitName}`,
+        `Classifications, terminology, and standard taxonomies`,
+        `Relationship with multidisciplinary health and technical fields`,
+      ],
+      activity: 'Concept mapping, lecture, small-group analysis',
+      resources: 'Reference textbooks, digital visual aids, anatomical/technical models',
+      remarks: 'Formative concept check & short quiz',
+    },
+    {
+      week: 3,
+      title: `Methodologies, Tools & Standard Operating Procedures`,
+      subs: [
+        `Standard diagnostic/practical instruments and tools in ${unitName}`,
+        `Standard Operating Procedures (SOPs) and safety protocols`,
+        `Instrument calibration, handling, and maintenance routines`,
+      ],
+      activity: 'Practical tool demonstration, SOP review, laboratory/workshop setup',
+      resources: 'Laboratory/workshop equipment, SOP reference sheets',
+      remarks: 'Practical tool checklist assessment',
+    },
+    {
+      week: 4,
+      title: `Applied Techniques & Practical Process Execution`,
+      subs: [
+        `Step-by-step execution of primary workplace procedures`,
+        `Data collection, recording, and documentation protocols`,
+        `Quality control measures and error minimization`,
+      ],
+      activity: 'Hands-on practical session, simulation exercises, peer reviews',
+      resources: 'Worksheets, practical kits, diagnostic consumables',
+      remarks: 'Practical performance rubric grading',
+    },
+    {
+      week: 5,
+      title: `Continuous Assessment 1 (RAT 1 & Module Review)`,
+      subs: [
+        `Readiness Assessment Test (RAT 1) covering Weeks 1–4`,
+        `Grading and debrief of Assignment 1`,
+        `Remedial discussions on challenging topics`,
+      ],
+      activity: 'Supervised RAT administration, feedback seminar',
+      resources: 'RAT question papers, grading rubrics, answer keys',
+      remarks: 'Continuous Assessment 1 (RAT: 15 Marks, Assignment: 5 Marks)',
+    },
+    {
+      week: 6,
+      title: `Intermediate Principles & Systems Analysis in ${unitName}`,
+      subs: [
+        `Advanced theoretical considerations and complex scenarios`,
+        `System interactions, pathway dynamics, and diagnostic interpretation`,
+        `Case study examination of standard industry challenges`,
+      ],
+      activity: 'Case study analysis, problem-solving workshops',
+      resources: 'Case study workbooks, technical charts, reference literature',
+      remarks: 'Case study written submission evaluation',
+    },
+    {
+      week: 7,
+      title: `Operational Management, Protocols & Risk Mitigation`,
+      subs: [
+        `Risk assessment and occupational hazard management in ${unitName}`,
+        `Statutory compliance, environmental regulations, and safety audits`,
+        `Inter-professional communication and team management`,
+      ],
+      activity: 'Risk audit simulation, protocol design exercise',
+      resources: 'OSHA guidelines, institutional safety manuals',
+      remarks: 'Risk assessment worksheet grading',
+    },
+    {
+      week: 8,
+      title: `Continuous Assessment 2 (Official Mid-Term CAT Examination)`,
+      subs: [
+        `Official Mid-Term Continuous Assessment Test (CAT)`,
+        `Individual logbook and practical portfolio inspection`,
+      ],
+      activity: 'Supervised CAT examination administration',
+      resources: 'Official CAT exam booklets, attendance sheets',
+      remarks: 'Official Mid-Term CAT Examination (15 Marks)',
+    },
+    {
+      week: 9,
+      title: `Specialized Applications & Advanced Techniques in ${unitName}`,
+      subs: [
+        `Emerging technologies and specialized methods in ${unitName}`,
+        `Troubleshooting deviations, discrepancies, and anomalous findings`,
+        `Evidence-based interventions and modern technical solutions`,
+      ],
+      activity: 'Advanced practical demonstration, technical investigation',
+      resources: 'Specialized equipment, scientific journal articles',
+      remarks: 'Technical problem-solving evaluation',
+    },
+    {
+      week: 10,
+      title: `Professional Standards, Quality Assurance & Documentation`,
+      subs: [
+        `Quality assurance (QA) and quality control (QC) frameworks`,
+        `Comprehensive record management, reporting, and audit trails`,
+        `Ethics, client confidentiality, and professional integrity`,
+      ],
+      activity: 'Audit documentation workshop, peer portfolio review',
+      resources: 'QA audit checklists, official record templates',
+      remarks: 'Quality audit assignment grading',
+    },
+    {
+      week: 11,
+      title: `Case Presentations & Evidence-Based Practical Demonstrations`,
+      subs: [
+        `Trainee group case study presentations and defenses`,
+        `Critical evaluation of practical interventions in ${unitName}`,
+        `Peer review and panel questions`,
+      ],
+      activity: 'Trainee PowerPoint / poster presentations, panel defense',
+      resources: 'Projector, presentation evaluation rubrics',
+      remarks: 'Trainee Presentation Assessment (10 Marks)',
+    },
+    {
+      week: 12,
+      title: `Integrated Practical Competency Evaluation & Logbook Review`,
+      subs: [
+        `Multi-station practical competency examination (OSPE / practical)`,
+        `Synthesis of practical, clinical, or workshop skills`,
+        `Final practical logbook verification and sign-off`,
+      ],
+      activity: 'Practical station rounds, logbook verification',
+      resources: 'Practical workstations, specimen sets, evaluation scorecards',
+      remarks: 'Final practical competency logbook sign-off',
+    },
+    {
+      week: 13,
+      title: `Course Synthesis, Revision & Final Examination Preparation`,
+      subs: [
+        `Comprehensive recap of all core syllabus competencies`,
+        `Past examination question analysis and model answer review`,
+        `Examination techniques, time management, and guidelines`,
+      ],
+      activity: 'Interactive revision seminar, model answer debrief',
+      resources: 'Past examination series, comprehensive summary notes',
+      remarks: 'Mock exam practice & exam readiness confirmation',
+    },
+    {
+      week: 14,
+      title: `Summative End-of-Term Examination & Assessment Evaluation`,
+      subs: [
+        `Supervised End-of-Term Summative Examination (70%)`,
+        `Departmental grade compilation and moderation`,
+        `Final markbook submission to examination board`,
+      ],
+      activity: 'Supervised final examination administration',
+      resources: 'Official examination papers, answer scripts, mark sheets',
+      remarks: 'End-of-Term Final Examination (70 Marks) — Total 100%',
+    },
+  ];
+
+  return weeklyFramework.map((w) => ({
+    weekNumber: w.week,
+    topicTitle: `Week ${w.week}: ${w.title}`,
+    subTopics: w.subs,
+    learningActivities: w.activity,
+    resourcesAndReferences: w.resources,
+    assessmentAndRemarks: w.remarks,
+  }));
+}
+
+/**
+ * Finds or synthesizes a unit curriculum definition by matching code or name.
+ *
+ * documentType is now checked FIRST against a composite key so a custom
+ * scheme_of_work upload and a custom course_outline upload for the same unit
+ * resolve to their own distinct content instead of sharing one slot.
+ * Falls back to the plain unit-code entry (built-in seed content, which is
+ * intentionally shared baseline framework across both document types) if no
+ * document-type-specific custom entry exists.
  */
 export function getUnitCurriculum(
   unitCode: string,
-  unitName: string
+  unitName: string,
+  documentType?: 'scheme_of_work' | 'course_outline'
 ): UnitCurriculumDefinition {
   const codeKey = normalizeUnitCodeKey(unitCode);
 
-  // 1. Direct code lookup
+  // 1. Document-type-specific custom entry (from ZIP ingestion / manual seed)
+  if (documentType && TVET_CURRICULUM_REGISTRY[`${codeKey}:${documentType}`]) {
+    return TVET_CURRICULUM_REGISTRY[`${codeKey}:${documentType}`];
+  }
+
+  // 2. Plain code lookup — built-in shared seed content
   if (TVET_CURRICULUM_REGISTRY[codeKey]) {
     return TVET_CURRICULUM_REGISTRY[codeKey];
   }
@@ -262,21 +610,22 @@ export function getUnitCurriculum(
     }
   }
 
-  // 3. Fallback: Return standard polished TVET definition based on the unit name
+  // 3. Fallback: Return domain-aware, structured 14-week progressive definition
   return {
     unitCode,
     unitName,
-    unitDescription: `This competency-based TVET unit equips trainees with essential theoretical principles, practical skills, and professional attitudes in ${unitName} (${unitCode}). Trainees develop industry competencies in accordance with national TVET occupational guidelines.`,
-    overallCompetency: `Demonstrate proficiency in ${unitName}, executing standard workplace procedures, troubleshooting deviations, and adhering to occupational safety standards.`,
+    unitDescription: `This competency-based unit equips trainees with essential theoretical principles, practical skills, and professional competencies in ${unitName} (${unitCode}). Trainees develop industry-standard skills in accordance with Imperial College occupational guidelines.`,
+    overallCompetency: `Demonstrate technical proficiency in ${unitName}, executing standard workplace procedures, practical skills, and adhering to occupational safety standards.`,
     learningOutcomes: [
       `Explain the core theories, principles, and regulatory standards of ${unitName}.`,
-      'Demonstrate technical proficiency in using relevant tools, diagnostic instruments, and software.',
-      'Execute practical tasks and produce compliant workplace documentation and records.',
-      'Evaluate outcomes and apply quality control measures to ensure occupational compliance.',
+      `Demonstrate technical proficiency in using relevant tools, diagnostic instruments, and methods for ${unitName}.`,
+      `Execute practical tasks and produce compliant workplace documentation and records for ${unitName}.`,
+      `Evaluate outcomes and apply quality control measures to ensure compliance in ${unitName}.`,
       'Collaborate effectively within multidisciplinary professional workplace teams.',
     ],
+    weeklySchedule: generateProgressiveWeeklySchedule(unitCode, unitName),
     references: [
-      'National TVET Curriculum and Assessment Standards (CDACC/KNEC).',
+      'National Curriculum and Assessment Standards (CDACC/KNEC).',
       `${unitName} Course Manual & Practical Reference Handbook (College Edition).`,
       'Applicable Professional Council and Statutory Regulations.',
     ],
@@ -294,4 +643,102 @@ export function getUnitCurriculum(
 export function registerUnitCurriculum(def: UnitCurriculumDefinition) {
   const codeKey = normalizeUnitCodeKey(def.unitCode);
   TVET_CURRICULUM_REGISTRY[codeKey] = def;
+}
+
+/**
+ * Persists an ingested unit curriculum definition into Supabase.
+ *
+ * IMPORTANT: document_type is now read from def.documentType, not hardcoded.
+ * A missing documentType is a caller bug (it must be assigned during ingestion
+ * or confirmed by the HOD in the preview step) — we refuse to guess here,
+ * since guessing wrong is exactly how scheme-of-work and course-outline
+ * content got mixed up previously.
+ */
+export async function persistUnitCurriculumToDatabase(def: UnitCurriculumDefinition): Promise<void> {
+  if (!def.documentType) {
+    throw new Error(
+      `Cannot persist "${def.unitCode}": documentType is missing. ` +
+      `Every unit must be tagged scheme_of_work or course_outline before it is committed.`
+    );
+  }
+
+  const codeKey = normalizeUnitCodeKey(def.unitCode);
+  const registryKey = `${codeKey}:${def.documentType}`;
+  TVET_CURRICULUM_REGISTRY[registryKey] = def;
+
+  // Composite id so scheme_of_work and course_outline for the same unit
+  // get separate template rows instead of clobbering one shared row.
+  const templateId = `tpl-tvet-${codeKey}-${def.documentType}`;
+
+  try {
+    const { createAdminClient } = await import('@/lib/supabase/admin');
+    const admin = createAdminClient();
+
+    // Bump version instead of always pinning version_number: 1, so re-uploads
+    // are auditable and create_teaching_document_record's
+    // "order by version_number desc limit 1" picks the latest intentionally.
+    const { data: existing } = await admin
+      .from('teaching_document_templates')
+      .select('version_number')
+      .eq('id', templateId)
+      .maybeSingle();
+
+    await admin.from('teaching_document_templates').upsert({
+      id: templateId,
+      document_type: def.documentType,
+      name: def.unitCode,
+      version_number: (existing?.version_number ?? 0) + 1,
+      status: 'active',
+      storage_bucket: 'teaching-documents',
+      storage_path: `curriculum/${codeKey}-${def.documentType}.json`,
+      original_filename: JSON.stringify(def),
+      notes: def.unitName,
+      updated_at: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.error('Failed to persist curriculum definition to DB:', err);
+    throw err;
+  }
+}
+
+/**
+ * Loads a persisted unit curriculum definition from Supabase
+ */
+export async function loadPersistedUnitCurriculum(
+  unitCode: string,
+  unitName: string,
+  documentType?: 'scheme_of_work' | 'course_outline'
+): Promise<UnitCurriculumDefinition> {
+  const codeKey = normalizeUnitCodeKey(unitCode);
+  const registryKey = documentType ? `${codeKey}:${documentType}` : codeKey;
+
+  if (TVET_CURRICULUM_REGISTRY[registryKey]) {
+    return TVET_CURRICULUM_REGISTRY[registryKey];
+  }
+
+  try {
+    const { createAdminClient } = await import('@/lib/supabase/admin');
+    const admin = createAdminClient();
+    const templateId = documentType
+      ? `tpl-tvet-${codeKey}-${documentType}`
+      : `tpl-tvet-${codeKey}`; // legacy id, pre-fix rows only
+
+    const { data: row } = await admin
+      .from('teaching_document_templates')
+      .select('original_filename')
+      .eq('id', templateId)
+      .maybeSingle();
+
+    if (row?.original_filename) {
+      const parsed = JSON.parse(row.original_filename) as UnitCurriculumDefinition;
+      if (parsed && parsed.unitCode) {
+        TVET_CURRICULUM_REGISTRY[registryKey] = parsed;
+        return parsed;
+      }
+    }
+  } catch {
+    // Fallback to sync getUnitCurriculum
+  }
+
+  return getUnitCurriculum(unitCode, unitName, documentType);
 }

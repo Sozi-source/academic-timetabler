@@ -1,6 +1,11 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '50mb',
+    },
+  },
   async headers() {
     return [
       {
@@ -33,4 +38,3 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
-

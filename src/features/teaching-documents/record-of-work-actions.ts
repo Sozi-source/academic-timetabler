@@ -13,14 +13,13 @@ function one<T>(value: Relation<T>): T | null {
   return Array.isArray(value) ? value[0] ?? null : value;
 }
 
-export async function getRecordOfWorkContext(allocationId: string): Promise<{
-  header: TVETDocumentHeaderContext;
-  entries: TVETRecordOfWorkEntry[];
-} | null> {
+export async function getDocumentHeaderContext(
+  allocationId: string
+): Promise<TVETDocumentHeaderContext | null> {
   const profile = await requireTrainerAccess();
   const admin = createAdminClient();
 
-  // 1. Fetch allocation and metadata
+  // 1. Fetch allocation and metadata — use REAL column names from the schema
   const { data: allocation, error } = await admin
     .from('teaching_allocations')
     .select(`
@@ -28,38 +27,108 @@ export async function getRecordOfWorkContext(allocationId: string): Promise<{
       unit_id,
       cohort_id,
       academic_period_id,
-      weekly_hours,
+      weekly_sessions,
+      session_duration_minutes,
       trainer_id,
-      unit:units(id, code, name, weekly_session_count),
-      cohort:cohorts(id, code, name, programme:programmes(name, department:departments(name))),
-      academic_period:academic_periods(id, code, name),
-      trainer:trainers(id, full_name, email)
+      units (id, code, name, weekly_sessions),
+      cohorts (id, code, name),
+      academic_periods (id, code, name),
+      trainers (id, full_name, email)
     `)
     .eq('id', allocationId)
     .maybeSingle();
 
-  if (error || !allocation) {
+  let targetAllocation = allocation;
+
+  if (error || !targetAllocation) {
+    // Fallback: fetch allocation without joins, then resolve each FK individually
+    const { data: basicAlloc } = await admin
+      .from('teaching_allocations')
+      .select('id, unit_id, cohort_id, academic_period_id, weekly_sessions, session_duration_minutes, trainer_id')
+      .eq('id', allocationId)
+      .maybeSingle();
+
+    if (!basicAlloc) {
+      return null;
+    }
+
+    targetAllocation = basicAlloc as typeof allocation;
+  }
+
+  if (!targetAllocation) {
     return null;
   }
 
-  const unit = one(allocation.unit as Relation<{ id: string; code: string; name: string; weekly_session_count: number }>);
-  const cohort = one(allocation.cohort as Relation<{
-    id: string;
-    code: string;
-    name: string;
-    programme: Relation<{ name: string; department: Relation<{ name: string }> }>;
-  }>);
-  const period = one(allocation.academic_period as Relation<{ id: string; code: string; name: string }>);
-  const trainer = one(allocation.trainer as Relation<{ id: string; full_name: string; email?: string }>);
+  // 2. Ownership Verification:
+  // Trainers can only access their own allocated units (HODs & Admins can access all for oversight)
+  if (profile.role === 'trainer') {
+    const { data: trainerRec } = await admin
+      .from('trainers')
+      .select('id')
+      .eq('profile_id', profile.id)
+      .eq('is_active', true)
+      .maybeSingle();
 
-  const deptName = one(one(cohort?.programme)?.department)?.name ?? profile.departmentName ?? 'Department';
-  const weeklyHours = Number(allocation.weekly_hours) || (unit?.weekly_session_count ? unit.weekly_session_count * 2 : 4);
+    if (!trainerRec || targetAllocation.trainer_id !== trainerRec.id) {
+      return null;
+    }
+  }
+
+  // 3. Resolve Relations safely
+  const rawUnit = (targetAllocation as Record<string, unknown>).units ?? (targetAllocation as Record<string, unknown>).unit;
+  let unit = one(rawUnit as Relation<{ id: string; code: string; name: string; weekly_sessions?: number }>);
+  if (!unit && targetAllocation.unit_id) {
+    const { data: directUnit } = await admin
+      .from('units')
+      .select('id, code, name, weekly_sessions')
+      .eq('id', targetAllocation.unit_id)
+      .maybeSingle();
+    unit = directUnit;
+  }
+
+  const rawCohort = (targetAllocation as Record<string, unknown>).cohorts ?? (targetAllocation as Record<string, unknown>).cohort;
+  let cohort = one(rawCohort as Relation<{ id: string; code?: string; name: string }>);
+  if (!cohort && targetAllocation.cohort_id) {
+    const { data: directCohort } = await admin
+      .from('cohorts')
+      .select('id, code, name')
+      .eq('id', targetAllocation.cohort_id)
+      .maybeSingle();
+    cohort = directCohort;
+  }
+
+  const rawPeriod = (targetAllocation as Record<string, unknown>).academic_periods ?? (targetAllocation as Record<string, unknown>).academic_period;
+  let period = one(rawPeriod as Relation<{ id: string; code?: string; name: string }>);
+  if (!period && targetAllocation.academic_period_id) {
+    const { data: directPeriod } = await admin
+      .from('academic_periods')
+      .select('id, code, name')
+      .eq('id', targetAllocation.academic_period_id)
+      .maybeSingle();
+    period = directPeriod;
+  }
+
+  const rawTrainer = (targetAllocation as Record<string, unknown>).trainers ?? (targetAllocation as Record<string, unknown>).trainer;
+  let trainer = one(rawTrainer as Relation<{ id: string; full_name: string; email?: string }>);
+  if (!trainer && targetAllocation.trainer_id) {
+    const { data: directTrainer } = await admin
+      .from('trainers')
+      .select('id, full_name, email')
+      .eq('id', targetAllocation.trainer_id)
+      .maybeSingle();
+    trainer = directTrainer;
+  }
+
+  const deptName = profile.departmentName ?? 'Department';
+  const weeklySessionCount = Number(targetAllocation.weekly_sessions) || (unit?.weekly_sessions ?? 2);
+  const sessionDurationHrs = (Number(targetAllocation.session_duration_minutes) || 120) / 60;
+  const weeklyHours = weeklySessionCount * sessionDurationHrs;
 
   const header: TVETDocumentHeaderContext = {
-    institutionName: 'Academic Planner TVET Institute',
+    institutionName: 'Imperial College of Medical & Health Sciences',
     departmentName: deptName,
     academicPeriodName: period?.name ?? 'Current Semester',
-    unitCode: unit?.code ?? 'Unit Code',
+    unitCode: unit?.code ?? 'UNIT',
     unitName: unit?.name ?? 'Unit Name',
     cohortName: cohort?.name ?? 'Cohort',
     trainerName: trainer?.full_name ?? profile.fullName ?? 'Trainer',
@@ -68,7 +137,28 @@ export async function getRecordOfWorkContext(allocationId: string): Promise<{
     weeklyHours,
   };
 
-  // 2. Fetch or initialize record of work document
+  // Preload DB-persisted curriculum definitions for this unit code.
+  // Record of Work tracks actual delivery against the Scheme of Work's
+  // planned weekly topics, so it must load the scheme_of_work variant
+  // specifically — not whatever shared/course_outline entry happened to exist.
+  const { loadPersistedUnitCurriculum } = await import('./curriculum-registry');
+  await loadPersistedUnitCurriculum(header.unitCode, header.unitName, 'scheme_of_work');
+
+  return header;
+}
+
+export async function getRecordOfWorkContext(allocationId: string): Promise<{
+  header: TVETDocumentHeaderContext;
+  entries: TVETRecordOfWorkEntry[];
+} | null> {
+  const header = await getDocumentHeaderContext(allocationId);
+  if (!header) {
+    return null;
+  }
+
+  const admin = createAdminClient();
+
+  // Fetch or initialize record of work document
   const { data: doc } = await admin
     .from('teaching_documents')
     .select('id, storage_path, original_filename')

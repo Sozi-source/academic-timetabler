@@ -72,7 +72,7 @@ export function unpackZipBuffer(zipBuffer: Buffer): ExtractedFileEntry[] {
 }
 
 /**
- * Extracts plain text from a .docx file buffer
+ * Extracts plain text from a .docx file buffer preserving table rows and cells
  */
 export function extractTextFromDocx(docxBuffer: Buffer): string {
   try {
@@ -81,18 +81,20 @@ export function extractTextFromDocx(docxBuffer: Buffer): string {
     if (!documentXml) return '';
 
     const xmlText = documentXml.buffer.toString('utf8');
-    // Extract text inside <w:t> tags and paragraph breaks
+    // Extract text inside <w:t> tags and preserve paragraph and table structure
     const cleaned = xmlText
-      .replace(/<w:p[^>]*>/g, '\n')
+      .replace(/<\/w:tr>/g, '\n')
+      .replace(/<\/w:tc>/g, '\t')
+      .replace(/<\/w:p>/g, '\n')
       .replace(/<w:tab[^>]*>/g, '\t')
-      .replace(/<[^>]+>/g, ' ')
+      .replace(/<[^>]+>/g, '')
       .replace(/&amp;/g, '&')
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
       .replace(/&quot;/g, '"')
       .replace(/&apos;/g, "'")
-      .replace(/[ \t]+/g, ' ')
-      .replace(/\n\s+/g, '\n')
+      .replace(/[ \f\v]+/g, ' ')
+      .replace(/\n\s*\n+/g, '\n')
       .trim();
 
     return cleaned;
@@ -108,20 +110,19 @@ export function parseCurriculumText(
   rawText: string,
   filename: string
 ): UnitCurriculumDefinition {
-  // 1. Detect Unit Code: e.g. "CND 1101", "NUT 101", "CLIN 201"
+  // 1. Detect Unit Code: e.g. "CND 1101", "NUT 101", "CLIN 201", "CHN 2309"
   const codeRegex = /\b([A-Z]{2,6})\s*([0-9]{3,4}[A-Z]?)\b/i;
   const matchCode = rawText.match(codeRegex) || filename.match(codeRegex);
   const unitCode = matchCode ? `${matchCode[1].toUpperCase()} ${matchCode[2].toUpperCase()}` : filename.replace(/\.[^/.]+$/, '').toUpperCase();
 
   // 2. Detect Unit Name
   let unitName = '';
-  const titleRegex = /(?:Unit\s*(?:Title|Name)?|Course\s*(?:Title|Name)?|Module\s*(?:Title|Name)?)\s*[:=-]\s*([^\n\r]+)/i;
+  const titleRegex = /(?:Unit\s*(?:Title|Name)?|Course\s*(?:Title|Name)?|Module\s*(?:Title|Name)?)\s*[:=-]\s*([^\n\r\t]+)/i;
   const matchTitle = rawText.match(titleRegex);
 
   if (matchTitle && matchTitle[1].trim()) {
     unitName = matchTitle[1].trim();
   } else {
-    // Try first prominent line of text or clean filename
     const firstLines = rawText.split('\n').map((l) => l.trim()).filter((l) => l.length > 5 && !codeRegex.test(l));
     unitName = firstLines[0] || filename.replace(/[-_]/g, ' ').replace(/\.[^/.]+$/, '');
   }
@@ -135,18 +136,43 @@ export function parseCurriculumText(
     learningOutcomes.push(...lines.slice(0, 6));
   }
 
-  // 4. Extract Weekly Schedule
+  // 4. Extract Weekly Schedule from text lines or table rows
   const weeklySchedule: SeedWeeklyTopic[] = [];
-  const weekMatches = [...rawText.matchAll(/(?:Week|Wk|Session)\s*(\d+)\s*[:.-]?\s*([^\n\r]+)/gi)];
+  const lines = rawText.split('\n');
 
-  if (weekMatches.length > 0) {
-    for (const m of weekMatches) {
-      const weekNum = Number(m[1]);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    // Case A: Tab-delimited row: "1\tTopic\tSubtopics..." or "Week 1\tTopic..."
+    const tabParts = trimmed.split('\t').map((p) => p.trim()).filter(Boolean);
+    if (tabParts.length >= 2) {
+      const weekMatch = tabParts[0].match(/^(?:Week|Wk|Session)?\s*(\d{1,2})$/i);
+      if (weekMatch) {
+        const weekNum = parseInt(weekMatch[1], 10);
+        if (weekNum >= 1 && weekNum <= 14) {
+          weeklySchedule.push({
+            weekNumber: weekNum,
+            topicTitle: tabParts[1],
+            subTopics: tabParts[2] ? [tabParts[2]] : [tabParts[1]],
+            learningActivities: tabParts[3] || undefined,
+            resourcesAndReferences: tabParts[4] || undefined,
+            assessmentAndRemarks: tabParts[5] || undefined,
+          });
+          continue;
+        }
+      }
+    }
+
+    // Case B: Inline week prefix: "Week 1: Topic" or "Week 1 - Topic"
+    const inlineMatch = trimmed.match(/^(?:Week|Wk|Session)\s*(\d{1,2})\s*[:.-]\s*(.+)$/i);
+    if (inlineMatch) {
+      const weekNum = parseInt(inlineMatch[1], 10);
       if (weekNum >= 1 && weekNum <= 14) {
         weeklySchedule.push({
           weekNumber: weekNum,
-          topicTitle: m[2].trim(),
-          subTopics: [m[2].trim()],
+          topicTitle: inlineMatch[2].trim(),
+          subTopics: [inlineMatch[2].trim()],
         });
       }
     }
@@ -218,16 +244,68 @@ export async function parseCurriculumExcel(
 }
 
 /**
- * Ingests and standardizes an entire ZIP archive of raw course outlines and schemes
+ * Supported institutional teaching document types this ingester can produce.
+ * Must match public.teaching_document_templates.document_type in Postgres.
+ */
+export type IngestibleDocumentType = 'scheme_of_work' | 'course_outline';
+
+/**
+ * Detects which document type a file belongs to from its path/filename or
+ * parent folder. Zips should ideally be organised as:
+ *   /scheme_of_work/CHN2309.docx
+ *   /course_outline/CHN2309.docx
+ * Folder-based detection is checked first (unambiguous); filename keywords
+ * are the fallback for flat zips.
+ */
+export function detectDocumentType(filename: string): IngestibleDocumentType | null {
+  const lower = filename.toLowerCase();
+
+  // Folder-based detection (preferred, unambiguous)
+  if (lower.includes('scheme_of_work/') || lower.includes('scheme-of-work/') || lower.includes('/sow/')) {
+    return 'scheme_of_work';
+  }
+  if (lower.includes('course_outline/') || lower.includes('course-outline/')) {
+    return 'course_outline';
+  }
+
+  // Filename keyword fallback
+  const hasScheme = /scheme[\s_-]*of[\s_-]*work|\bsow\b/.test(lower);
+  const hasOutline = /course[\s_-]*outline|\boutline\b/.test(lower);
+
+  if (hasScheme && !hasOutline) return 'scheme_of_work';
+  if (hasOutline && !hasScheme) return 'course_outline';
+
+  // Ambiguous or neither keyword present — caller must handle (flag for manual review)
+  return null;
+}
+
+/**
+ * Ingests and standardizes an entire ZIP archive of raw course outlines and schemes.
+ * Each extracted unit is tagged with its actual documentType so a scheme-of-work
+ * file and a course-outline file for the SAME unit code never overwrite each other,
+ * and so downstream persistence saves each under its correct document type.
  */
 export async function ingestCurriculumZipArchive(
   zipBuffer: Buffer
 ): Promise<{
   totalFilesProcessed: number;
   extractedUnits: UnitCurriculumDefinition[];
+  unresolvedFiles: string[];
 }> {
   const entries = unpackZipBuffer(zipBuffer);
   const unitsMap = new Map<string, UnitCurriculumDefinition>();
+  const unresolvedFiles: string[] = [];
+
+  const upsert = (parsed: UnitCurriculumDefinition, filename: string) => {
+    const documentType = detectDocumentType(filename);
+    if (!documentType) {
+      // Don't guess — surface it so the HOD can assign it manually in the preview UI.
+      unresolvedFiles.push(filename);
+      return;
+    }
+    const key = `${normalizeUnitCodeKey(parsed.unitCode)}:${documentType}`;
+    unitsMap.set(key, { ...parsed, documentType });
+  };
 
   for (const entry of entries) {
     const ext = entry.filename.toLowerCase();
@@ -235,15 +313,12 @@ export async function ingestCurriculumZipArchive(
     if (ext.endsWith('.docx')) {
       const text = extractTextFromDocx(entry.buffer);
       if (text.length > 20) {
-        const parsed = parseCurriculumText(text, entry.filename);
-        const key = normalizeUnitCodeKey(parsed.unitCode);
-        unitsMap.set(key, parsed);
+        upsert(parseCurriculumText(text, entry.filename), entry.filename);
       }
     } else if (ext.endsWith('.xlsx')) {
       const excelUnits = await parseCurriculumExcel(entry.buffer, entry.filename);
       for (const eu of excelUnits) {
-        const key = normalizeUnitCodeKey(eu.unitCode);
-        unitsMap.set(key, eu);
+        upsert(eu, entry.filename);
       }
     } else if (ext.endsWith('.txt') || ext.endsWith('.json')) {
       const text = entry.buffer.toString('utf8');
@@ -251,22 +326,20 @@ export async function ingestCurriculumZipArchive(
         try {
           const parsedJson = JSON.parse(text);
           if (parsedJson.unitCode) {
-            const key = normalizeUnitCodeKey(parsedJson.unitCode);
-            unitsMap.set(key, parsedJson);
+            upsert(parsedJson, entry.filename);
             continue;
           }
         } catch {
           // fallback to text parse
         }
       }
-      const parsed = parseCurriculumText(text, entry.filename);
-      const key = normalizeUnitCodeKey(parsed.unitCode);
-      unitsMap.set(key, parsed);
+      upsert(parseCurriculumText(text, entry.filename), entry.filename);
     }
   }
 
   return {
     totalFilesProcessed: entries.length,
     extractedUnits: Array.from(unitsMap.values()),
+    unresolvedFiles,
   };
 }

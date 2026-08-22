@@ -60,12 +60,12 @@ export default async function StaffDocumentsPage() {
       <PageHeader
         eyebrow="Staff"
         title="Teaching Documents"
-        description="Standardised TVET course outlines, schemes of work, and interactive records of work."
+        description="Standardised Imperial College course outlines, schemes of work, and interactive records of work."
         icon={FileText}
       />
 
       <div className="flex flex-wrap gap-2">
-        <Badge variant="success">TVET Standards Ready</Badge>
+        <Badge variant="success">Imperial Standard Ready</Badge>
         <Badge variant="neutral">
           {workspace.allocations.length} Allocated Units
         </Badge>

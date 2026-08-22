@@ -88,7 +88,7 @@ export interface TVETRecordOfWorkData {
 export function generateTVETCourseOutline(
   context: TVETDocumentHeaderContext
 ): TVETCourseOutlineData {
-  const curriculum = getUnitCurriculum(context.unitCode, context.unitName);
+  const curriculum = getUnitCurriculum(context.unitCode, context.unitName, 'course_outline');
 
   let weeklySchedule: TVETCourseOutlineTopic[] = [];
 
@@ -255,7 +255,7 @@ export function generateTVETSchemeOfWork(
   context: TVETDocumentHeaderContext
 ): TVETSchemeOfWorkData {
   const outline = generateTVETCourseOutline(context);
-  const curriculum = getUnitCurriculum(context.unitCode, context.unitName);
+  const curriculum = getUnitCurriculum(context.unitCode, context.unitName, 'scheme_of_work');
 
   const seedScheduleMap = new Map(
     (curriculum.weeklySchedule ?? []).map((w) => [w.weekNumber, w])

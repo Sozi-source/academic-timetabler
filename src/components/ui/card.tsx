@@ -59,3 +59,18 @@ export function CardContent({
     </div>
   );
 }
+
+export function CardTitle({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <h3 className={cn('text-sm font-bold text-text-primary', className)}>
+      {children}
+    </h3>
+  );
+}
+

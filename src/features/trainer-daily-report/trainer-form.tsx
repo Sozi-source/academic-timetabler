@@ -222,13 +222,24 @@ export function TrainerDailyReportForm({
         </section>
       ) : null}
 
+      {workspace.lessons.length === 0 ? (
+        <section className="rounded-xl border border-blue-200 bg-blue-50/70 px-4 py-3 text-blue-950">
+          <p className="text-xs font-semibold">
+            No scheduled lessons for this date
+          </p>
+          <p className="mt-0.5 text-[11px] text-blue-800/80">
+            To submit an official daily record for a non-teaching day, please enter your activity (meetings, prep, supervision) or any concerns below.
+          </p>
+        </section>
+      ) : null}
+
       <section className="grid gap-3 md:grid-cols-2">
         <label className="block rounded-xl border border-border bg-white p-4">
           <span className="text-xs font-semibold text-text-primary">
             Other activity
           </span>
           <span className="mt-1 block text-[10px] text-text-muted">
-            Optional · keep it brief
+            {workspace.lessons.length === 0 ? 'Required on non-teaching days' : 'Optional · keep it brief'}
           </span>
           <textarea
             name="otherActivity"
@@ -257,13 +268,15 @@ export function TrainerDailyReportForm({
       </section>
 
       {state.message ? (
-        <p
-          className={`text-xs ${
-            state.status === 'success' ? 'text-success' : 'text-danger'
+        <div
+          className={`rounded-xl border px-4 py-3 text-xs font-semibold ${
+            state.status === 'success'
+              ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
+              : 'border-rose-200 bg-rose-50 text-rose-900'
           }`}
         >
           {state.message}
-        </p>
+        </div>
       ) : null}
 
       <div className="flex justify-end">
@@ -273,7 +286,7 @@ export function TrainerDailyReportForm({
           className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
         >
           <ClipboardCheck className="size-4" />
-          {pending ? 'Submitting' : 'Submit daily report'}
+          {pending ? 'Submitting...' : 'Submit daily report'}
         </button>
       </div>
     </form>

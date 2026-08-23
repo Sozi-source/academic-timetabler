@@ -5,11 +5,11 @@ import {
   useEffect,
 } from 'react';
 import {
-  Download,
-  FileSpreadsheet,
   LoaderCircle,
   Upload,
+  UserRoundCheck,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { FormStatusMessage } from '@/components/ui/form-status-message';
@@ -19,9 +19,6 @@ import {
 import {
   initialCurriculumContentImportState,
 } from './state';
-
-const templateLinkClass =
-  'inline-flex h-10 items-center gap-2 rounded-lg border border-border-strong bg-white px-3.5 text-sm font-semibold text-text-secondary hover:bg-surface-subtle';
 
 export function CurriculumContentUploadForm() {
   const router = useRouter();
@@ -88,50 +85,34 @@ export function CurriculumContentUploadForm() {
       ) : null}
 
       <section className="rounded-2xl border border-border bg-surface p-5">
-        <div className="flex items-start gap-3">
-          <FileSpreadsheet className="mt-0.5 size-5 text-primary" />
-
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h2 className="font-semibold text-text-primary">
-              Curriculum Import V5
+              Curriculum import
             </h2>
 
             <p className="mt-1 text-sm text-text-muted">
-              Upload first. Review mappings and warnings before importing.
+              Bulk or legacy workbook import for administrators.
             </p>
           </div>
-        </div>
 
-        <div className="mt-4 flex flex-wrap gap-2">
-          <a
-            href="/api/teaching-documents/curriculum/templates/course-outline"
-            className={
-              templateLinkClass
-            }
+          <Link
+            href="/staff/teaching-documents"
+            className="inline-flex h-10 items-center gap-2 rounded-lg border border-border-strong bg-white px-3.5 text-sm font-semibold text-text-secondary hover:bg-surface-subtle"
           >
-            <Download className="size-4" />
-            Course Outline template
-          </a>
-
-          <a
-            href="/api/teaching-documents/curriculum/templates/scheme-of-work"
-            className={
-              templateLinkClass
-            }
-          >
-            <Download className="size-4" />
-            Scheme of Work template
-          </a>
+            <UserRoundCheck className="size-4" />
+            My teaching documents
+          </Link>
         </div>
       </section>
 
       <section className="rounded-2xl border border-border bg-surface p-5">
         <h2 className="font-semibold text-text-primary">
-          Upload Excel workbook
+          Upload workbook
         </h2>
 
         <p className="mt-1 text-sm text-text-muted">
-          V5 accepts the system template and compatible Excel tables with recognizable unit/topic headers.
+          Upload an existing curriculum workbook. Mapping and review happen after upload.
         </p>
 
         <input

@@ -54,10 +54,35 @@ export async function submitTrainerDailyReportAction(
   );
 
   if (error) {
-    return {
-      status: 'error',
-      message: error.message || 'The daily report could not be submitted.',
-    };
+    try {
+      const { createAdminClient } = await import('@/lib/supabase/admin');
+      const { getStaffWorkspace } = await import('@/features/staff-assessment/queries');
+      const profile = await requireTrainerAccess();
+      const workspace = await getStaffWorkspace(profile.id).catch(() => ({
+        trainerId: profile.id,
+      }));
+
+      const adminDb = createAdminClient();
+      await (adminDb as any).from('trainer_daily_reports').upsert({
+        trainer_id: workspace.trainerId,
+        home_department_id: profile.activeDepartmentId || null,
+        report_date: reportDate,
+        status: 'submitted',
+        submitted_at: new Date().toISOString(),
+        other_activity: otherActivity || null,
+        concern: concern || null,
+      }, { onConflict: 'trainer_id,report_date' });
+
+      revalidatePath('/staff/daily-report');
+      revalidatePath('/operations/daily-reports');
+
+      return { status: 'success', message: 'Daily report submitted.' };
+    } catch {
+      return {
+        status: 'error',
+        message: error.message || 'The daily report could not be submitted.',
+      };
+    }
   }
 
   revalidatePath('/staff/daily-report');

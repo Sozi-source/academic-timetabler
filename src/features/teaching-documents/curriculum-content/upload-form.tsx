@@ -4,17 +4,21 @@ import {
   useActionState,
   useEffect,
 } from 'react';
-import { useRouter } from 'next/navigation';
 import {
   Download,
   FileSpreadsheet,
   LoaderCircle,
   Upload,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { FormStatusMessage } from '@/components/ui/form-status-message';
-import { stageCurriculumContentImportAction } from './actions';
-import { initialCurriculumContentImportState } from './state';
+import {
+  stageCurriculumContentImportAction,
+} from './actions';
+import {
+  initialCurriculumContentImportState,
+} from './state';
 
 const templateLinkClass =
   'inline-flex h-10 items-center gap-2 rounded-lg border border-border-strong bg-white px-3.5 text-sm font-semibold text-text-secondary hover:bg-surface-subtle';
@@ -22,11 +26,14 @@ const templateLinkClass =
 export function CurriculumContentUploadForm() {
   const router = useRouter();
 
-  const [state, action, pending] =
-    useActionState(
-      stageCurriculumContentImportAction,
-      initialCurriculumContentImportState,
-    );
+  const [
+    state,
+    action,
+    pending,
+  ] = useActionState(
+    stageCurriculumContentImportAction,
+    initialCurriculumContentImportState,
+  );
 
   useEffect(() => {
     if (
@@ -44,7 +51,9 @@ export function CurriculumContentUploadForm() {
   ]);
 
   const details = [
-    ...new Set(state.details ?? []),
+    ...new Set(
+      state.details ?? [],
+    ),
   ];
 
   return (
@@ -55,7 +64,8 @@ export function CurriculumContentUploadForm() {
       {state.message ? (
         <FormStatusMessage
           status={
-            state.status === 'success'
+            state.status ===
+            'success'
               ? 'success'
               : 'error'
           }
@@ -65,23 +75,29 @@ export function CurriculumContentUploadForm() {
 
       {details.length ? (
         <div className="rounded-xl border border-danger-border bg-danger-surface p-4 text-sm text-danger">
-          {details.map((item, index) => (
-            <div key={`${index}-${item}`}>
-              {item}
-            </div>
-          ))}
+          {details.map(
+            (item, index) => (
+              <div
+                key={`${index}-${item}`}
+              >
+                {item}
+              </div>
+            ),
+          )}
         </div>
       ) : null}
 
       <section className="rounded-2xl border border-border bg-surface p-5">
         <div className="flex items-start gap-3">
           <FileSpreadsheet className="mt-0.5 size-5 text-primary" />
+
           <div>
             <h2 className="font-semibold text-text-primary">
-              Download Excel template
+              Curriculum Import V5
             </h2>
+
             <p className="mt-1 text-sm text-text-muted">
-              Use the system template for the document type you want to import.
+              Upload first. Review mappings and warnings before importing.
             </p>
           </div>
         </div>
@@ -89,7 +105,9 @@ export function CurriculumContentUploadForm() {
         <div className="mt-4 flex flex-wrap gap-2">
           <a
             href="/api/teaching-documents/curriculum/templates/course-outline"
-            className={templateLinkClass}
+            className={
+              templateLinkClass
+            }
           >
             <Download className="size-4" />
             Course Outline template
@@ -97,7 +115,9 @@ export function CurriculumContentUploadForm() {
 
           <a
             href="/api/teaching-documents/curriculum/templates/scheme-of-work"
-            className={templateLinkClass}
+            className={
+              templateLinkClass
+            }
           >
             <Download className="size-4" />
             Scheme of Work template
@@ -107,10 +127,11 @@ export function CurriculumContentUploadForm() {
 
       <section className="rounded-2xl border border-border bg-surface p-5">
         <h2 className="font-semibold text-text-primary">
-          Upload completed Excel
+          Upload Excel workbook
         </h2>
+
         <p className="mt-1 text-sm text-text-muted">
-          Only the official Academic Planner .xlsx templates are accepted.
+          V5 accepts the system template and compatible Excel tables with recognizable unit/topic headers.
         </p>
 
         <input
@@ -136,8 +157,8 @@ export function CurriculumContentUploadForm() {
           )}
 
           {pending
-            ? 'Validating'
-            : 'Validate and review'}
+            ? 'Staging'
+            : 'Upload and review'}
         </Button>
       </div>
     </form>

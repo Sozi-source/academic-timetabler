@@ -31,6 +31,21 @@ import { PageHeader } from '@/components/ui/page-header';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { getOperationsSnapshot } from '@/features/operations/queries';
 
+function formatPeriodDisplay(name: string | null | undefined): string {
+  if (!name) return 'Not Set';
+  return name
+    .replace(/September/gi, 'Sep')
+    .replace(/December/gi, 'Dec')
+    .replace(/January/gi, 'Jan')
+    .replace(/February/gi, 'Feb')
+    .replace(/March/gi, 'Mar')
+    .replace(/April/gi, 'Apr')
+    .replace(/August/gi, 'Aug')
+    .replace(/October/gi, 'Oct')
+    .replace(/November/gi, 'Nov')
+    .replace(/[-–—]+/g, ' – ');
+}
+
 export default async function DashboardPage() {
   const profile = await requireHodAccess();
   const snapshot = await getOperationsSnapshot().catch(() => null);
@@ -160,11 +175,11 @@ export default async function DashboardPage() {
 
       {/* Top Department Key Performance Indicators */}
       {snapshot && (
-        <section aria-label="Department Metrics" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <section aria-label="Department Metrics" className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-5">
           <MetricCard
             label="Active Period"
-            value={snapshot.activePeriodName ?? 'None'}
-            description="Current academic period"
+            value={formatPeriodDisplay(snapshot.activePeriodName)}
+            description={snapshot.activePeriodName || 'Current academic session'}
             icon={CalendarDays}
           />
           <MetricCard
@@ -186,9 +201,13 @@ export default async function DashboardPage() {
             icon={ClipboardList}
           />
           <MetricCard
-            label="Attendance Rate"
-            value={`${snapshot.attendance.attendanceRate}%`}
-            description={`${snapshot.attendance.completed} sessions logged`}
+            label="Class Attendance"
+            value={`${snapshot.attendance.completed} Logged`}
+            description={
+              snapshot.attendance.open > 0
+                ? `${snapshot.attendance.open} open session${snapshot.attendance.open === 1 ? '' : 's'}`
+                : 'All sessions completed'
+            }
             icon={Stethoscope}
           />
         </section>

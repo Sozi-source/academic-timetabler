@@ -4,23 +4,18 @@ import { revalidatePath } from 'next/cache';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { createClient } from '@/lib/supabase/server';
 import {
-  parseCurriculumContentWorkbook,
-  type ParsedCurriculumContentWorkbook,
-} from './workbook';
-import type { CurriculumContentImportState } from './state';
-
-function normalizeCode(value: string) {
-  return value
-    .trim()
-    .toUpperCase()
-    .replace(/\s+/g, ' ');
-}
-
-function cleanCodeKey(value: string) {
-  return value
-    .replace(/[\s\-_.]+/g, '')
-    .toUpperCase();
-}
+  matchCurriculumUnitsV5,
+  unresolvedUnitsV5,
+} from '../curriculum-import-v5/staging';
+import {
+  parseCurriculumWorkbookV5,
+} from '../curriculum-import-v5/xlsx';
+import {
+  type CurriculumImportBatchPayloadV5,
+} from '../curriculum-import-v5/schema';
+import type {
+  CurriculumContentImportState,
+} from './state';
 
 export async function stageCurriculumContentImportAction(
   _previous: CurriculumContentImportState,
@@ -31,39 +26,50 @@ export async function stageCurriculumContentImportAction(
   if (!profile.activeDepartmentId) {
     return {
       status: 'error',
-      message: 'No active department selected.',
+      message:
+        'No active department selected.',
     };
   }
 
   const file = formData.get('workbook');
 
-  if (!(file instanceof File) || file.size === 0) {
+  if (
+    !(file instanceof File) ||
+    file.size === 0
+  ) {
     return {
       status: 'error',
-      message: 'Please select an Excel workbook.',
+      message:
+        'Select an Excel workbook to import.',
+    };
+  }
+
+  if (
+    !file.name
+      .toLowerCase()
+      .endsWith('.xlsx')
+  ) {
+    return {
+      status: 'error',
+      message:
+        'Curriculum Import V5 currently accepts Excel (.xlsx) files.',
     };
   }
 
   if (file.size > 25 * 1024 * 1024) {
     return {
       status: 'error',
-      message: 'Excel workbook exceeds the 25 MB limit.',
-    };
-  }
-
-  if (!file.name.toLowerCase().endsWith('.xlsx')) {
-    return {
-      status: 'error',
       message:
-        'Curriculum Content accepts only the official Academic Planner Excel (.xlsx) templates.',
+        'Excel workbook exceeds the 25 MB limit.',
     };
   }
 
-  let parsed: ParsedCurriculumContentWorkbook;
+  let parsed;
 
   try {
-    parsed = await parseCurriculumContentWorkbook(
+    parsed = await parseCurriculumWorkbookV5(
       await file.arrayBuffer(),
+      file.name,
     );
   } catch (error) {
     return {
@@ -71,253 +77,265 @@ export async function stageCurriculumContentImportAction(
       message:
         error instanceof Error
           ? error.message
-          : 'Excel workbook could not be parsed.',
-    };
-  }
-
-  if (parsed.errors.length > 0) {
-    return {
-      status: 'error',
-      message: 'Validation failed.',
-      details: parsed.errors.slice(0, 100),
-    };
-  }
-
-  if (parsed.unitMappings.length === 0) {
-    return {
-      status: 'error',
-      message:
-        'No completed curriculum units were found in the workbook.',
+          : 'Workbook could not be parsed.',
     };
   }
 
   const supabase = await createClient();
 
-  const { data: units, error: unitError } =
-    await supabase
-      .from('units')
-      .select('id,code,name,department_id,is_active')
-      .eq('is_active', true);
+  const {
+    data: systemUnits,
+    error: unitsError,
+  } = await supabase
+    .from('units')
+    .select('id,code,name')
+    .eq('is_active', true);
 
-  if (unitError) {
+  if (unitsError) {
     return {
       status: 'error',
-      message: `Units could not be verified: ${unitError.message}`,
+      message: `System units could not be loaded: ${unitsError.message}`,
     };
   }
 
-  const unitMap = new Map<
-    string,
-    { id: string; code: string; name: string }
-  >();
+  const payload = matchCurriculumUnitsV5(
+    parsed,
+    (systemUnits ?? []).map((unit) => ({
+      id: String(unit.id),
+      code: String(unit.code),
+      name: String(unit.name),
+    })),
+  );
 
-  (units ?? []).forEach((unit) => {
-    const code = String(unit.code);
+  const unresolved =
+    unresolvedUnitsV5(payload);
 
-    unitMap.set(
-      normalizeCode(code),
-      {
-        id: unit.id,
-        code,
-        name: unit.name,
+  const warningCount =
+    payload.issues.filter(
+      (issue) =>
+        issue.severity === 'warning',
+    ).length;
+
+  const reviewCount =
+    payload.issues.filter(
+      (issue) =>
+        issue.severity === 'review',
+    ).length;
+
+  const importableContent =
+    payload.content.filter(
+      (item) =>
+        !item.excludedAsCalendarActivity,
+    );
+
+  const {
+    data: batch,
+    error: batchError,
+  } = await supabase
+    .from(
+      'curriculum_content_import_batches',
+    )
+    .insert({
+      department_id:
+        profile.activeDepartmentId,
+      original_file_name: file.name,
+      template_version: '5',
+      status: 'validated',
+      payload,
+      validation_summary: {
+        engineVersion: 5,
+        units: payload.units.length,
+        matchedUnits:
+          payload.units.length -
+          unresolved.length,
+        unresolvedUnits:
+          unresolved.length,
+        contentRows:
+          importableContent.length,
+        excludedCalendarRows:
+          payload.content.length -
+          importableContent.length,
+        warnings: warningCount,
+        reviewItems: reviewCount,
       },
-    );
-
-    unitMap.set(
-      cleanCodeKey(code),
-      {
-        id: unit.id,
-        code,
-        name: unit.name,
-      },
-    );
-  });
-
-  const resolvedMappings = new Map<
-    string,
-    { id: string; code: string; name: string }
-  >();
-
-  const missingCodes: string[] = [];
-
-  for (const mapping of parsed.unitMappings) {
-    const rawCode = mapping.unit_code;
-    const normalized = normalizeCode(rawCode);
-
-    const matched =
-      unitMap.get(normalized) ??
-      unitMap.get(cleanCodeKey(rawCode));
-
-    if (matched) {
-      resolvedMappings.set(normalized, matched);
-    } else {
-      missingCodes.push(rawCode);
-    }
-  }
-
-  const uniqueMissingCodes = [
-    ...new Set(missingCodes),
-  ];
-
-  if (uniqueMissingCodes.length > 0) {
-    return {
-      status: 'error',
-      message: `${uniqueMissingCodes.length} unit code(s) do not exist in the system registry.`,
-      details: uniqueMissingCodes.map(
-        (code) =>
-          `Unknown unit code: "${code}". Register or correct this unit before importing curriculum.`,
-      ),
-    };
-  }
-
-  const metadataByFamily =
-    new Map<string, Record<string, string>>(
-      parsed.curriculum.map((row) => [
-        row.content_family_key,
-        row,
-      ]),
-    );
-
-  const families = [
-    ...metadataByFamily.entries(),
-  ].map(([familyKey, metadata]) => {
-    const familyMappings =
-      parsed.unitMappings.filter(
-        (row) =>
-          row.content_family_key === familyKey,
-      );
-
-    return {
-      documentType: parsed.documentType,
-      familyKey,
-      familyName:
-        metadata.content_family_name ||
-        familyKey,
-      version: Number(
-        metadata.curriculum_version || 1,
-      ),
-      unitDescription:
-        metadata.unit_description || '',
-      overallCompetency:
-        metadata.overall_competency || '',
-      teachingLearningApproaches:
-        metadata.teaching_learning_approaches ||
-        '',
-      assessmentApproaches:
-        metadata.assessment_approaches || '',
-      learningOutcomes: parsed.outcomes
-        .filter(
-          (row) =>
-            row.content_family_key === familyKey &&
-            row.learning_outcome,
-        )
-        .map((row) => ({
-          sequence: Number(row.sequence || 1),
-          text: row.learning_outcome,
-        })),
-      weeks: parsed.weeks
-        .filter(
-          (row) =>
-            row.content_family_key === familyKey,
-        )
-        .map((row) => ({
-          unitCode: row.unit_code || '',
-          weekNumber: Number(row.week_number),
-          topic: row.topic,
-          specificCoverage:
-            row.specific_coverage || '',
-          learningOutcomes:
-            row.learning_outcomes || '',
-          teachingLearningActivities:
-            row.teaching_learning_activities ||
-            '',
-          assessmentLearningCheck:
-            row.assessment_learning_check || '',
-          resources: row.resources || '',
-        }))
-        .sort(
-          (a, b) =>
-            a.unitCode.localeCompare(
-              b.unitCode,
-            ) ||
-            a.weekNumber - b.weekNumber,
-        ),
-      references: parsed.references
-        .filter(
-          (row) =>
-            row.content_family_key === familyKey &&
-            row.reference_resource,
-        )
-        .map((row) => ({
-          sequence: Number(row.sequence || 1),
-          text: row.reference_resource,
-        })),
-      unitMappings: familyMappings.map(
-        (row, index) => {
-          const matched =
-            resolvedMappings.get(
-              normalizeCode(row.unit_code),
-            );
-
-          if (!matched) {
-            throw new Error(
-              `Unit mapping could not be resolved for ${row.unit_code}.`,
-            );
-          }
-
-          return {
-            unitId: matched.id,
-            unitCode: matched.code,
-            isPrimary: index === 0,
-          };
-        },
-      ),
-    };
-  });
-
-  const { data: batch, error: batchError } =
-    await supabase
-      .from('curriculum_content_import_batches')
-      .insert({
-        department_id:
-          profile.activeDepartmentId,
-        original_file_name: file.name,
-        template_version:
-          parsed.templateVersion,
-        status: 'validated',
-        payload: {
-          documentType: parsed.documentType,
-          families,
-        },
-        validation_summary: {
-          documentType: parsed.documentType,
-          families: families.length,
-          units: parsed.unitMappings.length,
-          weeks: parsed.weeks.length,
-          outcomes: parsed.outcomes.length,
-          references: parsed.references.length,
-          warnings: parsed.warnings,
-        },
-        created_by: profile.id,
-      })
-      .select('id')
-      .single();
+      created_by: profile.id,
+    })
+    .select('id')
+    .single();
 
   if (batchError || !batch) {
     return {
       status: 'error',
       message:
         batchError?.message ??
-        'Validation batch could not be created.',
+        'Import staging batch could not be created.',
     };
   }
 
   return {
     status: 'success',
     message:
-      'Curriculum content validated successfully. Review before importing.',
-    batchId: batch.id,
+      unresolved.length > 0
+        ? `Workbook staged. ${unresolved.length} unit mapping(s) need review.`
+        : 'Workbook staged successfully. Review before import.',
+    batchId: String(batch.id),
   };
+}
+
+export async function updateCurriculumV5UnitMappingAction(
+  formData: FormData,
+) {
+  await requireHodAccess();
+
+  const batchId = String(
+    formData.get('batchId') ?? '',
+  ).trim();
+
+  const sourceUnitKey = String(
+    formData.get('sourceUnitKey') ?? '',
+  ).trim();
+
+  const targetUnitId = String(
+    formData.get('targetUnitId') ?? '',
+  ).trim();
+
+  if (
+    !batchId ||
+    !sourceUnitKey ||
+    !targetUnitId
+  ) {
+    throw new Error(
+      'Missing curriculum mapping information.',
+    );
+  }
+
+  const supabase = await createClient();
+
+  const {
+    data: batch,
+    error: batchError,
+  } = await supabase
+    .from(
+      'curriculum_content_import_batches',
+    )
+    .select('payload')
+    .eq('id', batchId)
+    .single();
+
+  if (batchError || !batch?.payload) {
+    throw new Error(
+      batchError?.message ??
+        'Import batch could not be loaded.',
+    );
+  }
+
+  const {
+    data: target,
+    error: targetError,
+  } = await supabase
+    .from('units')
+    .select('id,code,name')
+    .eq('id', targetUnitId)
+    .eq('is_active', true)
+    .single();
+
+  if (targetError || !target) {
+    throw new Error(
+      targetError?.message ??
+        'Selected system unit could not be loaded.',
+    );
+  }
+
+  const payload =
+    batch.payload as CurriculumImportBatchPayloadV5;
+
+  payload.units = payload.units.map(
+    (unit) =>
+      unit.sourceUnitKey ===
+      sourceUnitKey
+        ? {
+            ...unit,
+            matchedUnitId: String(
+              target.id,
+            ),
+            matchedUnitCode: String(
+              target.code,
+            ),
+            matchedUnitName: String(
+              target.name,
+            ),
+            matchMethod: 'manual',
+          }
+        : unit,
+  );
+
+  payload.issues = payload.issues.filter(
+    (item) =>
+      !(
+        item.sourceUnitKey ===
+          sourceUnitKey &&
+        [
+          'unit_not_mapped',
+          'ambiguous_code',
+          'ambiguous_name',
+          'missing_unit_code',
+        ].includes(item.code)
+      ),
+  );
+
+  const unresolved =
+    unresolvedUnitsV5(payload);
+
+  const { error: updateError } =
+    await supabase
+      .from(
+        'curriculum_content_import_batches',
+      )
+      .update({
+        payload,
+        validation_summary: {
+          engineVersion: 5,
+          units: payload.units.length,
+          matchedUnits:
+            payload.units.length -
+            unresolved.length,
+          unresolvedUnits:
+            unresolved.length,
+          contentRows:
+            payload.content.filter(
+              (item) =>
+                !item
+                  .excludedAsCalendarActivity,
+            ).length,
+          excludedCalendarRows:
+            payload.content.filter(
+              (item) =>
+                item
+                  .excludedAsCalendarActivity,
+            ).length,
+          warnings:
+            payload.issues.filter(
+              (item) =>
+                item.severity ===
+                'warning',
+            ).length,
+          reviewItems:
+            payload.issues.filter(
+              (item) =>
+                item.severity ===
+                'review',
+            ).length,
+        },
+      })
+      .eq('id', batchId);
+
+  if (updateError) {
+    throw new Error(updateError.message);
+  }
+
+  revalidatePath(
+    `/teaching-documents/curriculum/import/${batchId}`,
+  );
 }
 
 export async function confirmCurriculumContentImportAction(
@@ -331,31 +349,96 @@ export async function confirmCurriculumContentImportAction(
 
   if (!batchId) {
     throw new Error(
-      'Missing curriculum content import batch.',
+      'Missing curriculum import batch.',
     );
   }
 
   const supabase = await createClient();
 
-  const { data, error } = await supabase.rpc(
-    'import_curriculum_content_batch',
-    {
-      target_batch_id: batchId,
-    },
-  );
+  const {
+    data: batch,
+    error: batchError,
+  } = await supabase
+    .from(
+      'curriculum_content_import_batches',
+    )
+    .select(
+      'payload,validation_summary,status',
+    )
+    .eq('id', batchId)
+    .single();
 
-  if (error) {
-    throw new Error(error.message);
+  if (batchError || !batch?.payload) {
+    throw new Error(
+      batchError?.message ??
+        'Import batch could not be loaded.',
+    );
   }
 
-  revalidatePath('/teaching-documents');
+  const payload =
+    batch.payload as CurriculumImportBatchPayloadV5;
+
+  const unresolved =
+    unresolvedUnitsV5(payload);
+
+  if (
+    payload.engineVersion !== 5
+  ) {
+    throw new Error(
+      'This is not a Curriculum Import Engine V5 batch.',
+    );
+  }
+
+  // V5 treats the batch payload as the versioned curriculum import record.
+  // Final teaching-document generation can consume this imported snapshot
+  // and distribute ordered content into the active academic period later.
+  const {
+    error: updateError,
+  } = await supabase
+    .from(
+      'curriculum_content_import_batches',
+    )
+    .update({
+      status: 'imported',
+      validation_summary: {
+        ...(batch.validation_summary ??
+          {}),
+        engineVersion: 5,
+        importedAt:
+          new Date().toISOString(),
+        importedWithReviewItems:
+          unresolved.length > 0 ||
+          payload.issues.some(
+            (issue) =>
+              issue.severity === 'review',
+          ),
+        unresolvedUnitsAtImport:
+          unresolved.length,
+        reviewItemsAtImport:
+          payload.issues.filter(
+            (issue) =>
+              issue.severity === 'review',
+          ).length,
+      },
+    })
+    .eq('id', batchId);
+
+  if (updateError) {
+    throw new Error(
+      updateError.message,
+    );
+  }
+
   revalidatePath(
     '/teaching-documents/curriculum',
   );
   revalidatePath(
     '/teaching-documents/curriculum/import',
   );
-  revalidatePath('/staff/documents');
+  revalidatePath(
+    `/teaching-documents/curriculum/import/${batchId}`,
+  );
 
-  return data;
+  // Form actions must resolve to void.
+  // Revalidation above is sufficient; the review page will refresh to the imported state.
 }

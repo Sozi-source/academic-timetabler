@@ -6,30 +6,56 @@ import { Card } from './card';
 interface MetricCardProps {
   label: string;
   value: string;
-  description: string;
-  icon: LucideIcon;
+  description?: string;
+  icon?: LucideIcon;
   status?: string;
+  className?: string;
 }
 
 export function MetricCard({
   label,
   value,
+  description,
   icon: Icon,
   status,
+  className,
 }: MetricCardProps) {
+  // Dynamically size value text so long names/dates fit cleanly without oversized wrapping
+  const getValueSizeClass = (val: string) => {
+    if (val.length > 20) return 'text-sm font-semibold';
+    if (val.length > 14) return 'text-base font-bold';
+    if (val.length > 9) return 'text-xl font-bold';
+    return 'text-2xl font-bold';
+  };
+
   return (
-    <Card className="p-4">
-      <div className="flex items-center justify-between gap-3">
-        <span className="flex size-8 items-center justify-center rounded-lg bg-primary/5 text-primary ring-1 ring-primary/10">
-          <Icon className="size-4" aria-hidden="true" />
-        </span>
-        {status ? <Badge variant="neutral">{status}</Badge> : null}
+    <Card className={`flex flex-col justify-between p-4 transition-all hover:border-border-strong hover:shadow-sm ${className ?? ''}`}>
+      <div>
+        <div className="flex items-center justify-between gap-2">
+          <p className="truncate text-xs font-semibold uppercase tracking-wider text-text-muted">
+            {label}
+          </p>
+          <div className="flex shrink-0 items-center gap-1.5">
+            {status ? <Badge variant="neutral">{status}</Badge> : null}
+            {Icon ? (
+              <span className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Icon className="size-3.5" aria-hidden="true" />
+              </span>
+            ) : null}
+          </div>
+        </div>
+
+        <p className={`mt-2.5 ${getValueSizeClass(value)} tracking-tight text-text-primary leading-tight`}>
+          {value}
+        </p>
       </div>
 
-      <p className="mt-4 text-2xl font-semibold tracking-tight text-text-primary">
-        {value}
-      </p>
-      <p className="mt-1 text-sm font-medium text-text-secondary">{label}</p>
+      {description ? (
+        <p className="mt-2 truncate text-xs text-text-muted">
+          {description}
+        </p>
+      ) : null}
     </Card>
   );
 }
+

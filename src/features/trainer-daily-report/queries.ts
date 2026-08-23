@@ -189,7 +189,9 @@ export async function getDepartmentDailyReports(
       .select('id, trainer_id, status, submitted_at, other_activity, concern')
       .eq('report_date', reportDate);
 
-    const reportMap = new Map((reportsData ?? []).map((r: any) => [String(r.trainer_id), r]));
+    const reportMap = new Map<string, Record<string, any>>(
+      (reportsData ?? []).map((r: any) => [String(r.trainer_id), r as Record<string, any>])
+    );
 
     const submittedReports: any[] = [];
     let totalConcerns = 0;
@@ -206,9 +208,9 @@ export async function getDepartmentDailyReports(
           trainerNumber: null,
           homeDepartmentId: departmentId,
           homeDepartmentName: departmentName,
-          submittedAt: rep.submitted_at || new Date().toISOString(),
-          otherActivity: rep.other_activity || '',
-          concern: rep.concern || '',
+          submittedAt: String(rep.submitted_at || new Date().toISOString()),
+          otherActivity: String(rep.other_activity || ''),
+          concern: String(rep.concern || ''),
           lessons: [],
         });
       }
@@ -229,7 +231,6 @@ export async function getDepartmentDailyReports(
         recordedAbsences: 0,
         concerns: totalConcerns,
       },
-      trainers: activeTrainers,
       pendingTrainers,
       reports: submittedReports,
     };
@@ -251,7 +252,6 @@ export async function getDepartmentDailyReports(
         recordedAbsences: 0,
         concerns: 0,
       },
-      trainers: [],
       pendingTrainers: [],
       reports: [],
     };

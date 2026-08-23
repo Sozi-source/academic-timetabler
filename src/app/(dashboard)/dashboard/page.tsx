@@ -91,10 +91,11 @@ export default async function DashboardPage() {
     },
     {
       title: 'Class Attendance & Oversight',
-      description: 'Monitor live session attendance, analytics, and authorized mark revisions.',
+      description: 'Monitor live session attendance, analytics, trainer daily reports and authorized mark revisions.',
       icon: Stethoscope,
       color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
       links: [
+        { label: 'Trainer Daily Reports', href: '/operations/daily-reports', icon: ClipboardList, badge: 'Daily Log' },
         { label: 'Class Attendance Registry', href: '/attendance', icon: Stethoscope },
         { label: 'Attendance Reopen Oversight', href: '/operations/attendance', icon: ClipboardCheck },
       ],
@@ -148,6 +149,13 @@ export default async function DashboardPage() {
         }
         actions={
           <div className="flex flex-wrap gap-2">
+            <Link
+              href="/operations/daily-reports"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-3 text-xs font-semibold text-emerald-900 transition hover:bg-emerald-100"
+            >
+              <ClipboardList className="size-3.5 text-emerald-800" aria-hidden="true" />
+              Trainer Daily Reports
+            </Link>
             <Link
               href="/staff"
               className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/10 px-3 text-xs font-semibold text-primary transition hover:bg-primary/20"

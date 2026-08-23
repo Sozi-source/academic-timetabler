@@ -127,6 +127,13 @@ export default async function OperationsPage() {
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <Link
+              href="/operations/daily-reports"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-3 text-xs font-semibold text-emerald-900 transition hover:bg-emerald-100"
+            >
+              <ClipboardCheck className="size-3.5 text-emerald-800" aria-hidden="true" />
+              Trainer Daily Reports
+            </Link>
+            <Link
               href="/dashboard"
               className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
             >

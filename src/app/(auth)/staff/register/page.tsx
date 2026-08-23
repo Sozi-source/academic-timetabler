@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
-import { CalendarDays, ShieldCheck, UserRoundCheck } from 'lucide-react';
-import Link from 'next/link';
+import { CalendarDays, UserRoundPlus } from 'lucide-react';
 
 import { TrainerRegistrationForm } from '@/features/trainer-access/trainer-registration-form';
 
@@ -34,28 +33,9 @@ export default function StaffRegistrationPage() {
         </div>
 
         <div className="p-5">
-          {/* Header */}
-          <div className="mb-4 flex items-center gap-2.5">
-            <span className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <UserRoundCheck className="size-4" aria-hidden="true" />
-            </span>
-            <div>
-              <h1 id="register-title" className="text-sm font-bold text-text-primary">
-                Staff Account Setup
-              </h1>
-              <p className="text-[11px] text-text-muted">
-                Create password for your trainer profile
-              </p>
-            </div>
-          </div>
-
-          {/* Info Banner */}
-          <div className="mb-4 flex items-start gap-2 rounded-lg border border-primary/15 bg-[#f3f8f7] px-3 py-2 text-[11px] leading-relaxed text-[#184f4b]">
-            <ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-[#2f706b]" aria-hidden="true" />
-            <p>
-              Use the email recorded in the department trainer roster.
-            </p>
-          </div>
+          <h1 id="register-title" className="mb-3 text-sm font-bold text-text-primary">
+            Staff Registration
+          </h1>
 
           <TrainerRegistrationForm />
         </div>

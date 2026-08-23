@@ -228,7 +228,7 @@ export function TrainerRegistrationForm() {
           htmlFor="staff-email"
           className="block text-xs font-semibold text-text-primary"
         >
-          Registered departmental email
+          Email address
         </label>
 
         <div className="relative">
@@ -256,7 +256,7 @@ export function TrainerRegistrationForm() {
           htmlFor="staff-password"
           className="block text-xs font-semibold text-text-primary"
         >
-          Create password
+          Password
         </label>
 
         <div className="relative">
@@ -323,7 +323,7 @@ export function TrainerRegistrationForm() {
             Creating account...
           </>
         ) : (
-          'Activate Staff Account'
+          'Create Account'
         )}
       </button>
 

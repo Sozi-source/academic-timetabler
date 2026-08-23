@@ -43,9 +43,16 @@ export default async function DailyReportsPrintPage({
         }
       `}</style>
 
-      <p className="no-print mb-4 text-right text-xs text-gray-600">
-        Use your browser Print command to save or share this report as PDF.
-      </p>
+      <div className="no-print mb-4 flex items-center justify-between border-b pb-3 text-xs text-gray-600">
+        <a
+          href={`/api/operations/daily-reports/export-word?date=${reportDate}`}
+          download
+          className="inline-flex items-center gap-1.5 rounded-lg border border-blue-300 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-900 transition hover:bg-blue-100"
+        >
+          Download Word Document (.docx)
+        </a>
+        <p>Use your browser Print command (Ctrl+P / Cmd+P) to save or share as PDF.</p>
+      </div>
 
       <header className="flex items-center gap-4 border-b-2 border-black pb-3">
         <Image

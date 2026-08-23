@@ -2,6 +2,7 @@ import {
   AlertTriangle,
   CalendarDays,
   ClipboardList,
+  FileDown,
   Printer,
   UsersRound,
 } from 'lucide-react';
@@ -57,14 +58,24 @@ export default async function DailyReportsPage({
         description="Daily teaching attendance, absences and concerns for HOD review."
         icon={ClipboardList}
         actions={
-          <Link
-            href={`/operations/daily-reports/print?date=${reportDate}`}
-            target="_blank"
-            className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
-          >
-            <Printer className="size-4" />
-            Management copy
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <a
+              href={`/api/operations/daily-reports/export-word?date=${reportDate}`}
+              download
+              className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 text-xs font-semibold text-blue-900 transition hover:bg-blue-100"
+            >
+              <FileDown className="size-4 text-blue-700" />
+              Download Word (.docx)
+            </a>
+            <Link
+              href={`/operations/daily-reports/print?date=${reportDate}`}
+              target="_blank"
+              className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
+            >
+              <Printer className="size-4" />
+              Management copy
+            </Link>
+          </div>
         }
       />
 

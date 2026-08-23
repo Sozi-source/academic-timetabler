@@ -450,7 +450,7 @@ function parseSharedStrings(
   if (!entry) return sharedStrings;
 
   const xml = entry.buffer.toString('utf8');
-  const itemPattern = /<si\b[^>]*>([\s\S]*?)<\/si>/g;
+  const itemPattern = /<(?:[A-Za-z_][\w.-]*:)?si\b[^>]*>([\s\S]*?)<\/(?:[A-Za-z_][\w.-]*:)?si>/g;
 
   let match: RegExpExecArray | null;
 
@@ -458,7 +458,7 @@ function parseSharedStrings(
     const itemXml = match[1];
     const textParts: string[] = [];
     const textPattern =
-      /<t\b[^>]*>([\s\S]*?)<\/t>/g;
+      /<(?:[A-Za-z_][\w.-]*:)?t\b[^>]*>([\s\S]*?)<\/(?:[A-Za-z_][\w.-]*:)?t>/g;
 
     let textMatch: RegExpExecArray | null;
 
@@ -546,7 +546,7 @@ function parseSheetDefinitions(
   if (!entry) return sheets;
 
   const xml = entry.buffer.toString('utf8');
-  const pattern = /<[^:>]*:?sheet\b([^>]*?)\/?>/g;
+  const pattern = /<(?:[A-Za-z_][\w.-]*:)?sheet\b([^>]*?)\/?>/g;
 
   let match: RegExpExecArray | null;
 
@@ -578,7 +578,7 @@ function parseWorksheetRows(
 ) {
   const rows: string[][] = [];
   const rowPattern =
-    /<row\b[^>]*?(?:r="(\d+)")?[^>]*>([\s\S]*?)<\/row>/g;
+    /<(?:[A-Za-z_][\w.-]*:)?row\b[^>]*?(?:r="(\d+)")?[^>]*>([\s\S]*?)<\/(?:[A-Za-z_][\w.-]*:)?row>/g;
 
   let rowMatch: RegExpExecArray | null;
   let sequentialRowIndex = 0;
@@ -599,7 +599,7 @@ function parseWorksheetRows(
     const rowXml = rowMatch[2];
 
     const cellPattern =
-      /<c\b([^>]*?)>([\s\S]*?)<\/c>/g;
+      /<(?:[A-Za-z_][\w.-]*:)?c\b([^>]*?)>([\s\S]*?)<\/(?:[A-Za-z_][\w.-]*:)?c>/g;
 
     let cellMatch: RegExpExecArray | null;
 
@@ -629,7 +629,7 @@ function parseWorksheetRows(
       if (type === 'inlineStr') {
         const textParts: string[] = [];
         const textPattern =
-          /<t\b[^>]*>([\s\S]*?)<\/t>/g;
+          /<(?:[A-Za-z_][\w.-]*:)?t\b[^>]*>([\s\S]*?)<\/(?:[A-Za-z_][\w.-]*:)?t>/g;
 
         let textMatch: RegExpExecArray | null;
 
@@ -646,7 +646,7 @@ function parseWorksheetRows(
       } else {
         const rawValue =
           cellXml.match(
-            /<v\b[^>]*>([\s\S]*?)<\/v>/,
+            /<(?:[A-Za-z_][\w.-]*:)?v\b[^>]*>([\s\S]*?)<\/(?:[A-Za-z_][\w.-]*:)?v>/,
           )?.[1] ?? '';
 
         if (type === 's') {

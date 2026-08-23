@@ -857,30 +857,73 @@ export async function parseCurriculumContentWorkbook(
   const documentTypeValue =
     metadata.get('document_type') ?? '';
 
-  let documentType: CurriculumDocumentType;
-
-  if (
-    templateKey === COURSE_TEMPLATE_KEY &&
-    documentTypeValue === 'course_outline'
-  ) {
-    documentType = 'course_outline';
-  } else if (
-    templateKey === SCHEME_TEMPLATE_KEY &&
-    documentTypeValue === 'scheme_of_work'
-  ) {
-    documentType = 'scheme_of_work';
-  } else {
-    throw new Error(
-      'Unknown curriculum template. Download a fresh Course Outline or Scheme of Work template from Academic Planner.',
-    );
-  }
-
   if (
     templateVersion !==
     SIMPLE_TEMPLATE_VERSION
   ) {
     throw new Error(
       `Template version ${templateVersion || 'unknown'} is not supported. Download the current template from Academic Planner.`,
+    );
+  }
+
+  // Detect the document type from the FIXED HEADER CONTRACT first.
+  // This is more reliable across different XLSX writers than relying
+  // exclusively on hidden metadata relationships.
+  const courseHeadersMatch =
+    validateRawHeaders(
+      detailsSheet,
+      COURSE_UNIT_HEADERS,
+    ) &&
+    validateRawHeaders(
+      weeklySheet,
+      COURSE_WEEK_HEADERS,
+    );
+
+  const schemeHeadersMatch =
+    validateRawHeaders(
+      detailsSheet,
+      SCHEME_UNIT_HEADERS,
+    ) &&
+    validateRawHeaders(
+      weeklySheet,
+      SCHEME_WEEK_HEADERS,
+    );
+
+  let documentType: CurriculumDocumentType;
+
+  if (courseHeadersMatch && !schemeHeadersMatch) {
+    documentType = 'course_outline';
+  } else if (schemeHeadersMatch && !courseHeadersMatch) {
+    documentType = 'scheme_of_work';
+  } else {
+    throw new Error(
+      'The workbook headers do not match either the Course Outline or Scheme of Work system template.',
+    );
+  }
+
+  // Metadata confirms identity but does not override the fixed headers.
+  const expectedTemplateKey =
+    documentType === 'course_outline'
+      ? COURSE_TEMPLATE_KEY
+      : SCHEME_TEMPLATE_KEY;
+
+  const expectedDocumentType = documentType;
+
+  if (
+    templateKey &&
+    templateKey !== expectedTemplateKey
+  ) {
+    throw new Error(
+      `Template metadata conflicts with the workbook headers. Headers identify ${documentType === 'course_outline' ? 'Course Outline' : 'Scheme of Work'}, but template_key is "${templateKey}". Download a fresh system template.`,
+    );
+  }
+
+  if (
+    documentTypeValue &&
+    documentTypeValue !== expectedDocumentType
+  ) {
+    throw new Error(
+      `Template metadata conflicts with the workbook headers. Headers identify ${documentType === 'course_outline' ? 'Course Outline' : 'Scheme of Work'}, but document_type is "${documentTypeValue}". Download a fresh system template.`,
     );
   }
 

@@ -280,6 +280,11 @@ function occurrenceDates({
       ) +
       1;
 
+    // Standard TVET semester is strictly 14 weeks
+    if (weekNumber > 14) {
+      break;
+    }
+
     result.push({
       date:
         isoDate(
@@ -299,7 +304,8 @@ function occurrenceDates({
 function schemeSuggestion(
   content: UnknownRow[],
   weekNumber: number,
-  _unitName = '',
+  unitName = '',
+  sessionIndexInWeek = 0,
 ) {
   const rows = content.filter((row) => {
     const seq = asNumber(row.sequence ?? row.weekNumber ?? row.week, -1);
@@ -310,22 +316,56 @@ function schemeSuggestion(
     return {
       topic: '',
       objectives: '',
+      deliveryMode: sessionIndexInWeek > 0 ? 'practical' : 'theory',
     };
   }
 
-  // User requirement: For topic covered only insert the topic and NO sub-topics
-  const topics = rows
+  // Topic title from scheme (without sub-topics)
+  const baseTopic = rows
     .map((row) => asString(row.topic ?? row.topicTitle).trim())
-    .filter(Boolean);
+    .filter(Boolean)[0] || unitName || 'Scheduled Topic';
 
-  const objectives = rows
+  // If this is the 2nd session of the week: Practical Application
+  if (sessionIndexInWeek === 1) {
+    const practicalTopic = `${baseTopic} (Practical Application)`;
+    const practicalObjectives = [
+      'By the end of the practical session, the trainee should be able to:',
+      `• Demonstrate practical procedures and hands-on techniques for ${baseTopic}.`,
+      `• Execute standard operating procedures and safety measures correctly.`,
+      `• Conduct setup, perform tasks, and record empirical observations accurately.`,
+    ].join('\n');
+
+    return {
+      topic: practicalTopic,
+      objectives: practicalObjectives,
+      deliveryMode: 'practical',
+    };
+  }
+
+  // If this is the 3rd+ session of the week: Tutorial / Review
+  if (sessionIndexInWeek >= 2) {
+    const tutorialTopic = `${baseTopic} (Tutorial & Practical Case Analysis)`;
+    const tutorialObjectives = [
+      'By the end of the session, the trainee should be able to:',
+      `• Analyze practical findings and solve case study exercises on ${baseTopic}.`,
+      `• Complete documentation, review competencies, and troubleshoot challenges.`,
+    ].join('\n');
+
+    return {
+      topic: tutorialTopic,
+      objectives: tutorialObjectives,
+      deliveryMode: 'practical',
+    };
+  }
+
+  // Session 1: Theory & Core Concepts from Scheme of Work
+  const rawOutcomes = rows
     .map((row) => {
-      const rawOutcomes = row.specificLearningOutcomes ?? row.learningOutcomes ?? row.objectives ?? row.outcomes;
-      let text = Array.isArray(rawOutcomes)
-        ? rawOutcomes.join('\n')
-        : asString(rawOutcomes).trim();
+      const outcomes = row.specificLearningOutcomes ?? row.learningOutcomes ?? row.objectives ?? row.outcomes;
+      let text = Array.isArray(outcomes)
+        ? outcomes.join('\n')
+        : asString(outcomes).trim();
 
-      // Clean all mojibakes
       text = text
         .replaceAll('â€¢', '•')
         .replaceAll('Â·', '·')
@@ -338,8 +378,9 @@ function schemeSuggestion(
     .filter(Boolean);
 
   return {
-    topic: topics.length > 0 ? [...new Set(topics)].join('; ') : '',
-    objectives: objectives.length > 0 ? [...new Set(objectives)].join('\n') : '',
+    topic: baseTopic,
+    objectives: rawOutcomes.length > 0 ? [...new Set(rawOutcomes)].join('\n') : '',
+    deliveryMode: 'theory',
   };
 }
 
@@ -491,14 +532,22 @@ function mapSubmittedEntry(
         startTime,
         endTime,
       ),
-    workCovered:
-      asString(
-        row.topic_covered,
-      ),
-    outcomesAchieved:
-      asString(
-        row.objectives,
-      ),
+    workCovered: (() => {
+      let topic = asString(row.topic_covered).trim();
+      if (topic.includes(': ') && !topic.includes('(')) {
+        topic = topic.split(/:\s+/)[0].trim() || topic;
+      }
+      return topic;
+    })(),
+    outcomesAchieved: (() => {
+      let objectives = asString(row.objectives).trim();
+      return objectives
+        .replaceAll('â€¢', '•')
+        .replaceAll('Â·', '·')
+        .replaceAll('â€”', '—')
+        .replaceAll('â€“', '–')
+        .replaceAll('ÃƒÆ’Ã†â€™', '');
+    })(),
     deliveryMode:
       asString(
         row.delivery_mode,
@@ -888,6 +937,32 @@ export async function getOnlineRecordOfWorkContext(
         ),
     );
 
+  // Asynchronously backfill / clean database rows if any had legacy mojibakes or subtopics
+  if (submittedRows && submittedRows.length > 0) {
+    for (const row of submittedRows) {
+      const originalTopic = asString(row.topic_covered);
+      const originalObj = asString(row.objectives);
+      let cleanTopic = originalTopic.trim();
+      if (cleanTopic.includes(': ') && !cleanTopic.includes('(')) {
+        cleanTopic = cleanTopic.split(/:\s+/)[0].trim() || cleanTopic;
+      }
+      const cleanObj = originalObj
+        .replaceAll('â€¢', '•')
+        .replaceAll('Â·', '·')
+        .replaceAll('â€”', '—')
+        .replaceAll('â€“', '–')
+        .replaceAll('ÃƒÆ’Ã†â€™', '');
+
+      if (cleanTopic !== originalTopic || cleanObj !== originalObj) {
+        db.from('record_of_work_entries')
+          .update({ topic_covered: cleanTopic, objectives: cleanObj })
+          .eq('id', row.id)
+          .then(() => {})
+          .catch(() => {});
+      }
+    }
+  }
+
   const submittedKeys =
     new Set(
       entries.map(
@@ -1011,12 +1086,6 @@ export async function getOnlineRecordOfWorkContext(
         continue;
       }
 
-      const suggestion = schemeSuggestion(
-        schemeContent,
-        occurrence.weekNumber,
-        asString(unit.name)
-      );
-
       occurrences.push({
         occurrenceKey:
           `${asString(
@@ -1055,24 +1124,18 @@ export async function getOnlineRecordOfWorkContext(
             startTime,
             endTime,
           ),
-        topicSuggestion:
-          suggestion.topic,
-        objectivesSuggestion:
-          suggestion.objectives,
+        topicSuggestion: '',
+        objectivesSuggestion: '',
         deliveryMode:
           asString(
             item.deliveryMode,
           ) ||
-          'Teaching',
-        canSubmit:
-          occurrence.date <=
-          today,
+          '',
+        canSubmit: occurrence.date <= today,
         timingStatus:
-          occurrence.date ===
-            today
+          occurrence.date === today
             ? 'today'
-            : occurrence.date <
-                today
+            : occurrence.date < today
               ? 'due'
               : 'scheduled',
       });
@@ -1093,6 +1156,36 @@ export async function getOnlineRecordOfWorkContext(
       left.sessionNumber -
         right.sessionNumber,
   );
+
+  // Apply sequential session differentiation per week (Session 1 = Theory, Session 2 = Practical Application)
+  const weekSessionCounts = new Map<number, number>();
+
+  // 1. Seed with already submitted sessions for each week
+  for (const entry of entries) {
+    if (entry.weekNumber) {
+      const currentCount = weekSessionCounts.get(entry.weekNumber) ?? 0;
+      weekSessionCounts.set(entry.weekNumber, currentCount + 1);
+    }
+  }
+
+  // 2. Evaluate remaining pending occurrences sequentially
+  for (const occ of occurrences) {
+    const sessionIndex = weekSessionCounts.get(occ.weekNumber) ?? 0;
+    weekSessionCounts.set(occ.weekNumber, sessionIndex + 1);
+
+    const suggestion = schemeSuggestion(
+      schemeContent,
+      occ.weekNumber,
+      asString(unit.name),
+      sessionIndex
+    );
+
+    occ.topicSuggestion = suggestion.topic;
+    occ.objectivesSuggestion = suggestion.objectives;
+    if (!occ.deliveryMode || occ.deliveryMode === 'Teaching') {
+      occ.deliveryMode = suggestion.deliveryMode;
+    }
+  }
 
   const periodNumber =
     asNumber(

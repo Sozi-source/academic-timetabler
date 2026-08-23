@@ -46,9 +46,9 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="My Units Â· Documents"
+        eyebrow="My Units · Documents"
         title={context.allocation.unitName}
-        description={`${context.allocation.cohortName} Â· ${context.allocation.academicPeriodName}`}
+        description={`${context.allocation.cohortName} · ${context.allocation.academicPeriodName}`}
         icon={FileText}
         actions={
           <Link

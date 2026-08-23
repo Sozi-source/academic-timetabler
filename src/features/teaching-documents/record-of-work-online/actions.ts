@@ -402,17 +402,20 @@ export async function submitOnlineRecordOfWorkAction(
         occurrenceKey,
     );
 
-  if (
-    !occurrence
-  ) {
+  if (!occurrence) {
     return {
-      status:
-        'error',
+      status: 'error',
       message:
         'This lesson is already recorded or is no longer part of the current published timetable.',
     };
   }
 
+  if (!occurrence.canSubmit) {
+    return {
+      status: 'error',
+      message: 'Future lessons cannot be submitted as completed before their scheduled date.',
+    };
+  }
 
 
   const topicCovered =

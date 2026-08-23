@@ -32,7 +32,8 @@ export async function getTrainerDailyReportWorkspace(
 
   // Fallback: Build workspace from published timetable and class sessions
   try {
-    const { getStaffWorkspace, getStaffPublishedTimetable } = await import('@/features/staff-workspace/queries');
+    const { getStaffWorkspace } = await import('@/features/staff-assessment/queries');
+    const { getStaffPublishedTimetable } = await import('@/features/staff-workspace/queries');
     const workspace = await getStaffWorkspace(profile.id);
     const timetable = await getStaffPublishedTimetable(profile.id);
 
@@ -42,7 +43,7 @@ export async function getTrainerDailyReportWorkspace(
     }).format(new Date(`${reportDate}T00:00:00Z`));
 
     const daySessions = (timetable?.sessions ?? []).filter(
-      (s) => s.dayOfWeek.toLowerCase() === reportDayOfWeek.toLowerCase()
+      (s) => s.dayName.toLowerCase() === reportDayOfWeek.toLowerCase()
     );
 
     const sessionIds = daySessions.map((s) => s.id);
@@ -54,33 +55,38 @@ export async function getTrainerDailyReportWorkspace(
           .eq('session_date', reportDate)
       : { data: [] };
 
-    const classSessionMap = new Map((classSessions ?? []).map((cs: any) => [cs.scheduled_session_id, cs]));
+    const classSessionMap = new Map<string, Record<string, any>>(
+      (classSessions ?? []).map((cs: any) => [String(cs.scheduled_session_id), cs as Record<string, any>])
+    );
 
     const lessons = daySessions.map((s) => {
       const cs = classSessionMap.get(s.id);
-      const attendanceStatus = (cs?.status as 'not_started' | 'open' | 'completed') || 'not_started';
+      const attendanceStatus = ((cs?.status as string) as 'not_started' | 'open' | 'completed') || 'not_started';
       const presentCount = Number(cs?.present_count || 0);
       const absentCount = Number(cs?.absent_count || 0);
 
+      const departmentId = profile.activeDepartmentId || '';
+      const departmentName = profile.departmentName || 'Department';
+
       return {
         id: cs ? String(cs.id) : null,
-        departmentId: workspace.homeDepartmentId,
-        departmentName: workspace.homeDepartmentName,
+        departmentId,
+        departmentName,
         timetableVersionId: '',
         timetableVersionNumber: 1,
         timetableTitle: 'Published Timetable',
         scheduledSessionId: s.id,
         teachingAllocationId: '',
         academicPeriodId: s.academicPeriodId,
-        cohortId: s.cohortId,
+        cohortId: '',
         unitId: s.unitId,
-        sessionNumber: s.sessionNumber || 1,
+        sessionNumber: s.sessionNumbers?.[0] || 1,
         startsAt: s.startsAt,
         endsAt: s.endsAt,
-        unitCode: s.unitCode || '',
+        unitCode: '',
         unitName: s.unitName,
-        cohortName: s.cohortName,
-        roomName: s.roomName || null,
+        cohortName: s.cohortNames?.join(', ') || 'Cohort',
+        roomName: s.roomLabel || null,
         deliveryMode: 'Teaching',
         attendanceSessionId: cs ? String(cs.id) : null,
         attendanceStatus,
@@ -90,6 +96,9 @@ export async function getTrainerDailyReportWorkspace(
         absentees: [],
       };
     });
+
+    const departmentId = profile.activeDepartmentId || '';
+    const departmentName = profile.departmentName || 'Department';
 
     const { data: existingReport } = await (supabase as any)
       .from('trainer_daily_reports')
@@ -106,8 +115,8 @@ export async function getTrainerDailyReportWorkspace(
       trainerId: workspace.trainerId,
       trainerName: workspace.trainerName,
       trainerNumber: null,
-      homeDepartmentId: workspace.homeDepartmentId,
-      homeDepartmentName: workspace.homeDepartmentName,
+      homeDepartmentId: departmentId,
+      homeDepartmentName: departmentName,
       status: existingReport?.status === 'submitted' ? 'submitted' : 'draft',
       reportId: existingReport ? String(existingReport.id) : null,
       submittedAt: existingReport?.submitted_at || null,

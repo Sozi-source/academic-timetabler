@@ -1,10 +1,12 @@
 import {
+  ArrowLeft,
   KeyRound,
   LockKeyhole,
   ShieldCheck,
   UserRoundCheck,
   UsersRound,
 } from 'lucide-react';
+import Link from 'next/link';
 
 import {
   MetricCard,
@@ -43,6 +45,15 @@ export default async function StudentPortalAccessPage() {
         title="Student access"
         description="Issue and manage student portal PINs."
         icon={KeyRound}
+        actions={
+          <Link
+            href="/students"
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
+          >
+            <ArrowLeft className="size-3.5" aria-hidden="true" />
+            Students
+          </Link>
+        }
       />
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">

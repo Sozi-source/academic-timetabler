@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   AlertTriangle,
+  ArrowLeft,
   BarChart3,
   CheckCircle2,
   ClipboardList,
@@ -101,6 +102,13 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
         }
         actions={
           <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/dashboard"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary transition hover:border-primary hover:text-primary"
+            >
+              <ArrowLeft className="size-3.5" aria-hidden="true" />
+              Dashboard
+            </Link>
             <Link
               href="/assessment/analysis"
               className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary transition hover:border-primary hover:text-primary"

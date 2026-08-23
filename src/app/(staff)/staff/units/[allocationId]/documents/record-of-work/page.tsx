@@ -1,27 +1,56 @@
-import { notFound } from 'next/navigation';
-import { requireTrainerAccess } from '@/features/auth/authorization';
-import { getRecordOfWorkContext } from '@/features/teaching-documents/record-of-work-actions';
-import { RecordOfWorkManager } from '@/features/teaching-documents/record-of-work-manager';
+import {
+  ArrowLeft,
+} from 'lucide-react';
+import Link from 'next/link';
+import {
+  notFound,
+} from 'next/navigation';
+
+import {
+  OnlineRecordOfWorkManager,
+} from '@/features/teaching-documents/record-of-work-online/manager';
+import {
+  getOnlineRecordOfWorkContext,
+} from '@/features/teaching-documents/record-of-work-online/queries';
 
 interface PageProps {
-  params: Promise<{ allocationId: string }>;
+  params: Promise<{
+    allocationId: string;
+  }>;
 }
 
-export default async function TVETRecordOfWorkPage({ params }: PageProps) {
-  await requireTrainerAccess();
-  const { allocationId } = await params;
+export default async function RecordOfWorkPage({
+  params,
+}: PageProps) {
+  const {
+    allocationId,
+  } =
+    await params;
 
-  const context = await getRecordOfWorkContext(allocationId);
+  const context =
+    await getOnlineRecordOfWorkContext(
+      allocationId,
+    );
 
-  if (!context) {
+  if (
+    !context
+  ) {
     notFound();
   }
 
   return (
-    <RecordOfWorkManager
-      allocationId={allocationId}
-      header={context.header}
-      entries={context.entries}
-    />
+    <div className="space-y-4">
+      <Link
+        href={`/staff/units/${allocationId}/documents`}
+        className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary"
+      >
+        <ArrowLeft className="size-3.5" />
+        Teaching Documents
+      </Link>
+
+      <OnlineRecordOfWorkManager
+        context={context}
+      />
+    </div>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
-import { ArrowLeft, CheckCircle, Clock, FileText, Printer } from 'lucide-react';
+import Image from 'next/image';
+import { ArrowLeft, FileDown, Pencil, Printer } from 'lucide-react';
 import Link from 'next/link';
 import type {
   TVETCourseOutlineData,
@@ -29,15 +30,33 @@ export function TVETDocumentViewer({
     recordOfWork?.header;
 
   if (!header) {
-    return <div>Document details unavailable.</div>;
+    return <div className="p-4 text-sm text-slate-600">Document details unavailable.</div>;
   }
 
   const title =
     type === 'course_outline'
-      ? 'STANDARD COURSE OUTLINE'
+      ? 'COURSE OUTLINE'
       : type === 'scheme_of_work'
-        ? 'STANDARD SCHEME OF WORK / LESSON PLAN'
-        : 'STANDARD RECORD OF WORK COVERED';
+        ? 'SCHEME OF WORK'
+        : 'RECORD OF WORK COVERED';
+
+  const handleExportWord = async () => {
+    try {
+      const res = await fetch(
+        `/api/teaching-documents/export-word?allocationId=${allocationId}&type=${type}`,
+      );
+      if (!res.ok) throw new Error('Export failed');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${header.unitCode}_${type}.docx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert('Word export is not available yet for this document.');
+    }
+  };
 
   const handlePrint = () => {
     window.print();
@@ -46,311 +65,436 @@ export function TVETDocumentViewer({
   return (
     <div className="space-y-6">
       {/* Top Action Bar (Hidden during printing) */}
-      <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-white p-4 shadow-sm print:hidden">
+      <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm print:hidden">
         <div className="flex items-center gap-2">
           <Link
             href={`/staff/units/${allocationId}/documents`}
-            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
           >
             <ArrowLeft className="size-3.5" aria-hidden="true" />
-            Back to Documents
+            Back
           </Link>
-          <span className="text-xs font-bold text-text-primary">
+          <span className="text-xs font-bold text-slate-900">
             {header.unitCode} · {header.unitName}
           </span>
         </div>
 
-        <button
-          type="button"
-          onClick={handlePrint}
-          className="inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-4 text-xs font-bold text-white shadow-sm transition hover:bg-primary-hover"
-        >
-          <Printer className="size-4" aria-hidden="true" />
-          Print / Export Document
-        </button>
+        <div className="flex items-center gap-2">
+          {type !== 'record_of_work' && (
+            <Link
+              href={`/teaching-documents/curriculum/editor?unitCode=${encodeURIComponent(header.unitCode)}`}
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
+            >
+              <Pencil className="size-3.5 text-slate-600" aria-hidden="true" />
+              Edit Course Outline
+            </Link>
+          )}
+
+          <button
+            type="button"
+            onClick={handlePrint}
+            className="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3.5 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
+          >
+            <Printer className="size-4 text-slate-600" aria-hidden="true" />
+            Print Preview
+          </button>
+
+          <button
+            type="button"
+            onClick={handleExportWord}
+            className="inline-flex h-9 items-center gap-2 rounded-lg bg-slate-900 px-4 text-xs font-bold text-white shadow-sm transition hover:bg-slate-800"
+          >
+            <FileDown className="size-4" aria-hidden="true" />
+            Export Word (.docx)
+          </button>
+        </div>
       </div>
 
-      {/* Printable Document Container */}
-      <div className="mx-auto max-w-4xl rounded-2xl border border-border bg-white p-8 shadow-sm print:m-0 print:max-w-none print:border-none print:p-0 print:shadow-none">
-        {/* Official Header Block */}
-        <div className="border-b-2 border-text-primary pb-4 text-center">
-          <h1 className="mt-1 text-lg font-black tracking-wide text-text-primary uppercase sm:text-xl">
-            {header.institutionName}
-          </h1>
-          <p className="text-xs font-semibold text-text-secondary">
-            DEPARTMENT OF {header.departmentName.toUpperCase()}
-          </p>
-          <div className="mt-2 inline-block rounded border border-text-primary px-3 py-1 text-xs font-extrabold tracking-wider uppercase">
-            {title}
-          </div>
-        </div>
+      {/* Printable Document Container (Professional Academic Layout) */}
+      <div className="mx-auto max-w-5xl rounded-2xl border border-slate-300 bg-white shadow-md print:m-0 print:max-w-none print:border-none print:shadow-none">
 
-        {/* Dynamic Context Matrix */}
-        <div className="mt-4 grid grid-cols-2 gap-2 border border-text-primary bg-surface-subtle p-3 text-xs font-medium sm:grid-cols-4">
-          <div>
-            <span className="font-bold text-text-muted uppercase text-[10px] block">Unit Code & Title:</span>
-            <span className="font-bold text-text-primary">{header.unitCode} - {header.unitName}</span>
-          </div>
-          <div>
-            <span className="font-bold text-text-muted uppercase text-[10px] block">Cohort / Class:</span>
-            <span className="font-bold text-text-primary">{header.cohortName}</span>
-          </div>
-          <div>
-            <span className="font-bold text-text-muted uppercase text-[10px] block">Trainer Name:</span>
-            <span className="font-bold text-text-primary">{header.trainerName}</span>
-          </div>
-          <div>
-            <span className="font-bold text-text-muted uppercase text-[10px] block">Academic Period:</span>
-            <span className="font-bold text-text-primary">{header.academicPeriodName}</span>
-          </div>
-          <div>
-            <span className="font-bold text-text-muted uppercase text-[10px] block">Weekly Contact Hours:</span>
-            <span className="font-bold text-text-primary">{header.weeklyHours} Hours / Week</span>
-          </div>
-          <div>
-            <span className="font-bold text-text-muted uppercase text-[10px] block">Total Nominal Hours:</span>
-            <span className="font-bold text-text-primary">{header.totalNominalHours} Hours (14 Weeks)</span>
-          </div>
-          <div>
-            <span className="font-bold text-text-muted uppercase text-[10px] block">Standard Status:</span>
-            <span className="font-bold text-success uppercase">APPROVED</span>
-          </div>
-          <div>
-            <span className="font-bold text-text-muted uppercase text-[10px] block">Generated Date:</span>
-            <span className="font-bold text-text-primary">{new Date().toLocaleDateString('en-GB')}</span>
-          </div>
-        </div>
+        {/* ── OFFICIAL ACADEMIC HEADER ── */}
+        <div className="border-b-2 border-slate-900 bg-white px-8 py-6 text-center print:px-6 print:py-4">
+          <div className="mx-auto flex flex-col items-center justify-center space-y-2">
+            {/* Official Center Crest / Logo Emblem */}
+            <div className="mb-1 flex items-center justify-center">
+              <Image
+                src="/branding/icmhs-logo.png"
+                alt="Imperial College Logo"
+                width={80}
+                height={80}
+                priority
+                className="h-16 w-auto object-contain mx-auto print:h-14"
+              />
+            </div>
 
-        {/* DOCUMENT TYPE 1: COURSE OUTLINE */}
-        {type === 'course_outline' && courseOutline && (
-          <div className="mt-6 space-y-5 text-xs text-text-primary">
-            <section>
-              <h2 className="border-b border-border pb-1 font-bold uppercase tracking-wider text-text-primary">
-                1. Unit Description & Overall Purpose
-              </h2>
-              <p className="mt-2 text-justify leading-relaxed text-text-secondary">
-                {courseOutline.unitDescription}
+            {/* Institution & Department */}
+            <div>
+              <h1 className="text-xl font-black tracking-wider text-slate-900 uppercase sm:text-2xl print:text-black">
+                {header.institutionName}
+              </h1>
+              <p className="mt-0.5 text-xs font-bold tracking-widest text-slate-700 uppercase print:text-black">
+                Department of {header.departmentName}
               </p>
-            </section>
+              <div className="mt-2.5 inline-block rounded-md border-2 border-slate-900 bg-slate-100 px-4 py-0.5 text-[11px] font-black tracking-widest text-slate-900 uppercase print:border-black print:bg-slate-100 print:text-black">
+                {title}
+              </div>
+            </div>
+          </div>
+        </div>
 
-            <section>
-              <h2 className="border-b border-border pb-1 font-bold uppercase tracking-wider text-text-primary">
-                2. Summary of Learning Outcomes (Core Competencies)
-              </h2>
-              <ul className="mt-2 list-inside list-disc space-y-1 text-text-secondary">
-                {courseOutline.learningOutcomes.map((lo, i) => (
-                  <li key={i}>{lo}</li>
-                ))}
-              </ul>
-            </section>
+        {/* ── CONSPICUOUS UNIT NAME BANNER ── */}
+        <div className="border-b-2 border-slate-900 bg-slate-100 px-8 py-3.5 text-center print:bg-slate-50 print:border-black">
+          <p className="text-[10px] font-bold tracking-widest text-slate-600 uppercase">Curriculum Unit</p>
+          <h2 className="text-lg font-black tracking-wide text-slate-900 uppercase sm:text-xl print:text-black">
+            {header.unitCode} — {header.unitName}
+          </h2>
+        </div>
 
-            <section>
-              <h2 className="border-b border-border pb-1 font-bold uppercase tracking-wider text-text-primary">
-                3. Weekly Delivery & Topical Breakdown
-              </h2>
-              <table className="mt-2 w-full border-collapse border border-text-primary text-left text-[11px]">
+        {/* ── CONTEXT MATRIX (HIGH-CONTRAST MONOCHROME-SAFE GRID) ── */}
+        <div className="grid grid-cols-2 gap-0 border-b-2 border-slate-900 bg-slate-50 text-xs sm:grid-cols-4 print:border-black">
+          {[
+            { label: 'Cohort / Class', value: header.cohortName },
+            { label: 'Trainer', value: header.trainerName },
+            { label: 'Academic Period', value: header.academicPeriodName },
+            { label: 'Contact Hours', value: `${header.weeklyHours} hrs/wk · ${header.totalNominalHours} hrs total` },
+            { label: 'Standard Status', value: 'APPROVED', highlight: true },
+            { label: 'Delivery Duration', value: '14 Weeks' },
+            { label: 'Generated', value: new Date().toLocaleDateString('en-GB') },
+            { label: 'Document Type', value: title },
+          ].map(({ label, value, highlight }) => (
+            <div key={label} className="border-r border-b border-slate-300 px-4 py-2.5 last:border-r-0 print:border-slate-800">
+              <span className="block text-[9px] font-bold uppercase tracking-wider text-slate-600">{label}</span>
+              <span className={`mt-0.5 block font-bold ${highlight ? 'text-slate-900 font-black' : 'text-slate-900'}`}>{value}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="p-8 print:p-6">
+
+          {/* ════════════════════════════════ COURSE OUTLINE ════════════════════════════════ */}
+          {type === 'course_outline' && courseOutline && (
+            <div className="space-y-6 text-xs text-slate-900">
+
+              <section>
+                <SectionHeading number="1" title="Unit Description & Overall Purpose" />
+                <p className="mt-2.5 leading-relaxed text-justify text-slate-800">
+                  {courseOutline.unitDescription || '—'}
+                </p>
+              </section>
+
+              <section>
+                <SectionHeading number="2" title="Summary of Learning Outcomes (Core Competencies)" />
+                <ul className="mt-2.5 space-y-1.5 text-slate-800">
+                  {courseOutline.learningOutcomes.map((lo, i) => (
+                    <li key={i} className="flex gap-2">
+                      <span className="shrink-0 mt-0.5 flex size-4 items-center justify-center rounded border border-slate-900 bg-slate-100 text-[10px] font-black text-slate-900">{i + 1}</span>
+                      <span className="leading-relaxed">{lo}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+
+              <section>
+                <SectionHeading number="3" title="Weekly Delivery & Topical Breakdown" />
+                <table className="mt-3 w-full border-collapse text-[11px] table-fixed border border-slate-300">
+                  <thead>
+                    <tr className="bg-slate-100 text-slate-900 border-b-2 border-slate-900">
+                      <th className="border border-slate-300 px-2 py-2 text-center w-[8%] font-black uppercase text-[9px] tracking-wider text-slate-900">Week</th>
+                      <th className="border border-slate-300 px-3 py-2 text-left w-[32%] font-black uppercase text-[9px] tracking-wider text-slate-900">Topic Title</th>
+                      <th className="border border-slate-300 px-3 py-2 text-left w-[52%] font-black uppercase text-[9px] tracking-wider text-slate-900">Content / Sub-topics to be Covered</th>
+                      <th className="border border-slate-300 px-2 py-2 text-center w-[8%] font-black uppercase text-[9px] tracking-wider text-slate-900">Hours</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {courseOutline.weeklySchedule.map((sched, idx) => {
+                      const allSubtopics = sched.subTopics.flatMap((st) =>
+                        typeof st === 'string' ? st.split(/\s*[·;]\s*/).filter(Boolean) : []
+                      );
+
+                      return (
+                        <tr key={sched.weekNumber} className={idx % 2 === 0 ? 'bg-white align-top' : 'bg-slate-50 align-top'}>
+                          <td className="border border-slate-300 px-2 py-2 text-center font-black text-slate-900">
+                            W{sched.weekNumber}
+                          </td>
+                          <td className="border border-slate-300 px-3 py-2 font-bold text-slate-900 leading-snug">
+                            {sched.topicTitle}
+                          </td>
+                          <td className="border border-slate-300 px-3 py-2 text-slate-800 leading-relaxed">
+                            {allSubtopics.length > 0 ? (
+                              <ul className="space-y-1">
+                                {allSubtopics.map((sub, sIdx) => (
+                                  <li key={sIdx} className="flex items-start gap-1.5">
+                                    <span className="shrink-0 text-slate-900 font-bold">•</span>
+                                    <span>{sub.trim()}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <span className="text-slate-400 italic">Core topic mastery and practical coverage.</span>
+                            )}
+                          </td>
+                          <td className="border border-slate-300 px-2 py-2 text-center font-semibold text-slate-800">
+                            {sched.hours} hrs
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </section>
+
+              {(courseOutline.teachingLearningApproaches || courseOutline.assessmentApproaches) && (
+                <section>
+                  <SectionHeading number="4" title="Teaching / Learning and Assessment Approaches" />
+                  <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                    <div className="rounded-lg border border-slate-300 bg-slate-50 p-3">
+                      <p className="font-black text-slate-900 text-[11px] mb-1.5">Teaching / Learning Approaches</p>
+                      <p className="text-slate-800 leading-relaxed">{courseOutline.teachingLearningApproaches || 'Interactive lectures, guided class discussions, practical demonstrations, and small-group problem-solving.'}</p>
+                    </div>
+                    <div className="rounded-lg border border-slate-300 bg-slate-50 p-3">
+                      <p className="font-black text-slate-900 text-[11px] mb-1.5">Assessment Approaches & Weighting</p>
+                      <ul className="space-y-1 text-slate-800">
+                        {(courseOutline.assessmentApproaches || '')
+                          .split(/\n+/)
+                          .map((item) => item.trim())
+                          .filter(Boolean)
+                          .map((line, idx) => (
+                            <li key={idx} className="flex items-start gap-1.5">
+                              <span className="shrink-0 text-slate-900 font-bold">•</span>
+                              <span>{line}</span>
+                            </li>
+                          ))}
+                      </ul>
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              <section>
+                <SectionHeading number="5" title="Instructional Resources & References" />
+                <div className="mt-3 grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="font-black text-slate-900 text-[11px] mb-1">References</p>
+                    {courseOutline.references.length === 0 ? (
+                      <p className="text-slate-600 italic leading-relaxed">Course Textbooks & Handouts as prescribed by the Department.</p>
+                    ) : (
+                      <ul className="space-y-1 text-slate-800">
+                        {courseOutline.references.map((r, i) => (
+                          <li key={i} className="flex gap-1.5">
+                            <span className="shrink-0 text-slate-900 font-bold">{i + 1}.</span>
+                            <span>{r.replace(/^\d+\.\s*/, '')}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-black text-slate-900 text-[11px] mb-1">Equipment & Safety Materials</p>
+                    {courseOutline.instructionalEquipment.length === 0 ? (
+                      <p className="text-slate-600 italic leading-relaxed">Whiteboard & Markers, Demonstration Aids & Standard Safety Gear.</p>
+                    ) : (
+                      <ul className="space-y-1 text-slate-800">
+                        {courseOutline.instructionalEquipment.map((e, i) => (
+                          <li key={i} className="flex gap-1.5">
+                            <span className="shrink-0 text-slate-900 font-bold">{i + 1}.</span>
+                            <span>{e.replace(/^\d+\.\s*/, '')}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              </section>
+            </div>
+          )}
+
+          {/* ════════════════════════════════ SCHEME OF WORK ════════════════════════════════ */}
+          {type === 'scheme_of_work' && schemeOfWork && (
+            <div className="space-y-4">
+              <table className="w-full border-collapse text-[10px] table-fixed border border-slate-300">
                 <thead>
-                  <tr className="border-b border-text-primary bg-surface-subtle font-bold uppercase">
-                    <th className="border-r border-text-primary p-2 w-16 text-center">Week</th>
-                    <th className="border-r border-text-primary p-2">Topic & Specific Coverage</th>
-                    <th className="p-2 w-20 text-center">Hours</th>
+                  <tr className="bg-slate-100 text-slate-900 border-b-2 border-slate-900">
+                    <th className="border border-slate-300 px-2 py-2 text-center w-[5%] font-black uppercase text-[9px] tracking-wider text-slate-900">Wk</th>
+                    <th className="border border-slate-300 px-2.5 py-2 text-left w-[25%] font-black uppercase text-[9px] tracking-wider text-slate-900">Topic & Sub-topics</th>
+                    <th className="border border-slate-300 px-2.5 py-2 text-left w-[40%] font-black uppercase text-[9px] tracking-wider text-slate-900">Specific Learning Outcomes (SLOs)</th>
+                    <th className="border border-slate-300 px-2 py-2 text-left w-[16%] font-black uppercase text-[9px] tracking-wider text-slate-900">Activities & Methodology</th>
+                    <th className="border border-slate-300 px-2 py-2 text-left w-[14%] font-black uppercase text-[9px] tracking-wider text-slate-900">Instructional Resources</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border">
-                  {courseOutline.weeklySchedule.map((sched) => (
-                    <tr key={sched.weekNumber} className="border-b border-border">
-                      <td className="border-r border-text-primary p-2 text-center font-bold">
-                        W{sched.weekNumber}
+                <tbody>
+                  {schemeOfWork.plannedWeeks.map((w, idx) => (
+                    <tr key={w.weekNumber} className={idx % 2 === 0 ? 'bg-white align-top' : 'bg-slate-50 align-top'}>
+                      <td className="border border-slate-300 px-2 py-2 text-center font-black text-slate-900">
+                        {w.weekNumber}
                       </td>
-                      <td className="border-r border-text-primary p-2">
-                        <div className="font-bold text-text-primary">{sched.topicTitle}</div>
-                        <div className="text-[10px] text-text-muted mt-0.5">
-                          {sched.subTopics.join(' · ')}
-                        </div>
+                      <td className="border border-slate-300 px-2.5 py-2">
+                        <div className="font-bold text-slate-900 leading-snug">{w.topic}</div>
+                        {w.subTopics && (
+                          <div className="mt-1 text-[9px] text-slate-600 leading-relaxed">{w.subTopics}</div>
+                        )}
                       </td>
-                      <td className="p-2 text-center font-medium">{sched.hours} hrs</td>
+                      {/* SLOs: individual bullets on separate lines with clean line-height */}
+                      <td className="border border-slate-300 px-2.5 py-2 text-slate-800 leading-relaxed">
+                        <SLOBullets text={w.specificLearningOutcomes} />
+                      </td>
+                      <td className="border border-slate-300 px-2 py-2 text-slate-800 leading-relaxed">
+                        {w.learningActivities}
+                      </td>
+                      <td className="border border-slate-300 px-2 py-2 text-slate-800 leading-relaxed">
+                        {w.resourcesAndReferences}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            </section>
-
-            {(courseOutline.teachingLearningApproaches || courseOutline.assessmentApproaches) ? (
-              <section>
-                <h2 className="border-b border-border pb-1 font-bold uppercase tracking-wider text-text-primary">
-                  4. Teaching / Learning and Assessment Approaches
-                </h2>
-                <div className="mt-2 grid gap-4 sm:grid-cols-2 text-text-secondary">
-                  <div>
-                    <p className="font-bold text-text-primary text-[11px]">Teaching / Learning Approaches</p>
-                    <p className="mt-1 leading-relaxed">{courseOutline.teachingLearningApproaches || '—'}</p>
-                  </div>
-                  <div>
-                    <p className="font-bold text-text-primary text-[11px]">Assessment Approaches</p>
-                    <p className="mt-1 leading-relaxed">{courseOutline.assessmentApproaches || '—'}</p>
-                  </div>
-                </div>
-              </section>
-            ) : null}
-
-            <section>
-              <h2 className="border-b border-border pb-1 font-bold uppercase tracking-wider text-text-primary">
-                5. Instructional Resources & References
-              </h2>
-              <div className="mt-2 grid grid-cols-2 gap-4 text-text-secondary">
-                <div>
-                  <p className="font-bold text-text-primary text-[11px]">References:</p>
-                  <ul className="mt-1 list-inside list-disc space-y-1">
-                    {courseOutline.references.map((r, i) => (
-                      <li key={i}>{r}</li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <p className="font-bold text-text-primary text-[11px]">Equipment & Safety Materials:</p>
-                  <ul className="mt-1 list-inside list-disc space-y-1">
-                    {courseOutline.instructionalEquipment.map((e, i) => (
-                      <li key={i}>{e}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </section>
-          </div>
-        )}
-
-        {/* DOCUMENT TYPE 2: SCHEME OF WORK */}
-        {type === 'scheme_of_work' && schemeOfWork && (
-          <div className="mt-6 space-y-4">
-            <table className="w-full border-collapse border border-text-primary text-left text-[10px]">
-              <thead>
-                <tr className="border-b border-text-primary bg-surface-subtle font-bold uppercase">
-                  <th className="border-r border-text-primary p-2 w-12 text-center">Wk</th>
-                  <th className="border-r border-text-primary p-2 w-44">Topic & Sub-topics</th>
-                  <th className="border-r border-text-primary p-2">Specific Learning Outcomes (SLOs)</th>
-                  <th className="border-r border-text-primary p-2 w-40">Activities & Methodology</th>
-                  <th className="border-r border-text-primary p-2 w-36">Resources & References</th>
-                  <th className="p-2 w-32">Assessment / Learning Check</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {schemeOfWork.plannedWeeks.map((w) => (
-                  <tr key={w.weekNumber} className="border-b border-border">
-                    <td className="border-r border-text-primary p-2 text-center font-bold">
-                      {w.weekNumber}
-                    </td>
-                    <td className="border-r border-text-primary p-2">
-                      <div className="font-bold text-text-primary">{w.topic}</div>
-                      <div className="text-[9px] text-text-muted mt-0.5">{w.subTopics}</div>
-                    </td>
-                    <td className="border-r border-text-primary p-2 text-text-secondary">
-                      {w.specificLearningOutcomes}
-                    </td>
-                    <td className="border-r border-text-primary p-2 text-text-secondary">
-                      {w.learningActivities}
-                    </td>
-                    <td className="border-r border-text-primary p-2 text-text-secondary">
-                      {w.resourcesAndReferences}
-                    </td>
-                    <td className="p-2 text-text-secondary font-medium">
-                      {w.assessmentAndRemarks}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* DOCUMENT TYPE 3: RECORD OF WORK */}
-        {type === 'record_of_work' && recordOfWork && (
-          <div className="mt-6 space-y-5">
-            {/* Progress Badge */}
-            <div className="flex items-center justify-between border border-border bg-surface-subtle p-3 text-xs">
-              <span className="font-semibold text-text-secondary">
-                Syllabus Progress: <strong>{recordOfWork.completedWeeksCount} of {recordOfWork.totalPlannedWeeks} Weeks Delivered</strong>
-              </span>
-              <span className="font-bold text-primary">
-                {recordOfWork.syllabusCompletionRate}% Delivered
-              </span>
             </div>
+          )}
 
-            <table className="w-full border-collapse border border-text-primary text-left text-[11px]">
-              <thead>
-                <tr className="border-b border-text-primary bg-surface-subtle font-bold uppercase">
-                  <th className="border-r border-text-primary p-2 w-14 text-center">Wk</th>
-                  <th className="border-r border-text-primary p-2 w-24">Date</th>
-                  <th className="border-r border-text-primary p-2">Work Covered / Activities</th>
-                  <th className="border-r border-text-primary p-2">Specific Outcomes Achieved</th>
-                  <th className="border-r border-text-primary p-2 w-28">Attendance</th>
-                  <th className="border-r border-text-primary p-2 w-32">Remarks / Deviations</th>
-                  <th className="p-2 w-24 text-center">Trainer Sign</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {recordOfWork.entries.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="p-6 text-center text-text-muted italic">
-                      No progress entries logged yet. Log entries using the trainer Record of Work manager.
-                    </td>
+          {/* ════════════════════════════════ RECORD OF WORK ════════════════════════════════ */}
+          {type === 'record_of_work' && recordOfWork && (
+            <div className="space-y-5">
+              <div className="flex items-center justify-between rounded-lg border border-slate-300 bg-slate-100 px-4 py-2.5 text-xs">
+                <span className="font-bold text-slate-700">
+                  Progress: <strong className="text-slate-900">{recordOfWork.completedWeeksCount} of {recordOfWork.totalPlannedWeeks} Weeks Delivered</strong>
+                </span>
+                <span className="font-black text-slate-900">
+                  {recordOfWork.syllabusCompletionRate}% Delivered
+                </span>
+              </div>
+
+              <table className="w-full border-collapse text-[10px] table-fixed border border-slate-300">
+                <thead>
+                  <tr className="bg-slate-100 text-slate-900 border-b-2 border-slate-900">
+                    <th className="border border-slate-300 px-2 py-2 text-center w-[5%] font-black uppercase text-[9px] tracking-wider text-slate-900">Wk</th>
+                    <th className="border border-slate-300 px-2 py-2 w-[12%] font-black uppercase text-[9px] tracking-wider text-slate-900">Date</th>
+                    <th className="border border-slate-300 px-2 py-2 w-[28%] font-black uppercase text-[9px] tracking-wider text-slate-900">Work Covered / Activities</th>
+                    <th className="border border-slate-300 px-2 py-2 w-[28%] font-black uppercase text-[9px] tracking-wider text-slate-900">Specific Outcomes Achieved</th>
+                    <th className="border border-slate-300 px-2 py-2 w-[11%] font-black uppercase text-[9px] tracking-wider text-slate-900">Attendance</th>
+                    <th className="border border-slate-300 px-2 py-2 w-[10%] font-black uppercase text-[9px] tracking-wider text-slate-900">Remarks</th>
+                    <th className="border border-slate-300 px-2 py-2 w-[6%] text-center font-black uppercase text-[9px] tracking-wider text-slate-900">Sign</th>
                   </tr>
-                ) : (
-                  recordOfWork.entries.map((entry) => (
-                    <tr key={entry.id} className="border-b border-border">
-                      <td className="border-r border-text-primary p-2 text-center font-bold">
-                        W{entry.weekNumber}
-                      </td>
-                      <td className="border-r border-text-primary p-2 font-medium text-text-secondary whitespace-nowrap">
-                        {entry.sessionDate}
-                      </td>
-                      <td className="border-r border-text-primary p-2 font-semibold text-text-primary">
-                        {entry.workCovered}
-                      </td>
-                      <td className="border-r border-text-primary p-2 text-text-secondary">
-                        {entry.outcomesAchieved}
-                      </td>
-                      <td className="border-r border-text-primary p-2 text-text-secondary">
-                        {entry.attendanceSummary}
-                      </td>
-                      <td className="border-r border-text-primary p-2 text-text-muted text-[10px]">
-                        {entry.remarks}
-                      </td>
-                      <td className="p-2 text-center font-bold text-[10px] text-text-primary">
-                        {entry.trainerSignature.split(' ')[0] || 'Signed'}
-                        <div className="text-[8px] text-text-muted">{new Date(entry.signedAt).toLocaleDateString('en-GB')}</div>
+                </thead>
+                <tbody>
+                  {recordOfWork.entries.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="p-6 text-center text-slate-500 italic">
+                        No entries logged yet.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
+                  ) : (
+                    recordOfWork.entries.map((entry, idx) => (
+                      <tr key={entry.id} className={idx % 2 === 0 ? 'bg-white align-top' : 'bg-slate-50 align-top'}>
+                        <td className="border border-slate-300 px-2 py-2 text-center font-black text-slate-900 print:border-slate-800">
+                          W{entry.weekNumber}
+                        </td>
+                        <td className="border border-slate-300 px-2 py-2 font-medium text-slate-700 whitespace-nowrap print:border-slate-800">
+                          {entry.sessionDate}
+                        </td>
+                        <td className="border border-slate-300 px-2 py-2 font-bold text-slate-900 leading-relaxed print:border-slate-800">
+                          {entry.workCovered}
+                        </td>
+                        <td className="border border-slate-300 px-2 py-2 text-slate-800 leading-relaxed print:border-slate-800">
+                          {entry.outcomesAchieved}
+                        </td>
+                        <td className="border border-slate-300 px-2 py-2 text-slate-700 print:border-slate-800">
+                          {entry.attendanceSummary}
+                        </td>
+                        <td className="border border-slate-300 px-2 py-2 text-slate-600 text-[9px] leading-relaxed print:border-slate-800">
+                          {entry.remarks}
+                        </td>
+                        <td className="border border-slate-300 px-2 py-2 text-center font-bold text-[9px] text-slate-900 print:border-slate-800">
+                          {entry.trainerSignature.split(' ')[0] || 'Signed'}
+                          <div className="text-[8px] text-slate-500">{new Date(entry.signedAt).toLocaleDateString('en-GB')}</div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
 
-        {/* Institutional Sign-off Block */}
-        <div className="mt-8 border-t-2 border-text-primary pt-4 text-xs">
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
-            <div>
-              <p className="font-bold text-text-primary uppercase text-[10px]">Trainer Sign-off:</p>
-              <div className="mt-6 border-b border-text-primary" />
-              <p className="mt-1 font-semibold text-text-secondary">{header.trainerName}</p>
-              <p className="text-[10px] text-text-muted">Date: ________________________</p>
-            </div>
-            <div>
-              <p className="font-bold text-text-primary uppercase text-[10px]">Head of Department (HOD):</p>
-              <div className="mt-6 border-b border-text-primary" />
-              <p className="mt-1 font-semibold text-text-secondary">Signature & Official Stamp</p>
-              <p className="text-[10px] text-text-muted">Date: ________________________</p>
-            </div>
-            <div>
-              <p className="font-bold text-text-primary uppercase text-[10px]">QA / Dean Verification:</p>
-              <div className="mt-6 border-b border-text-primary" />
-              <p className="mt-1 font-semibold text-text-secondary">Institutional Audit Stamp</p>
-              <p className="text-[10px] text-text-muted">Date: ________________________</p>
+          {/* ── INSTITUTIONAL SIGN-OFF BLOCK ── */}
+          <div className="mt-10 border-t-2 border-slate-900 pt-6 text-xs print:border-black">
+            <div className="grid grid-cols-3 gap-8">
+              {[
+                { role: 'Trainer Sign-off', name: header.trainerName },
+                { role: 'Head of Department (HOD)', name: 'Signature & Official Stamp' },
+                { role: 'Quality Assurance Verification', name: 'Institutional Audit Stamp' },
+              ].map(({ role, name }) => (
+                <div key={role}>
+                  <p className="text-[9px] font-black tracking-widest uppercase text-slate-900">{role}</p>
+                  <div className="mt-8 border-b-2 border-slate-900 print:border-black" />
+                  <p className="mt-1 font-bold text-slate-800">{name}</p>
+                  <p className="text-[10px] text-slate-500">Date: ________________________</p>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
+
+        </div>{/* /p-8 */}
       </div>
+    </div>
+  );
+}
+
+/** Styled section heading used across Course Outline sections */
+function SectionHeading({ number, title }: { number: string; title: string }) {
+  return (
+    <div className="flex items-center gap-2 border-b-2 border-slate-900 pb-1.5 print:border-black">
+      <span className="flex size-5 shrink-0 items-center justify-center rounded border border-slate-900 bg-slate-100 text-[10px] font-black text-slate-900">
+        {number}
+      </span>
+      <h2 className="text-[11px] font-black uppercase tracking-wider text-slate-900 print:text-black">{title}</h2>
+    </div>
+  );
+}
+
+/**
+ * Renders a Specific Learning Outcomes string as individual bullet lines.
+ * Splits on newline characters produced by synthesizeLearningObjectives.
+ */
+export function SLOBullets({ text }: { text: string }) {
+  if (!text) return <span className="text-slate-400">—</span>;
+
+  // Split on newline or bullet symbols
+  const rawLines = text.split(/[\n\r]+/).map((l) => l.trim()).filter(Boolean);
+
+  if (rawLines.length <= 1) {
+    // If it's a single string with inline bullets
+    const inlineParts = text.split(/[•·]+/).map((p) => p.trim()).filter(Boolean);
+    if (inlineParts.length > 1) {
+      const [preamble, ...bullets] = inlineParts;
+      return (
+        <div className="space-y-1">
+          <p className="text-[9px] italic text-slate-600 leading-tight">{preamble}</p>
+          <ul className="space-y-1">
+            {bullets.map((b, i) => (
+              <li key={i} className="flex items-start gap-1 leading-snug">
+                <span className="shrink-0 mt-[2px] text-slate-900 font-black text-[10px]">•</span>
+                <span>{b}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    }
+    return <span className="leading-relaxed">{text}</span>;
+  }
+
+  const [preamble, ...bullets] = rawLines;
+  return (
+    <div className="space-y-1">
+      <p className="text-[9px] italic text-slate-600 leading-tight">{preamble}</p>
+      <ul className="space-y-1">
+        {bullets.map((b, i) => (
+          <li key={i} className="flex items-start gap-1 leading-snug">
+            <span className="shrink-0 mt-[2px] text-slate-900 font-black text-[10px]">•</span>
+            <span>{b.replace(/^[•·\s-]+/, '')}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

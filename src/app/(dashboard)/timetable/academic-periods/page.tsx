@@ -1,9 +1,11 @@
 import { CrudModal } from '@/components/ui/crud-modal';
 import type { Metadata } from 'next';
 import {
+  ArrowLeft,
   CalendarDays,
   Plus,
 } from 'lucide-react';
+import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -81,23 +83,32 @@ export default async function AcademicPeriodsPage() {
           </div>
         }
         actions={
-          <Drawer>
-            <DrawerTrigger asChild>
-              <Button
-                leadingIcon={
-                  <Plus
-                    className="size-4"
-                    aria-hidden="true"
-                  />
-                }
-              >
-                Add Academic Period
-              </Button>
-            </DrawerTrigger>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/dashboard"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+            >
+              <ArrowLeft className="size-4" aria-hidden="true" />
+              Dashboard
+            </Link>
 
-            <DrawerContent>
-              <DrawerHeader>
-                <div className="flex items-center gap-3">
+            <Drawer>
+              <DrawerTrigger asChild>
+                <Button
+                  leadingIcon={
+                    <Plus
+                      className="size-4"
+                      aria-hidden="true"
+                    />
+                  }
+                >
+                  Add Academic Period
+                </Button>
+              </DrawerTrigger>
+
+              <DrawerContent>
+                <DrawerHeader>
+                  <div className="flex items-center gap-3">
                   <div className="flex size-10 items-center justify-center rounded-xl bg-primary-soft text-primary">
                     <CalendarDays
                       className="size-5"
@@ -137,6 +148,7 @@ export default async function AcademicPeriodsPage() {
               </DrawerBody>
             </DrawerContent>
           </Drawer>
+        </div>
         }
       />
 

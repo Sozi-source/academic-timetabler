@@ -72,62 +72,46 @@ export default async function StaffUnitsPage() {
           </p>
         </section>
       ) : (
-        <section className="space-y-2">
-          {workspace.allocations.map(
-            (
-              allocation,
-            ) => (
-              <Link
-                key={
-                  allocation.allocationId
-                }
-                href={`/staff/units/${allocation.allocationId}`}
-                className="block rounded-xl border border-border bg-white px-4 py-3 transition hover:border-border-strong hover:bg-surface-subtle/40"
-              >
-                <div className="grid gap-3 lg:grid-cols-[minmax(0,1.5fr)_minmax(10rem,.8fr)_auto] lg:items-center">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-text-primary">
-                      {
-                        allocation.unitName
-                      }
-                    </p>
-
-                    <p className="mt-1 text-[11px] text-text-muted">
-                      {
-                        allocation.cohortName
-                      }
-                      {' · '}
-                      {
-                        allocation.academicPeriodName
-                      }
-                    </p>
-                  </div>
-
-                  <p className="text-[11px] capitalize text-text-secondary">
-                    {
-                      allocation.allocationStatus
-                    }
+        <section className="space-y-3">
+          {workspace.allocations.map((allocation) => (
+            <Link
+              key={allocation.allocationId}
+              href={`/staff/units/${allocation.allocationId}`}
+              className="block rounded-xl border border-slate-200 border-l-4 border-l-teal-800 bg-white px-5 py-4 shadow-xs transition hover:border-l-amber-400 hover:border-slate-300 hover:bg-teal-50/20 hover:shadow-sm"
+            >
+              <div className="grid gap-3 lg:grid-cols-[minmax(0,1.5fr)_minmax(10rem,.8fr)_auto] lg:items-center">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-black text-slate-950">
+                    {allocation.unitName}
                   </p>
 
-                  <div className="flex flex-wrap gap-1.5">
-                    {assessmentBadge(
-                      'CAT',
-                      allocation.cat
-                        ?.workflowStatus ??
-                        null,
-                    )}
-
-                    {assessmentBadge(
-                      'Exam',
-                      allocation.exam
-                        ?.workflowStatus ??
-                        null,
-                    )}
-                  </div>
+                  <p className="mt-1 text-[11px] font-bold text-slate-500">
+                    {allocation.cohortName}
+                    {' · '}
+                    <span className="text-teal-800">{allocation.academicPeriodName}</span>
+                  </p>
                 </div>
-              </Link>
-            ),
-          )}
+
+                <p className="text-xs font-black capitalize text-slate-700">
+                  <span className="inline-block rounded-md bg-slate-100 px-2 py-0.5 border border-slate-200">
+                    {allocation.allocationStatus}
+                  </span>
+                </p>
+
+                <div className="flex flex-wrap gap-1.5">
+                  {assessmentBadge(
+                    'CAT',
+                    allocation.cat?.workflowStatus ?? null,
+                  )}
+
+                  {assessmentBadge(
+                    'Exam',
+                    allocation.exam?.workflowStatus ?? null,
+                  )}
+                </div>
+              </div>
+            </Link>
+          ))}
         </section>
       )}
     </div>

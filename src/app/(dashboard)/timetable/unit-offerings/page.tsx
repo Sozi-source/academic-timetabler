@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { CalendarCheck2, Upload } from 'lucide-react';
+import { ArrowLeft, CalendarCheck2, Upload } from 'lucide-react';
 
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -42,12 +42,20 @@ export default async function UnitOfferingsPage() {
           </div>
         }
         actions={
-          <Button asChild variant="outline" size="sm">
-            <Link href="/timetable/unit-offerings/import">
-              <Upload className="size-4" aria-hidden="true" />
-              Import
-            </Link>
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button asChild variant="outline" size="sm">
+              <Link href="/dashboard">
+                <ArrowLeft className="size-4" aria-hidden="true" />
+                Dashboard
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/timetable/unit-offerings/import">
+                <Upload className="size-4" aria-hidden="true" />
+                Import
+              </Link>
+            </Button>
+          </div>
         }
       />
 

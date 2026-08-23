@@ -1,4 +1,4 @@
-import { BarChart3, CalendarCheck2 } from 'lucide-react';
+import { ArrowLeft, BarChart3, CalendarCheck2 } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/ui/page-header';
@@ -67,13 +67,22 @@ export default async function DepartmentClassAttendancePage({ searchParams }: Pa
           </div>
         }
         actions={
-          <Link
-            href="/attendance/analytics"
-            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
-          >
-            <BarChart3 className="size-3.5" aria-hidden="true" />
-            Analytics
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/dashboard"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
+            >
+              <ArrowLeft className="size-3.5" aria-hidden="true" />
+              Dashboard
+            </Link>
+            <Link
+              href="/attendance/analytics"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
+            >
+              <BarChart3 className="size-3.5" aria-hidden="true" />
+              Analytics
+            </Link>
+          </div>
         }
       />
 

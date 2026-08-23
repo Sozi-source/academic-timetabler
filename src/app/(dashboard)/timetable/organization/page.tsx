@@ -1,7 +1,9 @@
 import {
+  ArrowLeft,
   Building2,
   Users,
 } from 'lucide-react';
+import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -58,12 +60,21 @@ export default async function OrganizationPage() {
           </div>
         }
         actions={
-          isSystemAdministrator ? (
-            <OrganizationAdminActions
-              profiles={profiles}
-              workspaces={workspaces}
-            />
-          ) : undefined
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/dashboard"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
+            >
+              <ArrowLeft className="size-3.5" aria-hidden="true" />
+              Dashboard
+            </Link>
+            {isSystemAdministrator ? (
+              <OrganizationAdminActions
+                profiles={profiles}
+                workspaces={workspaces}
+              />
+            ) : null}
+          </div>
         }
       />
 

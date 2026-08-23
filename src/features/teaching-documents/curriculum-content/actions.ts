@@ -429,6 +429,23 @@ export async function confirmCurriculumContentImportAction(
     );
   }
 
+  const {
+    error: publishError,
+  } = await (supabase as any)
+    .rpc(
+      'publish_curriculum_import_batch_to_library',
+      {
+        target_batch_id:
+          batchId,
+      },
+    );
+
+  if (publishError) {
+    throw new Error(
+      `Curriculum was imported but could not be published to the document library: ${publishError.message}`,
+    );
+  }
+
   revalidatePath(
     '/teaching-documents/curriculum',
   );

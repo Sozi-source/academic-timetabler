@@ -52,7 +52,6 @@ export const dashboardNavigation = [
     items: [
       { label: 'Teaching documents', href: '/teaching-documents', icon: FileText },
       { label: 'Curriculum content', href: '/teaching-documents/curriculum', icon: BookOpenCheck },
-      { label: 'Import curriculum', href: '/teaching-documents/curriculum/import', icon: FileSpreadsheet },
       { label: 'Document review', href: '/teaching-documents/review', icon: FileCheck2 },
       { label: 'Published documents', href: '/teaching-documents/published', icon: FileChartColumn },
       { label: 'Student releases', href: '/teaching-documents/releases', icon: FileOutput },
@@ -62,11 +61,9 @@ export const dashboardNavigation = [
     label: 'Oversight & QA',
     items: [
       { label: 'Operations', href: '/operations', icon: ShieldCheck },
+      { label: 'Class attendance', href: '/attendance', icon: Stethoscope },
       { label: 'Executive reports', href: '/reports', icon: BarChart3 },
       { label: 'Action Center', href: '/operations/action-center', icon: ListChecks },
-      { label: 'Operational incidents', href: '/operations/incidents', icon: ShieldCheck },
-      { label: 'Class attendance', href: '/attendance', icon: Stethoscope },
-      { label: 'Readiness checks', href: '/operations/readiness', icon: ClipboardCheck },
       { label: 'Operational audit', href: '/operations/audit', icon: History },
     ],
   },

@@ -60,23 +60,13 @@ export default async function StaffDocumentsPage() {
       <PageHeader
         eyebrow="Staff"
         title="Teaching Documents"
-        description="Standardised Imperial College course outlines, schemes of work, and interactive records of work."
+        description="Course outlines, schemes of work, and records of work for your allocated units."
         icon={FileText}
       />
 
       <div className="flex flex-wrap gap-2">
-        <Badge variant="success">Imperial Standard Ready</Badge>
         <Badge variant="neutral">
           {workspace.allocations.length} Allocated Units
-        </Badge>
-        <Badge
-          variant={
-            activeTemplateTypes.size === teachingDocumentKinds.length
-              ? 'success'
-              : 'neutral'
-          }
-        >
-          {activeTemplateTypes.size} Institutional Templates Ready
         </Badge>
       </div>
 
@@ -117,7 +107,7 @@ export default async function StaffDocumentsPage() {
                     <Link
                       href={`/staff/units/${allocation.allocationId}/documents/course-outline`}
                       className="inline-flex h-8 items-center gap-1 rounded-lg border border-border bg-white px-2.5 text-[11px] font-semibold text-text-secondary hover:bg-surface-subtle"
-                      title="View standard Course Outline"
+                      title="View Course Outline"
                     >
                       <BookOpen className="size-3" />
                       Course Outline
@@ -126,7 +116,7 @@ export default async function StaffDocumentsPage() {
                     <Link
                       href={`/staff/units/${allocation.allocationId}/documents/scheme-of-work`}
                       className="inline-flex h-8 items-center gap-1 rounded-lg border border-border bg-white px-2.5 text-[11px] font-semibold text-text-secondary hover:bg-surface-subtle"
-                      title="View standard Scheme of Work"
+                      title="View Scheme of Work"
                     >
                       <FileSpreadsheet className="size-3" />
                       Scheme of Work

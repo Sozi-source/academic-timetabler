@@ -107,7 +107,7 @@ export default async function DashboardPage() {
       links: [
         { label: 'Teaching Documents', href: '/teaching-documents', icon: FileText, badge: 'Documents' },
         { label: 'Curriculum Content', href: '/teaching-documents/curriculum', icon: BookOpen, badge: '14 Weeks' },
-        { label: 'Import Curriculum', href: '/teaching-documents/curriculum/import', icon: FileSpreadsheet, badge: 'Excel' },
+        { label: 'Syllabus Editor', href: '/teaching-documents/curriculum/editor', icon: FileSpreadsheet, badge: 'Word Upload' },
         { label: 'Trainer Document Review', href: '/teaching-documents/review', icon: FileCheck2 },
         { label: 'Published Documents', href: '/teaching-documents/published', icon: ShieldCheck },
         { label: 'Student Released Documents', href: '/teaching-documents/releases', icon: ShieldCheck },

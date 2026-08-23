@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { BookOpenCheck, CheckCircle2, Download, FileCheck2, TriangleAlert, UsersRound } from 'lucide-react';
+import { ArrowLeft, BookOpenCheck, CheckCircle2, Download, FileCheck2, TriangleAlert, UsersRound } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -25,9 +25,22 @@ export default async function UnitRegistrationPage() {
 
   if (!context.period) {
     return (
-
       <div className="space-y-4">
-        <PageHeader eyebrow="Registration" title="Unit registration" description="Verify student unit selections." icon={BookOpenCheck} />
+        <PageHeader
+          eyebrow="Registration"
+          title="Unit registration"
+          description="Verify student unit selections."
+          icon={BookOpenCheck}
+          actions={
+            <Link
+              href="/students"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
+            >
+              <ArrowLeft className="size-3.5" aria-hidden="true" />
+              Students
+            </Link>
+          }
+        />
         <EmptyState icon={BookOpenCheck} title="No active academic period" description="Activate an academic period first." />
       </div>
     );
@@ -35,9 +48,6 @@ export default async function UnitRegistrationPage() {
 
   return (
     <div className="space-y-4">
-      <div className="mb-4 flex flex-wrap justify-end gap-2">
-        <BatchRegistrationLink />
-      </div>
       <PageHeader
         eyebrow="Registration"
         title="Unit registration"
@@ -45,21 +55,31 @@ export default async function UnitRegistrationPage() {
         icon={BookOpenCheck}
         context={<Badge variant="institutional">{context.period.name}</Badge>}
         actions={(
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/students"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
+            >
+              <ArrowLeft className="size-3.5" aria-hidden="true" />
+              Students
+            </Link>
             <Link
               href="/students/unit-registration/stages"
               className="inline-flex h-9 items-center rounded-lg border border-border bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
             >
               Stage setup
             </Link>
+            <BatchRegistrationLink />
             <form method="post" action="/api/students/portal-access/issue">
-              <Button type="submit" variant="secondary" size="sm"><Download className="size-4" /> Issue access PINs</Button>
+              <Button type="submit" variant="secondary" size="sm">
+                <Download className="size-4" /> Issue access PINs
+              </Button>
             </form>
           </div>
         )}
       />
 
-      <div className="grid gap-3 md:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
         <MetricCard label="Students" value={String(context.students.length)} description="Active / admitted" icon={UsersRound} />
         <MetricCard label="Submitted" value={String(context.submittedCount)} description="Awaiting review" icon={FileCheck2} />
         <MetricCard label="Verified" value={String(context.verifiedCount)} description="Authoritative roster" icon={CheckCircle2} />

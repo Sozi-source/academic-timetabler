@@ -319,13 +319,13 @@ export function TeachingDocumentTemplateManager({
         {curriculumPresentationTemplate ? (
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-surface-subtle/60 px-3 py-2.5">
             <p className="text-[11px] leading-4 text-text-secondary">
-              Excel curriculum data is not uploaded here.
+              Curriculum data is entered via the online editor.
             </p>
             <a
-              href="/teaching-documents/curriculum/import"
+              href="/teaching-documents/curriculum/editor"
               className="text-[11px] font-semibold text-primary hover:underline"
             >
-              Open Curriculum Content
+              Open Syllabus Editor
             </a>
           </div>
         ) : null}

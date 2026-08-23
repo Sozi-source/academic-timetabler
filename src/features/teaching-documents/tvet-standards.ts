@@ -79,41 +79,39 @@ export interface TVETRecordOfWorkData {
   syllabusCompletionRate: number;
 }
 
-function fourteenWeeks(curriculum: UnitCurriculumDefinition, weeklyHours: number): TVETCourseOutlineTopic[] {
-  const schedule = [...(curriculum.weeklySchedule ?? [])]
-    .filter((row) => row.weekNumber >= 1 && row.weekNumber <= 14)
-    .sort((a,b) => a.weekNumber - b.weekNumber);
-
-  return Array.from({ length: 14 }, (_, index) => {
-    const weekNumber = index + 1;
-    const row = schedule.find((item) => item.weekNumber === weekNumber);
-    return {
-      weekNumber,
-      topicTitle: row?.topicTitle ?? '',
-      subTopics: row?.subTopics ?? [],
-      hours: row?.hours ?? weeklyHours,
-    };
-  });
-}
+import { distributeTopicsAcrossWeeks } from './distribution-engine';
+import type { AssessmentMilestones } from './assessment-milestones';
 
 /**
  * Presentation-only Course Outline builder.
- * Curriculum content MUST be supplied from the database. No generic topics,
- * CAT weeks, exam weeks, learning outcomes, references or assessments are fabricated.
+ * Curriculum topics are balanced across the 14-week term by the distribution engine.
  */
 export function generateTVETCourseOutline(
   context: TVETDocumentHeaderContext,
   curriculum?: UnitCurriculumDefinition | null,
+  milestones?: AssessmentMilestones | null,
 ): TVETCourseOutlineData {
   const source: UnitCurriculumDefinition = curriculum ?? { unitCode: context.unitCode, unitName: context.unitName };
+  const distributed = distributeTopicsAcrossWeeks(source.weeklySchedule ?? [], 14, milestones);
+
   return {
     header: context,
     unitDescription: source.unitDescription ?? '',
     overallCompetency: source.overallCompetency ?? '',
     learningOutcomes: source.learningOutcomes ?? [],
-    weeklySchedule: fourteenWeeks(source, context.weeklyHours),
+    weeklySchedule: distributed.map((d) => ({
+      weekNumber: d.weekNumber,
+      topicTitle: d.topicTitle,
+      subTopics: d.subTopics,
+      hours: context.weeklyHours,
+    })),
     teachingLearningApproaches: source.teachingLearningApproaches ?? '',
-    assessmentApproaches: source.assessmentApproaches ?? '',
+    assessmentApproaches:
+      source.assessmentApproaches &&
+      !source.assessmentApproaches.includes('Week 5') &&
+      !source.assessmentApproaches.includes('Week 8')
+        ? source.assessmentApproaches
+        : 'Continuous Assessment Tests (CAT / RAT) — 15%\nAssignments — 5%\nClass Presentations / Practical Tasks — 10%\nFinal Summative Examination — 70%\nTotal Course Evaluation — 100%',
     assessmentMatrix: {
       continuousAssessment: { assignment:5, presentation:10, rat:15, cat:15, courseworkWeightedTotal:30 },
       finalExamination:70,
@@ -124,28 +122,29 @@ export function generateTVETCourseOutline(
   };
 }
 
-/** Scheme of Work is another view of the same approved curriculum family. */
+/**
+ * Automatically synthesizes the 14-Week Scheme of Work directly from the Course Outline topics.
+ * Zero separate scheme-of-work uploads required.
+ */
 export function generateTVETSchemeOfWork(
   context: TVETDocumentHeaderContext,
   curriculum?: UnitCurriculumDefinition | null,
+  milestones?: AssessmentMilestones | null,
 ): TVETSchemeOfWorkData {
   const source: UnitCurriculumDefinition = curriculum ?? { unitCode: context.unitCode, unitName: context.unitName };
-  const byWeek = new Map((source.weeklySchedule ?? []).map((row) => [row.weekNumber,row]));
+  const distributed = distributeTopicsAcrossWeeks(source.weeklySchedule ?? [], 14, milestones);
+
   return {
     header: context,
-    plannedWeeks: Array.from({ length: 14 }, (_, index) => {
-      const weekNumber = index + 1;
-      const row = byWeek.get(weekNumber);
-      return {
-        weekNumber,
-        topic: row?.topicTitle ?? '',
-        subTopics: (row?.subTopics ?? []).join(' · '),
-        specificLearningOutcomes: row?.specificLearningOutcomes ?? '',
-        learningActivities: row?.learningActivities ?? '',
-        resourcesAndReferences: row?.resourcesAndReferences ?? '',
-        assessmentAndRemarks: row?.assessmentAndRemarks ?? '',
-      };
-    }),
+    plannedWeeks: distributed.map((d) => ({
+      weekNumber: d.weekNumber,
+      topic: d.topicTitle,
+      subTopics: d.subTopics.join(' · '),
+      specificLearningOutcomes: d.specificLearningOutcomes,
+      learningActivities: d.learningActivities,
+      resourcesAndReferences: d.resourcesAndReferences,
+      assessmentAndRemarks: d.assessmentAndRemarks,
+    })),
   };
 }
 

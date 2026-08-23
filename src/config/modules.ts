@@ -63,12 +63,12 @@ export const platformModules: readonly PlatformModule[] = [
   },
   {
     key: 'attendance',
-    title: 'Attendance & Clinical',
-    shortTitle: 'Attendance & Clinical',
-    description: 'Manage attendance and clinical progression.',
-    href: '/attendance-clinical',
+    title: 'Class Attendance',
+    shortTitle: 'Attendance',
+    description: 'Monitor trainer compliance and student attendance across all units.',
+    href: '/attendance',
     status: 'active',
     icon: Stethoscope,
-    capabilities: ['Class attendance', 'Attendance analytics', 'Student attendance', 'Clinical progression (later)'],
+    capabilities: ['Class attendance', 'Attendance analytics', 'Student attendance', 'Trainer compliance'],
   },
 ] as const;

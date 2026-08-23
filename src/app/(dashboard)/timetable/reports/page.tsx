@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import { BarChart3 } from 'lucide-react';
+import { ArrowLeft, BarChart3 } from 'lucide-react';
+import Link from 'next/link';
 
 import { PageHeader } from '@/components/ui/page-header';
 import { getAcademicPeriods } from '@/features/academic-periods/queries';
@@ -61,9 +62,18 @@ export default async function TimetableReportsPage({
         title="Timetable reports"
         description="Review the master timetable, cohort schedules, workloads and room usage."
         actions={(
-          <div className="inline-flex items-center gap-2 rounded-xl bg-primary-soft px-3 py-2 text-sm font-semibold text-primary">
-            <BarChart3 className="size-4" aria-hidden="true" />
-            Operational intelligence
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/dashboard"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
+            >
+              <ArrowLeft className="size-3.5" aria-hidden="true" />
+              Dashboard
+            </Link>
+            <div className="inline-flex h-9 items-center gap-2 rounded-lg bg-primary-soft px-3 text-xs font-semibold text-primary">
+              <BarChart3 className="size-3.5" aria-hidden="true" />
+              Operational intelligence
+            </div>
           </div>
         )}
       />

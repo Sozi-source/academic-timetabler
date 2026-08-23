@@ -1,5 +1,6 @@
 import {
   AlertTriangle,
+  ArrowLeft,
   ClipboardCheck,
   FileCheck2,
   ListChecks,
@@ -124,13 +125,22 @@ export default async function OperationsPage() {
           </Badge>
         }
         actions={
-          <Link
-            href="/operations/action-center"
-            className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-white transition hover:bg-primary-hover"
-          >
-            <ListChecks className="size-3.5" aria-hidden="true" />
-            Action Center
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/dashboard"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
+            >
+              <ArrowLeft className="size-3.5" aria-hidden="true" />
+              Dashboard
+            </Link>
+            <Link
+              href="/operations/action-center"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-white transition hover:bg-primary-hover"
+            >
+              <ListChecks className="size-3.5" aria-hidden="true" />
+              Action Center
+            </Link>
+          </div>
         }
       />
 

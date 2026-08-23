@@ -55,7 +55,7 @@ export default async function StudentDocumentPublicationPage() {
               className="size-3.5"
               aria-hidden="true"
             />
-            Templates
+            Teaching documents
           </Link>
         }
       />

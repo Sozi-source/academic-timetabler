@@ -66,26 +66,26 @@ describe('Student Portal Edge Cases & Isolation', () => {
   it('keeps absence (AB) separate from null/missing marks in student result display', () => {
     const satResult = studentResultDisplay({
       mark: 85,
-      isAbsent: false,
-      grade: 'A',
+      maximumMark: 100,
+      resultStatus: 'sat',
     });
-    expect(satResult.text).toBe('85');
-    expect(satResult.variant).toBe('success');
+
+    expect(satResult).toBe('85/100');
 
     const absentResult = studentResultDisplay({
       mark: null,
-      isAbsent: true,
-      grade: 'AB',
+      maximumMark: 100,
+      resultStatus: 'absent',
     });
-    expect(absentResult.text).toBe('AB');
-    expect(absentResult.variant).toBe('danger');
+
+    expect(absentResult).toBe('AB');
 
     const pendingResult = studentResultDisplay({
       mark: null,
-      isAbsent: false,
-      grade: null,
+      maximumMark: 100,
+      resultStatus: 'pending',
     });
-    expect(pendingResult.text).toBe('Pending');
-    expect(pendingResult.variant).toBe('neutral');
+
+    expect(pendingResult).toBe('—');
   });
 });

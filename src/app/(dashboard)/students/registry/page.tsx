@@ -1,5 +1,5 @@
 import { StudentStatusStage } from '@/features/students/student-status-stage';
-import { ChevronRight, Database, Download, FileUp, KeyRound, UsersRound } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Database, Download, FileUp, KeyRound, UsersRound } from 'lucide-react';
 import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
@@ -26,6 +26,10 @@ export default async function StudentRegistryPage({ searchParams }: { searchPara
         context={<Badge variant="neutral">{students.length} records</Badge>}
         actions={
           <div className="flex flex-wrap gap-2">
+            <Link href="/students" className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle">
+              <ArrowLeft className="size-3.5" />
+              Students
+            </Link>
             <Link href="/students/access" className="inline-flex h-9 items-center gap-2 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle">
               <KeyRound className="size-3.5" />
               Student access

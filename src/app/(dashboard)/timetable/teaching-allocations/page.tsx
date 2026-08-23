@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import { AlertTriangle, BookOpenCheck, CheckCircle2, Users } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, BookOpenCheck, CheckCircle2, Users } from 'lucide-react';
+import Link from 'next/link';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -56,7 +57,20 @@ export default async function Page({searchParams}:{searchParams:Promise<{period?
  const allocationTrainer=params.allocationTrainer??''; const allocationQuery=(params.allocationQ??'').trim(); const allocationSearch=allocationQuery.toLowerCase(); const visibleAllocations=currentAllocations.filter(allocation=>(!allocationTrainer||allocation.trainer_id===allocationTrainer)&&(!allocationSearch||[allocation.trainers?.full_name,allocation.trainers?.staff_number,allocation.units?.code,allocation.units?.name,allocation.cohorts?.code,allocation.cohorts?.name].some(value=>value?.toLowerCase().includes(allocationSearch))));
  const returnParams=new URLSearchParams(); if(period)returnParams.set('period',period); if(searchTerm)returnParams.set('q',searchTerm); const returnTo=`/timetable/teaching-allocations?${returnParams.toString()}`;
  return <div className="space-y-5">
-  <PageHeader eyebrow="Timetable preparation" title="Simple teaching allocation" description="Generate units, merge same-name classes across cohorts, then assign a trainer."/>
+  <PageHeader
+    eyebrow="Timetable preparation"
+    title="Simple teaching allocation"
+    description="Generate units, merge same-name classes across cohorts, then assign a trainer."
+    actions={
+      <Link
+        href="/dashboard"
+        className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
+      >
+        <ArrowLeft className="size-3.5" aria-hidden="true" />
+        Dashboard
+      </Link>
+    }
+  />
   {params.generated==='1'?<Alert variant="success" icon={CheckCircle2} title="Units generated and matching classes merged"><p>{params.created??'0'} new units created. {params.autoMerged??'0'} same-name group(s), covering {params.mergedUnits??'0'} units, were combined automatically.</p>{Number(params.mergeSkipped??0)>0?<p className="mt-1 font-medium">{params.mergeSkipped} matching group(s) stayed separate because their saved scheduling conditions need review.</p>:null}</Alert>:null}
   {params.allocationError?<Alert variant="danger" icon={AlertTriangle} title="The timetable change was not saved"><p>{params.allocationError}</p>{params.availabilityTrainer&&params.availabilityPeriod?<a href={`/timetable/trainers/availability?trainer=${encodeURIComponent(params.availabilityTrainer)}&period=${encodeURIComponent(params.availabilityPeriod)}&returnTo=${encodeURIComponent(returnTo)}`} className="mt-2 inline-flex h-9 items-center rounded-xl border border-danger-border bg-surface px-3 text-sm font-semibold text-danger">Set trainer availability</a>:null}</Alert>:null}
   {params.availabilitySaved==='1'?<Alert variant="success" icon={CheckCircle2}>Trainer availability saved. Select the trainer and assign the unit again.</Alert>:null}

@@ -1,5 +1,11 @@
-import { createClient } from '@/lib/supabase/server';
-import { TRAINER_ALLOCATION_TABLE } from './config';
+import {
+  createClient,
+} from '@/lib/supabase/server';
+import {
+  TRAINER_ALLOCATION_OWNER_COLUMN,
+  TRAINER_ALLOCATION_TABLE,
+  TRAINER_TABLE,
+} from './config';
 import type {
   TrainerAllocationDocumentRowV53,
   TrainerDocumentSummaryV53,
@@ -7,188 +13,539 @@ import type {
 } from './types';
 
 async function currentUser() {
-  const supabase = await createClient();
+  const supabase =
+    await createClient();
+
   const {
     data: { user },
     error,
-  } = await supabase.auth.getUser();
+  } =
+    await supabase.auth.getUser();
 
-  if (error || !user) {
-    throw new Error('You must be signed in.');
-  }
-
-  return { supabase, user };
-}
-
-export async function loadAccessibleTrainerAllocationsV53() {
-  const { supabase } = await currentUser();
-
-  // RLS on the existing allocation table remains the authority for which
-  // allocations a trainer can see. We intentionally request only identity
-  // fields that are required for workbook generation.
-  const { data: allocations, error } = await (supabase as any)
-    .from(TRAINER_ALLOCATION_TABLE)
-    .select('id,unit_id')
-    .not('unit_id', 'is', null);
-
-  if (error) {
+  if (
+    error ||
+    !user
+  ) {
     throw new Error(
-      `Trainer allocations could not be loaded from ${TRAINER_ALLOCATION_TABLE}: ${error.message}`,
+      'You must be signed in.',
     );
   }
 
-  const cleanAllocations = (allocations ?? [])
-    .filter((row: any) => row?.id && row?.unit_id)
-    .map((row: any) => ({
-      allocationId: String(row.id),
-      unitId: String(row.unit_id),
-    }));
+  return {
+    supabase,
+    user,
+  };
+}
+
+async function resolveCurrentTrainerIdV53(
+  supabase: any,
+  user: {
+    id: string;
+    email?:
+      | string
+      | null;
+  },
+) {
+  const userIdColumns = [
+    'user_id',
+    'profile_id',
+    'auth_user_id',
+  ] as const;
+
+  for (
+    const column of
+    userIdColumns
+  ) {
+    const {
+      data,
+      error,
+    } = await supabase
+      .from(
+        TRAINER_TABLE,
+      )
+      .select('id')
+      .eq(
+        column,
+        user.id,
+      )
+      .limit(2);
+
+    if (
+      !error &&
+      Array.isArray(
+        data,
+      ) &&
+      data.length ===
+        1 &&
+      data[0]?.id
+    ) {
+      return String(
+        data[0].id,
+      );
+    }
+  }
+
+  if (user.email) {
+    const {
+      data,
+      error,
+    } = await supabase
+      .from(
+        TRAINER_TABLE,
+      )
+      .select('id')
+      .eq(
+        'email',
+        user.email,
+      )
+      .limit(2);
+
+    if (
+      !error &&
+      Array.isArray(
+        data,
+      ) &&
+      data.length ===
+        1 &&
+      data[0]?.id
+    ) {
+      return String(
+        data[0].id,
+      );
+    }
+  }
+
+  return null;
+}
+
+export async function loadAccessibleTrainerAllocationsV53() {
+  const {
+    supabase,
+    user,
+  } =
+    await currentUser();
+
+  const trainerId =
+    await resolveCurrentTrainerIdV53(
+      supabase as any,
+      user,
+    );
+
+  if (!trainerId) {
+    return [] as TrainerAllocationDocumentRowV53[];
+  }
+
+  const {
+    data: allocations,
+    error,
+  } = await (supabase as any)
+    .from(
+      TRAINER_ALLOCATION_TABLE,
+    )
+    .select(
+      `id,unit_id,${TRAINER_ALLOCATION_OWNER_COLUMN}`,
+    )
+    .eq(
+      TRAINER_ALLOCATION_OWNER_COLUMN,
+      trainerId,
+    )
+    .not(
+      'unit_id',
+      'is',
+      null,
+    );
+
+  if (error) {
+    throw new Error(
+      `Your teaching allocations could not be loaded: ${error.message}`,
+    );
+  }
+
+  const cleanAllocations =
+    (allocations ?? [])
+      .filter(
+        (row: any) =>
+          row?.id &&
+          row?.unit_id &&
+          String(
+            row[
+              TRAINER_ALLOCATION_OWNER_COLUMN
+            ] ?? '',
+          ) ===
+            trainerId,
+      )
+      .map(
+        (row: any) => ({
+          allocationId:
+            String(
+              row.id,
+            ),
+          unitId:
+            String(
+              row.unit_id,
+            ),
+        }),
+      );
 
   const unitIds = [
     ...new Set(
       cleanAllocations.map(
-        (row: { unitId: string }) => row.unitId,
+        (row: {
+          unitId: string;
+        }) =>
+          row.unitId,
       ),
     ),
   ];
 
-  if (!unitIds.length) {
+  if (
+    !unitIds.length
+  ) {
     return [] as TrainerAllocationDocumentRowV53[];
   }
 
-  const { data: units, error: unitsError } = await (supabase as any)
+  const {
+    data: units,
+    error:
+      unitsError,
+  } = await (supabase as any)
     .from('units')
-    .select('id,code,name')
-    .in('id', unitIds);
+    .select(
+      'id,code,name',
+    )
+    .in(
+      'id',
+      unitIds,
+    );
 
   if (unitsError) {
     throw new Error(
-      `Allocated units could not be loaded: ${unitsError.message}`,
+      `Your allocated units could not be loaded: ${unitsError.message}`,
     );
   }
 
-  const unitMap = new Map<
-    string,
-    {
-      unitCode: string;
-      unitName: string;
-    }
-  >(
-    (units ?? []).map((unit: any) => [
-      String(unit.id),
+  const unitMap =
+    new Map<
+      string,
       {
-        unitCode: String(unit.code ?? ''),
-        unitName: String(unit.name ?? ''),
-      },
-    ]),
-  );
+        unitCode:
+          string;
+        unitName:
+          string;
+      }
+    >(
+      (units ?? []).map(
+        (unit: any) => [
+          String(
+            unit.id,
+          ),
+          {
+            unitCode:
+              String(
+                unit.code ??
+                  '',
+              ),
+            unitName:
+              String(
+                unit.name ??
+                  '',
+              ),
+          },
+        ],
+      ),
+    );
 
   return cleanAllocations
-    .map((allocation: { allocationId: string; unitId: string }) => {
-      const unit = unitMap.get(allocation.unitId);
+    .map(
+      (allocation: {
+        allocationId:
+          string;
+        unitId: string;
+      }) => {
+        const unit =
+          unitMap.get(
+            allocation.unitId,
+          );
 
-      if (!unit) return null;
+        if (!unit) {
+          return null;
+        }
 
-      return {
-        allocationId: allocation.allocationId,
-        unitId: allocation.unitId,
-        unitCode: unit.unitCode,
-        unitName: unit.unitName,
-      };
-    })
-    .filter(Boolean) as TrainerAllocationDocumentRowV53[];
+        return {
+          allocationId:
+            allocation.allocationId,
+          unitId:
+            allocation.unitId,
+          unitCode:
+            unit.unitCode,
+          unitName:
+            unit.unitName,
+        };
+      },
+    )
+    .filter(
+      Boolean,
+    ) as TrainerAllocationDocumentRowV53[];
 }
 
-export async function loadMissingTrainerDocumentsV53(
-  documentType: TrainerTeachingDocumentType,
+async function activeInstitutionalUnitIds(
+  supabase: any,
+  unitIds: string[],
+  documentType:
+    TrainerTeachingDocumentType,
 ) {
-  const { supabase } = await currentUser();
-  const allocations = await loadAccessibleTrainerAllocationsV53();
-
-  if (!allocations.length) {
-    return [] as TrainerAllocationDocumentRowV53[];
+  if (
+    !unitIds.length
+  ) {
+    return new Set<string>();
   }
 
-  const allocationIds = allocations.map(
-    (item) => item.allocationId,
-  );
-
-  const { data: activeRows, error } = await (supabase as any)
-    .from('trainer_teaching_document_versions')
-    .select('allocation_id')
-    .in('allocation_id', allocationIds)
-    .eq('document_type', documentType)
-    .eq('status', 'active');
+  const {
+    data,
+    error,
+  } = await supabase
+    .from(
+      'curriculum_document_versions',
+    )
+    .select(
+      'unit_id',
+    )
+    .in(
+      'unit_id',
+      unitIds,
+    )
+    .eq(
+      'document_type',
+      documentType,
+    )
+    .eq(
+      'status',
+      'active',
+    );
 
   if (error) {
     throw new Error(
-      `Current teaching documents could not be loaded: ${error.message}`,
+      `Institutional curriculum documents could not be loaded: ${error.message}`,
     );
   }
 
-  const completed = new Set(
-    (activeRows ?? []).map(
-      (row: any) => String(row.allocation_id),
+  return new Set(
+    (data ?? []).map(
+      (row: any) =>
+        String(
+          row.unit_id,
+        ),
     ),
   );
+}
+
+async function activeTrainerAllocationIds(
+  supabase: any,
+  allocationIds: string[],
+  documentType:
+    TrainerTeachingDocumentType,
+) {
+  if (
+    !allocationIds.length
+  ) {
+    return new Set<string>();
+  }
+
+  const {
+    data,
+    error,
+  } = await supabase
+    .from(
+      'trainer_teaching_document_versions',
+    )
+    .select(
+      'allocation_id',
+    )
+    .in(
+      'allocation_id',
+      allocationIds,
+    )
+    .eq(
+      'document_type',
+      documentType,
+    )
+    .eq(
+      'status',
+      'active',
+    );
+
+  if (error) {
+    throw new Error(
+      `Trainer teaching documents could not be loaded: ${error.message}`,
+    );
+  }
+
+  return new Set(
+    (data ?? []).map(
+      (row: any) =>
+        String(
+          row.allocation_id,
+        ),
+    ),
+  );
+}
+
+export async function loadMissingTrainerDocumentsV53(
+  documentType:
+    TrainerTeachingDocumentType,
+) {
+  const {
+    supabase,
+  } =
+    await currentUser();
+
+  const allocations =
+    await loadAccessibleTrainerAllocationsV53();
+
+  if (
+    !allocations.length
+  ) {
+    return [] as TrainerAllocationDocumentRowV53[];
+  }
+
+  const [
+    institutionalUnits,
+    trainerAllocations,
+  ] =
+    await Promise.all([
+      activeInstitutionalUnitIds(
+        supabase as any,
+        [
+          ...new Set(
+            allocations.map(
+              (item) =>
+                item.unitId,
+            ),
+          ),
+        ],
+        documentType,
+      ),
+      activeTrainerAllocationIds(
+        supabase as any,
+        allocations.map(
+          (item) =>
+            item.allocationId,
+        ),
+        documentType,
+      ),
+    ]);
 
   return allocations.filter(
-    (item) => !completed.has(item.allocationId),
+    (item) =>
+      !institutionalUnits.has(
+        item.unitId,
+      ) &&
+      !trainerAllocations.has(
+        item.allocationId,
+      ),
   );
 }
 
 export async function loadTrainerDocumentSummaryV53(): Promise<TrainerDocumentSummaryV53> {
-  const { supabase } = await currentUser();
-  const allocations = await loadAccessibleTrainerAllocationsV53();
+  const {
+    supabase,
+  } =
+    await currentUser();
 
-  if (!allocations.length) {
+  const allocations =
+    await loadAccessibleTrainerAllocationsV53();
+
+  if (
+    !allocations.length
+  ) {
     return {
-      totalAllocations: 0,
-      activeCourseOutlines: 0,
+      totalAllocations:
+        0,
+      activeCourseOutlines:
+        0,
       activeSchemes: 0,
-      missingCourseOutlines: [],
+      missingCourseOutlines:
+        [],
       missingSchemes: [],
     };
   }
 
-  const allocationIds = allocations.map(
-    (item) => item.allocationId,
-  );
+  const uniqueUnitIds = [
+    ...new Set(
+      allocations.map(
+        (item) =>
+          item.unitId,
+      ),
+    ),
+  ];
 
-  const { data: versions, error } = await (supabase as any)
-    .from('trainer_teaching_document_versions')
-    .select('allocation_id,document_type')
-    .in('allocation_id', allocationIds)
-    .eq('status', 'active');
-
-  if (error) {
-    throw new Error(
-      `Teaching document status could not be loaded: ${error.message}`,
+  const allocationIds =
+    allocations.map(
+      (item) =>
+        item.allocationId,
     );
-  }
 
-  const courseSet = new Set<string>();
-  const schemeSet = new Set<string>();
+  const [
+    institutionalCourseUnits,
+    institutionalSchemeUnits,
+    trainerCourseAllocations,
+    trainerSchemeAllocations,
+  ] =
+    await Promise.all([
+      activeInstitutionalUnitIds(
+        supabase as any,
+        uniqueUnitIds,
+        'course_outline',
+      ),
+      activeInstitutionalUnitIds(
+        supabase as any,
+        uniqueUnitIds,
+        'scheme_of_work',
+      ),
+      activeTrainerAllocationIds(
+        supabase as any,
+        allocationIds,
+        'course_outline',
+      ),
+      activeTrainerAllocationIds(
+        supabase as any,
+        allocationIds,
+        'scheme_of_work',
+      ),
+    ]);
 
-  for (const row of versions ?? []) {
-    if (row.document_type === 'course_outline') {
-      courseSet.add(String(row.allocation_id));
-    }
+  const missingCourseOutlines =
+    allocations.filter(
+      (item) =>
+        !institutionalCourseUnits.has(
+          item.unitId,
+        ) &&
+        !trainerCourseAllocations.has(
+          item.allocationId,
+        ),
+    );
 
-    if (row.document_type === 'scheme_of_work') {
-      schemeSet.add(String(row.allocation_id));
-    }
-  }
+  const missingSchemes =
+    allocations.filter(
+      (item) =>
+        !institutionalSchemeUnits.has(
+          item.unitId,
+        ) &&
+        !trainerSchemeAllocations.has(
+          item.allocationId,
+        ),
+    );
 
   return {
-    totalAllocations: allocations.length,
-    activeCourseOutlines: courseSet.size,
-    activeSchemes: schemeSet.size,
-    missingCourseOutlines: allocations.filter(
-      (item) => !courseSet.has(item.allocationId),
-    ),
-    missingSchemes: allocations.filter(
-      (item) => !schemeSet.has(item.allocationId),
-    ),
+    totalAllocations:
+      allocations.length,
+    activeCourseOutlines:
+      allocations.length -
+      missingCourseOutlines.length,
+    activeSchemes:
+      allocations.length -
+      missingSchemes.length,
+    missingCourseOutlines,
+    missingSchemes,
   };
 }

@@ -1,4 +1,4 @@
-import { AlertTriangle, BarChart3, CheckCircle2, FileUp, GraduationCap, History, Paperclip, UsersRound } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, BarChart3, CheckCircle2, FileUp, GraduationCap, History, Paperclip, UsersRound } from 'lucide-react';
 import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
@@ -21,7 +21,20 @@ export default async function StudentsModulePage() {
         description="Department student operations."
         icon={GraduationCap}
         context={<Badge variant="success">Active</Badge>}
-        actions={<Button asChild><Link href="/students/registry">Student registry</Link></Button>}
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/dashboard"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
+            >
+              <ArrowLeft className="size-3.5" aria-hidden="true" />
+              Dashboard
+            </Link>
+            <Button asChild>
+              <Link href="/students/registry">Student registry</Link>
+            </Button>
+          </div>
+        }
       />
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">

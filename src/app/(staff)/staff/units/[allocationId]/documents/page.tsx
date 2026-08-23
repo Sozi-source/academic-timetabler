@@ -2,10 +2,9 @@ import {
   ArrowLeft,
   BookOpen,
   CalendarCheck2,
-  Download,
-  FileCheck2,
   FileSpreadsheet,
   FileText,
+  Pencil,
   PlusCircle,
   Printer,
 } from 'lucide-react';
@@ -17,19 +16,7 @@ import { Card } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
 import { requireTrainerAccess } from '@/features/auth/authorization';
 import { requireStaffAllocation } from '@/features/staff-assessment/queries';
-import { TeachingDocumentWorkflowControls } from '@/features/teaching-documents/document-workflow-controls';
-import {
-  isTeachingDocumentReady,
-  teachingDocumentKinds,
-  teachingDocumentStatusLabel,
-  teachingDocumentStatusVariant,
-} from '@/features/teaching-documents/domain';
-import {
-  getActiveTeachingDocumentTemplates,
-  getTeachingDocumentsByAllocationIds,
-} from '@/features/teaching-documents/queries';
-import { getRecordOfWorkContext } from '@/features/teaching-documents/record-of-work-actions';
-import { StartTeachingDocumentButton } from '@/features/teaching-documents/start-document-button';
+import { getRecordOfWorkContext } from '@/features/teaching-documents/record-of-work-online/queries';
 
 interface PageProps {
   params: Promise<{
@@ -50,21 +37,7 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
     notFound();
   }
 
-  const [templates, documents, rowContext] = await Promise.all([
-    getActiveTeachingDocumentTemplates(),
-    getTeachingDocumentsByAllocationIds([allocationId]),
-    getRecordOfWorkContext(allocationId),
-  ]);
-
-  const templateByType = new Map(
-    templates.map((template) => [template.documentType, template])
-  );
-
-  const currentByType = new Map(
-    documents
-      .filter((document) => document.status !== 'archived')
-      .map((document) => [document.documentType, document])
-  );
+  const rowContext = await getRecordOfWorkContext(allocationId);
 
   const entriesCount = rowContext?.entries.length ?? 0;
   const uniqueWeeksCount = new Set(rowContext?.entries.map((e) => e.weekNumber) ?? []).size;
@@ -73,9 +46,9 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="My Units · Documents"
+        eyebrow="My Units Â· Documents"
         title={context.allocation.unitName}
-        description={`${context.allocation.cohortName} · ${context.allocation.academicPeriodName}`}
+        description={`${context.allocation.cohortName} Â· ${context.allocation.academicPeriodName}`}
         icon={FileText}
         actions={
           <Link
@@ -88,18 +61,18 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
         }
       />
 
-      {/* SECTION 1: STANDARDISED IMPERIAL COLLEGE TEACHING DOCUMENTS */}
+      {/* TEACHING DOCUMENTS */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-sm font-bold text-text-primary">
-              Standard Imperial College Teaching Documents
+              Teaching Documents
             </h2>
             <p className="text-xs text-text-muted">
-              Standardized curriculum structures with dynamic trainer and semester details.
+              Curriculum structures with dynamic trainer and semester details.
             </p>
           </div>
-          <Badge variant="success">Imperial Standard</Badge>
+          <Badge variant="success">Official</Badge>
         </div>
 
         <div className="grid gap-3 md:grid-cols-3">
@@ -110,20 +83,28 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
                 <span className="rounded-lg bg-primary/10 p-2 text-primary">
                   <BookOpen className="size-4" />
                 </span>
-                <Badge variant="neutral">Fixed Curriculum</Badge>
+                <Badge variant="neutral">Master Outline</Badge>
               </div>
               <h3 className="mt-3 text-sm font-bold text-text-primary">Course Outline</h3>
               <p className="mt-1 text-[11px] leading-relaxed text-text-muted">
                 Competency outcomes, 14-week topical schedule, 5-component grading breakdown, and references.
               </p>
             </div>
-            <div className="mt-4 pt-3 border-t border-border">
+            <div className="mt-4 pt-3 border-t border-border flex gap-2">
               <Link
                 href={`/staff/units/${allocationId}/documents/course-outline`}
-                className="inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-white hover:bg-primary-hover"
+                className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-white hover:bg-primary-hover"
               >
                 <Printer className="size-3.5" />
-                View & Print Outline
+                View & Print
+              </Link>
+              <Link
+                href={`/teaching-documents/curriculum/editor?unitId=${context.allocation.unitId}`}
+                className="inline-flex h-8 items-center justify-center gap-1 rounded-lg border border-border bg-white px-2.5 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
+                title="Edit Course Outline online"
+              >
+                <Pencil className="size-3.5" />
+                Edit
               </Link>
             </div>
           </Card>
@@ -139,16 +120,24 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
               </div>
               <h3 className="mt-3 text-sm font-bold text-text-primary">Scheme of Work</h3>
               <p className="mt-1 text-[11px] leading-relaxed text-text-muted">
-                Detailed weekly lesson matrix, learning activities, resources, and assessment strategies.
+                Detailed weekly lesson matrix, learning activities, resources, and remarks auto-synthesized from Outline.
               </p>
             </div>
-            <div className="mt-4 pt-3 border-t border-border">
+            <div className="mt-4 pt-3 border-t border-border flex gap-2">
               <Link
                 href={`/staff/units/${allocationId}/documents/scheme-of-work`}
-                className="inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-white hover:bg-primary-hover"
+                className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-white hover:bg-primary-hover"
               >
                 <Printer className="size-3.5" />
-                View & Print Scheme
+                View & Print
+              </Link>
+              <Link
+                href={`/teaching-documents/curriculum/editor?unitId=${context.allocation.unitId}`}
+                className="inline-flex h-8 items-center justify-center gap-1 rounded-lg border border-border bg-white px-2.5 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
+                title="Edit Course Outline to update Scheme"
+              >
+                <Pencil className="size-3.5" />
+                Edit
               </Link>
             </div>
           </Card>
@@ -189,112 +178,6 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
               </Link>
             </div>
           </Card>
-        </div>
-      </section>
-
-      {/* SECTION 2: INSTITUTIONAL UPLOADED TEMPLATES & SUBMISSION CONTROLS */}
-      <section className="space-y-3">
-        <h2 className="text-sm font-bold text-text-primary">
-          Institutional Document Approvals & Revisions
-        </h2>
-        <div className="grid gap-3 md:grid-cols-2">
-          {teachingDocumentKinds.map((kind) => {
-            const template = templateByType.get(kind.value);
-            const current = currentByType.get(kind.value);
-            const templateReady = isTeachingDocumentReady(
-              template?.status ?? null,
-              template?.storagePath ?? null
-            );
-
-            return (
-              <article
-                key={kind.value}
-                className="rounded-xl border border-border bg-white px-4 py-4"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-semibold text-text-primary">
-                      {kind.label}
-                    </h3>
-                    <p className="mt-1 text-[11px] leading-5 text-text-muted">
-                      {kind.description}
-                    </p>
-                  </div>
-
-                  {current ? (
-                    <Badge
-                      variant={teachingDocumentStatusVariant(current.status)}
-                    >
-                      {teachingDocumentStatusLabel(current.status)}
-                    </Badge>
-                  ) : (
-                    <Badge variant={templateReady ? 'success' : 'neutral'}>
-                      {templateReady
-                        ? `Template v${template?.versionNumber}`
-                        : 'Template pending'}
-                    </Badge>
-                  )}
-                </div>
-
-                <div className="mt-4 border-t border-border pt-3">
-                  {!current ? (
-                    <div className="flex flex-wrap items-end justify-between gap-3">
-                      <p className="text-[10px] text-text-muted">
-                        {templateReady
-                          ? 'Creates an exact private working copy.'
-                          : 'Official template not connected.'}
-                      </p>
-
-                      <StartTeachingDocumentButton
-                        allocationId={allocationId}
-                        documentType={kind.value}
-                        disabled={!templateReady}
-                      />
-                    </div>
-                  ) : current.status === 'draft' ? (
-                    <div className="flex flex-wrap items-end justify-between gap-3">
-                      <p className="text-[10px] text-text-muted">
-                        Prepare the exact template working copy.
-                      </p>
-
-                      <StartTeachingDocumentButton
-                        allocationId={allocationId}
-                        documentType={kind.value}
-                        disabled={!templateReady}
-                        label="Prepare"
-                      />
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="text-[10px] text-text-muted">
-                          Document v{current.versionNumber}
-                          {current.currentRevisionNumber
-                            ? ` · revision ${current.currentRevisionNumber}`
-                            : ''}
-                        </p>
-
-                        <a
-                          href={`/api/staff/teaching-documents/${current.id}/template`}
-                          className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-2.5 text-[11px] font-semibold text-text-secondary transition hover:bg-surface-subtle"
-                        >
-                          <Download className="size-3" aria-hidden="true" />
-                          Source template
-                        </a>
-                      </div>
-
-                      <TeachingDocumentWorkflowControls
-                        documentId={current.id}
-                        status={current.status}
-                        storagePath={current.storagePath}
-                        reviewNote={current.reviewNote}
-                      />
-                    </div>
-                  )}
-                </div>
-              </article>
-            );
-          })}
         </div>
       </section>
     </div>

@@ -172,11 +172,23 @@ export function LoginForm({
         Trainer without an account?{' '}
         <Link
           href="/staff/register"
-          className="font-semibold text-header-blue hover:underline"
+          className="font-semibold text-primary hover:underline"
         >
           Create staff account
         </Link>
       </p>
+
+      <div className="border-t border-border pt-3 text-center">
+        <p className="text-xs text-text-muted">
+          Are you a student?{' '}
+          <Link
+            href="/student/login"
+            className="font-semibold text-primary hover:underline"
+          >
+            Student Portal Sign In →
+          </Link>
+        </p>
+      </div>
     </form>
   );
 }

@@ -51,7 +51,7 @@ export default async function DailyReportsPage({
   const today = nairobiToday();
 
   return (
-    <div className="space-y-5">
+    <div className="mx-auto w-full max-w-[1400px] space-y-5">
       <PageHeader
         eyebrow="Academic operations"
         title="Trainer Daily Reports"

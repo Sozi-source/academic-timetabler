@@ -70,6 +70,18 @@ export default async function StudentPortalLoginPage() {
 
           <div className="px-6 py-5">
             <StudentLoginForm />
+
+            <div className="mt-4 border-t border-border pt-3 text-center">
+              <p className="text-xs text-text-muted">
+                Staff member or Trainer?{' '}
+                <Link
+                  href="/login"
+                  className="font-semibold text-primary hover:underline"
+                >
+                  Staff Sign In →
+                </Link>
+              </p>
+            </div>
           </div>
         </Card>
       </div>

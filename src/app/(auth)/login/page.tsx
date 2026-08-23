@@ -1,32 +1,24 @@
 import type { Metadata } from 'next';
-import { CalendarDays } from 'lucide-react';
-import { LoginForm } from '@/features/auth/login-form';
+import { UnifiedLoginCard } from '@/features/auth/unified-login-card';
 
 export const metadata: Metadata = {
   title: 'Sign in | Academic Planning System',
   description: 'Sign in to the Academic Planning System.',
 };
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string | string[] }> }) {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string | string[]; role?: string }>;
+}) {
   const parameters = await searchParams;
   const nextPath = typeof parameters.next === 'string' ? parameters.next : undefined;
+  const defaultRole = parameters.role === 'student' ? 'student' : 'staff';
 
-  return <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-5 py-10">
-    <div className="absolute inset-x-0 top-0 h-1.5 bg-institutional-yellow" aria-hidden="true" />
-
-    <section className="relative z-10 w-full max-w-md overflow-hidden rounded-xl border border-border bg-surface shadow-lg" aria-labelledby="login-title">
-      <div className="flex h-[4.75rem] items-center gap-3 border-b border-primary/20 bg-institutional-yellow px-6">
-        <span className="flex size-10 items-center justify-center rounded-lg bg-primary-deeper text-white shadow-sm ring-1 ring-black/10">
-          <CalendarDays className="size-5" aria-hidden="true" />
-        </span>
-        <p className="text-sm font-bold tracking-tight text-primary-deeper">Academic Planning System</p>
-      </div>
-
-      <div className="p-6">
-        <div className="mb-6 h-1 w-10 rounded-full bg-primary" aria-hidden="true" />
-        <h1 id="login-title" className="text-2xl font-semibold tracking-tight text-text-primary">Sign in</h1>
-        <div className="mt-6"><LoginForm nextPath={nextPath} /></div>
-      </div>
-    </section>
-  </main>;
+  return (
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-5 py-10">
+      <div className="absolute inset-x-0 top-0 h-1.5 bg-institutional-yellow" aria-hidden="true" />
+      <UnifiedLoginCard defaultRole={defaultRole} nextPath={nextPath} />
+    </main>
+  );
 }

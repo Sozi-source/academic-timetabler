@@ -1,11 +1,2 @@
-export interface CurriculumContentImportState {
-  status: 'idle' | 'error' | 'success';
-  message: string | null;
-  details?: string[];
-  batchId?: string;
-}
-
-export const initialCurriculumContentImportState: CurriculumContentImportState = {
-  status: 'idle',
-  message: null,
-};
+// This file is intentionally left empty - see ./state.ts for CurriculumContentImportState
+export {};

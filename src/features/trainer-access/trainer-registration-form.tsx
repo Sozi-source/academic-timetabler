@@ -200,46 +200,40 @@ export function TrainerRegistrationForm() {
 
   return (
     <form
-      onSubmit={
-        submit
-      }
-      className="space-y-4"
+      onSubmit={submit}
+      className="space-y-3.5"
     >
       {error ? (
-        <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-[11px] leading-5 text-red-800">
+        <div className="flex items-start gap-2.5 rounded-lg border border-danger-border bg-danger-surface px-3 py-2.5 text-xs text-danger">
           <AlertCircle
             className="mt-0.5 size-3.5 shrink-0"
             aria-hidden="true"
           />
-          {
-            error
-          }
+          <p>{error}</p>
         </div>
       ) : null}
 
       {notice ? (
-        <div className="flex items-start gap-2 rounded-lg border border-border bg-surface-subtle px-3 py-2.5 text-[11px] leading-5 text-text-secondary">
+        <div className="flex items-start gap-2.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs text-emerald-900">
           <CheckCircle2
-            className="mt-0.5 size-3.5 shrink-0"
+            className="mt-0.5 size-3.5 shrink-0 text-emerald-600"
             aria-hidden="true"
           />
-          {
-            notice
-          }
+          <p>{notice}</p>
         </div>
       ) : null}
 
-      <div>
+      <div className="space-y-1">
         <label
           htmlFor="staff-email"
-          className="text-xs font-semibold text-text-secondary"
+          className="block text-xs font-semibold text-text-primary"
         >
-          Registered email
+          Registered departmental email
         </label>
 
-        <div className="relative mt-1.5">
+        <div className="relative">
           <Mail
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-muted"
+            className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-text-muted"
             aria-hidden="true"
           />
 
@@ -248,37 +242,26 @@ export function TrainerRegistrationForm() {
             type="email"
             autoComplete="email"
             required
-            disabled={
-              pending
-            }
-            value={
-              email
-            }
-            onChange={
-              (
-                event,
-              ) =>
-                setEmail(
-                  event.target.value,
-                )
-            }
-            className="h-11 w-full rounded-lg border border-border-strong bg-white pl-10 pr-3 text-sm text-text-primary outline-none transition focus:border-header-blue focus:ring-4 focus:ring-header-blue/10 disabled:bg-surface-subtle"
-            placeholder="name@example.com"
+            disabled={pending}
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            className="h-10 w-full rounded-lg border border-border bg-surface pl-9 pr-3 text-xs text-text-primary outline-none transition placeholder:text-text-muted hover:border-focus-border focus:border-focus-border focus:ring-2 focus:ring-focus-ring/25 disabled:bg-surface-muted"
+            placeholder="name@college.ac.ke"
           />
         </div>
       </div>
 
-      <div>
+      <div className="space-y-1">
         <label
           htmlFor="staff-password"
-          className="text-xs font-semibold text-text-secondary"
+          className="block text-xs font-semibold text-text-primary"
         >
-          Password
+          Create password
         </label>
 
-        <div className="relative mt-1.5">
+        <div className="relative">
           <LockKeyhole
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-muted"
+            className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-text-muted"
             aria-hidden="true"
           />
 
@@ -287,88 +270,70 @@ export function TrainerRegistrationForm() {
             type="password"
             autoComplete="new-password"
             required
-            minLength={
-              8
-            }
-            disabled={
-              pending
-            }
-            value={
-              password
-            }
-            onChange={
-              (
-                event,
-              ) =>
-                setPassword(
-                  event.target.value,
-                )
-            }
-            className="h-11 w-full rounded-lg border border-border-strong bg-white pl-10 pr-3 text-sm text-text-primary outline-none transition focus:border-header-blue focus:ring-4 focus:ring-header-blue/10 disabled:bg-surface-subtle"
+            minLength={8}
+            disabled={pending}
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            className="h-10 w-full rounded-lg border border-border bg-surface pl-9 pr-3 text-xs text-text-primary outline-none transition hover:border-focus-border focus:border-focus-border focus:ring-2 focus:ring-focus-ring/25 disabled:bg-surface-muted"
+            placeholder="Min. 8 characters"
           />
         </div>
       </div>
 
-      <div>
+      <div className="space-y-1">
         <label
           htmlFor="staff-password-confirm"
-          className="text-xs font-semibold text-text-secondary"
+          className="block text-xs font-semibold text-text-primary"
         >
           Confirm password
         </label>
 
-        <input
-          id="staff-password-confirm"
-          type="password"
-          autoComplete="new-password"
-          required
-          minLength={
-            8
-          }
-          disabled={
-            pending
-          }
-          value={
-            confirmPassword
-          }
-          onChange={
-            (
-              event,
-            ) =>
-              setConfirmPassword(
-                event.target.value,
-              )
-          }
-          className="mt-1.5 h-11 w-full rounded-lg border border-border-strong bg-white px-3 text-sm text-text-primary outline-none transition focus:border-header-blue focus:ring-4 focus:ring-header-blue/10 disabled:bg-surface-subtle"
-        />
+        <div className="relative">
+          <LockKeyhole
+            className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-text-muted"
+            aria-hidden="true"
+          />
+
+          <input
+            id="staff-password-confirm"
+            type="password"
+            autoComplete="new-password"
+            required
+            minLength={8}
+            disabled={pending}
+            value={confirmPassword}
+            onChange={(event) => setConfirmPassword(event.target.value)}
+            className="h-10 w-full rounded-lg border border-border bg-surface pl-9 pr-3 text-xs text-text-primary outline-none transition hover:border-focus-border focus:border-focus-border focus:ring-2 focus:ring-focus-ring/25 disabled:bg-surface-muted"
+            placeholder="Repeat password"
+          />
+        </div>
       </div>
 
       <button
         type="submit"
-        disabled={
-          pending
-        }
-        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-header-blue px-4 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+        disabled={pending}
+        className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white shadow-2xs transition hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-focus-ring/40 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {pending ? (
-          <LoaderCircle
-            className="size-4 animate-spin"
-            aria-hidden="true"
-          />
-        ) : null}
-
-        {pending
-          ? 'Creating account'
-          : 'Create staff account'}
+          <>
+            <LoaderCircle
+              className="size-3.5 animate-spin"
+              aria-hidden="true"
+            />
+            Creating account...
+          </>
+        ) : (
+          'Activate Staff Account'
+        )}
       </button>
 
       <p className="text-center text-[11px] text-text-muted">
         Already registered?{' '}
         <Link
           href="/login"
-          className="font-semibold text-header-blue hover:underline"
+          className="font-semibold text-primary hover:underline"
         >
-          Sign in
+          Sign in →
         </Link>
       </p>
     </form>

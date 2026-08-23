@@ -38,7 +38,7 @@ export function LoginForm({
   return (
     <form
       action={formAction}
-      className="space-y-5"
+      className="space-y-3.5"
       noValidate
     >
       <input
@@ -50,10 +50,10 @@ export function LoginForm({
       {state.message ? (
         <div
           role="alert"
-          className="flex items-start gap-3 rounded-xl border border-danger-border bg-danger-surface px-4 py-3 text-sm text-danger"
+          className="flex items-start gap-2.5 rounded-lg border border-danger-border bg-danger-surface px-3 py-2.5 text-xs text-danger"
         >
           <AlertCircle
-            className="mt-0.5 size-4 shrink-0"
+            className="mt-0.5 size-3.5 shrink-0"
             aria-hidden="true"
           />
 
@@ -61,17 +61,17 @@ export function LoginForm({
         </div>
       ) : null}
 
-      <div className="space-y-2">
+      <div className="space-y-1">
         <label
           htmlFor="email"
-          className="block text-sm font-medium text-text-primary"
+          className="block text-xs font-semibold text-text-primary"
         >
           Email address
         </label>
 
         <div className="relative">
           <Mail
-            className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-text-muted"
+            className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-text-muted"
             aria-hidden="true"
           />
 
@@ -90,31 +90,31 @@ export function LoginForm({
                 : undefined
             }
             placeholder="name@college.ac.ke"
-            className="h-12 w-full rounded-xl border border-border-strong bg-surface pl-10 pr-4 text-sm text-text-primary outline-none transition placeholder:text-text-subtle hover:border-focus-border focus:border-focus-border focus:ring-4 focus:ring-focus-ring/25 disabled:cursor-not-allowed disabled:bg-surface-muted aria-invalid:border-danger aria-invalid:focus:ring-danger-border/40"
+            className="h-10 w-full rounded-lg border border-border bg-surface pl-9 pr-3 text-xs text-text-primary outline-none transition placeholder:text-text-muted hover:border-focus-border focus:border-focus-border focus:ring-2 focus:ring-focus-ring/25 disabled:cursor-not-allowed disabled:bg-surface-muted aria-invalid:border-danger aria-invalid:focus:ring-danger-border/40"
           />
         </div>
 
         {emailError ? (
           <p
             id="email-error"
-            className="text-xs font-medium text-danger"
+            className="text-[11px] font-medium text-danger"
           >
             {emailError}
           </p>
         ) : null}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1">
         <label
           htmlFor="password"
-          className="block text-sm font-medium text-text-primary"
+          className="block text-xs font-semibold text-text-primary"
         >
           Password
         </label>
 
         <div className="relative">
           <LockKeyhole
-            className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-text-muted"
+            className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-text-muted"
             aria-hidden="true"
           />
 
@@ -131,14 +131,14 @@ export function LoginForm({
                 ? 'password-error'
                 : undefined
             }
-            className="h-12 w-full rounded-xl border border-border-strong bg-surface pl-10 pr-4 text-sm text-text-primary outline-none transition hover:border-focus-border focus:border-focus-border focus:ring-4 focus:ring-focus-ring/25 disabled:cursor-not-allowed disabled:bg-surface-muted aria-invalid:border-danger aria-invalid:focus:ring-danger-border/40"
+            className="h-10 w-full rounded-lg border border-border bg-surface pl-9 pr-3 text-xs text-text-primary outline-none transition hover:border-focus-border focus:border-focus-border focus:ring-2 focus:ring-focus-ring/25 disabled:cursor-not-allowed disabled:bg-surface-muted aria-invalid:border-danger aria-invalid:focus:ring-danger-border/40"
           />
         </div>
 
         {passwordError ? (
           <p
             id="password-error"
-            className="text-xs font-medium text-danger"
+            className="text-[11px] font-medium text-danger"
           >
             {passwordError}
           </p>
@@ -148,28 +148,29 @@ export function LoginForm({
       <button
         type="submit"
         disabled={pending}
-        className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary-hover focus:outline-none focus:ring-4 focus:ring-focus-ring/40 disabled:cursor-not-allowed disabled:opacity-65"
+        className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white shadow-2xs transition hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-focus-ring/40 disabled:cursor-not-allowed disabled:opacity-65"
       >
         {pending ? (
           <>
             <LoaderCircle
-              className="size-4 animate-spin"
+              className="size-3.5 animate-spin"
               aria-hidden="true"
             />
-            Signing in
+            Signing in...
           </>
         ) : (
           <>
             <LogIn
-              className="size-4"
+              className="size-3.5"
               aria-hidden="true"
             />
             Sign in
           </>
         )}
       </button>
+
       <p className="text-center text-[11px] text-text-muted">
-        Trainer without an account?{' '}
+        New staff member?{' '}
         <Link
           href="/staff/register"
           className="font-semibold text-primary hover:underline"
@@ -177,18 +178,6 @@ export function LoginForm({
           Create staff account
         </Link>
       </p>
-
-      <div className="border-t border-border pt-3 text-center">
-        <p className="text-xs text-text-muted">
-          Are you a student?{' '}
-          <Link
-            href="/student/login"
-            className="font-semibold text-primary hover:underline"
-          >
-            Student Portal Sign In →
-          </Link>
-        </p>
-      </div>
     </form>
   );
 }

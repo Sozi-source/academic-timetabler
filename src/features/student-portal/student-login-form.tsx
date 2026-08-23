@@ -40,14 +40,12 @@ export function StudentLoginForm() {
 
   return (
     <form
-      action={
-        action
-      }
-      className="space-y-4"
+      action={action}
+      className="space-y-3.5"
     >
-      <div>
+      <div className="space-y-1">
         <label
-          className="mb-1.5 block text-xs font-semibold text-text-primary"
+          className="block text-xs font-semibold text-text-primary"
           htmlFor="admissionNumber"
         >
           Admission number
@@ -58,13 +56,14 @@ export function StudentLoginForm() {
           name="admissionNumber"
           autoComplete="username"
           required
-          placeholder="Your admission number"
+          placeholder="e.g. ADM-2026-001"
+          className="h-10 rounded-lg text-xs"
         />
       </div>
 
-      <div>
+      <div className="space-y-1">
         <label
-          className="mb-1.5 block text-xs font-semibold text-text-primary"
+          className="block text-xs font-semibold text-text-primary"
           htmlFor="pin"
         >
           Access PIN
@@ -72,7 +71,7 @@ export function StudentLoginForm() {
 
         <div className="relative">
           <KeyRound
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-muted"
+            className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-text-muted"
             aria-hidden="true"
           />
 
@@ -82,46 +81,38 @@ export function StudentLoginForm() {
             type="password"
             inputMode="numeric"
             autoComplete="current-password"
-            maxLength={
-              6
-            }
+            maxLength={6}
             required
             placeholder="6-digit PIN"
-            className="pl-10"
+            className="h-10 rounded-lg pl-9 text-xs"
           />
         </div>
       </div>
 
       {state.error ? (
-        <p className="text-xs font-medium text-danger">
-          {
-            state.error
-          }
+        <p className="text-[11px] font-medium text-danger">
+          {state.error}
         </p>
       ) : null}
 
       <Button
-        className="w-full"
+        className="h-10 w-full rounded-lg text-xs font-semibold"
         type="submit"
-        disabled={
-          pending
-        }
+        disabled={pending}
       >
         {pending ? (
           <LoaderCircle
-            className="size-4 animate-spin"
+            className="size-3.5 animate-spin"
             aria-hidden="true"
           />
         ) : (
           <LogIn
-            className="size-4"
+            className="size-3.5"
             aria-hidden="true"
           />
         )}
 
-        {pending
-          ? 'Signing in'
-          : 'Sign in'}
+        {pending ? 'Signing in...' : 'Sign in'}
       </Button>
     </form>
   );

@@ -57,6 +57,8 @@ export default async function DailyReportsPage({
         title="Trainer Daily Reports"
         description="Daily teaching attendance, absences and concerns for HOD review."
         icon={ClipboardList}
+        backHref="/dashboard"
+        backLabel="Dashboard"
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <a

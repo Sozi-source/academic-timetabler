@@ -21,7 +21,15 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
 
   return (
     <div className="space-y-4">
-      <PageHeader eyebrow="Assessment" title="Unit markbooks" description="One workbook per unit for CAT and final exam marks." icon={ListChecks} context={<Badge variant="neutral">{markbooks.length} units</Badge>} />
+      <PageHeader
+        eyebrow="Assessment"
+        title="Unit markbooks"
+        description="One workbook per unit for CAT and final exam marks."
+        icon={ListChecks}
+        backHref="/assessment"
+        backLabel="Assessments"
+        context={<Badge variant="neutral">{markbooks.length} units</Badge>}
+      />
 
       <Card className="p-4">
         <div className="mb-3 flex items-center gap-2"><ClipboardPlus className="size-4 text-primary" /><h2 className="text-sm font-bold text-text-primary">New unit markbook</h2></div>

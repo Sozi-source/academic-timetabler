@@ -13,7 +13,15 @@ export default async function AssessmentPopulationPage() {
 
   return (
     <div className="space-y-4">
-      <PageHeader eyebrow="Assessment" title="Assessment population" description="Expected students for each unit markbook." icon={UsersRound} context={<Badge variant="neutral">{markbooks.length} units</Badge>} />
+      <PageHeader
+        eyebrow="Assessment"
+        title="Assessment population"
+        description="Expected students for each unit markbook."
+        icon={UsersRound}
+        backHref="/assessment"
+        backLabel="Assessments"
+        context={<Badge variant="neutral">{markbooks.length} units</Badge>}
+      />
       <Card className="overflow-hidden">
         <div className="divide-y divide-border">
           {markbooks.map((assessment) => (

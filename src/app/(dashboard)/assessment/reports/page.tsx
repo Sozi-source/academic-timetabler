@@ -71,6 +71,8 @@ export default async function AssessmentReportsPage() {
         title="CAT & exam reports"
         description={data.periodName}
         icon={FileText}
+        backHref="/assessment"
+        backLabel="Assessments"
       />
 
       <div className="grid gap-4 md:grid-cols-2">

@@ -42,6 +42,8 @@ export default async function TeachingDocumentsPage() {
         title="Teaching Documents"
         description="Manage curriculum records, submissions and released documents."
         icon={FileText}
+        backHref="/dashboard"
+        backLabel="Dashboard"
         actions={
           <div className="flex flex-wrap gap-2">
             <Link

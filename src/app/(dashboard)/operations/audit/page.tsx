@@ -59,6 +59,8 @@ export default async function OperationsAuditPage() {
         title="Operational audit"
         description="Recent controlled workflow activity."
         icon={History}
+        backHref="/operations"
+        backLabel="Operations"
         context={
           <Badge variant="neutral">
             {

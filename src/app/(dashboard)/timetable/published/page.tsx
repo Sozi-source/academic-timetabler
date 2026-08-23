@@ -39,6 +39,8 @@ export default async function PublishedTimetablesPage({
       eyebrow="Step 4 of 4"
       title="Timetable publication"
       description="Publish the current timetable in one step. Every version stays in history."
+      backHref="/dashboard"
+      backLabel="Dashboard"
       actions={<Badge variant="primary"><FileChartColumn className="size-3.5"/> Direct publishing</Badge>}
     />
 

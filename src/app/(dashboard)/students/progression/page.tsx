@@ -28,6 +28,8 @@ export default async function StudentProgressionPage() {
         title="Student status & progression"
         description="Track exceptions and completion."
         icon={History}
+        backHref="/students"
+        backLabel="Students"
         context={<Badge variant="neutral">{students.length} tracked</Badge>}
       />
 

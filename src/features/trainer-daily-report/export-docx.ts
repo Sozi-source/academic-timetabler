@@ -350,8 +350,7 @@ export async function buildTrainerDailyReportDocx(
       {
         properties: {
           page: {
-            pageRanges: false,
-            orientation: PageOrientation.LANDSCAPE,
+            size: { orientation: PageOrientation.LANDSCAPE },
             margin: { top: 720, bottom: 720, left: 720, right: 720 }, // 0.5 in margins
           },
         },

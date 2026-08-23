@@ -3,6 +3,7 @@ import {
   CalendarCheck2,
   CalendarDays,
   ClipboardCheck,
+  ClipboardList,
   Download,
   FileText,
   GraduationCap,
@@ -82,12 +83,21 @@ export default async function StaffHomePage() {
         description="Your allocated units, teaching documents, and assessments."
         icon={GraduationCap}
         actions={
-          <Link
-            href="/staff/units"
-            className="inline-flex h-9 items-center justify-center rounded-xl bg-teal-900 px-4 text-xs font-black text-amber-300 shadow-sm transition hover:bg-teal-800 hover:text-amber-200 ring-1 ring-teal-950/20"
-          >
-            My Units
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/staff/daily-report"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-white px-3.5 text-xs font-bold text-teal-900 shadow-xs ring-1 ring-slate-200 hover:bg-slate-50 transition"
+            >
+              <ClipboardList className="size-3.5 text-teal-800" />
+              Daily Report
+            </Link>
+            <Link
+              href="/staff/units"
+              className="inline-flex h-9 items-center justify-center rounded-xl bg-teal-900 px-4 text-xs font-black text-amber-300 shadow-sm transition hover:bg-teal-800 hover:text-amber-200 ring-1 ring-teal-950/20"
+            >
+              My Units
+            </Link>
+          </div>
         }
       />
 
@@ -125,7 +135,7 @@ export default async function StaffHomePage() {
         <h2 className="text-xs font-black uppercase tracking-wider text-teal-800">
           Quick Access
         </h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           <Link
             href="/staff/attendance"
             className="group flex items-center gap-3 rounded-xl border border-slate-200 border-l-4 border-l-teal-700 bg-white p-3.5 shadow-xs transition hover:border-teal-500 hover:shadow-sm"
@@ -136,6 +146,19 @@ export default async function StaffHomePage() {
             <div>
               <p className="text-xs font-black text-slate-950 group-hover:text-teal-900">Attendance</p>
               <p className="text-[11px] text-slate-500 font-medium">Class check-in & register</p>
+            </div>
+          </Link>
+
+          <Link
+            href="/staff/daily-report"
+            className="group flex items-center gap-3 rounded-xl border border-slate-200 border-l-4 border-l-emerald-600 bg-white p-3.5 shadow-xs transition hover:border-emerald-500 hover:shadow-sm"
+          >
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-800 group-hover:bg-emerald-100 font-bold">
+              <ClipboardList className="size-4.5" />
+            </span>
+            <div>
+              <p className="text-xs font-black text-slate-950 group-hover:text-emerald-900">Daily Report</p>
+              <p className="text-[11px] text-slate-500 font-medium">Submit day's report & log</p>
             </div>
           </Link>
 

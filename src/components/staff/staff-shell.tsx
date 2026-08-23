@@ -6,6 +6,7 @@ import {
   BookOpenCheck,
   CalendarCheck2,
   CalendarDays,
+  ClipboardList,
   Download,
   FileText,
   History,
@@ -44,6 +45,7 @@ const NAV_SECTIONS: NavSection[] = [
       { label: 'My Units', href: '/staff/units', icon: BookOpenCheck },
       { label: 'Weekly Timetable', href: '/staff/timetable', icon: CalendarDays },
       { label: 'Attendance Register', href: '/staff/attendance', icon: CalendarCheck2 },
+      { label: 'Daily Report', href: '/staff/daily-report', icon: ClipboardList },
     ],
   },
   {
@@ -65,8 +67,8 @@ const NAV_SECTIONS: NavSection[] = [
 const MOBILE_BOTTOM_NAV = [
   { label: 'Overview', href: '/staff', icon: LayoutDashboard, exact: true },
   { label: 'My Units', href: '/staff/units', icon: BookOpenCheck },
-  { label: 'Timetable', href: '/staff/timetable', icon: CalendarDays },
   { label: 'Attendance', href: '/staff/attendance', icon: CalendarCheck2 },
+  { label: 'Daily Report', href: '/staff/daily-report', icon: ClipboardList },
   { label: 'Documents', href: '/staff/documents', icon: FileText },
 ];
 

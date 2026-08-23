@@ -7,7 +7,7 @@ import {
   UsersRound,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useActionState, useEffect } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import {
@@ -143,6 +143,9 @@ export function TrainerDailyReportForm({
 }) {
   const router = useRouter();
 
+  const [otherActivity, setOtherActivity] = useState('');
+  const [concern, setConcern] = useState('');
+
   const [state, action, pending] = useActionState(
     submitTrainerDailyReportAction,
     initialTrainerDailyReportActionState,
@@ -153,6 +156,10 @@ export function TrainerDailyReportForm({
       router.refresh();
     }
   }, [router, state.status]);
+
+  const isNonTeachingDay = workspace.lessons.length === 0;
+  const hasText = otherActivity.trim().length > 0 || concern.trim().length > 0;
+  const isSubmittable = isNonTeachingDay ? hasText : workspace.readyToSubmit;
 
   if (workspace.status === 'submitted') {
     return (
@@ -195,7 +202,15 @@ export function TrainerDailyReportForm({
   }
 
   return (
-    <form action={action} className="space-y-4">
+    <form
+      action={action}
+      onSubmit={(e) => {
+        if (isNonTeachingDay && !hasText) {
+          e.preventDefault();
+        }
+      }}
+      className="space-y-4"
+    >
       <input type="hidden" name="reportDate" value={workspace.reportDate} />
 
       <LessonList workspace={workspace} />
@@ -222,7 +237,7 @@ export function TrainerDailyReportForm({
         </section>
       ) : null}
 
-      {workspace.lessons.length === 0 ? (
+      {isNonTeachingDay ? (
         <section className="rounded-xl border border-blue-200 bg-blue-50/70 px-4 py-3 text-blue-950">
           <p className="text-xs font-semibold">
             No scheduled lessons for this date
@@ -239,12 +254,14 @@ export function TrainerDailyReportForm({
             Other activity
           </span>
           <span className="mt-1 block text-[10px] text-text-muted">
-            {workspace.lessons.length === 0 ? 'Required on non-teaching days' : 'Optional · keep it brief'}
+            {isNonTeachingDay ? 'Required on non-teaching days' : 'Optional · keep it brief'}
           </span>
           <textarea
             name="otherActivity"
             rows={4}
             maxLength={800}
+            value={otherActivity}
+            onChange={(e) => setOtherActivity(e.target.value)}
             className="mt-3 w-full resize-y rounded-lg border border-border bg-white px-3 py-2 text-xs leading-5 text-text-primary outline-none focus:border-primary"
             placeholder="Meeting, supervision, practical preparation..."
           />
@@ -261,6 +278,8 @@ export function TrainerDailyReportForm({
             name="concern"
             rows={4}
             maxLength={1200}
+            value={concern}
+            onChange={(e) => setConcern(e.target.value)}
             className="mt-3 w-full resize-y rounded-lg border border-border bg-white px-3 py-2 text-xs leading-5 text-text-primary outline-none focus:border-primary"
             placeholder="Student, timetable, room, equipment or academic concern..."
           />
@@ -279,10 +298,18 @@ export function TrainerDailyReportForm({
         </div>
       ) : null}
 
-      <div className="flex justify-end">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-[11px] text-text-muted">
+          {isNonTeachingDay && !hasText ? (
+            <span className="text-amber-800 font-medium">
+              * Enter your activity or notes above to enable submission.
+            </span>
+          ) : null}
+        </div>
+
         <button
           type="submit"
-          disabled={pending || !workspace.readyToSubmit}
+          disabled={pending || !isSubmittable}
           className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
         >
           <ClipboardCheck className="size-4" />

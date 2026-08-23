@@ -8,6 +8,7 @@ import {
   CalendarDays,
   CalendarRange,
   ClipboardCheck,
+  ClipboardList,
   FileChartColumn,
   FileCheck2,
   FileOutput,
@@ -62,6 +63,7 @@ export const dashboardNavigation = [
     items: [
       { label: 'Operations', href: '/operations', icon: ShieldCheck },
       { label: 'Class attendance', href: '/attendance', icon: Stethoscope },
+      { label: 'Trainer Daily Reports', href: '/operations/daily-reports', icon: ClipboardList },
       { label: 'Executive reports', href: '/reports', icon: BarChart3 },
       { label: 'Action Center', href: '/operations/action-center', icon: ListChecks },
       { label: 'Operational audit', href: '/operations/audit', icon: History },

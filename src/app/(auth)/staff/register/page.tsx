@@ -18,18 +18,13 @@ export default function StaffRegistrationPage() {
         aria-labelledby="register-title"
       >
         {/* Top Brand Banner */}
-        <div className="flex h-14 items-center gap-3 border-b border-primary/20 bg-institutional-yellow px-5">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-primary-deeper text-white shadow-2xs">
-            <CalendarDays className="size-4.5" aria-hidden="true" />
+        <div className="flex h-12 items-center gap-2.5 border-b border-primary/20 bg-institutional-yellow px-5">
+          <span className="flex size-7 items-center justify-center rounded-lg bg-primary-deeper text-white shadow-2xs">
+            <CalendarDays className="size-4" aria-hidden="true" />
           </span>
-          <div className="min-w-0">
-            <p className="truncate text-xs font-bold tracking-tight text-primary-deeper">
-              Academic Planning System
-            </p>
-            <p className="truncate text-[10px] font-medium text-primary-deep/80">
-              Imperial College of Medical & Health Sciences
-            </p>
-          </div>
+          <p className="truncate text-xs font-bold tracking-tight text-primary-deeper">
+            Academic Planning System
+          </p>
         </div>
 
         <div className="p-5">

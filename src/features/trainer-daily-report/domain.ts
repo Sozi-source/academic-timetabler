@@ -26,21 +26,33 @@ export function normalizeDailyReportDate(
   return Number.isNaN(parsed.getTime()) ? today : value;
 }
 
-export function formatDailyReportDate(value: string): string {
-  return new Intl.DateTimeFormat('en-GB', {
-    weekday: 'long',
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'UTC',
-  }).format(new Date(`${value}T00:00:00Z`));
+export function formatDailyReportDate(value?: string | null): string {
+  if (!value) return '';
+  try {
+    const d = new Date(`${value}T00:00:00Z`);
+    if (Number.isNaN(d.getTime())) return String(value);
+    return new Intl.DateTimeFormat('en-GB', {
+      weekday: 'long',
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(d);
+  } catch {
+    return String(value || '');
+  }
 }
 
-export function formatDailyReportTime(value: string): string {
-  const [rawHour, minute = '00'] = value.slice(0, 5).split(':');
-  const hour = Number(rawHour);
+export function formatDailyReportTime(value?: string | null): string {
+  if (!value || typeof value !== 'string') return '--:--';
+  try {
+    const [rawHour, minute = '00'] = value.slice(0, 5).split(':');
+    const hour = Number(rawHour);
 
-  if (!Number.isFinite(hour)) return value.slice(0, 5);
+    if (!Number.isFinite(hour)) return value.slice(0, 5);
 
-  return `${hour % 12 || 12}:${minute} ${hour >= 12 ? 'PM' : 'AM'}`;
+    return `${hour % 12 || 12}:${minute} ${hour >= 12 ? 'PM' : 'AM'}`;
+  } catch {
+    return String(value || '--:--');
+  }
 }

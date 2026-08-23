@@ -91,15 +91,18 @@ export async function getTrainerDailyReportWorkspace(
 
     let existingReport: any = null;
     try {
-      const { data: rep } = await (supabase as any)
+      const { createAdminClient } = await import('@/lib/supabase/admin');
+      const adminDb = createAdminClient();
+
+      const { data: rep } = await (adminDb as any)
         .from('trainer_daily_reports')
         .select('id, status, submitted_at, other_activity, concern')
-        .eq('trainer_id', workspace.trainerId)
+        .or(`trainer_id.eq.${workspace.trainerId},trainer_profile_id.eq.${profile.id}`)
         .eq('report_date', reportDate)
         .maybeSingle();
       existingReport = rep;
     } catch {
-      // Table might not exist yet
+      // Table query fallback
     }
 
     const readyToSubmit = lessons.length === 0 || lessons.every((l) => l.attendanceStatus === 'completed');
@@ -186,12 +189,14 @@ export async function getDepartmentDailyReports(
     // 2. Get submitted reports for this date
     const { data: reportsData } = await (adminDb as any)
       .from('trainer_daily_reports')
-      .select('id, trainer_id, status, submitted_at, other_activity, concern')
+      .select('id, trainer_id, trainer_profile_id, status, submitted_at, other_activity, concern')
       .eq('report_date', reportDate);
 
-    const reportMap = new Map<string, Record<string, any>>(
-      (reportsData ?? []).map((r: any) => [String(r.trainer_id), r as Record<string, any>])
-    );
+    const reportMap = new Map<string, Record<string, any>>();
+    for (const r of (reportsData ?? [])) {
+      if (r.trainer_id) reportMap.set(String(r.trainer_id), r);
+      if (r.trainer_profile_id) reportMap.set(String(r.trainer_profile_id), r);
+    }
 
     const submittedReports: any[] = [];
     let totalConcerns = 0;

@@ -84,3 +84,13 @@ export interface DepartmentDailyReportWorkspace {
   pendingTrainers: DepartmentDailyReportTrainer[];
   reports: DepartmentDailyReportItem[];
 }
+
+export interface TrainerDailyReportActionState {
+  status: 'idle' | 'success' | 'error';
+  message: string;
+}
+
+export const initialTrainerDailyReportActionState: TrainerDailyReportActionState = {
+  status: 'idle',
+  message: '',
+};

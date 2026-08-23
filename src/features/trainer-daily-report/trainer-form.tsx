@@ -10,12 +10,12 @@ import Link from 'next/link';
 import { useActionState, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+import { submitTrainerDailyReportAction } from './actions';
+import { formatDailyReportTime } from './domain';
 import {
   initialTrainerDailyReportActionState,
-  submitTrainerDailyReportAction,
-} from './actions';
-import { formatDailyReportTime } from './domain';
-import type { TrainerDailyReportWorkspace } from './types';
+  type TrainerDailyReportWorkspace,
+} from './types';
 
 function AttendanceBadge({
   status,
@@ -53,7 +53,9 @@ function LessonList({
 }: {
   workspace: TrainerDailyReportWorkspace;
 }) {
-  if (workspace.lessons.length === 0) {
+  const lessons = workspace?.lessons ?? [];
+
+  if (lessons.length === 0) {
     return (
       <section className="rounded-xl border border-border bg-white p-5 text-center">
         <UsersRound className="mx-auto size-5 text-text-muted" />
@@ -79,58 +81,61 @@ function LessonList({
       </div>
 
       <div className="divide-y divide-border">
-        {workspace.lessons.map((lesson) => (
-          <article key={lesson.scheduledSessionId} className="p-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-text-primary">
-                  {lesson.unitCode} · {lesson.unitName}
-                </p>
-                <p className="mt-1 text-[11px] text-text-muted">
-                  {lesson.cohortName} · {formatDailyReportTime(lesson.startsAt)}–
-                  {formatDailyReportTime(lesson.endsAt)}
-                </p>
-              </div>
-
-              <AttendanceBadge status={lesson.attendanceStatus} />
-            </div>
-
-            {lesson.attendanceStatus === 'completed' ? (
-              <div className="mt-3 rounded-lg bg-surface-subtle px-3 py-2.5">
-                <div className="flex flex-wrap gap-x-5 gap-y-1 text-[11px]">
-                  <span>
-                    Present: <strong>{lesson.presentCount}</strong>
-                  </span>
-                  <span>
-                    Absent: <strong>{lesson.absentCount}</strong>
-                  </span>
+        {lessons.map((lesson) => {
+          const absentees = lesson?.absentees ?? [];
+          return (
+            <article key={lesson.scheduledSessionId || Math.random()} className="p-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-text-primary">
+                    {lesson.unitCode ? `${lesson.unitCode} · ` : ''}{lesson.unitName || 'Lesson'}
+                  </p>
+                  <p className="mt-1 text-[11px] text-text-muted">
+                    {lesson.cohortName || 'Class'} · {formatDailyReportTime(lesson.startsAt)}–
+                    {formatDailyReportTime(lesson.endsAt)}
+                  </p>
                 </div>
 
-                {lesson.absentees.length > 0 ? (
-                  <div className="mt-2">
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-text-muted">
-                      Absentees
-                    </p>
-                    <div className="mt-1 flex flex-wrap gap-1.5">
-                      {lesson.absentees.map((student) => (
-                        <span
-                          key={student.studentId}
-                          className="rounded-md border border-border bg-white px-2 py-1 text-[10px] text-text-secondary"
-                        >
-                          {student.fullName} · {student.admissionNumber}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <p className="mt-2 text-[10px] text-text-muted">
-                    No absentees recorded.
-                  </p>
-                )}
+                <AttendanceBadge status={lesson.attendanceStatus} />
               </div>
-            ) : null}
-          </article>
-        ))}
+
+              {lesson.attendanceStatus === 'completed' ? (
+                <div className="mt-3 rounded-lg bg-surface-subtle px-3 py-2.5">
+                  <div className="flex flex-wrap gap-x-5 gap-y-1 text-[11px]">
+                    <span>
+                      Present: <strong>{lesson.presentCount || 0}</strong>
+                    </span>
+                    <span>
+                      Absent: <strong>{lesson.absentCount || 0}</strong>
+                    </span>
+                  </div>
+
+                  {absentees.length > 0 ? (
+                    <div className="mt-2">
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+                        Absentees
+                      </p>
+                      <div className="mt-1 flex flex-wrap gap-1.5">
+                        {absentees.map((student) => (
+                          <span
+                            key={student.studentId}
+                            className="rounded-md border border-border bg-white px-2 py-1 text-[10px] text-text-secondary"
+                          >
+                            {student.fullName} · {student.admissionNumber}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="mt-2 text-[10px] text-text-muted">
+                      No absentees recorded.
+                    </p>
+                  )}
+                </div>
+              ) : null}
+            </article>
+          );
+        })}
       </div>
     </section>
   );
@@ -143,8 +148,8 @@ export function TrainerDailyReportForm({
 }) {
   const router = useRouter();
 
-  const [otherActivity, setOtherActivity] = useState('');
-  const [concern, setConcern] = useState('');
+  const [otherActivity, setOtherActivity] = useState(workspace?.otherActivity || '');
+  const [concern, setConcern] = useState(workspace?.concern || '');
 
   const [state, action, pending] = useActionState(
     submitTrainerDailyReportAction,
@@ -157,9 +162,9 @@ export function TrainerDailyReportForm({
     }
   }, [router, state.status]);
 
-  const isNonTeachingDay = workspace.lessons.length === 0;
+  const isNonTeachingDay = (workspace?.lessons ?? []).length === 0;
   const hasText = otherActivity.trim().length > 0 || concern.trim().length > 0;
-  const isSubmittable = isNonTeachingDay ? hasText : workspace.readyToSubmit;
+  const isSubmittable = isNonTeachingDay ? hasText : Boolean(workspace?.readyToSubmit);
 
   if (workspace.status === 'submitted') {
     return (

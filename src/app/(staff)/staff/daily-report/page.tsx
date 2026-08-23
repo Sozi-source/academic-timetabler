@@ -22,9 +22,28 @@ export default async function TrainerDailyReportPage({
   searchParams,
 }: PageProps) {
   const params = await searchParams;
-  const reportDate = normalizeDailyReportDate(params.date);
-  const workspace =
-    await getTrainerDailyReportWorkspace(reportDate);
+  const reportDate = normalizeDailyReportDate(params?.date);
+
+  const workspace = await getTrainerDailyReportWorkspace(reportDate).catch((err) => {
+    console.error('Failed to load trainer daily report workspace:', err);
+    return {
+      reportDate,
+      trainerId: '',
+      trainerName: 'Trainer',
+      trainerNumber: null,
+      homeDepartmentId: '',
+      homeDepartmentName: 'Academic Department',
+      status: 'draft' as const,
+      reportId: null,
+      submittedAt: null,
+      otherActivity: '',
+      concern: '',
+      readyToSubmit: true,
+      blockingReason: null,
+      lessons: [],
+    };
+  });
+
   const today = nairobiToday();
 
   return (

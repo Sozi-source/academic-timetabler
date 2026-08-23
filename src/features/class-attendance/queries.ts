@@ -43,156 +43,111 @@ function asNumber(
 }
 
 export async function getStaffClassAttendanceSchedule(): Promise<ClassAttendanceScheduleItem[]> {
-  const supabase = await createClient();
-
-  try {
-    const { data, error } = await supabase.rpc('get_staff_class_attendance_schedule');
-
-    if (!error && Array.isArray(data) && data.length > 0) {
-      const items = (data as UnknownRow[])
-        .map((row): ClassAttendanceScheduleItem | null => {
-          const scheduledSessionId = asString(row.scheduled_session_id);
-          const teachingAllocationId = asString(row.teaching_allocation_id);
-          const academicPeriodId = asString(row.academic_period_id);
-          const cohortId = asString(row.cohort_id);
-          const unitId = asString(row.unit_id);
-
-          if (!scheduledSessionId || !teachingAllocationId || !academicPeriodId || !cohortId || !unitId) {
-            return null;
-          }
-
-          return {
-            scheduledSessionId,
-            teachingAllocationId,
-            academicPeriodId,
-            academicPeriodName: asString(row.academic_period_name) ?? 'Academic Period',
-            cohortId,
-            cohortName: asString(row.cohort_name) ?? 'Cohort',
-            unitId,
-            unitName: asString(row.unit_name) ?? 'Unit',
-            dayOfWeek: asString(row.day_of_week) ?? '',
-            daySequence: asNumber(row.day_sequence),
-            startsAt: asString(row.starts_at) ?? '',
-            endsAt: asString(row.ends_at) ?? '',
-            sessionNumber: asNumber(row.session_number),
-            teachingStartsOn: asString(row.teaching_starts_on) ?? '',
-            teachingEndsOn: asString(row.teaching_ends_on) ?? '',
-            latestClassSessionId: asString(row.latest_class_session_id),
-            latestSessionDate: asString(row.latest_session_date),
-            latestStatus: asString(row.latest_status) as ClassSessionStatus | null,
-          };
-        })
-        .filter((item): item is ClassAttendanceScheduleItem => Boolean(item));
-
-      if (items.length > 0) {
-        return items;
-      }
-    }
-  } catch (err) {
-    console.warn('RPC get_staff_class_attendance_schedule warning:', err);
-  }
-
-  // Direct Query Fallback: Pull from published timetable & allocations
   try {
     const { requireTrainerAccess } = await import('@/features/auth/authorization');
-    const { getStaffWorkspace } = await import('@/features/staff-workspace/queries');
+    const { getStaffWorkspace } = await import('@/features/staff-assessment/queries');
 
     const profile = await requireTrainerAccess();
     const workspace = await getStaffWorkspace(profile.id);
+    const supabase = await createClient();
 
-    // 1. Get published timetable periods
+    // 1. Fetch published timetable versions
     const { data: publishedVersions } = await (supabase as any)
       .from('timetable_versions')
-      .select('academic_period_id')
-      .eq('status', 'published');
+      .select('id, academic_period_id, snapshot, status')
+      .eq('status', 'published')
+      .order('version_number', { ascending: false });
 
-    const publishedPeriodIds = new Set(
-      (publishedVersions ?? []).map((v: any) => String(v.academic_period_id))
-    );
+    const items: ClassAttendanceScheduleItem[] = [];
+    const seenIds = new Set<string>();
 
-    // 2. Query scheduled sessions for trainer
-    const { data: rawSessions } = await (supabase as any)
-      .from('scheduled_sessions')
-      .select('id, teaching_allocation_id, academic_period_id, cohort_id, unit_id, day_of_week, day_sequence, starts_at, ends_at, session_number')
-      .eq('trainer_id', workspace.trainerId)
-      .neq('status', 'cancelled');
-
-    let sessions = (rawSessions ?? []).filter((s: any) =>
-      publishedPeriodIds.has(String(s.academic_period_id))
-    );
-
-    if (sessions.length === 0 && workspace.allocations.length > 0) {
-      const allocIds = workspace.allocations.map((a) => a.allocationId);
-      const { data: allocSessions } = await (supabase as any)
-        .from('scheduled_sessions')
-        .select('id, teaching_allocation_id, academic_period_id, cohort_id, unit_id, day_of_week, day_sequence, starts_at, ends_at, session_number')
-        .in('teaching_allocation_id', allocIds)
-        .neq('status', 'cancelled');
-
-      sessions = (allocSessions ?? []).filter((s: any) =>
-        publishedPeriodIds.has(String(s.academic_period_id))
-      );
+    const allocMap = new Map<string, any>();
+    for (const alloc of workspace.allocations) {
+      allocMap.set(alloc.allocationId, alloc);
+      allocMap.set(`${alloc.unitId}:${alloc.cohortId}`, alloc);
     }
 
-    if (sessions.length === 0) {
-      return [];
-    }
+    // 2. Extract sessions from published timetable snapshots
+    for (const version of publishedVersions ?? []) {
+      const snapshot = Array.isArray(version.snapshot) ? (version.snapshot as UnknownRow[]) : [];
+      for (const rawItem of snapshot) {
+        const item = rawItem as Record<string, any>;
+        const sessionId = String(item.id || '');
+        if (!sessionId || seenIds.has(sessionId)) continue;
 
-    // 3. Fetch academic periods, cohorts, units, and recent sessions
-    const periodIds = [...new Set(sessions.map((s: any) => s.academic_period_id))];
-    const cohortIds = [...new Set(sessions.map((s: any) => s.cohort_id))];
-    const unitIds = [...new Set(sessions.map((s: any) => s.unit_id))];
-    const sessionIds = sessions.map((s: any) => s.id);
+        const itemTrainerId = String(item.trainerId || item.trainer_id || '');
+        const itemAllocId = String(item.teachingAllocationId || item.allocationId || item.teaching_allocation_id || '');
+        const itemUnitId = String(item.unitId || item.unit_id || '');
+        const itemCohortId = String(item.cohortId || item.cohort_id || '');
 
-    const [
-      { data: periods },
-      { data: cohorts },
-      { data: units },
-      { data: classSessions },
-    ] = await Promise.all([
-      (supabase as any).from('academic_periods').select('id, name, teaching_starts_on, teaching_ends_on').in('id', periodIds),
-      (supabase as any).from('cohorts').select('id, name').in('id', cohortIds),
-      (supabase as any).from('units').select('id, name').in('id', unitIds),
-      (supabase as any).from('class_sessions').select('id, scheduled_session_id, session_date, status').in('scheduled_session_id', sessionIds).order('session_date', { ascending: false }),
-    ]);
+        const isTrainerMatch =
+          itemTrainerId === workspace.trainerId ||
+          allocMap.has(itemAllocId) ||
+          allocMap.has(`${itemUnitId}:${itemCohortId}`);
 
-    const periodMap = new Map((periods ?? []).map((p: any) => [p.id, p]));
-    const cohortMap = new Map((cohorts ?? []).map((c: any) => [c.id, c.name]));
-    const unitMap = new Map((units ?? []).map((u: any) => [u.id, u.name]));
-    const classSessionMap = new Map();
-    for (const cs of classSessions ?? []) {
-      if (!classSessionMap.has(cs.scheduled_session_id)) {
-        classSessionMap.set(cs.scheduled_session_id, cs);
+        if (!isTrainerMatch) continue;
+
+        seenIds.add(sessionId);
+
+        const alloc = allocMap.get(itemAllocId) || allocMap.get(`${itemUnitId}:${itemCohortId}`) || workspace.allocations[0];
+        const dayStr = String(item.day || item.dayOfWeek || item.day_of_week || 'Friday');
+        const startsAt = String(item.startTime || item.startsAt || item.starts_at || '08:00');
+        const endsAt = String(item.endTime || item.endsAt || item.ends_at || '10:00');
+
+        items.push({
+          scheduledSessionId: sessionId,
+          teachingAllocationId: alloc?.allocationId || itemAllocId || '',
+          academicPeriodId: String(version.academic_period_id || alloc?.academicPeriodId || ''),
+          academicPeriodName: alloc?.academicPeriodName || 'Current Term',
+          cohortId: itemCohortId || alloc?.cohortId || '',
+          cohortName: String(item.cohortName || alloc?.cohortName || 'Cohort'),
+          unitId: itemUnitId || alloc?.unitId || '',
+          unitName: String(item.unitName || alloc?.unitName || 'Unit'),
+          dayOfWeek: dayStr.charAt(0).toUpperCase() + dayStr.slice(1).toLowerCase(),
+          daySequence: 1,
+          startsAt,
+          endsAt,
+          sessionNumber: Number(item.sessionNumber || item.session_number || items.length + 1),
+          teachingStartsOn: String(alloc?.teachingStartsOn || ''),
+          teachingEndsOn: String(alloc?.teachingEndsOn || ''),
+          latestClassSessionId: null,
+          latestSessionDate: null,
+          latestStatus: null,
+        });
       }
     }
 
-    return sessions.map((s: any) => {
-      const period = periodMap.get(s.academic_period_id);
-      const latestCs = classSessionMap.get(s.id);
+    if (items.length > 0) {
+      // Attach latest class sessions if any exist
+      const sessionIds = items.map((i) => i.scheduledSessionId);
+      const { data: classSessions } = await (supabase as any)
+        .from('class_sessions')
+        .select('id, scheduled_session_id, session_date, status')
+        .in('scheduled_session_id', sessionIds)
+        .order('session_date', { ascending: false });
 
-      return {
-        scheduledSessionId: String(s.id),
-        teachingAllocationId: String(s.teaching_allocation_id || ''),
-        academicPeriodId: String(s.academic_period_id),
-        academicPeriodName: String(period?.name || 'Academic Period'),
-        cohortId: String(s.cohort_id),
-        cohortName: String(cohortMap.get(s.cohort_id) || 'Cohort'),
-        unitId: String(s.unit_id),
-        unitName: String(unitMap.get(s.unit_id) || 'Unit'),
-        dayOfWeek: String(s.day_of_week || ''),
-        daySequence: Number(s.day_sequence || 0),
-        startsAt: String(s.starts_at || ''),
-        endsAt: String(s.ends_at || ''),
-        sessionNumber: Number(s.session_number || 1),
-        teachingStartsOn: String(period?.teaching_starts_on || ''),
-        teachingEndsOn: String(period?.teaching_ends_on || ''),
-        latestClassSessionId: latestCs ? String(latestCs.id) : null,
-        latestSessionDate: latestCs ? String(latestCs.session_date) : null,
-        latestStatus: latestCs ? (String(latestCs.status) as ClassSessionStatus) : null,
-      };
-    });
+      const csMap = new Map();
+      for (const cs of classSessions ?? []) {
+        if (!csMap.has(cs.scheduled_session_id)) {
+          csMap.set(cs.scheduled_session_id, cs);
+        }
+      }
+
+      for (const item of items) {
+        const cs = csMap.get(item.scheduledSessionId);
+        if (cs) {
+          item.latestClassSessionId = String(cs.id);
+          item.latestSessionDate = String(cs.session_date);
+          item.latestStatus = cs.status as ClassSessionStatus;
+        }
+      }
+
+      return items;
+    }
+
+    return [];
   } catch (err) {
-    console.error('Attendance schedule direct fallback failed:', err);
+    console.error('getStaffClassAttendanceSchedule failed:', err);
     return [];
   }
 }
@@ -204,30 +159,29 @@ export async function getStaffClassAttendanceHistory(
   const supabase =
     await createClient();
 
-  const {
-    data,
-    error,
-  } =
-    await supabase.rpc(
-      'get_staff_class_attendance_history',
-      {
-        target_limit:
-          limit,
-      },
-    );
+  try {
+    const {
+      data,
+      error,
+    } =
+      await supabase.rpc(
+        'get_staff_class_attendance_history',
+        {
+          target_limit:
+            limit,
+        },
+      );
 
-  if (error) {
-    throw new Error(
-      `Unable to load attendance history: ${error.message}`,
-    );
-  }
+    if (error) {
+      return [];
+    }
 
-  return (
-    (
-      data ??
-      []
-    ) as UnknownRow[]
-  )
+    return (
+      (
+        data ??
+        []
+      ) as UnknownRow[]
+    )
     .map(
       (
         row,
@@ -316,6 +270,10 @@ export async function getStaffClassAttendanceHistory(
           item,
         ),
     );
+  } catch (err) {
+    console.warn('getStaffClassAttendanceHistory error:', err);
+    return [];
+  }
 }
 
 export async function getClassAttendanceWorkspace(
@@ -325,165 +283,106 @@ export async function getClassAttendanceWorkspace(
   const supabase =
     await createClient();
 
-  const {
-    data,
-    error,
-  } =
-    await supabase.rpc(
-      'get_class_attendance_workspace',
-      {
-        target_class_session_id:
+  try {
+    const {
+      data,
+      error,
+    } =
+      await supabase.rpc(
+        'get_class_attendance_workspace',
+        {
+          target_class_session_id:
+            classSessionId,
+        },
+      );
+
+    if (!error && data && Array.isArray(data) && data.length > 0) {
+      const rows = data as UnknownRow[];
+      const first = rows[0];
+      const teachingAllocationId = asString(first.teaching_allocation_id);
+      const scheduledSessionId = asString(first.scheduled_session_id);
+      const sessionDate = asString(first.session_date);
+      const sessionStatus = asString(first.session_status) as ClassSessionStatus | null;
+
+      if (teachingAllocationId && scheduledSessionId && sessionDate && sessionStatus) {
+        return {
           classSessionId,
-      },
-    );
-
-  if (error) {
-    if (
-      error.code ===
-        'P0002' ||
-      error.code ===
-        '42501'
-    ) {
-      return null;
+          teachingAllocationId,
+          scheduledSessionId,
+          sessionDate,
+          sessionStatus,
+          academicPeriodName: asString(first.academic_period_name) ?? 'Academic Period',
+          unitName: asString(first.unit_name) ?? 'Unit',
+          cohortName: asString(first.cohort_name) ?? 'Cohort',
+          startsAt: asString(first.starts_at) ?? '',
+          endsAt: asString(first.ends_at) ?? '',
+          rosterCount: asNumber(first.roster_count),
+          students: rows
+            .map((row) => {
+              const studentId = asString(row.student_id);
+              if (!studentId) return null;
+              return {
+                studentId,
+                admissionNumber: asString(row.admission_number) ?? '',
+                fullName: asString(row.full_name) ?? 'Student',
+                attendanceStatus: (asString(row.attendance_status) ?? 'unmarked') as ClassAttendanceStatus,
+                note: asString(row.note),
+              };
+            })
+            .filter((st): st is NonNullable<typeof st> => Boolean(st)),
+        };
+      }
     }
-
-    throw new Error(
-      `Unable to load class attendance: ${error.message}`,
-    );
+  } catch (err) {
+    console.warn('get_class_attendance_workspace RPC warning:', err);
   }
 
-  const rows =
-    (
-      data ??
-      []
-    ) as UnknownRow[];
+  // Direct Query Fallback
+  try {
+    const { data: cs } = await (supabase as any)
+      .from('class_sessions')
+      .select('id, scheduled_session_id, session_date, status, starts_at, ends_at, teaching_allocation_id, cohort_id, unit_id, academic_period_id')
+      .eq('id', classSessionId)
+      .maybeSingle();
 
-  if (
-    rows.length ===
-    0
-  ) {
+    if (!cs) return null;
+
+    const [
+      { data: period },
+      { data: unit },
+      { data: cohort },
+      { data: records },
+    ] = await Promise.all([
+      cs.academic_period_id ? (supabase as any).from('academic_periods').select('name').eq('id', cs.academic_period_id).maybeSingle() : { data: null },
+      cs.unit_id ? (supabase as any).from('units').select('name').eq('id', cs.unit_id).maybeSingle() : { data: null },
+      cs.cohort_id ? (supabase as any).from('cohorts').select('name').eq('id', cs.cohort_id).maybeSingle() : { data: null },
+      (supabase as any).from('class_attendance_records').select('student_id, status, note, students(admission_number, full_name)').eq('class_session_id', cs.id),
+    ]);
+
+    const students = (records ?? []).map((r: any) => ({
+      studentId: String(r.student_id),
+      admissionNumber: String(r.students?.admission_number || ''),
+      fullName: String(r.students?.full_name || 'Student'),
+      attendanceStatus: (r.status || 'unmarked') as ClassAttendanceStatus,
+      note: r.note ? String(r.note) : null,
+    }));
+
+    return {
+      classSessionId: cs.id,
+      teachingAllocationId: cs.teaching_allocation_id || '',
+      scheduledSessionId: cs.scheduled_session_id || '',
+      sessionDate: cs.session_date,
+      sessionStatus: (cs.status || 'open') as ClassSessionStatus,
+      academicPeriodName: period?.name || 'Current Term',
+      unitName: unit?.name || 'Unit',
+      cohortName: cohort?.name || 'Cohort',
+      startsAt: cs.starts_at || '',
+      endsAt: cs.ends_at || '',
+      rosterCount: students.length,
+      students,
+    };
+  } catch (directErr) {
+    console.error('getClassAttendanceWorkspace direct query failed:', directErr);
     return null;
   }
-
-  const first =
-    rows[0];
-
-  const teachingAllocationId =
-    asString(
-      first.teaching_allocation_id,
-    );
-
-  const scheduledSessionId =
-    asString(
-      first.scheduled_session_id,
-    );
-
-  const sessionDate =
-    asString(
-      first.session_date,
-    );
-
-  const sessionStatus =
-    asString(
-      first.session_status,
-    ) as
-      | ClassSessionStatus
-      | null;
-
-  if (
-    !teachingAllocationId ||
-    !scheduledSessionId ||
-    !sessionDate ||
-    !sessionStatus
-  ) {
-    return null;
-  }
-
-  return {
-    classSessionId,
-    teachingAllocationId,
-    scheduledSessionId,
-    sessionDate,
-    sessionStatus,
-    academicPeriodName:
-      asString(
-        first.academic_period_name,
-      ) ??
-      'Academic Period',
-    unitName:
-      asString(
-        first.unit_name,
-      ) ??
-      'Unit',
-    cohortName:
-      asString(
-        first.cohort_name,
-      ) ??
-      'Cohort',
-    startsAt:
-      asString(
-        first.starts_at,
-      ) ??
-      '',
-    endsAt:
-      asString(
-        first.ends_at,
-      ) ??
-      '',
-    rosterCount:
-      asNumber(
-        first.roster_count,
-      ),
-    students:
-      rows
-        .map(
-          (row) => {
-            const studentId =
-              asString(
-                row.student_id,
-              );
-
-            if (!studentId) {
-              return null;
-            }
-
-            return {
-              studentId,
-              admissionNumber:
-                asString(
-                  row.admission_number,
-                ) ??
-                '',
-              fullName:
-                asString(
-                  row.full_name,
-                ) ??
-                'Student',
-              attendanceStatus:
-                (
-                  asString(
-                    row.attendance_status,
-                  ) ??
-                  'unmarked'
-                ) as
-                  ClassAttendanceStatus,
-              note:
-                asString(
-                  row.note,
-                ),
-            };
-          },
-        )
-        .filter(
-          (
-            student,
-          ): student is
-            NonNullable<
-              typeof student
-            > =>
-            Boolean(
-              student,
-            ),
-        ),
-  };
 }

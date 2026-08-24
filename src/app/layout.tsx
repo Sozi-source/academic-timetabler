@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Toaster } from '@/components/ui/toaster';
+import { ScrollPreservation } from '@/components/ui/scroll-preservation';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -20,6 +21,7 @@ export default function RootLayout({
         className="flex min-h-full flex-col"
       >
         {children}
+        <ScrollPreservation />
         <Toaster />
       </body>
     </html>

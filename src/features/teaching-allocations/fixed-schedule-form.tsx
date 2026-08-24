@@ -92,7 +92,7 @@ export function FixedScheduleForm({
             <select
               name="workingDayId"
               defaultValue={fixedDayId ?? ''}
-              className="mt-1 h-10 w-full rounded-xl border border-border bg-surface px-2 text-sm text-text-primary"
+              className="mt-1 h-8 w-full rounded-xl border border-border bg-surface px-2 text-xs text-text-primary"
               required
               disabled={disabled}
             >
@@ -110,7 +110,7 @@ export function FixedScheduleForm({
               Full day · {fullDayLabel}
             </div>
           </div>
-          <button disabled={disabled} className="h-10 self-end whitespace-nowrap rounded-xl border border-border bg-surface px-3 text-sm font-semibold text-text-primary disabled:cursor-not-allowed disabled:opacity-60">
+          <button disabled={disabled} className="h-8 self-end whitespace-nowrap rounded-xl border border-border bg-surface px-3 text-xs font-semibold text-text-primary disabled:cursor-not-allowed disabled:opacity-60">
             Save full day
           </button>
         </div>
@@ -121,7 +121,7 @@ export function FixedScheduleForm({
             <select
               name="firstWorkingDayId"
               defaultValue={firstSavedDayId}
-              className="mt-1 h-10 w-full rounded-xl border border-border bg-surface px-2 text-sm text-text-primary"
+              className="mt-1 h-8 w-full rounded-xl border border-border bg-surface px-2 text-xs text-text-primary"
               required
               disabled={disabled}
             >
@@ -138,7 +138,7 @@ export function FixedScheduleForm({
             <select
               name="firstTimeSlotId"
               defaultValue={fixedSlotIds[0] ?? ''}
-              className="mt-1 h-10 w-full rounded-xl border border-border bg-surface px-2 text-sm text-text-primary"
+              className="mt-1 h-8 w-full rounded-xl border border-border bg-surface px-2 text-xs text-text-primary"
               required
               disabled={disabled}
             >
@@ -155,7 +155,7 @@ export function FixedScheduleForm({
             <select
               name="secondWorkingDayId"
               defaultValue={secondSavedDayId}
-              className="mt-1 h-10 w-full rounded-xl border border-border bg-surface px-2 text-sm text-text-primary disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-1 h-8 w-full rounded-xl border border-border bg-surface px-2 text-xs text-text-primary disabled:cursor-not-allowed disabled:opacity-60"
               disabled={disabled || !secondSessionAvailable}
             >
               <option value="">Not fixed</option>
@@ -171,7 +171,7 @@ export function FixedScheduleForm({
             <select
               name="secondTimeSlotId"
               defaultValue={fixedSlotIds[1] ?? ''}
-              className="mt-1 h-10 w-full rounded-xl border border-border bg-surface px-2 text-sm text-text-primary disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-1 h-8 w-full rounded-xl border border-border bg-surface px-2 text-xs text-text-primary disabled:cursor-not-allowed disabled:opacity-60"
               disabled={disabled || !secondSessionAvailable}
             >
               <option value="">Not fixed</option>
@@ -182,7 +182,7 @@ export function FixedScheduleForm({
               ))}
             </select>
           </label>
-          <button disabled={disabled} className="h-10 self-end whitespace-nowrap rounded-xl border border-border bg-surface px-3 text-sm font-semibold text-text-primary disabled:cursor-not-allowed disabled:opacity-60">
+          <button disabled={disabled} className="h-8 self-end whitespace-nowrap rounded-xl border border-border bg-surface px-3 text-xs font-semibold text-text-primary disabled:cursor-not-allowed disabled:opacity-60">
             Save fixed sessions
           </button>
         </div>

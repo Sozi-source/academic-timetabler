@@ -89,7 +89,7 @@ export function TimetableShell({ profile, children }: TimetableShellProps) {
           </div>
         </header>
 
-        <main className="mx-auto min-w-0 w-full max-w-[var(--content-max-width)] overflow-x-clip px-3 py-4 xl:px-5 xl:py-5 2xl:px-6 2xl:py-6 min-[1920px]:px-8">
+        <main className="mx-auto min-w-0 w-full max-w-none overflow-x-clip px-3 py-4 sm:px-4 md:px-6 lg:px-8 xl:px-10 xl:py-5 2xl:px-12 2xl:py-6 min-[1920px]:px-16">
           {children}
         </main>
       </div>

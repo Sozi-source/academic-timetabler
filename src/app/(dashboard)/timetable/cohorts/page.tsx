@@ -118,6 +118,13 @@ export default async function CohortsPage() {
             </Link>
 
             <Link
+              href="/timetable/programmes"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+            >
+              Programmes
+            </Link>
+
+            <Link
               href="/timetable/cohorts/import"
               className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
             >

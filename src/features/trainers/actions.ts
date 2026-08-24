@@ -150,6 +150,16 @@ export async function createTrainerAction(
 ): Promise<TrainerActionState> {
   await requireHodAccess();
 
+  let staffNum = formData.get('staffNumber');
+  if (typeof staffNum === 'string') {
+    staffNum = staffNum.trim();
+  }
+  if (!staffNum) {
+    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+    const generatedStaffNumber = `TRN-${Date.now().toString().slice(-4)}-${randomSuffix}`;
+    formData.set('staffNumber', generatedStaffNumber);
+  }
+
   const parsed =
     parseTrainerForm(formData);
 

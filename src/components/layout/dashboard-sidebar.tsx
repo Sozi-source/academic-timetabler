@@ -22,23 +22,22 @@ export function DashboardSidebar({
   const pathname = usePathname();
 
   const sidebarContent = (
-    <div className="flex h-full flex-col bg-navigation-background text-white">
-      <div className="flex min-h-[var(--header-height)] items-center justify-between border-b border-navigation-border px-5">
+    <div className="flex h-full flex-col bg-surface text-text-primary">
+      <div className="flex min-h-[var(--header-height)] items-center justify-between border-b border-border-soft px-5">
         <Link
           href="/dashboard"
           onClick={onMobileClose}
           className="flex min-w-0 items-center gap-3"
         >
-          <div className="relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-institutional-yellow text-primary-deeper shadow-sm ring-1 ring-white/10">
+          <div className="relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary shadow-sm border border-primary-soft/50">
             <CalendarRange
               className="size-5"
               aria-hidden="true"
             />
-            <span className="absolute -right-1 -top-1 size-2.5 rounded-full border-2 border-navigation-background bg-white" aria-hidden="true" />
           </div>
 
-          <p className="truncate text-sm font-semibold tracking-tight text-white">
-            Academic Planning
+          <p className="truncate text-sm font-bold tracking-tight text-text-primary">
+            Academic Planner
           </p>
         </Link>
 
@@ -47,7 +46,7 @@ export function DashboardSidebar({
             type="button"
             onClick={onMobileClose}
             aria-label="Close navigation"
-            className="flex size-9 items-center justify-center rounded-lg text-navigation-text transition hover:bg-navigation-hover hover:text-white lg:hidden"
+            className="flex size-9 items-center justify-center rounded-lg text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary lg:hidden"
           >
             <X
               className="size-5"
@@ -65,8 +64,7 @@ export function DashboardSidebar({
           {dashboardNavigation.map((section) => (
             <section key={section.label}>
               <div className="flex items-center gap-2 px-3">
-                <span className="h-px w-4 bg-institutional-yellow" aria-hidden="true" />
-                <p className="text-[0.65rem] font-semibold uppercase tracking-[0.17em] text-navigation-text/60">
+                <p className="text-[0.65rem] font-bold uppercase tracking-[0.17em] text-text-subtle">
                   {section.label}
                 </p>
               </div>
@@ -91,18 +89,18 @@ export function DashboardSidebar({
                       onClick={onMobileClose}
                       aria-current={active ? 'page' : undefined}
                       className={cn(
-                        'group relative flex min-h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition',
+                        'group relative flex min-h-10 items-center gap-3 rounded-lg px-3 text-sm font-semibold transition',
                         active
-                          ? 'bg-navigation-active text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] before:absolute before:inset-y-2 before:left-0 before:w-1 before:rounded-r-full before:bg-institutional-yellow'
-                          : 'text-navigation-text hover:bg-navigation-hover hover:text-white',
+                          ? 'bg-primary-soft text-primary border border-primary-soft/30'
+                          : 'text-text-secondary hover:bg-surface-subtle hover:text-text-primary',
                       )}
                     >
                       <span
                         className={cn(
                           'flex size-7 shrink-0 items-center justify-center rounded-md transition',
                           active
-                            ? 'bg-institutional-yellow text-primary-deeper'
-                            : 'text-navigation-text/75 group-hover:bg-white/10 group-hover:text-institutional-yellow',
+                            ? 'text-primary'
+                            : 'text-text-subtle group-hover:text-text-primary',
                         )}
                       >
                         <Icon
@@ -128,7 +126,7 @@ export function DashboardSidebar({
 
   return (
     <>
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[var(--sidebar-width)] border-r border-navigation-border bg-navigation-background shadow-[8px_0_28px_rgba(16,60,57,0.08)] lg:block">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[var(--sidebar-width)] border-r border-border-soft bg-surface shadow-[1px_0_10px_rgba(0,0,0,0.01)] lg:block">
         {sidebarContent}
       </aside>
 
@@ -138,10 +136,10 @@ export function DashboardSidebar({
             type="button"
             aria-label="Close navigation"
             onClick={onMobileClose}
-            className="absolute inset-0 bg-black/30 backdrop-blur-[1px]"
+            className="absolute inset-0 bg-black/25 backdrop-blur-[1px]"
           />
 
-          <aside className="relative h-full w-[min(19rem,86vw)] border-r border-navigation-border bg-navigation-background shadow-lg">
+          <aside className="relative h-full w-[min(17rem,80vw)] border-r border-border-soft bg-surface shadow-lg">
             {sidebarContent}
           </aside>
         </div>

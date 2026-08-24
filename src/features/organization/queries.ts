@@ -67,7 +67,15 @@ export const getWorkingDepartments = cache(
       getAccessibleDepartments(),
     ]);
 
-    if (!profile?.activeDepartmentId) {
+    if (!profile) {
+      return [];
+    }
+
+    if (profile.role === 'system_admin') {
+      return departments;
+    }
+
+    if (!profile.activeDepartmentId) {
       return [];
     }
 

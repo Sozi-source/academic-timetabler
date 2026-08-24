@@ -636,345 +636,95 @@ export async function getStudentPortalTimetable(
 
   const { data: publishedVersion } = await admin
     .from('timetable_versions')
-    .select('id, status')
+    .select('id, status, snapshot')
     .eq('academic_period_id', period.id)
     .eq('status', 'published')
     .limit(1)
     .maybeSingle();
 
-  if (!publishedVersion) {
+  if (!publishedVersion || !publishedVersion.snapshot) {
     return [];
   }
 
-  const {
-    data,
-    error,
-  } =
-    await admin
-      .from(
-        'scheduled_sessions',
-      )
-      .select(
-        '*',
-      )
-      .eq(
-        'academic_period_id',
-        period.id,
-      )
-      .neq(
-        'status',
-        'cancelled',
-      );
-
-  if (error) {
-    throw new Error(
-      `Unable to load student timetable: ${error.message}`,
+  const snapshotRaw = (publishedVersion.snapshot || []) as any[];
+  const sessions = snapshotRaw.filter((row: any) => {
+    const primaryCohortId = asString(row.cohortId);
+    const participantCohortIds = Array.isArray(row.participantCohortIds)
+      ? (row.participantCohortIds as string[])
+      : [];
+    return (
+      primaryCohortId === student.cohortId ||
+      participantCohortIds.includes(student.cohortId)
     );
-  }
+  });
 
-  const sessions =
-    ((data ?? []) as UnknownRow[]).filter((row) => {
-      const primaryCohortId = asString(row.cohort_id);
-      const participantCohortIds = Array.isArray(row.participant_cohort_ids)
-        ? (row.participant_cohort_ids as string[])
-        : [];
-      return (
-        primaryCohortId === student.cohortId ||
-        participantCohortIds.includes(student.cohortId)
-      );
-    });
-
-  if (
-    sessions.length ===
-    0
-  ) {
+  if (sessions.length === 0) {
     return [];
   }
 
-  const [
-    days,
-    slots,
-    units,
-    trainers,
-    rooms,
-  ] =
-    await Promise.all([
-      rowsByIds(
-        admin,
-        'working_days',
-        sessions
-          .map(
-            (row) =>
-              asString(
-                row.working_day_id,
-              ),
-          )
-          .filter(
-            (
-              value,
-            ): value is string =>
-              Boolean(
-                value,
-              ),
-          ),
-      ),
-      rowsByIds(
-        admin,
-        'time_slots',
-        sessions
-          .flatMap(
-            (row) => [
-              asString(
-                row.start_time_slot_id,
-              ),
-              asString(
-                row.end_time_slot_id,
-              ),
-            ],
-          )
-          .filter(
-            (
-              value,
-            ): value is string =>
-              Boolean(
-                value,
-              ),
-          ),
-      ),
-      rowsByIds(
-        admin,
-        'units',
-        sessions
-          .map(
-            (row) =>
-              asString(
-                row.unit_id,
-              ),
-          )
-          .filter(
-            (
-              value,
-            ): value is string =>
-              Boolean(
-                value,
-              ),
-          ),
-      ),
-      rowsByIds(
-        admin,
-        'trainers',
-        sessions
-          .map(
-            (row) =>
-              asString(
-                row.trainer_id,
-              ),
-          )
-          .filter(
-            (
-              value,
-            ): value is string =>
-              Boolean(
-                value,
-              ),
-          ),
-      ),
-      rowsByIds(
-        admin,
-        'rooms',
-        sessions
-          .map(
-            (row) =>
-              asString(
-                row.room_id,
-              ),
-          )
-          .filter(
-            (
-              value,
-            ): value is string =>
-              Boolean(
-                value,
-              ),
-          ),
-      ),
-    ]);
+  // Fetch time slots to map startTime to sequence numbers
+  const { data: slotsData } = await admin
+    .from('time_slots')
+    .select('starts_at, sequence_number')
+    .eq('academic_period_id', period.id);
 
-  const dayById =
-    mapById(
-      days,
-    );
-
-  const slotById =
-    mapById(
-      slots,
-    );
-
-  const unitById =
-    mapById(
-      units,
-    );
-
-  const trainerById =
-    mapById(
-      trainers,
-    );
-
-  const roomById =
-    mapById(
-      rooms,
-    );
+  const slotSequenceMap = new Map<string, number>();
+  if (slotsData) {
+    for (const slot of slotsData) {
+      if (slot.starts_at) {
+        slotSequenceMap.set(
+          asString(slot.starts_at),
+          asNumber(slot.sequence_number) ?? 99,
+        );
+      }
+    }
+  }
 
   return sessions
     .map(
       (
         row,
       ): StudentPortalTimetableSession | null => {
-        const id =
-          asString(
-            row.id,
-          );
+        const id = asString(row.id);
+        const unitId = asString(row.unitId);
+        const startsAt = asString(row.startTime) ?? '';
 
-        const day =
-          dayById.get(
-            asString(
-              row.working_day_id,
-            ) ??
-              '',
-          );
-
-        const startSlot =
-          slotById.get(
-            asString(
-              row.start_time_slot_id,
-            ) ??
-              '',
-          );
-
-        const endSlot =
-          slotById.get(
-            asString(
-              row.end_time_slot_id,
-            ) ??
-              '',
-          );
-
-        const unitId =
-          asString(
-            row.unit_id,
-          );
-
-        const unit =
-          unitById.get(
-            unitId ??
-              '',
-          );
-
-        const trainer =
-          trainerById.get(
-            asString(
-              row.trainer_id,
-            ) ??
-              '',
-          );
-
-        const room =
-          roomById.get(
-            asString(
-              row.room_id,
-            ) ??
-              '',
-          );
-
-        if (
-          !id ||
-          !unitId ||
-          !unit
-        ) {
+        if (!id || !unitId) {
           return null;
         }
 
         return {
           id,
-          dayName:
-            asString(
-              day?.day_of_week,
-            ) ??
-            'day',
-          daySequence:
-            asNumber(
-              day?.sequence_number,
-            ) ??
-            99,
-          startSequence:
-            asNumber(
-              startSlot
-                ?.sequence_number,
-            ) ??
-            99,
-          startsAt:
-            asString(
-              startSlot
-                ?.starts_at,
-            ) ??
-            '',
-          endsAt:
-            asString(
-              endSlot
-                ?.ends_at,
-            ) ??
-            asString(
-              startSlot
-                ?.ends_at,
-            ) ??
-            '',
+          dayName: asString(row.day) ?? 'day',
+          daySequence: asNumber(row.daySequence) ?? 99,
+          startSequence: slotSequenceMap.get(startsAt) ?? 99,
+          startsAt,
+          endsAt: asString(row.endTime) ?? '',
           unitId,
-          unitName:
-            asString(
-              unit.name,
-            ) ??
-            'Unit',
-          trainerName:
-            asString(
-              trainer
-                ?.full_name,
-            ) ??
-            'Trainer',
+          unitName: asString(row.unitName) ?? 'Unit',
+          trainerName: asString(row.trainerName) ?? 'Trainer',
           roomLabel:
-            asString(
-              room
-                ?.name,
-            ) ??
+            asString(row.roomName) ??
+            asString(row.roomCode) ??
             'Unallocated',
-          deliveryMode:
-            asString(
-              row.delivery_mode,
-            ) ??
-            'teaching',
+          deliveryMode: asString(row.deliveryMode) ?? 'teaching',
         };
       },
     )
     .filter(
       (
         session,
-      ): session is
-        StudentPortalTimetableSession =>
-        Boolean(
-          session,
-        ),
+      ): session is StudentPortalTimetableSession =>
+        Boolean(session),
     )
     .sort(
       (
         left,
         right,
       ) =>
-        left.daySequence -
-          right.daySequence ||
-        left.startSequence -
-          right.startSequence ||
-        left.unitName.localeCompare(
-          right.unitName,
-        ),
+        left.daySequence - right.daySequence ||
+        left.startSequence - right.startSequence ||
+        left.unitName.localeCompare(right.unitName),
     );
 }
 

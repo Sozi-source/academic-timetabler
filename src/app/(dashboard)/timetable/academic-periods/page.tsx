@@ -92,6 +92,27 @@ export default async function AcademicPeriodsPage() {
               Dashboard
             </Link>
 
+            <Link
+              href="/timetable/academic-years"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+            >
+              Years
+            </Link>
+
+            <Link
+              href="/timetable/time-slots"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+            >
+              Teaching Sessions
+            </Link>
+
+            <Link
+              href="/timetable/organization"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+            >
+              Departments
+            </Link>
+
             <Drawer>
               <DrawerTrigger asChild>
                 <Button

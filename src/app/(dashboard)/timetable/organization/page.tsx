@@ -85,7 +85,7 @@ export default async function OrganizationPage() {
       ) : null}
 
       {workspaces.length > 0 ? (
-        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <section className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           {workspaces.map((workspace) => (
             <Card key={workspace.id} className="p-4">
               <div className="flex items-start gap-3">

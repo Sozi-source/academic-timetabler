@@ -36,7 +36,7 @@ export function TimetableEditorWorkspace({
         {data.workingDays.map((day) => {
           const sessions = data.sessions.filter((session) => session.workingDayId === day.id);
           return (
-            <section key={day.id} className="min-w-0 rounded-2xl border border-border bg-surface-subtle p-3">
+            <section key={day.id} className="min-w-0 rounded-2xl border border-border bg-surface-subtle p-3 border-t-4 border-t-institutional-yellow shadow-sm">
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="font-semibold text-text-primary">{day.label}</h2>
                 <span className="rounded-full bg-surface px-2 py-1 text-xs text-text-muted">{sessions.length}</span>

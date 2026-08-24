@@ -50,6 +50,9 @@ export default async function UnitOfferingsPage() {
               </Link>
             </Button>
             <Button asChild variant="outline" size="sm">
+              <Link href="/timetable/units">Curriculum Units</Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
               <Link href="/timetable/unit-offerings/import">
                 <Upload className="size-4" aria-hidden="true" />
                 Import

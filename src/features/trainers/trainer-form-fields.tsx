@@ -112,13 +112,12 @@ export function TrainerFormFields({
         <FormField
           id="trainer-staff-number"
           label="Staff number"
-          required
           error={staffNumberError}
         >
           <Input
             id="trainer-staff-number"
             name="staffNumber"
-            required
+            placeholder="Auto-generated if left blank"
             disabled={pending}
             defaultValue={
               trainer?.staffNumber ?? ''

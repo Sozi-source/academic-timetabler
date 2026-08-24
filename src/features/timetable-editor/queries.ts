@@ -2,6 +2,7 @@ import 'server-only';
 
 import { cache } from 'react';
 
+import { getAuthenticatedProfile } from '@/features/auth/queries';
 import { createClient } from '@/lib/supabase/server';
 
 import type { EditorData, EditorSession } from './types';
@@ -16,7 +17,17 @@ export const getTimetableEditorData = cache(async (
 ): Promise<EditorData> => {
   const supabase = await createClient();
 
-  const [sessionResult, dayResult, slotResult, roomResult, cohortResult] = await Promise.all([
+  const [
+    profile,
+    sessionResult,
+    dayResult,
+    slotResult,
+    roomResult,
+    cohortResult,
+    trainerResult,
+    workloadResult,
+  ] = await Promise.all([
+    getAuthenticatedProfile(),
     supabase
       .from('scheduled_sessions')
       .select(`
@@ -65,13 +76,24 @@ export const getTimetableEditorData = cache(async (
       .from('cohorts')
       .select('id, code, name, actual_size')
       .order('code'),
+    supabase
+      .from('trainers')
+      .select('id, full_name, staff_number, home_department, department_id, normal_weekly_hours, workload_role')
+      .eq('is_active', true)
+      .eq('is_timetable_available', true)
+      .order('full_name'),
+    supabase.rpc('get_institution_trainer_workloads', {
+      target_academic_period_id: academicPeriodId,
+    }),
   ]);
 
   const failure = sessionResult.error
     ?? dayResult.error
     ?? slotResult.error
     ?? roomResult.error
-    ?? cohortResult.error;
+    ?? cohortResult.error
+    ?? trainerResult.error
+    ?? workloadResult.error;
   if (failure) {
     throw new Error(`Unable to load the timetable editor: ${failure.message}`);
   }
@@ -136,6 +158,10 @@ export const getTimetableEditorData = cache(async (
     };
   });
 
+  const workloads = new Map(
+    (workloadResult.data ?? []).map((w: any) => [w.trainer_id, Number(w.allocated_hours)]),
+  );
+
   return {
     sessions,
     workingDays: (dayResult.data ?? []).map((day) => ({
@@ -152,8 +178,20 @@ export const getTimetableEditorData = cache(async (
     })),
     rooms: (roomResult.data ?? []).map((room) => ({
       id: room.id,
+      name: room.name,
       label: `${room.code} · ${room.name} (${room.capacity})`,
       capacity: room.capacity,
     })),
+    trainers: (trainerResult.data ?? []).map((t) => ({
+      id: t.id,
+      fullName: t.full_name,
+      staffNumber: t.staff_number,
+      homeDepartment: t.home_department,
+      departmentId: t.department_id,
+      normalWeeklyHours: Number(t.normal_weekly_hours),
+      workloadRole: t.workload_role,
+      allocatedHours: workloads.get(t.id) ?? 0,
+    })),
+    profile,
   };
 });

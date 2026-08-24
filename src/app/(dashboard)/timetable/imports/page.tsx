@@ -73,7 +73,7 @@ export default function BulkImportsPage() {
         }
       />
 
-      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+      <section className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {imports.map((item) => (
           <article
             key={item.entity}

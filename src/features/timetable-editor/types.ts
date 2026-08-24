@@ -43,9 +43,30 @@ export interface EditorOption {
   label: string;
 }
 
+export interface EditorTrainer {
+  id: string;
+  fullName: string;
+  staffNumber: string;
+  homeDepartment: string | null;
+  departmentId: string | null;
+  normalWeeklyHours: number;
+  workloadRole: string;
+  allocatedHours: number;
+}
+
 export interface EditorData {
   sessions: EditorSession[];
   workingDays: Array<EditorOption & { sequenceNumber: number }>;
   timeSlots: Array<EditorOption & { startsAt: string; endsAt: string; sequenceNumber: number }>;
-  rooms: Array<EditorOption & { capacity: number }>;
+  rooms: Array<EditorOption & { name: string; capacity: number }>;
+  trainers: EditorTrainer[];
+  profile: {
+    id: string;
+    fullName: string;
+    email: string;
+    role: string;
+    departmentName: string;
+    activeDepartmentId: string | null;
+    isActive: boolean;
+  } | null;
 }

@@ -187,14 +187,10 @@ export async function getStaffPublishedTimetable(
 
   const { data: publishedVersions } = await supabase
     .from('timetable_versions')
-    .select('academic_period_id')
+    .select('academic_period_id, snapshot')
     .eq('status', 'published');
 
-  const publishedPeriodIds = new Set(
-    (publishedVersions ?? []).map((v: any) => String(v.academic_period_id)),
-  );
-
-  if (publishedPeriodIds.size === 0) {
+  if (!publishedVersions || publishedVersions.length === 0) {
     return {
       trainerId:
         workspace.trainerId,
@@ -205,406 +201,87 @@ export async function getStaffPublishedTimetable(
     };
   }
 
-  const {
-    data,
-    error,
-  } = await supabase
-    .from(
-      'scheduled_sessions',
-    )
-    .select(
-      '*',
-    )
-    .eq(
-      'trainer_id',
-      workspace.trainerId,
-    )
-    .neq(
-      'status',
-      'cancelled',
-    );
-
-  if (error) {
-    throw new Error(
-      `Unable to load your published timetable: ${error.message}`,
-    );
-  }
-
-  const rows = ((data ?? []) as UnknownRow[]).filter((row) =>
-    publishedPeriodIds.has(String(row.academic_period_id)),
+  const periodIds = Array.from(
+    new Set(publishedVersions.map((v) => String(v.academic_period_id))),
   );
 
-  if (
-    rows.length ===
-    0
-  ) {
-    return {
-      trainerId:
-        workspace.trainerId,
-      trainerName:
-        workspace.trainerName,
-      sessions:
-        [],
-    };
-  }
+  const { data: periods } = await supabase
+    .from('academic_periods')
+    .select('id, name, code')
+    .in('id', periodIds);
 
-  const periodIds =
-    rows
-      .map(
-        (row) =>
-          asString(
-            row.academic_period_id,
-          ),
-      )
-      .filter(
-        (
-          value,
-        ): value is string =>
-          Boolean(
-            value,
-          ),
-      );
-
-  const dayIds =
-    rows
-      .map(
-        (row) =>
-          asString(
-            row.working_day_id,
-          ),
-      )
-      .filter(
-        (
-          value,
-        ): value is string =>
-          Boolean(
-            value,
-          ),
-      );
-
-  const slotIds =
-    rows
-      .flatMap(
-        (row) => [
-          asString(
-            row.start_time_slot_id,
-          ),
-          asString(
-            row.end_time_slot_id,
-          ),
-        ],
-      )
-      .filter(
-        (
-          value,
-        ): value is string =>
-          Boolean(
-            value,
-          ),
-      );
-
-  const unitIds =
-    rows
-      .map(
-        (row) =>
-          asString(
-            row.unit_id,
-          ),
-      )
-      .filter(
-        (
-          value,
-        ): value is string =>
-          Boolean(
-            value,
-          ),
-      );
-
-  const cohortIds =
-    rows
-      .map(
-        (row) =>
-          asString(
-            row.cohort_id,
-          ),
-      )
-      .filter(
-        (
-          value,
-        ): value is string =>
-          Boolean(
-            value,
-          ),
-      );
-
-  const roomIds =
-    rows
-      .map(
-        (row) =>
-          asString(
-            row.room_id,
-          ),
-      )
-      .filter(
-        (
-          value,
-        ): value is string =>
-          Boolean(
-            value,
-          ),
-      );
-
-  const [
-    periods,
-    days,
-    slots,
-    units,
-    cohorts,
-    rooms,
-  ] =
-    await Promise.all([
-      lookupRows(
-        supabase,
-        'academic_periods',
-        periodIds,
-      ),
-      lookupRows(
-        supabase,
-        'working_days',
-        dayIds,
-      ),
-      lookupRows(
-        supabase,
-        'time_slots',
-        slotIds,
-      ),
-      lookupRows(
-        supabase,
-        'units',
-        unitIds,
-      ),
-      lookupRows(
-        supabase,
-        'cohorts',
-        cohortIds,
-      ),
-      lookupRows(
-        supabase,
-        'rooms',
-        roomIds,
-      ),
-    ]);
-
-  const periodById =
-    mapById(
-      periods,
-    );
-
-  const dayById =
-    mapById(
-      days,
-    );
-
-  const slotById =
-    mapById(
-      slots,
-    );
-
-  const unitById =
-    mapById(
-      units,
-    );
-
-  const cohortById =
-    mapById(
-      cohorts,
-    );
-
-  const roomById =
-    mapById(
-      rooms,
-    );
-
-  const mapped:
-    StaffTimetableSession[] =
-      [];
-
-  for (
-    const row of
-      rows
-  ) {
-    const id =
-      asString(
-        row.id,
-      );
-
-    const periodId =
-      asString(
-        row.academic_period_id,
-      );
-
-    const dayId =
-      asString(
-        row.working_day_id,
-      );
-
-    const startSlotId =
-      asString(
-        row.start_time_slot_id,
-      );
-
-    const endSlotId =
-      asString(
-        row.end_time_slot_id,
-      );
-
-    const unitId =
-      asString(
-        row.unit_id,
-      );
-
-    const cohortId =
-      asString(
-        row.cohort_id,
-      );
-
-    if (
-      !id ||
-      !periodId ||
-      !dayId ||
-      !startSlotId ||
-      !endSlotId ||
-      !unitId ||
-      !cohortId
-    ) {
-      continue;
+  const periodMap = new Map<string, { name: string; code: string | null }>();
+  if (periods) {
+    for (const p of periods) {
+      periodMap.set(String(p.id), {
+        name: String(p.name),
+        code: p.code ? String(p.code) : null,
+      });
     }
+  }
 
-    const period =
-      periodById.get(
-        periodId,
-      );
+  const { data: slotsData } = await supabase
+    .from('time_slots')
+    .select('starts_at, sequence_number, academic_period_id')
+    .in('academic_period_id', periodIds);
 
-    const day =
-      dayById.get(
-        dayId,
-      );
+  const slotSequenceMap = new Map<string, number>();
+  if (slotsData) {
+    for (const slot of slotsData) {
+      if (slot.starts_at && slot.academic_period_id) {
+        slotSequenceMap.set(
+          String(slot.academic_period_id) + '_' + String(slot.starts_at),
+          asNumber(slot.sequence_number) ?? 999,
+        );
+      }
+    }
+  }
 
-    const startSlot =
-      slotById.get(
-        startSlotId,
-      );
+  const sessions: any[] = [];
+  for (const version of publishedVersions) {
+    if (Array.isArray(version.snapshot)) {
+      for (const session of version.snapshot) {
+        session.academicPeriodId = String(version.academic_period_id);
+        sessions.push(session);
+      }
+    }
+  }
 
-    const endSlot =
-      slotById.get(
-        endSlotId,
-      );
+  const trainerIdStr = String(workspace.trainerId);
+  const trainerSessions = sessions.filter(
+    (session) => String(session.trainerId) === trainerIdStr,
+  );
 
-    const unit =
-      unitById.get(
-        unitId,
-      );
+  const mapped: StaffTimetableSession[] = [];
+  for (const row of trainerSessions) {
+    const id = asString(row.id);
+    const periodId = asString(row.academicPeriodId);
+    if (!id || !periodId) continue;
 
-    const cohort =
-      cohortById.get(
-        cohortId,
-      );
-
-    const roomId =
-      asString(
-        row.room_id,
-      );
-
-    const room =
-      roomId
-        ? roomById.get(
-            roomId,
-          )
-        : undefined;
+    const period = periodMap.get(periodId);
+    const startsAt = asString(row.startTime) ?? '';
+    const startSequence =
+      slotSequenceMap.get(periodId + '_' + startsAt) ?? 999;
 
     mapped.push({
       id,
-      academicPeriodId:
-        periodId,
-      academicPeriodName:
-        labelFrom(
-          period,
-          'Academic Period',
-        ),
-      academicPeriodCode:
-        period
-          ? asString(
-              period.code,
-            )
-          : null,
-      dayName:
-        day
-          ? asString(
-              day.day_of_week,
-            ) ??
-            labelFrom(
-              day,
-              'Day',
-            )
-          : 'Day',
-      daySequence:
-        asNumber(
-          day
-            ?.sequence_number,
-        ) ??
-        999,
-      startSequence:
-        asNumber(
-          startSlot
-            ?.sequence_number,
-        ) ??
-        999,
-      startsAt:
-        asString(
-          startSlot
-            ?.starts_at,
-        ) ??
-        '',
-      endsAt:
-        asString(
-          endSlot
-            ?.ends_at,
-        ) ??
-        asString(
-          startSlot
-            ?.ends_at,
-        ) ??
-        '',
-      unitId,
-      unitName:
-        labelFrom(
-          unit,
-          'Unit',
-        ),
-      cohortNames: [
-        labelFrom(
-          cohort,
-          'Cohort',
-        ),
-      ],
+      academicPeriodId: periodId,
+      academicPeriodName: period?.name ?? 'Academic Period',
+      academicPeriodCode: period?.code ?? null,
+      dayName: asString(row.day) ?? 'Day',
+      daySequence: asNumber(row.daySequence) ?? 999,
+      startSequence,
+      startsAt,
+      endsAt: asString(row.endTime) ?? '',
+      unitId: asString(row.unitId) ?? '',
+      unitName: asString(row.unitName) ?? 'Unit',
+      cohortNames: [asString(row.cohortName) ?? 'Cohort'],
       roomLabel:
-        room
-          ? labelFrom(
-              room,
-              'Room',
-            )
-          : 'Unallocated',
-      deliveryMode:
-        asString(
-          row.delivery_mode,
-        ) ??
-        'teaching',
-      sessionNumbers: [
-        asNumber(
-          row.session_number,
-        ) ??
-        1,
-      ],
+        asString(row.roomName) ??
+        asString(row.roomCode) ??
+        'Unallocated',
+      deliveryMode: asString(row.deliveryMode) ?? 'teaching',
+      sessionNumbers: [asNumber(row.sessionNumber) ?? 1],
     });
   }
 

@@ -48,6 +48,18 @@ function dayLabel(
     );
 }
 
+function formatTrainerAbbreviation(fullName: string): string {
+  if (!fullName || fullName === 'Unassigned trainer' || fullName === 'Unassigned') {
+    return fullName;
+  }
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length <= 1) return fullName;
+  const firstName = parts[0];
+  const lastName = parts[parts.length - 1];
+  const initial = lastName.charAt(0).toUpperCase();
+  return `${firstName} ${initial}.`;
+}
+
 export default async function StudentTimetablePage() {
   const session =
     await getStudentPortalSession();
@@ -221,7 +233,7 @@ export default async function StudentTimetablePage() {
                               aria-hidden="true"
                             />
                             {
-                              item.trainerName
+                              formatTrainerAbbreviation(item.trainerName)
                             }
                           </p>
                         </div>

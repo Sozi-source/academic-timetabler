@@ -35,12 +35,12 @@
   --institutional-accent-border: #d4aa00;
 
   /* Navigation */
-  --navigation-background: #103c39;
-  --navigation-border: #275a56;
-  --navigation-text: #d7e4e2;
-  --navigation-hover: #184f4b;
-  --navigation-active: #245f5a;
-  --navigation-active-text: #ffffff;
+  --navigation-background: #ffffff;
+  --navigation-border: #dfe6e5;
+  --navigation-text: #52606d;
+  --navigation-hover: #f8faf9;
+  --navigation-active: #e8f2f1;
+  --navigation-active-text: #2f706b;
 
   /* Text */
   --text-primary: #1f2937;
@@ -89,7 +89,7 @@
 
   /* Layout */
   --content-max-width: 100rem;
-  --sidebar-width: 17rem;
+  --sidebar-width: 15rem;
   --header-height: 4.5rem;
 }
 

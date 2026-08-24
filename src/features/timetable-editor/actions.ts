@@ -26,6 +26,7 @@ export async function moveScheduledSessionAction(
     startTimeSlotId: formData.get('startTimeSlotId'),
     endTimeSlotId: formData.get('endTimeSlotId'),
     roomId: formData.get('roomId'),
+    trainerId: formData.get('trainerId'),
     notes: formData.get('notes') || undefined,
   });
 
@@ -41,6 +42,7 @@ export async function moveScheduledSessionAction(
     target_end_time_slot_id: parsed.data.endTimeSlotId,
     target_room_id: parsed.data.roomId || null,
     target_notes: parsed.data.notes ?? null,
+    target_trainer_id: parsed.data.trainerId || null,
   });
 
   if (error) {

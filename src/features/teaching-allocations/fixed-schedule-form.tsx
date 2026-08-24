@@ -96,7 +96,7 @@ export function FixedScheduleForm({
               required
               disabled={disabled}
             >
-              <option value="">Select day</option>
+              <option value="">Select</option>
               {days.map((day) => (
                 <option key={day.id} value={day.id}>
                   {formatDay(day.day_of_week)}
@@ -125,7 +125,7 @@ export function FixedScheduleForm({
               required
               disabled={disabled}
             >
-              <option value="">Select day</option>
+              <option value="">Select</option>
               {days.map((day) => (
                 <option key={day.id} value={day.id}>
                   {formatDay(day.day_of_week)}
@@ -142,7 +142,7 @@ export function FixedScheduleForm({
               required
               disabled={disabled}
             >
-              <option value="">Select session</option>
+              <option value="">Select</option>
               {slots.map((slot) => (
                 <option key={slot.id} value={slot.id}>
                   {slot.name}

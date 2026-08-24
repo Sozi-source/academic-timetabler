@@ -20,11 +20,12 @@ export async function moveScheduledSessionAction(
 ): Promise<EditorActionState> {
   await requireHodAccess();
 
+  const slotId = formData.get('timeSlotId') || formData.get('startTimeSlotId');
   const parsed = moveSessionSchema.safeParse({
     sessionId: formData.get('sessionId'),
     workingDayId: formData.get('workingDayId'),
-    startTimeSlotId: formData.get('startTimeSlotId'),
-    endTimeSlotId: formData.get('endTimeSlotId'),
+    startTimeSlotId: slotId,
+    endTimeSlotId: formData.get('endTimeSlotId') || slotId,
     roomId: formData.get('roomId'),
     trainerId: formData.get('trainerId'),
     notes: formData.get('notes') || undefined,
@@ -49,8 +50,7 @@ export async function moveScheduledSessionAction(
     return { status: 'error', message: error.message };
   }
 
-  refreshEditor();
-  return { status: 'success', message: 'Session moved successfully.' };
+  return { status: 'success', message: 'Session updated successfully.' };
 }
 
 export async function toggleScheduledSessionLockAction(formData: FormData): Promise<void> {

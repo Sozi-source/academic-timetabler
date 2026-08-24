@@ -12,7 +12,8 @@ import {
   FileText,
   Settings,
 } from 'lucide-react';
-import { useActionState, useState, useEffect } from 'react';
+import { useActionState, useState, useEffect, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { FormStatusMessage } from '@/components/ui/form-status-message';
@@ -51,6 +52,8 @@ export function SessionEditorCard({
   session: EditorSession;
   data: EditorData;
 }) {
+  const router = useRouter();
+  const [, startTransition] = useTransition();
   const [state, action, pending] = useActionState(
     moveScheduledSessionAction,
     initialEditorActionState,
@@ -59,15 +62,26 @@ export function SessionEditorCard({
   const trainerUnassigned = !session.trainerId;
   const roomUnassigned = !session.roomId;
 
-  // Auto-close dialog after 1 second on success
+  // Auto-close dialog on success and refresh without losing scroll position
   useEffect(() => {
     if (state.status === 'success') {
+      const scrollY = window.scrollY;
       const timer = setTimeout(() => {
         setIsOpen(false);
-      }, 1000);
+        startTransition(() => {
+          router.refresh();
+          // Restore scroll after refresh paint
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              window.scrollTo({ top: scrollY, behavior: 'instant' });
+            });
+          });
+        });
+      }, 800);
       return () => clearTimeout(timer);
     }
-  }, [state.status]);
+  }, [state.status, router]);
+
 
   return (
     <article
@@ -193,53 +207,80 @@ export function SessionEditorCard({
                     </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-text-secondary">Day of Week</label>
-                    <Select
-                      name="workingDayId"
-                      defaultValue={session.workingDayId}
-                      aria-label="Working day"
-                      className="w-full"
-                    >
-                      {data.workingDays.map((day) => (
-                        <option key={day.id} value={day.id}>
-                          {day.label}
-                        </option>
-                      ))}
-                    </Select>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-text-secondary">Day of Week</label>
+                      <Select
+                        name="workingDayId"
+                        defaultValue={session.workingDayId}
+                        aria-label="Working day"
+                        className="w-full"
+                      >
+                        {data.workingDays.map((day) => (
+                          <option key={day.id} value={day.id}>
+                            {day.label}
+                          </option>
+                        ))}
+                      </Select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-text-secondary">Time Slot</label>
+                      <Select
+                        name="timeSlotId"
+                        defaultValue={session.startTimeSlotId}
+                        aria-label="Time slot"
+                        className="w-full"
+                      >
+                        {data.timeSlots.map((slot) => (
+                          <option key={slot.id} value={slot.id}>
+                            {slot.label}
+                          </option>
+                        ))}
+                      </Select>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-text-secondary">
-                        Start Time Slot
-                      </label>
+                      <label className="text-xs font-semibold text-text-secondary">Trainer</label>
                       <Select
-                        name="startTimeSlotId"
-                        defaultValue={session.startTimeSlotId}
-                        aria-label="Start slot"
+                        name="trainerId"
+                        defaultValue={session.trainerId ?? ''}
+                        aria-label="Trainer"
                         className="w-full"
                       >
-                        {data.timeSlots.map((slot) => (
-                          <option key={slot.id} value={slot.id}>
-                            {slot.label}
-                          </option>
-                        ))}
+                        <option value="">Unassigned</option>
+                        {data.trainers.map((t) => {
+                          const isGuest = data.profile && t.departmentId !== data.profile.activeDepartmentId;
+                          const workloadLabel = isGuest
+                            ? `Guest · ${t.allocatedHours}h`
+                            : `${t.allocatedHours}h`;
+                          return (
+                            <option key={t.id} value={t.id}>
+                              {t.fullName} ({workloadLabel})
+                            </option>
+                          );
+                        })}
                       </Select>
                     </div>
+
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-text-secondary">
-                        End Time Slot
-                      </label>
+                      <label className="text-xs font-semibold text-text-secondary">Room</label>
                       <Select
-                        name="endTimeSlotId"
-                        defaultValue={session.endTimeSlotId}
-                        aria-label="End slot"
+                        name="roomId"
+                        defaultValue={session.roomId ?? ''}
+                        aria-label="Room"
                         className="w-full"
                       >
-                        {data.timeSlots.map((slot) => (
-                          <option key={slot.id} value={slot.id}>
-                            {slot.label}
+                        <option value="">No room</option>
+                        {data.rooms.map((room) => (
+                          <option
+                            key={room.id}
+                            value={room.id}
+                            disabled={room.capacity < session.cohortSize}
+                          >
+                            {room.name}
                           </option>
                         ))}
                       </Select>
@@ -247,57 +288,7 @@ export function SessionEditorCard({
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-text-secondary">
-                      Trainer Assignment
-                    </label>
-                    <Select
-                      name="trainerId"
-                      defaultValue={session.trainerId ?? ''}
-                      aria-label="Trainer"
-                      className="w-full"
-                    >
-                      <option value="">No trainer assigned</option>
-                      {data.trainers.map((t) => {
-                        const isGuest = data.profile && t.departmentId !== data.profile.activeDepartmentId;
-                        const workloadLabel = isGuest
-                          ? `Guest · ${t.allocatedHours}h`
-                          : `${t.allocatedHours}h`;
-                        return (
-                          <option key={t.id} value={t.id}>
-                            {t.fullName} ({workloadLabel})
-                          </option>
-                        );
-                      })}
-                    </Select>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-text-secondary">
-                      Room Assignment
-                    </label>
-                    <Select
-                      name="roomId"
-                      defaultValue={session.roomId ?? ''}
-                      aria-label="Room"
-                      className="w-full"
-                    >
-                      <option value="">No room assigned</option>
-                      {data.rooms.map((room) => (
-                        <option
-                          key={room.id}
-                          value={room.id}
-                          disabled={room.capacity < session.cohortSize}
-                        >
-                          {room.name}
-                        </option>
-                      ))}
-                    </Select>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-text-secondary">
-                      Optional Note
-                    </label>
+                    <label className="text-xs font-semibold text-text-secondary">Note</label>
                     <input
                       name="notes"
                       defaultValue={
@@ -306,7 +297,7 @@ export function SessionEditorCard({
                           : (session.notes ?? '')
                       }
                       placeholder="e.g., Clinical rotation swap"
-                      className="h-10 w-full rounded-xl border border-border-strong bg-surface px-3 text-sm outline-none focus:border-primary placeholder:text-text-muted"
+                      className="h-9 w-full rounded-xl border border-border-strong bg-surface px-3 text-sm outline-none focus:border-primary placeholder:text-text-muted"
                     />
                   </div>
 

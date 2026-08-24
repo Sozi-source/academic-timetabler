@@ -158,7 +158,7 @@ export const getTimetableEditorData = cache(async (
     };
   });
 
-  const workloads = new Map(
+  const workloads = new Map<string, number>(
     (workloadResult.data ?? []).map((w: any) => [w.trainer_id, Number(w.allocated_hours)]),
   );
 

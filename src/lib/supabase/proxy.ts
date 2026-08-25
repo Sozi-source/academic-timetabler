@@ -10,6 +10,24 @@ export async function updateSession(request: NextRequest) {
     request,
   });
 
+  // Optimization 1: Bypass background prefetch requests entirely
+  const isPrefetch =
+    request.headers.get('x-middleware-prefetch') === '1' ||
+    request.headers.get('purpose') === 'prefetch';
+
+  if (isPrefetch) {
+    return response;
+  }
+
+  // Optimization 2: Avoid network roundtrips if no Supabase session cookie is present
+  const hasSessionCookie = request.cookies.getAll().some((cookie) =>
+    cookie.name.includes('auth-token')
+  );
+
+  if (!hasSessionCookie) {
+    return response;
+  }
+
   const supabase = createServerClient(
     environment.NEXT_PUBLIC_SUPABASE_URL,
     environment.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,

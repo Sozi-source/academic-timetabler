@@ -125,7 +125,7 @@ export function DashboardView({
   return (
     <div className="space-y-6">
       {/* Hub Gateways Grid */}
-      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 min-[1920px]:grid-cols-6">
         {hubs.map((hub) => {
           const Icon = hub.icon;
 

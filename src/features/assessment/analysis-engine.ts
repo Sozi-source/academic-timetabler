@@ -11,6 +11,7 @@ export interface AssessmentAnalysisResultRow {
   cohortId: string | null;
   status: OperationalAssessmentResultStatus;
   mark: number | null;
+  grade?: string | null;
 }
 
 export interface AssessmentAnalysisSummary {

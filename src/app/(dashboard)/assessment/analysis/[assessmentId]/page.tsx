@@ -454,7 +454,9 @@ export default async function AssessmentAnalysisDetailPage({
                       student.status ===
                         'pending'
                       ? '—'
-                      : 'Mark'}
+                      : student.grade
+                        ? `Grade ${student.grade}`
+                        : 'Mark'}
                 </p>
 
                 <p className="text-sm font-semibold text-text-primary sm:text-right">

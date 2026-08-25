@@ -137,7 +137,7 @@ function gradeFor(score: number) {
   if (score >= 65) return 'B';
   if (score >= 50) return 'C';
   if (score >= 40) return 'D';
-  return 'E';
+  return 'F';
 }
 
 function mainHeader(departmentName: string) {
@@ -612,6 +612,15 @@ function failedStudents(data: AssessmentPeriodReportData) {
     .filter((row) => row.total !== null && row.total < 40)
     .sort((a, b) => `${a.fullName}|${a.unitName}`.localeCompare(`${b.fullName}|${b.unitName}`));
 
+  // Count how many units each student failed in this academic period
+  const failedCountsByStudent = new Map<string, number>();
+  data.rows.forEach((row) => {
+    if (row.total !== null && row.total < 40) {
+      const count = failedCountsByStudent.get(row.admissionNumber) ?? 0;
+      failedCountsByStudent.set(row.admissionNumber, count + 1);
+    }
+  });
+
   const rows: TableRow[] = [
     new TableRow({
       tableHeader: true,
@@ -622,6 +631,11 @@ function failedStudents(data: AssessmentPeriodReportData) {
   ];
 
   failed.forEach((row, index) => {
+    const studentFailCount = failedCountsByStudent.get(row.admissionNumber) ?? 0;
+    const recommendation = studentFailCount > 3
+      ? 'Academic counselling with biological parent involved'
+      : 'Supplementary Exam';
+
     rows.push(
       new TableRow({
         children: [
@@ -630,7 +644,7 @@ function failedStudents(data: AssessmentPeriodReportData) {
           cell(row.admissionNumber),
           cell(row.unitName),
           cell(row.total?.toFixed(1) ?? ''),
-          cell('Supplementary Exam'),
+          cell(recommendation),
         ],
       }),
     );

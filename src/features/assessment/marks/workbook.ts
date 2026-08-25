@@ -226,7 +226,7 @@ function addCohortSummary(
         `IF(B${summaryRowNo}>=75,"A - DISTINCTION",` +
         `IF(B${summaryRowNo}>=65,"B - CREDIT",` +
         `IF(B${summaryRowNo}>=50,"C - SATISFACTORY",` +
-        `IF(B${summaryRowNo}>=40,"D - PASS","E - FAIL")))))`,
+        `IF(B${summaryRowNo}>=40,"D - PASS","F - FAIL")))))`,
     };
   } else {
     summary.getCell(1).value = 'COHORT MEAN SCORE';
@@ -243,7 +243,7 @@ function addCohortSummary(
         `IF(B${summaryRowNo}/${maxMark}>=0.75,"A - DISTINCTION",` +
         `IF(B${summaryRowNo}/${maxMark}>=0.65,"B - CREDIT",` +
         `IF(B${summaryRowNo}/${maxMark}>=0.5,"C - SATISFACTORY",` +
-        `IF(B${summaryRowNo}/${maxMark}>=0.4,"D - PASS","E - FAIL")))))`,
+        `IF(B${summaryRowNo}/${maxMark}>=0.4,"D - PASS","F - FAIL")))))`,
     };
   }
 
@@ -310,8 +310,8 @@ export async function buildAssessmentMarksWorkbook(context: WorkbookAssessmentCo
 
     if (context.assessmentType === 'exam') {
       const headers = [
-        'S/No.', 'Admn No.', "Student's Name", 'Assignments /5', 'Presentations / Practicals /10',
-        'RAT /15', 'CAT 1 /15', 'End Term Exam /70', 'Total /100', 'Grade', 'Comment',
+        'S/No.', 'Admn No.', "Student's Name", 'Assignment /5', 'Presentation /10',
+        'RAT /15', 'CAT /15', 'EXAM /70', 'Total /100', 'Grade', 'Comment',
       ];
       sheet.getRow(ASSESSMENT_MARKS_HEADER_ROW).values = headers;
       headerStyle(sheet.getRow(ASSESSMENT_MARKS_HEADER_ROW));
@@ -332,7 +332,7 @@ export async function buildAssessmentMarksWorkbook(context: WorkbookAssessmentCo
         }
         // RAT/CAT average and coursework remain intentionally invisible. Total uses the same logic directly.
         row.getCell(9).value = { formula: `IF(H${rowNo}="AB","AB",IF(OR(H${rowNo}="",COUNT(F${rowNo}:G${rowNo})=0),"",SUM(D${rowNo}:E${rowNo})+AVERAGE(F${rowNo}:G${rowNo})+H${rowNo}))` };
-        row.getCell(10).value = { formula: `IF(NOT(ISNUMBER(I${rowNo})),"",IF(I${rowNo}>=75,"A",IF(I${rowNo}>=65,"B",IF(I${rowNo}>=50,"C",IF(I${rowNo}>=40,"D","E")))))` };
+        row.getCell(10).value = { formula: `IF(NOT(ISNUMBER(I${rowNo})),"",IF(I${rowNo}>=75,"A",IF(I${rowNo}>=65,"B",IF(I${rowNo}>=50,"C",IF(I${rowNo}>=40,"D","F")))))` };
         row.getCell(11).value = { formula: `IF(H${rowNo}="AB","ABSENT",IF(NOT(ISNUMBER(I${rowNo})),"",IF(I${rowNo}>=75,"DISTINCTION",IF(I${rowNo}>=65,"CREDIT",IF(I${rowNo}>=50,"SATISFACTORY",IF(I${rowNo}>=40,"PASS","FAIL")))))` };
         if (student.attendanceStatus === 'absent') row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF4E5' } };
       });
@@ -354,7 +354,7 @@ export async function buildAssessmentMarksWorkbook(context: WorkbookAssessmentCo
           row.getCell(4).protection = { locked: false };
           row.getCell(4).dataValidation = { type: 'decimal', operator: 'between', formulae: [0, context.maxMark], allowBlank: false, showErrorMessage: true, error: `Enter a mark from 0 to ${context.maxMark}.` };
         }
-        row.getCell(5).value = { formula: `IF(D${rowNo}="AB","",IF(NOT(ISNUMBER(D${rowNo})),"",IF(D${rowNo}/${context.maxMark}>=0.75,"A",IF(D${rowNo}/${context.maxMark}>=0.65,"B",IF(D${rowNo}/${context.maxMark}>=0.5,"C",IF(D${rowNo}/${context.maxMark}>=0.4,"D","E")))))` };
+        row.getCell(5).value = { formula: `IF(D${rowNo}="AB","",IF(NOT(ISNUMBER(D${rowNo})),"",IF(D${rowNo}/${context.maxMark}>=0.75,"A",IF(D${rowNo}/${context.maxMark}>=0.65,"B",IF(D${rowNo}/${context.maxMark}>=0.5,"C",IF(D${rowNo}/${context.maxMark}>=0.4,"D","F")))))` };
         row.getCell(6).value = { formula: `IF(D${rowNo}="AB","ABSENT",IF(NOT(ISNUMBER(D${rowNo})),"",IF(D${rowNo}>=${context.passMark},"PASS","FAIL")))` };
         if (student.attendanceStatus === 'absent') row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF4E5' } };
       });
@@ -462,5 +462,5 @@ export function gradeFor(total: number | null, maxMark: number) {
   if (percent >= 65) return 'B';
   if (percent >= 50) return 'C';
   if (percent >= 40) return 'D';
-  return 'E';
+  return 'F';
 }

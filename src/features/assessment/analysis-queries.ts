@@ -87,6 +87,7 @@ export interface AssessmentAnalysisStudentRow {
   cohortName: string;
   status: string;
   mark: number | null;
+  grade: string | null;
 }
 
 export interface AssessmentAnalysisCohortRow {
@@ -247,6 +248,10 @@ function mapAnalysisResult(
     mark:
       asNumber(
         row.operational_mark,
+      ),
+    grade:
+      asString(
+        row.grade,
       ),
   };
 }
@@ -1009,7 +1014,7 @@ export const getAssessmentAnalysisDetail =
             'assessment_results',
           )
           .select(
-            'id, assessment_event_id, student_id, cohort_id, operational_result_status, operational_mark',
+            'id, assessment_event_id, student_id, cohort_id, operational_result_status, operational_mark, grade',
           )
           .in(
             'assessment_event_id',
@@ -1414,6 +1419,10 @@ export const getAssessmentAnalysisDetail =
                 mark:
                   result
                     ?.mapped.mark ??
+                  null,
+                grade:
+                  result
+                    ?.mapped.grade ??
                   null,
               } satisfies
                 AssessmentAnalysisStudentRow;

@@ -22,6 +22,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { MetricCard } from '@/components/ui/metric-card';
 import { PageHeader } from '@/components/ui/page-header';
+import { MarkbookDeleteButton } from './markbook-delete-button';
 import type {
   AssessmentControlCenterData,
   AssessmentControlCenterItem,
@@ -143,7 +144,7 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
           status="Configured"
         />
         <MetricCard
-          label="Assessment Population"
+          label="Roster Candidates"
           value={String(data.summary.totalPopulation)}
           description="Registered candidates snapshot"
           icon={UsersRound}
@@ -450,6 +451,10 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                           <BarChart3 className="size-3" aria-hidden="true" />
                           Analysis
                         </Link>
+                        <MarkbookDeleteButton
+                          assessmentId={item.id}
+                          unitLabel={`${item.unitCode} — ${item.unitName}`}
+                        />
                       </div>
                     </td>
                   </tr>

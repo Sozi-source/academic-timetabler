@@ -32,7 +32,7 @@ export function MetricCard({
     <Card className={`flex flex-col justify-between p-4 transition-all hover:border-border-strong hover:shadow-sm ${className ?? ''}`}>
       <div>
         <div className="flex items-center justify-between gap-2">
-          <p className="truncate text-xs font-semibold uppercase tracking-wider text-text-muted">
+          <p className="text-xs font-semibold tracking-wide text-text-muted">
             {label}
           </p>
           <div className="flex shrink-0 items-center gap-1.5">
@@ -51,7 +51,7 @@ export function MetricCard({
       </div>
 
       {description ? (
-        <p className="mt-2 truncate text-xs text-text-muted">
+        <p className="mt-2 text-xs text-text-muted leading-normal">
           {description}
         </p>
       ) : null}

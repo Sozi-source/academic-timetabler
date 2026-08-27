@@ -662,6 +662,83 @@ describe('generateTimetablePlan', () => {
     ).toBe(0);
   });
 
+  it('does not treat a stale session at the wrong fixed time as satisfying the allocation', () => {
+    const input = createPlannerInput({
+      allocations: [{
+        ...baseAllocation,
+        fixedWorkingDayId: 'day-2',
+        fixedWorkingDayIds: ['day-2'],
+        fixedTimeSlotIds: ['slot-1'],
+      }],
+    });
+
+    input.existingSessions = [{
+      id: 'stale-fixed-session',
+      academicPeriodId: 'period-1',
+      teachingAllocationId: baseAllocation.id,
+      cohortId: baseAllocation.cohortId,
+      unitId: baseAllocation.unitId,
+      trainerId: baseAllocation.trainerId,
+      workingDayId: 'day-1',
+      startTimeSlotId: 'slot-1',
+      endTimeSlotId: 'slot-2',
+      roomId: null,
+      sessionNumber: 1,
+      deliveryMode: 'theory',
+      status: 'locked',
+      source: 'manual',
+      conflictState: 'clear',
+      isLocked: true,
+    }];
+
+    const result = generateTimetablePlan(input);
+
+    expect(result.statistics.requestedSessionCount).toBe(1);
+    expect(result.sessions).toHaveLength(0);
+    expect(result.unscheduled).toHaveLength(1);
+    expect(result.unscheduled[0].conflictTypes).toContain('duplicate_session');
+  });
+
+  it('does not treat a session with the previous trainer as satisfying the allocation', () => {
+    const input = createPlannerInput({
+      allocations: [{
+        ...baseAllocation,
+        trainerId: 'trainer-borrowed',
+      }],
+    });
+    input.trainers.push({
+      ...input.trainers[0],
+      id: 'trainer-borrowed',
+      staffNumber: 'BORROWED-1',
+      fullName: 'Borrowed Trainer',
+    });
+    input.existingSessions = [{
+      id: 'session-with-previous-trainer',
+      academicPeriodId: 'period-1',
+      teachingAllocationId: baseAllocation.id,
+      cohortId: baseAllocation.cohortId,
+      unitId: baseAllocation.unitId,
+      trainerId: baseAllocation.trainerId,
+      workingDayId: 'day-1',
+      startTimeSlotId: 'slot-1',
+      endTimeSlotId: 'slot-2',
+      roomId: null,
+      sessionNumber: 1,
+      deliveryMode: 'theory',
+      status: 'locked',
+      source: 'manual',
+      conflictState: 'clear',
+      isLocked: true,
+    }];
+
+    const result = generateTimetablePlan(input);
+
+    expect(result.statistics.requestedSessionCount).toBe(1);
+    expect(result.sessions).toHaveLength(0);
+    expect(result.unscheduled).toHaveLength(1);
+    expect(result.unscheduled[0].conflictTypes).toContain('duplicate_session');
+  });
+
   it('preserves a satisfied locked session and generates only the missing weekly session', () => {
     const input = createPlannerInput({
       allocations: [

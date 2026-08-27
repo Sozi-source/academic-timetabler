@@ -166,7 +166,7 @@ export function GeneratorUnscheduledList({
                                 exchange with {suggestion.partnerTrainerName}
                               </p>
                               <p className="mt-1">
-                                {suggestion.partnerTrainerName} takes {session.unitCode ?? 'this unit'}; {suggestion.targetTrainerName} takes {suggestion.partnerUnitCode} — {suggestion.partnerUnitName} ({suggestion.partnerCohortCode}).
+                                {suggestion.partnerTrainerName} takes {session.unitName ?? 'this unit'}; {suggestion.targetTrainerName} takes {suggestion.partnerUnitName} ({suggestion.partnerCohortCode}).
                               </p>
                               <p className="mt-1 text-text-muted">
                                 {suggestion.durationMinutes} minutes · resolves {suggestion.resolvedSessionCount} session{suggestion.resolvedSessionCount === 1 ? '' : 's'} · {suggestion.remainingUnscheduledCount} unresolved remain · {suggestion.warningCount} warning{suggestion.warningCount === 1 ? '' : 's'}

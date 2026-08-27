@@ -100,6 +100,47 @@ function isActiveSession(
   ].includes(session.status);
 }
 
+function sessionSatisfiesRequest({
+  session,
+  allocation,
+  sessionNumber,
+}: {
+  session: PlanningSession;
+  allocation: PlanningAllocation;
+  sessionNumber: number;
+}) {
+  if (
+    session.teachingAllocationId !== allocation.id ||
+    session.sessionNumber !== sessionNumber ||
+    session.academicPeriodId !== allocation.academicPeriodId ||
+    session.cohortId !== allocation.cohortId ||
+    session.unitId !== allocation.unitId ||
+    session.trainerId !== allocation.trainerId
+  ) {
+    return false;
+  }
+
+  const fixedTimeSlotId =
+    allocation.fixedTimeSlotIds?.[sessionNumber - 1] ?? null;
+
+  if (!fixedTimeSlotId) {
+    return true;
+  }
+
+  const fixedWorkingDayId =
+    allocation.fixedWorkingDayIds?.[sessionNumber - 1] ??
+    allocation.fixedWorkingDayId ??
+    null;
+
+  return (
+    session.startTimeSlotId === fixedTimeSlotId &&
+    (!fixedWorkingDayId || session.workingDayId === fixedWorkingDayId) &&
+    (!allocation.isFullDaySession ||
+      !allocation.fixedEndTimeSlotId ||
+      session.endTimeSlotId === allocation.fixedEndTimeSlotId)
+  );
+}
+
 function createGeneratedSessionId({
   allocationId,
   sessionNumber,
@@ -927,14 +968,6 @@ export function generateTimetablePlan(
       []
     ).filter(isActiveSession);
 
-  const satisfiedRequestKeys =
-    new Set(
-      existingSessions.map(
-        (session) =>
-          `${session.teachingAllocationId}:${session.sessionNumber}`,
-      ),
-    );
-
   const workingDays =
     input.workingDays
       .filter(
@@ -974,11 +1007,14 @@ export function generateTimetablePlan(
       cohorts: input.cohorts,
       units: input.units,
       rooms: input.rooms,
-    }).filter(
-      (request) =>
-        !satisfiedRequestKeys.has(
-          `${request.allocation.id}:${request.sessionNumber}`,
-        ),
+    }).filter((request) =>
+      !existingSessions.some((session) =>
+        sessionSatisfiesRequest({
+          session,
+          allocation: request.allocation,
+          sessionNumber: request.sessionNumber,
+        }),
+      ),
     );
 
   const selectedSessions:

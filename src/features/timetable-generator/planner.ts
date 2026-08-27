@@ -115,7 +115,9 @@ function sessionSatisfiesRequest({
     session.academicPeriodId !== allocation.academicPeriodId ||
     session.cohortId !== allocation.cohortId ||
     session.unitId !== allocation.unitId ||
-    session.trainerId !== allocation.trainerId
+    session.trainerId !== allocation.trainerId ||
+    (allocation.preferredRoomId !== null &&
+      session.roomId !== allocation.preferredRoomId)
   ) {
     return false;
   }

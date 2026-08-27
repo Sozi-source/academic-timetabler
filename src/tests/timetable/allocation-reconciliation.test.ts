@@ -35,13 +35,33 @@ describe('allocation reconciliation', () => {
     })).toBe(true);
   });
 
-  it('reconciles an equivalent shared allocation after a period correction', () => {
+  it('does not override a different explicit shared-offering identity', () => {
     expect(allocationMatchesOffering(offering, {
       teachingOfferingId: 'old-2029-offering',
       cohortId: 'cnd-2026',
       unitId: 'old-representative-unit',
       participantCohortIds: ['cnd-2026', 'dnd-2026'],
       unitTitle: 'Communication Skills',
+      sessionDurationMinutes: 120,
+    })).toBe(false);
+  });
+
+  it('matches the exact source unit offering before considering titles', () => {
+    expect(allocationMatchesOffering({
+      ...offering,
+      teachingOfferingId: null,
+      participants: [{
+        cohortId: 'cnd-2026',
+        unitId: 'cnd-communication',
+        unitOfferingId: 'unit-offering-1',
+      }],
+    }, {
+      teachingOfferingId: null,
+      sourceUnitOfferingId: 'unit-offering-1',
+      cohortId: 'other-cohort',
+      unitId: 'other-unit',
+      participantCohortIds: [],
+      unitTitle: 'Different title',
       sessionDurationMinutes: 120,
     })).toBe(true);
   });

@@ -45,7 +45,8 @@ interface OfferingRow {
   teaching_offering_participants: Array<{
     id: string;
     cohort_id: string;
-    unit_id: string;
+      unit_id: string;
+      unit_offering_id: string | null;
     cohorts: Relation<{
       id: string;
       code: string;
@@ -94,6 +95,7 @@ interface AllocationContextRow {
   cohort_id: string;
   unit_id: string;
   teaching_offering_id: string | null;
+  source_unit_offering_id: string | null;
   participant_cohort_ids: string[] | null;
   trainer_id: string | null;
   preferred_room_id: string | null;
@@ -138,11 +140,15 @@ function mapOffering(
       participants: participants.map((participant) => ({
         cohortId: participant.cohortId,
         unitId: participant.unitId,
+        unitOfferingId: row.teaching_offering_participants.find(
+          (item) => item.id === participant.id,
+        )?.unit_offering_id ?? null,
       })),
       title: row.title,
       sessionDurationMinutes: row.session_duration_minutes,
     }, {
       teachingOfferingId: allocation.teaching_offering_id,
+      sourceUnitOfferingId: allocation.source_unit_offering_id,
       cohortId: allocation.cohort_id,
       unitId: allocation.unit_id,
       participantCohortIds: allocation.participant_cohort_ids ?? [allocation.cohort_id],
@@ -217,6 +223,7 @@ export const getSchedulingReadiness = cache(async (
         id,
         cohort_id,
         unit_id,
+        unit_offering_id,
         cohorts (id, code, name, actual_size, status, is_timetable_available),
         units (id, code, name, is_active, is_timetable_available)
       )
@@ -229,6 +236,7 @@ export const getSchedulingReadiness = cache(async (
       cohort_id,
       unit_id,
       teaching_offering_id,
+      source_unit_offering_id,
       participant_cohort_ids,
       trainer_id,
       preferred_room_id,

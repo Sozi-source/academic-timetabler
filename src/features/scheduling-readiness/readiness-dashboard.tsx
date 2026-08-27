@@ -1,18 +1,14 @@
 import Link from 'next/link';
 import {
   AlertTriangle,
-  BookOpenCheck,
   Building2,
   CheckCircle2,
-  Clock3,
   GraduationCap,
-  ShieldAlert,
   UsersRound,
 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MetricCard } from '@/components/ui/metric-card';
 import { Select } from '@/components/ui/select';
 
 import { includeAllUnassignedOfferingsAction, updateTeachingOfferingReadinessAction } from './actions';
@@ -106,11 +102,11 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
       </section>
 
       {readiness.issues.length > 0 ? (
-        <section className="space-y-3" aria-labelledby="readiness-issues-title">
+        <section className="space-y-2" aria-labelledby="readiness-issues-title">
           <h2 id="readiness-issues-title" className="text-lg font-semibold text-text-primary">Readiness issues</h2>
-          <div className="grid gap-3 lg:grid-cols-2">
+          <div className="grid gap-2 lg:grid-cols-2">
             {readiness.issues.map((entry) => (
-              <article key={entry.id} className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+              <article key={entry.id} className="rounded-xl border border-border bg-surface p-3 shadow-sm">
                 <div className="flex items-start gap-3">
                   <AlertTriangle className={`mt-0.5 size-4 shrink-0 ${entry.severity === 'blocker' ? 'text-danger' : 'text-warning'}`} aria-hidden="true" />
                   <div className="min-w-0 flex-1">
@@ -120,9 +116,9 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
                         {entry.severity === 'blocker' ? 'Blocker' : entry.severity === 'warning' ? 'Warning' : 'Notice'}
                       </Badge>
                     </div>
-                    <p className="mt-1 text-sm leading-6 text-text-secondary">{entry.description}</p>
+                    <p className="mt-1 text-sm leading-5 text-text-secondary">{entry.description}</p>
                     {entry.actionHref && entry.actionLabel ? (
-                      <Link href={entry.actionHref} className="mt-3 inline-flex text-sm font-semibold text-primary hover:underline">{entry.actionLabel}</Link>
+                      <Link href={entry.actionHref} className="mt-2 inline-flex text-sm font-semibold text-primary hover:underline">{entry.actionLabel}</Link>
                     ) : null}
                   </div>
                 </div>
@@ -132,7 +128,7 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
         </section>
       ) : null}
 
-      <section className="space-y-4" aria-labelledby="offering-readiness-title">
+      <section className="space-y-2.5" aria-labelledby="offering-readiness-title">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 id="offering-readiness-title" className="text-lg font-semibold text-text-primary">Teaching allocations</h2>
@@ -141,7 +137,7 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
           <span className="text-sm font-medium text-text-muted">{readiness.offerings.length} units</span>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           {readiness.offerings.map((offering) => {
             const requiredCapacity = offering.participants.reduce((total, participant) => total + participant.cohortSize, 0);
             const roomTooSmall = offering.preferredRoomCapacity !== null && offering.preferredRoomCapacity < requiredCapacity;
@@ -153,11 +149,11 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
             ].filter(Boolean) as string[];
 
             return (
-              <article key={offering.id} className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
-                <div className="grid gap-5 p-4 sm:p-5 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,0.72fr)] xl:items-start">
+              <article key={offering.id} className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
+                <div className="grid gap-3 p-3 xl:grid-cols-[minmax(0,0.9fr)_minmax(34rem,1.1fr)] xl:items-start">
                   <div className="min-w-0">
                     <div className="flex items-start gap-3">
-                      <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+                      <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary">
                         <GraduationCap className="size-4" aria-hidden="true" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -174,9 +170,9 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
                           </div>
                         </div>
 
-                        <div className="mt-4 grid items-stretch gap-3 md:grid-cols-3">
+                        <div className="mt-2.5 grid items-stretch gap-2 sm:grid-cols-3">
 
-                          <div className="flex min-w-0 flex-col rounded-xl bg-surface-subtle px-3 py-3">
+                          <div className="flex min-w-0 flex-col rounded-lg bg-surface-subtle px-2.5 py-2">
                             <p className="text-xs font-medium uppercase tracking-wide text-text-muted">
                               Demand
                             </p>
@@ -190,16 +186,16 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
                             </p>
                           </div>
 
-                          <div className="flex min-w-0 flex-col rounded-xl border border-border bg-surface-subtle px-3 py-3">
+                          <div className="flex min-w-0 flex-col rounded-lg border border-border bg-surface-subtle px-2.5 py-2">
                             <p className="text-xs font-medium uppercase tracking-wide text-text-muted">
                               Participants
                             </p>
 
                             {offering.participants.length > 0 ? (
-                              <div className="mt-1 space-y-1.5">
+                              <div className="mt-1 space-y-1">
                                 {offering.participants.map((participant) => (
                                   <div key={participant.id} className="min-w-0">
-                                    <p className="break-words font-medium leading-5 text-text-primary">
+                                    <p className="break-words text-sm font-medium leading-5 text-text-primary">
                                       {participant.cohortName}
                                     </p>
 
@@ -216,7 +212,7 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
                             )}
                           </div>
 
-                          <div className="flex min-w-0 flex-col rounded-xl bg-surface-subtle px-3 py-3">
+                          <div className="flex min-w-0 flex-col rounded-lg bg-surface-subtle px-2.5 py-2">
                             <p className="text-xs font-medium uppercase tracking-wide text-text-muted">
                               Capacity
                             </p>
@@ -234,29 +230,34 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
 
                         {issues.length > 0 ? (
                           <p
-                            className={`mt-3 text-xs font-medium ${
+                            className={`mt-2 text-xs font-medium ${
                               roomTooSmall ? 'text-danger' : 'text-warning'
                             }`}
                           >
                             {issues.join(' · ')}
                           </p>
                         ) : (
-                          <p className="mt-3 text-xs font-medium text-success">
+                          <p className="mt-2 text-xs font-medium text-success">
                             Allocation complete
                           </p>
                         )}
                       </div>
                     </div>
                   </div>
-                  <div className="min-w-0 rounded-2xl border border-border bg-surface-subtle p-3 sm:p-4">
-                    <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-text-muted">Allocation</p>
-                    <form action={updateTeachingOfferingReadinessAction} className="grid gap-3 sm:grid-cols-2">
+                  <div className="min-w-0 rounded-xl border border-border bg-surface-subtle p-3">
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">Allocation</p>
+                      <span className={`text-xs font-medium ${issues.length > 0 ? 'text-warning' : 'text-success'}`}>
+                        {issues.length > 0 ? `${issues.length} item${issues.length === 1 ? '' : 's'} pending` : 'Complete'}
+                      </span>
+                    </div>
+                    <form action={updateTeachingOfferingReadinessAction} className="grid gap-2 sm:grid-cols-2 2xl:grid-cols-[1.15fr_1fr_0.75fr_0.9fr_auto] 2xl:items-end">
                       <input type="hidden" name="offeringId" value={offering.id} />
                       <input type="hidden" name="academicPeriodId" value={readiness.academicPeriodId} />
 
-                      <label className="min-w-0 space-y-1.5">
+                      <label className="min-w-0 space-y-1">
                         <span className="text-xs font-medium text-text-secondary">Trainer</span>
-                        <Select name="trainerId" defaultValue={offering.trainerId ?? ''} aria-label={`Trainer for ${offering.title}`} className="h-10 w-full min-w-0 text-sm">
+                        <Select name="trainerId" defaultValue={offering.trainerId ?? ''} aria-label={`Trainer for ${offering.title}`} className="h-9 w-full min-w-0 text-sm">
                           <option value="">Select trainer</option>
                           {readiness.trainerOptions.map((trainer) => (
   <option key={trainer.id} value={trainer.id}>
@@ -266,17 +267,17 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
                         </Select>
                       </label>
 
-                      <label className="min-w-0 space-y-1.5">
+                      <label className="min-w-0 space-y-1">
                         <span className="text-xs font-medium text-text-secondary">Room</span>
-                        <Select name="preferredRoomId" defaultValue={offering.preferredRoomId ?? ''} aria-label={`Preferred room for ${offering.title}`} className="h-10 w-full min-w-0 text-sm">
+                        <Select name="preferredRoomId" defaultValue={offering.preferredRoomId ?? ''} aria-label={`Preferred room for ${offering.title}`} className="h-9 w-full min-w-0 text-sm">
                           <option value="">No room assigned</option>
                           {readiness.roomOptions.filter((room) => room.capacity >= requiredCapacity).map((room) => <option key={room.id} value={room.id}>{room.label}</option>)}
                         </Select>
                       </label>
 
-                      <label className="min-w-0 space-y-1.5">
+                      <label className="min-w-0 space-y-1">
                         <span className="text-xs font-medium text-text-secondary">Status</span>
-                        <Select name="status" defaultValue={offering.status} aria-label={`Status for ${offering.title}`} className="h-10 w-full min-w-0 text-sm">
+                        <Select name="status" defaultValue={offering.status} aria-label={`Status for ${offering.title}`} className="h-9 w-full min-w-0 text-sm">
                           <option value="draft">Draft</option>
                           <option value="active">Active</option>
                           <option value="suspended">Suspended</option>
@@ -285,15 +286,15 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
                         </Select>
                       </label>
 
-                      <label className="min-w-0 space-y-1.5">
+                      <label className="min-w-0 space-y-1">
                         <span className="text-xs font-medium text-text-secondary">Scheduling</span>
-                        <Select name="isTimetableEnabled" defaultValue={String(offering.isTimetableEnabled)} aria-label={`Timetable state for ${offering.title}`} className="h-10 w-full min-w-0 text-sm">
+                        <Select name="isTimetableEnabled" defaultValue={String(offering.isTimetableEnabled)} aria-label={`Timetable state for ${offering.title}`} className="h-9 w-full min-w-0 text-sm">
                           <option value="true">Timetable enabled</option>
                           <option value="false">Excluded</option>
                         </Select>
                       </label>
 
-                      <div className="sm:col-span-2 sm:flex sm:justify-end">
+                      <div className="sm:col-span-2 sm:flex sm:justify-end 2xl:col-span-1">
                         <Button type="submit" size="sm" className="w-full sm:w-auto">Save</Button>
                       </div>
                     </form>
@@ -306,14 +307,14 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
       </section>
 
       <section className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-border bg-surface p-5 shadow-sm">
+        <div className="rounded-xl border border-border bg-surface p-4 shadow-sm">
           <div className="flex items-center gap-2">
             <UsersRound className="size-5 text-primary" aria-hidden="true" />
             <h2 className="font-semibold text-text-primary">Trainer workload</h2>
           </div>
-          <div className="mt-4 space-y-3">
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
             {readiness.trainerWorkloads.map((workload) => (
-              <div key={workload.trainerId} className="rounded-xl border border-border p-3">
+              <div key={workload.trainerId} className="rounded-lg border border-border p-2.5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="min-w-0">
                     <p className="break-words font-medium text-text-primary">{workload.trainerName}</p>
@@ -329,13 +330,13 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border bg-surface p-5 shadow-sm">
+        <div className="rounded-xl border border-border bg-surface p-4 shadow-sm">
           <div className="flex items-center gap-2">
             <Building2 className="size-5 text-primary" aria-hidden="true" />
             <h2 className="font-semibold text-text-primary">Next step</h2>
           </div>
-          <p className="mt-3 text-sm text-text-secondary">Resolve blockers, then generate the timetable.</p>
-          <div className="mt-5 flex flex-wrap gap-2">
+          <p className="mt-2 text-sm text-text-secondary">Resolve blockers, then generate the timetable.</p>
+          <div className="mt-3 flex flex-wrap gap-2">
             <Link href="/timetable/generator" className={`inline-flex h-10 items-center justify-center rounded-xl px-4 text-sm font-semibold ${readiness.isReady ? 'bg-primary text-primary-foreground' : 'pointer-events-none bg-surface-muted text-text-muted'}`}>Open generator</Link>
             <Link href="/timetable/rooms" className="inline-flex h-10 items-center justify-center rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary">Rooms</Link>
           </div>

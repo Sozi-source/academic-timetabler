@@ -64,7 +64,7 @@ export async function assignOfferingAction(formData: FormData) {
     query.set('allocationError','Select a trainer before assigning the unit.');
     redirect(`${path}?${query.toString()}`);
   }
-  const db=await createClient(); const {error}=await db.rpc('assign_unit_offering_with_reservation',{p_offering_id:offering,p_trainer_id:trainer});
+  const db=await createClient(); const {error}=await db.rpc('assign_unit_offering_authoritatively',{p_offering_id:offering,p_trainer_id:trainer});
   if(error) {
     const availabilityRequired = /available teaching time|available for every fixed teaching session/i.test(error.message);
     query.set(

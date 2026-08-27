@@ -5,6 +5,7 @@ export interface OfferingAllocationIdentity {
   participants: Array<{
     cohortId: string;
     unitId: string;
+    unitOfferingId?: string | null;
   }>;
   title: string;
   sessionDurationMinutes: number;
@@ -12,6 +13,7 @@ export interface OfferingAllocationIdentity {
 
 export interface CurrentAllocationIdentity {
   teachingOfferingId: string | null;
+  sourceUnitOfferingId?: string | null;
   cohortId: string;
   unitId: string;
   participantCohortIds: string[];
@@ -23,11 +25,15 @@ export function allocationMatchesOffering(
   offering: OfferingAllocationIdentity,
   allocation: CurrentAllocationIdentity,
 ) {
-  if (
-    allocation.teachingOfferingId &&
-    allocation.teachingOfferingId === offering.teachingOfferingId
-  ) {
-    return true;
+  if (allocation.sourceUnitOfferingId) {
+    return offering.participants.some(
+      (participant) =>
+        participant.unitOfferingId === allocation.sourceUnitOfferingId,
+    );
+  }
+
+  if (allocation.teachingOfferingId) {
+    return allocation.teachingOfferingId === offering.teachingOfferingId;
   }
 
   if (

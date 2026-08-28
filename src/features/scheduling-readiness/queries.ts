@@ -47,6 +47,11 @@ interface OfferingRow {
     cohort_id: string;
       unit_id: string;
       unit_offering_id: string | null;
+    unit_offerings: Relation<{
+      approval_status: 'review_required' | 'approved' | 'withdrawn';
+      selection_state: 'included' | 'excluded';
+      is_timetable_enabled: boolean;
+    }>;
     cohorts: Relation<{
       id: string;
       code: string;
@@ -224,6 +229,7 @@ export const getSchedulingReadiness = cache(async (
         cohort_id,
         unit_id,
         unit_offering_id,
+        unit_offerings (approval_status, selection_state, is_timetable_enabled),
         cohorts (id, code, name, actual_size, status, is_timetable_available),
         units (id, code, name, is_active, is_timetable_available)
       )
@@ -249,7 +255,14 @@ export const getSchedulingReadiness = cache(async (
       rooms (id, code, name, room_type, capacity, is_active, is_timetable_available)
       ,
       units (name)
-    `).eq('academic_period_id', academicPeriodId).eq('is_timetable_enabled', true).in('status', ['draft', 'active']),
+      ,
+      source_unit_offering:unit_offerings!teaching_allocations_source_unit_offering_id_fkey!inner (
+        approval_status, selection_state, is_timetable_enabled
+      )
+    `).eq('academic_period_id', academicPeriodId).eq('is_timetable_enabled', true).in('status', ['draft', 'active'])
+      .eq('source_unit_offering.approval_status', 'approved')
+      .eq('source_unit_offering.selection_state', 'included')
+      .eq('source_unit_offering.is_timetable_enabled', true),
   ]);
 
   const firstError = periodResult.error ?? offeringsResult.error ?? daysResult.error ?? slotsResult.error ?? trainersResult.error ?? roomsResult.error ?? allocationsResult.error;
@@ -261,6 +274,13 @@ export const getSchedulingReadiness = cache(async (
 
   const allocations = (allocationsResult.data ?? []) as unknown as AllocationContextRow[];
   const offerings = ((offeringsResult.data ?? []) as unknown as OfferingRow[])
+    .filter((offering) => offering.teaching_offering_participants.length > 0
+      && offering.teaching_offering_participants.every((participant) => {
+        const source = first(participant.unit_offerings);
+        return source?.approval_status === 'approved'
+          && source.selection_state === 'included'
+          && source.is_timetable_enabled;
+      }))
     .map((offering) => mapOffering(offering, allocations));
   const assessment = assessSchedulingReadiness({
     academicPeriodStatus: periodResult.data.status,

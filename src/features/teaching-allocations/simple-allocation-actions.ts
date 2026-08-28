@@ -9,18 +9,13 @@ export async function generateCurrentOfferingsAction(formData: FormData) {
   if (!period) throw new Error('Select an Academic Period.');
   const db = await createClient(); const { data:generatedCount, error } = await db.rpc('generate_current_unit_offerings',{p_academic_period_id:period});
   if (error) throw new Error(error.message);
-  const {data:mergeData,error:mergeError}=await db.rpc('merge_matching_unit_offerings',{p_academic_period_id:period});
-  if(mergeError) throw new Error(mergeError.message);
-  const {error:reconciliationError}=await db.rpc('reconcile_previous_trainer_assignments',{p_academic_period_id:period});
-  if(reconciliationError) throw new Error(reconciliationError.message);
-  const mergeResult=(mergeData??{}) as {mergedGroupCount?:number;mergedUnitCount?:number;skippedGroupCount?:number};
   const query=new URLSearchParams({
     period,
     generated:'1',
     created:String(generatedCount??0),
-    autoMerged:String(mergeResult.mergedGroupCount??0),
-    mergedUnits:String(mergeResult.mergedUnitCount??0),
-    mergeSkipped:String(mergeResult.skippedGroupCount??0),
+    autoMerged:'0',
+    mergedUnits:'0',
+    mergeSkipped:'0',
   });
   revalidatePath(path); revalidatePath('/timetable/unit-offerings'); revalidatePath('/timetable/readiness'); revalidatePath('/timetable/generator');
   redirect(`${path}?${query.toString()}`);
@@ -79,8 +74,9 @@ export async function assignOfferingAction(formData: FormData) {
     }
     redirect(`${path}?${query.toString()}`);
   }
+  query.set('assigned','1');
   revalidatePath(path); revalidatePath('/timetable/generator'); revalidatePath('/timetable/readiness'); revalidatePath('/timetable/reports');
-  redirect(query.size>0?`${path}?${query.toString()}`:path);
+  redirect(`${path}?${query.toString()}`);
 }
 export async function reserveOfferingWithoutTrainerAction(formData: FormData) {
   await requireHodAccess();

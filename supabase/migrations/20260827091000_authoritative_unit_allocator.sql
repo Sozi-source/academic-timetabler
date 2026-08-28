@@ -42,7 +42,45 @@ begin
     raise exception 'The selected trainer is not available';
   end if;
 
-  if not coalesce(offering.is_provisionally_reserved, false) then
+  select candidate.* into allocation
+  from public.teaching_allocations candidate
+  where candidate.status in ('draft', 'active')
+    and (
+      candidate.source_unit_offering_id = offering.id
+      or (
+        offering.confirmed_shared_offering_id is not null
+        and candidate.teaching_offering_id = offering.confirmed_shared_offering_id
+      )
+      or (
+        candidate.source_unit_offering_id is null
+        and candidate.teaching_offering_id is null
+        and candidate.academic_period_id = offering.academic_period_id
+        and candidate.cohort_id = offering.cohort_id
+        and candidate.unit_id = offering.unit_id
+      )
+    )
+  order by
+    (candidate.source_unit_offering_id = offering.id) desc,
+    candidate.created_at,
+    candidate.id
+  limit 1
+  for update;
+
+  if allocation.id is not null and allocation.trainer_id is not null then
+    if allocation.trainer_id = trainer.id then
+      return jsonb_build_object(
+        'allocationId', allocation.id,
+        'trainerId', trainer.id,
+        'sourceUnitOfferingId', offering.id,
+        'alreadyAssigned', true
+      );
+    end if;
+
+    raise exception 'This unit is already assigned to another trainer';
+  end if;
+
+  if not coalesce(offering.is_provisionally_reserved, false)
+    and allocation.id is null then
     assignment_result := public.assign_unit_offering(p_offering_id, p_trainer_id);
     new_allocation_id := (assignment_result ->> 'allocationId')::uuid;
 

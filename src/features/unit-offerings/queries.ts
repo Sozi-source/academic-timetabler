@@ -38,6 +38,12 @@ const unitOfferingSelection = `
   source,
   origin,
   selection_state,
+  approval_status,
+  approved_by,
+  approved_at,
+  withdrawn_by,
+  withdrawn_at,
+  withdrawal_reason,
   recommended_stage_number,
   exception_reason,
   manually_reviewed,
@@ -281,6 +287,12 @@ function mapUnitOffering(
     origin: row.origin,
     selectionState:
       row.selection_state,
+    approvalStatus: row.approval_status,
+    approvedBy: row.approved_by,
+    approvedAt: row.approved_at,
+    withdrawnBy: row.withdrawn_by,
+    withdrawnAt: row.withdrawn_at,
+    withdrawalReason: row.withdrawal_reason,
 
     recommendedStageNumber:
       row.recommended_stage_number,
@@ -509,6 +521,7 @@ export const getSchedulableUnitOfferings =
           'selection_state',
           'included',
         )
+        .eq('approval_status', 'approved')
         .eq(
           'is_timetable_enabled',
           true,
@@ -618,3 +631,27 @@ export const getSpecialUnitCandidates =
       );
     },
   );
+
+export const getCohortUnitEditorOptions = cache(async () => {
+  const supabase = await createClient();
+  const [cohortResult, unitResult] = await Promise.all([
+    supabase.from('cohorts').select(`
+      id, code, name, programme_id,
+      programmes!inner(id, name)
+    `).in('status', ['planned', 'active']).eq('is_timetable_available', true).order('name'),
+    supabase.from('units').select('id, code, name, programme_id, academic_period_number')
+      .eq('is_active', true).eq('is_timetable_available', true).order('name'),
+  ]);
+  if (cohortResult.error) throw new Error(`Unable to load cohort editor options: ${cohortResult.error.message}`);
+  if (unitResult.error) throw new Error(`Unable to load programme units: ${unitResult.error.message}`);
+  return {
+    cohorts: (cohortResult.data ?? []).map((row) => {
+      const programme = Array.isArray(row.programmes) ? row.programmes[0] : row.programmes;
+      return { id: row.id, code: row.code, name: row.name, programmeId: row.programme_id, programmeName: programme?.name ?? 'Programme' };
+    }),
+    units: (unitResult.data ?? []).map((row) => ({
+      id: row.id, code: row.code, name: row.name, programmeId: row.programme_id,
+      stage: row.academic_period_number,
+    })),
+  };
+});

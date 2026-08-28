@@ -36,6 +36,12 @@ function createOffering(
     origin: 'curriculum',
     selectionState:
       'included',
+    approvalStatus: 'review_required',
+    approvedBy: null,
+    approvedAt: null,
+    withdrawnBy: null,
+    withdrawnAt: null,
+    withdrawalReason: null,
 
     recommendedStageNumber: 2,
     exceptionReason: null,

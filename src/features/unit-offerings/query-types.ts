@@ -1,5 +1,6 @@
 import type {
   UnitOfferingOrigin,
+  UnitOfferingApprovalStatus,
   UnitOfferingSelectionState,
   UnitOfferingStatus,
   UnitOfferingType,
@@ -84,6 +85,12 @@ export interface UnitOfferingQueryRow {
   origin: UnitOfferingOrigin;
   selection_state:
     UnitOfferingSelectionState;
+  approval_status: UnitOfferingApprovalStatus;
+  approved_by: string | null;
+  approved_at: string | null;
+  withdrawn_by: string | null;
+  withdrawn_at: string | null;
+  withdrawal_reason: string | null;
 
   recommended_stage_number:
     number | null;

@@ -1,12 +1,13 @@
 'use client';
 
-import { RotateCcw, Search } from 'lucide-react';
+import { CheckCircle2, RotateCcw, Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 
 import type { UnitOffering } from './types';
+import { approveUnitOfferingsAction, withdrawUnitOfferingAction } from './approval-actions';
 
 interface UnitOfferingTableProps {
   offerings: UnitOffering[];
@@ -31,6 +32,8 @@ function titleCase(value: string) {
 }
 
 function stateLabel(offering: UnitOffering) {
+  if (offering.approvalStatus === 'review_required') return 'Review required';
+  if (offering.approvalStatus === 'withdrawn') return 'Withdrawn';
   if (offering.selectionState === 'excluded') return 'Excluded';
   if (!offering.isTimetableEnabled) return 'Disabled';
   if (offering.status === 'draft') return 'Draft';
@@ -49,6 +52,8 @@ function stateClass(offering: UnitOffering) {
     return 'border-warning/20 bg-warning-subtle text-warning';
   }
 
+  if (label === 'Review required') return 'border-warning/20 bg-warning-subtle text-warning';
+
   if (label === 'Excluded' || label === 'Disabled') {
     return 'border-border bg-surface-subtle text-text-muted';
   }
@@ -61,6 +66,7 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
   const [programmeId, setProgrammeId] = useState('all');
   const [cohortId, setCohortId] = useState('all');
   const [state, setState] = useState<StateFilter>('all');
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const programmes = useMemo(() => {
     const values = new Map<string, string>();
@@ -218,6 +224,13 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
         </p>
       </section>
 
+      <form action={approveUnitOfferingsAction} className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-surface px-3 py-2">
+          <p className="text-xs text-text-muted">Approve only the units this cohort will actually study in this Academic Period.</p>
+          <Button type="submit" size="sm" disabled={selectedIds.length === 0} leadingIcon={<CheckCircle2 className="size-4" />}>
+            Approve selected ({selectedIds.length})
+          </Button>
+        </div>
       <section className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
         {filtered.length === 0 ? (
           <div className="px-4 py-10 text-center">
@@ -229,10 +242,11 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
             <table className="w-full table-fixed border-collapse text-left">
               <thead className="border-t-[3px] border-institutional-yellow bg-primary text-[10px] uppercase tracking-wide text-white/85 xl:text-xs">
                 <tr>
-                  <th className="w-[34%] px-3 py-2">Unit</th>
-                  <th className="w-[31%] px-3 py-2">Class</th>
+                  <th className="w-[5%] px-3 py-2">Pick</th>
+                  <th className="w-[29%] px-3 py-2">Unit</th>
+                  <th className="w-[26%] px-3 py-2">Class</th>
                   <th className="w-[20%] px-3 py-2">Sessions</th>
-                  <th className="w-[15%] px-3 py-2">State</th>
+                  <th className="w-[20%] px-3 py-2">Authorization</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-soft">
@@ -241,6 +255,11 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
 
                   return (
                     <tr key={offering.id} className="align-top transition hover:bg-surface-subtle/60">
+                      <td className="px-3 py-3">
+                        {offering.approvalStatus !== 'approved' ? (
+                          <input name="offeringId" value={offering.id} type="checkbox" checked={selectedIds.includes(offering.id)} onChange={(event) => setSelectedIds((current) => event.target.checked ? [...current, offering.id] : current.filter((id) => id !== offering.id))} aria-label={`Select ${offering.unit?.name ?? 'unit'}`} />
+                        ) : null}
+                      </td>
                       <td className="px-3 py-2.5">
                         <p className="break-words text-[12px] font-semibold leading-5 text-text-primary xl:text-sm">
                           {offering.unit?.name ?? '—'}
@@ -269,6 +288,12 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
                         <span className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold xl:text-xs ${stateClass(offering)}`}>
                           {stateLabel(offering)}
                         </span>
+                        {offering.approvalStatus === 'approved' ? (
+                          <div className="mt-2 flex gap-1">
+                            <input form={`withdraw-${offering.id}`} name="reason" required placeholder="Withdrawal reason" className="min-w-0 rounded border border-border px-2 py-1 text-[10px]" />
+                            <Button form={`withdraw-${offering.id}`} type="submit" name="offeringId" value={offering.id} size="sm" variant="ghost">Withdraw</Button>
+                          </div>
+                        ) : null}
                       </td>
                     </tr>
                   );
@@ -278,6 +303,10 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
           </div>
         )}
       </section>
+      </form>
+      {offerings.filter((offering) => offering.approvalStatus === 'approved').map((offering) => (
+        <form key={offering.id} id={`withdraw-${offering.id}`} action={withdrawUnitOfferingAction} />
+      ))}
     </div>
   );
 }

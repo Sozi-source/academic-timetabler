@@ -327,9 +327,7 @@ export const getTeachingAllocationById =
       const { data, error } =
         await supabase
           .from('teaching_allocations')
-          .select(
-            teachingAllocationSelection,
-          )
+          .select(teachingAllocationSelection)
           .eq('id', id)
           .maybeSingle();
 
@@ -395,9 +393,14 @@ export const getTimetableEnabledAllocations =
       const { data, error } =
         await supabase
           .from('teaching_allocations')
-          .select(
-            teachingAllocationSelection,
-          )
+          .select(`${teachingAllocationSelection},
+            source_unit_offering:unit_offerings!teaching_allocations_source_unit_offering_id_fkey!inner (
+              id,
+              approval_status,
+              selection_state,
+              is_timetable_enabled,
+              status
+            )`)
           .eq(
             'academic_period_id',
             academicPeriodId,
@@ -410,6 +413,10 @@ export const getTimetableEnabledAllocations =
             'draft',
             'active',
           ])
+          .eq('source_unit_offering.approval_status', 'approved')
+          .eq('source_unit_offering.selection_state', 'included')
+          .eq('source_unit_offering.is_timetable_enabled', true)
+          .in('source_unit_offering.status', ['draft', 'active'])
           .order('cohort_id', {
             ascending: true,
           });

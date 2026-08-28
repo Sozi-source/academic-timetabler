@@ -23,6 +23,11 @@ export type UnitOfferingSelectionState =
   | 'included'
   | 'excluded';
 
+export type UnitOfferingApprovalStatus =
+  | 'review_required'
+  | 'approved'
+  | 'withdrawn';
+
 export interface UnitOfferingProgrammeSummary {
   id: string;
   code: string;
@@ -95,6 +100,12 @@ export interface UnitOffering {
   origin: UnitOfferingOrigin;
   selectionState:
     UnitOfferingSelectionState;
+  approvalStatus: UnitOfferingApprovalStatus;
+  approvedBy: string | null;
+  approvedAt: string | null;
+  withdrawnBy: string | null;
+  withdrawnAt: string | null;
+  withdrawalReason: string | null;
 
   recommendedStageNumber: number | null;
   exceptionReason: string | null;
@@ -139,6 +150,12 @@ export interface UnitOfferingRow {
   origin: UnitOfferingOrigin;
   selection_state:
     UnitOfferingSelectionState;
+  approval_status: UnitOfferingApprovalStatus;
+  approved_by: string | null;
+  approved_at: string | null;
+  withdrawn_by: string | null;
+  withdrawn_at: string | null;
+  withdrawal_reason: string | null;
 
   recommended_stage_number:
     number | null;

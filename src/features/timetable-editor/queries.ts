@@ -204,7 +204,7 @@ export const getTimetableEditorData = cache(async (
     rooms: (roomResult.data ?? []).map((room) => ({
       id: room.id,
       name: room.name,
-      label: `${room.code} · ${room.name} (${room.capacity})`,
+      label: room.code,
       capacity: room.capacity,
     })),
     trainers: (trainerResult.data ?? []).map((t) => ({

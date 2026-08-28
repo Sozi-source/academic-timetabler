@@ -413,6 +413,9 @@ describe(
             .durationMinutes,
         ).toBe(120);
 
+        expect(preview.workingDays).toHaveLength(1);
+        expect(preview.teachingSlots).toHaveLength(2);
+
         expect(
           preview.generatedAt,
         ).toBe(

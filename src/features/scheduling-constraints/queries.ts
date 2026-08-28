@@ -64,7 +64,7 @@ export const getSchedulingConstraintData = cache(
 
     const rooms = (roomResult.data ?? []).map((item) => ({
       id: item.id,
-      label: `${item.code} - ${item.name}`,
+      label: item.code,
     }));
 
     const cohorts = (cohortResult.data ?? []).map((item) => ({

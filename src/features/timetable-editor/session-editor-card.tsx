@@ -280,7 +280,7 @@ export function SessionEditorCard({
                             value={room.id}
                             disabled={room.capacity < session.cohortSize}
                           >
-                            {room.name}
+                            {room.label}
                           </option>
                         ))}
                       </Select>

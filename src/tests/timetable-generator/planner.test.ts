@@ -570,6 +570,21 @@ describe('generateTimetablePlan', () => {
     ).toContain(
       'insufficient_room_capacity',
     );
+
+    expect(result.unscheduled[0].blockers).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'insufficient_room_capacity',
+          rejectedCandidateCount: 4,
+          candidateWindows: expect.arrayContaining([
+            'Monday S1 (08:00–10:00)',
+          ]),
+          suggestion: expect.stringContaining(
+            'suitable room',
+          ),
+        }),
+      ]),
+    );
   });
 
   it('schedules without a room when no room is assigned', () => {

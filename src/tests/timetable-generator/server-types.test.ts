@@ -87,6 +87,8 @@ describe(
             issues: [],
           },
           sessions: [],
+          workingDays: [],
+          teachingSlots: [],
           unscheduled: [],
           conflicts: [],
           statistics: {

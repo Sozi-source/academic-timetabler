@@ -810,6 +810,7 @@ function mapUnscheduledSessions({
             .attemptedCandidateCount,
         conflictTypes:
           unscheduled.conflictTypes,
+        blockers: unscheduled.blockers,
         exchangeSuggestions:
           exchangeSuggestions
             .filter((suggestion) =>
@@ -939,6 +940,28 @@ export function createGeneratorPreview({
         plannerResult,
         sourceData,
       }),
+
+    workingDays: sourceData.workingDays
+      .filter((day) => day.isEnabled)
+      .map((day) => ({
+        id: day.id,
+        name: day.dayOfWeek,
+        sequenceNumber: day.sequenceNumber,
+      })),
+
+    teachingSlots: sourceData.timeSlots
+      .filter((slot) =>
+        slot.isEnabled &&
+        slot.slotType === 'teaching',
+      )
+      .map((slot) => ({
+        id: slot.id,
+        code: slot.code,
+        name: slot.name,
+        startsAt: slot.startsAt,
+        endsAt: slot.endsAt,
+        sequenceNumber: slot.sequenceNumber,
+      })),
 
     unscheduled:
       mapUnscheduledSessions({

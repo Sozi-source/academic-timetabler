@@ -189,6 +189,14 @@ export interface GeneratorUnscheduledSession {
 
   conflictTypes: string[];
 
+  blockers: Array<{
+    type: string;
+    cause: string;
+    suggestion: string;
+    rejectedCandidateCount: number;
+    candidateWindows: string[];
+  }>;
+
   exchangeSuggestions:
     GeneratorExchangeSuggestion[];
 }
@@ -250,6 +258,21 @@ export interface GeneratorPreview {
     GeneratorReadinessSummary;
 
   sessions: GeneratorPreviewSession[];
+
+  workingDays: Array<{
+    id: string;
+    name: string;
+    sequenceNumber: number;
+  }>;
+
+  teachingSlots: Array<{
+    id: string;
+    code: string;
+    name: string;
+    startsAt: string;
+    endsAt: string;
+    sequenceNumber: number;
+  }>;
 
   unscheduled:
     GeneratorUnscheduledSession[];

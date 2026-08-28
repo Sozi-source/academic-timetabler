@@ -42,6 +42,15 @@ export interface UnscheduledPlanningSession {
   message: string;
   attemptedCandidateCount: number;
   conflictTypes: string[];
+  blockers: UnscheduledPlacementBlocker[];
+}
+
+export interface UnscheduledPlacementBlocker {
+  type: string;
+  cause: string;
+  suggestion: string;
+  rejectedCandidateCount: number;
+  candidateWindows: string[];
 }
 
 export interface AutomaticPlannerInput {
@@ -782,6 +791,78 @@ function getUnscheduledConflictTypes(
   ).sort();
 }
 
+function getConflictSuggestion(type: string) {
+  switch (type) {
+    case 'trainer_overlap':
+      return 'Move or unlock the named trainer session, choose another free period, or assign another eligible trainer.';
+    case 'cohort_overlap':
+      return 'Move or unlock the named cohort session, or choose a period when the cohort is free.';
+    case 'room_overlap':
+      return 'Choose another eligible room, or move or unlock the room booking shown here.';
+    case 'trainer_unavailable':
+      return 'Add this period to the trainer’s availability, choose one of their available periods, or assign another eligible trainer.';
+    case 'hard_constraint':
+      return 'Change or disable the named hard constraint, or place the session outside its restricted window.';
+    case 'trainer_daily_workload':
+    case 'trainer_weekly_workload':
+      return 'Reduce the trainer’s assigned load, move another session, or assign another eligible trainer.';
+    case 'insufficient_room_capacity':
+    case 'incompatible_room_type':
+    case 'room_unavailable':
+      return 'Make a suitable room available or change the allocation’s room requirement.';
+    default:
+      return 'Review the affected resource or rule, then regenerate the timetable.';
+  }
+}
+
+function getUnscheduledBlockers({ scores, input, scheduledSessions }: {
+  scores: PlacementScoreResult[];
+  input: AutomaticPlannerInput;
+  scheduledSessions: PlanningSession[];
+}): UnscheduledPlacementBlocker[] {
+  const days = new Map(input.workingDays.map((day) => [day.id, day]));
+  const slots = new Map(input.timeSlots.map((slot) => [slot.id, slot]));
+  const units = new Map(input.units.map((unit) => [unit.id, unit]));
+  const cohorts = new Map(input.cohorts.map((cohort) => [cohort.id, cohort]));
+  const sessions = new Map(scheduledSessions.map((session) => [session.id, session]));
+  const grouped = new Map<string, { type: string; cause: string; windows: Set<string>; candidates: Set<string> }>();
+
+  for (const score of scores) {
+    const day = days.get(score.session.workingDayId);
+    const start = slots.get(score.session.startTimeSlotId);
+    const end = slots.get(score.session.endTimeSlotId);
+    const dayName = day?.dayOfWeek
+      ? day.dayOfWeek[0].toUpperCase() + day.dayOfWeek.slice(1)
+      : 'Unknown day';
+    const slotName = start?.code ?? start?.name ?? 'unknown slot';
+    const window = `${dayName} ${slotName} (${start?.startsAt.slice(0, 5) ?? '?'}–${end?.endsAt.slice(0, 5) ?? '?'})`;
+
+    for (const conflict of score.conflicts.filter((item) => item.severity === 'blocked')) {
+      const other = conflict.sessionIds.map((id) => sessions.get(id)).find(Boolean);
+      const otherUnit = other ? units.get(other.unitId) : undefined;
+      const otherCohort = other ? cohorts.get(other.cohortId) : undefined;
+      const otherDescription = other
+        ? ` Conflicts with ${otherUnit?.code ?? otherUnit?.name ?? 'another session'} (${otherCohort?.code ?? 'unknown cohort'}).`
+        : '';
+      const resource = conflict.resourceLabel ? `${conflict.resourceLabel}: ` : '';
+      const cause = `${resource}${conflict.message}${otherDescription}`;
+      const key = `${conflict.type}|${cause}`;
+      const entry = grouped.get(key) ?? { type: conflict.type, cause, windows: new Set<string>(), candidates: new Set<string>() };
+      entry.windows.add(window);
+      entry.candidates.add(score.session.id);
+      grouped.set(key, entry);
+    }
+  }
+
+  return Array.from(grouped.values()).map((entry) => ({
+    type: entry.type,
+    cause: entry.cause,
+    suggestion: getConflictSuggestion(entry.type),
+    rejectedCandidateCount: entry.candidates.size,
+    candidateWindows: Array.from(entry.windows).sort(),
+  }));
+}
+
 function createUnscheduledMessage({
   conflictTypes,
 }: {
@@ -794,11 +875,7 @@ function createUnscheduledMessage({
   }
 
   return (
-    'Every candidate placement was rejected because of: ' +
-    conflictTypes
-      .join(', ')
-      .replaceAll('_', ' ') +
-    '.'
+    'No candidate slot passed all required timetable checks.'
   );
 }
 
@@ -1089,6 +1166,7 @@ export function generateTimetablePlan(
           'The linked fixed session was not scheduled because the complete double session could not be placed.',
         attemptedCandidateCount: 0,
         conflictTypes: ['linked_fixed_session'],
+        blockers: [],
       });
 
       continue;
@@ -1125,6 +1203,7 @@ export function generateTimetablePlan(
           'The allocation references a missing cohort, trainer, or unit.',
         attemptedCandidateCount: 0,
         conflictTypes: [],
+        blockers: [],
       });
 
       continue;
@@ -1140,6 +1219,7 @@ export function generateTimetablePlan(
           'No enabled working days exist for the Academic Period.',
         attemptedCandidateCount: 0,
         conflictTypes: [],
+        blockers: [],
       });
 
       continue;
@@ -1172,6 +1252,7 @@ export function generateTimetablePlan(
           : `No contiguous teaching-slot range matches ${allocation.sessionDurationMinutes} minutes.`,
         attemptedCandidateCount: 0,
         conflictTypes: [],
+        blockers: [],
       });
 
       continue;
@@ -1193,6 +1274,7 @@ export function generateTimetablePlan(
           'No active timetable-available room is eligible for this allocation.',
         attemptedCandidateCount: 0,
         conflictTypes: [],
+        blockers: [],
       });
 
       continue;
@@ -1277,6 +1359,11 @@ export function generateTimetablePlan(
               'The linked fixed session was removed because the complete double session could not be placed.',
             attemptedCandidateCount: scores.length,
             conflictTypes,
+            blockers: getUnscheduledBlockers({
+              scores,
+              input,
+              scheduledSessions: [...existingSessions, ...selectedSessions],
+            }),
           });
         }
       }
@@ -1294,6 +1381,11 @@ export function generateTimetablePlan(
         attemptedCandidateCount:
           scores.length,
         conflictTypes,
+        blockers: getUnscheduledBlockers({
+          scores,
+          input,
+          scheduledSessions: [...existingSessions, ...selectedSessions],
+        }),
       });
 
       continue;

@@ -328,7 +328,7 @@ export const getSchedulingReadiness = cache(async (
     })),
     roomOptions: (roomsResult.data ?? []).map((room) => ({
       id: room.id,
-      label: `${room.code} — ${room.name} (${room.capacity})`,
+      label: room.code,
       roomType: room.room_type,
       capacity: room.capacity,
     })),

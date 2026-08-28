@@ -34,6 +34,9 @@ import {
   GeneratorUnscheduledList,
 } from './generator-issues';
 import {
+  GeneratorMasterGrid,
+} from './generator-master-grid';
+import {
   GeneratorReadiness,
 } from './generator-readiness';
 import {
@@ -497,7 +500,7 @@ export function GeneratorWorkspace({
           <section className="space-y-4">
             <div>
               <h2 className="text-lg font-semibold text-text-primary">
-                Generated timetable preview
+                Master timetable preview
               </h2>
 
               <p className="mt-1 text-sm text-text-muted">
@@ -506,8 +509,13 @@ export function GeneratorWorkspace({
                   preview.generatedAt,
                 ).toLocaleString()}.
                 No session has been saved yet.
+                {preview.unscheduled.length > 0
+                  ? ` ${preview.unscheduled.length} unresolved session${preview.unscheduled.length === 1 ? ' is' : 's are'} omitted from this grid.`
+                  : ''}
               </p>
             </div>
+
+            <GeneratorMasterGrid preview={preview} />
 
             <GeneratorSessionTable
               sessions={preview.sessions}

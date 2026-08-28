@@ -19,6 +19,78 @@ import type {
   GeneratorUnscheduledSession,
 } from './server-types';
 
+type UnscheduledBlocker =
+  GeneratorUnscheduledSession['blockers'][number];
+
+function groupBlockers(
+  blockers: UnscheduledBlocker[],
+) {
+  const groups = new Map<string, {
+    type: string;
+    suggestion: string;
+    causes: string[];
+    windows: Set<string>;
+  }>();
+
+  for (const blocker of blockers) {
+    const group = groups.get(blocker.type) ?? {
+      type: blocker.type,
+      suggestion: blocker.suggestion,
+      causes: [],
+      windows: new Set<string>(),
+    };
+    group.causes.push(blocker.cause);
+    blocker.candidateWindows.forEach((window) =>
+      group.windows.add(window),
+    );
+    groups.set(blocker.type, group);
+  }
+
+  return Array.from(groups.values())
+    .map((group) => ({
+      ...group,
+      causes: Array.from(new Set(group.causes)),
+      windows: Array.from(group.windows).sort(),
+    }))
+    .sort(
+      (first, second) =>
+        second.windows.length -
+          first.windows.length ||
+        first.type.localeCompare(second.type),
+    );
+}
+
+function getBlockerSummary({
+  type,
+  causes,
+  windowCount,
+}: {
+  type: string;
+  causes: string[];
+  windowCount: number;
+}) {
+  const slots = `${windowCount} candidate slot${windowCount === 1 ? '' : 's'}`;
+
+  if (type === 'trainer_unavailable') {
+    const trainer = causes[0]?.split(':')[0];
+    return `${trainer ?? 'The trainer'} is unavailable in ${slots}.`;
+  }
+
+  if (type === 'cohort_overlap') {
+    return `${causes.length} existing session${causes.length === 1 ? '' : 's'} conflict across ${slots}.`;
+  }
+
+  if (type === 'trainer_overlap') {
+    return `${causes.length} trainer booking${causes.length === 1 ? '' : 's'} conflict across ${slots}.`;
+  }
+
+  if (type === 'room_overlap') {
+    return `${causes.length} room booking${causes.length === 1 ? '' : 's'} conflict across ${slots}.`;
+  }
+
+  return `${causes.length} blocker${causes.length === 1 ? '' : 's'} affect ${slots}.`;
+}
+
 export function GeneratorUnscheduledList({
   sessions,
   academicPeriodId,
@@ -117,8 +189,8 @@ export function GeneratorUnscheduledList({
                   </span>
                 </div>
 
-                {session.conflictTypes.length >
-                0 ? (
+                {session.conflictTypes.length > 0 &&
+                session.blockers.length === 0 ? (
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     {session.conflictTypes.map(
                       (type) => (
@@ -134,6 +206,48 @@ export function GeneratorUnscheduledList({
                       ),
                     )}
                   </div>
+                ) : null}
+
+                {session.blockers.length > 0 ? (
+                  <section className="mt-4 rounded-xl border border-warning-border bg-white/70 p-4">
+                    <h4 className="text-sm font-semibold text-text-primary">
+                      Why this session could not be placed
+                    </h4>
+                    <div className="mt-3 grid gap-3">
+                      {groupBlockers(session.blockers).map((group) => (
+                        <article key={group.type} className="rounded-lg border border-border bg-surface px-3 py-2.5 text-xs leading-5 text-text-secondary">
+                          <p className="font-semibold text-text-primary">
+                            {group.type.replaceAll('_', ' ')}
+                          </p>
+                          <p>
+                            {getBlockerSummary({
+                              type: group.type,
+                              causes: group.causes,
+                              windowCount: group.windows.length,
+                            })}
+                          </p>
+                          <p className="mt-1">
+                            <span className="font-semibold">Try:</span>{' '}
+                            {group.suggestion}
+                          </p>
+                          <details className="mt-1.5 text-text-muted">
+                            <summary className="cursor-pointer font-medium text-text-secondary">
+                              View exact conflicts
+                            </summary>
+                            <ul className="mt-1.5 list-disc space-y-1 pl-4">
+                              {group.causes.map((cause) => (
+                                <li key={cause}>{cause}</li>
+                              ))}
+                            </ul>
+                            <p className="mt-1.5">
+                              <span className="font-medium">Affected slots:</span>{' '}
+                              {group.windows.join(', ')}
+                            </p>
+                          </details>
+                        </article>
+                      ))}
+                    </div>
+                  </section>
                 ) : null}
 
                 {session.exchangeSuggestions.length > 0 ? (
@@ -200,7 +314,7 @@ export function GeneratorUnscheduledList({
                 ) : session.reason === 'no_valid_placement' &&
                 exchangeSuggestionsEvaluated ? (
                   <p className="mt-4 rounded-xl border border-border bg-surface px-4 py-3 text-xs leading-5 text-text-muted">
-                    No safe equal-duration trainer exchange was found in this department. Adjust availability, unlock an affected session, or review the fixed schedule before regenerating.
+                    No safe trainer exchange was found. Apply one of the fixes above, then regenerate.
                   </p>
                 ) : null}
               </div>

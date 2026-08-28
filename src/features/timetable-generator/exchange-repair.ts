@@ -37,6 +37,32 @@ function hasProtectedSession(
   );
 }
 
+function isDepartmentTrainer(
+  input: AutomaticPlannerInput,
+  trainerId: string,
+) {
+  const trainer = input.trainers.find((candidate) => candidate.id === trainerId);
+
+  return Boolean(
+    trainer &&
+    input.activeDepartmentId &&
+    trainer.departmentId === input.activeDepartmentId,
+  );
+}
+
+function isTrainerEligibleForUnit(
+  input: AutomaticPlannerInput,
+  trainerId: string,
+  unitId: string,
+) {
+  const eligibility = input.trainerUnitEligibility ?? [];
+  const unitHasRestrictions = eligibility.some((entry) => entry.unitId === unitId);
+
+  return !unitHasRestrictions || eligibility.some((entry) =>
+    entry.unitId === unitId && entry.trainerId === trainerId,
+  );
+}
+
 function createSwappedInput({
   input,
   targetTeachingAllocationId,
@@ -120,8 +146,10 @@ export function evaluateTrainerExchangeSuggestion({
     !partner.isTimetableEnabled ||
     partner.sessionDurationMinutes !== target.sessionDurationMinutes ||
     partnerTrainerId === targetTrainerId ||
-    !input.trainers.some((trainer) => trainer.id === targetTrainerId) ||
-    !input.trainers.some((trainer) => trainer.id === partnerTrainerId) ||
+    !isDepartmentTrainer(input, targetTrainerId) ||
+    !isDepartmentTrainer(input, partnerTrainerId) ||
+    !isTrainerEligibleForUnit(input, partnerTrainerId, target.unitId) ||
+    !isTrainerEligibleForUnit(input, targetTrainerId, partner.unitId) ||
     hasProtectedSession(input, target.id) ||
     hasProtectedSession(input, partner.id)
   ) {

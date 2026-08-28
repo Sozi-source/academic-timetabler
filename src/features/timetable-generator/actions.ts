@@ -31,6 +31,7 @@ import type {
   GeneratorDraftLifecycleActionState,
   GeneratorExchangeActionState,
   GeneratorPersistActionState,
+  GeneratorResetActionState,
 } from './server-types';
 
 function readExchangeRequest(formData: FormData) {
@@ -52,6 +53,59 @@ function isUuid(value: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
     value,
   );
+}
+
+export async function clearTimetableHistoryAction(
+  _previousState: GeneratorResetActionState,
+  formData: FormData,
+): Promise<GeneratorResetActionState> {
+  await requireHodAccess();
+
+  const academicPeriodId = String(formData.get('academicPeriodId') ?? '');
+  const confirmed = formData.get('confirmReset') === 'CLEAR';
+
+  if (!isUuid(academicPeriodId) || !confirmed) {
+    return {
+      status: 'error',
+      message: 'Select the confirmation checkbox before clearing timetable history.',
+      academicPeriodId,
+    };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('clear_department_timetable_history_authorized', {
+    target_academic_period_id: academicPeriodId,
+  });
+
+  if (error) {
+    return {
+      status: 'error',
+      message: `Timetable history was not cleared: ${error.message}`,
+      academicPeriodId,
+    };
+  }
+
+  revalidatePath('/timetable/generator');
+  revalidatePath('/timetable/editor');
+  revalidatePath('/timetable/conflicts');
+  revalidatePath('/timetable/published');
+  revalidatePath('/timetable/reports');
+
+  const result = data as {
+    deletedSessions?: number;
+    deletedGenerationRuns?: number;
+    deletedVersions?: number;
+    deletedAttendanceSessions?: number;
+    deletedRecordOfWorkEntries?: number;
+    deletedDailyReportLessons?: number;
+    deletedDailyReports?: number;
+  } | null;
+
+  return {
+    status: 'success',
+    message: `Clean slate created: ${result?.deletedRecordOfWorkEntries ?? 0} record-of-work entries, ${result?.deletedDailyReportLessons ?? 0} daily-report lessons, ${result?.deletedDailyReports ?? 0} empty daily reports, ${result?.deletedAttendanceSessions ?? 0} attendance sessions, ${result?.deletedSessions ?? 0} timetable sessions, ${result?.deletedGenerationRuns ?? 0} generation runs and ${result?.deletedVersions ?? 0} timetable versions removed. Allocations and setup were preserved.`,
+    academicPeriodId,
+  };
 }
 
 export async function generateTimetablePreviewAction(

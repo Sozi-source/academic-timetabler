@@ -143,6 +143,7 @@ function mapTrainer(
 ): PlanningTrainer {
   return {
     id: trainer.id,
+    departmentId: trainer.departmentId,
     staffNumber:
       trainer.staffNumber,
     fullName:
@@ -325,6 +326,7 @@ export function createAutomaticPlannerInput({
   return {
     academicPeriodId:
       sourceData.academicPeriod.id,
+    activeDepartmentId: sourceData.activeDepartmentId,
     allocations:
       sourceData.allocations.map(
         mapAllocation,
@@ -344,6 +346,7 @@ export function createAutomaticPlannerInput({
       sourceData.trainers.map((trainer) =>
         mapTrainer(trainer, sourceData.trainerAvailability),
       ),
+    trainerUnitEligibility: sourceData.trainerUnitEligibility ?? [],
     cohorts:
       sourceData.cohorts.map(
         mapCohort,

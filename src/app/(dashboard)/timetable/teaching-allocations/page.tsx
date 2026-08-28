@@ -26,12 +26,19 @@ export const metadata: Metadata = { title: 'Simple teaching allocation' };
 type Period={id:string;name:string;code:string;status:'planned'|'active'};
 type Trainer={id:string;full_name:string;staff_number:string;home_department:string|null;department_id:string|null;normal_weekly_hours:number;workload_role:'hod'|'course_coordinator'|'full_time_trainer'|'part_time'|'external';availability_mode:'generally_available'|'selected_slots_only'};
 type TrainerWorkload={trainer_id:string;allocated_hours:number|string;department_count:number|string};
-type UnitSummary={code:string;name:string;department_id:string|null;owning_department:string|null;is_service_unit:boolean;departments:{name:string}|null;unit_equivalence_members:{equivalence_group_id:string;status:string}[]|null};
+type EquivalenceMember={equivalence_group_id:string;status:string};
+type UnitSummary={code:string;name:string;department_id:string|null;owning_department:string|null;is_service_unit:boolean;departments:{name:string}|null;unit_equivalence_members:EquivalenceMember|EquivalenceMember[]|null};
 type Offering={id:string;cohort_id:string;unit_id:string;allocation_status:string;is_provisionally_reserved:boolean;confirmed_shared_offering_id:string|null;fixed_working_day_id:string|null;fixed_time_slot_id:string|null;weekly_sessions:number|null;session_duration_minutes:number|null;is_full_day_session:boolean;unit_offering_fixed_slots:{working_day_id:string;time_slot_id:string;sequence_number:number}[]|null;cohorts:{code:string;name:string;actual_size:number;programmes:{department_id:string}|null}|null;units:UnitSummary|null};
 type Day={id:string;day_of_week:string}; type Slot={id:string;name:string;starts_at:string;ends_at:string;sequence_number:number};
 type Allocation={id:string;cohort_id:string;unit_id:string;trainer_id:string|null;teaching_offering_id:string|null;source_unit_offering_id:string|null;participant_cohort_ids:string[]|null;weekly_sessions:number;session_duration_minutes:number;status:'draft'|'active';trainers:{full_name:string;staff_number:string}|null;units:UnitSummary|null;cohorts:{code:string;name:string;programmes:{department_id:string}|null}|null;scheduled_sessions:{id:string;status:string;is_locked:boolean}[]|null};
 const fmt=(n:number)=>Number.isInteger(n)?String(n):n.toFixed(1);
 const isClinicalRotationTitle=(value:string)=>/^clinical rotations?(?: (?:[ivx]+|\d+))?$/.test(value.toLowerCase().replace(/[^a-z0-9]+/g,' ').trim());
+const getApprovedEquivalence=(unit:UnitSummary|null)=>{
+ const members=unit?.unit_equivalence_members;
+ if(!members)return null;
+ const values=Array.isArray(members)?members:[members];
+ return values.find(member=>member.status==='approved')?.equivalence_group_id??null;
+};
 const getUnitOwnershipLabel=(unit:UnitSummary|null,activeDepartmentId:string|null)=>{
  if(!unit)return null;
  const owner=unit.departments?.name??unit.owning_department;
@@ -60,7 +67,7 @@ export default async function Page({searchParams}:{searchParams:Promise<{period?
  const hasAssignedTrainer=(offering:Offering)=>currentAllocations.some(allocation=>Boolean(allocation.trainer_id)&&allocationMatchesOffering({teachingOfferingId:offering.confirmed_shared_offering_id,participants:[{cohortId:offering.cohort_id,unitId:offering.unit_id,unitOfferingId:offering.id}],title:offering.units?.name??'',sessionDurationMinutes:offering.session_duration_minutes??120},{teachingOfferingId:allocation.teaching_offering_id,sourceUnitOfferingId:allocation.source_unit_offering_id,cohortId:allocation.cohort_id,unitId:allocation.unit_id,participantCohortIds:allocation.participant_cohort_ids??[allocation.cohort_id],unitTitle:allocation.units?.name??null,sessionDurationMinutes:allocation.session_duration_minutes}));
  const open=all.filter(o=>o.allocation_status==='unallocated'&&!hasAssignedTrainer(o)); const searchTerm=(params.q??'').trim(); const searchText=searchTerm.toLowerCase();
  const suggestionMap=new Map<string,Offering[]>();
- for(const item of open){const equivalence=item.units?.unit_equivalence_members?.find(member=>member.status==='approved')?.equivalence_group_id;if(!equivalence)continue;const key=`${equivalence}:${buildSharedClassMatchKey({title:item.units?.name??'',sessionDurationMinutes:item.session_duration_minutes??120})}`;const group=suggestionMap.get(key)??[];group.push(item);suggestionMap.set(key,group);}
+ for(const item of open){const equivalence=getApprovedEquivalence(item.units);if(!equivalence)continue;const key=`${equivalence}:${buildSharedClassMatchKey({title:item.units?.name??'',sessionDurationMinutes:item.session_duration_minutes??120})}`;const group=suggestionMap.get(key)??[];group.push(item);suggestionMap.set(key,group);}
  const suggestions=[...suggestionMap.values()].filter(group=>{const classKeys=new Set(group.map(item=>item.confirmed_shared_offering_id??item.id));const confirmedGroups=new Set(group.map(item=>item.confirmed_shared_offering_id).filter((value):value is string=>Boolean(value)));return group.every(item=>!item.is_provisionally_reserved)&&classKeys.size>1&&confirmedGroups.size<=1;});
  const representatives=open.filter((o,index)=>!o.confirmed_shared_offering_id||open.findIndex(x=>x.confirmed_shared_offering_id===o.confirmed_shared_offering_id)===index);
  const matchesSearch=(offering:Offering)=>[offering.units?.code,offering.units?.name,offering.cohorts?.code,offering.cohorts?.name].some(value=>value?.toLowerCase().includes(searchText));

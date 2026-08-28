@@ -33,6 +33,7 @@ export function createPlannerInput({
 
   return {
     academicPeriodId: 'period-1',
+    activeDepartmentId: 'department-1',
     allocations,
     existingSessions: [],
     workingDays:
@@ -40,7 +41,10 @@ export function createPlannerInput({
     timeSlots:
       conflictInput.timeSlots,
     trainers:
-      conflictInput.trainers,
+      conflictInput.trainers.map((trainer) => ({
+        ...trainer,
+        departmentId: 'department-1',
+      })),
     cohorts:
       conflictInput.cohorts,
     rooms:

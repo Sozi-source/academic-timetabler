@@ -103,6 +103,7 @@ export interface PlanningTimeSlot {
 
 export interface PlanningTrainer {
   id: string;
+  departmentId?: string;
   staffNumber: string;
   fullName: string;
   normalWeeklyHours: number;
@@ -115,6 +116,11 @@ export interface PlanningTrainer {
     workingDayId: string;
     timeSlotId: string;
   }>;
+}
+
+export interface PlanningTrainerUnitEligibility {
+  trainerId: string;
+  unitId: string;
 }
 
 export interface PlanningRoom {

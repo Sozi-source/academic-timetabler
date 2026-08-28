@@ -69,6 +69,12 @@ export interface GeneratorDraftLifecycleActionState {
   archivedPublishedVersionCount?: number;
 }
 
+export interface GeneratorResetActionState {
+  status: GeneratorActionStatus;
+  message: string | null;
+  academicPeriodId?: string;
+}
+
 export interface GeneratorProtectedTimetableSummary {
   id: string;
   versionNumber: number;
@@ -320,6 +326,11 @@ export const initialGeneratorExchangeActionState: GeneratorExchangeActionState =
 
 export const initialGeneratorDraftLifecycleActionState:
 GeneratorDraftLifecycleActionState = {
+  status: 'idle',
+  message: null,
+};
+
+export const initialGeneratorResetActionState: GeneratorResetActionState = {
   status: 'idle',
   message: null,
 };

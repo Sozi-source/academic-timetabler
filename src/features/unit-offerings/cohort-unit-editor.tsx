@@ -49,8 +49,8 @@ export function CohortUnitEditor({ academicPeriodId, cohorts, units, existingPai
           className="mt-0.5"
         />
         <span>
-          Add a repeat or deferred unit from another stage
-          <span className="block text-text-muted">This is an exception for Stage {cohort.currentStage}; explain the reason and approve it separately.</span>
+          Add a unit from another stage
+          <span className="block text-text-muted">For a local arrangement, elective, repeat or deferred unit. This is an exception for Stage {cohort.currentStage}; explain the reason and approve it separately.</span>
         </span>
       </label>
     ) : null}

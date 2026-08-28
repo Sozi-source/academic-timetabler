@@ -178,11 +178,12 @@ export async function GET(request: NextRequest) {
 
   const rows = requestedReport === 'workload'
     ? [
-        ['Trainer', 'Sessions', 'Target Hours', 'Scheduled Hours', 'Extra Hours', 'Status', 'Distinct Cohorts', 'Distinct Units'],
+        ['Trainer', 'Sessions', 'Target Hours', 'Allocated Hours', 'Scheduled Hours', 'Extra Hours', 'Status', 'Scheduled Cohorts', 'Scheduled Units'],
         ...data.workload.map((group) => [
           group.label,
           group.sessionCount,
           group.targetHours ?? 0,
+          group.allocatedHours ?? group.contactHours,
           group.contactHours,
           group.extraHours ?? 0,
           (group.extraHours ?? 0) > 0 ? 'Extra hours' : 'Within target',

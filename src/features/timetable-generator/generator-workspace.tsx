@@ -7,6 +7,7 @@ import {
   RefreshCw,
   Save,
   Sparkles,
+  Trash2,
 } from 'lucide-react';
 import {
   useActionState,
@@ -23,6 +24,7 @@ import {
 
 import {
   applyTrainerExchangeAction,
+  clearTimetableHistoryAction,
   generateTimetablePreviewAction,
   returnTimetableToEditableDraftAction,
   saveGeneratedTimetableDraftAction,
@@ -45,6 +47,7 @@ import {
   initialGeneratorDraftLifecycleActionState,
   initialGeneratorExchangeActionState,
   initialGeneratorPersistActionState,
+  initialGeneratorResetActionState,
   type TimetableGenerationRunSummary,
 } from './server-types';
 
@@ -82,6 +85,15 @@ export function GeneratorWorkspace({
   ] = useActionState(
     saveGeneratedTimetableDraftAction,
     initialGeneratorPersistActionState,
+  );
+
+  const [
+    resetState,
+    resetAction,
+    resetPending,
+  ] = useActionState(
+    clearTimetableHistoryAction,
+    initialGeneratorResetActionState,
   );
 
   const [
@@ -281,6 +293,33 @@ export function GeneratorWorkspace({
           </span>
         </label>
       </form>
+
+      <section className="rounded-2xl border border-danger/30 bg-danger-surface p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-danger">Clean timetable reset</p>
+            <h2 className="mt-1 font-semibold text-text-primary">Remove saved timetable and previous history</h2>
+            <p className="mt-1 max-w-2xl text-sm text-text-secondary">
+              Clears sessions, generation history, editor changes, conflict reviews, exchanges and publication versions for the selected period. Allocations and master setup remain unchanged.
+            </p>
+          </div>
+          <form action={resetAction} className="space-y-3">
+            <input type="hidden" name="academicPeriodId" value={preview?.academicPeriod.id ?? defaultAcademicPeriodId ?? ''} />
+            <label className="flex items-center gap-2 text-xs font-medium text-danger">
+              <input type="checkbox" name="confirmReset" value="CLEAR" required />
+              I understand previous timetable history will be deleted
+            </label>
+            <Button type="submit" variant="outline" className="border-danger/40 text-danger hover:bg-danger-surface" disabled={resetPending || !(preview?.academicPeriod.id ?? defaultAcademicPeriodId)} leadingIcon={<Trash2 className="size-4" />}>
+              {resetPending ? 'Clearing timetable' : 'Clear timetable history'}
+            </Button>
+          </form>
+        </div>
+        {resetState.message ? (
+          <div className="mt-4">
+            <FormStatusMessage status={resetState.status === 'success' ? 'success' : 'error'} title={resetState.status === 'success' ? 'Timetable cleared' : 'Timetable not cleared'} message={resetState.message} />
+          </div>
+        ) : null}
+      </section>
 
       {state.message ? (
         <FormStatusMessage

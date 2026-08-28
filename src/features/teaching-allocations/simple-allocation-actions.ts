@@ -196,3 +196,29 @@ export async function setFixedScheduleAction(formData: FormData) {
   revalidatePath('/timetable/generator');
   redirect(query.size>0?`${path}?${query.toString()}`:path);
 }
+
+export async function clearFixedScheduleAction(formData: FormData) {
+  await requireHodAccess();
+  const id=String(formData.get('offeringId')??'');
+  const period=String(formData.get('academicPeriodId')??'');
+  const searchQuery=String(formData.get('searchQuery')??'').trim();
+  const query=new URLSearchParams();
+  if(period) query.set('period',period);
+  if(searchQuery) query.set('q',searchQuery);
+  if(!id){
+    query.set('allocationError','The unit offering was not found.');
+    redirect(`${path}?${query.toString()}`);
+  }
+  const db=await createClient();
+  const {error}=await db.rpc('clear_unit_offering_fixed_schedule',{
+    p_offering_id:id,
+  });
+  if(error){
+    query.set('allocationError',error.message);
+    redirect(`${path}?${query.toString()}`);
+  }
+  revalidatePath(path);
+  revalidatePath('/timetable/readiness');
+  revalidatePath('/timetable/generator');
+  redirect(query.size>0?`${path}?${query.toString()}`:path);
+}

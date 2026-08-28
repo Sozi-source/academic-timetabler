@@ -111,19 +111,28 @@ export const getTrainerById = cache(
     const supabase = await createClient();
     const profile = await getAuthenticatedProfile();
 
-    if (!profile?.activeDepartmentId) {
+    if (
+      !profile ||
+      (profile.role !== 'system_admin' &&
+        !profile.activeDepartmentId)
+    ) {
       return null;
     }
 
-    const { data, error } = await supabase
+    let query = supabase
       .from('trainers')
       .select(trainerSelection)
-      .eq('id', id)
-      .eq(
+      .eq('id', id);
+
+    if (profile.role !== 'system_admin') {
+      query = query.eq(
         'department_id',
         profile.activeDepartmentId,
-      )
-      .maybeSingle();
+      );
+    }
+
+    const { data, error } =
+      await query.maybeSingle();
 
     if (error) {
       throw new Error(

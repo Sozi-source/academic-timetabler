@@ -47,6 +47,7 @@ export interface TimetableReportGroup {
   secondaryLabel?: string;
   sessionCount: number;
   contactHours: number;
+  allocatedHours?: number;
   targetHours?: number;
   extraHours?: number;
   rows: TimetableReportRow[];

@@ -56,6 +56,15 @@ export interface EditorTrainer {
 
 export interface EditorData {
   sessions: EditorSession[];
+  missingAllocations: Array<{
+    id: string;
+    unitCode: string;
+    unitName: string;
+    cohortCode: string;
+    trainerName: string;
+    missingSessionCount: number;
+    expectedSessionCount: number;
+  }>;
   workingDays: Array<EditorOption & { sequenceNumber: number }>;
   timeSlots: Array<EditorOption & { startsAt: string; endsAt: string; sequenceNumber: number }>;
   rooms: Array<EditorOption & { name: string; capacity: number }>;

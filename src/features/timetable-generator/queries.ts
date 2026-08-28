@@ -7,6 +7,7 @@ import {
 import {
   getAcademicPeriodById,
 } from '@/features/academic-periods/queries';
+import { getAuthenticatedProfile } from '@/features/auth/queries';
 import type {
   AcademicPeriod,
 } from '@/features/academic-periods/types';
@@ -62,12 +63,17 @@ import type {
 } from './types';
 
 export interface GeneratorSourceData {
+  activeDepartmentId?: string | null;
   academicPeriod: AcademicPeriod;
   allocations: TeachingAllocation[];
   workingDays: WorkingDay[];
   timeSlots: TimeSlot[];
   trainers: Trainer[];
   trainerAvailability: GeneratorTrainerAvailability[];
+  trainerUnitEligibility?: Array<{
+    trainerId: string;
+    unitId: string;
+  }>;
   constraints: PlanningConstraint[];
   cohorts: Cohort[];
   rooms: Room[];
@@ -226,12 +232,16 @@ export const getGeneratorSourceData =
         return null;
       }
 
+      const profile = await getAuthenticatedProfile();
+      const supabase = await createClient();
+
       const [
         allocations,
         workingDays,
         timeSlots,
         trainers,
         trainerAvailability,
+        trainerUnitEligibilityResult,
         constraints,
         cohorts,
         rooms,
@@ -250,6 +260,9 @@ export const getGeneratorSourceData =
         ),
         getTimetableAvailableTrainers(),
         getGeneratorTrainerAvailability(academicPeriodId),
+        supabase
+          .from('trainer_unit_eligibility')
+          .select('trainer_id, unit_id'),
         getGeneratorSchedulingConstraints(academicPeriodId),
         getTimetableAvailableCohorts(),
         getTimetableAvailableRooms(),
@@ -262,13 +275,26 @@ export const getGeneratorSourceData =
         ),
       ]);
 
+      if (trainerUnitEligibilityResult.error) {
+        throw new Error(
+          `Unable to load trainer unit eligibility: ${trainerUnitEligibilityResult.error.message}`,
+        );
+      }
+
       return {
+        activeDepartmentId: profile?.activeDepartmentId ?? null,
         academicPeriod,
         allocations,
         workingDays,
         timeSlots,
         trainers,
         trainerAvailability,
+        trainerUnitEligibility: (trainerUnitEligibilityResult.data ?? []).map(
+          (row) => ({
+            trainerId: row.trainer_id,
+            unitId: row.unit_id,
+          }),
+        ),
         constraints,
         cohorts,
         rooms,

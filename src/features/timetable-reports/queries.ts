@@ -88,11 +88,21 @@ export const getInstitutionTrainerTimetableReportsData = cache(async (
   academicPeriodId: string,
 ): Promise<TimetableReportsData> => {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc(
-    'get_institution_trainer_timetable_rows',
-    { target_academic_period_id: academicPeriodId },
-  );
+  const [sessionResult, workloadResult, trainerResult] = await Promise.all([
+    supabase.rpc(
+      'get_institution_trainer_timetable_rows',
+      { target_academic_period_id: academicPeriodId },
+    ),
+    supabase.rpc(
+      'get_institution_trainer_workloads',
+      { target_academic_period_id: academicPeriodId },
+    ),
+    supabase.from('trainers')
+      .select('id, full_name, normal_weekly_hours')
+      .eq('is_active', true),
+  ]);
 
+  const error = sessionResult.error ?? workloadResult.error ?? trainerResult.error;
   if (error) {
     throw new Error(
       `Unable to load institution trainer timetables: ${error.message}`,
@@ -100,7 +110,7 @@ export const getInstitutionTrainerTimetableReportsData = cache(async (
   }
 
   const rows: TimetableReportRow[] = (
-    (data ?? []) as InstitutionTrainerTimetableRow[]
+    (sessionResult.data ?? []) as InstitutionTrainerTimetableRow[]
   ).map((row) => {
     const startsAt = row.starts_at.slice(0, 5);
     const endsAt = row.ends_at.slice(0, 5);
@@ -138,5 +148,36 @@ export const getInstitutionTrainerTimetableReportsData = cache(async (
     };
   });
 
-  return buildTimetableReports(rows);
+  const report = buildTimetableReports(rows);
+  const trainers = new Map((trainerResult.data ?? []).map((trainer) => [
+    trainer.id,
+    trainer,
+  ]));
+  const scheduledByTrainer = new Map(report.byTrainer.map((group) => [
+    group.key,
+    group,
+  ]));
+
+  report.workload = (workloadResult.data ?? []).map((workload) => {
+    const scheduled = scheduledByTrainer.get(workload.trainer_id);
+    const trainer = trainers.get(workload.trainer_id);
+    const targetHours = scheduled?.targetHours
+      ?? Number(trainer?.normal_weekly_hours ?? 0);
+    const allocatedHours = Number(workload.allocated_hours);
+
+    return {
+      key: workload.trainer_id,
+      label: scheduled?.label ?? trainer?.full_name ?? 'Trainer',
+      sessionCount: scheduled?.sessionCount ?? 0,
+      contactHours: scheduled?.contactHours ?? 0,
+      allocatedHours,
+      targetHours,
+      extraHours: Math.max(0, Math.round((allocatedHours - targetHours) * 10) / 10),
+      rows: scheduled?.rows ?? [],
+    };
+  }).sort((left, right) =>
+    (right.allocatedHours ?? 0) - (left.allocatedHours ?? 0)
+      || left.label.localeCompare(right.label));
+
+  return report;
 });

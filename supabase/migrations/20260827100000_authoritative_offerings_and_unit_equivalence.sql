@@ -181,15 +181,23 @@ create or replace function public.approve_unit_equivalence_group(
 declare
   active_department uuid := public.current_user_primary_department_id();
   group_id uuid;
+  existing_group_id uuid;
   member_count integer;
-  canonical_key text := public.canonical_unit_name(p_canonical_name);
+  normalized_canonical_key text := public.canonical_unit_name(p_canonical_name);
 begin
   if auth.uid() is null or active_department is null
     or not public.current_user_can_manage_department(active_department) then
     raise exception using errcode = '42501', message = 'Select an authorized working department';
   end if;
-  if cardinality(p_unit_ids) < 2 or canonical_key = '' then
-    raise exception 'Select at least two units and provide a canonical name';
+  if coalesce(cardinality(p_unit_ids), 0) = 0 or normalized_canonical_key = '' then
+    raise exception 'Select at least one unit and provide a canonical name';
+  end if;
+  select equivalence_group.id into existing_group_id
+  from public.unit_equivalence_groups equivalence_group
+  where equivalence_group.department_id = active_department
+    and equivalence_group.canonical_key = normalized_canonical_key;
+  if existing_group_id is null and cardinality(p_unit_ids) < 2 then
+    raise exception 'Select at least two units when creating a new equivalence group';
   end if;
   select count(distinct unit_record.id) into member_count
   from public.units unit_record
@@ -204,7 +212,7 @@ begin
 
   insert into public.unit_equivalence_groups
     (canonical_name, canonical_key, department_id, notes, approved_by)
-  values (trim(p_canonical_name), canonical_key, active_department, nullif(trim(p_notes), ''), auth.uid())
+  values (trim(p_canonical_name), normalized_canonical_key, active_department, nullif(trim(p_notes), ''), auth.uid())
   on conflict (department_id, canonical_key) do update
     set canonical_name = excluded.canonical_name, notes = coalesce(excluded.notes, public.unit_equivalence_groups.notes),
         status = 'active', updated_at = now()

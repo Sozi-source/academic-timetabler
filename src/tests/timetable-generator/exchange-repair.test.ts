@@ -146,11 +146,27 @@ describe('same-department trainer exchange repair', () => {
     })).toEqual([]);
   });
 
-  it('does not consider a trainer outside the current department planning input', () => {
+  it('does not consider a guest trainer from another department', () => {
     const input = createExchangeInput();
-    input.trainers = input.trainers.filter(
-      (trainer) => trainer.id !== 'trainer-2',
+    input.trainers = input.trainers.map((trainer) =>
+      trainer.id === 'trainer-2'
+        ? { ...trainer, departmentId: 'guest-department' }
+        : trainer,
     );
+    const baseline = generateTimetablePlan(input);
+
+    expect(findTrainerExchangeSuggestions({
+      input,
+      baseline,
+    })).toEqual([]);
+  });
+
+  it('does not exchange a restricted unit with an unqualified trainer', () => {
+    const input = createExchangeInput();
+    input.trainerUnitEligibility = [{
+      trainerId: 'trainer-1',
+      unitId: 'unit-1',
+    }];
     const baseline = generateTimetablePlan(input);
 
     expect(findTrainerExchangeSuggestions({

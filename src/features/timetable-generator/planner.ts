@@ -46,12 +46,17 @@ export interface UnscheduledPlanningSession {
 
 export interface AutomaticPlannerInput {
   academicPeriodId: string;
+  activeDepartmentId?: string | null;
   allocations: PlanningAllocation[];
   existingSessions?: PlanningSession[];
   workingDays: PlanningWorkingDay[];
   timeSlots: PlanningTimeSlot[];
   constraints?: PlanningConstraint[];
   trainers: PlanningTrainer[];
+  trainerUnitEligibility?: Array<{
+    trainerId: string;
+    unitId: string;
+  }>;
   cohorts: PlanningCohort[];
   rooms: PlanningRoom[];
   units: PlanningUnit[];

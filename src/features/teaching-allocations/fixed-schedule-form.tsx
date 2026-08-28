@@ -1,4 +1,7 @@
-import { setFixedScheduleAction } from './simple-allocation-actions';
+import {
+  clearFixedScheduleAction,
+  setFixedScheduleAction,
+} from './simple-allocation-actions';
 
 interface FixedScheduleDay {
   id: string;
@@ -205,6 +208,20 @@ export function FixedScheduleForm({
               : 'This unit requires one session per week.'}
         </p>
       )}
+
+      {(fullDay || savedPatterns.length > 0) ? (
+        <div className="flex justify-end border-t border-border pt-2">
+          <button
+            type="submit"
+            formAction={clearFixedScheduleAction}
+            formNoValidate
+            disabled={disabled}
+            className="text-xs font-semibold text-danger disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Undo fixed time
+          </button>
+        </div>
+      ) : null}
     </form>
   );
 }

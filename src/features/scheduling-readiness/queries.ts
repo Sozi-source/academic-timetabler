@@ -51,6 +51,7 @@ interface OfferingRow {
       approval_status: 'review_required' | 'approved' | 'withdrawn';
       selection_state: 'included' | 'excluded';
       is_timetable_enabled: boolean;
+      confirmed_shared_offering_id: string | null;
     }>;
     cohorts: Relation<{
       id: string;
@@ -229,7 +230,7 @@ export const getSchedulingReadiness = cache(async (
         cohort_id,
         unit_id,
         unit_offering_id,
-        unit_offerings (approval_status, selection_state, is_timetable_enabled),
+        unit_offerings (approval_status, selection_state, is_timetable_enabled, confirmed_shared_offering_id),
         cohorts (id, code, name, actual_size, status, is_timetable_available),
         units (id, code, name, is_active, is_timetable_available)
       )
@@ -279,7 +280,9 @@ export const getSchedulingReadiness = cache(async (
         const source = first(participant.unit_offerings);
         return source?.approval_status === 'approved'
           && source.selection_state === 'included'
-          && source.is_timetable_enabled;
+          && source.is_timetable_enabled
+          && (!source.confirmed_shared_offering_id
+            || source.confirmed_shared_offering_id === offering.id);
       }))
     .map((offering) => mapOffering(offering, allocations));
   const assessment = assessSchedulingReadiness({

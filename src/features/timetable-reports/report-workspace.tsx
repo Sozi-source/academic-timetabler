@@ -127,6 +127,7 @@ function WorkloadReport({ groups }: { groups: TimetableReportGroup[] }) {
               <th className="px-3 py-2.5">Trainer</th>
               <th className="px-3 py-2.5">Sessions</th>
               <th className="px-3 py-2.5">Target</th>
+              <th className="px-3 py-2.5">Allocated</th>
               <th className="px-3 py-2.5">Scheduled</th>
               <th className="px-3 py-2.5">Extra</th>
               <th className="px-3 py-2.5">Status</th>
@@ -139,6 +140,7 @@ function WorkloadReport({ groups }: { groups: TimetableReportGroup[] }) {
                 <td className="break-words px-3 py-2.5 font-semibold text-text-primary">{group.label}</td>
                 <td className="px-3 py-2.5 text-text-secondary">{group.sessionCount}</td>
                 <td className="px-3 py-2.5 text-text-secondary">{group.targetHours ?? 0}h</td>
+                <td className="px-3 py-2.5 font-semibold text-text-primary">{group.allocatedHours ?? group.contactHours}h</td>
                 <td className="px-3 py-2.5 font-semibold text-primary">{group.contactHours}h</td>
                 <td className={`px-3 py-2.5 font-semibold ${(group.extraHours ?? 0) > 0 ? 'text-warning' : 'text-text-muted'}`}>{(group.extraHours ?? 0) > 0 ? `+${group.extraHours}h` : '0'}</td>
                 <td className="px-3 py-2.5"><Badge variant={(group.extraHours ?? 0) > 0 ? 'warning' : 'success'}>{(group.extraHours ?? 0) > 0 ? 'Extra hours' : 'Within target'}</Badge></td>

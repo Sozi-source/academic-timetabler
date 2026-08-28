@@ -3,6 +3,7 @@ import 'server-only';
 import { cache } from 'react';
 
 import { getAuthenticatedProfile } from '@/features/auth/queries';
+import { getTimetableEnabledAllocations } from '@/features/teaching-allocations/queries';
 import { createClient } from '@/lib/supabase/server';
 
 import type { EditorData, EditorSession } from './types';
@@ -20,6 +21,7 @@ export const getTimetableEditorData = cache(async (
   const [
     profile,
     sessionResult,
+    timetableAllocations,
     dayResult,
     slotResult,
     roomResult,
@@ -32,6 +34,7 @@ export const getTimetableEditorData = cache(async (
       .from('scheduled_sessions')
       .select(`
         id,
+        teaching_allocation_id,
         academic_period_id,
         working_day_id,
         start_time_slot_id,
@@ -53,6 +56,7 @@ export const getTimetableEditorData = cache(async (
       .eq('academic_period_id', academicPeriodId)
       .in('status', ['draft', 'confirmed', 'locked'])
       .order('session_number'),
+    getTimetableEnabledAllocations(academicPeriodId),
     supabase
       .from('working_days')
       .select('id, day_of_week, sequence_number')
@@ -162,8 +166,29 @@ export const getTimetableEditorData = cache(async (
     (workloadResult.data ?? []).map((w: any) => [w.trainer_id, Number(w.allocated_hours)]),
   );
 
+  const missingAllocations = timetableAllocations.flatMap((allocation) => {
+    const activeSessionCount = (sessionResult.data ?? []).filter(
+      (session) => session.teaching_allocation_id === allocation.id,
+    ).length;
+    const expectedSessionCount = Number(allocation.weeklySessions);
+    const missingSessionCount = Math.max(0, expectedSessionCount - activeSessionCount);
+
+    return missingSessionCount > 0
+      ? [{
+          id: allocation.id,
+          unitCode: allocation.unit?.code ?? 'Unit',
+          unitName: allocation.unit?.name ?? 'Unknown unit',
+          cohortCode: allocation.cohort?.code ?? 'Unknown cohort',
+          trainerName: allocation.trainer?.fullName ?? 'Unassigned trainer',
+          missingSessionCount,
+          expectedSessionCount,
+        }]
+      : [];
+  });
+
   return {
     sessions,
+    missingAllocations,
     workingDays: (dayResult.data ?? []).map((day) => ({
       id: day.id,
       label: day.day_of_week.charAt(0).toUpperCase() + day.day_of_week.slice(1),

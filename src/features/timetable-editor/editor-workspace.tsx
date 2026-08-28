@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { History, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, History, ShieldCheck } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
@@ -31,6 +31,29 @@ export function TimetableEditorWorkspace({
           </Link>
         </div>
       </div>
+
+      {data.missingAllocations.length > 0 ? (
+        <section className="rounded-2xl border border-warning/30 bg-warning-surface p-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="flex items-center gap-2 font-semibold text-text-primary">
+                <AlertTriangle className="size-4 text-warning" /> Units missing from timetable
+              </h2>
+              <p className="mt-1 text-xs text-text-muted">These allocated units have sessions that the generator could not place.</p>
+            </div>
+            <Link href="/timetable/generator" className="text-sm font-semibold text-primary hover:underline">Review placement issues</Link>
+          </div>
+          <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+            {data.missingAllocations.map((allocation) => (
+              <div key={allocation.id} className="rounded-xl border border-warning/20 bg-surface p-3 text-sm">
+                <p className="font-semibold text-text-primary">{allocation.unitCode} — {allocation.unitName}</p>
+                <p className="mt-1 text-xs text-text-muted">{allocation.cohortCode} · {allocation.trainerName}</p>
+                <p className="mt-2 text-xs font-semibold text-warning">{allocation.missingSessionCount} of {allocation.expectedSessionCount} sessions missing</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <div className="grid gap-4 xl:grid-cols-5">
         {data.workingDays.map((day) => {

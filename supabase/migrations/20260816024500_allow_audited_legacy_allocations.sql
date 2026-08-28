@@ -78,7 +78,7 @@ begin
         and offering.cohort_id = new.cohort_id
         and offering.unit_id = new.unit_id
         and offering.is_timetable_enabled = true
-        and offering.origin = 'legacy'
+        and offering.origin in ('legacy', 'special')
         and nullif(trim(offering.exception_reason), '') is not null
     ) into has_audited_legacy_offering;
 
@@ -142,4 +142,4 @@ end;
 $$;
 
 comment on function public.validate_teaching_allocation() is
-  'Validates timetable allocations and permits cross-stage units only through an enabled, audited legacy Unit on Offer exception.';
+  'Validates timetable allocations and permits cross-stage units only through an enabled, audited legacy or local-arrangement Unit on Offer exception.';

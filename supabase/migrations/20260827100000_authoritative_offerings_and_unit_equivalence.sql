@@ -109,9 +109,15 @@ begin
   end if;
 
   update public.unit_offerings offering set
-    approval_status = case when p_approve then 'approved' else 'withdrawn' end,
-    selection_state = case when p_approve then 'included' else 'excluded' end,
-    status = case when p_approve then 'draft' else 'cancelled' end,
+    approval_status = case when p_approve
+      then 'approved'::public.unit_offering_approval_status
+      else 'withdrawn'::public.unit_offering_approval_status end,
+    selection_state = case when p_approve
+      then 'included'::public.unit_offering_selection_state
+      else 'excluded'::public.unit_offering_selection_state end,
+    status = case when p_approve
+      then 'draft'::public.unit_offering_status
+      else 'cancelled'::public.unit_offering_status end,
     is_timetable_enabled = p_approve and offering.offering_type not in
       ('attachment', 'clinical_rotation', 'examination'),
     approved_by = case when p_approve then auth.uid() else null end,

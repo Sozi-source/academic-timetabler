@@ -636,7 +636,7 @@ export const getCohortUnitEditorOptions = cache(async () => {
   const supabase = await createClient();
   const [cohortResult, unitResult] = await Promise.all([
     supabase.from('cohorts').select(`
-      id, code, name, programme_id,
+      id, code, name, programme_id, current_academic_period_number,
       programmes!inner(id, name)
     `).in('status', ['planned', 'active']).eq('is_timetable_available', true).order('name'),
     supabase.from('units').select('id, code, name, programme_id, academic_period_number')
@@ -647,7 +647,14 @@ export const getCohortUnitEditorOptions = cache(async () => {
   return {
     cohorts: (cohortResult.data ?? []).map((row) => {
       const programme = Array.isArray(row.programmes) ? row.programmes[0] : row.programmes;
-      return { id: row.id, code: row.code, name: row.name, programmeId: row.programme_id, programmeName: programme?.name ?? 'Programme' };
+      return {
+        id: row.id,
+        code: row.code,
+        name: row.name,
+        programmeId: row.programme_id,
+        programmeName: programme?.name ?? 'Programme',
+        currentStage: row.current_academic_period_number,
+      };
     }),
     units: (unitResult.data ?? []).map((row) => ({
       id: row.id, code: row.code, name: row.name, programmeId: row.programme_id,

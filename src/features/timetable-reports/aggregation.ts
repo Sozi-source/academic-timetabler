@@ -3,6 +3,7 @@ import type {
   TimetableReportRow,
   TimetableReportsData,
 } from './types';
+import { formatVenueLabel } from './venue-label';
 
 function roundHours(minutes: number) {
   return Math.round((minutes / 60) * 10) / 10;
@@ -99,7 +100,7 @@ export function buildTimetableReports(
     byRoom: groupRows(
       rows,
       (row) => row.roomCode ?? 'UNASSIGNED',
-      (row) => row.roomCode ? `${row.roomCode} · ${row.roomName}` : 'No room assigned',
+      (row) => formatVenueLabel(row.roomCode, row.roomName),
     ),
     workload: [...byTrainer].sort((left, right) => {
       if (right.contactHours !== left.contactHours) {

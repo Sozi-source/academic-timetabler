@@ -18,13 +18,21 @@ import type {
   TimetableReportRow,
   TimetableReportsData,
 } from './types';
+import type { ManualEntryOptions } from './manual-entry';
+import { ManualTrainerEntryForm } from './manual-entry-form';
+import { ManualVenueEditor } from './manual-venue-editor';
+import { formatVenueLabel } from './venue-label';
 
 function SessionTable({
   rows,
   master = false,
+  academicPeriodId,
+  manualEntryOptions,
 }: {
   rows: TimetableReportRow[];
   master?: boolean;
+  academicPeriodId?: string;
+  manualEntryOptions?: ManualEntryOptions;
 }) {
   return (
     <div className="w-full overflow-hidden">
@@ -67,7 +75,12 @@ function SessionTable({
                 )}
               </td>
               <td className={master ? 'px-3 py-2.5 text-xs italic text-text-muted' : 'px-3 py-2.5 text-text-secondary'}>
-                {master ? presentation.venue : row.roomCode ? `${row.roomCode} · ${row.roomName}` : 'No room assigned'}
+                <div>{master ? presentation.venue : formatVenueLabel(row.roomCode, row.roomName)}</div>
+                {!master && row.status === 'manual' && academicPeriodId && manualEntryOptions ? (
+                  <div className="mt-2">
+                    <ManualVenueEditor entryId={row.sessionId} academicPeriodId={academicPeriodId} rooms={manualEntryOptions.rooms} currentRoomCode={row.roomCode} />
+                  </div>
+                ) : null}
               </td>
               <td className="px-3 py-2.5">
                 <Badge variant={row.isLocked ? 'warning' : row.status === 'confirmed' ? 'success' : 'neutral'}>
@@ -83,7 +96,11 @@ function SessionTable({
   );
 }
 
-function GroupedReport({ groups }: { groups: TimetableReportGroup[] }) {
+function GroupedReport({ groups, academicPeriodId, manualEntryOptions }: {
+  groups: TimetableReportGroup[];
+  academicPeriodId?: string;
+  manualEntryOptions?: ManualEntryOptions;
+}) {
   if (groups.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-border p-10 text-center text-sm text-text-muted">
@@ -110,7 +127,7 @@ function GroupedReport({ groups }: { groups: TimetableReportGroup[] }) {
               {(group.extraHours ?? 0) > 0 ? <Badge variant="warning">Extra +{group.extraHours} hrs</Badge> : null}
             </div>
           </div>
-          <SessionTable rows={group.rows} />
+          <SessionTable rows={group.rows} academicPeriodId={academicPeriodId} manualEntryOptions={manualEntryOptions} />
         </section>
       ))}
     </div>
@@ -160,10 +177,12 @@ export function TimetableReportsWorkspace({
   academicPeriodId,
   data,
   report,
+  manualEntryOptions,
 }: {
   academicPeriodId: string;
   data: TimetableReportsData;
   report: TimetableReportKind;
+  manualEntryOptions?: ManualEntryOptions;
 }) {
   return (
     <div className="space-y-6">
@@ -190,13 +209,17 @@ export function TimetableReportsWorkspace({
         <TimetableReportActions academicPeriodId={academicPeriodId} report={report} />
       </div>
 
+      {report === 'trainer' && manualEntryOptions ? (
+        <ManualTrainerEntryForm academicPeriodId={academicPeriodId} options={manualEntryOptions} />
+      ) : null}
+
       {report === 'master' ? (
         <div className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
           <SessionTable rows={data.rows} master />
         </div>
       ) : null}
       {report === 'cohort' ? <GroupedReport groups={data.byCohort} /> : null}
-      {report === 'trainer' ? <GroupedReport groups={data.byTrainer} /> : null}
+      {report === 'trainer' ? <GroupedReport groups={data.byTrainer} academicPeriodId={academicPeriodId} manualEntryOptions={manualEntryOptions} /> : null}
       {report === 'room' ? <GroupedReport groups={data.byRoom} /> : null}
       {report === 'workload' ? <WorkloadReport groups={data.workload} /> : null}
     </div>

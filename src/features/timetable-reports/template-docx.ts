@@ -20,6 +20,7 @@ import {
 } from 'docx';
 
 import { getMasterSessionPresentation } from './master-presentation';
+import { formatVenueLabel } from './venue-label';
 import type {
   TimetableReportGroup,
   TimetableReportRow,
@@ -443,9 +444,7 @@ export function personalSessionParagraphs(
       ?? row.departmentName
       ?? 'Department';
     const cohort = cohortCodes(row).join(' + ');
-    const venue = row.roomCode
-      ? row.roomName || row.roomCode
-      : 'Unallocated';
+    const venue = formatVenueLabel(row.roomCode, row.roomName, 'Unallocated');
 
     return [
       new Paragraph({

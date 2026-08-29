@@ -124,7 +124,7 @@ export default async function StaffTimetablePage() {
                     {period.sessions.length} weekly classes · {activeDaySeqs.size} teaching days
                   </p>
                 </div>
-                <span className="rounded bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-800 border border-teal-200">
+                <span className="rounded border border-primary/20 bg-primary-soft px-2.5 py-1 text-xs font-semibold text-primary">
                   Published Schedule
                 </span>
               </div>
@@ -236,8 +236,8 @@ export default async function StaffTimetablePage() {
                       {sessions.map((session) => (
                         <div key={session.id} className="p-3 space-y-1.5">
                           <div className="flex items-center justify-between text-xs">
-                            <span className="flex items-center gap-1 font-bold text-teal-800">
-                              <Clock3 className="size-3 text-teal-700" />
+                            <span className="flex items-center gap-1 font-bold text-primary">
+                              <Clock3 className="size-3 text-primary" />
                               {formatTimetableClock(session.startsAt)} – {formatTimetableClock(session.endsAt)}
                             </span>
                             <span className="text-[10px] uppercase font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">

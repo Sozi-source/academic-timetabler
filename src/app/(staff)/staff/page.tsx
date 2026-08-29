@@ -86,14 +86,14 @@ export default async function StaffHomePage() {
           <div className="flex items-center gap-2">
             <Link
               href="/staff/daily-report"
-              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-white px-3.5 text-xs font-bold text-teal-900 shadow-xs ring-1 ring-slate-200 hover:bg-slate-50 transition"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-surface px-3.5 text-xs font-bold text-primary shadow-xs ring-1 ring-border hover:bg-primary-subtle transition"
             >
-              <ClipboardList className="size-3.5 text-teal-800" />
+              <ClipboardList className="size-3.5 text-primary" />
               Daily Report
             </Link>
             <Link
               href="/staff/units"
-              className="inline-flex h-9 items-center justify-center rounded-xl bg-teal-900 px-4 text-xs font-black text-amber-300 shadow-sm transition hover:bg-teal-800 hover:text-amber-200 ring-1 ring-teal-950/20"
+              className="inline-flex h-9 items-center justify-center rounded-xl bg-primary px-4 text-xs font-black text-institutional-yellow-soft shadow-sm transition hover:bg-primary-hover ring-1 ring-primary-deeper/20"
             >
               My Units
             </Link>
@@ -108,7 +108,7 @@ export default async function StaffHomePage() {
           description="Active and completed Teaching Allocations"
           icon={BookOpenCheck}
           status="My Units"
-          className="border-t-4 border-t-teal-800 shadow-xs"
+          className="border-t-4 border-t-primary shadow-xs"
         />
 
         <MetricCard
@@ -126,25 +126,25 @@ export default async function StaffHomePage() {
           description="Assessment sets released"
           icon={GraduationCap}
           status="Results"
-          className="border-t-4 border-t-teal-700 shadow-xs"
+          className="border-t-4 border-t-primary shadow-xs"
         />
       </section>
 
       {/* QUICK ACCESS GRID */}
       <section className="space-y-3">
-        <h2 className="text-xs font-black uppercase tracking-wider text-teal-800">
+        <h2 className="text-xs font-black uppercase tracking-wider text-primary">
           Quick Access
         </h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           <Link
             href="/staff/attendance"
-            className="group flex items-center gap-3 rounded-xl border border-slate-200 border-l-4 border-l-teal-700 bg-white p-3.5 shadow-xs transition hover:border-teal-500 hover:shadow-sm"
+            className="group flex items-center gap-3 rounded-xl border border-border border-l-4 border-l-primary bg-surface p-3.5 shadow-xs transition hover:border-primary/50 hover:shadow-sm"
           >
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-teal-800 group-hover:bg-teal-100 font-bold">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary group-hover:bg-primary-soft font-bold">
               <CalendarCheck2 className="size-4.5" />
             </span>
             <div>
-              <p className="text-xs font-black text-slate-950 group-hover:text-teal-900">Attendance</p>
+              <p className="text-xs font-black text-slate-950 group-hover:text-primary">Attendance</p>
               <p className="text-[11px] text-slate-500 font-medium">Class check-in & register</p>
             </div>
           </Link>
@@ -158,7 +158,7 @@ export default async function StaffHomePage() {
             </span>
             <div>
               <p className="text-xs font-black text-slate-950 group-hover:text-emerald-900">Daily Report</p>
-              <p className="text-[11px] text-slate-500 font-medium">Submit day's report & log</p>
+              <p className="text-[11px] text-slate-500 font-medium">Submit today&apos;s report and log</p>
             </div>
           </Link>
 
@@ -177,13 +177,13 @@ export default async function StaffHomePage() {
 
           <Link
             href="/staff/documents"
-            className="group flex items-center gap-3 rounded-xl border border-slate-200 border-l-4 border-l-teal-800 bg-white p-3.5 shadow-xs transition hover:border-teal-600 hover:shadow-sm"
+            className="group flex items-center gap-3 rounded-xl border border-border border-l-4 border-l-primary bg-surface p-3.5 shadow-xs transition hover:border-primary/50 hover:shadow-sm"
           >
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-teal-900 group-hover:bg-teal-100 font-bold">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary group-hover:bg-primary-soft font-bold">
               <FileText className="size-4.5" />
             </span>
             <div>
-              <p className="text-xs font-black text-slate-950 group-hover:text-teal-900">Teaching Documents</p>
+              <p className="text-xs font-black text-slate-950 group-hover:text-primary">Teaching Documents</p>
               <p className="text-[11px] text-slate-500 font-medium">Outlines, Schemes & RoW</p>
             </div>
           </Link>
@@ -203,14 +203,14 @@ export default async function StaffHomePage() {
         </div>
       </section>
 
-      <section className="flex items-center justify-between rounded-xl border border-slate-200 border-l-4 border-l-teal-800 bg-white px-4 py-3 text-xs shadow-xs">
+      <section className="flex items-center justify-between rounded-xl border border-border border-l-4 border-l-primary bg-surface px-4 py-3 text-xs shadow-xs">
         <div>
           <span className="font-black text-slate-950">{workspace.trainerName}</span>
           <span className="ml-2 text-slate-500 font-medium">· Teaching Allocations Active</span>
         </div>
         <Link
           href="/staff/history"
-          className="inline-flex items-center gap-1 text-[11px] font-bold text-teal-800 hover:text-teal-950"
+          className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:text-primary-deep"
         >
           <History className="size-3.5" />
           View Activity History

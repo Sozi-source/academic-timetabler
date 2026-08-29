@@ -1,0 +1,167 @@
+/* Staff and student portal component system, based on the approved concept. */
+.academic-portal {
+  --background: #f6f9f8;
+  --surface: #ffffff;
+  --surface-subtle: #f6f9f8;
+  --surface-muted: #edf4f2;
+  --primary: #0f766e;
+  --primary-hover: #0d655e;
+  --primary-active: #0b5c56;
+  --primary-deep: #0b4f4a;
+  --primary-deeper: #083d39;
+  --primary-soft: #e8f4f2;
+  --primary-subtle: #f2f8f7;
+  --institutional-yellow: #ffd400;
+  --institutional-yellow-hover: #ebc400;
+  --institutional-yellow-soft: #fff0a3;
+  --institutional-yellow-subtle: #fff8cc;
+  --institutional-yellow-ink: #263c38;
+  --institutional-accent-border: #e1bd00;
+  --text-primary: #17211f;
+  --text-secondary: #4d5b57;
+  --text-muted: #66736f;
+  --text-subtle: #87938f;
+  --border: #dce6e3;
+  --border-soft: #e8efed;
+  --border-strong: #c5d3cf;
+  --focus-ring: #91c5c0;
+  --focus-border: #0f766e;
+  color: var(--text-primary);
+  background: var(--background);
+}
+
+.academic-portal main {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.academic-portal .portal-page-content > :where(div, section) {
+  max-width: 100%;
+}
+
+.academic-portal .portal-page-content :where(header)[class~="rounded-xl"] {
+  border-radius: 0.75rem;
+  border-color: var(--border);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.academic-portal .portal-page-content :where(header)[class~="rounded-xl"] h1 {
+  font-weight: 600;
+}
+
+.academic-portal .portal-page-content :where(header)[class~="rounded-xl"] [class*="bg-primary"] {
+  border-radius: 0.625rem;
+  background: var(--primary-soft);
+  color: var(--primary-deep);
+}
+
+.academic-portal main :where(h1, h2, h3) {
+  color: var(--text-primary);
+  letter-spacing: -0.015em;
+}
+
+.academic-portal main :where(section, article, div)[class~="bg-white"],
+.academic-portal main :where(section, article, div)[class~="bg-surface"] {
+  background-color: var(--surface);
+}
+
+.academic-portal main [class~="border-slate-200"],
+.academic-portal main [class~="border-border"] {
+  border-color: var(--border);
+}
+
+.academic-portal main :where(section, article)[class*="rounded-xl"][class*="border"] {
+  box-shadow: 0 1px 2px rgb(11 79 74 / 0.035);
+}
+
+.academic-portal main :where(section, article)[class*="rounded-2xl"][class*="border"] {
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px rgb(11 79 74 / 0.035);
+}
+
+.academic-portal main :where(a, button)[class*="rounded-xl"] {
+  border-radius: 0.5625rem;
+}
+
+.academic-portal main :where(a, button)[class*="bg-primary"] {
+  box-shadow: 0 2px 5px rgb(11 79 74 / 0.14);
+}
+
+.academic-portal main :where(.grid) > article[class*="border"]::before {
+  border-radius: inherit;
+}
+
+.academic-portal main :where(input, select, textarea) {
+  border-color: var(--border-strong);
+  background: var(--surface);
+  color: var(--text-primary);
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.academic-portal main :where(input, select, textarea):focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgb(15 118 110 / 0.12);
+  outline: none;
+}
+
+.academic-portal main :where(button, a) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.academic-portal main table {
+  border-color: var(--border);
+  background: var(--surface);
+}
+
+.academic-portal main thead {
+  background: var(--surface-subtle);
+  color: var(--text-muted);
+}
+
+.academic-portal main tbody > tr {
+  border-color: var(--border-soft);
+  transition: background-color 140ms ease;
+}
+
+.academic-portal main tbody > tr:hover {
+  background: var(--primary-subtle);
+}
+
+.academic-portal main [class~="shadow-xs"],
+.academic-portal main [class~="shadow-sm"] {
+  box-shadow: 0 2px 8px rgb(11 79 74 / 0.055);
+}
+
+.academic-portal main [class~="text-teal-900"],
+.academic-portal main [class~="text-teal-800"],
+.academic-portal main [class~="text-teal-700"] {
+  color: var(--primary);
+}
+
+.academic-portal main [class~="bg-teal-900"],
+.academic-portal main [class~="bg-teal-800"] {
+  background-color: var(--primary);
+}
+
+.academic-portal main [class~="bg-teal-50"],
+.academic-portal main [class~="bg-teal-100"] {
+  background-color: var(--primary-soft);
+}
+
+@media (max-width: 680px) {
+  .academic-portal main { font-size: 0.8125rem; }
+  .academic-portal main :where(section, article)[class*="rounded-xl"] { border-radius: 0.75rem; }
+  .academic-portal main table { min-width: 42rem; }
+  .academic-portal .portal-page-content > [class*="space-y"] { row-gap: 0.875rem; }
+  .academic-portal .portal-page-content :where(header)[class~="rounded-xl"] { padding: 0.875rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .academic-portal *, .academic-portal *::before, .academic-portal *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

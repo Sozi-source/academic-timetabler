@@ -13,6 +13,7 @@ import type {
   TimetableReportsData,
 } from './types';
 import { getMasterSessionPresentation } from './master-presentation';
+import { formatVenueLabel } from './venue-label';
 
 Font.registerHyphenationCallback((word) => [word]);
 
@@ -460,7 +461,7 @@ function PersonalSessionCell({ rows }: { rows: TimetableReportRow[] }) {
             </Text>
           ) : null}
           <Text style={personalStyles.personalVenue}>
-            Venue: {row.roomCode ? row.roomName || row.roomCode : 'Unallocated'}
+            Venue: {formatVenueLabel(row.roomCode, row.roomName, 'Unallocated')}
           </Text>
         </View>
       ))}

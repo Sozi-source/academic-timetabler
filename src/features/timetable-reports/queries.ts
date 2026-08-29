@@ -7,11 +7,35 @@ import { createClient } from '@/lib/supabase/server';
 
 import { buildTimetableReports } from './aggregation';
 import type { TimetableReportRow, TimetableReportsData } from './types';
+import type { ManualEntryOptions } from './manual-entry';
+import { formatVenueLabel } from './venue-label';
 
 function timeToMinutes(value: string) {
   const [hours, minutes] = value.slice(0, 5).split(':').map(Number);
   return hours * 60 + minutes;
 }
+
+export const getManualTrainerEntryOptions = cache(async (
+  academicPeriodId: string,
+): Promise<ManualEntryOptions> => {
+  const supabase = await createClient();
+  const [trainerResult, departmentResult, roomResult, dayResult, slotResult] = await Promise.all([
+    supabase.from('trainers').select('id, full_name, staff_number').eq('is_active', true).eq('is_timetable_available', true).order('full_name'),
+    supabase.from('departments').select('id, code, name').eq('is_active', true).order('name'),
+    supabase.from('rooms').select('id, code, name').eq('is_active', true).eq('is_timetable_available', true).order('code'),
+    supabase.from('working_days').select('id, day_of_week, sequence_number').eq('academic_period_id', academicPeriodId).eq('is_enabled', true).order('sequence_number'),
+    supabase.from('time_slots').select('id, name, starts_at, ends_at, sequence_number').eq('academic_period_id', academicPeriodId).eq('is_enabled', true).eq('slot_type', 'teaching').order('sequence_number'),
+  ]);
+  const error = trainerResult.error ?? departmentResult.error ?? roomResult.error ?? dayResult.error ?? slotResult.error;
+  if (error) throw new Error(`Unable to load manual timetable options: ${error.message}`);
+  return {
+    trainers: (trainerResult.data ?? []).map((trainer) => ({ id: trainer.id, label: `${trainer.full_name} · ${trainer.staff_number}` })),
+    departments: (departmentResult.data ?? []).map((department) => ({ id: department.id, label: `${department.code} · ${department.name}` })),
+    rooms: (roomResult.data ?? []).map((room) => ({ id: room.id, label: formatVenueLabel(room.code, room.name) })),
+    workingDays: (dayResult.data ?? []).map((day) => ({ id: day.id, label: day.day_of_week.charAt(0).toUpperCase() + day.day_of_week.slice(1) })),
+    timeSlots: (slotResult.data ?? []).map((slot) => ({ id: slot.id, label: `${slot.name} · ${slot.starts_at.slice(0, 5)}–${slot.ends_at.slice(0, 5)}` })),
+  };
+});
 
 export const getTimetableReportsData = cache(async (
   academicPeriodId: string,

@@ -7,6 +7,7 @@ import { getAcademicPeriods } from '@/features/academic-periods/queries';
 import { requireHodAccess } from '@/features/auth/authorization';
 import {
   getInstitutionTrainerTimetableReportsData,
+  getManualTrainerEntryOptions,
   getTimetableReportsData,
 } from '@/features/timetable-reports/queries';
 import { TimetableReportsWorkspace } from '@/features/timetable-reports/report-workspace';
@@ -54,6 +55,9 @@ export default async function TimetableReportsPage({
       ? await getInstitutionTrainerTimetableReportsData(selectedId)
       : await getTimetableReportsData(selectedId)
     : null;
+  const manualEntryOptions = selectedId && report === 'trainer'
+    ? await getManualTrainerEntryOptions(selectedId)
+    : undefined;
 
   return (
     <div className="space-y-6">
@@ -103,7 +107,7 @@ export default async function TimetableReportsPage({
       </form>
 
       {selectedId && data ? (
-        <TimetableReportsWorkspace academicPeriodId={selectedId} data={data} report={report} />
+        <TimetableReportsWorkspace academicPeriodId={selectedId} data={data} report={report} manualEntryOptions={manualEntryOptions} />
       ) : (
         <div className="rounded-2xl border border-dashed border-border p-10 text-center text-sm text-text-muted">
           No Academic Period is available for reporting.

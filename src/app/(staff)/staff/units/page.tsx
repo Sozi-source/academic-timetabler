@@ -15,6 +15,54 @@ import {
 import {
   getStaffWorkspace,
 } from '@/features/staff-assessment/queries';
+import type { StaffUnitAllocation } from '@/features/staff-assessment/types';
+
+type GroupedUnit = StaffUnitAllocation & {
+  cohortNames: string[];
+  allocations: StaffUnitAllocation[];
+};
+
+function groupAllocationsByUnit(
+  allocations: StaffUnitAllocation[],
+): GroupedUnit[] {
+  const groups = new Map<string, GroupedUnit>();
+
+  for (const allocation of allocations) {
+    const normalizedName = allocation.unitName
+      .trim()
+      .toLocaleLowerCase()
+      .replace(/[^a-z0-9]/g, '');
+    const key = `${allocation.academicPeriodId}:${normalizedName}`;
+    const existing = groups.get(key);
+
+    if (existing) {
+      existing.allocations.push(allocation);
+      if (!existing.cohortNames.includes(allocation.cohortName)) {
+        existing.cohortNames.push(allocation.cohortName);
+      }
+      continue;
+    }
+
+    groups.set(key, {
+      ...allocation,
+      cohortNames: [allocation.cohortName],
+      allocations: [allocation],
+    });
+  }
+
+  return [...groups.values()];
+}
+
+function groupedAssessmentStatus(
+  allocations: StaffUnitAllocation[],
+  type: 'cat' | 'exam',
+): string | null {
+  const statuses = allocations.map((allocation) =>
+    allocation[type]?.workflowStatus ?? null,
+  );
+  const unique = new Set(statuses);
+  return unique.size === 1 ? statuses[0] : 'Mixed';
+}
 
 function assessmentBadge(
   label: string,
@@ -49,6 +97,7 @@ export default async function StaffUnitsPage() {
     await getStaffWorkspace(
       profile.id,
     );
+  const groupedUnits = groupAllocationsByUnit(workspace.allocations);
 
   return (
     <div className="space-y-5">
@@ -73,11 +122,11 @@ export default async function StaffUnitsPage() {
         </section>
       ) : (
         <section className="space-y-3">
-          {workspace.allocations.map((allocation) => (
+          {groupedUnits.map((allocation) => (
             <Link
               key={allocation.allocationId}
               href={`/staff/units/${allocation.allocationId}`}
-              className="block rounded-xl border border-slate-200 border-l-4 border-l-teal-800 bg-white px-5 py-4 shadow-xs transition hover:border-l-amber-400 hover:border-slate-300 hover:bg-teal-50/20 hover:shadow-sm"
+              className="block rounded-xl border border-border border-l-4 border-l-primary bg-surface px-5 py-4 shadow-xs transition hover:border-l-institutional-yellow hover:border-border-strong hover:bg-primary-subtle hover:shadow-sm"
             >
               <div className="grid gap-3 lg:grid-cols-[minmax(0,1.5fr)_minmax(10rem,.8fr)_auto] lg:items-center">
                 <div className="min-w-0">
@@ -86,9 +135,9 @@ export default async function StaffUnitsPage() {
                   </p>
 
                   <p className="mt-1 text-[11px] font-bold text-slate-500">
-                    {allocation.cohortName}
+                    {allocation.cohortNames.join(' + ')}
                     {' · '}
-                    <span className="text-teal-800">{allocation.academicPeriodName}</span>
+                    <span className="text-primary">{allocation.academicPeriodName}</span>
                   </p>
                 </div>
 
@@ -101,12 +150,12 @@ export default async function StaffUnitsPage() {
                 <div className="flex flex-wrap gap-1.5">
                   {assessmentBadge(
                     'CAT',
-                    allocation.cat?.workflowStatus ?? null,
+                    groupedAssessmentStatus(allocation.allocations, 'cat'),
                   )}
 
                   {assessmentBadge(
                     'Exam',
-                    allocation.exam?.workflowStatus ?? null,
+                    groupedAssessmentStatus(allocation.allocations, 'exam'),
                   )}
                 </div>
               </div>

@@ -64,16 +64,12 @@ export default async function StudentDocumentsPage() {
       <div className="space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
-              Approved only
-            </p>
-
             <h1 className="mt-1 text-xl font-bold text-text-primary">
               Documents
             </h1>
 
             <p className="mt-1 text-xs text-text-muted">
-              Published teaching documents for your cohort.
+              Files published for your cohort.
             </p>
           </div>
 
@@ -91,7 +87,7 @@ export default async function StudentDocumentsPage() {
               FileText
             }
             title="No published documents"
-            description="Documents will appear after the department approves a controlled college template output."
+            description="Published files will appear here."
           />
         ) : (
           <Card className="divide-y divide-border">
@@ -141,11 +137,6 @@ export default async function StudentDocumentsPage() {
           </Card>
         )}
 
-        <p className="text-[10px] leading-4 text-text-muted">
-          Only approved documents explicitly
-          published by the department are
-          available here.
-        </p>
       </div>
     </StudentPortalShell>
   );

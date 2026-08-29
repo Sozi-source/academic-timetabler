@@ -164,7 +164,7 @@ export default async function StudentTimetablePage() {
               CalendarDays
             }
             title="No published timetable"
-            description="Your timetable appears here after the department publishes and locks your cohort schedule."
+            description="Your published schedule will appear here."
           />
         ) : (
           [

@@ -106,7 +106,7 @@ export default async function StudentUnitRegistrationPage() {
               ClipboardCheck
             }
             title="Registration unavailable"
-            description="No active academic period is configured."
+            description="No active academic period."
           />
         ) : units.length ===
         0 ? (
@@ -115,7 +115,7 @@ export default async function StudentUnitRegistrationPage() {
               ClipboardCheck
             }
             title="Not pre-registered"
-            description="Your department has not registered units for you in the active academic period."
+            description="No units are registered for this period."
           />
         ) : (
           <>
@@ -159,12 +159,7 @@ export default async function StudentUnitRegistrationPage() {
                   </p>
 
                   <p className="mt-1 max-w-xl text-[11px] leading-5 text-text-muted">
-                    The official college
-                    registration template has
-                    not been connected yet.
-                    Your registered units are
-                    already preserved in the
-                    system.
+                    Your registered units are saved.
                   </p>
                 </div>
 

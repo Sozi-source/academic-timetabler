@@ -1,8 +1,4 @@
-import {
-  ArrowLeft,
-  Keyboard,
-} from 'lucide-react';
-import Link from 'next/link';
+import { Keyboard } from 'lucide-react';
 import {
   notFound,
 } from 'next/navigation';
@@ -94,22 +90,10 @@ export default async function StaffOnlineMarksPage({
   return (
     <div className="space-y-5">
       <PageHeader
-        eyebrow="My Units · Final marks"
-        title="Online marks"
+        title="Enter marks"
         description={`${access.allocation.unitName} · ${access.allocation.cohortName}`}
-        icon={Keyboard}
-        actions={
-          <Link
-            href={`/staff/units/${allocationId}/assessment/${assessmentId}`}
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
-          >
-            <ArrowLeft
-              className="size-3.5"
-              aria-hidden="true"
-            />
-            Assessment
-          </Link>
-        }
+        backHref={`/staff/units/${allocationId}/assessment/${assessmentId}`}
+        backLabel="Assessment"
       />
 
       <div className="flex flex-wrap gap-2">

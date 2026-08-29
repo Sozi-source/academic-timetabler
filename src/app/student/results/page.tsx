@@ -94,7 +94,7 @@ export default async function StudentResultsPage() {
               GraduationCap
             }
             title="No published results"
-            description="Draft, imported or unfinalised marks are never shown here."
+            description="Published results will appear here."
           />
         ) : (
           <Card className="divide-y divide-border">

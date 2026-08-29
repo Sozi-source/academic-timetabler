@@ -89,11 +89,11 @@ export default async function StaffDownloadsPage() {
       <PageHeader
         eyebrow="Staff"
         title="Downloads"
-        description="Open the controlled source before generating a file."
+        description="Your printable files."
         icon={Download}
       />
 
-      <section className="grid gap-3 md:grid-cols-2">
+      <section className="portal-card-grid">
         <Link
           href="/staff/timetable"
           className="rounded-xl border border-border bg-white px-4 py-4 transition hover:border-border-strong hover:bg-surface-subtle/40"
@@ -105,8 +105,7 @@ export default async function StaffDownloadsPage() {
               </h2>
 
               <p className="mt-1 text-[11px] leading-5 text-text-muted">
-                View your published
-                personal timetable.
+                Published schedule.
               </p>
             </div>
 
@@ -128,8 +127,7 @@ export default async function StaffDownloadsPage() {
               </h2>
 
               <p className="mt-1 text-[11px] leading-5 text-text-muted">
-                Attendance, outline,
-                scheme and record files.
+                Teaching records and templates.
               </p>
             </div>
 
@@ -162,11 +160,14 @@ export default async function StaffDownloadsPage() {
           </Badge>
         </div>
 
-        {assessmentLinks.length ===
-        0 ? (
-          <div className="rounded-xl border border-border bg-white px-4 py-8 text-center">
-            <p className="text-xs font-semibold text-text-primary">
+        {assessmentLinks.length === 0 ? (
+          <div className="rounded-xl border border-border bg-white px-4 py-10 text-center">
+            <FileSpreadsheet className="mx-auto size-7 text-text-muted" aria-hidden="true" />
+            <p className="mt-2 text-xs font-bold text-text-primary">
               No assessment files yet
+            </p>
+            <p className="mt-1 text-[11px] text-text-muted">
+              Markbooks and signing sheets will appear once assessment rules are configured for your units.
             </p>
           </div>
         ) : (

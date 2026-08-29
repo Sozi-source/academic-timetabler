@@ -63,10 +63,10 @@ export function TVETDocumentViewer({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-4 sm:space-y-6">
       {/* Top Action Bar (Hidden during printing) */}
-      <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm print:hidden">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-4 print:hidden">
+        <div className="flex min-w-0 items-center gap-2">
           <Link
             href={`/staff/units/${allocationId}/documents`}
             className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
@@ -74,19 +74,20 @@ export function TVETDocumentViewer({
             <ArrowLeft className="size-3.5" aria-hidden="true" />
             Back
           </Link>
-          <span className="text-xs font-bold text-slate-900">
+          <span className="min-w-0 truncate text-xs font-bold text-slate-900">
             {header.unitCode} · {header.unitName}
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="grid grid-cols-3 gap-2 sm:flex sm:items-center">
           {type !== 'record_of_work' && (
             <Link
               href={`/teaching-documents/curriculum/editor?unitCode=${encodeURIComponent(header.unitCode)}`}
               className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
             >
               <Pencil className="size-3.5 text-slate-600" aria-hidden="true" />
-              Edit Course Outline
+              <span className="sm:hidden">Edit</span>
+              <span className="hidden sm:inline">Edit Course Outline</span>
             </Link>
           )}
 
@@ -96,7 +97,8 @@ export function TVETDocumentViewer({
             className="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3.5 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
           >
             <Printer className="size-4 text-slate-600" aria-hidden="true" />
-            Print Preview
+            <span className="sm:hidden">Print</span>
+            <span className="hidden sm:inline">Print Preview</span>
           </button>
 
           <button
@@ -105,16 +107,17 @@ export function TVETDocumentViewer({
             className="inline-flex h-9 items-center gap-2 rounded-lg bg-slate-900 px-4 text-xs font-bold text-white shadow-sm transition hover:bg-slate-800"
           >
             <FileDown className="size-4" aria-hidden="true" />
-            Export Word (.docx)
+            <span className="sm:hidden">Word</span>
+            <span className="hidden sm:inline">Export Word (.docx)</span>
           </button>
         </div>
       </div>
 
       {/* Printable Document Container (Professional Academic Layout) */}
-      <div className="mx-auto max-w-5xl rounded-2xl border border-slate-300 bg-white shadow-md print:m-0 print:max-w-none print:border-none print:shadow-none">
+      <div className="mx-auto min-w-0 max-w-5xl overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-md print:m-0 print:max-w-none print:overflow-visible print:border-none print:shadow-none">
 
         {/* ── OFFICIAL ACADEMIC HEADER ── */}
-        <div className="border-b-2 border-slate-900 bg-white px-8 py-6 text-center print:px-6 print:py-4">
+        <div className="border-b-2 border-slate-900 bg-white px-4 py-5 text-center sm:px-8 sm:py-6 print:px-6 print:py-4">
           <div className="mx-auto flex flex-col items-center justify-center space-y-2">
             {/* Official Center Crest / Logo Emblem */}
             <div className="mb-1 flex items-center justify-center">
@@ -130,7 +133,7 @@ export function TVETDocumentViewer({
 
             {/* Institution & Department */}
             <div>
-              <h1 className="text-xl font-black tracking-wider text-slate-900 uppercase sm:text-2xl print:text-black">
+              <h1 className="text-base font-black tracking-wide text-slate-900 uppercase sm:text-2xl sm:tracking-wider print:text-black">
                 {header.institutionName}
               </h1>
               <p className="mt-0.5 text-xs font-bold tracking-widest text-slate-700 uppercase print:text-black">
@@ -144,9 +147,9 @@ export function TVETDocumentViewer({
         </div>
 
         {/* ── CONSPICUOUS UNIT NAME BANNER ── */}
-        <div className="border-b-2 border-slate-900 bg-slate-100 px-8 py-3.5 text-center print:bg-slate-50 print:border-black">
+        <div className="border-b-2 border-slate-900 bg-slate-100 px-4 py-3 text-center sm:px-8 sm:py-3.5 print:bg-slate-50 print:border-black">
           <p className="text-[10px] font-bold tracking-widest text-slate-600 uppercase">Curriculum Unit</p>
-          <h2 className="text-lg font-black tracking-wide text-slate-900 uppercase sm:text-xl print:text-black">
+          <h2 className="text-sm font-black tracking-wide text-slate-900 uppercase sm:text-xl print:text-black">
             {header.unitCode} — {header.unitName}
           </h2>
         </div>
@@ -163,14 +166,14 @@ export function TVETDocumentViewer({
             { label: 'Generated', value: new Date().toLocaleDateString('en-GB') },
             { label: 'Document Type', value: title },
           ].map(({ label, value, highlight }) => (
-            <div key={label} className="border-r border-b border-slate-300 px-4 py-2.5 last:border-r-0 print:border-slate-800">
+            <div key={label} className="min-w-0 border-r border-b border-slate-300 px-3 py-2 sm:px-4 sm:py-2.5 last:border-r-0 print:border-slate-800">
               <span className="block text-[9px] font-bold uppercase tracking-wider text-slate-600">{label}</span>
               <span className={`mt-0.5 block font-bold ${highlight ? 'text-slate-900 font-black' : 'text-slate-900'}`}>{value}</span>
             </div>
           ))}
         </div>
 
-        <div className="p-8 print:p-6">
+        <div className="p-3 sm:p-8 print:p-6">
 
           {/* ════════════════════════════════ COURSE OUTLINE ════════════════════════════════ */}
           {type === 'course_outline' && courseOutline && (
@@ -197,7 +200,8 @@ export function TVETDocumentViewer({
 
               <section>
                 <SectionHeading number="3" title="Weekly Delivery & Topical Breakdown" />
-                <table className="mt-3 w-full border-collapse text-[11px] table-fixed border border-slate-300">
+                <div className="mt-3 overflow-x-auto overscroll-x-contain rounded border border-slate-300 print:overflow-visible">
+                <table className="w-full min-w-[44rem] border-collapse text-[11px] table-fixed print:min-w-0">
                   <thead>
                     <tr className="bg-slate-100 text-slate-900 border-b-2 border-slate-900">
                       <th className="border border-slate-300 px-2 py-2 text-center w-[8%] font-black uppercase text-[9px] tracking-wider text-slate-900">Week</th>
@@ -242,6 +246,7 @@ export function TVETDocumentViewer({
                     })}
                   </tbody>
                 </table>
+                </div>
               </section>
 
               {(courseOutline.teachingLearningApproaches || courseOutline.assessmentApproaches) && (
@@ -312,7 +317,8 @@ export function TVETDocumentViewer({
           {/* ════════════════════════════════ SCHEME OF WORK ════════════════════════════════ */}
           {type === 'scheme_of_work' && schemeOfWork && (
             <div className="space-y-4">
-              <table className="w-full border-collapse text-[10px] table-fixed border border-slate-300">
+              <div className="overflow-x-auto overscroll-x-contain rounded border border-slate-300 print:overflow-visible">
+              <table className="w-full min-w-[52rem] border-collapse text-[10px] table-fixed print:min-w-0">
                 <thead>
                   <tr className="bg-slate-100 text-slate-900 border-b-2 border-slate-900">
                     <th className="border border-slate-300 px-2 py-2 text-center w-[5%] font-black uppercase text-[9px] tracking-wider text-slate-900">Wk</th>
@@ -348,6 +354,7 @@ export function TVETDocumentViewer({
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           )}
 
@@ -363,7 +370,8 @@ export function TVETDocumentViewer({
                 </span>
               </div>
 
-              <table className="w-full border-collapse text-[10px] table-fixed border border-slate-300">
+              <div className="overflow-x-auto overscroll-x-contain rounded border border-slate-300 print:overflow-visible">
+              <table className="w-full min-w-[52rem] border-collapse text-[10px] table-fixed print:min-w-0">
                 <thead>
                   <tr className="bg-slate-100 text-slate-900 border-b-2 border-slate-900">
                     <th className="border border-slate-300 px-2 py-2 text-center w-[5%] font-black uppercase text-[9px] tracking-wider text-slate-900">Wk</th>
@@ -412,12 +420,13 @@ export function TVETDocumentViewer({
                   )}
                 </tbody>
               </table>
+              </div>
             </div>
           )}
 
           {/* ── INSTITUTIONAL SIGN-OFF BLOCK ── */}
           <div className="mt-10 border-t-2 border-slate-900 pt-6 text-xs print:border-black">
-            <div className="grid grid-cols-3 gap-8">
+            <div className="grid gap-8 sm:grid-cols-3">
               {[
                 { role: 'Trainer Sign-off', name: header.trainerName },
                 { role: 'Head of Department (HOD)', name: 'Signature & Official Stamp' },

@@ -75,10 +75,6 @@ export default async function StudentUnitsPage() {
       <div className="space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
-              Academic
-            </p>
-
             <h1 className="mt-1 text-xl font-bold text-text-primary">
               My Units
             </h1>
@@ -106,7 +102,7 @@ export default async function StudentUnitsPage() {
               BookOpenCheck
             }
             title="No registered units"
-            description="Your department has not pre-registered units for the active academic period."
+            description="No units are registered for this period."
           />
         ) : (
           <Card className="divide-y divide-border">

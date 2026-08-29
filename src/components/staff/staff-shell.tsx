@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import {
+  ArrowLeft,
   BookOpen,
   BookOpenCheck,
   CalendarCheck2,
@@ -17,8 +18,8 @@ import {
   PencilLine,
   X,
 } from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import Link, { useLinkStatus } from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 
 import { logoutAction } from '@/features/auth/actions';
 import type { AuthenticatedProfile } from '@/features/auth/types';
@@ -61,7 +62,7 @@ const NAV_SECTIONS: NavSection[] = [
   {
     title: 'Tools & Records',
     items: [
-      { label: 'Offline Markbooks', href: '/staff/downloads', icon: Download },
+      { label: 'Downloads', href: '/staff/downloads', icon: Download },
       { label: 'Activity History', href: '/staff/history', icon: History },
     ],
   },
@@ -82,8 +83,14 @@ function getInitials(fullName: string) {
     .join('');
 }
 
+function NavigationProgress() {
+  const { pending } = useLinkStatus();
+  return pending ? <span className="portal-route-progress" aria-hidden="true" /> : null;
+}
+
 export function StaffShell({ profile, children }: StaffShellProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const initials = getInitials(profile.fullName) || 'TR';
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -140,6 +147,7 @@ export function StaffShell({ profile, children }: StaffShellProps) {
                           : 'text-white/75 hover:bg-white/8 hover:text-white font-bold'
                       )}
                     >
+                      <NavigationProgress />
                       {isActive && (
                         <span className="absolute inset-y-2 left-0 w-1 rounded-r-full bg-institutional-yellow" />
                       )}
@@ -224,11 +232,22 @@ export function StaffShell({ profile, children }: StaffShellProps) {
       {/* Main Content Area */}
       <div className="flex flex-1 flex-col lg:pl-[14.75rem] min-w-0">
         {/* Top Header Bar */}
-        <header className="sticky top-0 z-30 flex h-[4.625rem] items-center justify-between border-b border-border bg-surface/95 px-4 sm:px-6 backdrop-blur shadow-2xs">
+        <header className="sticky top-0 z-30 flex h-[3.625rem] items-center justify-between border-b border-border bg-surface/95 px-3.5 sm:px-6 lg:h-[4.625rem] backdrop-blur shadow-2xs">
           <div className="flex items-center gap-2">
-            <button type="button" onClick={() => setMobileOpen(true)} aria-label="Open navigation" className="flex size-[2.625rem] items-center justify-center rounded-[0.625rem] border border-border bg-surface text-primary-deep shadow-sm transition active:scale-95 lg:hidden">
-              <Menu className="size-5" />
+            <button type="button" onClick={() => setMobileOpen(true)} aria-label="Open navigation" className="flex size-9 items-center justify-center rounded-[0.625rem] border border-border bg-surface text-primary-deep shadow-sm transition active:scale-95 lg:hidden">
+              <Menu className="size-[1.125rem]" />
             </button>
+            {pathname !== '/staff' ? (
+              <button
+                type="button"
+                onClick={() => router.back()}
+                aria-label="Go back"
+                title="Back"
+                className="flex size-9 shrink-0 items-center justify-center rounded-[0.625rem] border border-border bg-surface text-primary-deep shadow-sm transition hover:bg-primary-subtle active:scale-95"
+              >
+                <ArrowLeft className="size-[1.125rem]" />
+              </button>
+            ) : null}
             <span className="text-xs font-bold text-slate-900">
               Staff Workspace
             </span>
@@ -263,13 +282,13 @@ export function StaffShell({ profile, children }: StaffShellProps) {
         </header>
 
         {/* Page Content Body (with bottom padding for mobile nav) */}
-        <main className="portal-page-content flex-1 px-3.5 py-[1.125rem] sm:px-6 lg:px-[1.625rem] lg:py-[1.625rem] pb-20 lg:pb-8 max-w-[1600px] w-full mx-auto">
+        <main className="portal-page-content flex-1 px-4 py-3.5 sm:px-6 lg:px-[1.625rem] lg:py-[1.625rem] pb-20 lg:pb-8 max-w-[1600px] w-full mx-auto">
           {children}
         </main>
 
         {/* Mobile Bottom Navigation Bar (Clean & Professional) */}
         <nav className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-sm lg:hidden">
-          <div className="grid grid-cols-4 h-16 max-w-lg mx-auto">
+          <div className="grid h-[3.625rem] max-w-md grid-cols-4 mx-auto">
             {MOBILE_BOTTOM_NAV.map((item) => {
               const isActive = item.exact
                 ? pathname === item.href
@@ -287,6 +306,7 @@ export function StaffShell({ profile, children }: StaffShellProps) {
                       : 'text-slate-500 hover:text-slate-800 font-medium'
                   )}
                 >
+                  <NavigationProgress />
                   <Icon
                     className={cn(
                       'size-5',

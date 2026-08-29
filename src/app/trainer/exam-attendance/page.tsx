@@ -19,8 +19,10 @@ export default async function TrainerExamAttendancePage() {
       </div>
 
       {units.length === 0 ? (
-        <Card className="p-5 text-sm text-text-muted">
-          No Unit Markbooks are currently assigned to you.
+        <Card className="p-8 text-center text-sm text-text-muted">
+          <ClipboardCheck className="mx-auto size-8 text-text-muted" aria-hidden="true" />
+          <p className="mt-3 text-sm font-bold text-text-primary">No assigned units</p>
+          <p className="mt-1 text-xs text-text-muted">No Unit Markbooks are currently assigned to you.</p>
         </Card>
       ) : (
         <div className="grid gap-3 md:grid-cols-2">
@@ -35,7 +37,6 @@ export default async function TrainerExamAttendancePage() {
                     <div className="min-w-0">
                       <p className="text-xs font-semibold text-text-muted">{unit.unitCode}</p>
                       <h2 className="mt-0.5 truncate text-sm font-bold text-text-primary">{unit.unitName}</h2>
-                      <p className="mt-1 text-xs text-text-muted">{unit.academicPeriodName}</p>
                     </div>
                     <Badge variant={locked || complete ? 'success' : 'neutral'}>
                       {locked ? 'Locked' : complete ? 'Confirmed' : 'Pending'}

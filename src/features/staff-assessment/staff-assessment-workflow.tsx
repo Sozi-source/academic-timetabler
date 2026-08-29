@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  useRef,
   useState,
 } from 'react';
 import {
@@ -13,7 +12,6 @@ import {
   FileCheck2,
   Keyboard,
   LoaderCircle,
-  Upload,
   UserX,
 } from 'lucide-react';
 
@@ -26,7 +24,6 @@ import {
   canDownloadStaffSigningSheet,
   canEditStaffAttendance,
   canGenerateStaffPopulation,
-  canStageStaffMarkbook,
   canUseStaffOnlineMarks,
 } from './workflow-domain';
 
@@ -125,11 +122,6 @@ export function StaffAssessmentWorkflow({
   const router =
     useRouter();
 
-  const fileRef =
-    useRef<HTMLInputElement>(
-      null,
-    );
-
   const [
     busy,
     setBusy,
@@ -177,12 +169,6 @@ export function StaffAssessmentWorkflow({
     canDownloadStaffSigningSheet(
       state,
     );
-
-  const canStage =
-    canStageStaffMarkbook(
-      state,
-    );
-
 
   const canOnline =
     canUseStaffOnlineMarks({
@@ -407,80 +393,6 @@ export function StaffAssessmentWorkflow({
     }
   }
 
-  async function stageWorkbook(
-    file: File,
-  ) {
-    setBusy(
-      'stage',
-    );
-
-    setMessage(
-      null,
-    );
-
-    try {
-      const form =
-        new FormData();
-
-      form.set(
-        'file',
-        file,
-      );
-
-      const response =
-        await fetch(
-          `/api/staff/assessment/${assessmentId}/stage`,
-          {
-            method:
-              'POST',
-            body:
-              form,
-          },
-        );
-
-      const payload =
-        await response
-          .json()
-          .catch(
-            () => null,
-          );
-
-      if (
-        !response.ok ||
-        !payload?.batchId
-      ) {
-        const firstIssue =
-          payload?.issues?.[0]
-            ?.message;
-
-        setMessage(
-          firstIssue ??
-          payload?.message ??
-          'Workbook could not be staged.',
-        );
-
-        return;
-      }
-
-      router.push(
-        `/staff/marks/staged/${payload.batchId}?allocationId=${encodeURIComponent(
-          allocationId,
-        )}`,
-      );
-    } finally {
-      setBusy(
-        null,
-      );
-
-      if (
-        fileRef.current
-      ) {
-        fileRef.current.value =
-          '';
-      }
-    }
-  }
-
   return (
     <section className="space-y-4">
       <div className="rounded-xl border border-border bg-white px-4 py-4">
@@ -488,7 +400,7 @@ export function StaffAssessmentWorkflow({
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-sm font-semibold text-text-primary">
-                Assessment workflow
+                Marks
               </h2>
 
               <Badge variant="neutral">
@@ -506,9 +418,7 @@ export function StaffAssessmentWorkflow({
             </div>
 
             <p className="mt-1 text-[11px] leading-5 text-text-muted">
-              Population, absence,
-              markbook and result import
-              for this allocated unit.
+              Confirm the class list, enter marks, then submit.
             </p>
           </div>
 
@@ -540,31 +450,22 @@ export function StaffAssessmentWorkflow({
 
                 {students.length >
                 0
-                  ? 'Refresh population'
-                  : 'Generate population'}
+                  ? 'Refresh class list'
+                  : 'Load class list'}
               </button>
             ) : null}
 
-            <button
-              type="button"
-              disabled={
-                !canDownload ||
-                busy !==
-                  null
-              }
-              onClick={() =>
-                void downloadWorkbook(
-                  'markbook',
-                )
-              }
-              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-header-blue px-3 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <Download
-                className="size-3.5"
-                aria-hidden="true"
-              />
-              Markbook
-            </button>
+            {assessmentType === 'exam' ? (
+              <button
+                type="button"
+                disabled={!canDownload || busy !== null}
+                onClick={() => void downloadWorkbook('markbook')}
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Download className="size-3.5" aria-hidden="true" />
+                Download Excel
+              </button>
+            ) : null}
 
             <button
               type="button"
@@ -599,7 +500,7 @@ export function StaffAssessmentWorkflow({
                 onClick={() =>
                   void openOnlineMarks()
                 }
-                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-white transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {busy ===
                 'online' ? (
@@ -613,59 +514,10 @@ export function StaffAssessmentWorkflow({
                     aria-hidden="true"
                   />
                 )}
-                Online marks
+                Enter marks
               </button>
             ) : null}
 
-            <input
-              ref={
-                fileRef
-              }
-              type="file"
-              accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-              className="hidden"
-              onChange={(
-                event,
-              ) => {
-                const file =
-                  event.target
-                    .files?.[0];
-
-                if (file) {
-                  void stageWorkbook(
-                    file,
-                  );
-                }
-              }}
-            />
-
-            <button
-              type="button"
-              disabled={
-                !canStage ||
-                busy !==
-                  null
-              }
-              onClick={() =>
-                fileRef.current
-                  ?.click()
-              }
-              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {busy ===
-              'stage' ? (
-                <LoaderCircle
-                  className="size-3.5 animate-spin"
-                  aria-hidden="true"
-                />
-              ) : (
-                <Upload
-                  className="size-3.5"
-                  aria-hidden="true"
-                />
-              )}
-              Upload marks
-            </button>
           </div>
         </div>
 
@@ -673,8 +525,7 @@ export function StaffAssessmentWorkflow({
           <p className="mt-3 text-[11px] text-text-muted">
             Maximum and pass marks must
             be configured by the HOD
-            before a completed markbook
-            can be staged.
+            before marks can be submitted.
           </p>
         ) : null}
 
@@ -694,12 +545,11 @@ export function StaffAssessmentWorkflow({
         <div className="flex items-center justify-between gap-3">
           <div>
             <h2 className="text-sm font-semibold text-text-primary">
-              Assessment roster
+              Class list
             </h2>
 
             <p className="mt-1 text-[11px] text-text-muted">
-              Mark absence before the
-              first markbook download.
+              Mark exam absences before entering marks.
             </p>
           </div>
 
@@ -714,7 +564,7 @@ export function StaffAssessmentWorkflow({
         0 ? (
           <div className="rounded-xl border border-border bg-white px-4 py-8 text-center">
             <p className="text-xs font-semibold text-text-primary">
-              Population not generated
+              Class list not loaded
             </p>
           </div>
         ) : (

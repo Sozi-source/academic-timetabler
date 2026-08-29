@@ -53,7 +53,7 @@ export function AttendanceScheduleList({
   items: ClassAttendanceScheduleItem[];
 }) {
   const router = useRouter();
-  const today = useMemo(localDateValue, []);
+  const today = useMemo(() => localDateValue(), []);
   const [selectedDate, setSelectedDate] = useState<string>(today);
   const [viewAll, setViewAll] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
@@ -207,7 +207,7 @@ export function AttendanceScheduleList({
             No classes scheduled for {formattedSelectedDate}
           </p>
           <p className="mt-1 text-xs text-text-muted">
-            You don't have any timetable sessions scheduled on {selectedWeekday}s.
+            You don&apos;t have any timetable sessions scheduled on {selectedWeekday}s.
           </p>
           <div className="mt-4 flex justify-center gap-2">
             <Button
@@ -234,7 +234,7 @@ export function AttendanceScheduleList({
                       {item.unitName}
                     </p>
                     <p className="mt-0.5 text-[11px] text-text-muted">
-                      {item.cohortName} · {item.academicPeriodName}
+                      {item.cohortName}
                     </p>
                   </div>
 

@@ -51,7 +51,7 @@ export default async function TrainerDailyReportPage({
       <PageHeader
         eyebrow="Daily teaching record"
         title="Daily Report"
-        description="Scheduled lessons, absentees and brief operational notes."
+        description="Lessons, absences, and notes."
         icon={ClipboardCheck}
         backHref="/staff"
         backLabel="Staff Portal"

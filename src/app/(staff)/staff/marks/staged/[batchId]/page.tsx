@@ -123,13 +123,12 @@ export default async function StaffStagedMarkbookPage({
         }
       />
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="portal-metric-grid" data-columns="4">
         <MetricCard
           label="Rows"
           value={String(
             staged.totalRows,
           )}
-          description="Validated workbook rows"
           icon={FileSpreadsheet}
           status="Population"
         />
@@ -139,7 +138,6 @@ export default async function StaffStagedMarkbookPage({
           value={String(
             staged.numericMarks,
           )}
-          description="Numeric results"
           icon={FileSpreadsheet}
           status="Results"
         />
@@ -149,7 +147,6 @@ export default async function StaffStagedMarkbookPage({
           value={String(
             staged.absences,
           )}
-          description="Explicit AB"
           icon={FileSpreadsheet}
           status="Attendance"
         />
@@ -159,7 +156,6 @@ export default async function StaffStagedMarkbookPage({
           value={String(
             staged.missingMarks,
           )}
-          description="Must be zero to commit"
           icon={FileSpreadsheet}
           status="Validation"
         />

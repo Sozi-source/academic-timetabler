@@ -1,9 +1,9 @@
 'use client';
 
-import { BookOpenCheck, CalendarCheck2, CalendarDays, ClipboardCheck, FileText, GraduationCap, LayoutDashboard, LogOut, Menu, UserRound, X } from 'lucide-react';
+import { ArrowLeft, BookOpenCheck, CalendarCheck2, CalendarDays, ClipboardCheck, FileText, GraduationCap, LayoutDashboard, LogOut, Menu, UserRound, X } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import Link, { useLinkStatus } from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 
@@ -21,8 +21,14 @@ const navigation: readonly NavigationItem[] = [
 const bottomNavigation = [navigation[0], navigation[2], navigation[4]];
 const initials = (name: string) => name.trim().split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase()).join('');
 
+function NavigationProgress() {
+  const { pending } = useLinkStatus();
+  return pending ? <span className="portal-route-progress" aria-hidden="true" /> : null;
+}
+
 export function StudentPortalShell({ student, children }: { student: StudentPortalIdentity; children: ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const studentInitials = initials(student.fullName) || 'ST';
   const isActive = (href: string) => pathname === href || (href !== '/student' && pathname.startsWith(`${href}/`));
@@ -42,7 +48,7 @@ export function StudentPortalShell({ student, children }: { student: StudentPort
         <p className="mb-2 px-3 text-[0.625rem] font-bold uppercase tracking-[0.08em] text-white/55">Academics</p>
         <div className="space-y-1">{navigation.map((item) => { const active = isActive(item.href); const Icon = item.icon; return (
           <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} className={cn('relative flex min-h-11 items-center gap-3 rounded-lg border-l-[3px] px-3 text-sm font-medium transition-all duration-200 active:scale-[.98]', active ? 'border-l-[#ffd400] bg-white/13 text-white' : 'border-l-transparent text-white/80 hover:bg-white/8 hover:text-white')}>
-            <span className="flex size-8 items-center justify-center rounded-lg text-white/80"><Icon className="size-[1.05rem]" /></span><span>{item.label}</span>
+            <NavigationProgress /><span className="flex size-8 items-center justify-center rounded-lg text-white/80"><Icon className="size-[1.05rem]" /></span><span>{item.label}</span>
           </Link>
         ); })}</div>
       </nav>
@@ -62,13 +68,13 @@ export function StudentPortalShell({ student, children }: { student: StudentPort
       <div className={cn('relative h-full w-[19rem] max-w-[86vw] shadow-2xl transition-transform duration-300 ease-out', mobileOpen ? 'translate-x-0' : '-translate-x-full')}>{sidebar}<button type="button" onClick={() => setMobileOpen(false)} aria-label="Close navigation" className="absolute right-3 top-3 flex size-10 items-center justify-center rounded-xl bg-white/10 text-white transition active:scale-95"><X className="size-5" /></button></div>
     </div>
     <div className="min-w-0 lg:pl-[14.75rem]">
-      <header className="sticky top-0 z-30 flex h-[4.625rem] items-center justify-between border-b border-border bg-surface/95 px-4 shadow-sm backdrop-blur-xl sm:px-6">
-        <div className="flex min-w-0 items-center gap-3"><button type="button" onClick={() => setMobileOpen(true)} aria-label="Open navigation" className="flex size-[2.625rem] shrink-0 items-center justify-center rounded-[0.625rem] border border-border bg-surface text-primary-deep shadow-sm transition active:scale-95 lg:hidden"><Menu className="size-5" /></button><div className="min-w-0"><p className="text-[0.625rem] font-semibold uppercase tracking-[0.08em] text-text-muted">Student workspace</p><p className="truncate text-sm font-semibold text-text-primary">{student.fullName}</p></div></div>
-        <span className="flex size-9 items-center justify-center rounded-full bg-[#fff8cc] text-xs font-bold text-[#0b4f4a] ring-2 ring-white">{studentInitials}</span>
+      <header className="sticky top-0 z-30 flex h-[3.625rem] items-center justify-between border-b border-border bg-surface/95 px-3.5 shadow-sm backdrop-blur-xl sm:px-6 lg:h-[4.625rem]">
+        <div className="flex min-w-0 items-center gap-2.5"><button type="button" onClick={() => setMobileOpen(true)} aria-label="Open navigation" className="flex size-9 shrink-0 items-center justify-center rounded-[0.625rem] border border-border bg-surface text-primary-deep shadow-sm transition active:scale-95 lg:hidden"><Menu className="size-[1.125rem]" /></button>{pathname !== '/student' ? <button type="button" onClick={() => router.back()} aria-label="Go back" title="Back" className="flex size-9 shrink-0 items-center justify-center rounded-[0.625rem] border border-border bg-surface text-primary-deep shadow-sm transition hover:bg-primary-subtle active:scale-95"><ArrowLeft className="size-[1.125rem]" /></button> : null}<div className="min-w-0"><p className="text-[0.5625rem] font-semibold uppercase tracking-[0.08em] text-text-muted">Student workspace</p><p className="truncate text-xs font-semibold text-text-primary sm:text-sm">{student.fullName}</p></div></div>
+        <span className="flex size-8 items-center justify-center rounded-full bg-[#fff8cc] text-[0.625rem] font-bold text-[#0b4f4a] ring-2 ring-white lg:size-9 lg:text-xs">{studentInitials}</span>
       </header>
-      <main className="portal-page-content mx-auto w-full max-w-7xl px-3.5 py-[1.125rem] pb-24 sm:px-6 sm:py-7 lg:px-[1.625rem] lg:pb-8">{children}</main>
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_rgba(11,79,74,.08)] backdrop-blur-xl lg:hidden"><div className="mx-auto grid h-16 max-w-xl grid-cols-4">
-        {bottomNavigation.map((item) => { const active = isActive(item.href); const Icon = item.icon; return <Link key={item.href} href={item.href} className={cn('relative flex flex-col items-center justify-center gap-1 text-[0.625rem] font-semibold transition active:scale-95', active ? 'text-primary' : 'text-text-muted')}>{active ? <span className="absolute top-0 h-0.5 w-8 rounded-full bg-[#ffd400]" /> : null}<Icon className={cn('size-[1.125rem]', active && 'stroke-[2.5]')} /><span className="max-w-[4.5rem] truncate">{item.label}</span></Link>; })}
+      <main className="portal-page-content mx-auto w-full max-w-7xl px-4 py-3.5 pb-20 sm:px-6 sm:py-7 lg:px-[1.625rem] lg:pb-8">{children}</main>
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_rgba(11,79,74,.08)] backdrop-blur-xl lg:hidden"><div className="mx-auto grid h-[3.625rem] max-w-md grid-cols-4">
+        {bottomNavigation.map((item) => { const active = isActive(item.href); const Icon = item.icon; return <Link key={item.href} href={item.href} className={cn('relative flex flex-col items-center justify-center gap-1 text-[0.625rem] font-semibold transition active:scale-95', active ? 'text-primary' : 'text-text-muted')}><NavigationProgress />{active ? <span className="absolute top-0 h-0.5 w-8 rounded-full bg-[#ffd400]" /> : null}<Icon className={cn('size-[1.125rem]', active && 'stroke-[2.5]')} /><span className="max-w-[4.5rem] truncate">{item.label}</span></Link>; })}
         <button type="button" onClick={() => setMobileOpen(true)} className="flex flex-col items-center justify-center gap-1 text-[0.625rem] font-semibold text-text-muted transition active:scale-95" aria-label="Open more navigation"><Menu className="size-[1.125rem]" /><span>More</span></button>
       </div></nav>
     </div>

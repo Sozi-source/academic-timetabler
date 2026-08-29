@@ -81,10 +81,10 @@ function LessonList({
       </div>
 
       <div className="divide-y divide-border">
-        {lessons.map((lesson) => {
+        {lessons.map((lesson, index) => {
           const absentees = lesson?.absentees ?? [];
           return (
-            <article key={lesson.scheduledSessionId || Math.random()} className="p-4">
+            <article key={lesson.scheduledSessionId || `lesson-${index}`} className="p-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
                   <p className="text-xs font-semibold text-text-primary">

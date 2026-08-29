@@ -28,6 +28,7 @@ import {
   missingOnlineComponentCount,
   onlineMarkComponents,
   parseOnlineMarkInput,
+  type OnlineMarkComponentKey,
   type OnlineMarkValues,
 } from './online-marks-domain';
 
@@ -156,6 +157,16 @@ export function OnlineMarksEditor({
     >(
       null,
     );
+
+  const [visibleComponent, setVisibleComponent] =
+    useState<'all' | OnlineMarkComponentKey>('all');
+
+  const visibleComponents =
+    visibleComponent === 'all'
+      ? onlineMarkComponents
+      : onlineMarkComponents.filter(
+          (component) => component.key === visibleComponent,
+        );
 
   const editable =
     canEditOnlineMarks(
@@ -593,15 +604,40 @@ export function OnlineMarksEditor({
         </div>
       </section>
 
+      <section className="rounded-xl border border-border bg-white p-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="mr-1 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+            Enter
+          </span>
+          <button
+            type="button"
+            onClick={() => setVisibleComponent('all')}
+            className={visibleComponent === 'all' ? 'h-8 rounded-lg bg-primary px-3 text-[11px] font-semibold text-white' : 'h-8 rounded-lg border border-border px-3 text-[11px] font-semibold text-text-secondary'}
+          >
+            All marks
+          </button>
+          {onlineMarkComponents.map((component) => (
+            <button
+              key={component.key}
+              type="button"
+              onClick={() => setVisibleComponent(component.key)}
+              className={visibleComponent === component.key ? 'h-8 rounded-lg bg-primary px-3 text-[11px] font-semibold text-white' : 'h-8 rounded-lg border border-border px-3 text-[11px] font-semibold text-text-secondary'}
+            >
+              {component.label}
+            </button>
+          ))}
+        </div>
+      </section>
+
       <section className="overflow-x-auto rounded-xl border border-border bg-white">
-        <table className="w-full min-w-[930px] border-collapse text-left">
+        <table className={visibleComponent === 'all' ? 'w-full min-w-[930px] border-collapse text-left' : 'w-full min-w-[28rem] border-collapse text-left'}>
           <thead className="bg-surface-subtle">
             <tr className="border-b border-border text-[10px] font-bold uppercase tracking-wide text-text-muted">
               <th className="px-3 py-2.5">
                 Student
               </th>
 
-              {onlineMarkComponents.map(
+              {visibleComponents.map(
                 (component) => (
                   <th
                     key={
@@ -620,13 +656,12 @@ export function OnlineMarksEditor({
                 ),
               )}
 
-              <th className="px-2 py-2.5 text-center">
-                RAT/CAT /15
-              </th>
-
-              <th className="px-3 py-2.5 text-center">
-                Total /100
-              </th>
+              {visibleComponent === 'all' ? (
+                <>
+                  <th className="px-2 py-2.5 text-center">RAT/CAT /15</th>
+                  <th className="px-3 py-2.5 text-center">Total /100</th>
+                </>
+              ) : null}
             </tr>
           </thead>
 
@@ -663,34 +698,8 @@ export function OnlineMarksEditor({
                     ) : null}
                   </td>
 
-                  {(
-                    [
-                      [
-                        'assignment',
-                        5,
-                      ],
-                      [
-                        'presentation',
-                        10,
-                      ],
-                      [
-                        'rat',
-                        15,
-                      ],
-                      [
-                        'cat',
-                        15,
-                      ],
-                      [
-                        'exam',
-                        70,
-                      ],
-                    ] as const
-                  ).map(
-                    ([
-                      key,
-                      maximum,
-                    ]) => {
+                  {visibleComponents.map(
+                    ({ key, maximum }) => {
                       const field =
                         row.fields[
                           key
@@ -769,26 +778,16 @@ export function OnlineMarksEditor({
                     },
                   )}
 
-                  <td className="px-2 py-3 text-center text-xs font-semibold text-text-secondary">
-                    {row.ratCatAverage ===
-                    null
-                      ? '—'
-                      : row.ratCatAverage.toFixed(
-                          2,
-                        )}
-                  </td>
-
-                  <td className="px-3 py-3 text-center text-sm font-bold text-text-primary">
-                    {row.student.attendanceStatus ===
-                    'absent'
-                      ? 'AB'
-                      : row.total ===
-                          null
-                        ? '—'
-                        : row.total.toFixed(
-                            2,
-                          )}
-                  </td>
+                  {visibleComponent === 'all' ? (
+                    <>
+                      <td className="px-2 py-3 text-center text-xs font-semibold text-text-secondary">
+                        {row.ratCatAverage === null ? '—' : row.ratCatAverage.toFixed(2)}
+                      </td>
+                      <td className="px-3 py-3 text-center text-sm font-bold text-text-primary">
+                        {row.student.attendanceStatus === 'absent' ? 'AB' : row.total === null ? '—' : row.total.toFixed(2)}
+                      </td>
+                    </>
+                  ) : null}
                 </tr>
               ),
             )}

@@ -1,8 +1,4 @@
 import {
-  ArrowLeft,
-} from 'lucide-react';
-import Link from 'next/link';
-import {
   notFound,
 } from 'next/navigation';
 
@@ -40,14 +36,6 @@ export default async function RecordOfWorkPage({
 
   return (
     <div className="space-y-4">
-      <Link
-        href={`/staff/units/${allocationId}/documents`}
-        className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary"
-      >
-        <ArrowLeft className="size-3.5" />
-        Teaching Documents
-      </Link>
-
       <OnlineRecordOfWorkManager
         context={context}
       />

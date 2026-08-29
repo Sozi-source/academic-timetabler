@@ -6,6 +6,9 @@ import type {
   AssessmentMarkbookBundle,
   AssessmentMarkbookCohort,
 } from './markbook-generator';
+import {
+  getStaffOnlineMarkState,
+} from '@/features/staff-assessment/online-marks-query';
 
 type UnknownRow =
   Record<string, unknown>;
@@ -148,6 +151,7 @@ export async function loadAssessmentMarkbookBundle({
     rosterResult,
     periodResult,
     unitResult,
+    onlineMarks,
   ] = await Promise.all([
     supabase
       .from(
@@ -182,6 +186,10 @@ export async function loadAssessmentMarkbookBundle({
         unitId,
       )
       .maybeSingle(),
+
+    getStaffOnlineMarkState(
+      rootAssessmentId,
+    ),
   ]);
 
   const error =
@@ -343,6 +351,20 @@ export async function loadAssessmentMarkbookBundle({
       AssessmentMarkbookCohort
     >();
 
+  const marksByStudent =
+    new Map(
+      onlineMarks.map((marks) => [
+        marks.studentId,
+        {
+          assignment: marks.assignment,
+          presentation: marks.presentation,
+          rat: marks.rat,
+          cat: marks.cat,
+          exam: marks.exam,
+        },
+      ]),
+    );
+
   for (
     const row of rosterRows
   ) {
@@ -428,6 +450,16 @@ export async function loadAssessmentMarkbookBundle({
         ) === 'absent'
           ? 'absent'
           : 'expected',
+      marks:
+        marksByStudent.get(
+          studentId,
+        ) ?? {
+          assignment: null,
+          presentation: null,
+          rat: null,
+          cat: null,
+          exam: null,
+        },
     });
 
     groups.set(

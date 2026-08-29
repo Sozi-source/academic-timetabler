@@ -71,10 +71,6 @@ export default async function StudentAttendancePage() {
       <div className="space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
-              Completed classes only
-            </p>
-
             <h1 className="mt-1 text-xl font-bold text-text-primary">
               Attendance
             </h1>
@@ -94,13 +90,12 @@ export default async function StudentAttendancePage() {
           </Badge>
         </div>
 
-        <section className="grid gap-3 sm:grid-cols-3">
+        <section className="portal-metric-grid" data-columns="3">
           <MetricCard
             label="Attendance rate"
             value={attendanceRateLabel(
               attendance.attendanceRate,
             )}
-            description="Completed class records"
             icon={CalendarCheck2}
           />
 
@@ -109,7 +104,6 @@ export default async function StudentAttendancePage() {
             value={String(
               attendance.presentCount,
             )}
-            description="Recorded present"
             icon={CalendarCheck2}
           />
 
@@ -118,7 +112,6 @@ export default async function StudentAttendancePage() {
             value={String(
               attendance.absentCount,
             )}
-            description="Recorded absent"
             icon={CalendarCheck2}
           />
         </section>
@@ -128,7 +121,7 @@ export default async function StudentAttendancePage() {
           <EmptyState
             icon={CalendarCheck2}
             title="No completed attendance"
-            description="Your completed class attendance will appear here after it is recorded by the trainer."
+            description="Recorded classes will appear here."
           />
         ) : (
           <>

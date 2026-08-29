@@ -30,9 +30,67 @@
   background: var(--background);
 }
 
+/* Keep portal summaries compact and app-like on phones. */
+.academic-portal .portal-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+}
+
+.academic-portal .portal-metric-grid > :last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+.academic-portal .portal-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+}
+
+.academic-portal .portal-card-grid > :last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 640px) {
+  .academic-portal .portal-metric-grid {
+    gap: 0.75rem;
+  }
+
+  .academic-portal .portal-card-grid {
+    gap: 0.75rem;
+  }
+
+  .academic-portal .portal-metric-grid[data-columns='3'] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .academic-portal .portal-metric-grid[data-columns='4'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .academic-portal .portal-metric-grid > :last-child:nth-child(odd) {
+    grid-column: auto;
+  }
+
+  .academic-portal .portal-card-grid[data-columns='3'] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .academic-portal .portal-card-grid > :last-child:nth-child(odd) {
+    grid-column: auto;
+  }
+}
+
+@media (min-width: 1280px) {
+  .academic-portal .portal-metric-grid[data-columns='4'] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 .academic-portal main {
   font-size: 0.875rem;
   line-height: 1.5;
+  font-variant-numeric: tabular-nums;
 }
 
 .academic-portal .portal-page-content > :where(div, section) {
@@ -61,6 +119,10 @@
   letter-spacing: -0.015em;
 }
 
+.academic-portal main :where(h1, h2, h3, strong, th) { font-weight: 600; }
+.academic-portal main :where(label, button, a) { font-weight: 500; }
+.academic-portal main :where(p, td, dd) { text-wrap: pretty; }
+
 .academic-portal main :where(section, article, div)[class~="bg-white"],
 .academic-portal main :where(section, article, div)[class~="bg-surface"] {
   background-color: var(--surface);
@@ -82,6 +144,12 @@
 
 .academic-portal main :where(a, button)[class*="rounded-xl"] {
   border-radius: 0.5625rem;
+}
+
+.academic-portal main :where(a, button):active { transform: scale(0.985); }
+.academic-portal main :where(a, button):focus-visible {
+  outline: 2px solid var(--focus-border);
+  outline-offset: 2px;
 }
 
 .academic-portal main :where(a, button)[class*="bg-primary"] {
@@ -133,6 +201,58 @@
   box-shadow: 0 2px 8px rgb(11 79 74 / 0.055);
 }
 
+.academic-portal main svg { stroke-width: 1.8; }
+.academic-portal main :where(button, a):hover svg { stroke-width: 2; }
+
+.academic-portal main [class*="rounded-full"][class*="border"] {
+  min-height: 1.375rem;
+  padding-inline: 0.5rem;
+  font-size: 0.625rem;
+  box-shadow: none;
+}
+
+.academic-portal main [class*="border-dashed"] {
+  background: var(--surface);
+  border-color: var(--border-strong);
+}
+
+.academic-portal main [class*="border-dashed"] > :first-child {
+  box-shadow: none;
+}
+
+.academic-portal .portal-skeleton > div,
+.academic-portal .portal-skeleton article {
+  position: relative;
+  overflow: hidden;
+}
+
+.academic-portal .portal-skeleton > div::after,
+.academic-portal .portal-skeleton article::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 20%, rgb(15 118 110 / 0.055) 45%, transparent 70%);
+  transform: translateX(-100%);
+  animation: portal-skeleton-sheen 1.35s ease-in-out infinite;
+}
+
+.portal-route-progress {
+  position: fixed;
+  z-index: 100;
+  inset: 0 auto auto 0;
+  width: 38%;
+  height: 3px;
+  background: var(--institutional-yellow);
+  box-shadow: 0 0 8px rgb(255 212 0 / 0.55);
+  animation: portal-route-progress 1s ease-in-out infinite;
+}
+
+@keyframes portal-skeleton-sheen { to { transform: translateX(100%); } }
+@keyframes portal-route-progress {
+  0% { transform: translateX(-110%); }
+  70%, 100% { transform: translateX(265%); }
+}
+
 .academic-portal main [class~="text-teal-900"],
 .academic-portal main [class~="text-teal-800"],
 .academic-portal main [class~="text-teal-700"] {
@@ -150,11 +270,69 @@
 }
 
 @media (max-width: 680px) {
-  .academic-portal main { font-size: 0.8125rem; }
-  .academic-portal main :where(section, article)[class*="rounded-xl"] { border-radius: 0.75rem; }
+  .academic-portal .portal-page-content {
+    width: 100%;
+    max-width: 29rem;
+    margin-inline: auto;
+  }
+
+  .academic-portal main {
+    font-size: 0.75rem;
+    line-height: 1.42;
+  }
+
+  .academic-portal main h1 { font-size: 1rem; line-height: 1.3; }
+  .academic-portal main h2 { font-size: 0.875rem; line-height: 1.35; }
+  .academic-portal main h3 { font-size: 0.8125rem; line-height: 1.35; }
+  .academic-portal main p { line-height: 1.42; }
+
+  .academic-portal main :where(section, article)[class*="rounded-xl"],
+  .academic-portal main :where(section, article)[class*="rounded-2xl"] {
+    border-radius: 0.75rem;
+  }
+
+  .academic-portal main :where(section, article)[class*="border"] {
+    box-shadow: 0 2px 7px rgb(11 79 74 / 0.045);
+  }
+
+  .academic-portal main [class~="p-5"] { padding: 0.875rem; }
+  .academic-portal main [class~="p-4"] { padding: 0.75rem; }
+  .academic-portal main [class~="p-3"] { padding: 0.6875rem; }
+  .academic-portal main [class~="px-5"] { padding-inline: 0.875rem; }
+  .academic-portal main [class~="px-4"] { padding-inline: 0.75rem; }
+  .academic-portal main [class~="py-4"] { padding-block: 0.75rem; }
+  .academic-portal main [class~="py-3"] { padding-block: 0.6875rem; }
+
+  .academic-portal main :where(button, a)[class*="h-11"] { height: 2.375rem; }
+  .academic-portal main :where(button, a)[class*="h-10"] { height: 2.25rem; }
+  .academic-portal main :where(button, a)[class*="h-9"] { height: 2.125rem; }
+  .academic-portal main :where(input, select) { min-height: 2.25rem; font-size: 0.75rem; }
+  .academic-portal main textarea { font-size: 0.75rem; }
+
+  .academic-portal main [class~="text-sm"] { font-size: 0.75rem; }
+  .academic-portal main [class~="text-xs"] { font-size: 0.6875rem; }
+  .academic-portal main [class~="text-lg"] { font-size: 1rem; }
+  .academic-portal main [class~="text-xl"] { font-size: 1.125rem; }
+  .academic-portal main [class~="text-2xl"] { font-size: 1.25rem; }
+
   .academic-portal main table { min-width: 42rem; }
   .academic-portal .portal-page-content > [class*="space-y"] { row-gap: 0.875rem; }
-  .academic-portal .portal-page-content :where(header)[class~="rounded-xl"] { padding: 0.875rem; }
+  .academic-portal .portal-page-content :where(header)[class~="rounded-xl"] { padding: 0.75rem; }
+  .academic-portal .portal-page-content :where(header)[class~="rounded-xl"] [class*="size-9"] { width: 2rem; height: 2rem; }
+
+  .academic-portal main form[class*="rounded"]:has(select) {
+    position: sticky;
+    top: 3.875rem;
+    z-index: 15;
+    background: rgb(255 255 255 / 0.94);
+    backdrop-filter: blur(14px);
+  }
+}
+
+@media (max-width: 420px) {
+  .academic-portal .portal-page-content { max-width: 25rem; }
+  .academic-portal main [class~="gap-4"] { gap: 0.75rem; }
+  .academic-portal main [class~="gap-3"] { gap: 0.625rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -4,9 +4,6 @@ import {
 import Link from 'next/link';
 
 import {
-  Badge,
-} from '@/components/ui/badge';
-import {
   PageHeader,
 } from '@/components/ui/page-header';
 import {
@@ -19,7 +16,6 @@ import type { StaffUnitAllocation } from '@/features/staff-assessment/types';
 
 type GroupedUnit = StaffUnitAllocation & {
   cohortNames: string[];
-  allocations: StaffUnitAllocation[];
 };
 
 function groupAllocationsByUnit(
@@ -36,7 +32,6 @@ function groupAllocationsByUnit(
     const existing = groups.get(key);
 
     if (existing) {
-      existing.allocations.push(allocation);
       if (!existing.cohortNames.includes(allocation.cohortName)) {
         existing.cohortNames.push(allocation.cohortName);
       }
@@ -46,47 +41,10 @@ function groupAllocationsByUnit(
     groups.set(key, {
       ...allocation,
       cohortNames: [allocation.cohortName],
-      allocations: [allocation],
     });
   }
 
   return [...groups.values()];
-}
-
-function groupedAssessmentStatus(
-  allocations: StaffUnitAllocation[],
-  type: 'cat' | 'exam',
-): string | null {
-  const statuses = allocations.map((allocation) =>
-    allocation[type]?.workflowStatus ?? null,
-  );
-  const unique = new Set(statuses);
-  return unique.size === 1 ? statuses[0] : 'Mixed';
-}
-
-function assessmentBadge(
-  label: string,
-  status:
-    | string
-    | null,
-) {
-  return (
-    <Badge
-      variant={
-        status ===
-        'finalised' ||
-        status ===
-        'submitted'
-          ? 'success'
-          : 'neutral'
-      }
-    >
-      {label}: {
-        status ??
-        'Not created'
-      }
-    </Badge>
-  );
 }
 
 export default async function StaffUnitsPage() {
@@ -104,20 +62,18 @@ export default async function StaffUnitsPage() {
       <PageHeader
         eyebrow="Staff"
         title="My Units"
-        description="Teaching Allocations assigned to you."
+        description="Your teaching allocations."
         icon={BookOpenCheck}
       />
 
-      {workspace.allocations.length ===
-      0 ? (
-        <section className="rounded-xl border border-border bg-white px-5 py-10 text-center">
-          <p className="text-sm font-semibold text-text-primary">
+      {workspace.allocations.length === 0 ? (
+        <section className="rounded-xl border border-border bg-white px-5 py-12 text-center">
+          <BookOpenCheck className="mx-auto size-8 text-text-muted" aria-hidden="true" />
+          <p className="mt-3 text-sm font-bold text-text-primary">
             No allocated units
           </p>
-
-          <p className="mt-1 text-xs text-text-muted">
-            Your active Teaching
-            Allocations will appear here.
+          <p className="mx-auto mt-1 max-w-sm text-xs text-text-muted">
+            Your active teaching allocations will appear here once assigned by the department.
           </p>
         </section>
       ) : (
@@ -128,7 +84,7 @@ export default async function StaffUnitsPage() {
               href={`/staff/units/${allocation.allocationId}`}
               className="block rounded-xl border border-border border-l-4 border-l-primary bg-surface px-5 py-4 shadow-xs transition hover:border-l-institutional-yellow hover:border-border-strong hover:bg-primary-subtle hover:shadow-sm"
             >
-              <div className="grid gap-3 lg:grid-cols-[minmax(0,1.5fr)_minmax(10rem,.8fr)_auto] lg:items-center">
+              <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-black text-slate-950">
                     {allocation.unitName}
@@ -136,8 +92,6 @@ export default async function StaffUnitsPage() {
 
                   <p className="mt-1 text-[11px] font-bold text-slate-500">
                     {allocation.cohortNames.join(' + ')}
-                    {' · '}
-                    <span className="text-primary">{allocation.academicPeriodName}</span>
                   </p>
                 </div>
 
@@ -147,17 +101,6 @@ export default async function StaffUnitsPage() {
                   </span>
                 </p>
 
-                <div className="flex flex-wrap gap-1.5">
-                  {assessmentBadge(
-                    'CAT',
-                    groupedAssessmentStatus(allocation.allocations, 'cat'),
-                  )}
-
-                  {assessmentBadge(
-                    'Exam',
-                    groupedAssessmentStatus(allocation.allocations, 'exam'),
-                  )}
-                </div>
               </div>
             </Link>
           ))}

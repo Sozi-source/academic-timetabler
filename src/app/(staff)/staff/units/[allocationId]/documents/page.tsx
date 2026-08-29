@@ -1,5 +1,4 @@
 import {
-  ArrowLeft,
   BookOpen,
   CalendarCheck2,
   FileSpreadsheet,
@@ -46,19 +45,10 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="My Units · Documents"
         title={context.allocation.unitName}
-        description={`${context.allocation.cohortName} · ${context.allocation.academicPeriodName}`}
-        icon={FileText}
-        actions={
-          <Link
-            href={`/staff/units/${allocationId}`}
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
-          >
-            <ArrowLeft className="size-3.5" aria-hidden="true" />
-            Unit
-          </Link>
-        }
+        description={context.allocation.cohortName}
+        backHref={`/staff/units/${allocationId}`}
+        backLabel="Unit"
       />
 
       {/* TEACHING DOCUMENTS */}
@@ -69,13 +59,13 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
               Teaching Documents
             </h2>
             <p className="text-xs text-text-muted">
-              Curriculum structures with dynamic trainer and semester details.
+              Official unit files.
             </p>
           </div>
           <Badge variant="success">Official</Badge>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="portal-card-grid" data-columns="3">
           {/* Card 1: Course Outline */}
           <Card className="flex flex-col justify-between p-4">
             <div>
@@ -87,7 +77,7 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
               </div>
               <h3 className="mt-3 text-sm font-bold text-text-primary">Course Outline</h3>
               <p className="mt-1 text-[11px] leading-relaxed text-text-muted">
-                Competency outcomes, 14-week topical schedule, 5-component grading breakdown, and references.
+                Outcomes, schedule, grading, and references.
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-border flex gap-2">
@@ -120,7 +110,7 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
               </div>
               <h3 className="mt-3 text-sm font-bold text-text-primary">Scheme of Work</h3>
               <p className="mt-1 text-[11px] leading-relaxed text-text-muted">
-                Detailed weekly lesson matrix, learning activities, resources, and remarks auto-synthesized from Outline.
+                Weekly lessons, activities, and resources.
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-border flex gap-2">
@@ -155,7 +145,7 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
               </div>
               <h3 className="mt-3 text-sm font-bold text-text-primary">Record of Work Covered</h3>
               <p className="mt-1 text-[11px] leading-relaxed text-text-secondary">
-                Progressively log delivered sessions, student attendance, outcomes, and remarks across the term.
+                Weekly delivery and attendance log.
               </p>
               <div className="mt-2 text-[10px] font-semibold text-primary">
                 {uniqueWeeksCount} of 14 Weeks Logged ({entriesCount} sessions)

@@ -1,8 +1,4 @@
-import {
-  ArrowLeft,
-  ClipboardCheck,
-} from 'lucide-react';
-import Link from 'next/link';
+import { ClipboardCheck } from 'lucide-react';
 import {
   notFound,
 } from 'next/navigation';
@@ -76,33 +72,18 @@ export default async function StaffAssessmentPage({
   return (
     <div className="space-y-5">
       <PageHeader
-        eyebrow={`My Units · ${typeLabel}`}
-        title={
-          access.allocation.unitName
-        }
-        description={`${access.allocation.cohortName} · ${access.allocation.academicPeriodName}`}
-        icon={ClipboardCheck}
-        actions={
-          <Link
-            href={`/staff/units/${allocationId}`}
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
-          >
-            <ArrowLeft
-              className="size-3.5"
-              aria-hidden="true"
-            />
-            Unit
-          </Link>
-        }
+        title={access.allocation.unitName}
+        description={access.allocation.cohortName}
+        backHref={`/staff/units/${allocationId}`}
+        backLabel="Unit"
       />
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="portal-metric-grid" data-columns="4">
         <MetricCard
           label="Registered"
           value={String(
             population.registeredPopulation,
           )}
-          description="Assessment population"
           icon={ClipboardCheck}
           status="Roster"
         />
@@ -112,7 +93,6 @@ export default async function StaffAssessmentPage({
           value={String(
             population.expectedToSit,
           )}
-          description="Expected to sit"
           icon={ClipboardCheck}
           status="Attendance"
         />
@@ -122,7 +102,6 @@ export default async function StaffAssessmentPage({
           value={String(
             population.markedAbsent,
           )}
-          description="Marked before download"
           icon={ClipboardCheck}
           status="Attendance"
         />

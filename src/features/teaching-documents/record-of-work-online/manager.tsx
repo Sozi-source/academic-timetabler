@@ -2,6 +2,7 @@
 
 import { useState, useActionState } from 'react';
 import {
+  ArrowLeft,
   CheckCircle2,
   Clock3,
   FileCheck2,
@@ -226,13 +227,22 @@ export function OnlineRecordOfWorkManager({ context }: { context: OnlineRecordOf
       {/* 1. SIMPLE HEADER CARD */}
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h1 className="text-base font-bold text-slate-900">
-              Record of Work
-            </h1>
-            <p className="text-xs text-slate-600">
-              {context.header.unitCode} · {context.header.unitName}
-            </p>
+          <div className="flex items-center gap-3">
+            <Link
+              href={`/staff/units/${context.allocationId}/documents`}
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+            >
+              <ArrowLeft className="size-3.5" aria-hidden="true" />
+              Documents
+            </Link>
+            <div>
+              <h1 className="text-base font-bold text-slate-900">
+                Record of Work
+              </h1>
+              <p className="text-xs text-slate-600">
+                {context.header.unitCode} · {context.header.unitName}
+              </p>
+            </div>
           </div>
 
           <Link

@@ -4,7 +4,6 @@ import {
   CalendarDays,
   ClipboardCheck,
   ClipboardList,
-  Download,
   FileText,
   GraduationCap,
   History,
@@ -23,6 +22,9 @@ import {
 import {
   getStaffWorkspace,
 } from '@/features/staff-assessment/queries';
+import {
+  portalGreeting,
+} from '@/lib/portal-greeting';
 
 export default async function StaffHomePage() {
   const profile =
@@ -78,9 +80,9 @@ export default async function StaffHomePage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Staff"
-        title="Teaching workspace"
-        description="Your allocated units, teaching documents, and assessments."
+        eyebrow="Staff dashboard"
+        title={portalGreeting(profile.fullName)}
+        description="Units, classes, and assessments."
         icon={GraduationCap}
         actions={
           <div className="flex items-center gap-2">
@@ -101,31 +103,25 @@ export default async function StaffHomePage() {
         }
       />
 
-      <section className="grid gap-3 sm:grid-cols-3">
+      <section className="portal-metric-grid" data-columns="3">
         <MetricCard
           label="Allocated units"
           value={String(workspace.allocations.length)}
-          description="Active and completed Teaching Allocations"
           icon={BookOpenCheck}
-          status="My Units"
           className="border-t-4 border-t-primary shadow-xs"
         />
 
         <MetricCard
           label="Assessments"
           value={String(assessmentCount)}
-          description="CAT and Exam assessment sets"
           icon={ClipboardCheck}
-          status="Assessment"
           className="border-t-4 border-t-amber-400 shadow-xs"
         />
 
         <MetricCard
           label="Published"
           value={String(published)}
-          description="Assessment sets released"
           icon={GraduationCap}
-          status="Results"
           className="border-t-4 border-t-primary shadow-xs"
         />
       </section>
@@ -135,69 +131,64 @@ export default async function StaffHomePage() {
         <h2 className="text-xs font-black uppercase tracking-wider text-primary">
           Quick Access
         </h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3 xl:grid-cols-5">
           <Link
             href="/staff/attendance"
-            className="group flex items-center gap-3 rounded-xl border border-border border-l-4 border-l-primary bg-surface p-3.5 shadow-xs transition hover:border-primary/50 hover:shadow-sm"
+            className="group flex flex-col items-start gap-2 rounded-xl border border-border border-l-4 border-l-primary bg-surface p-3.5 shadow-xs transition hover:border-primary/50 hover:shadow-sm sm:flex-row sm:items-center sm:gap-3"
           >
             <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary group-hover:bg-primary-soft font-bold">
               <CalendarCheck2 className="size-4.5" />
             </span>
             <div>
               <p className="text-xs font-black text-slate-950 group-hover:text-primary">Attendance</p>
-              <p className="text-[11px] text-slate-500 font-medium">Class check-in & register</p>
             </div>
           </Link>
 
           <Link
             href="/staff/daily-report"
-            className="group flex items-center gap-3 rounded-xl border border-slate-200 border-l-4 border-l-emerald-600 bg-white p-3.5 shadow-xs transition hover:border-emerald-500 hover:shadow-sm"
+            className="group flex flex-col items-start gap-2 rounded-xl border border-slate-200 border-l-4 border-l-emerald-600 bg-white p-3.5 shadow-xs transition hover:border-emerald-500 hover:shadow-sm sm:flex-row sm:items-center sm:gap-3"
           >
             <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-800 group-hover:bg-emerald-100 font-bold">
               <ClipboardList className="size-4.5" />
             </span>
             <div>
               <p className="text-xs font-black text-slate-950 group-hover:text-emerald-900">Daily Report</p>
-              <p className="text-[11px] text-slate-500 font-medium">Submit today&apos;s report and log</p>
             </div>
           </Link>
 
           <Link
             href="/staff/timetable"
-            className="group flex items-center gap-3 rounded-xl border border-slate-200 border-l-4 border-l-amber-400 bg-white p-3.5 shadow-xs transition hover:border-amber-400 hover:shadow-sm"
+            className="group flex flex-col items-start gap-2 rounded-xl border border-slate-200 border-l-4 border-l-amber-400 bg-white p-3.5 shadow-xs transition hover:border-amber-400 hover:shadow-sm sm:flex-row sm:items-center sm:gap-3"
           >
             <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-800 group-hover:bg-amber-100 font-bold">
               <CalendarDays className="size-4.5" />
             </span>
             <div>
               <p className="text-xs font-black text-slate-950 group-hover:text-amber-900">Weekly Timetable</p>
-              <p className="text-[11px] text-slate-500 font-medium">Classrooms & schedule</p>
             </div>
           </Link>
 
           <Link
             href="/staff/documents"
-            className="group flex items-center gap-3 rounded-xl border border-border border-l-4 border-l-primary bg-surface p-3.5 shadow-xs transition hover:border-primary/50 hover:shadow-sm"
+            className="group flex flex-col items-start gap-2 rounded-xl border border-border border-l-4 border-l-primary bg-surface p-3.5 shadow-xs transition hover:border-primary/50 hover:shadow-sm sm:flex-row sm:items-center sm:gap-3"
           >
             <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary group-hover:bg-primary-soft font-bold">
               <FileText className="size-4.5" />
             </span>
             <div>
               <p className="text-xs font-black text-slate-950 group-hover:text-primary">Teaching Documents</p>
-              <p className="text-[11px] text-slate-500 font-medium">Outlines, Schemes & RoW</p>
             </div>
           </Link>
 
           <Link
-            href="/staff/downloads"
-            className="group flex items-center gap-3 rounded-xl border border-slate-200 border-l-4 border-l-amber-500 bg-white p-3.5 shadow-xs transition hover:border-amber-500 hover:shadow-sm"
+            href="/staff/units"
+            className="group col-span-2 flex flex-col items-start gap-2 rounded-xl border border-slate-200 border-l-4 border-l-amber-500 bg-white p-3.5 shadow-xs transition hover:border-amber-500 hover:shadow-sm sm:col-span-1 sm:flex-row sm:items-center sm:gap-3"
           >
             <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-900 group-hover:bg-amber-100 font-bold">
-              <Download className="size-4.5" />
+              <ClipboardCheck className="size-4.5" />
             </span>
             <div>
-              <p className="text-xs font-black text-slate-950 group-hover:text-amber-900">Offline Markbooks</p>
-              <p className="text-[11px] text-slate-500 font-medium">Download signing sheets</p>
+              <p className="text-xs font-black text-slate-950 group-hover:text-amber-900">Enter Marks</p>
             </div>
           </Link>
         </div>

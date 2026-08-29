@@ -62,17 +62,16 @@ export default async function StaffAttendancePage() {
       <PageHeader
         eyebrow="Staff"
         title="Class Attendance"
-        description="Record attendance from your published timetable."
+        description="Record class attendance."
         icon={CalendarCheck2}
       />
 
-      <section className="grid gap-3 sm:grid-cols-3">
+      <section className="portal-metric-grid" data-columns="3">
         <MetricCard
           label="Weekly classes"
           value={String(
             schedule.length,
           )}
-          description="Published timetable sessions"
           icon={Clock3}
         />
 
@@ -81,7 +80,6 @@ export default async function StaffAttendancePage() {
           value={String(
             completed,
           )}
-          description="Recent attendance sessions"
           icon={CheckCircle2}
         />
 
@@ -90,7 +88,6 @@ export default async function StaffAttendancePage() {
           value={String(
             open,
           )}
-          description="Attendance still editable"
           icon={UsersRound}
         />
       </section>
@@ -101,9 +98,6 @@ export default async function StaffAttendancePage() {
             Take attendance
           </h2>
 
-          <p className="mt-0.5 text-[11px] text-text-muted">
-            Choose the actual class date.
-          </p>
         </div>
 
         <AttendanceScheduleList

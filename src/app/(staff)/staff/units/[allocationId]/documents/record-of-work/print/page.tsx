@@ -1,6 +1,9 @@
+import { ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 import {
   notFound,
 } from 'next/navigation';
+import Image from 'next/image';
 
 import {
   getOnlineRecordOfWorkContext,
@@ -107,14 +110,23 @@ export default async function PrintRecordOfWorkPage({
         }
       `}</style>
 
-      <div className="no-print mb-4 text-right text-xs text-gray-600">
-        Use your browser print command to print or save as PDF.
+      <div className="no-print mb-4 flex items-center justify-between text-xs text-gray-600">
+        <Link
+          href={`/staff/units/${allocationId}/documents/record-of-work`}
+          className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+        >
+          <ArrowLeft className="size-3.5" />
+          Back to Record of Work
+        </Link>
+        <span>Use your browser print command to print or save as PDF.</span>
       </div>
 
       <header className="border-b-2 border-black pb-3 text-center">
-        <img
+        <Image
           src="/branding/icmhs-logo.png"
           alt="ICMHS logo"
+          width={64}
+          height={64}
           className="mx-auto mb-2 h-16 w-16 object-contain"
         />
         <h1 className="text-lg font-bold uppercase">

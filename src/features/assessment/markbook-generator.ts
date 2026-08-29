@@ -10,6 +10,13 @@ export interface AssessmentMarkbookStudent {
   attendanceStatus:
     | 'expected'
     | 'absent';
+  marks?: {
+    assignment: number | null;
+    presentation: number | null;
+    rat: number | null;
+    cat: number | null;
+    exam: number | null;
+  };
 }
 
 export interface AssessmentMarkbookCohort {
@@ -568,6 +575,150 @@ function createCohortSheet(
   };
 }
 
+function createOnlineMarksReportSheet(
+  workbook: ExcelJS.Workbook,
+  bundle: AssessmentMarkbookBundle,
+  cohort: AssessmentMarkbookCohort,
+) {
+  const sheet = workbook.addWorksheet(
+    uniqueSheetName(workbook, safeSheetName(cohort.cohortName, 'Cohort')),
+    {
+      views: [{ state: 'frozen', ySplit: 7, showGridLines: false }],
+      pageSetup: {
+        orientation: 'landscape',
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0,
+        paperSize: 9,
+        margins: { left: 0.25, right: 0.25, top: 0.35, bottom: 0.35, header: 0.2, footer: 0.2 },
+      },
+    },
+  );
+
+  sheet.mergeCells('A1:K1');
+  sheet.getCell('A1').value = 'IMPERIAL COLLEGE TRAINER PORTAL';
+  sheet.getCell('A1').font = { bold: true, size: 14, color: { argb: navy } };
+  sheet.getCell('A1').alignment = { horizontal: 'center', vertical: 'middle' };
+
+  sheet.mergeCells('A2:K2');
+  sheet.getCell('A2').value = 'ONLINE MARKS REPORT';
+  sheet.getCell('A2').font = { bold: true, size: 12 };
+  sheet.getCell('A2').alignment = { horizontal: 'center' };
+
+  sheet.mergeCells('A4:K4');
+  sheet.getCell('A4').value = `${bundle.unit.code ?? ''} ${bundle.unit.name} · ${cohort.cohortName}`.trim();
+  sheet.getCell('A4').font = { bold: true, size: 10 };
+  sheet.getCell('A4').alignment = { horizontal: 'center' };
+
+  sheet.mergeCells('A5:K5');
+  sheet.getCell('A5').value = `${bundle.academicPeriod.name} · Generated ${bundle.generatedAt.toLocaleString('en-GB')}`;
+  sheet.getCell('A5').font = { size: 9, color: { argb: 'FF4B5563' } };
+  sheet.getCell('A5').alignment = { horizontal: 'center' };
+
+  const headerRow = sheet.getRow(7);
+  headerRow.values = [
+    'No.',
+    'Admission Number',
+    'Student Name',
+    'Attendance',
+    'Assignment /5',
+    'Presentation /10',
+    'RAT /15',
+    'CAT /15',
+    'Exam /70',
+    'RAT/CAT /15',
+    'Final /100',
+  ];
+  headerRow.height = 28;
+  headerRow.eachCell((cell) => {
+    cell.font = { bold: true, size: 8, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: navy } };
+    cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+    applyThinBorder(cell);
+  });
+
+  const students = [...cohort.students].sort(
+    (first, second) =>
+      first.admissionNumber.localeCompare(second.admissionNumber) ||
+      first.fullName.localeCompare(second.fullName),
+  );
+
+  students.forEach((student, index) => {
+    const rowNumber = 8 + index;
+    const marks = student.marks ?? {
+      assignment: null,
+      presentation: null,
+      rat: null,
+      cat: null,
+      exam: null,
+    };
+    const ratCatAverage =
+      marks.rat === null || marks.cat === null
+        ? null
+        : (marks.rat + marks.cat) / 2;
+    const final =
+      student.attendanceStatus === 'absent' ||
+      marks.assignment === null ||
+      marks.presentation === null ||
+      ratCatAverage === null ||
+      marks.exam === null
+        ? null
+        : marks.assignment + marks.presentation + ratCatAverage + marks.exam;
+
+    const row = sheet.getRow(rowNumber);
+    row.values = [
+      index + 1,
+      student.admissionNumber,
+      student.fullName,
+      student.attendanceStatus === 'absent' ? 'Absent' : 'Expected',
+      marks.assignment,
+      marks.presentation,
+      marks.rat,
+      marks.cat,
+      student.attendanceStatus === 'absent' ? 'AB' : marks.exam,
+      ratCatAverage,
+      student.attendanceStatus === 'absent' ? 'AB' : final,
+    ];
+    row.height = 20;
+    row.eachCell((cell) => {
+      cell.font = { size: 9, color: { argb: 'FF111827' } };
+      cell.alignment = { vertical: 'middle', wrapText: true };
+      applyThinBorder(cell);
+    });
+    for (let column = 1; column <= 11; column += 1) {
+      if (column !== 2 && column !== 3) {
+        sheet.getCell(rowNumber, column).alignment = {
+          horizontal: 'center',
+          vertical: 'middle',
+        };
+      }
+    }
+    if (student.attendanceStatus === 'absent') {
+      row.eachCell((cell) => {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: pale } };
+      });
+    }
+  });
+
+  sheet.columns = [
+    { width: 6 },
+    { width: 18 },
+    { width: 28 },
+    { width: 12 },
+    { width: 13 },
+    { width: 15 },
+    { width: 10 },
+    { width: 10 },
+    { width: 11 },
+    { width: 13 },
+    { width: 12 },
+  ];
+  sheet.autoFilter = { from: { row: 7, column: 1 }, to: { row: 7, column: 11 } };
+  sheet.headerFooter.oddFooter = '&LGenerated from online marks&CPage &P of &N&RTrainer Portal';
+
+  return { sheet, firstStudentRow: 8, students };
+}
+
 export async function generateAssessmentMarkbook(
   bundle: AssessmentMarkbookBundle,
 ): Promise<Buffer> {
@@ -636,11 +787,9 @@ export async function generateAssessmentMarkbook(
       firstStudentRow,
       students,
     } =
-      createCohortSheet(
-        workbook,
-        bundle,
-        cohort,
-      );
+      bundle.assessmentType === 'exam'
+        ? createOnlineMarksReportSheet(workbook, bundle, cohort)
+        : createCohortSheet(workbook, bundle, cohort);
 
     students.forEach(
       (

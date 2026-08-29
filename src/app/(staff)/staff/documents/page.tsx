@@ -3,7 +3,6 @@ import {
   CalendarCheck2,
   FileSpreadsheet,
   FileText,
-  Printer,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -12,9 +11,7 @@ import { Card } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
 import { requireTrainerAccess } from '@/features/auth/authorization';
 import { getStaffWorkspace } from '@/features/staff-assessment/queries';
-import { teachingDocumentKinds } from '@/features/teaching-documents/domain';
 import {
-  getActiveTeachingDocumentTemplates,
   getTeachingDocumentsByAllocationIds,
 } from '@/features/teaching-documents/queries';
 
@@ -22,17 +19,8 @@ export default async function StaffDocumentsPage() {
   const profile = await requireTrainerAccess();
   const workspace = await getStaffWorkspace(profile.id);
 
-  const [templates, documents] = await Promise.all([
-    getActiveTeachingDocumentTemplates(),
-    getTeachingDocumentsByAllocationIds(
-      workspace.allocations.map((allocation) => allocation.allocationId)
-    ),
-  ]);
-
-  const activeTemplateTypes = new Set(
-    templates
-      .filter((template) => Boolean(template.storagePath))
-      .map((template) => template.documentType)
+  const documents = await getTeachingDocumentsByAllocationIds(
+    workspace.allocations.map((allocation) => allocation.allocationId)
   );
 
   const latestByAllocation = new Map<string, number>();
@@ -60,7 +48,7 @@ export default async function StaffDocumentsPage() {
       <PageHeader
         eyebrow="Staff"
         title="Teaching Documents"
-        description="Course outlines, schemes of work, and records of work for your allocated units."
+        description="Documents for your allocated units."
         icon={FileText}
       />
 
@@ -71,9 +59,13 @@ export default async function StaffDocumentsPage() {
       </div>
 
       {workspace.allocations.length === 0 ? (
-        <section className="rounded-xl border border-border bg-white px-5 py-10 text-center">
-          <p className="text-sm font-semibold text-text-primary">
+        <section className="rounded-xl border border-border bg-white px-5 py-12 text-center">
+          <FileText className="mx-auto size-8 text-text-muted" aria-hidden="true" />
+          <p className="mt-3 text-sm font-bold text-text-primary">
             No allocated units
+          </p>
+          <p className="mx-auto mt-1 max-w-sm text-xs text-text-muted">
+            Official teaching documents will appear here once teaching allocations are assigned.
           </p>
         </section>
       ) : (
@@ -99,10 +91,9 @@ export default async function StaffDocumentsPage() {
                     </div>
 
                     <p className="mt-1 text-[11px] text-text-muted">
-                      {allocation.cohortName} · {allocation.academicPeriodName}
+                      {allocation.cohortName}
                     </p>
                   </div>
-
                   <div className="flex flex-wrap items-center gap-2">
                     <Link
                       href={`/staff/units/${allocation.allocationId}/documents/course-outline`}

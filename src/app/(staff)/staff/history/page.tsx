@@ -96,7 +96,7 @@ export default async function StaffHistoryPage() {
       <PageHeader
         eyebrow="Staff"
         title="History"
-        description="Your assessment, teaching-document and attendance activity."
+        description="Your recent portal activity."
         icon={History}
       />
 
@@ -106,16 +106,18 @@ export default async function StaffHistoryPage() {
         } records
       </Badge>
 
-      {history.length ===
-      0 ? (
-        <section className="rounded-xl border border-border bg-white px-5 py-10 text-center">
+      {history.length === 0 ? (
+        <section className="rounded-xl border border-border bg-white px-5 py-12 text-center">
           <History
-            className="mx-auto size-5 text-text-muted"
+            className="mx-auto size-7 text-text-muted"
             aria-hidden="true"
           />
 
-          <p className="mt-3 text-sm font-semibold text-text-primary">
+          <p className="mt-3 text-sm font-bold text-text-primary">
             No activity yet
+          </p>
+          <p className="mx-auto mt-1 max-w-sm text-xs text-text-muted">
+            Your teaching logs, marks submissions, and attendance records will appear in this timeline.
           </p>
         </section>
       ) : (

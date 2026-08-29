@@ -1,8 +1,4 @@
-import {
-  ArrowLeft,
-  CalendarCheck2,
-} from 'lucide-react';
-import Link from 'next/link';
+import { CalendarCheck2 } from 'lucide-react';
 import {
   notFound,
 } from 'next/navigation';
@@ -56,28 +52,12 @@ export default async function StaffClassAttendanceSessionPage({
   return (
     <div className="space-y-5">
       <PageHeader
-        eyebrow="Class Attendance"
-        title={
-          workspace.unitName
-        }
+        title={workspace.unitName}
         description={`${workspace.cohortName} · ${workspace.sessionDate} · ${shortTime(
           workspace.startsAt,
-        )}–${shortTime(
-          workspace.endsAt,
-        )}`}
-        icon={CalendarCheck2}
-        actions={
-          <Link
-            href="/staff/attendance"
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
-          >
-            <ArrowLeft
-              className="size-3.5"
-              aria-hidden="true"
-            />
-            Attendance
-          </Link>
-        }
+        )}–${shortTime(workspace.endsAt)}`}
+        backHref="/staff/attendance"
+        backLabel="Attendance"
       />
 
       <div className="flex flex-wrap gap-2">

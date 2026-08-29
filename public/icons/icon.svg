@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title">
+  <title id="title">Imperial College Trainer Portal</title>
+  <rect width="1024" height="1024" fill="#075B52"/>
+  <rect x="176" y="176" width="672" height="672" rx="168" fill="#FFD400"/>
+  <g fill="none" stroke="#075B52" stroke-width="52" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M512 414C466 368 420 350 352 350V642C422 642 468 662 512 708"/>
+    <path d="M512 414C558 368 604 350 672 350V642C602 642 556 662 512 708"/>
+    <path d="M512 414V708"/>
+  </g>
+</svg>

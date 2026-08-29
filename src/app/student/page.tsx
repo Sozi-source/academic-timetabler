@@ -36,6 +36,9 @@ import {
 import {
   getStudentPortalSession,
 } from '@/features/student-portal/session';
+import {
+  portalGreeting,
+} from '@/lib/portal-greeting';
 
 export default async function StudentPortalPage() {
   const session =
@@ -96,10 +99,6 @@ export default async function StudentPortalPage() {
         String(
           units.length,
         ),
-      detail:
-        period
-          ?.name ??
-        'No active period',
       href:
         '/student/units',
       icon:
@@ -112,11 +111,6 @@ export default async function StudentPortalPage() {
         String(
           timetable.length,
         ),
-      detail:
-        timetable.length ===
-        1
-          ? 'Published session'
-          : 'Published sessions',
       href:
         '/student/timetable',
       icon:
@@ -129,8 +123,6 @@ export default async function StudentPortalPage() {
         String(
           results.length,
         ),
-      detail:
-        'Published CAT / Exam',
       href:
         '/student/results',
       icon:
@@ -143,8 +135,6 @@ export default async function StudentPortalPage() {
         String(
           documents.length,
         ),
-      detail:
-        'Approved records',
       href:
         '/student/documents',
       icon:
@@ -162,11 +152,11 @@ export default async function StudentPortalPage() {
         <section className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
-              Student Portal
+              Student dashboard
             </p>
 
             <h1 className="mt-1 text-xl font-bold text-text-primary">
-              Dashboard
+              {portalGreeting(student.fullName)}
             </h1>
 
             <p className="mt-1 text-xs text-text-muted">
@@ -219,7 +209,7 @@ export default async function StudentPortalPage() {
           </Card>
         ) : null}
 
-        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <section className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
           {cards.map(
             (
               item,
@@ -251,11 +241,6 @@ export default async function StudentPortalPage() {
                         }
                       </p>
 
-                      <p className="mt-1 text-[10px] leading-4 text-text-muted">
-                        {
-                          item.detail
-                        }
-                      </p>
                     </div>
 
                     <Icon
@@ -269,7 +254,7 @@ export default async function StudentPortalPage() {
           )}
         </section>
 
-        <section className="grid gap-3 md:grid-cols-2">
+        <section className="grid grid-cols-2 gap-2.5 sm:gap-3">
           <Link
             href="/student/unit-registration"
             className="rounded-xl border border-border bg-white px-4 py-4 shadow-sm transition hover:border-border-strong"

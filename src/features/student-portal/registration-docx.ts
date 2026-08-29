@@ -57,16 +57,6 @@ function line(
   });
 }
 
-function labelled(label: string, value: string, after = 40) {
-  return new Paragraph({
-    spacing: { after, line: 240 },
-    children: [
-      new TextRun({ text: `${label}: `, font: FONT, size: 19, bold: true }),
-      new TextRun({ text: value, font: FONT, size: 19 }),
-    ],
-  });
-}
-
 function cell(
   value: string,
   options: {
@@ -79,11 +69,11 @@ function cell(
     borders,
     verticalAlign: VerticalAlign.CENTER,
     shading: options.shading ? { fill: options.shading } : undefined,
-    margins: { top: 80, bottom: 80, left: 100, right: 100 },
+    margins: { top: 70, bottom: 70, left: 100, right: 100 },
     children: [
       line(value, {
         bold: options.bold,
-        size: 18,
+        size: 17.5,
         align: options.align,
         after: 0,
       }),
@@ -91,13 +81,109 @@ function cell(
   });
 }
 
-function approvalSection(title: string) {
-  return [
-    line(title, { bold: true, size: 19, before: 120, after: 55 }),
-    line('Name: ___________________________________   Date: __________________   Signature: __________________', { size: 18, after: 55 }),
-    line('Comment: __________________________________________________________________________________', { size: 18, after: 55 }),
-  ];
+function approvalBox(title: string) {
+  return new Table({
+    layout: TableLayoutType.FIXED,
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    columnWidths: [10000],
+    rows: [
+      new TableRow({
+        children: [
+          new TableCell({
+            borders,
+            shading: { fill: 'F1F5F9' },
+            verticalAlign: VerticalAlign.CENTER,
+            margins: { top: 50, bottom: 50, left: 100, right: 100 },
+            children: [
+              line(title, {
+                bold: true,
+                size: 17.5,
+                after: 0,
+              }),
+            ],
+          }),
+        ],
+      }),
+      new TableRow({
+        children: [
+          new TableCell({
+            borders,
+            verticalAlign: VerticalAlign.CENTER,
+            margins: { top: 60, bottom: 60, left: 100, right: 100 },
+            children: [
+              line(
+                'Name: _______________________________   Date: ___________________   Signature: ___________________',
+                { size: 17, after: 40 },
+              ),
+              line(
+                'Comment: ____________________________________________________________________________________',
+                { size: 17, after: 0 },
+              ),
+            ],
+          }),
+        ],
+      }),
+    ],
+  });
 }
+
+function accountsBox() {
+  return new Table({
+    layout: TableLayoutType.FIXED,
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    columnWidths: [5000, 5000],
+    rows: [
+      new TableRow({
+        children: [
+          new TableCell({
+            borders,
+            columnSpan: 2,
+            shading: { fill: 'F1F5F9' },
+            verticalAlign: VerticalAlign.CENTER,
+            margins: { top: 50, bottom: 50, left: 100, right: 100 },
+            children: [
+              line('ACCOUNTS CLEARANCE', {
+                bold: true,
+                size: 17.5,
+                after: 0,
+              }),
+            ],
+          }),
+        ],
+      }),
+      new TableRow({
+        children: [
+          cell('Previous Balance: KShs ____________________'),
+          cell('Amount Paid: KShs ____________________'),
+        ],
+      }),
+      new TableRow({
+        children: [
+          cell('Current Balance: KShs ____________________'),
+          cell('Hostel Fees: KShs ____________________'),
+        ],
+      }),
+      new TableRow({
+        children: [
+          new TableCell({
+            borders,
+            columnSpan: 2,
+            verticalAlign: VerticalAlign.CENTER,
+            margins: { top: 60, bottom: 60, left: 100, right: 100 },
+            children: [
+              line(
+                'Accounts Officer: __________________________   Date: __________________   Signature: __________________',
+                { size: 17, after: 0 },
+              ),
+            ],
+          }),
+        ],
+      }),
+    ],
+  });
+}
+
+const spacer = () => new Paragraph({ spacing: { after: 70 } });
 
 export async function buildStudentUnitRegistrationDocx(
   context: StudentPortalRegistrationContext,
@@ -135,7 +221,7 @@ export async function buildStudentUnitRegistrationDocx(
           new ImageRun({
             data: logo,
             type: 'png',
-            transformation: { width: 78, height: 57 },
+            transformation: { width: 72, height: 53 },
           }),
         ],
       }),
@@ -145,24 +231,25 @@ export async function buildStudentUnitRegistrationDocx(
   children.push(
     line('IMPERIAL COLLEGE OF MEDICAL AND HEALTH SCIENCES', {
       bold: true,
-      size: 25,
-      align: AlignmentType.CENTER,
-      after: 40,
-    }),
-    line('CONTINUING STUDENT UNIT REGISTRATION FORM', {
-      bold: true,
-      size: 22,
+      size: 24,
       align: AlignmentType.CENTER,
       after: 30,
     }),
+    line('CONTINUING STUDENT UNIT REGISTRATION FORM', {
+      bold: true,
+      size: 21,
+      align: AlignmentType.CENTER,
+      after: 25,
+    }),
     line(context.student.programmeName.toUpperCase(), {
       bold: true,
-      size: 20,
+      size: 19,
       align: AlignmentType.CENTER,
-      after: 130,
+      after: 100,
     }),
   );
 
+  // Student Profile Summary Box
   children.push(
     new Table({
       layout: TableLayoutType.FIXED,
@@ -195,15 +282,16 @@ export async function buildStudentUnitRegistrationDocx(
         }),
       ],
     }),
-    line('UNIT REGISTRATION', {
+    line('REGISTERED UNITS', {
       bold: true,
-      size: 21,
+      size: 19,
       align: AlignmentType.CENTER,
-      before: 150,
-      after: 70,
+      before: 120,
+      after: 60,
     }),
   );
 
+  // Registered Units Table
   children.push(
     new Table({
       layout: TableLayoutType.FIXED,
@@ -230,34 +318,39 @@ export async function buildStudentUnitRegistrationDocx(
         ),
       ],
     }),
+    spacer(),
   );
 
+  // Distinct Approvals Sections
   children.push(
-    line('ACCOUNTS', { bold: true, size: 19, before: 150, after: 55 }),
-    labelled('Previous balance', 'KShs ____________________________    Amount paid: KShs ____________________________'),
-    labelled('Balance', 'KShs _________________________________    Hostel fees: KShs ____________________________'),
-    line('Accounts officer: __________________________   Date: __________________   Signature: __________________', { size: 18, after: 60 }),
-    ...approvalSection('HOD APPROVAL'),
-    ...approvalSection('HOSTEL ALLOCATION / ADMINISTRATION'),
-    ...approvalSection('REGISTRAR'),
-    ...approvalSection('PRINCIPAL'),
-    ...approvalSection('MANAGING DIRECTOR'),
-    line('Print three copies for the student, HOD and Registrar records.', {
+    accountsBox(),
+    spacer(),
+    approvalBox('HOD APPROVAL'),
+    spacer(),
+    approvalBox('HOSTEL ALLOCATION / ADMINISTRATION'),
+    spacer(),
+    approvalBox('REGISTRAR APPROVAL'),
+    spacer(),
+    approvalBox('PRINCIPAL APPROVAL'),
+    spacer(),
+    approvalBox('MANAGING DIRECTOR APPROVAL'),
+    spacer(),
+    line('Print 1 copy for student records.', {
       bold: true,
       size: 17,
       align: AlignmentType.CENTER,
-      before: 130,
+      before: 80,
     }),
   );
 
   const document = new Document({
     creator: 'Imperial College of Medical and Health Sciences',
     title: `${context.student.admissionNumber} Unit Registration`,
-    description: 'Department-assigned continuing student unit registration form',
+    description: 'Continuing student unit registration form',
     styles: {
       default: {
         document: {
-          run: { font: FONT, size: 19 },
+          run: { font: FONT, size: 18 },
           paragraph: { spacing: { line: 240 } },
         },
       },
@@ -266,7 +359,7 @@ export async function buildStudentUnitRegistrationDocx(
       {
         properties: {
           page: {
-            margin: { top: 500, right: 540, bottom: 500, left: 540 },
+            margin: { top: 480, right: 500, bottom: 480, left: 500 },
           },
         },
         footers: {

@@ -1,8 +1,4 @@
-import {
-  ArrowLeft,
-  FileSpreadsheet,
-} from 'lucide-react';
-import Link from 'next/link';
+import { FileSpreadsheet } from 'lucide-react';
 import {
   notFound,
 } from 'next/navigation';
@@ -93,11 +89,6 @@ export default async function StaffStagedMarkbookPage({
     notFound();
   }
 
-  const backHref =
-    allocationId
-      ? `/staff/units/${allocationId}/assessment/${staged.rootAssessmentId}`
-      : '/staff/units';
-
   return (
     <div className="space-y-5">
       <PageHeader
@@ -107,20 +98,6 @@ export default async function StaffStagedMarkbookPage({
         }
         description={`${staged.academicPeriodName} · ${staged.assessmentType.toUpperCase()}`}
         icon={FileSpreadsheet}
-        actions={
-          <Link
-            href={
-              backHref
-            }
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
-          >
-            <ArrowLeft
-              className="size-3.5"
-              aria-hidden="true"
-            />
-            Assessment
-          </Link>
-        }
       />
 
       <section className="portal-metric-grid" data-columns="4">

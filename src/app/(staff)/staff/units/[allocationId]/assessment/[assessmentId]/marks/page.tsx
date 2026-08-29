@@ -47,6 +47,15 @@ export default async function StaffOnlineMarksPage({
   } =
     await params;
 
+  const isUUID =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      assessmentId,
+    );
+  const targetAssessmentId =
+    isUUID
+      ? assessmentId
+      : `alloc-${allocationId}`;
+
   const [
     access,
     population,
@@ -61,11 +70,11 @@ export default async function StaffOnlineMarksPage({
       }),
 
       getAssessmentPopulationWorkspace(
-        assessmentId,
+        targetAssessmentId,
       ),
 
       getStaffOnlineMarkState(
-        assessmentId,
+        targetAssessmentId,
       ),
     ]);
 
@@ -92,47 +101,9 @@ export default async function StaffOnlineMarksPage({
       <PageHeader
         title="Enter marks"
         description={`${access.allocation.unitName} · ${access.allocation.cohortName}`}
-        backHref={`/staff/units/${allocationId}/assessment/${assessmentId}`}
-        backLabel="Assessment"
       />
 
-      <div className="flex flex-wrap gap-2">
-        <Badge variant="neutral">
-          Assignment /5
-        </Badge>
 
-        <Badge variant="neutral">
-          Presentation /10
-        </Badge>
-
-        <Badge variant="neutral">
-          RAT /15
-        </Badge>
-
-        <Badge variant="neutral">
-          CAT /15
-        </Badge>
-
-        <Badge variant="neutral">
-          Exam /70
-        </Badge>
-
-        <Badge variant="institutional">
-          Final /100
-        </Badge>
-
-        <Badge
-          variant={
-            population.populationLockedAt
-              ? 'success'
-              : 'warning'
-          }
-        >
-          {population.populationLockedAt
-            ? 'Roster locked'
-            : 'Roster not locked'}
-        </Badge>
-      </div>
 
       {access.assessment.maximumMark !==
       100 ? (
@@ -152,7 +123,7 @@ export default async function StaffOnlineMarksPage({
 
       <OnlineMarksEditor
         assessmentId={
-          assessmentId
+          population.assessmentId
         }
         workflowStatus={
           population.workflowStatus

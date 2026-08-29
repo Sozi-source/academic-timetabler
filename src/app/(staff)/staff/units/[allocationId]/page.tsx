@@ -2,6 +2,7 @@ import {
   BookOpen,
   CalendarCheck2,
   ChevronRight,
+  Download,
   FileSpreadsheet,
   Keyboard,
   Pencil,
@@ -31,6 +32,7 @@ import {
 } from '@/features/staff-assessment/queries';
 import type {
   StaffAssessmentSummary,
+  StaffUnitAllocation,
 } from '@/features/staff-assessment/types';
 import {
   getRecordOfWorkContext,
@@ -43,33 +45,19 @@ interface PageProps {
 }
 
 function MarksCard({
-  allocationId,
-  assessment,
+  allocation,
 }: {
-  allocationId: string;
-  assessment: StaffAssessmentSummary | null;
+  allocation: StaffUnitAllocation;
 }) {
-  if (!assessment) {
-    return (
-      <article className="flex items-center justify-between rounded-xl border border-border bg-surface p-4 shadow-xs">
-        <div className="flex items-center gap-3">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface-subtle text-text-muted">
-            <Keyboard className="size-4.5" aria-hidden="true" />
-          </span>
-          <div>
-            <h3 className="text-sm font-bold text-text-primary">Marks Entry</h3>
-            <p className="text-xs text-text-muted">Pending assessment setup</p>
-          </div>
-        </div>
-
-        <Badge variant="neutral">Not configured</Badge>
-      </article>
-    );
-  }
+  const assessment = allocation.exam;
+  const assessmentId = assessment?.assessmentId ?? 'exam';
+  const registeredCount = assessment?.registered ?? 0;
+  const absentCount = assessment?.absent ?? 0;
+  const status = assessment?.workflowStatus ?? 'draft';
 
   return (
     <Link
-      href={`/staff/units/${allocationId}/assessment/${assessment.assessmentId}`}
+      href={`/staff/units/${allocation.allocationId}/assessment/${assessmentId}/marks`}
       className="group flex items-center justify-between rounded-xl border border-border border-l-4 border-l-primary bg-surface p-4 shadow-xs transition hover:border-border-strong hover:bg-surface-subtle"
     >
       <div className="flex items-center gap-3">
@@ -79,16 +67,19 @@ function MarksCard({
         <div>
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-bold text-text-primary">Marks Entry</h3>
-            <Badge variant="neutral">{assessment.workflowStatus}</Badge>
-            {assessment.published ? <Badge variant="success">Published</Badge> : null}
+            <Badge variant="neutral" className="capitalize">{status}</Badge>
+            {assessment?.published ? <Badge variant="success">Published</Badge> : null}
           </div>
           <p className="mt-0.5 text-xs text-text-muted">
-            {assessment.registered} registered · {assessment.absent} absent
+            {registeredCount} registered students{absentCount > 0 ? ` · ${absentCount} absent` : ''}
           </p>
         </div>
       </div>
 
-      <ChevronRight className="size-5 text-text-muted transition group-hover:translate-x-0.5 group-hover:text-primary" />
+      <span className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-white shadow-xs transition group-hover:bg-primary-hover">
+        <Keyboard className="size-3.5" />
+        Enter marks
+      </span>
     </Link>
   );
 }
@@ -121,8 +112,6 @@ export default async function StaffUnitPage({
       <PageHeader
         title={allocation.unitName}
         description={allocation.cohortName}
-        backHref="/staff/units"
-        backLabel="Units"
         actions={
           <Badge variant="institutional" className="capitalize">
             {allocation.allocationStatus}
@@ -136,8 +125,7 @@ export default async function StaffUnitPage({
           Assessment & Marks
         </h2>
         <MarksCard
-          allocationId={allocation.allocationId}
-          assessment={allocation.exam}
+          allocation={allocation}
         />
       </section>
 
@@ -250,33 +238,116 @@ export default async function StaffUnitPage({
         </div>
       </section>
 
-      {/* 3. Class Attendance */}
-      <section className="space-y-2">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-text-muted">
-          Class Register
+      {/* 3. Attendance Registers */}
+      <section className="space-y-2.5">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+          Attendance Registers
         </h2>
-        <Link
-          href={`/staff/attendance?allocationId=${allocation.allocationId}`}
-          className="group flex items-center justify-between rounded-xl border border-border bg-surface p-4 shadow-xs transition hover:border-border-strong hover:bg-surface-subtle"
-        >
-          <div className="flex items-center gap-3">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
-              <UsersRound className="size-4.5" aria-hidden="true" />
-            </span>
+
+        <div className="portal-card-grid" data-columns="3">
+          {/* 1. Class Attendance Sheet */}
+          <Card className="flex flex-col justify-between p-3.5 border-slate-200 bg-white shadow-2xs">
             <div>
-              <h3 className="text-sm font-bold text-text-primary">
-                Class Attendance Register
-              </h3>
-              <p className="mt-0.5 text-xs text-text-muted">
-                Record and view class session attendance
+              <div className="flex items-center gap-2">
+                <span className="flex size-7 items-center justify-center rounded bg-slate-100 text-slate-700">
+                  <UsersRound className="size-3.5" />
+                </span>
+                <h3 className="text-xs font-bold text-slate-900">
+                  Class Attendance
+                </h3>
+              </div>
+              <p className="mt-1 text-[11px] text-slate-500">
+                Monthly lesson roll
               </p>
             </div>
-          </div>
-          <ChevronRight className="size-5 text-text-muted transition group-hover:translate-x-0.5 group-hover:text-primary" />
-        </Link>
+            <div className="mt-3 flex gap-1.5 border-t border-slate-100 pt-2.5">
+              <Link
+                href={`/staff/units/${allocationId}/documents/class-attendance`}
+                className="inline-flex h-7 flex-1 items-center justify-center gap-1 rounded border border-slate-200 bg-white text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                <Printer className="size-3" />
+                Print
+              </Link>
+              <a
+                href={`/api/staff/units/${allocationId}/attendance-sheet/class`}
+                className="inline-flex h-7 items-center justify-center gap-1 rounded border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
+                title="Download Word format"
+              >
+                <Download className="size-3" />
+                .docx
+              </a>
+            </div>
+          </Card>
+
+          {/* 2. CAT Attendance List */}
+          <Card className="flex flex-col justify-between p-3.5 border-slate-200 bg-white shadow-2xs">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="flex size-7 items-center justify-center rounded bg-slate-100 text-slate-700">
+                  <FileSpreadsheet className="size-3.5" />
+                </span>
+                <h3 className="text-xs font-bold text-slate-900">
+                  CAT Attendance
+                </h3>
+              </div>
+              <p className="mt-1 text-[11px] text-slate-500">
+                Test signatures & marks
+              </p>
+            </div>
+            <div className="mt-3 flex gap-1.5 border-t border-slate-100 pt-2.5">
+              <Link
+                href={`/staff/units/${allocationId}/documents/cat-attendance`}
+                className="inline-flex h-7 flex-1 items-center justify-center gap-1 rounded border border-slate-200 bg-white text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                <Printer className="size-3" />
+                Print
+              </Link>
+              <a
+                href={`/api/staff/units/${allocationId}/attendance-sheet/cat`}
+                className="inline-flex h-7 items-center justify-center gap-1 rounded border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
+                title="Download Word format"
+              >
+                <Download className="size-3" />
+                .docx
+              </a>
+            </div>
+          </Card>
+
+          {/* 3. Exam Attendance List */}
+          <Card className="flex flex-col justify-between p-3.5 border-slate-200 bg-white shadow-2xs">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="flex size-7 items-center justify-center rounded bg-slate-100 text-slate-700">
+                  <FileSpreadsheet className="size-3.5" />
+                </span>
+                <h3 className="text-xs font-bold text-slate-900">
+                  Exam Attendance
+                </h3>
+              </div>
+              <p className="mt-1 text-[11px] text-slate-500">
+                Scripts & candidate register
+              </p>
+            </div>
+            <div className="mt-3 flex gap-1.5 border-t border-slate-100 pt-2.5">
+              <Link
+                href={`/staff/units/${allocationId}/documents/exam-attendance`}
+                className="inline-flex h-7 flex-1 items-center justify-center gap-1 rounded border border-slate-200 bg-white text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                <Printer className="size-3" />
+                Print
+              </Link>
+              <a
+                href={`/api/staff/units/${allocationId}/attendance-sheet/exam`}
+                className="inline-flex h-7 items-center justify-center gap-1 rounded border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
+                title="Download Word format"
+              >
+                <Download className="size-3" />
+                .docx
+              </a>
+            </div>
+          </Card>
+        </div>
       </section>
     </div>
   );
 }
-
-

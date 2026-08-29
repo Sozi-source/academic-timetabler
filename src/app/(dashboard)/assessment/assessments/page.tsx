@@ -1,10 +1,10 @@
-import { ClipboardPlus, ListChecks } from 'lucide-react';
+import { ClipboardPlus, ListChecks, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
-import { createAssessmentAction } from '@/features/assessment/actions';
+import { createAllAllocatedMarkbooksAction, createAssessmentAction } from '@/features/assessment/actions';
 import { getAssessments, getAssessmentSetupOptions } from '@/features/assessment/queries';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { MarkbookDeleteButton } from '@/features/assessment/markbook-delete-button';
@@ -15,6 +15,7 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
   await requireHodAccess();
   const [params, assessments, options] = await Promise.all([searchParams, getAssessments(), getAssessmentSetupOptions()]);
   const error = typeof params.error === 'string' ? params.error : '';
+  const bulkCreated = typeof params.bulk_created === 'string' ? params.bulk_created : null;
   const activePeriod = options.periods.find((period) => period.status === 'active') ?? null;
   const markbooks = assessments.filter((assessment) => assessment.title === 'Unit Markbook');
   const errorText = error === 'duplicate' ? 'This unit markbook already exists.' : error ? 'Unit markbook could not be saved.' : '';
@@ -29,7 +30,29 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
         backHref="/assessment"
         backLabel="Assessments"
         context={<Badge variant="neutral">{markbooks.length} units</Badge>}
+        actions={
+          activePeriod ? (
+            <form action={createAllAllocatedMarkbooksAction}>
+              <input type="hidden" name="academicPeriodId" value={activePeriod.id} />
+              <button
+                type="submit"
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3.5 text-xs font-semibold text-white shadow-xs transition hover:bg-primary-hover active:scale-95"
+              >
+                <Sparkles className="size-3.5" />
+                Generate all allocated markbooks
+              </button>
+            </form>
+          ) : null
+        }
       />
+
+      {bulkCreated !== null ? (
+        <p className="rounded-lg bg-success-subtle px-3 py-2 text-xs font-semibold text-success">
+          {bulkCreated === '0'
+            ? 'All allocated units already have markbooks configured.'
+            : `Successfully generated ${bulkCreated} unit markbook(s) with student rosters!`}
+        </p>
+      ) : null}
 
       <Card className="p-4">
         <div className="mb-3 flex items-center gap-2"><ClipboardPlus className="size-4 text-primary" /><h2 className="text-sm font-bold text-text-primary">New unit markbook</h2></div>

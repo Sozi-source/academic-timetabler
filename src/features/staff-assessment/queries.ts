@@ -279,6 +279,7 @@ export const getStaffWorkspace =
         [
           'cat',
           'exam',
+          'unit_markbook',
         ],
       );
 
@@ -436,7 +437,13 @@ export const getStaffWorkspace =
         ),
       );
 
-    const assessmentsByAllocation =
+    const assessmentsByCohort =
+      new Map<
+        string,
+        StaffAssessmentSummary[]
+      >();
+
+    const assessmentsByUnit =
       new Map<
         string,
         StaffAssessmentSummary[]
@@ -466,15 +473,19 @@ export const getStaffWorkspace =
           event.unit_id,
         );
 
-      const type =
+      const rawType =
         asString(
           event.assessment_type,
         );
 
+      const type =
+        rawType === 'unit_markbook'
+          ? 'exam'
+          : rawType;
+
       if (
         !id ||
         !periodId ||
-        !cohortId ||
         !unitId ||
         (
           type !==
@@ -497,6 +508,15 @@ export const getStaffWorkspace =
             periodId,
             unitId,
             type,
+          ].join(
+            ':',
+          ),
+        ) ??
+        ruleByKey.get(
+          [
+            periodId,
+            unitId,
+            'exam',
           ].join(
             ':',
           ),
@@ -535,12 +555,12 @@ export const getStaffWorkspace =
               asNumber(
                 rule
                   ?.maximum_mark,
-              ),
+              ) ?? 100,
             passMark:
               asNumber(
                 rule
                   ?.pass_mark,
-              ),
+              ) ?? 40,
             rosterLocked:
               Boolean(
                 event.population_locked_at,
@@ -552,27 +572,46 @@ export const getStaffWorkspace =
               true,
           };
 
-      const key =
-        assessmentKey({
-          periodId,
-          cohortId,
-          unitId,
-        });
+      if (cohortId) {
+        const key =
+          assessmentKey({
+            periodId,
+            cohortId,
+            unitId,
+          });
 
-      const current =
-        assessmentsByAllocation.get(
+        const current =
+          assessmentsByCohort.get(
+            key,
+          ) ??
+          [];
+
+        current.push(
+          summary,
+        );
+
+        assessmentsByCohort.set(
           key,
-        ) ??
-        [];
+          current,
+        );
+      } else {
+        const key = `${periodId}:${unitId}`;
 
-      current.push(
-        summary,
-      );
+        const current =
+          assessmentsByUnit.get(
+            key,
+          ) ??
+          [];
 
-      assessmentsByAllocation.set(
-        key,
-        current,
-      );
+        current.push(
+          summary,
+        );
+
+        assessmentsByUnit.set(
+          key,
+          current,
+        );
+      }
     }
 
     const mapped:
@@ -656,13 +695,20 @@ export const getStaffWorkspace =
                 return null;
               }
 
+              const cohortKey =
+                assessmentKey({
+                  periodId,
+                  cohortId,
+                  unitId,
+                });
+              const unitKey = `${periodId}:${unitId}`;
+
               const assessments =
-                assessmentsByAllocation.get(
-                  assessmentKey({
-                    periodId,
-                    cohortId,
-                    unitId,
-                  }),
+                assessmentsByCohort.get(
+                  cohortKey,
+                ) ??
+                assessmentsByUnit.get(
+                  unitKey,
                 ) ??
                 [];
 
@@ -797,6 +843,68 @@ export async function requireStaffAllocation({
   const cohort = Array.isArray(rawAlloc.cohort) ? rawAlloc.cohort[0] : rawAlloc.cohort;
   const period = Array.isArray(rawAlloc.period) ? rawAlloc.period[0] : rawAlloc.period;
 
+  const { data: rawEvent } = await admin
+    .from('assessment_events')
+    .select('id, workflow_status, population_locked_at, assessment_type, published_at')
+    .eq('academic_period_id', rawAlloc.academic_period_id)
+    .eq('unit_id', rawAlloc.unit_id)
+    .in('assessment_type', ['exam', 'unit_markbook'])
+    .maybeSingle();
+
+  let examSummary: StaffAssessmentSummary | null = null;
+
+  if (rawEvent?.id) {
+    const { data: pop } = await admin
+      .from('assessment_population_summary')
+      .select('registered_population, marked_absent, expected_to_sit')
+      .eq('assessment_id', rawEvent.id)
+      .maybeSingle();
+
+    examSummary = {
+      assessmentId: rawEvent.id,
+      type: 'exam',
+      workflowStatus: asString(rawEvent.workflow_status) ?? 'draft',
+      registered: Number(pop?.registered_population ?? 0),
+      absent: Number(pop?.marked_absent ?? 0),
+      expected: Number(pop?.expected_to_sit ?? 0),
+      maximumMark: 100,
+      passMark: 40,
+      rosterLocked: Boolean(rawEvent.population_locked_at),
+      published: Boolean(rawEvent.published_at),
+    };
+  } else {
+    // Dynamic student registration count lookup
+    const { count: studentCount } = await admin
+      .from('student_unit_registrations')
+      .select('student_id', { count: 'exact', head: true })
+      .eq('academic_period_id', rawAlloc.academic_period_id)
+      .eq('unit_id', rawAlloc.unit_id)
+      .eq('registration_status', 'registered');
+
+    let totalCount = studentCount ?? 0;
+    if (totalCount === 0 && rawAlloc.cohort_id) {
+      const { count: cohortCount } = await admin
+        .from('students')
+        .select('id', { count: 'exact', head: true })
+        .eq('current_cohort_id', rawAlloc.cohort_id)
+        .in('lifecycle_status', ['admitted', 'active']);
+      totalCount = cohortCount ?? 0;
+    }
+
+    examSummary = {
+      assessmentId: `alloc-${rawAlloc.id}`,
+      type: 'exam',
+      workflowStatus: 'draft',
+      registered: totalCount,
+      absent: 0,
+      expected: totalCount,
+      maximumMark: 100,
+      passMark: 40,
+      rosterLocked: false,
+      published: false,
+    };
+  }
+
   const fallbackAllocation: StaffUnitAllocation = {
     allocationId: rawAlloc.id,
     academicPeriodId: rawAlloc.academic_period_id,
@@ -808,7 +916,7 @@ export async function requireStaffAllocation({
     unitName: unit?.name ?? 'Unit Name',
     allocationStatus: rawAlloc.status ?? 'active',
     cat: null,
-    exam: null,
+    exam: examSummary,
   };
 
   return {
@@ -836,7 +944,7 @@ export async function requireStaffAssessment({
     return null;
   }
 
-  const assessment =
+  let assessment =
     [
       context.allocation.cat,
       context.allocation.exam,
@@ -848,7 +956,18 @@ export async function requireStaffAssessment({
     );
 
   if (!assessment) {
-    return null;
+    assessment = context.allocation.exam ?? {
+      assessmentId: `alloc-${allocationId}`,
+      type: 'exam',
+      workflowStatus: 'draft',
+      registered: 0,
+      absent: 0,
+      expected: 0,
+      maximumMark: 100,
+      passMark: 40,
+      rosterLocked: false,
+      published: false,
+    };
   }
 
   return {

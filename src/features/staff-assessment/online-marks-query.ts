@@ -80,11 +80,43 @@ export interface StaffOnlineMarkState {
 }
 
 export async function getStaffOnlineMarkState(
-  assessmentId:
-    string,
+  assessmentId: string,
 ): Promise<StaffOnlineMarkState[]> {
-  const supabase =
-    await createClient();
+  const supabase = await createClient();
+
+  let targetId = assessmentId;
+
+  if (targetId.startsWith('alloc-')) {
+    const allocId = targetId.replace('alloc-', '');
+    const { data: alloc } = await supabase
+      .from('teaching_allocations')
+      .select('academic_period_id, unit_id')
+      .eq('id', allocId)
+      .maybeSingle();
+
+    if (alloc) {
+      const { data: eventData } = await supabase
+        .from('assessment_events')
+        .select('id')
+        .eq('academic_period_id', alloc.academic_period_id)
+        .eq('unit_id', alloc.unit_id)
+        .in('assessment_type', ['exam', 'unit_markbook'])
+        .maybeSingle();
+
+      if (eventData?.id) {
+        targetId = eventData.id;
+      } else {
+        return [];
+      }
+    } else {
+      return [];
+    }
+  }
+
+  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetId);
+  if (!isUUID) {
+    return [];
+  }
 
   const [
     draftResult,
@@ -100,7 +132,7 @@ export async function getStaffOnlineMarkState(
         )
         .eq(
           'assessment_id',
-          assessmentId,
+          targetId,
         ),
 
       supabase

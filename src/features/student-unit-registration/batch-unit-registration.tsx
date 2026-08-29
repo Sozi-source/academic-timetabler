@@ -3,7 +3,11 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
-import { batchRegisterExpectedUnits } from './batch-actions';
+import {
+  batchRegisterExpectedUnits,
+  confirmReportedStudents,
+  dropUnconfirmedStudentUnits,
+} from './batch-actions';
 import { CohortStageAssignment } from './cohort-stage-assignment';
 import type { CohortStageSetup } from './cohort-stage-types';
 import type { BatchRegistrationContext } from './batch-types';
@@ -38,8 +42,14 @@ function eligibilityLabel(
 interface BatchUnitRegistrationProps {
   context: BatchRegistrationContext;
   
-  cohortStageSetups: CohortStageSetup[];summary: BatchRegistrationSummary | null;
+  cohortStageSetups: CohortStageSetup[];
+  summary: BatchRegistrationSummary | null;
   error: string | null;
+  notice: {
+    type: 'confirmed' | 'dropped';
+    students: number;
+    registrations: number;
+  } | null;
 }
 
 export function BatchUnitRegistration({
@@ -47,6 +57,7 @@ export function BatchUnitRegistration({
   cohortStageSetups,
   summary,
   error,
+  notice,
 }: BatchUnitRegistrationProps) {
   const [mode, setMode] = useState<'cohort' | 'selected'>('cohort');
   const [cohortId, setCohortId] = useState('');
@@ -218,6 +229,22 @@ export function BatchUnitRegistration({
         >
           <span className="font-semibold">Registration was not completed.</span>{' '}
           {decodeURIComponent(error)}
+        </div>
+      ) : null}
+
+      {notice ? (
+        <div
+          role="status"
+          className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-950"
+        >
+          <span className="font-semibold">
+            {notice.type === 'confirmed'
+              ? `${notice.students} students confirmed as reported.`
+              : `${notice.students} unconfirmed students removed from active unit rosters.`}
+          </span>{' '}
+          {notice.registrations > 0
+            ? `${notice.registrations} unit registrations were ${notice.type === 'confirmed' ? 'restored' : 'marked dropped'}.`
+            : null}
         </div>
       ) : null}
 
@@ -517,7 +544,6 @@ export function BatchUnitRegistration({
                     onChange={() =>
                       toggleStudent(student.id)
                     }
-                    disabled={!student.eligible}
                     className="h-4 w-4 rounded border-slate-300"
                   />
 
@@ -538,7 +564,7 @@ export function BatchUnitRegistration({
                     {student.stageCode ?? 'No stage'}
                   </span>
 
-                  <span>
+                  <span className="flex flex-col items-start gap-1">
                     {student.eligibilityReason === 'ready' ? (
                       <span className="inline-flex rounded-full bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-800 ring-1 ring-inset ring-emerald-200">
                         {eligibilityLabel(
@@ -554,6 +580,23 @@ export function BatchUnitRegistration({
                         )}
                       </span>
                     )}
+                    <span
+                      className={
+                        student.reportingStatus === 'reported'
+                          ? 'inline-flex rounded-full bg-sky-50 px-2 py-1 text-[11px] font-semibold text-sky-800 ring-1 ring-inset ring-sky-200'
+                          : student.reportingStatus === 'pending'
+                            ? 'inline-flex rounded-full bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-inset ring-slate-200'
+                            : 'inline-flex rounded-full bg-rose-50 px-2 py-1 text-[11px] font-semibold text-rose-800 ring-1 ring-inset ring-rose-200'
+                      }
+                    >
+                      {student.reportingStatus === 'reported'
+                        ? 'Reported · Active'
+                        : student.reportingStatus === 'deferred'
+                          ? 'Deferred'
+                          : student.reportingStatus === 'dropped_out'
+                            ? 'Dropped out'
+                            : 'Reporting pending'}
+                    </span>
                   </span>
                 </label>
               ))
@@ -561,7 +604,30 @@ export function BatchUnitRegistration({
           </div>
         </section>
 
-        <div className="sticky bottom-3 flex justify-end rounded-xl border border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur">
+        <div className="sticky bottom-3 flex flex-wrap justify-end gap-2 rounded-xl border border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur">
+          <button
+            type="submit"
+            formAction={dropUnconfirmedStudentUnits}
+            onClick={(event) => {
+              if (!window.confirm('Mark the selected unconfirmed students’ unit registrations as dropped?')) {
+                event.preventDefault();
+              }
+            }}
+            disabled={!context.period || selectedIds.size === 0}
+            className="inline-flex min-h-10 items-center justify-center rounded-lg border border-rose-200 bg-white px-4 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Drop unconfirmed units
+          </button>
+
+          <button
+            type="submit"
+            formAction={confirmReportedStudents}
+            disabled={!context.period || selectedIds.size === 0}
+            className="inline-flex min-h-10 items-center justify-center rounded-lg border border-emerald-700 bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Confirm reported
+          </button>
+
           <button
             type="submit"
             disabled={
@@ -571,7 +637,7 @@ export function BatchUnitRegistration({
             }
             className="inline-flex min-h-10 items-center justify-center rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
           >
-            {`Register ${selectedIds.size} selected students`}
+            {`Assign units to ${selectedIds.size}`}
           </button>
         </div>
       </form>

@@ -101,3 +101,95 @@ export async function batchRegisterExpectedUnits(
     `/students/unit-registration/batch?${params.toString()}`,
   );
 }
+
+function selectedStudentIds(formData: FormData): string[] {
+  return formData
+    .getAll('studentIds')
+    .filter(
+      (value): value is string =>
+        typeof value === 'string' && value.length > 0,
+    );
+}
+
+export async function confirmReportedStudents(formData: FormData) {
+  await requireHodAccess();
+
+  const academicPeriodId = formData.get('academicPeriodId');
+  const studentIds = selectedStudentIds(formData);
+
+  if (typeof academicPeriodId !== 'string' || !academicPeriodId) {
+    redirect('/students/unit-registration/batch?error=period');
+  }
+
+  if (studentIds.length === 0) {
+    redirect('/students/unit-registration/batch?error=students');
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('confirm_students_reported', {
+    target_academic_period_id: academicPeriodId,
+    target_student_ids: studentIds,
+    reporting_date: new Date().toISOString().slice(0, 10),
+  });
+
+  if (error) {
+    redirect(
+      `/students/unit-registration/batch?error=${encodeURIComponent(error.message)}`,
+    );
+  }
+
+  const result = data && typeof data === 'object'
+    ? data as Record<string, unknown>
+    : {};
+
+  revalidatePath('/students');
+  revalidatePath('/students/unit-registration');
+  revalidatePath('/students/unit-registration/batch');
+  revalidatePath('/student/unit-registration');
+
+  redirect(
+    `/students/unit-registration/batch?reporting=confirmed&students=${String(result.confirmed_students ?? studentIds.length)}&restored=${String(result.restored_registrations ?? 0)}`,
+  );
+}
+
+export async function dropUnconfirmedStudentUnits(formData: FormData) {
+  await requireHodAccess();
+
+  const academicPeriodId = formData.get('academicPeriodId');
+  const studentIds = selectedStudentIds(formData);
+
+  if (typeof academicPeriodId !== 'string' || !academicPeriodId) {
+    redirect('/students/unit-registration/batch?error=period');
+  }
+
+  if (studentIds.length === 0) {
+    redirect('/students/unit-registration/batch?error=students');
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc(
+    'drop_unconfirmed_student_units',
+    {
+      target_academic_period_id: academicPeriodId,
+      target_student_ids: studentIds,
+    },
+  );
+
+  if (error) {
+    redirect(
+      `/students/unit-registration/batch?error=${encodeURIComponent(error.message)}`,
+    );
+  }
+
+  const result = data && typeof data === 'object'
+    ? data as Record<string, unknown>
+    : {};
+
+  revalidatePath('/students/unit-registration');
+  revalidatePath('/students/unit-registration/batch');
+  revalidatePath('/student/unit-registration');
+
+  redirect(
+    `/students/unit-registration/batch?reporting=dropped&students=${String(result.affected_students ?? 0)}&registrations=${String(result.dropped_registrations ?? 0)}`,
+  );
+}

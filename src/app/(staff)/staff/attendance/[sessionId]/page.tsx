@@ -56,8 +56,6 @@ export default async function StaffClassAttendanceSessionPage({
         description={`${workspace.cohortName} · ${workspace.sessionDate} · ${shortTime(
           workspace.startsAt,
         )}–${shortTime(workspace.endsAt)}`}
-        backHref="/staff/attendance"
-        backLabel="Attendance"
       />
 
       <div className="flex flex-wrap gap-2">

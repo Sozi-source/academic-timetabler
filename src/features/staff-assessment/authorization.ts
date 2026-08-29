@@ -11,8 +11,23 @@ export async function trainerCanAccessAssessment(
     return false;
   }
 
-  const supabase =
-    await createClient();
+  const supabase = await createClient();
+
+  if (assessmentId.startsWith('alloc-')) {
+    const allocId = assessmentId.replace('alloc-', '');
+    const { data: alloc } = await supabase
+      .from('teaching_allocations')
+      .select('id')
+      .eq('id', allocId)
+      .maybeSingle();
+
+    return Boolean(alloc);
+  }
+
+  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(assessmentId);
+  if (!isUUID) {
+    return false;
+  }
 
   const {
     data,

@@ -53,8 +53,6 @@ export default async function TrainerDailyReportPage({
         title="Daily Report"
         description="Lessons, absences, and notes."
         icon={ClipboardCheck}
-        backHref="/staff"
-        backLabel="Staff Portal"
       />
 
       <section className="rounded-xl border border-border bg-white p-4">

@@ -187,6 +187,10 @@ export async function getStudentPortalIdentity(
             id,
             name,
             current_academic_period_number
+          ),
+          current_stage:programme_stages!students_current_stage_id_fkey(
+            code,
+            name
           )
         `,
       )
@@ -226,6 +230,10 @@ export async function getStudentPortalIdentity(
     )
       ? data.current_cohort[0]
       : data.current_cohort;
+
+  const stage = Array.isArray(data.current_stage)
+    ? data.current_stage[0]
+    : data.current_stage;
 
   if (
     !programme ||
@@ -269,6 +277,8 @@ export async function getStudentPortalIdentity(
             cohort.current_academic_period_number,
           )
         : null,
+    stageCode: stage?.code as string | null ?? null,
+    stageName: stage?.name as string | null ?? null,
     lifecycleStatus:
       data.lifecycle_status as
         string,
@@ -522,6 +532,8 @@ export async function getStudentPortalRegistrationContext(
         null,
       registrationState:
         'not_registered',
+      reportingStatus: null,
+      reportedOn: null,
       units:
         [],
     };
@@ -593,6 +605,20 @@ export async function getStudentPortalRegistrationContext(
         }
       : null;
 
+  const reportingResult = await (admin as any)
+    .from('student_period_reporting')
+    .select('reporting_status, reported_on')
+    .eq('student_id', studentId)
+    .eq('academic_period_id', period.id)
+    .maybeSingle();
+
+  const reportingStatus = reportingResult.data?.reporting_status as
+    | 'pending'
+    | 'reported'
+    | 'deferred'
+    | 'dropped_out'
+    | undefined;
+
   return {
     student,
     period,
@@ -604,6 +630,8 @@ export async function getStudentPortalRegistrationContext(
           ?.status ??
           null,
       ),
+    reportingStatus: reportingStatus ?? 'pending',
+    reportedOn: reportingResult.data?.reported_on ?? null,
     units,
   };
 }

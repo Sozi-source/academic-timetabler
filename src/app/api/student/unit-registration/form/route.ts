@@ -8,9 +8,15 @@ import {
 import {
   getStudentPortalSession,
 } from '@/features/student-portal/session';
+import {
+  buildStudentUnitRegistrationDocx,
+} from '@/features/student-portal/registration-docx';
 
 export const runtime =
   'nodejs';
+
+const docxMimeType =
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
 export async function GET() {
   const session =
@@ -55,18 +61,17 @@ export async function GET() {
     );
   }
 
-  return NextResponse.json(
-    {
-      message:
-        'The official college unit-registration template has not been configured yet.',
+  const document = await buildStudentUnitRegistrationDocx(context);
+  const filename = `${context.student.admissionNumber.replace(/[^a-zA-Z0-9_-]+/g, '-')} Unit Registration.docx`;
+
+  return new NextResponse(new Uint8Array(document), {
+    status: 200,
+    headers: {
+      'Content-Type': docxMimeType,
+      'Content-Disposition':
+        `attachment; filename="${filename}"; filename*=UTF-8''${encodeURIComponent(filename)}`,
+      'Cache-Control': 'private, no-store, max-age=0',
+      'X-Content-Type-Options': 'nosniff',
     },
-    {
-      status:
-        503,
-      headers: {
-        'Cache-Control':
-          'no-store',
-      },
-    },
-  );
+  });
 }

@@ -164,7 +164,7 @@ export default async function StudentPortalPage() {
                 student.programmeName
               }
               {' · '}
-              {studentStageLabel(
+              {student.stageCode ?? studentStageLabel(
                 student.academicPeriodNumber,
               )}
             </p>
@@ -172,15 +172,15 @@ export default async function StudentPortalPage() {
 
           <Badge
             variant={
-              registration.registrationState ===
-              'confirmed'
+              registration.reportingStatus ===
+              'reported'
                 ? 'success'
                 : 'institutional'
             }
           >
-            {studentRegistrationLabel(
-              registration.registrationState,
-            )}
+            {registration.reportingStatus === 'reported'
+              ? 'Active · Reported'
+              : studentRegistrationLabel(registration.registrationState)}
           </Badge>
         </section>
 

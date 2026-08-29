@@ -74,7 +74,7 @@ export async function getBatchRegistrationContext(): Promise<BatchRegistrationCo
       current_stage:programme_stages!students_current_stage_id_fkey(id, code, name, sequence_number)
     `)
     .in('programme_id', programmeIds)
-    .in('lifecycle_status', ['admitted', 'active'])
+    .in('lifecycle_status', ['admitted', 'active', 'deferred', 'dropped_out'])
     .order('full_name', { ascending: true });
 
   if (studentError) {
@@ -129,6 +129,20 @@ export async function getBatchRegistrationContext(): Promise<BatchRegistrationCo
     );
   }
 
+  const reportingResult = period
+    ? await (supabase as any)
+        .from('student_period_reporting')
+        .select('student_id, reporting_status')
+        .eq('academic_period_id', period.id)
+    : { data: [], error: null };
+
+  const reportingByStudent = new Map<string, string>(
+    ((reportingResult.data ?? []) as Array<{
+      student_id: string;
+      reporting_status: string;
+    }>).map((row) => [row.student_id, row.reporting_status]),
+  );
+
   const unitsByStage = new Map<string, Set<string>>();
 
   for (const row of stageUnitResult.data ?? []) {
@@ -169,6 +183,9 @@ export async function getBatchRegistrationContext(): Promise<BatchRegistrationCo
     const hasStage = Boolean(student.current_stage_id);
     const hasStageUnits = stageUnits.size > 0;
     const hasMatchingOfferings = expectedUnits > 0;
+    const lifecycleEligible = ['admitted', 'active'].includes(
+      student.lifecycle_status,
+    );
 
     const eligibilityReason:
       | 'ready'
@@ -193,8 +210,17 @@ export async function getBatchRegistrationContext(): Promise<BatchRegistrationCo
       cohortName: cohort?.name ?? null,
       stageId: student.current_stage_id,
       stageCode: stage?.code ?? null,
+      lifecycleStatus: student.lifecycle_status,
+      reportingStatus: (
+        student.lifecycle_status === 'deferred'
+          ? 'deferred'
+          : student.lifecycle_status === 'dropped_out'
+            ? 'dropped_out'
+            : reportingByStudent.get(student.id) ?? 'pending'
+      ) as 'pending' | 'reported' | 'deferred' | 'dropped_out',
       expectedUnits,
       eligible:
+        lifecycleEligible &&
         Boolean(student.current_cohort_id) &&
         eligibilityReason === 'ready',
       eligibilityReason,

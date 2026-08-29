@@ -1,5 +1,6 @@
 import {
   ClipboardCheck,
+  Download,
 } from 'lucide-react';
 import {
   redirect,
@@ -145,29 +146,41 @@ export default async function StudentUnitRegistrationPage() {
               </p>
             </Card>
 
+            <Card className="border-primary/20 bg-primary/[0.035] px-4 py-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-xs font-semibold text-text-primary">
+                      Department-assigned registration
+                    </p>
+                    <Badge
+                      variant={context.reportingStatus === 'reported' ? 'success' : 'warning'}
+                    >
+                      {context.reportingStatus === 'reported'
+                        ? 'Reporting confirmed'
+                        : 'Reporting pending'}
+                    </Badge>
+                  </div>
+                  <p className="mt-1 max-w-xl text-[11px] leading-5 text-text-muted">
+                    Download the form and take it through the approval desks. You do not need to select these units again.
+                  </p>
+                </div>
+
+                <a
+                  href="/api/student/unit-registration/form"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 text-xs font-semibold text-white shadow-xs transition hover:bg-primary-hover"
+                >
+                  <Download className="size-3.5" />
+                  Download form
+                </a>
+              </div>
+            </Card>
+
             <StudentRegistrationUnitList
               units={
                 units
               }
             />
-
-            <Card className="px-4 py-4">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs font-semibold text-text-primary">
-                    Registration form
-                  </p>
-
-                  <p className="mt-1 max-w-xl text-[11px] leading-5 text-text-muted">
-                    Your registered units are saved.
-                  </p>
-                </div>
-
-                <Badge variant="neutral">
-                  Template pending
-                </Badge>
-              </div>
-            </Card>
 
             {context.submission
               ?.verificationNote ? (

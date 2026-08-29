@@ -149,16 +149,17 @@ export function calculateRatCatAverage({
     null;
 }): number | null {
   if (
-    rat ===
-      null ||
     cat ===
       null
   ) {
     return null;
   }
 
+  // If a student misses RAT, 0 is awarded
+  const effectiveRat = rat ?? 0;
+
   return (
-    rat +
+    effectiveRat +
     cat
   ) / 2;
 }
@@ -175,6 +176,13 @@ export function calculateOnlineFinalTotal(
     return null;
   }
 
+  if (
+    values.cat === null ||
+    values.exam === null
+  ) {
+    return null;
+  }
+
   const ratCatAverage =
     calculateRatCatAverage({
       rat:
@@ -184,21 +192,19 @@ export function calculateOnlineFinalTotal(
     });
 
   if (
-    values.assignment ===
-      null ||
-    values.presentation ===
-      null ||
     ratCatAverage ===
-      null ||
-    values.exam ===
       null
   ) {
     return null;
   }
 
+  // If a student misses assignment, presentation, or RAT, 0 is awarded
+  const effectiveAssignment = values.assignment ?? 0;
+  const effectivePresentation = values.presentation ?? 0;
+
   return (
-    values.assignment +
-    values.presentation +
+    effectiveAssignment +
+    effectivePresentation +
     ratCatAverage +
     values.exam
   );
@@ -213,25 +219,16 @@ export function missingOnlineComponentCount({
   absent:
     boolean;
 }): number {
-  let missing =
-    [
-      values.assignment,
-      values.presentation,
-      values.rat,
-      values.cat,
-    ].filter(
-      (value) =>
-        value ===
-        null,
-    ).length;
+  // Assignment, Presentation, and RAT default to 0 if missed.
+  // Required components to complete are CAT and Exam (unless absent).
+  let missing = 0;
 
-  if (
-    !absent &&
-    values.exam ===
-      null
-  ) {
-    missing +=
-      1;
+  if (values.cat === null) {
+    missing += 1;
+  }
+
+  if (!absent && values.exam === null) {
+    missing += 1;
   }
 
   return missing;

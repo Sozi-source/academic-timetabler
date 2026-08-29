@@ -1,6 +1,6 @@
-import { CheckCircle2, Download, FileText, TriangleAlert } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Download, FileText, TriangleAlert } from 'lucide-react';
+import Link from 'next/link';
 
-import { Card } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
 import { getActiveAssessmentPeriodReportData } from '@/features/assessment/reports/queries';
 import { getAssessmentReportReadiness } from '@/features/assessment/reports/readiness';
@@ -20,33 +20,47 @@ function ReportCard({
   status: string;
 }) {
   return (
-    <Card className="p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h2 className="text-sm font-bold text-text-primary">{title}</h2>
-          <p className="mt-1 text-xs text-text-muted">{description}</p>
+    <div className="flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
+      <div>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-xs font-bold text-slate-900">{title}</h2>
+            <p className="mt-0.5 text-[11px] text-slate-500">{description}</p>
+          </div>
+          <div
+            className={`flex size-7 items-center justify-center rounded-lg ${
+              ready
+                ? 'bg-slate-100 text-slate-700'
+                : 'bg-slate-50 text-slate-400'
+            }`}
+          >
+            {ready ? (
+              <CheckCircle2 className="size-3.5" />
+            ) : (
+              <TriangleAlert className="size-3.5" />
+            )}
+          </div>
         </div>
-        <div className={`flex size-8 items-center justify-center rounded-lg ${ready ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'}`}>
-          {ready ? <CheckCircle2 className="size-4" /> : <TriangleAlert className="size-4" />}
-        </div>
+
+        <p className="mt-3 text-[11px] font-medium text-slate-600">{status}</p>
       </div>
 
-      <p className="mt-3 text-xs font-semibold text-text-secondary">{status}</p>
-
-      {ready ? (
-        <a
-          href={href}
-          className="mt-4 inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-3 text-xs font-semibold text-white"
-        >
-          <Download className="size-3.5" />
-          Download DOCX
-        </a>
-      ) : (
-        <span className="mt-4 inline-flex h-9 items-center rounded-lg border border-border px-3 text-xs font-semibold text-text-muted">
-          Complete current markbooks first
-        </span>
-      )}
-    </Card>
+      <div className="mt-4 pt-3 border-t border-slate-100">
+        {ready ? (
+          <a
+            href={href}
+            className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50"
+          >
+            <Download className="size-3.5" />
+            Download Word (.docx)
+          </a>
+        ) : (
+          <span className="inline-flex h-8 items-center rounded-lg border border-slate-100 bg-slate-50 px-3 text-xs font-semibold text-slate-400">
+            Awaiting mark submissions
+          </span>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -57,7 +71,11 @@ export default async function AssessmentReportsPage() {
   if (!data) {
     return (
       <div className="space-y-4">
-        <PageHeader eyebrow="Assessment" title="CAT & exam reports" description="No active academic period" icon={FileText} />
+        <PageHeader
+          title="Examination Reports Centre"
+          description="No active academic period found"
+          icon={FileText}
+        />
       </div>
     );
   }
@@ -65,40 +83,46 @@ export default async function AssessmentReportsPage() {
   const readiness = getAssessmentReportReadiness(data);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5 pb-12">
       <PageHeader
-        eyebrow="Assessment"
-        title="CAT & exam reports"
-        description={data.periodName}
+        title="Examination Reports Centre"
+        description={`${data.periodName} · Academic Board & Departmental Broadsheets`}
         icon={FileText}
-        backHref="/assessment"
-        backLabel="Assessments"
+        actions={
+          <Link
+            href="/assessment"
+            className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50"
+          >
+            <ArrowLeft className="size-3.5 text-slate-500" />
+            <span>Assessment Hub</span>
+          </Link>
+        }
       />
 
       <div className="grid gap-4 md:grid-cols-2">
         <ReportCard
-          title="CAT analysis report"
-          description="Institutional CAT analysis format."
+          title="CAT Performance Report"
+          description="Continuous assessment test breakdown by unit and student."
           href="/api/assessment/reports/cat"
           ready={readiness.catReady}
           status={
             readiness.catReady
-              ? `${readiness.catMarkedRows} CAT mark record(s) available across ${readiness.unitCount} unit(s).`
-              : 'No committed CAT marks are available yet.'
+              ? `${readiness.catMarkedRows} marks available across ${readiness.unitCount} units.`
+              : 'No committed CAT marks yet.'
           }
         />
 
         <ReportCard
-          title="Exam analysis report"
-          description="Institutional end-term exam analysis format."
+          title="Final Exam & Broadsheet Report"
+          description="Official end-term grade distributions, means, and pass statistics."
           href="/api/assessment/reports/exam"
           ready={readiness.examReady}
           status={
             readiness.examReady
-              ? `${readiness.examFinalRows} finalized exam record(s) available.`
+              ? `${readiness.examFinalRows} finalized exam records available.`
               : readiness.examAttendancePendingRows > 0
-                ? `${readiness.examAttendancePendingRows} attendance record(s) are still pending.`
-                : 'Final exam marks have not been completed.'
+                ? `${readiness.examAttendancePendingRows} records pending.`
+                : 'Final exam marks in progress.'
           }
         />
       </div>

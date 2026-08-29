@@ -7,6 +7,8 @@ export interface BatchRegistrationStudent {
   cohortName: string | null;
   stageId: string | null;
   stageCode: string | null;
+  lifecycleStatus: string;
+  reportingStatus: 'pending' | 'reported' | 'deferred' | 'dropped_out';
   expectedUnits: number;
   eligible: boolean;
   eligibilityReason:

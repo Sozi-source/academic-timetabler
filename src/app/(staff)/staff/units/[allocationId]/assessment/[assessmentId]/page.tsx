@@ -74,8 +74,6 @@ export default async function StaffAssessmentPage({
       <PageHeader
         title={access.allocation.unitName}
         description={access.allocation.cohortName}
-        backHref={`/staff/units/${allocationId}`}
-        backLabel="Unit"
       />
 
       <section className="portal-metric-grid" data-columns="4">

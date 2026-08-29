@@ -1,5 +1,7 @@
 import ExcelJS from 'exceljs';
 
+import { compareAdmissionNumbers } from '@/features/students/admission-number-sort';
+
 import type {
   AssessmentMarkbookBundle,
 } from './markbook-generator';
@@ -434,7 +436,8 @@ export async function generateAssessmentSigningSheet(
             first,
             second,
           ) =>
-            first.admissionNumber.localeCompare(
+            compareAdmissionNumbers(
+              first.admissionNumber,
               second.admissionNumber,
             ) ||
             first.fullName.localeCompare(

@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { ArrowLeft, FileDown, Pencil, Printer } from 'lucide-react';
+import { FileDown, Pencil, Printer } from 'lucide-react';
 import Link from 'next/link';
 import type {
   TVETCourseOutlineData,
@@ -67,13 +67,6 @@ export function TVETDocumentViewer({
       {/* Top Action Bar (Hidden during printing) */}
       <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-4 print:hidden">
         <div className="flex min-w-0 items-center gap-2">
-          <Link
-            href={`/staff/units/${allocationId}/documents`}
-            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
-          >
-            <ArrowLeft className="size-3.5" aria-hidden="true" />
-            Back
-          </Link>
           <span className="min-w-0 truncate text-xs font-bold text-slate-900">
             {header.unitCode} · {header.unitName}
           </span>

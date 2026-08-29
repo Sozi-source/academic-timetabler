@@ -1,5 +1,3 @@
-import { ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
 import {
   notFound,
 } from 'next/navigation';
@@ -111,13 +109,6 @@ export default async function PrintRecordOfWorkPage({
       `}</style>
 
       <div className="no-print mb-4 flex items-center justify-between text-xs text-gray-600">
-        <Link
-          href={`/staff/units/${allocationId}/documents/record-of-work`}
-          className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 text-xs font-semibold text-gray-700 hover:bg-gray-50"
-        >
-          <ArrowLeft className="size-3.5" />
-          Back to Record of Work
-        </Link>
         <span>Use your browser print command to print or save as PDF.</span>
       </div>
 

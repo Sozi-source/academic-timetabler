@@ -51,6 +51,20 @@ export default async function BatchUnitRegistrationPage({
     : null;
 
   const error = first(params.error) ?? null;
+  const reporting = first(params.reporting);
+  const reportingNoticeType: 'confirmed' | 'dropped' | null =
+    reporting === 'confirmed' || reporting === 'dropped'
+      ? reporting
+      : null;
+  const notice = reportingNoticeType
+    ? {
+        type: reportingNoticeType,
+        students: numberParam(params.students),
+        registrations: numberParam(
+          reportingNoticeType === 'confirmed' ? params.restored : params.registrations,
+        ),
+      }
+    : null;
 
   return (
     <main className="mx-auto w-full max-w-[1500px] px-3 py-4 sm:px-5 sm:py-5 lg:px-6">
@@ -58,8 +72,9 @@ export default async function BatchUnitRegistrationPage({
         context={context}
         summary={summary}
         error={error}
-              cohortStageSetups={cohortStageSetups}
-/>
+        notice={notice}
+        cohortStageSetups={cohortStageSetups}
+      />
     </main>
   );
 }

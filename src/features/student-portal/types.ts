@@ -20,6 +20,8 @@ export interface StudentPortalIdentity {
   cohortId: string | null;
   cohortName: string | null;
   academicPeriodNumber: number | null;
+  stageCode: string | null;
+  stageName: string | null;
   lifecycleStatus: string;
   detailsVerifiedAt: string | null;
 }
@@ -53,6 +55,8 @@ export interface StudentPortalRegistrationContext {
     verifiedAt: string | null;
   } | null;
   registrationState: StudentPortalRegistrationState;
+  reportingStatus: 'pending' | 'reported' | 'deferred' | 'dropped_out' | null;
+  reportedOn: string | null;
   units: StudentPortalUnit[];
 }
 

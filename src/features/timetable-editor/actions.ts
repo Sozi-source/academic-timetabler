@@ -36,15 +36,28 @@ export async function moveScheduledSessionAction(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.rpc('move_scheduled_session_safely', {
-    target_session_id: parsed.data.sessionId,
-    target_working_day_id: parsed.data.workingDayId,
-    target_start_time_slot_id: parsed.data.startTimeSlotId,
-    target_end_time_slot_id: parsed.data.endTimeSlotId,
-    target_room_id: parsed.data.roomId || null,
-    target_notes: parsed.data.notes ?? null,
-    target_trainer_id: parsed.data.trainerId || null,
-  });
+  const originalNotes = formData.get('originalNotes');
+  const roomOnlyChange =
+    formData.get('originalWorkingDayId') === parsed.data.workingDayId &&
+    formData.get('originalStartTimeSlotId') === parsed.data.startTimeSlotId &&
+    formData.get('originalEndTimeSlotId') === parsed.data.endTimeSlotId &&
+    (formData.get('originalTrainerId') || null) === (parsed.data.trainerId || null) &&
+    (typeof originalNotes === 'string' ? originalNotes : '') === (parsed.data.notes ?? '');
+
+  const { error } = roomOnlyChange
+    ? await supabase.rpc('assign_scheduled_session_room_safely', {
+        target_session_id: parsed.data.sessionId,
+        target_room_id: parsed.data.roomId || null,
+      })
+    : await supabase.rpc('move_scheduled_session_safely', {
+        target_session_id: parsed.data.sessionId,
+        target_working_day_id: parsed.data.workingDayId,
+        target_start_time_slot_id: parsed.data.startTimeSlotId,
+        target_end_time_slot_id: parsed.data.endTimeSlotId,
+        target_room_id: parsed.data.roomId || null,
+        target_notes: parsed.data.notes ?? null,
+        target_trainer_id: parsed.data.trainerId || null,
+      });
 
   if (error) {
     return { status: 'error', message: error.message };

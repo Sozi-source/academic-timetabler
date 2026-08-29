@@ -7,29 +7,18 @@ import {
   KeyRound,
   LoaderCircle,
   LockKeyhole,
+  RefreshCw,
   Search,
-  ShieldOff,
   ShieldCheck,
+  ShieldOff,
+  UserCheck,
   X,
 } from 'lucide-react';
-import {
-  useMemo,
-  useState,
-} from 'react';
-import {
-  useRouter,
-} from 'next/navigation';
+import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-import {
-  Badge,
-} from '@/components/ui/badge';
-import {
-  Button,
-} from '@/components/ui/button';
-import {
-  Input,
-} from '@/components/ui/input';
-
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   formatStudentPortalAccessTime,
   studentPortalAccessStatus,
@@ -40,746 +29,482 @@ import type {
   StudentPortalAccessStatus,
 } from './types';
 
-type FilterValue =
-  | 'all'
-  | StudentPortalAccessStatus;
-
-function statusVariant(
-  status:
-    StudentPortalAccessStatus,
-) {
-  if (
-    status ===
-    'active'
-  ) {
-    return 'success' as const;
-  }
-
-  if (
-    status ===
-    'locked'
-  ) {
-    return 'warning' as const;
-  }
-
-  if (
-    status ===
-    'disabled'
-  ) {
-    return 'danger' as const;
-  }
-
-  return 'neutral' as const;
-}
+type FilterValue = 'all' | StudentPortalAccessStatus;
 
 export function StudentPortalAccessManager({
   rows,
 }: {
-  rows:
-    StudentPortalAccessRow[];
+  rows: StudentPortalAccessRow[];
 }) {
-  const router =
-    useRouter();
+  const router = useRouter();
 
-  const [
-    query,
-    setQuery,
-  ] =
-    useState(
-      '',
-    );
+  const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState<FilterValue>('all');
+  const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
-  const [
-    filter,
-    setFilter,
-  ] =
-    useState<
-      FilterValue
-    >(
-      'all',
-    );
+  const [activeStudentPin, setActiveStudentPin] = useState<{
+    studentId: string;
+    admissionNumber: string;
+    fullName: string;
+    programmeCode: string;
+    cohortName: string;
+    pin: string;
+  } | null>(null);
 
-  const [
-    busy,
-    setBusy,
-  ] =
-    useState<
-      string | null
-    >(
-      null,
-    );
+  const visibleRows = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
 
-  const [
-    error,
-    setError,
-  ] =
-    useState<
-      string | null
-    >(
-      null,
-    );
+    return rows.filter((row) => {
+      const status = studentPortalAccessStatus(row);
 
-  const [
-    issuedPin,
-    setIssuedPin,
-  ] =
-    useState<{
-      studentId:
-        string;
-      admissionNumber:
-        string;
-      fullName:
-        string;
-      pin:
-        string;
-    } | null>(
-      null,
-    );
+      if (filter !== 'all' && status !== filter) {
+        return false;
+      }
 
-  const [
-    copied,
-    setCopied,
-  ] =
-    useState(
-      false,
-    );
+      if (!normalized) {
+        return true;
+      }
 
-  const visibleRows =
-    useMemo(
-      () => {
-        const normalized =
-          query
-            .trim()
-            .toLowerCase();
+      return [
+        row.fullName,
+        row.admissionNumber,
+        row.programmeCode,
+        row.cohortName,
+      ]
+        .join(' ')
+        .toLowerCase()
+        .includes(normalized);
+    });
+  }, [filter, query, rows]);
 
-        return rows.filter(
-          (row) => {
-            const status =
-              studentPortalAccessStatus(
-                row,
-              );
-
-            if (
-              filter !==
-                'all' &&
-              status !==
-                filter
-            ) {
-              return false;
-            }
-
-            if (!normalized) {
-              return true;
-            }
-
-            return [
-              row.fullName,
-              row.admissionNumber,
-              row.programmeCode,
-              row.cohortName,
-            ]
-              .join(
-                ' ',
-              )
-              .toLowerCase()
-              .includes(
-                normalized,
-              );
-          },
-        );
-      },
-      [
-        filter,
-        query,
-        rows,
-      ],
-    );
-
-  async function issuePin(
-    row:
-      StudentPortalAccessRow,
-  ) {
-    setBusy(
-      `pin:${row.studentId}`,
-    );
-
-    setError(
-      null,
-    );
-
-    setIssuedPin(
-      null,
-    );
+  // Issue or Rotate a PIN for an individual student
+  async function handleRotatePin(row: StudentPortalAccessRow) {
+    setBusy(`pin:${row.studentId}`);
+    setError(null);
 
     try {
-      const response =
-        await fetch(
-          `/api/students/portal-access/${row.studentId}/pin`,
-          {
-            method:
-              'POST',
-          },
-        );
+      const response = await fetch(
+        `/api/students/portal-access/${row.studentId}/pin`,
+        { method: 'POST' },
+      );
 
-      const payload =
-        await response
-          .json()
-          .catch(
-            () => null,
-          );
+      const payload = await response.json().catch(() => null);
 
       if (!response.ok) {
-        setError(
-          payload?.message ??
-          'PIN could not be issued.',
-        );
+        setError(payload?.message ?? 'PIN could not be rotated.');
         return;
       }
 
-      setIssuedPin({
-        studentId:
-          row.studentId,
-        admissionNumber:
-          row.admissionNumber,
-        fullName:
-          row.fullName,
-        pin:
-          payload.pin,
+      setActiveStudentPin({
+        studentId: row.studentId,
+        admissionNumber: row.admissionNumber,
+        fullName: row.fullName,
+        programmeCode: row.programmeCode,
+        cohortName: row.cohortName,
+        pin: payload.pin,
       });
 
-      setCopied(
-        false,
-      );
-
+      setCopied(false);
       router.refresh();
+    } catch {
+      setError('An error occurred while generating the PIN.');
     } finally {
-      setBusy(
-        null,
-      );
+      setBusy(null);
     }
   }
 
-  async function updateState(
-    row:
-      StudentPortalAccessRow,
-    active:
-      boolean,
+  // Toggle enable/disable
+  async function handleToggleState(
+    row: StudentPortalAccessRow,
+    active: boolean,
   ) {
-    setBusy(
-      `state:${row.studentId}`,
-    );
-
-    setError(
-      null,
-    );
+    setBusy(`state:${row.studentId}`);
+    setError(null);
 
     try {
-      const response =
-        await fetch(
-          `/api/students/portal-access/${row.studentId}/state`,
-          {
-            method:
-              'POST',
-            headers: {
-              'Content-Type':
-                'application/json',
-            },
-            body:
-              JSON.stringify({
-                active,
-              }),
-          },
-        );
+      const response = await fetch(
+        `/api/students/portal-access/${row.studentId}/state`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ active }),
+        },
+      );
 
-      const payload =
-        await response
-          .json()
-          .catch(
-            () => null,
-          );
+      const payload = await response.json().catch(() => null);
 
       if (!response.ok) {
-        setError(
-          payload?.message ??
-          'Access state could not be changed.',
-        );
+        setError(payload?.message ?? 'Account state could not be updated.');
         return;
       }
 
       router.refresh();
+    } catch {
+      setError('An error occurred while updating account state.');
     } finally {
-      setBusy(
-        null,
-      );
+      setBusy(null);
     }
   }
 
-  async function bulkIssue() {
-    setBusy(
-      'bulk',
-    );
-
-    setError(
-      null,
-    );
+  // Bulk issue / regenerate
+  async function handleBulkIssue(forceAll = false) {
+    setBusy(forceAll ? 'bulk-all' : 'bulk-missing');
+    setError(null);
 
     try {
-      const response =
-        await fetch(
-          '/api/students/portal-access/issue',
-          {
-            method:
-              'POST',
-          },
-        );
+      const response = await fetch(
+        `/api/students/portal-access/issue${forceAll ? '?forceAll=true' : ''}`,
+        { method: 'POST' },
+      );
 
       if (!response.ok) {
-        const payload =
-          await response
-            .json()
-            .catch(
-              () => null,
-            );
-
-        setError(
-          payload?.message ??
-          'Student access workbook could not be generated.',
-        );
-
+        const payload = await response.json().catch(() => null);
+        setError(payload?.message ?? 'Bulk PIN generation failed.');
         return;
       }
 
-      const blob =
-        await response.blob();
-
-      const url =
-        URL.createObjectURL(
-          blob,
-        );
-
-      const anchor =
-        document.createElement(
-          'a',
-        );
-
-      anchor.href =
-        url;
-
-      anchor.download =
-        'student-portal-access-pins.xlsx';
-
-      document.body.appendChild(
-        anchor,
-      );
-
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = forceAll
+        ? 'all-student-portal-pins.xlsx'
+        : 'new-student-portal-pins.xlsx';
+      document.body.appendChild(anchor);
       anchor.click();
-
       anchor.remove();
-
-      URL.revokeObjectURL(
-        url,
-      );
+      window.URL.revokeObjectURL(url);
 
       router.refresh();
+    } catch {
+      setError('An error occurred during bulk generation.');
     } finally {
-      setBusy(
-        null,
-      );
+      setBusy(null);
     }
   }
 
-  async function copyPin() {
-    if (!issuedPin) {
-      return;
-    }
-
-    await navigator.clipboard.writeText(
-      issuedPin.pin,
-    );
-
-    setCopied(
-      true,
-    );
+  async function handleCopyPin(text: string) {
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   }
 
-  const filters:
-    Array<{
-      value:
-        FilterValue;
-      label:
-        string;
-    }> = [
-      {
-        value:
-          'all',
-        label:
-          'All',
-      },
-      {
-        value:
-          'not_issued',
-        label:
-          'Not issued',
-      },
-      {
-        value:
-          'active',
-        label:
-          'Active',
-      },
-      {
-        value:
-          'disabled',
-        label:
-          'Disabled',
-      },
-      {
-        value:
-          'locked',
-        label:
-          'Locked',
-      },
-    ];
+  const filters: Array<{ value: FilterValue; label: string }> = [
+    { value: 'all', label: 'All Students' },
+    { value: 'active', label: 'Active Access' },
+    { value: 'not_issued', label: 'Not Issued' },
+    { value: 'disabled', label: 'Disabled' },
+    { value: 'locked', label: 'Locked' },
+  ];
 
   return (
-    <div className="space-y-4">
-      {issuedPin ? (
-        <section className="rounded-xl border border-institutional-accent-border bg-institutional-yellow/15 px-4 py-3.5">
-          <div className="flex flex-wrap items-start justify-between gap-3">
+    <div className="space-y-4 pb-12">
+      {/* Active Generated / Rotated PIN Banner */}
+      {activeStudentPin ? (
+        <section className="relative overflow-hidden rounded-xl border border-slate-300 bg-slate-900 p-4 text-white shadow-md">
+          <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted">
-                New access PIN
-              </p>
+              <div className="flex items-center gap-2">
+                <span className="flex size-7 items-center justify-center rounded bg-slate-800 text-slate-200">
+                  <KeyRound className="size-3.5" />
+                </span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Student Portal Access PIN
+                </span>
+              </div>
 
-              <p className="mt-1 text-xs font-semibold text-text-primary">
-                {
-                  issuedPin.fullName
-                }
-                {' · '}
-                {
-                  issuedPin.admissionNumber
-                }
-              </p>
+              <div className="mt-2">
+                <h3 className="text-sm font-bold text-white">
+                  {activeStudentPin.fullName}
+                </h3>
+                <p className="text-xs text-slate-400">
+                  {activeStudentPin.admissionNumber} · {activeStudentPin.cohortName} ({activeStudentPin.programmeCode})
+                </p>
+              </div>
 
-              <p className="mt-2 font-mono text-2xl font-extrabold tracking-[0.25em] text-text-primary">
-                {
-                  issuedPin.pin
-                }
-              </p>
+              {/* Large PIN display */}
+              <div className="mt-3 flex items-center gap-3">
+                <span className="rounded-lg bg-slate-800 px-4 py-2 font-mono text-2xl font-black tracking-[0.3em] text-white border border-slate-700 shadow-inner">
+                  {activeStudentPin.pin}
+                </span>
 
-              <p className="mt-1 text-[10px] text-text-muted">
-                Share securely. The PIN is not stored in readable form.
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleCopyPin(activeStudentPin.pin)}
+                  className="h-9 border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700 hover:text-white"
+                  leadingIcon={
+                    copied ? (
+                      <Check className="size-3.5 text-emerald-400" />
+                    ) : (
+                      <Clipboard className="size-3.5" />
+                    )
+                  }
+                >
+                  {copied ? 'Copied PIN' : 'Copy PIN'}
+                </Button>
+
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  disabled={busy !== null}
+                  onClick={() => {
+                    const row = rows.find((r) => r.studentId === activeStudentPin.studentId);
+                    if (row) handleRotatePin(row);
+                  }}
+                  className="h-9 text-slate-300 hover:bg-slate-800 hover:text-white"
+                  leadingIcon={
+                    busy === `pin:${activeStudentPin.studentId}` ? (
+                      <LoaderCircle className="size-3.5 animate-spin" />
+                    ) : (
+                      <RefreshCw className="size-3.5" />
+                    )
+                  }
+                >
+                  Rotate Again
+                </Button>
+              </div>
+
+              <p className="mt-2 text-[11px] text-slate-400">
+                Share this 6-digit PIN with the student for their portal sign-in.
               </p>
             </div>
 
-            <div className="flex gap-1.5">
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() =>
-                  void copyPin()
-                }
-                leadingIcon={
-                  copied ? (
-                    <Check
-                      className="size-3"
-                      aria-hidden="true"
-                    />
-                  ) : (
-                    <Clipboard
-                      className="size-3"
-                      aria-hidden="true"
-                    />
-                  )
-                }
-              >
-                {copied
-                  ? 'Copied'
-                  : 'Copy'}
-              </Button>
-
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                aria-label="Close PIN"
-                onClick={() =>
-                  setIssuedPin(
-                    null,
-                  )
-                }
-              >
-                <X
-                  className="size-3.5"
-                  aria-hidden="true"
-                />
-              </Button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setActiveStudentPin(null)}
+              className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-800 hover:text-white"
+              aria-label="Dismiss PIN Banner"
+            >
+              <X className="size-4" />
+            </button>
           </div>
         </section>
       ) : null}
 
-      <section className="flex flex-col gap-3 rounded-xl border border-border bg-white p-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="w-full max-w-md">
-          <Input
-            value={
-              query
-            }
-            onChange={(
-              event,
-            ) =>
-              setQuery(
-                event.target.value,
-              )
-            }
-            placeholder="Search student, admission no. or cohort"
-            leadingContent={
-              <Search
-                className="size-3.5"
-                aria-hidden="true"
-              />
-            }
+      {/* Action Bar & Search */}
+      <section className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative w-full max-w-md">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search student, admission number, cohort..."
+            className="h-9 w-full rounded-lg border border-slate-200 bg-white pl-8 pr-7 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-slate-400"
           />
+          {query ? (
+            <button
+              type="button"
+              onClick={() => setQuery('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+            >
+              <X className="size-3.5" />
+            </button>
+          ) : null}
         </div>
 
-        <Button
-          type="button"
-          size="sm"
-          disabled={
-            busy !==
-            null
-          }
-          onClick={() =>
-            void bulkIssue()
-          }
-          leadingIcon={
-            busy ===
-            'bulk' ? (
-              <LoaderCircle
-                className="size-3.5 animate-spin"
-                aria-hidden="true"
-              />
-            ) : (
-              <Download
-                className="size-3.5"
-                aria-hidden="true"
-              />
-            )
-          }
-        >
-          Issue all missing PINs
-        </Button>
+        {/* Bulk Action Buttons */}
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={busy !== null}
+            onClick={() => handleBulkIssue(false)}
+            className="h-9 text-xs font-semibold text-slate-700"
+            leadingIcon={
+              busy === 'bulk-missing' ? (
+                <LoaderCircle className="size-3.5 animate-spin" />
+              ) : (
+                <Download className="size-3.5" />
+              )
+            }
+          >
+            Issue Missing PINs
+          </Button>
+
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={busy !== null}
+            onClick={() => {
+              if (
+                window.confirm(
+                  'Are you sure you want to regenerate and rotate PINs for ALL students? This will overwrite existing PINs and download the updated spreadsheet.',
+                )
+              ) {
+                handleBulkIssue(true);
+              }
+            }}
+            className="h-9 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            leadingIcon={
+              busy === 'bulk-all' ? (
+                <LoaderCircle className="size-3.5 animate-spin" />
+              ) : (
+                <RefreshCw className="size-3.5" />
+              )
+            }
+          >
+            Rotate All PINs (Excel)
+          </Button>
+        </div>
       </section>
 
-      <div className="flex flex-wrap gap-1.5">
-        {filters.map(
-          (
-            item,
-          ) => (
-            <button
-              key={
-                item.value
-              }
-              type="button"
-              onClick={() =>
-                setFilter(
-                  item.value,
-                )
-              }
-              className={
-                filter ===
-                item.value
-                  ? 'rounded-lg border border-primary bg-primary px-2.5 py-1.5 text-[11px] font-semibold text-white'
-                  : 'rounded-lg border border-border bg-white px-2.5 py-1.5 text-[11px] font-semibold text-text-secondary transition hover:border-border-strong'
-              }
-            >
-              {
-                item.label
-              }
-            </button>
-          ),
-        )}
+      {/* Filter Tabs */}
+      <div className="flex flex-wrap items-center gap-1.5">
+        {filters.map((item) => (
+          <button
+            key={item.value}
+            type="button"
+            onClick={() => setFilter(item.value)}
+            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+              filter === item.value
+                ? 'bg-slate-900 text-white shadow-2xs'
+                : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+            }`}
+          >
+            {item.label}
+          </button>
+        ))}
       </div>
 
       {error ? (
-        <p className="rounded-lg border border-danger-border bg-danger-surface px-3 py-2.5 text-[11px] text-danger">
-          {
-            error
-          }
+        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-xs font-medium text-red-700">
+          {error}
         </p>
       ) : null}
 
-      <section className="overflow-hidden rounded-xl border border-border bg-white">
-        <div className="hidden border-b border-border bg-surface-subtle px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted lg:grid lg:grid-cols-[minmax(0,1.3fr)_8rem_minmax(8rem,.8fr)_8rem_9rem_auto] lg:items-center lg:gap-3">
-          <span>Student</span>
-          <span>Programme</span>
-          <span>Cohort</span>
-          <span>Access</span>
-          <span>Last login</span>
-          <span />
-        </div>
+      {/* Student List Table */}
+      <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xs">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="border-b border-slate-200 bg-slate-50 text-[11px] font-bold text-slate-600">
+              <tr>
+                <th className="px-4 py-2.5">Student</th>
+                <th className="px-3 py-2.5">Programme</th>
+                <th className="px-3 py-2.5">Cohort</th>
+                <th className="px-3 py-2.5 text-center">Status</th>
+                <th className="px-3 py-2.5 text-center">Last Sign In</th>
+                <th className="px-4 py-2.5 text-right">PIN Actions</th>
+              </tr>
+            </thead>
 
-        {visibleRows.length ===
-        0 ? (
-          <p className="px-4 py-6 text-center text-xs text-text-muted">
-            No students match this view.
-          </p>
-        ) : (
-          <div className="divide-y divide-border">
-            {visibleRows.map(
-              (
-                row,
-              ) => {
-                const status =
-                  studentPortalAccessStatus(
-                    row,
-                  );
+            <tbody className="divide-y divide-slate-100">
+              {visibleRows.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-xs text-slate-400">
+                    No students match this view.
+                  </td>
+                </tr>
+              ) : (
+                visibleRows.map((row) => {
+                  const status = studentPortalAccessStatus(row);
+                  const isBusyPin = busy === `pin:${row.studentId}`;
+                  const isBusyState = busy === `state:${row.studentId}`;
 
-                return (
-                  <article
-                    key={
-                      row.studentId
-                    }
-                    className="grid gap-3 px-4 py-3.5 lg:grid-cols-[minmax(0,1.3fr)_8rem_minmax(8rem,.8fr)_8rem_9rem_auto] lg:items-center"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-xs font-semibold text-text-primary">
-                        {
-                          row.fullName
-                        }
-                      </p>
+                  return (
+                    <tr key={row.studentId} className="transition hover:bg-slate-50/50">
+                      {/* Student Name & Adm */}
+                      <td className="px-4 py-3">
+                        <p className="font-bold text-slate-900">{row.fullName}</p>
+                        <p className="text-[11px] font-medium text-slate-500">{row.admissionNumber}</p>
+                      </td>
 
-                      <p className="mt-0.5 text-[10px] text-text-muted">
-                        {
-                          row.admissionNumber
-                        }
-                      </p>
-                    </div>
+                      {/* Programme */}
+                      <td className="px-3 py-3 text-slate-600">
+                        {row.programmeCode}
+                      </td>
 
-                    <p className="text-[11px] font-semibold text-text-secondary">
-                      {
-                        row.programmeCode
-                      }
-                    </p>
+                      {/* Cohort */}
+                      <td className="px-3 py-3 text-slate-600">
+                        {row.cohortName}
+                      </td>
 
-                    <p className="text-[11px] text-text-secondary">
-                      {
-                        row.cohortName
-                      }
-                    </p>
-
-                    <Badge
-                      variant={
-                        statusVariant(
-                          status,
-                        )
-                      }
-                    >
-                      {studentPortalAccessStatusLabel(
-                        status,
-                      )}
-                    </Badge>
-
-                    <p className="text-[10px] leading-4 text-text-muted">
-                      {formatStudentPortalAccessTime(
-                        row.lastLoginAt,
-                      )}
-                    </p>
-
-                    <div className="flex flex-wrap gap-1.5 lg:justify-end">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        disabled={
-                          busy !==
-                          null
-                        }
-                        onClick={() =>
-                          void issuePin(
-                            row,
-                          )
-                        }
-                        leadingIcon={
-                          busy ===
-                          `pin:${row.studentId}` ? (
-                            <LoaderCircle
-                              className="size-3 animate-spin"
-                              aria-hidden="true"
-                            />
-                          ) : (
-                            <KeyRound
-                              className="size-3"
-                              aria-hidden="true"
-                            />
-                          )
-                        }
-                      >
-                        {row.hasCredential
-                          ? 'Reset PIN'
-                          : 'Issue PIN'}
-                      </Button>
-
-                      {row.hasCredential ? (
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant={
-                            row.isActive
-                              ? 'ghost'
-                              : 'outline'
-                          }
-                          disabled={
-                            busy !==
-                            null
-                          }
-                          onClick={() =>
-                            void updateState(
-                              row,
-                              !row.isActive,
-                            )
-                          }
-                          leadingIcon={
-                            busy ===
-                            `state:${row.studentId}` ? (
-                              <LoaderCircle
-                                className="size-3 animate-spin"
-                                aria-hidden="true"
-                              />
-                            ) : row.isActive ? (
-                              <ShieldOff
-                                className="size-3"
-                                aria-hidden="true"
-                              />
-                            ) : (
-                              <ShieldCheck
-                                className="size-3"
-                                aria-hidden="true"
-                              />
-                            )
+                      {/* Access Status */}
+                      <td className="px-3 py-3 text-center">
+                        <Badge
+                          variant="neutral"
+                          className={
+                            status === 'active'
+                              ? 'bg-slate-100 text-slate-800'
+                              : status === 'not_issued'
+                                ? 'bg-slate-50 text-slate-400'
+                                : status === 'locked'
+                                  ? 'bg-amber-50 text-amber-800'
+                                  : 'bg-red-50 text-red-700'
                           }
                         >
-                          {row.isActive
-                            ? 'Disable'
-                            : 'Enable'}
-                        </Button>
-                      ) : null}
-                    </div>
-                  </article>
-                );
-              },
-            )}
-          </div>
-        )}
+                          {studentPortalAccessStatusLabel(status)}
+                        </Badge>
+                      </td>
+
+                      {/* Last Login */}
+                      <td className="px-3 py-3 text-center text-[11px] text-slate-400">
+                        {formatStudentPortalAccessTime(row.lastLoginAt)}
+                      </td>
+
+                      {/* Actions */}
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            disabled={busy !== null}
+                            onClick={() => handleRotatePin(row)}
+                            className="h-7 border-slate-200 px-2.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
+                            leadingIcon={
+                              isBusyPin ? (
+                                <LoaderCircle className="size-3 animate-spin" />
+                              ) : (
+                                <KeyRound className="size-3" />
+                              )
+                            }
+                          >
+                            {row.hasCredential ? 'Rotate PIN' : 'Generate PIN'}
+                          </Button>
+
+                          {row.hasCredential ? (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              disabled={busy !== null}
+                              onClick={() => handleToggleState(row, !row.isActive)}
+                              className="h-7 px-2 text-[11px] font-semibold text-slate-500 hover:text-slate-900"
+                              leadingIcon={
+                                isBusyState ? (
+                                  <LoaderCircle className="size-3 animate-spin" />
+                                ) : row.isActive ? (
+                                  <ShieldOff className="size-3" />
+                                ) : (
+                                  <ShieldCheck className="size-3" />
+                                )
+                              }
+                            >
+                              {row.isActive ? 'Disable' : 'Enable'}
+                            </Button>
+                          ) : null}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </section>
 
-      <p className="flex items-start gap-1.5 text-[10px] leading-4 text-text-muted">
-        <LockKeyhole
-          className="mt-0.5 size-3 shrink-0"
-          aria-hidden="true"
-        />
-        Five failed sign-in attempts temporarily lock the student account for 15 minutes.
+      <p className="flex items-center gap-1.5 text-[11px] text-slate-500">
+        <LockKeyhole className="size-3 text-slate-400" />
+        Admins can view and rotate student PINs at any time. PINs are securely hashed and validated upon student login.
       </p>
     </div>
   );

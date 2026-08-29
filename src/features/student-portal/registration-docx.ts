@@ -105,20 +105,33 @@ function approvalBox(title: string) {
         ],
       }),
       new TableRow({
+        height: { value: 380, rule: 'atLeast' },
         children: [
           new TableCell({
             borders,
             verticalAlign: VerticalAlign.CENTER,
             margins: { top: 60, bottom: 60, left: 100, right: 100 },
             children: [
-              line(
-                'Name: _______________________________   Date: ___________________   Signature: ___________________',
-                { size: 17, after: 40 },
-              ),
-              line(
-                'Comment: ____________________________________________________________________________________',
-                { size: 17, after: 0 },
-              ),
+              line('Name:                                           Date:                               Signature:', {
+                size: 17,
+                after: 0,
+              }),
+            ],
+          }),
+        ],
+      }),
+      new TableRow({
+        height: { value: 450, rule: 'atLeast' },
+        children: [
+          new TableCell({
+            borders,
+            verticalAlign: VerticalAlign.TOP,
+            margins: { top: 60, bottom: 60, left: 100, right: 100 },
+            children: [
+              line('Comment:', {
+                size: 17,
+                after: 0,
+              }),
             ],
           }),
         ],
@@ -152,18 +165,21 @@ function accountsBox() {
         ],
       }),
       new TableRow({
+        height: { value: 360, rule: 'atLeast' },
         children: [
-          cell('Previous Balance: KShs ____________________'),
-          cell('Amount Paid: KShs ____________________'),
+          cell('Previous Balance: KShs'),
+          cell('Amount Paid: KShs'),
         ],
       }),
       new TableRow({
+        height: { value: 360, rule: 'atLeast' },
         children: [
-          cell('Current Balance: KShs ____________________'),
-          cell('Hostel Fees: KShs ____________________'),
+          cell('Current Balance: KShs'),
+          cell('Hostel Fees: KShs'),
         ],
       }),
       new TableRow({
+        height: { value: 380, rule: 'atLeast' },
         children: [
           new TableCell({
             borders,
@@ -171,10 +187,10 @@ function accountsBox() {
             verticalAlign: VerticalAlign.CENTER,
             margins: { top: 60, bottom: 60, left: 100, right: 100 },
             children: [
-              line(
-                'Accounts Officer: __________________________   Date: __________________   Signature: __________________',
-                { size: 17, after: 0 },
-              ),
+              line('Accounts Officer:                               Date:                               Signature:', {
+                size: 17,
+                after: 0,
+              }),
             ],
           }),
         ],
@@ -265,19 +281,19 @@ export async function buildStudentUnitRegistrationDocx(
         new TableRow({
           children: [
             cell(`Course: ${context.student.programmeName}`),
-            cell(`Stage: ${context.student.stageCode ?? context.student.stageName ?? '________________'}`),
+            cell(`Stage: ${context.student.stageCode ?? context.student.stageName ?? ''}`),
           ],
         }),
         new TableRow({
           children: [
             cell(`Department: ${context.student.departmentName}`),
-            cell(`Intake: ${context.student.cohortName ?? '________________'}`),
+            cell(`Intake: ${context.student.cohortName ?? ''}`),
           ],
         }),
         new TableRow({
           children: [
             cell(`Academic Period: ${context.period.name}`),
-            cell('Resident: ______________________________'),
+            cell('Resident:'),
           ],
         }),
       ],

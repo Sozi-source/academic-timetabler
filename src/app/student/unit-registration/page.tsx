@@ -161,8 +161,8 @@ export default async function StudentUnitRegistrationPage() {
                         : 'Reporting pending'}
                     </Badge>
                   </div>
-                  <p className="mt-1 max-w-xl text-[11px] leading-5 text-text-muted">
-                    Download the form and take it through the approval desks. You do not need to select these units again.
+                  <p className="mt-0.5 text-[11px] text-text-muted">
+                    Download form for clearance approvals.
                   </p>
                 </div>
 

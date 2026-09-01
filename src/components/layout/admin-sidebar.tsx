@@ -25,7 +25,14 @@ interface AdminSidebarProps {
   onMobileClose?: () => void;
 }
 
-export const adminNavItems = [
+export interface AdminNavItem {
+  label: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string; 'aria-hidden'?: boolean | 'true' | 'false' }>;
+  exact?: boolean;
+}
+
+export const adminNavItems: AdminNavItem[] = [
   {
     label: 'Dashboard',
     href: '/dashboard',
@@ -67,7 +74,7 @@ export const adminNavItems = [
     href: '/timetable/organization',
     icon: Settings,
   },
-] as const;
+];
 
 export function AdminSidebar({
   departmentName = 'Human Nutrition & Dietetics',

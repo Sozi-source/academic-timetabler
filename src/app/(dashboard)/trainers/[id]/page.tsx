@@ -251,7 +251,7 @@ export default async function TrainerDetailsPage({
               trainerId={trainer.id}
               trainerName={trainer.fullName}
               trainerEmail={trainer.email}
-              buttonVariant="default"
+              buttonVariant="primary"
               buttonSize="sm"
               buttonLabel="Set Temporary Password"
             />

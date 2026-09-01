@@ -14,14 +14,14 @@ import {
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 
-import { Button } from '@/components/ui/button';
+import { Button, type ButtonSize, type ButtonVariant } from '@/components/ui/button';
 
 interface ResetTrainerPasswordProps {
   trainerId: string;
   trainerName: string;
   trainerEmail?: string | null;
-  buttonVariant?: 'default' | 'outline' | 'ghost';
-  buttonSize?: 'sm' | 'default';
+  buttonVariant?: ButtonVariant;
+  buttonSize?: ButtonSize;
   buttonLabel?: string;
 }
 

@@ -30,15 +30,17 @@ interface StaffShellProps {
   children: ReactNode;
 }
 
+interface NavItem {
+  label: string;
+  href: string;
+  icon: typeof LayoutDashboard;
+  exact?: boolean;
+  badge?: string;
+}
+
 interface NavSection {
   title: string;
-  items: {
-    label: string;
-    href: string;
-    icon: typeof LayoutDashboard;
-    exact?: boolean;
-    badge?: string;
-  }[];
+  items: NavItem[];
 }
 
 const NAV_SECTIONS: NavSection[] = [
@@ -68,7 +70,7 @@ const NAV_SECTIONS: NavSection[] = [
   },
 ];
 
-const MOBILE_BOTTOM_NAV = [
+const MOBILE_BOTTOM_NAV: NavItem[] = [
   { label: 'Overview', href: '/staff', icon: LayoutDashboard, exact: true },
   { label: 'Timetable', href: '/staff/timetable', icon: CalendarDays },
   { label: 'Attendance', href: '/staff/attendance', icon: CalendarCheck2 },

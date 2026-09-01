@@ -40,6 +40,10 @@ export function canUsePostLoginPath(
     return false;
   }
 
+  if (path === '/reset-password') {
+    return true;
+  }
+
   if (
     role ===
     'trainer'

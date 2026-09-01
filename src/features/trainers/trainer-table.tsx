@@ -55,9 +55,12 @@ const columns: ColumnDef<Trainer>[] = [
     header: 'Trainer',
     cell: ({ row }) => (
       <div className="min-w-0">
-        <p className="break-words text-[12px] font-semibold text-text-primary xl:text-sm">
+        <Link
+          href={`/trainers/${row.original.id}`}
+          className="break-words text-[12px] font-semibold text-text-primary transition hover:text-[#033B36] hover:underline xl:text-sm block"
+        >
           {row.original.fullName}
-        </p>
+        </Link>
         {row.original.homeDepartment ? (
           <p className="mt-0.5 break-words text-[10px] text-text-muted xl:text-xs">
             {row.original.homeDepartment}

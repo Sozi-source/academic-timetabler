@@ -105,12 +105,20 @@ export function LoginForm({
       </div>
 
       <div className="space-y-1">
-        <label
-          htmlFor="password"
-          className="block text-xs font-semibold text-text-primary"
-        >
-          Password
-        </label>
+        <div className="flex items-center justify-between">
+          <label
+            htmlFor="password"
+            className="block text-xs font-semibold text-text-primary"
+          >
+            Password
+          </label>
+          <Link
+            href="/forgot-password"
+            className="text-[11px] font-semibold text-primary hover:underline"
+          >
+            Forgot password?
+          </Link>
+        </div>
 
         <div className="relative">
           <LockKeyhole

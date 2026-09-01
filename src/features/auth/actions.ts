@@ -1,10 +1,16 @@
 'use server';
 
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { z } from 'zod';
 
 import { createClient } from '@/lib/supabase/server';
 
-import type { LoginActionState } from './action-types';
+import type {
+  LoginActionState,
+  PasswordResetActionState,
+  UpdatePasswordActionState,
+} from './action-types';
 import {
   canUsePostLoginPath,
   getHomePathForRole,
@@ -113,3 +119,95 @@ export async function logoutAction(): Promise<void> {
 
   redirect('/login');
 }
+
+export async function requestPasswordResetAction(
+  _previousState: PasswordResetActionState,
+  formData: FormData,
+): Promise<PasswordResetActionState> {
+  const emailRaw = formData.get('email');
+  const emailParsed = z
+    .string()
+    .trim()
+    .email('Enter a valid college email address.')
+    .safeParse(emailRaw);
+
+  if (!emailParsed.success) {
+    return {
+      status: 'error',
+      message: 'Enter a valid college email address.',
+      fieldErrors: {
+        email: emailParsed.error.flatten().formErrors,
+      },
+    };
+  }
+
+  const email = emailParsed.data.toLowerCase();
+  const supabase = await createClient();
+
+  const reqHeaders = await headers();
+  const host = reqHeaders.get('host') || 'localhost:3000';
+  const proto = reqHeaders.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
+  const origin = reqHeaders.get('origin') || `${proto}://${host}`;
+  const redirectTo = `${origin}/auth/callback?next=/reset-password`;
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo,
+  });
+
+  if (error) {
+    console.error('Password reset email error:', error.message);
+  }
+
+  return {
+    status: 'success',
+    email,
+    message: `If an account exists for ${email}, a password recovery link has been sent to your inbox.`,
+  };
+}
+
+export async function updatePasswordAction(
+  _previousState: UpdatePasswordActionState,
+  formData: FormData,
+): Promise<UpdatePasswordActionState> {
+  const password = String(formData.get('password') || '');
+  const confirmPassword = String(formData.get('confirmPassword') || '');
+
+  if (password.length < 8) {
+    return {
+      status: 'error',
+      message: 'Password must contain at least 8 characters.',
+      fieldErrors: {
+        password: ['Password must contain at least 8 characters.'],
+      },
+    };
+  }
+
+  if (password !== confirmPassword) {
+    return {
+      status: 'error',
+      message: 'Passwords do not match.',
+      fieldErrors: {
+        confirmPassword: ['Passwords do not match.'],
+      },
+    };
+  }
+
+  const supabase = await createClient();
+
+  const { error } = await supabase.auth.updateUser({
+    password,
+  });
+
+  if (error) {
+    return {
+      status: 'error',
+      message: error.message || 'Unable to update password. Your reset session may have expired.',
+    };
+  }
+
+  return {
+    status: 'success',
+    message: 'Your password has been successfully updated. You can now access your staff workspace.',
+  };
+}
+

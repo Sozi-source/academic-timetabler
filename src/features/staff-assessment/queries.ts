@@ -179,6 +179,7 @@ export const getStaffWorkspace =
       .in(
         'status',
         [
+          'draft',
           'active',
           'completed',
         ],

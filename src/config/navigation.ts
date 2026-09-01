@@ -20,6 +20,7 @@ export const dashboardNavigation = [
     label: 'Platform',
     items: [
       { label: 'Module Hub', href: '/dashboard', icon: ArrowLeft },
+      { label: 'Staff & Trainers', href: '/trainers', icon: UserRound },
     ],
   },
   {

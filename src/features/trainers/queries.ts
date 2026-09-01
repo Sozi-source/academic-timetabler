@@ -174,3 +174,80 @@ export const getTimetableAvailableTrainers =
       ).map(mapTrainer);
     },
   );
+
+export interface TrainerAllocationItem {
+  id: string;
+  unitCode: string;
+  unitName: string;
+  cohortCode: string;
+  cohortName: string;
+  cohortSize: number;
+  weeklySessions: number;
+  sessionDurationMinutes: number;
+  weeklyHours: number;
+  deliveryMode: string;
+  academicPeriodName: string;
+  isTimetableEnabled: boolean;
+  status: string;
+}
+
+export const getTrainerAllocations = cache(
+  async (trainerId: string): Promise<TrainerAllocationItem[]> => {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from('teaching_allocations')
+      .select(`
+        id,
+        weekly_sessions,
+        session_duration_minutes,
+        delivery_mode,
+        is_timetable_enabled,
+        status,
+        units (
+          code,
+          name
+        ),
+        cohorts (
+          code,
+          name,
+          actual_size
+        ),
+        academic_periods (
+          name
+        )
+      `)
+      .eq('trainer_id', trainerId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      return [];
+    }
+
+    return (data ?? []).map((row: any) => {
+      const unit = Array.isArray(row.units) ? row.units[0] : row.units;
+      const cohort = Array.isArray(row.cohorts) ? row.cohorts[0] : row.cohorts;
+      const period = Array.isArray(row.academic_periods) ? row.academic_periods[0] : row.academic_periods;
+      const weeklySessions = Number(row.weekly_sessions || 0);
+      const sessionDurationMinutes = Number(row.session_duration_minutes || 0);
+      const weeklyHours = (weeklySessions * sessionDurationMinutes) / 60;
+
+      return {
+        id: row.id,
+        unitCode: unit?.code || '—',
+        unitName: unit?.name || 'Unit',
+        cohortCode: cohort?.code || '—',
+        cohortName: cohort?.name || 'Class',
+        cohortSize: Number(cohort?.actual_size || 0),
+        weeklySessions,
+        sessionDurationMinutes,
+        weeklyHours,
+        deliveryMode: row.delivery_mode || 'theory',
+        academicPeriodName: period?.name || 'Active Period',
+        isTimetableEnabled: Boolean(row.is_timetable_enabled),
+        status: row.status || 'active',
+      };
+    });
+  },
+);
+

@@ -1,5 +1,6 @@
 import {
   ArrowLeft,
+  CheckCircle2,
   KeyRound,
   UserCheck,
   UserPlus,
@@ -149,32 +150,26 @@ export default async function TrainerAccessPage() {
                   className="grid gap-3 px-4 py-3.5 md:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)_10rem_auto] md:items-center"
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-xs font-semibold text-text-primary">
-                      {
-                        record.fullName
-                      }
-                    </p>
+                    <Link
+                      href={`/trainers/${record.trainerId}`}
+                      className="truncate text-xs font-semibold text-text-primary transition hover:text-header-blue hover:underline block"
+                    >
+                      {record.fullName}
+                    </Link>
 
                     <p className="mt-0.5 truncate text-[10px] text-text-muted">
-                      {
-                        record.email ??
-                        'No email'
-                      }
+                      {record.email ?? 'No email'}
                     </p>
                   </div>
 
                   <div className="min-w-0">
                     <p className="text-[11px] font-medium text-text-secondary">
-                      {trainerAccessDetail(
-                        record,
-                      )}
+                      {trainerAccessDetail(record)}
                     </p>
 
                     {record.profileRole ? (
                       <p className="mt-0.5 text-[10px] text-text-muted">
-                        Profile: {
-                          record.profileRole
-                        }
+                        Profile: {record.profileRole}
                       </p>
                     ) : null}
                   </div>
@@ -182,33 +177,44 @@ export default async function TrainerAccessPage() {
                   <div>
                     <Badge
                       variant={
-                        record.accessState ===
-                        'linked'
+                        record.accessState === 'linked'
                           ? 'success'
-                          : 'neutral'
+                          : record.accessState === 'ready_to_link'
+                            ? 'primary'
+                            : 'neutral'
                       }
                     >
-                      {trainerAccessLabel(
-                        record.accessState,
-                      )}
+                      {trainerAccessLabel(record.accessState)}
                     </Badge>
                   </div>
 
-                  <div className="md:justify-self-end">
-                    {canProvisionTrainerAccess(
-                      record.accessState,
-                    ) ? (
-                      <TrainerAccessAction
-                        trainerId={
-                          record.trainerId
-                        }
-                      />
-                    ) : record.accessState ===
-                      'account_required' ? (
-                      <span className="text-[10px] font-medium text-text-muted">
-                        Use /staff/register
+                  <div className="flex items-center gap-2 md:justify-self-end">
+                    {canProvisionTrainerAccess(record.accessState) ? (
+                      <TrainerAccessAction trainerId={record.trainerId} />
+                    ) : record.accessState === 'linked' ? (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700">
+                        <CheckCircle2 className="size-3.5 text-emerald-600" />
+                        Approved
                       </span>
-                    ) : null}
+                    ) : record.accessState === 'email_required' ? (
+                      <Link
+                        href={`/timetable/trainers/${record.trainerId}/edit`}
+                        className="text-[11px] font-semibold text-header-blue hover:underline"
+                      >
+                        Add email
+                      </Link>
+                    ) : (
+                      <span className="text-[10px] font-medium text-text-muted">
+                        Pending registration
+                      </span>
+                    )}
+
+                    <Link
+                      href={`/trainers/${record.trainerId}`}
+                      className="inline-flex h-8 items-center justify-center rounded-lg border border-border-strong bg-white px-2.5 text-[11px] font-medium text-text-secondary transition hover:bg-surface-subtle"
+                    >
+                      Profile
+                    </Link>
                   </div>
                 </article>
               ),

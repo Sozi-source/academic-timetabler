@@ -47,278 +47,278 @@ export function DashboardView({
   const attendanceOpen = snapshot?.attendance?.open ?? 1;
 
   return (
-    <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
+    <div className="flex flex-col gap-6 2xl:flex-row 2xl:items-start">
       {/* ========================================================= */}
       {/* 1. Main Dashboard Canvas (Dense & Perfectly Proportioned) */}
       {/* ========================================================= */}
-      <div className="min-w-0 flex-1 space-y-7">
+      <div className="min-w-0 flex-1 space-y-6">
         {/* Top Action Buttons Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-gray-900 sm:text-2xl">
+            <h1 className="text-lg font-bold tracking-tight text-gray-900 sm:text-xl">
               Department Overview
             </h1>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-xs text-gray-500">
               Live operational telemetry and academic management hub.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2">
             <Link
               href="/operations/daily-reports"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-xs font-semibold text-gray-700 shadow-2xs transition-colors hover:bg-gray-50 hover:text-gray-900"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-2xs transition-colors hover:bg-gray-50 hover:text-gray-900"
             >
-              <ClipboardList className="size-4 text-gray-500" aria-hidden="true" />
+              <ClipboardList className="size-3.5 text-gray-500" aria-hidden="true" />
               <span>Daily Reports</span>
             </Link>
 
             <Link
               href="/staff"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-xs font-semibold text-gray-700 shadow-2xs transition-colors hover:bg-gray-50 hover:text-gray-900"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-2xs transition-colors hover:bg-gray-50 hover:text-gray-900"
             >
-              <User className="size-4 text-gray-500" aria-hidden="true" />
+              <User className="size-3.5 text-gray-500" aria-hidden="true" />
               <span>My Workspace</span>
             </Link>
 
             <Link
               href="/operations/action-center"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-[#033B36] px-3.5 py-2 text-xs font-semibold text-white shadow-2xs transition-colors hover:bg-[#022A26]"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[#033B36] px-3 py-1.5 text-xs font-semibold text-white shadow-2xs transition-colors hover:bg-[#022A26]"
             >
-              <Zap className="size-4 text-[#FACC15]" aria-hidden="true" />
+              <Zap className="size-3.5 text-[#FACC15]" aria-hidden="true" />
               <span>Action Centre</span>
             </Link>
           </div>
         </div>
 
         {/* 4-Metric Telemetry Strip */}
-        <section aria-label="Department Metrics" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <section aria-label="Department Metrics" className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
           {/* Metric 1: ACTIVE TERM */}
-          <div className="flex flex-col justify-between rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-xs transition hover:shadow-sm">
-            <div className="flex items-start gap-3.5">
-              <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#033B36] text-white shadow-xs">
-                <CalendarDays className="size-5.5 text-[#FACC15]" aria-hidden="true" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
-                  Active Term
-                </p>
-                <p className="mt-0.5 text-base font-bold text-gray-900 leading-tight">
-                  {activePeriodName}
-                </p>
-                <p className="text-[11px] text-gray-500 mt-0.5">Academic session</p>
-              </div>
+          <div className="flex flex-col justify-between rounded-xl border border-gray-200/90 bg-white p-4 shadow-xs transition hover:border-[#033B36]/30 hover:shadow-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                Active Term
+              </span>
+              <span className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-[#033B36]/10 text-[#033B36]">
+                <CalendarDays className="size-4 text-[#033B36]" aria-hidden="true" />
+              </span>
             </div>
-            <div className="mt-4 h-1 w-10 rounded-full bg-[#033B36]" />
+            <div className="mt-2">
+              <p className="text-base font-bold text-gray-900 tracking-tight">
+                {activePeriodName}
+              </p>
+              <p className="text-[11px] text-gray-500 mt-0.5">Academic session</p>
+            </div>
+            <div className="mt-3 h-0.5 w-7 rounded-full bg-[#033B36]" />
           </div>
 
           {/* Metric 2: STUDENTS PORTAL */}
-          <div className="flex flex-col justify-between rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-xs transition hover:shadow-sm">
-            <div className="flex items-start gap-3.5">
-              <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#F59E0B] text-white shadow-xs">
-                <Users className="size-5.5 text-white" aria-hidden="true" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
-                  Students Portal
-                </p>
-                <p className="mt-0.5 text-base font-bold text-gray-900 leading-tight">
-                  {studentsRegistered} / {studentsEligible}
-                </p>
-                <p className="text-[11px] text-gray-500 mt-0.5">
-                  {studentsPinsActive} PINs active
-                </p>
-              </div>
+          <div className="flex flex-col justify-between rounded-xl border border-gray-200/90 bg-white p-4 shadow-xs transition hover:border-[#F59E0B]/30 hover:shadow-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                Students Portal
+              </span>
+              <span className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-[#F59E0B]/15 text-[#D97706]">
+                <Users className="size-4 text-[#D97706]" aria-hidden="true" />
+              </span>
             </div>
-            <div className="mt-4 h-1 w-10 rounded-full bg-[#F59E0B]" />
+            <div className="mt-2">
+              <p className="text-base font-bold text-gray-900 tracking-tight">
+                {studentsRegistered} / {studentsEligible}
+              </p>
+              <p className="text-[11px] text-gray-500 mt-0.5">
+                {studentsPinsActive} PINs active
+              </p>
+            </div>
+            <div className="mt-3 h-0.5 w-7 rounded-full bg-[#F59E0B]" />
           </div>
 
           {/* Metric 3: TEACHING ALLOCATIONS */}
-          <div className="flex flex-col justify-between rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-xs transition hover:shadow-sm">
-            <div className="flex items-start gap-3.5">
-              <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#033B36] text-white shadow-xs">
-                <Monitor className="size-5.5 text-white" aria-hidden="true" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
-                  Teaching Units
-                </p>
-                <p className="mt-0.5 text-base font-bold text-gray-900 leading-tight">
-                  {teachingUnits} Units
-                </p>
-                <p className="text-[11px] text-gray-500 mt-0.5">
-                  {publishedSessions} published
-                </p>
-              </div>
+          <div className="flex flex-col justify-between rounded-xl border border-gray-200/90 bg-white p-4 shadow-xs transition hover:border-[#033B36]/30 hover:shadow-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                Teaching Units
+              </span>
+              <span className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-[#033B36]/10 text-[#033B36]">
+                <Monitor className="size-4 text-[#033B36]" aria-hidden="true" />
+              </span>
             </div>
-            <div className="mt-4 h-1 w-10 rounded-full bg-[#033B36]" />
+            <div className="mt-2">
+              <p className="text-base font-bold text-gray-900 tracking-tight">
+                {teachingUnits} Units
+              </p>
+              <p className="text-[11px] text-gray-500 mt-0.5">
+                {publishedSessions} published
+              </p>
+            </div>
+            <div className="mt-3 h-0.5 w-7 rounded-full bg-[#033B36]" />
           </div>
 
           {/* Metric 4: CLASS ATTENDANCE */}
-          <div className="flex flex-col justify-between rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-xs transition hover:shadow-sm">
-            <div className="flex items-start gap-3.5">
-              <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#15803D] text-white shadow-xs">
-                <CheckCircle2 className="size-5.5 text-white" aria-hidden="true" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
-                  Class Attendance
-                </p>
-                <p className="mt-0.5 text-base font-bold text-gray-900 leading-tight">
-                  {attendanceCompleted} Completed
-                </p>
-                <p className="text-[11px] text-gray-500 mt-0.5">
-                  {attendanceOpen} open today
-                </p>
-              </div>
+          <div className="flex flex-col justify-between rounded-xl border border-gray-200/90 bg-white p-4 shadow-xs transition hover:border-[#15803D]/30 hover:shadow-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                Class Attendance
+              </span>
+              <span className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+                <CheckCircle2 className="size-4 text-emerald-600" aria-hidden="true" />
+              </span>
             </div>
-            <div className="mt-4 h-1 w-10 rounded-full bg-[#15803D]" />
+            <div className="mt-2">
+              <p className="text-base font-bold text-gray-900 tracking-tight">
+                {attendanceCompleted} Completed
+              </p>
+              <p className="text-[11px] text-gray-500 mt-0.5">
+                {attendanceOpen} open today
+              </p>
+            </div>
+            <div className="mt-3 h-0.5 w-7 rounded-full bg-[#15803D]" />
           </div>
         </section>
 
         {/* Department Modules Grid */}
-        <section aria-labelledby="department-modules-heading" className="space-y-3.5">
+        <section aria-labelledby="department-modules-heading" className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 id="department-modules-heading" className="text-sm font-bold uppercase tracking-wider text-gray-700">
+            <h2 id="department-modules-heading" className="text-xs font-bold uppercase tracking-wider text-gray-700">
               Department Core Modules
             </h2>
-            <span className="text-xs font-medium text-gray-500">5 Operational Workspaces</span>
+            <span className="text-[11px] font-medium text-gray-500">6 Operational Workspaces</span>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {/* Module 1: Daily Operations */}
             <Link
               href="/operations/daily-reports"
-              className="group flex flex-col items-center justify-center rounded-2xl border border-[#E5E7EB] bg-white px-3 py-6 text-center shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-[#033B36]/30 hover:shadow-md"
+              className="group flex flex-col items-center justify-center rounded-xl border border-gray-200/90 bg-white px-2.5 py-4 text-center shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:border-[#033B36]/30 hover:shadow-sm"
             >
-              <div className="flex size-13 items-center justify-center rounded-full bg-[#033B36] text-white shadow-xs transition group-hover:scale-105">
-                <Clock className="size-6 text-white" aria-hidden="true" />
+              <div className="flex size-10 items-center justify-center rounded-full bg-[#033B36] text-white shadow-2xs transition group-hover:scale-105">
+                <Clock className="size-4.5 text-white" aria-hidden="true" />
               </div>
-              <p className="mt-4 text-xs font-bold text-[#033B36]">
+              <p className="mt-2.5 text-[11px] font-bold text-[#033B36]">
                 Daily Operations
               </p>
-              <div className="mt-3 h-1 w-8 rounded-full bg-[#033B36]" />
+              <div className="mt-2 h-0.5 w-6 rounded-full bg-[#033B36]" />
             </Link>
 
             {/* Module 2: Academic Planning */}
             <Link
               href="/timetable"
-              className="group flex flex-col items-center justify-center rounded-2xl border border-[#E5E7EB] bg-white px-3 py-6 text-center shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-[#F59E0B]/30 hover:shadow-md"
+              className="group flex flex-col items-center justify-center rounded-xl border border-gray-200/90 bg-white px-2.5 py-4 text-center shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:border-[#F59E0B]/30 hover:shadow-sm"
             >
-              <div className="flex size-13 items-center justify-center rounded-full bg-[#F59E0B] text-white shadow-xs transition group-hover:scale-105">
-                <CalendarDays className="size-6 text-white" aria-hidden="true" />
+              <div className="flex size-10 items-center justify-center rounded-full bg-[#F59E0B] text-white shadow-2xs transition group-hover:scale-105">
+                <CalendarDays className="size-4.5 text-white" aria-hidden="true" />
               </div>
-              <p className="mt-4 text-xs font-bold text-[#B45309]">
+              <p className="mt-2.5 text-[11px] font-bold text-[#B45309]">
                 Academic Planning
               </p>
-              <div className="mt-3 h-1 w-8 rounded-full bg-[#F59E0B]" />
+              <div className="mt-2 h-0.5 w-6 rounded-full bg-[#F59E0B]" />
             </Link>
 
             {/* Module 3: Staff & Trainers */}
             <Link
               href="/trainers"
-              className="group flex flex-col items-center justify-center rounded-2xl border border-[#E5E7EB] bg-white px-3 py-6 text-center shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-[#033B36]/30 hover:shadow-md"
+              className="group flex flex-col items-center justify-center rounded-xl border border-gray-200/90 bg-white px-2.5 py-4 text-center shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:border-[#033B36]/30 hover:shadow-sm"
             >
-              <div className="flex size-13 items-center justify-center rounded-full bg-[#033B36] text-white shadow-xs transition group-hover:scale-105">
-                <Users className="size-6 text-white" aria-hidden="true" />
+              <div className="flex size-10 items-center justify-center rounded-full bg-[#033B36] text-white shadow-2xs transition group-hover:scale-105">
+                <Users className="size-4.5 text-white" aria-hidden="true" />
               </div>
-              <p className="mt-4 text-xs font-bold text-[#033B36]">
+              <p className="mt-2.5 text-[11px] font-bold text-[#033B36]">
                 Staff & Trainers
               </p>
-              <div className="mt-3 h-1 w-8 rounded-full bg-[#033B36]" />
+              <div className="mt-2 h-0.5 w-6 rounded-full bg-[#033B36]" />
             </Link>
 
             {/* Module 4: Quality Assurance */}
             <Link
               href="/teaching-documents"
-              className="group flex flex-col items-center justify-center rounded-2xl border border-[#E5E7EB] bg-white px-3 py-6 text-center shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-[#033B36]/30 hover:shadow-md"
+              className="group flex flex-col items-center justify-center rounded-xl border border-gray-200/90 bg-white px-2.5 py-4 text-center shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:border-[#033B36]/30 hover:shadow-sm"
             >
-              <div className="flex size-13 items-center justify-center rounded-full bg-[#033B36] text-white shadow-xs transition group-hover:scale-105">
-                <FileText className="size-6 text-white" aria-hidden="true" />
+              <div className="flex size-10 items-center justify-center rounded-full bg-[#033B36] text-white shadow-2xs transition group-hover:scale-105">
+                <FileText className="size-4.5 text-white" aria-hidden="true" />
               </div>
-              <p className="mt-4 text-xs font-bold text-[#033B36]">
+              <p className="mt-2.5 text-[11px] font-bold text-[#033B36]">
                 Quality Assurance
               </p>
-              <div className="mt-3 h-1 w-8 rounded-full bg-[#033B36]" />
+              <div className="mt-2 h-0.5 w-6 rounded-full bg-[#033B36]" />
             </Link>
 
             {/* Module 5: Grading & Results */}
             <Link
               href="/assessment"
-              className="group flex flex-col items-center justify-center rounded-2xl border border-[#E5E7EB] bg-white px-3 py-6 text-center shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-[#F59E0B]/30 hover:shadow-md"
+              className="group flex flex-col items-center justify-center rounded-xl border border-gray-200/90 bg-white px-2.5 py-4 text-center shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:border-[#F59E0B]/30 hover:shadow-sm"
             >
-              <div className="flex size-13 items-center justify-center rounded-full bg-[#F59E0B] text-white shadow-xs transition group-hover:scale-105">
-                <BarChart3 className="size-6 text-white" aria-hidden="true" />
+              <div className="flex size-10 items-center justify-center rounded-full bg-[#F59E0B] text-white shadow-2xs transition group-hover:scale-105">
+                <BarChart3 className="size-4.5 text-white" aria-hidden="true" />
               </div>
-              <p className="mt-4 text-xs font-bold text-[#B45309]">
+              <p className="mt-2.5 text-[11px] font-bold text-[#B45309]">
                 Grading & Results
               </p>
-              <div className="mt-3 h-1 w-8 rounded-full bg-[#F59E0B]" />
+              <div className="mt-2 h-0.5 w-6 rounded-full bg-[#F59E0B]" />
             </Link>
 
             {/* Module 6: Action Centre */}
             <Link
               href="/operations/action-center"
-              className="group flex flex-col items-center justify-center rounded-2xl border border-[#E5E7EB] bg-white px-3 py-6 text-center shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-[#033B36]/30 hover:shadow-md"
+              className="group flex flex-col items-center justify-center rounded-xl border border-gray-200/90 bg-white px-2.5 py-4 text-center shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:border-[#033B36]/30 hover:shadow-sm"
             >
-              <div className="flex size-13 items-center justify-center rounded-full bg-[#033B36] text-white shadow-xs transition group-hover:scale-105">
-                <Zap className="size-6 text-[#FACC15]" aria-hidden="true" />
+              <div className="flex size-10 items-center justify-center rounded-full bg-[#033B36] text-white shadow-2xs transition group-hover:scale-105">
+                <Zap className="size-4.5 text-[#FACC15]" aria-hidden="true" />
               </div>
-              <p className="mt-4 text-xs font-bold text-[#033B36]">
+              <p className="mt-2.5 text-[11px] font-bold text-[#033B36]">
                 Action Centre
               </p>
-              <div className="mt-3 h-1 w-8 rounded-full bg-[#033B36]" />
+              <div className="mt-2 h-0.5 w-6 rounded-full bg-[#033B36]" />
             </Link>
           </div>
         </section>
 
         {/* Quick Access Bar */}
-        <section aria-labelledby="quick-access-heading" className="space-y-3.5">
+        <section aria-labelledby="quick-access-heading" className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 id="quick-access-heading" className="text-sm font-bold uppercase tracking-wider text-gray-700">
+            <h2 id="quick-access-heading" className="text-xs font-bold uppercase tracking-wider text-gray-700">
               Quick Shortcuts
             </h2>
-            <span className="text-xs font-medium text-gray-500">Direct Workspace Links</span>
+            <span className="text-[11px] font-medium text-gray-500">Direct Workspace Links</span>
           </div>
 
-          <div className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-xs">
-            <div className="grid grid-cols-1 divide-y sm:grid-cols-5 sm:divide-y-0 sm:divide-x divide-gray-200">
+          <div className="overflow-hidden rounded-xl border border-gray-200/90 bg-white shadow-2xs">
+            <div className="grid grid-cols-2 divide-y sm:grid-cols-5 sm:divide-y-0 sm:divide-x divide-gray-200">
               <Link
                 href="/timetable/reports"
-                className="flex items-center justify-center gap-2.5 px-4 py-3.5 text-xs font-medium text-gray-800 transition hover:bg-gray-50 hover:text-[#033B36]"
+                className="flex items-center justify-center gap-2 px-3 py-3 text-xs font-medium text-gray-700 transition hover:bg-gray-50 hover:text-[#033B36]"
               >
-                <CalendarDays className="size-4 text-gray-500 shrink-0" aria-hidden="true" />
+                <CalendarDays className="size-3.5 text-gray-500 shrink-0" aria-hidden="true" />
                 <span className="truncate">Timetables</span>
               </Link>
 
               <Link
                 href="/timetable/teaching-allocations"
-                className="flex items-center justify-center gap-2.5 px-4 py-3.5 text-xs font-medium text-gray-800 transition hover:bg-gray-50 hover:text-[#033B36]"
+                className="flex items-center justify-center gap-2 px-3 py-3 text-xs font-medium text-gray-700 transition hover:bg-gray-50 hover:text-[#033B36]"
               >
-                <Users className="size-4 text-gray-500 shrink-0" aria-hidden="true" />
+                <Users className="size-3.5 text-gray-500 shrink-0" aria-hidden="true" />
                 <span className="truncate">Allocations</span>
               </Link>
 
               <Link
-                href="/teaching-documents"
-                className="flex items-center justify-center gap-2.5 px-4 py-3.5 text-xs font-medium text-gray-800 transition hover:bg-gray-50 hover:text-[#033B36]"
+                href="/timetable/rooms"
+                className="flex items-center justify-center gap-2 px-3 py-3 text-xs font-medium text-gray-700 transition hover:bg-gray-50 hover:text-[#033B36]"
               >
-                <Folder className="size-4 text-gray-500 shrink-0" aria-hidden="true" />
-                <span className="truncate">Curriculum</span>
+                <Folder className="size-3.5 text-gray-500 shrink-0" aria-hidden="true" />
+                <span className="truncate">Rooms</span>
               </Link>
 
               <Link
-                href="/assessment/reports"
-                className="flex items-center justify-center gap-2.5 px-4 py-3.5 text-xs font-medium text-gray-800 transition hover:bg-gray-50 hover:text-[#033B36]"
+                href="/timetable/trainers"
+                className="flex items-center justify-center gap-2 px-3 py-3 text-xs font-medium text-gray-700 transition hover:bg-gray-50 hover:text-[#033B36]"
               >
-                <FileText className="size-4 text-gray-500 shrink-0" aria-hidden="true" />
-                <span className="truncate">Exam Reports</span>
+                <UserCheck className="size-3.5 text-gray-500 shrink-0" aria-hidden="true" />
+                <span className="truncate">Trainers</span>
               </Link>
 
               <Link
-                href="/assessment/analysis"
-                className="flex items-center justify-center gap-2.5 px-4 py-3.5 text-xs font-medium text-gray-800 transition hover:bg-gray-50 hover:text-[#033B36]"
+                href="/assessment"
+                className="flex items-center justify-center gap-2 px-3 py-3 text-xs font-medium text-gray-700 transition hover:bg-gray-50 hover:text-[#033B36] col-span-2 sm:col-span-1 border-t sm:border-t-0"
               >
-                <TrendingUp className="size-4 text-gray-500 shrink-0" aria-hidden="true" />
+                <TrendingUp className="size-3.5 text-gray-500 shrink-0" aria-hidden="true" />
                 <span className="truncate">Results</span>
               </Link>
             </div>
@@ -327,11 +327,11 @@ export function DashboardView({
       </div>
 
       {/* ========================================================= */}
-      {/* 2. Fixed Right Companion Sidebar (Clamped 280px-320px)    */}
+      {/* 2. Fixed Right Companion Sidebar (Only on 2xl+ Displays)  */}
       {/* ========================================================= */}
       <aside
         aria-label="Operational Pulse & Shortcuts"
-        className="w-full shrink-0 space-y-4 xl:w-72 2xl:w-80"
+        className="hidden 2xl:block 2xl:w-72 min-[1800px]:w-80 shrink-0 space-y-4"
       >
         {/* Card 1: Academic Session Pulse */}
         <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-xs">

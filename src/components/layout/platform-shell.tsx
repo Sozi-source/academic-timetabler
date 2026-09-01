@@ -25,7 +25,7 @@ export function PlatformShell({ profile, children }: PlatformShellProps) {
       />
 
       {/* Main Content Area */}
-      <div className="flex min-h-screen flex-col lg:pl-[250px]">
+      <div className="flex min-h-screen flex-col lg:pl-[215px]">
         {/* Top Header */}
         <AdminHeader
           profile={profile}

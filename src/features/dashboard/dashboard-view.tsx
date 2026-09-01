@@ -52,15 +52,15 @@ export function DashboardView({
       {/* 1. Main Dashboard Canvas (Dense & Perfectly Proportioned) */}
       {/* ========================================================= */}
       <div className="min-w-0 flex-1 space-y-6">
-        {/* Top Action Buttons Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="text-lg font-bold tracking-tight text-gray-900 sm:text-xl">
-              Department Overview
-            </h1>
-            <p className="text-xs text-gray-500">
-              Live operational telemetry and academic management hub.
-            </p>
+        {/* Operational Controls & Quick Action Strip */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-1 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 text-[11px] font-semibold text-emerald-800">
+              <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Live Operational Hub
+            </span>
+            <span className="hidden text-xs text-gray-400 sm:inline">•</span>
+            <span className="hidden text-xs text-gray-500 sm:inline">Telemetry & Management Control</span>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">

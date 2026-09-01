@@ -37,68 +37,68 @@ export function AdminHeader({
   const departmentLabel = profile.departmentName || 'Human Nutrition & Dietetics';
 
   return (
-    <header className="sticky top-0 z-20 flex h-20 items-center justify-between border-b border-[#E5E7EB] bg-white px-4 sm:px-8 shadow-xs">
+    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 sm:px-6 lg:px-8 shadow-2xs">
       {/* Left: Mobile Toggle & Page Title & Subtitle */}
-      <div className="flex items-center gap-3.5">
+      <div className="flex items-center gap-3">
         {onOpenMobileNav ? (
           <button
             type="button"
             onClick={onOpenMobileNav}
             aria-label="Open navigation menu"
-            className="flex size-10 items-center justify-center rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 lg:hidden"
+            className="flex size-9 items-center justify-center rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 lg:hidden"
           >
-            <Menu className="size-5" />
+            <Menu className="size-4.5" />
           </button>
         ) : null}
 
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-[#111827] sm:text-2xl">
+          <h1 className="text-base font-bold tracking-tight text-gray-900 sm:text-lg leading-snug">
             {title}
           </h1>
-          <p className="text-xs font-normal text-[#6B7280] mt-0.5">
-            {departmentLabel} <span className="mx-1">•</span> {activePeriodName}
+          <p className="text-xs font-normal text-gray-500 leading-none mt-0.5">
+            {departmentLabel} <span className="mx-1 text-gray-300">•</span> {activePeriodName}
           </p>
         </div>
       </div>
 
       {/* Right: Notifications & User Profile */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         {/* Notification Bell */}
         <button
           type="button"
           aria-label="Notifications"
-          className="relative flex size-10 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+          className="relative flex size-9 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
         >
-          <Bell className="size-5" />
-          <span className="absolute top-2 right-2 size-2 rounded-full bg-[#EAB308]" />
+          <Bell className="size-4.5" />
+          <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-[#EAB308]" />
         </button>
 
         {/* Vertical Divider */}
-        <div className="h-8 w-px bg-[#E5E7EB]" aria-hidden="true" />
+        <div className="h-6 w-px bg-gray-200" aria-hidden="true" />
 
         {/* User Badge with Dropdown */}
         <div className="relative">
           <button
             type="button"
             onClick={() => setDropdownOpen((prev) => !prev)}
-            className="flex items-center gap-3 rounded-xl p-1 text-left transition hover:bg-gray-50 focus:outline-none"
+            className="flex items-center gap-2.5 rounded-xl p-1 text-left transition hover:bg-gray-50 focus:outline-none"
             aria-expanded={dropdownOpen}
           >
             <div className="hidden text-right md:block">
-              <p className="text-sm font-semibold leading-tight text-[#111827]">
+              <p className="text-xs font-semibold leading-tight text-gray-900">
                 {displayName}
               </p>
-              <p className="text-xs text-[#6B7280] leading-tight mt-0.5">
+              <p className="text-[11px] text-gray-500 leading-tight mt-0.5">
                 {roleLabel}
               </p>
             </div>
 
             {/* Deep Teal Avatar */}
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#033B36] text-sm font-bold text-white shadow-xs">
+            <div className="flex size-8.5 shrink-0 items-center justify-center rounded-full bg-[#033B36] text-xs font-bold text-white shadow-2xs">
               {initial}
             </div>
 
-            <ChevronDown className="size-4 text-gray-400 transition-transform duration-200" />
+            <ChevronDown className="size-3.5 text-gray-400" />
           </button>
 
           {/* User Dropdown Menu */}

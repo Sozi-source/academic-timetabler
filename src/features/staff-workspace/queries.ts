@@ -14,6 +14,7 @@ import {
 import {
   createClient,
 } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 import {
   historyTimestamp,
@@ -76,6 +77,10 @@ Promise<SupabaseClient> {
     await createClient()
   ) as unknown as
     SupabaseClient;
+}
+
+function timetableClient(): SupabaseClient {
+  return createAdminClient() as unknown as SupabaseClient;
 }
 
 async function lookupRows(
@@ -182,20 +187,24 @@ export async function getStaffPublishedTimetable(
       profileId,
     );
 
-  const supabase =
-    await untypedClient();
+  // The caller is already authenticated as a trainer and getStaffWorkspace()
+  // has resolved that account to one trainer ID. The department-scoped RLS
+  // policies intentionally do not expose timetable snapshots to trainers, so
+  // this server-only query reads with the service role and filters by that ID.
+  const supabase = timetableClient();
 
-  const { data: publishedVersionsData } = await supabase
+  const { data: publishedVersions, error: versionError } = await supabase
     .from('timetable_versions')
     .select('academic_period_id, snapshot, status')
-    .in('status', ['published', 'approved', 'submitted', 'draft'])
+    .eq('status', 'published')
     .order('version_number', { ascending: false });
 
-  const publishedVersions = publishedVersionsData?.filter((v) => v.status === 'published').length
-    ? publishedVersionsData.filter((v) => v.status === 'published')
-    : (publishedVersionsData ?? []);
+  if (versionError) {
+    throw new Error(`Unable to load published timetables: ${versionError.message}`);
+  }
 
-  // If we have versions with snapshots:
+  // Trainers can see published schedules only. A live-session fallback below
+  // is constrained to the same published academic periods.
   if (publishedVersions && publishedVersions.length > 0) {
     const periodIds = Array.from(
       new Set(publishedVersions.map((v) => String(v.academic_period_id))),
@@ -290,8 +299,21 @@ export async function getStaffPublishedTimetable(
     }
   }
 
-  // Fallback: Query live scheduled_sessions in case the timetable hasn't been snapshotted to a version yet
-  const { data: liveScheduled } = await supabase
+  if (!publishedVersions || publishedVersions.length === 0) {
+    return {
+      trainerId: workspace.trainerId,
+      trainerName: workspace.trainerName,
+      sessions: [],
+    };
+  }
+
+  const publishedPeriodIds = [
+    ...new Set(publishedVersions.map((version) => String(version.academic_period_id))),
+  ];
+
+  // A published version can predate a legitimate timetable repair. Fall back
+  // to the trainer's live sessions, but never expose an unpublished period.
+  const { data: liveScheduled, error: liveScheduleError } = await supabase
     .from('scheduled_sessions')
     .select(`
       id,
@@ -306,7 +328,12 @@ export async function getStaffPublishedTimetable(
       rooms ( code, name )
     `)
     .eq('trainer_id', workspace.trainerId)
+    .in('academic_period_id', publishedPeriodIds)
     .in('status', ['draft', 'confirmed', 'locked']);
+
+  if (liveScheduleError) {
+    throw new Error(`Unable to load the trainer timetable: ${liveScheduleError.message}`);
+  }
 
   if (liveScheduled && liveScheduled.length > 0) {
     const mapped: StaffTimetableSession[] = [];

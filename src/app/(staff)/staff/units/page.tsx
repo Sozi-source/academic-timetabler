@@ -12,40 +12,7 @@ import {
 import {
   getStaffWorkspace,
 } from '@/features/staff-assessment/queries';
-import type { StaffUnitAllocation } from '@/features/staff-assessment/types';
-
-type GroupedUnit = StaffUnitAllocation & {
-  cohortNames: string[];
-};
-
-function groupAllocationsByUnit(
-  allocations: StaffUnitAllocation[],
-): GroupedUnit[] {
-  const groups = new Map<string, GroupedUnit>();
-
-  for (const allocation of allocations) {
-    const normalizedName = allocation.unitName
-      .trim()
-      .toLocaleLowerCase()
-      .replace(/[^a-z0-9]/g, '');
-    const key = `${allocation.academicPeriodId}:${normalizedName}`;
-    const existing = groups.get(key);
-
-    if (existing) {
-      if (!existing.cohortNames.includes(allocation.cohortName)) {
-        existing.cohortNames.push(allocation.cohortName);
-      }
-      continue;
-    }
-
-    groups.set(key, {
-      ...allocation,
-      cohortNames: [allocation.cohortName],
-    });
-  }
-
-  return [...groups.values()];
-}
+import { groupStaffUnitAllocations } from '@/features/staff-assessment/unit-grouping';
 
 export default async function StaffUnitsPage() {
   const profile =
@@ -55,7 +22,7 @@ export default async function StaffUnitsPage() {
     await getStaffWorkspace(
       profile.id,
     );
-  const groupedUnits = groupAllocationsByUnit(workspace.allocations);
+  const groupedUnits = groupStaffUnitAllocations(workspace.allocations);
 
   return (
     <div className="space-y-5">

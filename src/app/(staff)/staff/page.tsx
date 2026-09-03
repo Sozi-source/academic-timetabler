@@ -22,6 +22,7 @@ import {
 import {
   getStaffWorkspace,
 } from '@/features/staff-assessment/queries';
+import { groupStaffUnitAllocations } from '@/features/staff-assessment/unit-grouping';
 import {
   portalGreeting,
 } from '@/lib/portal-greeting';
@@ -34,6 +35,7 @@ export default async function StaffHomePage() {
     await getStaffWorkspace(
       profile.id,
     );
+  const groupedUnits = groupStaffUnitAllocations(workspace.allocations);
 
   const assessmentCount =
     workspace.allocations.reduce(
@@ -106,7 +108,7 @@ export default async function StaffHomePage() {
       <section className="portal-metric-grid" data-columns="3">
         <MetricCard
           label="Allocated units"
-          value={String(workspace.allocations.length)}
+          value={String(groupedUnits.length)}
           icon={BookOpenCheck}
           className="border-t-4 border-t-primary shadow-xs"
         />

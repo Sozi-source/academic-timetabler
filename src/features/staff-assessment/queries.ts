@@ -4,9 +4,7 @@ import {
   cache,
 } from 'react';
 
-import {
-  createClient,
-} from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 import type {
   StaffAssessmentSummary,
@@ -106,8 +104,12 @@ export const getStaffWorkspace =
   cache(async (
     profileId: string,
   ): Promise<StaffWorkspace> => {
+    // This workspace is reached only after requireTrainerAccess. Query with the
+    // service role, then scope every record explicitly to the linked trainer.
+    // Department RLS correctly limits administration, but otherwise prevents a
+    // trainer from reading their own allocation in a different department.
     const supabase =
-      await createClient();
+      createAdminClient();
 
     const {
       data: trainer,

@@ -151,111 +151,113 @@ export default async function OperationsPage() {
         }
       />
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {cards.map(
-          (
-            card,
-          ) => (
+      {/* 1. Standardized Metric Telemetry Strip */}
+      <section aria-label="Operational Telemetry" className="grid gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
+        {cards.map((card) => {
+          const Icon = card.icon;
+          const needsAction = card.value > 0;
+          return (
             <Link
-              key={
-                card.label
-              }
-              href={
-                card.href
-              }
-              className="block"
+              key={card.label}
+              href={card.href}
+              className="group flex flex-col justify-between rounded-xl border border-gray-200/90 bg-white p-4 shadow-xs transition hover:border-[#033B36]/30 hover:shadow-sm"
             >
-              <MetricCard
-                label={
-                  card.label
-                }
-                value={String(
-                  card.value,
-                )}
-                description={
-                  card.description
-                }
-                icon={
-                  card.icon
-                }
-                status={
-                  card.value >
-                  0
-                    ? 'Action'
-                    : 'Clear'
-                }
-              />
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                  {card.label}
+                </span>
+                <span className={`flex size-7.5 shrink-0 items-center justify-center rounded-lg ${
+                  needsAction ? 'bg-amber-50 text-amber-700' : 'bg-[#033B36]/10 text-[#033B36]'
+                }`}>
+                  <Icon className="size-4" aria-hidden="true" />
+                </span>
+              </div>
+              <div className="mt-2">
+                <p className="text-xl font-bold text-gray-900 tracking-tight">
+                  {card.value}
+                </p>
+                <p className="text-[11px] text-gray-500 mt-0.5">{card.description}</p>
+              </div>
+              <div className={`mt-3 h-0.5 w-7 rounded-full ${needsAction ? 'bg-amber-500' : 'bg-[#033B36]'}`} />
             </Link>
-          ),
-        )}
+          );
+        })}
       </section>
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      {/* 2. Operations Workspaces Grid */}
+      <section aria-label="Operations Workspaces" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <Link
           href="/operations/action-center"
-          className="rounded-xl border border-border bg-white px-4 py-4 transition hover:border-border-strong hover:bg-surface-subtle/40"
+          className="group rounded-xl border border-gray-200 bg-white p-4 shadow-2xs transition hover:border-gray-300 hover:bg-gray-50/70"
         >
-          <ListChecks className="size-4 text-primary" aria-hidden="true" />
-          <p className="mt-2 text-sm font-semibold text-text-primary">
+          <div className="flex size-9 items-center justify-center rounded-lg bg-[#033B36] text-white shadow-2xs transition group-hover:scale-105">
+            <ListChecks className="size-4.5 text-[#FACC15]" aria-hidden="true" />
+          </div>
+          <p className="mt-3 text-xs font-bold text-gray-900 group-hover:text-[#033B36] transition-colors">
             Action Center
           </p>
-          <p className="mt-1 text-[11px] leading-5 text-text-muted">
+          <p className="mt-1 text-[11px] text-gray-500 leading-relaxed">
             Prioritised operational and release follow-up.
           </p>
         </Link>
 
         <Link
           href="/operations/incidents"
-          className="rounded-xl border border-border bg-white px-4 py-4 transition hover:border-border-strong hover:bg-surface-subtle/40"
+          className="group rounded-xl border border-gray-200 bg-white p-4 shadow-2xs transition hover:border-gray-300 hover:bg-gray-50/70"
         >
-          <AlertTriangle className="size-4 text-primary" aria-hidden="true" />
-          <p className="mt-2 text-sm font-semibold text-text-primary">
-            Operational incidents
+          <div className="flex size-9 items-center justify-center rounded-lg bg-amber-500 text-white shadow-2xs transition group-hover:scale-105">
+            <AlertTriangle className="size-4.5 text-white" aria-hidden="true" />
+          </div>
+          <p className="mt-3 text-xs font-bold text-gray-900 group-hover:text-amber-700 transition-colors">
+            Operational Incidents
           </p>
-          <p className="mt-1 text-[11px] leading-5 text-text-muted">
-            Pilot and Production incident register.
+          <p className="mt-1 text-[11px] text-gray-500 leading-relaxed">
+            Pilot and production incident register.
           </p>
         </Link>
+
         <Link
           href="/operations/attendance"
-          className="rounded-xl border border-border bg-white px-4 py-4 transition hover:border-border-strong hover:bg-surface-subtle/40"
+          className="group rounded-xl border border-gray-200 bg-white p-4 shadow-2xs transition hover:border-gray-300 hover:bg-gray-50/70"
         >
-          <p className="text-sm font-semibold text-text-primary">
-            Attendance oversight
+          <div className="flex size-9 items-center justify-center rounded-lg bg-[#033B36] text-white shadow-2xs transition group-hover:scale-105">
+            <ClipboardCheck className="size-4.5 text-white" aria-hidden="true" />
+          </div>
+          <p className="mt-3 text-xs font-bold text-gray-900 group-hover:text-[#033B36] transition-colors">
+            Attendance Oversight
           </p>
-
-          <p className="mt-1 text-[11px] leading-5 text-text-muted">
-            Review trainer class attendance
-            and reopen completed records when
-            a correction is authorised.
+          <p className="mt-1 text-[11px] text-gray-500 leading-relaxed">
+            Review and audit trainer class attendance logs.
           </p>
         </Link>
 
         <Link
           href="/teaching-documents/releases"
-          className="rounded-xl border border-border bg-white px-4 py-4 transition hover:border-border-strong hover:bg-surface-subtle/40"
+          className="group rounded-xl border border-gray-200 bg-white p-4 shadow-2xs transition hover:border-gray-300 hover:bg-gray-50/70"
         >
-          <p className="text-sm font-semibold text-text-primary">
-            Student documents
+          <div className="flex size-9 items-center justify-center rounded-lg bg-[#033B36] text-white shadow-2xs transition group-hover:scale-105">
+            <FileCheck2 className="size-4.5 text-white" aria-hidden="true" />
+          </div>
+          <p className="mt-3 text-xs font-bold text-gray-900 group-hover:text-[#033B36] transition-colors">
+            Student Documents
           </p>
-
-          <p className="mt-1 text-[11px] leading-5 text-text-muted">
-            Publish only approved controlled
-            documents to the student portal.
+          <p className="mt-1 text-[11px] text-gray-500 leading-relaxed">
+            Publish approved controlled documents to portal.
           </p>
         </Link>
 
         <Link
           href="/assessment/reports"
-          className="rounded-xl border border-border bg-white px-4 py-4 transition hover:border-border-strong hover:bg-surface-subtle/40"
+          className="group rounded-xl border border-gray-200 bg-white p-4 shadow-2xs transition hover:border-gray-300 hover:bg-gray-50/70 sm:col-span-2 lg:col-span-1"
         >
-          <p className="text-sm font-semibold text-text-primary">
-            Academic reports
+          <div className="flex size-9 items-center justify-center rounded-lg bg-[#F59E0B] text-white shadow-2xs transition group-hover:scale-105">
+            <ShieldCheck className="size-4.5 text-white" aria-hidden="true" />
+          </div>
+          <p className="mt-3 text-xs font-bold text-gray-900 group-hover:text-[#B45309] transition-colors">
+            Academic Reports
           </p>
-
-          <p className="mt-1 text-[11px] leading-5 text-text-muted">
-            Review assessment completeness
-            and performance before release.
+          <p className="mt-1 text-[11px] text-gray-500 leading-relaxed">
+            Review assessment completeness & marks.
           </p>
         </Link>
       </section>

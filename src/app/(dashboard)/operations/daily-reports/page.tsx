@@ -26,18 +26,21 @@ interface PageProps {
 function SummaryCard({
   label,
   value,
+  accent = false,
 }: {
   label: string;
   value: number;
+  accent?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-white p-4">
-      <p className="text-xl font-semibold tracking-tight text-text-primary">
-        {value}
-      </p>
-      <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+    <div className="flex flex-col justify-between rounded-xl border border-gray-200/90 bg-white p-3.5 shadow-2xs transition hover:shadow-xs">
+      <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
         {label}
       </p>
+      <p className="mt-1 text-lg font-bold tracking-tight text-gray-900">
+        {value}
+      </p>
+      <div className={`mt-2.5 h-0.5 w-6 rounded-full ${accent ? 'bg-amber-500' : 'bg-[#033B36]'}`} />
     </div>
   );
 }
@@ -134,10 +137,12 @@ export default async function DailyReportsPage({
         <SummaryCard
           label="Absences"
           value={workspace.summary.recordedAbsences}
+          accent={workspace.summary.recordedAbsences > 0}
         />
         <SummaryCard
           label="Concerns"
           value={workspace.summary.concerns}
+          accent={workspace.summary.concerns > 0}
         />
       </section>
 

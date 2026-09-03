@@ -3,6 +3,7 @@
 import {
   ArrowRight,
   BarChart3,
+  BookOpenCheck,
   CalendarDays,
   CalendarRange,
   CheckCircle2,
@@ -181,10 +182,10 @@ export function DashboardView({
             <h2 id="department-modules-heading" className="text-xs font-bold uppercase tracking-wider text-gray-700">
               Department Core Modules
             </h2>
-            <span className="text-[11px] font-medium text-gray-500">6 Operational Workspaces</span>
+            <span className="text-[11px] font-medium text-gray-500">7 Operational Workspaces</span>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7">
             {/* Module 1: Daily Operations */}
             <Link
               href="/operations/daily-reports"
@@ -213,7 +214,21 @@ export function DashboardView({
               <div className="mt-2 h-0.5 w-6 rounded-full bg-[#F59E0B]" />
             </Link>
 
-            {/* Module 3: Staff & Trainers */}
+            {/* Module 3: Unit Registration */}
+            <Link
+              href="/students/unit-registration"
+              className="group flex flex-col items-center justify-center rounded-xl border border-gray-200/90 bg-white px-2.5 py-4 text-center shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:border-[#033B36]/30 hover:shadow-sm"
+            >
+              <div className="flex size-10 items-center justify-center rounded-full bg-[#033B36] text-white shadow-2xs transition group-hover:scale-105">
+                <BookOpenCheck className="size-4.5 text-white" aria-hidden="true" />
+              </div>
+              <p className="mt-2.5 text-[11px] font-bold text-[#033B36]">
+                Unit Registration
+              </p>
+              <div className="mt-2 h-0.5 w-6 rounded-full bg-[#033B36]" />
+            </Link>
+
+            {/* Module 4: Staff & Trainers */}
             <Link
               href="/trainers"
               className="group flex flex-col items-center justify-center rounded-xl border border-gray-200/90 bg-white px-2.5 py-4 text-center shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:border-[#033B36]/30 hover:shadow-sm"
@@ -227,7 +242,7 @@ export function DashboardView({
               <div className="mt-2 h-0.5 w-6 rounded-full bg-[#033B36]" />
             </Link>
 
-            {/* Module 4: Quality Assurance */}
+            {/* Module 5: Quality Assurance */}
             <Link
               href="/teaching-documents"
               className="group flex flex-col items-center justify-center rounded-xl border border-gray-200/90 bg-white px-2.5 py-4 text-center shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:border-[#033B36]/30 hover:shadow-sm"
@@ -241,7 +256,7 @@ export function DashboardView({
               <div className="mt-2 h-0.5 w-6 rounded-full bg-[#033B36]" />
             </Link>
 
-            {/* Module 5: Grading & Results */}
+            {/* Module 6: Grading & Results */}
             <Link
               href="/assessment"
               className="group flex flex-col items-center justify-center rounded-xl border border-gray-200/90 bg-white px-2.5 py-4 text-center shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:border-[#F59E0B]/30 hover:shadow-sm"
@@ -255,7 +270,7 @@ export function DashboardView({
               <div className="mt-2 h-0.5 w-6 rounded-full bg-[#F59E0B]" />
             </Link>
 
-            {/* Module 6: Action Centre */}
+            {/* Module 7: Action Centre */}
             <Link
               href="/operations/action-center"
               className="group flex flex-col items-center justify-center rounded-xl border border-gray-200/90 bg-white px-2.5 py-4 text-center shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:border-[#033B36]/30 hover:shadow-sm"

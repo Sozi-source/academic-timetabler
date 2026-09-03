@@ -3,6 +3,7 @@
 import {
   BarChart2,
   BookOpen,
+  BookOpenCheck,
   CalendarDays,
   Clock,
   FileText,
@@ -48,6 +49,11 @@ export const adminNavItems: AdminNavItem[] = [
     label: 'Academic Planning',
     href: '/timetable',
     icon: CalendarDays,
+  },
+  {
+    label: 'Unit Registration',
+    href: '/students/unit-registration',
+    icon: BookOpenCheck,
   },
   {
     label: 'Quality Assurance',

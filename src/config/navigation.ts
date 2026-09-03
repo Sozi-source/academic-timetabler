@@ -1,6 +1,7 @@
 import {
   ArrowLeft,
   BookOpen,
+  BookOpenCheck,
   Building2,
   CalendarRange,
   ClipboardCheck,
@@ -21,6 +22,7 @@ export const dashboardNavigation = [
     items: [
       { label: 'Module Hub', href: '/dashboard', icon: ArrowLeft },
       { label: 'Staff & Trainers', href: '/trainers', icon: UserRound },
+      { label: 'Unit Registration', href: '/students/unit-registration', icon: BookOpenCheck },
     ],
   },
   {

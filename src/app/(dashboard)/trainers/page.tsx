@@ -97,39 +97,81 @@ export default async function StaffManagementPage() {
         }
       />
 
-      {/* 1. Metric Telemetry Strip */}
-      <section aria-label="Staff Overview Metrics" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          label="Total Trainers"
-          value={String(trainers.length)}
-          description="Department teaching register"
-          icon={Users}
-          status="Active"
-        />
+      {/* 1. Standardized Metric Telemetry Strip */}
+      <section aria-label="Staff Overview Metrics" className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="flex flex-col justify-between rounded-xl border border-gray-200/90 bg-white p-4 shadow-xs transition hover:border-[#033B36]/30 hover:shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
+              Total Trainers
+            </span>
+            <span className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-[#033B36]/10 text-[#033B36]">
+              <Users className="size-4 text-[#033B36]" aria-hidden="true" />
+            </span>
+          </div>
+          <div className="mt-2">
+            <p className="text-xl font-bold text-gray-900 tracking-tight">
+              {trainers.length}
+            </p>
+            <p className="text-[11px] text-gray-500 mt-0.5">Department teaching register</p>
+          </div>
+          <div className="mt-3 h-0.5 w-7 rounded-full bg-[#033B36]" />
+        </div>
 
-        <MetricCard
-          label="Timetable Available"
-          value={String(availableTrainers.length)}
-          description="Eligible for lesson slots"
-          icon={UserCheck}
-          status="Ready"
-        />
+        <div className="flex flex-col justify-between rounded-xl border border-gray-200/90 bg-white p-4 shadow-xs transition hover:border-[#F59E0B]/30 hover:shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
+              Timetable Available
+            </span>
+            <span className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-[#F59E0B]/15 text-[#D97706]">
+              <UserCheck className="size-4 text-[#D97706]" aria-hidden="true" />
+            </span>
+          </div>
+          <div className="mt-2">
+            <p className="text-xl font-bold text-gray-900 tracking-tight">
+              {availableTrainers.length}
+            </p>
+            <p className="text-[11px] text-gray-500 mt-0.5">Eligible for lesson slots</p>
+          </div>
+          <div className="mt-3 h-0.5 w-7 rounded-full bg-[#F59E0B]" />
+        </div>
 
-        <MetricCard
-          label="Workspaces Linked"
-          value={String(summary.linked)}
-          description="Staff portal authenticated"
-          icon={KeyRound}
-          status="Linked"
-        />
+        <div className="flex flex-col justify-between rounded-xl border border-gray-200/90 bg-white p-4 shadow-xs transition hover:border-[#033B36]/30 hover:shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
+              Workspaces Linked
+            </span>
+            <span className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-[#033B36]/10 text-[#033B36]">
+              <KeyRound className="size-4 text-[#033B36]" aria-hidden="true" />
+            </span>
+          </div>
+          <div className="mt-2">
+            <p className="text-xl font-bold text-gray-900 tracking-tight">
+              {summary.linked}
+            </p>
+            <p className="text-[11px] text-gray-500 mt-0.5">Staff portal authenticated</p>
+          </div>
+          <div className="mt-3 h-0.5 w-7 rounded-full bg-[#033B36]" />
+        </div>
 
-        <MetricCard
-          label="Pending Approval / Setup"
-          value={String(summary.ready + summary.accountRequired)}
-          description={`${summary.ready} ready to link · ${summary.accountRequired} pending`}
-          icon={Clock}
-          status="Action Needed"
-        />
+        <div className="flex flex-col justify-between rounded-xl border border-gray-200/90 bg-white p-4 shadow-xs transition hover:border-[#15803D]/30 hover:shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
+              Pending Setup
+            </span>
+            <span className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
+              <Clock className="size-4 text-amber-600" aria-hidden="true" />
+            </span>
+          </div>
+          <div className="mt-2">
+            <p className="text-xl font-bold text-gray-900 tracking-tight">
+              {summary.ready + summary.accountRequired}
+            </p>
+            <p className="text-[11px] text-gray-500 mt-0.5">
+              {summary.ready} ready · {summary.accountRequired} pending
+            </p>
+          </div>
+          <div className="mt-3 h-0.5 w-7 rounded-full bg-amber-500" />
+        </div>
       </section>
 
       {/* 2. Workspace Access & Account Approvals Panel */}

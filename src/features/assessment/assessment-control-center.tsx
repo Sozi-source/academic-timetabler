@@ -125,75 +125,81 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
       {/* Top 4 Analytics Telemetry Cards */}
       <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
         {/* Metric 1: Allocated Units */}
-        <div className="flex items-center gap-3.5 rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
-            <ClipboardList className="size-4" />
-          </div>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+        <div className="flex flex-col justify-between rounded-xl border border-gray-200/90 bg-white p-4 shadow-xs transition hover:border-[#033B36]/30 hover:shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
               Allocated Units
-            </p>
-            <p className="text-sm font-bold text-slate-900">
+            </span>
+            <span className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-[#033B36]/10 text-[#033B36]">
+              <ClipboardList className="size-4 text-[#033B36]" aria-hidden="true" />
+            </span>
+          </div>
+          <div className="mt-2">
+            <p className="text-xl font-bold text-gray-900 tracking-tight">
               {totalUnits} Units
             </p>
-            <p className="text-[11px] text-slate-500">
-              {data.selectedPeriodName}
-            </p>
+            <p className="text-[11px] text-gray-500 mt-0.5">{data.selectedPeriodName}</p>
           </div>
+          <div className="mt-3 h-0.5 w-7 rounded-full bg-[#033B36]" />
         </div>
 
         {/* Metric 2: Submissions */}
-        <div className="flex items-center gap-3.5 rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
-            <CheckCircle2 className="size-4" />
-          </div>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+        <div className="flex flex-col justify-between rounded-xl border border-gray-200/90 bg-white p-4 shadow-xs transition hover:border-[#15803D]/30 hover:shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
               Submitted Markbooks
-            </p>
-            <p className="text-sm font-bold text-slate-900">
+            </span>
+            <span className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+              <CheckCircle2 className="size-4 text-emerald-600" aria-hidden="true" />
+            </span>
+          </div>
+          <div className="mt-2">
+            <p className="text-xl font-bold text-gray-900 tracking-tight">
               {submittedUnits} / {totalUnits} ({submissionRate}%)
             </p>
-            <p className="text-[11px] text-slate-500">
+            <p className="text-[11px] text-gray-500 mt-0.5">
               {inProgressUnits} in draft · {pendingUnits} pending
             </p>
           </div>
+          <div className="mt-3 h-0.5 w-7 rounded-full bg-[#15803D]" />
         </div>
 
         {/* Metric 3: Candidate Population */}
-        <div className="flex items-center gap-3.5 rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
-            <UsersRound className="size-4" />
-          </div>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+        <div className="flex flex-col justify-between rounded-xl border border-gray-200/90 bg-white p-4 shadow-xs transition hover:border-[#F59E0B]/30 hover:shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
               Total Candidates
-            </p>
-            <p className="text-sm font-bold text-slate-900">
+            </span>
+            <span className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-[#F59E0B]/15 text-[#D97706]">
+              <UsersRound className="size-4 text-[#D97706]" aria-hidden="true" />
+            </span>
+          </div>
+          <div className="mt-2">
+            <p className="text-xl font-bold text-gray-900 tracking-tight">
               {totalCandidates} Enrolled
             </p>
-            <p className="text-[11px] text-slate-500">
-              Across all cohorts in term
-            </p>
+            <p className="text-[11px] text-gray-500 mt-0.5">Across all cohorts in term</p>
           </div>
+          <div className="mt-3 h-0.5 w-7 rounded-full bg-[#F59E0B]" />
         </div>
 
         {/* Metric 4: Marks Sat */}
-        <div className="flex items-center gap-3.5 rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
-            <BarChart3 className="size-4" />
-          </div>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+        <div className="flex flex-col justify-between rounded-xl border border-gray-200/90 bg-white p-4 shadow-xs transition hover:border-[#033B36]/30 hover:shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
               Assessment Sittings
-            </p>
-            <p className="text-sm font-bold text-slate-900">
+            </span>
+            <span className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-[#033B36]/10 text-[#033B36]">
+              <BarChart3 className="size-4 text-[#033B36]" aria-hidden="true" />
+            </span>
+          </div>
+          <div className="mt-2">
+            <p className="text-xl font-bold text-gray-900 tracking-tight">
               {totalSat} Completed
             </p>
-            <p className="text-[11px] text-slate-500">
-              Continuous & Exam entries
-            </p>
+            <p className="text-[11px] text-gray-500 mt-0.5">Continuous & Exam entries</p>
           </div>
+          <div className="mt-3 h-0.5 w-7 rounded-full bg-[#033B36]" />
         </div>
       </div>
 

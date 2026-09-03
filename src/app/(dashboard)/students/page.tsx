@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowLeft, BarChart3, CheckCircle2, FileUp, GraduationCap, History, Paperclip, UsersRound } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, BarChart3, BookOpenCheck, CheckCircle2, FileUp, GraduationCap, History, Paperclip, UsersRound } from 'lucide-react';
 import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
@@ -46,13 +46,21 @@ export default async function StudentsModulePage() {
         <MetricCard label="Graduated" value={String(summary.graduated)} description="Historical" icon={GraduationCap} />
       </div>
 
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
         <Card className="flex items-center justify-between gap-3 p-4">
           <div className="flex items-center gap-3">
             <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-white"><UsersRound className="size-4" /></span>
             <div><p className="text-sm font-bold text-text-primary">Student registry</p><p className="text-xs text-text-muted">{summary.total} records</p></div>
           </div>
           <Link href="/students/registry" className="text-xs font-semibold text-primary hover:underline">Open</Link>
+        </Card>
+
+        <Card className="flex items-center justify-between gap-3 p-4">
+          <div className="flex items-center gap-3">
+            <span className="flex size-9 items-center justify-center rounded-lg bg-institutional-yellow text-institutional-yellow-ink"><BookOpenCheck className="size-4" /></span>
+            <div><p className="text-sm font-bold text-text-primary">Unit registration</p><p className="text-xs text-text-muted">Roster & verification</p></div>
+          </div>
+          <Link href="/students/unit-registration" className="text-xs font-semibold text-primary hover:underline">Open</Link>
         </Card>
 
         <Card className="flex items-center justify-between gap-3 p-4">

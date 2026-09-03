@@ -84,144 +84,39 @@ function cell(
   });
 }
 
-// Accounts Clearance block with expanded Date space (32%)
-function accountsBox() {
-  return new Table({
-    layout: TableLayoutType.FIXED,
-    width: { size: 100, type: WidthType.PERCENTAGE },
-    columnWidths: [3600, 3200, 3200],
-    rows: [
-      // Shaded Header
-      new TableRow({
-        children: [
-          new TableCell({
-            borders,
-            columnSpan: 3,
-            shading: { fill: 'E8EEF5' },
-            verticalAlign: VerticalAlign.CENTER,
-            margins: { top: 45, bottom: 45, left: 100, right: 100 },
-            children: [
-              line('ACCOUNTS CLEARANCE', {
-                bold: true,
-                size: 20,
-                after: 0,
-              }),
-            ],
-          }),
-        ],
-      }),
-      // Balances
-      new TableRow({
-        height: { value: 310, rule: 'atLeast' },
-        children: [
-          cell('Previous Balance: KShs', { size: 20 }),
-          new TableCell({
-            borders,
-            columnSpan: 2,
-            verticalAlign: VerticalAlign.CENTER,
-            margins: { top: 55, bottom: 55, left: 100, right: 100 },
-            children: [line('Amount Paid: KShs', { size: 20, after: 0 })],
-          }),
-        ],
-      }),
-      new TableRow({
-        height: { value: 310, rule: 'atLeast' },
-        children: [
-          cell('Current Balance: KShs', { size: 20 }),
-          new TableCell({
-            borders,
-            columnSpan: 2,
-            verticalAlign: VerticalAlign.CENTER,
-            margins: { top: 55, bottom: 55, left: 100, right: 100 },
-            children: [line('Hostel Fees: KShs', { size: 20, after: 0 })],
-          }),
-        ],
-      }),
-      // Accounts Signoff (Officer 36%, Date 32%, Signature 32%)
-      new TableRow({
-        height: { value: 330, rule: 'atLeast' },
-        children: [
-          cell('Accounts Officer:', { size: 20 }),
-          cell('Date:', { size: 20 }),
-          cell('Signature:', { size: 20 }),
-        ],
+function signOffLine(text: string, options: { bold?: boolean; after?: number } = {}) {
+  return new Paragraph({
+    spacing: { after: options.after ?? 0, line: 200 },
+    children: [
+      new TextRun({
+        text,
+        font: 'Times New Roman',
+        size: 18,
+        bold: options.bold ?? false,
+        color: '000000',
       }),
     ],
   });
 }
 
-// Consolidated Approvals Table with expanded Date space (22%) and balanced Name (32%)
-function approvalsTable() {
-  const desks = [
-    { title: '1. HOD APPROVAL' },
-    { title: '2. HOSTEL ALLOCATION / ADMINISTRATION' },
-    { title: '3. REGISTRAR APPROVAL' },
-    { title: '4. PRINCIPAL APPROVAL' },
-    { title: '5. MANAGING DIRECTOR APPROVAL' },
+function signOffSection() {
+  return [
+    signOffLine('ACCOUNTS.', { bold: true }),
+    signOffLine('Previous balance: KShs………………………………………………….………Amount Paid………….………………………………….'),
+    signOffLine('Balance: KShs……………………………………………………………………Hostel Fees…………………………………………….'),
+    signOffLine('Date: ……………………………………………………………………………Signature: ………………………………………', { after: 45 }),
+    signOffLine('Approved/not approved by: HOD: ……………………………………………Date: ………………………………………….'),
+    signOffLine('Comment: ………………………………………………………………………Signature: ……………………………………', { after: 45 }),
+    signOffLine('HOSTEL ALLOCATION.', { bold: true }),
+    signOffLine('Administrator: …………………………………………………………………Date: ………………………………………….'),
+    signOffLine('Comment: …………………………………………………………………………………Signature………………………………………', { after: 45 }),
+    signOffLine('REGISTRAR: …………………………………………………………….Date: ………………………………………….'),
+    signOffLine('Comment: ……………………………………………………………….Signature: ………………………………………', { after: 45 }),
+    signOffLine('PRINCIPAL: ………………………………………………… ……….Date: ………………………………………'),
+    signOffLine('Comment: ………………………………………………………………….Signature: ……………………………………', { after: 45 }),
+    signOffLine('MANAGING DIRECTOR: ………………………………………………Date: ……………………………….'),
+    signOffLine('Comment: ………………………………………………………………….Signature: …………………………………….'),
   ];
-
-  const rows: TableRow[] = [
-    // Main Header
-    new TableRow({
-      children: [
-        new TableCell({
-          borders,
-          columnSpan: 4,
-          shading: { fill: 'E8EEF5' },
-          verticalAlign: VerticalAlign.CENTER,
-          margins: { top: 45, bottom: 45, left: 100, right: 100 },
-          children: [
-            line('CLEARANCE & APPROVAL DESKS', {
-              bold: true,
-              size: 20,
-              after: 0,
-            }),
-          ],
-        }),
-      ],
-    }),
-  ];
-
-  for (const desk of desks) {
-    // Desk Sign-off Row: Desk (24%), Name (32%), Date (22%), Signature (22%)
-    rows.push(
-      new TableRow({
-        height: { value: 330, rule: 'atLeast' },
-        children: [
-          new TableCell({
-            borders,
-            shading: { fill: 'F8FAFC' },
-            verticalAlign: VerticalAlign.CENTER,
-            margins: { top: 50, bottom: 50, left: 100, right: 100 },
-            children: [line(desk.title, { bold: true, size: 19, after: 0 })],
-          }),
-          cell('Name:', { size: 20 }),
-          cell('Date:', { size: 20 }),
-          cell('Signature:', { size: 20 }),
-        ],
-      }),
-      // Comment Row
-      new TableRow({
-        height: { value: 330, rule: 'atLeast' },
-        children: [
-          new TableCell({
-            borders,
-            columnSpan: 4,
-            verticalAlign: VerticalAlign.TOP,
-            margins: { top: 50, bottom: 50, left: 100, right: 100 },
-            children: [line('Comment:', { size: 20, after: 0 })],
-          }),
-        ],
-      }),
-    );
-  }
-
-  return new Table({
-    layout: TableLayoutType.FIXED,
-    width: { size: 100, type: WidthType.PERCENTAGE },
-    columnWidths: [2400, 3200, 2200, 2200],
-    rows,
-  });
 }
 
 const spacer = () => new Paragraph({ spacing: { after: 70, line: 220 } });
@@ -365,14 +260,11 @@ export async function buildStudentUnitRegistrationDocx(
         ),
       ],
     }),
-    spacer(),
   );
 
-  // Distinct Accounts & Approvals Sections
   children.push(
-    accountsBox(),
     spacer(),
-    approvalsTable(),
+    ...signOffSection(),
   );
 
   const document = new Document({
@@ -391,7 +283,10 @@ export async function buildStudentUnitRegistrationDocx(
       {
         properties: {
           page: {
-            margin: { top: 380, right: 460, bottom: 380, left: 460 },
+            // Fixed A4 print area. The compact reference sign-off sequence and
+            // registered-unit roster are designed to remain on this one page.
+            size: { width: 11906, height: 16838 },
+            margin: { top: 300, right: 400, bottom: 300, left: 400 },
           },
         },
         footers: {
@@ -402,11 +297,10 @@ export async function buildStudentUnitRegistrationDocx(
                 spacing: { before: 30, after: 0 },
                 children: [
                   new TextRun({
-                    text: 'Print 1 copy for student records.',
-                    font: FONT,
-                    size: 15,
-                    color: '64748B',
-                    italics: true,
+                    text: 'This form should be filled in one copy and filed in HODs and Registrar’s Office.',
+                    font: 'Times New Roman',
+                    size: 18,
+                    color: '000000',
                   }),
                 ],
               }),

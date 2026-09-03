@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft, BookOpenCheck, CheckCircle2, Download, FileCheck2, TriangleAlert, UsersRound } from 'lucide-react';
+import { ArrowLeft, BookOpenCheck, CheckCircle2, Download, Eye, FileCheck2, TriangleAlert, UsersRound } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -114,6 +114,15 @@ export default async function UnitRegistrationPage() {
                 </div>
                 <div>{statusBadge(student.status, student.hasException)}</div>
                 <div className="min-w-0">
+                  {student.selectedUnits > 0 ? (
+                    <Link
+                      href={`/students/unit-registration/preview/${student.id}`}
+                      className="mb-1.5 inline-flex h-7 items-center gap-1 rounded-md border border-border bg-white px-2 text-[0.6875rem] font-semibold text-text-secondary hover:bg-surface-subtle"
+                    >
+                      <Eye className="size-3" />
+                      Preview form
+                    </Link>
+                  ) : null}
                   {student.status === 'submitted' && student.submissionId ? (
                     <div className="space-y-1.5">
                       {student.hasException && student.exceptionReason ? <p className="truncate text-[0.6875rem] text-warning">{student.exceptionReason}</p> : null}

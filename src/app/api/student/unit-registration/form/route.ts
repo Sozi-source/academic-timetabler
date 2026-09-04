@@ -14,6 +14,8 @@ import {
 
 export const runtime =
   'nodejs';
+export const dynamic =
+  'force-dynamic';
 
 const docxMimeType =
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
@@ -70,7 +72,9 @@ export async function GET() {
       'Content-Type': docxMimeType,
       'Content-Disposition':
         `attachment; filename="${filename}"; filename*=UTF-8''${encodeURIComponent(filename)}`,
-      'Cache-Control': 'private, no-store, max-age=0',
+      'Cache-Control': 'private, no-store, no-cache, max-age=0, must-revalidate',
+      Pragma: 'no-cache',
+      Expires: '0',
       'X-Content-Type-Options': 'nosniff',
     },
   });

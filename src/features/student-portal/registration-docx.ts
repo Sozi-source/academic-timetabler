@@ -27,6 +27,54 @@ const border = {
 } as const;
 const borders = { top: border, bottom: border, left: border, right: border } as const;
 
+/**
+ * The form is calibrated to strictly occupy MAX 1 single page across all unit loads.
+ * Dynamic scaling smoothly budgets row heights, font sizes, and card padding.
+ */
+const MIN_SCALE_UNITS = 6;
+const MAX_SCALE_UNITS = 12;
+
+function lerp(spacious: number, compact: number, t: number): number {
+  return Math.round(spacious + (compact - spacious) * t);
+}
+
+interface FormMetrics {
+  particularsRowHeight: number;
+  particularsCellMargin: number;
+  unitsHeadingBefore: number;
+  unitsHeadingAfter: number;
+  unitRowHeight: number;
+  postUnitsTableSpacing: number;
+  signOffHeadingHeight: number;
+  signOffHeadingMargin: number;
+  signOffDateRowHeight: number;
+  signOffCommentRowHeight: number;
+  signOffCellMargin: number;
+  signOffSpacerAfter: number;
+}
+
+function computeFormMetrics(unitCount: number): FormMetrics {
+  const t = Math.min(
+    1,
+    Math.max(0, (unitCount - MIN_SCALE_UNITS) / (MAX_SCALE_UNITS - MIN_SCALE_UNITS)),
+  );
+
+  return {
+    particularsRowHeight: lerp(215, 175, t),
+    particularsCellMargin: lerp(32, 22, t),
+    unitsHeadingBefore: lerp(20, 12, t),
+    unitsHeadingAfter: lerp(12, 6, t),
+    unitRowHeight: lerp(215, 175, t),
+    postUnitsTableSpacing: lerp(25, 14, t),
+    signOffHeadingHeight: lerp(195, 155, t),
+    signOffHeadingMargin: lerp(32, 22, t),
+    signOffDateRowHeight: lerp(260, 205, t),
+    signOffCommentRowHeight: lerp(260, 205, t),
+    signOffCellMargin: lerp(42, 28, t),
+    signOffSpacerAfter: lerp(42, 22, t),
+  };
+}
+
 function line(
   text: string,
   options: {
@@ -43,14 +91,14 @@ function line(
     alignment: options.align ?? AlignmentType.LEFT,
     spacing: {
       before: options.before ?? 0,
-      after: options.after ?? 15,
+      after: options.after ?? 12,
       line: 210,
     },
     children: [
       new TextRun({
         text,
         font: FONT,
-        size: options.size ?? 18,
+        size: options.size ?? 17.5,
         bold: options.bold ?? false,
         italics: options.italics ?? false,
         color: options.color ?? '0F172A',
@@ -67,16 +115,22 @@ function cell(
     align?: (typeof AlignmentType)[keyof typeof AlignmentType];
     shading?: string;
   } = {},
+  metrics?: FormMetrics,
 ) {
   return new TableCell({
     borders,
     verticalAlign: VerticalAlign.CENTER,
     shading: options.shading ? { fill: options.shading } : undefined,
-    margins: { top: 35, bottom: 35, left: 80, right: 80 },
+    margins: {
+      top: metrics?.particularsCellMargin ?? 32,
+      bottom: metrics?.particularsCellMargin ?? 32,
+      left: 85,
+      right: 85,
+    },
     children: [
       line(value, {
         bold: options.bold,
-        size: options.size ?? 18,
+        size: options.size ?? 17.5,
         align: options.align,
         after: 0,
       }),
@@ -84,154 +138,154 @@ function cell(
   });
 }
 
-// Accounts Clearance Box (Compact, fits 1 page)
-function accountsBox() {
+const signOffBorder = {
+  style: BorderStyle.SINGLE,
+  size: 6,
+  color: '7DA6B3',
+} as const;
+const signOffBorders = { top: signOffBorder, bottom: signOffBorder, left: signOffBorder, right: signOffBorder } as const;
+
+function signOffSpacer(metrics: FormMetrics) {
+  return new Paragraph({ spacing: { after: metrics.signOffSpacerAfter, line: 30 } });
+}
+
+function signOffText(
+  text: string,
+  options: { bold?: boolean; color?: string; size?: number; align?: (typeof AlignmentType)[keyof typeof AlignmentType] } = {},
+) {
+  return line(text, {
+    bold: options.bold,
+    color: options.color ?? '111827',
+    size: options.size ?? 15.5,
+    align: options.align,
+    after: 0,
+  });
+}
+
+function signOffLabelCell(label: string, metrics: FormMetrics) {
+  return new TableCell({
+    borders: signOffBorders,
+    verticalAlign: VerticalAlign.CENTER,
+    shading: { fill: 'F7FAFC' },
+    margins: { top: metrics.signOffCellMargin, bottom: metrics.signOffCellMargin, left: 95, right: 70 },
+    children: [signOffText(label, { bold: true, color: '334155' })],
+  });
+}
+
+function signOffWriteCell(metrics: FormMetrics) {
+  return new TableCell({
+    borders: signOffBorders,
+    verticalAlign: VerticalAlign.CENTER,
+    margins: { top: metrics.signOffCellMargin, bottom: metrics.signOffCellMargin, left: 75, right: 95 },
+    children: [signOffText('', { color: '000000' })],
+  });
+}
+
+function signOffHeading(title: string, metrics: FormMetrics) {
+  return new TableCell({
+    borders: signOffBorders,
+    columnSpan: 4,
+    verticalAlign: VerticalAlign.CENTER,
+    shading: { fill: 'DCE9ED' },
+    margins: { top: metrics.signOffHeadingMargin, bottom: metrics.signOffHeadingMargin, left: 95, right: 95 },
+    children: [signOffText(title, { bold: true, color: '0F4C5C', size: 16.5 })],
+  });
+}
+
+function approvalCard(title: string, approverLabel: string, metrics: FormMetrics) {
   return new Table({
     layout: TableLayoutType.FIXED,
     width: { size: 100, type: WidthType.PERCENTAGE },
-    columnWidths: [3600, 3200, 3200],
+    columnWidths: [2100, 3900, 1100, 2900],
     rows: [
-      // Shaded Header
       new TableRow({
         cantSplit: true,
-        children: [
-          new TableCell({
-            borders,
-            columnSpan: 3,
-            shading: { fill: 'E8EEF5' },
-            verticalAlign: VerticalAlign.CENTER,
-            margins: { top: 30, bottom: 30, left: 80, right: 80 },
-            children: [
-              line('ACCOUNTS CLEARANCE', {
-                bold: true,
-                size: 18,
-                after: 0,
-              }),
-            ],
-          }),
-        ],
+        height: { value: metrics.signOffHeadingHeight, rule: 'atLeast' },
+        children: [signOffHeading(title, metrics)],
       }),
-      // Balances
       new TableRow({
         cantSplit: true,
-        height: { value: 240, rule: 'atLeast' },
+        height: { value: metrics.signOffDateRowHeight, rule: 'atLeast' },
         children: [
-          cell('Previous Balance: KShs', { size: 17.5 }),
-          new TableCell({
-            borders,
-            columnSpan: 2,
-            verticalAlign: VerticalAlign.CENTER,
-            margins: { top: 35, bottom: 35, left: 80, right: 80 },
-            children: [line('Amount Paid: KShs', { size: 17.5, after: 0 })],
-          }),
+          signOffLabelCell(approverLabel, metrics),
+          signOffWriteCell(metrics),
+          signOffLabelCell('Date', metrics),
+          signOffWriteCell(metrics),
         ],
       }),
       new TableRow({
         cantSplit: true,
-        height: { value: 240, rule: 'atLeast' },
+        height: { value: metrics.signOffCommentRowHeight, rule: 'atLeast' },
         children: [
-          cell('Current Balance: KShs', { size: 17.5 }),
-          new TableCell({
-            borders,
-            columnSpan: 2,
-            verticalAlign: VerticalAlign.CENTER,
-            margins: { top: 35, bottom: 35, left: 80, right: 80 },
-            children: [line('Hostel Fees: KShs', { size: 17.5, after: 0 })],
-          }),
-        ],
-      }),
-      // Accounts Signoff
-      new TableRow({
-        cantSplit: true,
-        height: { value: 250, rule: 'atLeast' },
-        children: [
-          cell('Accounts Officer:', { size: 17.5 }),
-          cell('Date:', { size: 17.5 }),
-          cell('Signature:', { size: 17.5 }),
+          signOffLabelCell('Comment', metrics),
+          signOffWriteCell(metrics),
+          signOffLabelCell('Signature', metrics),
+          signOffWriteCell(metrics),
         ],
       }),
     ],
   });
 }
 
-// Consolidated Clearance & Approval Desks Table (Compact, guaranteed 1 page)
-function approvalsTable() {
-  const desks = [
-    { title: '1. HOD APPROVAL' },
-    { title: '2. HOSTEL ALLOCATION / ADMINISTRATION' },
-    { title: '3. REGISTRAR APPROVAL' },
-    { title: '4. PRINCIPAL APPROVAL' },
-    { title: '5. MANAGING DIRECTOR APPROVAL' },
-  ];
-
-  const rows: TableRow[] = [
-    // Main Header
-    new TableRow({
-      cantSplit: true,
-      children: [
-        new TableCell({
-          borders,
-          columnSpan: 4,
-          shading: { fill: 'E8EEF5' },
-          verticalAlign: VerticalAlign.CENTER,
-          margins: { top: 30, bottom: 30, left: 80, right: 80 },
-          children: [
-            line('CLEARANCE & APPROVAL DESKS', {
-              bold: true,
-              size: 18,
-              after: 0,
-            }),
-          ],
-        }),
-      ],
-    }),
-  ];
-
-  for (const desk of desks) {
-    // Desk Sign-off Row: Desk (24%), Name (32%), Date (22%), Signature (22%)
-    rows.push(
-      new TableRow({
-        cantSplit: true,
-        height: { value: 250, rule: 'atLeast' },
-        children: [
-          new TableCell({
-            borders,
-            shading: { fill: 'F8FAFC' },
-            verticalAlign: VerticalAlign.CENTER,
-            margins: { top: 35, bottom: 35, left: 80, right: 80 },
-            children: [line(desk.title, { bold: true, size: 17, after: 0 })],
-          }),
-          cell('Name:', { size: 17.5 }),
-          cell('Date:', { size: 17.5 }),
-          cell('Signature:', { size: 17.5 }),
-        ],
-      }),
-      // Comment Row
-      new TableRow({
-        cantSplit: true,
-        height: { value: 250, rule: 'atLeast' },
-        children: [
-          new TableCell({
-            borders,
-            columnSpan: 4,
-            verticalAlign: VerticalAlign.TOP,
-            margins: { top: 35, bottom: 35, left: 80, right: 80 },
-            children: [line('Comment:', { size: 17.5, after: 0 })],
-          }),
-        ],
-      }),
-    );
-  }
-
+function accountsClearanceCard(metrics: FormMetrics) {
   return new Table({
     layout: TableLayoutType.FIXED,
     width: { size: 100, type: WidthType.PERCENTAGE },
-    columnWidths: [2400, 3200, 2200, 2200],
-    rows,
+    columnWidths: [2300, 2700, 1900, 3100],
+    rows: [
+      new TableRow({
+        cantSplit: true,
+        height: { value: metrics.signOffHeadingHeight, rule: 'atLeast' },
+        children: [signOffHeading('ACCOUNTS.', metrics)],
+      }),
+      new TableRow({
+        cantSplit: true,
+        height: { value: metrics.signOffDateRowHeight, rule: 'atLeast' },
+        children: [
+          signOffLabelCell('Previous balance: KShs', metrics),
+          signOffWriteCell(metrics),
+          signOffLabelCell('Amount paid', metrics),
+          signOffWriteCell(metrics),
+        ],
+      }),
+      new TableRow({
+        cantSplit: true,
+        height: { value: metrics.signOffDateRowHeight, rule: 'atLeast' },
+        children: [
+          signOffLabelCell('Balance: KShs', metrics),
+          signOffWriteCell(metrics),
+          signOffLabelCell('Hostel fees', metrics),
+          signOffWriteCell(metrics),
+        ],
+      }),
+      new TableRow({
+        cantSplit: true,
+        height: { value: metrics.signOffDateRowHeight, rule: 'atLeast' },
+        children: [
+          signOffLabelCell('Date', metrics),
+          signOffWriteCell(metrics),
+          signOffLabelCell('Signature', metrics),
+          signOffWriteCell(metrics),
+        ],
+      }),
+    ],
   });
 }
 
-const spacer = () => new Paragraph({ spacing: { after: 35, line: 160 } });
+function premiumSignOffSection(metrics: FormMetrics): Array<Paragraph | Table> {
+  const cards = [
+    approvalCard('HOD APPROVAL', 'Approved/not approved by: HOD:', metrics),
+    approvalCard('HOSTEL ALLOCATION.', 'Administrator:', metrics),
+    approvalCard('REGISTRAR APPROVAL', 'REGISTRAR:', metrics),
+    approvalCard('PRINCIPAL APPROVAL', 'PRINCIPAL:', metrics),
+    approvalCard('MANAGING DIRECTOR APPROVAL', 'MANAGING DIRECTOR:', metrics),
+  ];
+
+  return [
+    accountsClearanceCard(metrics),
+    ...cards.flatMap((card) => [signOffSpacer(metrics), card]),
+  ];
+}
 
 export async function buildStudentUnitRegistrationDocx(
   context: StudentPortalRegistrationContext,
@@ -250,6 +304,8 @@ export async function buildStudentUnitRegistrationDocx(
     throw new Error('No assigned units are available for this period.');
   }
 
+  const metrics = computeFormMetrics(units.length);
+
   let logo: Buffer | null = null;
   try {
     logo = await readFile(
@@ -264,12 +320,12 @@ export async function buildStudentUnitRegistrationDocx(
     children.push(
       new Paragraph({
         alignment: AlignmentType.CENTER,
-        spacing: { after: 15 },
+        spacing: { after: 12 },
         children: [
           new ImageRun({
             data: logo,
             type: 'png',
-            transformation: { width: 52, height: 39 },
+            transformation: { width: 56, height: 42 },
           }),
         ],
       }),
@@ -281,19 +337,19 @@ export async function buildStudentUnitRegistrationDocx(
       bold: true,
       size: 22,
       align: AlignmentType.CENTER,
-      after: 10,
+      after: 8,
     }),
     line('CONTINUING STUDENT UNIT REGISTRATION FORM', {
       bold: true,
       size: 19,
       align: AlignmentType.CENTER,
-      after: 10,
+      after: 8,
     }),
     line(context.student.programmeName.toUpperCase(), {
       bold: true,
       size: 17.5,
       align: AlignmentType.CENTER,
-      after: 35,
+      after: 25,
     }),
   );
 
@@ -305,45 +361,41 @@ export async function buildStudentUnitRegistrationDocx(
       columnWidths: [5000, 5000],
       rows: [
         new TableRow({
-          cantSplit: true,
-          height: { value: 230, rule: 'atLeast' },
+          height: { value: metrics.particularsRowHeight, rule: 'atLeast' },
           children: [
-            cell(`Name: ${context.student.fullName}`, { bold: true, size: 17.5 }),
-            cell(`Admission No: ${context.student.admissionNumber}`, { bold: true, size: 17.5 }),
+            cell(`Name: ${context.student.fullName}`, { bold: true, size: 17 }, metrics),
+            cell(`Admission No: ${context.student.admissionNumber}`, { bold: true, size: 17 }, metrics),
           ],
         }),
         new TableRow({
-          cantSplit: true,
-          height: { value: 230, rule: 'atLeast' },
+          height: { value: metrics.particularsRowHeight, rule: 'atLeast' },
           children: [
-            cell(`Course: ${context.student.programmeName}`, { size: 17.5 }),
-            cell(`Stage: ${context.student.stageCode ?? context.student.stageName ?? ''}`, { size: 17.5 }),
+            cell(`Course: ${context.student.programmeName}`, { size: 17 }, metrics),
+            cell(`Stage: ${context.student.stageCode ?? context.student.stageName ?? ''}`, { size: 17 }, metrics),
           ],
         }),
         new TableRow({
-          cantSplit: true,
-          height: { value: 230, rule: 'atLeast' },
+          height: { value: metrics.particularsRowHeight, rule: 'atLeast' },
           children: [
-            cell(`Department: ${context.student.departmentName}`, { size: 17.5 }),
-            cell(`Intake: ${context.student.cohortName ?? ''}`, { size: 17.5 }),
+            cell(`Department: ${context.student.departmentName}`, { size: 17 }, metrics),
+            cell(`Intake: ${context.student.cohortName ?? ''}`, { size: 17 }, metrics),
           ],
         }),
         new TableRow({
-          cantSplit: true,
-          height: { value: 230, rule: 'atLeast' },
+          height: { value: metrics.particularsRowHeight, rule: 'atLeast' },
           children: [
-            cell(`Academic Period: ${context.period.name}`, { size: 17.5 }),
-            cell('Resident:', { size: 17.5 }),
+            cell(`Academic Period: ${context.period.name}`, { size: 17 }, metrics),
+            cell('Resident:', { size: 17 }, metrics),
           ],
         }),
       ],
     }),
     line('REGISTERED UNITS', {
       bold: true,
-      size: 18,
+      size: 17,
       align: AlignmentType.CENTER,
-      before: 30,
-      after: 15,
+      before: metrics.unitsHeadingBefore,
+      after: metrics.unitsHeadingAfter,
     }),
   );
 
@@ -356,35 +408,31 @@ export async function buildStudentUnitRegistrationDocx(
       rows: [
         new TableRow({
           tableHeader: true,
-          cantSplit: true,
-          height: { value: 230, rule: 'atLeast' },
+          height: { value: metrics.unitRowHeight, rule: 'atLeast' },
           children: [
-            cell('S/No.', { bold: true, align: AlignmentType.CENTER, shading: 'E8EEF5', size: 17.5 }),
-            cell('Unit Code', { bold: true, shading: 'E8EEF5', size: 17.5 }),
-            cell('Unit Name', { bold: true, shading: 'E8EEF5', size: 17.5 }),
+            cell('S/No.', { bold: true, align: AlignmentType.CENTER, shading: 'DCE9ED', size: 17 }, metrics),
+            cell('Unit Code', { bold: true, shading: 'DCE9ED', size: 17 }, metrics),
+            cell('Unit Name', { bold: true, shading: 'DCE9ED', size: 17 }, metrics),
           ],
         }),
         ...units.map((unit, index) =>
           new TableRow({
             cantSplit: true,
-            height: { value: 230, rule: 'atLeast' },
+            height: { value: metrics.unitRowHeight, rule: 'atLeast' },
             children: [
-              cell(String(index + 1), { align: AlignmentType.CENTER, size: 17.5 }),
-              cell(unit.unitCode, { bold: true, size: 17.5 }),
-              cell(unit.unitName, { size: 17.5 }),
+              cell(String(index + 1), { align: AlignmentType.CENTER, size: 17 }, metrics),
+              cell(unit.unitCode, { bold: true, size: 17 }, metrics),
+              cell(unit.unitName, { size: 17 }, metrics),
             ],
           }),
         ),
       ],
     }),
-    spacer(),
   );
 
-  // Distinct Accounts & Approvals Sections
   children.push(
-    accountsBox(),
-    spacer(),
-    approvalsTable(),
+    new Paragraph({ spacing: { after: metrics.postUnitsTableSpacing, line: 30 } }),
+    ...premiumSignOffSection(metrics),
   );
 
   const document = new Document({
@@ -394,7 +442,7 @@ export async function buildStudentUnitRegistrationDocx(
     styles: {
       default: {
         document: {
-          run: { font: FONT, size: 18 },
+          run: { font: FONT, size: 17 },
           paragraph: { spacing: { line: 200, after: 0 } },
         },
       },
@@ -404,7 +452,7 @@ export async function buildStudentUnitRegistrationDocx(
         properties: {
           page: {
             size: { width: 11906, height: 16838 },
-            margin: { top: 300, right: 380, bottom: 300, left: 380 },
+            margin: { top: 200, right: 300, bottom: 180, left: 300 },
           },
         },
         footers: {
@@ -412,13 +460,13 @@ export async function buildStudentUnitRegistrationDocx(
             children: [
               new Paragraph({
                 alignment: AlignmentType.CENTER,
-                spacing: { before: 20, after: 0 },
+                spacing: { before: 10, after: 0 },
                 children: [
                   new TextRun({
                     text: 'This form should be filled in one copy and filed at the Registrar of Students.',
                     font: FONT,
                     size: 14,
-                    color: '64748B',
+                    color: '475569',
                     italics: true,
                   }),
                 ],

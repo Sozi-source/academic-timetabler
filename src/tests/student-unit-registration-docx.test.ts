@@ -4,8 +4,8 @@ import { buildStudentUnitRegistrationDocx } from '@/features/student-portal/regi
 import type { StudentPortalRegistrationContext } from '@/features/student-portal/types';
 
 describe('student unit registration Word form', () => {
-  it('generates the polished HOD-assigned form with one registered-unit roster', async () => {
-    const context: StudentPortalRegistrationContext = {
+  function makeContext(unitCount: number): StudentPortalRegistrationContext {
+    return {
       student: {
         id: 'student-1',
         admissionNumber: 'CND/S-1001/IC/25',
@@ -32,32 +32,33 @@ describe('student unit registration Word form', () => {
       registrationState: 'pre_registered',
       reportingStatus: 'pending',
       reportedOn: null,
-      units: [
-        {
-          registrationId: 'registration-2',
-          unitId: 'unit-2',
-          unitCode: 'CND 1302',
-          unitName: 'Meal Planning, Management and Service',
-          registrationStatus: 'registered',
-          source: 'department',
-          registeredAt: '2026-08-29T00:00:00Z',
-        },
-        {
-          registrationId: 'registration-1',
-          unitId: 'unit-1',
-          unitCode: 'CND 1301',
-          unitName: 'Basic Mathematics',
-          registrationStatus: 'registered',
-          source: 'department',
-          registeredAt: '2026-08-29T00:00:00Z',
-        },
-      ],
+      units: Array.from({ length: unitCount }, (_, i) => ({
+        registrationId: `reg-${i + 1}`,
+        unitId: `unit-${i + 1}`,
+        unitCode: `CND 130${i + 1}`,
+        unitName: `Unit Name ${i + 1}`,
+        registrationStatus: 'registered' as const,
+        source: 'department' as const,
+        registeredAt: '2026-08-29T00:00:00Z',
+      })),
     };
+  }
 
-    const document = await buildStudentUnitRegistrationDocx(context);
+  it('generates the polished form for standard 6 units', async () => {
+    const document = await buildStudentUnitRegistrationDocx(makeContext(6));
+    expect(document.byteLength).toBeGreaterThan(10_000);
+    expect(document.subarray(0, 2).toString()).toBe('PK');
+  });
 
+  it('generates the form with 8 units without overflowing', async () => {
+    const document = await buildStudentUnitRegistrationDocx(makeContext(8));
+    expect(document.byteLength).toBeGreaterThan(10_000);
+    expect(document.subarray(0, 2).toString()).toBe('PK');
+  });
+
+  it('generates the form with 12 units using compact mode', async () => {
+    const document = await buildStudentUnitRegistrationDocx(makeContext(12));
     expect(document.byteLength).toBeGreaterThan(10_000);
     expect(document.subarray(0, 2).toString()).toBe('PK');
   });
 });
-

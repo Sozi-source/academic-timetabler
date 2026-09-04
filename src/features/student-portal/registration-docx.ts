@@ -28,17 +28,19 @@ const border = {
 const borders = { top: border, bottom: border, left: border, right: border } as const;
 
 /**
- * The form is calibrated to strictly occupy MAX 1 single page across all unit loads.
- * Dynamic scaling smoothly budgets row heights, font sizes, and card padding.
+ * The form is calibrated to guarantee MAX 1 page even for 8 to 12 registered units.
+ * Row heights, font sizes, and card padding dynamically scale based on exact unit load.
  */
 const MIN_SCALE_UNITS = 6;
-const MAX_SCALE_UNITS = 12;
+const MAX_SCALE_UNITS = 10;
 
 function lerp(spacious: number, compact: number, t: number): number {
   return Math.round(spacious + (compact - spacious) * t);
 }
 
 interface FormMetrics {
+  fontSize: number;
+  headerFontSize: number;
   particularsRowHeight: number;
   particularsCellMargin: number;
   unitsHeadingBefore: number;
@@ -60,18 +62,20 @@ function computeFormMetrics(unitCount: number): FormMetrics {
   );
 
   return {
-    particularsRowHeight: lerp(215, 175, t),
-    particularsCellMargin: lerp(32, 22, t),
-    unitsHeadingBefore: lerp(20, 12, t),
-    unitsHeadingAfter: lerp(12, 6, t),
-    unitRowHeight: lerp(215, 175, t),
-    postUnitsTableSpacing: lerp(25, 14, t),
-    signOffHeadingHeight: lerp(195, 155, t),
-    signOffHeadingMargin: lerp(32, 22, t),
-    signOffDateRowHeight: lerp(260, 205, t),
-    signOffCommentRowHeight: lerp(260, 205, t),
-    signOffCellMargin: lerp(42, 28, t),
-    signOffSpacerAfter: lerp(42, 22, t),
+    fontSize: lerp(18.5, 16, t),
+    headerFontSize: lerp(23, 20, t),
+    particularsRowHeight: lerp(280, 190, t),
+    particularsCellMargin: lerp(46, 24, t),
+    unitsHeadingBefore: lerp(24, 12, t),
+    unitsHeadingAfter: lerp(16, 6, t),
+    unitRowHeight: lerp(280, 190, t),
+    postUnitsTableSpacing: lerp(30, 14, t),
+    signOffHeadingHeight: lerp(215, 160, t),
+    signOffHeadingMargin: lerp(38, 22, t),
+    signOffDateRowHeight: lerp(370, 225, t),
+    signOffCommentRowHeight: lerp(380, 225, t),
+    signOffCellMargin: lerp(58, 28, t),
+    signOffSpacerAfter: lerp(120, 40, t),
   };
 }
 
@@ -91,8 +95,8 @@ function line(
     alignment: options.align ?? AlignmentType.LEFT,
     spacing: {
       before: options.before ?? 0,
-      after: options.after ?? 12,
-      line: 210,
+      after: options.after ?? 10,
+      line: 205,
     },
     children: [
       new TextRun({
@@ -122,15 +126,15 @@ function cell(
     verticalAlign: VerticalAlign.CENTER,
     shading: options.shading ? { fill: options.shading } : undefined,
     margins: {
-      top: metrics?.particularsCellMargin ?? 32,
-      bottom: metrics?.particularsCellMargin ?? 32,
+      top: metrics?.particularsCellMargin ?? 36,
+      bottom: metrics?.particularsCellMargin ?? 36,
       left: 85,
       right: 85,
     },
     children: [
       line(value, {
         bold: options.bold,
-        size: options.size ?? 17.5,
+        size: options.size ?? metrics?.fontSize ?? 17.5,
         align: options.align,
         after: 0,
       }),
@@ -152,11 +156,12 @@ function signOffSpacer(metrics: FormMetrics) {
 function signOffText(
   text: string,
   options: { bold?: boolean; color?: string; size?: number; align?: (typeof AlignmentType)[keyof typeof AlignmentType] } = {},
+  metrics?: FormMetrics,
 ) {
   return line(text, {
     bold: options.bold,
     color: options.color ?? '111827',
-    size: options.size ?? 15.5,
+    size: options.size ?? (metrics ? metrics.fontSize - 2 : 15.5),
     align: options.align,
     after: 0,
   });
@@ -168,7 +173,7 @@ function signOffLabelCell(label: string, metrics: FormMetrics) {
     verticalAlign: VerticalAlign.CENTER,
     shading: { fill: 'F7FAFC' },
     margins: { top: metrics.signOffCellMargin, bottom: metrics.signOffCellMargin, left: 95, right: 70 },
-    children: [signOffText(label, { bold: true, color: '334155' })],
+    children: [signOffText(label, { bold: true, color: '334155' }, metrics)],
   });
 }
 
@@ -177,7 +182,7 @@ function signOffWriteCell(metrics: FormMetrics) {
     borders: signOffBorders,
     verticalAlign: VerticalAlign.CENTER,
     margins: { top: metrics.signOffCellMargin, bottom: metrics.signOffCellMargin, left: 75, right: 95 },
-    children: [signOffText('', { color: '000000' })],
+    children: [signOffText('', { color: '000000' }, metrics)],
   });
 }
 
@@ -188,7 +193,7 @@ function signOffHeading(title: string, metrics: FormMetrics) {
     verticalAlign: VerticalAlign.CENTER,
     shading: { fill: 'DCE9ED' },
     margins: { top: metrics.signOffHeadingMargin, bottom: metrics.signOffHeadingMargin, left: 95, right: 95 },
-    children: [signOffText(title, { bold: true, color: '0F4C5C', size: 16.5 })],
+    children: [signOffText(title, { bold: true, color: '0F4C5C', size: metrics.fontSize - 1 }, metrics)],
   });
 }
 
@@ -335,21 +340,15 @@ export async function buildStudentUnitRegistrationDocx(
   children.push(
     line('IMPERIAL COLLEGE OF MEDICAL AND HEALTH SCIENCES', {
       bold: true,
-      size: 22,
+      size: metrics.headerFontSize,
       align: AlignmentType.CENTER,
       after: 8,
     }),
     line('CONTINUING STUDENT UNIT REGISTRATION FORM', {
       bold: true,
-      size: 19,
+      size: metrics.headerFontSize - 3,
       align: AlignmentType.CENTER,
-      after: 8,
-    }),
-    line(context.student.programmeName.toUpperCase(), {
-      bold: true,
-      size: 17.5,
-      align: AlignmentType.CENTER,
-      after: 25,
+      after: 18,
     }),
   );
 
@@ -361,38 +360,42 @@ export async function buildStudentUnitRegistrationDocx(
       columnWidths: [5000, 5000],
       rows: [
         new TableRow({
+          cantSplit: true,
           height: { value: metrics.particularsRowHeight, rule: 'atLeast' },
           children: [
-            cell(`Name: ${context.student.fullName}`, { bold: true, size: 17 }, metrics),
-            cell(`Admission No: ${context.student.admissionNumber}`, { bold: true, size: 17 }, metrics),
+            cell(`Name: ${context.student.fullName}`, { bold: true, size: metrics.fontSize }, metrics),
+            cell(`Admission No: ${context.student.admissionNumber}`, { bold: true, size: metrics.fontSize }, metrics),
           ],
         }),
         new TableRow({
+          cantSplit: true,
           height: { value: metrics.particularsRowHeight, rule: 'atLeast' },
           children: [
-            cell(`Course: ${context.student.programmeName}`, { size: 17 }, metrics),
-            cell(`Stage: ${context.student.stageCode ?? context.student.stageName ?? ''}`, { size: 17 }, metrics),
+            cell(`Course: ${context.student.programmeName}`, { size: metrics.fontSize }, metrics),
+            cell(`Stage: ${context.student.stageCode ?? context.student.stageName ?? ''}`, { size: metrics.fontSize }, metrics),
           ],
         }),
         new TableRow({
+          cantSplit: true,
           height: { value: metrics.particularsRowHeight, rule: 'atLeast' },
           children: [
-            cell(`Department: ${context.student.departmentName}`, { size: 17 }, metrics),
-            cell(`Intake: ${context.student.cohortName ?? ''}`, { size: 17 }, metrics),
+            cell(`Department: ${context.student.departmentName}`, { size: metrics.fontSize }, metrics),
+            cell(`Intake: ${context.student.cohortName ?? ''}`, { size: metrics.fontSize }, metrics),
           ],
         }),
         new TableRow({
+          cantSplit: true,
           height: { value: metrics.particularsRowHeight, rule: 'atLeast' },
           children: [
-            cell(`Academic Period: ${context.period.name}`, { size: 17 }, metrics),
-            cell('Resident:', { size: 17 }, metrics),
+            cell(`Academic Period: ${context.period.name}`, { size: metrics.fontSize }, metrics),
+            cell('Resident:', { size: metrics.fontSize }, metrics),
           ],
         }),
       ],
     }),
     line('REGISTERED UNITS', {
       bold: true,
-      size: 17,
+      size: metrics.fontSize,
       align: AlignmentType.CENTER,
       before: metrics.unitsHeadingBefore,
       after: metrics.unitsHeadingAfter,
@@ -408,11 +411,12 @@ export async function buildStudentUnitRegistrationDocx(
       rows: [
         new TableRow({
           tableHeader: true,
+          cantSplit: true,
           height: { value: metrics.unitRowHeight, rule: 'atLeast' },
           children: [
-            cell('S/No.', { bold: true, align: AlignmentType.CENTER, shading: 'DCE9ED', size: 17 }, metrics),
-            cell('Unit Code', { bold: true, shading: 'DCE9ED', size: 17 }, metrics),
-            cell('Unit Name', { bold: true, shading: 'DCE9ED', size: 17 }, metrics),
+            cell('S/No.', { bold: true, align: AlignmentType.CENTER, shading: 'DCE9ED', size: metrics.fontSize }, metrics),
+            cell('Unit Code', { bold: true, shading: 'DCE9ED', size: metrics.fontSize }, metrics),
+            cell('Unit Name', { bold: true, shading: 'DCE9ED', size: metrics.fontSize }, metrics),
           ],
         }),
         ...units.map((unit, index) =>
@@ -420,9 +424,9 @@ export async function buildStudentUnitRegistrationDocx(
             cantSplit: true,
             height: { value: metrics.unitRowHeight, rule: 'atLeast' },
             children: [
-              cell(String(index + 1), { align: AlignmentType.CENTER, size: 17 }, metrics),
-              cell(unit.unitCode, { bold: true, size: 17 }, metrics),
-              cell(unit.unitName, { size: 17 }, metrics),
+              cell(String(index + 1), { align: AlignmentType.CENTER, size: metrics.fontSize }, metrics),
+              cell(unit.unitCode, { bold: true, size: metrics.fontSize }, metrics),
+              cell(unit.unitName, { size: metrics.fontSize }, metrics),
             ],
           }),
         ),
@@ -431,7 +435,7 @@ export async function buildStudentUnitRegistrationDocx(
   );
 
   children.push(
-    new Paragraph({ spacing: { after: metrics.postUnitsTableSpacing, line: 30 } }),
+    new Paragraph({ spacing: { after: metrics.postUnitsTableSpacing, line: 20 } }),
     ...premiumSignOffSection(metrics),
   );
 
@@ -442,7 +446,7 @@ export async function buildStudentUnitRegistrationDocx(
     styles: {
       default: {
         document: {
-          run: { font: FONT, size: 17 },
+          run: { font: FONT, size: metrics.fontSize },
           paragraph: { spacing: { line: 200, after: 0 } },
         },
       },
@@ -452,7 +456,7 @@ export async function buildStudentUnitRegistrationDocx(
         properties: {
           page: {
             size: { width: 11906, height: 16838 },
-            margin: { top: 200, right: 300, bottom: 180, left: 300 },
+            margin: { top: 180, right: 280, bottom: 160, left: 280 },
           },
         },
         footers: {
@@ -460,12 +464,12 @@ export async function buildStudentUnitRegistrationDocx(
             children: [
               new Paragraph({
                 alignment: AlignmentType.CENTER,
-                spacing: { before: 10, after: 0 },
+                spacing: { before: 8, after: 0 },
                 children: [
                   new TextRun({
                     text: 'This form should be filled in one copy and filed at the Registrar of Students.',
                     font: FONT,
-                    size: 14,
+                    size: 13,
                     color: '475569',
                     italics: true,
                   }),

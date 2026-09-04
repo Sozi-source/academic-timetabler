@@ -7,11 +7,8 @@ const CARD_BORDER = '#7DA6B3';
 const PARTICULARS_BORDER = '#334155';
 
 /**
- * The preview mirrors the one-page Word form: since the number of
- * registered units varies per student, cell padding and card spacing
- * scale between a "spacious" and a "compact" calibration (matching
- * the docx generator) so the printed page is always filled without
- * ever needing a second sheet.
+ * The preview mirrors the one-page Word form: calibrated to occupy 75% to 85%
+ * of the page with comfortable writing heights and strict 1-page print fit.
  */
 const MIN_SCALE_UNITS = 6;
 const MAX_SCALE_UNITS = 12;
@@ -34,17 +31,17 @@ function computePreviewMetrics(unitCount: number): PreviewMetrics {
   );
 
   return {
-    particularsPaddingMm: lerp(1.4, 0.6, t),
-    cellPaddingMm: lerp(1.4, 0.6, t),
-    cardGapMm: lerp(2.4, 1, t),
-    sectionGapMm: lerp(3, 1.2, t),
+    particularsPaddingMm: lerp(1.7, 0.85, t),
+    cellPaddingMm: lerp(1.7, 0.85, t),
+    cardGapMm: lerp(4.5, 2.2, t),
+    sectionGapMm: lerp(3.5, 1.8, t),
   };
 }
 
 function SectionHeading({ children, metrics }: { children: string; metrics: PreviewMetrics }) {
   return (
     <div
-      className="border text-[9px] font-bold uppercase text-[#0F4C5C]"
+      className="border text-[9.5px] font-bold uppercase text-[#0F4C5C]"
       style={{
         backgroundColor: HEADER_FILL,
         borderColor: PARTICULARS_BORDER,
@@ -67,12 +64,12 @@ function ApprovalCard({
 }) {
   const cellStyle = { borderColor: CARD_BORDER, padding: `${metrics.cellPaddingMm}mm 2mm` };
   const labelCellStyle = { ...cellStyle, backgroundColor: '#F7FAFC' };
-  const cellClass = 'border text-[9px]';
+  const cellClass = 'border text-[9.5px]';
 
   return (
     <div style={{ marginTop: `${metrics.cardGapMm}mm` }}>
       <div
-        className="border text-[9px] font-bold text-[#0F4C5C]"
+        className="border text-[9.5px] font-bold text-[#0F4C5C]"
         style={{ backgroundColor: HEADER_FILL, borderColor: CARD_BORDER, padding: `${metrics.cellPaddingMm}mm 2mm` }}
       >
         {title}
@@ -113,20 +110,19 @@ export function UnitRegistrationFormPreview({
   if (!context.period) return null;
 
   const metrics = computePreviewMetrics(units.length);
-  const cellClass = 'border text-[9px]';
+  const cellClass = 'border text-[9.5px]';
   const cellStyle = { borderColor: CARD_BORDER, padding: `${metrics.cellPaddingMm}mm 2mm` };
   const labelCellStyle = { ...cellStyle, backgroundColor: '#F7FAFC' };
-  const particularsCellStyle = { padding: `${metrics.particularsPaddingMm}mm` };
-  const tableCellStyle = { borderColor: PARTICULARS_BORDER, padding: `${metrics.cellPaddingMm}mm 1mm` };
+  const particularsCellStyle = { padding: `${metrics.particularsPaddingMm}mm 2mm` };
+  const tableCellStyle = { borderColor: PARTICULARS_BORDER, padding: `${metrics.cellPaddingMm}mm 1.5mm` };
 
   return (
-    <article className="mx-auto w-full max-w-[210mm] bg-white p-[9mm] font-sans text-[9px] leading-[1.15] text-black shadow-sm print:w-[210mm] print:max-w-none print:p-[9mm] print:shadow-none">
+    <article className="mx-auto w-full max-w-[210mm] bg-white p-[8mm] font-sans text-[9.5px] leading-[1.2] text-black shadow-sm print:w-[210mm] print:max-w-none print:p-[8mm] print:shadow-none print:break-inside-avoid">
       <header className="flex items-center justify-center gap-3 text-center">
         <Image src="/branding/icmhs-logo.png" alt="Imperial College of Medical and Health Sciences" width={58} height={44} className="shrink-0" />
         <div>
-          <h2 className="text-[12px] font-bold">IMPERIAL COLLEGE OF MEDICAL AND HEALTH SCIENCES</h2>
-          <p className="mt-0.5 text-[10px] font-bold">CONTINUING STUDENT UNIT REGISTRATION FORM</p>
-          <p className="mt-0.5 text-[9px] font-bold uppercase">{context.student.programmeName}</p>
+          <h2 className="text-[12px] font-bold text-[#0F172A]">IMPERIAL COLLEGE OF MEDICAL AND HEALTH SCIENCES</h2>
+          <p className="mt-0.5 text-[10px] font-bold text-[#0F4C5C]">CONTINUING STUDENT UNIT REGISTRATION FORM</p>
         </div>
       </header>
 
@@ -152,7 +148,7 @@ export function UnitRegistrationFormPreview({
       <div style={{ marginTop: `${metrics.sectionGapMm}mm` }}>
         <SectionHeading metrics={metrics}>Registered Units</SectionHeading>
       </div>
-      <table className="w-full border-collapse border text-[9px]" style={{ borderColor: PARTICULARS_BORDER }}>
+      <table className="w-full border-collapse border text-[9.5px]" style={{ borderColor: PARTICULARS_BORDER }}>
         <thead>
           <tr style={{ backgroundColor: HEADER_FILL }}>
             <th className="w-10 border text-center" style={tableCellStyle}>S/No.</th>
@@ -173,7 +169,7 @@ export function UnitRegistrationFormPreview({
 
       <div style={{ marginTop: `${metrics.cardGapMm}mm` }}>
         <div
-          className="border text-[9px] font-bold text-[#0F4C5C]"
+          className="border text-[9.5px] font-bold text-[#0F4C5C]"
           style={{ backgroundColor: HEADER_FILL, borderColor: CARD_BORDER, padding: `${metrics.cellPaddingMm}mm 2mm` }}
         >
           ACCOUNTS.
@@ -204,7 +200,7 @@ export function UnitRegistrationFormPreview({
       <ApprovalCard title="PRINCIPAL APPROVAL" approverLabel="PRINCIPAL:" metrics={metrics} />
       <ApprovalCard title="MANAGING DIRECTOR APPROVAL" approverLabel="MANAGING DIRECTOR:" metrics={metrics} />
 
-      <footer className="mt-2 text-center text-[9px]">
+      <footer className="mt-2 text-center text-[9px] text-[#475569] italic">
         This form should be filled in one copy and filed at the Registrar of Students.
       </footer>
     </article>

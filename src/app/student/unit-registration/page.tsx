@@ -7,13 +7,14 @@ import { redirect } from 'next/navigation';
 import { StudentPortalShell } from '@/components/student/student-portal-shell';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
+import { PrintActionButton } from '@/components/ui/print-action-button';
 import {
   activeStudentUnits,
   studentRegistrationLabel,
 } from '@/features/student-portal/domain';
 import { getStudentPortalRegistrationContext } from '@/features/student-portal/queries';
 import { getStudentPortalSession } from '@/features/student-portal/session';
-import { StudentRegistrationUnitList } from '@/features/student-portal/unit-registration-form';
+import { UnitRegistrationFormPreview } from '@/features/student-unit-registration/unit-registration-form-preview';
 
 export default async function StudentUnitRegistrationPage() {
   const session = await getStudentPortalSession();
@@ -49,8 +50,8 @@ export default async function StudentUnitRegistrationPage() {
           />
         ) : (
           <>
-            {/* Unified Elegant Header Card */}
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
+            {/* Action & Metadata Header (Hidden when printing) */}
+            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs print:hidden">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
@@ -90,26 +91,27 @@ export default async function StudentUnitRegistrationPage() {
                   </div>
                 </div>
 
-                <div className="flex flex-col items-start sm:items-end gap-1">
+                {/* Primary Dual Actions: Print / PDF & Download Word */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <PrintActionButton label="Print / Save PDF" />
                   <a
                     href="/api/student/unit-registration/form"
-                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-3.5 text-xs font-semibold text-white shadow-2xs transition hover:bg-slate-800"
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-3.5 text-xs font-semibold text-white shadow-2xs transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500/40"
                   >
                     <Download className="size-3.5" />
-                    <span>Download Form (.docx)</span>
+                    <span>Download (.docx)</span>
                   </a>
-                  <span className="text-[11px] text-slate-400">
-                    For clearance desk approvals
-                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Units Roster */}
-            <StudentRegistrationUnitList units={units} />
+            {/* Complete Full-Page Official HTML Form */}
+            <div className="rounded-xl border border-slate-200 bg-slate-100/60 p-2 sm:p-6 print:border-none print:bg-white print:p-0">
+              <UnitRegistrationFormPreview context={context} />
+            </div>
 
             {context.submission?.verificationNote ? (
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[11px] text-slate-500 print:hidden">
                 Department note: {context.submission.verificationNote}
               </p>
             ) : null}

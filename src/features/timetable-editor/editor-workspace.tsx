@@ -55,23 +55,25 @@ export function TimetableEditorWorkspace({
         </section>
       ) : null}
 
-      <div className="grid gap-4 xl:grid-cols-5">
-        {data.workingDays.map((day) => {
-          const sessions = data.sessions.filter((session) => session.workingDayId === day.id);
-          return (
-            <section key={day.id} className="min-w-0 rounded-2xl border border-border bg-surface-subtle p-3 border-t-4 border-t-institutional-yellow shadow-sm">
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="font-semibold text-text-primary">{day.label}</h2>
-                <span className="rounded-full bg-surface px-2 py-1 text-xs text-text-muted">{sessions.length}</span>
-              </div>
-              <div className="space-y-3">
-                {sessions.length > 0 ? sessions.map((session) => (
-                  <SessionEditorCard key={session.id} session={session} data={data} />
-                )) : <p className="rounded-xl border border-dashed border-border px-3 py-8 text-center text-xs text-text-muted">No sessions</p>}
-              </div>
-            </section>
-          );
-        })}
+      <div className="overflow-x-auto pb-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 min-w-[1050px]">
+          {data.workingDays.map((day) => {
+            const sessions = data.sessions.filter((session) => session.workingDayId === day.id);
+            return (
+              <section key={day.id} className="min-w-[200px] rounded-2xl border border-border bg-surface-subtle p-3 border-t-4 border-t-institutional-yellow shadow-sm">
+                <div className="mb-3 flex items-center justify-between">
+                  <h2 className="font-semibold text-text-primary">{day.label}</h2>
+                  <span className="rounded-full bg-surface px-2 py-1 text-xs text-text-muted">{sessions.length}</span>
+                </div>
+                <div className="space-y-3">
+                  {sessions.length > 0 ? sessions.map((session) => (
+                    <SessionEditorCard key={session.id} session={session} data={data} />
+                  )) : <p className="rounded-xl border border-dashed border-border px-3 py-8 text-center text-xs text-text-muted">No sessions</p>}
+                </div>
+              </section>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

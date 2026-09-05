@@ -86,18 +86,10 @@ export function SessionEditorCard({
           : 'bg-surface border-border-soft border-t-2 border-t-primary/60',
       )}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <span className="inline-flex items-center rounded-md bg-primary-soft/50 px-2 py-0.5 text-[10px] font-bold text-primary border border-primary/20">
-            {session.unitCode}
-          </span>
-          <h3
-            className="mt-1.5 text-xs font-bold text-text-primary leading-snug line-clamp-2"
-            title={session.unitName}
-          >
-            {session.unitName}
-          </h3>
-        </div>
+      <div className="flex items-center justify-between gap-2">
+        <span className="inline-flex items-center rounded-md bg-primary-soft/50 px-2 py-0.5 text-[10px] font-bold text-primary border border-primary/20">
+          {session.unitCode}
+        </span>
 
         {!trainerUnassigned ? (
           <form action={toggleScheduledSessionLockAction} className="shrink-0">
@@ -106,7 +98,7 @@ export function SessionEditorCard({
               type="submit"
               size="icon"
               variant={session.isLocked ? 'secondary' : 'ghost'}
-              className="size-8 rounded-lg"
+              className="size-7 rounded-lg"
               aria-label={session.isLocked ? 'Unlock session' : 'Lock session'}
               title={session.isLocked ? 'Unlock session' : 'Lock session'}
             >
@@ -119,6 +111,13 @@ export function SessionEditorCard({
           </form>
         ) : null}
       </div>
+
+      <h3
+        className="mt-2 text-xs font-bold text-text-primary leading-snug break-words"
+        title={session.unitName}
+      >
+        {session.unitName}
+      </h3>
 
       <div className="mt-3.5 space-y-2 border-t border-border-soft pt-3 text-[11px]">
         <div className="flex items-center gap-2 text-text-secondary">

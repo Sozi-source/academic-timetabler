@@ -449,22 +449,28 @@ function MasterTimetable({
 function PersonalSessionCell({ rows }: { rows: TimetableReportRow[] }) {
   return (
     <View style={[personalStyles.cell, personalStyles.sessionCell, { width: '29.5%' }]}>
-      {rows.map((row, index) => (
-        <View key={row.sessionId} style={{ alignItems: 'center', width: '100%' }}>
-          {index > 0 ? <View style={personalStyles.separator} /> : null}
-          <Text style={personalStyles.personalUnitName}>{row.unitName}</Text>
-          <Text style={personalStyles.personalUnitCode}>{row.unitCode}</Text>
-          <Text style={personalStyles.personalCohort}>{cohortCodes(row).join(' + ')}</Text>
-          {row.departmentName ? (
-            <Text style={personalStyles.department}>
-              {row.departmentCode ? `${row.departmentCode} - ` : ''}{row.departmentName}
+      {rows.map((row, index) => {
+        const showDepartment = Boolean(row.departmentName) &&
+          row.departmentCode?.toUpperCase() !== 'HND' &&
+          row.departmentName?.toUpperCase() !== 'HND';
+
+        return (
+          <View key={row.sessionId} style={{ alignItems: 'center', width: '100%' }}>
+            {index > 0 ? <View style={personalStyles.separator} /> : null}
+            <Text style={personalStyles.personalUnitName}>{row.unitName}</Text>
+            <Text style={personalStyles.personalUnitCode}>{row.unitCode}</Text>
+            <Text style={personalStyles.personalCohort}>{cohortCodes(row).join(' + ')}</Text>
+            {showDepartment ? (
+              <Text style={personalStyles.department}>
+                {row.departmentCode ? `${row.departmentCode} - ` : ''}{row.departmentName}
+              </Text>
+            ) : null}
+            <Text style={personalStyles.personalVenue}>
+              Venue: {formatVenueLabel(row.roomCode, row.roomName, 'Unallocated')}
             </Text>
-          ) : null}
-          <Text style={personalStyles.personalVenue}>
-            Venue: {formatVenueLabel(row.roomCode, row.roomName, 'Unallocated')}
-          </Text>
-        </View>
-      ))}
+          </View>
+        );
+      })}
     </View>
   );
 }

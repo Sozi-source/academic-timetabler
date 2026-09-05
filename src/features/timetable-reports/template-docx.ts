@@ -445,6 +445,9 @@ export function personalSessionParagraphs(
       ?? 'Department';
     const cohort = cohortCodes(row).join(' + ');
     const venue = formatVenueLabel(row.roomCode, row.roomName, 'Unallocated');
+    const showDepartment = department
+      && department.toUpperCase() !== 'HND'
+      && row.departmentCode?.toUpperCase() !== 'HND';
 
     return [
       new Paragraph({
@@ -462,10 +465,14 @@ export function personalSessionParagraphs(
           new TextRun(cohort),
         ],
       }),
-      new Paragraph({
-        style: 'PersonalDepartment',
-        children: [new TextRun(department)],
-      }),
+      ...(showDepartment
+        ? [
+            new Paragraph({
+              style: 'PersonalDepartment',
+              children: [new TextRun(department)],
+            }),
+          ]
+        : []),
       new Paragraph({
         style: 'PersonalVenue',
         children: [

@@ -1,4 +1,4 @@
-import { ArrowLeft, CalendarDays, History, UserRound } from 'lucide-react';
+import { ArrowLeft, CalendarDays, Eye, History, UserRound } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -60,6 +60,15 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         description={`${student.programme?.code ?? 'Programme'} · ${student.current_cohort?.name ?? student.admission_cohort?.name ?? 'No cohort'}`}
         icon={UserRound}
         context={<Badge variant={statusVariant(student.lifecycle_status)}>{student.lifecycle_status.replaceAll('_', ' ')}</Badge>}
+        actions={
+          <Link
+            href={`/students/registry/${student.id}/portal-view`}
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3.5 text-xs font-bold text-white shadow-2xs transition hover:bg-primary-hover active:scale-95"
+          >
+            <Eye className="size-3.5" />
+            <span>View as Student</span>
+          </Link>
+        }
       />
 
       <div className="grid gap-3 md:grid-cols-3">

@@ -221,12 +221,12 @@ export function StudentUnitRegistrationTable({ students }: StudentUnitRegistrati
                 <div className="flex items-center justify-end gap-2 min-w-0">
                   {student.selectedUnits > 0 && (
                     <Link
-                      href={`/students/unit-registration/preview/${student.id}`}
-                      className="inline-flex h-8 items-center gap-1 rounded-lg border border-border bg-surface px-2.5 text-[11px] font-semibold text-text-secondary hover:bg-surface-subtle transition active:scale-95"
-                      title="Preview registration form"
+                      href={`/students/registry/${student.id}/portal-view`}
+                      className="inline-flex h-8 items-center gap-1 rounded-lg border border-border bg-surface px-2.5 text-[11px] font-bold text-text-secondary hover:bg-surface-subtle transition active:scale-95"
+                      title="View as Student (Portal Preview)"
                     >
                       <Eye className="size-3.5 text-primary" />
-                      Preview
+                      View Portal
                     </Link>
                   )}
 

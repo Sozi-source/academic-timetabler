@@ -548,10 +548,18 @@ export function GeneratorWorkspace({
                     <Save className="size-4" aria-hidden="true" />
                   )}
                 >
-                  {persistPending ? 'Saving draft' : 'Save draft timetable'}
+                  {persistPending ? 'Saving draft...' : 'Save draft timetable'}
                 </Button>
               </form>
             </div>
+            {persistState.message ? (
+              <div className="mt-4">
+                <FormStatusMessage
+                  status={persistState.status === 'success' ? 'success' : 'error'}
+                  message={persistState.message}
+                />
+              </div>
+            ) : null}
           </section>
         </div>
       )}

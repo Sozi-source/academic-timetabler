@@ -50,6 +50,21 @@ function friendlyPublicationError({
     };
   }
 
+  if (
+    normalized.includes('no draft timetable sessions')
+    || normalized.includes('available to version')
+    || normalized.includes('sessions_total')
+  ) {
+    return {
+      status: 'error',
+      title: 'Save the draft timetable first',
+      message:
+        `There are no saved draft sessions found for this academic period yet (${message}). Open Generate Timetable, ensure the preview is generated, and click "Save draft timetable" at the bottom.`,
+      actionHref: `/timetable/generator?period=${encodeURIComponent(academicPeriodId)}`,
+      actionLabel: 'Go to Generator',
+    };
+  }
+
   if (normalized.includes('conflict')) {
     return {
       status: 'error',
@@ -64,8 +79,7 @@ function friendlyPublicationError({
   return {
     status: 'error',
     title: 'The timetable was not changed',
-    message:
-      'We could not complete this step. Check the timetable and try again. If the problem continues, refresh the page before retrying.',
+    message: message || 'We could not complete this step. Check the timetable and try again. If the problem continues, refresh the page before retrying.',
   };
 }
 

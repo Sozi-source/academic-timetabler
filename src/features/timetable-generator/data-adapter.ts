@@ -117,9 +117,11 @@ function mapAllocation(
     deliveryMode:
       allocation.deliveryMode,
     weeklySessions:
-      allocation.weeklySessions,
+      allocation.weeklySessions ?? 1,
     sessionDurationMinutes:
-      allocation.sessionDurationMinutes,
+      allocation.isFullDaySession
+        ? 480
+        : (allocation.sessionDurationMinutes === 480 ? 120 : allocation.sessionDurationMinutes ?? 120),
     isTimetableEnabled:
       allocation.isTimetableEnabled,
     fixedWorkingDayId:

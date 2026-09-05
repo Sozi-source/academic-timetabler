@@ -107,6 +107,7 @@ export function UnitFormFields({
             id="unit-code"
             name="code"
             required
+            maxLength={60}
             disabled={pending}
             defaultValue={unit?.code ?? ''}
             hasError={Boolean(codeError)}
@@ -122,6 +123,7 @@ export function UnitFormFields({
           <Input
             id="unit-short-name"
             name="shortName"
+            maxLength={80}
             disabled={pending}
             defaultValue={unit?.shortName ?? ''}
             hasError={Boolean(shortNameError)}
@@ -131,7 +133,7 @@ export function UnitFormFields({
 
       <FormField
         id="unit-name"
-        label="Official unit name"
+        label="Unit name"
         required
         error={nameError}
       >
@@ -139,6 +141,7 @@ export function UnitFormFields({
           id="unit-name"
           name="name"
           required
+          maxLength={180}
           disabled={pending}
           defaultValue={unit?.name ?? ''}
           hasError={Boolean(nameError)}
@@ -148,7 +151,7 @@ export function UnitFormFields({
       <div className="grid gap-4 sm:grid-cols-2">
         <FormField
           id="unit-category"
-          label="Unit category"
+          label="Category"
           required
           error={categoryError}
         >
@@ -157,7 +160,9 @@ export function UnitFormFields({
             name="category"
             required
             disabled={pending}
-            defaultValue={unit?.category ?? 'core'}
+            defaultValue={
+              unit?.category ?? 'core'
+            }
             hasError={Boolean(categoryError)}
           >
             {unitCategoryOptions.map((option) => (
@@ -172,13 +177,13 @@ export function UnitFormFields({
         </FormField>
 
         <FormField
-          id="unit-period"
-          label="Academic Period number"
+          id="unit-period-number"
+          label="Programme stage (Period number)"
           required
           error={periodError}
         >
           <Input
-            id="unit-period"
+            id="unit-period-number"
             name="academicPeriodNumber"
             type="number"
             min={1}
@@ -193,11 +198,14 @@ export function UnitFormFields({
         </FormField>
       </div>
 
-      <section className="space-y-4 rounded-xl border border-border-soft bg-surface-subtle p-4">
+      <section className="space-y-4 rounded-xl border border-border bg-surface-subtle p-4">
         <div>
           <h3 className="text-sm font-semibold text-text-primary">
-            Contact hours and scheduling
+            Teaching structure
           </h3>
+          <p className="mt-1 text-xs text-text-muted">
+            Define the weekly teaching requirement and room needs for the generator.
+          </p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
@@ -302,6 +310,43 @@ export function UnitFormFields({
             ))}
           </Select>
         </FormField>
+      </section>
+
+      <section className="space-y-4 rounded-xl border border-border bg-surface-subtle p-4">
+        <div>
+          <h3 className="text-sm font-semibold text-text-primary">
+            Timetable and status
+          </h3>
+          <p className="mt-1 text-xs text-text-muted">
+            Configure timetable scheduling availability and active status for this unit.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-6">
+          <label className="flex cursor-pointer items-center gap-2.5 text-xs font-medium text-text-primary">
+            <input
+              type="checkbox"
+              name="isTimetableAvailable"
+              value="true"
+              disabled={pending}
+              defaultChecked={unit ? unit.isTimetableAvailable : true}
+              className="size-4 rounded border-border text-primary focus:ring-primary"
+            />
+            Available for Timetable scheduling
+          </label>
+
+          <label className="flex cursor-pointer items-center gap-2.5 text-xs font-medium text-text-primary">
+            <input
+              type="checkbox"
+              name="isActive"
+              value="true"
+              disabled={pending}
+              defaultChecked={unit ? unit.isActive : true}
+              className="size-4 rounded border-border text-primary focus:ring-primary"
+            />
+            Active unit
+          </label>
+        </div>
       </section>
 
       <FormField

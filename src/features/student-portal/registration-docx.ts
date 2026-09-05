@@ -23,7 +23,7 @@ const FONT = 'Arial';
 const border = {
   style: BorderStyle.SINGLE,
   size: 4,
-  color: '334155',
+  color: '000000',
 } as const;
 const borders = { top: border, bottom: border, left: border, right: border } as const;
 
@@ -105,7 +105,7 @@ function line(
         size: options.size ?? 17.5,
         bold: options.bold ?? false,
         italics: options.italics ?? false,
-        color: options.color ?? '0F172A',
+        color: options.color ?? '000000',
       }),
     ],
   });
@@ -117,14 +117,12 @@ function cell(
     bold?: boolean;
     size?: number;
     align?: (typeof AlignmentType)[keyof typeof AlignmentType];
-    shading?: string;
   } = {},
   metrics?: FormMetrics,
 ) {
   return new TableCell({
     borders,
     verticalAlign: VerticalAlign.CENTER,
-    shading: options.shading ? { fill: options.shading } : undefined,
     margins: {
       top: metrics?.particularsCellMargin ?? 36,
       bottom: metrics?.particularsCellMargin ?? 36,
@@ -137,6 +135,7 @@ function cell(
         size: options.size ?? metrics?.fontSize ?? 17.5,
         align: options.align,
         after: 0,
+        color: '000000',
       }),
     ],
   });
@@ -144,8 +143,8 @@ function cell(
 
 const signOffBorder = {
   style: BorderStyle.SINGLE,
-  size: 6,
-  color: '7DA6B3',
+  size: 4,
+  color: '000000',
 } as const;
 const signOffBorders = { top: signOffBorder, bottom: signOffBorder, left: signOffBorder, right: signOffBorder } as const;
 
@@ -160,7 +159,7 @@ function signOffText(
 ) {
   return line(text, {
     bold: options.bold,
-    color: options.color ?? '111827',
+    color: options.color ?? '000000',
     size: options.size ?? (metrics ? metrics.fontSize - 2 : 15.5),
     align: options.align,
     after: 0,
@@ -171,9 +170,8 @@ function signOffLabelCell(label: string, metrics: FormMetrics) {
   return new TableCell({
     borders: signOffBorders,
     verticalAlign: VerticalAlign.CENTER,
-    shading: { fill: 'F7FAFC' },
     margins: { top: metrics.signOffCellMargin, bottom: metrics.signOffCellMargin, left: 95, right: 70 },
-    children: [signOffText(label, { bold: true, color: '334155' }, metrics)],
+    children: [signOffText(label, { bold: true, color: '000000' }, metrics)],
   });
 }
 
@@ -191,9 +189,8 @@ function signOffHeading(title: string, metrics: FormMetrics) {
     borders: signOffBorders,
     columnSpan: 4,
     verticalAlign: VerticalAlign.CENTER,
-    shading: { fill: 'DCE9ED' },
     margins: { top: metrics.signOffHeadingMargin, bottom: metrics.signOffHeadingMargin, left: 95, right: 95 },
-    children: [signOffText(title, { bold: true, color: '0F4C5C', size: metrics.fontSize - 1 }, metrics)],
+    children: [signOffText(title, { bold: true, color: '000000', size: metrics.fontSize - 1 }, metrics)],
   });
 }
 
@@ -414,9 +411,9 @@ export async function buildStudentUnitRegistrationDocx(
           cantSplit: true,
           height: { value: metrics.unitRowHeight, rule: 'atLeast' },
           children: [
-            cell('S/No.', { bold: true, align: AlignmentType.CENTER, shading: 'DCE9ED', size: metrics.fontSize }, metrics),
-            cell('Unit Code', { bold: true, shading: 'DCE9ED', size: metrics.fontSize }, metrics),
-            cell('Unit Name', { bold: true, shading: 'DCE9ED', size: metrics.fontSize }, metrics),
+            cell('S/No.', { bold: true, align: AlignmentType.CENTER, size: metrics.fontSize }, metrics),
+            cell('Unit Code', { bold: true, size: metrics.fontSize }, metrics),
+            cell('Unit Name', { bold: true, size: metrics.fontSize }, metrics),
           ],
         }),
         ...units.map((unit, index) =>
@@ -446,7 +443,7 @@ export async function buildStudentUnitRegistrationDocx(
     styles: {
       default: {
         document: {
-          run: { font: FONT, size: metrics.fontSize },
+          run: { font: FONT, size: metrics.fontSize, color: '000000' },
           paragraph: { spacing: { line: 200, after: 0 } },
         },
       },
@@ -470,7 +467,7 @@ export async function buildStudentUnitRegistrationDocx(
                     text: 'This form should be filled in one copy and filed at the Registrar of Students.',
                     font: FONT,
                     size: 13,
-                    color: '475569',
+                    color: '000000',
                     italics: true,
                   }),
                 ],

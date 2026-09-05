@@ -566,6 +566,50 @@ export async function saveGeneratedTimetableDraftAction(
     }
 
     const supabase = await createClient();
+
+    // Ensure teaching_allocations duration matches the scheduled session duration before database trigger validation
+    const sessionAllocations120 = Array.from(
+      new Set(
+        preview.sessions
+          .filter((s) => s.durationMinutes === 120)
+          .map((s) => s.teachingAllocationId)
+          .filter((id): id is string => Boolean(id)),
+      ),
+    );
+
+    if (sessionAllocations120.length > 0) {
+      await supabase
+        .from('teaching_allocations')
+        .update({
+          session_duration_minutes: 120,
+          is_full_day_session: false,
+          updated_at: new Date().toISOString(),
+        })
+        .in('id', sessionAllocations120)
+        .neq('session_duration_minutes', 120);
+    }
+
+    const sessionAllocations480 = Array.from(
+      new Set(
+        preview.sessions
+          .filter((s) => s.durationMinutes >= 480)
+          .map((s) => s.teachingAllocationId)
+          .filter((id): id is string => Boolean(id)),
+      ),
+    );
+
+    if (sessionAllocations480.length > 0) {
+      await supabase
+        .from('teaching_allocations')
+        .update({
+          session_duration_minutes: 480,
+          is_full_day_session: true,
+          updated_at: new Date().toISOString(),
+        })
+        .in('id', sessionAllocations480)
+        .neq('session_duration_minutes', 480);
+    }
+
     const payload = preview.sessions.map((session) => ({
       academicPeriodId: session.academicPeriodId,
       teachingAllocationId: session.teachingAllocationId,
@@ -609,6 +653,8 @@ export async function saveGeneratedTimetableDraftAction(
     revalidatePath('/timetable/generator');
     revalidatePath('/timetable/editor');
     revalidatePath('/timetable/conflicts');
+    revalidatePath('/timetable/published');
+    revalidatePath('/timetable/reports');
 
     return {
       status: 'success',

@@ -856,4 +856,471 @@ describe('generateTimetablePlan', () => {
       ),
     ).toHaveLength(0);
   });
+
+  it('prioritizes allocations from other-department trainers with restricted schedules to prevent unscheduled collisions', () => {
+    const input = createPlannerInput({
+      allocations: [
+        {
+          id: 'allocation-internal',
+          academicPeriodId: 'period-1',
+          cohortId: 'cohort-1',
+          unitId: 'unit-1',
+          trainerId: 'trainer-internal',
+          preferredRoomId: null,
+          deliveryMode: 'theory',
+          weeklySessions: 1,
+          sessionDurationMinutes: 120,
+          isTimetableEnabled: true,
+        },
+        {
+          id: 'allocation-ondieki',
+          academicPeriodId: 'period-1',
+          cohortId: 'cohort-1',
+          unitId: 'unit-2',
+          trainerId: 'trainer-ondieki',
+          preferredRoomId: null,
+          deliveryMode: 'theory',
+          weeklySessions: 1,
+          sessionDurationMinutes: 120,
+          isTimetableEnabled: true,
+        },
+      ],
+    });
+
+    input.units.push({
+      id: 'unit-2',
+      code: 'ICT 201',
+      name: 'ICT Systems',
+      preferredRoomType: null,
+      isActive: true,
+      isTimetableAvailable: true,
+    });
+
+    input.trainers = [
+      {
+        id: 'trainer-internal',
+        departmentId: 'department-1',
+        staffNumber: 'ST-001',
+        fullName: 'Internal Trainer',
+        normalWeeklyHours: 20,
+        maximumWeeklyHours: 25,
+        maximumDailyHours: 8,
+        isActive: true,
+        isTimetableAvailable: true,
+        availabilityMode: 'generally_available',
+      },
+      {
+        id: 'trainer-ondieki',
+        departmentId: 'department-2', // Other department / guest trainer
+        staffNumber: 'ST-OND',
+        fullName: 'Brian Ondieki',
+        normalWeeklyHours: 10,
+        maximumWeeklyHours: 15,
+        maximumDailyHours: 6,
+        isActive: true,
+        isTimetableAvailable: true,
+        availabilityMode: 'selected_slots_only',
+        availableSlots: [
+          { workingDayId: 'day-1', timeSlotId: 'slot-1' },
+          { workingDayId: 'day-1', timeSlotId: 'slot-2' },
+        ],
+      },
+    ];
+
+    const result = generateTimetablePlan(input);
+
+    expect(result.unscheduled).toHaveLength(0);
+    expect(result.sessions).toHaveLength(2);
+
+    const ondiekiSession = result.sessions.find(
+      (s) => s.teachingAllocationId === 'allocation-ondieki',
+    );
+    expect(ondiekiSession).toBeDefined();
+    expect(ondiekiSession?.workingDayId).toBe('day-1');
+    expect(ondiekiSession?.startTimeSlotId).toBe('slot-1');
+    expect(ondiekiSession?.endTimeSlotId).toBe('slot-2');
+
+    const internalSession = result.sessions.find(
+      (s) => s.teachingAllocationId === 'allocation-internal',
+    );
+    expect(internalSession).toBeDefined();
+    expect(internalSession?.workingDayId).not.toBe('day-1');
+  });
+
+  it('prioritizes other-department guest trainers with fixed slot allocations over general internal allocations', () => {
+    const input = createPlannerInput({
+      allocations: [
+        {
+          id: 'allocation-internal-flexible',
+          academicPeriodId: 'period-1',
+          cohortId: 'cohort-1',
+          unitId: 'unit-1',
+          trainerId: 'trainer-internal',
+          preferredRoomId: null,
+          deliveryMode: 'theory',
+          weeklySessions: 1,
+          sessionDurationMinutes: 120,
+          isTimetableEnabled: true,
+        },
+        {
+          id: 'allocation-guest-fixed',
+          academicPeriodId: 'period-1',
+          cohortId: 'cohort-1',
+          unitId: 'unit-2',
+          trainerId: 'trainer-guest',
+          preferredRoomId: null,
+          deliveryMode: 'theory',
+          weeklySessions: 1,
+          sessionDurationMinutes: 120,
+          isTimetableEnabled: true,
+          fixedWorkingDayId: 'day-1',
+          fixedTimeSlotIds: ['slot-1'],
+        },
+      ],
+    });
+
+    input.units.push({
+      id: 'unit-2',
+      code: 'MED 202',
+      name: 'Clinical Practice',
+      preferredRoomType: null,
+      isActive: true,
+      isTimetableAvailable: true,
+    });
+
+    input.trainers = [
+      {
+        id: 'trainer-internal',
+        departmentId: 'department-1',
+        staffNumber: 'ST-001',
+        fullName: 'Internal Trainer',
+        normalWeeklyHours: 20,
+        maximumWeeklyHours: 25,
+        maximumDailyHours: 8,
+        isActive: true,
+        isTimetableAvailable: true,
+        availabilityMode: 'generally_available',
+      },
+      {
+        id: 'trainer-guest',
+        departmentId: 'department-2',
+        staffNumber: 'ST-GST',
+        fullName: 'Guest Trainer',
+        normalWeeklyHours: 10,
+        maximumWeeklyHours: 15,
+        maximumDailyHours: 6,
+        isActive: true,
+        isTimetableAvailable: true,
+        availabilityMode: 'generally_available',
+      },
+    ];
+
+    const result = generateTimetablePlan(input);
+
+    expect(result.unscheduled).toHaveLength(0);
+    expect(result.sessions).toHaveLength(2);
+
+    const guestSession = result.sessions.find(
+      (s) => s.teachingAllocationId === 'allocation-guest-fixed',
+    );
+    expect(guestSession?.workingDayId).toBe('day-1');
+    expect(guestSession?.startTimeSlotId).toBe('slot-1');
+  });
+
+  it('prioritizes multi-cohort shared classes before individual cohort sessions to prevent calendar exhaustion', () => {
+    const input = createPlannerInput({
+      allocations: [
+        {
+          id: 'alloc-cnd-individual',
+          academicPeriodId: 'period-1',
+          cohortId: 'cohort-1',
+          unitId: 'unit-1',
+          trainerId: 'trainer-1',
+          preferredRoomId: null,
+          deliveryMode: 'theory',
+          weeklySessions: 1,
+          sessionDurationMinutes: 120,
+          isTimetableEnabled: true,
+        },
+        {
+          id: 'alloc-dhn-individual',
+          academicPeriodId: 'period-1',
+          cohortId: 'cohort-2',
+          unitId: 'unit-2',
+          trainerId: 'trainer-1',
+          preferredRoomId: null,
+          deliveryMode: 'theory',
+          weeklySessions: 1,
+          sessionDurationMinutes: 120,
+          isTimetableEnabled: true,
+        },
+        {
+          id: 'alloc-shared-nutrition',
+          academicPeriodId: 'period-1',
+          cohortId: 'cohort-1',
+          unitId: 'unit-nutrition',
+          trainerId: 'trainer-2',
+          preferredRoomId: null,
+          deliveryMode: 'theory',
+          weeklySessions: 1,
+          sessionDurationMinutes: 120,
+          isTimetableEnabled: true,
+          participantCohortIds: ['cohort-1', 'cohort-2', 'cohort-3'],
+        },
+      ],
+    });
+
+    input.cohorts.push(
+      { id: 'cohort-2', code: 'DHN-25', name: 'DHN Jan 25', actualSize: 30, isTimetableAvailable: true },
+      { id: 'cohort-3', code: 'CHN-25', name: 'CHN May 25', actualSize: 25, isTimetableAvailable: true },
+    );
+
+    input.units.push(
+      { id: 'unit-2', code: 'DHN 2303', name: 'Diet Therapy', preferredRoomType: null, isActive: true, isTimetableAvailable: true },
+      { id: 'unit-nutrition', code: 'NUT 101', name: 'Nutrition in the Lifespan', preferredRoomType: null, isActive: true, isTimetableAvailable: true },
+    );
+
+    input.trainers.push({
+      id: 'trainer-2',
+      departmentId: 'department-1',
+      staffNumber: 'ST-002',
+      fullName: 'Martin Wanjohi',
+      normalWeeklyHours: 20,
+      maximumWeeklyHours: 25,
+      maximumDailyHours: 8,
+      isActive: true,
+      isTimetableAvailable: true,
+      availabilityMode: 'generally_available',
+    });
+
+    const result = generateTimetablePlan(input);
+
+    expect(result.unscheduled).toHaveLength(0);
+    expect(result.sessions).toHaveLength(3);
+
+    const sharedSession = result.sessions.find((s) => s.teachingAllocationId === 'alloc-shared-nutrition');
+    expect(sharedSession).toBeDefined();
+
+    // Verify no cohort overlap between individual sessions and shared session
+    for (const session of result.sessions) {
+      if (session.id !== sharedSession?.id) {
+        expect(
+          session.workingDayId === sharedSession?.workingDayId &&
+          session.startTimeSlotId === sharedSession?.startTimeSlotId,
+        ).toBe(false);
+      }
+    }
+  });
+
+  it('automatically relocates a flexible conflicting class to another open time when a constrained class needs the slot', () => {
+    // 2 working days (day-1 and day-2), 1 time slot (slot-1 to slot-2)
+    // Trainer A (flexible) is scheduled.
+    // Trainer B (constrained to day-1 only via availability) arrives later.
+    // The scheduler relocates Trainer A to day-2 and places Trainer B on day-1.
+    const input = createPlannerInput({
+      allocations: [
+        {
+          id: 'alloc-flexible',
+          academicPeriodId: 'period-1',
+          cohortId: 'cohort-1',
+          unitId: 'unit-1',
+          trainerId: 'trainer-flex',
+          preferredRoomId: null,
+          deliveryMode: 'theory',
+          weeklySessions: 1,
+          sessionDurationMinutes: 120,
+          isTimetableEnabled: true,
+        },
+        {
+          id: 'alloc-constrained',
+          academicPeriodId: 'period-1',
+          cohortId: 'cohort-1',
+          unitId: 'unit-2',
+          trainerId: 'trainer-const',
+          preferredRoomId: null,
+          deliveryMode: 'theory',
+          weeklySessions: 1,
+          sessionDurationMinutes: 120,
+          isTimetableEnabled: true,
+        },
+      ],
+    });
+
+    input.units.push({
+      id: 'unit-2',
+      code: 'UNIT-2',
+      name: 'Constrained Unit',
+      preferredRoomType: null,
+      isActive: true,
+      isTimetableAvailable: true,
+    });
+
+    input.trainers = [
+      {
+        id: 'trainer-flex',
+        departmentId: 'department-1',
+        staffNumber: 'ST-FLX',
+        fullName: 'Flexible Trainer',
+        normalWeeklyHours: 20,
+        maximumWeeklyHours: 25,
+        maximumDailyHours: 8,
+        isActive: true,
+        isTimetableAvailable: true,
+        availabilityMode: 'generally_available',
+      },
+      {
+        id: 'trainer-const',
+        departmentId: 'department-1',
+        staffNumber: 'ST-CST',
+        fullName: 'Constrained Trainer',
+        normalWeeklyHours: 10,
+        maximumWeeklyHours: 15,
+        maximumDailyHours: 6,
+        isActive: true,
+        isTimetableAvailable: true,
+        availabilityMode: 'selected_slots_only',
+        availableSlots: [
+          { workingDayId: 'day-1', timeSlotId: 'slot-1' },
+          { workingDayId: 'day-1', timeSlotId: 'slot-2' },
+        ],
+      },
+    ];
+
+    const result = generateTimetablePlan(input);
+
+    expect(result.unscheduled).toHaveLength(0);
+    expect(result.sessions).toHaveLength(2);
+
+    const constrainedSession = result.sessions.find((s) => s.teachingAllocationId === 'alloc-constrained');
+    const flexibleSession = result.sessions.find((s) => s.teachingAllocationId === 'alloc-flexible');
+
+    expect(constrainedSession?.workingDayId).toBe('day-1');
+    expect(flexibleSession?.workingDayId).toBe('day-2');
+  });
+
+  it('relocates multiple flexible single-cohort classes to accommodate a multi-cohort shared class', () => {
+    // 3 working days (day-1, day-2, day-3), 1 time slot (slot-1 to slot-2)
+    // 2 single-cohort flexible sessions occupy day-1 for cohort-1 and cohort-2.
+    // A shared class across [cohort-1, cohort-2] arrives and needs day-1 (e.g. trainer only available day-1).
+    // Schedular displaces both single-cohort sessions and relocates them to day-2 and day-3.
+    const input = createPlannerInput({
+      allocations: [
+        {
+          id: 'alloc-flex-1',
+          academicPeriodId: 'period-1',
+          cohortId: 'cohort-1',
+          unitId: 'unit-1',
+          trainerId: 'trainer-flex-1',
+          preferredRoomId: null,
+          deliveryMode: 'theory',
+          weeklySessions: 1,
+          sessionDurationMinutes: 120,
+          isTimetableEnabled: true,
+        },
+        {
+          id: 'alloc-flex-2',
+          academicPeriodId: 'period-1',
+          cohortId: 'cohort-2',
+          unitId: 'unit-2',
+          trainerId: 'trainer-flex-2',
+          preferredRoomId: null,
+          deliveryMode: 'theory',
+          weeklySessions: 1,
+          sessionDurationMinutes: 120,
+          isTimetableEnabled: true,
+        },
+        {
+          id: 'alloc-shared-const',
+          academicPeriodId: 'period-1',
+          cohortId: 'cohort-1',
+          unitId: 'unit-shared',
+          trainerId: 'trainer-shared',
+          preferredRoomId: null,
+          deliveryMode: 'theory',
+          weeklySessions: 1,
+          sessionDurationMinutes: 120,
+          isTimetableEnabled: true,
+          participantCohortIds: ['cohort-1', 'cohort-2'],
+        },
+      ],
+    });
+
+    input.workingDays.push({
+      id: 'day-3',
+      academicPeriodId: 'period-1',
+      dayOfWeek: 'Wednesday',
+      sequenceNumber: 3,
+      isEnabled: true,
+    });
+
+    input.cohorts.push({
+      id: 'cohort-2',
+      code: 'COHORT-2',
+      name: 'Cohort 2',
+      actualSize: 20,
+      isTimetableAvailable: true,
+    });
+
+    input.units.push(
+      { id: 'unit-2', code: 'UNIT-2', name: 'Unit 2', preferredRoomType: null, isActive: true, isTimetableAvailable: true },
+      { id: 'unit-shared', code: 'NUT 101', name: 'Nutrition in the Lifespan', preferredRoomType: null, isActive: true, isTimetableAvailable: true },
+    );
+
+    input.trainers = [
+      {
+        id: 'trainer-flex-1',
+        departmentId: 'department-1',
+        staffNumber: 'ST-1',
+        fullName: 'Flex 1',
+        normalWeeklyHours: 20,
+        maximumWeeklyHours: 25,
+        maximumDailyHours: 8,
+        isActive: true,
+        isTimetableAvailable: true,
+        availabilityMode: 'generally_available',
+      },
+      {
+        id: 'trainer-flex-2',
+        departmentId: 'department-1',
+        staffNumber: 'ST-2',
+        fullName: 'Flex 2',
+        normalWeeklyHours: 20,
+        maximumWeeklyHours: 25,
+        maximumDailyHours: 8,
+        isActive: true,
+        isTimetableAvailable: true,
+        availabilityMode: 'generally_available',
+      },
+      {
+        id: 'trainer-shared',
+        departmentId: 'department-1',
+        staffNumber: 'ST-SH',
+        fullName: 'Martin Wanjohi',
+        normalWeeklyHours: 20,
+        maximumWeeklyHours: 25,
+        maximumDailyHours: 8,
+        isActive: true,
+        isTimetableAvailable: true,
+        availabilityMode: 'selected_slots_only',
+        availableSlots: [
+          { workingDayId: 'day-1', timeSlotId: 'slot-1' },
+          { workingDayId: 'day-1', timeSlotId: 'slot-2' },
+        ],
+      },
+    ];
+
+    const result = generateTimetablePlan(input);
+
+    expect(result.unscheduled).toHaveLength(0);
+    expect(result.sessions).toHaveLength(3);
+
+    const sharedSession = result.sessions.find((s) => s.teachingAllocationId === 'alloc-shared-const');
+    const flex1Session = result.sessions.find((s) => s.teachingAllocationId === 'alloc-flex-1');
+    const flex2Session = result.sessions.find((s) => s.teachingAllocationId === 'alloc-flex-2');
+
+    expect(sharedSession?.workingDayId).toBe('day-1');
+    expect(flex1Session?.workingDayId).not.toBe('day-1');
+    expect(flex2Session?.workingDayId).not.toBe('day-1');
+  });
 });
+

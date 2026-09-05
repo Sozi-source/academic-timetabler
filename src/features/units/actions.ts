@@ -179,6 +179,16 @@ export async function createUnitAction(
     };
   }
 
+  const isActive =
+    formData.get('isActive') === 'true' ||
+    formData.get('isActive') === 'on' ||
+    formData.get('isActive') === null;
+
+  const isTimetableAvailable =
+    formData.get('isTimetableAvailable') === 'true' ||
+    formData.get('isTimetableAvailable') === 'on' ||
+    formData.get('isTimetableAvailable') === null;
+
   const supabase = await createClient();
 
   const { error } = await supabase
@@ -205,8 +215,8 @@ export async function createUnitAction(
       preferred_room_type:
         parsed.data.preferredRoomType ||
         null,
-      is_active: true,
-      is_timetable_available: true,
+      is_active: isActive,
+      is_timetable_available: isTimetableAvailable,
       notes:
         parsed.data.notes || null,
     });
@@ -263,6 +273,14 @@ export async function updateUnitAction(
     };
   }
 
+  const isActive =
+    formData.get('isActive') === 'true' ||
+    formData.get('isActive') === 'on';
+
+  const isTimetableAvailable =
+    formData.get('isTimetableAvailable') === 'true' ||
+    formData.get('isTimetableAvailable') === 'on';
+
   const supabase = await createClient();
 
   const { error } = await supabase
@@ -289,6 +307,8 @@ export async function updateUnitAction(
       preferred_room_type:
         parsed.data.preferredRoomType ||
         null,
+      is_active: isActive,
+      is_timetable_available: isTimetableAvailable,
       notes:
         parsed.data.notes || null,
     })

@@ -105,8 +105,8 @@ export function DataTable<TData, TValue>({
           />
         </div>
       ) : (
-        <div className="w-full overflow-hidden">
-          <div className="w-full overflow-hidden"><table className="w-full table-fixed border-collapse text-left">
+        <div className="w-full">
+          <div className="w-full overflow-x-auto min-h-[140px]"><table className="w-full table-fixed border-collapse text-left">
             <thead className="border-t-[3px] border-institutional-yellow bg-primary">
               {table
                 .getHeaderGroups()

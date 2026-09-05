@@ -216,7 +216,13 @@ function detectWorkloadConflicts(
 
     for (const daySessions of dayGroups.values()) {
       const dailyMinutes = daySessions.reduce(
-        (total, session) => total + minutes(session.endTime) - minutes(session.startTime),
+        (total, session) => {
+          const rawDuration = minutes(session.endTime) - minutes(session.startTime);
+          const effectiveDuration = (session.isFullDaySession || rawDuration >= 480)
+            ? 120
+            : rawDuration;
+          return total + effectiveDuration;
+        },
         0,
       );
       const approvedFullDayOnly = daySessions.length === 1 &&
@@ -240,7 +246,13 @@ function detectWorkloadConflicts(
     }
 
     const weeklyMinutes = trainerSessions.reduce(
-      (total, session) => total + minutes(session.endTime) - minutes(session.startTime),
+      (total, session) => {
+        const rawDuration = minutes(session.endTime) - minutes(session.startTime);
+        const effectiveDuration = (session.isFullDaySession || rawDuration >= 480)
+          ? 120
+          : rawDuration;
+        return total + effectiveDuration;
+      },
       0,
     );
 

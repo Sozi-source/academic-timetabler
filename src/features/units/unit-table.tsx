@@ -78,14 +78,17 @@ const columns: ColumnDef<Unit>[] = [
     maxSize: 240,
     cell: ({ row }) => (
       <div className="min-w-0 max-w-full pr-3">
-        <p className="max-w-[220px] whitespace-normal break-words font-semibold leading-5 text-text-primary">
+        <Link
+          href={`/timetable/units/${row.original.id}/edit`}
+          className="max-w-[220px] whitespace-normal break-words font-semibold leading-5 text-primary hover:underline"
+        >
           {row.original.name}
-        </p>
+        </Link>
 
         <p className="mt-1 text-[10px] leading-4 text-text-muted">
           {row.original.code}
           {row.original.shortName
-            ? ` ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· ${row.original.shortName}`
+            ? ` · ${row.original.shortName}`
             : ''}
         </p>
       </div>

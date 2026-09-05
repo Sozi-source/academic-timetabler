@@ -343,11 +343,6 @@ export function analyzeTrainerWorkloads({
             ),
           );
 
-        const teachingMinutes =
-          sumIntervalMinutes(
-            mergedIntervals,
-          );
-
         const {
           idleMinutes,
           largestIdleGapMinutes,
@@ -367,6 +362,15 @@ export function analyzeTrainerWorkloads({
                 interval.startMinutes >=
               480,
           );
+
+        const rawTeachingMinutes =
+          sumIntervalMinutes(
+            mergedIntervals,
+          );
+
+        const teachingMinutes = hasFullDaySession
+          ? (rawTeachingMinutes >= 480 ? rawTeachingMinutes - 480 + 120 : rawTeachingMinutes)
+          : rawTeachingMinutes;
 
         return {
           workingDayId:

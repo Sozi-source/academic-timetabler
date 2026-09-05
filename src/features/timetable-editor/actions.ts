@@ -12,6 +12,8 @@ function refreshEditor() {
   revalidatePath('/timetable/editor');
   revalidatePath('/timetable/generator');
   revalidatePath('/timetable/conflicts');
+  revalidatePath('/timetable/published');
+  revalidatePath('/timetable/reports');
 }
 
 export async function moveScheduledSessionAction(
@@ -63,6 +65,7 @@ export async function moveScheduledSessionAction(
     return { status: 'error', message: error.message };
   }
 
+  refreshEditor();
   return { status: 'success', message: 'Session updated successfully.' };
 }
 

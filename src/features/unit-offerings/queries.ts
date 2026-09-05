@@ -639,8 +639,10 @@ export const getCohortUnitEditorOptions = cache(async () => {
       id, code, name, programme_id, current_academic_period_number,
       programmes!inner(id, name)
     `).in('status', ['planned', 'active']).eq('is_timetable_available', true).order('name'),
-    supabase.from('units').select('id, code, name, programme_id, academic_period_number')
-      .eq('is_active', true).eq('is_timetable_available', true).order('name'),
+    supabase.from('units').select(`
+      id, code, name, programme_id, academic_period_number,
+      programmes(id, name, code)
+    `).neq('is_active', false).order('name'),
   ]);
   if (cohortResult.error) throw new Error(`Unable to load cohort editor options: ${cohortResult.error.message}`);
   if (unitResult.error) throw new Error(`Unable to load programme units: ${unitResult.error.message}`);
@@ -656,9 +658,16 @@ export const getCohortUnitEditorOptions = cache(async () => {
         currentStage: row.current_academic_period_number,
       };
     }),
-    units: (unitResult.data ?? []).map((row) => ({
-      id: row.id, code: row.code, name: row.name, programmeId: row.programme_id,
-      stage: row.academic_period_number,
-    })),
+    units: (unitResult.data ?? []).map((row) => {
+      const programme = Array.isArray(row.programmes) ? row.programmes[0] : row.programmes;
+      return {
+        id: row.id,
+        code: row.code,
+        name: row.name,
+        programmeId: row.programme_id,
+        programmeName: programme?.name ?? null,
+        stage: row.academic_period_number ?? null,
+      };
+    }),
   };
 });

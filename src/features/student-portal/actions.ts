@@ -1,23 +1,12 @@
 'use server';
 
-import {
-  redirect,
-} from 'next/navigation';
-import {
-  z,
-} from 'zod';
+import { redirect } from 'next/navigation';
+import { z } from 'zod';
 
-import {
-  createAdminClient,
-} from '@/lib/supabase/admin';
+import { checkRateLimit, clearRateLimit } from '@/lib/security/rate-limit';
+import { createAdminClient } from '@/lib/supabase/admin';
 
-import {
-  studentProfileSchema,
-} from './profile';
-import {
-  checkRateLimit,
-  clearRateLimit,
-} from '@/lib/security/rate-limit';
+import { studentProfileSchema } from './profile';
 import {
   createStudentPortalSession,
   getStudentPortalSession,
@@ -25,53 +14,40 @@ import {
 } from './session';
 
 export interface StudentLoginState {
-  error:
-    string |
-    null;
+  error: string | null;
 }
 
-const loginSchema =
-  z.object({
-    admissionNumber:
-      z.string()
-        .trim()
-        .min(
-          3,
-        )
-        .max(
-          80,
-        ),
-    pin:
-      z.string()
-        .regex(
-          /^\d{6}$/,
-        ),
-  });
+export interface StudentActivationState {
+  error: string | null;
+}
+
+const loginSchema = z.object({
+  admissionNumber: z.string().trim().min(3).max(80),
+  pin: z.string().trim().min(4).max(60),
+});
+
+const activationSchema = z.object({
+  admissionNumber: z.string().trim().min(3).max(80),
+  phoneNumber: z.string().trim().min(7).max(25),
+  newPin: z.string().trim().min(4, 'PIN/Password must be at least 4 characters long').max(60),
+  confirmPin: z.string().trim(),
+}).refine((data) => data.newPin === data.confirmPin, {
+  message: 'PIN/Passwords do not match',
+  path: ['confirmPin'],
+});
 
 export async function studentPortalLogin(
-  _state:
-    StudentLoginState,
-  formData:
-    FormData,
+  _state: StudentLoginState,
+  formData: FormData,
 ): Promise<StudentLoginState> {
-  const parsed =
-    loginSchema.safeParse({
-      admissionNumber:
-        formData.get(
-          'admissionNumber',
-        ),
-      pin:
-        formData.get(
-          'pin',
-        ),
-    });
+  const parsed = loginSchema.safeParse({
+    admissionNumber: formData.get('admissionNumber'),
+    pin: formData.get('pin'),
+  });
 
-  if (
-    !parsed.success
-  ) {
+  if (!parsed.success) {
     return {
-      error:
-        'Enter your admission number and 6-digit PIN.',
+      error: 'Please enter your admission number and PIN/password.',
     };
   }
 
@@ -88,192 +64,121 @@ export async function studentPortalLogin(
     };
   }
 
-  const admin =
-    createAdminClient();
+  const admin = createAdminClient();
 
-  const {
-    data,
-    error,
-  } =
-    await admin.rpc(
-      'authenticate_student_portal',
-      {
-        supplied_admission_number:
-          parsed.data
-            .admissionNumber,
-        supplied_pin:
-          parsed.data.pin,
-      },
-    );
+  const { data, error } = await admin.rpc('authenticate_student_portal', {
+    supplied_admission_number: parsed.data.admissionNumber,
+    supplied_pin: parsed.data.pin,
+  });
 
-  if (
-    error ||
-    !data
-  ) {
+  if (error || !data) {
     return {
-      error:
-        'Admission number or PIN is incorrect.',
+      error: 'Admission number or PIN/password is incorrect.',
     };
   }
 
   clearRateLimit(`student-login:${parsed.data.admissionNumber.toUpperCase()}`);
 
-  await createStudentPortalSession(
-    data as
-      string,
-  );
+  await createStudentPortalSession(data as string);
 
-  redirect(
-    '/student',
-  );
+  redirect('/student');
+}
+
+export async function activateStudentAccount(
+  _state: StudentActivationState,
+  formData: FormData,
+): Promise<StudentActivationState> {
+  const parsed = activationSchema.safeParse({
+    admissionNumber: formData.get('admissionNumber'),
+    phoneNumber: formData.get('phoneNumber'),
+    newPin: formData.get('newPin'),
+    confirmPin: formData.get('confirmPin'),
+  });
+
+  if (!parsed.success) {
+    const firstIssue = parsed.error.issues[0];
+    return {
+      error: firstIssue ? firstIssue.message : 'Please check your details and try again.',
+    };
+  }
+
+  const admin = createAdminClient();
+
+  const { data, error } = await admin.rpc('activate_student_portal_account', {
+    supplied_admission_number: parsed.data.admissionNumber,
+    supplied_phone_number: parsed.data.phoneNumber,
+    new_pin: parsed.data.newPin,
+  });
+
+  if (error || !data) {
+    return {
+      error: error?.message || 'Unable to activate account. Verify your admission & phone number.',
+    };
+  }
+
+  await createStudentPortalSession(data as string);
+
+  redirect('/student');
 }
 
 export async function studentPortalLogout() {
   await revokeStudentPortalSession();
 
-  redirect(
-    '/student/login',
-  );
+  redirect('/student/login');
 }
 
-export async function verifyStudentProfile(
-  formData:
-    FormData,
-) {
-  const session =
-    await getStudentPortalSession();
+export async function verifyStudentProfile(formData: FormData) {
+  const session = await getStudentPortalSession();
 
   if (!session) {
-    redirect(
-      '/student/login',
-    );
+    redirect('/student/login');
   }
 
-  const parsed =
-    studentProfileSchema.safeParse({
-      fullName:
-        formData.get(
-          'fullName',
-        ),
-      kcseIndexNumber:
-        formData.get(
-          'kcseIndexNumber',
-        ),
-      nationalIdNumber:
-        formData.get(
-          'nationalIdNumber',
-        ),
-      phoneNumber:
-        formData.get(
-          'phoneNumber',
-        ),
-      email:
-        formData.get(
-          'email',
-        ),
-    });
+  const parsed = studentProfileSchema.safeParse({
+    fullName: formData.get('fullName'),
+    kcseIndexNumber: formData.get('kcseIndexNumber'),
+    nationalIdNumber: formData.get('nationalIdNumber'),
+    phoneNumber: formData.get('phoneNumber'),
+    email: formData.get('email'),
+  });
 
-  if (
-    !parsed.success
-  ) {
-    redirect(
-      '/student/profile?error=invalid',
-    );
+  if (!parsed.success) {
+    redirect('/student/profile?error=invalid');
   }
 
-  const kcseRaw =
-    parsed.data
-      .kcseIndexNumber
-      ?.replace(
-        /\s+/g,
-        '',
-      ) ||
-    null;
+  const kcseRaw = parsed.data.kcseIndexNumber?.replace(/\s+/g, '') || null;
+  const kcse = kcseRaw && /^\d{11}$/.test(kcseRaw)
+    ? `${kcseRaw.slice(0, 8)}/${kcseRaw.slice(8)}`
+    : kcseRaw;
 
-  const kcse =
-    kcseRaw &&
-    /^\d{11}$/.test(
-      kcseRaw,
-    )
-      ? `${kcseRaw.slice(
-          0,
-          8,
-        )}/${kcseRaw.slice(
-          8,
-        )}`
-      : kcseRaw;
-
-  const admin =
-    createAdminClient();
+  const admin = createAdminClient();
 
   const payload = {
-    full_name:
-      parsed.data
-        .fullName,
-    kcse_index_number:
-      kcse,
-    national_id_number:
-      parsed.data
-        .nationalIdNumber
-        ?.replace(
-          /\s+/g,
-          '',
-        ) ||
-      null,
-    phone_number:
-      parsed.data
-        .phoneNumber ||
-      null,
-    email:
-      parsed.data
-        .email ||
-      null,
-    details_verified_at:
-      new Date()
-        .toISOString(),
+    full_name: parsed.data.fullName,
+    kcse_index_number: kcse,
+    national_id_number: parsed.data.nationalIdNumber?.replace(/\s+/g, '') || null,
+    phone_number: parsed.data.phoneNumber || null,
+    email: parsed.data.email || null,
+    details_verified_at: new Date().toISOString(),
   };
 
-  const {
-    error,
-  } =
-    await admin
-      .from(
-        'students',
-      )
-      .update(
-        payload,
-      )
-      .eq(
-        'id',
-        session.studentId,
-      );
+  const { error } = await admin
+    .from('students')
+    .update(payload)
+    .eq('id', session.studentId);
 
   if (error) {
-    redirect(
-      '/student/profile?error=save',
-    );
+    redirect('/student/profile?error=save');
   }
 
-  await admin
-    .from(
-      'student_profile_verifications',
-    )
-    .insert({
-      student_id:
-        session.studentId,
-      full_name:
-        payload.full_name,
-      kcse_index_number:
-        payload.kcse_index_number,
-      national_id_number:
-        payload.national_id_number,
-      phone_number:
-        payload.phone_number,
-      email:
-        payload.email,
-    });
+  await admin.from('student_profile_verifications').insert({
+    student_id: session.studentId,
+    full_name: payload.full_name,
+    kcse_index_number: payload.kcse_index_number,
+    national_id_number: payload.national_id_number,
+    phone_number: payload.phone_number,
+    email: payload.email,
+  });
 
-  redirect(
-    '/student/profile?saved=1',
-  );
+  redirect('/student/profile?saved=1');
 }

@@ -1,6 +1,7 @@
 import {
   ClipboardCheck,
   Download,
+  FileCheck2,
 } from 'lucide-react';
 import { redirect } from 'next/navigation';
 
@@ -46,17 +47,29 @@ export default async function StudentUnitRegistrationPage() {
           <EmptyState
             icon={ClipboardCheck}
             title="Not pre-registered"
-            description="No units are registered for this period."
+            description="No units have been pre-registered for your cohort yet. Contact your Department Admin."
           />
         ) : (
           <>
-            {/* Action & Metadata Header (Hidden when printing) */}
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs print:hidden">
-              <div className="flex flex-wrap items-start justify-between gap-4">
+            {/* Header & Workflow Banner (Hidden when printing) */}
+            <div className="rounded-xl border border-border bg-surface p-4 shadow-2xs print:hidden space-y-3">
+              {/* Guidance Callout */}
+              <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary-subtle p-3 text-xs text-primary-deep">
+                <FileCheck2 className="size-4 shrink-0 text-primary mt-0.5" />
+                <div>
+                  <p className="font-bold text-text-primary">Department Pre-Registered Units</p>
+                  <p className="mt-0.5 text-[11px] text-text-secondary leading-relaxed">
+                    Your units have been registered by your Department Admin. Download or print this official prefilled form and circulate it for physical approvals upon reporting to college.
+                  </p>
+                </div>
+              </div>
+
+              {/* Action Header & Metadata */}
+              <div className="flex flex-wrap items-center justify-between gap-4 pt-1">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h1 className="text-lg font-bold text-slate-900">
-                      Unit Registration
+                    <h1 className="text-base font-bold text-text-primary sm:text-lg">
+                      Official Unit Registration Form
                     </h1>
                     <Badge
                       variant={
@@ -73,46 +86,38 @@ export default async function StudentUnitRegistrationPage() {
                       variant={context.reportingStatus === 'reported' ? 'success' : 'warning'}
                     >
                       {context.reportingStatus === 'reported'
-                        ? 'Reporting confirmed'
-                        : 'Reporting pending'}
+                        ? 'Reporting Confirmed'
+                        : 'Reporting Pending'}
                     </Badge>
                   </div>
 
-                  <p className="mt-0.5 text-xs text-slate-500">
-                    {context.period?.name ?? 'Academic period'} · {units.length} Assigned Units
+                  <p className="mt-1 text-xs text-text-muted">
+                    {context.period?.name ?? 'Academic period'} · <span className="font-bold text-text-primary">{units.length} Assigned Units</span>
                   </p>
-
-                  <div className="mt-2.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-slate-700">
-                    <span className="font-bold text-slate-900">{context.student.fullName}</span>
-                    <span className="text-slate-300">|</span>
-                    <span className="font-medium text-slate-600">{context.student.admissionNumber}</span>
-                    <span className="text-slate-300">|</span>
-                    <span className="text-slate-600">{context.student.cohortName ?? 'Cohort'}</span>
-                  </div>
                 </div>
 
-                {/* Primary Dual Actions: Print / PDF & Download Word */}
+                {/* Clear Single-Purpose Action Buttons */}
                 <div className="flex flex-wrap items-center gap-2">
                   <PrintActionButton label="Print / Save PDF" />
                   <a
                     href="/api/student/unit-registration/form"
-                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-3.5 text-xs font-semibold text-white shadow-2xs transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500/40"
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 text-xs font-bold text-white shadow-2xs transition hover:bg-primary-hover active:scale-95"
                   >
                     <Download className="size-3.5" />
-                    <span>Download (.docx)</span>
+                    <span>Download Prefilled Form (.docx)</span>
                   </a>
                 </div>
               </div>
             </div>
 
-            {/* Complete Full-Page Official HTML Form */}
-            <div className="rounded-xl border border-slate-200 bg-slate-100/60 p-2 sm:p-6 print:border-none print:bg-white print:p-0">
+            {/* Complete Full-Page Official HTML Form Preview */}
+            <div className="rounded-xl border border-border bg-surface-subtle p-2 sm:p-6 print:border-none print:bg-white print:p-0">
               <UnitRegistrationFormPreview context={context} />
             </div>
 
             {context.submission?.verificationNote ? (
-              <p className="text-[11px] text-slate-500 print:hidden">
-                Department note: {context.submission.verificationNote}
+              <p className="text-[11px] text-text-muted print:hidden">
+                Department Note: {context.submission.verificationNote}
               </p>
             ) : null}
           </>

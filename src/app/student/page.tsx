@@ -1,25 +1,18 @@
 import {
   BookOpenCheck,
   CalendarDays,
+  ChevronRight,
   ClipboardCheck,
   FileText,
   GraduationCap,
   UserRound,
 } from 'lucide-react';
 import Link from 'next/link';
-import {
-  redirect,
-} from 'next/navigation';
+import { redirect } from 'next/navigation';
 
-import {
-  StudentPortalShell,
-} from '@/components/student/student-portal-shell';
-import {
-  Badge,
-} from '@/components/ui/badge';
-import {
-  Card,
-} from '@/components/ui/card';
+import { StudentPortalShell } from '@/components/student/student-portal-shell';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 import {
   activeStudentUnits,
   studentRegistrationLabel,
@@ -33,150 +26,64 @@ import {
   getStudentPortalResults,
   getStudentPortalTimetable,
 } from '@/features/student-portal/queries';
-import {
-  getStudentPortalSession,
-} from '@/features/student-portal/session';
-import {
-  portalGreeting,
-} from '@/lib/portal-greeting';
+import { getStudentPortalSession } from '@/features/student-portal/session';
+import { portalGreeting } from '@/lib/portal-greeting';
 
 export default async function StudentPortalPage() {
-  const session =
-    await getStudentPortalSession();
+  const session = await getStudentPortalSession();
 
   if (!session) {
-    redirect(
-      '/student/login',
-    );
+    redirect('/student/login');
   }
 
-  const [
-    student,
-    period,
-    registration,
-    timetable,
-    results,
-    documents,
-  ] =
-    await Promise.all([
-      getStudentPortalIdentity(
-        session.studentId,
-      ),
-      getActiveStudentPortalPeriod(),
-      getStudentPortalRegistrationContext(
-        session.studentId,
-      ),
-      getStudentPortalTimetable(
-        session.studentId,
-      ),
-      getStudentPortalResults(
-        session.studentId,
-      ),
-      getStudentPortalDocuments(
-        session.studentId,
-      ),
-    ]);
+  const [student, period, registration, timetable, results, documents] = await Promise.all([
+    getStudentPortalIdentity(session.studentId),
+    getActiveStudentPortalPeriod(),
+    getStudentPortalRegistrationContext(session.studentId),
+    getStudentPortalTimetable(session.studentId),
+    getStudentPortalResults(session.studentId),
+    getStudentPortalDocuments(session.studentId),
+  ]);
 
-  if (
-    !student ||
-    !registration
-  ) {
-    redirect(
-      '/student/login',
-    );
+  if (!student || !registration) {
+    redirect('/student/login');
   }
 
-  const units =
-    activeStudentUnits(
-      registration.units,
-    );
+  const units = activeStudentUnits(registration.units);
 
   const cards = [
-    {
-      label:
-        'My Units',
-      value:
-        String(
-          units.length,
-        ),
-      href:
-        '/student/units',
-      icon:
-        BookOpenCheck,
-    },
-    {
-      label:
-        'Timetable',
-      value:
-        String(
-          timetable.length,
-        ),
-      href:
-        '/student/timetable',
-      icon:
-        CalendarDays,
-    },
-    {
-      label:
-        'Results',
-      value:
-        String(
-          results.length,
-        ),
-      href:
-        '/student/results',
-      icon:
-        GraduationCap,
-    },
-    {
-      label:
-        'Documents',
-      value:
-        String(
-          documents.length,
-        ),
-      href:
-        '/student/documents',
-      icon:
-        FileText,
-    },
+    { label: 'My Units', value: String(units.length), href: '/student/units', icon: BookOpenCheck },
+    { label: 'Timetable', value: String(timetable.length), href: '/student/timetable', icon: CalendarDays },
+    { label: 'Results', value: String(results.length), href: '/student/results', icon: GraduationCap },
+    { label: 'Documents', value: String(documents.length), href: '/student/documents', icon: FileText },
   ] as const;
 
   return (
-    <StudentPortalShell
-      student={
-        student
-      }
-    >
-      <div className="space-y-5">
-        <section className="flex flex-wrap items-start justify-between gap-3">
+    <StudentPortalShell student={student}>
+      <div className="space-y-4">
+        {/* Header Summary */}
+        <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-surface p-4 shadow-2xs">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
-              Student dashboard
-            </p>
-
-            <h1 className="mt-1 text-xl font-bold text-text-primary">
+            <div className="flex items-center gap-2">
+              <span className="inline-block size-2 rounded-full bg-primary" />
+              <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-text-muted">
+                Student Portal
+              </p>
+            </div>
+            <h1 className="mt-1 text-lg font-bold text-text-primary sm:text-xl">
               {portalGreeting(student.fullName)}
             </h1>
-
-            <p className="mt-1 text-xs text-text-muted">
-              {
-                student.programmeName
-              }
-              {' · '}
-              {student.stageCode ?? studentStageLabel(
-                student.academicPeriodNumber,
-              )}
+            <p className="mt-0.5 text-xs text-text-secondary">
+              {student.programmeName} ·{' '}
+              <span className="font-semibold text-primary">
+                {student.stageCode ?? studentStageLabel(student.academicPeriodNumber)}
+              </span>
             </p>
           </div>
 
           <Badge
-            variant={
-              registration.reportingStatus ===
-              'reported'
-                ? 'success'
-                : 'institutional'
-            }
+            variant={registration.reportingStatus === 'reported' ? 'success' : 'institutional'}
+            className="px-3 py-1 text-xs font-bold shadow-xs"
           >
             {registration.reportingStatus === 'reported'
               ? 'Active · Reported'
@@ -184,125 +91,90 @@ export default async function StudentPortalPage() {
           </Badge>
         </section>
 
-        {!student.detailsVerifiedAt ? (
-          <Card className="flex flex-wrap items-center justify-between gap-3 px-4 py-3.5">
-            <div>
-              <p className="text-xs font-semibold text-text-primary">
-                Verify your profile
-              </p>
-
-              <p className="mt-0.5 text-[11px] text-text-muted">
-                Confirm your student details.
-              </p>
+        {/* Verification Alert Banner */}
+        {!student.detailsVerifiedAt && (
+          <Card className="flex flex-wrap items-center justify-between gap-3 border-amber-200 bg-amber-50/70 p-3.5 shadow-2xs">
+            <div className="flex items-center gap-2.5">
+              <UserRound className="size-4.5 text-amber-800" aria-hidden="true" />
+              <div>
+                <p className="text-xs font-bold text-amber-950">Verify Details</p>
+                <p className="text-[11px] text-amber-800">Confirm contact & student record.</p>
+              </div>
             </div>
 
             <Link
               href="/student/profile"
-              className="inline-flex min-h-8 items-center gap-1.5 rounded-lg bg-primary px-3 text-[11px] font-semibold text-white"
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-amber-900 px-3 text-[11px] font-bold text-white shadow-xs transition active:scale-95"
             >
-              <UserRound
-                className="size-3.5"
-                aria-hidden="true"
-              />
-              Open profile
+              Verify Profile
+              <ChevronRight className="size-3.5" />
             </Link>
           </Card>
-        ) : null}
+        )}
 
-        <section className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
-          {cards.map(
-            (
-              item,
-            ) => {
-              const Icon =
-                item.icon;
+        {/* Metric Cards Grid */}
+        <section className="grid grid-cols-2 gap-2.5 sm:gap-3.5 lg:grid-cols-4">
+          {cards.map((item) => {
+            const Icon = item.icon;
 
-              return (
-                <Link
-                  key={
-                    item.href
-                  }
-                  href={
-                    item.href
-                  }
-                  className="rounded-xl border border-border bg-white px-4 py-4 shadow-sm transition hover:border-border-strong hover:bg-surface-subtle/40"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-[11px] font-semibold text-text-muted">
-                        {
-                          item.label
-                        }
-                      </p>
-
-                      <p className="mt-1 text-xl font-bold text-text-primary">
-                        {
-                          item.value
-                        }
-                      </p>
-
-                    </div>
-
-                    <Icon
-                      className="size-4 text-text-muted"
-                      aria-hidden="true"
-                    />
-                  </div>
-                </Link>
-              );
-            },
-          )}
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="group relative rounded-xl border border-border bg-surface p-3.5 shadow-2xs transition-all duration-150 hover:border-primary/40 hover:bg-primary-subtle/30 active:scale-[0.98]"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-text-muted transition-colors group-hover:text-primary">
+                    {item.label}
+                  </span>
+                  <span className="flex size-7 items-center justify-center rounded-lg bg-primary-soft text-primary">
+                    <Icon className="size-4" aria-hidden="true" />
+                  </span>
+                </div>
+                <p className="mt-2 text-2xl font-black tracking-tight text-text-primary">
+                  {item.value}
+                </p>
+              </Link>
+            );
+          })}
         </section>
 
-        <section className="grid grid-cols-2 gap-2.5 sm:gap-3">
+        {/* Quick Action Cards Grid */}
+        <section className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3.5">
           <Link
             href="/student/unit-registration"
-            className="rounded-xl border border-border bg-white px-4 py-4 shadow-sm transition hover:border-border-strong"
+            className="group flex items-center justify-between rounded-xl border border-border bg-surface p-4 shadow-2xs transition-all duration-150 hover:border-primary/40 hover:bg-primary-subtle/20 active:scale-[0.98]"
           >
-            <div className="flex items-start gap-3">
-              <span className="flex size-9 items-center justify-center rounded-lg bg-institutional-yellow text-institutional-yellow-ink">
-                <ClipboardCheck
-                  className="size-4"
-                  aria-hidden="true"
-                />
+            <div className="flex items-center gap-3">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-institutional-yellow text-institutional-yellow-ink font-bold shadow-xs">
+                <ClipboardCheck className="size-5" aria-hidden="true" />
               </span>
-
               <div>
-                <p className="text-xs font-semibold text-text-primary">
-                  Unit registration
+                <p className="text-xs font-bold text-text-primary group-hover:text-primary transition-colors">
+                  Unit Registration
                 </p>
-
-                <p className="mt-1 text-[11px] leading-5 text-text-muted">
-                  View the units pre-registered
-                  by your department.
-                </p>
+                <p className="text-[11px] text-text-muted">Registered units & stage subjects</p>
               </div>
             </div>
+            <ChevronRight className="size-4 text-text-subtle transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
           </Link>
 
           <Link
             href="/student/profile"
-            className="rounded-xl border border-border bg-white px-4 py-4 shadow-sm transition hover:border-border-strong"
+            className="group flex items-center justify-between rounded-xl border border-border bg-surface p-4 shadow-2xs transition-all duration-150 hover:border-primary/40 hover:bg-primary-subtle/20 active:scale-[0.98]"
           >
-            <div className="flex items-start gap-3">
-              <span className="flex size-9 items-center justify-center rounded-lg bg-surface-subtle text-text-secondary">
-                <UserRound
-                  className="size-4"
-                  aria-hidden="true"
-                />
+            <div className="flex items-center gap-3">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-surface-subtle text-primary border border-border font-bold shadow-xs">
+                <UserRound className="size-5" aria-hidden="true" />
               </span>
-
               <div>
-                <p className="text-xs font-semibold text-text-primary">
-                  Profile
+                <p className="text-xs font-bold text-text-primary group-hover:text-primary transition-colors">
+                  Academic Profile
                 </p>
-
-                <p className="mt-1 text-[11px] leading-5 text-text-muted">
-                  Review your academic and
-                  contact details.
-                </p>
+                <p className="text-[11px] text-text-muted">Personal info & stage progression</p>
               </div>
             </div>
+            <ChevronRight className="size-4 text-text-subtle transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
           </Link>
         </section>
       </div>

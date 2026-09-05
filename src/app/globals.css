@@ -3,8 +3,8 @@
 @source "../";
 
 /* ============================================================
-   Academic Planning System Design System
-   Light Django-inspired enterprise theme
+   Academic Planning System — Enterprise Design System
+   Teal & Institutional Accent Palette with Mobile-Native Tokens
    ============================================================ */
 
 :root {
@@ -17,17 +17,17 @@
   --surface-muted: #eef3f2;
   --surface-raised: #ffffff;
 
-  /* Teal identity */
-  --primary: #2f706b;
-  --primary-hover: #285f5b;
-  --primary-active: #214f4c;
-  --primary-deep: #184f4b;
-  --primary-deeper: #103c39;
-  --primary-soft: #e8f2f1;
-  --primary-subtle: #f3f8f7;
+  /* Teal primary identity */
+  --primary: #0f766e;
+  --primary-hover: #0d655e;
+  --primary-active: #0b5c56;
+  --primary-deep: #0b4f4a;
+  --primary-deeper: #083d39;
+  --primary-soft: #e8f4f2;
+  --primary-subtle: #f2f8f7;
   --primary-foreground: #ffffff;
 
-  /* Institutional accent — bright yellow complements teal; no maroon */
+  /* Institutional yellow accent */
   --institutional-yellow: #f5c400;
   --institutional-yellow-hover: #e4b500;
   --institutional-yellow-soft: #fff2a4;
@@ -40,32 +40,32 @@
   --navigation-border: #dfe6e5;
   --navigation-text: #52606d;
   --navigation-hover: #f8faf9;
-  --navigation-active: #e8f2f1;
-  --navigation-active-text: #2f706b;
+  --navigation-active: #e8f4f2;
+  --navigation-active-text: #0f766e;
 
-  /* Text */
-  --text-primary: #1f2937;
-  --text-secondary: #52606d;
-  --text-muted: #718096;
-  --text-subtle: #94a3b8;
+  /* Typography Colors */
+  --text-primary: #17211f;
+  --text-secondary: #4d5b57;
+  --text-muted: #66736f;
+  --text-subtle: #87938f;
   --text-inverse: #ffffff;
 
-  /* Borders */
+  /* Borders & Dividers */
   --border: #dfe6e5;
   --border-soft: #e9eeed;
   --border-strong: #cbd6d4;
 
-  /* Focus */
-  --focus-ring: #9fc5c1;
-  --focus-border: #3b7f79;
+  /* Focus & Controls */
+  --focus-ring: #91c5c0;
+  --focus-border: #0f766e;
 
-  /* Secondary actions */
+  /* Secondary & Muted Actions */
   --secondary: #edf2f1;
   --secondary-hover: #e2e9e8;
   --secondary-foreground: #33413f;
 
-  /* Semantic states */
-  --success: #34745b;
+  /* Semantic Feedback States */
+  --success: #2d6a4f;
   --success-surface: #edf7f1;
   --success-border: #c7e4d3;
 
@@ -77,21 +77,20 @@
   --danger-surface: #fdf1f1;
   --danger-border: #ebc8c8;
 
-  --info: #426b78;
-  --info-surface: #eef6f8;
-  --info-border: #c9dde2;
+  --info: #0284c7;
+  --info-surface: #f0f9ff;
+  --info-border: #bae6fd;
 
-  /* Shape */
+  /* Radius System */
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
   --radius-xl: 1.25rem;
 
-
-  /* Layout */
+  /* Layout Constraints */
   --content-max-width: 100rem;
-  --sidebar-width: 15rem;
-  --header-height: 4.5rem;
+  --sidebar-width: 15.5rem;
+  --header-height: 4rem;
 }
 
 @theme inline {
@@ -119,18 +118,12 @@
   --color-institutional-yellow-ink: var(--institutional-yellow-ink);
   --color-institutional-accent-border: var(--institutional-accent-border);
 
-  --color-navigation-background:
-    var(--navigation-background);
-  --color-navigation-border:
-    var(--navigation-border);
-  --color-navigation-text:
-    var(--navigation-text);
-  --color-navigation-hover:
-    var(--navigation-hover);
-  --color-navigation-active:
-    var(--navigation-active);
-  --color-navigation-active-text:
-    var(--navigation-active-text);
+  --color-navigation-background: var(--navigation-background);
+  --color-navigation-border: var(--navigation-border);
+  --color-navigation-text: var(--navigation-text);
+  --color-navigation-hover: var(--navigation-hover);
+  --color-navigation-active: var(--navigation-active);
+  --color-navigation-active-text: var(--navigation-active-text);
 
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
@@ -147,8 +140,7 @@
 
   --color-secondary: var(--secondary);
   --color-secondary-hover: var(--secondary-hover);
-  --color-secondary-foreground:
-    var(--secondary-foreground);
+  --color-secondary-foreground: var(--secondary-foreground);
 
   --color-success: var(--success);
   --color-success-surface: var(--success-surface);
@@ -166,17 +158,10 @@
   --color-info-surface: var(--info-surface);
   --color-info-border: var(--info-border);
 
-  /* Elevation */
-  --shadow-sm:
-    0 1px 2px rgb(31 41 55 / 0.04);
+  --shadow-sm: 0 1px 2px rgb(15 118 110 / 0.04);
+  --shadow-md: 0 6px 18px rgb(15 118 110 / 0.06);
+  --shadow-lg: 0 16px 36px rgb(15 118 110 / 0.08);
 
-  --shadow-md:
-    0 8px 24px rgb(31 41 55 / 0.07);
-
-  --shadow-lg:
-    0 20px 50px rgb(31 41 55 / 0.1);
-
-  /* Typography Stack */
   --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
@@ -188,6 +173,7 @@
 html {
   min-height: 100%;
   background: var(--background);
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -195,35 +181,62 @@ body {
   margin: 0;
   background: var(--background);
   color: var(--text-primary);
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    "Helvetica Neue",
-    Arial,
-    sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
 
-button,
-input,
-select,
-textarea {
+button, input, select, textarea {
   font: inherit;
-}
-
-button,
-a,
-input,
-select,
-textarea {
   outline-color: var(--focus-ring);
 }
 
 ::selection {
   background: var(--primary-soft);
-  color: var(--primary-active);
+  color: var(--primary-deep);
+}
+
+/* Native Mobile App Touch & Utility Helpers */
+.touch-target {
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-card {
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 0.875rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.mobile-card:active {
+  transform: scale(0.985);
+}
+
+.badge-compact {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.badge-compact-primary {
+  background: var(--primary-soft);
+  color: var(--primary-deep);
+  border: 1px solid rgb(15 118 110 / 0.15);
+}
+
+.badge-compact-yellow {
+  background: var(--institutional-yellow-soft);
+  color: var(--institutional-yellow-ink);
+  border: 1px solid var(--institutional-accent-border);
 }

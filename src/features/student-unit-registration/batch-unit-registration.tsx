@@ -635,9 +635,9 @@ export function BatchUnitRegistration({
               (mode === 'cohort' && !cohortId) ||
               selectedIds.size === 0
             }
-            className="inline-flex min-h-10 items-center justify-center rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+            className="inline-flex min-h-10 items-center justify-center rounded-lg bg-primary px-4 text-sm font-bold text-white shadow-sm transition hover:bg-primary-hover active:scale-95 disabled:cursor-not-allowed disabled:bg-slate-300"
           >
-            {`Assign units to ${selectedIds.size}`}
+            {`Register Units (${selectedIds.size})`}
           </button>
         </div>
       </form>

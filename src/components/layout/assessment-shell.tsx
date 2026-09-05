@@ -14,7 +14,6 @@ import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 
-import { Button } from '@/components/ui/button';
 import { logoutAction } from '@/features/auth/actions';
 import type { AuthenticatedProfile } from '@/features/auth/types';
 import { cn } from '@/lib/utils/cn';
@@ -24,53 +23,59 @@ interface AssessmentShellProps {
   children: ReactNode;
 }
 
-const navigation = [
+const NAVIGATION_ITEMS = [
   { label: 'Overview', href: '/assessment', icon: LayoutDashboard },
   { label: 'CAT & Exam Analysis', href: '/assessment/analysis', icon: BarChart3 },
-  { label: 'Examination Reports Centre', href: '/assessment/reports', icon: FileText },
+  { label: 'Reports', href: '/assessment/reports', icon: FileText },
 ] as const;
 
 function getInitials(fullName: string) {
-  return fullName.trim().split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase()).join('');
+  return fullName
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('');
 }
 
 export function AssessmentShell({ profile, children }: AssessmentShellProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const initials = getInitials(profile.fullName) || 'HD';
 
   const sidebar = (
-    <aside className="flex h-full w-[260px] shrink-0 flex-col bg-slate-900 text-slate-100 lg:sticky lg:top-0 lg:h-dvh lg:self-start lg:overflow-y-auto border-r border-slate-800">
+    <aside className="flex h-full w-[230px] shrink-0 flex-col bg-[#0b1727] text-slate-100 lg:sticky lg:top-0 lg:h-dvh lg:self-start lg:overflow-y-auto border-r border-[#1e293b]">
       {/* Brand Header */}
-      <div className="border-b border-slate-800 px-4 py-3.5">
-        <div className="flex items-center gap-3">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-slate-200 shadow-2xs border border-slate-700">
-            <GraduationCap className="size-4" aria-hidden="true" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-bold leading-tight text-white">Results & Exams</p>
-            <p className="mt-0.5 truncate text-[11px] text-slate-400">Academic performance</p>
+      <div className="border-b border-[#1e293b] px-4 py-3.5">
+        <Link href="/dashboard" className="flex items-center gap-2.5 group">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#16273e] text-sky-400 border border-[#2b3d54] shadow-xs group-hover:scale-105 transition-transform">
+            <GraduationCap className="size-4 text-sky-400" aria-hidden="true" />
           </div>
-        </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs font-bold leading-tight text-white tracking-tight">Results & Exams</p>
+            <p className="mt-0.5 truncate text-[10px] font-medium text-slate-400">Academic Analytics</p>
+          </div>
+        </Link>
       </div>
 
-      <nav className="flex min-h-0 flex-1 flex-col overflow-y-auto px-3 py-3.5">
-        <div className="space-y-4">
+      <nav className="flex min-h-0 flex-1 flex-col overflow-y-auto px-2.5 py-3.5">
+        <div className="space-y-3.5">
           <div>
-            <p className="mb-1.5 px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Navigation</p>
+            <p className="mb-1.5 px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">Navigation</p>
             <Link
               href="/dashboard"
               onClick={() => setMobileOpen(false)}
-              className="flex min-h-9 w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-semibold text-slate-300 transition hover:bg-slate-800 hover:text-white"
+              className="flex min-h-8.5 w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-300 transition hover:bg-[#16273e] hover:text-white"
             >
               <ArrowLeft className="size-3.5 shrink-0 text-slate-400" />
-              <span className="truncate">Back to Module Hub</span>
+              <span className="truncate">Module Hub</span>
             </Link>
           </div>
 
           <div>
-            <p className="mb-1.5 px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Analysis & Reports</p>
+            <p className="mb-1.5 px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">Analysis & Reports</p>
             <div className="space-y-1">
-              {navigation.map((item) => {
+              {NAVIGATION_ITEMS.map((item) => {
                 const active = pathname === item.href || (item.href !== '/assessment' && pathname.startsWith(item.href));
                 const Icon = item.icon;
                 return (
@@ -79,13 +84,13 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
                     href={item.href}
                     onClick={() => setMobileOpen(false)}
                     className={cn(
-                      'relative flex min-h-9 w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-semibold transition',
+                      'relative flex min-h-9 w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all duration-150',
                       active
-                        ? 'bg-slate-800 text-white shadow-2xs'
-                        : 'text-slate-300 hover:bg-slate-800/60 hover:text-white',
+                        ? 'bg-[#16273e] text-white shadow-xs border-l-2 border-l-sky-400 font-bold'
+                        : 'text-slate-300 hover:bg-[#16273e]/60 hover:text-white',
                     )}
                   >
-                    <Icon className={cn('size-3.5 shrink-0', active ? 'text-white' : 'text-slate-400')} />
+                    <Icon className={cn('size-3.5 shrink-0', active ? 'text-sky-400' : 'text-slate-400')} />
                     <span className="truncate">{item.label}</span>
                   </Link>
                 );
@@ -96,20 +101,21 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
       </nav>
 
       {/* User Footer */}
-      <div className="border-t border-slate-800 p-3">
-        <div className="flex w-full items-center gap-2.5 rounded-lg bg-slate-800/60 p-2 border border-slate-700/50">
-          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-slate-700 text-[11px] font-bold text-white">
-            {getInitials(profile.fullName) || 'HD'}
+      <div className="border-t border-[#1e293b] p-2.5">
+        <div className="flex w-full items-center gap-2 rounded-lg bg-[#16273e]/70 p-2 border border-[#2b3d54]/60 shadow-2xs">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-sky-950 text-[10px] font-bold text-sky-400 border border-sky-800/60">
+            {initials}
           </span>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-semibold text-slate-200">{profile.fullName}</p>
-            <p className="truncate text-[10px] text-slate-400">{profile.departmentName}</p>
+            <p className="truncate text-xs font-bold text-white">{profile.fullName}</p>
+            <p className="truncate text-[10px] font-medium text-slate-400">{profile.departmentName || 'Department'}</p>
           </div>
           <form action={logoutAction}>
             <button
               type="submit"
-              className="rounded p-1 text-slate-400 hover:bg-slate-700 hover:text-white"
+              className="rounded p-1 text-slate-400 hover:bg-rose-950/60 hover:text-rose-400 transition"
               aria-label="Sign out"
+              title="Sign out"
             >
               <LogOut className="size-3.5" />
             </button>
@@ -120,38 +126,51 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50/50 text-slate-900">
+    <div className="academic-portal min-h-screen bg-[#f8fafc] text-slate-900">
+      {/* Top Accent Line */}
+      <div className="fixed inset-x-0 top-0 z-[60] h-1 bg-sky-500" aria-hidden="true" />
+
       <div className="flex min-h-screen">
         <div className="hidden lg:block">{sidebar}</div>
-        {mobileOpen ? (
-          <div className="fixed inset-0 z-40 lg:hidden">
+        {mobileOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden">
             <button
               type="button"
-              className="absolute inset-0 bg-black/40"
+              className="absolute inset-0 bg-slate-950/50 backdrop-blur-[2px]"
               onClick={() => setMobileOpen(false)}
               aria-label="Close navigation"
             />
-            <div className="relative h-full w-[260px] max-w-[86vw]">{sidebar}</div>
+            <div className="relative h-full w-[230px] max-w-[85vw]">{sidebar}</div>
           </div>
-        ) : null}
+        )}
         <div className="min-w-0 flex-1">
-          <header className="sticky top-0 z-30 flex min-h-[var(--header-height)] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6">
+          {/* Header */}
+          <header className="sticky top-0 z-30 flex h-[3.5rem] items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 backdrop-blur-xl sm:px-6 lg:h-[4rem] shadow-2xs">
             <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="lg:hidden"
+              <button
+                type="button"
+                className="flex size-8.5 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-xs lg:hidden active:scale-95"
                 onClick={() => setMobileOpen(true)}
                 aria-label="Open navigation"
               >
                 <Menu className="size-4" />
-              </Button>
-              <div>
-                <p className="text-xs font-bold text-slate-800">Results & Exams Analysis</p>
+              </button>
+              <div className="flex items-center gap-2">
+                <span className="h-4.5 w-1 rounded-full bg-sky-500" />
+                <p className="text-xs font-bold text-slate-900 sm:text-sm">Results & Exams</p>
+                <span className="hidden sm:inline text-slate-300">·</span>
+                <span className="hidden sm:inline text-xs font-medium text-slate-500">{profile.departmentName}</span>
               </div>
             </div>
+
+            <div className="flex items-center gap-2">
+              <span className="hidden md:inline-flex items-center rounded-md bg-sky-50 px-2 py-0.5 text-[11px] font-bold text-sky-800 border border-sky-200/80">
+                Academic Performance
+              </span>
+            </div>
           </header>
-          <main className="mx-auto w-full max-w-[var(--content-max-width)] px-4 py-5 sm:px-6 lg:px-8 lg:py-6">
+
+          <main className="mx-auto w-full max-w-[1600px] px-4 py-4 sm:px-6 lg:px-8 lg:py-5">
             {children}
           </main>
         </div>

@@ -281,15 +281,19 @@ export function SessionEditorCard({
                           className="w-full"
                         >
                           <option value="">No room</option>
-                          {data.rooms.map((room) => (
-                            <option
-                              key={room.id}
-                              value={room.id}
-                              disabled={room.capacity < session.cohortSize}
-                            >
-                              {room.label}
-                            </option>
-                          ))}
+                          {data.rooms.map((room) => {
+                            const isUnderCapacity =
+                              room.capacity > 0 &&
+                              session.cohortSize > 0 &&
+                              room.capacity < session.cohortSize;
+                            return (
+                              <option key={room.id} value={room.id}>
+                                {room.label}
+                                {room.capacity > 0 ? ` (${room.capacity} cap)` : ''}
+                                {isUnderCapacity ? ' ⚠️' : ''}
+                              </option>
+                            );
+                          })}
                         </Select>
                       </div>
                     </div>

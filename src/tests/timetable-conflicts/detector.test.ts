@@ -23,7 +23,7 @@ const base: ConflictSession = {
   roomId: 'r1',
   roomCode: 'R1',
   roomName: 'Room 1',
-  roomCapacity: 50,
+  roomCapacity: 60,
   workingDayId: 'd1',
   workingDayLabel: 'Monday',
   startTimeSlotId: 's1',

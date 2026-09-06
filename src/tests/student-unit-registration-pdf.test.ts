@@ -44,21 +44,65 @@ describe('student unit registration PDF form', () => {
     };
   }
 
-  it('generates a valid PDF buffer for 6 units', async () => {
+  function countPdfPages(buffer: Buffer): number {
+    const text = buffer.toString('latin1');
+    const matches = text.match(/\/Type\s*\/Page\b/g);
+    return matches ? matches.length : 0;
+  }
+
+  it('generates a valid PDF buffer for 1 unit on exactly 1 page', async () => {
+    const document = await buildStudentUnitRegistrationPdf(makeContext(1));
+    expect(document.byteLength).toBeGreaterThan(1_000);
+    expect(document.subarray(0, 4).toString()).toBe('%PDF');
+    expect(countPdfPages(document)).toBe(1);
+  });
+
+  it('generates a valid PDF buffer for 2 units on exactly 1 page', async () => {
+    const document = await buildStudentUnitRegistrationPdf(makeContext(2));
+    expect(document.byteLength).toBeGreaterThan(1_000);
+    expect(document.subarray(0, 4).toString()).toBe('%PDF');
+    expect(countPdfPages(document)).toBe(1);
+  });
+
+  it('generates a valid PDF buffer for 4 units on exactly 1 page', async () => {
+    const document = await buildStudentUnitRegistrationPdf(makeContext(4));
+    expect(document.byteLength).toBeGreaterThan(1_000);
+    expect(document.subarray(0, 4).toString()).toBe('%PDF');
+    expect(countPdfPages(document)).toBe(1);
+  });
+
+  it('generates a valid PDF buffer for 6 units on exactly 1 page', async () => {
     const document = await buildStudentUnitRegistrationPdf(makeContext(6));
     expect(document.byteLength).toBeGreaterThan(1_000);
     expect(document.subarray(0, 4).toString()).toBe('%PDF');
+    expect(countPdfPages(document)).toBe(1);
   });
 
-  it('generates a valid PDF buffer for 8 units', async () => {
+  it('generates a valid PDF buffer for 7 units on exactly 1 page', async () => {
+    const document = await buildStudentUnitRegistrationPdf(makeContext(7));
+    expect(document.byteLength).toBeGreaterThan(1_000);
+    expect(document.subarray(0, 4).toString()).toBe('%PDF');
+    expect(countPdfPages(document)).toBe(1);
+  });
+
+  it('generates a valid PDF buffer for 8 units on exactly 1 page', async () => {
     const document = await buildStudentUnitRegistrationPdf(makeContext(8));
     expect(document.byteLength).toBeGreaterThan(1_000);
     expect(document.subarray(0, 4).toString()).toBe('%PDF');
+    expect(countPdfPages(document)).toBe(1);
   });
 
-  it('generates a valid PDF buffer for 12 units', async () => {
+  it('generates a valid PDF buffer for 10 units on exactly 1 page', async () => {
+    const document = await buildStudentUnitRegistrationPdf(makeContext(10));
+    expect(document.byteLength).toBeGreaterThan(1_000);
+    expect(document.subarray(0, 4).toString()).toBe('%PDF');
+    expect(countPdfPages(document)).toBe(1);
+  });
+
+  it('generates a valid PDF buffer for 12 units on exactly 1 page', async () => {
     const document = await buildStudentUnitRegistrationPdf(makeContext(12));
     expect(document.byteLength).toBeGreaterThan(1_000);
     expect(document.subarray(0, 4).toString()).toBe('%PDF');
+    expect(countPdfPages(document)).toBe(1);
   });
 });

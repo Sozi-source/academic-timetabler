@@ -476,7 +476,7 @@ export function OnlineMarksEditor({
 
           {paginatedRows.length === 0 ? (
             <div className="px-4 py-8 text-center text-xs text-slate-500">
-              No students match "{searchQuery}"
+              No students match &ldquo;{searchQuery}&rdquo;
             </div>
           ) : (
             <div className="divide-y divide-slate-200">
@@ -589,7 +589,7 @@ export function OnlineMarksEditor({
                     colSpan={8}
                     className="px-4 py-8 text-center text-xs text-slate-500"
                   >
-                    No students match "{searchQuery}"
+                    No students match &ldquo;{searchQuery}&rdquo;
                   </td>
                 </tr>
               ) : (

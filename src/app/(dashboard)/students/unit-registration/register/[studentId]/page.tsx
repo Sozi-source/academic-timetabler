@@ -96,18 +96,22 @@ export default async function DepartmentStudentUnitRegistrationPage({
                 : 'Select the student stage first.'}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Badge variant="neutral">{expected} expected</Badge>
             <Badge variant={context.existingStatus === 'verified' ? 'success' : 'neutral'}>
               {context.existingStatus === 'verified' ? 'Verified' : 'Not verified'}
             </Badge>
-                    {context.existingStatus !== 'not_submitted' ? (
-            <UndoUnitRegistrationButton
-              studentId={context.student.id}
-              academicPeriodId={context.period.id}
-            />
-          ) : null}
-</div>
+            {context.existingStatus !== 'not_submitted' || context.units.some((u) => u.isSelected) ? (
+              <UndoUnitRegistrationButton
+                studentId={context.student.id}
+                academicPeriodId={context.period.id}
+                studentName={context.student.fullName}
+                label="Unregister student"
+                variant="danger"
+                size="sm"
+              />
+            ) : null}
+          </div>
         </div>
 
 {context.student.currentStageId ? (
@@ -154,7 +158,17 @@ export default async function DepartmentStudentUnitRegistrationPage({
             />
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+            {context.existingStatus !== 'not_submitted' || context.units.some((u) => u.isSelected) ? (
+              <UndoUnitRegistrationButton
+                studentId={context.student.id}
+                academicPeriodId={context.period.id}
+                studentName={context.student.fullName}
+                label="Unregister (Clear all units)"
+                variant="outline"
+                size="md"
+              />
+            ) : <div />}
             <Button type="submit">
               <CheckCircle2 className="size-4" />
               Save & verify registration

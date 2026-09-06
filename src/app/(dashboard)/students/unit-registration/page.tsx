@@ -79,7 +79,10 @@ export default async function UnitRegistrationPage() {
       {context.students.length === 0 ? (
         <EmptyState icon={UsersRound} title="No active students" description="Import students before registration." />
       ) : (
-        <StudentUnitRegistrationTable students={context.students} />
+        <StudentUnitRegistrationTable
+          students={context.students}
+          academicPeriodId={context.period.id}
+        />
       )}
     </div>
   );

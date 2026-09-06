@@ -28,19 +28,21 @@ export async function approveUnitOfferingsAction(formData: FormData) {
 
 export async function withdrawUnitOfferingAction(formData: FormData) {
   await requireHodAccess();
-  const offeringId = String(formData.get('offeringId') ?? '');
-  const reason = String(formData.get('reason') ?? '').trim();
-  if (!offeringId || !reason) redirect(`${path}?approvalError=${encodeURIComponent('A withdrawal reason is required')}`);
+  const rawOfferingIds = formData.getAll('offeringId').map(String).filter(Boolean);
+  const singleOfferingId = String(formData.get('offeringId') ?? '');
+  const offeringIds = rawOfferingIds.length > 0 ? rawOfferingIds : (singleOfferingId ? [singleOfferingId] : []);
+  const reason = String(formData.get('reason') ?? 'Excluded from active cohort teaching plan').trim() || 'Excluded from active cohort teaching plan';
+  if (offeringIds.length === 0) redirect(`${path}?approvalError=${encodeURIComponent('Select at least one offering to withdraw')}`);
   const db = await createClient();
   const { error } = await db.rpc('set_unit_offering_approval', {
-    p_offering_ids: [offeringId], p_approve: false, p_reason: reason,
+    p_offering_ids: offeringIds, p_approve: false, p_reason: reason,
   });
   if (error) redirect(`${path}?approvalError=${encodeURIComponent(error.message)}`);
   revalidatePath(path);
   revalidatePath('/timetable/teaching-allocations');
   revalidatePath('/timetable/readiness');
   revalidatePath('/timetable/generator');
-  redirect(`${path}?withdrawn=1`);
+  redirect(`${path}?withdrawn=${offeringIds.length}`);
 }
 
 export async function addCohortUnitOfferingAction(formData: FormData) {

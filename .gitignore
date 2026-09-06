@@ -40,6 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# local shell wrapper
+powershell.cmd
+
 # backups & temporary artifacts
 .*-backup*
 *- Copy.*

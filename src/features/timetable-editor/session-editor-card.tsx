@@ -66,13 +66,16 @@ export function SessionEditorCard({
   useEffect(() => {
     if (state.status === 'success') {
       const scrollY = window.scrollY;
-      setIsOpen(false);
-      startTransition(() => {
-        router.refresh();
-        requestAnimationFrame(() => {
-          window.scrollTo({ top: scrollY, behavior: 'instant' });
+      const timer = setTimeout(() => {
+        setIsOpen(false);
+        startTransition(() => {
+          router.refresh();
+          requestAnimationFrame(() => {
+            window.scrollTo({ top: scrollY, behavior: 'instant' });
+          });
         });
-      });
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [state.status, router]);
 

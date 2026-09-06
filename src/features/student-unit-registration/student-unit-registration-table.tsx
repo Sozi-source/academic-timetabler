@@ -13,9 +13,11 @@ import { useMemo, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import type { RegistrationStudent } from './types';
+import { UndoUnitRegistrationButton } from './undo-registration-button';
 
 interface StudentUnitRegistrationTableProps {
   students: RegistrationStudent[];
+  academicPeriodId?: string | null;
 }
 
 function statusBadge(status: string, hasException: boolean) {
@@ -26,7 +28,10 @@ function statusBadge(status: string, hasException: boolean) {
   return <Badge variant="neutral">Pending</Badge>;
 }
 
-export function StudentUnitRegistrationTable({ students }: StudentUnitRegistrationTableProps) {
+export function StudentUnitRegistrationTable({
+  students,
+  academicPeriodId,
+}: StudentUnitRegistrationTableProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [cohortFilter, setCohortFilter] = useState<string>('all');
@@ -178,7 +183,7 @@ export function StudentUnitRegistrationTable({ students }: StudentUnitRegistrati
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-border bg-surface shadow-2xs">
-          <div className="grid grid-cols-[1.5fr_1fr_0.75fr_0.75fr_1.25fr] gap-3 border-b border-border bg-surface-subtle px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-text-muted">
+          <div className="grid grid-cols-[1.3fr_1fr_0.7fr_0.7fr_1.6fr] gap-3 border-b border-border bg-surface-subtle px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-text-muted">
             <span>Student</span>
             <span>Cohort / Programme</span>
             <span>Units</span>
@@ -190,7 +195,7 @@ export function StudentUnitRegistrationTable({ students }: StudentUnitRegistrati
             {paginatedStudents.map((student) => (
               <div
                 key={student.id}
-                className="grid grid-cols-[1.5fr_1fr_0.75fr_0.75fr_1.25fr] items-center gap-3 px-4 py-3 hover:bg-primary-subtle/20 transition-colors"
+                className="grid grid-cols-[1.3fr_1fr_0.7fr_0.7fr_1.6fr] items-center gap-3 px-4 py-3 hover:bg-primary-subtle/20 transition-colors"
               >
                 {/* Student Info */}
                 <div className="min-w-0">
@@ -217,16 +222,27 @@ export function StudentUnitRegistrationTable({ students }: StudentUnitRegistrati
                 {/* Status Badge */}
                 <div>{statusBadge(student.status, student.hasException)}</div>
 
-                {/* Single Clear Action Button */}
-                <div className="flex items-center justify-end gap-2 min-w-0">
+                {/* Action Buttons */}
+                <div className="flex flex-wrap items-center justify-end gap-1.5 min-w-0">
+                  {academicPeriodId && (student.selectedUnits > 0 || student.status !== 'not_submitted') && (
+                    <UndoUnitRegistrationButton
+                      studentId={student.id}
+                      academicPeriodId={academicPeriodId}
+                      studentName={student.fullName}
+                      label="Unregister"
+                      variant="danger"
+                      size="sm"
+                    />
+                  )}
+
                   {student.selectedUnits > 0 && (
                     <Link
                       href={`/students/registry/${student.id}/portal-view`}
-                      className="inline-flex h-8 items-center gap-1 rounded-lg border border-border bg-surface px-2.5 text-[11px] font-bold text-text-secondary hover:bg-surface-subtle transition active:scale-95"
+                      className="inline-flex h-8 items-center gap-1 rounded-lg border border-border bg-surface px-2 text-[11px] font-bold text-text-secondary hover:bg-surface-subtle transition active:scale-95"
                       title="View as Student (Portal Preview)"
                     >
                       <Eye className="size-3.5 text-primary" />
-                      View Portal
+                      Portal
                     </Link>
                   )}
 

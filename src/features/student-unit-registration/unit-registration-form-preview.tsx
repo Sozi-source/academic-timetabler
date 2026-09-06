@@ -6,19 +6,17 @@ function OfficialApprovalCard({
   num,
   title,
   approverLabel,
-  marginClass,
   paddingClass,
   linePbClass,
 }: {
   num: number;
   title: string;
   approverLabel: string;
-  marginClass: string;
   paddingClass: string;
   linePbClass: string;
 }) {
   return (
-    <div className={`${marginClass} overflow-hidden rounded-sm border border-slate-600 bg-white`}>
+    <div className="overflow-hidden rounded-sm border border-slate-600 bg-white">
       <div className="bg-slate-200 px-2.5 py-0.5 text-[9.5px] font-bold text-slate-900 border-b border-slate-500">
         {num}. {title}
       </div>
@@ -59,15 +57,14 @@ export function UnitRegistrationFormPreview({
   const rowCount = Math.max(1, halfCount);
 
   // Stable 1-page A4 print budget:
-  // Ensures strict 1-page fit across 1 to 12 registered units with +1mm expanded writing cards.
-  const cardMarginClass = rowCount <= 3 ? 'mt-3' : rowCount === 4 ? 'mt-2' : 'mt-1.5';
-  const cardPaddingClass = rowCount <= 3 ? 'p-2.5' : rowCount === 4 ? 'p-2' : 'p-1.5';
-  const linePbClass = rowCount <= 3 ? 'pb-2' : rowCount === 4 ? 'pb-1.5' : 'pb-1';
-  const sectionMarginClass = rowCount <= 3 ? 'mt-3' : rowCount === 4 ? 'mt-2' : 'mt-1.5';
+  // Dynamically balances writing cards so the form gracefully fills the entire page height down to MD approval
+  const cardPaddingClass = rowCount <= 4 ? 'p-2 sm:p-2.5' : 'p-1.5 sm:p-2';
+  const linePbClass = rowCount <= 4 ? 'pb-2 sm:pb-2.5' : 'pb-1 sm:pb-1.5';
+  const sectionMarginClass = rowCount <= 4 ? 'mt-2.5 sm:mt-3' : 'mt-1.5 sm:mt-2';
 
   return (
-    <article className="mx-auto w-full max-w-[210mm] min-h-[285mm] bg-white p-4 sm:p-[8mm] font-sans text-[10px] leading-tight text-slate-900 shadow-sm print:w-[210mm] print:max-w-none print:min-h-0 print:p-[8mm] print:shadow-none print:break-inside-avoid flex flex-col justify-between">
-      <div>
+    <article className="mx-auto w-full max-w-[210mm] min-h-[290mm] bg-white p-4 sm:p-[7mm] font-sans text-[10px] leading-tight text-slate-900 shadow-sm print:w-[210mm] print:max-w-none print:min-h-[282mm] print:h-[282mm] print:p-[7mm] print:shadow-none print:break-inside-avoid flex flex-col justify-between">
+      <div className="flex-1 flex flex-col">
         {/* HEADER SECTION (OFFICIAL LETTERHEAD STYLE) */}
         <header className="flex flex-col sm:flex-row sm:items-center justify-between border-b-2 border-slate-900 pb-2 gap-3">
           <div className="flex items-center gap-3 min-w-0">
@@ -181,85 +178,83 @@ export function UnitRegistrationFormPreview({
           </table>
         </section>
 
-        {/* 1. ACCOUNTS CLEARANCE CARD */}
-        <div className="mt-[8mm] overflow-hidden rounded-sm border border-slate-600 bg-white">
-          <div className="bg-slate-200 px-2.5 py-0.5 text-[9.5px] font-bold text-slate-900 border-b border-slate-500">
-            1. ACCOUNTS CLEARANCE
+        {/* APPROVALS WORKFLOW SECTION (CARDS 1-6) - Expands to fill available vertical space down to the footer */}
+        <div className="flex-1 flex flex-col justify-between mt-2.5 sm:mt-3">
+          {/* 1. ACCOUNTS CLEARANCE CARD */}
+          <div className="overflow-hidden rounded-sm border border-slate-600 bg-white">
+            <div className="bg-slate-200 px-2.5 py-0.5 text-[9.5px] font-bold text-slate-900 border-b border-slate-500">
+              1. ACCOUNTS CLEARANCE
+            </div>
+            <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 ${cardPaddingClass} text-[9px] text-slate-900`}>
+              <div className={`border-b border-dotted border-slate-700 ${linePbClass} font-semibold text-slate-900`}>
+                Previous balance: KShs
+              </div>
+              <div className={`border-b border-dotted border-slate-700 ${linePbClass} font-semibold text-slate-900`}>
+                Amount paid: KShs
+              </div>
+            </div>
+            <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 ${cardPaddingClass} pt-0 text-[9px] text-slate-900`}>
+              <div className={`border-b border-dotted border-slate-700 ${linePbClass} font-semibold text-slate-900`}>
+                Balance: KShs
+              </div>
+              <div className={`border-b border-dotted border-slate-700 ${linePbClass} font-semibold text-slate-900`}>
+                Hostel fees: KShs
+              </div>
+            </div>
+            <div className={`grid grid-cols-1 sm:grid-cols-[1.6fr_1fr_1fr] gap-3 ${cardPaddingClass} pt-0 text-[9px] text-slate-900`}>
+              <div className={`border-b border-dotted border-slate-700 ${linePbClass} font-semibold text-slate-900`}>
+                Accounts Officer:
+              </div>
+              <div className={`border-b border-dotted border-slate-700 ${linePbClass} font-semibold text-slate-900`}>
+                Signature:
+              </div>
+              <div className={`border-b border-dotted border-slate-700 ${linePbClass} font-semibold text-slate-900`}>
+                Date:
+              </div>
+            </div>
           </div>
-          <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 ${cardPaddingClass} text-[9px] text-slate-900`}>
-            <div className={`border-b border-dotted border-slate-700 ${linePbClass} font-semibold text-slate-900`}>
-              Previous balance: KShs
-            </div>
-            <div className={`border-b border-dotted border-slate-700 ${linePbClass} font-semibold text-slate-900`}>
-              Amount paid: KShs
-            </div>
-          </div>
-          <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 ${cardPaddingClass} pt-0 text-[9px] text-slate-900`}>
-            <div className={`border-b border-dotted border-slate-700 ${linePbClass} font-semibold text-slate-900`}>
-              Balance: KShs
-            </div>
-            <div className={`border-b border-dotted border-slate-700 ${linePbClass} font-semibold text-slate-900`}>
-              Hostel fees: KShs
-            </div>
-          </div>
-          <div className={`grid grid-cols-1 sm:grid-cols-[1.6fr_1fr_1fr] gap-3 ${cardPaddingClass} pt-0 text-[9px] text-slate-900`}>
-            <div className={`border-b border-dotted border-slate-700 ${linePbClass} font-semibold text-slate-900`}>
-              Accounts Officer:
-            </div>
-            <div className={`border-b border-dotted border-slate-700 ${linePbClass} font-semibold text-slate-900`}>
-              Signature:
-            </div>
-            <div className={`border-b border-dotted border-slate-700 ${linePbClass} font-semibold text-slate-900`}>
-              Date:
-            </div>
-          </div>
-        </div>
 
-        {/* 2-6. OFFICIAL APPROVAL CARDS */}
-        <OfficialApprovalCard
-          num={2}
-          title="HOD APPROVAL"
-          approverLabel="Approved/not approved by: HOD:"
-          marginClass={cardMarginClass}
-          paddingClass={cardPaddingClass}
-          linePbClass={linePbClass}
-        />
-        <OfficialApprovalCard
-          num={3}
-          title="HOSTEL ALLOCATION"
-          approverLabel="Administrator:"
-          marginClass={cardMarginClass}
-          paddingClass={cardPaddingClass}
-          linePbClass={linePbClass}
-        />
-        <OfficialApprovalCard
-          num={4}
-          title="REGISTRAR APPROVAL"
-          approverLabel="REGISTRAR:"
-          marginClass={cardMarginClass}
-          paddingClass={cardPaddingClass}
-          linePbClass={linePbClass}
-        />
-        <OfficialApprovalCard
-          num={5}
-          title="PRINCIPAL APPROVAL"
-          approverLabel="PRINCIPAL:"
-          marginClass={cardMarginClass}
-          paddingClass={cardPaddingClass}
-          linePbClass={linePbClass}
-        />
-        <OfficialApprovalCard
-          num={6}
-          title="MANAGING DIRECTOR APPROVAL"
-          approverLabel="MANAGING DIRECTOR:"
-          marginClass={cardMarginClass}
-          paddingClass={cardPaddingClass}
-          linePbClass={linePbClass}
-        />
+          {/* 2-6. OFFICIAL APPROVAL CARDS */}
+          <OfficialApprovalCard
+            num={2}
+            title="HOD APPROVAL"
+            approverLabel="Approved/not approved by: HOD:"
+            paddingClass={cardPaddingClass}
+            linePbClass={linePbClass}
+          />
+          <OfficialApprovalCard
+            num={3}
+            title="HOSTEL ALLOCATION"
+            approverLabel="Administrator:"
+            paddingClass={cardPaddingClass}
+            linePbClass={linePbClass}
+          />
+          <OfficialApprovalCard
+            num={4}
+            title="REGISTRAR APPROVAL"
+            approverLabel="REGISTRAR:"
+            paddingClass={cardPaddingClass}
+            linePbClass={linePbClass}
+          />
+          <OfficialApprovalCard
+            num={5}
+            title="PRINCIPAL APPROVAL"
+            approverLabel="PRINCIPAL:"
+            paddingClass={cardPaddingClass}
+            linePbClass={linePbClass}
+          />
+          <OfficialApprovalCard
+            num={6}
+            title="MANAGING DIRECTOR APPROVAL"
+            approverLabel="MANAGING DIRECTOR:"
+            paddingClass={cardPaddingClass}
+            linePbClass={linePbClass}
+          />
+        </div>
       </div>
 
       {/* FOOTER */}
-      <footer className="mt-3 text-center border-t border-slate-300 pt-1.5 text-[8.5px] text-slate-500 italic">
+      <footer className="mt-2 text-center border-t border-slate-300 pt-1 text-[8.5px] text-slate-500 italic">
         Form Ref: ICMHS/REG/2026/0482 &nbsp;|&nbsp; This form should be filled in one copy and filed at the Registrar of Students.
       </footer>
     </article>

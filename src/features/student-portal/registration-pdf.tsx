@@ -15,12 +15,29 @@ const PRIMARY = '#0f172a';
 
 const styles = StyleSheet.create({
   page: {
-    paddingTop: 20,
-    paddingBottom: 20,
-    paddingHorizontal: 24,
+    paddingTop: 18,
+    paddingBottom: 16,
+    paddingHorizontal: 22,
     fontSize: 9.5,
     fontFamily: 'Helvetica',
     color: '#000000',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+  },
+  topSection: {
+    flexDirection: 'column',
+  },
+  approvalsSection: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    marginTop: 2,
+  },
+  footerContainer: {
+    marginTop: 4,
+    borderTopWidth: 1,
+    borderTopColor: '#cbd5e1',
+    paddingTop: 3,
   },
   header: {
     flexDirection: 'row',
@@ -171,7 +188,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#334155',
     borderRadius: 2,
-    marginBottom: 5.5,
     overflow: 'hidden',
     backgroundColor: '#ffffff',
   },
@@ -254,12 +270,12 @@ function ApprovalCardPdf({
   num: number;
   title: string;
   approverLabel: string;
-  cardMarginBottom: number;
+  cardMarginBottom?: number;
   cardRowPaddingY: number;
   minLineHeight: number;
 }) {
   return (
-    <View style={[styles.cardBox, { marginBottom: cardMarginBottom }]} wrap={false}>
+    <View style={[styles.cardBox, cardMarginBottom !== undefined ? { marginBottom: cardMarginBottom } : null]} wrap={false}>
       <View style={styles.cardTitleBar}>
         <Text style={styles.cardTitleText}>{num}. {title}</Text>
       </View>
@@ -304,185 +320,188 @@ export function UnitRegistrationPdfDocument({
   const rightUnits = units.slice(halfCount);
   const rowCount = Math.max(1, halfCount);
 
-  // Stable 1-page A4 height budget (Total document height ~650-680pt out of 801pt printable limit):
-  // Ensures strict 1-page A4 fit across 1 to 12 registered units with +1mm expanded writing cards.
-  const cardMarginBottom = rowCount <= 3 ? 7.5 : rowCount === 4 ? 6 : 4.5;
-  const cardRowPaddingY = rowCount <= 3 ? 5.5 : rowCount === 4 ? 4 : 3;
-  const minLineHeight = rowCount <= 3 ? 17 : rowCount === 4 ? 14 : 12;
-  const sectionMarginBottom = rowCount <= 3 ? 7.5 : rowCount === 4 ? 6 : 4.5;
+  // Dynamic 1-page A4 height budget:
+  // Balances writing lines & card row paddings so the form stretches cleanly all the way down to the footer
+  const cardRowPaddingY = rowCount <= 2 ? 6.5 : rowCount <= 4 ? 5 : 3.5;
+  const minLineHeight = rowCount <= 2 ? 21 : rowCount <= 4 ? 17.5 : 13;
+  const sectionMarginBottom = rowCount <= 4 ? 5.5 : 4;
 
   return (
     <Document title={`${context.student.admissionNumber} Unit Registration Form`}>
       <Page size="A4" style={styles.page}>
-        {/* HEADER SECTION */}
-        <View style={styles.header}>
-          <View style={styles.logoGroup}>
-            {logoDataUri ? (
-              <Image src={logoDataUri} style={styles.logo} />
-            ) : null}
-            <View style={styles.titleCol}>
-              <Text style={styles.collegeName}>
-                Imperial College of Medical and Health Sciences
-              </Text>
-              <Text style={styles.tagline}>
-                Committed to Professional Excellence
-              </Text>
-              <Text style={styles.officeName}>
-                OFFICE OF THE REGISTRAR (ACADEMIC AFFAIRS)
-              </Text>
+        {/* TOP COMPACT SECTION: HEADER, TITLE, PARTICULARS & UNITS TABLE */}
+        <View style={styles.topSection}>
+          {/* HEADER SECTION */}
+          <View style={styles.header}>
+            <View style={styles.logoGroup}>
+              {logoDataUri ? (
+                /* eslint-disable-next-line jsx-a11y/alt-text */
+                <Image src={logoDataUri} style={styles.logo} />
+              ) : null}
+              <View style={styles.titleCol}>
+                <Text style={styles.collegeName}>
+                  Imperial College of Medical and Health Sciences
+                </Text>
+                <Text style={styles.tagline}>
+                  Committed to Professional Excellence
+                </Text>
+                <Text style={styles.officeName}>
+                  OFFICE OF THE REGISTRAR (ACADEMIC AFFAIRS)
+                </Text>
+              </View>
+            </View>
+            <View style={styles.rightCol}>
+              <Text style={styles.semesterLabel}>Semester / Period:</Text>
+              <Text style={styles.semesterVal}>{period.name}</Text>
             </View>
           </View>
-          <View style={styles.rightCol}>
-            <Text style={styles.semesterLabel}>Semester / Period:</Text>
-            <Text style={styles.semesterVal}>{period.name}</Text>
-          </View>
-        </View>
 
-        {/* CENTERED DOCUMENT FORM TITLE */}
-        <View style={styles.formTitleContainer}>
-          <Text style={styles.formTitle}>
-            CONTINUING STUDENT UNIT REGISTRATION FORM
-          </Text>
-        </View>
-
-        {/* STUDENT PARTICULARS (3 ROWS - REMOVED REDUNDANT ACADEMIC PERIOD ROW) */}
-        <View style={[styles.particularsBox, { marginBottom: sectionMarginBottom }]}>
-          <View style={styles.pRow}>
-            <View style={styles.pCellLeft}>
-              <Text><Text style={styles.bold}>Student Name:</Text> {context.student.fullName}</Text>
-            </View>
-            <View style={styles.pCellRight}>
-              <Text><Text style={styles.bold}>Admission No:</Text> {context.student.admissionNumber}</Text>
-            </View>
-          </View>
-          <View style={styles.pRow}>
-            <View style={styles.pCellLeft}>
-              <Text><Text style={styles.bold}>Course:</Text> {context.student.programmeName}</Text>
-            </View>
-            <View style={styles.pCellRight}>
-              <Text><Text style={styles.bold}>Stage:</Text> {context.student.stageCode ?? context.student.stageName ?? 'N/A'}</Text>
-            </View>
-          </View>
-          <View style={styles.pRowLast}>
-            <View style={styles.pCellLeft}>
-              <Text><Text style={styles.bold}>Department:</Text> {context.student.departmentName}</Text>
-            </View>
-            <View style={styles.pCellRight}>
-              <Text><Text style={styles.bold}>Intake:</Text> {context.student.cohortName ?? 'N/A'}</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* REGISTERED UNITS OVERVIEW (2-COLUMN PARALLEL GRID) */}
-        <View style={[styles.unitSection, { marginBottom: 23 }]}>
-          <View style={styles.unitHeaderBar}>
-            <Text style={styles.unitHeaderText}>
-              Registered Units Overview ({units.length} Units)
+          {/* CENTERED DOCUMENT FORM TITLE */}
+          <View style={styles.formTitleContainer}>
+            <Text style={styles.formTitle}>
+              CONTINUING STUDENT UNIT REGISTRATION FORM
             </Text>
           </View>
-          <View style={styles.unitHeadRow}>
-            <Text style={styles.thSn}>S/N</Text>
-            <Text style={styles.thCode}>Code</Text>
-            <Text style={styles.thTitleLeft}>Unit Name</Text>
-            <Text style={styles.thSn}>S/N</Text>
-            <Text style={styles.thCode}>Code</Text>
-            <Text style={styles.thTitleRight}>Unit Name</Text>
-          </View>
-          {leftUnits.map((left, idx) => {
-            const right = rightUnits[idx];
-            return (
-              <View key={left.registrationId} style={styles.unitRow}>
-                <Text style={styles.tdSn}>{idx + 1}</Text>
-                <Text style={styles.tdCode}>{left.unitCode}</Text>
-                <Text style={styles.tdTitleLeft}>{left.unitName}</Text>
-                <Text style={styles.tdSn}>{right ? idx + halfCount + 1 : ''}</Text>
-                <Text style={styles.tdCode}>{right ? right.unitCode : ''}</Text>
-                <Text style={styles.tdTitleRight}>{right ? right.unitName : ''}</Text>
+
+          {/* STUDENT PARTICULARS (3 ROWS - REMOVED REDUNDANT ACADEMIC PERIOD ROW) */}
+          <View style={[styles.particularsBox, { marginBottom: sectionMarginBottom }]}>
+            <View style={styles.pRow}>
+              <View style={styles.pCellLeft}>
+                <Text><Text style={styles.bold}>Student Name:</Text> {context.student.fullName}</Text>
               </View>
-            );
-          })}
+              <View style={styles.pCellRight}>
+                <Text><Text style={styles.bold}>Admission No:</Text> {context.student.admissionNumber}</Text>
+              </View>
+            </View>
+            <View style={styles.pRow}>
+              <View style={styles.pCellLeft}>
+                <Text><Text style={styles.bold}>Course:</Text> {context.student.programmeName}</Text>
+              </View>
+              <View style={styles.pCellRight}>
+                <Text><Text style={styles.bold}>Stage:</Text> {context.student.stageCode ?? context.student.stageName ?? 'N/A'}</Text>
+              </View>
+            </View>
+            <View style={styles.pRowLast}>
+              <View style={styles.pCellLeft}>
+                <Text><Text style={styles.bold}>Department:</Text> {context.student.departmentName}</Text>
+              </View>
+              <View style={styles.pCellRight}>
+                <Text><Text style={styles.bold}>Intake:</Text> {context.student.cohortName ?? 'N/A'}</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* REGISTERED UNITS OVERVIEW (2-COLUMN PARALLEL GRID) */}
+          <View style={[styles.unitSection, { marginBottom: sectionMarginBottom }]}>
+            <View style={styles.unitHeaderBar}>
+              <Text style={styles.unitHeaderText}>
+                Registered Units Overview ({units.length} Units)
+              </Text>
+            </View>
+            <View style={styles.unitHeadRow}>
+              <Text style={styles.thSn}>S/N</Text>
+              <Text style={styles.thCode}>Code</Text>
+              <Text style={styles.thTitleLeft}>Unit Name</Text>
+              <Text style={styles.thSn}>S/N</Text>
+              <Text style={styles.thCode}>Code</Text>
+              <Text style={styles.thTitleRight}>Unit Name</Text>
+            </View>
+            {leftUnits.map((left, idx) => {
+              const right = rightUnits[idx];
+              return (
+                <View key={left.registrationId} style={styles.unitRow}>
+                  <Text style={styles.tdSn}>{idx + 1}</Text>
+                  <Text style={styles.tdCode}>{left.unitCode}</Text>
+                  <Text style={styles.tdTitleLeft}>{left.unitName}</Text>
+                  <Text style={styles.tdSn}>{right ? idx + halfCount + 1 : ''}</Text>
+                  <Text style={styles.tdCode}>{right ? right.unitCode : ''}</Text>
+                  <Text style={styles.tdTitleRight}>{right ? right.unitName : ''}</Text>
+                </View>
+              );
+            })}
+          </View>
         </View>
 
-        {/* 1. ACCOUNTS CLEARANCE CARD */}
-        <View style={[styles.cardBox, { marginBottom: cardMarginBottom }]} wrap={false}>
-          <View style={styles.cardTitleBar}>
-            <Text style={styles.cardTitleText}>1. ACCOUNTS CLEARANCE</Text>
+        {/* APPROVALS WORKFLOW SECTION (CARDS 1-6) - Stretches across remaining vertical space */}
+        <View style={styles.approvalsSection}>
+          {/* 1. ACCOUNTS CLEARANCE CARD */}
+          <View style={styles.cardBox} wrap={false}>
+            <View style={styles.cardTitleBar}>
+              <Text style={styles.cardTitleText}>1. ACCOUNTS CLEARANCE</Text>
+            </View>
+            <View style={[styles.cardRow, { paddingTop: cardRowPaddingY, paddingBottom: cardRowPaddingY }]}>
+              <View style={[styles.cellHalf, { minHeight: minLineHeight }]}>
+                <Text style={styles.bold}>Previous balance: KShs</Text>
+              </View>
+              <View style={[styles.cellHalf, { minHeight: minLineHeight }]}>
+                <Text style={styles.bold}>Amount paid: KShs</Text>
+              </View>
+            </View>
+            <View style={[styles.cardRow, { paddingTop: cardRowPaddingY, paddingBottom: cardRowPaddingY }]}>
+              <View style={[styles.cellHalf, { minHeight: minLineHeight }]}>
+                <Text style={styles.bold}>Balance: KShs</Text>
+              </View>
+              <View style={[styles.cellHalf, { minHeight: minLineHeight }]}>
+                <Text style={styles.bold}>Hostel fees: KShs</Text>
+              </View>
+            </View>
+            <View style={[styles.cardRowLast, { paddingTop: cardRowPaddingY, paddingBottom: cardRowPaddingY }]}>
+              <View style={[styles.cellLeft, { minHeight: minLineHeight }]}>
+                <Text style={styles.bold}>Accounts Officer:</Text>
+              </View>
+              <View style={[styles.cellRight, { minHeight: minLineHeight }]}>
+                <Text style={styles.bold}>Signature:</Text>
+              </View>
+              <View style={[styles.cellRight, { minHeight: minLineHeight }]}>
+                <Text style={styles.bold}>Date:</Text>
+              </View>
+            </View>
           </View>
-          <View style={[styles.cardRow, { paddingTop: cardRowPaddingY, paddingBottom: cardRowPaddingY }]}>
-            <View style={[styles.cellHalf, { minHeight: minLineHeight }]}>
-              <Text style={styles.bold}>Previous balance: KShs</Text>
-            </View>
-            <View style={[styles.cellHalf, { minHeight: minLineHeight }]}>
-              <Text style={styles.bold}>Amount paid: KShs</Text>
-            </View>
-          </View>
-          <View style={[styles.cardRow, { paddingTop: cardRowPaddingY, paddingBottom: cardRowPaddingY }]}>
-            <View style={[styles.cellHalf, { minHeight: minLineHeight }]}>
-              <Text style={styles.bold}>Balance: KShs</Text>
-            </View>
-            <View style={[styles.cellHalf, { minHeight: minLineHeight }]}>
-              <Text style={styles.bold}>Hostel fees: KShs</Text>
-            </View>
-          </View>
-          <View style={[styles.cardRowLast, { paddingTop: cardRowPaddingY, paddingBottom: cardRowPaddingY }]}>
-            <View style={[styles.cellLeft, { minHeight: minLineHeight }]}>
-              <Text style={styles.bold}>Accounts Officer:</Text>
-            </View>
-            <View style={[styles.cellRight, { minHeight: minLineHeight }]}>
-              <Text style={styles.bold}>Signature:</Text>
-            </View>
-            <View style={[styles.cellRight, { minHeight: minLineHeight }]}>
-              <Text style={styles.bold}>Date:</Text>
-            </View>
-          </View>
+
+          {/* 2-6. OFFICIAL APPROVAL CARDS */}
+          <ApprovalCardPdf
+            num={2}
+            title="HOD APPROVAL"
+            approverLabel="Approved/not approved by: HOD:"
+            cardRowPaddingY={cardRowPaddingY}
+            minLineHeight={minLineHeight}
+          />
+          <ApprovalCardPdf
+            num={3}
+            title="HOSTEL ALLOCATION"
+            approverLabel="Administrator:"
+            cardRowPaddingY={cardRowPaddingY}
+            minLineHeight={minLineHeight}
+          />
+          <ApprovalCardPdf
+            num={4}
+            title="REGISTRAR APPROVAL"
+            approverLabel="REGISTRAR:"
+            cardRowPaddingY={cardRowPaddingY}
+            minLineHeight={minLineHeight}
+          />
+          <ApprovalCardPdf
+            num={5}
+            title="PRINCIPAL APPROVAL"
+            approverLabel="PRINCIPAL:"
+            cardRowPaddingY={cardRowPaddingY}
+            minLineHeight={minLineHeight}
+          />
+          <ApprovalCardPdf
+            num={6}
+            title="MANAGING DIRECTOR APPROVAL"
+            approverLabel="MANAGING DIRECTOR:"
+            cardRowPaddingY={cardRowPaddingY}
+            minLineHeight={minLineHeight}
+          />
         </View>
 
-        {/* 2-6. OFFICIAL APPROVAL CARDS */}
-        <ApprovalCardPdf
-          num={2}
-          title="HOD APPROVAL"
-          approverLabel="Approved/not approved by: HOD:"
-          cardMarginBottom={cardMarginBottom}
-          cardRowPaddingY={cardRowPaddingY}
-          minLineHeight={minLineHeight}
-        />
-        <ApprovalCardPdf
-          num={3}
-          title="HOSTEL ALLOCATION"
-          approverLabel="Administrator:"
-          cardMarginBottom={cardMarginBottom}
-          cardRowPaddingY={cardRowPaddingY}
-          minLineHeight={minLineHeight}
-        />
-        <ApprovalCardPdf
-          num={4}
-          title="REGISTRAR APPROVAL"
-          approverLabel="REGISTRAR:"
-          cardMarginBottom={cardMarginBottom}
-          cardRowPaddingY={cardRowPaddingY}
-          minLineHeight={minLineHeight}
-        />
-        <ApprovalCardPdf
-          num={5}
-          title="PRINCIPAL APPROVAL"
-          approverLabel="PRINCIPAL:"
-          cardMarginBottom={cardMarginBottom}
-          cardRowPaddingY={cardRowPaddingY}
-          minLineHeight={minLineHeight}
-        />
-        <ApprovalCardPdf
-          num={6}
-          title="MANAGING DIRECTOR APPROVAL"
-          approverLabel="MANAGING DIRECTOR:"
-          cardMarginBottom={cardMarginBottom}
-          cardRowPaddingY={cardRowPaddingY}
-          minLineHeight={minLineHeight}
-        />
-
-        {/* FOOTER */}
-        <Text style={styles.footerText}>
-          Form Ref: ICMHS/REG/2026/0482  |  This form should be filled in one copy and filed at the Registrar of Students.
-        </Text>
+        {/* FOOTER SECTION */}
+        <View style={styles.footerContainer}>
+          <Text style={styles.footerText}>
+            Form Ref: ICMHS/REG/2026/0482  |  This form should be filled in one copy and filed at the Registrar of Students.
+          </Text>
+        </View>
       </Page>
     </Document>
   );

@@ -226,10 +226,24 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
 
       <form action={approveUnitOfferingsAction} className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-surface px-3 py-2">
-          <p className="text-xs text-text-muted">Approve only the units this cohort will actually study in this Academic Period.</p>
-          <Button type="submit" size="sm" disabled={selectedIds.length === 0} leadingIcon={<CheckCircle2 className="size-4" />}>
-            Approve selected ({selectedIds.length})
-          </Button>
+          <p className="text-xs text-text-muted">
+            Approve units this cohort will study, or withdraw units that should not be offered this session.
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              type="submit"
+              formAction={withdrawUnitOfferingAction}
+              size="sm"
+              variant="outline"
+              disabled={selectedIds.length === 0}
+              className="text-rose-700 hover:bg-rose-50 border-rose-300"
+            >
+              Withdraw selected ({selectedIds.length})
+            </Button>
+            <Button type="submit" size="sm" disabled={selectedIds.length === 0} leadingIcon={<CheckCircle2 className="size-4" />}>
+              Approve selected ({selectedIds.length})
+            </Button>
+          </div>
         </div>
       <section className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
         {filtered.length === 0 ? (
@@ -293,6 +307,16 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
                             <input form={`withdraw-${offering.id}`} name="reason" required placeholder="Withdrawal reason" className="min-w-0 rounded border border-border px-2 py-1 text-[10px]" />
                             <Button form={`withdraw-${offering.id}`} type="submit" name="offeringId" value={offering.id} size="sm" variant="ghost">Withdraw</Button>
                           </div>
+                        ) : offering.approvalStatus !== 'withdrawn' ? (
+                          <div className="mt-1.5">
+                            <button
+                              form={`withdraw-${offering.id}`}
+                              type="submit"
+                              className="text-[11px] font-medium text-rose-600 hover:text-rose-800 hover:underline"
+                            >
+                              Drop from cohort
+                            </button>
+                          </div>
                         ) : null}
                       </td>
                     </tr>
@@ -304,8 +328,11 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
         )}
       </section>
       </form>
-      {offerings.filter((offering) => offering.approvalStatus === 'approved').map((offering) => (
-        <form key={offering.id} id={`withdraw-${offering.id}`} action={withdrawUnitOfferingAction} />
+      {offerings.map((offering) => (
+        <form key={offering.id} id={`withdraw-${offering.id}`} action={withdrawUnitOfferingAction}>
+          <input type="hidden" name="offeringId" value={offering.id} />
+          <input type="hidden" name="reason" value="Dropped from cohort teaching plan for this academic period" />
+        </form>
       ))}
     </div>
   );

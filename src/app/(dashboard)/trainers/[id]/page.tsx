@@ -146,7 +146,7 @@ export default async function TrainerDetailsPage({
         backLabel="Staff & Trainers"
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <Button asChild variant="default" size="sm" className="bg-[#033B36] text-white hover:bg-[#022A26] shadow-xs">
+            <Button asChild variant="primary" size="sm" className="bg-[#033B36] text-white hover:bg-[#022A26] shadow-xs">
               <Link href={`/trainers/${trainer.id}/portal-view`}>
                 <Eye className="size-3.5" aria-hidden="true" />
                 <span>View Staff Portal</span>
@@ -220,7 +220,7 @@ export default async function TrainerDetailsPage({
             </span>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <Button asChild variant="default" size="sm" className="bg-[#033B36] text-white hover:bg-[#022A26] shadow-xs">
+            <Button asChild variant="primary" size="sm" className="bg-[#033B36] text-white hover:bg-[#022A26] shadow-xs">
               <Link href={`/trainers/${trainer.id}/portal-view`}>
                 <Eye className="size-3.5" aria-hidden="true" />
                 <span>View Staff Portal</span>

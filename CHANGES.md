@@ -17,6 +17,25 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 
 ---
 
+### 2026-09-06: Fix Next.js & TypeScript Build Errors — Docx TableVerticalAlign & WeekdayCode Test
+- **Files Modified**:
+  - `src/features/student-portal/registration-docx.ts`
+  - `src/tests/timetable-generator/planner.test.ts`
+- **What Changed**:
+  - **Fixed `TableVerticalAlign` Type Error in Docx Generator**: Replaced generic `VerticalAlign` (`'both' | 'center' | 'top' | 'bottom'`) with the docx table-specific `VerticalAlignTable` enum (`'center' | 'top' | 'bottom'`), eliminating the TS2322 assignment error in `buildStudentUnitRegistrationDocx`.
+  - **Fixed `WeekdayCode` Casing Error in Planner Test**: Corrected capitalized `'Wednesday'` to canonical lowercase `'wednesday'` on `PlanningWorkingDay.dayOfWeek` in `src/tests/timetable-generator/planner.test.ts`.
+
+### 2026-09-06: Fix Next.js Build Type Errors — Button Variant, Badge Variant & StudentPortalUnit Property
+- **Files Modified**:
+  - `src/app/(dashboard)/trainers/[id]/page.tsx`
+  - `src/app/(dashboard)/students/registry/[studentId]/portal-view/page.tsx`
+  - `src/app/(dashboard)/trainers/[id]/portal-view/page.tsx`
+  - `src/app/student/unit-registration/page.tsx`
+- **What Changed**:
+  - **Fixed `ButtonVariant` Error**: Replaced invalid `variant="default"` on `<Button>` with valid `variant="primary"` on the trainer profile page (`src/app/(dashboard)/trainers/[id]/page.tsx`).
+  - **Fixed `unitTitle` Property Error**: Replaced non-existent `unit.unitTitle` lookup with canonical `unit.unitName` on `StudentPortalUnit` in student portal view.
+  - **Fixed Badge Variant Error**: Replaced invalid `variant="outline"` prop usages on `<Badge>` components with valid `variant="neutral"` across student and trainer portal view pages and unit registration form previews.
+
 ### 2026-09-06: Admin Sidebar Navigation Vertical Spacing Update
 - **Files Modified**:
   - `src/components/layout/admin-sidebar.tsx`

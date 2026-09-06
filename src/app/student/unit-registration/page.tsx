@@ -188,7 +188,7 @@ export default async function StudentUnitRegistrationPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
                     <p className="font-bold text-text-primary">Official Form Preview</p>
-                    <Badge variant="outline" className="text-[10px] font-mono bg-surface">A4 Single Page</Badge>
+                    <Badge variant="neutral" className="text-[10px] font-mono bg-surface">A4 Single Page</Badge>
                   </div>
                   <p className="mt-0.5 text-[11px] text-text-secondary leading-relaxed">
                     Pre-filled official document for <span className="font-bold">{context.student.fullName}</span>. Print or download as PDF for clearance signatures.

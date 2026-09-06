@@ -13,7 +13,7 @@ import {
   TableLayoutType,
   TableRow,
   TextRun,
-  VerticalAlign,
+  VerticalAlignTable,
   WidthType,
 } from 'docx';
 
@@ -77,13 +77,13 @@ function cell(
     colSpan?: number;
     borders?: typeof tableBorders;
     margins?: { top?: number; bottom?: number; left?: number; right?: number };
-    vAlign?: (typeof VerticalAlign)[keyof typeof VerticalAlign];
+    vAlign?: (typeof VerticalAlignTable)[keyof typeof VerticalAlignTable];
   } = {},
 ) {
   return new TableCell({
     width: options.width ? { size: options.width, type: WidthType.DXA } : undefined,
     columnSpan: options.colSpan ?? 1,
-    verticalAlign: options.vAlign ?? VerticalAlign.CENTER,
+    verticalAlign: options.vAlign ?? VerticalAlignTable.CENTER,
     shading: options.bgColor ? { fill: options.bgColor } : undefined,
     borders: options.borders ?? tableBorders,
     margins: {

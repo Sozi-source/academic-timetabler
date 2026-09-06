@@ -1248,7 +1248,7 @@ describe('generateTimetablePlan', () => {
     input.workingDays.push({
       id: 'day-3',
       academicPeriodId: 'period-1',
-      dayOfWeek: 'Wednesday',
+      dayOfWeek: 'wednesday',
       sequenceNumber: 3,
       isEnabled: true,
     });

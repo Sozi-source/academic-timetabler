@@ -181,7 +181,7 @@ export default async function AdminStudentPortalViewPage({
                         <FileCheck2 className="size-3.5 text-primary" />
                         Form Overview
                       </p>
-                      <Badge variant="outline" className="text-[10px] font-mono">
+                      <Badge variant="neutral" className="text-[10px] font-mono">
                         {units.length} Units
                       </Badge>
                     </div>
@@ -261,7 +261,7 @@ export default async function AdminStudentPortalViewPage({
                         </p>
                       </div>
                     </div>
-                    <Badge variant="outline" className="text-[10px] font-mono bg-surface shrink-0">
+                    <Badge variant="neutral" className="text-[10px] font-mono bg-surface shrink-0">
                       A4 Single Page
                     </Badge>
                   </div>
@@ -288,7 +288,7 @@ export default async function AdminStudentPortalViewPage({
                   <div key={unit.unitCode} className="p-3 rounded-lg border border-border bg-surface-subtle/50 flex flex-col justify-between space-y-2">
                     <div>
                       <span className="font-mono text-xs font-bold text-primary">{unit.unitCode}</span>
-                      <p className="text-xs font-semibold text-text-primary mt-0.5">{unit.unitTitle ?? unit.unitName}</p>
+                      <p className="text-xs font-semibold text-text-primary mt-0.5">{unit.unitName}</p>
                     </div>
                     <div className="flex items-center justify-between text-[11px] border-t border-border/60 pt-2">
                       <span className="text-text-muted">Status</span>

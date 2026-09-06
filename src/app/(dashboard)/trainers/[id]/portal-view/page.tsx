@@ -158,7 +158,7 @@ export default async function AdminTrainerPortalViewPage({
                 Consolidated teaching allocations and active markbook entries.
               </p>
             </div>
-            <Badge variant="outline" className="text-xs font-mono">
+            <Badge variant="neutral" className="text-xs font-mono">
               {totalWeeklyHours} Total Weekly Hours
             </Badge>
           </div>

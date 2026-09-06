@@ -17,7 +17,131 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 
 ---
 
-## Recent Architectural Updates
+### 2026-09-06: Admin Sidebar Navigation Vertical Spacing Update
+- **Files Modified**:
+  - `src/components/layout/admin-sidebar.tsx`
+- **What Changed**:
+  - **Increased Vertical Spacing**: Increased item list spacing from `space-y-0.5` to `space-y-2` and link padding from `py-2` to `py-2.5`, giving navigation items room to breathe and improving target area ergonomics.
+
+### 2026-09-06: Enterprise Admin Route — Staff / Trainer Portal Workspace Preview & Access Buttons
+- **Files Added/Modified**:
+  - `src/app/(dashboard)/trainers/[id]/portal-view/page.tsx` (NEW)
+  - `src/app/(dashboard)/timetable/trainers/[id]/portal-view/page.tsx` (NEW)
+  - `src/app/(dashboard)/trainers/[id]/page.tsx`
+  - `src/features/trainers/trainer-table.tsx`
+- **What Changed**:
+  - **New Admin Preview Route (`/trainers/[id]/portal-view`)**: Implemented an enterprise-grade admin inspection page allowing HODs and administrators to inspect any trainer's personal staff portal workspace directly.
+  - **Staff Directory Row Action**: Added an eye icon button (`View Staff Portal`) directly into the actions column of every trainer row in `TrainerTable` (`/trainers` and `/timetable/trainers`).
+  - **Profile Page Placements**: Prominently added **"View Staff Portal"** action buttons across multiple touchpoints on trainer details pages (`/trainers/[id]`):
+    1. Top PageHeader actions bar
+    2. Active Workspace Authorization banner
+    3. Assigned Teaching Allocations section header
+
+### 2026-09-06: Main Dashboard Student Portal Telemetry Update
+- **Files Modified**:
+  - `src/features/dashboard/dashboard-view.tsx`
+- **What Changed**:
+  - **Purged Legacy "PINs Active" Terminology**: Replaced outdated legacy `185 PINs active` subtext on the main HOD dashboard **Students Portal** telemetry card with `{studentsPortalActive} Accounts active`.
+  - **Updated Telemetry Ratios**: Aligned metric main display to show `{studentsPortalActive} / {studentsEligible}` (e.g., `65 / 185` active accounts vs total student population), accurately reflecting self-service account activations.
+
+### 2026-09-06: Marks Entry Editor UI — Cream Background & Square Input Fields
+- **Files Modified**:
+  - `src/features/staff-assessment/online-marks-editor.tsx`
+- **What Changed**:
+  - **Cream Background Fill**: Replaced plain white background on mark input fields and grid containers with an institutional warm cream background (`bg-[#fffdf5]` for inputs, `bg-[#fbf9f1]` / `bg-[#f2ece0]` for containers and table headers), eliminating glare and giving the online markbook an official grade-register feel.
+  - **No Rounded Input Fields (`rounded-none`)**: Removed pill/oval border radii (`rounded-lg` / `rounded-full`) across all numeric mark input boxes, search filters, mode toggles, and page control buttons, switching to crisp rectangular `rounded-none` inputs.
+
+### 2026-09-06: Industry-Level Hardening & Consolidation of Staff Unit Allocations ("My Units")
+- **Files Modified**:
+  - `src/features/staff-assessment/unit-grouping.ts`
+  - `src/tests/staff-unit-grouping.test.ts`
+  - `src/app/(staff)/staff/units/page.tsx`
+  - `src/app/(staff)/staff/units/[allocationId]/page.tsx`
+- **What Changed**:
+  - **Canonical Unit Key Normalization**: Updated `groupStaffUnitAllocations` in `unit-grouping.ts` to group trainer allocations by canonical unit title and normalized unit code (`canonicalUnitKey`), replacing raw `unit_id` UUID keying. This permanently prevents unit card splitting when identical or shared units (e.g. *Nutrition Epidemiology* across `DHN MAY 24` and `DNDT JAN 26`) have different database `unit_id` UUIDs across programmes.
+  - **Multi-Cohort Aggregation**: Added `primaryAllocationId`, `allAllocationIds`, `cohortIds`, `cohortNames`, and `combinedCohortLabel` (e.g., `"DHN MAY 24 + DNDT JAN 26"`) to `GroupedStaffUnitAllocation`.
+  - **Staff Units UI Hardening**: Updated `/staff/units` to display single consolidated cards with cohort pill badges (`DHN MAY 24`, `DNDT JAN 26`) and a `Combined (X Cohorts)` indicator tag. Updated `/staff/units/[allocationId]` to render the combined cohort description in the page header.
+  - **Automated Test Hardening**: Expanded `staff-unit-grouping.test.ts` test suite covering multi-UUID canonical title matching, formatting variations, distinct unit isolation, and academic period boundaries.
+
+### 2026-09-06: Desktop Optimization for View as Student & Unit Registration Pages
+- **Files Modified**:
+  - `src/components/student/student-portal-shell.tsx`
+  - `src/app/student/unit-registration/page.tsx`
+  - `src/app/(dashboard)/students/registry/[studentId]/portal-view/page.tsx`
+- **What Changed**:
+  - **Eliminated Double Sidebar & Left Offset in Admin Preview**: Fixed `StudentPortalShell` when rendering in Admin Preview mode (`isAdminPreview = true`) to bypass the duplicate fixed left student sidebar and remove the extra `lg:pl-[14.75rem]` (236px) left padding that caused a large empty gap inside the admin dashboard layout.
+  - **Ultra-Wide Screen Width Expansion**: Updated `StudentPortalShell` main content container to `w-full max-w-[1600px] lg:px-8`, eliminating awkward centered margins between the left navigation sidebar and main content cards on high-resolution displays (1080p, 1440p, 4K).
+  - **Desktop 2-Column Split Layout**: Replaced the stacked single-column layout with a responsive 2-column grid (`xl:grid xl:grid-cols-12 xl:gap-6`) on large viewports (`xl:` 1280px and `2xl:` 1536px).
+    - **Left Column (`xl:col-span-5` / `2xl:col-span-4`)**: Sticky sidebar featuring student overview details, registration and reporting status badges, quick export PDF & print buttons, a physical clearance checklist guide, and an assigned units quick summary list.
+    - **Right Column (`xl:col-span-7` / `2xl:col-span-8`)**: Centered A4 form canvas displaying the single-page `UnitRegistrationFormPreview` with document preview header and shadow canvas borders.
+  - **Mobile/Tablet Compatibility**: Retained clean single-column stacked rendering on viewports smaller than `xl` (< 1280px) and preserved `print:hidden`/`print:block` directives for strict 1-page A4 printing.
+
+### 2026-09-06: Student Registry Search, Column Sorting & Pagination Implementation
+- **Files Added/Modified**:
+  - `src/features/students/student-registry-table.tsx` (NEW)
+  - `src/app/(dashboard)/students/registry/page.tsx`
+- **What Changed**:
+  - **Real-Time Registry Search**: Added an interactive search toolbar filtering by Student Name, Admission Number, Programme Code/Name, Cohort Name, and Stage Code with instant input feedback and a clear search action.
+  - **Status Pill Count Badges**: Added dynamic count badges on each status filter pill (`All (310)`, `Active (185)`, `Deferred`, `Dropped out`, `Completed`, `Graduated`).
+  - **Column Sorting**: Added interactive column sorting toggles for Student Name, Programme, Cohort, and Status / Stage columns.
+  - **Full Pagination Controls**: Integrated `@/components/ui/pagination` providing page size selection (`15`, `25`, `50`, `100` records per page, default 25), "Showing X to Y of Z records" counters, and page navigation controls (`First`, `Previous`, `Next`, `Last`). Removed hardcoded `slice(0, 100)` limit.
+
+
+
+
+
+
+### 2026-09-05: Student Portal Results UI Hidden
+- **Files Modified**:
+  - `src/components/student/student-portal-shell.tsx`
+  - `src/app/student/page.tsx`
+  - `src/app/student/results/page.tsx`
+- **What Changed**:
+  - Removed **Results** navigation links from `StudentPortalShell` sidebar and mobile bottom navigation bar.
+  - Removed the **Results** metric card from the Student Portal Dashboard.
+  - Redirected direct `/student/results` route requests back to the Student Portal main dashboard (`/student`).
+
+### 2026-09-05: Complete Purge of Obsolete Admin PIN Issuance Buttons & Security Register Shift
+- **Files Modified**:
+  - `src/features/student-access/access-manager.tsx`
+  - `src/app/(dashboard)/students/access/page.tsx`
+- **What Changed**:
+  - Completely purged obsolete admin PIN issuance elements: `Issue Missing PINs` button, `Rotate All PINs (Excel)` button, and `Rotate PIN` row actions.
+  - Converted `/students/access` into a clean **Student Account Security & Activation Register** focused strictly on tracking self-service account activations (`Activated` vs `Not Activated`), account locks, and access controls (`Disable Access` / `Enable Access`).
+
+### 2026-09-05: Mobile-Native Student Portal Shell & Conditional Document Action Buttons
+- **Files Modified**:
+  - `src/components/student/student-portal-shell.tsx`
+  - `src/components/ui/print-action-button.tsx`
+  - `src/app/(dashboard)/students/registry/[studentId]/portal-view/page.tsx`
+  - `src/app/student/unit-registration/page.tsx`
+- **What Changed**:
+  - Conditionally rendered the **"Print / PDF"** and **"Download Form (.docx)"** action buttons so they only display when registered units exist (`units.length > 0`) for the active period. When 0 units exist, the buttons are hidden to prevent user confusion.
+  - Re-architected action buttons into a balanced 50/50 equal-width grid (`grid grid-cols-2 gap-2`), eliminating mismatched vertical brick-style green pills on mobile.
+  - Replaced horizontal scrollbars and truncated pill tabs with a clean 3-segment control bar (`grid grid-cols-3 gap-1 bg-surface-subtle p-1 rounded-lg border border-border`), guaranteeing zero text truncation or scroll tracks.
+  - Upgraded `StudentPortalShell` with an integrated 4-item **Mobile Bottom Navigation Bar** (`Dashboard`, `Registration`, `Timetable`, `Results`), complete with active indicator pills and `isAdminPreview` tab-routing support.
+
+### 2026-09-05: Unit Registration Form API Authentication & Friendly HTML Error Pages
+- **Files Modified**:
+  - `src/app/api/student/unit-registration/form/route.ts`
+  - `src/app/api/students/unit-registration/[studentId]/form/route.ts`
+  - `src/app/(dashboard)/students/registry/[studentId]/portal-view/page.tsx`
+- **What Changed**:
+  - Added institutional HTML error page rendering (`renderHtmlErrorPage`) when direct browser navigations encounter `404` (no registered units) or `401` (auth required), eliminating unstyled raw JSON outputs in browser tabs.
+  - Updated `/api/student/unit-registration/form` to support dual authentication: accepts `?studentId=...` for HOD/Admin sessions via `requireHodAccess()` while preserving student portal session authentication (`getStudentPortalSession()`).
+  - Updated the Admin "View as Student" portal preview download link to point directly to `/api/students/unit-registration/${context.student.id}/form`.
+
+### 2026-09-05: Student Portal Access & Activation Tracking Workspace
+- **Files Modified**:
+  - `src/app/(dashboard)/students/access/page.tsx`
+  - `src/config/navigation.ts`
+  - `src/features/dashboard/dashboard-view.tsx`
+- **What Changed**:
+  - Updated the Student Access Control Center at `/students/access` to focus on real-time tracking of self-service account activations (`Accounts Activated`, `Active Access`, `Locked Accounts`, `Never Activated`).
+  - Added `Users` icon import to `src/config/navigation.ts` resolving missing symbol `ReferenceError`.
+  - Added dedicated **"Student Registry"** navigation item (`/students/registry`) under `Platform` in sidebar navigation.
+  - Linked the **"Students Portal"** metric card on the Admin Dashboard directly to `/students/registry` with interactive hover states and arrow shortcuts.
+  - Added a dedicated **"Student Registry"** module tile to the Department Core Modules grid (expanding operational workspaces to 8 core modules).
 
 ### 2026-09-05: Student Self-Service Account Activation & Admin PIN Purge
 - **Files Added/Modified**:

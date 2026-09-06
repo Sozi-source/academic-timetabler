@@ -15,13 +15,9 @@ import {
 import { groupStaffUnitAllocations } from '@/features/staff-assessment/unit-grouping';
 
 export default async function StaffUnitsPage() {
-  const profile =
-    await requireTrainerAccess();
+  const profile = await requireTrainerAccess();
 
-  const workspace =
-    await getStaffWorkspace(
-      profile.id,
-    );
+  const workspace = await getStaffWorkspace(profile.id);
   const groupedUnits = groupStaffUnitAllocations(workspace.allocations);
 
   return (
@@ -47,8 +43,8 @@ export default async function StaffUnitsPage() {
         <section className="space-y-3">
           {groupedUnits.map((allocation) => (
             <Link
-              key={allocation.allocationId}
-              href={`/staff/units/${allocation.allocationId}`}
+              key={allocation.primaryAllocationId || allocation.allocationId}
+              href={`/staff/units/${allocation.primaryAllocationId || allocation.allocationId}`}
               className="block rounded-xl border border-border border-l-4 border-l-primary bg-surface px-5 py-4 shadow-xs transition hover:border-l-institutional-yellow hover:border-border-strong hover:bg-primary-subtle hover:shadow-sm"
             >
               <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
@@ -57,9 +53,21 @@ export default async function StaffUnitsPage() {
                     {allocation.unitName}
                   </p>
 
-                  <p className="mt-1 text-[11px] font-bold text-slate-500">
-                    {allocation.cohortNames.join(' + ')}
-                  </p>
+                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                    {allocation.cohortNames.map((cohort) => (
+                      <span
+                        key={cohort}
+                        className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10.5px] font-bold text-slate-700 border border-slate-200"
+                      >
+                        {cohort}
+                      </span>
+                    ))}
+                    {allocation.cohortNames.length > 1 && (
+                      <span className="text-[10px] font-bold text-primary bg-primary-subtle px-1.5 py-0.5 rounded border border-primary/20">
+                        Combined ({allocation.cohortNames.length} Cohorts)
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <p className="text-xs font-black capitalize text-slate-700">
@@ -67,7 +75,6 @@ export default async function StaffUnitsPage() {
                     {allocation.allocationStatus}
                   </span>
                 </p>
-
               </div>
             </Link>
           ))}

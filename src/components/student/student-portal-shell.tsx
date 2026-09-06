@@ -35,13 +35,17 @@ const NAVIGATION_ITEMS: readonly NavigationItem[] = [
   { label: 'My Units', href: '/student/units', icon: BookOpenCheck },
   { label: 'Timetable', href: '/student/timetable', icon: CalendarDays },
   { label: 'Registration', href: '/student/unit-registration', icon: ClipboardCheck },
-  { label: 'Results', href: '/student/results', icon: GraduationCap },
   { label: 'Attendance', href: '/student/attendance', icon: CalendarCheck2 },
   { label: 'Documents', href: '/student/documents', icon: FileText },
   { label: 'Profile', href: '/student/profile', icon: UserRound },
 ];
 
-const MOBILE_NAV_ITEMS = [NAVIGATION_ITEMS[0], NAVIGATION_ITEMS[2], NAVIGATION_ITEMS[4]];
+const MOBILE_NAV_ITEMS = [
+  { ...NAVIGATION_ITEMS[0], tabKey: 'dashboard' },
+  { ...NAVIGATION_ITEMS[3], tabKey: 'registration' },
+  { ...NAVIGATION_ITEMS[2], tabKey: 'timetable' },
+  { ...NAVIGATION_ITEMS[6], tabKey: 'profile' },
+];
 
 function getInitials(fullName: string) {
   return fullName
@@ -60,17 +64,35 @@ function NavigationProgress() {
 export function StudentPortalShell({
   student,
   children,
+  isAdminPreview = false,
+  studentId,
+  activeTab = 'registration',
 }: {
   student: StudentPortalIdentity;
   children: ReactNode;
+  isAdminPreview?: boolean;
+  studentId?: string;
+  activeTab?: string;
 }) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const studentInitials = getInitials(student.fullName) || 'ST';
 
-  const isRouteActive = (href: string) =>
-    pathname === href || (href !== '/student' && pathname.startsWith(`${href}/`));
+  const getHref = (item: { href: string; tabKey?: string }) => {
+    if (isAdminPreview && studentId) {
+      const tab = item.tabKey || item.href.split('/').pop() || 'registration';
+      return `/students/registry/${studentId}/portal-view?tab=${tab}`;
+    }
+    return item.href;
+  };
+
+  const isRouteActive = (href: string, tabKey?: string) => {
+    if (isAdminPreview) {
+      return activeTab === (tabKey || href.split('/').pop());
+    }
+    return pathname === href || (href !== '/student' && pathname.startsWith(`${href}/`));
+  };
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
@@ -104,11 +126,12 @@ export function StudentPortalShell({
         {NAVIGATION_ITEMS.map((item) => {
           const active = isRouteActive(item.href);
           const Icon = item.icon;
+          const href = getHref(item);
 
           return (
             <Link
               key={item.href}
-              href={item.href}
+              href={href}
               onClick={() => setMobileOpen(false)}
               className={cn(
                 'relative flex min-h-11 items-center gap-3 rounded-xl border-l-[3px] px-3.5 text-xs font-semibold transition-all duration-150 active:scale-[0.98]',
@@ -153,6 +176,14 @@ export function StudentPortalShell({
       </div>
     </div>
   );
+
+  if (isAdminPreview) {
+    return (
+      <div className="w-full space-y-4">
+        {children}
+      </div>
+    );
+  }
 
   return (
     <div className="academic-portal min-h-screen bg-background">
@@ -239,7 +270,7 @@ export function StudentPortalShell({
         </header>
 
         {/* Main Content Body */}
-        <main className="portal-page-content mx-auto w-full max-w-7xl px-4 py-3.5 pb-20 sm:px-6 sm:py-7 lg:px-[1.625rem] lg:pb-8">
+        <main className="portal-page-content w-full max-w-[1600px] px-4 py-3.5 pb-20 sm:px-6 sm:py-7 lg:px-8 lg:pb-8">
           {children}
         </main>
 
@@ -247,12 +278,13 @@ export function StudentPortalShell({
         <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_rgba(11,79,74,.08)] backdrop-blur-xl lg:hidden">
           <div className="mx-auto grid h-[3.625rem] max-w-md grid-cols-4">
             {MOBILE_NAV_ITEMS.map((item) => {
-              const active = isRouteActive(item.href);
+              const active = isRouteActive(item.href, item.tabKey);
               const Icon = item.icon;
+              const href = getHref(item);
               return (
                 <Link
                   key={item.href}
-                  href={item.href}
+                  href={href}
                   className={cn(
                     'relative flex flex-col items-center justify-center gap-1 text-[10px] font-bold transition active:scale-95',
                     active ? 'text-primary' : 'text-text-muted hover:text-text-primary'

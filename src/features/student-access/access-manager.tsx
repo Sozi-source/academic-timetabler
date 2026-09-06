@@ -1,17 +1,11 @@
 'use client';
 
 import {
-  Check,
-  Clipboard,
-  Download,
-  KeyRound,
   LoaderCircle,
   LockKeyhole,
-  RefreshCw,
   Search,
   ShieldCheck,
   ShieldOff,
-  UserCheck,
   X,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -194,99 +188,14 @@ export function StudentPortalAccessManager({
   const filters: Array<{ value: FilterValue; label: string }> = [
     { value: 'all', label: 'All Students' },
     { value: 'active', label: 'Active Access' },
-    { value: 'not_issued', label: 'Not Issued' },
+    { value: 'not_issued', label: 'Not Activated' },
     { value: 'disabled', label: 'Disabled' },
     { value: 'locked', label: 'Locked' },
   ];
 
   return (
     <div className="space-y-4 pb-12">
-      {/* Active Generated / Rotated PIN Banner */}
-      {activeStudentPin ? (
-        <section className="relative overflow-hidden rounded-xl border border-slate-300 bg-slate-900 p-4 text-white shadow-md">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="flex size-7 items-center justify-center rounded bg-slate-800 text-slate-200">
-                  <KeyRound className="size-3.5" />
-                </span>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  Student Portal Access PIN
-                </span>
-              </div>
-
-              <div className="mt-2">
-                <h3 className="text-sm font-bold text-white">
-                  {activeStudentPin.fullName}
-                </h3>
-                <p className="text-xs text-slate-400">
-                  {activeStudentPin.admissionNumber} · {activeStudentPin.cohortName} ({activeStudentPin.programmeCode})
-                </p>
-              </div>
-
-              {/* Large PIN display */}
-              <div className="mt-3 flex items-center gap-3">
-                <span className="rounded-lg bg-slate-800 px-4 py-2 font-mono text-2xl font-black tracking-[0.3em] text-white border border-slate-700 shadow-inner">
-                  {activeStudentPin.pin}
-                </span>
-
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleCopyPin(activeStudentPin.pin)}
-                  className="h-9 border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700 hover:text-white"
-                  leadingIcon={
-                    copied ? (
-                      <Check className="size-3.5 text-emerald-400" />
-                    ) : (
-                      <Clipboard className="size-3.5" />
-                    )
-                  }
-                >
-                  {copied ? 'Copied PIN' : 'Copy PIN'}
-                </Button>
-
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  disabled={busy !== null}
-                  onClick={() => {
-                    const row = rows.find((r) => r.studentId === activeStudentPin.studentId);
-                    if (row) handleRotatePin(row);
-                  }}
-                  className="h-9 text-slate-300 hover:bg-slate-800 hover:text-white"
-                  leadingIcon={
-                    busy === `pin:${activeStudentPin.studentId}` ? (
-                      <LoaderCircle className="size-3.5 animate-spin" />
-                    ) : (
-                      <RefreshCw className="size-3.5" />
-                    )
-                  }
-                >
-                  Rotate Again
-                </Button>
-              </div>
-
-              <p className="mt-2 text-[11px] text-slate-400">
-                Share this 6-digit PIN with the student for their portal sign-in.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setActiveStudentPin(null)}
-              className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-800 hover:text-white"
-              aria-label="Dismiss PIN Banner"
-            >
-              <X className="size-4" />
-            </button>
-          </div>
-        </section>
-      ) : null}
-
-      {/* Action Bar & Search */}
+      {/* Search & Filter Bar */}
       <section className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full max-w-md">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-slate-400" />
@@ -308,71 +217,24 @@ export function StudentPortalAccessManager({
           ) : null}
         </div>
 
-        {/* Bulk Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled={busy !== null}
-            onClick={() => handleBulkIssue(false)}
-            className="h-9 text-xs font-semibold text-slate-700"
-            leadingIcon={
-              busy === 'bulk-missing' ? (
-                <LoaderCircle className="size-3.5 animate-spin" />
-              ) : (
-                <Download className="size-3.5" />
-              )
-            }
-          >
-            Issue Missing PINs
-          </Button>
-
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled={busy !== null}
-            onClick={() => {
-              if (
-                window.confirm(
-                  'Are you sure you want to regenerate and rotate PINs for ALL students? This will overwrite existing PINs and download the updated spreadsheet.',
-                )
-              ) {
-                handleBulkIssue(true);
-              }
-            }}
-            className="h-9 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-            leadingIcon={
-              busy === 'bulk-all' ? (
-                <LoaderCircle className="size-3.5 animate-spin" />
-              ) : (
-                <RefreshCw className="size-3.5" />
-              )
-            }
-          >
-            Rotate All PINs (Excel)
-          </Button>
+        {/* Filter Pills */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {filters.map((item) => (
+            <button
+              key={item.value}
+              type="button"
+              onClick={() => setFilter(item.value)}
+              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                filter === item.value
+                  ? 'bg-slate-900 text-white shadow-2xs'
+                  : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
         </div>
       </section>
-
-      {/* Filter Tabs */}
-      <div className="flex flex-wrap items-center gap-1.5">
-        {filters.map((item) => (
-          <button
-            key={item.value}
-            type="button"
-            onClick={() => setFilter(item.value)}
-            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-              filter === item.value
-                ? 'bg-slate-900 text-white shadow-2xs'
-                : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-            }`}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
 
       {error ? (
         <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-xs font-medium text-red-700">
@@ -389,9 +251,9 @@ export function StudentPortalAccessManager({
                 <th className="px-4 py-2.5">Student</th>
                 <th className="px-3 py-2.5">Programme</th>
                 <th className="px-3 py-2.5">Cohort</th>
-                <th className="px-3 py-2.5 text-center">Status</th>
+                <th className="px-3 py-2.5 text-center">Activation Status</th>
                 <th className="px-3 py-2.5 text-center">Last Sign In</th>
-                <th className="px-4 py-2.5 text-right">PIN Actions</th>
+                <th className="px-4 py-2.5 text-right">Account Controls</th>
               </tr>
             </thead>
 
@@ -405,7 +267,6 @@ export function StudentPortalAccessManager({
               ) : (
                 visibleRows.map((row) => {
                   const status = studentPortalAccessStatus(row);
-                  const isBusyPin = busy === `pin:${row.studentId}`;
                   const isBusyState = busy === `state:${row.studentId}`;
 
                   return (
@@ -432,15 +293,15 @@ export function StudentPortalAccessManager({
                           variant="neutral"
                           className={
                             status === 'active'
-                              ? 'bg-slate-100 text-slate-800'
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                               : status === 'not_issued'
-                                ? 'bg-slate-50 text-slate-400'
+                                ? 'bg-slate-100 text-slate-500'
                                 : status === 'locked'
-                                  ? 'bg-amber-50 text-amber-800'
-                                  : 'bg-red-50 text-red-700'
+                                  ? 'bg-amber-50 text-amber-800 border-amber-200'
+                                  : 'bg-red-50 text-red-700 border-red-200'
                           }
                         >
-                          {studentPortalAccessStatusLabel(status)}
+                          {status === 'not_issued' ? 'Not Activated' : studentPortalAccessStatusLabel(status)}
                         </Badge>
                       </td>
 
@@ -452,45 +313,31 @@ export function StudentPortalAccessManager({
                       {/* Actions */}
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1.5">
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            disabled={busy !== null}
-                            onClick={() => handleRotatePin(row)}
-                            className="h-7 border-slate-200 px-2.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
-                            leadingIcon={
-                              isBusyPin ? (
-                                <LoaderCircle className="size-3 animate-spin" />
-                              ) : (
-                                <KeyRound className="size-3" />
-                              )
-                            }
-                          >
-                            {row.hasCredential ? 'Rotate PIN' : 'Generate PIN'}
-                          </Button>
-
                           {row.hasCredential ? (
                             <Button
                               type="button"
                               size="sm"
-                              variant="ghost"
+                              variant="outline"
                               disabled={busy !== null}
                               onClick={() => handleToggleState(row, !row.isActive)}
-                              className="h-7 px-2 text-[11px] font-semibold text-slate-500 hover:text-slate-900"
+                              className="h-7 px-2.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
                               leadingIcon={
                                 isBusyState ? (
                                   <LoaderCircle className="size-3 animate-spin" />
                                 ) : row.isActive ? (
-                                  <ShieldOff className="size-3" />
+                                  <ShieldOff className="size-3 text-red-600" />
                                 ) : (
-                                  <ShieldCheck className="size-3" />
+                                  <ShieldCheck className="size-3 text-emerald-600" />
                                 )
                               }
                             >
-                              {row.isActive ? 'Disable' : 'Enable'}
+                              {row.isActive ? 'Disable Access' : 'Enable Access'}
                             </Button>
-                          ) : null}
+                          ) : (
+                            <span className="text-[11px] font-medium text-slate-400 italic">
+                              Pending Activation
+                            </span>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -504,7 +351,7 @@ export function StudentPortalAccessManager({
 
       <p className="flex items-center gap-1.5 text-[11px] text-slate-500">
         <LockKeyhole className="size-3 text-slate-400" />
-        Admins can view and rotate student PINs at any time. PINs are securely hashed and validated upon student login.
+        Students activate their portal accounts directly at <span className="font-mono text-slate-700 font-bold">/student/activate</span>. Admins can track activation status and manage security access controls.
       </p>
     </div>
   );

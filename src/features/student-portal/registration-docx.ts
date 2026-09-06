@@ -20,66 +20,24 @@ import {
 import type { StudentPortalRegistrationContext } from './types';
 
 const FONT = 'Arial';
-const border = {
+const PRIMARY_COLOR = '033B36';
+
+const borderThin = {
   style: BorderStyle.SINGLE,
   size: 4,
-  color: '000000',
+  color: '64748B',
 } as const;
-const borders = { top: border, bottom: border, left: border, right: border } as const;
 
-/**
- * The form is calibrated to guarantee MAX 1 page even for 8 to 12 registered units.
- * Row heights, font sizes, and card padding dynamically scale based on exact unit load.
- */
-const MIN_SCALE_UNITS = 6;
-const MAX_SCALE_UNITS = 10;
+const tableBorders = {
+  top: borderThin,
+  bottom: borderThin,
+  left: borderThin,
+  right: borderThin,
+  insideHorizontal: borderThin,
+  insideVertical: borderThin,
+} as const;
 
-function lerp(spacious: number, compact: number, t: number): number {
-  return Math.round(spacious + (compact - spacious) * t);
-}
-
-interface FormMetrics {
-  fontSize: number;
-  headerFontSize: number;
-  particularsRowHeight: number;
-  particularsCellMargin: number;
-  unitsHeadingBefore: number;
-  unitsHeadingAfter: number;
-  unitRowHeight: number;
-  postUnitsTableSpacing: number;
-  signOffHeadingHeight: number;
-  signOffHeadingMargin: number;
-  signOffDateRowHeight: number;
-  signOffCommentRowHeight: number;
-  signOffCellMargin: number;
-  signOffSpacerAfter: number;
-}
-
-function computeFormMetrics(unitCount: number): FormMetrics {
-  const t = Math.min(
-    1,
-    Math.max(0, (unitCount - MIN_SCALE_UNITS) / (MAX_SCALE_UNITS - MIN_SCALE_UNITS)),
-  );
-
-  return {
-    fontSize: lerp(18.5, 16, t),
-    headerFontSize: lerp(23, 20, t),
-    particularsRowHeight: lerp(280, 190, t),
-    particularsCellMargin: lerp(46, 24, t),
-    unitsHeadingBefore: lerp(24, 12, t),
-    unitsHeadingAfter: lerp(16, 6, t),
-    unitRowHeight: lerp(280, 190, t),
-    postUnitsTableSpacing: lerp(30, 14, t),
-    signOffHeadingHeight: lerp(215, 160, t),
-    signOffHeadingMargin: lerp(38, 22, t),
-    signOffDateRowHeight: lerp(370, 225, t),
-    signOffCommentRowHeight: lerp(380, 225, t),
-    signOffCellMargin: lerp(58, 28, t),
-    signOffSpacerAfter: lerp(120, 40, t),
-  };
-}
-
-function line(
+function p(
   text: string,
   options: {
     bold?: boolean;
@@ -95,14 +53,14 @@ function line(
     alignment: options.align ?? AlignmentType.LEFT,
     spacing: {
       before: options.before ?? 0,
-      after: options.after ?? 10,
-      line: 205,
+      after: options.after ?? 20,
+      line: 200,
     },
     children: [
       new TextRun({
         text,
         font: FONT,
-        size: options.size ?? 17.5,
+        size: options.size ?? 16,
         bold: options.bold ?? false,
         italics: options.italics ?? false,
         color: options.color ?? '000000',
@@ -112,181 +70,30 @@ function line(
 }
 
 function cell(
-  value: string,
+  children: Paragraph[],
   options: {
-    bold?: boolean;
-    size?: number;
-    align?: (typeof AlignmentType)[keyof typeof AlignmentType];
+    width?: number;
+    bgColor?: string;
+    colSpan?: number;
+    borders?: typeof tableBorders;
+    margins?: { top?: number; bottom?: number; left?: number; right?: number };
+    vAlign?: (typeof VerticalAlign)[keyof typeof VerticalAlign];
   } = {},
-  metrics?: FormMetrics,
 ) {
   return new TableCell({
-    borders,
-    verticalAlign: VerticalAlign.CENTER,
+    width: options.width ? { size: options.width, type: WidthType.DXA } : undefined,
+    columnSpan: options.colSpan ?? 1,
+    verticalAlign: options.vAlign ?? VerticalAlign.CENTER,
+    shading: options.bgColor ? { fill: options.bgColor } : undefined,
+    borders: options.borders ?? tableBorders,
     margins: {
-      top: metrics?.particularsCellMargin ?? 36,
-      bottom: metrics?.particularsCellMargin ?? 36,
-      left: 85,
-      right: 85,
+      top: options.margins?.top ?? 25,
+      bottom: options.margins?.bottom ?? 25,
+      left: options.margins?.left ?? 60,
+      right: options.margins?.right ?? 60,
     },
-    children: [
-      line(value, {
-        bold: options.bold,
-        size: options.size ?? metrics?.fontSize ?? 17.5,
-        align: options.align,
-        after: 0,
-        color: '000000',
-      }),
-    ],
+    children,
   });
-}
-
-const signOffBorder = {
-  style: BorderStyle.SINGLE,
-  size: 4,
-  color: '000000',
-} as const;
-const signOffBorders = { top: signOffBorder, bottom: signOffBorder, left: signOffBorder, right: signOffBorder } as const;
-
-function signOffSpacer(metrics: FormMetrics) {
-  return new Paragraph({ spacing: { after: metrics.signOffSpacerAfter, line: 30 } });
-}
-
-function signOffText(
-  text: string,
-  options: { bold?: boolean; color?: string; size?: number; align?: (typeof AlignmentType)[keyof typeof AlignmentType] } = {},
-  metrics?: FormMetrics,
-) {
-  return line(text, {
-    bold: options.bold,
-    color: options.color ?? '000000',
-    size: options.size ?? (metrics ? metrics.fontSize - 2 : 15.5),
-    align: options.align,
-    after: 0,
-  });
-}
-
-function signOffLabelCell(label: string, metrics: FormMetrics) {
-  return new TableCell({
-    borders: signOffBorders,
-    verticalAlign: VerticalAlign.CENTER,
-    margins: { top: metrics.signOffCellMargin, bottom: metrics.signOffCellMargin, left: 95, right: 70 },
-    children: [signOffText(label, { bold: true, color: '000000' }, metrics)],
-  });
-}
-
-function signOffWriteCell(metrics: FormMetrics) {
-  return new TableCell({
-    borders: signOffBorders,
-    verticalAlign: VerticalAlign.CENTER,
-    margins: { top: metrics.signOffCellMargin, bottom: metrics.signOffCellMargin, left: 75, right: 95 },
-    children: [signOffText('', { color: '000000' }, metrics)],
-  });
-}
-
-function signOffHeading(title: string, metrics: FormMetrics) {
-  return new TableCell({
-    borders: signOffBorders,
-    columnSpan: 4,
-    verticalAlign: VerticalAlign.CENTER,
-    margins: { top: metrics.signOffHeadingMargin, bottom: metrics.signOffHeadingMargin, left: 95, right: 95 },
-    children: [signOffText(title, { bold: true, color: '000000', size: metrics.fontSize - 1 }, metrics)],
-  });
-}
-
-function approvalCard(title: string, approverLabel: string, metrics: FormMetrics) {
-  return new Table({
-    layout: TableLayoutType.FIXED,
-    width: { size: 100, type: WidthType.PERCENTAGE },
-    columnWidths: [2100, 3900, 1100, 2900],
-    rows: [
-      new TableRow({
-        cantSplit: true,
-        height: { value: metrics.signOffHeadingHeight, rule: 'atLeast' },
-        children: [signOffHeading(title, metrics)],
-      }),
-      new TableRow({
-        cantSplit: true,
-        height: { value: metrics.signOffDateRowHeight, rule: 'atLeast' },
-        children: [
-          signOffLabelCell(approverLabel, metrics),
-          signOffWriteCell(metrics),
-          signOffLabelCell('Date', metrics),
-          signOffWriteCell(metrics),
-        ],
-      }),
-      new TableRow({
-        cantSplit: true,
-        height: { value: metrics.signOffCommentRowHeight, rule: 'atLeast' },
-        children: [
-          signOffLabelCell('Comment', metrics),
-          signOffWriteCell(metrics),
-          signOffLabelCell('Signature', metrics),
-          signOffWriteCell(metrics),
-        ],
-      }),
-    ],
-  });
-}
-
-function accountsClearanceCard(metrics: FormMetrics) {
-  return new Table({
-    layout: TableLayoutType.FIXED,
-    width: { size: 100, type: WidthType.PERCENTAGE },
-    columnWidths: [2300, 2700, 1900, 3100],
-    rows: [
-      new TableRow({
-        cantSplit: true,
-        height: { value: metrics.signOffHeadingHeight, rule: 'atLeast' },
-        children: [signOffHeading('ACCOUNTS.', metrics)],
-      }),
-      new TableRow({
-        cantSplit: true,
-        height: { value: metrics.signOffDateRowHeight, rule: 'atLeast' },
-        children: [
-          signOffLabelCell('Previous balance: KShs', metrics),
-          signOffWriteCell(metrics),
-          signOffLabelCell('Amount paid', metrics),
-          signOffWriteCell(metrics),
-        ],
-      }),
-      new TableRow({
-        cantSplit: true,
-        height: { value: metrics.signOffDateRowHeight, rule: 'atLeast' },
-        children: [
-          signOffLabelCell('Balance: KShs', metrics),
-          signOffWriteCell(metrics),
-          signOffLabelCell('Hostel fees', metrics),
-          signOffWriteCell(metrics),
-        ],
-      }),
-      new TableRow({
-        cantSplit: true,
-        height: { value: metrics.signOffDateRowHeight, rule: 'atLeast' },
-        children: [
-          signOffLabelCell('Date', metrics),
-          signOffWriteCell(metrics),
-          signOffLabelCell('Signature', metrics),
-          signOffWriteCell(metrics),
-        ],
-      }),
-    ],
-  });
-}
-
-function premiumSignOffSection(metrics: FormMetrics): Array<Paragraph | Table> {
-  const cards = [
-    approvalCard('HOD APPROVAL', 'Approved/not approved by: HOD:', metrics),
-    approvalCard('HOSTEL ALLOCATION.', 'Administrator:', metrics),
-    approvalCard('REGISTRAR APPROVAL', 'REGISTRAR:', metrics),
-    approvalCard('PRINCIPAL APPROVAL', 'PRINCIPAL:', metrics),
-    approvalCard('MANAGING DIRECTOR APPROVAL', 'MANAGING DIRECTOR:', metrics),
-  ];
-
-  return [
-    accountsClearanceCard(metrics),
-    ...cards.flatMap((card) => [signOffSpacer(metrics), card]),
-  ];
 }
 
 export async function buildStudentUnitRegistrationDocx(
@@ -306,8 +113,6 @@ export async function buildStudentUnitRegistrationDocx(
     throw new Error('No assigned units are available for this period.');
   }
 
-  const metrics = computeFormMetrics(units.length);
-
   let logo: Buffer | null = null;
   try {
     logo = await readFile(
@@ -318,16 +123,18 @@ export async function buildStudentUnitRegistrationDocx(
   }
 
   const children: Array<Paragraph | Table> = [];
+
+  // 1. HEADER SECTION
   if (logo) {
     children.push(
       new Paragraph({
         alignment: AlignmentType.CENTER,
-        spacing: { after: 12 },
+        spacing: { after: 10 },
         children: [
           new ImageRun({
             data: logo,
             type: 'png',
-            transformation: { width: 56, height: 42 },
+            transformation: { width: 48, height: 34 },
           }),
         ],
       }),
@@ -335,115 +142,241 @@ export async function buildStudentUnitRegistrationDocx(
   }
 
   children.push(
-    line('IMPERIAL COLLEGE OF MEDICAL AND HEALTH SCIENCES', {
+    p('IMPERIAL COLLEGE OF MEDICAL AND HEALTH SCIENCES', {
       bold: true,
-      size: metrics.headerFontSize,
+      size: 20,
       align: AlignmentType.CENTER,
-      after: 8,
+      color: PRIMARY_COLOR,
+      after: 6,
     }),
-    line('CONTINUING STUDENT UNIT REGISTRATION FORM', {
+    p('OFFICE OF THE REGISTRAR (ACADEMIC AFFAIRS)', {
       bold: true,
-      size: metrics.headerFontSize - 3,
+      size: 14,
       align: AlignmentType.CENTER,
-      after: 18,
+      color: '475569',
+      after: 6,
+    }),
+    p('CONTINUING STUDENT UNIT REGISTRATION FORM', {
+      bold: true,
+      size: 16,
+      align: AlignmentType.CENTER,
+      color: PRIMARY_COLOR,
+      after: 30,
     }),
   );
 
-  // Student Profile Summary Box
+  // Total Printable Width = 11906 - (800 * 2) = 10306 dxa
+  const TOTAL_WIDTH = 10306;
+  const HALF_WIDTH = Math.floor(TOTAL_WIDTH / 2); // 5153 dxa
+
+  // 2. STUDENT PARTICULAR BOX (2-Column Key Value Grid)
   children.push(
     new Table({
       layout: TableLayoutType.FIXED,
-      width: { size: 100, type: WidthType.PERCENTAGE },
-      columnWidths: [5000, 5000],
+      width: { size: TOTAL_WIDTH, type: WidthType.DXA },
+      columnWidths: [HALF_WIDTH, HALF_WIDTH],
       rows: [
         new TableRow({
           cantSplit: true,
-          height: { value: metrics.particularsRowHeight, rule: 'atLeast' },
           children: [
-            cell(`Name: ${context.student.fullName}`, { bold: true, size: metrics.fontSize }, metrics),
-            cell(`Admission No: ${context.student.admissionNumber}`, { bold: true, size: metrics.fontSize }, metrics),
+            cell([p(`Student Name: ${context.student.fullName}`, { bold: true, after: 0 })], { width: HALF_WIDTH }),
+            cell([p(`Admission No: ${context.student.admissionNumber}`, { bold: true, after: 0 })], { width: HALF_WIDTH }),
           ],
         }),
         new TableRow({
           cantSplit: true,
-          height: { value: metrics.particularsRowHeight, rule: 'atLeast' },
           children: [
-            cell(`Course: ${context.student.programmeName}`, { size: metrics.fontSize }, metrics),
-            cell(`Stage: ${context.student.stageCode ?? context.student.stageName ?? ''}`, { size: metrics.fontSize }, metrics),
+            cell([p(`Course: ${context.student.programmeName}`, { after: 0 })], { width: HALF_WIDTH }),
+            cell([p(`Stage: ${context.student.stageCode ?? context.student.stageName ?? 'N/A'}`, { after: 0 })], { width: HALF_WIDTH }),
           ],
         }),
         new TableRow({
           cantSplit: true,
-          height: { value: metrics.particularsRowHeight, rule: 'atLeast' },
           children: [
-            cell(`Department: ${context.student.departmentName}`, { size: metrics.fontSize }, metrics),
-            cell(`Intake: ${context.student.cohortName ?? ''}`, { size: metrics.fontSize }, metrics),
+            cell([p(`Department: ${context.student.departmentName}`, { after: 0 })], { width: HALF_WIDTH }),
+            cell([p(`Intake: ${context.student.cohortName ?? 'N/A'}`, { after: 0 })], { width: HALF_WIDTH }),
           ],
         }),
         new TableRow({
           cantSplit: true,
-          height: { value: metrics.particularsRowHeight, rule: 'atLeast' },
           children: [
-            cell(`Academic Period: ${context.period.name}`, { size: metrics.fontSize }, metrics),
-            cell('Resident:', { size: metrics.fontSize }, metrics),
+            cell([p(`Academic Period: ${context.period.name}`, { after: 0 })], { width: HALF_WIDTH }),
+            cell([p('Residential Status: Resident / Non-Resident', { after: 0 })], { width: HALF_WIDTH }),
           ],
         }),
       ],
     }),
-    line('REGISTERED UNITS', {
-      bold: true,
-      size: metrics.fontSize,
-      align: AlignmentType.CENTER,
-      before: metrics.unitsHeadingBefore,
-      after: metrics.unitsHeadingAfter,
-    }),
+    new Paragraph({ spacing: { after: 30 } }),
   );
 
-  // Registered Units Table
-  children.push(
-    new Table({
-      layout: TableLayoutType.FIXED,
-      width: { size: 100, type: WidthType.PERCENTAGE },
-      columnWidths: [850, 1900, 7250],
-      rows: [
-        new TableRow({
-          tableHeader: true,
-          cantSplit: true,
-          height: { value: metrics.unitRowHeight, rule: 'atLeast' },
-          children: [
-            cell('S/No.', { bold: true, align: AlignmentType.CENTER, size: metrics.fontSize }, metrics),
-            cell('Unit Code', { bold: true, size: metrics.fontSize }, metrics),
-            cell('Unit Name', { bold: true, size: metrics.fontSize }, metrics),
-          ],
-        }),
-        ...units.map((unit, index) =>
-          new TableRow({
-            cantSplit: true,
-            height: { value: metrics.unitRowHeight, rule: 'atLeast' },
-            children: [
-              cell(String(index + 1), { align: AlignmentType.CENTER, size: metrics.fontSize }, metrics),
-              cell(unit.unitCode, { bold: true, size: metrics.fontSize }, metrics),
-              cell(unit.unitName, { size: metrics.fontSize }, metrics),
-            ],
-          }),
+  // 3. REGISTERED UNITS OVERVIEW (2-COLUMN PARALLEL GRID)
+  const halfCount = Math.ceil(units.length / 2);
+  const leftUnits = units.slice(0, halfCount);
+  const rightUnits = units.slice(halfCount);
+
+  // Columns: Left S/N (650), Left Code (1550), Left Title (2953), Right S/N (650), Right Code (1550), Right Title (2953)
+  const c1 = 650;
+  const c2 = 1550;
+  const c3 = 2953;
+
+  const unitTableRows: TableRow[] = [
+    new TableRow({
+      cantSplit: true,
+      children: [
+        cell(
+          [p(`REGISTERED UNITS OVERVIEW (${units.length} UNITS)`, { bold: true, color: 'FFFFFF', align: AlignmentType.CENTER, size: 15, after: 0 })],
+          { width: TOTAL_WIDTH, colSpan: 6, bgColor: PRIMARY_COLOR, margins: { top: 25, bottom: 25, left: 60, right: 60 } },
         ),
       ],
     }),
-  );
+    new TableRow({
+      tableHeader: true,
+      cantSplit: true,
+      children: [
+        cell([p('S/N', { bold: true, align: AlignmentType.CENTER, after: 0, size: 14 })], { width: c1, bgColor: 'F1F5F9' }),
+        cell([p('Code', { bold: true, after: 0, size: 14 })], { width: c2, bgColor: 'F1F5F9' }),
+        cell([p('Unit Name', { bold: true, after: 0, size: 14 })], { width: c3, bgColor: 'F1F5F9' }),
+        cell([p('S/N', { bold: true, align: AlignmentType.CENTER, after: 0, size: 14 })], { width: c1, bgColor: 'F1F5F9' }),
+        cell([p('Code', { bold: true, after: 0, size: 14 })], { width: c2, bgColor: 'F1F5F9' }),
+        cell([p('Unit Name', { bold: true, after: 0, size: 14 })], { width: c3, bgColor: 'F1F5F9' }),
+      ],
+    }),
+  ];
+
+  for (let i = 0; i < halfCount; i++) {
+    const left = leftUnits[i];
+    const right = rightUnits[i];
+    unitTableRows.push(
+      new TableRow({
+        cantSplit: true,
+        children: [
+          cell([p(String(i + 1), { align: AlignmentType.CENTER, after: 0, size: 14 })], { width: c1 }),
+          cell([p(left.unitCode, { bold: true, after: 0, size: 14 })], { width: c2 }),
+          cell([p(left.unitName, { after: 0, size: 14 })], { width: c3 }),
+          cell([p(right ? String(i + halfCount + 1) : '', { align: AlignmentType.CENTER, after: 0, size: 14 })], { width: c1 }),
+          cell([p(right ? right.unitCode : '', { bold: true, after: 0, size: 14 })], { width: c2 }),
+          cell([p(right ? right.unitName : '', { after: 0, size: 14 })], { width: c3 }),
+        ],
+      }),
+    );
+  }
 
   children.push(
-    new Paragraph({ spacing: { after: metrics.postUnitsTableSpacing, line: 20 } }),
-    ...premiumSignOffSection(metrics),
+    new Table({
+      layout: TableLayoutType.FIXED,
+      width: { size: TOTAL_WIDTH, type: WidthType.DXA },
+      columnWidths: [c1, c2, c3, c1, c2, c3],
+      rows: unitTableRows,
+    }),
+    new Paragraph({ spacing: { after: 30 } }),
   );
+
+  // 4. ACCOUNTS CLEARANCE CARD
+  children.push(
+    new Table({
+      layout: TableLayoutType.FIXED,
+      width: { size: TOTAL_WIDTH, type: WidthType.DXA },
+      columnWidths: [HALF_WIDTH, HALF_WIDTH],
+      rows: [
+        new TableRow({
+          cantSplit: true,
+          children: [
+            cell(
+              [p('1. ACCOUNTS CLEARANCE', { bold: true, color: PRIMARY_COLOR, size: 14, after: 0 })],
+              { width: TOTAL_WIDTH, colSpan: 2, bgColor: 'F1F5F9' },
+            ),
+          ],
+        }),
+        new TableRow({
+          cantSplit: true,
+          children: [
+            cell([p('Previous balance: KShs _______________________', { size: 14, after: 0 })], { width: HALF_WIDTH }),
+            cell([p('Amount paid: KShs __________________________', { size: 14, after: 0 })], { width: HALF_WIDTH }),
+          ],
+        }),
+        new TableRow({
+          cantSplit: true,
+          children: [
+            cell([p('Balance: KShs ______________________________', { size: 14, after: 0 })], { width: HALF_WIDTH }),
+            cell([p('Hostel fees: KShs ____________________________', { size: 14, after: 0 })], { width: HALF_WIDTH }),
+          ],
+        }),
+        new TableRow({
+          cantSplit: true,
+          children: [
+            cell([p('Date: ______________________________________', { size: 14, after: 0 })], { width: HALF_WIDTH }),
+            cell([p('Signature: _________________________________', { size: 14, after: 0 })], { width: HALF_WIDTH }),
+          ],
+        }),
+      ],
+    }),
+    new Paragraph({ spacing: { after: 24 } }),
+  );
+
+  // 5. FIVE APPROVAL CARDS (HOD, HOSTEL, REGISTRAR, PRINCIPAL, MANAGING DIRECTOR)
+  const makeOfficialApprovalCard = (
+    sectionNum: number,
+    title: string,
+    approverLabel: string,
+  ) => {
+    const LEFT_COL = 6183;
+    const RIGHT_COL = 4123;
+
+    return new Table({
+      layout: TableLayoutType.FIXED,
+      width: { size: TOTAL_WIDTH, type: WidthType.DXA },
+      columnWidths: [LEFT_COL, RIGHT_COL],
+      rows: [
+        new TableRow({
+          cantSplit: true,
+          children: [
+            cell(
+              [p(`${sectionNum}. ${title}`, { bold: true, color: PRIMARY_COLOR, size: 14, after: 0 })],
+              { width: TOTAL_WIDTH, colSpan: 2, bgColor: 'F1F5F9' },
+            ),
+          ],
+        }),
+        new TableRow({
+          cantSplit: true,
+          children: [
+            cell([p(approverLabel, { bold: true, size: 14, after: 0 })], { width: LEFT_COL }),
+            cell([p('Date: ________________________', { size: 14, after: 0 })], { width: RIGHT_COL }),
+          ],
+        }),
+        new TableRow({
+          cantSplit: true,
+          children: [
+            cell([p('Comment: _______________________________________________', { size: 14, after: 0 })], { width: LEFT_COL }),
+            cell([p('Signature: ___________________', { size: 14, after: 0 })], { width: RIGHT_COL }),
+          ],
+        }),
+      ],
+    });
+  };
+
+  const officialCards = [
+    { num: 2, title: 'HOD APPROVAL', label: 'Approved/not approved by: HOD:' },
+    { num: 3, title: 'HOSTEL ALLOCATION', label: 'Administrator:' },
+    { num: 4, title: 'REGISTRAR APPROVAL', label: 'REGISTRAR:' },
+    { num: 5, title: 'PRINCIPAL APPROVAL', label: 'PRINCIPAL:' },
+    { num: 6, title: 'MANAGING DIRECTOR APPROVAL', label: 'MANAGING DIRECTOR:' },
+  ];
+
+  for (const card of officialCards) {
+    children.push(
+      makeOfficialApprovalCard(card.num, card.title, card.label),
+      new Paragraph({ spacing: { after: 20 } }),
+    );
+  }
 
   const document = new Document({
     creator: 'Imperial College of Medical and Health Sciences',
-    title: `${context.student.admissionNumber} Unit Registration`,
-    description: 'Continuing student unit registration form',
+    title: `${context.student.admissionNumber} Unit Registration Form`,
+    description: 'Official continuing student unit registration clearance document',
     styles: {
       default: {
         document: {
-          run: { font: FONT, size: metrics.fontSize, color: '000000' },
+          run: { font: FONT, size: 16, color: '000000' },
           paragraph: { spacing: { line: 200, after: 0 } },
         },
       },
@@ -453,7 +386,7 @@ export async function buildStudentUnitRegistrationDocx(
         properties: {
           page: {
             size: { width: 11906, height: 16838 },
-            margin: { top: 180, right: 280, bottom: 160, left: 280 },
+            margin: { top: 800, right: 800, bottom: 800, left: 800 },
           },
         },
         footers: {
@@ -461,13 +394,13 @@ export async function buildStudentUnitRegistrationDocx(
             children: [
               new Paragraph({
                 alignment: AlignmentType.CENTER,
-                spacing: { before: 8, after: 0 },
+                spacing: { before: 10, after: 0 },
                 children: [
                   new TextRun({
-                    text: 'This form should be filled in one copy and filed at the Registrar of Students.',
+                    text: 'Form Ref: ICMHS/REG/2026/0482  |  This form should be filled in one copy and filed at the Registrar of Students.',
                     font: FONT,
                     size: 13,
-                    color: '000000',
+                    color: '475569',
                     italics: true,
                   }),
                 ],

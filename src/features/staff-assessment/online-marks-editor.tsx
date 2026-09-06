@@ -361,34 +361,34 @@ export function OnlineMarksEditor({
   return (
     <div className="space-y-3.5 pb-24">
       {/* Sleek Compact Stats Strip */}
-      <section className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-white px-3.5 py-2.5 shadow-xs">
-        <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-text-secondary">
+      <section className="flex flex-wrap items-center justify-between gap-2 rounded-none border border-slate-300 bg-[#fbf9f1] px-3.5 py-2.5 shadow-2xs">
+        <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-700">
           <span>
-            <strong className="text-text-primary">{students.length}</strong> Students
+            <strong className="text-slate-950">{students.length}</strong> Students
           </span>
           {absent > 0 ? (
-            <span className="text-warning">
+            <span className="text-amber-800">
               · <strong>{absent}</strong> Absent
             </span>
           ) : null}
         </div>
-        <Badge variant="neutral">Scale /100</Badge>
+        <Badge variant="neutral" className="rounded-none border border-slate-300 bg-[#fffdf5] font-semibold text-slate-800">Scale /100</Badge>
       </section>
 
       {/* Mode Switcher & Search Filter */}
-      <section className="space-y-2.5 rounded-xl border border-border bg-white p-2.5 sm:p-3 shadow-xs">
+      <section className="space-y-2.5 rounded-none border border-slate-300 bg-[#fbf9f1] p-2.5 sm:p-3 shadow-2xs">
         {/* Component Tabs */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 [scrollbar-width:none] [-webkit-overflow-scrolling:touch]">
-          <span className="shrink-0 px-1 text-[10px] font-bold uppercase tracking-wide text-text-muted">
+          <span className="shrink-0 px-1 text-[10px] font-bold uppercase tracking-wide text-slate-600">
             Mode:
           </span>
           <button
             type="button"
             onClick={() => setVisibleComponent('all')}
-            className={`h-8 shrink-0 rounded-lg px-2.5 text-xs font-semibold transition ${
+            className={`h-8 shrink-0 rounded-none px-2.5 text-xs font-bold transition ${
               visibleComponent === 'all'
-                ? 'bg-primary text-white shadow-xs'
-                : 'border border-border bg-surface-subtle text-text-secondary hover:bg-surface'
+                ? 'bg-[#0b4f4a] text-white shadow-2xs'
+                : 'border border-slate-300 bg-[#fffdf5] text-slate-800 hover:bg-[#f2ece0]'
             }`}
           >
             All marks
@@ -398,10 +398,10 @@ export function OnlineMarksEditor({
               key={component.key}
               type="button"
               onClick={() => setVisibleComponent(component.key)}
-              className={`h-8 shrink-0 rounded-lg px-2.5 text-xs font-semibold transition ${
+              className={`h-8 shrink-0 rounded-none px-2.5 text-xs font-bold transition ${
                 visibleComponent === component.key
-                  ? 'bg-primary text-white shadow-xs'
-                  : 'border border-border bg-surface-subtle text-text-secondary hover:bg-surface'
+                  ? 'bg-[#0b4f4a] text-white shadow-2xs'
+                  : 'border border-slate-300 bg-[#fffdf5] text-slate-800 hover:bg-[#f2ece0]'
               }`}
             >
               {component.label} /{component.maximum}
@@ -412,7 +412,7 @@ export function OnlineMarksEditor({
         {/* Search Bar & Page Size Selector */}
         <div className="flex flex-wrap items-center gap-2 pt-1">
           <div className="relative min-w-[200px] flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-text-muted" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-slate-500" />
             <input
               type="text"
               value={searchQuery}
@@ -421,7 +421,7 @@ export function OnlineMarksEditor({
                 setCurrentPage(1);
               }}
               placeholder="Search by student name or admission no..."
-              className="h-8 w-full rounded-lg border border-border bg-surface-subtle pl-8 pr-8 text-xs text-text-primary placeholder:text-text-muted outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/10"
+              className="h-8 w-full rounded-none border border-slate-300 bg-[#fffdf5] pl-8 pr-8 text-xs text-slate-900 placeholder:text-slate-500 outline-none transition focus:border-[#0b4f4a] focus:bg-white focus:ring-2 focus:ring-[#0b4f4a]/20"
             />
             {searchQuery ? (
               <button
@@ -430,7 +430,7 @@ export function OnlineMarksEditor({
                   setSearchQuery('');
                   setCurrentPage(1);
                 }}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-900"
                 aria-label="Clear search"
               >
                 <X className="size-3.5" />
@@ -438,8 +438,8 @@ export function OnlineMarksEditor({
             ) : null}
           </div>
 
-          <div className="flex items-center gap-1.5 text-xs text-text-muted">
-            <span className="text-[11px] font-medium">Show:</span>
+          <div className="flex items-center gap-1.5 text-xs text-slate-600">
+            <span className="text-[11px] font-semibold">Show:</span>
             <div className="flex items-center gap-1">
               {[10, 25, 'all'].map((size) => (
                 <button
@@ -449,10 +449,10 @@ export function OnlineMarksEditor({
                     setPageSize(size as number | 'all');
                     setCurrentPage(1);
                   }}
-                  className={`h-7 rounded-md px-2 text-[11px] font-semibold transition ${
+                  className={`h-7 rounded-none px-2 text-[11px] font-bold transition ${
                     pageSize === size
-                      ? 'bg-primary text-white shadow-xs'
-                      : 'border border-border bg-surface-subtle text-text-secondary hover:bg-surface'
+                      ? 'bg-[#0b4f4a] text-white shadow-2xs'
+                      : 'border border-slate-300 bg-[#fffdf5] text-slate-800 hover:bg-[#f2ece0]'
                   }`}
                 >
                   {size === 'all' ? 'All' : size}
@@ -466,8 +466,8 @@ export function OnlineMarksEditor({
       {/* Main Table / List View */}
       {isSingleMode && singleComponent ? (
         /* SINGLE ENTRY MODE: Guaranteed 100% visible on all mobile screens without truncation */
-        <section className="overflow-hidden rounded-xl border border-border bg-white shadow-xs">
-          <div className="flex items-center justify-between border-b border-border bg-surface-subtle px-3.5 py-2.5 text-[10px] font-bold uppercase tracking-wide text-text-muted">
+        <section className="overflow-hidden rounded-none border border-slate-300 bg-[#fffdf5] shadow-2xs">
+          <div className="flex items-center justify-between border-b border-slate-300 bg-[#f2ece0] px-3.5 py-2.5 text-[10px] font-bold uppercase tracking-wide text-slate-800">
             <span>Student</span>
             <span className="shrink-0 text-right">
               {singleComponent.label} /{singleComponent.maximum}
@@ -475,11 +475,11 @@ export function OnlineMarksEditor({
           </div>
 
           {paginatedRows.length === 0 ? (
-            <div className="px-4 py-8 text-center text-xs text-text-muted">
+            <div className="px-4 py-8 text-center text-xs text-slate-500">
               No students match "{searchQuery}"
             </div>
           ) : (
-            <div className="divide-y divide-border">
+            <div className="divide-y divide-slate-200">
               {paginatedRows.map((row) => {
                 const key = singleComponent.key;
                 const field = row.fields[key];
@@ -489,23 +489,23 @@ export function OnlineMarksEditor({
                 return (
                   <div
                     key={row.student.studentId}
-                    className="flex items-center justify-between gap-3 px-3.5 py-2.5 transition hover:bg-surface-subtle/40"
+                    className="flex items-center justify-between gap-3 px-3.5 py-2.5 transition hover:bg-[#fbf9f1]"
                   >
                     {/* Left: Student Name & ID */}
                     <div className="min-w-0 flex-1 pr-1">
-                      <p className="text-xs font-bold text-text-primary leading-tight truncate">
+                      <p className="text-xs font-bold text-slate-900 leading-tight truncate">
                         {row.student.fullName}
                       </p>
-                      <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] font-medium text-text-muted">
+                      <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] font-medium text-slate-600">
                         <span>{row.student.admissionNumber}</span>
                         {row.total !== null ? (
-                          <span className="font-semibold text-primary">
+                          <span className="font-bold text-[#0b4f4a]">
                             · {row.total.toFixed(1)}/100
                           </span>
                         ) : null}
                       </div>
                       {isExamAbsent ? (
-                        <Badge variant="warning" className="mt-0.5 text-[9px] py-0 px-1">
+                        <Badge variant="warning" className="mt-0.5 rounded-none text-[9px] py-0 px-1">
                           Absent
                         </Badge>
                       ) : null}
@@ -514,7 +514,7 @@ export function OnlineMarksEditor({
                     {/* Right: Input box (shrink-0, fixed width w-20, NEVER truncated) */}
                     <div className="shrink-0">
                       {isExamAbsent ? (
-                        <div className="flex h-10 w-20 items-center justify-center rounded-lg bg-surface-subtle text-xs font-bold text-text-secondary">
+                        <div className="flex h-10 w-20 items-center justify-center rounded-none border border-slate-300 bg-[#eee8d7] text-xs font-bold text-slate-700">
                           AB
                         </div>
                       ) : (
@@ -545,14 +545,14 @@ export function OnlineMarksEditor({
                               handleKeyDown(e, row.studentIndex, key)
                             }
                             aria-label={`${key} mark for ${row.student.fullName}`}
-                            className={`h-10 w-20 rounded-lg border bg-white px-2 text-center text-base font-bold text-text-primary outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:bg-surface-subtle [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                            className={`h-10 w-20 rounded-none border bg-[#fffdf5] px-2 text-center text-base font-bold text-slate-900 outline-none transition focus:border-[#0b4f4a] focus:ring-2 focus:ring-[#0b4f4a]/20 disabled:bg-[#eee8d7] disabled:text-slate-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                               field.valid
-                                ? 'border-border-strong'
-                                : 'border-danger focus:ring-danger/20'
+                                ? 'border-slate-400 focus:border-[#0b4f4a]'
+                                : 'border-red-600 focus:ring-red-600/20'
                             }`}
                           />
                           {!field.valid ? (
-                            <p className="mt-0.5 text-right text-[9px] font-medium text-danger">
+                            <p className="mt-0.5 text-right text-[9px] font-semibold text-red-600">
                               {field.message}
                             </p>
                           ) : null}
@@ -567,9 +567,9 @@ export function OnlineMarksEditor({
         </section>
       ) : (
         /* ALL MARKS MODE: Full scrollable spreadsheet table */
-        <section className="overflow-x-auto rounded-xl border border-border bg-white shadow-xs">
+        <section className="overflow-x-auto rounded-none border border-slate-300 bg-[#fffdf5] shadow-2xs">
           <table className="w-full min-w-[760px] border-collapse text-left">
-            <thead className="bg-surface-subtle border-b border-border text-[10px] font-bold uppercase tracking-wide text-text-muted">
+            <thead className="bg-[#f2ece0] border-b border-slate-300 text-[10px] font-bold uppercase tracking-wide text-slate-800">
               <tr>
                 <th className="px-3 py-2.5">Student</th>
                 {onlineMarkComponents.map((c) => (
@@ -582,12 +582,12 @@ export function OnlineMarksEditor({
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-slate-200">
               {paginatedRows.length === 0 ? (
                 <tr>
                   <td
                     colSpan={8}
-                    className="px-4 py-8 text-center text-xs text-text-muted"
+                    className="px-4 py-8 text-center text-xs text-slate-500"
                   >
                     No students match "{searchQuery}"
                   </td>
@@ -596,17 +596,17 @@ export function OnlineMarksEditor({
                 paginatedRows.map((row) => (
                   <tr
                     key={row.student.studentId}
-                    className="align-middle transition hover:bg-surface-subtle/50"
+                    className="align-middle transition hover:bg-[#fbf9f1]"
                   >
                     <td className="px-3 py-2.5">
-                      <p className="text-xs font-semibold text-text-primary line-clamp-1">
+                      <p className="text-xs font-bold text-slate-900 line-clamp-1">
                         {row.student.fullName}
                       </p>
-                      <p className="text-[10px] font-medium text-text-muted">
+                      <p className="text-[10px] font-medium text-slate-600">
                         {row.student.admissionNumber}
                       </p>
                       {row.student.attendanceStatus === 'absent' ? (
-                        <Badge variant="warning" className="mt-0.5 text-[9px]">
+                        <Badge variant="warning" className="mt-0.5 rounded-none text-[9px]">
                           Exam absent
                         </Badge>
                       ) : null}
@@ -620,7 +620,7 @@ export function OnlineMarksEditor({
                       return (
                         <td key={key} className="px-1.5 py-2.5">
                           {examAbsent ? (
-                            <div className="mx-auto flex h-9 w-16 items-center justify-center rounded-lg bg-surface-subtle text-xs font-bold text-text-secondary">
+                            <div className="mx-auto flex h-9 w-16 items-center justify-center rounded-none border border-slate-300 bg-[#eee8d7] text-xs font-bold text-slate-700">
                               AB
                             </div>
                           ) : (
@@ -651,14 +651,14 @@ export function OnlineMarksEditor({
                                   handleKeyDown(e, row.studentIndex, key)
                                 }
                                 aria-label={`${key} mark for ${row.student.fullName}`}
-                                className={`h-9 w-full rounded-lg border bg-white px-1 text-center text-xs font-semibold text-text-primary outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15 disabled:bg-surface-subtle [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                                className={`h-9 w-full rounded-none border bg-[#fffdf5] px-1 text-center text-xs font-bold text-slate-900 outline-none transition focus:border-[#0b4f4a] focus:ring-2 focus:ring-[#0b4f4a]/20 disabled:bg-[#eee8d7] disabled:text-slate-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                                   field.valid
-                                    ? 'border-border-strong'
-                                    : 'border-danger focus:ring-danger/20'
+                                    ? 'border-slate-400 focus:border-[#0b4f4a]'
+                                    : 'border-red-600 focus:ring-red-600/20'
                                 }`}
                               />
                               {!field.valid ? (
-                                <p className="mt-0.5 text-center text-[9px] font-medium text-danger">
+                                <p className="mt-0.5 text-center text-[9px] font-semibold text-red-600">
                                   {field.message}
                                 </p>
                               ) : null}
@@ -668,12 +668,12 @@ export function OnlineMarksEditor({
                       );
                     })}
 
-                    <td className="px-2 py-2.5 text-center text-xs font-semibold text-text-secondary">
+                    <td className="px-2 py-2.5 text-center text-xs font-bold text-slate-700">
                       {row.ratCatAverage === null
                         ? '—'
                         : row.ratCatAverage.toFixed(2)}
                     </td>
-                    <td className="px-3 py-2.5 text-center text-sm font-bold text-text-primary">
+                    <td className="px-3 py-2.5 text-center text-sm font-extrabold text-slate-950">
                       {row.student.attendanceStatus === 'absent'
                         ? 'AB'
                         : row.total === null
@@ -690,9 +690,9 @@ export function OnlineMarksEditor({
 
       {/* Pagination Strip */}
       {totalItems > 0 && pageSize !== 'all' && totalPages > 1 ? (
-        <section className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-white px-3.5 py-2.5 text-xs text-text-secondary shadow-xs">
-          <span className="text-[11px] font-medium">
-            Showing <strong className="text-text-primary">{startIndex}–{endIndex}</strong> of <strong className="text-text-primary">{totalItems}</strong> students
+        <section className="flex flex-wrap items-center justify-between gap-2 rounded-none border border-slate-300 bg-[#fbf9f1] px-3.5 py-2.5 text-xs text-slate-700 shadow-2xs">
+          <span className="text-[11px] font-semibold">
+            Showing <strong className="text-slate-950">{startIndex}–{endIndex}</strong> of <strong className="text-slate-950">{totalItems}</strong> students
           </span>
 
           <div className="flex items-center gap-1.5">
@@ -700,13 +700,13 @@ export function OnlineMarksEditor({
               type="button"
               disabled={safeCurrentPage <= 1}
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              className="inline-flex h-8 items-center gap-1 rounded-lg border border-border bg-surface-subtle px-2.5 text-xs font-semibold text-text-secondary transition hover:bg-surface disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex h-8 items-center gap-1 rounded-none border border-slate-300 bg-[#fffdf5] px-2.5 text-xs font-bold text-slate-800 transition hover:bg-[#f2ece0] disabled:cursor-not-allowed disabled:opacity-40"
             >
               <ChevronLeft className="size-3.5" />
               <span>Prev</span>
             </button>
 
-            <span className="px-2 text-[11px] font-bold text-text-primary">
+            <span className="px-2 text-[11px] font-bold text-slate-900">
               {safeCurrentPage} / {totalPages}
             </span>
 
@@ -714,7 +714,7 @@ export function OnlineMarksEditor({
               type="button"
               disabled={safeCurrentPage >= totalPages}
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              className="inline-flex h-8 items-center gap-1 rounded-lg border border-border bg-surface-subtle px-2.5 text-xs font-semibold text-text-secondary transition hover:bg-surface disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex h-8 items-center gap-1 rounded-none border border-slate-300 bg-[#fffdf5] px-2.5 text-xs font-bold text-slate-800 transition hover:bg-[#f2ece0] disabled:cursor-not-allowed disabled:opacity-40"
             >
               <span>Next</span>
               <ChevronRight className="size-3.5" />

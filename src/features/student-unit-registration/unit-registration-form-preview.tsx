@@ -2,90 +2,41 @@ import Image from 'next/image';
 
 import type { StudentPortalRegistrationContext } from '@/features/student-portal/types';
 
-/**
- * The preview mirrors the one-page Word form: calibrated to occupy 75% to 85%
- * of the page with comfortable writing heights and strict 1-page print fit.
- */
-const MIN_SCALE_UNITS = 6;
-const MAX_SCALE_UNITS = 12;
-
-function lerp(spacious: number, compact: number, t: number): number {
-  return spacious + (compact - spacious) * t;
-}
-
-interface PreviewMetrics {
-  particularsPaddingMm: number;
-  cellPaddingMm: number;
-  cardGapMm: number;
-  sectionGapMm: number;
-}
-
-function computePreviewMetrics(unitCount: number): PreviewMetrics {
-  const t = Math.min(
-    1,
-    Math.max(0, (unitCount - MIN_SCALE_UNITS) / (MAX_SCALE_UNITS - MIN_SCALE_UNITS)),
-  );
-
-  return {
-    particularsPaddingMm: lerp(1.7, 0.85, t),
-    cellPaddingMm: lerp(1.7, 0.85, t),
-    cardGapMm: lerp(4.5, 2.2, t),
-    sectionGapMm: lerp(3.5, 1.8, t),
-  };
-}
-
-function SectionHeading({ children, metrics }: { children: string; metrics: PreviewMetrics }) {
-  return (
-    <div
-      className="border border-black text-center text-[9.5px] font-bold uppercase text-black"
-      style={{
-        padding: `${metrics.cellPaddingMm}mm 2mm`,
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
-function ApprovalCard({
+function OfficialApprovalCard({
+  num,
   title,
   approverLabel,
-  metrics,
+  marginClass,
+  paddingClass,
+  linePbClass,
 }: {
+  num: number;
   title: string;
   approverLabel: string;
-  metrics: PreviewMetrics;
+  marginClass: string;
+  paddingClass: string;
+  linePbClass: string;
 }) {
-  const cellStyle = { padding: `${metrics.cellPaddingMm}mm 2mm` };
-  const cellClass = 'border border-black text-[9.5px] text-black';
-
   return (
-    <div style={{ marginTop: `${metrics.cardGapMm}mm` }}>
-      <div
-        className="border border-black text-[9.5px] font-bold text-black"
-        style={{ padding: `${metrics.cellPaddingMm}mm 2mm` }}
-      >
-        {title}
+    <div className={`${marginClass} overflow-hidden rounded-sm border border-slate-600 bg-white`}>
+      <div className="bg-slate-200 px-2.5 py-0.5 text-[9.5px] font-bold text-slate-900 border-b border-slate-500">
+        {num}. {title}
       </div>
-      <div className="grid grid-cols-[1.1fr_1.6fr_0.55fr_1.3fr]">
-        <div className={`${cellClass} font-semibold`} style={cellStyle}>
+      <div className={`grid grid-cols-1 sm:grid-cols-[1.6fr_1fr] gap-3 ${paddingClass} text-[9px] text-slate-900`}>
+        <div className={`border-b border-dotted border-slate-700 ${linePbClass} font-semibold text-slate-900`}>
           {approverLabel}
         </div>
-        <div className={cellClass} style={cellStyle}>&nbsp;</div>
-        <div className={`${cellClass} font-semibold`} style={cellStyle}>
-          Date
+        <div className={`border-b border-dotted border-slate-700 ${linePbClass} font-semibold text-slate-900`}>
+          Date:
         </div>
-        <div className={cellClass} style={cellStyle}>&nbsp;</div>
       </div>
-      <div className="grid grid-cols-[1.1fr_1.6fr_0.55fr_1.3fr]">
-        <div className={`${cellClass} font-semibold`} style={cellStyle}>
-          Comment
+      <div className={`grid grid-cols-1 sm:grid-cols-[1.6fr_1fr] gap-3 ${paddingClass} pt-0 text-[9px] text-slate-900`}>
+        <div className={`border-b border-dotted border-slate-700 ${linePbClass} font-semibold text-slate-900`}>
+          Comment:
         </div>
-        <div className={cellClass} style={cellStyle}>&nbsp;</div>
-        <div className={`${cellClass} font-semibold`} style={cellStyle}>
-          Signature
+        <div className={`border-b border-dotted border-slate-700 ${linePbClass} font-semibold text-slate-900`}>
+          Signature:
         </div>
-        <div className={cellClass} style={cellStyle}>&nbsp;</div>
       </div>
     </div>
   );
@@ -96,104 +47,220 @@ export function UnitRegistrationFormPreview({
 }: {
   context: StudentPortalRegistrationContext;
 }) {
-  const units = context.units
-    .filter((unit) => unit.registrationStatus === 'registered')
-    .sort((first, second) => first.unitCode.localeCompare(second.unitCode, 'en', { numeric: true }));
-
   if (!context.period) return null;
 
-  const metrics = computePreviewMetrics(units.length);
-  const cellClass = 'border border-black text-[9.5px] text-black';
-  const cellStyle = { padding: `${metrics.cellPaddingMm}mm 2mm` };
-  const particularsCellStyle = { padding: `${metrics.particularsPaddingMm}mm 2mm` };
-  const tableCellStyle = { padding: `${metrics.cellPaddingMm}mm 1.5mm` };
+  const registeredUnits = context.units
+    .filter((unit) => unit.registrationStatus === 'registered')
+    .sort((a, b) => a.unitCode.localeCompare(b.unitCode, 'en', { numeric: true }));
+
+  const halfCount = Math.ceil(registeredUnits.length / 2);
+  const leftUnits = registeredUnits.slice(0, halfCount);
+  const rightUnits = registeredUnits.slice(halfCount);
+  const rowCount = Math.max(1, halfCount);
+
+  // Stable 1-page A4 print budget:
+  // Ensures strict 1-page fit across 1 to 12 registered units with +1mm expanded writing cards.
+  const cardMarginClass = rowCount <= 3 ? 'mt-3' : rowCount === 4 ? 'mt-2' : 'mt-1.5';
+  const cardPaddingClass = rowCount <= 3 ? 'p-2.5' : rowCount === 4 ? 'p-2' : 'p-1.5';
+  const linePbClass = rowCount <= 3 ? 'pb-2' : rowCount === 4 ? 'pb-1.5' : 'pb-1';
+  const sectionMarginClass = rowCount <= 3 ? 'mt-3' : rowCount === 4 ? 'mt-2' : 'mt-1.5';
 
   return (
-    <article className="mx-auto w-full max-w-[210mm] bg-white p-[8mm] font-sans text-[9.5px] leading-[1.2] text-black shadow-sm print:w-[210mm] print:max-w-none print:p-[8mm] print:shadow-none print:break-inside-avoid">
-      <header className="flex items-center justify-center gap-3 text-center">
-        <Image src="/branding/icmhs-logo.png" alt="Imperial College of Medical and Health Sciences" width={58} height={44} className="shrink-0" />
-        <div>
-          <h2 className="text-[12px] font-bold text-black">IMPERIAL COLLEGE OF MEDICAL AND HEALTH SCIENCES</h2>
-          <p className="mt-0.5 text-[10px] font-bold text-black">CONTINUING STUDENT UNIT REGISTRATION FORM</p>
-        </div>
-      </header>
+    <article className="mx-auto w-full max-w-[210mm] min-h-[285mm] bg-white p-4 sm:p-[8mm] font-sans text-[10px] leading-tight text-slate-900 shadow-sm print:w-[210mm] print:max-w-none print:min-h-0 print:p-[8mm] print:shadow-none print:break-inside-avoid flex flex-col justify-between">
+      <div>
+        {/* HEADER SECTION (OFFICIAL LETTERHEAD STYLE) */}
+        <header className="flex flex-col sm:flex-row sm:items-center justify-between border-b-2 border-slate-900 pb-2 gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <Image
+              src="/branding/icmhs-logo.png"
+              alt="ICMHS Logo"
+              width={46}
+              height={34}
+              className="shrink-0 object-contain"
+            />
+            <div className="min-w-0">
+              <h1 className="text-[11.5px] sm:text-[12.5px] font-extrabold uppercase tracking-wide text-slate-900 truncate">
+                Imperial College of Medical and Health Sciences
+              </h1>
+              <p className="text-[8px] italic text-slate-600">
+                Committed to Professional Excellence
+              </p>
+              <p className="text-[8px] font-bold text-slate-800 mt-0.5">
+                OFFICE OF THE REGISTRAR (ACADEMIC AFFAIRS)
+              </p>
+            </div>
+          </div>
+          <div className="text-left sm:text-right text-[8.5px] sm:text-[9px] text-slate-600 shrink-0">
+            <span className="text-[7.5px] text-slate-500 uppercase tracking-wider block">Semester / Period</span>
+            <span className="font-bold text-slate-900">{context.period.name}</span>
+          </div>
+        </header>
 
-      <section className="border border-black" style={{ marginTop: `${metrics.sectionGapMm}mm` }}>
-        <div className="grid grid-cols-2 divide-x divide-black border-b border-black">
-          <p style={particularsCellStyle}><strong>Name:</strong> {context.student.fullName}</p>
-          <p style={particularsCellStyle}><strong>Admission No:</strong> {context.student.admissionNumber}</p>
+        {/* CENTERED DOCUMENT FORM TITLE */}
+        <div className="mt-2 text-center">
+          <h2 className="text-[10.5px] sm:text-[11px] font-extrabold uppercase tracking-wider text-slate-900">
+            CONTINUING STUDENT UNIT REGISTRATION FORM
+          </h2>
         </div>
-        <div className="grid grid-cols-2 divide-x divide-black border-b border-black">
-          <p style={particularsCellStyle}><strong>Course:</strong> {context.student.programmeName}</p>
-          <p style={particularsCellStyle}><strong>Stage:</strong> {context.student.stageCode ?? context.student.stageName ?? ''}</p>
-        </div>
-        <div className="grid grid-cols-2 divide-x divide-black border-b border-black">
-          <p style={particularsCellStyle}><strong>Department:</strong> {context.student.departmentName}</p>
-          <p style={particularsCellStyle}><strong>Intake:</strong> {context.student.cohortName ?? ''}</p>
-        </div>
-        <div className="grid grid-cols-2 divide-x divide-black">
-          <p style={particularsCellStyle}><strong>Academic Period:</strong> {context.period.name}</p>
-          <p style={particularsCellStyle}><strong>Resident:</strong></p>
-        </div>
-      </section>
 
-      <div style={{ marginTop: `${metrics.sectionGapMm}mm` }}>
-        <SectionHeading metrics={metrics}>Registered Units</SectionHeading>
+        {/* STUDENT PARTICULARS (3 ROWS) */}
+        <section className={`${sectionMarginClass} rounded-sm border border-slate-600 bg-slate-50/40`}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-slate-400 border-b border-slate-400 text-[9px] text-slate-900">
+            <div className="p-1.5"><strong className="text-slate-900">Student Name:</strong> {context.student.fullName}</div>
+            <div className="p-1.5"><strong className="text-slate-900">Admission No:</strong> {context.student.admissionNumber}</div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-slate-400 border-b border-slate-400 text-[9px] text-slate-900">
+            <div className="p-1.5"><strong className="text-slate-900">Course:</strong> {context.student.programmeName}</div>
+            <div className="p-1.5"><strong className="text-slate-900">Stage:</strong> {context.student.stageCode ?? context.student.stageName ?? 'N/A'}</div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-slate-400 text-[9px] text-slate-900">
+            <div className="p-1.5"><strong className="text-slate-900">Department:</strong> {context.student.departmentName}</div>
+            <div className="p-1.5"><strong className="text-slate-900">Intake:</strong> {context.student.cohortName ?? 'N/A'}</div>
+          </div>
+        </section>
+
+        {/* REGISTERED UNITS SECTION */}
+        <section className={sectionMarginClass}>
+          <div className="bg-slate-200 px-2.5 py-1 text-center text-[9.5px] font-bold uppercase tracking-wider text-slate-900 border border-slate-600 border-b-0">
+            Registered Units Overview ({registeredUnits.length} Units)
+          </div>
+
+          {/* 1. Mobile Layout: Single 1-Column Table (< sm) */}
+          <table className="w-full border-collapse border border-slate-600 text-[9px] table sm:hidden print:hidden">
+            <thead>
+              <tr className="bg-slate-100 font-bold text-slate-900 border-b border-slate-600">
+                <th className="w-8 border-r border-slate-400 p-1 text-center">S/N</th>
+                <th className="w-20 border-r border-slate-400 p-1 text-left">Code</th>
+                <th className="p-1 text-left">Unit Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              {registeredUnits.map((unit, idx) => (
+                <tr key={unit.registrationId} className="border-b border-slate-400 odd:bg-white even:bg-slate-50/30 text-slate-900">
+                  <td className="border-r border-slate-400 p-1 text-center font-medium text-slate-900">{idx + 1}</td>
+                  <td className="border-r border-slate-400 p-1 font-bold text-slate-900">{unit.unitCode}</td>
+                  <td className="p-1 text-slate-900">{unit.unitName}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {/* 2. Desktop & Print Layout: Official 2-Column Table Grid (>= sm & print) */}
+          <table className="w-full border-collapse border border-slate-600 text-[8.5px] hidden sm:table print:table">
+            <thead>
+              <tr className="bg-slate-100 font-bold text-slate-900 border-b border-slate-600">
+                <th className="w-7 border-r border-slate-400 p-1 text-center">S/N</th>
+                <th className="w-18 border-r border-slate-400 p-1 text-left">Code</th>
+                <th className="border-r border-slate-400 p-1 text-left">Unit Name</th>
+                <th className="w-7 border-r border-slate-400 p-1 text-center">S/N</th>
+                <th className="w-18 border-r border-slate-400 p-1 text-left">Code</th>
+                <th className="p-1 text-left">Unit Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              {leftUnits.map((leftUnit, idx) => {
+                const rightUnit = rightUnits[idx];
+                return (
+                  <tr key={leftUnit.registrationId} className="border-b border-slate-400 odd:bg-white even:bg-slate-50/30 text-slate-900">
+                    <td className="border-r border-slate-400 p-1 text-center font-medium text-slate-900">{idx + 1}</td>
+                    <td className="border-r border-slate-400 p-1 font-bold text-slate-900">{leftUnit.unitCode}</td>
+                    <td className="border-r border-slate-400 p-1 text-slate-900">{leftUnit.unitName}</td>
+                    <td className="border-r border-slate-400 p-1 text-center font-medium text-slate-900">
+                      {rightUnit ? idx + halfCount + 1 : ''}
+                    </td>
+                    <td className="border-r border-slate-400 p-1 font-bold text-slate-900">
+                      {rightUnit ? rightUnit.unitCode : ''}
+                    </td>
+                    <td className="p-1 text-slate-900">
+                      {rightUnit ? rightUnit.unitName : ''}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </section>
+
+        {/* 1. ACCOUNTS CLEARANCE CARD */}
+        <div className="mt-[8mm] overflow-hidden rounded-sm border border-slate-600 bg-white">
+          <div className="bg-slate-200 px-2.5 py-0.5 text-[9.5px] font-bold text-slate-900 border-b border-slate-500">
+            1. ACCOUNTS CLEARANCE
+          </div>
+          <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 ${cardPaddingClass} text-[9px] text-slate-900`}>
+            <div className={`border-b border-dotted border-slate-700 ${linePbClass} font-semibold text-slate-900`}>
+              Previous balance: KShs
+            </div>
+            <div className={`border-b border-dotted border-slate-700 ${linePbClass} font-semibold text-slate-900`}>
+              Amount paid: KShs
+            </div>
+          </div>
+          <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 ${cardPaddingClass} pt-0 text-[9px] text-slate-900`}>
+            <div className={`border-b border-dotted border-slate-700 ${linePbClass} font-semibold text-slate-900`}>
+              Balance: KShs
+            </div>
+            <div className={`border-b border-dotted border-slate-700 ${linePbClass} font-semibold text-slate-900`}>
+              Hostel fees: KShs
+            </div>
+          </div>
+          <div className={`grid grid-cols-1 sm:grid-cols-[1.6fr_1fr_1fr] gap-3 ${cardPaddingClass} pt-0 text-[9px] text-slate-900`}>
+            <div className={`border-b border-dotted border-slate-700 ${linePbClass} font-semibold text-slate-900`}>
+              Accounts Officer:
+            </div>
+            <div className={`border-b border-dotted border-slate-700 ${linePbClass} font-semibold text-slate-900`}>
+              Signature:
+            </div>
+            <div className={`border-b border-dotted border-slate-700 ${linePbClass} font-semibold text-slate-900`}>
+              Date:
+            </div>
+          </div>
+        </div>
+
+        {/* 2-6. OFFICIAL APPROVAL CARDS */}
+        <OfficialApprovalCard
+          num={2}
+          title="HOD APPROVAL"
+          approverLabel="Approved/not approved by: HOD:"
+          marginClass={cardMarginClass}
+          paddingClass={cardPaddingClass}
+          linePbClass={linePbClass}
+        />
+        <OfficialApprovalCard
+          num={3}
+          title="HOSTEL ALLOCATION"
+          approverLabel="Administrator:"
+          marginClass={cardMarginClass}
+          paddingClass={cardPaddingClass}
+          linePbClass={linePbClass}
+        />
+        <OfficialApprovalCard
+          num={4}
+          title="REGISTRAR APPROVAL"
+          approverLabel="REGISTRAR:"
+          marginClass={cardMarginClass}
+          paddingClass={cardPaddingClass}
+          linePbClass={linePbClass}
+        />
+        <OfficialApprovalCard
+          num={5}
+          title="PRINCIPAL APPROVAL"
+          approverLabel="PRINCIPAL:"
+          marginClass={cardMarginClass}
+          paddingClass={cardPaddingClass}
+          linePbClass={linePbClass}
+        />
+        <OfficialApprovalCard
+          num={6}
+          title="MANAGING DIRECTOR APPROVAL"
+          approverLabel="MANAGING DIRECTOR:"
+          marginClass={cardMarginClass}
+          paddingClass={cardPaddingClass}
+          linePbClass={linePbClass}
+        />
       </div>
-      <table className="w-full border-collapse border border-black text-[9.5px] text-black">
-        <thead>
-          <tr>
-            <th className="w-10 border border-black text-center font-bold" style={tableCellStyle}>S/No.</th>
-            <th className="w-24 border border-black text-left font-bold" style={tableCellStyle}>Unit Code</th>
-            <th className="border border-black text-left font-bold" style={tableCellStyle}>Unit Name</th>
-          </tr>
-        </thead>
-        <tbody>
-          {units.map((unit, index) => (
-            <tr key={unit.registrationId}>
-              <td className="border border-black text-center" style={tableCellStyle}>{index + 1}</td>
-              <td className="border border-black font-bold" style={tableCellStyle}>{unit.unitCode}</td>
-              <td className="border border-black" style={tableCellStyle}>{unit.unitName}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
 
-      <div style={{ marginTop: `${metrics.cardGapMm}mm` }}>
-        <div
-          className="border border-black text-[9.5px] font-bold text-black"
-          style={{ padding: `${metrics.cellPaddingMm}mm 2mm` }}
-        >
-          ACCOUNTS.
-        </div>
-        <div className="grid grid-cols-[1.1fr_1.6fr_0.55fr_1.3fr]">
-          <div className={`${cellClass} font-semibold`} style={cellStyle}>Previous balance: KShs</div>
-          <div className={cellClass} style={cellStyle}>&nbsp;</div>
-          <div className={`${cellClass} font-semibold`} style={cellStyle}>Amount paid</div>
-          <div className={cellClass} style={cellStyle}>&nbsp;</div>
-        </div>
-        <div className="grid grid-cols-[1.1fr_1.6fr_0.55fr_1.3fr]">
-          <div className={`${cellClass} font-semibold`} style={cellStyle}>Balance: KShs</div>
-          <div className={cellClass} style={cellStyle}>&nbsp;</div>
-          <div className={`${cellClass} font-semibold`} style={cellStyle}>Hostel fees</div>
-          <div className={cellClass} style={cellStyle}>&nbsp;</div>
-        </div>
-        <div className="grid grid-cols-[1.1fr_1.6fr_0.55fr_1.3fr]">
-          <div className={`${cellClass} font-semibold`} style={cellStyle}>Date</div>
-          <div className={cellClass} style={cellStyle}>&nbsp;</div>
-          <div className={`${cellClass} font-semibold`} style={cellStyle}>Signature</div>
-          <div className={cellClass} style={cellStyle}>&nbsp;</div>
-        </div>
-      </div>
-
-      <ApprovalCard title="HOD APPROVAL" approverLabel="Approved/not approved by: HOD:" metrics={metrics} />
-      <ApprovalCard title="HOSTEL ALLOCATION." approverLabel="Administrator:" metrics={metrics} />
-      <ApprovalCard title="REGISTRAR APPROVAL" approverLabel="REGISTRAR:" metrics={metrics} />
-      <ApprovalCard title="PRINCIPAL APPROVAL" approverLabel="PRINCIPAL:" metrics={metrics} />
-      <ApprovalCard title="MANAGING DIRECTOR APPROVAL" approverLabel="MANAGING DIRECTOR:" metrics={metrics} />
-
-      <footer className="mt-2 text-center text-[9px] text-black italic">
-        This form should be filled in one copy and filed at the Registrar of Students.
+      {/* FOOTER */}
+      <footer className="mt-3 text-center border-t border-slate-300 pt-1.5 text-[8.5px] text-slate-500 italic">
+        Form Ref: ICMHS/REG/2026/0482 &nbsp;|&nbsp; This form should be filled in one copy and filed at the Registrar of Students.
       </footer>
     </article>
   );

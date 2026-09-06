@@ -14,7 +14,9 @@ import {
   School,
   SlidersHorizontal,
   Sparkles,
+  UserCheck,
   UserRound,
+  Users,
 } from 'lucide-react';
 
 export const dashboardNavigation = [
@@ -22,6 +24,7 @@ export const dashboardNavigation = [
     label: 'Platform',
     items: [
       { label: 'Module Hub', href: '/dashboard', icon: ArrowLeft },
+      { label: 'Student Registry', href: '/students/registry', icon: Users },
       { label: 'Staff & Trainers', href: '/trainers', icon: UserRound },
       { label: 'Unit Registration', href: '/students/unit-registration', icon: BookOpenCheck },
     ],

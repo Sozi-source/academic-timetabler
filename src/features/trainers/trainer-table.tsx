@@ -6,6 +6,7 @@ import {
   CalendarX2,
   CheckCircle2,
   CircleOff,
+  Eye,
   Pencil,
   RotateCcw,
   UserRound,
@@ -137,6 +138,15 @@ const columns: ColumnDef<Trainer>[] = [
     header: '',
     cell: ({ row }) => (
       <div className="flex items-center justify-end gap-1">
+        <Link
+          href={`/trainers/${row.original.id}/portal-view`}
+          aria-label={`View staff portal for ${row.original.fullName}`}
+          title="View Staff Portal"
+          className="inline-flex size-8 items-center justify-center rounded-lg border border-[#033B36]/20 bg-[#033B36]/10 text-[#033B36] transition hover:bg-[#033B36] hover:text-white"
+        >
+          <Eye className="size-3.5" aria-hidden="true" />
+        </Link>
+
         <Link
           href={`/timetable/trainers/${row.original.id}/edit`}
           aria-label={`Edit ${row.original.fullName}`}

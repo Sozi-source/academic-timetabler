@@ -54,7 +54,6 @@ export default async function StudentPortalPage() {
   const cards = [
     { label: 'My Units', value: String(units.length), href: '/student/units', icon: BookOpenCheck },
     { label: 'Timetable', value: String(timetable.length), href: '/student/timetable', icon: CalendarDays },
-    { label: 'Results', value: String(results.length), href: '/student/results', icon: GraduationCap },
     { label: 'Documents', value: String(documents.length), href: '/student/documents', icon: FileText },
   ] as const;
 
@@ -113,7 +112,7 @@ export default async function StudentPortalPage() {
         )}
 
         {/* Metric Cards Grid */}
-        <section className="grid grid-cols-2 gap-2.5 sm:gap-3.5 lg:grid-cols-4">
+        <section className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 sm:gap-3.5">
           {cards.map((item) => {
             const Icon = item.icon;
 

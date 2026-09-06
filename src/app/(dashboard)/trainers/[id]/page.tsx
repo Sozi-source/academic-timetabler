@@ -8,6 +8,7 @@ import {
   CalendarCheck,
   CheckCircle2,
   Clock,
+  Eye,
   KeyRound,
   Mail,
   Pencil,
@@ -145,6 +146,12 @@ export default async function TrainerDetailsPage({
         backLabel="Staff & Trainers"
         actions={
           <div className="flex flex-wrap items-center gap-2">
+            <Button asChild variant="default" size="sm" className="bg-[#033B36] text-white hover:bg-[#022A26] shadow-xs">
+              <Link href={`/trainers/${trainer.id}/portal-view`}>
+                <Eye className="size-3.5" aria-hidden="true" />
+                <span>View Staff Portal</span>
+              </Link>
+            </Button>
             <ResetTrainerPassword
               trainerId={trainer.id}
               trainerName={trainer.fullName}
@@ -213,6 +220,12 @@ export default async function TrainerDetailsPage({
             </span>
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            <Button asChild variant="default" size="sm" className="bg-[#033B36] text-white hover:bg-[#022A26] shadow-xs">
+              <Link href={`/trainers/${trainer.id}/portal-view`}>
+                <Eye className="size-3.5" aria-hidden="true" />
+                <span>View Staff Portal</span>
+              </Link>
+            </Button>
             <ResetTrainerPassword
               trainerId={trainer.id}
               trainerName={trainer.fullName}
@@ -460,12 +473,20 @@ export default async function TrainerDetailsPage({
                 {utilizationPercentage}% Workload Used
               </p>
             </div>
-            <Link
-              href="/timetable/teaching-allocations"
-              className="inline-flex h-8 items-center justify-center rounded-lg bg-[#033B36] px-3 text-xs font-semibold text-white transition hover:bg-[#022A26]"
-            >
-              Manage Allocations
-            </Link>
+            <div className="flex items-center gap-2">
+              <Button asChild variant="outline" size="sm" className="border-[#033B36] text-[#033B36] hover:bg-[#033B36]/10">
+                <Link href={`/trainers/${trainer.id}/portal-view`}>
+                  <Eye className="size-3.5 mr-1" aria-hidden="true" />
+                  <span>View Staff Portal</span>
+                </Link>
+              </Button>
+              <Link
+                href="/timetable/teaching-allocations"
+                className="inline-flex h-8 items-center justify-center rounded-lg bg-[#033B36] px-3 text-xs font-semibold text-white transition hover:bg-[#022A26]"
+              >
+                Manage Allocations
+              </Link>
+            </div>
           </div>
         </div>
 

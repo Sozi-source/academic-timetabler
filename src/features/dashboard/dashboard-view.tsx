@@ -39,7 +39,7 @@ export function DashboardView({
   // Dynamic telemetry figures with design fallbacks
   const studentsRegistered = snapshot?.students?.registered ?? 26;
   const studentsEligible = snapshot?.students?.eligible ?? 185;
-  const studentsPinsActive = snapshot?.students?.portalActive ?? 185;
+  const studentsPortalActive = snapshot?.students?.portalActive ?? 65;
 
   const teachingUnits = snapshot?.timetable?.activeAllocations ?? 63;
   const publishedSessions = snapshot?.timetable?.publishedSessions ?? 0;
@@ -113,25 +113,29 @@ export function DashboardView({
           </div>
 
           {/* Metric 2: STUDENTS PORTAL */}
-          <div className="flex flex-col justify-between rounded-xl border border-gray-200/90 bg-white p-4 shadow-xs transition hover:border-[#F59E0B]/30 hover:shadow-sm">
+          <Link
+            href="/students/registry"
+            className="group flex flex-col justify-between rounded-xl border border-gray-200/90 bg-white p-4 shadow-xs transition hover:border-[#033B36]/40 hover:shadow-sm"
+          >
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 group-hover:text-[#033B36]">
                 Students Portal
               </span>
-              <span className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-[#F59E0B]/15 text-[#D97706]">
-                <Users className="size-4 text-[#D97706]" aria-hidden="true" />
+              <span className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-[#033B36]/10 text-[#033B36] transition group-hover:bg-[#033B36] group-hover:text-white">
+                <Users className="size-4" aria-hidden="true" />
               </span>
             </div>
             <div className="mt-2">
-              <p className="text-base font-bold text-gray-900 tracking-tight">
-                {studentsRegistered} / {studentsEligible}
+              <p className="text-base font-bold text-gray-900 tracking-tight flex items-center justify-between">
+                <span>{studentsPortalActive} / {studentsEligible}</span>
+                <ArrowRight className="size-3.5 text-gray-400 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 text-[#033B36]" aria-hidden="true" />
               </p>
               <p className="text-[11px] text-gray-500 mt-0.5">
-                {studentsPinsActive} PINs active
+                {studentsPortalActive} Accounts active
               </p>
             </div>
-            <div className="mt-3 h-0.5 w-7 rounded-full bg-[#F59E0B]" />
-          </div>
+            <div className="mt-3 h-0.5 w-7 rounded-full bg-[#033B36]" />
+          </Link>
 
           {/* Metric 3: TEACHING ALLOCATIONS */}
           <div className="flex flex-col justify-between rounded-xl border border-gray-200/90 bg-white p-4 shadow-xs transition hover:border-[#033B36]/30 hover:shadow-sm">
@@ -182,10 +186,10 @@ export function DashboardView({
             <h2 id="department-modules-heading" className="text-xs font-bold uppercase tracking-wider text-gray-700">
               Department Core Modules
             </h2>
-            <span className="text-[11px] font-medium text-gray-500">7 Operational Workspaces</span>
+            <span className="text-[11px] font-medium text-gray-500">8 Operational Workspaces</span>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
             {/* Module 1: Daily Operations */}
             <Link
               href="/operations/daily-reports"
@@ -200,7 +204,21 @@ export function DashboardView({
               <div className="mt-2 h-0.5 w-6 rounded-full bg-[#033B36]" />
             </Link>
 
-            {/* Module 2: Academic Planning */}
+            {/* Module 2: Student Registry */}
+            <Link
+              href="/students/registry"
+              className="group flex flex-col items-center justify-center rounded-xl border border-gray-200/90 bg-white px-2.5 py-4 text-center shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:border-[#033B36]/30 hover:shadow-sm"
+            >
+              <div className="flex size-10 items-center justify-center rounded-full bg-[#033B36] text-white shadow-2xs transition group-hover:scale-105">
+                <UserCheck className="size-4.5 text-white" aria-hidden="true" />
+              </div>
+              <p className="mt-2.5 text-[11px] font-bold text-[#033B36]">
+                Student Registry
+              </p>
+              <div className="mt-2 h-0.5 w-6 rounded-full bg-[#033B36]" />
+            </Link>
+
+            {/* Module 3: Academic Planning */}
             <Link
               href="/timetable"
               className="group flex flex-col items-center justify-center rounded-xl border border-gray-200/90 bg-white px-2.5 py-4 text-center shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:border-[#F59E0B]/30 hover:shadow-sm"
@@ -214,7 +232,7 @@ export function DashboardView({
               <div className="mt-2 h-0.5 w-6 rounded-full bg-[#F59E0B]" />
             </Link>
 
-            {/* Module 3: Unit Registration */}
+            {/* Module 4: Unit Registration */}
             <Link
               href="/students/unit-registration"
               className="group flex flex-col items-center justify-center rounded-xl border border-gray-200/90 bg-white px-2.5 py-4 text-center shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:border-[#033B36]/30 hover:shadow-sm"
@@ -377,8 +395,8 @@ export function DashboardView({
             </div>
 
             <div className="flex items-center justify-between text-[11px] text-gray-600">
-              <span>Portal Admissions:</span>
-              <span className="font-semibold text-gray-900">{studentsPinsActive} Active</span>
+              <span>Portal Accounts:</span>
+              <span className="font-semibold text-gray-900">{studentsPortalActive} Active</span>
             </div>
           </div>
         </div>

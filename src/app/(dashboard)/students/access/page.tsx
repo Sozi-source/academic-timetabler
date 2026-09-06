@@ -23,8 +23,8 @@ export default async function StudentPortalAccessPage() {
   return (
     <div className="space-y-5 pb-12">
       <PageHeader
-        title="Student Portal Access & PINs"
-        description="Issue, view, and rotate student portal authentication PINs."
+        title="Student Portal Access & Accounts"
+        description="Track activated student accounts, monitor sign-ins, and manage credential status in real-time."
         icon={KeyRound}
         actions={
           <Link
@@ -60,12 +60,12 @@ export default async function StudentPortalAccessPage() {
           </span>
           <div>
             <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              PINs Issued
+              Accounts Activated
             </p>
             <p className="text-sm font-bold text-slate-900">
               {summary.issued} / {summary.eligible}
             </p>
-            <p className="text-[11px] text-slate-500">{summary.notIssued} not issued</p>
+            <p className="text-[11px] text-slate-500">{summary.notIssued} not yet activated</p>
           </div>
         </div>
 

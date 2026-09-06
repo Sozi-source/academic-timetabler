@@ -126,7 +126,7 @@ export function AdminSidebar({
       </div>
 
       {/* Navigation Links */}
-      <nav aria-label="Admin navigation" className="flex-1 space-y-0.5 overflow-y-auto px-2.5 py-4">
+      <nav aria-label="Admin navigation" className="flex-1 space-y-2 overflow-y-auto px-3 py-4">
         {adminNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = item.exact
@@ -140,7 +140,7 @@ export function AdminSidebar({
               onClick={onMobileClose}
               aria-current={isActive ? 'page' : undefined}
               className={cn(
-                'group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium transition-colors duration-150',
+                'group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-medium transition-all duration-150',
                 isActive
                   ? 'bg-[#084D46] text-[#FEF08A] font-semibold shadow-2xs'
                   : 'text-[#B0C8C4] hover:bg-[#064741] hover:text-white',
@@ -149,14 +149,14 @@ export function AdminSidebar({
               {/* Left Accent Bar for Active State */}
               {isActive ? (
                 <span
-                  className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r-full bg-[#FACC15]"
+                  className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-[#FACC15]"
                   aria-hidden="true"
                 />
               ) : null}
 
               <Icon
                 className={cn(
-                  'size-4 shrink-0 transition-colors',
+                  'size-4.5 shrink-0 transition-colors',
                   isActive ? 'text-[#FACC15]' : 'text-[#8EAAA5] group-hover:text-white',
                 )}
                 aria-hidden="true"

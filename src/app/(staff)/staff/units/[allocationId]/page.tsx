@@ -37,6 +37,7 @@ import type {
 import {
   getRecordOfWorkContext,
 } from '@/features/teaching-documents/record-of-work-online/queries';
+import { groupStaffUnitAllocations } from '@/features/staff-assessment/unit-grouping';
 
 interface PageProps {
   params: Promise<{
@@ -102,7 +103,11 @@ export default async function StaffUnitPage({
     notFound();
   }
 
-  const { allocation } = context;
+  const { allocation, workspace } = context;
+  const groupedUnits = groupStaffUnitAllocations(workspace?.allocations ?? [allocation]);
+  const groupedAllocation = groupedUnits.find((g) => g.allAllocationIds?.includes(allocationId) || g.allocationId === allocationId);
+  const cohortDescription = groupedAllocation ? groupedAllocation.combinedCohortLabel : allocation.cohortName;
+
   const entriesCount = rowContext?.entries.length ?? 0;
   const uniqueWeeksCount = new Set(rowContext?.entries.map((e) => e.weekNumber) ?? []).size;
   const syllabusRate = Math.min(100, Math.round((uniqueWeeksCount / 14) * 100));
@@ -111,7 +116,7 @@ export default async function StaffUnitPage({
     <div className="space-y-5">
       <PageHeader
         title={allocation.unitName}
-        description={allocation.cohortName}
+        description={cohortDescription}
         actions={
           <Badge variant="institutional" className="capitalize">
             {allocation.allocationStatus}

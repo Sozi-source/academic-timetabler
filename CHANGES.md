@@ -17,6 +17,18 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 
 ---
 
+### 2026-09-06: Student Unit Registration — 1-Click Unregister Action Button
+- **Files Modified**:
+  - `src/features/student-unit-registration/undo-registration-button.tsx`
+  - `src/features/student-unit-registration/student-unit-registration-table.tsx`
+  - `src/app/(dashboard)/students/unit-registration/page.tsx`
+  - `src/app/(dashboard)/students/unit-registration/register/[studentId]/page.tsx`
+- **What Changed**:
+  - **Enhanced `UndoUnitRegistrationButton`**: Extended the component with customizable variants (`danger`, `outline`, `subtle`), sizes (`sm`, `md`), custom labels, student-specific confirmation messages, and loading spinners.
+  - **Row-Level "Unregister" Button on Table**: Added the `Unregister` danger action button directly in the main table row on `/students/unit-registration` for any student who has units registered or submissions (`student.selectedUnits > 0 || student.status !== 'not_submitted'`).
+  - **Individual Registration Page Integration**: Placed prominent unregister action buttons on `/students/unit-registration/register/[studentId]` (in both the top stage/status header and the bottom form action bar alongside "Save & verify registration").
+  - **Administrative Undo**: Calls `DELETE /api/students/unit-registration/[studentId]/undo`, executing the database RPC `undo_student_unit_registration` to clear registrations and submissions for the target academic period without resetting student stage or cohort.
+
 ### 2026-09-06: Database Migration — Fix Unit Offering Withdrawal Exception Reason Check Constraint
 - **Files Added**:
   - `supabase/migrations/20260906213500_fix_unit_offering_withdrawal_exception_reason_constraint.sql`

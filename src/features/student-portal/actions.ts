@@ -29,11 +29,11 @@ const loginSchema = z.object({
 const activationSchema = z.object({
   admissionNumber: z.string().trim().min(3).max(80),
   phoneNumber: z.string().trim().min(7).max(25),
-  newPin: z.string().trim().min(4, 'PIN/Password must be at least 4 characters long').max(60),
-  confirmPin: z.string().trim(),
-}).refine((data) => data.newPin === data.confirmPin, {
-  message: 'PIN/Passwords do not match',
-  path: ['confirmPin'],
+  password: z.string().trim().min(4, 'Password must be at least 4 characters long').max(60),
+  confirmPassword: z.string().trim(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
 });
 
 export async function studentPortalLogin(
@@ -42,12 +42,12 @@ export async function studentPortalLogin(
 ): Promise<StudentLoginState> {
   const parsed = loginSchema.safeParse({
     admissionNumber: formData.get('admissionNumber'),
-    pin: formData.get('pin'),
+    pin: formData.get('password') ?? formData.get('pin'),
   });
 
   if (!parsed.success) {
     return {
-      error: 'Please enter your admission number and PIN/password.',
+      error: 'Please enter your admission number and password.',
     };
   }
 
@@ -73,7 +73,7 @@ export async function studentPortalLogin(
 
   if (error || !data) {
     return {
-      error: 'Admission number or PIN/password is incorrect.',
+      error: 'Admission number or password is incorrect.',
     };
   }
 
@@ -88,11 +88,14 @@ export async function activateStudentAccount(
   _state: StudentActivationState,
   formData: FormData,
 ): Promise<StudentActivationState> {
+  const rawPassword = formData.get('password') ?? formData.get('newPassword') ?? formData.get('newPin');
+  const rawConfirmPassword = formData.get('confirmPassword') ?? formData.get('confirmPin');
+
   const parsed = activationSchema.safeParse({
     admissionNumber: formData.get('admissionNumber'),
     phoneNumber: formData.get('phoneNumber'),
-    newPin: formData.get('newPin'),
-    confirmPin: formData.get('confirmPin'),
+    password: rawPassword,
+    confirmPassword: rawConfirmPassword,
   });
 
   if (!parsed.success) {
@@ -107,7 +110,7 @@ export async function activateStudentAccount(
   const { data, error } = await admin.rpc('activate_student_portal_account', {
     supplied_admission_number: parsed.data.admissionNumber,
     supplied_phone_number: parsed.data.phoneNumber,
-    new_pin: parsed.data.newPin,
+    new_pin: parsed.data.password,
   });
 
   if (error || !data) {

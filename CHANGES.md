@@ -17,6 +17,28 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 
 ---
 
+### 2026-09-06: Student Portal Activation & Sign-In Form Cleanup — Password Terminology
+- **Files Modified**:
+  - `src/features/student-portal/student-activation-form.tsx`
+  - `src/features/student-portal/student-login-form.tsx`
+  - `src/features/student-portal/actions.ts`
+  - `src/app/student/activate/page.tsx`
+- **What Changed**:
+  - **Replaced PIN Terminology**: Cleaned up the activation and sign-in experiences to consistently ask students for their **Password** rather than confusing "PIN / Password".
+  - **Form Labels & Placeholders**: Updated labels to **Set Password** and **Confirm Password**, with clear placeholders (`Create password (min 4 characters)` and `Re-enter password`).
+  - **Action Button**: Simplified the submit button label to **Activate Account**.
+  - **Iconography**: Swapped generic key icons for standard `Lock` icons on password fields.
+  - **Action Compatibility**: Updated `activateStudentAccount` and `studentPortalLogin` server actions to support `password` / `confirmPassword` while maintaining backward compatibility with existing callers.
+
+### 2026-09-06: Database Migration — Repair `student_portal_credentials` Column & Self-Service Activation RPC
+- **Files Added/Modified**:
+  - `supabase/migrations/20260906193500_repair_student_portal_credentials_created_at.sql` (NEW)
+  - `supabase/migrations/20260905211500_student_self_service_activation.sql`
+- **What Changed**:
+  - **Added `created_at` Column**: Executed `alter table public.student_portal_credentials add column if not exists created_at timestamptz not null default now()` to eliminate runtime error `column "created_at" of relation "student_portal_credentials" does not exist`.
+  - **Repaired Activation RPC (`activate_student_portal_account`)**: Updated the self-service student activation procedure to populate both `issued_at` and `created_at`, safely record audit events to `student_portal_access_events`, and handle missing event tables gracefully without interrupting account activation.
+- **Manual Follow-up**: Run `supabase db push` or run the SQL in Supabase SQL editor to apply `20260906193500_repair_student_portal_credentials_created_at.sql` on the live database.
+
 ### 2026-09-06: Fix Next.js & TypeScript Build Errors — Docx TableVerticalAlign & WeekdayCode Test
 - **Files Modified**:
   - `src/features/student-portal/registration-docx.ts`

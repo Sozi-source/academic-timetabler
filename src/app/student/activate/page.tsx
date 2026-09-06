@@ -44,7 +44,7 @@ export default async function StudentAccountActivationPage() {
             </span>
             <div>
               <h1 className="text-base font-bold text-text-primary">Activate Account</h1>
-              <p className="text-xs text-text-muted">Set up your preferred PIN/password.</p>
+              <p className="text-xs text-text-muted">Set up your student account password.</p>
             </div>
           </div>
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { KeyRound, LoaderCircle, LogIn, UserCheck } from 'lucide-react';
+import { LoaderCircle, Lock, LogIn, UserCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useActionState } from 'react';
 
@@ -33,10 +33,10 @@ export function StudentLoginForm() {
 
       <div className="space-y-1">
         <label className="block text-xs font-semibold text-text-primary" htmlFor="pin">
-          Preferred PIN / Password
+          Password
         </label>
         <div className="relative">
-          <KeyRound
+          <Lock
             className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-text-muted"
             aria-hidden="true"
           />
@@ -46,7 +46,7 @@ export function StudentLoginForm() {
             type="password"
             autoComplete="current-password"
             required
-            placeholder="Enter your PIN or password"
+            placeholder="Enter your password"
             className="h-10 rounded-lg pl-9 text-xs"
           />
         </div>
@@ -77,7 +77,7 @@ export function StudentLoginForm() {
           className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary-deep transition"
         >
           <UserCheck className="size-3.5" />
-          First time here? Activate account & set PIN
+          First time here? Activate your account
         </Link>
       </div>
     </form>

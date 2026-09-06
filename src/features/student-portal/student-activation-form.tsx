@@ -1,6 +1,6 @@
 'use client';
 
-import { KeyRound, LoaderCircle, Phone, UserCheck } from 'lucide-react';
+import { LoaderCircle, Lock, Phone, UserCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useActionState } from 'react';
 
@@ -54,45 +54,47 @@ export function StudentActivationForm() {
         <p className="text-[10px] text-text-muted">Enter phone number used during college application/admission.</p>
       </div>
 
-      {/* New Preferred PIN / Password */}
+      {/* Set Password */}
       <div className="space-y-1">
-        <label className="block text-xs font-semibold text-text-primary" htmlFor="newPin">
-          Set Preferred PIN / Password
+        <label className="block text-xs font-semibold text-text-primary" htmlFor="password">
+          Set Password
         </label>
         <div className="relative">
-          <KeyRound
+          <Lock
             className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-text-muted"
             aria-hidden="true"
           />
           <Input
-            id="newPin"
-            name="newPin"
+            id="password"
+            name="password"
             type="password"
+            autoComplete="new-password"
             required
             minLength={4}
-            placeholder="Create PIN or password (min 4 characters)"
+            placeholder="Create password (min 4 characters)"
             className="h-10 rounded-lg pl-9 text-xs"
           />
         </div>
       </div>
 
-      {/* Confirm Preferred PIN */}
+      {/* Confirm Password */}
       <div className="space-y-1">
-        <label className="block text-xs font-semibold text-text-primary" htmlFor="confirmPin">
-          Confirm Preferred PIN / Password
+        <label className="block text-xs font-semibold text-text-primary" htmlFor="confirmPassword">
+          Confirm Password
         </label>
         <div className="relative">
-          <KeyRound
+          <Lock
             className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-text-muted"
             aria-hidden="true"
           />
           <Input
-            id="confirmPin"
-            name="confirmPin"
+            id="confirmPassword"
+            name="confirmPassword"
             type="password"
+            autoComplete="new-password"
             required
             minLength={4}
-            placeholder="Re-enter chosen PIN or password"
+            placeholder="Re-enter password"
             className="h-10 rounded-lg pl-9 text-xs"
           />
         </div>
@@ -114,7 +116,7 @@ export function StudentActivationForm() {
         ) : (
           <UserCheck className="size-3.5" aria-hidden="true" />
         )}
-        {pending ? 'Activating account...' : 'Activate Account & Set PIN'}
+        {pending ? 'Activating account...' : 'Activate Account'}
       </Button>
 
       <div className="pt-2 text-center border-t border-border">
@@ -122,7 +124,7 @@ export function StudentActivationForm() {
           href="/student/login"
           className="text-xs font-semibold text-text-muted hover:text-text-primary transition"
         >
-          Already activated your account? <span className="font-bold text-primary">Sign in</span>
+          Already activated? <span className="font-bold text-primary">Sign in</span>
         </Link>
       </div>
     </form>

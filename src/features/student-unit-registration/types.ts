@@ -39,6 +39,9 @@ export interface DepartmentRegistrationUnit {
   name: string;
   isExpected: boolean;
   isSelected: boolean;
+  category?: 'expected' | 'offered' | 'curriculum';
+  stageName?: string | null;
+  stageCode?: string | null;
 }
 
 export interface DepartmentRegistrationEditor {

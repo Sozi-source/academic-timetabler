@@ -15,9 +15,124 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 3. **Source Data Organization (`Course_outlines.zip`)**:
    - Move Milkah Wambui's Learning Plan (scheme of work) from the "course outlines" folder to the correct "schemes of work" folder before re-ingesting.
 
----
+### 2026-09-07: Registrar Live Reporting Synchronization & Real-time Reconciliation (Phase 2)
+- **Files Added**:
+  - `src/features/student-reporting-sync/types.ts`
+  - `src/features/student-reporting-sync/parsers.ts`
+  - `src/features/student-reporting-sync/reconciliation.ts`
+  - `src/features/student-reporting-sync/actions.ts`
+  - `src/features/student-reporting-sync/reporting-sync-dialog.tsx`
+  - `src/tests/students/reporting-sync.test.ts`
+- **Files Modified**:
+  - `src/app/(dashboard)/students/registry/page.tsx`
+  - `src/app/(dashboard)/students/unit-registration/page.tsx`
+  - `CHANGES.md`
+- **What Changed**:
+  - **Multi-Source Ingestion Engine**: Built a robust ingestion pipeline supporting:
+    1. **Live Google Sheets**: Normalizes sharing links (`/edit#gid=0`, `/view`, `/pubhtml`, `/pub`) into direct CSV export endpoints and fetches live data over HTTP with clear diagnostics for private permission errors.
+    2. **Spreadsheet File Upload**: Parses `.xlsx`, `.xls`, and `.csv` workbooks using `exceljs` with automatic header and pattern recognition.
+    3. **Quick Clipboard Paste**: Parses tab/newline-separated rows directly copied from Google Sheets or Excel tables.
+  - **Multi-Tenant Safe Reconciliation**: Reconciles incoming admission numbers against active department students and `student_period_reporting` records for the active academic semester. Categorizes rows into `ready` (to activate), `already_reported` (already active), and `unmatched` (unknown to department).
+  - **Interactive Review & Confirmation Dialog (`ReportingSyncDialog`)**:
+    - Displays real-time KPI metrics (Total Rows, Ready to Activate, Already Active, Unmatched).
+    - Features filter pills, instant text search, and per-student exclusion checkboxes.
+    - Provides effective date selection and one-click bulk confirmation (`confirm_students_reported` / `batch_update_student_status`).
+    - Transitions students to `active`, sets academic phase to `in_class`, updates `student_period_reporting`, and logs audit events.
+  - **Surface Placement**: Embedded the "Sync Reporting" dialog directly in both the **Student Registry** (`/students/registry`) and **Unit Registration** (`/students/unit-registration`) action toolbars.
+  - **Unit Tests**: Added 10 Vitest assertions in `src/tests/students/reporting-sync.test.ts` verifying URL normalization, CSV/paste parsing, and key normalization. All 34/34 student test assertions passing.
+
+### 2026-09-07: Student Lifecycle — Reactivation & Resumption from Completed Status
+- **Files Added**:
+  - `supabase/migrations/20260907230000_allow_completed_student_resumption.sql`
+- **Files Modified**:
+  - `src/features/students/progression-form.tsx`
+  - `src/features/students/actions.ts`
+  - `CHANGES.md`
+- **What Changed**:
+  - **Reactivation of Deferred / Repeater Students**: Resolved the domain edge case where students who deferred or repeated studies while their original admission cohort graduated/completed were prematurely marked `completed`, causing them to be excluded from the Student Unit Registration list (`/students/unit-registration`).
+  - **Individual Progression Resumption Support**: Updated `record_student_lifecycle_transition` PostgreSQL function and `ProgressionForm` to allow `resumption` transitions from `completed` status back to `active` (and `academic_phase = 'in_class'`), requiring assignment to an active study cohort while keeping the student's original `admission_cohort_id` immutable.
+  - **Unit Registration Revalidation**: Added `revalidatePath('/students/unit-registration')` to progression transitions to immediately update unit registration rosters upon reactivation.
+  - **Individual Case Resolution**: Updated Felicia Mukami (`CHN/S-4184/IC/24`, `CHN SEP 24`) to `active` status and `in_class` phase, successfully verifying her presence on the unit registration roster.
+- **Manual Follow-up**:
+  - Run `supabase db push` to deploy `20260907230000_allow_completed_student_resumption.sql`.
+
+### 2026-09-07: Student Registry — Batch Actions, Reporting Confirmation & Lifecycle Management (Phase 1)
+- **Files Added**:
+  - `supabase/migrations/20260907221500_batch_student_lifecycle_management.sql`
+  - `src/features/students/batch-action-dialogs.tsx`
+  - `src/tests/students/batch-lifecycle.test.ts`
+- **Files Modified**:
+  - `src/features/students/types.ts`
+  - `src/features/students/validation.ts`
+  - `src/features/students/actions.ts`
+  - `src/features/students/queries.ts`
+  - `src/features/students/student-registry-table.tsx`
+  - `src/app/(dashboard)/students/registry/page.tsx`
+- **What Changed**:
+  - **Multi-Select & Checkbox System**: Added per-row checkboxes, header "select all on page" with indeterminate state, and full cross-page filtered selection in `StudentRegistryTable`.
+  - **Cohort-by-Cohort Dropdown Filter**: Added a dedicated cohort filter dropdown in the toolbar alongside existing status pills and instant text search, enabling HODs to immediately isolate any cohort (e.g. `DNDT JAN 24`).
+  - **Sticky Batch Action Toolbar**: When 1 or more students are selected, a floating/docked toolbar appears providing 4 core operational actions:
+    1. **Confirm Reported**: 1-click batch reporting confirmation that transitions admitted students to `active`, updates `student_period_reporting` for the active semester, and logs user attribution.
+    2. **Reassign Current Cohort (Repeaters)**: Safely shifts repeating students to their current study cohort while leaving `admission_cohort_id` permanently intact, creating an entry in `student_cohort_assignments` and logging a `cohort_change` event.
+    3. **Mark Deferred**: Enforces required future resumption date and reason, transitions to `deferred`, and updates period reporting.
+    4. **Mark Dropped Out**: Enforces required administrative reason, transitions to `dropped_out`, excludes them from active semester rosters, and logs audit events.
+  - **Transactional Backend & Fallback**: Created `batch_update_student_status` and `batch_reassign_student_cohort` PostgreSQL RPCs with row locking, tenant department isolation, and graceful TypeScript fallback logic in `actions.ts`.
+  - **Unit Testing**: 10 Vitest assertions in `batch-lifecycle.test.ts` verifying all schema rules and constraints.
+- **Manual Follow-up**:
+  - Run `supabase db push` to push migration `20260907221500_batch_student_lifecycle_management.sql` to your Supabase PostgreSQL database.
+
+### 2026-09-07: Student Unit Registration — View Persistence on Save
+- **Files Modified**:
+  - `src/features/student-unit-registration/actions.ts`
+  - `src/app/(dashboard)/students/unit-registration/register/[studentId]/page.tsx`
+- **What Changed**:
+  - **Registration Persistence**: In `registerStudentUnitsByDepartment`, replaced the previous redirect to the student list (`redirect('/students/unit-registration?registered=1')`) with a redirect staying directly on the registration editor (`redirect(`/students/unit-registration/register/${studentId}?saved=1`)`).
+  - **Success Feedback Banner**: Added an explicit confirmation banner (`saved=1`) confirming that unit registration was saved and verified successfully while maintaining all selected checkboxes and verified status.
+  - **Academic Stage Update Feedback**: Added a confirmation badge (`stage_updated=1`) when changing student academic stages.
+  - **Explicit Return Navigation**: Added "Return to Student List" navigation buttons in both the header and footer actions, allowing the user to return to the student table whenever they choose rather than being automatically booted out upon saving.
+
+### 2026-09-07: Student Unit Registration — Flexible Unit Selection & DNDT Y1S2 Stage Alignment
+- **Files Added**:
+  - `supabase/migrations/20260907091000_fix_dndt_stages_and_registration_flexibility.sql`
+- **Files Modified**:
+  - `src/features/student-unit-registration/types.ts`
+  - `src/features/student-unit-registration/queries.ts`
+  - `src/features/student-unit-registration/actions.ts`
+  - `src/app/(dashboard)/students/unit-registration/register/[studentId]/page.tsx`
+- **What Changed**:
+  - **DNDT Stage Realignment**: Fixed `programme_stage_units` for DNDT so that `Year 1 Semester 2 (Y1S2)` contains all seven `12xx` units (`DNDT 1201` through `DNDT 1207`) and `Year 1 Semester 3 (Y1S3)` contains all six `13xx` units (`DNDT 1301` through `DNDT 1306`). Realigned `academic_period_number` on the units table to match official curriculum.
+  - **Provisioned Unit Offerings**: Created active, included unit offerings for `DNDT 1202` and `DNDT 1207` for `DNDT JAN 26` in the active term (`September-December 2026`), ensuring all 7 Y1S2 units are on offer and eligible for registration.
+  - **Removed Restrictive Unit Suppression**: Removed the check in `getDepartmentRegistrationEditor` that previously suppressed any unit not strictly matching `isExpected`.
+  - **Flexible Multi-Tiered Unit Registration UI**:
+    1. **Expected Stage Units**: Highlighted and pre-checked by default for standard academic progression.
+    2. **Other Units Offered This Term**: Shows all other units offered for the student's cohort or programme during the active term, selectable with individual checkboxes.
+    3. **Expandable Additional Programme Units (Retakes & Carry-overs)**: Allows HODs to expand and pick ANY unit across the entire programme curriculum for students needing retakes from earlier stages or advance registrations.
+  - **Auto-Provisioning in Server Action**: In `registerStudentUnitsByDepartment`, if an HOD selects a valid programme curriculum unit that does not yet have an offering row for the student's cohort in the active period, it is automatically provisioned (`origin: 'special', exception_reason: 'Department unit offering'`) so registration saves seamlessly.
+  - **Optional Note Fallback**: Provided default note `'Department authorized registration'` when custom unit selections differ from expected units, preventing form rejections when HODs leave the note blank.
+
+### 2026-09-07: Student Registry — Admission Number Correction with Programme & Cohort Auto-Sync
+- **Files Added**:
+  - `supabase/migrations/20260907052500_update_student_admission_number.sql`
+  - `src/features/students/edit-admission-number-dialog.tsx`
+  - `src/tests/students/update-admission-number.test.ts`
+- **Files Modified**:
+  - `src/features/students/types.ts`
+  - `src/features/students/validation.ts`
+  - `src/features/students/actions.ts`
+  - `src/features/students/student-registry-table.tsx`
+  - `src/app/(dashboard)/students/registry/[studentId]/page.tsx`
+- **What Changed**:
+  - **Programme & Cohort Auto-Synchronization**: When an admission number is corrected to a different programme code (e.g. from `DHNT/...` to `DNDT/...`), the system automatically resolves the corresponding programme and intake cohort (e.g. `DNDT` and `DNDT JAN 26`). Both `students.programme_id`, `students.admission_cohort_id`, `students.current_cohort_id`, and active `student_cohort_assignments` are updated atomically.
+  - **Database RPC (`update_student_admission_number`)**: Enhanced PostgreSQL function supporting `new_programme_id` and `new_cohort_id` with row locking, department tenant isolation, uniqueness enforcement, student record updates, active cohort assignment updates, and audit logging to `student_lifecycle_events`.
+  - **Server Action Fallback Safety**: In `updateStudentAdmissionNumberAction`, if the database RPC hasn't been migrated yet (`PGRST202` schema cache), it runs the identical update logic directly via Supabase client, maintaining database integrity constraints (`validate_student_academic_identity` and `validate_student_cohort_assignment`).
+  - **Compact Fixed-Height Modal (`EditAdmissionNumberDialog`)**: Redesigned to be ultra-compact and fit within any viewport without scrolling (`max-h-[calc(100dvh-2rem)]`). Removed reason chips and extra textareas to keep the modal focused strictly on the student name, current admission number, corrected admission number input, and 1-line inference preview.
+  - **Registry UI Placement**: Removed the edit action from the broad registry list table (`/students/registry`) to avoid clutter and prevent accidental edits; the edit dialog is cleanly nested within the student detail page (`/students/registry/[studentId]`).
+  - **Unit Testing**: 9 Vitest assertions verifying schema validation, whitespace trimming, character constraints, and inference extraction.
+- **Manual Follow-up**:
+  - Run `supabase db push` or execute `20260907052500_update_student_admission_number.sql` in Supabase SQL editor to install/update the RPC.
 
 ### 2026-09-06: Student Unit Registration — 1-Click Unregister Action Button
+
 - **Files Modified**:
   - `src/features/student-unit-registration/undo-registration-button.tsx`
   - `src/features/student-unit-registration/student-unit-registration-table.tsx`

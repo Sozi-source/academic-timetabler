@@ -108,3 +108,34 @@ export const initialStudentProgressionActionState: StudentProgressionActionState
   status: 'idle',
   message: null,
 };
+
+export interface UpdateAdmissionNumberActionState {
+  status: 'idle' | 'success' | 'error';
+  message: string | null;
+  newAdmissionNumber?: string;
+  fieldErrors?: {
+    studentId?: string[];
+    admissionNumber?: string[];
+    reason?: string[];
+    notes?: string[];
+  };
+}
+
+export const initialUpdateAdmissionNumberActionState: UpdateAdmissionNumberActionState = {
+  status: 'idle',
+  message: null,
+};
+
+export interface BatchStudentActionState {
+  status: 'idle' | 'success' | 'error';
+  message: string | null;
+  updatedCount?: number;
+  fieldErrors?: Record<string, string[]>;
+}
+
+export const initialBatchStudentActionState: BatchStudentActionState = {
+  status: 'idle',
+  message: null,
+};
+
+

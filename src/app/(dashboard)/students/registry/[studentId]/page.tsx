@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { ProgressionForm } from '@/features/students/progression-form';
+import { EditAdmissionNumberDialog } from '@/features/students/edit-admission-number-dialog';
 import { getStudentById, getStudentCohortOptions, getStudentLifecycleEvents } from '@/features/students/queries';
 import type { StudentLifecycleEventType, StudentLifecycleStatus } from '@/features/students/types';
 
@@ -61,14 +62,22 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         icon={UserRound}
         context={<Badge variant={statusVariant(student.lifecycle_status)}>{student.lifecycle_status.replaceAll('_', ' ')}</Badge>}
         actions={
-          <Link
-            href={`/students/registry/${student.id}/portal-view`}
-            className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3.5 text-xs font-bold text-white shadow-2xs transition hover:bg-primary-hover active:scale-95"
-          >
-            <Eye className="size-3.5" />
-            <span>View as Student</span>
-          </Link>
+          <div className="flex items-center gap-2">
+            <EditAdmissionNumberDialog
+              studentId={student.id}
+              studentName={student.full_name}
+              currentAdmissionNumber={student.admission_number}
+            />
+            <Link
+              href={`/students/registry/${student.id}/portal-view`}
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3.5 text-xs font-bold text-white shadow-2xs transition hover:bg-primary-hover active:scale-95"
+            >
+              <Eye className="size-3.5" />
+              <span>View as Student</span>
+            </Link>
+          </div>
         }
+
       />
 
       <div className="grid gap-3 md:grid-cols-3">

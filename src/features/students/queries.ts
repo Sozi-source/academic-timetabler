@@ -212,3 +212,40 @@ export const getStudentCohortOptions = cache(async (programmeId: string): Promis
     expectedCompletionDate: row.expected_completion_date,
   }));
 });
+
+export interface RegistryCohortOption {
+  id: string;
+  code: string;
+  name: string;
+  programmeId: string;
+  programmeCode: string;
+}
+
+interface CohortWithProgrammeRow {
+  id: string;
+  code: string;
+  name: string;
+  programme_id: string;
+  programme: { code: string } | null;
+}
+
+export const getRegistryCohortOptions = cache(async (): Promise<RegistryCohortOption[]> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('cohorts')
+    .select('id, code, name, programme_id, programme:programmes!cohorts_programme_id_fkey(code)')
+    .in('status', ['planned', 'active'])
+    .order('name', { ascending: true });
+
+  if (error) throw new Error(`Unable to load cohort options: ${error.message}`);
+
+  const rows = (data ?? []) as unknown as CohortWithProgrammeRow[];
+  return rows.map((row) => ({
+    id: row.id,
+    code: row.code,
+    name: row.name,
+    programmeId: row.programme_id,
+    programmeCode: row.programme?.code ?? '',
+  }));
+});
+

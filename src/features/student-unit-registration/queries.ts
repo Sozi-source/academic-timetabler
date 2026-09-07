@@ -2,7 +2,7 @@ import { cache } from 'react';
 
 import { createClient } from '@/lib/supabase/server';
 
-import type { DepartmentRegistrationEditor, ProgrammeStageSetup, RegistrationStudent, UnitRegistrationContext } from './types';
+import type { DepartmentRegistrationEditor, DepartmentRegistrationUnit, ProgrammeStageSetup, RegistrationStudent, UnitRegistrationContext } from './types';
 
 export const getUnitRegistrationContext = cache(async (): Promise<UnitRegistrationContext> => {
   const supabase = await createClient();
@@ -158,7 +158,7 @@ export async function getDepartmentRegistrationEditor(
     return null;
   }
 
-  const [offeringResult, registrationResult, submissionResult, stageResult, stageUnitResult] = await Promise.all([
+  const [offeringResult, registrationResult, submissionResult, stageResult, stageUnitResult, programmeUnitsResult] = await Promise.all([
     supabase
       .from('unit_offerings')
       .select(`
@@ -191,6 +191,11 @@ export async function getDepartmentRegistrationEditor(
     supabase
       .from('programme_stage_units')
       .select('stage_id, unit_id'),
+    supabase
+      .from('units')
+      .select('id, code, name, academic_period_number')
+      .eq('programme_id', student.programme_id)
+      .order('code', { ascending: true }),
   ]);
 
   if (offeringResult.error) throw new Error(`Unable to load offered units: ${offeringResult.error.message}`);
@@ -198,6 +203,21 @@ export async function getDepartmentRegistrationEditor(
   if (submissionResult.error) throw new Error(`Unable to load registration status: ${submissionResult.error.message}`);
   if (stageResult.error) throw new Error(`Unable to load programme stages: ${stageResult.error.message}`);
   if (stageUnitResult.error) throw new Error(`Unable to load stage units: ${stageUnitResult.error.message}`);
+  if (programmeUnitsResult.error) throw new Error(`Unable to load programme units: ${programmeUnitsResult.error.message}`);
+
+  const stagesById = new Map((stageResult.data ?? []).map((s) => [s.id, s]));
+  const stageByUnitId = new Map<string, { stageId: string; stageName: string; stageCode: string; sequenceNumber: number }>();
+  for (const su of stageUnitResult.data ?? []) {
+    const s = stagesById.get(su.stage_id);
+    if (s) {
+      stageByUnitId.set(su.unit_id, {
+        stageId: s.id,
+        stageName: s.name,
+        stageCode: s.code,
+        sequenceNumber: s.sequence_number,
+      });
+    }
+  }
 
   const selected = new Set((registrationResult.data ?? []).map((row) => row.unit_id));
   const stageUnitIds = new Set(
@@ -206,32 +226,69 @@ export async function getDepartmentRegistrationEditor(
       .map((row) => row.unit_id),
   );
   const hasConfiguredStage = Boolean(student.current_stage_id && stageUnitIds.size > 0);
-  const available = new Map<string, { id: string; code: string; name: string; isExpected: boolean }>();
+
+  // Map of unit offerings in the active period for the student's programme
+  const offeredCohortUnitIds = new Set<string>();
+  const offeredProgrammeUnitIds = new Set<string>();
 
   for (const offering of offeringResult.data ?? []) {
     const unit = Array.isArray(offering.unit) ? offering.unit[0] : offering.unit;
     if (!unit || unit.programme_id !== student.programme_id) continue;
+    offeredProgrammeUnitIds.add(unit.id);
+    if (offering.cohort_id === student.current_cohort_id) {
+      offeredCohortUnitIds.add(unit.id);
+    }
+  }
 
+  // Collect all available units from programme curriculum & offerings
+  const unitsMap = new Map<string, DepartmentRegistrationUnit>();
+
+  for (const unit of programmeUnitsResult.data ?? []) {
+    const stageInfo = stageByUnitId.get(unit.id);
     const isExpected = hasConfiguredStage
       ? stageUnitIds.has(unit.id)
-      : offering.cohort_id === student.current_cohort_id;
+      : offeredCohortUnitIds.has(unit.id);
 
-    // Keep expected/currently-selected units visible. Other offered units are hidden
-    // from the normal workflow and can be surfaced only if already selected.
-    if (!isExpected && !selected.has(unit.id)) continue;
+    const isOfferedInTerm = offeredProgrammeUnitIds.has(unit.id);
+    const category: 'expected' | 'offered' | 'curriculum' = isExpected
+      ? 'expected'
+      : isOfferedInTerm
+        ? 'offered'
+        : 'curriculum';
 
-    const existing = available.get(unit.id);
-    available.set(unit.id, {
+    unitsMap.set(unit.id, {
       id: unit.id,
       code: unit.code,
       name: unit.name,
-      isExpected: Boolean(existing?.isExpected || isExpected),
+      isExpected,
+      isSelected: selected.size > 0 ? selected.has(unit.id) : isExpected,
+      category,
+      stageName: stageInfo?.stageName ?? (unit.academic_period_number ? `Semester ${unit.academic_period_number}` : null),
+      stageCode: stageInfo?.stageCode ?? (unit.academic_period_number ? `S${unit.academic_period_number}` : null),
     });
   }
 
   const programme = Array.isArray(student.programme) ? student.programme[0] : student.programme;
   const cohort = Array.isArray(student.current_cohort) ? student.current_cohort[0] : student.current_cohort;
   const currentStage = Array.isArray(student.current_stage) ? student.current_stage[0] : student.current_stage;
+
+  const categoryRank: Record<string, number> = {
+    expected: 0,
+    offered: 1,
+    curriculum: 2,
+  };
+
+  const sortedUnits = [...unitsMap.values()].sort((a, b) => {
+    const rankA = categoryRank[a.category ?? 'curriculum'];
+    const rankB = categoryRank[b.category ?? 'curriculum'];
+    if (rankA !== rankB) return rankA - rankB;
+
+    const seqA = stageByUnitId.get(a.id)?.sequenceNumber ?? 99;
+    const seqB = stageByUnitId.get(b.id)?.sequenceNumber ?? 99;
+    if (seqA !== seqB) return seqA - seqB;
+
+    return a.code.localeCompare(b.code);
+  });
 
   return {
     period: { id: period.id, code: period.code, name: period.name },
@@ -250,12 +307,7 @@ export async function getDepartmentRegistrationEditor(
       name: stage.name,
       sequenceNumber: stage.sequence_number,
     })),
-    units: [...available.values()]
-      .sort((a, b) => Number(b.isExpected) - Number(a.isExpected) || a.name.localeCompare(b.name))
-      .map((unit) => ({
-        ...unit,
-        isSelected: selected.size > 0 ? selected.has(unit.id) : unit.isExpected,
-      })),
+    units: sortedUnits,
     existingStatus: submissionResult.data?.status ?? 'not_submitted',
     existingNote:
       submissionResult.data?.verification_note ??

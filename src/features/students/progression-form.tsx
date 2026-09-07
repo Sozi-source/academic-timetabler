@@ -24,7 +24,7 @@ interface ProgressionFormProps {
 
 const labels = {
   deferral: 'Defer studies',
-  resumption: 'Resume studies',
+  resumption: 'Resume studies / Return to active cohort',
   programme_completion: 'Mark completed',
   graduation: 'Mark graduated',
 } as const;
@@ -36,7 +36,7 @@ function availableTransitions(status: StudentLifecycleStatus): Transition[] {
     return ['deferral', 'programme_completion'];
   }
   if (status === 'deferred') return ['resumption'];
-  if (status === 'completed') return ['graduation'];
+  if (status === 'completed') return ['graduation', 'resumption'];
   return [];
 }
 

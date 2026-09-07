@@ -7,6 +7,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { MetricCard } from '@/components/ui/metric-card';
 import { PageHeader } from '@/components/ui/page-header';
 import { requireHodAccess } from '@/features/auth/authorization';
+import { ReportingSyncDialog } from '@/features/student-reporting-sync/reporting-sync-dialog';
 import { getUnitRegistrationContext } from '@/features/student-unit-registration/queries';
 import { BatchRegistrationLink } from '@/features/student-unit-registration/batch-registration-link';
 import { StudentUnitRegistrationTable } from '@/features/student-unit-registration/student-unit-registration-table';
@@ -56,6 +57,7 @@ export default async function UnitRegistrationPage() {
               <ArrowLeft className="size-3.5" aria-hidden="true" />
               Students
             </Link>
+            <ReportingSyncDialog />
             <Link
               href="/students/unit-registration/stages"
               className="inline-flex h-9 items-center rounded-lg border border-border bg-surface px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"

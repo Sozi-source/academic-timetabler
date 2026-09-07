@@ -61,11 +61,52 @@ export async function registerStudentUnitsByDepartment(formData: FormData) {
   }
 
   const supabase = await createClient();
+
+  // Ensure every selected unit has an active unit offering in this period for registration validity
+  const { data: student } = await supabase
+    .from('students')
+    .select('current_cohort_id, programme_id')
+    .eq('id', studentId)
+    .single();
+
+  if (student?.current_cohort_id) {
+    const { data: existingOfferings } = await supabase
+      .from('unit_offerings')
+      .select('unit_id')
+      .eq('academic_period_id', academicPeriodId)
+      .in('unit_id', unitIds)
+      .eq('selection_state', 'included')
+      .neq('status', 'cancelled');
+
+    const offeredSet = new Set((existingOfferings ?? []).map((o) => o.unit_id));
+    const missingUnitIds = unitIds.filter((id) => !offeredSet.has(id));
+
+    if (missingUnitIds.length > 0) {
+      for (const missingId of missingUnitIds) {
+        await supabase
+          .from('unit_offerings')
+          .insert({
+            academic_period_id: academicPeriodId,
+            cohort_id: student.current_cohort_id,
+            unit_id: missingId,
+            selection_state: 'included',
+            status: 'active',
+            offering_type: 'classroom',
+            origin: 'special',
+            exception_reason: 'Department unit offering',
+            is_timetable_enabled: true,
+            weekly_sessions: 2,
+            session_duration_minutes: 120,
+          });
+      }
+    }
+  }
+
   const { error } = await supabase.rpc('department_register_student_units', {
     target_student_id: studentId,
     target_academic_period_id: academicPeriodId,
     selected_unit_ids: unitIds,
-    supplied_note: note || null,
+    supplied_note: note || 'Department authorized registration',
   });
 
   if (error) {
@@ -76,7 +117,7 @@ export async function registerStudentUnitsByDepartment(formData: FormData) {
 
   revalidatePath('/students/unit-registration');
   revalidatePath(`/students/unit-registration/register/${studentId}`);
-  redirect('/students/unit-registration?registered=1');
+  redirect(`/students/unit-registration/register/${studentId}?saved=1`);
 }
 
 
@@ -102,7 +143,7 @@ export async function setStudentProgrammeStage(formData: FormData) {
 
   revalidatePath('/students/unit-registration');
   revalidatePath(`/students/unit-registration/register/${studentId}`);
-  redirect(`/students/unit-registration/register/${studentId}`);
+  redirect(`/students/unit-registration/register/${studentId}?stage_updated=1`);
 }
 
 export async function createProgrammeStage(formData: FormData) {

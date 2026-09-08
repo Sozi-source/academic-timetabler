@@ -15,6 +15,24 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 3. **Source Data Organization (`Course_outlines.zip`)**:
    - Move Milkah Wambui's Learning Plan (scheme of work) from the "course outlines" folder to the correct "schemes of work" folder before re-ingesting.
 
+### 2026-09-08: Fix CHN Curriculum Stages & Y2S2 Unit Offerings
+- **Files Added**:
+  - `supabase/migrations/20260908123000_fix_chn_stages_and_offerings.sql`
+- **What Changed**:
+  - **Realigned CHN Stages**: Fixed an issue where all `CHN 23xx` units (intended for Year 2 Semester 3) were incorrectly bound to the `Y1S1` stage and had `academic_period_number = 1`. They have been reassigned to `Y2S3` with `academic_period_number = 6`. This fixes the "No stage units" blocker for Y2S3 students.
+  - **Provisioned Unit Offerings**: Created active unit offerings for all `CHN 22xx` units (Y2S2) for the `CHN JAN/MAR 25` cohort in the current active period. This resolves the "No matching units on offer" blocker for Y2S2 students in that cohort.
+- **Manual Follow-ups**:
+  - Run `supabase db push` to push migration `20260908123000_fix_chn_stages_and_offerings.sql` to your Supabase PostgreSQL database.
+
+### 2026-09-08: Student Unit Registration — Missing Cohort Fix
+- **Files Added**:
+  - `supabase/migrations/20260908113000_fix_department_register_student_units_cohort.sql`
+- **What Changed**:
+  - **Fixed Database RPC (`department_register_student_units`)**: Corrected an issue where saving unit registrations from the department interface threw an "Academic registration reference not found" error. The previous migration (`20260907091000...`) omitted the required `cohort_id`, `submission_id`, `source`, and `notes` fields in the `INSERT` clause for `student_unit_registrations`.
+  - **Maintained Conflict Resolution**: Preserved the new `ON CONFLICT DO UPDATE` upsert logic but populated all required `excluded.*` fields to strictly satisfy the `student_unit_registrations_validate` trigger constraint.
+- **Manual Follow-ups**:
+  - Run `supabase db push` to push migration `20260908113000_fix_department_register_student_units_cohort.sql` to your Supabase PostgreSQL database.
+
 ### 2026-09-07: Registrar Live Reporting Synchronization & Real-time Reconciliation (Phase 2)
 - **Files Added**:
   - `src/features/student-reporting-sync/types.ts`

@@ -55,7 +55,7 @@ export function StudentShell({ profile, children }: StudentShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const sidebar = (
-    <aside className="flex h-full w-[272px] shrink-0 flex-col bg-primary text-white lg:sticky lg:top-0 lg:h-dvh lg:self-start lg:overflow-y-auto">
+    <aside className="flex h-full w-[240px] shrink-0 flex-col bg-primary text-white lg:sticky lg:top-0 lg:h-dvh lg:self-start lg:overflow-y-auto">
       <div className="border-b border-white/10 px-4 py-3.5">
         <div className="flex items-center gap-3">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-institutional-yellow text-institutional-yellow-ink shadow-sm">
@@ -159,7 +159,7 @@ export function StudentShell({ profile, children }: StudentShellProps) {
         {mobileOpen ? (
           <div className="fixed inset-0 z-40 lg:hidden">
             <button className="absolute inset-0 bg-black/35" onClick={() => setMobileOpen(false)} aria-label="Close navigation" />
-            <div className="relative h-full w-[272px] max-w-[86vw]">{sidebar}</div>
+            <div className="relative h-full w-[240px] max-w-[86vw]">{sidebar}</div>
           </div>
         ) : null}
 

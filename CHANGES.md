@@ -15,6 +15,15 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 3. **Source Data Organization (`Course_outlines.zip`)**:
    - Move Milkah Wambui's Learning Plan (scheme of work) from the "course outlines" folder to the correct "schemes of work" folder before re-ingesting.
 
+### 2026-09-08: Class Attendance — Late Registration Logic Fix
+- **Files Added**:
+  - `supabase/migrations/20260908173000_fix_late_student_attendance.sql`
+- **What Changed**:
+  - **Late Reporting Fix**: Hardened the `open_class_attendance_session` PostgreSQL RPC to ensure that students who register late (due to fee challenges or other issues) are not retroactively added to past class attendance sheets.
+  - Added condition `and registration.registered_at::date <= target_session_date` to the attendance roster snapshot logic. Attendance will now only pick up students from the date they actually register/resume.
+- **Manual Follow-ups**:
+  - Run `supabase db push` or execute `20260908173000_fix_late_student_attendance.sql` in Supabase SQL editor to apply the changes.
+
 ### 2026-09-08: Fix CHN Curriculum Stages & Y2S2 Unit Offerings
 - **Files Added**:
   - `supabase/migrations/20260908123000_fix_chn_stages_and_offerings.sql`

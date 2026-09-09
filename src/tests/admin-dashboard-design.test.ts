@@ -3,13 +3,14 @@ import { describe, expect, it } from 'vitest';
 import { adminNavItems } from '@/components/layout/admin-sidebar';
 
 describe('Admin Portal Design Specification Verification', () => {
-  it('defines all 8 required sidebar navigation items from the design', () => {
+  it('defines all required sidebar navigation items from the design', () => {
     const labels = adminNavItems.map((item) => item.label);
 
     expect(labels).toEqual([
       'Dashboard',
       'Daily Operations',
       'Academic Planning',
+      'Unit Registration',
       'Quality Assurance',
       'Grading & Results',
       'Reports',
@@ -24,6 +25,7 @@ describe('Admin Portal Design Specification Verification', () => {
     expect(navMap.get('Dashboard')).toBe('/dashboard');
     expect(navMap.get('Daily Operations')).toBe('/operations');
     expect(navMap.get('Academic Planning')).toBe('/timetable');
+    expect(navMap.get('Unit Registration')).toBe('/students/unit-registration');
     expect(navMap.get('Quality Assurance')).toBe('/teaching-documents');
     expect(navMap.get('Grading & Results')).toBe('/assessment');
     expect(navMap.get('Reports')).toBe('/timetable/reports');

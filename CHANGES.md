@@ -15,7 +15,55 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 3. **Source Data Organization (`Course_outlines.zip`)**:
    - Move Milkah Wambui's Learning Plan (scheme of work) from the "course outlines" folder to the correct "schemes of work" folder before re-ingesting.
 
-<<<<<<< HEAD
+### 2026-09-09: Wide-Screen Responsiveness, Multi-Column Density & Microcopy Pruning
+- **Files Modified**:
+  - `src/app/globals.css`
+  - `src/components/layout/admin-sidebar.tsx`
+  - `src/components/layout/platform-shell.tsx`
+  - `src/components/layout/dashboard-sidebar.tsx`
+  - `src/components/layout/student-shell.tsx`
+  - `src/components/layout/assessment-shell.tsx`
+  - `src/components/staff/staff-shell.tsx`
+  - `src/components/student/student-portal-shell.tsx`
+  - `src/app/(dashboard)/teaching-documents/page.tsx`
+  - `src/app/(dashboard)/assessment/reports/page.tsx`
+  - `src/app/student/page.tsx`
+  - `src/app/trainer/exam-attendance/page.tsx`
+  - `src/features/scheduling-readiness/readiness-dashboard.tsx`
+  - `src/features/class-attendance/attendance-schedule-list.tsx`
+  - `src/app/(dashboard)/trainers/[id]/page.tsx`
+  - `src/app/(dashboard)/timetable/unit-equivalence/page.tsx`
+  - `src/features/timetable-generator/generator-issues.tsx`
+  - `src/features/imports/unit-offerings/unit-offering-template-download-panel.tsx`
+  - `src/features/dashboard/dashboard-view.tsx`
+  - `src/app/(dashboard)/operations/page.tsx`
+  - `src/app/(dashboard)/operations/action-center/page.tsx`
+  - `src/app/(dashboard)/timetable/page.tsx`
+  - `src/app/(dashboard)/timetable/unit-offerings/import/page.tsx`
+  - `src/app/(dashboard)/students/access/page.tsx`
+  - `src/app/(dashboard)/students/page.tsx`
+  - `src/features/timetable-conflicts/conflict-center.tsx`
+  - `src/features/timetable-publication/publication-workspace.tsx`
+  - `src/features/timetable-reports/report-workspace.tsx`
+  - `src/tests/admin-dashboard-design.test.ts`
+  - `CHANGES.md`
+- **What Changed**:
+  - **Sidebar Standardization Across All Shells**: Replaced oversized and hardcoded widths (e.g., `w-[272px]` in `student-shell.tsx`, `14.75rem` in staff/student shells) with a unified CSS variable `--sidebar-width: 14.5rem` (232px) and maximum drawer width `max-w-[85vw]`. Eliminated layout shifting and oversized sidebar footprints on widescreen monitors.
+  - **Bounded Responsive Content Viewports**: Standardized max content width `--content-max-width: 90rem` (1440px) across `PlatformShell`, `StudentShell`, `AssessmentShell`, `StaffShell`, and `StudentPortalShell`. Prevents excessive whitespace and horizontal bloating on 1920px+ and 4K displays.
+  - **Furnished Multi-Column Grid Scaling (Eliminating 2-Card Layout Swelling)**:
+    - `teaching-documents/page.tsx`: Replaced 2-metric card strip with 4-metric overview (`grid-cols-2 lg:grid-cols-4`) and replaced single full-width block with 4 actionable cards (Curriculum Library, Student Releases, Review Queue, Outline Editor).
+    - `assessment/reports/page.tsx`: Expanded 2 report cards into 4 distinct report generators (`grid-cols-2 lg:grid-cols-4`) with concise summary copy.
+    - `student/page.tsx`: Replaced 2 quick-action cards with a balanced 4-column student workspace (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-4`).
+    - `trainer/exam-attendance/page.tsx`: Expanded card grid from `md:grid-cols-2` to `sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4`.
+    - `scheduling-readiness/readiness-dashboard.tsx`: Upgraded issues grid from `lg:grid-cols-2` to `sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3` and balanced the bottom row into a 3-column span layout.
+    - `class-attendance/attendance-schedule-list.tsx`: Enhanced session grid from `lg:grid-cols-2` to `sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5`.
+    - `timetable/unit-equivalence/page.tsx`: Upgraded subject grid from `lg:grid-cols-2` to `sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4`.
+    - `timetable-generator/generator-issues.tsx`: Scaled conflicts grid to `sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3`.
+    - `trainers/[id]/page.tsx` & `unit-offering-template-download-panel.tsx`: Bounded 2-column layouts with `max-w-5xl` and `max-w-4xl` to preserve high visual density.
+  - **Microcopy Purge & Minimally Wordy UI**:
+    - Pruned verbose multi-sentence descriptions and repetitive disclaimers across `dashboard-view.tsx`, `operations/page.tsx`, `operations/action-center/page.tsx`, `timetable/page.tsx`, `unit-offerings/import/page.tsx`, `students/page.tsx`, `timetable-conflicts/conflict-center.tsx`, `publication-workspace.tsx`, and `report-workspace.tsx`.
+    - Converted rambling helper paragraphs into punchy 2-4 word tags and bulleted guidelines, significantly improving information density.
+
 ### 2026-09-09: Unit-Registration-Driven Student Timetable Resolution (Cross-Cohort / Deferment Support)
 - **Files Modified**:
   - `src/features/student-portal/queries.ts`
@@ -42,7 +90,7 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
   - **Database Migration**: Created `20260908221000_repair_class_attendance_roster.sql` backfilling `cohort_id` on `student_unit_registrations`, ensuring `department_register_student_units` persists `cohort_id`, and making `open_class_attendance_session` robust across shared and cross-cohort unit registrations.
 - **Manual Follow-up**:
   - Run `supabase db push` to apply `20260908221000_repair_class_attendance_roster.sql` to production database.
-=======
+
 ### 2026-09-08: Class Attendance — Late Registration Logic Fix
 - **Files Added**:
   - `supabase/migrations/20260908173000_fix_late_student_attendance.sql`
@@ -69,7 +117,6 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
   - **Maintained Conflict Resolution**: Preserved the new `ON CONFLICT DO UPDATE` upsert logic but populated all required `excluded.*` fields to strictly satisfy the `student_unit_registrations_validate` trigger constraint.
 - **Manual Follow-ups**:
   - Run `supabase db push` to push migration `20260908113000_fix_department_register_student_units_cohort.sql` to your Supabase PostgreSQL database.
->>>>>>> 5ceac1ce96f2f3f9d4926b69995ab2903f2d6f63
 
 ### 2026-09-07: Registrar Live Reporting Synchronization & Real-time Reconciliation (Phase 2)
 - **Files Added**:

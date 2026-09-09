@@ -125,98 +125,65 @@ export function BatchUnitRegistration({
 
   return (
     <div className="space-y-4 sm:space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <Link
-          href="/students/unit-registration"
-          className="inline-flex min-h-9 items-center rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
-        >
-          Back to Unit Registration
-        </Link>
-
-        <Link
-          href="/students/unit-registration/stages"
-          className="inline-flex min-h-9 items-center rounded-lg px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-100"
-        >
-          Programme stages
-        </Link>
-      </div>
-
       {summary ? (
         <section
           aria-live="polite"
-          className="overflow-hidden rounded-xl border border-emerald-200 bg-emerald-50"
+          className="grid divide-y divide-emerald-200 overflow-hidden rounded-xl border border-emerald-200 bg-emerald-50/50 sm:grid-cols-5 sm:divide-x sm:divide-y-0"
         >
-          <div className="border-b border-emerald-200 px-4 py-3 sm:px-5">
-            <h2 className="text-sm font-semibold text-emerald-950">
-              Batch registration completed
-            </h2>
-            <p className="mt-0.5 text-xs leading-5 text-emerald-800">
-              Existing unit registrations were preserved and skipped automatically.
-            </p>
+          <div className="px-4 py-3">
+            <div className="text-lg font-semibold text-emerald-950">
+              {summary.selected}
+            </div>
+            <div className="text-[11px] font-medium uppercase tracking-wide text-emerald-700">
+              Selected
+            </div>
           </div>
 
-          <div className="grid gap-px bg-emerald-200 sm:grid-cols-5">
-            <div className="bg-emerald-50 px-4 py-3">
-              <div className="text-lg font-semibold text-emerald-950">
-                {summary.selected}
-              </div>
-              <div className="text-[11px] font-medium uppercase tracking-wide text-emerald-700">
-                Selected
-              </div>
+          <div className="px-4 py-3">
+            <div className="text-lg font-semibold text-emerald-950">
+              {summary.eligible}
             </div>
-
-            <div className="bg-emerald-50 px-4 py-3">
-              <div className="text-lg font-semibold text-emerald-950">
-                {summary.eligible}
-              </div>
-              <div className="text-[11px] font-medium uppercase tracking-wide text-emerald-700">
-                Eligible
-              </div>
+            <div className="text-[11px] font-medium uppercase tracking-wide text-emerald-700">
+              Eligible
             </div>
+          </div>
 
-            <div className="bg-emerald-50 px-4 py-3">
-              <div className="text-lg font-semibold text-emerald-950">
-                {summary.created}
-              </div>
-              <div className="text-[11px] font-medium uppercase tracking-wide text-emerald-700">
-                Created
-              </div>
+          <div className="px-4 py-3">
+            <div className="text-lg font-semibold text-emerald-950">
+              {summary.created}
             </div>
-
-            <div className="bg-emerald-50 px-4 py-3">
-              <div className="text-lg font-semibold text-emerald-950">
-                {summary.skipped}
-              </div>
-              <div className="text-[11px] font-medium uppercase tracking-wide text-emerald-700">
-                Already registered
-              </div>
+            <div className="text-[11px] font-medium uppercase tracking-wide text-emerald-700">
+              Created
             </div>
+          </div>
 
+          <div className="px-4 py-3">
+            <div className="text-lg font-semibold text-emerald-950">
+              {summary.skipped}
+            </div>
+            <div className="text-[11px] font-medium uppercase tracking-wide text-emerald-700">
+              Already registered
+            </div>
+          </div>
+
+          <div className="px-4 py-3">
             <div
               className={
                 summary.attention > 0
-                  ? 'bg-amber-50 px-4 py-3'
-                  : 'bg-emerald-50 px-4 py-3'
+                  ? 'text-lg font-semibold text-amber-900'
+                  : 'text-lg font-semibold text-emerald-950'
               }
             >
-              <div
-                className={
-                  summary.attention > 0
-                    ? 'text-lg font-semibold text-amber-900'
-                    : 'text-lg font-semibold text-emerald-950'
-                }
-              >
-                {summary.attention}
-              </div>
-              <div
-                className={
-                  summary.attention > 0
-                    ? 'text-[11px] font-medium uppercase tracking-wide text-amber-700'
-                    : 'text-[11px] font-medium uppercase tracking-wide text-emerald-700'
-                }
-              >
-                Need attention
-              </div>
+              {summary.attention}
+            </div>
+            <div
+              className={
+                summary.attention > 0
+                  ? 'text-[11px] font-medium uppercase tracking-wide text-amber-700'
+                  : 'text-[11px] font-medium uppercase tracking-wide text-emerald-700'
+              }
+            >
+              Need attention
             </div>
           </div>
         </section>
@@ -249,18 +216,18 @@ export function BatchUnitRegistration({
       ) : null}
 
       <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-border bg-gradient-to-r from-primary/10 via-primary/[0.04] to-background px-5 py-4 sm:px-6">
+        <div className="border-b border-border bg-[#eef3f3] px-5 py-4 sm:px-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-inset ring-primary/15">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#dce7e7]">
               <svg
+                xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="1.8"
+                strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="h-5 w-5 text-primary"
-                aria-hidden="true"
+                className="h-5 w-5 text-[#426a6a]"
               >
                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                 <circle cx="9" cy="7" r="4" />
@@ -270,54 +237,54 @@ export function BatchUnitRegistration({
             </div>
 
             <div className="min-w-0">
-              <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+              <h1 className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
                 Batch unit registration
               </h1>
 
-              <p className="mt-0.5 text-sm text-muted-foreground">
+              <p className="mt-0.5 text-sm text-slate-600">
                 Register expected units by cohort or selected students.
               </p>
             </div>
           </div>
         </div>
 
-        <div className="grid gap-px bg-slate-200 sm:grid-cols-4">
-          <div className="bg-white px-4 py-3">
-            <div className="text-xl font-semibold text-slate-950">
+        <div className="grid divide-y divide-slate-200 sm:grid-cols-4 sm:divide-x sm:divide-y-0">
+          <div className="px-4 py-3">
+            <div className="text-lg font-semibold text-slate-950">
               {context.students.length}
             </div>
-            <div className="mt-0.5 text-[11px] font-medium uppercase tracking-wide text-slate-500">
+            <div className="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-500">
               Students
             </div>
           </div>
 
-          <div className="bg-white px-4 py-3">
-            <div className="text-xl font-semibold text-slate-950">
+          <div className="px-4 py-3">
+            <div className="text-lg font-semibold text-slate-950">
               {
                 context.students.filter(
                   (student) => student.eligible,
                 ).length
               }
             </div>
-            <div className="mt-0.5 text-[11px] font-medium uppercase tracking-wide text-slate-500">
+            <div className="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-500">
               Eligible
             </div>
           </div>
 
-          <div className="bg-white px-4 py-3">
-            <div className="text-xl font-semibold text-slate-950">
+          <div className="px-4 py-3">
+            <div className="text-lg font-semibold text-slate-950">
               {context.cohorts.length}
             </div>
-            <div className="mt-0.5 text-[11px] font-medium uppercase tracking-wide text-slate-500">
+            <div className="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-500">
               Cohorts
             </div>
           </div>
 
-          <div className="bg-white px-4 py-3">
-            <div className="text-sm font-semibold text-slate-950">
+          <div className="px-4 py-3">
+            <div className="text-sm font-semibold text-slate-950 uppercase">
               {context.period?.code ?? 'No active period'}
             </div>
-            <div className="mt-0.5 text-[11px] font-medium uppercase tracking-wide text-slate-500">
+            <div className="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-500">
               Academic period
             </div>
           </div>
@@ -604,7 +571,7 @@ export function BatchUnitRegistration({
           </div>
         </section>
 
-        <div className="sticky bottom-3 flex flex-wrap justify-end gap-2 rounded-xl border border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur">
+        <div className="sticky bottom-3 flex flex-wrap justify-end gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
           <button
             type="submit"
             formAction={dropUnconfirmedStudentUnits}
@@ -614,7 +581,7 @@ export function BatchUnitRegistration({
               }
             }}
             disabled={!context.period || selectedIds.size === 0}
-            className="inline-flex min-h-10 items-center justify-center rounded-lg border border-rose-200 bg-white px-4 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-10 items-center justify-center rounded-full px-5 text-sm font-medium text-rose-400 transition hover:bg-rose-50 hover:text-rose-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Drop unconfirmed units
           </button>
@@ -623,7 +590,7 @@ export function BatchUnitRegistration({
             type="submit"
             formAction={confirmReportedStudents}
             disabled={!context.period || selectedIds.size === 0}
-            className="inline-flex min-h-10 items-center justify-center rounded-lg border border-emerald-700 bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-10 items-center justify-center rounded-full bg-[#82b4a1] px-5 text-sm font-medium text-white transition hover:bg-[#6e9b8a] disabled:cursor-not-allowed disabled:opacity-50"
           >
             Confirm reported
           </button>
@@ -635,7 +602,7 @@ export function BatchUnitRegistration({
               (mode === 'cohort' && !cohortId) ||
               selectedIds.size === 0
             }
-            className="inline-flex min-h-10 items-center justify-center rounded-lg bg-primary px-4 text-sm font-bold text-white shadow-sm transition hover:bg-primary-hover active:scale-95 disabled:cursor-not-allowed disabled:bg-slate-300"
+            className="inline-flex min-h-10 items-center justify-center rounded-full bg-[#cbd5e1] px-5 text-sm font-medium text-white transition hover:bg-[#94a3b8] disabled:cursor-not-allowed disabled:bg-[#cbd5e1]"
           >
             {`Register Units (${selectedIds.size})`}
           </button>

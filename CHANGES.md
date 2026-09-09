@@ -14,6 +14,87 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
    - Update `curriculum-zip-upload-dialog.tsx` to display `unresolvedFiles` from the ingestion preview response, allowing HODs to select document types manually prior to commit.
 3. **Source Data Organization (`Course_outlines.zip`)**:
    - Move Milkah Wambui's Learning Plan (scheme of work) from the "course outlines" folder to the correct "schemes of work" folder before re-ingesting.
+### 2026-09-09: Phase 3 — Nested Portals Multi-Column Enhancement & Form Instructions Pruning
+- **Files Modified**:
+  - `src/app/(staff)/staff/units/page.tsx`
+  - `src/app/(staff)/staff/documents/page.tsx`
+  - `src/app/student/documents/page.tsx`
+  - `src/features/imports/master-data/master-data-import-upload-form.tsx`
+  - `src/features/imports/units/unit-import-upload-form.tsx`
+  - `src/features/imports/trainers/trainer-import-upload-form.tsx`
+  - `src/features/imports/teaching-allocations/teaching-allocation-import-upload-form.tsx`
+  - `src/features/imports/rooms/room-import-upload-form.tsx`
+- **What Changed**:
+  - **Staff Units Allocation Multi-Column Grid**: Upgraded trainer unit allocation list from single-column vertical stack (`space-y-3`) to a responsive multi-column card grid (`grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3`), furnishing each unit with its cohorts, combined badges, and status badge.
+  - **Staff Teaching Documents Grid**: Upgraded trainer teaching documents view from vertical rows to a multi-column card grid (`grid gap-3.5 sm:grid-cols-2 xl:grid-cols-3`), providing quick action buttons for Course Outline, Scheme of Work, and Record of Work per unit.
+  - **Student Documents Multi-Column Grid**: Upgraded student document download view from a single-column list card into a high-density 3-column card grid (`grid gap-3 sm:grid-cols-2 lg:grid-cols-3`) with download buttons and version badges.
+  - **Excel Import Upload Instructions Pruning**: Pruned long-winded paragraphs across all 5 master data and timetable import upload forms (`master-data`, `units`, `trainers`, `teaching-allocations`, `rooms`) to concise, professional 1-line guidance.
+- **Verification**: `npm run check` (`tsc --noEmit`, ESLint, Next.js build) passed with 0 errors across all 152 routes.
+
+### 2026-09-09: Phase 2 — System-Wide Layout Density, Multi-Column Scaling & Microcopy Pruning
+- **Files Modified**:
+  - `src/app/(dashboard)/students/unit-registration/register/[studentId]/page.tsx`
+  - `src/features/student-unit-registration/batch-unit-registration.tsx`
+  - `src/features/student-unit-registration/programme-stage-management.tsx`
+  - `src/app/(dashboard)/students/unit-registration/stages/page.tsx`
+  - `src/app/(dashboard)/students/unit-registration/batch/page.tsx`
+  - `src/app/(dashboard)/students/lifecycle-progression/page.tsx`
+  - `src/app/(dashboard)/testing/page.tsx`
+  - `src/app/(dashboard)/testing/deployments/page.tsx`
+  - `src/app/(dashboard)/testing/sign-off/page.tsx`
+  - `src/app/(dashboard)/attendance-clinical/class-attendance/analytics/page.tsx`
+  - `src/app/(dashboard)/operations/readiness/page.tsx`
+  - `src/app/(dashboard)/operations/daily-reports/page.tsx`
+  - `src/app/(dashboard)/students/reports/page.tsx`
+  - `src/app/(dashboard)/timetable/cohorts/page.tsx`
+  - `src/app/(dashboard)/timetable/programmes/page.tsx`
+  - `src/app/(dashboard)/timetable/units/page.tsx`
+  - `src/app/(dashboard)/assessment/analysis/[assessmentId]/page.tsx`
+  - `src/app/(dashboard)/assessment/analysis/page.tsx`
+  - `src/features/timetable-editor/editor-workspace.tsx`
+  - `src/features/timetable-conflicts/conflict-center.tsx`
+  - `src/features/timetable-publication/publication-workspace.tsx`
+  - `src/features/imports/master-data/master-data-import-review-page.tsx`
+  - `src/features/imports/unit-offerings/unit-offering-import-preview.tsx`
+  - `src/app/(dashboard)/operations/page.tsx`
+  - `src/app/(dashboard)/operations/action-center/page.tsx`
+  - `src/app/(dashboard)/operations/incidents/page.tsx`
+  - `src/app/(dashboard)/attendance/page.tsx`
+  - `src/app/(dashboard)/teaching-documents/review/page.tsx`
+  - `src/app/(dashboard)/timetable/unit-equivalence/page.tsx`
+  - `src/app/(dashboard)/timetable/units/import/[batchId]/page.tsx`
+  - `src/app/(dashboard)/timetable/unit-offerings/import/[batchId]/page.tsx`
+  - `src/app/(dashboard)/timetable/trainers/import/[batchId]/page.tsx`
+  - `src/app/(dashboard)/timetable/teaching-allocations/import/[batchId]/page.tsx`
+  - `src/app/(dashboard)/timetable/rooms/import/[batchId]/page.tsx`
+  - `src/app/(dashboard)/timetable/units/loading.tsx`
+  - `src/app/(dashboard)/timetable/unit-offerings/loading.tsx`
+  - `src/app/(dashboard)/timetable/trainers/loading.tsx`
+  - `src/app/(dashboard)/timetable/teaching-allocations/loading.tsx`
+  - `src/app/(dashboard)/timetable/rooms/loading.tsx`
+  - `src/app/(dashboard)/timetable/cohorts/loading.tsx`
+  - `src/app/(dashboard)/timetable/programmes/loading.tsx`
+  - `src/app/(dashboard)/trainers/page.tsx`
+  - `src/app/(dashboard)/timetable/units/import/page.tsx`
+  - `src/app/(dashboard)/timetable/cohorts/import/page.tsx`
+  - `src/app/(dashboard)/timetable/academic-years/page.tsx`
+  - `src/app/(dashboard)/timetable/academic-periods/page.tsx`
+  - `src/app/(dashboard)/timetable/time-slots/page.tsx`
+  - `src/app/(dashboard)/timetable/constraints/page.tsx`
+  - `src/app/(dashboard)/timetable/conflicts/page.tsx`
+  - `src/app/(dashboard)/timetable/trainers/import/page.tsx`
+  - `src/app/(dashboard)/timetable/teaching-allocations/import/page.tsx`
+  - `src/app/(dashboard)/timetable/rooms/import/page.tsx`
+  - `src/app/(dashboard)/students/unit-registration/page.tsx`
+  - `src/app/portal-theme.css`
+- **What Changed**:
+  - **Eliminated 2-Card Layout Bloat**: Replaced remaining `sm:grid-cols-2 xl:grid-cols-4` patterns with `sm:grid-cols-2 lg:grid-cols-4`, ensuring intermediate desktop and iPad landscape viewports (1024px–1279px) render 4 columns instead of 2 giant stretching cards. Upgraded 5-metric layouts to include intermediate `md:grid-cols-3` breakpoints.
+  - **Container Width Standardization**: Replaced legacy `max-w-[1500px]` and `max-w-[1600px]` wrappers with unified `max-w-[var(--content-max-width)]` (90rem/1440px) across stage setup, batch unit registration, and student lifecycle progression.
+  - **Multi-Column Checklist & Selection Grids**: Upgraded student unit registration checklists (`expectedUnits`, `otherOfferedUnits`, `curriculumUnits`), stage unit binding checkboxes, and timetable editor missing allocations from 2 columns to responsive 3–4 columns (`sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4`).
+  - **Portal Theme Grid Alignment**: Activated 4-column metric grids in `portal-theme.css` at `@media (min-width: 1024px)` instead of waiting for `1280px`.
+  - **Loading Skeleton Harmony**: Synchronized all timetable entity loading skeletons with the new `grid gap-3 sm:grid-cols-2 lg:grid-cols-4` layouts to eliminate layout shifting during navigation.
+  - **Microcopy Pruning**: Pruned long-winded page header descriptions across 14 dashboard and import views into concise microcopy.
+- **Verification**: `npm run check` (`tsc --noEmit`, ESLint, Next.js build) passed with 0 errors across all 152 routes.
 
 ### 2026-09-09: Wide-Screen Responsiveness, Multi-Column Density & Microcopy Pruning
 - **Files Modified**:

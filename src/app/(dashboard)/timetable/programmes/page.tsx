@@ -171,7 +171,7 @@ export default async function ProgrammesPage() {
 
       <section
         aria-label="Programme metrics"
-        className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
       >
         <MetricCard
           label="Registered programmes"

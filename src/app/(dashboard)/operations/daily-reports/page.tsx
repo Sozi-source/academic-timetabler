@@ -117,7 +117,7 @@ export default async function DailyReportsPage({
         </form>
       </section>
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
+      <section className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
         <SummaryCard
           label="Expected"
           value={workspace.summary.expectedTrainers}

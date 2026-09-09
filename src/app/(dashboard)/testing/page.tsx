@@ -99,7 +99,7 @@ export default async function SystemTestingPage() {
         }
       />
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <section className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
         <MetricCard
           label="Active period"
           value={snapshot.activePeriod?.name ?? 'None'}
@@ -187,7 +187,7 @@ export default async function SystemTestingPage() {
           </p>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {areas.map((area) => (
             <article key={area.key} className="rounded-xl border border-border bg-white px-4 py-4">
               <div className="flex items-start justify-between gap-3">

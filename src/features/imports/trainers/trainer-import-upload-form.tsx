@@ -98,9 +98,7 @@ export function TrainerImportUploadForm() {
             </h2>
 
             <p className="text-sm leading-6 text-text-muted">
-              Download the workbook, replace the
-              example data with real trainer records,
-              then upload the completed .xlsx file.
+              Fill trainer records using the template structure, then upload the workbook.
             </p>
 
             <TemplateDownloadLink

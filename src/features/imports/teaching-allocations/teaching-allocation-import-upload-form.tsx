@@ -98,10 +98,7 @@ export function TeachingAllocationImportUploadForm() {
             </h2>
 
             <p className="text-sm leading-6 text-text-muted">
-              Use Academic Period codes, cohort codes,
-              unit codes, trainer staff numbers and
-              optional room codes. Database identifiers
-              are resolved automatically.
+              Use period, cohort, unit, trainer, and room codes. Identifiers are resolved automatically.
             </p>
 
             <TemplateDownloadLink

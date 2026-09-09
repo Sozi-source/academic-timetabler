@@ -29,7 +29,7 @@ export function TimetableConflictCenter({
   data: ConflictCenterData;
 }) {
   return <div className="space-y-6">
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <MetricCard label="Open conflicts" value={String(data.summary.total - data.summary.resolved)} description="Requires review" icon={ShieldAlert}/>
       <MetricCard label="Blocking" value={String(data.summary.blocked)} description="Publication blockers" icon={CircleAlert}/>
       <MetricCard label="Warnings" value={String(data.summary.warnings)} description="Preference alerts" icon={AlertTriangle}/>

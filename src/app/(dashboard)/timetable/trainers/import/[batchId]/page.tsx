@@ -123,7 +123,7 @@ export default async function TrainerImportPreviewPage({
 
       <section
         aria-label="Import validation metrics"
-        className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
       >
         <MetricCard
           label="Workbook rows"

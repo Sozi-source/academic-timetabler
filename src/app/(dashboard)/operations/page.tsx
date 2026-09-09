@@ -152,7 +152,7 @@ export default async function OperationsPage() {
       />
 
       {/* 1. Standardized Metric Telemetry Strip */}
-      <section aria-label="Operational Telemetry" className="grid gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
+      <section aria-label="Operational Telemetry" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((card) => {
           const Icon = card.icon;
           const needsAction = card.value > 0;

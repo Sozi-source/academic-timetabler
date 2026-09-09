@@ -26,7 +26,7 @@ export default function ImportTrainersPage() {
       <PageHeader
         eyebrow="Bulk data import"
         title="Import trainers"
-        description="Upload the Trainers workbook, then validate and review before import."
+        description="Upload workbook and validate before import."
         context={
           <div className="inline-flex items-center gap-2 text-sm text-text-muted">
             <FileSpreadsheet

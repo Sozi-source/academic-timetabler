@@ -93,7 +93,7 @@ export function TimetablePublicationWorkspace({
   );
 
   return <div className="space-y-6">
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <MetricCard label="Versions" value={String(versions.length)} description="Saved snapshots" icon={FileClock}/>
       <MetricCard label="Next version" value={`v${nextVersionNumber}`} description={nextVersionTitle} icon={Clock3}/>
       <MetricCard label="Published sessions" value={String(published?.sessionCount ?? 0)} description={published ? `Live as v${published.versionNumber}` : 'Draft only'} icon={CalendarCheck2}/>

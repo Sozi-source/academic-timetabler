@@ -96,7 +96,7 @@ export function ProgrammeStageManagement({
         </div>
       </section>
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Metric
           icon={BookOpenCheck}
           label="Programmes"
@@ -293,7 +293,7 @@ export function ProgrammeStageManagement({
                                   </button>
                                 </div>
 
-                                <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+                                <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                                   {setup.units.map(
                                     (unit) => (
                                       <label

@@ -98,9 +98,7 @@ export function RoomImportUploadForm() {
             </h2>
 
             <p className="text-sm leading-6 text-text-muted">
-              Download the standardized workbook,
-              replace the example row with real room
-              records, and save it in .xlsx format.
+              Fill room records using the template structure, then upload the workbook.
             </p>
 
             <TemplateDownloadLink

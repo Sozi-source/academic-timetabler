@@ -104,7 +104,7 @@ export function MasterDataImportUploadForm({
               Fixed-header template
             </h2>
             <p className="text-sm leading-6 text-text-muted">
-              Keep every header unchanged. Fill the teal required columns; grey optional columns may remain blank and use safe defaults.
+              Keep headers unchanged. Fill required fields; optional fields may remain blank.
             </p>
             <TemplateDownloadLink
               entityType={entity}

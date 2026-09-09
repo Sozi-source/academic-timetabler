@@ -90,7 +90,7 @@ export default async function StudentDocumentsPage() {
             description="Published files will appear here."
           />
         ) : (
-          <Card className="divide-y divide-border">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {documents.map(
               (
                 document,
@@ -99,42 +99,47 @@ export default async function StudentDocumentsPage() {
                   key={
                     document.id
                   }
-                  className="grid gap-2 px-4 py-3.5 sm:grid-cols-[minmax(0,1fr)_9rem_auto] sm:items-center"
+                  className="flex flex-col justify-between rounded-xl border border-border bg-surface p-4 shadow-2xs transition hover:border-primary/40 hover:bg-primary-subtle/20"
                 >
                   <div>
-                    <p className="text-xs font-semibold text-text-primary">
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary font-bold">
+                        <FileText className="size-4" />
+                      </span>
+                      <Badge variant="neutral" className="text-[10px]">
+                        v{document.versionNumber}
+                      </Badge>
+                    </div>
+
+                    <h2 className="mt-3 text-sm font-bold text-text-primary line-clamp-1">
                       {
                         document.documentType
                       }
-                    </p>
+                    </h2>
 
-                    <p className="mt-0.5 text-[10px] text-text-muted">
+                    <p className="mt-0.5 text-xs text-text-muted line-clamp-2">
                       {
                         document.unitName
                       }
                     </p>
                   </div>
 
-                  <p className="text-[10px] text-text-muted">
-                    Version {
-                      document.versionNumber
-                    }
-                  </p>
-
-                  <a
-                    href={`/api/student/documents/${document.id}`}
-                    className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-2.5 text-[11px] font-semibold text-text-secondary transition hover:bg-surface-subtle"
-                  >
-                    <Download
-                      className="size-3"
-                      aria-hidden="true"
-                    />
-                    Download
-                  </a>
+                  <div className="mt-4 pt-3 border-t border-border flex justify-end">
+                    <a
+                      href={`/api/student/documents/${document.id}`}
+                      className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
+                    >
+                      <Download
+                        className="size-3.5"
+                        aria-hidden="true"
+                      />
+                      Download
+                    </a>
+                  </div>
                 </article>
               ),
             )}
-          </Card>
+          </div>
         )}
 
       </div>

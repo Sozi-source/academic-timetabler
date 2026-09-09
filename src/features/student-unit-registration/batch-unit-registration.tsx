@@ -316,7 +316,7 @@ export function BatchUnitRegistration({
             Registration scope
           </h2>
 
-          <div className="mt-3 grid gap-2 md:grid-cols-2">
+          <div className="mt-3 grid max-w-xl gap-2.5 sm:grid-cols-2">
             <button
               type="button"
               onClick={() => setMode('cohort')}

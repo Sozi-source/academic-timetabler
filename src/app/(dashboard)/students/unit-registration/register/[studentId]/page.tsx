@@ -163,7 +163,7 @@ export default async function DepartmentStudentUnitRegistrationPage({
                   </span>
                 </div>
                 {expectedUnits.length > 0 ? (
-                  <div className="grid gap-2 md:grid-cols-2">
+                  <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {expectedUnits.map((unit) => (
                       <label
                         key={unit.id}
@@ -205,7 +205,7 @@ export default async function DepartmentStudentUnitRegistrationPage({
                     </span>
                     <span className="text-[11px] text-text-muted">Offered for other cohorts / electives</span>
                   </div>
-                  <div className="grid gap-2 md:grid-cols-2">
+                  <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {otherOfferedUnits.map((unit) => (
                       <label
                         key={unit.id}
@@ -256,7 +256,7 @@ export default async function DepartmentStudentUnitRegistrationPage({
                   <p className="mb-3 mt-1.5 text-[11px] text-text-muted">
                     Select any unit from earlier stages for retakes/carry-overs or other curriculum requirements. Offerings are auto-provisioned.
                   </p>
-                  <div className="grid gap-2 md:grid-cols-2">
+                  <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {curriculumUnits.map((unit) => (
                       <label
                         key={unit.id}

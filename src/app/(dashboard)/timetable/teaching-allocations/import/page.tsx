@@ -26,7 +26,7 @@ export default function ImportTeachingAllocationsPage() {
       <PageHeader
         eyebrow="Bulk data import"
         title="Import teaching allocations"
-        description="Upload the workbook, resolve relationships and review conflicts before import."
+        description="Upload allocation workbook to import."
         context={
           <div className="inline-flex items-center gap-2 text-sm text-text-muted">
             <CalendarCheck2

@@ -148,7 +148,7 @@ export default async function TeachingDocumentReviewPage() {
                       }
                     </p>
 
-                    <div className="mt-3 grid gap-2 text-[10px] text-text-secondary sm:grid-cols-2 xl:grid-cols-4">
+                    <div className="mt-3 grid gap-2 text-[10px] text-text-secondary grid-cols-2 sm:grid-cols-4">
                       <div>
                         <p className="font-bold uppercase tracking-wide text-text-muted">
                           Trainer

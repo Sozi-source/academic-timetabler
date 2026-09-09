@@ -45,7 +45,7 @@ export default async function UnitRegistrationPage() {
       <PageHeader
         eyebrow="Registration"
         title="Unit Registration"
-        description="Batch register cohorts or manage individual student unit offerings."
+        description="Batch register cohorts and manage student unit selections."
         icon={BookOpenCheck}
         context={<Badge variant="institutional">{context.period.name}</Badge>}
         actions={(

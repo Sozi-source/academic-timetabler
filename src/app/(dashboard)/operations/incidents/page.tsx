@@ -41,7 +41,7 @@ export default async function ProductionIncidentsPage() {
       <PageHeader
         eyebrow="Pilot & Production"
         title="Operational incidents"
-        description="Track post-release incidents separately from UAT defects."
+        description="Post-release production and pilot incident tracking."
         icon={AlertTriangle}
         context={
           <Badge variant={blocking > 0 ? 'danger' : 'success'}>

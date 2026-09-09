@@ -97,7 +97,7 @@ export async function MasterDataImportReviewPage({
         }
       />
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard
           label="Workbook rows"
           value={String(batch.totalRows)}

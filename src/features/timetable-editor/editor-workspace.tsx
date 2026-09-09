@@ -43,7 +43,7 @@ export function TimetableEditorWorkspace({
             </div>
             <Link href="/timetable/generator" className="text-sm font-semibold text-primary hover:underline">Review placement issues</Link>
           </div>
-          <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-3 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {data.missingAllocations.map((allocation) => (
               <div key={allocation.id} className="rounded-xl border border-warning/20 bg-surface p-3 text-sm">
                 <p className="font-semibold text-text-primary">{allocation.unitCode} — {allocation.unitName}</p>

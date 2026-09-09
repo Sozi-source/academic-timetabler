@@ -26,7 +26,7 @@ export default function ImportUnitsPage() {
       <PageHeader
         eyebrow="Bulk data import"
         title="Import units"
-        description="Upload the Units workbook, resolve Programme Codes and validate before import."
+        description="Upload workbook and validate before import."
         context={
           <div className="inline-flex items-center gap-2 text-sm text-text-muted">
             <BookOpen

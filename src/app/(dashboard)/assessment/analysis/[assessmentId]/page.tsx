@@ -125,7 +125,7 @@ export default async function AssessmentAnalysisDetailPage({
         }
       />
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <section className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
         <MetricCard
           label="Registered"
           value={String(
@@ -233,7 +233,7 @@ export default async function AssessmentAnalysisDetailPage({
           </Badge>
         </div>
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
           <div className="rounded-lg border border-border bg-surface-subtle/40 px-3 py-3">
             <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-text-muted">
               Lowest

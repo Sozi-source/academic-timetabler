@@ -9,7 +9,7 @@ export default function ProgrammesLoading() {
         <Skeleton className="h-5 w-[42rem] max-w-full" />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({
           length: 4,
         }).map((_, index) => (

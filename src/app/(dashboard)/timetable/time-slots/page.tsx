@@ -129,8 +129,7 @@ export default async function TimetableCalendarPage({
           </h1>
 
           <p className="mt-1.5 max-w-2xl text-sm leading-6 text-text-secondary">
-            Configure teaching days and the daily
-            timetable structure for each Academic Period.
+            Teaching days and session time slots.
           </p>
         </div>
 

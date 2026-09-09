@@ -44,7 +44,7 @@ export default async function LifecycleProgressionPage({
   const error = first(params.error) ?? null;
 
   return (
-    <main className="mx-auto w-full max-w-[1500px] px-3 py-4 sm:px-5 sm:py-5 lg:px-6">
+    <main className="mx-auto w-full max-w-[var(--content-max-width)] px-3 py-4 sm:px-5 sm:py-5 lg:px-6">
       <StageProgressionManager
         context={context}
         summary={summary}

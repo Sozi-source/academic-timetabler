@@ -98,9 +98,7 @@ export function UnitImportUploadForm() {
             </h2>
 
             <p className="text-sm leading-6 text-text-muted">
-              Download the standardized workbook and
-              use existing Programme Codes to associate
-              every unit with the correct programme.
+              Use existing Programme Codes to link each unit to its programme.
             </p>
 
             <TemplateDownloadLink

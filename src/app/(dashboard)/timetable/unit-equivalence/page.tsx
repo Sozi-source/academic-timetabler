@@ -33,7 +33,7 @@ export default async function UnitEquivalencePage({ searchParams }: PageProps<'/
         <form key={canonical} action={approveEquivalenceGroupAction}>
           <Card className="space-y-3 p-4">
             <div className="flex items-start gap-3"><GitMerge className="mt-1 size-5 text-primary" /><div><p className="font-semibold">{rows[0].unit_name}</p><p className="text-xs text-text-muted">Exact normalized match · academic approval required</p></div></div>
-            <div className="grid gap-2 md:grid-cols-2">{rows.map((row) => <label key={row.unit_id} className="flex gap-2 rounded-lg border border-border p-3 text-sm"><input type="checkbox" name="unitId" value={row.unit_id} defaultChecked /><span><strong>{row.unit_code}</strong> — {row.unit_name}<br /><span className="text-xs text-text-muted">{row.programme_code} · {row.programme_name}</span></span></label>)}</div>
+            <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">{rows.map((row) => <label key={row.unit_id} className="flex gap-2 rounded-lg border border-border p-3 text-sm"><input type="checkbox" name="unitId" value={row.unit_id} defaultChecked /><span><strong>{row.unit_code}</strong> — {row.unit_name}<br /><span className="text-xs text-text-muted">{row.programme_code} · {row.programme_name}</span></span></label>)}</div>
             <div className="grid gap-2 md:grid-cols-[1fr_1fr_auto]"><Input name="canonicalName" defaultValue={rows[0].unit_name} aria-label="Canonical unit name" required /><Input name="notes" placeholder="Academic review note (optional)" aria-label="Review note" /><Button type="submit">Approve equivalence</Button></div>
           </Card>
         </form>

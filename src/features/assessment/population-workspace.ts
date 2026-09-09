@@ -112,49 +112,17 @@ export const getAllocationPopulationWorkspace = cache(
 
     // Allocation documents and allocation-level marks use the live unit
     // registration roster across every cohort taking this unit.
-    const reportingResult = await (supabase as any)
-      .from('student_period_reporting')
-      .select('student_id')
+    const { data: registrationData } = await supabase
+      .from('student_unit_registrations')
+      .select('student_id, registration_status, student:students(id, admission_number, full_name)')
       .eq('academic_period_id', alloc.academic_period_id)
-      .eq('reporting_status', 'reported');
-
-    const reportedStudentIds = ((reportingResult.data ?? []) as Array<{
-      student_id: string;
-    }>).map((row) => row.student_id);
-
-    let regStudents: Array<{
-      student_id: string;
-      student: Array<{
-        id: string;
-        admission_number: string | null;
-        full_name: string | null;
-      }> | {
-        id: string;
-        admission_number: string | null;
-        full_name: string | null;
-      } | null;
-    }> | null = [];
-
-    if (reportingResult.error || reportedStudentIds.length > 0) {
-      let registrationQuery = supabase
-        .from('student_unit_registrations')
-        .select('student_id, student:students(id, admission_number, full_name)')
-        .eq('academic_period_id', alloc.academic_period_id)
-        .eq('unit_id', alloc.unit_id)
-        .eq('registration_status', 'registered');
-
-      if (!reportingResult.error) {
-        registrationQuery = registrationQuery.in('student_id', reportedStudentIds);
-      }
-
-      const registrationResult = await registrationQuery;
-      regStudents = registrationResult.data;
-    }
+      .eq('unit_id', alloc.unit_id)
+      .eq('registration_status', 'registered');
 
     const students: AssessmentPopulationStudent[] = [];
 
-    if (regStudents && regStudents.length > 0) {
-      for (const reg of regStudents) {
+    if (registrationData && registrationData.length > 0) {
+      for (const reg of registrationData) {
         const st = Array.isArray(reg.student) ? reg.student[0] : reg.student;
         if (st?.id) {
           students.push({
@@ -167,7 +135,7 @@ export const getAllocationPopulationWorkspace = cache(
           });
         }
       }
-    } else if (reportingResult.error && alloc.cohort_id) {
+    } else if (alloc.cohort_id) {
       const { data: cohortStudents } = await supabase
         .from('students')
         .select('id, admission_number, full_name')

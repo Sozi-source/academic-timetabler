@@ -88,8 +88,8 @@
   --radius-xl: 1.25rem;
 
   /* Layout Constraints */
-  --content-max-width: 100rem;
-  --sidebar-width: 15.5rem;
+  --content-max-width: 90rem;
+  --sidebar-width: 14.5rem;
   --header-height: 4rem;
 }
 

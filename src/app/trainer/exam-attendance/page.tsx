@@ -25,7 +25,7 @@ export default async function TrainerExamAttendancePage() {
           <p className="mt-1 text-xs text-text-muted">No Unit Markbooks are currently assigned to you.</p>
         </Card>
       ) : (
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {units.map((unit) => {
             const locked = Boolean(unit.examMarksFinalizedAt);
             const complete = Boolean(unit.attendanceFinalizedAt);

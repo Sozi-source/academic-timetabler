@@ -139,7 +139,7 @@ export function DashboardSidebar({
             className="absolute inset-0 bg-black/25 backdrop-blur-[1px]"
           />
 
-          <aside className="relative h-full w-[min(17rem,80vw)] border-r border-border-soft bg-surface shadow-lg">
+          <aside className="relative h-full w-[var(--sidebar-width)] max-w-[85vw] border-r border-border-soft bg-surface shadow-lg">
             {sidebarContent}
           </aside>
         </div>

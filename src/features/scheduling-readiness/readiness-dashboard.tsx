@@ -104,7 +104,7 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
       {readiness.issues.length > 0 ? (
         <section className="space-y-2" aria-labelledby="readiness-issues-title">
           <h2 id="readiness-issues-title" className="text-lg font-semibold text-text-primary">Readiness issues</h2>
-          <div className="grid gap-2 lg:grid-cols-2">
+          <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
             {readiness.issues.map((entry) => (
               <article key={entry.id} className="rounded-xl border border-border bg-surface p-3 shadow-sm">
                 <div className="flex items-start gap-3">
@@ -306,13 +306,13 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
         </div>
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-xl border border-border bg-surface p-4 shadow-sm">
+      <section className="grid gap-4 lg:grid-cols-3">
+        <div className="rounded-xl border border-border bg-surface p-4 shadow-sm lg:col-span-2">
           <div className="flex items-center gap-2">
             <UsersRound className="size-5 text-primary" aria-hidden="true" />
             <h2 className="font-semibold text-text-primary">Trainer workload</h2>
           </div>
-          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
             {readiness.trainerWorkloads.map((workload) => (
               <div key={workload.trainerId} className="rounded-lg border border-border p-2.5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -330,15 +330,17 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
           </div>
         </div>
 
-        <div className="rounded-xl border border-border bg-surface p-4 shadow-sm">
-          <div className="flex items-center gap-2">
-            <Building2 className="size-5 text-primary" aria-hidden="true" />
-            <h2 className="font-semibold text-text-primary">Next step</h2>
+        <div className="rounded-xl border border-border bg-surface p-4 shadow-sm lg:col-span-1 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <Building2 className="size-5 text-primary" aria-hidden="true" />
+              <h2 className="font-semibold text-text-primary">Next step</h2>
+            </div>
+            <p className="mt-2 text-xs text-text-secondary">Resolve blockers, then generate the timetable.</p>
           </div>
-          <p className="mt-2 text-sm text-text-secondary">Resolve blockers, then generate the timetable.</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Link href="/timetable/generator" className={`inline-flex h-10 items-center justify-center rounded-xl px-4 text-sm font-semibold ${readiness.isReady ? 'bg-primary text-primary-foreground' : 'pointer-events-none bg-surface-muted text-text-muted'}`}>Open generator</Link>
-            <Link href="/timetable/rooms" className="inline-flex h-10 items-center justify-center rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary">Rooms</Link>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link href="/timetable/generator" className={`inline-flex h-9 items-center justify-center rounded-lg px-3.5 text-xs font-semibold ${readiness.isReady ? 'bg-primary text-primary-foreground' : 'pointer-events-none bg-surface-muted text-text-muted'}`}>Open generator</Link>
+            <Link href="/timetable/rooms" className="inline-flex h-9 items-center justify-center rounded-lg border border-border-strong bg-surface px-3.5 text-xs font-semibold text-text-secondary">Rooms</Link>
           </div>
         </div>
       </section>

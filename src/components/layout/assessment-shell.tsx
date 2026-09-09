@@ -44,7 +44,7 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
   const initials = getInitials(profile.fullName) || 'HD';
 
   const sidebar = (
-    <aside className="flex h-full w-[230px] shrink-0 flex-col bg-[#0b1727] text-slate-100 lg:sticky lg:top-0 lg:h-dvh lg:self-start lg:overflow-y-auto border-r border-[#1e293b]">
+    <aside className="flex h-full w-[var(--sidebar-width)] shrink-0 flex-col bg-[#0b1727] text-slate-100 lg:sticky lg:top-0 lg:h-dvh lg:self-start lg:overflow-y-auto border-r border-[#1e293b]">
       {/* Brand Header */}
       <div className="border-b border-[#1e293b] px-4 py-3.5">
         <Link href="/dashboard" className="flex items-center gap-2.5 group">
@@ -140,7 +140,7 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
               onClick={() => setMobileOpen(false)}
               aria-label="Close navigation"
             />
-            <div className="relative h-full w-[230px] max-w-[85vw]">{sidebar}</div>
+            <div className="relative h-full w-[var(--sidebar-width)] max-w-[85vw]">{sidebar}</div>
           </div>
         )}
         <div className="min-w-0 flex-1">
@@ -170,7 +170,7 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
             </div>
           </header>
 
-          <main className="mx-auto w-full max-w-[1600px] px-4 py-4 sm:px-6 lg:px-8 lg:py-5">
+          <main className="mx-auto w-full max-w-[var(--content-max-width)] px-4 py-4 sm:px-6 lg:px-8 lg:py-5">
             {children}
           </main>
         </div>

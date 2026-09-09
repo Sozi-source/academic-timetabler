@@ -25,7 +25,7 @@ export function PlatformShell({ profile, children }: PlatformShellProps) {
       />
 
       {/* Main Content Area */}
-      <div className="flex min-h-screen flex-col lg:pl-[215px]">
+      <div className="flex min-h-screen flex-col lg:pl-[var(--sidebar-width)]">
         {/* Top Header */}
         <AdminHeader
           profile={profile}
@@ -35,7 +35,7 @@ export function PlatformShell({ profile, children }: PlatformShellProps) {
         />
 
         {/* Page Content */}
-        <main className="flex-1 px-4 py-6 sm:px-8 sm:py-8 w-full max-w-[1600px] mx-auto">
+        <main className="flex-1 px-4 py-6 sm:px-8 sm:py-8 w-full max-w-[var(--content-max-width)] mx-auto">
           {children}
         </main>
       </div>

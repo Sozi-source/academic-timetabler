@@ -102,7 +102,11 @@ export async function POST(
         (adminDb as any).from('rooms').select('id, name').limit(1),
         match.teachingAllocationId || match.allocationId
           ? (adminDb as any).from('teaching_allocations').select('*').eq('id', match.teachingAllocationId || match.allocationId).maybeSingle()
-          : { data: null },
+          : (adminDb as any).from('teaching_allocations').select('*')
+              .eq('academic_period_id', periodId)
+              .eq('unit_id', match.unitId)
+              .eq('cohort_id', match.cohortId)
+              .maybeSingle(),
       ]);
 
       const workingDay = (days ?? []).find((d: any) => String(d.day_of_week).toLowerCase() === dayStr) || days?.[0];
@@ -110,10 +114,21 @@ export async function POST(
       const endSlot = (slots ?? []).find((s: any) => String(s.ends_at).slice(0, 5) === String(match.endTime || '10:00').slice(0, 5)) || slots?.[slots.length - 1] || startSlot;
       const room = (rooms ?? []).find((r: any) => r.name === match.roomName) || rooms?.[0];
 
-      const teachingAllocId = alloc?.data?.id || match.teachingAllocationId || match.allocationId;
-      const cohortId = alloc?.data?.cohort_id || match.cohortId;
-      const unitId = alloc?.data?.unit_id || match.unitId;
-      const trainerId = alloc?.data?.trainer_id || match.trainerId;
+      let teachingAllocId = alloc?.id || alloc?.data?.id || match.teachingAllocationId || match.allocationId;
+      if (!teachingAllocId) {
+        const { data: fallbackAlloc } = await (adminDb as any)
+          .from('teaching_allocations')
+          .select('id')
+          .eq('academic_period_id', periodId)
+          .eq('unit_id', match.unitId)
+          .limit(1)
+          .maybeSingle();
+        teachingAllocId = fallbackAlloc?.id;
+      }
+
+      const cohortId = match.cohortId || alloc?.cohort_id || alloc?.data?.cohort_id;
+      const unitId = match.unitId || alloc?.unit_id || alloc?.data?.unit_id;
+      const trainerId = match.trainerId || alloc?.trainer_id || alloc?.data?.trainer_id;
 
       if (workingDay && startSlot && endSlot && room && teachingAllocId && cohortId && unitId && trainerId) {
         await (adminDb as any).from('scheduled_sessions').upsert({
@@ -131,9 +146,20 @@ export async function POST(
           delivery_mode: 'lecture',
           status: 'locked',
           is_locked: true,
+          participant_cohort_ids: Array.isArray(match.participantCohortIds) && match.participantCohortIds.length > 0
+            ? match.participantCohortIds
+            : [cohortId],
         }, { onConflict: 'id' });
       }
     }
+  }
+
+  // Ensure scheduled session is locked if it was previously draft
+  if (existingSession && existingSession.status !== 'locked') {
+    await (adminDb as any)
+      .from('scheduled_sessions')
+      .update({ status: 'locked', is_locked: true, updated_at: new Date().toISOString() })
+      .eq('id', payload.scheduledSessionId);
   }
 
   const {
@@ -155,12 +181,44 @@ export async function POST(
     try {
       const { data: existingCs } = await (adminDb as any)
         .from('class_sessions')
-        .select('id')
+        .select('id, academic_period_id, unit_id, cohort_id')
         .eq('scheduled_session_id', payload.scheduledSessionId)
         .eq('session_date', payload.sessionDate)
         .maybeSingle();
 
       if (existingCs) {
+        // Self-heal: ensure entries exist in class_attendance_entries
+        const { count: existingCount } = await (adminDb as any)
+          .from('class_attendance_entries')
+          .select('*', { count: 'exact', head: true })
+          .eq('class_session_id', existingCs.id);
+
+        if (!existingCount || existingCount === 0) {
+          const { data: regStudents } = await (adminDb as any)
+            .from('student_unit_registrations')
+            .select('student_id, cohort_id')
+            .eq('academic_period_id', existingCs.academic_period_id)
+            .eq('unit_id', existingCs.unit_id)
+            .eq('registration_status', 'registered');
+
+          if (regStudents && regStudents.length > 0) {
+            const records = regStudents.map((st: any) => ({
+              class_session_id: existingCs.id,
+              student_id: st.student_id,
+              cohort_id: st.cohort_id || existingCs.cohort_id,
+              attendance_status: 'unmarked',
+            }));
+            await (adminDb as any)
+              .from('class_attendance_entries')
+              .upsert(records, { onConflict: 'class_session_id,student_id' });
+
+            await (adminDb as any)
+              .from('class_sessions')
+              .update({ roster_count: records.length, updated_at: new Date().toISOString() })
+              .eq('id', existingCs.id);
+          }
+        }
+
         return NextResponse.json({
           success: true,
           classSessionId: existingCs.id,
@@ -198,23 +256,53 @@ export async function POST(
         throw insertError || new Error('Failed to create class session');
       }
 
-      // Seed student registrations into class_attendance_entries
-      if (sessionData.cohort_id) {
-        const { data: students } = await (adminDb as any)
+      // Seed student registrations into class_attendance_entries from student_unit_registrations
+      let records: any[] = [];
+      if (sessionData.unit_id && sessionData.academic_period_id) {
+        const { data: regStudents } = await (adminDb as any)
+          .from('student_unit_registrations')
+          .select('student_id, cohort_id')
+          .eq('academic_period_id', sessionData.academic_period_id)
+          .eq('unit_id', sessionData.unit_id)
+          .eq('registration_status', 'registered');
+
+        if (regStudents && regStudents.length > 0) {
+          records = regStudents.map((st: any) => ({
+            class_session_id: newCs.id,
+            student_id: st.student_id,
+            cohort_id: st.cohort_id || sessionData.cohort_id,
+            attendance_status: 'unmarked',
+          }));
+        }
+      }
+
+      // Fallback to active cohort students using valid columns if no unit registrations exist
+      if (records.length === 0 && sessionData.cohort_id) {
+        const { data: cohortStudents } = await (adminDb as any)
           .from('students')
           .select('id')
-          .eq('cohort_id', sessionData.cohort_id)
-          .eq('status', 'active');
+          .eq('current_cohort_id', sessionData.cohort_id)
+          .in('lifecycle_status', ['admitted', 'active']);
 
-        if (students && students.length > 0) {
-          const records = students.map((st: any) => ({
+        if (cohortStudents && cohortStudents.length > 0) {
+          records = cohortStudents.map((st: any) => ({
             class_session_id: newCs.id,
             student_id: st.id,
             cohort_id: sessionData.cohort_id,
             attendance_status: 'unmarked',
           }));
-          await (adminDb as any).from('class_attendance_entries').upsert(records, { onConflict: 'class_session_id,student_id' });
         }
+      }
+
+      if (records.length > 0) {
+        await (adminDb as any)
+          .from('class_attendance_entries')
+          .upsert(records, { onConflict: 'class_session_id,student_id' });
+
+        await (adminDb as any)
+          .from('class_sessions')
+          .update({ roster_count: records.length, updated_at: new Date().toISOString() })
+          .eq('id', newCs.id);
       }
 
       return NextResponse.json({

@@ -221,7 +221,7 @@ export function AttendanceScheduleList({
           </div>
         </section>
       ) : (
-        <section className="grid gap-3 lg:grid-cols-2">
+        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           {displayedItems.map((item) => (
             <article
               key={item.scheduledSessionId}

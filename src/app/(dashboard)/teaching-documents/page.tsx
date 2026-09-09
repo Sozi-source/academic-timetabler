@@ -3,6 +3,7 @@ import {
   FileCheck2,
   FileOutput,
   FileText,
+  PencilLine,
   ShieldCheck,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -38,9 +39,9 @@ export default async function TeachingDocumentsPage() {
   return (
     <div className="space-y-5">
       <PageHeader
-        eyebrow="Academic operations"
+        eyebrow="Curriculum & QA"
         title="Teaching Documents"
-        description="Manage curriculum records, submissions and released documents."
+        description="Curriculum registry, trainer submissions and controlled student releases."
         icon={FileText}
         backHref="/dashboard"
         backLabel="Dashboard"
@@ -48,37 +49,28 @@ export default async function TeachingDocumentsPage() {
           <div className="flex flex-wrap gap-2">
             <Link
               href="/teaching-documents/curriculum"
-              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
             >
-              <BookOpenCheck
-                className="size-3.5"
-                aria-hidden="true"
-              />
-              Curriculum content
+              <BookOpenCheck className="size-3.5" aria-hidden="true" />
+              Curriculum
             </Link>
 
             <Link
               href="/teaching-documents/releases"
-              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
             >
-              <FileOutput
-                className="size-3.5"
-                aria-hidden="true"
-              />
-              Student releases
+              <FileOutput className="size-3.5" aria-hidden="true" />
+              Releases
             </Link>
 
             <Link
               href="/teaching-documents/review"
-              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
             >
-              <FileCheck2
-                className="size-3.5"
-                aria-hidden="true"
-              />
+              <FileCheck2 className="size-3.5" aria-hidden="true" />
               Review
               {counts.submitted > 0 ? (
-                <span className="rounded-full bg-warning-surface px-1.5 py-0.5 text-[9px] font-bold text-warning">
+                <span className="rounded-full bg-warning-surface px-1.5 py-0.2 text-[9px] font-bold text-warning">
                   {counts.submitted}
                 </span>
               ) : null}
@@ -87,55 +79,101 @@ export default async function TeachingDocumentsPage() {
         }
       />
 
-      <section className="grid gap-3 sm:grid-cols-2">
+      {/* 4-Metric Telemetry Strip */}
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard
-          label="Curriculum documents"
-          value={String(
-            curriculumDocuments,
-          )}
-          description="Active Course Outlines and Schemes"
+          label="Curriculum library"
+          value={String(curriculumDocuments)}
+          description="Outlines and schemes"
           icon={ShieldCheck}
           status="Controlled"
         />
 
         <MetricCard
           label="Awaiting review"
-          value={String(
-            counts.submitted,
-          )}
-          description="Submitted by trainers"
+          value={String(counts.submitted)}
+          description="Trainer submissions"
           icon={FileCheck2}
-          status={
-            counts.submitted > 0
-              ? 'Action'
-              : 'Clear'
-          }
+          status={counts.submitted > 0 ? 'Action' : 'Clear'}
+        />
+
+        <MetricCard
+          label="Active records"
+          value={String(counts.documents)}
+          description="Teaching documents"
+          icon={FileText}
+        />
+
+        <MetricCard
+          label="Master templates"
+          value={String(counts.activeTemplates)}
+          description="Standard TVET templates"
+          icon={BookOpenCheck}
         />
       </section>
 
-      <Link
-        href="/teaching-documents/curriculum"
-        className="block rounded-xl border border-border bg-white p-4 transition hover:border-border-strong hover:bg-surface-subtle/40"
-      >
-        <div className="flex items-start gap-3">
-          <div className="rounded-lg bg-surface-subtle p-2">
-            <BookOpenCheck
-              className="size-4 text-primary"
-              aria-hidden="true"
-            />
+      {/* 4 Core Operational Workspaces */}
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Link
+          href="/teaching-documents/curriculum"
+          className="group rounded-xl border border-border bg-white p-4 shadow-2xs transition hover:border-border-strong hover:bg-surface-subtle/40"
+        >
+          <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary transition group-hover:scale-105">
+            <BookOpenCheck className="size-4.5" aria-hidden="true" />
           </div>
+          <p className="mt-3 text-xs font-bold text-text-primary group-hover:text-primary transition-colors">
+            Curriculum Library
+          </p>
+          <p className="mt-1 text-[11px] text-text-muted leading-relaxed">
+            Manage course outlines and schemes of work.
+          </p>
+        </Link>
 
-          <div>
-            <h2 className="text-sm font-semibold text-text-primary">
-              Curriculum Content
-            </h2>
-
-            <p className="mt-1 text-[11px] leading-5 text-text-muted">
-              View, download, replace and manage active Course Outlines and Schemes of Work.
-            </p>
+        <Link
+          href="/teaching-documents/releases"
+          className="group rounded-xl border border-border bg-white p-4 shadow-2xs transition hover:border-border-strong hover:bg-surface-subtle/40"
+        >
+          <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary transition group-hover:scale-105">
+            <FileOutput className="size-4.5" aria-hidden="true" />
           </div>
-        </div>
-      </Link>
+          <p className="mt-3 text-xs font-bold text-text-primary group-hover:text-primary transition-colors">
+            Student Releases
+          </p>
+          <p className="mt-1 text-[11px] text-text-muted leading-relaxed">
+            Publish controlled documents to student portal.
+          </p>
+        </Link>
+
+        <Link
+          href="/teaching-documents/review"
+          className="group rounded-xl border border-border bg-white p-4 shadow-2xs transition hover:border-border-strong hover:bg-surface-subtle/40"
+        >
+          <div className="flex size-9 items-center justify-center rounded-lg bg-amber-50 text-amber-700 transition group-hover:scale-105">
+            <FileCheck2 className="size-4.5" aria-hidden="true" />
+          </div>
+          <p className="mt-3 text-xs font-bold text-text-primary group-hover:text-amber-700 transition-colors">
+            Review Queue
+          </p>
+          <p className="mt-1 text-[11px] text-text-muted leading-relaxed">
+            Verify and approve trainer document uploads.
+          </p>
+        </Link>
+
+        <Link
+          href="/teaching-documents/curriculum/editor"
+          className="group rounded-xl border border-border bg-white p-4 shadow-2xs transition hover:border-border-strong hover:bg-surface-subtle/40"
+        >
+          <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary transition group-hover:scale-105">
+            <PencilLine className="size-4.5" aria-hidden="true" />
+          </div>
+          <p className="mt-3 text-xs font-bold text-text-primary group-hover:text-primary transition-colors">
+            Outline Editor
+          </p>
+          <p className="mt-1 text-[11px] text-text-muted leading-relaxed">
+            Draft and modify modular curriculum outlines.
+          </p>
+        </Link>
+      </section>
     </div>
   );
 }

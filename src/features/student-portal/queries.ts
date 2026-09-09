@@ -652,8 +652,7 @@ export async function getStudentPortalTimetable(
     ]);
 
   if (
-    !student
-      ?.cohortId ||
+    !student ||
     !period
   ) {
     return [];
@@ -661,6 +660,59 @@ export async function getStudentPortalTimetable(
 
   const admin =
     adminClient();
+
+  // 1. Fetch student's active unit registrations for this period
+  const { data: regRows } = await admin
+    .from('student_unit_registrations')
+    .select('unit_id, cohort_id, unit_offering_id, registration_status')
+    .eq('student_id', studentId)
+    .eq('academic_period_id', period.id)
+    .eq('registration_status', 'registered');
+
+  const registeredUnits = (regRows ?? []) as UnknownRow[];
+  const hasRegistrations = registeredUnits.length > 0;
+
+  const registeredUnitIds = new Set<string>();
+  const regOfferingIds: string[] = [];
+
+  for (const reg of registeredUnits) {
+    const uId = asString(reg.unit_id);
+    const offId = asString(reg.unit_offering_id);
+    if (uId) {
+      registeredUnitIds.add(uId);
+    }
+    if (offId) {
+      regOfferingIds.push(offId);
+    }
+  }
+
+  // Resolve the cohort hosting the unit offering (e.g. Cohort B for deferred students)
+  const offeringCohortByUnit = new Map<string, string>();
+  if (regOfferingIds.length > 0) {
+    const { data: offerings } = await admin
+      .from('unit_offerings')
+      .select('id, unit_id, cohort_id')
+      .in('id', regOfferingIds);
+
+    if (offerings) {
+      for (const off of offerings) {
+        const uId = asString(off.unit_id);
+        const cId = asString(off.cohort_id);
+        if (uId && cId) {
+          offeringCohortByUnit.set(uId, cId);
+        }
+      }
+    }
+  }
+
+  // Fallback to reg.cohort_id if offering did not supply it
+  for (const reg of registeredUnits) {
+    const uId = asString(reg.unit_id);
+    const cId = asString(reg.cohort_id);
+    if (uId && cId && !offeringCohortByUnit.has(uId)) {
+      offeringCohortByUnit.set(uId, cId);
+    }
+  }
 
   const { data: publishedVersion } = await admin
     .from('timetable_versions')
@@ -675,16 +727,63 @@ export async function getStudentPortalTimetable(
   }
 
   const snapshotRaw = (publishedVersion.snapshot || []) as any[];
-  const sessions = snapshotRaw.filter((row: any) => {
-    const primaryCohortId = asString(row.cohortId);
-    const participantCohortIds = Array.isArray(row.participantCohortIds)
-      ? (row.participantCohortIds as string[])
-      : [];
-    return (
-      primaryCohortId === student.cohortId ||
-      participantCohortIds.includes(student.cohortId)
-    );
-  });
+
+  let sessions: any[] = [];
+
+  if (hasRegistrations) {
+    // Filter snapshot sessions to only those teaching the student's registered units
+    const unitSessions = snapshotRaw.filter((row: any) => {
+      const sessionUnitId = asString(row.unitId);
+      return sessionUnitId && registeredUnitIds.has(sessionUnitId);
+    });
+
+    const sessionsByUnit = new Map<string, any[]>();
+    for (const session of unitSessions) {
+      const uId = asString(session.unitId)!;
+      const list = sessionsByUnit.get(uId) ?? [];
+      list.push(session);
+      sessionsByUnit.set(uId, list);
+    }
+
+    for (const [uId, candidates] of sessionsByUnit.entries()) {
+      const targetCohortId = offeringCohortByUnit.get(uId);
+      if (targetCohortId) {
+        const cohortMatches = candidates.filter((row: any) => {
+          const sessionCohortId = asString(row.cohortId);
+          const participantCohortIds = Array.isArray(row.participantCohortIds)
+            ? (row.participantCohortIds as string[])
+            : [];
+          return (
+            sessionCohortId === targetCohortId ||
+            participantCohortIds.includes(targetCohortId)
+          );
+        });
+
+        if (cohortMatches.length > 0) {
+          sessions.push(...cohortMatches);
+          continue;
+        }
+      }
+
+      sessions.push(...candidates);
+    }
+  } else {
+    // Fallback if student has not registered units yet: show primary cohort timetable
+    if (!student.cohortId) {
+      return [];
+    }
+
+    sessions = snapshotRaw.filter((row: any) => {
+      const primaryCohortId = asString(row.cohortId);
+      const participantCohortIds = Array.isArray(row.participantCohortIds)
+        ? (row.participantCohortIds as string[])
+        : [];
+      return (
+        primaryCohortId === student.cohortId ||
+        participantCohortIds.includes(student.cohortId)
+      );
+    });
+  }
 
   if (sessions.length === 0) {
     return [];

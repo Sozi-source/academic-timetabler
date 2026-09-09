@@ -56,12 +56,10 @@ export function DashboardView({
         {/* Operational Controls & Quick Action Strip */}
         <div className="flex flex-wrap items-center justify-between gap-3 pb-1 border-b border-gray-100">
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 text-[11px] font-semibold text-emerald-800">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-800">
               <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
               Live Operational Hub
             </span>
-            <span className="hidden text-xs text-gray-400 sm:inline">•</span>
-            <span className="hidden text-xs text-gray-500 sm:inline">Telemetry & Management Control</span>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -184,9 +182,9 @@ export function DashboardView({
         <section aria-labelledby="department-modules-heading" className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 id="department-modules-heading" className="text-xs font-bold uppercase tracking-wider text-gray-700">
-              Department Core Modules
+              Core Modules
             </h2>
-            <span className="text-[11px] font-medium text-gray-500">8 Operational Workspaces</span>
+            <span className="text-[11px] font-medium text-gray-500">8 Workspaces</span>
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
@@ -310,7 +308,7 @@ export function DashboardView({
             <h2 id="quick-access-heading" className="text-xs font-bold uppercase tracking-wider text-gray-700">
               Quick Shortcuts
             </h2>
-            <span className="text-[11px] font-medium text-gray-500">Direct Workspace Links</span>
+            <span className="text-[11px] font-medium text-gray-500">Quick Links</span>
           </div>
 
           <div className="overflow-hidden rounded-xl border border-gray-200/90 bg-white shadow-2xs">
@@ -364,7 +362,7 @@ export function DashboardView({
       {/* ========================================================= */}
       <aside
         aria-label="Operational Pulse & Shortcuts"
-        className="hidden 2xl:block 2xl:w-72 min-[1800px]:w-80 shrink-0 space-y-4"
+        className="hidden 2xl:block 2xl:w-64 min-[1800px]:w-72 shrink-0 space-y-4"
       >
         {/* Card 1: Academic Session Pulse */}
         <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-xs">

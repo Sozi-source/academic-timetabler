@@ -333,7 +333,7 @@ export default async function TrainerDetailsPage({
       </section>
 
       {/* 4. Detailed Profile & Workload Information Grid */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 max-w-5xl">
         {/* Contact & Administrative Details */}
         <section aria-labelledby="contact-info-heading" className="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-gray-100 pb-3">

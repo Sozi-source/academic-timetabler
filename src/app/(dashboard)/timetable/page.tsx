@@ -31,24 +31,24 @@ export default async function TimetableHubPage() {
 
   const schedulingSteps = [
     {
-      title: 'Step 1: Check Readiness',
-      description: 'Validate unit offerings, allocations, and room availability before generation.',
+      title: 'Check Readiness',
+      description: 'Offerings, allocations & room limits.',
       href: '/timetable/readiness',
       icon: ClipboardCheck,
       badge: 'Step 1',
       color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
     },
     {
-      title: 'Step 2: Review & Edit',
-      description: 'Interactive session editor with automatic clash detection and room moves.',
+      title: 'Review & Edit',
+      description: 'Clash-detected schedule editor.',
       href: '/timetable/editor',
       icon: PencilRuler,
       badge: 'Step 2',
       color: 'bg-blue-50 text-blue-700 border-blue-200',
     },
     {
-      title: 'Step 3: Published Timetables',
-      description: 'Manage live timetable snapshots published to student and staff portals.',
+      title: 'Published Timetables',
+      description: 'Active snapshots on portals.',
       href: '/timetable/published',
       icon: FileChartColumn,
       badge: 'Step 3',
@@ -56,7 +56,7 @@ export default async function TimetableHubPage() {
     },
     {
       title: 'Timetable Reports',
-      description: 'Download master department timetables, trainer schedules, and room allocation sheets.',
+      description: 'PDF & Word export center.',
       href: '/timetable/reports',
       icon: ListChecks,
       badge: 'Export',
@@ -67,60 +67,60 @@ export default async function TimetableHubPage() {
   const masterSetupItems = [
     {
       label: 'Academic Periods',
-      description: 'Terms, semesters, and session dates',
+      description: 'Term & semester dates',
       href: '/timetable/academic-periods',
       icon: CalendarRange,
     },
     {
       label: 'Programmes & Cohorts',
-      description: 'Class groups and curriculum structures',
+      description: 'Class groups & curriculum',
       href: '/timetable/cohorts',
       icon: School,
     },
     {
       label: 'Unit Offerings',
-      description: 'Units slated for the active academic term',
+      description: 'Active term offerings',
       href: '/timetable/unit-offerings',
       icon: BookOpen,
     },
     {
       label: 'Trainers & Staff',
-      description: 'Trainer directory, availability & access',
+      description: 'Staff directory & loads',
       href: '/timetable/trainers',
       icon: UserRound,
     },
     {
       label: 'Teaching Allocations',
-      description: 'Unit assignments to teaching staff',
+      description: 'Trainer assignments',
       href: '/timetable/teaching-allocations',
       icon: Presentation,
     },
     {
       label: 'Lecture Rooms',
-      description: 'Classrooms, labs, and capacity limits',
+      description: 'Venues & capacity',
       href: '/timetable/rooms',
       icon: Building2,
     },
     {
       label: 'Scheduling Constraints',
-      description: 'Rules, forbidden slots, and limits',
+      description: 'Rules & forbidden slots',
       href: '/timetable/constraints',
       icon: SlidersHorizontal,
     },
     {
       label: 'Excel Master Imports',
-      description: 'Bulk upload cohorts, units, and trainers',
+      description: 'Bulk data upload',
       href: '/timetable/imports',
       icon: FileSpreadsheet,
     },
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="max-w-[var(--content-max-width)] mx-auto space-y-6">
       <PageHeader
         eyebrow="Academic Operations"
         title="Academic Planning & Timetabling"
-        description="Comprehensive timetable generation, live schedule editing, and master institutional setup."
+        description="Schedule generation, live editing, and master institutional setup."
         icon={CalendarDays}
         backHref="/dashboard"
         backLabel="Dashboard"

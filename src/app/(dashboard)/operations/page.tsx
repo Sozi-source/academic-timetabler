@@ -196,8 +196,8 @@ export default async function OperationsPage() {
           <p className="mt-3 text-xs font-bold text-gray-900 group-hover:text-[#033B36] transition-colors">
             Action Center
           </p>
-          <p className="mt-1 text-[11px] text-gray-500 leading-relaxed">
-            Prioritised operational and release follow-up.
+          <p className="mt-1 text-[11px] text-gray-500">
+            Prioritised release follow-up.
           </p>
         </Link>
 
@@ -211,8 +211,8 @@ export default async function OperationsPage() {
           <p className="mt-3 text-xs font-bold text-gray-900 group-hover:text-amber-700 transition-colors">
             Operational Incidents
           </p>
-          <p className="mt-1 text-[11px] text-gray-500 leading-relaxed">
-            Pilot and production incident register.
+          <p className="mt-1 text-[11px] text-gray-500">
+            Production incident log.
           </p>
         </Link>
 
@@ -226,8 +226,8 @@ export default async function OperationsPage() {
           <p className="mt-3 text-xs font-bold text-gray-900 group-hover:text-[#033B36] transition-colors">
             Attendance Oversight
           </p>
-          <p className="mt-1 text-[11px] text-gray-500 leading-relaxed">
-            Review and audit trainer class attendance logs.
+          <p className="mt-1 text-[11px] text-gray-500">
+            Audit class attendance registers.
           </p>
         </Link>
 
@@ -241,8 +241,8 @@ export default async function OperationsPage() {
           <p className="mt-3 text-xs font-bold text-gray-900 group-hover:text-[#033B36] transition-colors">
             Student Documents
           </p>
-          <p className="mt-1 text-[11px] text-gray-500 leading-relaxed">
-            Publish approved controlled documents to portal.
+          <p className="mt-1 text-[11px] text-gray-500">
+            Publish approved documents.
           </p>
         </Link>
 
@@ -256,8 +256,8 @@ export default async function OperationsPage() {
           <p className="mt-3 text-xs font-bold text-gray-900 group-hover:text-[#B45309] transition-colors">
             Academic Reports
           </p>
-          <p className="mt-1 text-[11px] text-gray-500 leading-relaxed">
-            Review assessment completeness & marks.
+          <p className="mt-1 text-[11px] text-gray-500">
+            Assessment & marks summary.
           </p>
         </Link>
       </section>

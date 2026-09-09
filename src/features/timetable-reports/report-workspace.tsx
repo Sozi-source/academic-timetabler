@@ -186,13 +186,13 @@ export function TimetableReportsWorkspace({
 }) {
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <MetricCard label="Scheduled sessions" value={String(data.summary.totalSessions)} description="All draft, confirmed and locked sessions." icon={CalendarClock} />
-        <MetricCard label="Contact hours" value={`${data.summary.totalContactHours}`} description="Total scheduled teaching hours in the selected period." icon={Clock3} />
-        <MetricCard label="Cohorts" value={String(data.summary.distinctCohorts)} description="Distinct cohorts represented in the timetable." icon={UsersRound} />
-        <MetricCard label="Trainers" value={String(data.summary.distinctTrainers)} description="Distinct trainers with scheduled teaching." icon={BookOpenCheck} />
-        <MetricCard label="Rooms" value={String(data.summary.distinctRooms)} description="Distinct teaching spaces currently in use." icon={Building2} />
-        <MetricCard label="Locked sessions" value={String(data.summary.lockedSessions)} description="Sessions protected from regeneration." icon={LockKeyhole} />
+      <div className="grid gap-3.5 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
+        <MetricCard label="Scheduled sessions" value={String(data.summary.totalSessions)} description="Draft & confirmed" icon={CalendarClock} />
+        <MetricCard label="Contact hours" value={`${data.summary.totalContactHours}`} description="Teaching hours" icon={Clock3} />
+        <MetricCard label="Cohorts" value={String(data.summary.distinctCohorts)} description="Active cohorts" icon={UsersRound} />
+        <MetricCard label="Trainers" value={String(data.summary.distinctTrainers)} description="Active trainers" icon={BookOpenCheck} />
+        <MetricCard label="Rooms" value={String(data.summary.distinctRooms)} description="Active rooms" icon={Building2} />
+        <MetricCard label="Locked sessions" value={String(data.summary.lockedSessions)} description="Protected sessions" icon={LockKeyhole} />
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-4 shadow-sm">
@@ -200,10 +200,10 @@ export function TimetableReportsWorkspace({
           <p className="text-sm font-semibold text-text-primary">Report output</p>
           <p className="mt-1 text-xs text-text-muted">
             {report === 'trainer'
-              ? 'Export complete institution-wide personal trainer timetables as editable Word or PDF.'
+              ? 'Export trainer timetables as Word or PDF.'
               : report === 'master'
-                ? 'Export the department master timetable as editable Word, PDF or CSV.'
-                : 'Print this report or download its CSV data.'}
+                ? 'Export master timetable as Word, PDF or CSV.'
+                : 'Print report or download CSV data.'}
           </p>
         </div>
         <TimetableReportActions academicPeriodId={academicPeriodId} report={report} />

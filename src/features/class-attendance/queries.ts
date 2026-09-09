@@ -356,14 +356,57 @@ export async function getClassAttendanceWorkspace(
       cs.academic_period_id ? (supabase as any).from('academic_periods').select('name').eq('id', cs.academic_period_id).maybeSingle() : { data: null },
       cs.unit_id ? (supabase as any).from('units').select('name').eq('id', cs.unit_id).maybeSingle() : { data: null },
       cs.cohort_id ? (supabase as any).from('cohorts').select('name').eq('id', cs.cohort_id).maybeSingle() : { data: null },
-      (supabase as any).from('class_attendance_records').select('student_id, status, note, students(admission_number, full_name)').eq('class_session_id', cs.id),
+      (supabase as any).from('class_attendance_entries').select('student_id, attendance_status, note, students(admission_number, full_name)').eq('class_session_id', cs.id),
     ]);
 
-    const students = (records ?? []).map((r: any) => ({
+    let finalRecords = records ?? [];
+
+    if (finalRecords.length === 0 && cs.unit_id && cs.academic_period_id) {
+      try {
+        const { createAdminClient } = await import('@/lib/supabase/admin');
+        const adminDb = createAdminClient();
+
+        const { data: regStudents } = await (adminDb as any)
+          .from('student_unit_registrations')
+          .select('student_id, cohort_id, students(admission_number, full_name)')
+          .eq('academic_period_id', cs.academic_period_id)
+          .eq('unit_id', cs.unit_id)
+          .eq('registration_status', 'registered');
+
+        if (regStudents && regStudents.length > 0) {
+          const newEntries = regStudents.map((reg: any) => ({
+            class_session_id: cs.id,
+            student_id: reg.student_id,
+            cohort_id: reg.cohort_id || cs.cohort_id,
+            attendance_status: 'unmarked',
+          }));
+
+          await (adminDb as any)
+            .from('class_attendance_entries')
+            .upsert(newEntries, { onConflict: 'class_session_id,student_id' });
+
+          await (adminDb as any)
+            .from('class_sessions')
+            .update({ roster_count: newEntries.length, updated_at: new Date().toISOString() })
+            .eq('id', cs.id);
+
+          finalRecords = regStudents.map((r: any) => ({
+            student_id: r.student_id,
+            attendance_status: 'unmarked',
+            note: null,
+            students: r.students,
+          }));
+        }
+      } catch (syncErr) {
+        console.warn('Auto-seed class_attendance_entries failed:', syncErr);
+      }
+    }
+
+    const students = finalRecords.map((r: any) => ({
       studentId: String(r.student_id),
       admissionNumber: String(r.students?.admission_number || ''),
       fullName: String(r.students?.full_name || 'Student'),
-      attendanceStatus: (r.status || 'unmarked') as ClassAttendanceStatus,
+      attendanceStatus: (r.attendance_status || r.status || 'unmarked') as ClassAttendanceStatus,
       note: r.note ? String(r.note) : null,
     }));
 

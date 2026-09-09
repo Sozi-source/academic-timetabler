@@ -15,6 +15,33 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 3. **Source Data Organization (`Course_outlines.zip`)**:
    - Move Milkah Wambui's Learning Plan (scheme of work) from the "course outlines" folder to the correct "schemes of work" folder before re-ingesting.
 
+### 2026-09-09: Unit-Registration-Driven Student Timetable Resolution (Cross-Cohort / Deferment Support)
+- **Files Modified**:
+  - `src/features/student-portal/queries.ts`
+  - `CHANGES.md`
+- **What Changed**:
+  - **Registration-Driven Timetable Filtering**: Refactored `getStudentPortalTimetable` in `src/features/student-portal/queries.ts` to query `student_unit_registrations` for the student's active registered units in the current academic period.
+  - **Cross-Cohort / Deferment Session Resolution**: Resolves the exact unit offering hosting each registered unit (`unit_offerings.cohort_id`), matching the timetable sessions of the cohort teaching those units (e.g. Cohort B for a student of Cohort A who deferred or is retaking units).
+  - **Graceful Fallback**: If a student has not registered units yet, falls back to previewing her primary cohort's published schedule.
+  - **Root Cause Eliminated**: Eliminated the hardcoded `primaryCohortId === student.cohortId` filter which previously locked deferred students to their old cohort's schedule and completely hid the units they registered for with other cohorts.
+
+### 2026-09-08: Class Attendance Student Roster Repair & Multi-Layer Roster Reconciliation
+- **Files Added**:
+  - `supabase/migrations/20260908221000_repair_class_attendance_roster.sql`
+- **Files Modified**:
+  - `src/features/assessment/population-workspace.ts`
+  - `src/app/api/staff/attendance/sessions/route.ts`
+  - `src/features/class-attendance/queries.ts`
+  - `CHANGES.md`
+- **What Changed**:
+  - **Direct Registered Students Access in Documents**: Updated `getAllocationPopulationWorkspace` in `population-workspace.ts` to make `student_unit_registrations` the primary authoritative roster source for class attendance registers. Removed the exclusionary gate on `student_period_reporting.reporting_status = 'reported'` which caused 0 students to appear because term reporting was in 'pending' status for the semester.
+  - **Timetable Snapshot Allocation Resolution & Session Locking**: In `src/app/api/staff/attendance/sessions/route.ts`, added lookup of `teaching_allocations` by `(academic_period_id, unit_id, cohort_id)` when the timetable snapshot omitted `teachingAllocationId`. Automatically updates `scheduled_sessions` to `status = 'locked'`, satisfying the prerequisite for `open_class_attendance_session` RPC.
+  - **Attendance Session Student Seeding Fix**: Fixed the fallback in `sessions/route.ts` which was querying non-existent columns `cohort_id` and `status` on `students`. Updated it to seed `class_attendance_entries` directly from `student_unit_registrations` where `registration_status = 'registered'`.
+  - **Typo Fix & Roster Self-Healing in Attendance Workspace**: In `src/features/class-attendance/queries.ts`, fixed table name from `class_attendance_records` to `class_attendance_entries` and column `attendance_status`. Added self-healing logic that automatically backfills entries from `student_unit_registrations` if a session had 0 entries previously.
+  - **Database Migration**: Created `20260908221000_repair_class_attendance_roster.sql` backfilling `cohort_id` on `student_unit_registrations`, ensuring `department_register_student_units` persists `cohort_id`, and making `open_class_attendance_session` robust across shared and cross-cohort unit registrations.
+- **Manual Follow-up**:
+  - Run `supabase db push` to apply `20260908221000_repair_class_attendance_roster.sql` to production database.
+
 ### 2026-09-07: Registrar Live Reporting Synchronization & Real-time Reconciliation (Phase 2)
 - **Files Added**:
   - `src/features/student-reporting-sync/types.ts`

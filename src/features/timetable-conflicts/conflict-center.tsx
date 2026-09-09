@@ -29,14 +29,14 @@ export function TimetableConflictCenter({
   data: ConflictCenterData;
 }) {
   return <div className="space-y-6">
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <MetricCard label="Open conflicts" value={String(data.summary.total - data.summary.resolved)} description="Detected issues still requiring attention." icon={ShieldAlert}/>
-      <MetricCard label="Blocking" value={String(data.summary.blocked)} description="Must be corrected before publication." icon={CircleAlert}/>
-      <MetricCard label="Warnings" value={String(data.summary.warnings)} description="Quality or preference issues to review." icon={AlertTriangle}/>
-      <MetricCard label="Resolved" value={String(data.summary.resolved)} description="Reviewed decisions retained in the audit trail." icon={CheckCircle2}/>
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <MetricCard label="Open conflicts" value={String(data.summary.total - data.summary.resolved)} description="Requires review" icon={ShieldAlert}/>
+      <MetricCard label="Blocking" value={String(data.summary.blocked)} description="Publication blockers" icon={CircleAlert}/>
+      <MetricCard label="Warnings" value={String(data.summary.warnings)} description="Preference alerts" icon={AlertTriangle}/>
+      <MetricCard label="Resolved" value={String(data.summary.resolved)} description="Audit retained" icon={CheckCircle2}/>
     </div>
 
-    {data.conflicts.length === 0 ? <div className="rounded-2xl border border-success-border bg-success-surface p-8 text-center"><CheckCircle2 className="mx-auto size-8 text-success"/><h2 className="mt-3 font-semibold text-text-primary">No timetable conflicts detected</h2><p className="mt-1 text-sm text-text-muted">The current draft satisfies overlap, capacity and active constraint checks.</p></div> : null}
+    {data.conflicts.length === 0 ? <div className="rounded-xl border border-success-border bg-success-surface p-6 text-center"><CheckCircle2 className="mx-auto size-6 text-success"/><h2 className="mt-2 text-sm font-semibold text-text-primary">No conflicts detected</h2><p className="mt-0.5 text-xs text-text-muted">Draft satisfies overlap, room and constraint checks.</p></div> : null}
 
     <div className="space-y-3">
       {data.conflicts.map((conflict) => <article key={conflict.key} className="rounded-2xl border border-border bg-surface p-5 shadow-sm">

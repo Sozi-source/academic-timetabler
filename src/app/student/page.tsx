@@ -139,20 +139,56 @@ export default async function StudentPortalPage() {
         </section>
 
         {/* Quick Action Cards Grid */}
-        <section className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3.5">
+        <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Link
             href="/student/unit-registration"
-            className="group flex items-center justify-between rounded-xl border border-border bg-surface p-4 shadow-2xs transition-all duration-150 hover:border-primary/40 hover:bg-primary-subtle/20 active:scale-[0.98]"
+            className="group flex items-center justify-between rounded-xl border border-border bg-surface p-3.5 shadow-2xs transition-all duration-150 hover:border-primary/40 hover:bg-primary-subtle/20 active:scale-[0.98]"
           >
             <div className="flex items-center gap-3">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-institutional-yellow text-institutional-yellow-ink font-bold shadow-xs">
-                <ClipboardCheck className="size-5" aria-hidden="true" />
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-institutional-yellow text-institutional-yellow-ink font-bold shadow-xs">
+                <ClipboardCheck className="size-4.5" aria-hidden="true" />
               </span>
               <div>
                 <p className="text-xs font-bold text-text-primary group-hover:text-primary transition-colors">
-                  Unit Registration
+                  Registration
                 </p>
-                <p className="text-[11px] text-text-muted">Registered units & stage subjects</p>
+                <p className="text-[11px] text-text-muted">Registered units</p>
+              </div>
+            </div>
+            <ChevronRight className="size-4 text-text-subtle transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+          </Link>
+
+          <Link
+            href="/student/timetable"
+            className="group flex items-center justify-between rounded-xl border border-border bg-surface p-3.5 shadow-2xs transition-all duration-150 hover:border-primary/40 hover:bg-primary-subtle/20 active:scale-[0.98]"
+          >
+            <div className="flex items-center gap-3">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-white font-bold shadow-xs">
+                <CalendarDays className="size-4.5" aria-hidden="true" />
+              </span>
+              <div>
+                <p className="text-xs font-bold text-text-primary group-hover:text-primary transition-colors">
+                  Timetable
+                </p>
+                <p className="text-[11px] text-text-muted">Weekly schedule</p>
+              </div>
+            </div>
+            <ChevronRight className="size-4 text-text-subtle transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+          </Link>
+
+          <Link
+            href="/student/documents"
+            className="group flex items-center justify-between rounded-xl border border-border bg-surface p-3.5 shadow-2xs transition-all duration-150 hover:border-primary/40 hover:bg-primary-subtle/20 active:scale-[0.98]"
+          >
+            <div className="flex items-center gap-3">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary font-bold shadow-xs">
+                <FileText className="size-4.5" aria-hidden="true" />
+              </span>
+              <div>
+                <p className="text-xs font-bold text-text-primary group-hover:text-primary transition-colors">
+                  Documents
+                </p>
+                <p className="text-[11px] text-text-muted">Outlines & schemes</p>
               </div>
             </div>
             <ChevronRight className="size-4 text-text-subtle transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
@@ -160,17 +196,17 @@ export default async function StudentPortalPage() {
 
           <Link
             href="/student/profile"
-            className="group flex items-center justify-between rounded-xl border border-border bg-surface p-4 shadow-2xs transition-all duration-150 hover:border-primary/40 hover:bg-primary-subtle/20 active:scale-[0.98]"
+            className="group flex items-center justify-between rounded-xl border border-border bg-surface p-3.5 shadow-2xs transition-all duration-150 hover:border-primary/40 hover:bg-primary-subtle/20 active:scale-[0.98]"
           >
             <div className="flex items-center gap-3">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-surface-subtle text-primary border border-border font-bold shadow-xs">
-                <UserRound className="size-5" aria-hidden="true" />
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface-subtle text-primary border border-border font-bold shadow-xs">
+                <UserRound className="size-4.5" aria-hidden="true" />
               </span>
               <div>
                 <p className="text-xs font-bold text-text-primary group-hover:text-primary transition-colors">
-                  Academic Profile
+                  Profile
                 </p>
-                <p className="text-[11px] text-text-muted">Personal info & stage progression</p>
+                <p className="text-[11px] text-text-muted">Record & stage</p>
               </div>
             </div>
             <ChevronRight className="size-4 text-text-subtle transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />

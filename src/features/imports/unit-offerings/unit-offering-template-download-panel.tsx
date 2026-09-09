@@ -62,7 +62,7 @@ export function UnitOfferingTemplateDownloadPanel({
     );
 
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="grid gap-4 sm:grid-cols-2 max-w-4xl">
       <Card className="p-4">
         <div className="flex items-start gap-3">
           <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-surface-subtle text-text-secondary">

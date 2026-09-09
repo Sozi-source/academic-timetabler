@@ -37,7 +37,7 @@ export default async function StudentsModulePage() {
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
+      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6">
         <MetricCard label="Active" value={String(summary.active)} description="Current" icon={CheckCircle2} />
         <MetricCard label="Attachment" value={String(summary.attachment)} description="Active phase" icon={Paperclip} />
         <MetricCard label="Deferred" value={String(summary.deferred)} description="Expected back" icon={History} />
@@ -46,7 +46,7 @@ export default async function StudentsModulePage() {
         <MetricCard label="Graduated" value={String(summary.graduated)} description="Historical" icon={GraduationCap} />
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="flex items-center justify-between gap-3 p-4">
           <div className="flex items-center gap-3">
             <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-white"><UsersRound className="size-4" /></span>

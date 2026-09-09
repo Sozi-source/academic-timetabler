@@ -191,7 +191,7 @@ export function StudentPortalShell({
       <div className="fixed inset-x-0 top-0 z-[60] h-1 bg-[#ffd400]" aria-hidden="true" />
 
       {/* Desktop Fixed Left Sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[14.75rem] border-r border-border shadow-md lg:block">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[var(--sidebar-width)] border-r border-border shadow-md lg:block">
         {sidebarContent}
       </aside>
 
@@ -231,7 +231,7 @@ export function StudentPortalShell({
       </div>
 
       {/* Main Content Viewport */}
-      <div className="min-w-0 lg:pl-[14.75rem]">
+      <div className="min-w-0 lg:pl-[var(--sidebar-width)]">
         {/* Sticky Mobile/Desktop Top Header */}
         <header className="sticky top-0 z-30 flex h-[3.625rem] items-center justify-between border-b border-border bg-surface/95 px-3.5 shadow-2xs backdrop-blur-xl sm:px-6 lg:h-[4.625rem]">
           <div className="flex min-w-0 items-center gap-2.5">
@@ -270,7 +270,7 @@ export function StudentPortalShell({
         </header>
 
         {/* Main Content Body */}
-        <main className="portal-page-content w-full max-w-[1600px] px-4 py-3.5 pb-20 sm:px-6 sm:py-7 lg:px-8 lg:pb-8">
+        <main className="portal-page-content w-full max-w-[var(--content-max-width)] px-4 py-3.5 pb-20 sm:px-6 sm:py-7 lg:px-8 lg:pb-8">
           {children}
         </main>
 

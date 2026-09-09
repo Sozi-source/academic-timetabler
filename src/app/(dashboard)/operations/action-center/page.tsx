@@ -71,17 +71,17 @@ export default async function OperationsActionCenterPage() {
       />
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard label="Actions" value={String(counts.total)} description="Current queue" icon={ListChecks} />
-        <MetricCard label="Critical" value={String(counts.critical)} description="Release / production blockers" icon={AlertTriangle} />
-        <MetricCard label="Warnings" value={String(counts.warning)} description="Operational follow-up" icon={ShieldCheck} />
-        <MetricCard label="Information" value={String(counts.info)} description="Non-blocking next steps" icon={CheckCircle2} />
+        <MetricCard label="Actions" value={String(counts.total)} description="Active queue" icon={ListChecks} />
+        <MetricCard label="Critical" value={String(counts.critical)} description="Critical blockers" icon={AlertTriangle} />
+        <MetricCard label="Warnings" value={String(counts.warning)} description="Review items" icon={ShieldCheck} />
+        <MetricCard label="Information" value={String(counts.info)} description="Advisory notices" icon={CheckCircle2} />
       </section>
 
       {items.length === 0 ? (
         <section className="rounded-xl border border-success-border bg-success-surface px-4 py-7 text-center">
           <CheckCircle2 className="mx-auto size-5 text-success" aria-hidden="true" />
           <p className="mt-2 text-sm font-bold text-text-primary">No current actions</p>
-          <p className="mt-1 text-[11px] text-text-muted">Operational and release controls are clear.</p>
+          <p className="mt-1 text-[11px] text-text-muted">All operational controls clear.</p>
         </section>
       ) : (
         <section className="overflow-hidden rounded-xl border border-border bg-white">

@@ -118,36 +118,16 @@ export default async function ImportUnitOfferingsPage() {
         <UnitOfferingImportUploadForm />
       </div>
 
-      <section className="rounded-2xl border border-border bg-surface p-5">
-        <h2 className="font-semibold text-text-primary">
-          How the prefilled template is generated
+      <section className="rounded-xl border border-border bg-surface p-4 max-w-4xl">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-text-muted">
+          Import Guidelines
         </h2>
 
-        <div className="mt-4 grid gap-3 text-sm leading-6 text-text-muted md:grid-cols-2">
-          <p>
-            A cohort contributes units only from its
-            registered programme and current academic
-            stage.
-          </p>
-
-          <p>
-            Inactive units, inactive cohorts and
-            records disabled for timetabling are not
-            included.
-          </p>
-
-          <p>
-            The system does not create or guess any
-            unit. Empty results mean the curriculum
-            must first be configured in the database.
-          </p>
-
-          <p>
-            You may edit the workbook, remove units,
-            add special units and assign shared-class
-            keys before uploading it.
-          </p>
-        </div>
+        <ul className="mt-2.5 space-y-1.5 text-xs text-text-secondary">
+          <li>• Units derive directly from active cohort programmes and current academic stages.</li>
+          <li>• Inactive cohorts and non-timetabled units are excluded automatically.</li>
+          <li>• Verify shared-class keys and remove unneeded units in Excel prior to upload.</li>
+        </ul>
       </section>
     </div>
   );

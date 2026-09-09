@@ -186,7 +186,7 @@ export function AdminSidebar({
   return (
     <>
       {/* Desktop Fixed Sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[215px] border-r border-[#0A4741] bg-[#033B36] shadow-lg lg:block">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[var(--sidebar-width)] border-r border-[#0A4741] bg-[#033B36] shadow-lg lg:block">
         {sidebarContent}
       </aside>
 
@@ -200,7 +200,7 @@ export function AdminSidebar({
             className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"
           />
 
-          <aside className="relative h-full w-[240px] max-w-[85vw] bg-[#033B36] shadow-2xl">
+          <aside className="relative h-full w-[var(--sidebar-width)] max-w-[85vw] bg-[#033B36] shadow-2xl">
             {sidebarContent}
           </aside>
         </div>

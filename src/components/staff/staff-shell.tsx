@@ -214,7 +214,7 @@ export function StaffShell({ profile, children }: StaffShellProps) {
       <div className="fixed inset-x-0 top-0 z-[60] h-1 bg-[#ffd400]" aria-hidden="true" />
 
       {/* Desktop Fixed Left Sidebar */}
-      <aside className="hidden lg:flex lg:w-[14.75rem] lg:flex-col lg:fixed lg:inset-y-0 lg:z-40 border-r border-slate-200">
+      <aside className="hidden lg:flex lg:w-[var(--sidebar-width)] lg:flex-col lg:fixed lg:inset-y-0 lg:z-40 border-r border-slate-200">
         {sidebarContent}
       </aside>
 
@@ -232,7 +232,7 @@ export function StaffShell({ profile, children }: StaffShellProps) {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex flex-1 flex-col lg:pl-[14.75rem] min-w-0">
+      <div className="flex flex-1 flex-col lg:pl-[var(--sidebar-width)] min-w-0">
         {/* Top Header Bar */}
         <header className="sticky top-0 z-30 flex h-[3.625rem] items-center justify-between border-b border-border bg-surface/95 px-3.5 sm:px-6 lg:h-[4.625rem] backdrop-blur shadow-2xs">
           <div className="flex items-center gap-2">
@@ -284,7 +284,7 @@ export function StaffShell({ profile, children }: StaffShellProps) {
         </header>
 
         {/* Page Content Body (with bottom padding for mobile nav) */}
-        <main className="portal-page-content flex-1 px-4 py-3.5 sm:px-6 lg:px-[1.625rem] lg:py-[1.625rem] pb-20 lg:pb-8 max-w-[1600px] w-full mx-auto">
+        <main className="portal-page-content flex-1 px-4 py-3.5 sm:px-6 lg:px-[1.625rem] lg:py-[1.625rem] pb-20 lg:pb-8 max-w-[var(--content-max-width)] w-full mx-auto">
           {children}
         </main>
 

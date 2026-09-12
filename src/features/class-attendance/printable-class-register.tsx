@@ -131,7 +131,7 @@ export function PrintableClassRegister({
             <span className="font-bold">Department:</span> {departmentName}
           </p>
           <p>
-            <span className="font-bold">Programme:</span> {programmeName} ({cohortName})
+            <span className="font-bold">Cohort:</span> {cohortName}
           </p>
           <div className="flex items-center justify-between font-bold">
             <span>Unit: {unitName} ({unitCode})</span>

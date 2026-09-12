@@ -15,8 +15,8 @@ export default async function TVETSchemeOfWorkPage({ params }: PageProps) {
   if (!header) notFound();
 
   const [curriculum, milestones] = await Promise.all([
-    getApprovedCurriculumForUnitCode(header.unitCode, header.unitName),
-    getAssessmentMilestones(),
+    getApprovedCurriculumForUnitCode(header.unitCode, header.unitName, 'scheme_of_work'),
+    getAssessmentMilestones(header.academicPeriodId ?? undefined),
   ]);
 
   if (!curriculum) {

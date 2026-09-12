@@ -3,6 +3,7 @@ import 'server-only';
 import {
   createClient,
 } from '@/lib/supabase/server';
+import { getUnifiedUnitRoster } from '@/features/academic-roster/unified-roster';
 
 import type {
   ClassAttendanceHistoryItem,
@@ -118,6 +119,35 @@ export async function getStaffClassAttendanceSchedule(): Promise<ClassAttendance
     }
 
     if (items.length > 0) {
+      // Resolve multi-cohort names for each unit & academic period
+      const unitPeriodKeys = [...new Set(items.map((i) => `${i.unitId}:${i.academicPeriodId}`).filter(Boolean))];
+      const multiCohortMap = new Map<string, string>();
+
+      await Promise.all(
+        unitPeriodKeys.map(async (key) => {
+          const [uId, pId] = key.split(':');
+          try {
+            const roster = await getUnifiedUnitRoster({
+              supabase,
+              unitId: uId,
+              academicPeriodId: pId,
+            });
+            if (roster.joinedCohortName && roster.joinedCohortName !== 'Cohort') {
+              multiCohortMap.set(key, roster.joinedCohortName);
+            }
+          } catch {
+            // Ignore failure, retain snapshot cohort name
+          }
+        })
+      );
+
+      for (const item of items) {
+        const fullCohortName = multiCohortMap.get(`${item.unitId}:${item.academicPeriodId}`);
+        if (fullCohortName) {
+          item.cohortName = fullCohortName;
+        }
+      }
+
       // Attach latest class sessions if any exist
       const sessionIds = items.map((i) => i.scheduledSessionId);
       const { data: classSessions } = await (supabase as any)
@@ -277,138 +307,83 @@ export async function getStaffClassAttendanceHistory(
 }
 
 export async function getClassAttendanceWorkspace(
-  classSessionId:
-    string,
+  classSessionId: string,
 ): Promise<ClassAttendanceWorkspace | null> {
-  const supabase =
-    await createClient();
+  const supabase = await createClient();
 
-  try {
-    const {
-      data,
-      error,
-    } =
-      await supabase.rpc(
-        'get_class_attendance_workspace',
-        {
-          target_class_session_id:
-            classSessionId,
-        },
-      );
-
-    if (!error && data && Array.isArray(data) && data.length > 0) {
-      const rows = data as UnknownRow[];
-      const first = rows[0];
-      const teachingAllocationId = asString(first.teaching_allocation_id);
-      const scheduledSessionId = asString(first.scheduled_session_id);
-      const sessionDate = asString(first.session_date);
-      const sessionStatus = asString(first.session_status) as ClassSessionStatus | null;
-
-      if (teachingAllocationId && scheduledSessionId && sessionDate && sessionStatus) {
-        return {
-          classSessionId,
-          teachingAllocationId,
-          scheduledSessionId,
-          sessionDate,
-          sessionStatus,
-          academicPeriodName: asString(first.academic_period_name) ?? 'Academic Period',
-          unitName: asString(first.unit_name) ?? 'Unit',
-          cohortName: asString(first.cohort_name) ?? 'Cohort',
-          startsAt: asString(first.starts_at) ?? '',
-          endsAt: asString(first.ends_at) ?? '',
-          rosterCount: asNumber(first.roster_count),
-          students: rows
-            .map((row) => {
-              const studentId = asString(row.student_id);
-              if (!studentId) return null;
-              return {
-                studentId,
-                admissionNumber: asString(row.admission_number) ?? '',
-                fullName: asString(row.full_name) ?? 'Student',
-                attendanceStatus: (asString(row.attendance_status) ?? 'unmarked') as ClassAttendanceStatus,
-                note: asString(row.note),
-              };
-            })
-            .filter((st): st is NonNullable<typeof st> => Boolean(st)),
-        };
-      }
-    }
-  } catch (err) {
-    console.warn('get_class_attendance_workspace RPC warning:', err);
-  }
-
-  // Direct Query Fallback
   try {
     const { data: cs } = await (supabase as any)
       .from('class_sessions')
-      .select('id, scheduled_session_id, session_date, status, starts_at, ends_at, teaching_allocation_id, cohort_id, unit_id, academic_period_id')
+      .select('id, scheduled_session_id, session_date, status, starts_at, ends_at, teaching_allocation_id, cohort_id, unit_id, academic_period_id, roster_count')
       .eq('id', classSessionId)
       .maybeSingle();
 
     if (!cs) return null;
 
-    const [
-      { data: period },
-      { data: unit },
-      { data: cohort },
-      { data: records },
-    ] = await Promise.all([
+    const { createAdminClient } = await import('@/lib/supabase/admin');
+    const adminDb = createAdminClient();
+
+    const [roster, periodResult, unitResult, entriesResult] = await Promise.all([
+      getUnifiedUnitRoster({
+        supabase: adminDb,
+        unitId: cs.unit_id,
+        academicPeriodId: cs.academic_period_id,
+        allocationId: cs.teaching_allocation_id,
+      }),
       cs.academic_period_id ? (supabase as any).from('academic_periods').select('name').eq('id', cs.academic_period_id).maybeSingle() : { data: null },
       cs.unit_id ? (supabase as any).from('units').select('name').eq('id', cs.unit_id).maybeSingle() : { data: null },
-      cs.cohort_id ? (supabase as any).from('cohorts').select('name').eq('id', cs.cohort_id).maybeSingle() : { data: null },
-      (supabase as any).from('class_attendance_entries').select('student_id, attendance_status, note, students(admission_number, full_name)').eq('class_session_id', cs.id),
+      (adminDb as any).from('class_attendance_entries').select('student_id, attendance_status, note').eq('class_session_id', cs.id),
     ]);
 
-    let finalRecords = records ?? [];
-
-    if (finalRecords.length === 0 && cs.unit_id && cs.academic_period_id) {
-      try {
-        const { createAdminClient } = await import('@/lib/supabase/admin');
-        const adminDb = createAdminClient();
-
-        const { data: regStudents } = await (adminDb as any)
-          .from('student_unit_registrations')
-          .select('student_id, cohort_id, students(admission_number, full_name)')
-          .eq('academic_period_id', cs.academic_period_id)
-          .eq('unit_id', cs.unit_id)
-          .eq('registration_status', 'registered');
-
-        if (regStudents && regStudents.length > 0) {
-          const newEntries = regStudents.map((reg: any) => ({
-            class_session_id: cs.id,
-            student_id: reg.student_id,
-            cohort_id: reg.cohort_id || cs.cohort_id,
-            attendance_status: 'unmarked',
-          }));
-
-          await (adminDb as any)
-            .from('class_attendance_entries')
-            .upsert(newEntries, { onConflict: 'class_session_id,student_id' });
-
-          await (adminDb as any)
-            .from('class_sessions')
-            .update({ roster_count: newEntries.length, updated_at: new Date().toISOString() })
-            .eq('id', cs.id);
-
-          finalRecords = regStudents.map((r: any) => ({
-            student_id: r.student_id,
-            attendance_status: 'unmarked',
-            note: null,
-            students: r.students,
-          }));
-        }
-      } catch (syncErr) {
-        console.warn('Auto-seed class_attendance_entries failed:', syncErr);
-      }
+    const existingEntriesMap = new Map<string, { attendanceStatus: ClassAttendanceStatus; note: string | null }>();
+    for (const entry of (entriesResult.data ?? [])) {
+      existingEntriesMap.set(String(entry.student_id), {
+        attendanceStatus: (entry.attendance_status || 'unmarked') as ClassAttendanceStatus,
+        note: entry.note ? String(entry.note) : null,
+      });
     }
 
-    const students = finalRecords.map((r: any) => ({
-      studentId: String(r.student_id),
-      admissionNumber: String(r.students?.admission_number || ''),
-      fullName: String(r.students?.full_name || 'Student'),
-      attendanceStatus: (r.attendance_status || r.status || 'unmarked') as ClassAttendanceStatus,
-      note: r.note ? String(r.note) : null,
-    }));
+    // Auto-seed missing students from all registered cohorts into class_attendance_entries
+    const missingStudents = roster.students.filter((st) => !existingEntriesMap.has(st.studentId));
+    if (missingStudents.length > 0) {
+      const newRecords = missingStudents.map((st) => ({
+        class_session_id: cs.id,
+        student_id: st.studentId,
+        cohort_id: st.cohortId || cs.cohort_id,
+        attendance_status: st.reportingStatus === 'reported' ? 'unmarked' : 'not_reported',
+      }));
+
+      await (adminDb as any)
+        .from('class_attendance_entries')
+        .upsert(newRecords, { onConflict: 'class_session_id,student_id', ignoreDuplicates: true });
+
+      for (const rec of newRecords) {
+        existingEntriesMap.set(rec.student_id, {
+          attendanceStatus: rec.attendance_status as ClassAttendanceStatus,
+          note: null,
+        });
+      }
+
+      await (adminDb as any)
+        .from('class_sessions')
+        .update({ roster_count: roster.totalCount, updated_at: new Date().toISOString() })
+        .eq('id', cs.id);
+    }
+
+    const students = roster.students.map((st) => {
+      const entry = existingEntriesMap.get(st.studentId);
+      const isReported = st.reportingStatus === 'reported';
+      const defaultStatus: ClassAttendanceStatus = isReported ? 'unmarked' : 'not_reported';
+      return {
+        studentId: st.studentId,
+        admissionNumber: st.admissionNumber,
+        fullName: st.fullName,
+        attendanceStatus: entry?.attendanceStatus ?? defaultStatus,
+        note: entry?.note ?? null,
+        reportingStatus: st.reportingStatus ?? null,
+        isReported,
+      };
+    });
 
     return {
       classSessionId: cs.id,
@@ -416,16 +391,16 @@ export async function getClassAttendanceWorkspace(
       scheduledSessionId: cs.scheduled_session_id || '',
       sessionDate: cs.session_date,
       sessionStatus: (cs.status || 'open') as ClassSessionStatus,
-      academicPeriodName: period?.name || 'Current Term',
-      unitName: unit?.name || 'Unit',
-      cohortName: cohort?.name || 'Cohort',
+      academicPeriodName: periodResult.data?.name || 'Current Term',
+      unitName: unitResult.data?.name || 'Unit',
+      cohortName: roster.joinedCohortName || 'Cohort',
       startsAt: cs.starts_at || '',
       endsAt: cs.ends_at || '',
       rosterCount: students.length,
       students,
     };
-  } catch (directErr) {
-    console.error('getClassAttendanceWorkspace direct query failed:', directErr);
+  } catch (err) {
+    console.error('getClassAttendanceWorkspace failed:', err);
     return null;
   }
 }

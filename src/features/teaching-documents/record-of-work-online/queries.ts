@@ -856,15 +856,17 @@ export async function getOnlineRecordOfWorkContext(
     const { getAssessmentMilestones } = await import('../assessment-milestones');
     const { generateTVETSchemeOfWork } = await import('../tvet-standards');
 
+    const periodId = asString(allocation.academic_period_id) || undefined;
     const [curriculumDef, milestones] = await Promise.all([
-      getApprovedCurriculumForUnitCode(asString(unit.code), asString(unit.name)),
-      getAssessmentMilestones(),
+      getApprovedCurriculumForUnitCode(asString(unit.code), asString(unit.name), 'scheme_of_work'),
+      getAssessmentMilestones(periodId),
     ]);
 
     const tvetHeader = {
       institutionName: 'Imperial College of Medical & Health Sciences',
       departmentName: asString(department?.name) || profile.departmentName || 'Department',
       academicPeriodName: asString(period.name),
+      academicPeriodId: periodId,
       unitCode: asString(unit.code),
       unitName: asString(unit.name),
       cohortName: asString(cohort.name),

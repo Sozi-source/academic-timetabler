@@ -34,7 +34,7 @@ export default async function CATAttendancePage({ params }: PageProps) {
       allocationId={allocationId}
       unitCode={context.allocation.unitCode}
       unitName={context.allocation.unitName}
-      cohortName={context.allocation.cohortName}
+      cohortName={population.cohort?.name || context.allocation.cohortName}
       periodName={context.allocation.academicPeriodName}
       trainerName={context.workspace.trainerName}
       institutionName={metadata.institutionName}

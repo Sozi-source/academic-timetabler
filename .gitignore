@@ -48,3 +48,6 @@ powershell.cmd
 *- Copy.*
 *.backup
 *.tmp
+*.pdf
+*.docx
+scratch*.json

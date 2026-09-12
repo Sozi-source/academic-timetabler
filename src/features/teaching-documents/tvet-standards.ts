@@ -1,9 +1,10 @@
-import type { UnitCurriculumDefinition } from './curriculum-registry';
+import { getUnitCurriculum, type UnitCurriculumDefinition } from './curriculum-registry';
 
 export interface TVETDocumentHeaderContext {
   institutionName: string;
   departmentName: string;
   academicPeriodName: string;
+  academicPeriodId?: string | null;
   unitCode: string;
   unitName: string;
   cohortName: string;
@@ -34,9 +35,15 @@ export interface TVETCourseOutlineData {
    * Kept temporarily so existing tests/callers compile during migration.
    */
   assessmentMatrix: {
-    continuousAssessment: { assignment:number; presentation:number; rat:number; cat:number; courseworkWeightedTotal:number };
-    finalExamination:number;
-    finalTotal:number;
+    continuousAssessment: {
+      assignment?: number;
+      presentation?: number;
+      rat?: number;
+      cat: number;
+      courseworkWeightedTotal: number;
+    };
+    finalExamination: number;
+    finalTotal: number;
   };
   references: string[];
   instructionalEquipment: string[];
@@ -80,7 +87,7 @@ export interface TVETRecordOfWorkData {
 }
 
 import { distributeTopicsAcrossWeeks } from './distribution-engine';
-import type { AssessmentMilestones } from './assessment-milestones';
+import { DEFAULT_ASSESSMENT_MILESTONES, type AssessmentMilestones } from './assessment-milestones';
 
 /**
  * Presentation-only Course Outline builder.
@@ -91,31 +98,46 @@ export function generateTVETCourseOutline(
   curriculum?: UnitCurriculumDefinition | null,
   milestones?: AssessmentMilestones | null,
 ): TVETCourseOutlineData {
-  const source: UnitCurriculumDefinition = curriculum ?? { unitCode: context.unitCode, unitName: context.unitName };
-  const distributed = distributeTopicsAcrossWeeks(source.weeklySchedule ?? [], 14, milestones);
+  const effectiveMilestones = milestones ?? DEFAULT_ASSESSMENT_MILESTONES;
+  const source: UnitCurriculumDefinition =
+    curriculum ?? getUnitCurriculum(context.unitCode, context.unitName);
+  const distributed = distributeTopicsAcrossWeeks(source.weeklySchedule ?? [], 14, effectiveMilestones);
 
   return {
     header: context,
     unitDescription: source.unitDescription ?? '',
     overallCompetency: source.overallCompetency ?? '',
     learningOutcomes: source.learningOutcomes ?? [],
-    weeklySchedule: distributed.map((d) => ({
-      weekNumber: d.weekNumber,
-      topicTitle: d.topicTitle,
-      subTopics: d.subTopics,
-      hours: context.weeklyHours,
-    })),
+    weeklySchedule: distributed.map((d) => {
+      const isCat = d.weekNumber === effectiveMilestones.catWeek;
+      const isExam = d.weekNumber === effectiveMilestones.examWeek;
+
+      let subTopics = [...d.subTopics];
+      if (isCat || isExam) {
+        subTopics = [];
+      }
+
+      return {
+        weekNumber: d.weekNumber,
+        topicTitle: d.topicTitle,
+        subTopics,
+        hours: context.weeklyHours,
+      };
+    }),
     teachingLearningApproaches: source.teachingLearningApproaches ?? '',
     assessmentApproaches:
-      source.assessmentApproaches &&
-      !source.assessmentApproaches.includes('Week 5') &&
-      !source.assessmentApproaches.includes('Week 8')
+      effectiveMilestones.catDate || effectiveMilestones.examDate
+        ? `Continuous Assessment Test (CAT) [Week ${effectiveMilestones.catWeek}${effectiveMilestones.catDate ? ` · ${effectiveMilestones.catDate}` : ''}] — 30%\nFinal Summative Examination [Week ${effectiveMilestones.examWeek}${effectiveMilestones.examDate ? ` · ${effectiveMilestones.examDate}` : ''}] — 70%\nTotal Course Evaluation — 100%`
+        : source.assessmentApproaches &&
+          !source.assessmentApproaches.includes('Week 5') &&
+          !source.assessmentApproaches.includes('Week 8') &&
+          !source.assessmentApproaches.includes('RAT')
         ? source.assessmentApproaches
-        : 'Continuous Assessment Tests (CAT / RAT) — 15%\nAssignments — 5%\nClass Presentations / Practical Tasks — 10%\nFinal Summative Examination — 70%\nTotal Course Evaluation — 100%',
+        : `Continuous Assessment Test (CAT) [Week ${effectiveMilestones.catWeek}] — 30%\nFinal Summative Examination [Week ${effectiveMilestones.examWeek}] — 70%\nTotal Course Evaluation — 100%`,
     assessmentMatrix: {
-      continuousAssessment: { assignment:5, presentation:10, rat:15, cat:15, courseworkWeightedTotal:30 },
-      finalExamination:70,
-      finalTotal:100,
+      continuousAssessment: { cat: 30, courseworkWeightedTotal: 30 },
+      finalExamination: 70,
+      finalTotal: 100,
     },
     references: source.references ?? [],
     instructionalEquipment: source.instructionalEquipment ?? [],
@@ -131,7 +153,8 @@ export function generateTVETSchemeOfWork(
   curriculum?: UnitCurriculumDefinition | null,
   milestones?: AssessmentMilestones | null,
 ): TVETSchemeOfWorkData {
-  const source: UnitCurriculumDefinition = curriculum ?? { unitCode: context.unitCode, unitName: context.unitName };
+  const source: UnitCurriculumDefinition =
+    curriculum ?? getUnitCurriculum(context.unitCode, context.unitName);
   const distributed = distributeTopicsAcrossWeeks(source.weeklySchedule ?? [], 14, milestones);
 
   return {
@@ -139,7 +162,7 @@ export function generateTVETSchemeOfWork(
     plannedWeeks: distributed.map((d) => ({
       weekNumber: d.weekNumber,
       topic: d.topicTitle,
-      subTopics: d.subTopics.join(' · '),
+      subTopics: d.subTopics.join('\n'),
       specificLearningOutcomes: d.specificLearningOutcomes,
       learningActivities: d.learningActivities,
       resourcesAndReferences: d.resourcesAndReferences,
@@ -161,4 +184,153 @@ export function computeRecordOfWorkSummary(
     completedWeeksCount: uniqueDeliveredWeeks,
     syllabusCompletionRate: Math.min(100,Math.round((uniqueDeliveredWeeks / totalPlannedWeeks) * 100)),
   };
+}
+
+/**
+ * Parses subtopics into discrete lines from strings (joined by \n, ·, ;, or bullets) or arrays
+ */
+export function parseSubTopics(input?: string | string[] | null): string[] {
+  if (!input) return [];
+  if (Array.isArray(input)) {
+    return input.flatMap((item) => parseSubTopics(item));
+  }
+  return input
+    .split(/[\n\r]+|[·;]+|(?<=[a-z0-9\)])\s*•\s*/i)
+    .map((s) => s.replace(/^[•·\s\d.-]+/, '').trim())
+    .filter((s) => s.length > 0);
+}
+
+/**
+ * Parses learning activities into discrete lines
+ */
+export function parseActivitiesList(input?: string | null): string[] {
+  if (!input) return [];
+  let items = input
+    .split(/[\n\r]+|[·;•]+/)
+    .map((s) => s.replace(/^[•·\s-]+/, '').trim())
+    .filter(Boolean);
+
+  if (items.length === 1 && items[0].includes(',')) {
+    const commaParts = items[0]
+      .split(/,\s*(?:and\s+)?|\s+and\s+/i)
+      .map((s) => s.replace(/^\s*[-•]\s*/, '').trim())
+      .filter((s) => s.length > 2);
+    if (commaParts.length > 1) {
+      items = commaParts;
+    }
+  }
+
+  return items;
+}
+
+/**
+ * Action verbs used in TVET behavioral objectives
+ */
+const ACTION_VERBS =
+  'explain|describe|identify|analyze|demonstrate|apply|evaluate|discuss|outline|define|classify|assess|examine|formulate|differentiate|relate|plan|categorize|practice|operate|observe|select|prepare|portion|present|maintain|clean';
+
+/**
+ * Parses Specific Learning Outcomes into discrete lines.
+ * Handles multi-line strings, semicolon/bullet separated items, and compound single-line sentences.
+ */
+export function parseSLOOutcomes(input?: string | null): string[] {
+  if (!input || !input.trim()) return [];
+
+  const rawLines = input
+    .split(/[\n\r]+/)
+    .map((l) => l.trim())
+    .filter(Boolean);
+
+  if (rawLines.length > 1) {
+    const firstIsPreamble = /^by the end of/i.test(rawLines[0]);
+    const lines = firstIsPreamble ? rawLines.slice(1) : rawLines;
+    return lines
+      .map((b) => b.replace(/^[•·\s\d.-]+/, '').trim())
+      .filter(Boolean)
+      .map((b) => (b.endsWith('.') ? b : `${b}.`));
+  }
+
+  let cleanSingle = input
+    .replace(/^by the end of [^:]+:\s*/i, '')
+    .replace(/^[•·\s-]+/, '')
+    .trim();
+
+  // 1. Lettered or numbered list: e.g. a) ... b) ... or 1. ... 2. ...
+  if (/\b[a-z]\)\s+/i.test(cleanSingle)) {
+    const parts = cleanSingle
+      .split(/\s*\b[a-z]\)\s+/i)
+      .map((p) => p.trim())
+      .filter((p) => p.length > 2);
+    if (parts.length > 0) {
+      return parts.map((p) => {
+        const c = p.replace(/[.,;]\s*$/, '').trim();
+        return c.charAt(0).toUpperCase() + c.slice(1) + '.';
+      });
+    }
+  }
+
+  // 2. Semicolon or bullet separation
+  if (/[•·;]+/.test(cleanSingle)) {
+    const parts = cleanSingle
+      .split(/[•·;]+/)
+      .map((p) => p.replace(/^[•·\s\d.-]+/, '').trim())
+      .filter((p) => p.length > 2);
+    if (parts.length > 1) {
+      return parts.map((p) => {
+        const c = p.replace(/[.,;]\s*$/, '').trim();
+        return c.charAt(0).toUpperCase() + c.slice(1) + '.';
+      });
+    }
+  }
+
+  // 3. Compound action clause separation: e.g. "Explain culinary terms, plan kitchen layouts, and identify professional..."
+  const compoundRegex = new RegExp(
+    `(?:,\\s+and\\s+|\\s*,\\s*)(?=(?:${ACTION_VERBS})\\b)`,
+    'i',
+  );
+  if (compoundRegex.test(cleanSingle)) {
+    const parts = cleanSingle
+      .split(compoundRegex)
+      .map((p) => p.trim())
+      .filter((p) => p.length > 2);
+    if (parts.length > 1) {
+      return parts.map((p) => {
+        const c = p.replace(/[.,;]\s*$/, '').trim();
+        return c.charAt(0).toUpperCase() + c.slice(1) + '.';
+      });
+    }
+  }
+
+  const finalClean = cleanSingle.replace(/[.,;]\s*$/, '').trim();
+  return finalClean ? [finalClean.charAt(0).toUpperCase() + finalClean.slice(1) + '.'] : [];
+}
+
+/**
+ * Parses instructional resources into discrete lines
+ */
+export function parseResourcesList(input?: string | null): string[] {
+  if (!input) return [];
+  const items = input
+    .split(/[\n\r]+|[·;•]+/)
+    .map((s) => s.replace(/^[•·\s-]+/, '').replace(/^\d+\.\s*/, '').trim())
+    .filter(Boolean);
+
+  const result: string[] = [];
+  for (const item of items) {
+    if (item.includes(',')) {
+      // Split by comma outside parentheses (e.g. "Food Science (7th Ed), Practical Cookery (4th Ed)")
+      const parts = item
+        .split(/,\s*(?![^()]*\))/)
+        .map((s) => s.replace(/^[•·\s-]+/, '').replace(/^\d+\.\s*/, '').trim())
+        .filter((s) => s.length > 1);
+      if (parts.length > 1) {
+        result.push(...parts);
+      } else {
+        result.push(item);
+      }
+    } else {
+      result.push(item);
+    }
+  }
+  return result;
 }

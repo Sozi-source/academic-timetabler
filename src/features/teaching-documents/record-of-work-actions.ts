@@ -128,6 +128,7 @@ export async function getDocumentHeaderContext(
     institutionName: 'Imperial College of Medical & Health Sciences',
     departmentName: deptName,
     academicPeriodName: period?.name ?? 'Current Semester',
+    academicPeriodId: targetAllocation.academic_period_id ?? period?.id ?? null,
     unitCode: unit?.code ?? 'UNIT',
     unitName: unit?.name ?? 'Unit Name',
     cohortName: cohort?.name ?? 'Cohort',
@@ -337,27 +338,63 @@ export async function generateRecordOfWorkFromSchemeAction(
     return { ok: false, count: 0, error: 'Allocation not found.' };
   }
 
-  // Import Scheme generator
+  // Import Scheme generator and curriculum loader
   const { generateTVETSchemeOfWork } = await import('./tvet-standards');
-  const scheme = generateTVETSchemeOfWork(context.header);
+  const { loadPersistedUnitCurriculum } = await import('./curriculum-registry');
+  const { getAssessmentMilestones } = await import('./assessment-milestones');
+
+  const milestones = await getAssessmentMilestones(context.header.academicPeriodId ?? undefined);
+
+  // Load the scheme_of_work curriculum definition for this unit so that the
+  // generated ROW entries contain real topics, not empty placeholders.
+  const curriculum = await loadPersistedUnitCurriculum(
+    context.header.unitCode,
+    context.header.unitName,
+    'scheme_of_work',
+  );
+  const scheme = generateTVETSchemeOfWork(context.header, curriculum, milestones);
 
   // Generate 14-week entries from Scheme of Work
   const generatedEntries: TVETRecordOfWorkEntry[] = scheme.plannedWeeks.map(
-    (week, i) => ({
-      id: `row-gen-${Date.now()}-${i + 1}`,
-      allocationId,
-      weekNumber: week.weekNumber,
-      sessionDate: new Date(Date.now() + i * 7 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split('T')[0],
-      workCovered: `${week.topic}: ${week.subTopics}`,
-      outcomesAchieved: week.specificLearningOutcomes,
-      attendanceSummary: 'Recorded in attendance sheet',
-      remarks: week.assessmentAndRemarks || 'Delivered as scheduled',
-      trainerSignature: context.header.trainerName,
-      signedAt: new Date().toISOString(),
-      hodStatus: 'pending',
-    })
+    (week, i) => {
+      const isExam = week.weekNumber === milestones.examWeek;
+      const isCat = week.weekNumber === milestones.catWeek;
+      const isRevision = week.weekNumber === 13;
+
+      let workCovered = `${week.topic}: ${week.subTopics}`;
+      let outcomesAchieved = week.specificLearningOutcomes;
+      let remarks = week.assessmentAndRemarks || 'Delivered as scheduled';
+
+      if (isExam) {
+        workCovered = `End of Term / Semester Examination: ${week.topic}`;
+        outcomesAchieved = 'Summative evaluation of all unit learning outcomes and core competencies';
+        remarks = milestones.examRemarks || week.assessmentAndRemarks || 'Institutional examination administered per semester program of activities';
+      } else if (isCat) {
+        workCovered = `Continuous Assessment Test (CAT): ${week.topic}`;
+        outcomesAchieved = 'Formative assessment of competencies covered in preceding weeks';
+        remarks = milestones.catRemarks || week.assessmentAndRemarks || 'Continuous assessment administered per QA academic calendar';
+      } else if (isRevision) {
+        workCovered = `Revision & Remediation: ${week.topic}`;
+        outcomesAchieved = 'Consolidation of competencies and review of continuous assessment results';
+        remarks = week.assessmentAndRemarks || 'Revision conducted as scheduled';
+      }
+
+      return {
+        id: `row-gen-${Date.now()}-${i + 1}`,
+        allocationId,
+        weekNumber: week.weekNumber,
+        sessionDate: new Date(Date.now() + i * 7 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0],
+        workCovered,
+        outcomesAchieved,
+        attendanceSummary: 'Recorded in attendance sheet',
+        remarks,
+        trainerSignature: context.header.trainerName,
+        signedAt: new Date().toISOString(),
+        hodStatus: 'pending',
+      };
+    }
   );
 
   const payloadString = JSON.stringify(generatedEntries);

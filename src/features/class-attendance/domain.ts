@@ -33,76 +33,47 @@ export const classAttendanceOptions:
   ];
 
 export function classAttendanceStatusLabel(
-  status:
-    ClassAttendanceStatus,
+  status: ClassAttendanceStatus,
 ): string {
-  switch (
-    status
-  ) {
+  switch (status) {
     case 'present':
       return 'Present';
-
     case 'absent':
       return 'Absent';
-
+    case 'not_reported':
+      return 'Not Reported';
     default:
       return 'Unmarked';
   }
 }
 
 export function classAttendanceStatusVariant(
-  status:
-    ClassAttendanceStatus,
-):
-  | 'neutral'
-  | 'success'
-  | 'warning'
-  | 'danger'
-  | 'info' {
-  switch (
-    status
-  ) {
+  status: ClassAttendanceStatus,
+): 'neutral' | 'success' | 'warning' | 'danger' | 'info' {
+  switch (status) {
     case 'present':
       return 'success';
-
     case 'absent':
       return 'danger';
-
+    case 'not_reported':
+      return 'warning';
     default:
       return 'neutral';
   }
 }
 
 export function classAttendanceSummary(
-  statuses:
-    ClassAttendanceStatus[],
+  statuses: ClassAttendanceStatus[],
 ) {
-  const count =
-    (
-      status:
-        ClassAttendanceStatus,
-    ) =>
-      statuses.filter(
-        (value) =>
-          value ===
-          status,
-      ).length;
+  const count = (status: ClassAttendanceStatus) =>
+    statuses.filter((value) => value === status).length;
 
   return {
-    total:
-      statuses.length,
-    present:
-      count(
-        'present',
-      ),
-    absent:
-      count(
-        'absent',
-      ),
-    unmarked:
-      count(
-        'unmarked',
-      ),
+    total: statuses.length,
+    present: count('present'),
+    absent: count('absent'),
+    notReported: count('not_reported'),
+    unmarked: count('unmarked'),
   };
 }
 

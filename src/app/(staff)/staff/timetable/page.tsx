@@ -4,6 +4,7 @@ import {
   MapPin,
   Users,
 } from 'lucide-react';
+import Link from 'next/link';
 
 import { PageHeader } from '@/components/ui/page-header';
 import { requireTrainerAccess } from '@/features/auth/authorization';
@@ -179,30 +180,46 @@ export default async function StaffTimetablePage() {
                             >
                               {matchingSessions.length > 0 ? (
                                 <div className="space-y-1.5">
-                                  {matchingSessions.map((session) => (
-                                    <div
-                                      key={session.id}
-                                      className="rounded border border-slate-200 bg-white p-2 text-xs hover:border-slate-300 transition"
-                                    >
-                                      <p className="font-bold text-slate-900 leading-snug">
-                                        {session.unitName}
-                                      </p>
-                                      <div className="mt-1 flex items-center justify-between text-[11px] text-slate-600">
-                                        <span className="flex items-center gap-1 font-medium">
-                                          <MapPin className="size-3 text-slate-400" />
-                                          {session.roomLabel}
-                                        </span>
-                                        <span className="capitalize text-[10px] text-slate-500">
-                                          {session.deliveryMode}
-                                        </span>
-                                      </div>
-                                      {session.cohortNames.length > 0 && (
-                                        <p className="mt-0.5 text-[10px] text-slate-500 truncate" title={session.cohortNames.join(', ')}>
-                                          {session.cohortNames.join(' · ')}
+                                  {matchingSessions.map((session) => {
+                                    const cardContent = (
+                                      <>
+                                        <p className="font-bold text-slate-900 leading-snug">
+                                          {session.unitName}
                                         </p>
-                                      )}
-                                    </div>
-                                  ))}
+                                        <div className="mt-1 flex items-center justify-between text-[11px] text-slate-600">
+                                          <span className="flex items-center gap-1 font-medium">
+                                            <MapPin className="size-3 text-slate-400" />
+                                            {session.roomLabel}
+                                          </span>
+                                          <span className="capitalize text-[10px] text-slate-500">
+                                            {session.deliveryMode}
+                                          </span>
+                                        </div>
+                                        {session.cohortNames.length > 0 && (
+                                          <p className="mt-0.5 text-[10px] text-slate-500 truncate" title={session.cohortNames.join(', ')}>
+                                            {session.cohortNames.join(' · ')}
+                                          </p>
+                                        )}
+                                      </>
+                                    );
+
+                                    const baseClassName = "rounded border border-slate-200 bg-white p-2 text-xs transition";
+
+                                    return session.allocationId ? (
+                                      <Link
+                                        key={session.id}
+                                        href={`/staff/units/${session.allocationId}`}
+                                        className={`${baseClassName} block hover:border-primary/40 hover:bg-primary/5`}
+                                        title="View unit documents"
+                                      >
+                                        {cardContent}
+                                      </Link>
+                                    ) : (
+                                      <div key={session.id} className={`${baseClassName} hover:border-slate-300`}>
+                                        {cardContent}
+                                      </div>
+                                    );
+                                  })}
                                 </div>
                               ) : (
                                 <span className="text-slate-300 block text-center py-2">—</span>
@@ -233,36 +250,53 @@ export default async function StaffTimetablePage() {
                     </div>
 
                     <div className="divide-y divide-slate-100">
-                      {sessions.map((session) => (
-                        <div key={session.id} className="p-3 space-y-1.5">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="flex items-center gap-1 font-bold text-primary">
-                              <Clock3 className="size-3 text-primary" />
-                              {formatTimetableClock(session.startsAt)} – {formatTimetableClock(session.endsAt)}
-                            </span>
-                            <span className="text-[10px] uppercase font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
-                              {session.deliveryMode}
-                            </span>
-                          </div>
-
-                          <p className="text-xs font-bold text-slate-900 leading-snug">
-                            {session.unitName}
-                          </p>
-
-                          <div className="flex items-center justify-between text-[11px] text-slate-600 pt-0.5">
-                            <span className="flex items-center gap-1">
-                              <MapPin className="size-3 text-slate-400" />
-                              {session.roomLabel}
-                            </span>
-                            {session.cohortNames.length > 0 && (
-                              <span className="flex items-center gap-1 text-slate-500 truncate max-w-[160px]">
-                                <Users className="size-3 text-slate-400" />
-                                {session.cohortNames.join(' · ')}
+                      {sessions.map((session) => {
+                        const sessionRow = (
+                          <>
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="flex items-center gap-1 font-bold text-primary">
+                                <Clock3 className="size-3 text-primary" />
+                                {formatTimetableClock(session.startsAt)} – {formatTimetableClock(session.endsAt)}
                               </span>
-                            )}
+                              <span className="text-[10px] uppercase font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+                                {session.deliveryMode}
+                              </span>
+                            </div>
+
+                            <p className="text-xs font-bold text-slate-900 leading-snug">
+                              {session.unitName}
+                            </p>
+
+                            <div className="flex items-center justify-between text-[11px] text-slate-600 pt-0.5">
+                              <span className="flex items-center gap-1">
+                                <MapPin className="size-3 text-slate-400" />
+                                {session.roomLabel}
+                              </span>
+                              {session.cohortNames.length > 0 && (
+                                <span className="flex items-center gap-1 text-slate-500 truncate max-w-[160px]">
+                                  <Users className="size-3 text-slate-400" />
+                                  {session.cohortNames.join(' · ')}
+                                </span>
+                              )}
+                            </div>
+                          </>
+                        );
+
+                        return session.allocationId ? (
+                          <Link
+                            key={session.id}
+                            href={`/staff/units/${session.allocationId}`}
+                            className="block p-3 space-y-1.5 hover:bg-primary/5 transition"
+                            title="View unit documents"
+                          >
+                            {sessionRow}
+                          </Link>
+                        ) : (
+                          <div key={session.id} className="p-3 space-y-1.5">
+                            {sessionRow}
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 ))}

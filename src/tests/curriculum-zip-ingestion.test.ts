@@ -101,18 +101,22 @@ describe('TVET Curriculum ZIP Ingestion & Scheme Auto-Generation', () => {
 
       expect(scheme.plannedWeeks).toHaveLength(14);
 
-      // Verify that every week has specific learning outcomes and assessment strategies
+      // Verify teaching weeks vs assessment weeks
       for (const week of scheme.plannedWeeks) {
         expect(week.weekNumber).toBeGreaterThanOrEqual(1);
         expect(week.weekNumber).toBeLessThanOrEqual(14);
         expect(week.topic).toBeTruthy();
-        expect(week.specificLearningOutcomes).toContain('By the end of the week');
+        if (week.weekNumber === 8 || week.weekNumber === 14) {
+          expect(week.specificLearningOutcomes).toBe('');
+          expect(week.subTopics).toBe('');
+        } else {
+          expect(week.specificLearningOutcomes).toContain('By the end of the lesson/topic');
+        }
       }
 
       // Check milestones
-      expect(scheme.plannedWeeks[4].assessmentAndRemarks).toContain('RAT');
       expect(scheme.plannedWeeks[7].assessmentAndRemarks).toContain('CAT');
-      expect(scheme.plannedWeeks[13].assessmentAndRemarks).toContain('Final Examination');
+      expect(scheme.plannedWeeks[13].assessmentAndRemarks).toContain('End of Term Examination');
     });
   });
 });

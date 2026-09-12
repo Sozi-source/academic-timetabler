@@ -11,6 +11,7 @@ import {
 import {
   createClient,
 } from '@/lib/supabase/server';
+import { getUnifiedUnitRoster } from '@/features/academic-roster/unified-roster';
 
 interface CreatePayload {
   scheduledSessionId?:
@@ -176,139 +177,54 @@ export async function POST(
       },
     );
 
+  let classSessionId = data;
+
   if (error) {
     // If RPC fails (e.g. date outside period or day mismatch), use direct class_sessions insert / retrieval fallback with admin client
     try {
       const { data: existingCs } = await (adminDb as any)
         .from('class_sessions')
-        .select('id, academic_period_id, unit_id, cohort_id')
+        .select('id, academic_period_id, unit_id, cohort_id, teaching_allocation_id')
         .eq('scheduled_session_id', payload.scheduledSessionId)
         .eq('session_date', payload.sessionDate)
         .maybeSingle();
 
       if (existingCs) {
-        // Self-heal: ensure entries exist in class_attendance_entries
-        const { count: existingCount } = await (adminDb as any)
-          .from('class_attendance_entries')
-          .select('*', { count: 'exact', head: true })
-          .eq('class_session_id', existingCs.id);
+        classSessionId = existingCs.id;
+      } else {
+        const { data: sessionData } = await (adminDb as any)
+          .from('scheduled_sessions')
+          .select('*')
+          .eq('id', payload.scheduledSessionId)
+          .maybeSingle();
 
-        if (!existingCount || existingCount === 0) {
-          const { data: regStudents } = await (adminDb as any)
-            .from('student_unit_registrations')
-            .select('student_id, cohort_id')
-            .eq('academic_period_id', existingCs.academic_period_id)
-            .eq('unit_id', existingCs.unit_id)
-            .eq('registration_status', 'registered');
-
-          if (regStudents && regStudents.length > 0) {
-            const records = regStudents.map((st: any) => ({
-              class_session_id: existingCs.id,
-              student_id: st.student_id,
-              cohort_id: st.cohort_id || existingCs.cohort_id,
-              attendance_status: 'unmarked',
-            }));
-            await (adminDb as any)
-              .from('class_attendance_entries')
-              .upsert(records, { onConflict: 'class_session_id,student_id' });
-
-            await (adminDb as any)
-              .from('class_sessions')
-              .update({ roster_count: records.length, updated_at: new Date().toISOString() })
-              .eq('id', existingCs.id);
-          }
+        if (!sessionData) {
+          throw new Error('Scheduled session record could not be found.');
         }
 
-        return NextResponse.json({
-          success: true,
-          classSessionId: existingCs.id,
-        });
-      }
-
-      const { data: sessionData } = await (adminDb as any)
-        .from('scheduled_sessions')
-        .select('*')
-        .eq('id', payload.scheduledSessionId)
-        .maybeSingle();
-
-      if (!sessionData) {
-        throw new Error('Scheduled session record could not be found.');
-      }
-
-      const { data: newCs, error: insertError } = await (adminDb as any)
-        .from('class_sessions')
-        .insert({
-          academic_period_id: sessionData.academic_period_id,
-          teaching_allocation_id: sessionData.teaching_allocation_id,
-          scheduled_session_id: payload.scheduledSessionId,
-          cohort_id: sessionData.cohort_id,
-          unit_id: sessionData.unit_id,
-          trainer_id: sessionData.trainer_id,
-          session_date: payload.sessionDate,
-          starts_at: '08:00:00',
-          ends_at: '10:00:00',
-          status: 'open',
-        })
-        .select('id')
-        .single();
-
-      if (insertError || !newCs) {
-        throw insertError || new Error('Failed to create class session');
-      }
-
-      // Seed student registrations into class_attendance_entries from student_unit_registrations
-      let records: any[] = [];
-      if (sessionData.unit_id && sessionData.academic_period_id) {
-        const { data: regStudents } = await (adminDb as any)
-          .from('student_unit_registrations')
-          .select('student_id, cohort_id')
-          .eq('academic_period_id', sessionData.academic_period_id)
-          .eq('unit_id', sessionData.unit_id)
-          .eq('registration_status', 'registered');
-
-        if (regStudents && regStudents.length > 0) {
-          records = regStudents.map((st: any) => ({
-            class_session_id: newCs.id,
-            student_id: st.student_id,
-            cohort_id: st.cohort_id || sessionData.cohort_id,
-            attendance_status: 'unmarked',
-          }));
-        }
-      }
-
-      // Fallback to active cohort students using valid columns if no unit registrations exist
-      if (records.length === 0 && sessionData.cohort_id) {
-        const { data: cohortStudents } = await (adminDb as any)
-          .from('students')
-          .select('id')
-          .eq('current_cohort_id', sessionData.cohort_id)
-          .in('lifecycle_status', ['admitted', 'active']);
-
-        if (cohortStudents && cohortStudents.length > 0) {
-          records = cohortStudents.map((st: any) => ({
-            class_session_id: newCs.id,
-            student_id: st.id,
-            cohort_id: sessionData.cohort_id,
-            attendance_status: 'unmarked',
-          }));
-        }
-      }
-
-      if (records.length > 0) {
-        await (adminDb as any)
-          .from('class_attendance_entries')
-          .upsert(records, { onConflict: 'class_session_id,student_id' });
-
-        await (adminDb as any)
+        const { data: newCs, error: insertError } = await (adminDb as any)
           .from('class_sessions')
-          .update({ roster_count: records.length, updated_at: new Date().toISOString() })
-          .eq('id', newCs.id);
-      }
+          .insert({
+            academic_period_id: sessionData.academic_period_id,
+            teaching_allocation_id: sessionData.teaching_allocation_id,
+            scheduled_session_id: payload.scheduledSessionId,
+            cohort_id: sessionData.cohort_id,
+            unit_id: sessionData.unit_id,
+            trainer_id: sessionData.trainer_id,
+            session_date: payload.sessionDate,
+            starts_at: '08:00:00',
+            ends_at: '10:00:00',
+            status: 'open',
+          })
+          .select('id')
+          .single();
 
-      return NextResponse.json({
-        success: true,
-        classSessionId: newCs.id,
-      });
+        if (insertError || !newCs) {
+          throw insertError || new Error('Failed to create class session');
+        }
+
+        classSessionId = newCs.id;
+      }
     } catch (fallbackErr: any) {
       return NextResponse.json(
         {
@@ -322,10 +238,55 @@ export async function POST(
     }
   }
 
+  // Ensure all registered cohorts and students for this unit & academic period are present in class_attendance_entries
+  if (classSessionId) {
+    try {
+      const { data: cs } = await (adminDb as any)
+        .from('class_sessions')
+        .select('id, academic_period_id, unit_id, cohort_id, teaching_allocation_id')
+        .eq('id', classSessionId)
+        .maybeSingle();
+
+      if (cs?.unit_id && cs?.academic_period_id) {
+        const roster = await getUnifiedUnitRoster({
+          supabase: adminDb,
+          unitId: cs.unit_id,
+          academicPeriodId: cs.academic_period_id,
+          allocationId: cs.teaching_allocation_id,
+        });
+
+        if (roster.students.length > 0) {
+          const records = roster.students.map((st) => ({
+            class_session_id: cs.id,
+            student_id: st.studentId,
+            cohort_id: st.cohortId || cs.cohort_id,
+            attendance_status: st.reportingStatus === 'reported' ? 'unmarked' : 'not_reported',
+          }));
+
+          await (adminDb as any)
+            .from('class_attendance_entries')
+            .upsert(records, { onConflict: 'class_session_id,student_id', ignoreDuplicates: true });
+
+          await (adminDb as any)
+            .from('class_sessions')
+            .update({ roster_count: roster.totalCount, updated_at: new Date().toISOString() })
+            .eq('id', cs.id);
+
+          if (roster.cohortIds.length > 0) {
+            await (adminDb as any)
+              .from('scheduled_sessions')
+              .update({ participant_cohort_ids: roster.cohortIds })
+              .eq('id', payload.scheduledSessionId);
+          }
+        }
+      }
+    } catch (reconcileErr) {
+      console.warn('Class attendance session roster auto-reconcile warning:', reconcileErr);
+    }
+  }
+
   return NextResponse.json({
-    success:
-      true,
-    classSessionId:
-      data,
+    success: true,
+    classSessionId,
   });
 }

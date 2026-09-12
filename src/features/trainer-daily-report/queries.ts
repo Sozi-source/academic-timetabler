@@ -8,8 +8,107 @@ import { createClient } from '@/lib/supabase/server';
 
 import type {
   DepartmentDailyReportWorkspace,
+  PastUnrecordedSession,
   TrainerDailyReportWorkspace,
 } from './types';
+import type { ClassAttendanceScheduleItem } from '@/features/class-attendance/types';
+
+export async function detectPastUnrecordedSessions({
+  supabase,
+  schedule,
+  reportDate,
+  lookbackDays = 14,
+}: {
+  supabase: any;
+  schedule: ClassAttendanceScheduleItem[];
+  reportDate: string;
+  lookbackDays?: number;
+}): Promise<PastUnrecordedSession[]> {
+  if (schedule.length === 0) return [];
+
+  const targetDateObj = new Date(`${reportDate}T00:00:00Z`);
+  const pastDates: Array<{ dateStr: string; dayOfWeek: string; daysOverdue: number }> = [];
+
+  for (let i = 1; i <= lookbackDays; i++) {
+    const pastObj = new Date(targetDateObj.getTime() - i * 24 * 60 * 60 * 1000);
+    const dateStr = pastObj.toISOString().slice(0, 10);
+    const dayOfWeek = new Intl.DateTimeFormat('en-GB', {
+      weekday: 'long',
+      timeZone: 'UTC',
+    }).format(pastObj);
+    pastDates.push({ dateStr, dayOfWeek, daysOverdue: i });
+  }
+
+  const scheduledOnDates: Array<{
+    scheduledSessionId: string;
+    sessionDate: string;
+    dayOfWeek: string;
+    unitCode: string;
+    unitName: string;
+    cohortName: string;
+    startsAt: string;
+    endsAt: string;
+    daysOverdue: number;
+  }> = [];
+
+  for (const dateItem of pastDates) {
+    for (const item of schedule) {
+      if (item.dayOfWeek.toLowerCase() === dateItem.dayOfWeek.toLowerCase()) {
+        if (item.teachingStartsOn && dateItem.dateStr < item.teachingStartsOn) continue;
+        if (item.teachingEndsOn && dateItem.dateStr > item.teachingEndsOn) continue;
+
+        scheduledOnDates.push({
+          scheduledSessionId: item.scheduledSessionId,
+          sessionDate: dateItem.dateStr,
+          dayOfWeek: dateItem.dayOfWeek,
+          unitCode: '',
+          unitName: item.unitName,
+          cohortName: item.cohortName,
+          startsAt: item.startsAt,
+          endsAt: item.endsAt,
+          daysOverdue: dateItem.daysOverdue,
+        });
+      }
+    }
+  }
+
+  if (scheduledOnDates.length === 0) return [];
+
+  const scheduledSessionIds = [...new Set(scheduledOnDates.map((s) => s.scheduledSessionId))];
+  const dates = [...new Set(scheduledOnDates.map((s) => s.sessionDate))];
+
+  const { data: recordedSessions } = await (supabase as any)
+    .from('class_sessions')
+    .select('id, scheduled_session_id, session_date, status')
+    .in('scheduled_session_id', scheduledSessionIds)
+    .in('session_date', dates);
+
+  const recordedMap = new Map<string, string>();
+  for (const cs of recordedSessions ?? []) {
+    recordedMap.set(`${cs.scheduled_session_id}:${cs.session_date}`, cs.status);
+  }
+
+  const unrecorded: PastUnrecordedSession[] = [];
+  for (const s of scheduledOnDates) {
+    const status = recordedMap.get(`${s.scheduledSessionId}:${s.sessionDate}`);
+    if (!status || status === 'open') {
+      unrecorded.push({
+        scheduledSessionId: s.scheduledSessionId,
+        sessionDate: s.sessionDate,
+        dayOfWeek: s.dayOfWeek,
+        unitCode: s.unitCode,
+        unitName: s.unitName,
+        cohortName: s.cohortName,
+        startsAt: s.startsAt,
+        endsAt: s.endsAt,
+        daysOverdue: s.daysOverdue,
+        status: status === 'open' ? 'open' : 'not_started',
+      });
+    }
+  }
+
+  return unrecorded.sort((a, b) => b.daysOverdue - a.daysOverdue);
+}
 
 export async function getTrainerDailyReportWorkspace(
   reportDate: string,
@@ -24,7 +123,28 @@ export async function getTrainerDailyReportWorkspace(
     );
 
     if (!error && data && Array.isArray(data.lessons)) {
-      return data as TrainerDailyReportWorkspace;
+      const { getStaffClassAttendanceSchedule } = await import('@/features/class-attendance/queries');
+      const attendanceSchedule = await getStaffClassAttendanceSchedule().catch(() => []);
+      const pastUnrecordedSessions = await detectPastUnrecordedSessions({
+        supabase,
+        schedule: attendanceSchedule,
+        reportDate,
+      });
+      const hasOverduePastSessions = pastUnrecordedSessions.some((p) => p.daysOverdue > 2);
+      const readyToSubmit = Boolean(data.readyToSubmit) && !hasOverduePastSessions;
+      const blockingReason = !data.readyToSubmit
+        ? data.blockingReason
+        : hasOverduePastSessions
+        ? 'You have overdue unrecorded past classes (>48h). Record past attendance or log an exception note to submit.'
+        : null;
+
+      return {
+        ...data,
+        readyToSubmit,
+        blockingReason,
+        pastUnrecordedSessions,
+        hasOverduePastSessions,
+      } as TrainerDailyReportWorkspace;
     }
   } catch (err) {
     console.warn('get_trainer_daily_report_workspace RPC warning:', err);
@@ -45,6 +165,12 @@ export async function getTrainerDailyReportWorkspace(
       getStaffClassAttendanceSchedule().catch(() => []),
     ]);
 
+    const pastUnrecordedSessions = await detectPastUnrecordedSessions({
+      supabase,
+      schedule: attendanceSchedule,
+      reportDate,
+    });
+
     const reportDayOfWeek = new Intl.DateTimeFormat('en-GB', {
       weekday: 'long',
       timeZone: 'UTC',
@@ -57,8 +183,66 @@ export async function getTrainerDailyReportWorkspace(
     const departmentId = profile.activeDepartmentId || '';
     const departmentName = profile.departmentName || 'Department';
 
+    const sessionIdsWithClassSession = daySessions
+      .map((s) => s.latestClassSessionId)
+      .filter((id): id is string => Boolean(id));
+
+    const sessionStatsMap = new Map<string, {
+      rosterCount: number;
+      presentCount: number;
+      absentCount: number;
+      notReportedCount: number;
+      absentees: Array<{ studentId: string; admissionNumber: string; fullName: string; note: string | null }>;
+    }>();
+
+    if (sessionIdsWithClassSession.length > 0) {
+      try {
+        const { data: classSessions } = await (supabase as any)
+          .from('class_sessions')
+          .select('id, roster_count')
+          .in('id', sessionIdsWithClassSession);
+
+        const { data: entries } = await (supabase as any)
+          .from('class_attendance_entries')
+          .select('class_session_id, attendance_status, note, students(id, admission_number, full_name)')
+          .in('class_session_id', sessionIdsWithClassSession);
+
+        for (const cs of classSessions ?? []) {
+          sessionStatsMap.set(cs.id, {
+            rosterCount: Number(cs.roster_count || 0),
+            presentCount: 0,
+            absentCount: 0,
+            notReportedCount: 0,
+            absentees: [],
+          });
+        }
+
+        for (const entry of entries ?? []) {
+          const stats = sessionStatsMap.get(entry.class_session_id);
+          if (stats) {
+            if (entry.attendance_status === 'present') stats.presentCount++;
+            if (entry.attendance_status === 'absent') {
+              stats.absentCount++;
+              stats.absentees.push({
+                studentId: entry.students?.id || '',
+                admissionNumber: entry.students?.admission_number || '—',
+                fullName: entry.students?.full_name || 'Student',
+                note: entry.note || null,
+              });
+            }
+            if (entry.attendance_status === 'not_reported') {
+              stats.notReportedCount++;
+            }
+          }
+        }
+      } catch (statsErr) {
+        console.warn('Failed to load session attendance stats:', statsErr);
+      }
+    }
+
     const lessons = daySessions.map((s) => {
-      const attendanceStatus = (s.latestStatus as 'not_started' | 'open' | 'completed') || 'not_started';
+      const attendanceStatus = (s.latestStatus as 'not_started' | 'open' | 'completed' | 'cancelled') || 'not_started';
+      const stats = s.latestClassSessionId ? sessionStatsMap.get(s.latestClassSessionId) : null;
 
       return {
         id: s.latestClassSessionId || null,
@@ -82,10 +266,11 @@ export async function getTrainerDailyReportWorkspace(
         deliveryMode: 'Teaching',
         attendanceSessionId: s.latestClassSessionId || null,
         attendanceStatus,
-        rosterCount: 0,
-        presentCount: 0,
-        absentCount: 0,
-        absentees: [],
+        rosterCount: stats?.rosterCount ?? 0,
+        presentCount: stats?.presentCount ?? 0,
+        absentCount: stats?.absentCount ?? 0,
+        notReportedCount: stats?.notReportedCount ?? 0,
+        absentees: stats?.absentees ?? [],
       };
     });
 
@@ -105,8 +290,14 @@ export async function getTrainerDailyReportWorkspace(
       // Table query fallback
     }
 
-    const readyToSubmit = lessons.length === 0 || lessons.every((l) => l.attendanceStatus === 'completed');
-    const blockingReason = readyToSubmit ? null : 'Complete attendance for all scheduled lessons before submitting the daily report.';
+    const lessonsComplete = lessons.length === 0 || lessons.every((l) => l.attendanceStatus === 'completed' || l.attendanceStatus === 'cancelled');
+    const hasOverduePastSessions = pastUnrecordedSessions.some((p) => p.daysOverdue > 2);
+    const readyToSubmit = lessonsComplete && !hasOverduePastSessions;
+    const blockingReason = !lessonsComplete
+      ? 'Complete attendance for all scheduled lessons before submitting the daily report.'
+      : hasOverduePastSessions
+      ? 'You have overdue unrecorded past classes (>48h). Record past attendance or log an exception note to submit.'
+      : null;
 
     return {
       reportDate,
@@ -123,6 +314,8 @@ export async function getTrainerDailyReportWorkspace(
       readyToSubmit,
       blockingReason,
       lessons,
+      pastUnrecordedSessions,
+      hasOverduePastSessions,
     };
   } catch (fallbackErr) {
     console.error('Trainer daily report workspace fallback failed:', fallbackErr);
@@ -144,6 +337,8 @@ export async function getTrainerDailyReportWorkspace(
       readyToSubmit: true,
       blockingReason: null,
       lessons: [],
+      pastUnrecordedSessions: [],
+      hasOverduePastSessions: false,
     };
   }
 }

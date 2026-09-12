@@ -21,6 +21,8 @@ function session(
   return {
     id:
       's1',
+    allocationId:
+      null,
     academicPeriodId:
       'p1',
     academicPeriodName:

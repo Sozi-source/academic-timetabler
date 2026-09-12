@@ -15,8 +15,8 @@ export default async function TVETCourseOutlinePage({ params }: PageProps) {
   if (!header) notFound();
 
   const [curriculum, milestones] = await Promise.all([
-    getApprovedCurriculumForUnitCode(header.unitCode, header.unitName),
-    getAssessmentMilestones(),
+    getApprovedCurriculumForUnitCode(header.unitCode, header.unitName, 'course_outline'),
+    getAssessmentMilestones(header.academicPeriodId ?? undefined),
   ]);
 
   if (!curriculum) {

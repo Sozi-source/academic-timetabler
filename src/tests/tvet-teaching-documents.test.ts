@@ -3,6 +3,9 @@ import {
   computeRecordOfWorkSummary,
   generateTVETCourseOutline,
   generateTVETSchemeOfWork,
+  parseActivitiesList,
+  parseResourcesList,
+  parseSubTopics,
   type TVETDocumentHeaderContext,
   type TVETRecordOfWorkEntry,
 } from '@/features/teaching-documents/tvet-standards';
@@ -48,14 +51,11 @@ describe('TVET Standardised Teaching Documents Suite', () => {
       expect(totalHours).toBe(56);
     });
 
-    it('enforces the exact TVET 5-component assessment breakdown totaling 100%', () => {
+    it('enforces the exact TVET assessment breakdown totaling 100%', () => {
       const outline = generateTVETCourseOutline(mockHeader);
       const matrix = outline.assessmentMatrix;
 
-      expect(matrix.continuousAssessment.assignment).toBe(5);
-      expect(matrix.continuousAssessment.presentation).toBe(10);
-      expect(matrix.continuousAssessment.rat).toBe(15);
-      expect(matrix.continuousAssessment.cat).toBe(15);
+      expect(matrix.continuousAssessment.cat).toBe(30);
       expect(matrix.continuousAssessment.courseworkWeightedTotal).toBe(30);
 
       expect(matrix.finalExamination).toBe(70);
@@ -109,14 +109,15 @@ describe('TVET Standardised Teaching Documents Suite', () => {
       expect(scheme.plannedWeeks).toHaveLength(14);
 
       // Check specific milestone weeks
-      const week5RAT = scheme.plannedWeeks.find((w) => w.weekNumber === 5);
-      expect(week5RAT?.assessmentAndRemarks).toContain('RAT');
-
       const week8CAT = scheme.plannedWeeks.find((w) => w.weekNumber === 8);
       expect(week8CAT?.assessmentAndRemarks).toContain('CAT');
+      expect(week8CAT?.subTopics).toBe('');
+      expect(week8CAT?.specificLearningOutcomes).toBe('');
 
       const week14Exam = scheme.plannedWeeks.find((w) => w.weekNumber === 14);
-      expect(week14Exam?.assessmentAndRemarks).toContain('Final Examination');
+      expect(week14Exam?.assessmentAndRemarks).toContain('End of Term Examination');
+      expect(week14Exam?.subTopics).toBe('');
+      expect(week14Exam?.specificLearningOutcomes).toBe('');
     });
   });
 
@@ -180,4 +181,100 @@ describe('TVET Standardised Teaching Documents Suite', () => {
       expect(summary.entries).toHaveLength(0);
     });
   });
+
+  describe('Semester Program of Activities & Calendar Milestones Integration', () => {
+    it('integrates custom milestones into Scheme of Work and Course Outline', async () => {
+      const { mapProgramOfActivitiesToMilestones } = await import(
+        '@/features/teaching-documents/program-of-activities/queries'
+      );
+      const { DEFAULT_PROGRAM_OF_ACTIVITIES } = await import(
+        '@/features/teaching-documents/program-of-activities/types'
+      );
+
+      const mappedMilestones = mapProgramOfActivitiesToMilestones(DEFAULT_PROGRAM_OF_ACTIVITIES);
+
+      // Verify mapping of CAT week and Exam week
+      expect(mappedMilestones.catWeek).toBe(8);
+      expect(mappedMilestones.examWeek).toBe(14);
+
+      // Verify Scheme of Work generation respects the milestones
+      const scheme = generateTVETSchemeOfWork(mockHeader, undefined, mappedMilestones);
+      expect(scheme.plannedWeeks).toHaveLength(14);
+
+      const week8 = scheme.plannedWeeks.find((w) => w.weekNumber === 8);
+      expect(week8?.assessmentAndRemarks).toContain('Continuous Assessment Test (CAT)');
+      expect(week8?.subTopics).toBe('');
+      expect(week8?.specificLearningOutcomes).toBe('');
+
+      const week14 = scheme.plannedWeeks.find((w) => w.weekNumber === 14);
+      expect(week14?.assessmentAndRemarks).toContain('End of Term Examination');
+      expect(week14?.subTopics).toBe('');
+      expect(week14?.specificLearningOutcomes).toBe('');
+
+      // Verify Course Outline schedule respects the milestones
+      const outline = generateTVETCourseOutline(mockHeader, undefined, mappedMilestones);
+      expect(outline.weeklySchedule).toHaveLength(14);
+      const outlineW8 = outline.weeklySchedule.find((w) => w.weekNumber === 8);
+      expect(outlineW8?.topicTitle).toContain('CAT');
+      expect(outlineW8?.subTopics).toEqual([]);
+
+      const outlineW14 = outline.weeklySchedule.find((w) => w.weekNumber === 14);
+      expect(outlineW14?.topicTitle).toContain('Examination');
+      expect(outlineW14?.subTopics).toEqual([]);
+    });
+  });
+
+  describe('Scheme of Work & Course Outline Polish & College Scheduled Dates', () => {
+    it('parses subtopics, activities, and resources into discrete lines', () => {
+      const subtopics = parseSubTopics('Input devices · Output devices · Central Processing Unit (CPU)');
+      expect(subtopics).toEqual(['Input devices', 'Output devices', 'Central Processing Unit (CPU)']);
+
+      const newlineSubtopics = parseSubTopics('Input devices\nOutput devices\nStorage media');
+      expect(newlineSubtopics).toEqual(['Input devices', 'Output devices', 'Storage media']);
+
+      const activities = parseActivitiesList('Interactive lecture · Practical demonstration · Group discussion');
+      expect(activities).toEqual(['Interactive lecture', 'Practical demonstration', 'Group discussion']);
+
+      const commaActivities = parseActivitiesList('Lecture presentations, group discussions, and laboratory analysis');
+      expect(commaActivities).toEqual(['Lecture presentations', 'group discussions', 'laboratory analysis']);
+
+      const resources = parseResourcesList('Course Textbooks · Whiteboard & Markers · Handouts');
+      expect(resources).toEqual(['Course Textbooks', 'Whiteboard & Markers', 'Handouts']);
+    });
+
+    it('ensures specific learning outcomes start with bold standard lead-in on teaching weeks', () => {
+      const scheme = generateTVETSchemeOfWork(mockHeader);
+      for (const week of scheme.plannedWeeks) {
+        if (week.weekNumber === 8 || week.weekNumber === 14) {
+          expect(week.specificLearningOutcomes).toBe('');
+          expect(week.subTopics).toBe('');
+        } else {
+          expect(week.specificLearningOutcomes).toContain('By the end of the lesson/topic, the trainee should be able to:');
+        }
+      }
+    });
+
+    it('applies college-wide CAT and End-Term scheduled dates to all trainer documents', () => {
+      const collegeMilestones = {
+        catWeek: 8,
+        examWeek: 14,
+        catRemarks: 'Continuous Assessment Test (CAT)',
+        examRemarks: 'End of Term Examination',
+        catDate: '9th – 13th June 2026',
+        examDate: '20th – 31st July 2026',
+      };
+
+      const scheme = generateTVETSchemeOfWork(mockHeader, undefined, collegeMilestones);
+      const week8 = scheme.plannedWeeks.find((w) => w.weekNumber === 8);
+      const week14 = scheme.plannedWeeks.find((w) => w.weekNumber === 14);
+
+      expect(week8?.assessmentAndRemarks).toContain('Date: 9th – 13th June 2026');
+      expect(week14?.assessmentAndRemarks).toContain('Date: 20th – 31st July 2026');
+
+      const outline = generateTVETCourseOutline(mockHeader, undefined, collegeMilestones);
+      expect(outline.assessmentApproaches).toContain('9th – 13th June 2026');
+      expect(outline.assessmentApproaches).toContain('20th – 31st July 2026');
+    });
+  });
 });
+

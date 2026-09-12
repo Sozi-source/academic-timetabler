@@ -19,10 +19,14 @@ import {
   WidthType,
 } from 'docx';
 
-import type {
-  TVETCourseOutlineData,
-  TVETSchemeOfWorkData,
-  TVETRecordOfWorkData,
+import {
+  parseActivitiesList,
+  parseResourcesList,
+  parseSLOOutcomes,
+  parseSubTopics,
+  type TVETCourseOutlineData,
+  type TVETSchemeOfWorkData,
+  type TVETRecordOfWorkData,
 } from './tvet-standards';
 
 const FONT = 'Arial';
@@ -42,10 +46,11 @@ const headerBorders = {
   right: { style: BorderStyle.SINGLE, size: 4, color: HEADER_BORDER_COLOR },
 } as const;
 
-function clean(value: string | null | undefined, fallback = 'â€”') {
+function clean(value: string | null | undefined, fallback = '—') {
   const text = value?.trim();
   return text ? text : fallback;
 }
+
 
 function p(
   text: string,
@@ -249,7 +254,7 @@ export async function buildTVETDocumentDocx(
                   spacing: { before: 0, after: 0 },
                   children: [
                     new TextRun({
-                      text: `${header.unitCode} â€” ${header.unitName.toUpperCase()}`,
+                      text: `${header.unitCode} — ${header.unitName.toUpperCase()}`,
                       font: FONT,
                       bold: true,
                       size: 22,
@@ -416,23 +421,172 @@ export async function buildTVETDocumentDocx(
         rows: [
           new TableRow({
             children: [
-              cell('Wk', { isHeader: true, align: AlignmentType.CENTER, widthPct: 5 }),
-              cell('Topic & Sub-topics', { isHeader: true, widthPct: 25 }),
-              cell('Specific Learning Outcomes (SLOs)', { isHeader: true, widthPct: 40 }),
+              cell('Wk', { isHeader: true, align: AlignmentType.CENTER, widthPct: 4 }),
+              cell('Topic & Sub-topics', { isHeader: true, widthPct: 20 }),
+              cell('Specific Learning Outcomes (SLOs)', { isHeader: true, widthPct: 28 }),
               cell('Activities & Methodology', { isHeader: true, widthPct: 16 }),
-              cell('Instructional Resources', { isHeader: true, widthPct: 14 }),
+              cell('Instructional Resources', { isHeader: true, widthPct: 18 }),
+              cell('Assessment & Remarks', { isHeader: true, widthPct: 14 }),
             ],
           }),
           ...sow.plannedWeeks.map((w, idx) => {
             const fill = idx % 2 === 1 ? ZEBRA_BG : 'FFFFFF';
-            const sub = w.subTopics ? `\n${w.subTopics}` : '';
+            const subtopics = parseSubTopics(w.subTopics);
+            const isMilestone =
+              Boolean(w.assessmentAndRemarks) &&
+              (w.assessmentAndRemarks.toLowerCase().includes('cat') ||
+                w.assessmentAndRemarks.toLowerCase().includes('exam'));
+
+            // 1. Topic & Subtopics (each subtopic on new line using bullet)
+            const topicChildren: Paragraph[] = [
+              new Paragraph({
+                alignment: AlignmentType.LEFT,
+                spacing: { before: 20, after: subtopics.length > 0 ? 30 : 20, line: 240 },
+                children: [
+                  new TextRun({ text: clean(w.topic), font: FONT, bold: true, size: 15, color: PRIMARY_DARK }),
+                ],
+              }),
+              ...subtopics.map((st) =>
+                new Paragraph({
+                  alignment: AlignmentType.LEFT,
+                  spacing: { before: 10, after: 10, line: 220 },
+                  indent: { left: 140 },
+                  children: [
+                    new TextRun({ text: '•  ', font: FONT, bold: true, size: 14, color: PRIMARY_DARK }),
+                    new TextRun({ text: clean(st), font: FONT, size: 14, color: '333333' }),
+                  ],
+                }),
+              ),
+            ];
+
+            // 2. Specific Learning Outcomes: start with "By the end of the lesson/topic, the trainee should be able to:" (bold), then each outcome on its line
+            const sloOutcomes = parseSLOOutcomes(w.specificLearningOutcomes);
+
+            const sloChildren: Paragraph[] = sloOutcomes.length > 0
+              ? [
+                  new Paragraph({
+                    alignment: AlignmentType.LEFT,
+                    spacing: { before: 20, after: 20, line: 240 },
+                    children: [
+                      new TextRun({
+                        text: 'By the end of the lesson/topic, the trainee should be able to:',
+                        font: FONT,
+                        bold: true,
+                        size: 14,
+                        color: PRIMARY_DARK,
+                      }),
+                    ],
+                  }),
+                  ...sloOutcomes.map((lo) =>
+                    new Paragraph({
+                      alignment: AlignmentType.LEFT,
+                      spacing: { before: 10, after: 10, line: 220 },
+                      indent: { left: 140 },
+                      children: [
+                        new TextRun({ text: '•  ', font: FONT, bold: true, size: 14, color: PRIMARY_DARK }),
+                        new TextRun({ text: clean(lo), font: FONT, size: 14, color: '333333' }),
+                      ],
+                    }),
+                  ),
+                ]
+              : [
+                  new Paragraph({
+                    alignment: AlignmentType.LEFT,
+                    spacing: { before: 20, after: 20, line: 240 },
+                    children: [new TextRun({ text: '—', font: FONT, size: 14, color: '777777' })],
+                  }),
+                ];
+
+            // 3. Activities: each activity on a new line
+            const activities = parseActivitiesList(w.learningActivities);
+            const activityChildren: Paragraph[] = activities.length > 0
+              ? activities.map((act) =>
+                  new Paragraph({
+                    alignment: AlignmentType.LEFT,
+                    spacing: { before: 10, after: 10, line: 220 },
+                    indent: { left: 140 },
+                    children: [
+                      new TextRun({ text: '•  ', font: FONT, bold: true, size: 14, color: PRIMARY_DARK }),
+                      new TextRun({ text: clean(act), font: FONT, size: 14, color: '333333' }),
+                    ],
+                  }),
+                )
+              : [
+                  new Paragraph({
+                    alignment: AlignmentType.LEFT,
+                    spacing: { before: 20, after: 20, line: 240 },
+                    children: [new TextRun({ text: '—', font: FONT, size: 14, color: '777777' })],
+                  }),
+                ];
+
+            // 4. Resources: each resource on a new line, widened column (18%)
+            const resources = parseResourcesList(w.resourcesAndReferences);
+            const resourceChildren: Paragraph[] = resources.length > 0
+              ? resources.map((res) =>
+                  new Paragraph({
+                    alignment: AlignmentType.LEFT,
+                    spacing: { before: 10, after: 10, line: 220 },
+                    indent: { left: 140 },
+                    children: [
+                      new TextRun({ text: '•  ', font: FONT, bold: true, size: 14, color: PRIMARY_DARK }),
+                      new TextRun({ text: clean(res), font: FONT, size: 14, color: '333333' }),
+                    ],
+                  }),
+                )
+              : [
+                  new Paragraph({
+                    alignment: AlignmentType.LEFT,
+                    spacing: { before: 20, after: 20, line: 240 },
+                    children: [new TextRun({ text: '—', font: FONT, size: 14, color: '777777' })],
+                  }),
+                ];
+
+            // 5. Assessment & Remarks: with scheduled college date
+            const remarkParts = (w.assessmentAndRemarks || '—').split('\n');
+            const mainRemark = remarkParts[0];
+            const datePart = remarkParts.find((p) => p.includes('Date:'));
+
+            const remarkChildren: Paragraph[] = [
+              new Paragraph({
+                alignment: AlignmentType.LEFT,
+                spacing: { before: 20, after: datePart ? 10 : 20, line: 240 },
+                children: [
+                  new TextRun({
+                    text: clean(mainRemark),
+                    font: FONT,
+                    bold: isMilestone,
+                    size: 14,
+                    color: isMilestone ? PRIMARY_DARK : '333333',
+                  }),
+                ],
+              }),
+              ...(datePart
+                ? [
+                    new Paragraph({
+                      alignment: AlignmentType.LEFT,
+                      spacing: { before: 10, after: 20, line: 220 },
+                      children: [
+                        new TextRun({
+                          text: clean(datePart),
+                          font: FONT,
+                          bold: true,
+                          size: 13,
+                          color: 'B45309',
+                        }),
+                      ],
+                    }),
+                  ]
+                : []),
+            ];
+
             return new TableRow({
               children: [
-                cell(String(w.weekNumber), { align: AlignmentType.CENTER, bold: true, color: PRIMARY_DARK, fill, widthPct: 5 }),
-                cell(`${w.topic}${sub}`, { fill, widthPct: 25 }),
-                cell(w.specificLearningOutcomes || 'â€”', { fill, widthPct: 40 }),
-                cell(w.learningActivities || 'â€”', { fill, widthPct: 16 }),
-                cell(w.resourcesAndReferences || 'â€”', { fill, widthPct: 14 }),
+                cell(String(w.weekNumber), { align: AlignmentType.CENTER, bold: true, color: PRIMARY_DARK, fill, widthPct: 4 }),
+                cell(topicChildren, { fill, widthPct: 20 }),
+                cell(sloChildren, { fill, widthPct: 28 }),
+                cell(activityChildren, { fill, widthPct: 16 }),
+                cell(resourceChildren, { fill, widthPct: 18 }),
+                cell(remarkChildren, { fill, widthPct: 14 }),
               ],
             });
           }),

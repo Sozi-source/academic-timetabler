@@ -23,6 +23,12 @@ import {
 import {
   getTeachingDocumentAdminCounts,
 } from '@/features/teaching-documents/queries';
+import {
+  getAssessmentMilestones,
+} from '@/features/teaching-documents/assessment-milestones';
+import {
+  AssessmentMilestonesCard,
+} from '@/features/teaching-documents/assessment-milestones-card';
 
 export default async function TeachingDocumentsPage() {
   await requireHodAccess();
@@ -30,10 +36,12 @@ export default async function TeachingDocumentsPage() {
   const [
     curriculumDocuments,
     counts,
+    milestones,
   ] =
     await Promise.all([
       getCurriculumLibraryCountV54(),
       getTeachingDocumentAdminCounts(),
+      getAssessmentMilestones(),
     ]);
 
   return (
@@ -111,6 +119,9 @@ export default async function TeachingDocumentsPage() {
           icon={BookOpenCheck}
         />
       </section>
+
+      {/* College Assessment Milestones & Dates Setup */}
+      <AssessmentMilestonesCard milestones={milestones} />
 
       {/* 4 Core Operational Workspaces */}
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

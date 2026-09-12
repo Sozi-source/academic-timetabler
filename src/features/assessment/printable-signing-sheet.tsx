@@ -120,7 +120,7 @@ export function PrintableSigningSheet({
             <span className="font-bold">Department:</span> {departmentName}
           </p>
           <p>
-            <span className="font-bold">Programme:</span> {programmeName} ({cohortName})
+            <span className="font-bold">Cohort:</span> {cohortName}
           </p>
           <div className="flex flex-wrap items-center justify-between gap-2 font-bold">
             <span>Unit: {unitName} ({unitCode})</span>

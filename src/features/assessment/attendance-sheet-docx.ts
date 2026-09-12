@@ -33,6 +33,7 @@ export interface AttendanceSheetDocumentData {
   schoolName: string;
   departmentName: string;
   programmeName: string;
+  cohortName?: string;
   academicPeriodName: string;
   unitCode: string;
   unitName: string;
@@ -178,7 +179,7 @@ export async function generateAttendanceSheetDocx(
     }),
     labelLine('School', data.schoolName),
     labelLine('Department', data.departmentName),
-    labelLine('Programme', data.programmeName),
+    labelLine('Cohort', data.cohortName || data.programmeName),
     labelLine('Unit', `${data.unitCode} - ${data.unitName}`),
     ...(data.venueName ? [labelLine('Venue', data.venueName)] : []),
     new Paragraph({ spacing: { after: 60 } }),

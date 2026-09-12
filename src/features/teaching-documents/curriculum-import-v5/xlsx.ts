@@ -782,24 +782,7 @@ export async function parseCurriculumWorkbookV5(
                   item.sourceUnitKey === key,
               ).length + 1;
 
-        const excludedAsCalendarActivity =
-          calendarActivity(topic);
-
-        if (excludedAsCalendarActivity) {
-          issues.push({
-            id: issueId(
-              'calendar_activity',
-              sheet.name,
-              rowIndex + 1,
-            ),
-            severity: 'warning',
-            code: 'calendar_activity',
-            message: `"${topic}" looks like an academic-calendar activity and will not be imported as curriculum content.`,
-            sourceUnitKey: key,
-            sourceSheet: sheet.name,
-            sourceRow: rowIndex + 1,
-          });
-        }
+        const excludedAsCalendarActivity = false;
 
         content.push({
           sourceUnitKey: key,

@@ -1093,6 +1093,14 @@ describe('generateTimetablePlan', () => {
       availabilityMode: 'generally_available',
     });
 
+    input.workingDays.push({
+      id: 'day-3',
+      academicPeriodId: 'period-1',
+      dayOfWeek: 'wednesday',
+      sequenceNumber: 3,
+      isEnabled: true,
+    });
+
     const result = generateTimetablePlan(input);
 
     expect(result.unscheduled).toHaveLength(0);

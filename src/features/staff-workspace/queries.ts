@@ -271,6 +271,7 @@ export async function getStaffPublishedTimetable(
 
         mapped.push({
           id,
+          allocationId: asString(row.allocationId) ?? null,
           academicPeriodId: periodId,
           academicPeriodName: period?.name ?? 'Academic Period',
           academicPeriodCode: period?.code ?? null,
@@ -319,6 +320,7 @@ export async function getStaffPublishedTimetable(
       id,
       academic_period_id,
       session_number,
+      teaching_allocation_id,
       academic_periods ( id, name, code ),
       working_days ( day_of_week, sequence_number ),
       start_time_slot:time_slots!scheduled_sessions_start_time_slot_id_fkey ( starts_at, ends_at, sequence_number ),
@@ -348,6 +350,7 @@ export async function getStaffPublishedTimetable(
 
       mapped.push({
         id: row.id,
+        allocationId: asString(row.teaching_allocation_id) ?? null,
         academicPeriodId: row.academic_period_id,
         academicPeriodName: period?.name ?? 'Academic Period',
         academicPeriodCode: period?.code ?? null,

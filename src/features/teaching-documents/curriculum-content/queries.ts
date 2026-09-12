@@ -1,10 +1,59 @@
 import { cache } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import {
+  findCanonicalCurriculum,
   getUnitCurriculum,
   normalizeUnitCodeKey,
   type UnitCurriculumDefinition,
 } from '@/features/teaching-documents/curriculum-registry';
+
+function enrichWithCanonical(
+  def: UnitCurriculumDefinition,
+  lookupCode: string,
+  lookupName?: string,
+): UnitCurriculumDefinition {
+  const canonical = findCanonicalCurriculum(lookupCode, lookupName);
+  if (!canonical) return def;
+
+  // Harmonize weekly schedule: if def schedule is missing or has only single-line outcomes without multi-bullet depth, upgrade to canonical
+  let weeklySchedule = def.weeklySchedule;
+  const canonicalSchedule = canonical.weeklySchedule;
+  const canonicalHasRichSLOs =
+    canonicalSchedule &&
+    canonicalSchedule.length > 0 &&
+    canonicalSchedule.some((w) => Boolean(w.specificLearningOutcomes && w.specificLearningOutcomes.includes('\n•')));
+
+  if (
+    !weeklySchedule ||
+    weeklySchedule.length === 0 ||
+    (canonicalHasRichSLOs &&
+      weeklySchedule.every((w) => !w.specificLearningOutcomes || !w.specificLearningOutcomes.includes('\n•')))
+  ) {
+    if (canonicalSchedule && canonicalSchedule.length > 0) {
+      weeklySchedule = canonicalSchedule;
+    }
+  }
+
+  return {
+    ...def,
+    unitDescription: def.unitDescription?.trim() ? def.unitDescription : canonical.unitDescription,
+    overallCompetency: def.overallCompetency?.trim() ? def.overallCompetency : canonical.overallCompetency,
+    learningOutcomes:
+      def.learningOutcomes && def.learningOutcomes.length > 0
+        ? def.learningOutcomes
+        : (canonical.learningOutcomes ?? []),
+    references:
+      def.references && def.references.length > 0
+        ? def.references
+        : (canonical.references ?? []),
+    instructionalEquipment:
+      def.instructionalEquipment && def.instructionalEquipment.length > 0
+        ? def.instructionalEquipment
+        : (canonical.instructionalEquipment ?? []),
+    weeklySchedule: weeklySchedule || canonical.weeklySchedule,
+  };
+}
+
 
 export const getCurriculumContentImportBatch = cache(async (batchId: string) => {
   const supabase = await createClient();
@@ -54,7 +103,11 @@ function cleanReferenceList(val?: string | string[] | null, unitCode?: string, u
 }
 
 export const getApprovedCurriculumForUnitCode = cache(
-  async (unitCode: string, unitName?: string): Promise<UnitCurriculumDefinition> => {
+  async (
+    unitCode: string,
+    unitName?: string,
+    documentType: 'course_outline' | 'scheme_of_work' = 'course_outline',
+  ): Promise<UnitCurriculumDefinition> => {
     const supabase = await createClient();
     const targetKey = cleanKey(unitCode);
     const targetNameKey = cleanKey(unitName);
@@ -97,13 +150,14 @@ export const getApprovedCurriculumForUnitCode = cache(
       console.warn('Could not query units:', err);
     }
 
-    // 2. Priority 0: Check trainer_teaching_document_versions (Trainer uploaded workbooks for this exact unit)
+    // 2. Priority 0: Check trainer_teaching_document_versions (Trainer uploaded workbooks for this exact unit and document type)
     if (unitId) {
       try {
         const { data: trainerVersions } = await supabase
           .from('trainer_teaching_document_versions' as any)
           .select('source_payload,document_type')
           .eq('unit_id', unitId)
+          .eq('document_type', documentType)
           .eq('status', 'active')
           .order('created_at', { ascending: false });
 
@@ -114,7 +168,7 @@ export const getApprovedCurriculumForUnitCode = cache(
             // Verify payload code matches this unit to prevent cross-mapping
             const pCodeKey = cleanKey(payload.unitCode);
             if (!pCodeKey || pCodeKey === targetKey || (unitId && firstVer.unit_id === unitId)) {
-              return {
+              return enrichWithCanonical({
                 unitCode: payload.unitCode || resolvedCode,
                 unitName: payload.unitName || resolvedName,
                 weeklySchedule: payload.content.map((row: any, idx: number) => ({
@@ -128,7 +182,7 @@ export const getApprovedCurriculumForUnitCode = cache(
                   resourcesAndReferences: cleanResourceField(row.resources),
                   assessmentAndRemarks: row.assessment || undefined,
                 })),
-              };
+              }, resolvedCode || unitCode, resolvedName || unitName);
             }
           }
         }
@@ -144,6 +198,7 @@ export const getApprovedCurriculumForUnitCode = cache(
           .from('curriculum_document_versions' as any)
           .select('payload,document_type')
           .eq('unit_id', unitId)
+          .eq('document_type', documentType)
           .eq('status', 'active')
           .order('created_at', { ascending: false });
 
@@ -161,7 +216,7 @@ export const getApprovedCurriculumForUnitCode = cache(
               docCodeKey === targetKey ||
               (targetNameKey && docNameKey === targetNameKey)
             ) {
-              return {
+              return enrichWithCanonical({
                 unitCode: unitMeta.unitCode || resolvedCode,
                 unitName: unitMeta.unitName || resolvedName,
                 unitDescription: unitMeta.unitDescription || undefined,
@@ -183,7 +238,7 @@ export const getApprovedCurriculumForUnitCode = cache(
                   resourcesAndReferences: cleanResourceField(row.resources),
                   assessmentAndRemarks: row.assessment || undefined,
                 })),
-              };
+              }, resolvedCode || unitCode, resolvedName || unitName);
             }
           }
         }
@@ -225,7 +280,7 @@ export const getApprovedCurriculumForUnitCode = cache(
               );
 
               if (unitContent.length > 0) {
-                return {
+                return enrichWithCanonical({
                   unitCode: matchedUnitEntry.matchedUnitCode || matchedUnitEntry.sourceUnitCode || resolvedCode,
                   unitName: matchedUnitEntry.matchedUnitName || matchedUnitEntry.sourceUnitName || resolvedName,
                   unitDescription: matchedUnitEntry.unitDescription || undefined,
@@ -245,7 +300,7 @@ export const getApprovedCurriculumForUnitCode = cache(
                     resourcesAndReferences: cleanResourceField(row.resources),
                     assessmentAndRemarks: row.assessment || undefined,
                   })),
-                };
+                }, resolvedCode || unitCode, resolvedName || unitName);
               }
             }
           }
@@ -288,7 +343,7 @@ export const getApprovedCurriculumForUnitCode = cache(
               ]);
 
               if (weeks && weeks.length > 0) {
-                return {
+                return enrichWithCanonical({
                   unitCode: resolvedCode,
                   unitName: resolvedName,
                   unitDescription: family.unit_description ?? undefined,
@@ -307,7 +362,7 @@ export const getApprovedCurriculumForUnitCode = cache(
                   instructionalEquipment: [],
                   teachingLearningApproaches: family.teaching_learning_approaches ?? undefined,
                   assessmentApproaches: family.assessment_approaches ?? undefined,
-                };
+                }, resolvedCode || unitCode, resolvedName || unitName);
               }
             }
           }
@@ -317,19 +372,34 @@ export const getApprovedCurriculumForUnitCode = cache(
       }
     }
 
-    // 6. Priority 4: Check teaching_document_templates table
+    // 6. Priority 4: Check teaching_document_templates table (scoped composite ID first, then legacy)
     try {
       const codeKey = normalizeUnitCodeKey(unitCode);
+      const scopedId = `tpl-tvet-${codeKey}-${documentType}`;
+      const { data: scopedRow } = await supabase
+        .from('teaching_document_templates')
+        .select('original_filename')
+        .eq('id', scopedId)
+        .maybeSingle();
+
+      if (scopedRow?.original_filename) {
+        const parsed = JSON.parse(scopedRow.original_filename) as UnitCurriculumDefinition;
+        if (parsed && cleanKey(parsed.unitCode) === targetKey) {
+          return enrichWithCanonical(parsed, resolvedCode || unitCode, resolvedName || unitName);
+        }
+      }
+
+      const legacyId = `tpl-tvet-${codeKey}`;
       const { data: row } = await supabase
         .from('teaching_document_templates')
         .select('original_filename')
-        .eq('id', `tpl-tvet-${codeKey}`)
+        .eq('id', legacyId)
         .maybeSingle();
 
       if (row?.original_filename) {
         const parsed = JSON.parse(row.original_filename) as UnitCurriculumDefinition;
         if (parsed && cleanKey(parsed.unitCode) === targetKey) {
-          return parsed;
+          return enrichWithCanonical(parsed, resolvedCode || unitCode, resolvedName || unitName);
         }
       }
     } catch {

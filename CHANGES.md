@@ -14,7 +14,265 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
    - Update `curriculum-zip-upload-dialog.tsx` to display `unresolvedFiles` from the ingestion preview response, allowing HODs to select document types manually prior to commit.
 3. **Source Data Organization (`Course_outlines.zip`)**:
    - Move Milkah Wambui's Learning Plan (scheme of work) from the "course outlines" folder to the correct "schemes of work" folder before re-ingesting.
-### 2026-09-09: Phase 3 — Nested Portals Multi-Column Enhancement & Form Instructions Pruning
+
+### 2026-09-12: Daily Report Attendance-First Overhaul, Past Attendance Enforcement & Unreported Students Solution
+- **Files Added**:
+  - `supabase/migrations/20260912190000_attendance_not_reported_and_daily_report_v2.sql`
+  - `src/app/api/staff/attendance/sessions/exception/route.ts`
+- **Files Modified**:
+  - `src/features/academic-roster/unified-roster.ts`
+  - `src/features/class-attendance/types.ts`
+  - `src/features/class-attendance/domain.ts`
+  - `src/features/class-attendance/queries.ts`
+  - `src/features/class-attendance/attendance-editor.tsx`
+  - `src/app/(staff)/staff/attendance/[sessionId]/page.tsx`
+  - `src/app/api/staff/attendance/sessions/route.ts`
+  - `src/features/trainer-daily-report/types.ts`
+  - `src/features/trainer-daily-report/queries.ts`
+  - `src/features/trainer-daily-report/trainer-form.tsx`
+  - `src/tests/class-attendance-domain.test.ts`
+  - `src/tests/operations-attendance-oversight.test.ts`
+- **What Changed**:
+  - **Daily Report Attendance-First Workflow**:
+    - Embedded prominent direct **"Record Attendance"** CTA buttons on each scheduled lesson card in `TrainerDailyReportForm`.
+    - Integrated automatic session creation and smooth return-to-report navigation (`returnTo=/staff/daily-report?date=...`) upon register completion.
+    - Added comprehensive **Class Attendance Summary Table** displaying scheduled times, units, cohorts, total enrolled, present, absent, not reported, and status.
+    - Added dedicated **Absentees Breakdown Table** detailing student names, admission numbers, cohorts, and reasons.
+  - **Un-Reported Students Solution (`not_reported`)**:
+    - Expanded `class_attendance_entries.attendance_status` to include `'not_reported'`.
+    - Integrated `student_period_reporting` across `getUnifiedUnitRoster`, `open_class_attendance_session`, and `getClassAttendanceWorkspace` to auto-tag students with unconfirmed reporting status as `'not_reported'`.
+    - Prevented un-reported students from being counted as absent or appearing in absentees lists, while enabling trainers to still mark them `Present` if they attend class in person without blocking completion.
+  - **Graceful Past Unrecorded Attendance Enforcement**:
+    - Implemented `detectPastUnrecordedSessions` to identify past timetable sessions in the active term lacking attendance records.
+    - Added **Unrecorded Past Classes Banner** alerting trainers to overdue sessions (>48h).
+    - Added **"Class Did Not Take Place" Exception Dialog** and API endpoint (`api/staff/attendance/sessions/exception`), allowing trainers to log auditable reasons (public holidays, college events, rescheduled classes, official leave) so compliance is enforced without trapping trainers or forcing artificial registers.
+- **Verification Evidence**:
+  - `npm test`: 116 test files passed, 569 tests passed (Exit code 0).
+  - `npm run check`: TypeScript typecheck (0 errors), ESLint (0 errors), Next.js 16 production build succeeded (Exit code 0).
+
+### 2026-09-12: Concise Cohort Short Names Display on Printable Attendance Sheets & Word Exports
+- **Files Modified**:
+  - `src/features/assessment/printable-signing-sheet.tsx`
+  - `src/features/class-attendance/printable-class-register.tsx`
+  - `src/features/assessment/attendance-sheet-docx.ts`
+- **What Changed**:
+  - Replaced concatenated multi-programme full titles (e.g. `Certificate in Human Nutrition and Dietetics / Certificate in Nutrition and Dietetics / Diploma in Nutrition and Dietetics (CHN JAN/MAR 25 / CHN MAY 25 / CND JAN/MAR 26 / DND JAN/MAR 26)`) with concise cohort short names: `Cohort: CHN JAN/MAR 25 / CHN MAY 25 / CND JAN/MAR 26 / DND JAN/MAR 26` across printable Class Attendance, CAT Attendance, Exam Attendance sheets, and Word (.docx) exports.
+- **Verification Evidence**:
+  - `npm test`: 116 test files passed, 569 tests passed.
+  - `npm run check`: TypeScript typecheck (0 errors), ESLint (0 errors), Next.js 16 production build succeeded (Exit code 0).
+
+### 2026-09-12: Unified Multi-Cohort Student Rosters Across Class Attendance, CAT, Exam, and Daily Reports
+- **Files Added**:
+  - `src/features/academic-roster/unified-roster.ts`
+  - `supabase/migrations/20260912180000_unified_unit_attendance_roster.sql`
+  - `src/tests/unified-unit-roster.test.ts`
+- **Files Modified**:
+  - `src/features/assessment/population-workspace.ts`
+  - `src/features/assessment/attendance-sheet-data.ts`
+  - `src/features/assessment/attendance-sheet-docx.ts`
+  - `src/app/api/staff/units/[allocationId]/attendance-sheet/[type]/route.ts`
+  - `src/app/(staff)/staff/units/[allocationId]/documents/cat-attendance/page.tsx`
+  - `src/app/(staff)/staff/units/[allocationId]/documents/exam-attendance/page.tsx`
+  - `src/app/(staff)/staff/units/[allocationId]/documents/class-attendance/page.tsx`
+  - `src/app/api/staff/attendance/sessions/route.ts`
+  - `src/features/class-attendance/queries.ts`
+  - `src/features/trainer-daily-report/queries.ts`
+- **What Changed**:
+  - **Unified Unit Roster Helper (`getUnifiedUnitRoster`)**: Created authoritative server helper that discovers all cohorts offering or taking a unit in an academic period (from `unit_offerings`, `teaching_allocations`, and `student_unit_registrations`) and builds the complete union of students (both explicit unit registrations and enrolled active cohort members), deduplicated by `student_id` and naturally sorted by admission number.
+  - **Assessment & Population Workspaces**: Refactored `getAllocationPopulationWorkspace` and `getAssessmentPopulationWorkspace` to use `getUnifiedUnitRoster`, returning multi-cohort header names (e.g. `CHN MAY 25 / CHN JAN/MAR 25`) and full candidate rosters.
+  - **CAT & Exam Attendance Sheets**: Updated printable signing sheets and Word (.docx) export route to display the combined multi-cohort label and full candidate population.
+  - **Class Attendance Register & Interactive Workspace**: Refactored `getClassAttendanceWorkspace` and `sessions/route.ts` to automatically seed all candidates across all offering cohorts into `class_attendance_entries` while preserving previously marked states (`present`, `absent`, notes).
+  - **Trainer Daily Reports**: Updated `getTrainerDailyReportWorkspace` and `_trainer_daily_schedule_v1` to display combined multi-cohort titles and accurate live attendance roster/present/absent metrics.
+  - **Database Migration**: Created `20260912180000_unified_unit_attendance_roster.sql` upgrading `open_class_attendance_session` and `_trainer_daily_schedule_v1` with multi-cohort resolution.
+- **Verification Evidence**:
+  - `npm test`: 116 test files passed, 569 tests passed.
+  - `npm run check`: TypeScript typecheck (0 errors), ESLint (0 errors), Next.js 16 production build succeeded (Exit code 0).
+
+### 2026-09-12: Multi-Bullet SLO & Comma-Separated Resources Parsing, Food Production Harmonization
+- **Files Modified**:
+  - `src/features/teaching-documents/curriculum-data/module-1.ts`
+  - `src/features/teaching-documents/tvet-standards.ts`
+  - `src/features/teaching-documents/tvet-document-viewer.tsx`
+  - `src/features/teaching-documents/export-docx.ts`
+  - `src/features/teaching-documents/curriculum-content/queries.ts`
+- **What Changed**:
+  - **Dynamic Multi-Bullet SLO Parser (`parseSLOOutcomes`)**: Enhanced `tvet-standards.ts` and `tvet-document-viewer.tsx` with `parseSLOOutcomes` to split compound sentences (e.g. `Explain culinary terms, plan kitchen layouts, and identify professional kitchen personnel standards`) into discrete, capitalized bulleted lines with trailing periods.
+  - **Discrete Comma-Separated Resources Parsing (`parseResourcesList`)**: Updated `parseResourcesList` in `tvet-standards.ts` to split comma-separated instructional resources outside parentheses (e.g. `Food Science (7th Ed), Practical Cookery (4th Ed), Whiteboard, Kitchen layout charts`) into individual bulleted items, each on its own line.
+  - **Food Production for Invalids and Convalescents (Unit 13.1.0 / CHN 2203 / CND 1304 / DND 1304 / DHN 1305)**:
+    - Extracted the complete statutory 12-topic curriculum from `Diploma Curriculum.pdf` pages 84-91 into `module-1.ts`.
+    - Synced all 8 active `curriculum_document_versions` in Supabase with discrete multi-bullet outcomes, activities, and resources.
+    - Updated `enrichWithCanonical` to automatically upgrade un-expanded or single-bullet schedules to the rich canonical syllabus schedule.
+  - **Table Layout & Header Alignment**: Adjusted column widths and header wrapping in `tvet-document-viewer.tsx` to prevent truncation of `Assessment & Remarks`.
+- **Verification Evidence**:
+  - `npm test`: 115 test files passed, 567 tests passed.
+  - `npm run check`: TypeScript (0 errors), ESLint (0 errors), Next.js 16 build succeeded (Exit code 0).
+
+### 2026-09-12: Exact Theory Specific Objectives Integration for Statutory TVET Learning Outcomes
+- **Files Modified**:
+  - `src/features/teaching-documents/curriculum-data/module-1.ts`
+  - `src/features/teaching-documents/curriculum-data/module-2.ts`
+  - `src/features/teaching-documents/curriculum-data/module-3.ts`
+- **What Changed**:
+  - **Statutory Theory Specific Objectives Extraction**: Extracted the exact lettered clauses (`a)`, `b)`, `c)`, `d)`...) from the "Theory - Specific Objectives" sections of `Diploma Curriculum.pdf` across all sub-modules for all 43 units in Modules I, II, and III.
+  - **Statutory Lead-in Formatting**: Every weekly topic strictly begins with the statutory TVET lead-in:
+    `By the end of the lesson/topic, the trainee should be able to:`
+    followed by each authentic objective on its own bulleted line (e.g., `• Define terms used in entrepreneurship.`, `• Explain the differences between self employment and formal employment.`, etc.).
+  - **High-Precision Cleansing**: Purged all OCR scanning typos (e.g. `fonnal` -> `formal`, `ot'` -> `of`, `titetors` -> `factors`, `atreet` -> `affect`, `enttvpt•eneurial` -> `entrepreneurial`, `traincc` -> `trainee`) and removed stray OCR line numbers/code annotations.
+  - **Derived Subtopics**: Populated `subTopics` arrays with discrete, non-empty curriculum topics corresponding directly to the statutory objectives.
+- **Verification Evidence**:
+  - `npm test`: 115 test files passed, 567 tests passed.
+  - `npm run check`: TypeScript typecheck (0 errors), ESLint (0 errors), Next.js 16 production build succeeded (Exit code 0).
+
+### 2026-09-12: Full 494-Page Authentic TVET Curriculum OCR Extraction & Zero-Synthesis Engine Mandate
+- **Files Modified / Added**:
+  - `src/features/teaching-documents/curriculum-data/module-1.ts`
+  - `src/features/teaching-documents/curriculum-data/module-2.ts`
+  - `src/features/teaching-documents/curriculum-data/module-3.ts`
+  - `src/features/teaching-documents/distribution-engine.ts`
+  - `src/features/teaching-documents/tvet-standards.ts`
+  - `src/tests/tvet-teaching-documents.test.ts`
+  - `src/tests/curriculum-harmonization.test.ts`
+- **What Changed**:
+  - **Full Document Extraction (Diploma Curriculum.pdf)**: Rendered all 247 landscape pages and split them into 494 portrait pages. Processed all 494 pages through Windows Media OCR (`[Windows.Media.Ocr.OcrEngine]`), extracting the raw, authentic TVET statutory text across all 43 units.
+  - **Zero-Synthesis Mandate (100% Authentic Content)**: Completely purged all synthetic filler (such as the 461 occurrences of *"Demonstrate practical and theoretical understanding of..."*, generic discussion templates, and fallback synthesis) from the curriculum registry and document generation engine.
+  - **Authentic Statutory Sections Populated**: Every unit across Module I, Module II, and Module III is populated with:
+    - Authentic unit descriptions (official syllabus Introductions).
+    - Authentic unit competencies & learning outcomes (official General Objectives).
+    - Authentic weekly topic sequences with statutory sub-module unit titles (e.g. Introduction to Diet Therapy, The Body Tissues, Membranes and Glands, Microscopy, etc.).
+    - Authentic Specific Learning Outcomes starting with the TVET statutory bold lead-in **By the end of the lesson/topic, the trainee should be able to:** followed by discrete behavioral objectives.
+    - Authentic Pedagogical Learning Activities (from syllabus Suggested Activities).
+    - Authentic Instructional Equipment & References (official textbook citations and laboratory materials).
+  - **Zero-Synthesis Distribution Engine**: Updated `distribution-engine.ts` and `tvet-standards.ts` so Schemes of Work and Course Outlines draw directly and exclusively from the authentic extracted curriculum data without injecting synthetic objectives.
+- **Verification Evidence**:
+  - Full test suite passed 100% (`npm test`: 115 test files passed, 567 tests passed).
+  - Repository check passed code 0 (`npm run check`: TypeScript 0 errors, ESLint 0 errors, Next.js 16 build succeeded).
+- **Manual Follow-up**:
+  - None required. All 43 units are instantly active with authentic content for all trainers generating Course Outlines and Schemes of Work.
+
+### 2026-09-12: Complete Purge of Hardcoded RAT/CAT/Exam Schedules & Empty Assessment Row Standards
+- **Files Modified / Added**:
+  - `src/features/teaching-documents/curriculum-data/module-1.ts`
+  - `src/features/teaching-documents/curriculum-data/module-2.ts`
+  - `src/features/teaching-documents/curriculum-data/module-3.ts`
+  - `src/features/teaching-documents/assessment-milestones.ts`
+  - `src/features/teaching-documents/assessment-milestones-actions.ts`
+  - `src/features/teaching-documents/assessment-milestones-card.tsx`
+  - `src/features/teaching-documents/distribution-engine.ts`
+  - `src/features/teaching-documents/tvet-standards.ts`
+  - `src/features/teaching-documents/tvet-document-viewer.tsx`
+  - `src/features/teaching-documents/export-docx.ts`
+  - `src/features/teaching-documents/program-of-activities/types.ts`
+  - `src/features/teaching-documents/program-of-activities/queries.ts`
+  - `src/features/teaching-documents/record-of-work-actions.ts`
+  - `src/tests/tvet-teaching-documents.test.ts`
+  - `src/tests/curriculum-zip-ingestion.test.ts`
+  - `src/tests/curriculum-harmonization.test.ts`
+- **What Changed**:
+  - **Purged Hardcoded Assessments from Master Curriculum Data**: Cleaned all 43 units across `module-1.ts`, `module-2.ts`, and `module-3.ts`. Removed hardcoded synthetic Week 8 (CAT) and Week 14 (Exam) rows from non-attachment units, leaving pure authentic syllabus topics. Stripped all `(RAT 1)` / `(CAT)` inline markers from topic titles and sub-topics.
+  - **Eliminated RAT (Continuous Assessment Test & Final Exam Only)**: Removed Continuous Assessment 1 (RAT) from all interfaces, drawer controls, and calculations. Standardized on a 2-tier college grading structure: Continuous Assessment Test (CAT, 30% coursework) and End-Term Examination (70% summative).
+  - **Dynamic Assessment Milestone Injection**: Week placement for CAT and Final Exam is determined strictly by college-wide institutional setup (`AssessmentMilestones` / `semester_program_activities`), not hardcoded weeks. Non-milestone teaching weeks distribute syllabus topics dynamically across the remaining term weeks.
+  - **Empty Assessment Rows Without Synthetic Content**: On configured CAT and Exam weeks, Sub-topics, Specific Learning Outcomes, Learning Activities, and Instructional Resources are generated completely empty (`[]` or `''`). Prohibited synthetic text (e.g. fake behavioral objectives like "Explain principles of Mid-Term theory...", fake culinary assessments, fake question paper resources).
+  - **Viewer & Word DOCX Empty State Formatting**: Both `tvet-document-viewer.tsx` and `export-docx.ts` render clean dashes (`—`) without printing bold TVET lead-ins or empty bullet points when assessment rows have no syllabus content.
+- **Verification Evidence**:
+  - Full test suite passed 100% (`npm test`: 115 test files passed, 567 tests passed).
+  - Production check passed code 0 (`npm run check`: TypeScript 0 errors, ESLint 0 errors, Next.js 16 build succeeded).
+- **Manual Follow-up**:
+  - None required. College assessment dates can be set at `/teaching-documents` or `/teaching-documents/curriculum`.
+
+### 2026-09-12: Scheme of Work Typography & Column Polish + College-Wide Assessment Schedule Setup
+- **Files Modified / Added**:
+  - `src/features/teaching-documents/assessment-milestones.ts`
+  - `src/features/teaching-documents/assessment-milestones-actions.ts`
+  - `src/features/teaching-documents/assessment-milestones-card.tsx`
+  - `src/app/(dashboard)/teaching-documents/page.tsx`
+  - `src/features/teaching-documents/distribution-engine.ts`
+  - `src/features/teaching-documents/tvet-standards.ts`
+  - `src/features/teaching-documents/tvet-document-viewer.tsx`
+  - `src/features/teaching-documents/export-docx.ts`
+  - `src/tests/tvet-teaching-documents.test.ts`
+  - `src/tests/curriculum-zip-ingestion.test.ts`
+  - `src/tests/timetable-generator/planner.test.ts`
+  - `src/features/timetable-editor/validation.ts`
+- **What Changed**:
+  - **Scheme of Work Polish (Sub-topics)**: Sub-topics in each weekly block now occupy discrete individual lines with bold bullet points (`•`) across both web preview (`tvet-document-viewer.tsx`) and Word `.docx` exports (`export-docx.ts`).
+  - **Scheme of Work Polish (Specific Learning Outcomes)**: Standardized all specific learning outcomes to begin with the TVET statutory bold lead-in **By the end of the lesson/topic, the trainee should be able to:** followed by individual behavioral outcomes on separate lines with clean bullet formatting.
+  - **Scheme of Work Polish (Activities & Resources)**: Pedagogical activities and instructional resources each render on separate lines. Widened the Resources column in both HTML and DOCX tables from 11% to 18% with word wrapping enabled to gracefully accommodate textbook citations, manuals, and laboratory equipment as content expands.
+  - **College-Wide Assessment Schedule Setup**:
+    - Added scheduled date/period configuration for Continuous Assessment 1 (RAT 1), Mid-Term CAT, and Final Examination (End-Term) in `AssessmentMilestones` and `AssessmentMilestonesCard`.
+    - Placed `AssessmentMilestonesCard` prominently on both `/teaching-documents` and `/teaching-documents/curriculum` dashboards so HODs/Admins can configure dates once for the entire college.
+    - Added direct "Assessment Schedule" quick link in the document viewer top action bar.
+    - Attached college scheduled assessment dates to all trainer Course Outlines (Section 3 weekly schedule & Section 4 evaluation policy) and Schemes of Work (Assessment & Remarks column with date badges and DOCX styling) automatically.
+- **Verification Evidence**:
+  - Full test suite passed 100% (`npm test`: 115 test files passed, 567 tests passed).
+  - Production check passed code 0 (`npm run check`: TypeScript 0 errors, ESLint 0 errors, Next.js 16 build succeeded).
+- **Manual Follow-up**:
+  - HODs can navigate to `/teaching-documents` to configure the active semester's college-wide dates for CAT and End-Term exams.
+
+### 2026-09-12: Complete TVET KNEC Nutrition Curriculum Extraction & CND/DND Shared Resource Harmonization
+- **Files Modified / Added**:
+  - `src/features/teaching-documents/curriculum-data/types.ts` [NEW]
+  - `src/features/teaching-documents/curriculum-data/module-1.ts` [NEW]
+  - `src/features/teaching-documents/curriculum-data/module-2.ts` [NEW]
+  - `src/features/teaching-documents/curriculum-data/module-3.ts` [NEW]
+  - `src/features/teaching-documents/curriculum-data/shared-map.ts` [NEW]
+  - `src/features/teaching-documents/curriculum-data/index.ts` [NEW]
+  - `src/features/teaching-documents/curriculum-registry.ts`
+  - `src/features/teaching-documents/curriculum-content/queries.ts`
+  - `src/features/teaching-documents/distribution-engine.ts`
+  - `src/features/teaching-documents/export-docx.ts`
+  - `src/tests/curriculum-harmonization.test.ts` [NEW]
+- **What Changed**:
+  - **Full Curriculum Extraction**: Extracted and synthesized the complete official KNEC TVET Diploma in Nutrition and Dietetics curriculum across all 3 modules (43 units total: 19 units in Module I, 12 units in Module II, 12 units in Module III) from `Diploma Curriculum.pdf`.
+  - **Authentic 14-Week Topical Sequences**: Seeded every unit with authentic 14-week topic outlines, discrete subtopics, specific behavioral learning outcomes, diversified pedagogical learning activities, standard instructional resources, and textbook citations (e.g. Ross & Wilson, Guyton & Hall, Krause's Food & The Nutrition Care Process, Prescott Microbiology, WHO guidelines).
+  - **Zero Database / Seed Disruption**: The database schema, seeds, sessions, cohorts, stages, and timetables remain 100% untouched; all curriculum resources are stored and consumed purely for document generation (Course Outlines and Schemes of Work).
+  - **CND <-> DND Shared Unit Harmonization**: Created `shared-map.ts` containing 329 normalized alias mappings between Certificate (CND) and Diploma (DND) unit codes. Units shared between programmes (e.g., Diet Therapy I, Food Safety & Hygiene, ICT, Communication Skills, Human Anatomy & Physiology, Nutrition in Emergencies, Nutrition Assessment, Meal Planning, Maternal & Child Nutrition, Legal Aspects, etc.) share the exact same underlying curriculum definitions, schedules, and learning materials.
+  - **Integrated Master Registry & Non-Destructive Enrichment**: Connected `findCanonicalCurriculum` and `MASTER_CURRICULUM_REGISTRY` into `getUnitCurriculum` in `curriculum-registry.ts`. In `queries.ts`, implemented `enrichWithCanonical` to non-destructively augment any DB-stored versions (trainer uploads or partial templates) with canonical descriptions, competencies, learning outcomes, textbook references, and instructional equipment while preserving custom trainer weekly schedules.
+  - **Accreditation Milestones Alignment**: Updated `distributeTopicsAcrossWeeks` in `distribution-engine.ts` so institutional assessment milestones (RAT, CAT, Final Exam) overlay correctly on milestone weeks while preserving topic-specific continuous assessments across all other teaching weeks.
+  - **DOCX Clean Typography**: Resolved unicode character fallback issues in `export-docx.ts`.
+- **Verification Evidence**:
+  - Vitest test suites passed 100% (`src/tests/tvet-teaching-documents.test.ts` and `src/tests/curriculum-harmonization.test.ts`: 17/17 tests passing).
+  - `npm run check` completed with code 0 (`npm run typecheck && npm run lint && npm run build`).
+  - Next.js 16 production build succeeded across all routes and API endpoints with 0 TypeScript/ESLint errors.
+- **Manual Follow-up**:
+  - None required. All 43 units are instantly active and accessible for all HODs and trainers when generating Course Outlines and Schemes of Work.
+
+
+### 2026-09-11: Quality Assurance Teaching Documents — Semester Program of Activities & Standardized SOW/Outline/ROW Engine
+- **Files Modified / Added**:
+  - `supabase/migrations/20260911070000_semester_program_of_activities.sql` [NEW]
+  - `src/features/teaching-documents/program-of-activities/types.ts` [NEW]
+  - `src/features/teaching-documents/program-of-activities/queries.ts` [NEW]
+  - `src/features/teaching-documents/program-of-activities/actions.ts` [NEW]
+  - `src/features/teaching-documents/assessment-milestones.ts`
+  - `src/features/teaching-documents/assessment-milestones-actions.ts`
+  - `src/features/teaching-documents/curriculum-editor/docx-parser.ts`
+  - `src/features/teaching-documents/curriculum-import-v5/xlsx.ts`
+  - `src/features/teaching-documents/curriculum-content/queries.ts`
+  - `src/features/teaching-documents/curriculum-registry.ts`
+  - `src/features/teaching-documents/distribution-engine.ts`
+  - `src/features/teaching-documents/tvet-standards.ts`
+  - `src/features/teaching-documents/tvet-document-viewer.tsx`
+  - `src/features/teaching-documents/export-docx.ts`
+  - `src/features/teaching-documents/record-of-work-actions.ts`
+  - `src/features/teaching-documents/record-of-work-online/queries.ts`
+  - `src/app/api/teaching-documents/export-word/route.ts`
+  - `src/app/(staff)/staff/units/[allocationId]/documents/course-outline/page.tsx`
+  - `src/app/(staff)/staff/units/[allocationId]/documents/scheme-of-work/page.tsx`
+  - `src/tests/tvet-teaching-documents.test.ts`
+- **What Changed**:
+  - **Semester Program of Activities Architecture**: Implemented database schema (`semester_program_activities`) and domain services allowing semester academic calendar milestones (Orientation, Continuous Assessment Tests, Mid-Term CAT week, Revision week, End of Term Examination week) to be configured centrally and dynamically inherited across all QA teaching documents.
+  - **Course Outline Import Route Fixes**: Corrected destructive calendar omission filter in `docx-parser.ts` and `xlsx.ts` so imported syllabi with milestone rows retain their full 14-week curriculum sequence without dropping weeks or distorting distributions.
+  - **Document-Type Scoping & Isolation**: Scoped `getApprovedCurriculumForUnitCode` by `documentType` (`course_outline` vs `scheme_of_work`), resolving collisions where an uploaded course outline could overwrite a scheme of work or vice versa.
+  - **TVET Accreditation 6-Column Scheme of Work Standard**: Added Column 6 ("Assessment & Remarks") to both the web viewer and Word export (`export-docx.ts`) featuring visual badge highlights for milestone assessment weeks (CAT, RAT, Exam, Revision).
+  - **Course Outline Schedule Milestone Guarantees**: Updated `generateTVETCourseOutline` to overlay institutional assessment milestones (CAT week, End of Term Exam week) directly onto the weekly delivery schedule across all units.
+  - **Record of Work Milestone Synchronization**: Updated `generateRecordOfWorkFromSchemeAction` and `record-of-work-online/queries.ts` to automatically populate standard QA work-covered and competency descriptions for assessment weeks from the active Semester Program of Activities.
+- **Verification Evidence**:
+  - `npx vitest run src/tests/tvet-teaching-documents.test.ts src/tests/curriculum-zip-ingestion.test.ts`: 12/12 passed (100%).
+  - `npm run typecheck`: Passed with 0 errors (`next typegen && tsc --noEmit`).
+  - `npm run lint`: Passed with 0 errors (`eslint`).
+  - `npm run build`: Next.js 16.2.12 Turbopack production build completed successfully across all 152 routes and API endpoints.
+- **Manual Follow-up**:
+  - Apply the migration `supabase/migrations/20260911070000_semester_program_of_activities.sql` to your Supabase project (e.g. via `supabase db push`).
 - **Files Modified**:
   - `src/app/(staff)/staff/units/page.tsx`
   - `src/app/(staff)/staff/documents/page.tsx`

@@ -26,11 +26,25 @@ export interface TrainerDailyReportLesson {
   roomName: string | null;
   deliveryMode: string;
   attendanceSessionId: string | null;
-  attendanceStatus: 'not_started' | 'open' | 'completed';
+  attendanceStatus: 'not_started' | 'open' | 'completed' | 'cancelled';
   rosterCount: number;
   presentCount: number;
   absentCount: number;
+  notReportedCount: number;
   absentees: TrainerDailyReportAbsentee[];
+}
+
+export interface PastUnrecordedSession {
+  scheduledSessionId: string;
+  sessionDate: string;
+  dayOfWeek: string;
+  unitCode: string;
+  unitName: string;
+  cohortName: string;
+  startsAt: string;
+  endsAt: string;
+  daysOverdue: number;
+  status: 'not_started' | 'open';
 }
 
 export interface TrainerDailyReportWorkspace {
@@ -48,6 +62,8 @@ export interface TrainerDailyReportWorkspace {
   readyToSubmit: boolean;
   blockingReason: string | null;
   lessons: TrainerDailyReportLesson[];
+  pastUnrecordedSessions?: PastUnrecordedSession[];
+  hasOverduePastSessions?: boolean;
 }
 
 export interface DepartmentDailyReportTrainer {

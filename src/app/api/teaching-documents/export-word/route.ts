@@ -28,9 +28,10 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Teaching allocation not found' }, { status: 404 });
     }
 
+    const docType = type === 'scheme_of_work' ? 'scheme_of_work' : 'course_outline';
     const [curriculum, milestones] = await Promise.all([
-      getApprovedCurriculumForUnitCode(header.unitCode, header.unitName),
-      getAssessmentMilestones(),
+      getApprovedCurriculumForUnitCode(header.unitCode, header.unitName, docType),
+      getAssessmentMilestones(header.academicPeriodId ?? undefined),
     ]);
 
     if (!curriculum) {
@@ -40,7 +41,7 @@ export async function GET(request: Request) {
     let docxBuffer: Buffer;
 
     if (type === 'course_outline') {
-      const courseOutline = generateTVETCourseOutline(header, curriculum);
+      const courseOutline = generateTVETCourseOutline(header, curriculum, milestones);
       docxBuffer = await buildTVETDocumentDocx('course_outline', { courseOutline });
     } else if (type === 'scheme_of_work') {
       const schemeOfWork = generateTVETSchemeOfWork(header, curriculum, milestones);

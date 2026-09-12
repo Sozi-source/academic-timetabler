@@ -70,47 +70,13 @@ export function AssessmentMilestonesCard({
 
             <DrawerBody>
               <form onSubmit={handleSubmit} className="space-y-4">
-                {/* RAT Week */}
-                <div className="rounded-xl border border-border bg-surface-subtle/40 p-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-text-primary">
-                      Continuous Assessment 1 (RAT 1)
-                    </label>
-                    <span className="text-[11px] font-semibold text-primary">15 Marks</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="col-span-1">
-                      <label className="text-[10px] font-medium text-text-muted">Week #</label>
-                      <select
-                        name="ratWeek"
-                        defaultValue={milestones.ratWeek}
-                        className="mt-1 w-full rounded-lg border border-border bg-white px-2.5 py-1.5 text-xs font-semibold text-text-primary"
-                      >
-                        {Array.from({ length: 14 }, (_, i) => i + 1).map((w) => (
-                          <option key={w} value={w}>
-                            Week {w}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="col-span-2">
-                      <label className="text-[10px] font-medium text-text-muted">Description</label>
-                      <input
-                        name="ratRemarks"
-                        defaultValue={milestones.ratRemarks}
-                        className="mt-1 w-full rounded-lg border border-border bg-white px-2.5 py-1.5 text-xs text-text-primary"
-                      />
-                    </div>
-                  </div>
-                </div>
-
                 {/* CAT Week */}
                 <div className="rounded-xl border border-border bg-surface-subtle/40 p-3 space-y-2">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-bold text-text-primary">
-                      Mid-Term CAT
+                      Continuous Assessment Test (CAT)
                     </label>
-                    <span className="text-[11px] font-semibold text-primary">15 Marks</span>
+                    <span className="text-[11px] font-semibold text-primary">30% Coursework</span>
                   </div>
                   <div className="grid grid-cols-3 gap-3">
                     <div className="col-span-1">
@@ -136,15 +102,24 @@ export function AssessmentMilestonesCard({
                       />
                     </div>
                   </div>
+                  <div>
+                    <label className="text-[10px] font-medium text-text-muted">Scheduled Date / Period (College-wide)</label>
+                    <input
+                      name="catDate"
+                      defaultValue={milestones.catDate}
+                      placeholder="e.g. 30th June – 4th July 2026"
+                      className="mt-1 w-full rounded-lg border border-border bg-white px-2.5 py-1.5 text-xs text-text-primary placeholder:text-text-muted/60"
+                    />
+                  </div>
                 </div>
 
                 {/* Exam Week */}
                 <div className="rounded-xl border border-border bg-surface-subtle/40 p-3 space-y-2">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-bold text-text-primary">
-                      Final Examination
+                      End of Term Examination
                     </label>
-                    <span className="text-[11px] font-semibold text-primary">70 Marks</span>
+                    <span className="text-[11px] font-semibold text-primary">70% Summative</span>
                   </div>
                   <div className="grid grid-cols-3 gap-3">
                     <div className="col-span-1">
@@ -169,6 +144,15 @@ export function AssessmentMilestonesCard({
                         className="mt-1 w-full rounded-lg border border-border bg-white px-2.5 py-1.5 text-xs text-text-primary"
                       />
                     </div>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-medium text-text-muted">Scheduled Date / Period (College-wide)</label>
+                    <input
+                      name="examDate"
+                      defaultValue={milestones.examDate}
+                      placeholder="e.g. 10th – 14th August 2026"
+                      className="mt-1 w-full rounded-lg border border-border bg-white px-2.5 py-1.5 text-xs text-text-primary placeholder:text-text-muted/60"
+                    />
                   </div>
                 </div>
 
@@ -195,27 +179,25 @@ export function AssessmentMilestonesCard({
         </Drawer>
       </div>
 
-      <div className="mt-2.5 grid grid-cols-1 gap-2 sm:grid-cols-3 pt-2.5 border-t border-border">
+      <div className="mt-2.5 grid grid-cols-1 gap-2 sm:grid-cols-2 pt-2.5 border-t border-border">
         <div className="flex items-center justify-between rounded-lg bg-surface-subtle/60 px-3 py-2">
           <div>
-            <div className="text-[10px] font-bold uppercase text-text-muted">Assessment 1</div>
-            <div className="text-xs font-semibold text-text-primary">RAT 1 · 15 Marks</div>
-          </div>
-          <Badge variant="neutral">Week {milestones.ratWeek}</Badge>
-        </div>
-
-        <div className="flex items-center justify-between rounded-lg bg-surface-subtle/60 px-3 py-2">
-          <div>
-            <div className="text-[10px] font-bold uppercase text-text-muted">Mid-Term</div>
-            <div className="text-xs font-semibold text-text-primary">CAT · 15 Marks</div>
+            <div className="text-[10px] font-bold uppercase text-text-muted">Continuous Assessment</div>
+            <div className="text-xs font-semibold text-text-primary">CAT · 30% Weighting</div>
+            {milestones.catDate && (
+              <div className="text-[10px] font-medium text-primary mt-0.5">📅 {milestones.catDate}</div>
+            )}
           </div>
           <Badge variant="neutral">Week {milestones.catWeek}</Badge>
         </div>
 
         <div className="flex items-center justify-between rounded-lg bg-surface-subtle/60 px-3 py-2">
           <div>
-            <div className="text-[10px] font-bold uppercase text-text-muted">Final Exam</div>
-            <div className="text-xs font-semibold text-text-primary">Supervised · 70 Marks</div>
+            <div className="text-[10px] font-bold uppercase text-text-muted">Final Examination</div>
+            <div className="text-xs font-semibold text-text-primary">End-Term · 70% Weighting</div>
+            {milestones.examDate && (
+              <div className="text-[10px] font-medium text-primary mt-0.5">📅 {milestones.examDate}</div>
+            )}
           </div>
           <Badge variant="neutral">Week {milestones.examWeek}</Badge>
         </div>

@@ -42,6 +42,8 @@ describe('attendance oversight release policy', () => {
         1,
       absent:
         1,
+      notReported:
+        0,
       unmarked:
         1,
     });

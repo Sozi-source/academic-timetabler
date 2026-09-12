@@ -1,5 +1,8 @@
 export interface StaffTimetableSession {
   id: string;
+  /** The teaching_allocation ID for this session, if available. Used to link
+   *  directly from the timetable to the unit's teaching documents. */
+  allocationId: string | null;
   academicPeriodId: string;
   academicPeriodName: string;
   academicPeriodCode: string | null;

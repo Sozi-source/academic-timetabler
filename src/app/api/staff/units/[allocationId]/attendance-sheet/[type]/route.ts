@@ -60,6 +60,7 @@ export async function GET(
     schoolName: metadata.schoolName,
     departmentName: metadata.departmentName,
     programmeName: metadata.programmeName,
+    cohortName: population.cohort?.name || context.allocation.cohortName,
     academicPeriodName: context.allocation.academicPeriodName,
     unitCode: context.allocation.unitCode,
     unitName: context.allocation.unitName,

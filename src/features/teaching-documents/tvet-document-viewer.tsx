@@ -1,12 +1,16 @@
 'use client';
 
 import Image from 'next/image';
-import { FileDown, Pencil, Printer } from 'lucide-react';
+import { CalendarCheck, FileDown, Pencil, Printer } from 'lucide-react';
 import Link from 'next/link';
-import type {
-  TVETCourseOutlineData,
-  TVETRecordOfWorkData,
-  TVETSchemeOfWorkData,
+import {
+  parseActivitiesList,
+  parseResourcesList,
+  parseSLOOutcomes,
+  parseSubTopics,
+  type TVETCourseOutlineData,
+  type TVETRecordOfWorkData,
+  type TVETSchemeOfWorkData,
 } from './tvet-standards';
 
 interface ViewerProps {
@@ -72,7 +76,17 @@ export function TVETDocumentViewer({
           </span>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 sm:flex sm:items-center">
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2">
+          <Link
+            href="/teaching-documents/curriculum"
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-white px-3 text-xs font-semibold text-text-secondary shadow-2xs transition hover:bg-surface-subtle"
+            title="Configure college-wide CAT and End-Term assessment dates"
+          >
+            <CalendarCheck className="size-3.5 text-primary" aria-hidden="true" />
+            <span className="sm:hidden">Dates</span>
+            <span className="hidden sm:inline">Assessment Schedule</span>
+          </Link>
+
           {type !== 'record_of_work' && (
             <Link
               href={`/teaching-documents/curriculum/editor?unitCode=${encodeURIComponent(header.unitCode)}`}
@@ -80,7 +94,7 @@ export function TVETDocumentViewer({
             >
               <Pencil className="size-3.5 text-slate-600" aria-hidden="true" />
               <span className="sm:hidden">Edit</span>
-              <span className="hidden sm:inline">Edit Course Outline</span>
+              <span className="hidden sm:inline">Edit Outline</span>
             </Link>
           )}
 
@@ -311,40 +325,118 @@ export function TVETDocumentViewer({
           {type === 'scheme_of_work' && schemeOfWork && (
             <div className="space-y-4">
               <div className="overflow-x-auto overscroll-x-contain rounded border border-slate-300 print:overflow-visible">
-              <table className="w-full min-w-[52rem] border-collapse text-[10px] table-fixed print:min-w-0">
+              <table className="w-full min-w-[62rem] border-collapse text-[10px] table-fixed print:min-w-0">
                 <thead>
                   <tr className="bg-slate-100 text-slate-900 border-b-2 border-slate-900">
-                    <th className="border border-slate-300 px-2 py-2 text-center w-[5%] font-black uppercase text-[9px] tracking-wider text-slate-900">Wk</th>
-                    <th className="border border-slate-300 px-2.5 py-2 text-left w-[25%] font-black uppercase text-[9px] tracking-wider text-slate-900">Topic & Sub-topics</th>
-                    <th className="border border-slate-300 px-2.5 py-2 text-left w-[40%] font-black uppercase text-[9px] tracking-wider text-slate-900">Specific Learning Outcomes (SLOs)</th>
+                    <th className="border border-slate-300 px-2 py-2 text-center w-[4%] font-black uppercase text-[9px] tracking-wider text-slate-900">Wk</th>
+                    <th className="border border-slate-300 px-2.5 py-2 text-left w-[21%] font-black uppercase text-[9px] tracking-wider text-slate-900">Topic & Sub-topics</th>
+                    <th className="border border-slate-300 px-2.5 py-2 text-left w-[26%] font-black uppercase text-[9px] tracking-wider text-slate-900">Specific Learning Outcomes (SLOs)</th>
                     <th className="border border-slate-300 px-2 py-2 text-left w-[16%] font-black uppercase text-[9px] tracking-wider text-slate-900">Activities & Methodology</th>
-                    <th className="border border-slate-300 px-2 py-2 text-left w-[14%] font-black uppercase text-[9px] tracking-wider text-slate-900">Instructional Resources</th>
+                    <th className="border border-slate-300 px-2.5 py-2 text-left w-[18%] font-black uppercase text-[9px] tracking-wider text-slate-900">Instructional Resources</th>
+                    <th className="border border-slate-300 px-2 py-2 text-left w-[15%] font-black uppercase text-[9px] tracking-wider text-slate-900 whitespace-nowrap">Assessment & Remarks</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {schemeOfWork.plannedWeeks.map((w, idx) => (
-                    <tr key={w.weekNumber} className={idx % 2 === 0 ? 'bg-white align-top' : 'bg-slate-50 align-top'}>
-                      <td className="border border-slate-300 px-2 py-2 text-center font-black text-slate-900">
-                        {w.weekNumber}
-                      </td>
-                      <td className="border border-slate-300 px-2.5 py-2">
-                        <div className="font-bold text-slate-900 leading-snug">{w.topic}</div>
-                        {w.subTopics && (
-                          <div className="mt-1 text-[9px] text-slate-600 leading-relaxed">{w.subTopics}</div>
-                        )}
-                      </td>
-                      {/* SLOs: individual bullets on separate lines with clean line-height */}
-                      <td className="border border-slate-300 px-2.5 py-2 text-slate-800 leading-relaxed">
-                        <SLOBullets text={w.specificLearningOutcomes} />
-                      </td>
-                      <td className="border border-slate-300 px-2 py-2 text-slate-800 leading-relaxed">
-                        {w.learningActivities}
-                      </td>
-                      <td className="border border-slate-300 px-2 py-2 text-slate-800 leading-relaxed">
-                        {w.resourcesAndReferences}
-                      </td>
-                    </tr>
-                  ))}
+                  {schemeOfWork.plannedWeeks.map((w, idx) => {
+                    const isMilestone =
+                      Boolean(w.assessmentAndRemarks) &&
+                      (w.assessmentAndRemarks.toLowerCase().includes('cat') ||
+                        w.assessmentAndRemarks.toLowerCase().includes('exam'));
+
+                    const subtopics = parseSubTopics(w.subTopics);
+                    const activities = parseActivitiesList(w.learningActivities);
+                    const resources = parseResourcesList(w.resourcesAndReferences);
+
+                    return (
+                      <tr
+                        key={w.weekNumber}
+                        className={
+                          isMilestone
+                            ? 'bg-amber-50/40 align-top'
+                            : idx % 2 === 0
+                            ? 'bg-white align-top'
+                            : 'bg-slate-50 align-top'
+                        }
+                      >
+                        <td className="border border-slate-300 px-2 py-2 text-center font-black text-slate-900">
+                          {w.weekNumber}
+                        </td>
+                        <td className="border border-slate-300 px-2.5 py-2">
+                          <div className="font-bold text-slate-900 leading-snug">{w.topic}</div>
+                          {subtopics.length > 0 ? (
+                            <ul className="mt-1.5 space-y-1 text-[9px] text-slate-700">
+                              {subtopics.map((sub, sIdx) => (
+                                <li key={sIdx} className="flex items-start gap-1.5 leading-snug">
+                                  <span className="shrink-0 text-slate-900 font-bold">•</span>
+                                  <span className="break-words">{sub}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <span className="text-slate-400 italic text-[9px]">—</span>
+                          )}
+                        </td>
+                        {/* SLOs: bold preamble followed by individual bullet lines */}
+                        <td className="border border-slate-300 px-2.5 py-2 text-slate-800 leading-relaxed">
+                          <SLOBullets text={w.specificLearningOutcomes} />
+                        </td>
+                        {/* Activities: each activity on a new line */}
+                        <td className="border border-slate-300 px-2 py-2 text-slate-800 leading-relaxed">
+                          {activities.length > 0 ? (
+                            <ul className="space-y-1 text-[9px] text-slate-800">
+                              {activities.map((act, aIdx) => (
+                                <li key={aIdx} className="flex items-start gap-1.5 leading-snug">
+                                  <span className="shrink-0 text-slate-900 font-bold">•</span>
+                                  <span className="break-words">{act}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <span className="text-slate-400 italic">—</span>
+                          )}
+                        </td>
+                        {/* Resources: each resource on a new line, widened column */}
+                        <td className="border border-slate-300 px-2.5 py-2 text-slate-800 leading-relaxed">
+                          {resources.length > 0 ? (
+                            <ul className="space-y-1 text-[9px] text-slate-800">
+                              {resources.map((res, rIdx) => (
+                                <li key={rIdx} className="flex items-start gap-1.5 leading-snug">
+                                  <span className="shrink-0 text-slate-900 font-bold">•</span>
+                                  <span className="break-words">{res}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <span className="text-slate-400 italic">—</span>
+                          )}
+                        </td>
+                        {/* Assessment & Remarks: with college scheduled dates */}
+                        <td className="border border-slate-300 px-2 py-2 text-slate-800 leading-relaxed">
+                          {w.assessmentAndRemarks ? (
+                            <div className="space-y-1">
+                              <span
+                                className={
+                                  isMilestone
+                                    ? 'inline-block rounded border border-amber-300 bg-amber-100/80 px-1.5 py-0.5 font-bold text-amber-950 text-[9px] leading-tight'
+                                    : 'font-medium text-[9px] leading-tight text-slate-800'
+                                }
+                              >
+                                {w.assessmentAndRemarks.split('\n')[0]}
+                              </span>
+                              {w.assessmentAndRemarks.includes('Date:') && (
+                                <div className="text-[8.5px] font-bold text-amber-900 flex items-center gap-1">
+                                  <span>📅</span>
+                                  <span>{w.assessmentAndRemarks.split('Date:')[1]?.trim()}</span>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-slate-400">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
               </div>
@@ -455,45 +547,28 @@ function SectionHeading({ number, title }: { number: string; title: string }) {
 
 /**
  * Renders a Specific Learning Outcomes string as individual bullet lines.
- * Splits on newline characters produced by synthesizeLearningObjectives.
+ * Starts with bold TVET standard lead-in: "By the end of the lesson/topic, the trainee should be able to:"
+ * followed by each outcome on its own discrete line.
  */
-export function SLOBullets({ text }: { text: string }) {
-  if (!text) return <span className="text-slate-400">—</span>;
+export function SLOBullets({ text }: { text?: string | null }) {
+  if (!text || !text.trim()) return <span className="text-slate-400 italic">—</span>;
 
-  // Split on newline or bullet symbols
-  const rawLines = text.split(/[\n\r]+/).map((l) => l.trim()).filter(Boolean);
+  const outcomes = parseSLOOutcomes(text);
 
-  if (rawLines.length <= 1) {
-    // If it's a single string with inline bullets
-    const inlineParts = text.split(/[•·]+/).map((p) => p.trim()).filter(Boolean);
-    if (inlineParts.length > 1) {
-      const [preamble, ...bullets] = inlineParts;
-      return (
-        <div className="space-y-1">
-          <p className="text-[9px] italic text-slate-600 leading-tight">{preamble}</p>
-          <ul className="space-y-1">
-            {bullets.map((b, i) => (
-              <li key={i} className="flex items-start gap-1 leading-snug">
-                <span className="shrink-0 mt-[2px] text-slate-900 font-black text-[10px]">•</span>
-                <span>{b}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      );
-    }
-    return <span className="leading-relaxed">{text}</span>;
+  if (outcomes.length === 0) {
+    return <span className="text-slate-400 italic">—</span>;
   }
 
-  const [preamble, ...bullets] = rawLines;
   return (
-    <div className="space-y-1">
-      <p className="text-[9px] italic text-slate-600 leading-tight">{preamble}</p>
-      <ul className="space-y-1">
-        {bullets.map((b, i) => (
-          <li key={i} className="flex items-start gap-1 leading-snug">
-            <span className="shrink-0 mt-[2px] text-slate-900 font-black text-[10px]">•</span>
-            <span>{b.replace(/^[•·\s-]+/, '')}</span>
+    <div className="space-y-1.5">
+      <p className="text-[9px] font-bold text-slate-900 leading-tight">
+        By the end of the lesson/topic, the trainee should be able to:
+      </p>
+      <ul className="space-y-1 text-[9px] text-slate-800">
+        {outcomes.map((lo, i) => (
+          <li key={i} className="flex items-start gap-1.5 leading-snug">
+            <span className="shrink-0 text-slate-900 font-bold">•</span>
+            <span className="break-words">{lo}</span>
           </li>
         ))}
       </ul>

@@ -1,4 +1,5 @@
-import { CalendarCheck2 } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowLeft, CalendarCheck2 } from 'lucide-react';
 import {
   notFound,
 } from 'next/navigation';
@@ -23,27 +24,25 @@ import {
 } from '@/features/class-attendance/queries';
 
 interface PageProps {
-  params:
-    Promise<{
-      sessionId:
-        string;
-    }>;
+  params: Promise<{
+    sessionId: string;
+  }>;
+  searchParams?: Promise<{
+    returnTo?: string;
+  }>;
 }
 
 export default async function StaffClassAttendanceSessionPage({
   params,
+  searchParams,
 }: PageProps) {
   await requireTrainerAccess();
 
-  const {
-    sessionId,
-  } =
-    await params;
+  const { sessionId } = await params;
+  const sParams = searchParams ? await searchParams : {};
+  const returnTo = sParams?.returnTo;
 
-  const workspace =
-    await getClassAttendanceWorkspace(
-      sessionId,
-    );
+  const workspace = await getClassAttendanceWorkspace(sessionId);
 
   if (!workspace) {
     notFound();
@@ -51,6 +50,18 @@ export default async function StaffClassAttendanceSessionPage({
 
   return (
     <div className="space-y-5">
+      {returnTo ? (
+        <div>
+          <Link
+            href={returnTo}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-white px-3 py-1.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
+          >
+            <ArrowLeft className="size-3.5" />
+            Return to Daily Report
+          </Link>
+        </div>
+      ) : null}
+
       <PageHeader
         title={workspace.unitName}
         description={`${workspace.cohortName} · ${workspace.sessionDate} · ${shortTime(
@@ -96,6 +107,7 @@ export default async function StaffClassAttendanceSessionPage({
         students={
           workspace.students
         }
+        returnTo={returnTo}
       />
     </div>
   );

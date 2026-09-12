@@ -2,6 +2,7 @@ import { cache } from 'react';
 
 import { createClient } from '@/lib/supabase/server';
 import { compareAdmissionNumbers } from '@/features/students/admission-number-sort';
+import { getUnifiedUnitRoster } from '@/features/academic-roster/unified-roster';
 
 type UnknownRow = Record<string, unknown>;
 
@@ -110,55 +111,23 @@ export const getAllocationPopulationWorkspace = cache(
     const cohort = Array.isArray(alloc.cohort) ? alloc.cohort[0] : alloc.cohort;
     const period = Array.isArray(alloc.period) ? alloc.period[0] : alloc.period;
 
-    // Allocation documents and allocation-level marks use the live unit
-    // registration roster across every cohort taking this unit.
-    const { data: registrationData } = await supabase
-      .from('student_unit_registrations')
-      .select('student_id, registration_status, student:students(id, admission_number, full_name)')
-      .eq('academic_period_id', alloc.academic_period_id)
-      .eq('unit_id', alloc.unit_id)
-      .eq('registration_status', 'registered');
+    // Allocation documents and allocation-level marks use the unified unit
+    // roster across every cohort taking this unit.
+    const roster = await getUnifiedUnitRoster({
+      supabase,
+      allocationId: alloc.id,
+      unitId: alloc.unit_id,
+      academicPeriodId: alloc.academic_period_id,
+    });
 
-    const students: AssessmentPopulationStudent[] = [];
-
-    if (registrationData && registrationData.length > 0) {
-      for (const reg of registrationData) {
-        const st = Array.isArray(reg.student) ? reg.student[0] : reg.student;
-        if (st?.id) {
-          students.push({
-            populationId: st.id,
-            studentId: st.id,
-            admissionNumber: st.admission_number ?? '—',
-            fullName: st.full_name ?? 'Student',
-            attendanceStatus: 'expected',
-            registrationStatus: 'registered',
-          });
-        }
-      }
-    } else if (alloc.cohort_id) {
-      const { data: cohortStudents } = await supabase
-        .from('students')
-        .select('id, admission_number, full_name')
-        .eq('current_cohort_id', alloc.cohort_id)
-        .in('lifecycle_status', ['admitted', 'active']);
-
-      if (cohortStudents) {
-        for (const st of cohortStudents) {
-          students.push({
-            populationId: st.id,
-            studentId: st.id,
-            admissionNumber: st.admission_number ?? '—',
-            fullName: st.full_name ?? 'Student',
-            attendanceStatus: 'expected',
-            registrationStatus: 'enrolled',
-          });
-        }
-      }
-    }
-
-    students.sort((first, second) =>
-      compareAdmissionNumbers(first.admissionNumber, second.admissionNumber),
-    );
+    const students: AssessmentPopulationStudent[] = roster.students.map((st) => ({
+      populationId: st.studentId,
+      studentId: st.studentId,
+      admissionNumber: st.admissionNumber,
+      fullName: st.fullName,
+      attendanceStatus: st.attendanceStatus,
+      registrationStatus: st.registrationStatus,
+    }));
 
     return {
       assessmentId: `alloc-${alloc.id}`,
@@ -176,12 +145,10 @@ export const getAllocationPopulationWorkspace = cache(
         code: period?.code ?? 'SEM',
         name: period?.name ?? 'Academic Period',
       },
-      cohort: cohort
-        ? {
-            id: cohort.id,
-            name: cohort.name,
-          }
-        : null,
+      cohort: {
+        id: alloc.cohort_id || (roster.cohortIds[0] ?? ''),
+        name: roster.joinedCohortName || cohort?.name || 'Cohort',
+      },
       students,
       registeredPopulation: students.length,
       expectedToSit: students.length,
@@ -322,6 +289,8 @@ export const getAssessmentPopulationWorkspace =
 
     let studentRows: UnknownRow[] = [];
 
+    let discoveredCohortName: string | null = null;
+
     if (studentIds.length > 0) {
       const {
         data,
@@ -342,45 +311,26 @@ export const getAssessmentPopulationWorkspace =
       studentRows =
         (data ?? []) as UnknownRow[];
     } else {
-      // Auto-discovery fallback: fetch students directly from registrations or cohort
-      const { data: regData } = await supabase
-        .from('student_unit_registrations')
-        .select('student_id, student:students(id, admission_number, full_name)')
-        .eq('academic_period_id', periodId)
-        .eq('unit_id', unitId)
-        .eq('registration_status', 'registered');
+      // Auto-discovery fallback: fetch students across all registered cohorts
+      const roster = await getUnifiedUnitRoster({
+        supabase,
+        unitId,
+        academicPeriodId: periodId,
+      });
+      discoveredCohortName = roster.joinedCohortName;
 
-      if (regData && regData.length > 0) {
-        for (const reg of regData) {
-          const st = Array.isArray(reg.student) ? reg.student[0] : reg.student;
-          if (st?.id) {
-            studentRows.push(st as UnknownRow);
-            populationRows.push({
-              id: st.id,
-              student_id: st.id,
-              attendance_status: 'expected',
-              registration_status: 'registered',
-            });
-          }
-        }
-      } else if (cohortId) {
-        const { data: cohortStudents } = await supabase
-          .from('students')
-          .select('id, admission_number, full_name')
-          .eq('current_cohort_id', cohortId)
-          .in('lifecycle_status', ['admitted', 'active']);
-
-        if (cohortStudents) {
-          for (const st of cohortStudents) {
-            studentRows.push(st as UnknownRow);
-            populationRows.push({
-              id: st.id,
-              student_id: st.id,
-              attendance_status: 'expected',
-              registration_status: 'enrolled',
-            });
-          }
-        }
+      for (const st of roster.students) {
+        studentRows.push({
+          id: st.studentId,
+          admission_number: st.admissionNumber,
+          full_name: st.fullName,
+        });
+        populationRows.push({
+          id: st.studentId,
+          student_id: st.studentId,
+          attendance_status: 'expected',
+          registration_status: st.registrationStatus,
+        });
       }
     }
 
@@ -502,9 +452,14 @@ export const getAssessmentPopulationWorkspace =
               id:
                 cohortResult.data.id,
               name:
-                cohortResult.data.name,
+                discoveredCohortName || cohortResult.data.name,
             }
-          : null,
+          : discoveredCohortName
+            ? {
+                id: '',
+                name: discoveredCohortName,
+              }
+            : null,
       academicPeriod: {
         id: periodResult.data.id,
         code:

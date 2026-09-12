@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { getUnifiedUnitRoster } from '@/features/academic-roster/unified-roster';
 
 type RelationRow = Record<string, unknown>;
 
@@ -28,7 +29,7 @@ export async function getAttendanceSheetMetadata(
   allocationId: string,
 ): Promise<AttendanceSheetMetadata> {
   const supabase = await createClient();
-  const [allocResult, slotResult] = await Promise.all([
+  const [allocResult, slotResult, roster] = await Promise.all([
     supabase
       .from('teaching_allocations')
       .select(`
@@ -52,6 +53,10 @@ export async function getAttendanceSheetMetadata(
       .eq('allocation_id', allocationId)
       .limit(1)
       .maybeSingle(),
+    getUnifiedUnitRoster({
+      supabase,
+      allocationId,
+    }).catch(() => null),
   ]);
 
   if (allocResult.error) {
@@ -65,12 +70,22 @@ export async function getAttendanceSheetMetadata(
   const room = (slotResult.data as any)?.room;
   const venueName = room ? `${room.name || ''} ${room.code ? `(${room.code})` : ''}`.trim() : 'THK 2- 06/08';
 
+  const departmentName =
+    (roster?.departmentName && roster.departmentName !== 'Department' ? roster.departmentName : null) ||
+    text(department?.name) ||
+    'Human Nutrition and Dietetics';
+
+  const programmeName =
+    (roster?.joinedProgrammeName && roster.joinedProgrammeName !== 'Programme' ? roster.joinedProgrammeName : null) ||
+    text(programme?.name) ||
+    'Diploma in Human Nutrition and Dietetics';
+
   return {
     institutionName: 'Imperial College of Medical and Health Sciences',
     campusName: 'Thika',
     schoolName: 'Imperial',
-    departmentName: text(department?.name) ?? 'Applied Science',
-    programmeName: text(programme?.name) ?? 'Diploma in Science Laboratory Technology',
+    departmentName,
+    programmeName,
     venueName,
   };
 }

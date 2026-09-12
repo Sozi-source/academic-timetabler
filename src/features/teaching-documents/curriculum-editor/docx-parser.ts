@@ -161,7 +161,7 @@ export function parseDocxSyllabus(docxBuffer: Buffer): ParsedDocxSyllabus {
             candidateCells = cells.slice(1);
           }
 
-          if (topicTitle && topicTitle.length > 1 && !isCalendarMilestone(topicTitle)) {
+          if (topicTitle && topicTitle.length > 1) {
             // Filter candidate cells to exclude methodology and reference citations
             const validSubtopicParts: string[] = [];
             for (const c of candidateCells) {
@@ -221,7 +221,7 @@ export function parseDocxSyllabus(docxBuffer: Buffer): ParsedDocxSyllabus {
       const topicMatch = line.match(/^(?:(?:Topic|Unit|Module|Week|Lesson)\s*\d+[:.-]|\d+[\.\)]\s*)(.+)/i);
 
       if (topicMatch) {
-        if (currentTopic && !isCalendarMilestone(currentTopic.topicTitle)) {
+        if (currentTopic) {
           listTopics.push({
             topicTitle: currentTopic.topicTitle,
             subTopics: currentTopic.subTopicsList.join(' · '),
@@ -243,7 +243,7 @@ export function parseDocxSyllabus(docxBuffer: Buffer): ParsedDocxSyllabus {
       }
     }
 
-    if (currentTopic && !isCalendarMilestone(currentTopic.topicTitle)) {
+    if (currentTopic) {
       listTopics.push({
         topicTitle: currentTopic.topicTitle,
         subTopics: currentTopic.subTopicsList.join(' · '),

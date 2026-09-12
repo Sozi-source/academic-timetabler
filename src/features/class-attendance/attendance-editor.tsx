@@ -37,13 +37,12 @@ export function ClassAttendanceEditor({
   sessionId,
   sessionStatus,
   students,
+  returnTo,
 }: {
-  sessionId:
-    string;
-  sessionStatus:
-    ClassSessionStatus;
-  students:
-    ClassAttendanceStudent[];
+  sessionId: string;
+  sessionStatus: ClassSessionStatus;
+  students: ClassAttendanceStudent[];
+  returnTo?: string;
 }) {
   const router =
     useRouter();
@@ -323,7 +322,11 @@ export function ClassAttendanceEditor({
         'Attendance completed.',
       );
 
-      router.refresh();
+      if (returnTo) {
+        router.push(returnTo);
+      } else {
+        router.refresh();
+      }
     } finally {
       setBusy(
         null,
@@ -333,7 +336,7 @@ export function ClassAttendanceEditor({
 
   return (
     <div className="space-y-4">
-      <section className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <section className={`grid grid-cols-2 gap-2 ${summary.notReported > 0 ? 'sm:grid-cols-5' : 'sm:grid-cols-4'}`}>
         {[
           [
             'Students',
@@ -350,6 +353,11 @@ export function ClassAttendanceEditor({
             summary.absent,
             'danger',
           ],
+          ...(summary.notReported > 0 ? [[
+            'Not Reported',
+            summary.notReported,
+            'warning',
+          ] as const] : []),
           [
             'Unmarked',
             summary.unmarked,
@@ -380,6 +388,7 @@ export function ClassAttendanceEditor({
                       | 'neutral'
                       | 'success'
                       | 'danger'
+                      | 'warning'
                   }
                 >
                   {
@@ -424,11 +433,18 @@ export function ClassAttendanceEditor({
                       }
                     </p>
 
-                    <p className="mt-0.5 text-[10px] text-text-muted">
-                      {
-                        student.admissionNumber
-                      }
-                    </p>
+                    <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                      <span className="text-[10px] text-text-muted">
+                        {
+                          student.admissionNumber
+                        }
+                      </span>
+                      {student.isReported === false || (student.reportingStatus && student.reportingStatus !== 'reported') ? (
+                        <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[9px] font-semibold text-amber-800">
+                          Not Reported
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
 
                   <div className="flex flex-wrap gap-1.5">
@@ -470,6 +486,36 @@ export function ClassAttendanceEditor({
                         </button>
                       ),
                     )}
+
+                    {student.isReported === false || (student.reportingStatus && student.reportingStatus !== 'reported') || status === 'not_reported' ? (
+                      <button
+                        type="button"
+                        disabled={
+                          !editable ||
+                          busy !==
+                            null
+                        }
+                        onClick={() =>
+                          setStatuses(
+                            (
+                              current,
+                            ) => ({
+                              ...current,
+                              [student.studentId]:
+                                'not_reported',
+                            }),
+                          )
+                        }
+                        className={
+                          status ===
+                          'not_reported'
+                            ? 'inline-flex min-h-8 min-w-16 items-center justify-center rounded-lg border border-amber-600 bg-amber-600 px-2.5 text-[10px] font-bold text-white'
+                            : 'inline-flex min-h-8 min-w-16 items-center justify-center rounded-lg border border-border-strong bg-white px-2.5 text-[10px] font-semibold text-text-secondary transition hover:bg-surface-subtle disabled:opacity-55'
+                        }
+                      >
+                        Not Reported
+                      </button>
+                    ) : null}
 
                     {status !==
                     'unmarked' ? (

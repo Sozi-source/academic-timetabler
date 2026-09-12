@@ -459,7 +459,7 @@ export default async function TrainerDetailsPage({
                 Assigned Teaching Allocations
               </h2>
               <p className="text-xs text-gray-500">
-                Units and student cohorts assigned to {trainer.fullName} for active academic sessions.
+                Approved timetable units and student cohorts assigned to {trainer.fullName} for active academic sessions.
               </p>
             </div>
           </div>
@@ -541,8 +541,8 @@ export default async function TrainerDetailsPage({
                 </div>
 
                 <div className="md:justify-self-end">
-                  <Badge variant={item.isTimetableEnabled ? 'success' : 'neutral'}>
-                    {item.isTimetableEnabled ? 'Timetable Enabled' : 'Draft'}
+                  <Badge variant="success">
+                    Timetable Approved
                   </Badge>
                 </div>
               </article>

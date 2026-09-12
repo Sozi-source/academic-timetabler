@@ -15,6 +15,26 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 3. **Source Data Organization (`Course_outlines.zip`)**:
    - Move Milkah Wambui's Learning Plan (scheme of work) from the "course outlines" folder to the correct "schemes of work" folder before re-ingesting.
 
+### 2026-09-12: Purged Draft & Archived Units from Trainer Details Page (`/trainers/[id]`)
+- **Files Added**:
+  - `supabase/migrations/20260912204500_purge_draft_teaching_allocations.sql`
+- **Files Modified**:
+  - `src/features/trainers/queries.ts`
+  - `src/app/(dashboard)/trainers/[id]/page.tsx`
+- **What Changed**:
+  - **Trainer Allocations Query Filtering**:
+    - Updated `getTrainerAllocations` in `src/features/trainers/queries.ts` to strictly filter by `.eq('is_timetable_enabled', true).eq('status', 'active')`.
+    - Eliminated obsolete draft/archived teaching allocation records (e.g. 2029 test records and disabled imports) that were previously bloating trainer workload statistics and displaying with "Draft" badges on the trainer profile.
+  - **Trainer Details UI & Workload Telemetry**:
+    - Updated `src/app/(dashboard)/trainers/[id]/page.tsx` to badge active units as `Timetable Approved` (variant `success`) and updated description to `Approved timetable units and student cohorts assigned to {trainer.fullName} for active academic sessions.`
+    - Workload hours and utilization percentage now accurately reflect only approved timetable allocations (e.g. Mary Kaganjo now accurately displays 5 approved timetable units instead of 13 bloated draft entries).
+  - **Database Cleanup Migration**:
+    - Purged unreferenced draft and archived `teaching_allocations` across all trainers.
+    - Added versioned SQL migration `20260912204500_purge_draft_teaching_allocations.sql`.
+- **Verification Evidence**:
+  - `npm test`: 116 test files passed, 569 tests passed (Exit code 0).
+  - `npm run check`: TypeScript typecheck (0 errors), ESLint (0 errors), Next.js production build succeeded (Exit code 0).
+
 ### 2026-09-12: Strict Unit Registration Roster Enforcement (Exclusion of Unregistered Cohort Members)
 - **Files Added**:
   - `supabase/migrations/20260912193000_strict_unit_registration_roster.sql`

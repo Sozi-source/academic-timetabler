@@ -218,6 +218,8 @@ export const getTrainerAllocations = cache(
         )
       `)
       .eq('trainer_id', trainerId)
+      .eq('is_timetable_enabled', true)
+      .eq('status', 'active')
       .order('created_at', { ascending: false });
 
     if (error) {

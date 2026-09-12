@@ -15,6 +15,30 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 3. **Source Data Organization (`Course_outlines.zip`)**:
    - Move Milkah Wambui's Learning Plan (scheme of work) from the "course outlines" folder to the correct "schemes of work" folder before re-ingesting.
 
+### 2026-09-12: Strict Unit Registration Roster Enforcement (Exclusion of Unregistered Cohort Members)
+- **Files Added**:
+  - `supabase/migrations/20260912193000_strict_unit_registration_roster.sql`
+- **Files Modified**:
+  - `supabase/migrations/20260911070000_semester_program_of_activities.sql`
+  - `src/features/academic-roster/unified-roster.ts`
+  - `src/features/class-attendance/queries.ts`
+  - `src/app/api/staff/attendance/sessions/route.ts`
+  - `src/tests/unified-unit-roster.test.ts`
+- **What Changed**:
+  - **Migration Enum Cast Fix**:
+    - Fixed `20260911070000_semester_program_of_activities.sql` RLS manage policy where `p.role in ('admin', 'hod', 'dean', 'principal')` was failing with PostgreSQL `ERROR: invalid input value for enum app_role: "admin"` during `supabase db push`. Updated to `p.role::text in ('system_admin', 'admin', 'hod', 'dean', 'principal')` to support all management roles and adhere to `public.app_role` enum values (`'system_admin'`, `'hod'`).
+  - **Authoritative Source of Truth (Unit Registrations Only)**:
+    - Academic registers (Class Attendance, CAT Attendance, Exam Attendance sheets, Markbooks, and Daily Report absentees) now strictly reference verified unit registrations from `student_unit_registrations` (`registration_status = 'registered'`).
+    - Removed the cohort-wide active student fallback in `getUnifiedUnitRoster` that incorrectly added unregistered students (such as Francis Maina in DHN MAY 24 appearing on DHN 3203 Epidemiology) simply because their cohort shared the room or timetable session.
+    - Participating cohorts are still discovered to accurately render combined header titles (e.g. `Cohort: CHN JAN/MAR 25 / CHN MAY 25`), but the student list is strictly confined to students registered for that unit.
+  - **Orphan Entry Purging**:
+    - Enhanced `getClassAttendanceWorkspace` and `POST /api/staff/attendance/sessions` to detect and immediately purge any orphaned `class_attendance_entries` where the student is not registered for that unit.
+    - Updated `open_class_attendance_session` database function to insert exclusively from `student_unit_registrations` and delete any legacy non-registered student entries.
+    - Provided one-time migration cleanup query synchronizing all session `roster_count` values.
+- **Verification Evidence**:
+  - `npm test`: 116 test files passed, 569 tests passed (Exit code 0).
+  - `npm run check`: TypeScript typecheck (0 errors), ESLint (0 errors), Next.js production build succeeded (Exit code 0).
+
 ### 2026-09-12: Daily Report Attendance-First Overhaul, Past Attendance Enforcement & Unreported Students Solution
 - **Files Added**:
   - `supabase/migrations/20260912190000_attendance_not_reported_and_daily_report_v2.sql`

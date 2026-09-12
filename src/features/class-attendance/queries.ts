@@ -343,7 +343,30 @@ export async function getClassAttendanceWorkspace(
       });
     }
 
-    // Auto-seed missing students from all registered cohorts into class_attendance_entries
+    // Purge any legacy entries for students not registered for this unit
+    const validStudentIdSet = new Set(roster.students.map((st) => st.studentId));
+    const orphanedStudentIds = (entriesResult.data ?? [])
+      .map((entry: any) => String(entry.student_id))
+      .filter((sId: string) => !validStudentIdSet.has(sId));
+
+    if (orphanedStudentIds.length > 0) {
+      await (adminDb as any)
+        .from('class_attendance_entries')
+        .delete()
+        .eq('class_session_id', cs.id)
+        .in('student_id', orphanedStudentIds);
+
+      for (const oId of orphanedStudentIds) {
+        existingEntriesMap.delete(oId);
+      }
+
+      await (adminDb as any)
+        .from('class_sessions')
+        .update({ roster_count: roster.totalCount, updated_at: new Date().toISOString() })
+        .eq('id', cs.id);
+    }
+
+    // Auto-seed missing registered students into class_attendance_entries
     const missingStudents = roster.students.filter((st) => !existingEntriesMap.has(st.studentId));
     if (missingStudents.length > 0) {
       const newRecords = missingStudents.map((st) => ({

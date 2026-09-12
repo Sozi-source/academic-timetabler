@@ -86,14 +86,14 @@ create policy semester_program_activities_manage
     exists (
       select 1 from public.profiles p
       where p.id = auth.uid()
-        and p.role in ('admin', 'hod', 'dean', 'principal')
+        and p.role::text in ('system_admin', 'admin', 'hod', 'dean', 'principal')
     )
   )
   with check (
     exists (
       select 1 from public.profiles p
       where p.id = auth.uid()
-        and p.role in ('admin', 'hod', 'dean', 'principal')
+        and p.role::text in ('system_admin', 'admin', 'hod', 'dean', 'principal')
     )
   );
 

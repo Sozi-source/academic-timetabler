@@ -256,6 +256,24 @@ export async function POST(
         });
 
         if (roster.students.length > 0) {
+          const validStudentIdSet = new Set(roster.students.map((st) => st.studentId));
+          const { data: currentEntries } = await (adminDb as any)
+            .from('class_attendance_entries')
+            .select('student_id')
+            .eq('class_session_id', cs.id);
+
+          const orphanedIds = (currentEntries ?? [])
+            .map((e: any) => String(e.student_id))
+            .filter((sId: string) => !validStudentIdSet.has(sId));
+
+          if (orphanedIds.length > 0) {
+            await (adminDb as any)
+              .from('class_attendance_entries')
+              .delete()
+              .eq('class_session_id', cs.id)
+              .in('student_id', orphanedIds);
+          }
+
           const records = roster.students.map((st) => ({
             class_session_id: cs.id,
             student_id: st.studentId,

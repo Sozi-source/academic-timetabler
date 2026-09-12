@@ -196,24 +196,15 @@ export async function getUnifiedUnitRoster({
     ? programmes.map((p) => p.name).join(' / ')
     : 'Programme';
 
-  // 4. Fetch students from all registered cohorts
-  let cohortStudents: any[] = [];
-  if (allCohortIds.length > 0) {
-    const { data: stData } = await supabase
-      .from('students')
-      .select('id, admission_number, full_name, current_cohort_id, lifecycle_status')
-      .in('current_cohort_id', allCohortIds)
-      .in('lifecycle_status', ['admitted', 'active']);
-    cohortStudents = stData ?? [];
-  }
-
-  // 5. Merge and deduplicate candidates by studentId
+  // 4. Populate candidates strictly from verified unit registrations
+  // Students must be explicitly registered for this unit; merely belonging to a cohort
+  // sharing the timetable slot does not place an unregistered student on the roster.
   const candidateMap = new Map<string, UnifiedRosterCandidate>();
 
-  // A. First add registered students from student_unit_registrations
   for (const reg of registrations ?? []) {
     const st = Array.isArray(reg.student) ? reg.student[0] : reg.student;
     if (!st?.id) continue;
+    if (st.lifecycle_status && !['admitted', 'active'].includes(st.lifecycle_status)) continue;
 
     const cohortId = reg.cohort_id || st.current_cohort_id || '';
     const cohortInfo = cohortMap.get(cohortId);
@@ -229,26 +220,7 @@ export async function getUnifiedUnitRoster({
     });
   }
 
-  // B. Then add all active students from all registered cohorts if not already present
-  for (const st of cohortStudents) {
-    if (!st?.id) continue;
-    if (candidateMap.has(st.id)) continue;
-
-    const cohortId = st.current_cohort_id || '';
-    const cohortInfo = cohortMap.get(cohortId);
-
-    candidateMap.set(st.id, {
-      studentId: st.id,
-      admissionNumber: st.admission_number ?? '—',
-      fullName: st.full_name ?? 'Student',
-      cohortId,
-      cohortName: cohortInfo?.name ?? 'Cohort',
-      registrationStatus: 'enrolled',
-      attendanceStatus: 'expected',
-    });
-  }
-
-  // 6. Attach student reporting status from student_period_reporting
+  // 5. Attach student reporting status from student_period_reporting
   const allCandidateStudentIds = Array.from(candidateMap.keys());
   if (allCandidateStudentIds.length > 0 && academicPeriodId) {
     try {
@@ -273,7 +245,7 @@ export async function getUnifiedUnitRoster({
     }
   }
 
-  // 7. Sort naturally by admission number
+  // 6. Sort naturally by admission number
   const students = Array.from(candidateMap.values()).sort((a, b) =>
     compareAdmissionNumbers(a.admissionNumber, b.admissionNumber)
   );

@@ -218,11 +218,25 @@ export const getDepartmentExecutiveReport = cache(
         .eq('department_id', departmentId)
         .in('status', ['active', 'planned']),
 
-      // 6. Student Unit Registrations
-      admin
-        .from('student_unit_registrations')
-        .select('id, cohort_id, student_id, registration_status')
-        .eq('academic_period_id', periodId),
+      // 6. Student Unit Registrations (paginated to avoid 1,000-row limit)
+      (async () => {
+        const PAGE_SIZE = 1000;
+        const allRegistrations: Array<{ id: string; cohort_id: string | null; student_id: string; registration_status: string }> = [];
+        let from = 0;
+        while (true) {
+          const { data, error } = await admin
+            .from('student_unit_registrations')
+            .select('id, cohort_id, student_id, registration_status')
+            .eq('academic_period_id', periodId)
+            .range(from, from + PAGE_SIZE - 1);
+          if (error) return { data: null, error };
+          if (!data || data.length === 0) break;
+          allRegistrations.push(...data);
+          if (data.length < PAGE_SIZE) break;
+          from += PAGE_SIZE;
+        }
+        return { data: allRegistrations, error: null };
+      })(),
 
       // 7. Class Attendance Sessions
       admin

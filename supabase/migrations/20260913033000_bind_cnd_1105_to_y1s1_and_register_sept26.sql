@@ -99,7 +99,7 @@ begin
       academic_period_id,
       registration_status,
       registered_at,
-      registered_by,
+      created_by,
       notes
     )
     select
@@ -113,7 +113,7 @@ begin
       'Registered via CND 1105 Y1S1 curriculum stage alignment'
     from public.students s
     where s.current_cohort_id = v_cnd_sep26_cohort_id
-      and coalesce(s.lifecycle_status, 'active') not in ('discontinued', 'transferred', 'withdrawn')
+      and s.lifecycle_status in ('admitted', 'active')
       and not exists (
         select 1
         from public.student_unit_registrations sur

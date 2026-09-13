@@ -54,6 +54,8 @@ export interface AssessmentPopulationStudent {
     | 'expected'
     | 'absent';
   registrationStatus: string | null;
+  cohortId?: string;
+  cohortName?: string;
 }
 
 export interface AssessmentPopulationWorkspace {
@@ -127,6 +129,8 @@ export const getAllocationPopulationWorkspace = cache(
       fullName: st.fullName,
       attendanceStatus: st.attendanceStatus,
       registrationStatus: st.registrationStatus,
+      cohortId: st.cohortId,
+      cohortName: st.cohortName,
     }));
 
     return {

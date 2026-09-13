@@ -1,4 +1,5 @@
 import { compareAdmissionNumbers } from '@/features/students/admission-number-sort';
+import { canonicalizeSharedUnitTitle } from '@/features/teaching-allocations/shared-class-matching';
 
 export interface UnifiedRosterCandidate {
   studentId: string;
@@ -43,10 +44,12 @@ export async function getUnifiedUnitRoster({
   let allocationParticipantCohortIds: string[] = [];
 
   // 1. Resolve allocation details if allocationId provided
+  let allocationTeachingOfferingId: string | null = null;
+
   if (allocationId) {
     const { data: alloc } = await supabase
       .from('teaching_allocations')
-      .select('id, unit_id, academic_period_id, cohort_id, participant_cohort_ids')
+      .select('id, unit_id, academic_period_id, cohort_id, participant_cohort_ids, teaching_offering_id')
       .eq('id', allocationId)
       .maybeSingle();
 
@@ -54,6 +57,7 @@ export async function getUnifiedUnitRoster({
       if (!unitId) unitId = alloc.unit_id;
       if (!academicPeriodId) academicPeriodId = alloc.academic_period_id;
       allocationCohortId = alloc.cohort_id;
+      allocationTeachingOfferingId = alloc.teaching_offering_id || null;
       if (Array.isArray(alloc.participant_cohort_ids)) {
         allocationParticipantCohortIds = alloc.participant_cohort_ids.filter(Boolean);
       }
@@ -75,37 +79,118 @@ export async function getUnifiedUnitRoster({
     };
   }
 
-  // 2. Discover all cohorts offering or taking this unit in this academic period
+  // 2. Discover all equivalent / shared unit IDs in this academic period
   const cohortIdSet = new Set<string>();
   if (allocationCohortId) cohortIdSet.add(allocationCohortId);
   for (const cid of allocationParticipantCohortIds) cohortIdSet.add(cid);
+
+  const relatedUnitIdSet = new Set<string>();
+  if (unitId) relatedUnitIdSet.add(unitId);
+
+  let sharedOfferingId = allocationTeachingOfferingId;
+
+  // If no sharedOfferingId from allocation, check if unit_offerings has confirmed_shared_offering_id
+  if (!sharedOfferingId) {
+    try {
+      const { data: directOfferings } = await supabase
+        .from('unit_offerings')
+        .select('confirmed_shared_offering_id')
+        .eq('academic_period_id', academicPeriodId)
+        .eq('unit_id', unitId)
+        .not('confirmed_shared_offering_id', 'is', null);
+
+      for (const off of directOfferings ?? []) {
+        if (off?.confirmed_shared_offering_id) {
+          sharedOfferingId = off.confirmed_shared_offering_id;
+          break;
+        }
+      }
+    } catch {
+      // Ignore if table/query is unavailable in test mocks
+    }
+  }
+
+  // If we have a sharedOfferingId, fetch all units and cohorts belonging to this shared offering
+  if (sharedOfferingId) {
+    try {
+      const { data: sharedOfferings } = await supabase
+        .from('unit_offerings')
+        .select('unit_id, cohort_id')
+        .eq('academic_period_id', academicPeriodId)
+        .eq('confirmed_shared_offering_id', sharedOfferingId);
+
+      for (const off of sharedOfferings ?? []) {
+        if (off?.unit_id) relatedUnitIdSet.add(off.unit_id);
+        if (off?.cohort_id) cohortIdSet.add(off.cohort_id);
+      }
+    } catch {
+      // Ignore if unavailable in test mocks
+    }
+  }
+
+  // Also check if any participant cohorts have unit offerings with matching canonical unit title
+  const participantCohorts = Array.from(cohortIdSet);
+  if (participantCohorts.length > 0) {
+    try {
+      const { data: unitData } = await supabase
+        .from('units')
+        .select('name')
+        .eq('id', unitId)
+        .maybeSingle();
+
+      if (unitData?.name) {
+        const canonicalTitle = canonicalizeSharedUnitTitle(unitData.name);
+        const { data: cohortOfferings } = await supabase
+          .from('unit_offerings')
+          .select('unit_id, cohort_id, units(name)')
+          .eq('academic_period_id', academicPeriodId)
+          .in('cohort_id', participantCohorts);
+
+        for (const off of cohortOfferings ?? []) {
+          const u = Array.isArray(off?.units) ? off.units[0] : off?.units;
+          if (u?.name && canonicalizeSharedUnitTitle(u.name) === canonicalTitle) {
+            if (off?.unit_id) relatedUnitIdSet.add(off.unit_id);
+            if (off?.cohort_id) cohortIdSet.add(off.cohort_id);
+          }
+        }
+      }
+    } catch {
+      // Ignore if unavailable in test mocks
+    }
+  }
+
+  const allUnitIds = Array.from(relatedUnitIdSet);
+
+  // 3. Discover all offerings, allocations, and verified registrations across related units
+  const offeringsQuery = supabase
+    .from('unit_offerings')
+    .select('cohort_id')
+    .eq('academic_period_id', academicPeriodId);
+
+  const allocsQuery = supabase
+    .from('teaching_allocations')
+    .select('cohort_id, participant_cohort_ids')
+    .eq('academic_period_id', academicPeriodId);
+
+  const regQuery = supabase
+    .from('student_unit_registrations')
+    .select(`
+      student_id,
+      cohort_id,
+      registration_status,
+      student:students(id, admission_number, full_name, current_cohort_id, lifecycle_status)
+    `)
+    .eq('academic_period_id', academicPeriodId)
+    .eq('registration_status', 'registered');
 
   const [
     { data: offerings },
     { data: otherAllocs },
     { data: registrations },
   ] = await Promise.all([
-    supabase
-      .from('unit_offerings')
-      .select('cohort_id')
-      .eq('academic_period_id', academicPeriodId)
-      .eq('unit_id', unitId),
-    supabase
-      .from('teaching_allocations')
-      .select('cohort_id, participant_cohort_ids')
-      .eq('academic_period_id', academicPeriodId)
-      .eq('unit_id', unitId),
-    supabase
-      .from('student_unit_registrations')
-      .select(`
-        student_id,
-        cohort_id,
-        registration_status,
-        student:students(id, admission_number, full_name, current_cohort_id, lifecycle_status)
-      `)
-      .eq('academic_period_id', academicPeriodId)
-      .eq('unit_id', unitId)
-      .eq('registration_status', 'registered'),
+    allUnitIds.length === 1 ? offeringsQuery.eq('unit_id', allUnitIds[0]) : offeringsQuery.in('unit_id', allUnitIds),
+    allUnitIds.length === 1 ? allocsQuery.eq('unit_id', allUnitIds[0]) : allocsQuery.in('unit_id', allUnitIds),
+    allUnitIds.length === 1 ? regQuery.eq('unit_id', allUnitIds[0]) : regQuery.in('unit_id', allUnitIds),
   ]);
 
   for (const off of offerings ?? []) {
@@ -245,10 +330,12 @@ export async function getUnifiedUnitRoster({
     }
   }
 
-  // 6. Sort naturally by admission number
-  const students = Array.from(candidateMap.values()).sort((a, b) =>
-    compareAdmissionNumbers(a.admissionNumber, b.admissionNumber)
-  );
+  // 6. Sort naturally by cohort first, then by admission number within each cohort
+  const students = Array.from(candidateMap.values()).sort((a, b) => {
+    const cohortComparison = (a.cohortName || '').localeCompare(b.cohortName || '');
+    if (cohortComparison !== 0) return cohortComparison;
+    return compareAdmissionNumbers(a.admissionNumber, b.admissionNumber);
+  });
 
   return {
     unitId,

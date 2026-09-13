@@ -13,7 +13,194 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 2. **Curriculum Upload UI Update (`curriculum-zip-upload-dialog.tsx`)**:
    - Update `curriculum-zip-upload-dialog.tsx` to display `unresolvedFiles` from the ingestion preview response, allowing HODs to select document types manually prior to commit.
 3. **Source Data Organization (`Course_outlines.zip`)**:
-   - Move Milkah Wambui's Learning Plan (scheme of work) from the "course outlines" folder to the correct "schemes of work" folder before re-ingesting.
+### 2026-09-13: Replaced Print Function with Direct PDF Download Function
+- **Files Added/Modified**:
+  - `src/features/assessment/attendance-sheet-pdf.tsx` (NEW)
+  - `src/tests/attendance-sheet-pdf.test.ts` (NEW)
+  - `src/app/api/staff/units/[allocationId]/attendance-sheet/[type]/route.ts`
+  - `src/features/class-attendance/printable-class-register.tsx`
+  - `src/features/assessment/printable-signing-sheet.tsx`
+- **What Changed**:
+  - **Replaced `window.print()` with Native PDF File Download**:
+    - Replaced the browser print dialog trigger (`onClick={() => window.print()}`) with a direct file download link (`<a href="...?format=pdf" download>`) across `printable-class-register.tsx` and `printable-signing-sheet.tsx`.
+    - Clicking "Download PDF" now immediately downloads the official, pre-rendered PDF document directly to the user's computer.
+  - **Implemented Institutional PDF Generator (`attendance-sheet-pdf.tsx`)**:
+    - Built with `@react-pdf/renderer` supporting both Landscape (for Class Attendance) and Portrait (for CAT / Exam Attendance).
+    - Features full institutional branding: centered college logo (`icmhs-logo.png`), institution title, academic period, department and unit metadata.
+    - Separate A4 page per cohort for multi-cohort shared units, maintaining CDACC/TVET audit compliance.
+    - Sequential numbering (1 to N) per cohort plus 4 blank candidate entry rows.
+    - Full-width landscape sign-off section with pre-filled trainer name, wide comment underlines, and clean signature lines with zero box borders.
+  - **Integrated PDF Endpoint in Attendance Sheet API Route**:
+    - Updated `/api/staff/units/[allocationId]/attendance-sheet/[type]` to accept `?format=pdf`.
+    - Generates and streams the PDF document with `Content-Type: application/pdf` and `Content-Disposition: attachment; filename="... Attendance Sheet.pdf"`.
+- **Verification Evidence**:
+  - `npm test -- src/tests/attendance-sheet-pdf.test.ts`: 3/3 tests passed (CAT, Multi-Cohort Exam, and Landscape Class PDF generation).
+  - `npm test -- src/tests/attendance-sheet-docx.test.ts`: 3/3 tests passed.
+  - `npm run check`: TypeScript typecheck, ESLint, and Next.js 16 production build succeeded (Exit code 0).
+
+### 2026-09-13: Word Docx Borderless Sign-off, Wrap Prevention & "Download PDF" Renaming
+- **Files Modified**:
+  - `src/features/assessment/attendance-sheet-docx.ts`
+  - `src/features/class-attendance/printable-class-register.tsx`
+  - `src/features/assessment/printable-signing-sheet.tsx`
+  - `src/components/ui/print-action-button.tsx`
+  - `src/tests/attendance-sheet-docx.test.ts`
+- **What Changed**:
+  - **Removed Word Table Box Borders**:
+    - Set `borders: TableBorders.NONE` on `new Table(...)` for both class and exam sign-off sections, eliminating default outer and inner grid borders in Microsoft Word.
+    - Preserved crisp bottom underline borders (`w:bottom w:val="single"`) exclusively on the handwriting/signing fields.
+  - **Prevented Text Wrapping in Word (`Comme\nnt:`)**:
+    - Expanded column widths in landscape Word sign-off table to `[2800, 2600, 1500, 6000, 900, 1600]` dxa:
+      - Column 2 ("Comment:"): Expanded from `1100` to `1500` dxa, providing double the required width for the 8-character string.
+      - Column 0 ("Class Representative:"): Expanded to `2800` dxa.
+      - Column 4 ("Sign:"): Expanded to `900` dxa.
+    - Added `keepLines: true` to paragraph formatting in `signoffLabelCell` to prevent Word from splitting lines.
+    - Applied non-breaking spaces (`\u00A0`) in multi-word labels (`Class\u00A0Representative:`, `Exam\u00A0Officer:`) and `whitespace-nowrap` on all web preview labels.
+  - **Renamed "Print / Save PDF" to "Download PDF"**:
+    - Updated web action buttons in `printable-class-register.tsx`, `printable-signing-sheet.tsx`, and the reusable `PrintActionButton` component to display "Download PDF" with `<Download />` icons.
+- **Verification Evidence**:
+  - `npm test -- src/tests/attendance-sheet-docx.test.ts`: Passed (verified `TableBorders.NONE`, `keepLines`, and underline borders).
+  - `npm run check`: TypeScript typecheck, ESLint, and Next.js 16 production build succeeded (Exit code 0).
+
+### 2026-09-13: Full-Width & Well-Spaced Landscape Sign-off Section (Web & Word .docx)
+- **Files Modified**:
+  - `src/features/class-attendance/printable-class-register.tsx`
+  - `src/features/assessment/printable-signing-sheet.tsx`
+  - `src/features/assessment/attendance-sheet-docx.ts`
+  - `src/app/api/staff/units/[allocationId]/attendance-sheet/[type]/route.ts`
+  - `src/components/staff/staff-shell.tsx`
+  - `src/tests/attendance-sheet-docx.test.ts`
+- **What Changed**:
+  - **Word (.docx) Landscape Orientation & Exact Table Layout Matching Web Preview**:
+    - Addressed user feedback where downloaded Word documents did not retain the landscape layout, full-width alignment, and sign-off formatting seen in the web preview (`media_1789279315395.png`).
+    - Configured `PageOrientation.LANDSCAPE` with dimensions `16838 x 11906` dxa and standard `720` dxa margins for class attendance sheets in Word.
+    - Updated the main attendance register table columns to span the exact `15400` dxa usable width (`[700, 2600, 4500, ...Array(8).fill(950)]`).
+    - Replaced plain text underscore paragraphs with an official Word `Table` (`width: 100%`, `columnWidths: [2400, 3200, 1100, 5900, 800, 2000]`) with borderless cells and crisp bottom borders on input lines.
+    - Added `trainerName` to the API route payload so the Trainer row in Word displays the trainer name (e.g. `Wilfred Osozi`) directly on the underline, matching the web preview.
+    - Also converted Exam/CAT attendance sheet sign-offs to full-width structured tables in Word.
+  - **Full-Width Landscape Alignment in Browser & Print**:
+    - Unified the register table and sign-off block inside a shared `min-w-[900px] w-full` container so the sign-off block spans 100% of the table's width, from the leftmost `No.` column to the rightmost session column, with zero right-side blank space.
+    - Updated the grid to use proportional `fr` units (`grid-cols-[150px_1.2fr_70px_2.5fr_45px_1fr]`):
+      - Role & Name: `150px` label + `1.2fr` underline. Pre-fills `trainerName` when available.
+      - Comment: `70px` label + `2.5fr` wide underline for detailed observation remarks.
+      - Sign: `45px` label + `1fr` underline extending directly to the outer right edge.
+  - **Generous Vertical Spacing**:
+    - Increased vertical gap to `gap-y-5` with `h-5` underlines for comfortable handwriting and signing clearance.
+  - **Print Layout & Portal Shell Fixes**:
+    - Added `@page { size: A4 landscape; margin: 8mm 10mm; }` so browser print dialog automatically defaults to Landscape.
+    - In `staff-shell.tsx`, added `print:hidden` to the sidebar, top header, and mobile navigation bar, and removed `lg:pl-[var(--sidebar-width)]` and `max-w-[var(--content-max-width)]` in print mode (`@media print`) so printed landscape documents occupy 100% of the page width without clipping or displacement.
+- **Verification Evidence**:
+  - `npm test`: 116 test files passed, 572 tests passed.
+  - `npm run check`: TypeScript typecheck, ESLint, and Next.js 16 production build succeeded (Exit code 0).
+
+### 2026-09-13: Dedicated Multi-Cohort Separate Lists for Shared Classes
+- **Files Modified/Added**:
+  - `src/features/academic-roster/unified-roster.ts`
+  - `src/features/assessment/population-workspace.ts`
+  - `src/features/class-attendance/printable-class-register.tsx`
+  - `src/features/assessment/printable-signing-sheet.tsx`
+  - `src/features/assessment/attendance-sheet-docx.ts`
+  - `src/app/(staff)/staff/units/[allocationId]/documents/class-attendance/page.tsx`
+  - `src/app/(staff)/staff/units/[allocationId]/documents/cat-attendance/page.tsx`
+  - `src/app/(staff)/staff/units/[allocationId]/documents/exam-attendance/page.tsx`
+  - `src/app/api/staff/units/[allocationId]/attendance-sheet/[type]/route.ts`
+  - `src/tests/attendance-sheet-docx.test.ts`
+- **What Changed**:
+  - **Separate Cohort Organization for Shared Classes**:
+    - Addressed user requirement to provide separate, dedicated lists per cohort (e.g. CND SEPT 26 separate from DND SEPT 26) instead of intermingling them, meeting TVET accreditation, external examination (KNEC/CDACC), and departmental filing standards.
+    - Added cohort tracking metadata (`cohortId`, `cohortName`) through `AssessmentPopulationStudent` and roster data models.
+  - **Interactive Cohort Switcher & Dedicated Print Layouts**:
+    - `PrintableClassRegister`:
+      - Added interactive cohort tabs (`All Cohorts`, `CND SEPT 26`, `DND SEPT 26`) to toggle the preview in the browser.
+      - Automatically groups students by cohort in alphabetical cohort order (e.g. Certificate first, Diploma next).
+      - Numbers students sequentially starting from 1 for each cohort register (`1..N`).
+      - Appends dedicated blank rows (4 rows) and sign-off blocks per cohort.
+      - Configured CSS print page breaks (`break-after: page`) between cohort registers so each cohort automatically prints onto clean, separate A4 pages.
+    - `PrintableSigningSheet` (CAT & Exam):
+      - Added interactive cohort tabs with badge counts.
+      - Renders dedicated signing sheets per cohort with sequential numbering (1 to N), 4 blank signing rows per cohort, and individual certification summaries.
+      - Separates printed cohort lists with page breaks.
+  - **Multi-Cohort Word (.docx) Export**:
+    - Upgraded `generateAttendanceSheetDocx` to group candidates by cohort.
+    - When multiple cohorts exist, it now creates a dedicated Word document `section` per cohort, automatically generating clean page breaks, per-cohort headers, 1..N sequential numbering, and official institutional sign-off footers.
+  - **Verification Evidence**:
+    - Added automated unit test in `src/tests/attendance-sheet-docx.test.ts` verifying multi-cohort document generation.
+    - `npm test`: 116 test files passed, 571 tests passed (Exit code 0).
+    - `npm run check`: TypeScript typecheck, ESLint, and Next.js 16 production build succeeded (Exit code 0).
+
+### 2026-09-13: Shared Class Attendance Roster Integration & Equivalent Units
+- **Files Modified/Added**:
+  - `src/features/academic-roster/unified-roster.ts`
+  - `src/tests/unified-unit-roster.test.ts`
+  - `supabase/migrations/20260913043000_shared_class_attendance_roster.sql`
+- **What Changed**:
+  - **Shared Class Equivalent Unit Roster Discovery**:
+    - Identified that in shared classes (such as `CND SEPT 26` sharing timetable slots with `DND SEPT 26`), students are registered under their programme-specific unit codes (e.g. `CND 1104` vs `DND 1104`), while teaching allocations and timetable slots are tied to a single primary unit ID.
+    - Previously, both `getUnifiedUnitRoster` and the PostgreSQL `open_class_attendance_session` RPC filtered strictly by `reg.unit_id = unitId`, omitting all students registered under the equivalent units of the shared class.
+    - Enhanced `getUnifiedUnitRoster` to discover all equivalent unit IDs via:
+      1. `teaching_allocations.teaching_offering_id`
+      2. `unit_offerings.confirmed_shared_offering_id`
+      3. Participating cohorts with matching canonical unit titles via `canonicalizeSharedUnitTitle`.
+    - Updated query to fetch `student_unit_registrations` with `.in('unit_id', allUnitIds)` for active registered students (`registration_status = 'registered'`).
+    - Added all participant and related unit cohorts into `allCohortIds` so header displays show joined cohort names (e.g. `CND SEPT 26 / DND SEPT 26`).
+  - **PostgreSQL Database Migration**:
+    - Created migration `20260913043000_shared_class_attendance_roster.sql` upgrading `open_class_attendance_session` to dynamically discover related shared units and seed `class_attendance_entries` across all equivalent units while preserving strict unit registration enforcement (unregistered cohort members like Francis Maina remain strictly excluded).
+    - Added one-time sync updating active `class_sessions` and synchronizing `roster_count`.
+    - Pushed migration to remote Supabase database (`npx supabase db push --yes`).
+  - **Automated Tests**:
+    - Added test in `unified-unit-roster.test.ts` verifying that when a shared class has multiple equivalent units, registered students from both cohorts are included and unregistered cohort members are excluded.
+- **Verification Evidence**:
+  - Live database test verified that all 23 students from `CND SEPT 26` are present on all 6 shared allocations:
+    - `DND 1106`: 39 students (15 DND SEPT 26 + 1 DND SEPT 25 + 23 CND SEPT 26)
+    - `DND 1105`: 60 students (15 DND SEPT 26 + 23 CND SEPT 26 + 21 CND SEPT 25 + 1 DND SEPT 25)
+    - `DND 1103`: 40 students (15 DND SEPT 26 + 23 CND SEPT 26 + 2 DND retakers)
+    - `CND 1101`: 39 students (23 CND SEPT 26 + 15 DND SEPT 26 + 1 DND SEPT 25)
+    - `DND 1104`: 39 students (15 DND SEPT 26 + 23 CND SEPT 26 + 1 CND SEPT 25)
+    - `CND 1102`: 39 students (23 CND SEPT 26 + 15 DND SEPT 26 + 1 DND SEPT 25)
+  - `npm test`: 116 test files passed, 570 tests passed (Exit code 0).
+  - `npm run check`: TypeScript typecheck (0 errors), ESLint (0 errors), Next.js production build succeeded (Exit code 0).
+  - `npx supabase db push --dry-run` confirms remote database is completely up to date.
+
+### 2026-09-13: PostgREST 1,000-Row Truncation Fix in Unit Registration & Reporting
+- **Files Modified**:
+  - `src/features/student-unit-registration/queries.ts`
+  - `src/features/student-unit-registration/student-unit-registration-table.tsx`
+  - `src/features/reporting/queries.ts`
+  - `supabase/migrations/20260912204500_purge_draft_teaching_allocations.sql`
+  - `supabase/migrations/20260913033000_bind_cnd_1105_to_y1s1_and_register_sept26.sql`
+- **What Changed**:
+  - **Supabase / PostgREST 1,000-Row Truncation Root Cause Resolution**:
+    - Identified that `getUnitRegistrationContext` and `getDepartmentAcademicReportingDashboard` fetched `student_unit_registrations` without range pagination.
+    - With 1,214 registrations active in `September-December 2026`, PostgREST silently capped the query response at 1,000 rows. Students falling towards the end of the alphabetical roster (such as `AKOI, VINCENT MUKOYA`, `CND/S-8171/IC/26`) had 5 of their 6 registered units cut off, resulting in the UI incorrectly displaying `1 / 6 units assigned` and status `Pending`.
+    - Implemented chunked `.range(from, from + PAGE_SIZE - 1)` loop fetching across all 1,214+ registration rows in `queries.ts` and `reporting/queries.ts`.
+    - Vincent Akoi and all 23 students in `CND SEPT 26` now accurately reflect **6 / 6 units assigned**.
+  - **Registered & Partial Status Badging**:
+    - In `student-unit-registration-table.tsx`: added direct check in `statusBadge` to render `<Badge variant="success">Registered</Badge>` when a student has all expected units assigned (`selectedUnits >= expectedUnits`), and `<Badge variant="warning">Partial (X/Y)</Badge>` when partially assigned.
+    - Updated table status dropdown filter to support filtering by `Registered`.
+  - **Remote Migration Bugfixes**:
+    - Fixed `20260912204500_purge_draft_teaching_allocations.sql`: replaced non-existent `timetable_slots` with `class_sessions` and `scheduled_sessions`.
+    - Fixed `20260913033000_bind_cnd_1105_to_y1s1_and_register_sept26.sql`: corrected enum filtering to valid `student_lifecycle_status` values (`'admitted'`, `'active'`) and column name to `created_by`.
+    - Successfully pushed all migrations to remote Supabase (`npx supabase db push --yes`).
+- **Verification Evidence**:
+  - `npm test`: 116 test files passed, 569 tests passed (Exit code 0).
+  - `npm run check`: TypeScript typecheck (0 errors), ESLint (0 errors), Next.js production build succeeded (Exit code 0).
+  - Dry run `npx supabase db push --dry-run` confirms remote database is completely up to date.
+
+### 2026-09-13: CND 1105 Y1S1 Stage Alignment & CND SEPT 26 Unit Registration
+- **Files Added**:
+  - `supabase/migrations/20260913033000_bind_cnd_1105_to_y1s1_and_register_sept26.sql`
+- **What Changed**:
+  - **CND 1105 Curriculum Stage Alignment**:
+    - Realigned `CND 1105: Human Anatomy and Physiology` from `Y2S1` (where it had been erroneously placed with `academic_period_number = 4`) to `Y1S1` (`Year 1 Semester 1`) with `academic_period_number = 1`.
+    - In `programme_stage_units`: deleted the erroneous binding of `CND 1105` to `Y2S1` and bound it to `Y1S1` (`7b8c78d5-cae7-496a-a09e-7fd15cffdd1a`).
+    - CND Year 1 Semester 1 now correctly provides all 6 expected curriculum units: `CND 1101`, `CND 1102`, `CND 1103`, `CND 1104`, `CND 1105`, and `CND 1106`.
+  - **Cohort Unit Registration**:
+    - Registered `CND 1105` for all 23 active students in `CND-SEP-2026` (`CND SEPT 26`) for active academic period `September-December 2026`.
+    - `CND SEPT 26` now has 138 total active unit registrations (6 units x 23 students).
+- **Verification Evidence**:
+  - `npm test`: 116 test files passed, 569 tests passed (Exit code 0).
+  - `npm run check`: TypeScript typecheck (0 errors), ESLint (0 errors), Next.js production build succeeded (Exit code 0).
+  - Database status: `CND-SEP-2026` has 6 stage units and 138 registered unit records.
 
 ### 2026-09-13: Unit Registration Pipeline & September 2026 Intake Resolution
 - **Files Added**:

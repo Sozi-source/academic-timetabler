@@ -26,7 +26,28 @@ export const getUnitRegistrationContext = cache(async (): Promise<UnitRegistrati
     };
   }
 
-  const [studentResult, offeringResult, registrationResult, submissionResult, stageUnitOverviewResult] = await Promise.all([
+  const fetchAllRegistrations = async (periodId: string) => {
+    const PAGE_SIZE = 1000;
+    const allRegistrations: Array<{ student_id: string; unit_id: string; registration_status: string }> = [];
+    let from = 0;
+    while (true) {
+      const { data, error } = await supabase
+        .from('student_unit_registrations')
+        .select('student_id, unit_id, registration_status')
+        .eq('academic_period_id', periodId)
+        .eq('registration_status', 'registered')
+        .range(from, from + PAGE_SIZE - 1);
+
+      if (error) throw new Error(`Unable to load registrations: ${error.message}`);
+      if (!data || data.length === 0) break;
+      allRegistrations.push(...data);
+      if (data.length < PAGE_SIZE) break;
+      from += PAGE_SIZE;
+    }
+    return allRegistrations;
+  };
+
+  const [studentResult, offeringResult, allRegistrations, submissionResult, stageUnitOverviewResult] = await Promise.all([
     supabase
       .from('students')
       .select(`
@@ -46,11 +67,7 @@ export const getUnitRegistrationContext = cache(async (): Promise<UnitRegistrati
       .eq('academic_period_id', period.id)
       .eq('selection_state', 'included')
       .neq('status', 'cancelled'),
-    supabase
-      .from('student_unit_registrations')
-      .select('student_id, unit_id, registration_status')
-      .eq('academic_period_id', period.id)
-      .eq('registration_status', 'registered'),
+    fetchAllRegistrations(period.id),
     supabase
       .from('student_unit_registration_submissions')
       .select('id, student_id, status, has_exception, exception_reason, verification_note')
@@ -62,7 +79,6 @@ export const getUnitRegistrationContext = cache(async (): Promise<UnitRegistrati
 
   if (studentResult.error) throw new Error(`Unable to load students: ${studentResult.error.message}`);
   if (offeringResult.error) throw new Error(`Unable to load offered units: ${offeringResult.error.message}`);
-  if (registrationResult.error) throw new Error(`Unable to load registrations: ${registrationResult.error.message}`);
   if (submissionResult.error) throw new Error(`Unable to load submissions: ${submissionResult.error.message}`);
   if (stageUnitOverviewResult.error) throw new Error(`Unable to load stage units: ${stageUnitOverviewResult.error.message}`);
 
@@ -77,7 +93,7 @@ export const getUnitRegistrationContext = cache(async (): Promise<UnitRegistrati
   }
 
   const selectionsByStudent = new Map<string, number>();
-  for (const registration of registrationResult.data ?? []) {
+  for (const registration of allRegistrations) {
     selectionsByStudent.set(registration.student_id, (selectionsByStudent.get(registration.student_id) ?? 0) + 1);
   }
 

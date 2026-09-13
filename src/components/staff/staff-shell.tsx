@@ -211,14 +211,14 @@ export function StaffShell({ profile, children }: StaffShellProps) {
   return (
     <div className="academic-portal min-h-screen bg-background flex">
       {/* Subtle Institutional Brand Accent Header Line */}
-      <div className="fixed inset-x-0 top-0 z-[60] h-1 bg-[#ffd400]" aria-hidden="true" />
+      <div className="fixed inset-x-0 top-0 z-[60] h-1 bg-[#ffd400] print:hidden" aria-hidden="true" />
 
       {/* Desktop Fixed Left Sidebar */}
-      <aside className="hidden lg:flex lg:w-[var(--sidebar-width)] lg:flex-col lg:fixed lg:inset-y-0 lg:z-40 border-r border-slate-200">
+      <aside className="hidden lg:flex lg:w-[var(--sidebar-width)] lg:flex-col lg:fixed lg:inset-y-0 lg:z-40 border-r border-slate-200 print:hidden">
         {sidebarContent}
       </aside>
 
-      <div className={cn('fixed inset-0 z-50 lg:hidden transition-[visibility] duration-300', mobileOpen ? 'visible' : 'invisible delay-300')} aria-hidden={!mobileOpen}>
+      <div className={cn('fixed inset-0 z-50 lg:hidden transition-[visibility] duration-300 print:hidden', mobileOpen ? 'visible' : 'invisible delay-300')} aria-hidden={!mobileOpen}>
         <button type="button" aria-label="Close navigation" onClick={() => setMobileOpen(false)} className={cn('absolute inset-0 bg-slate-950/45 backdrop-blur-[2px] transition-opacity duration-300', mobileOpen ? 'opacity-100' : 'opacity-0')} />
         <div
           onClick={(event) => { if ((event.target as HTMLElement).closest('a')) setMobileOpen(false); }}
@@ -232,9 +232,9 @@ export function StaffShell({ profile, children }: StaffShellProps) {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex flex-1 flex-col lg:pl-[var(--sidebar-width)] min-w-0">
+      <div className="flex flex-1 flex-col lg:pl-[var(--sidebar-width)] min-w-0 print:pl-0 print:m-0 print:w-full">
         {/* Top Header Bar */}
-        <header className="sticky top-0 z-30 flex h-[3.625rem] items-center justify-between border-b border-border bg-surface/95 px-3.5 sm:px-6 lg:h-[4.625rem] backdrop-blur shadow-2xs">
+        <header className="sticky top-0 z-30 flex h-[3.625rem] items-center justify-between border-b border-border bg-surface/95 px-3.5 sm:px-6 lg:h-[4.625rem] backdrop-blur shadow-2xs print:hidden">
           <div className="flex items-center gap-2">
             <button type="button" onClick={() => setMobileOpen(true)} aria-label="Open navigation" className="flex size-9 items-center justify-center rounded-[0.625rem] border border-border bg-surface text-primary-deep shadow-sm transition active:scale-95 lg:hidden">
               <Menu className="size-[1.125rem]" />
@@ -284,12 +284,12 @@ export function StaffShell({ profile, children }: StaffShellProps) {
         </header>
 
         {/* Page Content Body (with bottom padding for mobile nav) */}
-        <main className="portal-page-content flex-1 px-4 py-3.5 sm:px-6 lg:px-[1.625rem] lg:py-[1.625rem] pb-20 lg:pb-8 max-w-[var(--content-max-width)] w-full mx-auto">
+        <main className="portal-page-content flex-1 px-4 py-3.5 sm:px-6 lg:px-[1.625rem] lg:py-[1.625rem] pb-20 lg:pb-8 max-w-[var(--content-max-width)] w-full mx-auto print:max-w-none print:w-full print:p-0 print:m-0">
           {children}
         </main>
 
         {/* Mobile Bottom Navigation Bar (Clean & Professional) */}
-        <nav className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-sm lg:hidden">
+        <nav className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-sm lg:hidden print:hidden">
           <div className="grid h-[3.625rem] max-w-md grid-cols-4 mx-auto">
             {MOBILE_BOTTOM_NAV.map((item) => {
               const isActive = item.exact

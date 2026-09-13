@@ -20,11 +20,17 @@ interface StudentUnitRegistrationTableProps {
   academicPeriodId?: string | null;
 }
 
-function statusBadge(status: string, hasException: boolean) {
+function statusBadge(status: string, hasException: boolean, selectedUnits: number, expectedUnits: number) {
   if (status === 'verified') return <Badge variant="success">Verified</Badge>;
   if (status === 'submitted')
     return <Badge variant={hasException ? 'warning' : 'institutional'}>{hasException ? 'Review' : 'Submitted'}</Badge>;
   if (status === 'returned') return <Badge variant="warning">Returned</Badge>;
+  if (selectedUnits >= expectedUnits && expectedUnits > 0) {
+    return <Badge variant="success">Registered</Badge>;
+  }
+  if (selectedUnits > 0) {
+    return <Badge variant="warning">Partial ({selectedUnits}/{expectedUnits})</Badge>;
+  }
   return <Badge variant="neutral">Pending</Badge>;
 }
 
@@ -60,7 +66,8 @@ export function StudentUnitRegistrationTable({
 
       // 2. Status Filter
       if (statusFilter !== 'all') {
-        if (statusFilter === 'pending' && student.status !== 'not_submitted') return false;
+        if (statusFilter === 'registered' && (student.selectedUnits < student.expectedUnits || student.expectedUnits === 0)) return false;
+        if (statusFilter === 'pending' && (student.selectedUnits > 0 || student.status !== 'not_submitted')) return false;
         if (statusFilter === 'submitted' && student.status !== 'submitted') return false;
         if (statusFilter === 'verified' && student.status !== 'verified') return false;
         if (statusFilter === 'returned' && student.status !== 'returned') return false;
@@ -133,6 +140,7 @@ export function StudentUnitRegistrationTable({
               className="bg-transparent text-xs font-medium text-text-primary outline-none cursor-pointer"
             >
               <option value="all">All Statuses</option>
+              <option value="registered">Registered</option>
               <option value="pending">Pending</option>
               <option value="submitted">Submitted</option>
               <option value="verified">Verified</option>
@@ -220,7 +228,7 @@ export function StudentUnitRegistrationTable({
                 </div>
 
                 {/* Status Badge */}
-                <div>{statusBadge(student.status, student.hasException)}</div>
+                <div>{statusBadge(student.status, student.hasException, student.selectedUnits, student.expectedUnits)}</div>
 
                 {/* Action Buttons */}
                 <div className="flex flex-wrap items-center justify-end gap-1.5 min-w-0">

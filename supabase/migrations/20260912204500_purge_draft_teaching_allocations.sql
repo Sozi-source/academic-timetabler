@@ -9,8 +9,8 @@ where (ta.is_timetable_enabled = false or ta.status in ('archived', 'draft'))
     where ss.teaching_allocation_id = ta.id
   )
   and not exists (
-    select 1 from public.timetable_slots ts
-    where ts.allocation_id = ta.id
+    select 1 from public.class_sessions cs
+    where cs.teaching_allocation_id = ta.id
   )
   and not exists (
     select 1 from public.teaching_documents td

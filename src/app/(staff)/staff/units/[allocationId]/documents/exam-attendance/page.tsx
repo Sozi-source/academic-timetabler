@@ -47,6 +47,7 @@ export default async function ExamAttendancePage({ params }: PageProps) {
         studentId: s.studentId,
         admissionNumber: s.admissionNumber,
         fullName: s.fullName,
+        cohortName: s.cohortName,
       }))}
     />
   );

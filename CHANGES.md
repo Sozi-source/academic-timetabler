@@ -12,7 +12,32 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
    - Legacy DB rows stored curriculum templates under `tpl-tvet-<code>` (without document type suffix). A migration is needed to reclassify each row as either `scheme_of_work` or `course_outline` and re-save under `tpl-tvet-<code>-<type>`.
 2. **Curriculum Upload UI Update (`curriculum-zip-upload-dialog.tsx`)**:
    - Update `curriculum-zip-upload-dialog.tsx` to display `unresolvedFiles` from the ingestion preview response, allowing HODs to select document types manually prior to commit.
-3. **Source Data Organization (`Course_outlines.zip`)**:
+### 2026-09-13: TVET Curriculum Harmonization & Phase 1 Quality Cleansing
+- **Files Added/Modified**:
+  - `src/features/teaching-documents/curriculum-data/module-1.ts`
+  - `src/features/teaching-documents/curriculum-data/shared-map.ts`
+  - `src/features/teaching-documents/curriculum-content/queries.ts`
+  - `supabase/migrations/20260913160000_deactivate_corrupted_curriculum_versions.sql` (NEW)
+- **What Changed**:
+  - **Overhauled Canonical Module 1 Units (`module-1.ts`)**:
+    - Cleansed and structured all 19 canonical curriculum units across Nutrition, Dietetics, and Core Common Units.
+    - Completely purged OCR corruption artifacts (e.g. `crnail`, `(Fating system`, `O'cd) (15vd)`), misallocated outlines (e.g. Biochemistry content under Nutrition Epidemiology), and Table of Contents bleed.
+    - Each unit now includes authoritative TVET unit descriptions, Bloom's revised taxonomy competencies, 4–6 discrete learning outcomes, 14-week structured syllabi (`• ...` specific learning outcomes, student-centered learning activities, instructional resources, and TVET assessment milestones: CAT 1 in Week 6/7, Mid-Term CAT 2 in Week 9, Revision in Week 13, and Final Examination in Week 14), standard textbooks, and lab/instructional equipment.
+  - **Disambiguated Unit Mappings & Title-First Resolution (`shared-map.ts`)**:
+    - Expanded registry with 306 mappings across all institutional acronyms, codes, and title variants.
+    - Updated `resolveCanonicalKey` to prioritize exact normalized unit title matching before course code matching. This resolves inter-departmental code collisions where different courses share identical numbers (e.g. CCU 1106 ICT no longer collides with Life Skills; CCU 1103 HIV no longer collides with Nutrition).
+    - Verified against all 59 currently active teaching allocations in the institution with zero unmapped units or fallback errors.
+  - **Database Migration & Corrupted Version Patch**:
+    - Created migration `20260913160000_deactivate_corrupted_curriculum_versions.sql` and superseded historical corrupted rows in `curriculum_document_versions` in Supabase (deactivating `7d1e41bb-b2bc-4cce-84f2-3176856bb58b` and `253edeaf-5785-4f01-88d4-5c12df7a160e`).
+  - **Trainer Portal Content Guardrails (`queries.ts`)**:
+    - Added automated corruption detection (`isCorruptedText`) and mismatched payload validation (`isMismatchedPayload`) to the curriculum query pipeline.
+    - Any legacy or corrupted DB record is automatically rejected at runtime, falling back smoothly to the verified canonical syllabus data.
+- **Verification Evidence**:
+  - `npx vitest run src/tests/curriculum-harmonization.test.ts`: 8/8 tests passed.
+  - `npx vitest run src/tests/tvet-teaching-documents.test.ts`: 12/12 tests passed.
+  - `verify_all_active_units.py`: Verified 59 out of 59 active institutional teaching allocations resolve cleanly with 0 OCR errors.
+  - `npm run check`: TypeScript strict check, ESLint, and Next.js 16 production build succeeded (Exit code 0).
+
 ### 2026-09-13: Replaced Print Function with Direct PDF Download Function
 - **Files Added/Modified**:
   - `src/features/assessment/attendance-sheet-pdf.tsx` (NEW)

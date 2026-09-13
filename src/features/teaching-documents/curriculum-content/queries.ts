@@ -7,6 +7,31 @@ import {
   type UnitCurriculumDefinition,
 } from '@/features/teaching-documents/curriculum-registry';
 
+function isCorruptedText(text?: string | null): boolean {
+  if (!text) return false;
+  return (
+    /crnail|\(fating|o'cd\)|time\s+ours|total\s+for\s+module|mcxlule|\.\.i\.oi/i.test(text) ||
+    /﻿3\.1\.o/i.test(text)
+  );
+}
+
+function isMismatchedPayload(targetName: string | undefined, payload: any): boolean {
+  if (!targetName || !payload) return false;
+  const lowTarget = targetName.toLowerCase();
+  const desc = String(payload.unit?.unitDescription || payload.unitDescription || '').toLowerCase();
+  const firstTopic = String(payload.content?.[0]?.topic || '').toLowerCase();
+
+  // If target unit is NOT biochemistry, but payload is heavily biochemistry
+  if (!lowTarget.includes('biochem') && (desc.includes('intermediate metabolism') || firstTopic.includes('biochemistry'))) {
+    return true;
+  }
+  // If target unit is NOT communication, but payload is about communication skills
+  if (!lowTarget.includes('communication') && !lowTarget.includes('ict') && firstTopic.includes('communication process')) {
+    return true;
+  }
+  return false;
+}
+
 function enrichWithCanonical(
   def: UnitCurriculumDefinition,
   lookupCode: string,
@@ -15,7 +40,13 @@ function enrichWithCanonical(
   const canonical = findCanonicalCurriculum(lookupCode, lookupName);
   if (!canonical) return def;
 
-  // Harmonize weekly schedule: if def schedule is missing or has only single-line outcomes without multi-bullet depth, upgrade to canonical
+  const isDescCorrupt = isCorruptedText(def.unitDescription);
+  const isCompCorrupt = isCorruptedText(def.overallCompetency);
+  const isScheduleCorrupt = def.weeklySchedule?.some(
+    (w) => isCorruptedText(w.topicTitle) || isCorruptedText(w.specificLearningOutcomes)
+  );
+
+  // Harmonize weekly schedule: if def schedule is missing, corrupted, or has only single-line outcomes without multi-bullet depth, upgrade to canonical
   let weeklySchedule = def.weeklySchedule;
   const canonicalSchedule = canonical.weeklySchedule;
   const canonicalHasRichSLOs =
@@ -26,6 +57,7 @@ function enrichWithCanonical(
   if (
     !weeklySchedule ||
     weeklySchedule.length === 0 ||
+    isScheduleCorrupt ||
     (canonicalHasRichSLOs &&
       weeklySchedule.every((w) => !w.specificLearningOutcomes || !w.specificLearningOutcomes.includes('\n•')))
   ) {
@@ -36,10 +68,12 @@ function enrichWithCanonical(
 
   return {
     ...def,
-    unitDescription: def.unitDescription?.trim() ? def.unitDescription : canonical.unitDescription,
-    overallCompetency: def.overallCompetency?.trim() ? def.overallCompetency : canonical.overallCompetency,
+    unitDescription: !isDescCorrupt && def.unitDescription?.trim() ? def.unitDescription : canonical.unitDescription,
+    overallCompetency: !isCompCorrupt && def.overallCompetency?.trim() ? def.overallCompetency : canonical.overallCompetency,
     learningOutcomes:
-      def.learningOutcomes && def.learningOutcomes.length > 0
+      def.learningOutcomes &&
+      def.learningOutcomes.length > 0 &&
+      !def.learningOutcomes.some(isCorruptedText)
         ? def.learningOutcomes
         : (canonical.learningOutcomes ?? []),
     references:
@@ -210,11 +244,12 @@ export const getApprovedCurriculumForUnitCode = cache(
             const docCodeKey = cleanKey(unitMeta.unitCode);
             const docNameKey = cleanKey(unitMeta.unitName);
 
-            // Strict validation: Must match target unit code or name
+            // Strict validation: Must match target unit code or name and must NOT be mismatched payload
             if (
-              !docCodeKey ||
-              docCodeKey === targetKey ||
-              (targetNameKey && docNameKey === targetNameKey)
+              (!docCodeKey ||
+                docCodeKey === targetKey ||
+                (targetNameKey && docNameKey === targetNameKey)) &&
+              !isMismatchedPayload(resolvedName || unitName, payload)
             ) {
               return enrichWithCanonical({
                 unitCode: unitMeta.unitCode || resolvedCode,

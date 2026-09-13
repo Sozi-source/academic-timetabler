@@ -39,12 +39,35 @@ function eligibilityLabel(
       return 'No matching units on offer';
   }
 }
+
+function formatBatchErrorMessage(error: string): string {
+  const decoded = decodeURIComponent(error).trim();
+  switch (decoded) {
+    case 'students':
+    case 'NO_STUDENTS_SELECTED':
+      return 'No eligible students were selected. If this cohort was recently admitted, ensure it has an assigned academic stage (e.g. Year 1 Semester 1) and that units on offer exist for this period.';
+    case 'cohort':
+    case 'COHORT_REQUIRED':
+      return 'Please select a cohort to proceed with batch unit registration.';
+    case 'period':
+    case 'PERIOD_REQUIRED':
+      return 'An active academic period is required before unit registration can run.';
+    case 'mode':
+      return 'Please select a valid registration mode (Entire cohort or Selected students).';
+    case 'stage_selection_required':
+      return 'Please select an academic stage before setting the cohort stage.';
+    default:
+      return decoded;
+  }
+}
+
 interface BatchUnitRegistrationProps {
   context: BatchRegistrationContext;
-  
   cohortStageSetups: CohortStageSetup[];
   summary: BatchRegistrationSummary | null;
   error: string | null;
+  stageUpdated?: boolean;
+  initialCohortId?: string | null;
   notice: {
     type: 'confirmed' | 'dropped';
     students: number;
@@ -57,13 +80,19 @@ export function BatchUnitRegistration({
   cohortStageSetups,
   summary,
   error,
+  stageUpdated,
+  initialCohortId,
   notice,
 }: BatchUnitRegistrationProps) {
   const [mode, setMode] = useState<'cohort' | 'selected'>('cohort');
-  const [cohortId, setCohortId] = useState('');
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(
-    new Set(),
-  );
+  const [cohortId, setCohortId] = useState(initialCohortId ?? '');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => {
+    if (!initialCohortId) return new Set();
+    const eligibleIds = context.students
+      .filter((student) => student.cohortId === initialCohortId && student.eligible)
+      .map((student) => student.id);
+    return new Set(eligibleIds);
+  });
 
   const cohortStudents = useMemo(
     () =>
@@ -189,13 +218,26 @@ export function BatchUnitRegistration({
         </section>
       ) : null}
 
+      {stageUpdated ? (
+        <div
+          role="status"
+          className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-950 flex items-center gap-2.5"
+        >
+          <span className="size-2 rounded-full bg-emerald-500 shrink-0" />
+          <span>
+            <strong className="font-semibold">Cohort stage updated successfully.</strong>{' '}
+            Students in this cohort have inherited the selected stage and eligible units have been refreshed.
+          </span>
+        </div>
+      ) : null}
+
       {error ? (
         <div
           role="alert"
           className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900"
         >
-          <span className="font-semibold">Registration was not completed.</span>{' '}
-          {decodeURIComponent(error)}
+          <span className="font-semibold">Registration notice:</span>{' '}
+          {formatBatchErrorMessage(error)}
         </div>
       ) : null}
 
@@ -393,10 +435,20 @@ export function BatchUnitRegistration({
                 ))}
               </select>
               {cohortId ? (
-                <CohortStageAssignment
-                  cohortId={cohortId}
-                  setups={cohortStageSetups}
-                />
+                <>
+                  <CohortStageAssignment
+                    cohortId={cohortId}
+                    setups={cohortStageSetups}
+                  />
+                  {cohortStageSetups.find((s) => s.cohortId === cohortId && !s.currentStageId) ? (
+                    <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50/80 p-2.5 text-xs text-amber-900 flex items-start gap-2">
+                      <span className="mt-0.5 size-1.5 rounded-full bg-amber-500 shrink-0" />
+                      <div>
+                        <strong className="font-semibold">Stage Assignment Required:</strong> This cohort has not yet been assigned to an academic stage. Please select and assign a stage above to enable automatic unit registration for these students.
+                      </div>
+                    </div>
+                  ) : null}
+                </>
               ) : null}
             </div>
           ) : (

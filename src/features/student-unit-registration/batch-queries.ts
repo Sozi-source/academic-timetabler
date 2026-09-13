@@ -70,7 +70,12 @@ export async function getBatchRegistrationContext(): Promise<BatchRegistrationCo
       current_cohort_id,
       current_stage_id,
       lifecycle_status,
-      current_cohort:cohorts!students_current_cohort_id_fkey(id, name),
+      current_cohort:cohorts!students_current_cohort_id_fkey(
+        id,
+        name,
+        current_stage_id,
+        current_stage:programme_stages!cohorts_current_stage_id_fkey(id, code, name, sequence_number)
+      ),
       current_stage:programme_stages!students_current_stage_id_fkey(id, code, name, sequence_number)
     `)
     .in('programme_id', programmeIds)
@@ -86,7 +91,12 @@ export async function getBatchRegistrationContext(): Promise<BatchRegistrationCo
   const stageIds = [
     ...new Set(
       (students ?? [])
-        .map((student) => student.current_stage_id)
+        .flatMap((student) => {
+          const cohort = Array.isArray(student.current_cohort)
+            ? student.current_cohort[0]
+            : student.current_cohort;
+          return [student.current_stage_id, cohort?.current_stage_id];
+        })
         .filter((value): value is string => Boolean(value)),
     ),
   ];
@@ -168,8 +178,16 @@ export async function getBatchRegistrationContext(): Promise<BatchRegistrationCo
       ? student.current_stage[0]
       : student.current_stage;
 
-    const stageUnits = student.current_stage_id
-      ? unitsByStage.get(student.current_stage_id) ?? new Set<string>()
+    const cohortStage = Array.isArray((cohort as any)?.current_stage)
+      ? (cohort as any)?.current_stage[0]
+      : (cohort as any)?.current_stage;
+
+    const effectiveStageId =
+      student.current_stage_id || cohort?.current_stage_id || null;
+    const effectiveStage = stage || cohortStage || null;
+
+    const stageUnits = effectiveStageId
+      ? unitsByStage.get(effectiveStageId) ?? new Set<string>()
       : new Set<string>();
 
     const offeredUnits = student.current_cohort_id
@@ -180,7 +198,7 @@ export async function getBatchRegistrationContext(): Promise<BatchRegistrationCo
       offeredUnits.has(unitId),
     ).length;
 
-    const hasStage = Boolean(student.current_stage_id);
+    const hasStage = Boolean(effectiveStageId);
     const hasStageUnits = stageUnits.size > 0;
     const hasMatchingOfferings = expectedUnits > 0;
     const lifecycleEligible = ['admitted', 'active'].includes(
@@ -208,8 +226,8 @@ export async function getBatchRegistrationContext(): Promise<BatchRegistrationCo
         programmeCode.get(student.programme_id) ?? '-',
       cohortId: student.current_cohort_id,
       cohortName: cohort?.name ?? null,
-      stageId: student.current_stage_id,
-      stageCode: stage?.code ?? null,
+      stageId: effectiveStageId,
+      stageCode: effectiveStage?.code ?? null,
       lifecycleStatus: student.lifecycle_status,
       reportingStatus: (
         student.lifecycle_status === 'deferred'

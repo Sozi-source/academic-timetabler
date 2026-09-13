@@ -51,6 +51,8 @@ export default async function BatchUnitRegistrationPage({
     : null;
 
   const error = first(params.error) ?? null;
+  const stageUpdated = first(params.stage_updated) === '1';
+  const initialCohortId = first(params.cohortId) ?? null;
   const reporting = first(params.reporting);
   const reportingNoticeType: 'confirmed' | 'dropped' | null =
     reporting === 'confirmed' || reporting === 'dropped'
@@ -72,6 +74,8 @@ export default async function BatchUnitRegistrationPage({
         context={context}
         summary={summary}
         error={error}
+        stageUpdated={stageUpdated}
+        initialCohortId={initialCohortId}
         notice={notice}
         cohortStageSetups={cohortStageSetups}
       />

@@ -39,6 +39,8 @@ export function CohortStageAssignment({
         ) : null}
       </div>
 
+      <input type="hidden" name="cohortId" value={cohortId} />
+
       <div className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
         <div>
           <label

@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 
 import { requireHodAccess } from '@/features/auth/authorization';
 import { createClient } from '@/lib/supabase/server';
@@ -19,7 +20,7 @@ export async function setCohortStageAction(formData: FormData) {
     typeof stageId !== 'string' ||
     !stageId
   ) {
-    throw new Error('Select a cohort and academic stage.');
+    redirect('/students/unit-registration/batch?error=stage_selection_required');
   }
 
   const supabase = await createClient();
@@ -31,10 +32,14 @@ export async function setCohortStageAction(formData: FormData) {
   });
 
   if (error) {
-    throw new Error(error.message);
+    redirect(
+      `/students/unit-registration/batch?error=${encodeURIComponent(error.message)}`,
+    );
   }
 
   revalidatePath('/students/unit-registration/batch');
   revalidatePath('/students/unit-registration');
   revalidatePath('/students/lifecycle-progression');
+
+  redirect(`/students/unit-registration/batch?stage_updated=1&cohortId=${cohortId}`);
 }

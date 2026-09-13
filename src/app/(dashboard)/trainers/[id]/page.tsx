@@ -4,31 +4,24 @@ import { notFound } from 'next/navigation';
 import {
   AlertCircle,
   ArrowLeft,
-  BookOpen,
+  Briefcase,
   CalendarCheck,
   CheckCircle2,
   Clock,
   Eye,
+  GraduationCap,
   KeyRound,
   Mail,
   Pencil,
   Phone,
+  Plus,
   Presentation,
   ShieldCheck,
-  User,
-  UserCheck,
-  Users,
 } from 'lucide-react';
 
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { PageHeader } from '@/components/ui/page-header';
+import { Progress } from '@/components/ui/progress';
 import { requireHodAccess } from '@/features/auth/authorization';
-import {
-  canProvisionTrainerAccess,
-  trainerAccessDetail,
-  trainerAccessLabel,
-} from '@/features/trainer-access/domain';
 import { getTrainerAccessRegister } from '@/features/trainer-access/queries';
 import { TrainerAccessAction } from '@/features/trainer-access/trainer-access-action';
 import { ResetTrainerPassword } from '@/features/trainers/reset-trainer-password';
@@ -88,6 +81,12 @@ function formatAvailabilityMode(mode: string): string {
   }
 }
 
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
 export async function generateMetadata({
   params,
 }: TrainerDetailsPageProps): Promise<Metadata> {
@@ -136,428 +135,375 @@ export default async function TrainerDetailsPage({
 
   return (
     <div className="space-y-6">
-      {/* 1. Header & Navigation */}
-      <PageHeader
-        eyebrow="Staff Directory"
-        title={trainer.fullName}
-        description={`Trainer profile, workspace authorization, and institutional teaching parameters.`}
-        icon={User}
-        backHref="/trainers"
-        backLabel="Staff & Trainers"
-        actions={
-          <div className="flex flex-wrap items-center gap-2">
-            <Button asChild variant="primary" size="sm" className="bg-[#033B36] text-white hover:bg-[#022A26] shadow-xs">
-              <Link href={`/trainers/${trainer.id}/portal-view`}>
-                <Eye className="size-3.5" aria-hidden="true" />
-                <span>View Staff Portal</span>
-              </Link>
-            </Button>
-            <ResetTrainerPassword
-              trainerId={trainer.id}
-              trainerName={trainer.fullName}
-              trainerEmail={trainer.email}
-              buttonVariant="outline"
-              buttonSize="sm"
-              buttonLabel="Reset Password"
-            />
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/timetable/trainers/${trainer.id}/edit`}>
-                <Pencil className="size-3.5" aria-hidden="true" />
-                Edit Profile
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="sm">
-              <Link href="/timetable/trainers/availability">
-                <CalendarCheck className="size-3.5" aria-hidden="true" />
-                Availability
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="sm">
-              <Link href="/timetable/teaching-allocations">
-                <BookOpen className="size-3.5" aria-hidden="true" />
-                Assign Units
-              </Link>
-            </Button>
-          </div>
-        }
-      />
+      {/* 1. Top Navigation & Action Toolbar (Unified, Zero Duplication) */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <Link
+          href="/trainers"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-900 transition"
+        >
+          <ArrowLeft className="size-3.5" />
+          Back to Staff Directory
+        </Link>
 
-      {/* 2. Top Workspace Authorization & Approval Banner */}
-      {accessState === 'ready_to_link' ? (
-        <div className="flex flex-col gap-4 rounded-2xl border border-amber-200 bg-amber-50/80 p-5 shadow-xs sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-3.5">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-800">
-              <KeyRound className="size-5" aria-hidden="true" />
-            </span>
-            <div>
-              <p className="text-sm font-bold text-amber-900">
-                Matching Account Found · Pending HOD Approval
-              </p>
-              <p className="mt-0.5 text-xs text-amber-700 leading-relaxed">
-                A registered user account matching <span className="font-semibold text-amber-900">{trainer.email}</span> is awaiting authorization. Approve and link workspace access now.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
-            <ResetTrainerPassword
-              trainerId={trainer.id}
-              trainerName={trainer.fullName}
-              trainerEmail={trainer.email}
-              buttonVariant="outline"
-              buttonSize="sm"
-              buttonLabel="Reset Password"
-            />
+        <div className="flex flex-wrap items-center gap-2">
+          {accessState === 'ready_to_link' && (
             <TrainerAccessAction trainerId={trainer.id} />
-          </div>
-        </div>
-      ) : accessState === 'linked' ? (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 text-xs text-emerald-800">
-          <div className="flex items-center gap-2.5">
-            <CheckCircle2 className="size-4.5 text-emerald-600 shrink-0" />
-            <span>
-              <strong>Staff Workspace is Active & Linked:</strong> {trainer.fullName} is authorized to sign in with <code className="font-mono text-emerald-900">{trainer.email}</code>.
-            </span>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <Button asChild variant="primary" size="sm" className="bg-[#033B36] text-white hover:bg-[#022A26] shadow-xs">
-              <Link href={`/trainers/${trainer.id}/portal-view`}>
-                <Eye className="size-3.5" aria-hidden="true" />
-                <span>View Staff Portal</span>
-              </Link>
-            </Button>
-            <ResetTrainerPassword
-              trainerId={trainer.id}
-              trainerName={trainer.fullName}
-              trainerEmail={trainer.email}
-              buttonVariant="outline"
-              buttonSize="sm"
-              buttonLabel="Reset Password"
-            />
-            <Badge variant="success">Active Workspace</Badge>
-          </div>
-        </div>
-      ) : accessState === 'email_required' ? (
-        <div className="flex items-center justify-between rounded-2xl border border-red-200 bg-red-50/70 p-4 text-xs text-red-800">
-          <div className="flex items-center gap-2.5">
-            <AlertCircle className="size-4.5 text-red-600 shrink-0" />
-            <span>
-              <strong>Email Required:</strong> Add a college email address to this trainer profile to enable staff workspace registration and account linking.
-            </span>
-          </div>
+          )}
+
+          <Button
+            asChild
+            variant="primary"
+            size="sm"
+            className="bg-[#033B36] text-white hover:bg-[#022A26] shadow-xs"
+          >
+            <Link href={`/trainers/${trainer.id}/portal-view`}>
+              <Eye className="size-3.5 mr-1.5" aria-hidden="true" />
+              <span>View Staff Portal</span>
+            </Link>
+          </Button>
+
+          <ResetTrainerPassword
+            trainerId={trainer.id}
+            trainerName={trainer.fullName}
+            trainerEmail={trainer.email}
+            buttonVariant="outline"
+            buttonSize="sm"
+            buttonLabel="Reset Password"
+          />
+
           <Button asChild variant="outline" size="sm">
             <Link href={`/timetable/trainers/${trainer.id}/edit`}>
-              Add Email
+              <Pencil className="size-3.5 mr-1.5" aria-hidden="true" />
+              Edit Profile
+            </Link>
+          </Button>
+
+          <Button asChild variant="outline" size="sm">
+            <Link href="/timetable/trainers/availability">
+              <CalendarCheck className="size-3.5 mr-1.5" aria-hidden="true" />
+              Availability
             </Link>
           </Button>
         </div>
-      ) : (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-gray-200 bg-gray-50/80 p-4 text-xs text-gray-700">
-          <div className="flex items-center gap-2.5">
-            <Clock className="size-4.5 text-gray-500 shrink-0" />
-            <span>
-              <strong>Awaiting Registration / Password:</strong> Set a temporary password directly or have the trainer register with <code className="font-mono">{trainer.email}</code>.
-            </span>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <ResetTrainerPassword
-              trainerId={trainer.id}
-              trainerName={trainer.fullName}
-              trainerEmail={trainer.email}
-              buttonVariant="primary"
-              buttonSize="sm"
-              buttonLabel="Set Temporary Password"
-            />
-            <Badge variant="neutral">Registration Pending</Badge>
-          </div>
-        </div>
-      )}
-
-      {/* 3. Key Telemetry Cards */}
-      <section aria-label="Trainer Status Summary" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Card 1: Account Status */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-xs">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Account Status</p>
-          <div className="mt-2 flex items-center justify-between">
-            <span className="text-base font-bold text-gray-900">
-              {trainer.isActive ? 'Active Staff' : 'Inactive'}
-            </span>
-            <Badge variant={trainer.isActive ? 'success' : 'neutral'}>
-              {trainer.isActive ? 'Active' : 'Disabled'}
-            </Badge>
-          </div>
-          <p className="mt-1 text-[11px] text-gray-500">Institutional record</p>
-        </div>
-
-        {/* Card 2: Timetable Availability */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-xs">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Timetable Availability</p>
-          <div className="mt-2 flex items-center justify-between">
-            <span className="text-base font-bold text-gray-900">
-              {trainer.isTimetableAvailable ? 'Available' : 'Unavailable'}
-            </span>
-            <Badge variant={trainer.isTimetableAvailable ? 'primary' : 'neutral'}>
-              {formatAvailabilityMode(trainer.availabilityMode)}
-            </Badge>
-          </div>
-          <p className="mt-1 text-[11px] text-gray-500">Scheduling engine flag</p>
-        </div>
-
-        {/* Card 3: Weekly Workload Target (Corrected) */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-xs">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Weekly Workload Target</p>
-          <div className="mt-2 flex items-center justify-between">
-            <span className="text-base font-bold text-gray-900">
-              {trainer.normalWeeklyHours} hrs / wk
-            </span>
-            <span className="text-xs font-semibold text-gray-500">
-              Max {trainer.maximumDailyHours}h / day
-            </span>
-          </div>
-          <p className="mt-1 text-[11px] text-gray-500">{formatWorkloadRole(trainer.workloadRole)}</p>
-        </div>
-
-        {/* Card 4: Workspace Authorization */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-xs">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Workspace Authorization</p>
-          <div className="mt-2 flex items-center justify-between">
-            <span className="text-base font-bold text-gray-900">
-              {trainerAccessLabel(accessState)}
-            </span>
-            <Badge variant={accessState === 'linked' ? 'success' : accessState === 'ready_to_link' ? 'primary' : 'neutral'}>
-              {accessState === 'linked' ? 'Linked' : 'Pending'}
-            </Badge>
-          </div>
-          <p className="mt-1 text-[11px] text-gray-500">Staff portal state</p>
-        </div>
-      </section>
-
-      {/* 4. Detailed Profile & Workload Information Grid */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 max-w-5xl">
-        {/* Contact & Administrative Details */}
-        <section aria-labelledby="contact-info-heading" className="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs space-y-4">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-            <h2 id="contact-info-heading" className="text-sm font-bold text-gray-900">
-              Contact & Identity Information
-            </h2>
-            <Button asChild variant="ghost" size="sm">
-              <Link href={`/timetable/trainers/${trainer.id}/edit`} className="text-xs text-[#033B36]">
-                <Pencil className="size-3 mr-1" />
-                Edit
-              </Link>
-            </Button>
-          </div>
-
-          <div className="space-y-3.5 text-xs">
-            <div className="flex items-center justify-between py-1 border-b border-gray-50">
-              <span className="text-gray-500 flex items-center gap-1.5">
-                <Mail className="size-3.5 text-gray-400" />
-                College Email
-              </span>
-              {trainer.email ? (
-                <a href={`mailto:${trainer.email}`} className="font-semibold text-gray-900 hover:text-[#033B36] hover:underline">
-                  {trainer.email}
-                </a>
-              ) : (
-                <span className="text-red-500 font-medium italic">Not set</span>
-              )}
-            </div>
-
-            <div className="flex items-center justify-between py-1 border-b border-gray-50">
-              <span className="text-gray-500 flex items-center gap-1.5">
-                <Phone className="size-3.5 text-gray-400" />
-                Phone Number
-              </span>
-              {trainer.phoneNumber ? (
-                <a href={`tel:${trainer.phoneNumber}`} className="font-semibold text-gray-900 hover:text-[#033B36] hover:underline">
-                  {trainer.phoneNumber}
-                </a>
-              ) : (
-                <span className="text-gray-400 italic">Not set</span>
-              )}
-            </div>
-
-            <div className="flex items-center justify-between py-1 border-b border-gray-50">
-              <span className="text-gray-500">Staff Number</span>
-              <span className="font-mono font-semibold text-gray-900">{trainer.staffNumber || '—'}</span>
-            </div>
-
-            <div className="flex items-center justify-between py-1 border-b border-gray-50">
-              <span className="text-gray-500">Employment Type</span>
-              <span className="font-semibold text-gray-900">{formatEmploymentType(trainer.employmentType)}</span>
-            </div>
-
-            <div className="flex items-center justify-between py-1 border-b border-gray-50">
-              <span className="text-gray-500">Workload Role</span>
-              <span className="font-semibold text-gray-900">{formatWorkloadRole(trainer.workloadRole)}</span>
-            </div>
-
-            <div className="flex items-center justify-between py-1">
-              <span className="text-gray-500">Specialization</span>
-              <span className="font-semibold text-gray-900">{trainer.specialization || 'General'}</span>
-            </div>
-          </div>
-        </section>
-
-        {/* Teaching Capacity & Academic Settings */}
-        <section aria-labelledby="capacity-info-heading" className="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs space-y-4">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-            <h2 id="capacity-info-heading" className="text-sm font-bold text-gray-900">
-              Teaching Workload & Parameters
-            </h2>
-            <Button asChild variant="ghost" size="sm">
-              <Link href="/timetable/trainers/availability" className="text-xs text-[#033B36]">
-                <CalendarCheck className="size-3 mr-1" />
-                Availability
-              </Link>
-            </Button>
-          </div>
-
-          <div className="space-y-3.5 text-xs">
-            <div className="flex items-center justify-between py-1 border-b border-gray-50">
-              <span className="text-gray-500">Home Department</span>
-              <span className="font-semibold text-gray-900">{trainer.homeDepartment || 'Current Department'}</span>
-            </div>
-
-            <div className="flex items-center justify-between py-1 border-b border-gray-50">
-              <span className="text-gray-500">Qualifications</span>
-              <span className="font-semibold text-gray-900">{trainer.qualifications || 'Recorded on file'}</span>
-            </div>
-
-            <div className="flex items-center justify-between py-1 border-b border-gray-50">
-              <span className="text-gray-500">Weekly Workload Target</span>
-              <span className="font-semibold text-gray-900">{trainer.normalWeeklyHours} hrs / week</span>
-            </div>
-
-            <div className="flex items-center justify-between py-1 border-b border-gray-50">
-              <span className="text-gray-500">Daily Scheduling Limit</span>
-              <span className="font-semibold text-gray-900">{trainer.maximumDailyHours} hrs / day</span>
-            </div>
-
-            <div className="flex items-center justify-between py-1 border-b border-gray-50">
-              <span className="text-gray-500">Availability Mode</span>
-              <span className="font-semibold text-gray-900">{formatAvailabilityMode(trainer.availabilityMode)}</span>
-            </div>
-
-            <div className="flex items-center justify-between py-1">
-              <span className="text-gray-500">Timetable Engine Flag</span>
-              <span className="font-semibold text-gray-900">{trainer.isTimetableAvailable ? 'Included in generator' : 'Excluded from generator'}</span>
-            </div>
-          </div>
-        </section>
       </div>
 
-      {/* 5. Assigned Teaching Units & Workload Utilization */}
-      <section aria-labelledby="teaching-allocations-heading" className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xs">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 bg-gray-50/60 px-5 py-3.5">
-          <div className="flex items-center gap-2.5">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-[#033B36]/10 text-[#033B36]">
-              <Presentation className="size-4.5" aria-hidden="true" />
-            </span>
-            <div>
-              <h2 id="teaching-allocations-heading" className="text-sm font-bold text-gray-900">
-                Assigned Teaching Allocations
-              </h2>
+      {/* 2. Unified Hero Card: Identity, Badges & Workload Telemetry */}
+      <section
+        aria-label="Trainer Profile Overview"
+        className="rounded-2xl border border-gray-200 bg-white p-6 shadow-xs"
+      >
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          {/* Identity & Status */}
+          <div className="flex items-start gap-4">
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-[#033B36] text-base font-bold text-white shadow-xs">
+              {getInitials(trainer.fullName)}
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <h1 className="text-xl font-bold text-gray-900 tracking-tight sm:text-2xl">
+                  {trainer.fullName}
+                </h1>
+                {trainer.staffNumber && (
+                  <span className="rounded-md bg-gray-100 px-2 py-0.5 font-mono text-xs font-semibold text-gray-700">
+                    {trainer.staffNumber}
+                  </span>
+                )}
+              </div>
+
               <p className="text-xs text-gray-500">
-                Approved timetable units and student cohorts assigned to {trainer.fullName} for active academic sessions.
+                <span>{formatWorkloadRole(trainer.workloadRole)}</span>
+                <span className="mx-1.5 text-gray-300">·</span>
+                <span>{trainer.homeDepartment || 'Human Nutrition & Dietetics'}</span>
               </p>
+
+              {/* Status Chips Row */}
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                {/* Active Staff */}
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                    trainer.isActive
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
+                      : 'bg-gray-100 text-gray-600 border border-gray-200'
+                  }`}
+                >
+                  <span
+                    className={`size-1.5 rounded-full ${
+                      trainer.isActive ? 'bg-emerald-500' : 'bg-gray-400'
+                    }`}
+                  />
+                  {trainer.isActive ? 'Active Staff' : 'Inactive'}
+                </span>
+
+                {/* Workspace State */}
+                {accessState === 'linked' ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-200/60">
+                    <CheckCircle2 className="size-3 text-emerald-600" />
+                    Portal Linked ({trainer.email})
+                  </span>
+                ) : accessState === 'ready_to_link' ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-800 border border-amber-200">
+                    <KeyRound className="size-3 text-amber-600" />
+                    Pending Link ({trainer.email})
+                  </span>
+                ) : accessState === 'account_required' ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-semibold text-gray-700 border border-gray-200">
+                    <Clock className="size-3 text-gray-500" />
+                    Registration Pending
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-0.5 text-[11px] font-semibold text-rose-700 border border-rose-200">
+                    <AlertCircle className="size-3 text-rose-600" />
+                    Email Required
+                  </span>
+                )}
+
+                {/* Timetable Availability */}
+                <span className="inline-flex items-center gap-1 rounded-full bg-gray-50 px-2.5 py-0.5 text-[11px] font-semibold text-gray-600 border border-gray-200">
+                  <CalendarCheck className="size-3 text-gray-400" />
+                  {formatAvailabilityMode(trainer.availabilityMode)}
+                </span>
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <p className="text-xs font-bold text-gray-900">
-                {totalAllocatedHours} / {targetHours} hrs
-              </p>
-              <p className="text-[10px] text-gray-500">
-                {utilizationPercentage}% Workload Used
-              </p>
+          {/* Workload Progress Gauge */}
+          <div className="flex flex-col gap-2 rounded-xl border border-gray-100 bg-gray-50/70 p-4 lg:min-w-[260px]">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold text-gray-600">Workload Target</span>
+              <span className="font-bold text-gray-900">
+                {totalAllocatedHours} / {targetHours} hrs/wk
+              </span>
             </div>
-            <div className="flex items-center gap-2">
-              <Button asChild variant="outline" size="sm" className="border-[#033B36] text-[#033B36] hover:bg-[#033B36]/10">
-                <Link href={`/trainers/${trainer.id}/portal-view`}>
-                  <Eye className="size-3.5 mr-1" aria-hidden="true" />
-                  <span>View Staff Portal</span>
-                </Link>
-              </Button>
-              <Link
-                href="/timetable/teaching-allocations"
-                className="inline-flex h-8 items-center justify-center rounded-lg bg-[#033B36] px-3 text-xs font-semibold text-white transition hover:bg-[#022A26]"
-              >
-                Manage Allocations
-              </Link>
+
+            <Progress
+              value={utilizationPercentage}
+              max={100}
+              className="h-2 bg-gray-200"
+              indicatorClassName={
+                utilizationPercentage > 100
+                  ? 'bg-amber-600'
+                  : utilizationPercentage >= 75
+                  ? 'bg-[#033B36]'
+                  : 'bg-emerald-600'
+              }
+            />
+
+            <div className="flex items-center justify-between text-[11px] text-gray-500">
+              <span>{utilizationPercentage}% Allocated</span>
+              <span>Max {trainer.maximumDailyHours}h / day</span>
             </div>
           </div>
         </div>
-
-        {allocations.length === 0 ? (
-          <div className="px-5 py-10 text-center">
-            <Presentation className="mx-auto size-6 text-gray-400" aria-hidden="true" />
-            <p className="mt-2 text-xs font-semibold text-gray-900">No units assigned yet</p>
-            <p className="mt-0.5 text-xs text-gray-500">
-              Assign units from Teaching Allocations to generate timetables for this trainer.
-            </p>
-            <div className="mt-4">
-              <Button asChild variant="outline" size="sm">
-                <Link href="/timetable/teaching-allocations">
-                  Assign Teaching Unit
-                </Link>
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="divide-y divide-gray-100">
-            {allocations.map((item) => (
-              <article
-                key={item.id}
-                className="grid gap-3 px-5 py-3.5 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1.25fr)_8rem_auto] md:items-center transition hover:bg-gray-50/50"
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-xs font-bold text-gray-900">
-                    <span className="font-mono text-[#033B36] mr-1.5">{item.unitCode}</span>
-                    {item.unitName}
-                  </p>
-                  <p className="mt-0.5 text-[11px] text-gray-500">
-                    {item.academicPeriodName} · {item.deliveryMode.toUpperCase()}
-                  </p>
-                </div>
-
-                <div className="min-w-0">
-                  <p className="truncate text-xs font-semibold text-gray-800">
-                    {item.cohortName} ({item.cohortCode})
-                  </p>
-                  <p className="mt-0.5 text-[11px] text-gray-500">
-                    Class Size: {item.cohortSize} students
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-xs font-bold text-gray-900">
-                    {item.weeklyHours} hrs / wk
-                  </p>
-                  <p className="text-[11px] text-gray-500">
-                    {item.weeklySessions} session{item.weeklySessions === 1 ? '' : 's'} × {item.sessionDurationMinutes}m
-                  </p>
-                </div>
-
-                <div className="md:justify-self-end">
-                  <Badge variant="success">
-                    Timetable Approved
-                  </Badge>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
       </section>
 
-      {/* 6. Administrative Notes */}
-      {trainer.notes && (
-        <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Administrative Notes</h2>
-          <p className="text-xs text-gray-700 whitespace-pre-wrap leading-relaxed">{trainer.notes}</p>
-        </section>
-      )}
+      {/* 3. Main Content: Allocations (Left) & Credentials (Right) */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        {/* Approved Teaching Allocations (col-span-8) */}
+        <div className="space-y-6 lg:col-span-8">
+          <section
+            aria-labelledby="teaching-allocations-heading"
+            className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xs"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 bg-gray-50/60 px-5 py-3.5">
+              <div className="flex items-center gap-2.5">
+                <span className="flex size-8 items-center justify-center rounded-lg bg-[#033B36]/10 text-[#033B36]">
+                  <Presentation className="size-4.5" aria-hidden="true" />
+                </span>
+                <div>
+                  <h2
+                    id="teaching-allocations-heading"
+                    className="text-sm font-bold text-gray-900"
+                  >
+                    Approved Timetable Allocations
+                  </h2>
+                  <p className="text-xs text-gray-500">
+                    {allocations.length}{' '}
+                    {allocations.length === 1 ? 'unit' : 'units'} active
+                    {allocations[0]?.academicPeriodName
+                      ? ` · ${allocations[0].academicPeriodName}`
+                      : ''}
+                  </p>
+                </div>
+              </div>
+
+              <Link
+                href="/timetable/teaching-allocations"
+                className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 text-xs font-semibold text-gray-700 shadow-2xs transition hover:bg-gray-50 hover:text-gray-900"
+              >
+                <Plus className="size-3.5 text-gray-500" />
+                Assign Unit
+              </Link>
+            </div>
+
+            {allocations.length === 0 ? (
+              <div className="px-5 py-12 text-center">
+                <Presentation
+                  className="mx-auto size-7 text-gray-300"
+                  aria-hidden="true"
+                />
+                <p className="mt-2.5 text-xs font-semibold text-gray-900">
+                  No approved units assigned
+                </p>
+                <p className="mt-1 text-xs text-gray-500 max-w-sm mx-auto">
+                  Assign teaching units from the allocations dashboard to schedule
+                  classes for this trainer.
+                </p>
+                <div className="mt-4">
+                  <Button asChild variant="outline" size="sm">
+                    <Link href="/timetable/teaching-allocations">
+                      Assign Teaching Unit
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-100">
+                {allocations.map((item) => (
+                  <article
+                    key={item.id}
+                    className="flex flex-col gap-2 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between transition hover:bg-gray-50/60"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-bold text-gray-900">
+                        <span className="font-mono text-[#033B36] mr-2">
+                          {item.unitCode}
+                        </span>
+                        <span>{item.unitName}</span>
+                        {item.deliveryMode &&
+                          item.deliveryMode.toLowerCase() !== 'theory' && (
+                            <span className="ml-2 rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-amber-700 border border-amber-200">
+                              {item.deliveryMode}
+                            </span>
+                          )}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-6 sm:shrink-0">
+                      <div className="text-left sm:w-36">
+                        <p className="text-xs font-semibold text-gray-800">
+                          {item.cohortName}
+                        </p>
+                        <p className="text-[11px] text-gray-400">
+                          {item.cohortSize} students
+                        </p>
+                      </div>
+
+                      <div className="text-right sm:w-28">
+                        <p className="text-xs font-bold text-gray-900">
+                          {item.weeklyHours} hrs / wk
+                        </p>
+                        <p className="text-[11px] text-gray-400">
+                          {item.weeklySessions} session{item.weeklySessions === 1 ? '' : 's'}
+                        </p>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+
+        {/* Credentials & Administrative Information (col-span-4) */}
+        <div className="space-y-6 lg:col-span-4">
+          <section
+            aria-labelledby="contact-credentials-heading"
+            className="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs space-y-4"
+          >
+            <h2
+              id="contact-credentials-heading"
+              className="text-xs font-bold uppercase tracking-wider text-gray-500 border-b border-gray-100 pb-2.5"
+            >
+              Contact & Credentials
+            </h2>
+
+            <div className="space-y-3.5 text-xs">
+              <div className="flex items-center justify-between py-1 border-b border-gray-50">
+                <span className="text-gray-500 flex items-center gap-1.5">
+                  <Mail className="size-3.5 text-gray-400" />
+                  Email
+                </span>
+                {trainer.email ? (
+                  <a
+                    href={`mailto:${trainer.email}`}
+                    className="font-semibold text-gray-900 hover:text-[#033B36] hover:underline truncate max-w-[180px]"
+                  >
+                    {trainer.email}
+                  </a>
+                ) : (
+                  <span className="text-red-500 font-medium italic">Not set</span>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between py-1 border-b border-gray-50">
+                <span className="text-gray-500 flex items-center gap-1.5">
+                  <Phone className="size-3.5 text-gray-400" />
+                  Phone
+                </span>
+                {trainer.phoneNumber ? (
+                  <a
+                    href={`tel:${trainer.phoneNumber}`}
+                    className="font-semibold text-gray-900 hover:text-[#033B36] hover:underline"
+                  >
+                    {trainer.phoneNumber}
+                  </a>
+                ) : (
+                  <span className="text-gray-400 italic">Not set</span>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between py-1 border-b border-gray-50">
+                <span className="text-gray-500 flex items-center gap-1.5">
+                  <Briefcase className="size-3.5 text-gray-400" />
+                  Employment
+                </span>
+                <span className="font-semibold text-gray-900">
+                  {formatEmploymentType(trainer.employmentType)}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between py-1 border-b border-gray-50">
+                <span className="text-gray-500 flex items-center gap-1.5">
+                  <GraduationCap className="size-3.5 text-gray-400" />
+                  Specialization
+                </span>
+                <span className="font-semibold text-gray-900">
+                  {trainer.specialization || 'General'}
+                </span>
+              </div>
+
+              <div className="flex items-start justify-between py-1">
+                <span className="text-gray-500 flex items-center gap-1.5 shrink-0 pt-0.5">
+                  <ShieldCheck className="size-3.5 text-gray-400" />
+                  Qualifications
+                </span>
+                <span className="font-semibold text-gray-900 text-right leading-relaxed max-w-[200px]">
+                  {trainer.qualifications || 'Recorded on file'}
+                </span>
+              </div>
+            </div>
+          </section>
+
+          {/* Administrative Notes (Only rendered if notes exist) */}
+          {trainer.notes && (
+            <section
+              aria-labelledby="admin-notes-heading"
+              className="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs"
+            >
+              <h2
+                id="admin-notes-heading"
+                className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2"
+              >
+                Administrative Notes
+              </h2>
+              <p className="text-xs text-gray-700 whitespace-pre-wrap leading-relaxed">
+                {trainer.notes}
+              </p>
+            </section>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

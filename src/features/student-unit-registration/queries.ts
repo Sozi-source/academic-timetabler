@@ -148,7 +148,7 @@ export async function getDepartmentRegistrationEditor(
       lifecycle_status,
       current_stage:programme_stages!students_current_stage_id_fkey(id, name, code, sequence_number),
       programme:programmes!students_programme_id_fkey(code),
-      current_cohort:cohorts!students_current_cohort_id_fkey(name)
+      current_cohort:cohorts!students_current_cohort_id_fkey(name, current_stage_id)
     `)
     .eq('id', studentId)
     .maybeSingle();
@@ -220,12 +220,15 @@ export async function getDepartmentRegistrationEditor(
   }
 
   const selected = new Set((registrationResult.data ?? []).map((row) => row.unit_id));
+  const cohort = Array.isArray(student.current_cohort) ? student.current_cohort[0] : student.current_cohort;
+  const effectiveStageId = student.current_stage_id || cohort?.current_stage_id || null;
+
   const stageUnitIds = new Set(
     (stageUnitResult.data ?? [])
-      .filter((row) => row.stage_id === student.current_stage_id)
+      .filter((row) => row.stage_id === effectiveStageId)
       .map((row) => row.unit_id),
   );
-  const hasConfiguredStage = Boolean(student.current_stage_id && stageUnitIds.size > 0);
+  const hasConfiguredStage = Boolean(effectiveStageId && stageUnitIds.size > 0);
 
   // Map of unit offerings in the active period for the student's programme
   const offeredCohortUnitIds = new Set<string>();
@@ -269,7 +272,6 @@ export async function getDepartmentRegistrationEditor(
   }
 
   const programme = Array.isArray(student.programme) ? student.programme[0] : student.programme;
-  const cohort = Array.isArray(student.current_cohort) ? student.current_cohort[0] : student.current_cohort;
   const currentStage = Array.isArray(student.current_stage) ? student.current_stage[0] : student.current_stage;
 
   const categoryRank: Record<string, number> = {

@@ -15,19 +15,60 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 3. **Source Data Organization (`Course_outlines.zip`)**:
    - Move Milkah Wambui's Learning Plan (scheme of work) from the "course outlines" folder to the correct "schemes of work" folder before re-ingesting.
 
-### 2026-09-12: Purged Draft & Archived Units from Trainer Details Page (`/trainers/[id]`)
+### 2026-09-13: Unit Registration Pipeline & September 2026 Intake Resolution
+- **Files Added**:
+  - `supabase/migrations/20260913030000_fix_unit_registration_pipeline_and_sept26_stages.sql`
+- **Files Modified**:
+  - `src/features/student-unit-registration/batch-queries.ts`
+  - `src/features/student-unit-registration/queries.ts`
+  - `src/features/student-unit-registration/cohort-stage-actions.ts`
+  - `src/features/student-unit-registration/cohort-stage-assignment.tsx`
+  - `src/features/student-unit-registration/batch-unit-registration.tsx`
+  - `src/app/(dashboard)/students/unit-registration/batch/page.tsx`
+- **What Changed**:
+  - **September 2026 Intake Cohort Stage Assignment & Unit Registration**:
+    - Identified that `DNDT-SEP-2026 (DNDT SEPT 26)` had `current_stage_id = null`, and its enrolled students had `current_stage_id = null`.
+    - Assigned stage `Y1S1` (`356a135b-a1ae-48ae-b630-fdbd5106af6a`) to cohort `DNDT-SEP-2026` and its students in database migration `20260913030000_fix_unit_registration_pipeline_and_sept26_stages.sql`.
+    - Automatically registered all 14 expected units (7 curriculum units per student) for `DNDT SEPT 26` under active academic period `2f94652a-1c40-4359-bd1b-21f25f92d2bf` (`September-December 2026`).
+    - Verified all September 2026 intake cohorts:
+      - `CND SEPT 26`: 23 students, 115 registered units (Y1S1).
+      - `DND SEPT 26`: 15 students, 90 registered units (Y1S1).
+      - `DNDT SEPT 26`: 2 students, 14 registered units (Y1S1).
+  - **Cohort Stage Fallback in Unit Registration Pipeline**:
+    - Updated `batch-queries.ts` to join `cohorts.current_stage_id` and compute `effectiveStageId = student.current_stage_id || studentCohort?.current_stage_id || null`. Students without an individual stage override now correctly inherit their cohort's stage rather than being rejected with `eligibilityReason: 'no_stage'`.
+    - Updated `queries.ts` (`getDepartmentRegistrationEditor`) to similarly evaluate `effectiveStageId = student.current_stage_id || cohort?.current_stage_id || null`.
+    - Updated `batch_register_expected_student_units` RPC in PostgreSQL migration to select `coalesce(s.current_stage_id, c.current_stage_id)`.
+  - **Error Handling & Cryptic Messaging Overhaul**:
+    - Overhauled `batch-unit-registration.tsx` error decoding: replaced raw message string dumps like `"Registration was not completed. students"` with clear, actionable user guidance:
+      - `students` -> "No students were selected for registration. Please select at least one student before submitting."
+      - `cohort` -> "Cohort not found or invalid. Please select a valid cohort."
+      - `period` -> "Active academic period not found. Please verify the academic calendar configuration."
+      - `failed` / generic -> "Unable to complete batch registration. Please verify student stage assignments and unit offerings."
+    - Enhanced `CohortStageAssignment` in `cohort-stage-actions.ts`: wrapped stage assignment in a robust try/catch block with explicit Server Action redirect passing `?stage_updated=1&cohortId=...`.
+    - Added emerald confirmation banner on batch registration page upon cohort stage updates (`"Cohort stage updated to [Stage]. Eligible students are ready for registration."`), automatically selecting eligible students so the HOD can proceed with one click.
+    - Added an empty-state stage setup prompt inside the batch form when a cohort has no stage assigned, preventing user confusion.
+- **Verification Evidence**:
+  - `npm test`: 116 test files passed, 569 tests passed (Exit code 0).
+  - `npm run check`: TypeScript typecheck (0 errors), ESLint (0 errors), Next.js production build succeeded (Exit code 0).
+
+### 2026-09-12: Premium Executive Redesign & Draft Purge for Trainer Details Page (`/trainers/[id]`)
 - **Files Added**:
   - `supabase/migrations/20260912204500_purge_draft_teaching_allocations.sql`
 - **Files Modified**:
   - `src/features/trainers/queries.ts`
   - `src/app/(dashboard)/trainers/[id]/page.tsx`
 - **What Changed**:
+  - **Premium Executive UI Redesign**:
+    - Completely redesigned `src/app/(dashboard)/trainers/[id]/page.tsx` with a minimal, unified layout eliminating repetitive components and scattered actions.
+    - **Unified Header Action Toolbar**: Placed a single navigation backlink and consolidated buttons (`View Staff Portal` in institutional `#033B36`, `Reset Password`, `Edit Profile`, `Availability`, and `TrainerAccessAction` when pending). Eliminated all duplicate portal buttons and redundant edit links.
+    - **Hero Identity Card**: Features an initials avatar badge, staff number, workload role, department, and a single status chip row (`Active Staff`, `Portal Linked`, `Availability Mode`). Removed duplicate green banners and repetitive status telemetry boxes.
+    - **Integrated Workload Progress Gauge**: Direct real-time progress bar showing `{totalAllocatedHours} / {targetHours} hrs/wk`, utilization percentage, and daily caps in a compact widget.
+    - **Clean Two-Column Split**:
+      - **Approved Teaching Allocations (Left, col-span-8)**: Clean table cards with unit code badges, cohort names, class sizes, session durations, and `Timetable Approved` badges with a direct `+ Assign Unit` action.
+      - **Contact & Credentials (Right, col-span-4)**: Unified card grouping Email, Phone, Employment Type, Specialization, Qualifications, and optional Administrative Notes.
   - **Trainer Allocations Query Filtering**:
     - Updated `getTrainerAllocations` in `src/features/trainers/queries.ts` to strictly filter by `.eq('is_timetable_enabled', true).eq('status', 'active')`.
     - Eliminated obsolete draft/archived teaching allocation records (e.g. 2029 test records and disabled imports) that were previously bloating trainer workload statistics and displaying with "Draft" badges on the trainer profile.
-  - **Trainer Details UI & Workload Telemetry**:
-    - Updated `src/app/(dashboard)/trainers/[id]/page.tsx` to badge active units as `Timetable Approved` (variant `success`) and updated description to `Approved timetable units and student cohorts assigned to {trainer.fullName} for active academic sessions.`
-    - Workload hours and utilization percentage now accurately reflect only approved timetable allocations (e.g. Mary Kaganjo now accurately displays 5 approved timetable units instead of 13 bloated draft entries).
   - **Database Cleanup Migration**:
     - Purged unreferenced draft and archived `teaching_allocations` across all trainers.
     - Added versioned SQL migration `20260912204500_purge_draft_teaching_allocations.sql`.

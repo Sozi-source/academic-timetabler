@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { CalendarCheck, FileDown, Pencil, Printer } from 'lucide-react';
+import { AlertCircle, CalendarCheck, FileDown, Pencil, Printer } from 'lucide-react';
 import Link from 'next/link';
 import {
   parseActivitiesList,
@@ -37,6 +37,13 @@ export function TVETDocumentViewer({
     return <div className="p-4 text-sm text-slate-600">Document details unavailable.</div>;
   }
 
+  const isDocumentReady =
+    type === 'record_of_work'
+      ? true
+      : type === 'course_outline'
+      ? courseOutline?.isAvailable !== false && (courseOutline?.weeklySchedule?.length ?? 0) > 0
+      : schemeOfWork?.isAvailable !== false && (schemeOfWork?.plannedWeeks?.length ?? 0) > 0;
+
   const title =
     type === 'course_outline'
       ? 'COURSE OUTLINE'
@@ -45,6 +52,11 @@ export function TVETDocumentViewer({
         : 'RECORD OF WORK COVERED';
 
   const handleExportWord = async () => {
+    if (!isDocumentReady) {
+      alert('Word export is disabled: curriculum content for this unit is not yet ready.');
+      return;
+    }
+
     try {
       const res = await fetch(
         `/api/teaching-documents/export-word?allocationId=${allocationId}&type=${type}`,
@@ -74,6 +86,12 @@ export function TVETDocumentViewer({
           <span className="min-w-0 truncate text-xs font-bold text-slate-900">
             {header.unitCode} · {header.unitName}
           </span>
+          {!isDocumentReady && (
+            <span className="shrink-0 inline-flex items-center gap-1 rounded-md bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-900 border border-amber-300">
+              <AlertCircle className="size-3 text-amber-600" />
+              Content Pending
+            </span>
+          )}
         </div>
 
         <div className="grid grid-cols-2 sm:flex sm:items-center gap-2">
@@ -87,7 +105,7 @@ export function TVETDocumentViewer({
             <span className="hidden sm:inline">Assessment Schedule</span>
           </Link>
 
-          {type !== 'record_of_work' && (
+          {type !== 'record_of_work' && isDocumentReady && (
             <Link
               href={`/teaching-documents/curriculum/editor?unitCode=${encodeURIComponent(header.unitCode)}`}
               className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
@@ -111,7 +129,13 @@ export function TVETDocumentViewer({
           <button
             type="button"
             onClick={handleExportWord}
-            className="inline-flex h-9 items-center gap-2 rounded-lg bg-slate-900 px-4 text-xs font-bold text-white shadow-sm transition hover:bg-slate-800"
+            disabled={!isDocumentReady}
+            className={`inline-flex h-9 items-center gap-2 rounded-lg px-4 text-xs font-bold shadow-sm transition ${
+              isDocumentReady
+                ? 'bg-slate-900 text-white hover:bg-slate-800'
+                : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
+            }`}
+            title={isDocumentReady ? 'Export Word (.docx)' : 'Curriculum content is not yet ready'}
           >
             <FileDown className="size-4" aria-hidden="true" />
             <span className="sm:hidden">Word</span>
@@ -184,14 +208,37 @@ export function TVETDocumentViewer({
 
           {/* ════════════════════════════════ COURSE OUTLINE ════════════════════════════════ */}
           {type === 'course_outline' && courseOutline && (
-            <div className="space-y-6 text-xs text-slate-900">
-
-              <section>
-                <SectionHeading number="1" title="Unit Description & Overall Purpose" />
-                <p className="mt-2.5 leading-relaxed text-justify text-slate-800">
-                  {courseOutline.unitDescription || '—'}
-                </p>
-              </section>
+            !isDocumentReady ? (
+              <div className="space-y-6">
+                <div className="rounded-xl border border-amber-300 bg-amber-50 p-6 text-amber-950 shadow-xs">
+                  <div className="flex items-start gap-3.5">
+                    <AlertCircle className="size-6 text-amber-600 shrink-0 mt-0.5" />
+                    <div className="space-y-2">
+                      <h3 className="font-bold text-sm text-amber-950 uppercase tracking-wide">
+                        Curriculum Content Not Yet Ready
+                      </h3>
+                      <p className="text-xs leading-relaxed text-amber-900">
+                        {courseOutline.notReadyMessage ||
+                          `The official curriculum course outline for ${header.unitCode} (${header.unitName}) has not yet been ingested. Broken or unverified content has been purged in accordance with institutional policy.`}
+                      </p>
+                      <div className="pt-2 text-[11px] text-amber-800 border-t border-amber-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <span>
+                          <strong>Status:</strong> Awaiting official TVET syllabus document upload (DOCX/PDF).
+                        </span>
+                        <span>Please provide the authentic syllabus to the Head of Department (HOD) for automated ingestion.</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-6 text-xs text-slate-900">
+                <section>
+                  <SectionHeading number="1" title="Unit Description & Overall Purpose" />
+                  <p className="mt-2.5 leading-relaxed text-justify text-slate-800">
+                    {courseOutline.unitDescription || '—'}
+                  </p>
+                </section>
 
               <section>
                 <SectionHeading number="2" title="Summary of Learning Outcomes (Core Competencies)" />
@@ -319,10 +366,34 @@ export function TVETDocumentViewer({
                 </div>
               </section>
             </div>
-          )}
+          ))}
 
           {/* ════════════════════════════════ SCHEME OF WORK ════════════════════════════════ */}
           {type === 'scheme_of_work' && schemeOfWork && (
+            !isDocumentReady ? (
+              <div className="space-y-6">
+                <div className="rounded-xl border border-amber-300 bg-amber-50 p-6 text-amber-950 shadow-xs">
+                  <div className="flex items-start gap-3.5">
+                    <AlertCircle className="size-6 text-amber-600 shrink-0 mt-0.5" />
+                    <div className="space-y-2">
+                      <h3 className="font-bold text-sm text-amber-950 uppercase tracking-wide">
+                        Scheme of Work Not Yet Ready
+                      </h3>
+                      <p className="text-xs leading-relaxed text-amber-900">
+                        {schemeOfWork.notReadyMessage ||
+                          `The official 14-week scheme of work for ${header.unitCode} (${header.unitName}) has not yet been ingested. Broken or unverified content has been purged in accordance with institutional policy.`}
+                      </p>
+                      <div className="pt-2 text-[11px] text-amber-800 border-t border-amber-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <span>
+                          <strong>Status:</strong> Awaiting official TVET syllabus document upload (DOCX/PDF).
+                        </span>
+                        <span>Weekly delivery schedule, specific learning outcomes, and assessment milestones will appear once the curriculum document is uploaded.</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
             <div className="space-y-4">
               <div className="overflow-x-auto overscroll-x-contain rounded border border-slate-300 print:overflow-visible">
               <table className="w-full min-w-[62rem] border-collapse text-[10px] table-fixed print:min-w-0">
@@ -441,7 +512,7 @@ export function TVETDocumentViewer({
               </table>
               </div>
             </div>
-          )}
+          ))}
 
           {/* ════════════════════════════════ RECORD OF WORK ════════════════════════════════ */}
           {type === 'record_of_work' && recordOfWork && (

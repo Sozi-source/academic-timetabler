@@ -26,6 +26,10 @@ export interface UnitCurriculumDefinition {
   instructionalEquipment?: string[];
   teachingLearningApproaches?: string;
   assessmentApproaches?: string;
+  /** Indicates whether verified syllabus content has been ingested and is available. */
+  isAvailable?: boolean;
+  /** Explicit human-readable explanation when content is not yet ready. */
+  notReadyMessage?: string;
 }
 
 export interface CanonicalCurriculumUnit extends UnitCurriculumDefinition {

@@ -9,6 +9,7 @@
 import {
   findCanonicalCurriculum,
   getAllCurriculumUnits,
+  isCompatibleUnitTitle,
   MASTER_CURRICULUM_REGISTRY,
   type CanonicalCurriculumUnit,
   type SeedWeeklyTopic,
@@ -16,7 +17,7 @@ import {
 } from './curriculum-data';
 
 export type { SeedWeeklyTopic, UnitCurriculumDefinition, CanonicalCurriculumUnit };
-export { MASTER_CURRICULUM_REGISTRY, findCanonicalCurriculum, getAllCurriculumUnits };
+export { MASTER_CURRICULUM_REGISTRY, findCanonicalCurriculum, getAllCurriculumUnits, isCompatibleUnitTitle };
 
 
 /**
@@ -93,30 +94,32 @@ export function getUnitCurriculum(
     };
   }
 
-  // 3. Dynamic registry name search
-  for (const def of Object.values(TVET_CURRICULUM_REGISTRY)) {
-    if (
-      def.unitName.toLowerCase().includes(unitName.toLowerCase()) ||
-      unitName.toLowerCase().includes(def.unitName.toLowerCase())
-    ) {
-      return {
-        ...def,
-        unitCode,
-        unitName,
-      };
+  // 3. Dynamic registry exact name search (strictly exact normalized match)
+  const normTargetName = normalizeUnitCodeKey(unitName);
+  if (normTargetName) {
+    for (const def of Object.values(TVET_CURRICULUM_REGISTRY)) {
+      if (normalizeUnitCodeKey(def.unitName) === normTargetName) {
+        return {
+          ...def,
+          unitCode,
+          unitName,
+        };
+      }
     }
   }
 
-  // 4. Fallback: Return empty/unpopulated unit structure (never fabricate topics)
+  // 4. Fallback: Return empty/unpopulated unit structure with clear not-ready flag (never fabricate topics)
   return {
     unitCode,
     unitName,
-    unitDescription: '',
-    overallCompetency: '',
+    unitDescription: 'Curriculum content for this unit is currently pending official TVET syllabus document ingestion.',
+    overallCompetency: 'Pending official syllabus upload.',
     learningOutcomes: [],
     weeklySchedule: [],
     references: [],
     instructionalEquipment: [],
+    isAvailable: false,
+    notReadyMessage: `Curriculum content for ${unitCode} (${unitName}) is not yet available. The official course outline and scheme of work will be published once the syllabus document is uploaded by the department.`,
   };
 }
 

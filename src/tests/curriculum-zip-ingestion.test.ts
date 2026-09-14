@@ -87,17 +87,43 @@ describe('TVET Curriculum ZIP Ingestion & Scheme Auto-Generation', () => {
 
   describe('Scheme-to-Record Auto Generation', () => {
     it('pre-populates 14-week Record of Work delivery roadmap from Scheme of Work', () => {
-      const scheme = generateTVETSchemeOfWork({
-        institutionName: 'Academic Planner TVET College',
-        departmentName: 'Health Sciences',
-        academicPeriodName: 'Jan - Apr 2026',
-        unitCode: 'CLIN 101',
-        unitName: 'Clinical Medicine Foundations',
-        cohortName: 'DND Jan 2026',
-        trainerName: 'Dr. Mwangi',
-        totalNominalHours: 56,
-        weeklyHours: 4,
-      });
+      const rawCurriculum = `
+        REPUBLIC OF KENYA - TVET CURRICULUM
+        Unit Code: CLIN 101
+        Unit Title: Clinical Medicine Foundations
+        
+        Weekly Schedule:
+        Week 1: Body Systems & Medical Terminology
+        Week 2: Cellular Pathology & Disease Processes
+        Week 3: Diagnostic Instruments & Vitals
+        Week 4: Fluid & Electrolyte Balance
+        Week 5: Pharmacology Principles
+        Week 6: Infection Control & Aseptic Techniques
+        Week 7: Patient Assessment & Physical Examination
+        Week 8: Continuous Assessment Test (Official CAT)
+        Week 9: Clinical Lab Diagnostics
+        Week 10: Medical Documentation & Protocols
+        Week 11: Emergency Care & Triage
+        Week 12: Therapeutic Interventions
+        Week 13: Clinical Skills Revision
+        Week 14: Final Summative Examination
+      `;
+      const curriculum = parseCurriculumText(rawCurriculum, 'CLIN_101.txt');
+
+      const scheme = generateTVETSchemeOfWork(
+        {
+          institutionName: 'Academic Planner TVET College',
+          departmentName: 'Health Sciences',
+          academicPeriodName: 'Jan - Apr 2026',
+          unitCode: 'CLIN 101',
+          unitName: 'Clinical Medicine Foundations',
+          cohortName: 'DND Jan 2026',
+          trainerName: 'Dr. Mwangi',
+          totalNominalHours: 56,
+          weeklyHours: 4,
+        },
+        curriculum,
+      );
 
       expect(scheme.plannedWeeks).toHaveLength(14);
 

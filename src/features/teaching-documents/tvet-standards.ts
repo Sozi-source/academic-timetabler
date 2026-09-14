@@ -47,6 +47,8 @@ export interface TVETCourseOutlineData {
   };
   references: string[];
   instructionalEquipment: string[];
+  isAvailable?: boolean;
+  notReadyMessage?: string;
 }
 
 export interface TVETSchemeOfWorkWeek {
@@ -62,6 +64,8 @@ export interface TVETSchemeOfWorkWeek {
 export interface TVETSchemeOfWorkData {
   header: TVETDocumentHeaderContext;
   plannedWeeks: TVETSchemeOfWorkWeek[];
+  isAvailable?: boolean;
+  notReadyMessage?: string;
 }
 
 export interface TVETRecordOfWorkEntry {
@@ -101,10 +105,23 @@ export function generateTVETCourseOutline(
   const effectiveMilestones = milestones ?? DEFAULT_ASSESSMENT_MILESTONES;
   const source: UnitCurriculumDefinition =
     curriculum ?? getUnitCurriculum(context.unitCode, context.unitName);
-  const distributed = distributeTopicsAcrossWeeks(source.weeklySchedule ?? [], 14, effectiveMilestones);
+  
+  const isAvailable =
+    source.isAvailable !== false &&
+    Boolean(source.weeklySchedule && source.weeklySchedule.length > 0);
+  const notReadyMessage = !isAvailable
+    ? source.notReadyMessage ||
+      `Curriculum content for ${context.unitCode} (${context.unitName}) is currently not ready. The official course outline and scheme of work have not yet been published by the department.`
+    : undefined;
+
+  const distributed = isAvailable
+    ? distributeTopicsAcrossWeeks(source.weeklySchedule ?? [], 14, effectiveMilestones)
+    : [];
 
   return {
     header: context,
+    isAvailable,
+    notReadyMessage,
     unitDescription: source.unitDescription ?? '',
     overallCompetency: source.overallCompetency ?? '',
     learningOutcomes: source.learningOutcomes ?? [],
@@ -155,10 +172,23 @@ export function generateTVETSchemeOfWork(
 ): TVETSchemeOfWorkData {
   const source: UnitCurriculumDefinition =
     curriculum ?? getUnitCurriculum(context.unitCode, context.unitName);
-  const distributed = distributeTopicsAcrossWeeks(source.weeklySchedule ?? [], 14, milestones);
+
+  const isAvailable =
+    source.isAvailable !== false &&
+    Boolean(source.weeklySchedule && source.weeklySchedule.length > 0);
+  const notReadyMessage = !isAvailable
+    ? source.notReadyMessage ||
+      `Curriculum content for ${context.unitCode} (${context.unitName}) is currently not ready. The official course outline and scheme of work have not yet been published by the department.`
+    : undefined;
+
+  const distributed = isAvailable
+    ? distributeTopicsAcrossWeeks(source.weeklySchedule ?? [], 14, milestones)
+    : [];
 
   return {
     header: context,
+    isAvailable,
+    notReadyMessage,
     plannedWeeks: distributed.map((d) => ({
       weekNumber: d.weekNumber,
       topic: d.topicTitle,

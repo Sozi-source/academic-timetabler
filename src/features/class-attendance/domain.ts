@@ -2,6 +2,16 @@ import type {
   ClassAttendanceStatus,
 } from './types';
 
+export const ABSENT_CIRCUMSTANCES = [
+  'Leave of absence',
+  'Pending unit registration',
+  'Medical / Sickness',
+  'Official college duty',
+  'Fee clearance / Admin',
+] as const;
+
+export type AbsentCircumstance = (typeof ABSENT_CIRCUMSTANCES)[number];
+
 export const classAttendanceOptions:
   ReadonlyArray<{
     value:

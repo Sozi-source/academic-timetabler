@@ -1,0 +1,179 @@
+import json
+
+module2_units = [
+    {
+        "canonicalKey": "intro_microbiology",
+        "syllabusCode": "22.2.0",
+        "unitCode": "22.2.0",
+        "unitName": "Introduction to Microbiology",
+        "moduleNumber": 2,
+        "nominalHours": 66,
+        "theoryHours": 39,
+        "practicalHours": 26,
+        "aliases": ["22.2.0", "Introduction to Microbiology", "CND 2101", "DND 2303", "CHN 2101", "DHN 2201", "DNDT 1103"],
+    },
+    {
+        "canonicalKey": "diet_therapy_ii",
+        "syllabusCode": "23.2.0",
+        "unitCode": "23.2.0",
+        "unitName": "Diet Therapy II",
+        "moduleNumber": 2,
+        "nominalHours": 66,
+        "theoryHours": 39,
+        "practicalHours": 26,
+        "aliases": ["23.2.0", "Diet Therapy II", "CND 2201", "DND 2105", "DHN 2205", "DNDT 1104"],
+    },
+    {
+        "canonicalKey": "food_processing_preservation",
+        "syllabusCode": "24.2.0",
+        "unitCode": "24.2.0",
+        "unitName": "Principles of Food Processing and Preservation",
+        "moduleNumber": 2,
+        "nominalHours": 66,
+        "theoryHours": 39,
+        "practicalHours": 26,
+        "aliases": ["24.2.0", "Principles of Food Processing and Preservation", "CND 2106", "CND 2202", "DND 2106", "DHN 2204", "DNDT 1106"],
+    },
+    {
+        "canonicalKey": "intro_biostatistics",
+        "syllabusCode": "25.2.0",
+        "unitCode": "25.2.0",
+        "unitName": "Introduction to Biostatistics",
+        "moduleNumber": 2,
+        "nominalHours": 66,
+        "theoryHours": 39,
+        "practicalHours": 26,
+        "aliases": ["25.2.0", "Introduction to Biostatistics", "CND 2104", "DND 2304", "DHN 2202", "DNDT 1102"],
+    },
+    {
+        "canonicalKey": "basic_biochemistry",
+        "syllabusCode": "26.2.0",
+        "unitCode": "26.2.0",
+        "unitName": "Basic Biochemistry",
+        "moduleNumber": 2,
+        "nominalHours": 66,
+        "theoryHours": 39,
+        "practicalHours": 26,
+        "aliases": ["26.2.0", "Basic Biochemistry", "CND 2105", "DND 2305", "DND 3106", "DHN 2203", "DHN 2304", "DNDT 1105"],
+    },
+    {
+        "canonicalKey": "nutrition_in_lifespan",
+        "syllabusCode": "27.2.0",
+        "unitCode": "27.2.0",
+        "unitName": "Nutrition in the Lifespan",
+        "moduleNumber": 2,
+        "nominalHours": 66,
+        "theoryHours": 39,
+        "practicalHours": 26,
+        "aliases": ["27.2.0", "Nutrition in the Lifespan", "DND 2104", "DHN 2302"],
+    },
+    {
+        "canonicalKey": "nutrition_and_behaviour",
+        "syllabusCode": "28.2.0",
+        "unitCode": "28.2.0",
+        "unitName": "Principles of Nutrition and Behaviour",
+        "moduleNumber": 2,
+        "nominalHours": 66,
+        "theoryHours": 39,
+        "practicalHours": 26,
+        "aliases": ["28.2.0", "Principles of Nutrition and Behaviour", "DND 2307", "CHN 2201", "DHN 2305", "DNDT 1202"],
+    },
+    {
+        "canonicalKey": "primary_health_care",
+        "syllabusCode": "29.2.0",
+        "unitCode": "29.2.0",
+        "unitName": "Introduction to Primary Health Care",
+        "moduleNumber": 2,
+        "nominalHours": 44,
+        "theoryHours": 26,
+        "practicalHours": 17,
+        "aliases": ["29.2.0", "Introduction to Primary Health Care", "DND 1307", "DHN 2207"],
+    },
+    {
+        "canonicalKey": "first_aid",
+        "syllabusCode": "30.2.0",
+        "unitCode": "30.2.0",
+        "unitName": "First Aid",
+        "moduleNumber": 2,
+        "nominalHours": 55,
+        "theoryHours": 33,
+        "practicalHours": 22,
+        "aliases": ["30.2.0", "First Aid", "DCU 1104", "DND 2107", "DNDT 1101"],
+    },
+    {
+        "canonicalKey": "business_plan",
+        "syllabusCode": "31.2.0",
+        "unitCode": "31.2.0",
+        "unitName": "Business Plan",
+        "moduleNumber": 2,
+        "nominalHours": 44,
+        "theoryHours": 26,
+        "practicalHours": 17,
+        "aliases": ["31.2.0", "Business Plan"],
+    },
+    {
+        "canonicalKey": "research_methods",
+        "syllabusCode": "32.2.0",
+        "unitCode": "32.2.0",
+        "unitName": "Research Methods",
+        "moduleNumber": 2,
+        "nominalHours": 44,
+        "theoryHours": 26,
+        "practicalHours": 17,
+        "aliases": ["32.2.0", "Research Methods", "DND 2306", "DHN 2307", "DNDT 1107"],
+    },
+    {
+        "canonicalKey": "industrial_attachment_ii",
+        "syllabusCode": "33.2.0",
+        "unitCode": "33.2.0",
+        "unitName": "Industrial Attachment II",
+        "moduleNumber": 2,
+        "nominalHours": 330,
+        "theoryHours": 198,
+        "practicalHours": 132,
+        "aliases": ["33.2.0", "Industrial Attachment II", "DND 3301"],
+    }
+]
+
+lines = [
+    "// Authoritative TVET Curriculum Registry — Module 2",
+    "// Status: Pending Official TVET Syllabus Ingestion",
+    "// All broken OCR content and synthetic placeholders purged in accordance with institutional policy.",
+    "import type { CanonicalCurriculumUnit } from './types';",
+    "",
+    "export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {"
+]
+
+for u in module2_units:
+    k = u["canonicalKey"]
+    name = u["unitName"]
+    code = u["syllabusCode"]
+    lines.append(f'  "{k}": {{')
+    lines.append(f'    canonicalKey: "{k}",')
+    lines.append(f'    syllabusCode: "{code}",')
+    lines.append(f'    unitCode: "{code}",')
+    lines.append(f'    unitName: "{name}",')
+    lines.append(f'    moduleNumber: 2,')
+    lines.append(f'    nominalHours: {u["nominalHours"]},')
+    lines.append(f'    theoryHours: {u["theoryHours"]},')
+    lines.append(f'    practicalHours: {u["practicalHours"]},')
+    aliases_json = json.dumps(u["aliases"], ensure_ascii=False)
+    lines.append(f'    aliases: {aliases_json},')
+    lines.append(f'    isAvailable: false,')
+    lines.append(f'    notReadyMessage: "Curriculum content for {name} ({code}) is not yet available. The verified course outline and scheme of work will be published once the syllabus document is uploaded by the department.",')
+    lines.append(f'    unitDescription: "Curriculum syllabus content for this unit is currently pending official TVET document ingestion.",')
+    lines.append(f'    overallCompetency: "Pending official syllabus upload.",')
+    lines.append(f'    learningOutcomes: [],')
+    lines.append(f'    weeklySchedule: [],')
+    lines.append(f'    references: [],')
+    lines.append(f'    instructionalEquipment: []')
+    lines.append('  },')
+
+lines.append("};")
+lines.append("")
+
+output = "\n".join(lines)
+with open('src/features/teaching-documents/curriculum-data/module-2.ts', 'w', encoding='utf-8') as f:
+    f.write(output)
+
+print(f"Successfully generated clean module-2.ts with {len(module2_units)} purged and pending units.")

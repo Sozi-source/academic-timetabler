@@ -8,9 +8,15 @@ import {
   formatDailyReportDate,
   formatDailyReportTime,
   normalizeDailyReportDate,
+  shiftDailyReportDate,
 } from '@/features/trainer-daily-report/domain';
 
 describe('trainer daily report domain', () => {
+  it('correctly shifts report dates backward and forward', () => {
+    expect(shiftDailyReportDate('2026-08-24', -1)).toBe('2026-08-23');
+    expect(shiftDailyReportDate('2026-08-24', 1)).toBe('2026-08-25');
+    expect(shiftDailyReportDate('2026-09-01', -1)).toBe('2026-08-31');
+  });
   it('keeps a valid ISO report date', () => {
     expect(
       normalizeDailyReportDate(

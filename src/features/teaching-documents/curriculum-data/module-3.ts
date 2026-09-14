@@ -1,2555 +1,1966 @@
-// Automatically generated authoritative TVET Curriculum Registry
-// Source: KNEC Diploma in Nutrition and Dietetics Syllabus (Module 3)
+// Authoritative TVET Curriculum Registry — Module 3
+// Source: Official KNEC Diploma in Nutrition and Dietetics Curriculum Specification
+// Single Source of Truth — 100% Verbatim Extraction
 import type { CanonicalCurriculumUnit } from './types';
 
 export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
   "food_microbiology_parasitology": {
-    "canonicalKey": "food_microbiology_parasitology",
-    "syllabusCode": "34.3.0",
-    "unitCode": "34.3.0",
-    "unitName": "Food Microbiology and Parasitology",
-    "moduleNumber": 3,
-    "nominalHours": 66,
-    "theoryHours": 39,
-    "practicalHours": 26,
-    "aliases": [
-      "34.3.0",
-      "Food Microbiology and Parasitology"
-],
-    "unitDescription": "unit is intended to equip the knowledge and skills to carry out and controlling microorganism with",
-    "overallCompetency": "Understand the role and significance of parasites in food.",
-    "learningOutcomes": [
-      "Understand the role and significance of parasites in food.",
-      "Carry out sampling of materials.",
-      "Describe the intrinsic parameters of that aff<.",
-      "Culture, isolate and classify micrcorganisms and.",
-      "Comprehend the control of microorgznisms in frxh3.",
-      "Understand the action of microorganism on diffazt food."
-],
-    "weeklySchedule": [
+    canonicalKey: "food_microbiology_parasitology",
+    syllabusCode: "34.3.0",
+    unitCode: "34.3.0",
+    unitName: "Food Microbiology and Parasitology",
+    moduleNumber: 3,
+    nominalHours: 66,
+    theoryHours: 39,
+    practicalHours: 27,
+    aliases: ["34.3.0", "Food Microbiology and Parasitology"],
+    unitDescription: "This module unit is intended to equip the trainee with knowledge and skills to carry out and controlling microorganisms associated with foods.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: understand the role and significance of microorganisms and parasites in food; understand the intrinsic parameters of foods that affect microbial growth; culture, isolate and classify microorganisms and parasites.",
+    learningOutcomes: [
+      "understand the role and significance of microorganisms and parasites in food",
+      "understand the intrinsic parameters of foods that affect microbial growth",
+      "culture, isolate and classify microorganisms and parasites",
+      "comprehend the control of microorganisms in food",
+      "understand the action of microorganisms on different components of food materials",
+      "comprehend zoonotic diseases and control measures"
+    ],
+    weeklySchedule: [
       {
-            "weekNumber": 1,
-            "topicTitle": "Food Microbiology and Parasitology Core Topic 1",
-            "subTopics": [
-                  "Microbiology and parasitology",
-                  "Background of microbiology and parasitology",
-                  "Im1Y)rtance of studying microbiology and parasitology"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain meaning of microbiology and parasitology.\n\u2022 Outline the background of microbiology and parasitology.\n\u2022 Explain im1Y)rtance of studying microbiology and parasitology.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 1,
+        topicTitle: "34.3.01 Introduction to Food Microbiology and Parasitology & 34.3.02 Role and Significance of Microorganisms",
+        subTopics: ["Meaning of terms", "Background of food microbiology and parasitology", "Importance of food microbiology and parasitology", "Significance of microorganisms", "Role of microorganisms in the environment and human activities", "Primary sources of microorganisms found in food: soil and water; plants and plant products; intestinal tract of animals; food utensils; animal feeds and hides; air and dust", "Introduction to sampling methods", "Surface sampling techniques"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 34.3.01 Introduction to Food Microbiology and Parasitology & 34.3.02 Role and Significance of Microorganisms.\n• Explain background of food microbiology and parasitology.\n• Explain the functions and physiological role of food microbiology and parasitology.\n• Explain the functions and physiological role of microorganisms.\n• Explain the functions and physiological role of microorganisms in the environment and human activities.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 2,
-            "topicTitle": "Food Microbiology and Parasitology Core Topic 2",
-            "subTopics": [
-                  "Necessity of sampling",
-                  "Carry out sampling of liquid and solid focd materials"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the necessity of sampling.\n\u2022 Carry out sampling of liquid and solid focd materials.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 2,
+        topicTitle: "34.3.03 Spoilage Microorganisms in Food",
+        subTopics: ["Meaning of terms", "Spoilage microorganisms in various foods: meat and meat products; poultry and sea foods; fruits and vegetables; dairy and cereal products", "Storage of various food products", "Microbial action on various foods", "Specifics of microbial spoilage"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 34.3.03 Spoilage Microorganisms in Food.\n• Interpret and apply spoilage microorganisms in various foods: meat and meat products; poultry and sea foods; fruits and vegetables; dairy and cereal products.\n• Explain storage of various food products.\n• Explain microbial action on various foods.\n• Explain specifics of microbial spoilage.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 3,
-            "topicTitle": "Food Microbiology and Parasitology Core Topic 3",
-            "subTopics": [
-                  "Carry out sampling of liquids and solid food materials",
-                  "Use surface sampling techniques"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Carry out sampling of liquids and solid food materials.\n\u2022 Use surface sampling techniques.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 3,
+        topicTitle: "34.3.04 Food Borne Illnesses",
+        subTopics: ["Meaning of terms", "Specific food infections, symptoms, prevention and control of common food borne illnesses", "Typhoid", "Paratyphoid", "Salmonellosis", "Shigellosis", "Vibriosis", "Yersinia", "Cholera", "Listeriosis", "Campylobacteriosis"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 34.3.04 Food Borne Illnesses.\n• Explain specific food infections, symptoms, prevention and control of common food borne illnesses.\n• Explain typhoid.\n• Explain paratyphoid.\n• Explain salmonellosis.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 4,
-            "topicTitle": "Illnesses .05to",
-            "subTopics": [
-                  "Of terms used in food infections",
-                  "Common food infections, the microorganisms responsible, symptoms and their prevention  343.05T"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the of terms used in food infections.\n\u2022 Describe common food infections, the microorganisms responsible, symptoms and their prevention  343.05T.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 4,
+        topicTitle: "34.3.06 Food Poisoning by Bacteria",
+        subTopics: ["Factors that influence the number and type of microorganism in food", "Specific food intoxications", "Botulism", "Bacillus cereus", "Clostridium perfringens", "Staphylococcus food poisoning"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain factors that influence the number and type of microorganism in food.\n• Explain specific food intoxications.\n• Explain botulism.\n• Explain bacillus cereus.\n• Explain clostridium perfringens.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 5,
-            "topicTitle": "Food Microbiology and Parasitology Core Topic 5",
-            "subTopics": [
-                  "Core concepts and practical competencies"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Distinguish different.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 5,
+        topicTitle: "34.3.07 Food Poisoning by Fungi (Moulds)",
+        subTopics: ["Meaning of terms", "Specific aflatoxicosis", "Food borne intoxication by moulds", "Preventive measures against food borne intoxication by moulds"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 34.3.07 Food Poisoning by Fungi (Moulds).\n• Explain specific aflatoxicosis.\n• Explain food borne intoxication by moulds.\n• Explain prevention, control and management measures for against food borne intoxication by moulds.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 6,
-            "topicTitle": "Food Poisoning By Bacteria",
-            "subTopics": [
-                  "Of terms",
-                  "Intrinsic and extrinsic factors",
-                  "Incidences and type of microorganism in foods",
-                  "Factors that influence the and type of microorganism in food product",
-                  "Speci fic food intoxications, microorganisms concerned and preventive measures"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the of terms.\n\u2022 Describe intrinsic and extrinsic factors.\n\u2022 Explain incidences and type of microorganism in foods.\n\u2022 Describe the factors that influence the and type of microorganism in food product.\n\u2022 Describe speci fic food intoxications, microorganisms concerned and preventive measures.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 6,
+        topicTitle: "34.3.08 Zoonotic Diseases",
+        subTopics: ["Anthrax", "Brucellosis"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain anthrax.\n• Explain brucellosis.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 7,
-            "topicTitle": "Food Microbiology and Parasitology Core Topic 7",
-            "subTopics": [
-                  "Afla10Kicosis C) describe intoxication by moulds",
-                  "Preventatl\u00fc measures against food intoxication by"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain of.\n\u2022 Explain afla10Kicosis C) describe intoxication by moulds.\n\u2022 Describe preventatl\u00fc measures against food intoxication by.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 7,
+        topicTitle: "34.3.09 Intestinal Parasites",
+        subTopics: ["Protozoa", "Helminths – tapeworms, pinworms, and roundworms"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain protozoa.\n• Explain helminths – tapeworms, pinworms, and roundworms.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 8,
-            "topicTitle": "Food Microbiology and Parasitology Core Topic 8",
-            "subTopics": [
-                  "Understand the meaning of zonootic diseases",
-                  "Common   znomotic diseases and how they can prevented"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Understand the meaning of zonootic diseases.\n\u2022 Describe common   znomotic diseases and how they can prevented.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Food Microbiology and Parasitology)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Food Microbiology and Parasitology.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
       },
       {
-            "weekNumber": 9,
-            "topicTitle": "Intestinal Parasites",
-            "subTopics": [
-                  "Core concepts and practical competencies"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Intestinal parasites in humans.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 9,
+        topicTitle: "34.3.10 Determination of Microorganisms in Food",
+        subTopics: ["Examination of bacteria", "Methods of sampling bacteria", "Methods of isolation"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain examination of bacteria.\n• Describe methods and procedures for sampling bacteria.\n• Describe methods and procedures for isolation.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 10,
-            "topicTitle": "Food Microbiology and Parasitology Core Topic 10",
-            "subTopics": [
-                  "For total coliforms",
-                  "For faecal coliforrns"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Assess for total coliforms.\n\u2022 Examine for faecal coliforrns.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 10,
+        topicTitle: "34.3.11 Concept of Indicator Organism",
+        subTopics: ["Identification and enumeration of indicator microorganism", "Indicator of quality", "Indicator of safety", "Coliforms", "Faecal coliforms"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain identification and enumeration of indicator microorganism.\n• Explain indicator of quality.\n• Explain indicator of safety.\n• Explain coliforms.\n• Explain faecal coliforms.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 11,
-            "topicTitle": "Microorganisms in Food",
-            "subTopics": [
-                  "Core concepts and practical competencies"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Describe heat treatment for control of microorganisms in food explain low temperature treatment describe water activity reduction.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 11,
+        topicTitle: "34.3.12 Control of Microorganism in Food",
+        subTopics: ["Heat treatment", "Low temperature treatment", "Effects of reduction of water activity", "Chemical agents and food preservatives", "Use of irradiation"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain heat treatment.\n• Explain low temperature treatment.\n• Explain effects of reduction of water activity.\n• Explain chemical agents and food preservatives.\n• Explain use of irradiation.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 12,
-            "topicTitle": "Emerging Xnd Trends",
-            "subTopics": [
-                  "Carry out pasteurization of foods",
-                  "Sterilization of foods",
-                  "Use low temiMature to control",
-                  "Promote use of chemical agents in food preservatives to control microorganisms 111 food"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Carry out pasteurization of foods.\n\u2022 Apply sterilization of foods.\n\u2022 Use low temiMature to control.\n\u2022 Promote use of chemical agents in food preservatives to control microorganisms 111 food.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
-      }
-],
-    "references": [
-      "Prescott, L. M., Harley, J. P., & Klein, D. A. (2020). Prescott's Microbiology (11th ed.). McGraw-Hill Education.",
-      "Nelson, D. L., & Cox, M. M. (2017). Lehninger Principles of Biochemistry (7th ed.). W. H. Freeman.",
-      "Frazier, W. C., & Westhoff, D. C. (2014). Food Microbiology (5th ed.). McGraw-Hill.",
-      "Mahan, L. K., & Raymond, J. L. (2017). Krause's Food & the Nutrition Care Process (14th ed.). Elsevier.",
-      "Whitney, E., & Rolfes, S. R. (2018). Understanding Nutrition (15th ed.). Cengage Learning."
-],
-    "instructionalEquipment": [
-      "Compound binocular microscopes with oil immersion objectives",
-      "Prepared histological and microbiological slides",
-      "Standard laboratory glassware (beakers, pipettes, petri dishes)",
-      "Autoclave sterilization unit and bacteriological incubators",
-      "Chemical reagents, Gram staining kits, and culture media",
-      "Interactive display screen and multimedia data projector",
-      "Computer workstations with TVET management software"
-],
+        weekNumber: 12,
+        topicTitle: "34.3.13 Emerging Issues and Trends",
+        subTopics: ["Emerging issues and trends", "Challenges posed by the emerging trends", "Ways of coping with challenges posed by the emerging trends"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 34.3.13 Emerging Issues and Trends.\n• Explain ways of coping with challenges posed by the emerging trends.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "34.3.13 Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Emerging issues and trends", "Challenges posed by the emerging trends", "Ways of coping with challenges posed by the emerging trends"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 34.3.13 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in 34.3.13 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain ways of coping with challenges posed by the emerging trends.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Food Microbiology and Parasitology)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Food Microbiology and Parasitology in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
+    ],
+    references: ["Jay, J. M., Loessner, M. J., & Golden, D. A. (2018). Modern Food Microbiology (7th ed.). Springer.", "Adams, M. R., & Moss, M. O. (2019). Food Microbiology (4th ed.). Royal Society of Chemistry."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "communicable_non_communicable": {
-    "canonicalKey": "communicable_non_communicable",
-    "syllabusCode": "35.3.0",
-    "unitCode": "35.3.0",
-    "unitName": "Communicable and Non-Communicable Diseases",
-    "moduleNumber": 3,
-    "nominalHours": 55,
-    "theoryHours": 33,
-    "practicalHours": 22,
-    "aliases": [
-      "35.3.0",
-      "Communicable and Non-Communicable Diseases"
-],
-    "unitDescription": "The purpose of this mcxiule unit is to equip the trainee with skills and attitudes to enable them to present, control and manage communicable and non-communicable diseases.",
-    "overallCompetency": "Distinguish between communicable and noncommunicable diseases.",
-    "learningOutcomes": [
-      "Distinguish between communicable and noncommunicable diseases.",
-      "Describe the causes, transmission routes, prevention and control of various cornmunicable diseases.",
-      "Describe the causes, prevention and control ofxm-communieable diseases.",
-      "Describe drugs and substan\u00e6s abuse within the community its management."
-],
-    "weeklySchedule": [
+    canonicalKey: "communicable_non_communicable",
+    syllabusCode: "35.3.0",
+    unitCode: "35.3.0",
+    unitName: "Communicable and Non-Communicable Diseases",
+    moduleNumber: 3,
+    nominalHours: 55,
+    theoryHours: 35,
+    practicalHours: 20,
+    aliases: ["35.3.0", "Communicable and Non-Communicable Diseases"],
+    unitDescription: "The purpose of this module unit is to provide knowledge, skills and attitudes to enable the trainee to understand, prevent, control and manage communicable and non-communicable diseases.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: distinguish between communicable and non-communicable diseases; describe the causes, transmission routes, prevention and control of various communicable diseases; describe the causes, prevention and control of non-communicable diseases.",
+    learningOutcomes: [
+      "distinguish between communicable and non-communicable diseases",
+      "describe the causes, transmission routes, prevention and control of various communicable diseases",
+      "describe the causes, prevention and control of non-communicable diseases",
+      "describe drugs and substances abuse within the community and its management"
+    ],
+    weeklySchedule: [
       {
-            "weekNumber": 1,
-            "topicTitle": "Communicable Diseases (Part 1)",
-            "subTopics": [
-                  "Communi\u00fcible discascs",
-                  "Actiology and epidemiology of vanous communicable diseases",
-                  "Agent, host and environment in the transmission Of various communicable diseases"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the meaning Of communi\u00fcible discascs.\n\u2022 Identify the actiology and epidemiology of vanous communicable diseases.\n\u2022 Describe the agent, host and environment in the transmission Of various communicable diseases.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 1,
+        topicTitle: "35.3.01 Aetiology and Principles of Communicable Diseases",
+        subTopics: ["Definition of communicable diseases", "Diarrhoea", "Pneumonia", "Bronchitis", "HIV", "Malaria", "Tuberculosis", "Measles", "Herpes Zoster", "Agent, host and environment", "Transmission cycle", "Zoonotic diseases", "Anthrax", "Brucellosis", "Principles for managing communicable diseases"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 35.3.01 Aetiology and Principles of Communicable Diseases.\n• Explain diarrhoea.\n• Explain pneumonia.\n• Explain bronchitis.\n• Explain HIV.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 2,
-            "topicTitle": "Communicable Diseases (Part 2)",
-            "subTopics": [
-                  "Transmission cycles of commt.micable diseases",
-                  "Zoonotic di seases",
-                  "Principles of managing communicable diseases"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Describe the transmission cycles of commt.micable diseases.\n\u2022 Explain zoonotic di seases.\n\u2022 Discuss the principles of managing communicable diseases.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 2,
+        topicTitle: "35.3.02 Non-Communicable Diseases",
+        subTopics: ["Definition of terms", "Gout", "Obesity", "Osteoporosis", "Diabetes", "Inflammatory Bowel Disease", "Hypertension", "Asthma", "Cancer", "Causes, prevention and control", "Managing non-communicable diseases", "Palliative care"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 35.3.02 Non-Communicable Diseases.\n• Explain gout.\n• Explain obesity.\n• Explain osteoporosis.\n• Explain diabetes.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 3,
-            "topicTitle": "Communicable and Non-Communicable Diseases Core Topic 2",
-            "subTopics": [
-                  "Identification of",
-                  "issues",
-                  "Challenges Ofcmerging",
-                  "and trends",
-                  "353.04T3",
-                  "35.3.04PO"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify emerging.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 3,
+        topicTitle: "35.3.03 Drug Abuse",
+        subTopics: ["Definition of terms", "Classes of abused drugs", "Commonly used drugs in our communities", "Risk factors and effects of drug abuse", "Drug abuse and the youth", "Management of drug abuse"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 35.3.03 Drug Abuse.\n• Classify abused drugs and describe their categories.\n• Explain commonly used drugs in our communities.\n• Explain risk factors and effects of drug abuse.\n• Explain drug abuse and the youth.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 4,
-            "topicTitle": "Communicable and Non-Communicable Diseases Core Topic 3",
-            "subTopics": [
-                  "Cart)' Out field study on emerging issues and trends",
-                  "In groups On",
-                  "C) issues and trends explain the challenges of emerging issues and trends discuss how to cope with the challenges how to manage challenges posed by emerging issues and trends"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Cart)' Out field study on emerging issues and trends.\n\u2022 Discuss in groups On.\n\u2022 C) issues and trends explain the challenges of emerging issues and trends discuss how to cope with the challenges how to manage challenges posed by emerging issues and trends.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 4,
+        topicTitle: "35.3.04 Emerging Issues and Trends",
+        subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Ways of managing challenges posed by emerging issues and trends"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 35.3.04 Emerging Issues and Trends.\n• Explain ways of managing challenges posed by emerging issues and trends.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 5,
-            "topicTitle": "Communicable and Non-Communicable Diseases Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Communicable and Non-Communicable Diseases",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Communicable and Non-Communicable Diseases.\n\u2022 Analyze professional case scenarios in Communicable and Non-Communicable Diseases.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 5,
+        topicTitle: "Applied Practice & Case Studies in Communicable and Non-Communicable Diseases (Week 5)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Communicable and Non-Communicable Diseases in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
       },
       {
-            "weekNumber": 6,
-            "topicTitle": "Communicable and Non-Communicable Diseases Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Communicable and Non-Communicable Diseases",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Communicable and Non-Communicable Diseases.\n\u2022 Analyze professional case scenarios in Communicable and Non-Communicable Diseases.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 6,
+        topicTitle: "Applied Practice & Case Studies in Communicable and Non-Communicable Diseases (Week 6)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Communicable and Non-Communicable Diseases in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
       },
       {
-            "weekNumber": 7,
-            "topicTitle": "Communicable and Non-Communicable Diseases Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Communicable and Non-Communicable Diseases",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Communicable and Non-Communicable Diseases.\n\u2022 Analyze professional case scenarios in Communicable and Non-Communicable Diseases.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 7,
+        topicTitle: "Applied Practice & Case Studies in Communicable and Non-Communicable Diseases (Week 7)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Communicable and Non-Communicable Diseases in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
       },
       {
-            "weekNumber": 8,
-            "topicTitle": "Communicable and Non-Communicable Diseases Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Communicable and Non-Communicable Diseases",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Communicable and Non-Communicable Diseases.\n\u2022 Analyze professional case scenarios in Communicable and Non-Communicable Diseases.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Communicable and Non-Communicable Diseases)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Communicable and Non-Communicable Diseases.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
       },
       {
-            "weekNumber": 9,
-            "topicTitle": "Communicable and Non-Communicable Diseases Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Communicable and Non-Communicable Diseases",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Communicable and Non-Communicable Diseases.\n\u2022 Analyze professional case scenarios in Communicable and Non-Communicable Diseases.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 9,
+        topicTitle: "Applied Practice & Case Studies in Communicable and Non-Communicable Diseases (Week 9)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Communicable and Non-Communicable Diseases in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
       },
       {
-            "weekNumber": 10,
-            "topicTitle": "Communicable and Non-Communicable Diseases Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Communicable and Non-Communicable Diseases",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Communicable and Non-Communicable Diseases.\n\u2022 Analyze professional case scenarios in Communicable and Non-Communicable Diseases.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 10,
+        topicTitle: "Applied Practice & Case Studies in Communicable and Non-Communicable Diseases (Week 10)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Communicable and Non-Communicable Diseases in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
       },
       {
-            "weekNumber": 11,
-            "topicTitle": "Communicable and Non-Communicable Diseases Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Communicable and Non-Communicable Diseases",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Communicable and Non-Communicable Diseases.\n\u2022 Analyze professional case scenarios in Communicable and Non-Communicable Diseases.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 11,
+        topicTitle: "Applied Practice & Case Studies in Communicable and Non-Communicable Diseases (Week 11)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Communicable and Non-Communicable Diseases in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
       },
       {
-            "weekNumber": 12,
-            "topicTitle": "Communicable and Non-Communicable Diseases Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Communicable and Non-Communicable Diseases",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Communicable and Non-Communicable Diseases.\n\u2022 Analyze professional case scenarios in Communicable and Non-Communicable Diseases.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
-      }
-],
-    "references": [
-      "Waugh, A., & Grant, A. (2018). Ross & Wilson Anatomy and Physiology in Health and Illness (13th ed.). Elsevier.",
-      "Hall, J. E. (2020). Guyton and Hall Textbook of Medical Physiology (14th ed.). Saunders.",
-      "Tortora, G. J., & Derrickson, B. (2017). Principles of Anatomy and Physiology (15th ed.). Wiley.",
-      "Mahan, L. K., & Raymond, J. L. (2017). Krause's Food & the Nutrition Care Process (14th ed.). Elsevier.",
-      "Whitney, E., & Rolfes, S. R. (2018). Understanding Nutrition (15th ed.). Cengage Learning."
-],
-    "instructionalEquipment": [
-      "Full-scale articulated anatomical human skeleton model",
-      "Torso anatomical models with removable internal organs",
-      "Sphygmomanometers and clinical stethoscopes",
-      "Digital glucometers and test strips",
-      "Clinical examination couch and hand hygiene stations",
-      "Interactive display screen and multimedia data projector",
-      "Computer workstations with TVET management software"
-],
+        weekNumber: 12,
+        topicTitle: "Applied Practice & Case Studies in Communicable and Non-Communicable Diseases (Week 12)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Communicable and Non-Communicable Diseases in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "35.3.04 Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Ways of managing challenges posed by emerging issues and trends"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 35.3.04 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in 35.3.04 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain ways of managing challenges posed by emerging issues and trends.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Communicable and Non-Communicable Diseases)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Communicable and Non-Communicable Diseases in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
+    ],
+    references: ["Heymann, D. L. (2020). Control of Communicable Diseases Manual (21st ed.). APHA.", "WHO. (2020). Global Status Report on Noncommunicable Diseases. World Health Organization."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "food_security": {
-    "canonicalKey": "food_security",
-    "syllabusCode": "36.3.0",
-    "unitCode": "36.3.0",
-    "unitName": "Food Security",
-    "moduleNumber": 3,
-    "nominalHours": 66,
-    "theoryHours": 39,
-    "practicalHours": 26,
-    "aliases": [
-      "36.3.0",
-      "Food Security"
-],
-    "unitDescription": "This mcxluic unit is intended to provide thc With relevant knowlcdge, skills and attitudes to implement food Sccurity and nutrition interventions in the community.",
-    "overallCompetency": "Appreciate the importance of food and nutrition security.",
-    "learningOutcomes": [
-      "Appreciate the importance of food and nutrition security.",
-      "Understand the coml.x\u00bbnents and levels of security.",
-      "Develop an understanding of the indicators security.",
-      "Understand the importance of nutrition interventions in focxi insecure situations.",
-      "Appreciatc the role of various stakeholders irfiod security."
-],
-    "weeklySchedule": [
+    canonicalKey: "food_security",
+    syllabusCode: "36.3.0",
+    unitCode: "36.3.0",
+    unitName: "Food Security",
+    moduleNumber: 3,
+    nominalHours: 55,
+    theoryHours: 35,
+    practicalHours: 20,
+    aliases: ["36.3.0", "Food Security"],
+    unitDescription: "This module unit is intended to equip the trainee with knowledge, skills and attitudes concerning food security and relevant nutrition interventions in the community.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: appreciate the importance of food and nutrition security; understand the importance of nutrition interventions in food security; appreciate the role of various stakeholders in food security.",
+    learningOutcomes: [
+      "appreciate the importance of food and nutrition security",
+      "understand the importance of nutrition interventions in food security",
+      "appreciate the role of various stakeholders in food security"
+    ],
+    weeklySchedule: [
       {
-            "weekNumber": 1,
-            "topicTitle": "Food Security Core Topic 1",
-            "subTopics": [
-                  "Identification of",
-                  "issues",
-                  "Challenges Ofcmerging",
-                  "and trends",
-                  "353.04T3",
-                  "35.3.04PO"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify emerging.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 1,
+        topicTitle: "36.3.01 Introduction to Food Security",
+        subTopics: ["Meaning of key terms used in food security", "Importance of food security", "Right to food and food sovereignty"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain meaning of key terms used in food security.\n• Explain the functions and physiological role of food security.\n• Explain right to food and food sovereignty.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 2,
-            "topicTitle": "Food Security Core Topic 2",
-            "subTopics": [
-                  "Cart)' Out field study on emerging issues and trends",
-                  "In groups On",
-                  "C) issues and trends explain the challenges of emerging issues and trends discuss how to cope with the challenges how to manage challenges posed by emerging issues and trends"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Cart)' Out field study on emerging issues and trends.\n\u2022 Discuss in groups On.\n\u2022 C) issues and trends explain the challenges of emerging issues and trends discuss how to cope with the challenges how to manage challenges posed by emerging issues and trends.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 2,
+        topicTitle: "36.3.02 Components of Food Security",
+        subTopics: ["Meaning of terms", "Food availability and food security", "Food accessibility and food security", "Food utilization and food security", "Food sustainability"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 36.3.02 Components of Food Security.\n• Explain food availability and food security.\n• Explain food accessibility and food security.\n• Explain food utilization and food security.\n• Explain food sustainability.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 3,
-            "topicTitle": "Food Security 3s301t0 (Part 1)",
-            "subTopics": [
-                  "Terms explain how availability affects food security explain how food accessn)ility affects food sa:urity explain how food utilization affects security discuss sustainability 53.01T1 362.01T2 363.01T",
-                  "Terms"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain terms explain how availability affects food security explain how food accessn)ility affects food sa:urity explain how food utilization affects security discuss sustainability 53.01T1 362.01T2 363.01T.\n\u2022 Define terms.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 3,
+        topicTitle: "36.3.03 Measurement of Food Security",
+        subTopics: ["Individual food security", "Household food security", "National food security"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain individual food security.\n• Explain household food security.\n• Explain national food security.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 4,
-            "topicTitle": "Food Security 3s301t0 (Part 2)",
-            "subTopics": [
-                  "Importance of ft.X)d security",
-                  "Right to food and food sovereignty"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Discuss the importance of ft.X)d security.\n\u2022 Explain the right to food and food sovereignty.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 4,
+        topicTitle: "36.3.04 Cross-Cutting Issues in Food Security",
+        subTopics: ["Socio-economic factors influencing food security", "Cultural factors affecting food security", "Political factors influencing food security", "Environmental factors influencing food security"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain socio-economic factors influencing food security.\n• Explain cultural factors affecting food security.\n• Explain political factors influencing food security.\n• Explain environmental factors influencing food security.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 5,
-            "topicTitle": "Measurement of Food Security",
-            "subTopics": [
-                  "Individual food security",
-                  "Household food security",
-                  "National food security"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Discuss individual food security.\n\u2022 Discuss household food security.\n\u2022 Discuss national food security.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 5,
+        topicTitle: "36.3.05 Indicators of Food Security",
+        subTopics: ["Indicators reflecting on food supply and availability", "Indicators reflecting on food accessibility", "Indicators reflecting on food utilization"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain indicators reflecting on food supply and availability.\n• Explain indicators reflecting on food accessibility.\n• Explain indicators reflecting on food utilization.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 6,
-            "topicTitle": "Food Security Core Topic 5 (Part 1)",
-            "subTopics": [
-                  "Terms",
-                  "Indicators reflecting on food supply and availability"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain terms.\n\u2022 Discuss the indicators reflecting on food supply and availability.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 6,
+        topicTitle: "36.3.06 Food Insecurity",
+        subTopics: ["Meaning of terms", "Types of food insecurity", "Causes of food insecurity", "Vulnerable groups to food insecurity", "Effects of food insecurity", "Coping strategies to food insecurity"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 36.3.06 Food Insecurity.\n• Classify food insecurity and describe their categories.\n• Analyze factors affecting food insecurity.\n• Explain vulnerable groups to food insecurity.\n• Explain effects of food insecurity.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 7,
-            "topicTitle": "Food Security Core Topic 5 (Part 2)",
-            "subTopics": [
-                  "Indicators reflecting on food accessibility",
-                  "Indicators reflecting on food utilization"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Discuss the indicators reflecting on food accessibility.\n\u2022 Discuss the indicators reflecting on food utilization.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 7,
+        topicTitle: "36.3.07 Food Security Interventions",
+        subTopics: ["Meaning of terms", "Nutrition intervention", "Process of nutrition intervention programme development", "Community participation in nutrition intervention", "Types of nutrition interventions"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 36.3.07 Food Security Interventions.\n• Explain nutrition intervention.\n• Describe the structure, components and function of process of nutrition intervention programme development.\n• Explain community participation in nutrition intervention.\n• Classify nutrition interventions and describe their categories.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 8,
-            "topicTitle": "Food Insecurity",
-            "subTopics": [
-                  "of terms",
-                  "of food insecurity",
-                  "of food insecurity",
-                  "groups to",
-                  "insecurity in the",
-                  "society"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain terms distinguish the types of food insecurity discuss the causes of food insecurity identify the vulnerable groups to food insecurity in the society discuss the effects of food insecurity explain coping strategies in food insecurity.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Food Security)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Food Security.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
       },
       {
-            "weekNumber": 9,
-            "topicTitle": "Interventions (Part 1)",
-            "subTopics": [
-                  "Terms",
-                  "Reasons for nutrition intervention"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain terms.\n\u2022 Explain the reasons for nutrition intervention.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 9,
+        topicTitle: "36.3.08 Gender and Food Security",
+        subTopics: ["Factors that determine the role of gender in food security in the society", "Role of gender in food security"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain factors that determine the role of gender in food security in the society.\n• Explain the functions and physiological role of gender in food security.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 10,
-            "topicTitle": "Interventions (Part 2)",
-            "subTopics": [
-                  "Process of nutrition intervention program development",
-                  "Community participation in nutrition intervention",
-                  "Types of interventions"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Discuss the process of nutrition intervention program development.\n\u2022 Discuss community participation in nutrition intervention.\n\u2022 Describe the types of interventions.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 10,
+        topicTitle: "36.3.09 Stakeholders in Food Security",
+        subTopics: ["Stakeholders in food security", "Role of the legislature in food security", "Role of the ministries", "Role played by NGOs, BOs, FBOs and other agencies in food security"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain stakeholders in food security.\n• Explain the functions and physiological role of the legislature in food security.\n• Explain the functions and physiological role of the ministries.\n• Explain role played by NGOs, BOs, FBOs and other agencies in food security.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 11,
-            "topicTitle": "Food Security Core Topic 8",
-            "subTopics": [
-                  "security",
-                  "of the legislatures in",
-                  "security",
-                  "of the govemment",
-                  "ministries",
-                  "role in food"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify stakeholders in focxi s\u00e6urity explain the role of legislature in food security explain the role of government in focxi security community role in food security explain the role of NGOs, FB0s, CBOs in security.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 11,
+        topicTitle: "36.3.10 Actions to Improve Food Security",
+        subTopics: ["Access", "Supplies", "Storage", "Production and distribution", "Marketing, import, export, prices", "Availability", "Processing", "Transport"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain access.\n• Explain supplies.\n• Explain storage.\n• Explain production and distribution.\n• Explain marketing, import, export, prices.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 12,
-            "topicTitle": "Food Security Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Food Security",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Food Security.\n\u2022 Analyze professional case scenarios in Food Security.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
-      }
-],
-    "references": [
-      "Mahan, L. K., & Raymond, J. L. (2017). Krause's Food & the Nutrition Care Process (14th ed.). Elsevier.",
-      "Whitney, E., & Rolfes, S. R. (2018). Understanding Nutrition (15th ed.). Cengage Learning.",
-      "Ministry of Health (MOH) Kenya. (2020). National Guidelines for Healthy Diets and Physical Activity.",
-      "World Health Organization. (2019). Essential Nutrition Actions: Mainstreaming nutrition through the life-course.",
-      "Kenya National Examinations Council. (2021). Diploma in Nutrition and Dietetics Regulations and Syllabuses.",
-      "Technical and Vocational Education and Training Authority (TVETA). Occupational Standards for Nutrition Technologists."
-],
-    "instructionalEquipment": [
-      "Interactive display screen and multimedia data projector",
-      "Computer workstations with TVET management software",
-      "Whiteboard and dry-erase markers",
-      "Flipcharts and instructional wall posters"
-],
+        weekNumber: 12,
+        topicTitle: "36.3.11 Emerging Issues and Trends",
+        subTopics: ["Emerging trends", "Global trends in food production, trade and economic implications", "Coping with challenges"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain emerging trends.\n• Explain global trends in food production, trade and economic implications.\n• Explain coping with challenges.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "36.3.11 Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Emerging trends", "Global trends in food production, trade and economic implications", "Coping with challenges"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain emerging trends.\n• Explain global trends in food production, trade and economic implications.\n• Explain coping with challenges.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Food Security)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Food Security in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
+    ],
+    references: ["FAO, IFAD, UNICEF, WFP and WHO. (2021). The State of Food Security and Nutrition in the World. FAO.", "Coates, J. (2018). Measuring Food Security: Principles and Practice. Practical Action Publishing."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "nutrition_education_counselling": {
-    "canonicalKey": "nutrition_education_counselling",
-    "syllabusCode": "37.3.0",
-    "unitCode": "37.3.0",
-    "unitName": "Nutrition Education and Counselling",
-    "moduleNumber": 3,
-    "nominalHours": 55,
-    "theoryHours": 33,
-    "practicalHours": 22,
-    "aliases": [
-      "37.3.0",
-      "Nutrition Education and Counselling"
-],
-    "unitDescription": "to Nutrition Education and Counselling Healthy Human Behaviour",
-    "overallCompetency": "Describe the of nutrition education and counselling.",
-    "learningOutcomes": [
-      "Describe the of nutrition education and counselling.",
-      "Discuss factors that influence behaviour.",
-      "Demonstrate counselling skills and techniques in health and nutrition.",
-      "Manage nutrition related.",
-      "Explain the emerging issues and trends in health.and nutrition education and promotion."
-],
-    "weeklySchedule": [
+    canonicalKey: "nutrition_education_counselling",
+    syllabusCode: "37.3.0",
+    unitCode: "37.3.0",
+    unitName: "Nutrition Education and Counselling",
+    moduleNumber: 3,
+    nominalHours: 66,
+    theoryHours: 36,
+    practicalHours: 30,
+    aliases: ["37.3.0", "Nutrition Education and Counselling"],
+    unitDescription: "This module unit is intended to equip the trainee with knowledge, skills and attitudes to enable him/her counsel clients on nutrition-related issues and complications that will enhance behaviour change for healthy living.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: describe the scope of nutrition education and counselling; discuss factors that influence behaviour; demonstrate counselling skills and techniques.",
+    learningOutcomes: [
+      "describe the scope of nutrition education and counselling",
+      "discuss factors that influence behaviour",
+      "demonstrate counselling skills and techniques",
+      "manage nutrition related complications",
+      "explain the emerging issues and trends in health and nutrition education and promotion"
+    ],
+    weeklySchedule: [
       {
-            "weekNumber": 1,
-            "topicTitle": "Education and Counselling",
-            "subTopics": [
-                  "Terms",
-                  "Origin of education and counselling",
-                  "Objectives of"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the meaning of terms.\n\u2022 Explain the origin of education and counselling.\n\u2022 Describe objectives of.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 1,
+        topicTitle: "37.3.01 Introduction to Nutrition Education and Counselling",
+        subTopics: ["Meaning of terms used in nutrition education", "Origin of nutrition education", "Objectives of nutrition education", "Principles of nutrition education", "Principles of nutrition counselling"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 37.3.01 Introduction to Nutrition Education and Counselling.\n• Explain origin of nutrition education.\n• Explain objectives of nutrition education.\n• Describe the principles of nutrition education.\n• Describe the principles of nutrition counselling.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 2,
-            "topicTitle": "Healthy Behaviour (Part 1)",
-            "subTopics": [
-                  "Terms",
-                  "Behaviour"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the meaning of terms.\n\u2022 Describe behaviour.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 2,
+        topicTitle: "37.3.02 Healthy Human Behaviour",
+        subTopics: ["Meaning of terms", "Models and theories of behaviour", "Factors that influence behaviour"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 37.3.02 Healthy Human Behaviour.\n• Explain models and theories of behaviour.\n• Explain factors that influence behaviour.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 3,
-            "topicTitle": "Healthy Behaviour (Part 2)",
-            "subTopics": [
-                  "Factors 37,3.01T1     nutrition",
-                  "Principles of nutrition education"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the factors 37,3.01T1     nutrition.\n\u2022 Explain the principles of nutrition education.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 3,
+        topicTitle: "37.3.03 Models and Theories of Nutrition Education and Counselling",
+        subTopics: ["Health and nutrition education models and theories"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain health and nutrition education models and theories.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 4,
-            "topicTitle": "In Nutrition Education (Part 1)",
-            "subTopics": [
-                  "Meaning oi terms ntify ii) health belief model Lay's model iv) social learning theory",
-                  "Theory of reasoned aetion vi) bio-psychosocial model of behaviour ehange vii) beliefs, attitude, subjective norms and enabling factors (BASNEF) model",
-                  "Importance of communication in nutrition education"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the meaning oi terms ntify ii) health belief model Lay's model iv) social learning theory.\n\u2022 Theory of reasoned aetion vi) bio-psychosocial model of behaviour ehange vii) beliefs, attitude, subjective norms and enabling factors (BASNEF) model.\n\u2022 Explain the importance of communication in nutrition education.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 4,
+        topicTitle: "37.3.04 Communication in Nutrition Education and Counselling",
+        subTopics: ["Meaning of terms", "Importance of communication to nutrition education and counselling", "Components of communication", "Characteristics of a good health and nutrition educator and counsellor", "Methods of teaching and materials"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 37.3.04 Communication in Nutrition Education and Counselling.\n• Explain the functions and physiological role of communication to nutrition education and counselling.\n• Describe the structure and components of communication.\n• Explain characteristics of a good health and nutrition educator and counsellor.\n• Describe methods and procedures for teaching and materials.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 5,
-            "topicTitle": "In Nutrition Education (Part 2)",
-            "subTopics": [
-                  "Eo.nents Of communication",
-                  "DescrikN the characteristics of nutrition educator",
-                  "Methods ; teaching material"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify the eo.nents Of communication.\n\u2022 DescrikN the characteristics of nutrition educator.\n\u2022 Explain methods ; teaching material.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 5,
+        topicTitle: "37.3.05 Nutrition Counselling",
+        subTopics: ["Meaning of terms", "Importance of nutrition counselling", "Steps in nutrition counselling", "Counselling in multicultural settings", "Techniques in counselling", "Roles and qualities of a nutrition counsellor"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 37.3.05 Nutrition Counselling.\n• Explain the functions and physiological role of nutrition counselling.\n• Explain steps in nutrition counselling.\n• Explain counselling in multicultural settings.\n• Explain techniques in counselling.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 6,
-            "topicTitle": "Nutrition Counselllng",
-            "subTopics": [
-                  "of in",
-                  "counsel ling",
-                  "of nutrition",
-                  "counselling",
-                  "of nutrition",
-                  "counselling"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 D) define terms in nutrition counselling explain the aims of nutrition counselling discuss the Of nutrition counselling describe the steps in nutrition counselling.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 6,
+        topicTitle: "37.3.06 Nutrition Counselling in Various Physiological Conditions",
+        subTopics: ["Vulnerable groups", "Pregnancy and lactation", "Paediatric", "Adolescence", "Geriatric", "Sports and athletics"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain vulnerable groups.\n• Explain pregnancy and lactation.\n• Explain paediatric.\n• Explain adolescence.\n• Explain geriatric.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 7,
-            "topicTitle": "Emerging Issues and Trends",
-            "subTopics": [
-                  "Emerging issues in nutrition education and counselling",
-                  "Challenges",
-                  "Coping"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify emerging issues in nutrition education and counselling.\n\u2022 Discuss the challenges.\n\u2022 Explain the coping.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 7,
+        topicTitle: "37.3.07 Nutrition Counselling in Various Disease Conditions",
+        subTopics: ["HIV/AIDS", "Diabetes", "Cancer", "Gastro-intestinal tract disorders", "Renal conditions", "Cardiovascular diseases"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain HIV/AIDS.\n• Explain diabetes.\n• Explain cancer.\n• Explain gastro-intestinal tract disorders.\n• Explain renal conditions.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 8,
-            "topicTitle": "Nutrition Education and Counselling Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Nutrition Education and Counselling",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Nutrition Education and Counselling.\n\u2022 Analyze professional case scenarios in Nutrition Education and Counselling.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Nutrition Education and Counselling)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Nutrition Education and Counselling.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
       },
       {
-            "weekNumber": 9,
-            "topicTitle": "Nutrition Education and Counselling Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Nutrition Education and Counselling",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Nutrition Education and Counselling.\n\u2022 Analyze professional case scenarios in Nutrition Education and Counselling.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 9,
+        topicTitle: "37.3.08 Nutrition Counselling in Vegetarianism",
+        subTopics: ["Nutrition counselling for vegans", "Lacto-ovo-vegetarians", "Lacto vegetarians"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain nutrition counselling for vegans.\n• Explain lacto-ovo-vegetarians.\n• Explain lacto vegetarians.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 10,
-            "topicTitle": "Nutrition Education and Counselling Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Nutrition Education and Counselling",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Nutrition Education and Counselling.\n\u2022 Analyze professional case scenarios in Nutrition Education and Counselling.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 10,
+        topicTitle: "37.3.09 Emerging Issues and Trends",
+        subTopics: ["Emerging issues", "Challenges", "Coping mechanisms"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 37.3.09 Emerging Issues and Trends.\n• Explain coping mechanisms.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 11,
-            "topicTitle": "Nutrition Education and Counselling Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Nutrition Education and Counselling",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Nutrition Education and Counselling.\n\u2022 Analyze professional case scenarios in Nutrition Education and Counselling.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 11,
+        topicTitle: "Applied Practice & Case Studies in Nutrition Education and Counselling (Week 11)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Nutrition Education and Counselling in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
       },
       {
-            "weekNumber": 12,
-            "topicTitle": "Nutrition Education and Counselling Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Nutrition Education and Counselling",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Nutrition Education and Counselling.\n\u2022 Analyze professional case scenarios in Nutrition Education and Counselling.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
-      }
-],
-    "references": [
-      "Mahan, L. K., & Raymond, J. L. (2017). Krause's Food & the Nutrition Care Process (14th ed.). Elsevier.",
-      "Whitney, E., & Rolfes, S. R. (2018). Understanding Nutrition (15th ed.). Cengage Learning.",
-      "Ministry of Health (MOH) Kenya. (2020). National Guidelines for Healthy Diets and Physical Activity.",
-      "World Health Organization. (2019). Essential Nutrition Actions: Mainstreaming nutrition through the life-course.",
-      "Kenya National Examinations Council. (2021). Diploma in Nutrition and Dietetics Regulations and Syllabuses.",
-      "Technical and Vocational Education and Training Authority (TVETA). Occupational Standards for Nutrition Technologists."
-],
-    "instructionalEquipment": [
-      "Standard infant and adult stadiometers and height boards",
-      "Calibrated electronic weighing scales and SECA mother-child scales",
-      "Mid-Upper Arm Circumference (MUAC) tapes (child and adult)",
-      "Food composition tables and standardized dietary exchange lists",
-      "Demonstration food basket models and portion measurement tools",
-      "Interactive display screen and multimedia data projector",
-      "Computer workstations with TVET management software"
-],
+        weekNumber: 12,
+        topicTitle: "Applied Practice & Case Studies in Nutrition Education and Counselling (Week 12)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Nutrition Education and Counselling in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "37.3.09 Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Emerging issues", "Challenges", "Coping mechanisms"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 37.3.09 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in 37.3.09 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping mechanisms.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Nutrition Education and Counselling)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Nutrition Education and Counselling in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
+    ],
+    references: ["Contento, I. R. (2020). Nutrition Education: Linking Research, Theory, and Practice (4th ed.). Jones & Bartlett Learning.", "Snetselaar, L. G. (2019). Nutrition Counseling Skills for the Practitioner. Jones & Bartlett Learning."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "diet_therapy_iii": {
-    "canonicalKey": "diet_therapy_iii",
-    "syllabusCode": "38.3.0",
-    "unitCode": "38.3.0",
-    "unitName": "Diet Therapy III",
-    "moduleNumber": 3,
-    "nominalHours": 66,
-    "theoryHours": 39,
-    "practicalHours": 26,
-    "aliases": [
-      "38.3.0",
-      "Diet Therapy III"
-],
-    "unitDescription": "This module unit is intended to equip the trainee with knowledge, and attitudes in diet therapy to enable manage",
-    "overallCompetency": "Describe the role of nutrition in managing diseases and disease.",
-    "learningOutcomes": [
-      "Describe the role of nutrition in managing diseases and disease.",
-      "Apply dietary mcxiifications in the management of disease and disease conditions.",
-      "Apply dict therapy in the management Of disease, conditions and disorders.",
-      "Counsel on appropriate lifestyles to be adopted to prevent diseases."
-],
-    "weeklySchedule": [
+    canonicalKey: "diet_therapy_iii",
+    syllabusCode: "38.3.0",
+    unitCode: "38.3.0",
+    unitName: "Diet Therapy III",
+    moduleNumber: 3,
+    nominalHours: 66,
+    theoryHours: 36,
+    practicalHours: 30,
+    aliases: ["38.3.0", "Diet Therapy III", "Diet Therapy II"],
+    unitDescription: "This module unit is intended to equip the trainee with knowledge, skills and attitudes in diet therapy to enable him/her manage various conditions and disorders using diet.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: describe the role of nutrition in managing diseases or disease conditions; apply dietary modifications in the management of disease and disease conditions; apply diet therapy in the management of disease, conditions and disorders.",
+    learningOutcomes: [
+      "describe the role of nutrition in managing diseases or disease conditions",
+      "apply dietary modifications in the management of disease and disease conditions",
+      "apply diet therapy in the management of disease, conditions and disorders",
+      "counsel on appropriate lifestyles to be adopted to prevent diseases"
+    ],
+    weeklySchedule: [
       {
-            "weekNumber": 1,
-            "topicTitle": "Emerging Issues and Trends",
-            "subTopics": [
-                  "Emerging issues in nutrition education and counselling",
-                  "Challenges",
-                  "Coping"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify emerging issues in nutrition education and counselling.\n\u2022 Discuss the challenges.\n\u2022 Explain the coping.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 1,
+        topicTitle: "38.3.01 Respiratory Diseases",
+        subTopics: ["Meaning of terms", "Types of respiratory diseases and disorders", "Etiology", "Causes", "Signs and symptoms", "Management and diet modifications"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 38.3.01 Respiratory Diseases.\n• Classify respiratory diseases and disorders and describe their categories.\n• Explain etiology.\n• Explain causes.\n• Describe deficiency signs, symptoms and disorders related to 38.3.01 Respiratory Diseases.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 2,
-            "topicTitle": "Respiratory Diseases",
-            "subTopics": [
-                  "Core concepts and practical competencies"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain terns discuss types of respiratory diseases and disorders describe etiology of respiratory diseases explain the causes of respirato:y diseases describe signs and symptoms of respiratory diseases discuss management of inbom errors of metabolism respiratory diseases 3S.3.01PO 3S.3.01P.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 2,
+        topicTitle: "38.3.02 Febrile Conditions",
+        subTopics: ["Meaning of terms", "Causes", "Classification", "Nutrition and metabolic implications of fevers", "Management"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 38.3.02 Febrile Conditions.\n• Explain causes.\n• Classify classification.\n• Explain nutrition and metabolic implications of fevers.\n• Explain management.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 3,
-            "topicTitle": "Febrile Conditions",
-            "subTopics": [
-                  "Allergies ii) upper respiratory tract infections iii) lower respiratory tract infections Etiology Causes Signs and symptoms Management",
-                  "Terms enumerate causes of febrile conditions descrilx classification of fevers discuss nutrition and metabolic impl ications of fevers describe management of fevers"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Allergies ii) upper respiratory tract infections iii) lower respiratory tract infections Etiology Causes Signs and symptoms Management.\n\u2022 Explain meaning of terms enumerate causes of febrile conditions descrilx classification of fevers discuss nutrition and metabolic impl ications of fevers describe management of fevers.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 3,
+        topicTitle: "38.3.03 Nutrition in Surgery",
+        subTopics: ["Meaning of terms", "Physiological changes during surgery", "Nutritional implication of surgery", "Nutrition support in various surgical conditions (head, gastro-intestinal tract)"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 38.3.03 Nutrition in Surgery.\n• Explain physiological changes during surgery.\n• Explain nutritional implication of surgery.\n• Explain nutrition support in various surgical conditions (head, gastro-intestinal tract).",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 4,
-            "topicTitle": "Diet Therapy III Core Topic 4 (Part 1)",
-            "subTopics": [
-                  "Terms",
-                  "Physiological changes during surgery"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain terms.\n\u2022 Discuss physiological changes during surgery.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 4,
+        topicTitle: "38.3.04 Nutrition in Cancer",
+        subTopics: ["Meaning of terms", "Classification of cancer diseases", "Nutrition implications of cancer", "Management of cancer"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 38.3.04 Nutrition in Cancer.\n• Classify cancer diseases and describe their categories.\n• Explain nutrition implications of cancer.\n• Explain prevention, control and management measures for cancer.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 5,
-            "topicTitle": "Diet Therapy III Core Topic 4 (Part 2)",
-            "subTopics": [
-                  "Nutritional implication of surgery 400 3S.3.03T1 3S.3.03T2 3S3.03T2 3S.3.03T",
-                  "Nutrition support for surgery Fmients"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Discuss the nutritional implication of surgery 400 3S.3.03T1 3S.3.03T2 3S3.03T2 3S.3.03T.\n\u2022 Discuss nutrition support for surgery Fmients.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 5,
+        topicTitle: "38.3.05 Nutrition in Burns",
+        subTopics: ["Meaning of terms", "Types of burns", "Causes", "Signs and symptoms", "Management", "Nutrition implications of burns"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 38.3.05 Nutrition in Burns.\n• Classify burns and describe their categories.\n• Explain causes.\n• Describe deficiency signs, symptoms and disorders related to 38.3.05 Nutrition in Burns.\n• Explain management.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 6,
-            "topicTitle": "-necro-mescu\u00e4r Diseases",
-            "subTopics": [
-                  "Erne: ging issues and trends",
-                  "Challenges by emcrging issues and trends",
-                  "Ways of coping wilh challenges by emerging issues and  383.07T5  3S.3.07P0 Causes of neuromuscular diseases and disorders Signs and symptoms of neuromuscular diseases and disorders Management of neuromuscular diseases and disorders"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain erne: ging issues and trends.\n\u2022 Discuss challenges by emcrging issues and trends.\n\u2022 Discuss ways of coping wilh challenges by emerging issues and  383.07T5  3S.3.07P0 Causes of neuromuscular diseases and disorders Signs and symptoms of neuromuscular diseases and disorders Management of neuromuscular diseases and disorders.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 6,
+        topicTitle: "38.3.06 Musculo-skeletal Diseases",
+        subTopics: ["Meaning of terms", "Types of musculoskeletal diseases", "Etiology", "Causes", "Signs and symptoms", "Management"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 38.3.06 Musculo-skeletal Diseases.\n• Classify musculoskeletal diseases and describe their categories.\n• Explain etiology.\n• Explain causes.\n• Describe deficiency signs, symptoms and disorders related to 38.3.06 Musculo-skeletal Diseases.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 7,
-            "topicTitle": "\ufeffintroduction to Epidemiology",
-            "subTopics": [
-                  "of epidemiology",
-                  "EPIDEMIOLOGIC",
-                  "DISEASE",
-                  "OCCURRENCE"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain terms discuss the historical overview of epidemiology explain the goals of epidemiology explain the scope Of epidemiology discuss advantages and disadvantages of nutritional epidemiology.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 7,
+        topicTitle: "38.3.07 Neuromuscular Diseases",
+        subTopics: ["Meaning of terms", "Types", "Etiology", "Causes", "Signs and symptoms", "Management"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 38.3.07 Neuromuscular Diseases.\n• Explain types.\n• Explain etiology.\n• Explain causes.\n• Describe deficiency signs, symptoms and disorders related to 38.3.07 Neuromuscular Diseases.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 8,
-            "topicTitle": "Disease Occurrence",
-            "subTopics": [
-                  "of terms",
-                  "overview of",
-                  "epidemiology",
-                  "Goals of epidemiology",
-                  "of epidemiology"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain terms.\n\u2022 Describe the.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Diet Therapy III)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Diet Therapy III.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
       },
       {
-            "weekNumber": 9,
-            "topicTitle": "Diet Therapy III Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Diet Therapy III",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Diet Therapy III.\n\u2022 Analyze professional case scenarios in Diet Therapy III.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 9,
+        topicTitle: "38.3.08 Emerging Issues and Trends",
+        subTopics: ["Emerging trends", "Challenges", "Coping with challenges"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain emerging trends.\n• Discuss emerging issues, trends and coping strategies in 38.3.08 Emerging Issues and Trends.\n• Explain coping with challenges.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 10,
-            "topicTitle": "Diet Therapy III Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Diet Therapy III",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Diet Therapy III.\n\u2022 Analyze professional case scenarios in Diet Therapy III.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 10,
+        topicTitle: "Applied Practice & Case Studies in Diet Therapy III (Week 10)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Diet Therapy III in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
       },
       {
-            "weekNumber": 11,
-            "topicTitle": "Diet Therapy III Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Diet Therapy III",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Diet Therapy III.\n\u2022 Analyze professional case scenarios in Diet Therapy III.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 11,
+        topicTitle: "Applied Practice & Case Studies in Diet Therapy III (Week 11)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Diet Therapy III in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
       },
       {
-            "weekNumber": 12,
-            "topicTitle": "Diet Therapy III Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Diet Therapy III",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Diet Therapy III.\n\u2022 Analyze professional case scenarios in Diet Therapy III.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
-      }
-],
-    "references": [
-      "Waugh, A., & Grant, A. (2018). Ross & Wilson Anatomy and Physiology in Health and Illness (13th ed.). Elsevier.",
-      "Hall, J. E. (2020). Guyton and Hall Textbook of Medical Physiology (14th ed.). Saunders.",
-      "Tortora, G. J., & Derrickson, B. (2017). Principles of Anatomy and Physiology (15th ed.). Wiley.",
-      "Mahan, L. K., & Raymond, J. L. (2017). Krause's Food & the Nutrition Care Process (14th ed.). Elsevier.",
-      "Whitney, E., & Rolfes, S. R. (2018). Understanding Nutrition (15th ed.). Cengage Learning."
-],
-    "instructionalEquipment": [
-      "Full-scale articulated anatomical human skeleton model",
-      "Torso anatomical models with removable internal organs",
-      "Sphygmomanometers and clinical stethoscopes",
-      "Digital glucometers and test strips",
-      "Clinical examination couch and hand hygiene stations",
-      "Interactive display screen and multimedia data projector",
-      "Computer workstations with TVET management software"
-],
+        weekNumber: 12,
+        topicTitle: "Applied Practice & Case Studies in Diet Therapy III (Week 12)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Diet Therapy III in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "38.3.08 Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Emerging trends", "Challenges", "Coping with challenges"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain emerging trends.\n• Discuss emerging issues, trends and coping strategies in 38.3.08 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping with challenges.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Diet Therapy III)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Diet Therapy III in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
+    ],
+    references: ["Mahan, L. K., & Raymond, J. L. (2020). Krause's Food & the Nutrition Care Process (15th ed.). Elsevier.", "Escott-Stump, S. (2019). Nutrition and Diagnosis-Related Care (8th ed.). Wolters Kluwer."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "nutrition_epidemiology": {
-    "canonicalKey": "nutrition_epidemiology",
-    "syllabusCode": "39.3.0",
-    "unitCode": "39.3.0",
-    "unitName": "Nutrition Epidemiology",
-    "moduleNumber": 3,
-    "nominalHours": 66,
-    "theoryHours": 39,
-    "practicalHours": 26,
-    "aliases": [
-      "39.3.0",
-      "Nutrition Epidemiology"
-],
-    "unitDescription": "This module unit is intended to provide the trainee with skills and attitudes in determining nutritional disease",
-    "overallCompetency": "Appreciate the role of nutrition epidemiology in nutrition and dietetics.",
-    "learningOutcomes": [
-      "Appreciate the role of nutrition epidemiology in nutrition and dietetics.",
-      "Apply nutrition epidemiology principles in nutritioa and.",
-      "Understand how to conduct epidemiologic studies in nutrition and dietetics.",
-      "Develop a positive attitude towards planning and evaluating community nutrition services.",
-      "Appreciate the role of effecti'.e record keeping in epidemiologic studies in nutrition and dietetics."
-],
-    "weeklySchedule": [
+    canonicalKey: "nutrition_epidemiology",
+    syllabusCode: "39.3.0",
+    unitCode: "39.3.0",
+    unitName: "Nutrition Epidemiology",
+    moduleNumber: 3,
+    nominalHours: 66,
+    theoryHours: 40,
+    practicalHours: 26,
+    aliases: ["39.3.0", "Nutrition Epidemiology"],
+    unitDescription: "This module unit is intended to provide the trainee with knowledge, skills and attitudes in determining nutrition-related disease occurrence.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: appreciate the role of nutrition epidemiology; apply nutrition epidemiology to community nutrition services; understand the importance of epidemiological studies in nutrition and dietetics.",
+    learningOutcomes: [
+      "appreciate the role of nutrition epidemiology",
+      "apply nutrition epidemiology to community nutrition services",
+      "understand the importance of epidemiological studies in nutrition and dietetics",
+      "appreciate the role of effective record keeping in nutrition and dietetics"
+    ],
+    weeklySchedule: [
       {
-            "weekNumber": 1,
-            "topicTitle": "\ufeffintroduction to Epidemiology",
-            "subTopics": [
-                  "of epidemiology",
-                  "EPIDEMIOLOGIC",
-                  "DISEASE",
-                  "OCCURRENCE"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain terms discuss the historical overview of epidemiology explain the goals of epidemiology explain the scope Of epidemiology discuss advantages and disadvantages of nutritional epidemiology.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 1,
+        topicTitle: "39.3.01 Introduction to Epidemiology & 39.3.02 Epidemiologic Approach to Disease Occurrence",
+        subTopics: ["Meaning of terms", "Historical overview of epidemiology", "Goals of epidemiology", "Scope of epidemiology", "Advantages and disadvantages of nutritional epidemiology", "Meaning of terms", "Epidemiologic triad", "Interaction between agent, host and environment", "Clinical medicine vs epidemiology", "Steps in epidemiologic approach"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 39.3.01 Introduction to Epidemiology & 39.3.02 Epidemiologic Approach to Disease Occurrence.\n• Explain historical overview of epidemiology.\n• Explain goals of epidemiology.\n• Explain scope of epidemiology.\n• Explain advantages and disadvantages of nutritional epidemiology.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 2,
-            "topicTitle": "Disease Occurrence",
-            "subTopics": [
-                  "of terms",
-                  "overview of",
-                  "epidemiology",
-                  "Goals of epidemiology",
-                  "of epidemiology"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain terms.\n\u2022 Describe the.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 2,
+        topicTitle: "39.3.03 Application of Epidemiology",
+        subTopics: ["Communicable diseases", "Nutritional deficiency disorders", "Chronic diseases"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain communicable diseases.\n• Explain nutritional deficiency disorders.\n• Explain chronic diseases.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 3,
-            "topicTitle": "Application of Epidemiology",
-            "subTopics": [
-                  "Application of epidemiology to communicable diseases",
-                  "Nutrition deficiency disorders",
-                  "Application of epidemiology to chronic diseases"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain application of epidemiology to communicable diseases.\n\u2022 Discuss nutrition deficiency disorders.\n\u2022 Describe application of epidemiology to chronic diseases.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 3,
+        topicTitle: "39.3.04 Measures of Morbidity",
+        subTopics: ["Meaning of terms", "Types of morbidity measures", "Incidence rates", "Prevalence rates", "Prevalence pool"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 39.3.04 Measures of Morbidity.\n• Classify morbidity measures and describe their categories.\n• Explain incidence rates.\n• Explain prevalence rates.\n• Explain prevalence pool.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 4,
-            "topicTitle": "Mortality .05t0",
-            "subTopics": [
-                  "Terms",
-                  "Importance Of mortality data",
-                  "Measures of mortality",
-                  "Sources of mortality data"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain terms.\n\u2022 Discuss the importance Of mortality data.\n\u2022 Describe the measures of mortality.\n\u2022 Explain the sources of mortality data.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 4,
+        topicTitle: "39.3.05 Measures of Mortality",
+        subTopics: ["Meaning of terms", "Importance of mortality data", "Measures of mortality", "Sources of mortality data"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 39.3.05 Measures of Mortality.\n• Explain the functions and physiological role of mortality data.\n• Explain measures of mortality.\n• Identify dietary sources of mortality data.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 5,
-            "topicTitle": "Nutrition Epidemiology Core Topic 5",
-            "subTopics": [
-                  "Calculate case fatality rate",
-                  "Calculate mortality rates"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Calculate case fatality rate.\n\u2022 Calculate mortality rates.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 5,
+        topicTitle: "39.3.06 Measures of Natality",
+        subTopics: ["Meaning of terms", "Natality", "Natality rates", "Crude birth rate", "General fertility rate", "Types of natality measures", "Importance of natality data", "Sources of natality data"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 39.3.06 Measures of Natality.\n• Explain natality.\n• Explain natality rates.\n• Explain crude birth rate.\n• Explain general fertility rate.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 6,
-            "topicTitle": "Measures of Natality",
-            "subTopics": [
-                  "Core concepts and practical competencies"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the meaning of terms describe types of natality measures explain importance Of natality data.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 6,
+        topicTitle: "39.3.07 Natural History of Disease & 39.3.08 Disease Prevention",
+        subTopics: ["Meaning of terms", "Pathogenesis", "Pre-symptomatic", "Symptomatic", "Disability and rehabilitation", "Primary", "Secondary", "Tertiary"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 39.3.07 Natural History of Disease & 39.3.08 Disease Prevention.\n• Explain pathogenesis.\n• Explain pre-symptomatic.\n• Explain symptomatic.\n• Explain disability and rehabilitation.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 7,
-            "topicTitle": "Disease Prevention",
-            "subTopics": [
-                  "Primary disease prevention",
-                  "Secondary disease prevention",
-                  "Tertiaty disease prever,tl"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain primary disease prevention.\n\u2022 Describe secondary disease prevention.\n\u2022 Explain tertiaty disease prever,tl.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 7,
+        topicTitle: "39.3.09 Population Screening",
+        subTopics: ["Meaning of terms", "General aims of screening", "Population screening tools", "Characteristics of screening tools", "Considerations in establishing screening programmes"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 39.3.09 Population Screening.\n• Explain general aims of screening.\n• Demonstrate safe handling and operation of population screening tools.\n• Demonstrate safe handling and operation of characteristics of screening tools.\n• Explain considerations in establishing screening programmes.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 8,
-            "topicTitle": "Disease Prevention",
-            "subTopics": [
-                  "Core concepts and practical competencies"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain terms.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Nutrition Epidemiology)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Nutrition Epidemiology.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
       },
       {
-            "weekNumber": 9,
-            "topicTitle": "Population Screening",
-            "subTopics": [
-                  "Population screening",
-                  "General aims of screening",
-                  "Various instruments Of screeni ng",
-                  "Highlight the characteristics of screening",
-                  "Considerations in        393.09 393.09C  establishing screening programm"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain meaning of population screening.\n\u2022 List the general aims of screening.\n\u2022 Identify the various instruments Of screeni ng.\n\u2022 Highlight the characteristics of screening.\n\u2022 Explain the considerations in        393.09 393.09C  establishing screening programm.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 9,
+        topicTitle: "39.3.10 Outbreak Investigation",
+        subTopics: ["Meaning of terms", "Importance of investigating an outbreak", "Steps of outbreak investigation"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 39.3.10 Outbreak Investigation.\n• Explain the functions and physiological role of investigating an outbreak.\n• Explain steps of outbreak investigation.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 10,
-            "topicTitle": "Nutrition Epidemiology Core Topic 10",
-            "subTopics": [
-                  "Treatment fer experimental studies",
-                  "Design simple case- control and cohort studies"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Apply treatment fer experimental studies.\n\u2022 Design simple case- control and cohort studies.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 10,
+        topicTitle: "39.3.11 Analytical Epidemiology",
+        subTopics: ["Observation study", "Experimental study", "Case control study", "Cross-sectional study", "Cohort study", "Randomized controlled trials", "Relative risk and odds ratio", "Ethics in epidemiology"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain observation study.\n• Explain experimental study.\n• Explain case control study.\n• Explain cross-sectional study.\n• Explain cohort study.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 11,
-            "topicTitle": "Experimental Designs",
-            "subTopics": [
-                  "Random control trials",
-                  "Relative risk",
-                  "Culds ratio",
-                  "Ethics in  Theory",
-                  "Community health cycle",
-                  "Ways Of :$.12Tl \u2022:e.12T2 \u00e9*.12T4 P*.12PO 93.12P1 epidemiology"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Describe random control trials.\n\u2022 Explain relative risk.\n\u2022 Explain culds ratio.\n\u2022 Explain ethics in  Theory.\n\u2022 Describe the community health cycle.\n\u2022 Explain the ways Of :$.12Tl \u2022:e.12T2 \u00e9*.12T4 P*.12PO 93.12P1 epidemiology.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 11,
+        topicTitle: "39.3.14 Community Health Record Keeping",
+        subTopics: ["Purpose of record keeping", "Patient care record", "Disease register", "Survey records"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain purpose of record keeping.\n• Explain patient care record.\n• Explain disease register.\n• Explain survey records.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 12,
-            "topicTitle": "Record Keeping",
-            "subTopics": [
-                  "Of record keeping",
-                  "Patient care record",
-                  "Importance of a disease register",
-                  "Survey records"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the of record keeping.\n\u2022 Discuss patient care record.\n\u2022 Explain the importance of a disease register.\n\u2022 Explain survey records.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 12,
+        topicTitle: "39.3.15 Emerging Issues and Trends",
+        subTopics: ["Emerging trends", "Challenges", "Coping with challenges"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain emerging trends.\n• Discuss emerging issues, trends and coping strategies in 39.3.15 Emerging Issues and Trends.\n• Explain coping with challenges.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 13,
-            "topicTitle": "Nutrition Epidemiology Core Topic 13",
-            "subTopics": [
-                  "Emerging issues and trends",
-                  "Challenges B)'sed by emerging issues and trends",
-                  "Ways of Coping with chal lenges by emerging issues and"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain emerging issues and trends.\n\u2022 Discuss challenges B)'sed by emerging issues and trends.\n\u2022 Discuss ways of Coping with chal lenges by emerging issues and.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
-      }
-],
-    "references": [
-      "Mahan, L. K., & Raymond, J. L. (2017). Krause's Food & the Nutrition Care Process (14th ed.). Elsevier.",
-      "Whitney, E., & Rolfes, S. R. (2018). Understanding Nutrition (15th ed.). Cengage Learning.",
-      "Ministry of Health (MOH) Kenya. (2020). National Guidelines for Healthy Diets and Physical Activity.",
-      "World Health Organization. (2019). Essential Nutrition Actions: Mainstreaming nutrition through the life-course.",
-      "Kenya National Examinations Council. (2021). Diploma in Nutrition and Dietetics Regulations and Syllabuses.",
-      "Technical and Vocational Education and Training Authority (TVETA). Occupational Standards for Nutrition Technologists."
-],
-    "instructionalEquipment": [
-      "Standard infant and adult stadiometers and height boards",
-      "Calibrated electronic weighing scales and SECA mother-child scales",
-      "Mid-Upper Arm Circumference (MUAC) tapes (child and adult)",
-      "Food composition tables and standardized dietary exchange lists",
-      "Demonstration food basket models and portion measurement tools",
-      "Interactive display screen and multimedia data projector",
-      "Computer workstations with TVET management software"
-],
+        weekNumber: 13,
+        topicTitle: "39.3.15 Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Emerging trends", "Challenges", "Coping with challenges"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain emerging trends.\n• Discuss emerging issues, trends and coping strategies in 39.3.15 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping with challenges.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Nutrition Epidemiology)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Nutrition Epidemiology in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
+    ],
+    references: ["Willett, W. (2018). Nutritional Epidemiology (3rd ed.). Oxford University Press.", "Gordis, L. (2019). Epidemiology (6th ed.). Elsevier."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "nutrition_in_emergencies": {
-    "canonicalKey": "nutrition_in_emergencies",
-    "syllabusCode": "40.3.0",
-    "unitCode": "40.3.0",
-    "unitName": "Nutrition in Emergencies",
-    "moduleNumber": 3,
-    "nominalHours": 66,
-    "theoryHours": 39,
-    "practicalHours": 26,
-    "aliases": [
-      "40.3.0",
-      "Nutrition in Emergencies"
-],
-    "unitDescription": "This module unit is intendcxi to equip thc trainee with knowledg skills and attitudes to undertakc various types of nutrition interventions applicable in emergencies.",
-    "overallCompetency": "At the end of the module unit the trainee should be able to:.",
-    "learningOutcomes": [
-      "At the end of the module unit the trainee should be able to:.",
-      "Discuss the types, phases and consequences of disasters/emergencies.",
-      "Discuss the food and nutrition emergency responses.",
-      "Discuss the roles of key stakeholders in humanitarian assistance."
-],
-    "weeklySchedule": [
+    canonicalKey: "nutrition_in_emergencies",
+    syllabusCode: "40.3.0",
+    unitCode: "40.3.0",
+    unitName: "Nutrition in Emergencies",
+    moduleNumber: 3,
+    nominalHours: 55,
+    theoryHours: 35,
+    practicalHours: 20,
+    aliases: ["CND 2301", "DND 2301", "40.3.0", "Nutrition in Emergencies"],
+    unitDescription: "This module unit is intended to equip the trainee with knowledge, skills and attitudes to undertake various nutrition interventions applicable in emergencies.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: discuss the types, phases and consequences of disasters/emergencies; discuss the food and nutrition emergency response; discuss the roles of key stakeholders in humanitarian assistance.",
+    learningOutcomes: [
+      "discuss the types, phases and consequences of disasters/emergencies",
+      "discuss the food and nutrition emergency response",
+      "discuss the roles of key stakeholders in humanitarian assistance"
+    ],
+    weeklySchedule: [
       {
-            "weekNumber": 1,
-            "topicTitle": "Nutrition in Emergencies",
-            "subTopics": [
-                  "Terms",
-                  "Types of emergenctes",
-                  "Phases of emergenctes",
-                  "Trends and consequences of disasters"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain meaning of terms.\n\u2022 Discuss the types of emergenctes.\n\u2022 Explain phases of emergenctes.\n\u2022 Identify trends and consequences of disasters.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 1,
+        topicTitle: "40.3.01 Introduction to Nutrition in Emergencies",
+        subTopics: ["Meaning of terms", "Types of emergencies", "Phases of emergencies", "Trends and consequences of disasters"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 40.3.01 Introduction to Nutrition in Emergencies.\n• Classify emergencies and describe their categories.\n• Explain phases of emergencies.\n• Discuss emerging issues, trends and coping strategies in 40.3.01 Introduction to Nutrition in Emergencies.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 2,
-            "topicTitle": "Nutrition in Emergencies Core Topic 2",
-            "subTopics": [
-                  "Cxplain of emergencies",
-                  "Trends and consequences of disasters"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Cxplain of emergencies.\n\u2022 Identify trends and consequences of disasters.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 2,
+        topicTitle: "40.3.02 Overview of Malnutrition in Emergencies",
+        subTopics: ["Types of malnutrition", "Strategies to address macro and micronutrient deficiencies"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Classify malnutrition and describe their categories.\n• Explain strategies to address macro and micronutrient deficiencies.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 3,
-            "topicTitle": "Malnutrition in Emergencies",
-            "subTopics": [
-                  "Of malnutrition",
-                  "Strategies to addres macro and micro nutrient deficiencies"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain of malnutrition.\n\u2022 Discuss strategies to addres macro and micro nutrient deficiencies.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 3,
+        topicTitle: "40.3.03 Roles and Responsibilities of Stakeholders in Humanitarian Activities",
+        subTopics: ["Role of NGOs and FBOs", "Role of the military", "Socio-political factors surrounding emergencies"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the functions and physiological role of ngos and FBOs.\n• Explain the functions and physiological role of the military.\n• Explain socio-political factors surrounding emergencies.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 4,
-            "topicTitle": "Nutrition in Emergencies Core Topic 4",
-            "subTopics": [
-                  "Identi& the roies and responsEiIities of NGOs, FBOs and military humanitarian activities",
-                  "Illustrate the socio- political factos surrounding emergencies   403"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identi& the roies and responsEiIities of NGOs, FBOs and military humanitarian activities.\n\u2022 Illustrate the socio- political factos surrounding emergencies   403.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 4,
+        topicTitle: "40.3.04 Approaches to Nutrition Situation Analysis",
+        subTopics: ["Meaning of terms", "Rapid assessment", "Nutrition surveys"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 40.3.04 Approaches to Nutrition Situation Analysis.\n• Explain rapid assessment.\n• Explain nutrition surveys.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 5,
-            "topicTitle": "Situation Analysis",
-            "subTopics": [
-                  "Of terms",
-                  "Rapid assessment",
-                  "Illustrate nutrition surveys"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain of terms.\n\u2022 Discuss rapid assessment.\n\u2022 Illustrate nutrition surveys.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 5,
+        topicTitle: "40.3.05 Food and Nutrition Emergency Responses",
+        subTopics: ["Essential emergency responses", "Selective feeding programmes"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain essential emergency responses.\n• Explain selective feeding programmes.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 6,
-            "topicTitle": "Situation Analysis",
-            "subTopics": [
-                  "A plan for rapid assessment",
-                  "Carry out nutrition surveys"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Formulate a plan for rapid assessment.\n\u2022 Carry out nutrition surveys.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 6,
+        topicTitle: "40.3.06 Nutrition Intervention Programs",
+        subTopics: ["School feeding", "Emergency relief food", "Famine relief", "Food for work", "Supplementation", "Disaster preparedness and management"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain school feeding.\n• Explain emergency relief food.\n• Explain famine relief.\n• Explain food for work.\n• Explain supplementation.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 7,
-            "topicTitle": "Emergency Responses",
-            "subTopics": [
-                  "Essential emergency responses",
-                  "Selective f\u00e6ding programmes"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain essential emergency responses.\n\u2022 Identify selective f\u00e6ding programmes.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 7,
+        topicTitle: "40.3.07 Monitoring and Evaluation of Food and Nutrition Emergency Situations",
+        subTopics: ["Meaning of terms", "Importance of monitoring and evaluation", "Challenges of monitoring and evaluation", "Sphere standards in monitoring and evaluation of food and nutrition responses in emergency responses"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 40.3.07 Monitoring and Evaluation of Food and Nutrition Emergency Situations.\n• Explain the functions and physiological role of monitoring and evaluation.\n• Discuss emerging issues, trends and coping strategies in 40.3.07 Monitoring and Evaluation of Food and Nutrition Emergency Situations.\n• Explain sphere standards in monitoring and evaluation of food and nutrition responses in emergency responses.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 8,
-            "topicTitle": "Nutrition in Emergencies Core Topic 8",
-            "subTopics": [
-                  "Emanage em ergency",
-                  "Selective supplementary ald therapeutic feeding programmes"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Emanage em ergency.\n\u2022 Identify selective supplementary ald therapeutic feeding programmes.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Nutrition in Emergencies)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Nutrition in Emergencies.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
       },
       {
-            "weekNumber": 9,
-            "topicTitle": "Intervention Programs",
-            "subTopics": [
-                  "School feedin\" programmes",
-                  "Emergency relief food",
-                  "Manage famine relief",
-                  "Feod for work",
-                  "Determine food fortification and supplementation",
-                  "Disaster preparedness and management"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify school feedin\" programmes.\n\u2022 Explain emergency relief food.\n\u2022 Manage famine relief.\n\u2022 Identify feod for work.\n\u2022 Determine food fortification and supplementation.\n\u2022 Discuss disaster preparedness and management.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 9,
+        topicTitle: "40.3.08 Emerging Issues and Trends",
+        subTopics: ["Emerging issues", "Challenges", "Coping strategies"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 40.3.08 Emerging Issues and Trends.\n• Explain coping strategies.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 10,
-            "topicTitle": "Nutrition in Emergencies Core Topic 10",
-            "subTopics": [
-                  "Manage school programmes",
-                  "Determine emergency relief food",
-                  "Determine iced fortification and supplementation",
-                  "Manage disaster"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Manage school programmes.\n\u2022 Determine emergency relief food.\n\u2022 Determine iced fortification and supplementation.\n\u2022 Manage disaster.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 10,
+        topicTitle: "Applied Practice & Case Studies in Nutrition in Emergencies (Week 10)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Nutrition in Emergencies in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
       },
       {
-            "weekNumber": 11,
-            "topicTitle": "Elmergency Situations",
-            "subTopics": [
-                  "Terms",
-                  "Discus the importance of monitoring and evaluation of food and nutrition responses in emergency situations",
-                  "Challenges of monitoring and evaluation",
-                  "Sphere standards in emergency responses"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain meaning of terms.\n\u2022 Discus the importance of monitoring and evaluation of food and nutrition responses in emergency situations.\n\u2022 Identify the challenges of monitoring and evaluation.\n\u2022 Explain sphere standards in emergency responses.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 11,
+        topicTitle: "Applied Practice & Case Studies in Nutrition in Emergencies (Week 11)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Nutrition in Emergencies in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
       },
       {
-            "weekNumber": 12,
-            "topicTitle": "Emerging Issues and Trends",
-            "subTopics": [
-                  "Emet issues and",
-                  "\u2022-emerging ISS and trends"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify emet issues and.\n\u2022 Discuss the \u2022-emerging ISS and trends.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
-      }
-],
-    "references": [
-      "Mahan, L. K., & Raymond, J. L. (2017). Krause's Food & the Nutrition Care Process (14th ed.). Elsevier.",
-      "Whitney, E., & Rolfes, S. R. (2018). Understanding Nutrition (15th ed.). Cengage Learning.",
-      "Ministry of Health (MOH) Kenya. (2020). National Guidelines for Healthy Diets and Physical Activity.",
-      "World Health Organization. (2019). Essential Nutrition Actions: Mainstreaming nutrition through the life-course.",
-      "Kenya National Examinations Council. (2021). Diploma in Nutrition and Dietetics Regulations and Syllabuses.",
-      "Technical and Vocational Education and Training Authority (TVETA). Occupational Standards for Nutrition Technologists."
-],
-    "instructionalEquipment": [
-      "Standard infant and adult stadiometers and height boards",
-      "Calibrated electronic weighing scales and SECA mother-child scales",
-      "Mid-Upper Arm Circumference (MUAC) tapes (child and adult)",
-      "Food composition tables and standardized dietary exchange lists",
-      "Demonstration food basket models and portion measurement tools",
-      "Interactive display screen and multimedia data projector",
-      "Computer workstations with TVET management software"
-],
+        weekNumber: 12,
+        topicTitle: "Applied Practice & Case Studies in Nutrition in Emergencies (Week 12)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Nutrition in Emergencies in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "40.3.08 Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Emerging issues", "Challenges", "Coping strategies"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 40.3.08 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in 40.3.08 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping strategies.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Nutrition in Emergencies)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Nutrition in Emergencies in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
+    ],
+    references: ["Sphere Association. (2018). The Sphere Handbook: Humanitarian Charter and Minimum Standards in Humanitarian Response.", "Emergency Nutrition Network (ENN). (2020). Infant and Young Child Feeding in Emergencies Operational Guidance."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "community_partnership_skills": {
-    "canonicalKey": "community_partnership_skills",
-    "syllabusCode": "41.3.0",
-    "unitCode": "41.3.0",
-    "unitName": "Community Partnership Skills",
-    "moduleNumber": 3,
-    "nominalHours": 55,
-    "theoryHours": 33,
-    "practicalHours": 22,
-    "aliases": [
-      "41.3.0",
-      "Community Partnership Skills"
-],
-    "unitDescription": "The puqx)se of this course is to provide the trainee with know skills and attitudes in community partnership skills. ledg",
-    "overallCompetency": "Understand the concept of community partnership skills.",
-    "learningOutcomes": [
-      "Understand the concept of community partnership skills.",
-      "Identify different levels of participatory partnership.",
-      "Identify problems and challenges in devclopinga genuine partnership.",
-      "Develop community mobilization skills."
-],
-    "weeklySchedule": [
+    canonicalKey: "community_partnership_skills",
+    syllabusCode: "41.3.0",
+    unitCode: "41.3.0",
+    unitName: "Community Partnership Skills",
+    moduleNumber: 3,
+    nominalHours: 55,
+    theoryHours: 35,
+    practicalHours: 20,
+    aliases: ["41.3.0", "Community Partnership Skills"],
+    unitDescription: "The purpose of this module unit is to provide the trainee with community partnership skills.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: understand the concept of community partnership; identify different levels of partnership; identify possible problems of developing a genuine partnership.",
+    learningOutcomes: [
+      "understand the concept of community partnership",
+      "identify different levels of partnership",
+      "identify possible problems of developing a genuine partnership",
+      "develop community mobilization skills"
+    ],
+    weeklySchedule: [
       {
-            "weekNumber": 1,
-            "topicTitle": "Partnership Skills",
-            "subTopics": [
-                  "Terms",
-                  "413.01T3 41.31)lPO community partnership skills",
-                  "Characteristics of community entry programme"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the meaning of terms.\n\u2022 Describe the   413.01T3 41.31)lPO community partnership skills.\n\u2022 Describe the characteristics of community entry programme.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 1,
+        topicTitle: "41.3.01 Introduction to Community Partnership Skills",
+        subTopics: ["Meaning of terms", "Overview of community partnership skills", "Characteristics of community entry programme"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 41.3.01 Introduction to Community Partnership Skills.\n• Explain overview of community partnership skills.\n• Explain characteristics of community entry programme.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 2,
-            "topicTitle": "Community Programmes (Part 1)",
-            "subTopics": [
-                  "Levels of partnership",
-                  "Ideal partnership relationship"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Describe the levels of partnership.\n\u2022 Describe ideal partnership relationship.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 2,
+        topicTitle: "41.3.02 Community Structure",
+        subTopics: ["Introduction to community structure", "Community practitioner roles and responsibilities"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain introduction to community structure.\n• Explain community practitioner roles and responsibilities.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 3,
-            "topicTitle": "Community Programmes (Part 2)",
-            "subTopics": [
-                  "Benefits of a genuine relatk\u00bbnship",
-                  "Challenges of developing a genuine relationship"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the benefits of a genuine relatk\u00bbnship.\n\u2022 Discuss the challenges of developing a genuine relationship.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 3,
+        topicTitle: "41.3.03 Partnership in Community Programmes",
+        subTopics: ["Levels of partnership", "Ideal partnership relationship", "Benefits of a genuine relationship", "Challenges of developing a genuine relationship"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain levels of partnership.\n• Explain ideal partnership relationship.\n• Explain benefits of a genuine relationship.\n• Discuss emerging issues, trends and coping strategies in 41.3.03 Partnership in Community Programmes.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 4,
-            "topicTitle": "Community Entry",
-            "subTopics": [
-                  "Core concepts and practical competencies"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 D) explain the meaning of terms describe community entry process describe the steps in community entry and partnership skills discuss the roles and responsibilities of a community practitioner.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 4,
+        topicTitle: "41.3.04 Community Entry Process",
+        subTopics: ["Meaning of terms", "Community entry process", "Steps in community entry and partnership process", "Community practitioner roles and responsibilities"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 41.3.04 Community Entry Process.\n• Describe the structure, components and function of community entry process.\n• Describe the structure, components and function of steps in community entry and partnership process.\n• Explain community practitioner roles and responsibilities.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 5,
-            "topicTitle": "Partnership Skills",
-            "subTopics": [
-                  "Core concepts and practical competencies"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Discuss tools used in community partnership 429 41.3.05Ti.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 5,
+        topicTitle: "41.3.05 Tools and Methods in Community Partnership Skills",
+        subTopics: ["Tools used in community partnership", "Methods used in community partnership", "Conceptual framework and models"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate safe handling and operation of tools used in community partnership.\n• Explain methods used in community partnership.\n• Explain conceptual framework and models.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 6,
-            "topicTitle": ".06t4 .06p0 (Part 1)",
-            "subTopics": [
-                  "Terms",
-                  "Steps in community mobilisation"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the meaning of terms.\n\u2022 Describe the steps in community mobilisation.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 6,
+        topicTitle: "41.3.06 Community Mobilisation",
+        subTopics: ["Meaning of terms", "Steps in community mobilisation", "Challenges in community mobilisation", "Community mobilisation in nutrition intervention"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 41.3.06 Community Mobilisation.\n• Explain steps in community mobilisation.\n• Discuss emerging issues, trends and coping strategies in 41.3.06 Community Mobilisation.\n• Explain community mobilisation in nutrition intervention.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 7,
-            "topicTitle": ".06t4 .06p0 (Part 2)",
-            "subTopics": [
-                  "Challengcs in community mobilisation",
-                  "Community mobilisation in nutrition intervention"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the challengcs in community mobilisation.\n\u2022 Explain community mobilisation in nutrition intervention.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 7,
+        topicTitle: "41.3.07 Community Acting",
+        subTopics: ["Community acting groups", "Levels of participation: individual, family, groups", "Particular techniques"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain community acting groups.\n• Explain levels of participation: individual, family, groups.\n• Explain particular techniques.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 8,
-            "topicTitle": "Acting",
-            "subTopics": [
-                  "Community acting groups",
-                  "L.wels of participation in community groups",
-                  "Particular techniques"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Discuss community acting groups.\n\u2022 Discuss l.wels of participation in community groups.\n\u2022 Discuss particular techniques.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Community Partnership Skills)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Community Partnership Skills.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
       },
       {
-            "weekNumber": 9,
-            "topicTitle": "Issues and Trends",
-            "subTopics": [
-                  "Emerging issues and trends",
-                  "Challenges poscd by emerging Issues",
-                  "Ways of managing challenges posed by emerging issues and trends"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the emerging issues and trends.\n\u2022 Discuss challenges poscd by emerging Issues.\n\u2022 Discuss ways of managing challenges posed by emerging issues and trends.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 9,
+        topicTitle: "41.3.08 Emerging Issues and Trends",
+        subTopics: ["Emerging issues and trends", "Challenges of emerging issues", "Coping with challenges"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 41.3.08 Emerging Issues and Trends.\n• Explain coping with challenges.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 10,
-            "topicTitle": "Community Partnership Skills Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Community Partnership Skills",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Community Partnership Skills.\n\u2022 Analyze professional case scenarios in Community Partnership Skills.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 10,
+        topicTitle: "Applied Practice & Case Studies in Community Partnership Skills (Week 10)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Community Partnership Skills in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
       },
       {
-            "weekNumber": 11,
-            "topicTitle": "Community Partnership Skills Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Community Partnership Skills",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Community Partnership Skills.\n\u2022 Analyze professional case scenarios in Community Partnership Skills.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 11,
+        topicTitle: "Applied Practice & Case Studies in Community Partnership Skills (Week 11)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Community Partnership Skills in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
       },
       {
-            "weekNumber": 12,
-            "topicTitle": "Community Partnership Skills Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Community Partnership Skills",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Community Partnership Skills.\n\u2022 Analyze professional case scenarios in Community Partnership Skills.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
-      }
-],
-    "references": [
-      "Kenya National Examinations Council. (2021). Diploma in Nutrition and Dietetics Regulations and Syllabuses.",
-      "Technical and Vocational Education and Training Authority (TVETA). Occupational Standards for Nutrition Technologists.",
-      "Norton, P. (2018). Introduction to Computers (7th ed.). McGraw-Hill.",
-      "Mahan, L. K., & Raymond, J. L. (2017). Krause's Food & the Nutrition Care Process (14th ed.). Elsevier.",
-      "Whitney, E., & Rolfes, S. R. (2018). Understanding Nutrition (15th ed.). Cengage Learning."
-],
-    "instructionalEquipment": [
-      "Interactive display screen and multimedia data projector",
-      "Computer workstations with TVET management software",
-      "Whiteboard and dry-erase markers",
-      "Flipcharts and instructional wall posters"
-],
+        weekNumber: 12,
+        topicTitle: "Applied Practice & Case Studies in Community Partnership Skills (Week 12)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Community Partnership Skills in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "41.3.08 Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Emerging issues and trends", "Challenges of emerging issues", "Coping with challenges"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 41.3.08 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in 41.3.08 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping with challenges.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Community Partnership Skills)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Community Partnership Skills in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
+    ],
+    references: ["Rabinowitz, P., & Fawcett, S. B. (2020). Building and Sustaining Collaborative Partnerships. Community Tool Box.", "Oakley, P. (2018). Community Involvement in Health Development: An Examination of the Critical Issues. WHO."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "nutrition_assessment_surveillance": {
-    "canonicalKey": "nutrition_assessment_surveillance",
-    "syllabusCode": "42.3.0",
-    "unitCode": "42.3.0",
-    "unitName": "Nutrition Assessment and Surveillance",
-    "moduleNumber": 3,
-    "nominalHours": 66,
-    "theoryHours": 39,
-    "practicalHours": 26,
-    "aliases": [
-      "42.3.0",
-      "Nutrition Assessment and Surveillance"
-],
-    "unitDescription": "This module unit is intended to provide the trainee with knowledge, skills and attitudes in nutrition assessment and surveillance. The trainee will be equipped with knowlcxlge on nature and comln\u2022sition of fo.xd, utilization and deficiency symptoms of nutrients in the human body.",
-    "overallCompetency": "Appreciete thc role of nutrition assessment and surveillance in nutrition and dietetics.",
-    "learningOutcomes": [
-      "Appreciete thc role of nutrition assessment and surveillance in nutrition and dietetics.",
-      "Apply nutrition assessment and surveillance principles.",
-      "Dcvclop skills in nutrition assessment techniques.",
-      "Appreeiatc the importance of nutrition information and data in nutrition assessment and surveillance.",
-      "Understand malnutrition and growth monitoring in the context of nutrition surveillance.",
-      "Conduct programme of monitoring and evaluation."
-],
-    "weeklySchedule": [
+    canonicalKey: "nutrition_assessment_surveillance",
+    syllabusCode: "42.3.0",
+    unitCode: "42.3.0",
+    unitName: "Nutrition Assessment and Surveillance",
+    moduleNumber: 3,
+    nominalHours: 66,
+    theoryHours: 36,
+    practicalHours: 30,
+    aliases: ["CND 2302", "DND 2302", "42.3.0", "Nutrition Assessment and Surveillance"],
+    unitDescription: "This module unit is intended to provide the trainee with knowledge, skills and attitudes in nutrition assessment and surveillance.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: appreciate the role of nutrition assessment and surveillance in nutrition and dietetics; apply nutrition assessment and surveillance principles; develop skills in nutrition assessment techniques.",
+    learningOutcomes: [
+      "appreciate the role of nutrition assessment and surveillance in nutrition and dietetics",
+      "apply nutrition assessment and surveillance principles",
+      "develop skills in nutrition assessment techniques",
+      "appreciate the importance of nutrition information in nutrition assessment and surveillance",
+      "understand malnutrition and growth monitoring in the context of nutrition surveillance",
+      "conduct programme monitoring and evaluation"
+    ],
+    weeklySchedule: [
       {
-            "weekNumber": 1,
-            "topicTitle": "Issues and Trends",
-            "subTopics": [
-                  "Emerging issues and trends",
-                  "Challenges poscd by emerging Issues",
-                  "Ways of managing challenges posed by emerging issues and trends"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the emerging issues and trends.\n\u2022 Discuss challenges poscd by emerging Issues.\n\u2022 Discuss ways of managing challenges posed by emerging issues and trends.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 1,
+        topicTitle: "42.3.01 Introduction to Nutrition Assessment and Surveillance",
+        subTopics: ["Meaning of terms", "Importance of nutrition assessment", "Application of nutrition assessment"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 42.3.01 Introduction to Nutrition Assessment and Surveillance.\n• Explain the functions and physiological role of nutrition assessment.\n• Explain application of nutrition assessment.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 2,
-            "topicTitle": "Assessment and Surveillance",
-            "subTopics": [
-                  "Terms",
-                  "Importance of nutrition assessment",
-                  "Application of nutrition assessment"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain terms.\n\u2022 Explain the importance of nutrition assessment.\n\u2022 Explain the application of nutrition assessment.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 2,
+        topicTitle: "42.3.02 Nutrition Assessment Techniques",
+        subTopics: ["Concept of nutrition assessment techniques", "Pregnancy monitoring and operational assessment", "Assessment of lactation", "Complementary feeding", "Growth monitoring", "Nutrition assessment equipment", "Choice of nutrition assessment techniques"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the concept of nutrition assessment techniques.\n• Explain pregnancy monitoring and operational assessment.\n• Explain assessment of lactation.\n• Explain complementary feeding.\n• Explain growth monitoring.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 3,
-            "topicTitle": "Assessmeint Tectiniqufs",
-            "subTopics": [
-                  "Concept of nutrition assessment techniques",
-                  "Nutritiou assessment equipment"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the concept of nutrition assessment techniques.\n\u2022 Describe nutritiou assessment equipment.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 3,
+        topicTitle: "42.3.03 Anthropometric Assessment",
+        subTopics: ["Importance of anthropometric assessment", "Types of anthropometric measurements", "Indices of anthropometric measurements"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the functions and physiological role of anthropometric assessment.\n• Classify anthropometric measurements and describe their categories.\n• Explain indices of anthropometric measurements.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 4,
-            "topicTitle": "Anthropometric Assessment",
-            "subTopics": [
-                  "Importance of anthropometric assessment",
-                  "Types of anthropometric measurements",
-                  "Indices of anthropometry"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain importance of anthropometric assessment.\n\u2022 Discuss types of anthropometric measurements.\n\u2022 Explain indices of anthropometry.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 4,
+        topicTitle: "42.3.04 Biochemical Assessment",
+        subTopics: ["Meaning of terms", "Types of biochemical assessment", "Biochemical reference values", "Strengths and limitations of biochemical assessment"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 42.3.04 Biochemical Assessment.\n• Classify biochemical assessment and describe their categories.\n• Evaluate biochemical reference values.\n• Explain strengths and limitations of biochemical assessment.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 5,
-            "topicTitle": "Biochemical Assessment",
-            "subTopics": [
-                  "of terms",
-                  "assessments",
-                  "reference",
-                  "values",
-                  "and limitations",
-                  "biochemical"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 D) explain the meaning of terms discuss types of biochemical assessment explain biochemical reference values describe the strengths and limitations of biochemical assessment.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 5,
+        topicTitle: "42.3.05 Clinical Examination",
+        subTopics: ["Clinical examinations", "Strength and limitation of clinical examination", "Indices of clinical examination", "Application of clinical examination"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain clinical examinations.\n• Explain strength and limitation of clinical examination.\n• Explain indices of clinical examination.\n• Explain application of clinical examination.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 6,
-            "topicTitle": "Nutrition Assessment and Surveillance Core Topic 6",
-            "subTopics": [
-                  "Terms",
-                  "Importance of nutrition assessment",
-                  "Application of nutrition assessment"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain terms.\n\u2022 Explain the importance of nutrition assessment.\n\u2022 Explain the application of nutrition assessment.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 6,
+        topicTitle: "42.3.06 Dietary Surveys",
+        subTopics: ["Measurements used in dietary survey", "Factors that influence the choice of dietary methods", "Dietary recall questionnaires", "Food frequency questionnaires", "Diet history", "Advantages and disadvantages of dietary survey"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain measurements used in dietary survey.\n• Explain factors that influence the choice of dietary methods.\n• Explain dietary recall questionnaires.\n• Explain food frequency questionnaires.\n• Explain diet history.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 7,
-            "topicTitle": "Assessment Techniques",
-            "subTopics": [
-                  "Concept of nutrition assessment techniques",
-                  "Nutrition assessment equipment"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the Concept of nutrition assessment techniques.\n\u2022 Describe nutrition assessment equipment.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 7,
+        topicTitle: "42.3.07 Nutrition Surveillance",
+        subTopics: ["Meaning of terms", "Importance of nutrition surveillance", "Characteristics of surveillance", "Principles of nutrition surveillance"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 42.3.07 Nutrition Surveillance.\n• Explain the functions and physiological role of nutrition surveillance.\n• Explain characteristics of surveillance.\n• Describe the principles of nutrition surveillance.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 8,
-            "topicTitle": "Nutrition Assessment and Surveillance Core Topic 8",
-            "subTopics": [
-                  "Importance of anthropometric assessment",
-                  "Types of anthropometric measurements",
-                  "Indices of anthropometry"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain importance of anthropometric assessment.\n\u2022 Discuss types of anthropometric measurements.\n\u2022 Explain indices of anthropometry.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Nutrition Assessment and Surveillance)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Nutrition Assessment and Surveillance.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
       },
       {
-            "weekNumber": 9,
-            "topicTitle": "Biochemical Assessment",
-            "subTopics": [
-                  "of terms",
-                  "of biochemical",
-                  "assessments",
-                  "reference",
-                  "values",
-                  "and limitations"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 D) explain the meaning of terms discuss types of biochemical assessment explain biochemical reference values describe the strengths and limitations of biochemical assessment.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 9,
+        topicTitle: "42.3.08 Surveillance Information",
+        subTopics: ["Nutrition surveillance information", "Importance of nutrition surveillance information", "Principal users of surveillance information"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain nutrition surveillance information.\n• Explain the functions and physiological role of nutrition surveillance information.\n• Explain principal users of surveillance information.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 10,
-            "topicTitle": "Examination",
-            "subTopics": [
-                  "Clinical cxarmna:ions",
-                  "Strength and limitation of clinical examination",
-                  "Indices of clinical examination",
-                  "Application of clinical examination"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Discuss clinical cxarmna:ions.\n\u2022 Explain the strength and limitation of clinical examination.\n\u2022 Describe indices of clinical examination.\n\u2022 Discuss application of clinical examination.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 10,
+        topicTitle: "42.3.09 Types of Nutrition Survey",
+        subTopics: ["Meaning of terms", "Rapid appraisal", "Rapid assessment", "Baseline survey", "Follow-up survey"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 42.3.09 Types of Nutrition Survey.\n• Explain rapid appraisal.\n• Explain rapid assessment.\n• Explain baseline survey.\n• Explain follow-up survey.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 11,
-            "topicTitle": "Nutrition Assessment and Surveillance Core Topic 11",
-            "subTopics": [
-                  "Measurements used in dietary surveys",
-                  "Factors that influence the choice of dietary sung methods",
-                  "Dietary recall questionnaires measurements",
-                  "Dcscribe food frequency questionnarre",
-                  "Use of diet history in dietary assessment",
-                  "Advantages and disadvantages of dietary survey"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Discuss measurements used in dietary surveys.\n\u2022 Explain factors that influence the choice of dietary sung methods.\n\u2022 Discuss dietary recall questionnaires measurements.\n\u2022 Dcscribe food frequency questionnarre.\n\u2022 Explain the use of diet history in dietary assessment.\n\u2022 Discuss the advantages and disadvantages of dietary survey.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 11,
+        topicTitle: "42.3.10 Programme Monitoring and Evaluation",
+        subTopics: ["Introduction to programme monitoring and evaluation", "Programme planning", "Programme implementation", "Programme monitoring", "Programme evaluation", "Theory and methodologies of programme and system planning", "Monitoring and evaluation"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain introduction to programme monitoring and evaluation.\n• Explain programme planning.\n• Explain programme implementation.\n• Explain programme monitoring.\n• Explain programme evaluation.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 12,
-            "topicTitle": "Nutrition Assessment and Surveillance Core Topic 12",
-            "subTopics": [
-                  "Terms",
-                  "Importance of nutrition surveillance"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain terms.\n\u2022 Discuss importance of nutrition surveillance.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 12,
+        topicTitle: "42.3.12 Emerging Issues and Trends",
+        subTopics: ["Identification of trends", "Challenges", "Coping mechanisms"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain identification of trends.\n• Discuss emerging issues, trends and coping strategies in 42.3.12 Emerging Issues and Trends.\n• Explain coping mechanisms.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 13,
-            "topicTitle": "Nutrition Survey C}.ioto",
-            "subTopics": [
-                  "Terms",
-                  "Various types of nutrition surveys"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the meaning of terms.\n\u2022 Describe the various types of nutrition surveys.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 13,
+        topicTitle: "42.3.12 Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Identification of trends", "Challenges", "Coping mechanisms"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain identification of trends.\n• Discuss emerging issues, trends and coping strategies in 42.3.12 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping mechanisms.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
       },
       {
-            "weekNumber": 14,
-            "topicTitle": "Nutrition Assessment and Surveillance Core Topic 14",
-            "subTopics": [
-                  "Emerging",
-                  "Challenges poscd by the emerging issues and trends",
-                  "Ways of coping with challenges"
-            ],
-            "hours": 5,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Discuss the emerging.\n\u2022 Discuss the challenges poscd by the emerging issues and trends.\n\u2022 Explain ways of coping with challenges.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
-      }
-],
-    "references": [
-      "Mahan, L. K., & Raymond, J. L. (2017). Krause's Food & the Nutrition Care Process (14th ed.). Elsevier.",
-      "Whitney, E., & Rolfes, S. R. (2018). Understanding Nutrition (15th ed.). Cengage Learning.",
-      "Ministry of Health (MOH) Kenya. (2020). National Guidelines for Healthy Diets and Physical Activity.",
-      "World Health Organization. (2019). Essential Nutrition Actions: Mainstreaming nutrition through the life-course.",
-      "Kenya National Examinations Council. (2021). Diploma in Nutrition and Dietetics Regulations and Syllabuses.",
-      "Technical and Vocational Education and Training Authority (TVETA). Occupational Standards for Nutrition Technologists."
-],
-    "instructionalEquipment": [
-      "Standard infant and adult stadiometers and height boards",
-      "Calibrated electronic weighing scales and SECA mother-child scales",
-      "Mid-Upper Arm Circumference (MUAC) tapes (child and adult)",
-      "Food composition tables and standardized dietary exchange lists",
-      "Demonstration food basket models and portion measurement tools",
-      "Interactive display screen and multimedia data projector",
-      "Computer workstations with TVET management software"
-],
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Nutrition Assessment and Surveillance)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Nutrition Assessment and Surveillance in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
+    ],
+    references: ["Gibson, R. S. (2019). Principles of Nutritional Assessment (2nd ed.). Oxford University Press.", "WHO. (2020). Training Course on Child Growth Assessment. World Health Organization."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "product_development_marketing_sales": {
-    "canonicalKey": "product_development_marketing_sales",
-    "syllabusCode": "43.3.0",
-    "unitCode": "43.3.0",
-    "unitName": "Product Development, Marketing and Sales",
-    "moduleNumber": 3,
-    "nominalHours": 55,
-    "theoryHours": 33,
-    "practicalHours": 22,
-    "aliases": [
-      "43.3.0",
-      "Product Development, Marketing and Sales"
-],
-    "unitDescription": "This modulc unit is intended to impart the trainee with knowledge, skills and attitudcs required in development, marketing and sale of industrial products. The trainee will acquire knowledgc on stages of product developmcnt and identification to commercialization and imparted with skills of managing the marketing of the product.",
-    "overallCompetency": "Describe the stages in product development from ideas to commercialization.",
-    "learningOutcomes": [
-      "Describe the stages in product development from ideas to commercialization.",
-      "Apply Skills ofplanning process in commercialization of new products.",
-      "Market the new products.",
-      "Evaluate product sales."
-],
-    "weeklySchedule": [
+    canonicalKey: "product_development_marketing_sales",
+    syllabusCode: "43.3.0",
+    unitCode: "43.3.0",
+    unitName: "Product Development, Marketing and Sales",
+    moduleNumber: 3,
+    nominalHours: 55,
+    theoryHours: 30,
+    practicalHours: 25,
+    aliases: ["43.3.0", "Product Development, Marketing and Sales"],
+    unitDescription: "This module unit is intended to impart the trainee with knowledge and skills required in product development, marketing and sale of industrial products, and to impart skills of marketing the product.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: describe the stages in product development from ideas; demonstrate skills of planning process in commercialization of new products; develop skills of marketing the product.",
+    learningOutcomes: [
+      "describe the stages in product development from ideas",
+      "demonstrate skills of planning process in commercialization of new products",
+      "develop skills of marketing the product",
+      "evaluate product sales"
+    ],
+    weeklySchedule: [
       {
-            "weekNumber": 1,
-            "topicTitle": "Product Development, Marketing and Sales Core Topic 1",
-            "subTopics": [
-                  "Emerging",
-                  "Challenges poscd by the emerging issues and trends",
-                  "Ways of coping with challenges"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Discuss the emerging.\n\u2022 Discuss the challenges poscd by the emerging issues and trends.\n\u2022 Explain ways of coping with challenges.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 1,
+        topicTitle: "43.3.01 Introduction to Product Development",
+        subTopics: ["Meaning of terms", "Importance of product development", "Levels of product development", "Product life cycle"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 43.3.01 Introduction to Product Development.\n• Explain the functions and physiological role of product development.\n• Explain levels of product development.\n• Explain product life cycle.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 2,
-            "topicTitle": "Introduction",
-            "subTopics": [
-                  "Terms",
-                  "Importance of product development",
-                  "Levels of product development",
-                  "Life cycle of a product"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the meaning of terms.\n\u2022 Explain the importance of product development.\n\u2022 Describe the levels of product development.\n\u2022 Describe the life cycle of a product.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 2,
+        topicTitle: "43.3.02 Idea Generation and Concept Development",
+        subTopics: ["Sources of ideas", "Processing of ideas", "Information gathering", "Information evaluation", "Feasibility analysis"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Identify dietary sources of ideas.\n• Describe the structure, components and function of processing of ideas.\n• Explain information gathering.\n• Explain information evaluation.\n• Explain feasibility analysis.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 3,
-            "topicTitle": "Idea Generation Development",
-            "subTopics": [
-                  "Identi$ sources of ideas for product development",
-                  "Idea processing",
-                  "Information gathering process",
-                  "Information",
-                  "Analyse feasibility of ideas and concepts"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identi$ sources of ideas for product development.\n\u2022 Describe idea processing.\n\u2022 Describe information gathering process.\n\u2022 Evaluate information.\n\u2022 Analyse feasibility of ideas and concepts.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 3,
+        topicTitle: "43.3.03 Prototype Production and Testing",
+        subTopics: ["Production of prototypes", "Evaluation of prototype products", "Prototype modification"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain production of prototypes.\n• Explain evaluation of prototype products.\n• Explain prototype modification.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 4,
-            "topicTitle": "Production and Testing",
-            "subTopics": [
-                  "Produce prototypes from a concept specification",
-                  "Carry out prototype product evaluation",
-                  "Modify prototype based on evaluation",
-                  "Commercial viability"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Produce prototypes from a concept specification.\n\u2022 Carry out prototype product evaluation.\n\u2022 Modify prototype based on evaluation.\n\u2022 Outline commercial viability.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 4,
+        topicTitle: "43.3.04 Initial Product Run",
+        subTopics: ["Factors affecting new product development", "Causes of new product failure", "Output levels", "Quality control and quality checks", "Process efficacy analysis"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Analyze factors affecting new product development.\n• Analyze factors affecting new product failure.\n• Explain output levels.\n• Explain quality control and quality checks.\n• Describe the structure, components and function of process efficacy analysis.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 5,
-            "topicTitle": "Product Development, Marketing and Sales Core Topic 5",
-            "subTopics": [
-                  "Produce",
-                  "Perform commercial viability assessment of a"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Produce.\n\u2022 Perform commercial viability assessment of a.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 5,
+        topicTitle: "43.3.05 Market Sampling",
+        subTopics: ["Market segmentation", "Product trials", "Customer reactions"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain market segmentation.\n• Explain product trials.\n• Explain customer reactions.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 6,
-            "topicTitle": "Initial Product Run",
-            "subTopics": [
-                  "Factors affecting new product development",
-                  "Causes of new product failure"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the factors affecting new product development.\n\u2022 Explain the causes of new product failure.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 6,
+        topicTitle: "43.3.06 Product Launch",
+        subTopics: ["Product launching methods", "Product launch timing", "Product launch evaluation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain product launching methods.\n• Explain product launch timing.\n• Explain product launch evaluation.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 7,
-            "topicTitle": "Product Development, Marketing and Sales Core Topic 7",
-            "subTopics": [
-                  "Produce adequate developed product units",
-                  "Analyse process efficacy Of initial product runs"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Produce adequate developed product units.\n\u2022 Analyse process efficacy Of initial product runs.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 7,
+        topicTitle: "43.3.07 Product Commercialization",
+        subTopics: ["Product plan", "Financial plan", "Pre-launch trial", "Marketing plan", "Operations plan", "Financial analysis and projection"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain product plan.\n• Explain financial plan.\n• Explain pre-launch trial.\n• Explain marketing plan.\n• Explain operations plan.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 8,
-            "topicTitle": "Product Development, Marketing and Sales Core Topic 8",
-            "subTopics": [
-                  "Carry out market segmentation",
-                  "Carry out",
-                  "Customer"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Carry out market segmentation.\n\u2022 Carry out.\n\u2022 Evaluate customer.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Product Development, Marketing and Sales)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Product Development, Marketing and Sales.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
       },
       {
-            "weekNumber": 9,
-            "topicTitle": "Product Development, Marketing and Sales Core Topic 9",
-            "subTopics": [
-                  "Can-y out product trials on selected consumers",
-                  "Customer reactions"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Can-y out product trials on selected consumers.\n\u2022 Evaluate customer reactions.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 9,
+        topicTitle: "43.3.08 Marketing Management",
+        subTopics: ["Marketing management principles", "Marketing mix: Product, Place, Price, Promotion", "Entry strategies"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain marketing management principles.\n• Explain marketing mix: Product, Place, Price, Promotion.\n• Explain entry strategies.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 10,
-            "topicTitle": "Product Development, Marketing and Sales Core Topic 10",
-            "subTopics": [
-                  "Types of product launch",
-                  "Timing of product launch",
-                  "Product launch"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Describe types of product launch.\n\u2022 Discuss timing of product launch.\n\u2022 Evaluate product launch.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 10,
+        topicTitle: "43.3.09 Product Sales",
+        subTopics: ["Salesmanship", "Sales process", "Sales management", "Sales evaluation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain salesmanship.\n• Describe the structure, components and function of sales process.\n• Explain sales management.\n• Explain sales evaluation.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 11,
-            "topicTitle": "Product",
-            "subTopics": [
-                  "Core concepts and practical competencies"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 F) develop a product plan prepare a financial plan Carry out pre- launch trials design a marketing plan develop an operations plan perform a financial analysis and projection Coment plan Financial plan Pre-launch trial Marketing plan Operations plan Financial analysis and projcction.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 11,
+        topicTitle: "43.3.10 Emerging Issues and Trends",
+        subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Managing challenges posed by emerging issues and trends"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 43.3.10 Emerging Issues and Trends.\n• Explain managing challenges posed by emerging issues and trends.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 12,
-            "topicTitle": "Product Development, Marketing and Sales Core Topic 12",
-            "subTopics": [
-                  "Prepare an operations plan",
-                  "Prepare a financial analysis and projection report"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Prepare an operations plan.\n\u2022 Prepare a financial analysis and projection report.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 12,
+        topicTitle: "Applied Practice & Case Studies in Product Development, Marketing and Sales (Week 12)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Product Development, Marketing and Sales in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
       },
       {
-            "weekNumber": 13,
-            "topicTitle": "Marketing Management",
-            "subTopics": [
-                  "Marketing management principles",
-                  "Marketing mix",
-                  "Entry strategies for a new product"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Discuss marketing management principles.\n\u2022 Explain marketing mix.\n\u2022 Describe entry strategies for a new product.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 13,
+        topicTitle: "43.3.10 Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Managing challenges posed by emerging issues and trends"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 43.3.10 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in 43.3.10 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain managing challenges posed by emerging issues and trends.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
       },
       {
-            "weekNumber": 14,
-            "topicTitle": "Product Development, Marketing and Sales Core Topic 16",
-            "subTopics": [
-                  "Meaning and purpose of management",
-                  "Management schools of thought",
-                  "M anagement theory",
-                  "Management functions"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the meaning and purpose of management.\n\u2022 Discuss management schools of thought.\n\u2022 Discuss m anagement theory.\n\u2022 Explain management functions.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
-      }
-],
-    "references": [
-      "Kenya National Examinations Council. (2021). Diploma in Nutrition and Dietetics Regulations and Syllabuses.",
-      "Technical and Vocational Education and Training Authority (TVETA). Occupational Standards for Nutrition Technologists.",
-      "Norton, P. (2018). Introduction to Computers (7th ed.). McGraw-Hill.",
-      "Mahan, L. K., & Raymond, J. L. (2017). Krause's Food & the Nutrition Care Process (14th ed.). Elsevier.",
-      "Whitney, E., & Rolfes, S. R. (2018). Understanding Nutrition (15th ed.). Cengage Learning."
-],
-    "instructionalEquipment": [
-      "Interactive display screen and multimedia data projector",
-      "Computer workstations with TVET management software",
-      "Whiteboard and dry-erase markers",
-      "Flipcharts and instructional wall posters"
-],
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Product Development, Marketing and Sales)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Product Development, Marketing and Sales in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
+    ],
+    references: ["Earle, M., Earle, R., & Anderson, A. (2018). Food Product Development: Maximising Success. Woodhead Publishing.", "Kotler, P., & Armstrong, G. (2020). Principles of Marketing (18th ed.). Pearson."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "industrial_organization_management": {
-    "canonicalKey": "industrial_organization_management",
-    "syllabusCode": "44.3.0",
-    "unitCode": "44.3.0",
-    "unitName": "Industrial Organization and Management",
-    "moduleNumber": 3,
-    "nominalHours": 44,
-    "theoryHours": 26,
-    "practicalHours": 17,
-    "aliases": [
-      "44.3.0",
-      "Industrial Organization and Management"
-],
-    "unitDescription": "This module unit is intended to expose the trainee to the practical experience in project planning and execution. Thc trainee is therefore expected to plan, gather, review and present projegt materials and information in accordance with given specifications.",
-    "overallCompetency": "At the end of the module unit, the traince should be able to:.",
-    "learningOutcomes": [
-      "At the end of the module unit, the traince should be able to:.",
-      "Carry out a proj ect.",
-      "Apply various methodologies in data collection for different types of projects.",
-      "Analyze and interpret project data and make conclusions based on the subject matter.",
-      "Present a project report in an organized manner, taking in consideration quality of materials, neatness and the standard format(s)."
-],
-    "weeklySchedule": [
+    canonicalKey: "industrial_organization_management",
+    syllabusCode: "44.3.0",
+    unitCode: "44.3.0",
+    unitName: "Industrial Organization and Management",
+    moduleNumber: 3,
+    nominalHours: 55,
+    theoryHours: 35,
+    practicalHours: 20,
+    aliases: ["44.3.0", "Industrial Organization and Management"],
+    unitDescription: "This module unit is intended to provide the trainee with knowledge, skills and attitudes to perform effectively in an organization.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: appreciate basic managerial skills in a working environment; apply supervisory knowledge and skills to enhance productivity and quality of products; understand the fundamental aspects of labour laws and industrial relations.",
+    learningOutcomes: [
+      "appreciate basic managerial skills in a working environment",
+      "apply supervisory knowledge and skills to enhance productivity and quality of products",
+      "understand the fundamental aspects of labour laws and industrial relations",
+      "cope with emerging issues and trends in industrial organisation and management"
+    ],
+    weeklySchedule: [
       {
-            "weekNumber": 1,
-            "topicTitle": "Industrial Organization and Management Core Topic 1 (Part 1)",
-            "subTopics": [
-                  "Meaning and purpose of management",
-                  "Management schools of thought"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the meaning and purpose of management.\n\u2022 Discuss management schools of thought.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 1,
+        topicTitle: "44.3.01 Introduction to Management & 44.3.02 Organization",
+        subTopics: ["Meaning and purpose of management", "Management schools of thought", "Management theory", "Management functions", "Structure and design", "Principles of organization", "Relationship within an organization", "Delegation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain meaning and purpose of management.\n• Explain management schools of thought.\n• Explain management theory.\n• Explain management functions.\n• Explain structure and design.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 2,
-            "topicTitle": "Industrial Organization and Management Core Topic 1 (Part 2)",
-            "subTopics": [
-                  "M anagement theory",
-                  "Management functions"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Discuss m anagement theory.\n\u2022 Explain management functions.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 2,
+        topicTitle: "44.3.03 Management Styles",
+        subTopics: ["Meaning of terms", "Management styles"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 44.3.03 Management Styles.\n• Explain management styles.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 3,
-            "topicTitle": "Industrial Organization and Management Core Topic 2",
-            "subTopics": [
-                  "Construct quality control charts",
-                  "Statistical quality control and sampling"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Construct quality control charts.\n\u2022 Demonstrate statistical quality control and sampling.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 3,
+        topicTitle: "44.3.04 Production",
+        subTopics: ["Types of production", "Requirements", "Planning", "Control"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Classify production and describe their categories.\n• Determine and calculate recommended dietary allowances and nutrient requirements.\n• Explain planning.\n• Explain control.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 4,
-            "topicTitle": "Industrial Organization and Management Core Topic 3",
-            "subTopics": [
-                  "Core concepts and practical competencies"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the meaning of terms describe the factors of describe the relationship between scarce resources and decision making explain the production curve explain demand and supply curves.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 4,
+        topicTitle: "44.3.05 Material Control",
+        subTopics: ["Sources of information", "Purchasing procedure", "Receiving procedure", "Types of stores", "Filing"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Identify dietary sources of information.\n• Explain purchasing procedure.\n• Explain receiving procedure.\n• Classify stores and describe their categories.\n• Explain filing.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 5,
-            "topicTitle": "Industrial Organization and Management Core Topic 4",
-            "subTopics": [
-                  "of terms",
-                  "of insurance",
-                  "of insurance",
-                  "Re-insurance",
-                  "insurance",
-                  "Subrogation"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 F) explain the meaning of terms explain the purpose of insurance state the tYiB of insurance explain re-insurance explain double insurance explain subrogation 44.3.08Tl 44.3.osn .'1'.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 5,
+        topicTitle: "44.3.06 Quality Control",
+        subTopics: ["Meaning and importance of quality control", "Concept of quality", "Statistical quality control and sampling", "Quality control charts", "Standardization", "Process control and quality control", "Quality control cycles and their uses", "Quality cost effects and implementation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain meaning and importance of quality control.\n• Explain the concept of quality.\n• Explain statistical quality control and sampling.\n• Interpret and apply quality control charts.\n• Explain standardization.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 6,
-            "topicTitle": "Office Prachce",
-            "subTopics": [
-                  "Functions of an office",
-                  "Main considerations for an office environment"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 State the functions of an office.\n\u2022 Explain the main considerations for an office environment.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 6,
+        topicTitle: "44.3.07 Economics",
+        subTopics: ["Meaning of terms", "Factors of production", "Scarce resources and decision making", "Production possibility curve (frontier)", "Demand and supply curves"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 44.3.07 Economics.\n• Explain factors of production.\n• Explain scarce resources and decision making.\n• Explain production possibility curve (frontier).\n• Explain demand and supply curves.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 7,
-            "topicTitle": "And Trends",
-            "subTopics": [
-                  "Emerging issues and trends",
-                  "Challenges    by emerging",
-                  "Ways of managing challenges poscd by emerging issues and trends"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the emerging issues and trends.\n\u2022 Discuss challenges    by emerging.\n\u2022 Discuss ways of managing challenges poscd by emerging issues and trends.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 7,
+        topicTitle: "44.3.08 Insurance",
+        subTopics: ["Meaning of terms", "Purpose of insurance", "Types of insurance", "Re-insurance", "Double insurance", "Subrogation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 44.3.08 Insurance.\n• Explain purpose of insurance.\n• Classify insurance and describe their categories.\n• Explain re-insurance.\n• Explain double insurance.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 8,
-            "topicTitle": "Research Project Work",
-            "subTopics": [
-                  "Project work",
-                  "Importance of a project work",
-                  "Types of research projects"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the meaning of project work.\n\u2022 Explain importance of a project work.\n\u2022 Identify types of research projects.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Industrial Organization and Management)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Industrial Organization and Management.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
       },
       {
-            "weekNumber": 9,
-            "topicTitle": "Project Proposal (Part 1)",
-            "subTopics": [
-                  "Various types of research projects",
-                  "Importance of a research.project proposal"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Describe the various types of research projects.\n\u2022 Explain the importance of a research.project proposal.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 9,
+        topicTitle: "44.3.09 Human Resource Management",
+        subTopics: ["Meaning of terms", "Functions of human resource manager", "Human resource process"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 44.3.09 Human Resource Management.\n• Explain the functions and physiological role of human resource manager.\n• Describe the structure, components and function of human resource process.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 10,
-            "topicTitle": "Project Proposal (Part 2)",
-            "subTopics": [
-                  "Main factors to consider when selecting a research project",
-                  "Research project objectives",
-                  "Prepare a research project proposal"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify the main factors to consider when selecting a research project.\n\u2022 Formulate research project objectives.\n\u2022 Prepare a research project proposal.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 10,
+        topicTitle: "44.3.10 Labour Laws and Relations",
+        subTopics: ["Conditions of employment", "Collective bargaining", "Industrial disputes"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain conditions of employment.\n• Explain collective bargaining.\n• Explain industrial disputes.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 11,
-            "topicTitle": "Industrial Organization and Management Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Industrial Organization and Management",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Industrial Organization and Management.\n\u2022 Analyze professional case scenarios in Industrial Organization and Management.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 11,
+        topicTitle: "44.3.11 Office Organization and Management",
+        subTopics: ["Filing systems", "Filing methods and equipment", "Indexing", "Computerized filing", "Reprography: typing, photocopying, duplicating", "Essentials of public relations: intrinsic, extrinsic", "Creation of conducive office environment"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Describe the structure, components and function of filing systems.\n• Demonstrate safe handling and operation of filing methods and equipment.\n• Explain indexing.\n• Explain computerized filing.\n• Explain reprography: typing, photocopying, duplicating.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 12,
-            "topicTitle": "Industrial Organization and Management Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Industrial Organization and Management",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 4,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Industrial Organization and Management.\n\u2022 Analyze professional case scenarios in Industrial Organization and Management.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
-      }
-],
-    "references": [
-      "Kenya National Examinations Council. (2021). Diploma in Nutrition and Dietetics Regulations and Syllabuses.",
-      "Technical and Vocational Education and Training Authority (TVETA). Occupational Standards for Nutrition Technologists.",
-      "Norton, P. (2018). Introduction to Computers (7th ed.). McGraw-Hill.",
-      "Mahan, L. K., & Raymond, J. L. (2017). Krause's Food & the Nutrition Care Process (14th ed.). Elsevier.",
-      "Whitney, E., & Rolfes, S. R. (2018). Understanding Nutrition (15th ed.). Cengage Learning."
-],
-    "instructionalEquipment": [
-      "Interactive display screen and multimedia data projector",
-      "Computer workstations with TVET management software",
-      "Whiteboard and dry-erase markers",
-      "Flipcharts and instructional wall posters"
-],
+        weekNumber: 12,
+        topicTitle: "44.3.12 Emerging Issues and Trends",
+        subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Managing challenges posed by emerging issues and trends"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 44.3.12 Emerging Issues and Trends.\n• Explain managing challenges posed by emerging issues and trends.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "44.3.12 Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Managing challenges posed by emerging issues and trends"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 44.3.12 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in 44.3.12 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain managing challenges posed by emerging issues and trends.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Industrial Organization and Management)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Industrial Organization and Management in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
+    ],
+    references: ["Cole, G. A., & Kelly, P. (2020). Management Theory and Practice (8th ed.). Cengage Learning.", "Robbins, S. P., & Coulter, M. (2021). Management (15th ed.). Pearson."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "trade_project": {
-    "canonicalKey": "trade_project",
-    "syllabusCode": "45.3.0",
-    "unitCode": "45.3.0",
-    "unitName": "Trade Project",
-    "moduleNumber": 3,
-    "nominalHours": 715,
-    "theoryHours": 429,
-    "practicalHours": 286,
-    "aliases": [
-      "45.3.0",
-      "Trade Project"
-],
-    "unitDescription": "TO RESEARCH PROJECT WORK Competence The trainee should have the ability to differentiate between types of projects in a firm's project work Theory Specific Objectives By the end of the sub- module unit, the trainee should be able to: a) explain the meaning of project work b) explain importance of a project work c) identify types of research projects Content Meaning of project work Importance of project work Types of projects Practice Specific Objective By the end of the sub- module unit, thc trainee should be able to identify types of research projects Content Identifying types of research projects 465  \ufeff",
-    "overallCompetency": "Demonstrate comprehensive mastery of Trade Project according to KNEC TVET occupational standards.",
-    "learningOutcomes": [
-      "Demonstrate comprehensive mastery of Trade Project according to KNEC TVET occupational standards."
-],
-    "weeklySchedule": [
+    canonicalKey: "trade_project",
+    syllabusCode: "45.3.0",
+    unitCode: "45.3.0",
+    unitName: "Trade Project",
+    moduleNumber: 3,
+    nominalHours: 110,
+    theoryHours: 20,
+    practicalHours: 90,
+    aliases: ["CND 2306", "45.3.0", "Trade Project"],
+    unitDescription: "The module unit is intended to develop the trainee's ability to carry out project work.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: carry out a project; apply various methodologies in data collection for different types of projects; analyze and interpret project data and make conclusions based on the subject matter.",
+    learningOutcomes: [
+      "carry out a project",
+      "apply various methodologies in data collection for different types of projects",
+      "analyze and interpret project data and make conclusions based on the subject matter",
+      "present a project report in an organized manner, taking into consideration quality of materials, neatness and the standard format(s)"
+    ],
+    weeklySchedule: [
       {
-            "weekNumber": 1,
-            "topicTitle": "Research Project Work",
-            "subTopics": [
-                  "Project work",
-                  "Importance of a project work",
-                  "Types of research projects"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the meaning of project work.\n\u2022 Explain importance of a project work.\n\u2022 Identify types of research projects.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 1,
+        topicTitle: "45.3.01 Introduction to Research Project Work",
+        subTopics: ["Meaning of project work", "Importance of project work", "Types of projects"],
+        hours: 8,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain meaning of project work.\n• Explain the functions and physiological role of project work.\n• Classify projects and describe their categories.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 2,
-            "topicTitle": "Project Proposal (Part 1)",
-            "subTopics": [
-                  "Various types of research projects",
-                  "Importance of a research.project proposal"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Describe the various types of research projects.\n\u2022 Explain the importance of a research.project proposal.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 2,
+        topicTitle: "45.3.02 Research Project Proposal",
+        subTopics: ["Types of research projects", "Importance of a research project proposal", "Factors to consider in selecting a research project: type of project; sources of data; quality specifications; available technology; personnel requirements", "Research project objectives", "Preparation of a research project proposal"],
+        hours: 8,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Classify research projects and describe their categories.\n• Explain the functions and physiological role of a research project proposal.\n• Determine and calculate recommended dietary allowances and nutrient requirements.\n• Explain research project objectives.\n• Describe methods and procedures for a research project proposal.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 3,
-            "topicTitle": "Project Proposal (Part 2)",
-            "subTopics": [
-                  "Main factors to consider when selecting a research project",
-                  "Research project objectives",
-                  "Prepare a research project proposal"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify the main factors to consider when selecting a research project.\n\u2022 Formulate research project objectives.\n\u2022 Prepare a research project proposal.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 3,
+        topicTitle: "45.3.03 Methodologies",
+        subTopics: ["Sampling", "Instruments for data collection", "Data collection", "Methods of data analysis", "Procedure in carrying out different types of research projects"],
+        hours: 8,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain sampling.\n• Explain instruments for data collection.\n• Explain data collection.\n• Describe methods and procedures for data analysis.\n• Explain procedure in carrying out different types of research projects.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 4,
-            "topicTitle": "45304t1 45304t2",
-            "subTopics": [
-                  "Sources Of research project data",
-                  "Data collection methods'"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify sources Of research project data.\n\u2022 Describe data collection methods'.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 4,
+        topicTitle: "45.3.04 Data Collection",
+        subTopics: ["Sources of research project data", "Data collection methods/procedures"],
+        hours: 8,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Identify dietary sources of research project data.\n• Explain data collection methods/procedures.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 5,
-            "topicTitle": "45304t1 45304t2",
-            "subTopics": [
-                  "Prepare different data collection tools",
-                  "Collect data for a given research project"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Prepare different data collection tools.\n\u2022 Collect data for a given research project.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 5,
+        topicTitle: "45.3.05 Data Presentation, Analysis and Interpretation",
+        subTopics: ["Data presentation", "Data analysis", "Data interpretation process"],
+        hours: 8,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain data presentation.\n• Explain data analysis.\n• Describe the structure, components and function of data interpretation process.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 6,
-            "topicTitle": "Trade Project Core Topic 5 (Part 1)",
-            "subTopics": [
-                  "Write the final report emerging isszzs Theory Specific By the eza module should aF,e to:",
-                  "Issues"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Write the final report emerging isszzs Theory Specific By the eza module should aF,e to:.\n\u2022 Explain issues.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 6,
+        topicTitle: "45.3.06 Report Writing",
+        subTopics: ["Project report", "Presentation of report"],
+        hours: 8,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain project report.\n• Explain presentation of report.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 7,
-            "topicTitle": "Trade Project Core Topic 5 (Part 2)",
-            "subTopics": [
-                  "Posed 'ey issues and reds",
-                  "Ways   of a project",
-                  "Make a presentation of project work"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Discuss posed 'ey issues and reds.\n\u2022 Discuss ways   of a project.\n\u2022 Make a presentation of project work.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 7,
+        topicTitle: "45.3.07 Emerging Issues and Trends",
+        subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Coping with challenges posed by emerging issues and trends"],
+        hours: 8,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 45.3.07 Emerging Issues and Trends.\n• Explain coping with challenges posed by emerging issues and trends.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
-            "weekNumber": 8,
-            "topicTitle": "Trade Project Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Trade Project",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Trade Project.\n\u2022 Analyze professional case scenarios in Trade Project.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Trade Project)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 8,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Trade Project.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
       },
       {
-            "weekNumber": 9,
-            "topicTitle": "Trade Project Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Trade Project",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Trade Project.\n\u2022 Analyze professional case scenarios in Trade Project.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 9,
+        topicTitle: "Applied Practice & Case Studies in Trade Project (Week 9)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 8,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Trade Project in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
       },
       {
-            "weekNumber": 10,
-            "topicTitle": "Trade Project Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Trade Project",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Trade Project.\n\u2022 Analyze professional case scenarios in Trade Project.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 10,
+        topicTitle: "Applied Practice & Case Studies in Trade Project (Week 10)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 8,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Trade Project in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
       },
       {
-            "weekNumber": 11,
-            "topicTitle": "Trade Project Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Trade Project",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Trade Project.\n\u2022 Analyze professional case scenarios in Trade Project.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
+        weekNumber: 11,
+        topicTitle: "Applied Practice & Case Studies in Trade Project (Week 11)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 8,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Trade Project in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
       },
       {
-            "weekNumber": 12,
-            "topicTitle": "Trade Project Practical Applications & Case Review",
-            "subTopics": [
-                  "Practical applications of Trade Project",
-                  "Clinical and community case study analysis",
-                  "Professional occupational standards review"
-            ],
-            "hours": 6,
-            "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate integrated practical competence in Trade Project.\n\u2022 Analyze professional case scenarios in Trade Project.\n\u2022 Evaluate TVET occupational standards and best practices.",
-            "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-            "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-            "assessmentAndRemarks": "Written examinations, oral quizzes, continuous assessment tests, and practical evaluations"
-      }
-],
-    "references": [
-      "Kenya National Examinations Council. (2021). Diploma in Nutrition and Dietetics Regulations and Syllabuses.",
-      "Technical and Vocational Education and Training Authority (TVETA). Occupational Standards for Nutrition Technologists.",
-      "Norton, P. (2018). Introduction to Computers (7th ed.). McGraw-Hill.",
-      "Mahan, L. K., & Raymond, J. L. (2017). Krause's Food & the Nutrition Care Process (14th ed.). Elsevier.",
-      "Whitney, E., & Rolfes, S. R. (2018). Understanding Nutrition (15th ed.). Cengage Learning."
-],
-    "instructionalEquipment": [
-      "Interactive display screen and multimedia data projector",
-      "Computer workstations with TVET management software",
-      "Whiteboard and dry-erase markers",
-      "Flipcharts and instructional wall posters"
-],
+        weekNumber: 12,
+        topicTitle: "Applied Practice & Case Studies in Trade Project (Week 12)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 8,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Trade Project in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "45.3.07 Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Coping with challenges posed by emerging issues and trends"],
+        hours: 8,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 45.3.07 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in 45.3.07 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping with challenges posed by emerging issues and trends.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Trade Project)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 8,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Trade Project in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
+    ],
+    references: ["KNEC. (2021). Guidelines for Trade Projects in Technical Examinations. Kenya National Examinations Council.", "Mugenda, O. M., & Mugenda, A. G. (2019). Research Methods: Quantitative and Qualitative Approaches. ACTS Press."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
 };

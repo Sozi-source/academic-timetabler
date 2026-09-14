@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import {
   findCanonicalCurriculum,
   getUnitCurriculum,
+  isCompatibleUnitTitle,
   normalizeUnitCodeKey,
   type UnitCurriculumDefinition,
 } from '@/features/teaching-documents/curriculum-registry';
@@ -20,6 +21,29 @@ function isMismatchedPayload(targetName: string | undefined, payload: any): bool
   const lowTarget = targetName.toLowerCase();
   const desc = String(payload.unit?.unitDescription || payload.unitDescription || '').toLowerCase();
   const firstTopic = String(payload.content?.[0]?.topic || '').toLowerCase();
+  const payloadName = String(payload.unit?.unitName || payload.unitName || '');
+
+  // If payload defines a unitName and it is incompatible with targetName, reject as mismatch
+  if (payloadName && !isCompatibleUnitTitle(targetName, payloadName)) {
+    return true;
+  }
+
+  // If target unit is Agricultural Production / Agriculture, but payload is about Food Security
+  if (
+    (lowTarget.includes('agric') || lowTarget.includes('production')) &&
+    (desc.includes('food security') || firstTopic.includes('food security') || firstTopic.includes('concept of food security'))
+  ) {
+    return true;
+  }
+
+  // If target unit is NOT food security, but payload is about food security
+  if (
+    !lowTarget.includes('food security') &&
+    !lowTarget.includes('security') &&
+    (firstTopic.includes('food security') || firstTopic.includes('dimensions of food security'))
+  ) {
+    return true;
+  }
 
   // If target unit is NOT biochemistry, but payload is heavily biochemistry
   if (!lowTarget.includes('biochem') && (desc.includes('intermediate metabolism') || firstTopic.includes('biochemistry'))) {
@@ -39,6 +63,36 @@ function enrichWithCanonical(
 ): UnitCurriculumDefinition {
   const canonical = findCanonicalCurriculum(lookupCode, lookupName);
   if (!canonical) return def;
+
+  // Enforce semantic compatibility: never attach an unrelated canonical curriculum
+  const targetTitle = def.unitName || lookupName;
+  if (targetTitle && !isCompatibleUnitTitle(targetTitle, canonical.unitName)) {
+    return {
+      ...def,
+      learningOutcomes: [],
+      references: [],
+      instructionalEquipment: [],
+      weeklySchedule: [],
+      isAvailable: false,
+      notReadyMessage: `Curriculum content for ${def.unitCode || lookupCode} (${targetTitle}) is currently pending official TVET document ingestion.`,
+    };
+  }
+
+  if (canonical.isAvailable === false) {
+    return {
+      ...def,
+      unitDescription: canonical.unitDescription,
+      overallCompetency: canonical.overallCompetency,
+      learningOutcomes: [],
+      references: [],
+      instructionalEquipment: [],
+      weeklySchedule: [],
+      isAvailable: false,
+      notReadyMessage:
+        canonical.notReadyMessage ||
+        `Curriculum content for this unit is currently pending official TVET document ingestion.`,
+    };
+  }
 
   const isDescCorrupt = isCorruptedText(def.unitDescription);
   const isCompCorrupt = isCorruptedText(def.overallCompetency);
@@ -68,6 +122,8 @@ function enrichWithCanonical(
 
   return {
     ...def,
+    isAvailable: true,
+    notReadyMessage: canonical.notReadyMessage,
     unitDescription: !isDescCorrupt && def.unitDescription?.trim() ? def.unitDescription : canonical.unitDescription,
     overallCompetency: !isCompCorrupt && def.overallCompetency?.trim() ? def.overallCompetency : canonical.overallCompetency,
     learningOutcomes:

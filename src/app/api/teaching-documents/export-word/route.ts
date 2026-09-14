@@ -34,8 +34,15 @@ export async function GET(request: Request) {
       getAssessmentMilestones(header.academicPeriodId ?? undefined),
     ]);
 
-    if (!curriculum) {
-      return NextResponse.json({ error: 'Curriculum content not found' }, { status: 404 });
+    if (!curriculum || curriculum.isAvailable === false || (!curriculum.weeklySchedule || curriculum.weeklySchedule.length === 0)) {
+      return NextResponse.json(
+        {
+          error:
+            curriculum?.notReadyMessage ||
+            'Curriculum content for this unit is not yet ready. The verified syllabus has not been uploaded by the department.',
+        },
+        { status: 400 }
+      );
     }
 
     let docxBuffer: Buffer;

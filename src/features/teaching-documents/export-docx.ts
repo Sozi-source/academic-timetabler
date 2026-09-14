@@ -327,42 +327,53 @@ export async function buildTVETDocumentDocx(
     });
 
     // Section 3: 14-Week Topical Breakdown Table
-    children.push(
-      sectionHeader('3', 'Weekly Delivery & Topical Breakdown'),
-      new Table({
-        width: { size: 100, type: WidthType.PERCENTAGE },
-        layout: TableLayoutType.FIXED,
-        rows: [
-          new TableRow({
-            children: [
-              cell('Week', { isHeader: true, align: AlignmentType.CENTER, widthPct: 8 }),
-              cell('Topic Title', { isHeader: true, widthPct: 32 }),
-              cell('Content / Sub-topics to be Covered', { isHeader: true, widthPct: 52 }),
-              cell('Hours', { isHeader: true, align: AlignmentType.CENTER, widthPct: 8 }),
-            ],
-          }),
-          ...co.weeklySchedule.map((sched, idx) => {
-            const fill = idx % 2 === 1 ? ZEBRA_BG : 'FFFFFF';
-            const subList = sched.subTopics.flatMap((st) =>
-              typeof st === 'string' ? st.split(/\s*[·;]\s*/).filter(Boolean) : []
-            );
-            const subFormatted = subList.length > 0
-              ? subList.map((s) => `• ${s.trim()}`).join('\n')
-              : 'Core topic coverage';
-
-            return new TableRow({
+    if (co.weeklySchedule.length === 0) {
+      children.push(
+        p('NOTICE: Curriculum content for this unit is currently pending official TVET syllabus ingestion. Course outline topics and weekly schedules have not yet been published by the department.', {
+          bold: true,
+          color: '996600',
+          before: 80,
+          after: 120,
+        }),
+      );
+    } else {
+      children.push(
+        sectionHeader('3', 'Weekly Delivery & Topical Breakdown'),
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          layout: TableLayoutType.FIXED,
+          rows: [
+            new TableRow({
               children: [
-                cell(`W${sched.weekNumber}`, { align: AlignmentType.CENTER, bold: true, color: PRIMARY_DARK, fill, widthPct: 8 }),
-                cell(sched.topicTitle, { bold: true, fill, widthPct: 32 }),
-                cell(subFormatted, { fill, widthPct: 52 }),
-                cell(`${sched.hours} hrs`, { align: AlignmentType.CENTER, fill, widthPct: 8 }),
+                cell('Week', { isHeader: true, align: AlignmentType.CENTER, widthPct: 8 }),
+                cell('Topic Title', { isHeader: true, widthPct: 32 }),
+                cell('Content / Sub-topics to be Covered', { isHeader: true, widthPct: 52 }),
+                cell('Hours', { isHeader: true, align: AlignmentType.CENTER, widthPct: 8 }),
               ],
-            });
-          }),
-        ],
-      }),
-      p('', { after: 100 }),
-    );
+            }),
+            ...co.weeklySchedule.map((sched, idx) => {
+              const fill = idx % 2 === 1 ? ZEBRA_BG : 'FFFFFF';
+              const subList = sched.subTopics.flatMap((st) =>
+                typeof st === 'string' ? st.split(/\s*[·;]\s*/).filter(Boolean) : []
+              );
+              const subFormatted = subList.length > 0
+                ? subList.map((s) => `• ${s.trim()}`).join('\n')
+                : 'Core topic coverage';
+
+              return new TableRow({
+                children: [
+                  cell(`W${sched.weekNumber}`, { align: AlignmentType.CENTER, bold: true, color: PRIMARY_DARK, fill, widthPct: 8 }),
+                  cell(sched.topicTitle, { bold: true, fill, widthPct: 32 }),
+                  cell(subFormatted, { fill, widthPct: 52 }),
+                  cell(`${sched.hours} hrs`, { align: AlignmentType.CENTER, fill, widthPct: 8 }),
+                ],
+              });
+            }),
+          ],
+        }),
+        p('', { after: 100 }),
+      );
+    }
 
     // Section 4: Approaches
     if (co.teachingLearningApproaches || co.assessmentApproaches) {
@@ -413,9 +424,19 @@ export async function buildTVETDocumentDocx(
   if (type === 'scheme_of_work' && data.schemeOfWork) {
     const sow = data.schemeOfWork;
 
-    // 14-Week Balanced Table
-    children.push(
-      new Table({
+    if (sow.plannedWeeks.length === 0) {
+      children.push(
+        p('NOTICE: Curriculum content for this unit is currently pending official TVET syllabus ingestion. The 14-week scheme of work has not yet been published by the department.', {
+          bold: true,
+          color: '996600',
+          before: 80,
+          after: 120,
+        }),
+      );
+    } else {
+      // 14-Week Balanced Table
+      children.push(
+        new Table({
         width: { size: 100, type: WidthType.PERCENTAGE },
         layout: TableLayoutType.FIXED,
         rows: [
@@ -594,6 +615,7 @@ export async function buildTVETDocumentDocx(
       }),
       p('', { after: 120 }),
     );
+    }
   }
 
   // 5. Sign-off Blocks

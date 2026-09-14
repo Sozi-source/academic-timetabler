@@ -7,7 +7,9 @@ import {
   CheckCircle2,
   ClipboardCheck,
   Clock,
+  ExternalLink,
   LoaderCircle,
+  Send,
   UsersRound,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -22,6 +24,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { ABSENT_CIRCUMSTANCES } from '@/features/class-attendance/domain';
 import { submitTrainerDailyReportAction } from './actions';
 import { formatDailyReportDate, formatDailyReportTime } from './domain';
 import type {
@@ -37,8 +40,8 @@ function AttendanceBadge({
 }) {
   if (status === 'completed') {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full border border-success-border bg-success-surface px-2 py-1 text-[10px] font-semibold text-success">
-        <CheckCircle2 className="size-3" />
+      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
+        <CheckCircle2 className="size-3 text-emerald-600" />
         Completed
       </span>
     );
@@ -46,8 +49,8 @@ function AttendanceBadge({
 
   if (status === 'cancelled') {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-700">
-        <CheckCircle2 className="size-3" />
+      <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
+        <CheckCircle2 className="size-3 text-slate-500" />
         Did Not Take Place
       </span>
     );
@@ -55,17 +58,17 @@ function AttendanceBadge({
 
   if (status === 'open') {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full border border-warning-border bg-warning-surface px-2 py-1 text-[10px] font-semibold text-warning">
-        <AlertTriangle className="size-3" />
-        In progress
+      <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+        <AlertTriangle className="size-3 text-amber-600" />
+        In Progress
       </span>
     );
   }
 
   return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-border bg-surface-subtle px-2 py-1 text-[10px] font-semibold text-text-muted">
-      <AlertTriangle className="size-3" />
-      Not completed
+    <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+      <AlertTriangle className="size-3 text-slate-400" />
+      Not Recorded
     </span>
   );
 }
@@ -125,8 +128,9 @@ function SessionExceptionDialog({
 
       onOpenChange(false);
       onSuccess();
-    } catch (err: any) {
-      setError(err?.message || 'Network error.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Network error.';
+      setError(msg);
     } finally {
       setBusy(false);
     }
@@ -136,7 +140,7 @@ function SessionExceptionDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Session Did Not Take Place</DialogTitle>
+          <DialogTitle>Session Exception</DialogTitle>
           <DialogDescription>
             Record why {session.unitName} ({session.cohortName}) did not take place on {session.sessionDate}.
           </DialogDescription>
@@ -168,14 +172,14 @@ function SessionExceptionDialog({
 
           <div>
             <label className="block text-xs font-semibold text-text-primary">
-              Explanation / Remarks (Optional)
+              Remarks (Optional)
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
               maxLength={500}
-              placeholder="Provide any additional context or rescheduled date..."
+              placeholder="Additional context or rescheduled date..."
               className="mt-1.5 w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-text-primary outline-none focus:border-primary"
             />
           </div>
@@ -206,7 +210,6 @@ function SessionExceptionDialog({
 
 function PastUnrecordedBanner({
   sessions,
-  reportDate,
   onRecordPast,
   onLogException,
 }: {
@@ -216,25 +219,20 @@ function PastUnrecordedBanner({
   onLogException: (session: PastUnrecordedSession) => void;
 }) {
   const [isOpen, setIsOpen] = useState(true);
-  const overdueCount = sessions.filter((s) => s.daysOverdue > 2).length;
 
   if (sessions.length === 0) return null;
 
   return (
-    <section className="overflow-hidden rounded-xl border border-amber-300 bg-amber-50/80 shadow-xs">
-      <div className="flex flex-col gap-2 border-b border-amber-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-start gap-2.5">
-          <AlertCircle className="mt-0.5 size-4.5 shrink-0 text-amber-700" />
-          <div>
-            <h3 className="text-xs font-bold text-amber-950">
-              Unrecorded Past Classes ({sessions.length})
-            </h3>
-            <p className="mt-0.5 text-[11px] text-amber-800">
-              {overdueCount > 0
-                ? `${overdueCount} class(es) are older than 48 hours. Record attendance or log an exception to unlock today's submission.`
-                : 'Please record past class attendance or log an exception if the class did not take place.'}
-            </p>
-          </div>
+    <section className="overflow-hidden rounded-xl border border-amber-300 bg-amber-50/90 shadow-xs">
+      <div className="flex flex-col gap-2 border-b border-amber-200/80 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2">
+          <AlertCircle className="size-4 shrink-0 text-amber-700" />
+          <h3 className="text-xs font-bold text-amber-950">
+            Overdue Attendance ({sessions.length})
+          </h3>
+          <span className="hidden text-xs text-amber-800 sm:inline">
+            — Record attendance or log an exception to submit today&apos;s report.
+          </span>
         </div>
 
         <button
@@ -242,12 +240,12 @@ function PastUnrecordedBanner({
           onClick={() => setIsOpen(!isOpen)}
           className="self-start text-[11px] font-semibold text-amber-900 underline hover:text-amber-950 sm:self-center"
         >
-          {isOpen ? 'Collapse' : 'View Classes'}
+          {isOpen ? 'Hide Classes' : 'Show Classes'}
         </button>
       </div>
 
       {isOpen ? (
-        <div className="divide-y divide-amber-200/70 bg-white/70">
+        <div className="divide-y divide-amber-200/60 bg-white/80">
           {sessions.map((session) => (
             <div
               key={`${session.scheduledSessionId}-${session.sessionDate}`}
@@ -255,14 +253,14 @@ function PastUnrecordedBanner({
             >
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-xs text-text-primary">
+                  <span className="text-xs font-bold text-text-primary">
                     {session.unitName}
                   </span>
                   <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold text-amber-800">
-                    {session.daysOverdue}d ago
+                    {session.daysOverdue}d overdue
                   </span>
                 </div>
-                <p className="mt-0.5 text-[10px] text-text-muted">
+                <p className="mt-0.5 text-[11px] text-text-muted">
                   {session.cohortName} · {session.dayOfWeek}, {session.sessionDate} · {formatDailyReportTime(session.startsAt)}–{formatDailyReportTime(session.endsAt)}
                 </p>
               </div>
@@ -274,7 +272,7 @@ function PastUnrecordedBanner({
                   className="inline-flex items-center gap-1 rounded-lg bg-primary px-2.5 py-1 text-[11px] font-semibold text-white transition hover:bg-primary-hover shadow-xs"
                 >
                   <CalendarCheck2 className="size-3" />
-                  Record Attendance
+                  Record
                 </button>
                 <button
                   type="button"
@@ -305,13 +303,13 @@ function ScheduledLessonsSection({
 
   if (lessons.length === 0) {
     return (
-      <section className="rounded-xl border border-border bg-white p-6 text-center">
+      <section className="rounded-xl border border-border bg-white p-6 text-center shadow-xs">
         <UsersRound className="mx-auto size-6 text-text-muted" />
-        <p className="mt-2 text-sm font-semibold text-text-primary">
-          No scheduled lessons for this date
+        <p className="mt-2 text-xs font-bold text-text-primary">
+          No Scheduled Lessons
         </p>
-        <p className="mt-1 text-xs text-text-muted">
-          You may still report other activities (meetings, supervision, prep) or concerns below.
+        <p className="mt-0.5 text-[11px] text-text-muted">
+          Submit your activity log or concerns below to file a non-teaching day record.
         </p>
       </section>
     );
@@ -319,17 +317,12 @@ function ScheduledLessonsSection({
 
   return (
     <section className="overflow-hidden rounded-xl border border-border bg-white shadow-xs">
-      <div className="border-b border-border bg-surface-subtle px-4 py-3 sm:flex sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-sm font-bold text-text-primary">
-            Scheduled Lessons
-          </h2>
-          <p className="mt-0.5 text-[11px] text-text-muted">
-            Record class attendance directly for each session below.
-          </p>
-        </div>
-        <span className="hidden rounded-full bg-slate-200/80 px-2 py-0.5 text-[10px] font-bold text-slate-700 sm:inline-block">
-          {lessons.length} Lesson{lessons.length === 1 ? '' : 's'}
+      <div className="flex items-center justify-between border-b border-border bg-slate-50/70 px-4 py-2.5">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-text-primary">
+          Scheduled Lessons ({lessons.length})
+        </h2>
+        <span className="text-[10px] font-medium text-text-muted">
+          Tap to take or review attendance
         </span>
       </div>
 
@@ -340,7 +333,7 @@ function ScheduledLessonsSection({
           return (
             <article
               key={lesson.scheduledSessionId || `lesson-${index}`}
-              className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"
+              className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between hover:bg-slate-50/40 transition-colors"
             >
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
@@ -349,25 +342,38 @@ function ScheduledLessonsSection({
                   </p>
                   <AttendanceBadge status={lesson.attendanceStatus} />
                 </div>
-                <p className="mt-1 text-[11px] text-text-muted">
-                  {lesson.cohortName || 'Class'} · {formatDailyReportTime(lesson.startsAt)}–{formatDailyReportTime(lesson.endsAt)}
-                  {lesson.roomName ? ` · Room: ${lesson.roomName}` : ''}
-                </p>
+
+                <div className="mt-1 flex flex-wrap items-center gap-x-2 text-[11px] text-text-muted">
+                  <span className="font-medium text-text-secondary">{lesson.cohortName || 'Class'}</span>
+                  <span>·</span>
+                  <span>{formatDailyReportTime(lesson.startsAt)}–{formatDailyReportTime(lesson.endsAt)}</span>
+                  {lesson.roomName ? (
+                    <>
+                      <span>·</span>
+                      <span className="rounded bg-slate-100 px-1.5 py-0.2 text-[10px] text-slate-700">
+                        {lesson.roomName}
+                      </span>
+                    </>
+                  ) : null}
+                </div>
 
                 {lesson.attendanceStatus === 'completed' ? (
-                  <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px]">
-                    <span className="text-slate-700">
+                  <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px]">
+                    <span className="text-slate-600">
                       Roster: <strong>{lesson.rosterCount || 0}</strong>
                     </span>
-                    <span className="text-emerald-700 font-medium">
-                      Present: <strong>{lesson.presentCount || 0}</strong>
+                    <span className="flex items-center gap-1 font-semibold text-emerald-700">
+                      <span className="size-1.5 rounded-full bg-emerald-500" />
+                      Present: {lesson.presentCount || 0}
                     </span>
-                    <span className="text-rose-700 font-medium">
-                      Absent: <strong>{lesson.absentCount || 0}</strong>
+                    <span className="flex items-center gap-1 font-semibold text-rose-700">
+                      <span className="size-1.5 rounded-full bg-rose-500" />
+                      Absent: {lesson.absentCount || 0}
                     </span>
                     {lesson.notReportedCount > 0 ? (
-                      <span className="text-amber-700 font-medium">
-                        Not Reported: <strong>{lesson.notReportedCount}</strong>
+                      <span className="flex items-center gap-1 font-medium text-amber-700">
+                        <span className="size-1.5 rounded-full bg-amber-500" />
+                        Not Reported: {lesson.notReportedCount}
                       </span>
                     ) : null}
                   </div>
@@ -379,23 +385,23 @@ function ScheduledLessonsSection({
                   <button
                     type="button"
                     onClick={() => onRecordAttendance(lesson)}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-white px-3 py-1.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle shadow-2xs"
                   >
                     <CheckCircle2 className="size-3.5 text-emerald-600" />
-                    View / Edit Register
+                    View Register
                   </button>
                 ) : lesson.attendanceStatus === 'open' ? (
                   <button
                     type="button"
                     onClick={() => onRecordAttendance(lesson)}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-warning-border bg-warning-surface px-3 py-1.5 text-xs font-semibold text-warning-hover transition hover:bg-warning/10"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-900 transition hover:bg-amber-100 shadow-2xs"
                   >
-                    <AlertTriangle className="size-3.5" />
-                    Continue Marking
+                    <AlertTriangle className="size-3.5 text-amber-600" />
+                    Continue Register
                   </button>
                 ) : lesson.attendanceStatus === 'cancelled' ? (
-                  <span className="text-[11px] font-medium text-text-muted">
-                    Session Cancelled / Exception Logged
+                  <span className="text-[11px] font-medium text-text-muted italic">
+                    Did Not Take Place
                   </span>
                 ) : (
                   <button
@@ -409,7 +415,7 @@ function ScheduledLessonsSection({
                     ) : (
                       <CalendarCheck2 className="size-3.5" />
                     )}
-                    Record Attendance
+                    Take Attendance
                   </button>
                 )}
               </div>
@@ -430,19 +436,19 @@ function ClassAttendanceSummaryTable({
 
   return (
     <section className="overflow-hidden rounded-xl border border-border bg-white shadow-xs">
-      <div className="border-b border-border bg-surface-subtle px-4 py-2.5">
-        <h3 className="text-xs font-bold uppercase tracking-wide text-text-primary">
-          Class Attendance Summary
+      <div className="border-b border-border bg-slate-50/70 px-4 py-2.5">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-text-primary">
+          Class Attendance Overview
         </h3>
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs">
-          <thead className="border-b border-border bg-surface-subtle/50 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+          <thead className="border-b border-border bg-slate-50/40 text-[10px] font-semibold uppercase tracking-wider text-text-muted">
             <tr>
               <th className="px-4 py-2.5">Time</th>
               <th className="px-4 py-2.5">Unit</th>
-              <th className="px-4 py-2.5">Class / Cohort</th>
+              <th className="px-4 py-2.5">Cohort</th>
               <th className="px-3 py-2.5 text-center">Roster</th>
               <th className="px-3 py-2.5 text-center text-emerald-700">Present</th>
               <th className="px-3 py-2.5 text-center text-rose-700">Absent</th>
@@ -452,29 +458,29 @@ function ClassAttendanceSummaryTable({
           </thead>
           <tbody className="divide-y divide-border">
             {lessons.map((l) => (
-              <tr key={l.scheduledSessionId} className="hover:bg-surface-subtle/30">
-                <td className="whitespace-nowrap px-4 py-2.5 text-text-muted">
+              <tr key={l.scheduledSessionId} className="hover:bg-slate-50/40 transition-colors">
+                <td className="whitespace-nowrap px-4 py-2 text-text-muted font-mono text-[11px]">
                   {formatDailyReportTime(l.startsAt)}–{formatDailyReportTime(l.endsAt)}
                 </td>
-                <td className="px-4 py-2.5 font-semibold text-text-primary">
+                <td className="px-4 py-2 font-semibold text-text-primary">
                   {l.unitCode ? `${l.unitCode} · ` : ''}{l.unitName}
                 </td>
-                <td className="px-4 py-2.5 text-text-secondary">
+                <td className="px-4 py-2 text-text-secondary">
                   {l.cohortName}
                 </td>
-                <td className="px-3 py-2.5 text-center font-medium text-text-primary">
+                <td className="px-3 py-2 text-center font-medium text-text-primary font-mono">
                   {l.rosterCount || 0}
                 </td>
-                <td className="px-3 py-2.5 text-center font-bold text-emerald-700">
+                <td className="px-3 py-2 text-center font-bold text-emerald-700 font-mono">
                   {l.presentCount || 0}
                 </td>
-                <td className="px-3 py-2.5 text-center font-bold text-rose-700">
+                <td className="px-3 py-2 text-center font-bold text-rose-700 font-mono">
                   {l.absentCount || 0}
                 </td>
-                <td className="px-3 py-2.5 text-center text-amber-700 font-medium">
+                <td className="px-3 py-2 text-center text-amber-700 font-medium font-mono">
                   {l.notReportedCount || 0}
                 </td>
-                <td className="px-4 py-2.5 text-center">
+                <td className="px-4 py-2 text-center">
                   <AttendanceBadge status={l.attendanceStatus} />
                 </td>
               </tr>
@@ -500,78 +506,82 @@ function AbsenteesTableSection({
     }))
   );
 
-  const totalNotReported = lessons.reduce((acc, l) => acc + (l.notReportedCount || 0), 0);
   const anyCompleted = lessons.some((l) => l.attendanceStatus === 'completed');
 
+  if (allAbsentees.length === 0 && !anyCompleted) return null;
+
+  if (allAbsentees.length === 0 && anyCompleted) {
+    return (
+      <section className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/70 px-4 py-3 text-emerald-950 shadow-xs">
+        <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
+        <p className="text-xs font-medium">
+          <strong>100% Attendance:</strong> All enrolled students attended their scheduled classes today.
+        </p>
+      </section>
+    );
+  }
+
   return (
-    <div className="space-y-3">
-      {allAbsentees.length > 0 ? (
-        <section className="overflow-hidden rounded-xl border border-rose-200 bg-white shadow-xs">
-          <div className="border-b border-rose-100 bg-rose-50/70 px-4 py-3">
-            <h3 className="flex items-center gap-1.5 text-xs font-bold text-rose-950">
-              <AlertTriangle className="size-3.5 text-rose-600" />
-              Students Who Missed Class ({allAbsentees.length})
-            </h3>
-            <p className="mt-0.5 text-[11px] text-rose-800">
-              These reported students were marked absent across your scheduled classes.
-            </p>
-          </div>
+    <section className="overflow-hidden rounded-xl border border-rose-200 bg-white shadow-xs">
+      <div className="flex items-center justify-between border-b border-rose-100 bg-rose-50/80 px-4 py-2.5">
+        <h3 className="flex items-center gap-1.5 text-xs font-bold text-rose-950">
+          <AlertTriangle className="size-3.5 text-rose-600" />
+          Absentee Register ({allAbsentees.length})
+        </h3>
+        <span className="text-[10px] text-rose-800">
+          Students marked absent across today&apos;s sessions
+        </span>
+      </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="border-b border-rose-100 bg-rose-50/30 text-[10px] font-semibold uppercase tracking-wide text-rose-900/80">
-                <tr>
-                  <th className="px-4 py-2.5">Student Name</th>
-                  <th className="px-4 py-2.5">Admission No.</th>
-                  <th className="px-4 py-2.5">Cohort</th>
-                  <th className="px-4 py-2.5">Unit</th>
-                  <th className="px-4 py-2.5">Remarks / Reason</th>
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-xs">
+          <thead className="border-b border-rose-100 bg-rose-50/40 text-[10px] font-semibold uppercase tracking-wider text-rose-900/80">
+            <tr>
+              <th className="px-4 py-2">Student Name</th>
+              <th className="px-4 py-2">Admission No.</th>
+              <th className="px-4 py-2">Cohort</th>
+              <th className="px-4 py-2">Unit</th>
+              <th className="px-4 py-2">Circumstance / Remarks</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {allAbsentees.map((s) => {
+              const isKnownCircumstance = (ABSENT_CIRCUMSTANCES as readonly string[]).includes(s.note || '');
+
+              return (
+                <tr key={`${s.studentId}-${s.unitCode}`} className="hover:bg-slate-50/50">
+                  <td className="px-4 py-2 font-semibold text-text-primary">
+                    {s.fullName}
+                  </td>
+                  <td className="px-4 py-2 font-mono text-[11px] text-text-secondary">
+                    {s.admissionNumber}
+                  </td>
+                  <td className="px-4 py-2 text-text-secondary">
+                    {s.cohortName}
+                  </td>
+                  <td className="px-4 py-2 text-text-muted">
+                    {s.unitCode ? `${s.unitCode} · ` : ''}{s.unitName}
+                  </td>
+                  <td className="px-4 py-2">
+                    {s.note ? (
+                      isKnownCircumstance ? (
+                        <span className="inline-block rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-semibold text-rose-900">
+                          {s.note}
+                        </span>
+                      ) : (
+                        <span className="italic text-text-muted">{s.note}</span>
+                      )
+                    ) : (
+                      <span className="text-text-muted/60">—</span>
+                    )}
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {allAbsentees.map((s) => (
-                  <tr key={`${s.studentId}-${s.unitCode}`} className="hover:bg-surface-subtle/40">
-                    <td className="px-4 py-2.5 font-semibold text-text-primary">
-                      {s.fullName}
-                    </td>
-                    <td className="px-4 py-2.5 font-mono text-[11px] text-text-secondary">
-                      {s.admissionNumber}
-                    </td>
-                    <td className="px-4 py-2.5 text-text-secondary">
-                      {s.cohortName}
-                    </td>
-                    <td className="px-4 py-2.5 text-text-muted">
-                      {s.unitCode ? `${s.unitCode} · ` : ''}{s.unitName}
-                    </td>
-                    <td className="px-4 py-2.5 text-text-muted italic">
-                      {s.note || 'No note recorded'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      ) : anyCompleted ? (
-        <section className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4 text-emerald-950 shadow-xs">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="size-4 text-emerald-600" />
-            <p className="text-xs font-semibold">100% Attendance Recorded</p>
-          </div>
-          <p className="mt-0.5 text-[11px] text-emerald-800">
-            All reported students attended their scheduled classes today.
-          </p>
-        </section>
-      ) : null}
-
-      {totalNotReported > 0 ? (
-        <section className="rounded-xl border border-amber-200 bg-amber-50/70 px-4 py-3 text-amber-950 shadow-xs">
-          <p className="text-xs font-medium">
-            ℹ️ <strong>{totalNotReported}</strong> enrolled student{totalNotReported === 1 ? '' : 's'} have not yet reported for this semester and are excluded from absences.
-          </p>
-        </section>
-      ) : null}
-    </div>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }
 
@@ -626,8 +636,9 @@ export function TrainerDailyReportForm({
       } else {
         alert(data?.message || 'Could not open attendance session.');
       }
-    } catch (err: any) {
-      alert(err?.message || 'Failed to open class attendance.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to open class attendance.';
+      alert(msg);
     } finally {
       setOpeningSessionId(null);
     }
@@ -653,8 +664,9 @@ export function TrainerDailyReportForm({
       } else {
         alert(data?.message || 'Could not open past attendance session.');
       }
-    } catch (err: any) {
-      alert(err?.message || 'Failed to open past class attendance.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to open past class attendance.';
+      alert(msg);
     }
   }
 
@@ -670,14 +682,19 @@ export function TrainerDailyReportForm({
   if (workspace.status === 'submitted') {
     return (
       <div className="space-y-4">
-        <section className="rounded-xl border border-success-border bg-success-surface px-4 py-3">
-          <div className="flex items-center gap-2 text-success">
-            <CheckCircle2 className="size-4" />
-            <p className="text-sm font-semibold">Daily Report submitted</p>
+        <section className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50/80 px-4 py-3 shadow-xs">
+          <div className="flex items-center gap-2 text-emerald-900">
+            <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
+            <div>
+              <p className="text-xs font-bold">Daily Report Submitted</p>
+              <p className="text-[11px] text-emerald-800">
+                Official department record locked for {formatDailyReportDate(workspace.reportDate)}.
+              </p>
+            </div>
           </div>
-          <p className="mt-1 text-[11px] text-text-secondary">
-            This daily report is locked as an official department record.
-          </p>
+          <span className="rounded-full bg-emerald-200/60 px-2.5 py-0.5 text-[10px] font-bold text-emerald-900">
+            Official Record
+          </span>
         </section>
 
         <ScheduledLessonsSection
@@ -691,20 +708,20 @@ export function TrainerDailyReportForm({
 
         {(workspace.otherActivity || workspace.concern) ? (
           <section className="grid gap-3 md:grid-cols-2">
-            <div className="rounded-xl border border-border bg-white p-4">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-text-muted">
-                Other activity
+            <div className="rounded-xl border border-border bg-white p-4 shadow-xs">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
+                Activity Log
               </p>
-              <p className="mt-2 whitespace-pre-line text-xs leading-5 text-text-primary">
+              <p className="mt-2 whitespace-pre-line text-xs leading-relaxed text-text-primary">
                 {workspace.otherActivity || '—'}
               </p>
             </div>
 
-            <div className="rounded-xl border border-border bg-white p-4">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-text-muted">
-                Concern / action required
+            <div className="rounded-xl border border-border bg-white p-4 shadow-xs">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
+                Concerns & Issues
               </p>
-              <p className="mt-2 whitespace-pre-line text-xs leading-5 text-text-primary">
+              <p className="mt-2 whitespace-pre-line text-xs leading-relaxed text-text-primary">
                 {workspace.concern || '—'}
               </p>
             </div>
@@ -750,80 +767,77 @@ export function TrainerDailyReportForm({
         <ClassAttendanceSummaryTable lessons={workspace.lessons} />
         <AbsenteesTableSection lessons={workspace.lessons} />
 
-        {!workspace.readyToSubmit ? (
-          <section className="rounded-xl border border-warning-border bg-warning-surface px-4 py-3">
-            <div className="flex items-start gap-2.5">
-              <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
-              <div>
-                <p className="text-xs font-semibold text-text-primary">
-                  Attendance pending before report submission
-                </p>
-                <p className="mt-1 text-[11px] leading-5 text-text-secondary">
-                  {workspace.blockingReason}
-                </p>
-                <Link
-                  href="/staff/attendance"
-                  className="mt-2 inline-flex text-[11px] font-semibold text-primary hover:underline"
-                >
-                  Go to Class Attendance portal →
-                </Link>
-              </div>
+        {/* Pending Attendance Action Banner */}
+        {!workspace.readyToSubmit && !isNonTeachingDay ? (
+          <section className="flex items-start gap-2.5 rounded-xl border border-amber-300 bg-amber-50/90 p-3.5 shadow-xs">
+            <AlertTriangle className="size-4 shrink-0 text-amber-600 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-xs font-bold text-amber-950">
+                Attendance Pending Before Submission
+              </p>
+              <p className="mt-0.5 text-[11px] text-amber-800">
+                {workspace.blockingReason || 'Complete register for all scheduled classes above to enable report submission.'}
+              </p>
             </div>
           </section>
         ) : null}
 
+        {/* Non-Teaching Day Callout */}
         {isNonTeachingDay ? (
-          <section className="rounded-xl border border-blue-200 bg-blue-50/70 px-4 py-3 text-blue-950">
-            <p className="text-xs font-semibold">
-              No scheduled lessons for this date
-            </p>
-            <p className="mt-0.5 text-[11px] text-blue-800/80">
-              To submit an official daily record for a non-teaching day, please enter your activity (meetings, prep, supervision) or any concerns below.
+          <section className="rounded-xl border border-blue-200 bg-blue-50/70 p-3.5 text-blue-950 shadow-xs">
+            <p className="text-xs font-bold">Non-Teaching Day</p>
+            <p className="mt-0.5 text-[11px] text-blue-850">
+              Please enter your daily activities (meetings, supervision, preparation) or concerns below to submit.
             </p>
           </section>
         ) : null}
 
+        {/* Form Inputs */}
         <section className="grid gap-3 md:grid-cols-2">
-          <label className="block rounded-xl border border-border bg-white p-4">
-            <span className="text-xs font-semibold text-text-primary">
-              Other activity
-            </span>
-            <span className="mt-1 block text-[10px] text-text-muted">
-              {isNonTeachingDay ? 'Required on non-teaching days' : 'Optional · keep it brief'}
-            </span>
+          <label className="block rounded-xl border border-border bg-white p-4 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-text-primary">
+                Activity Log
+              </span>
+              <span className="text-[10px] text-text-muted">
+                {otherActivity.length}/800 {isNonTeachingDay ? '(Required)' : '(Optional)'}
+              </span>
+            </div>
             <textarea
               name="otherActivity"
-              rows={4}
+              rows={3}
               maxLength={800}
               value={otherActivity}
               onChange={(e) => setOtherActivity(e.target.value)}
-              className="mt-3 w-full resize-y rounded-lg border border-border bg-white px-3 py-2 text-xs leading-5 text-text-primary outline-none focus:border-primary"
-              placeholder="Meeting, supervision, practical preparation..."
+              className="mt-2 w-full resize-y rounded-lg border border-border bg-slate-50/50 p-2.5 text-xs text-text-primary outline-none focus:border-primary focus:bg-white focus:ring-1 focus:ring-primary/20"
+              placeholder="Meetings, exam prep, lab setup, project supervision..."
             />
           </label>
 
-          <label className="block rounded-xl border border-border bg-white p-4">
-            <span className="text-xs font-semibold text-text-primary">
-              Concern / action required
-            </span>
-            <span className="mt-1 block text-[10px] text-text-muted">
-              Optional · only what needs attention
-            </span>
+          <label className="block rounded-xl border border-border bg-white p-4 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-text-primary">
+                Concerns & Academic Notes
+              </span>
+              <span className="text-[10px] text-text-muted">
+                {concern.length}/1200 (Optional)
+              </span>
+            </div>
             <textarea
               name="concern"
-              rows={4}
+              rows={3}
               maxLength={1200}
               value={concern}
               onChange={(e) => setConcern(e.target.value)}
-              className="mt-3 w-full resize-y rounded-lg border border-border bg-white px-3 py-2 text-xs leading-5 text-text-primary outline-none focus:border-primary"
-              placeholder="Student, timetable, room, equipment or academic concern..."
+              className="mt-2 w-full resize-y rounded-lg border border-border bg-slate-50/50 p-2.5 text-xs text-text-primary outline-none focus:border-primary focus:bg-white focus:ring-1 focus:ring-primary/20"
+              placeholder="Student attendance, timetable conflicts, room or equipment issues..."
             />
           </label>
         </section>
 
         {state.message ? (
           <div
-            className={`rounded-xl border px-4 py-3 text-xs font-semibold ${
+            className={`rounded-xl border px-4 py-2.5 text-xs font-semibold ${
               state.status === 'success'
                 ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
                 : 'border-rose-200 bg-rose-50 text-rose-900'
@@ -833,11 +847,12 @@ export function TrainerDailyReportForm({
           </div>
         ) : null}
 
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        {/* Action Bar */}
+        <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-[11px] text-text-muted">
             {isNonTeachingDay && !hasText ? (
-              <span className="text-amber-800 font-medium">
-                * Enter your activity or notes above to enable submission.
+              <span className="font-medium text-amber-800">
+                * Enter an activity log or note above to submit.
               </span>
             ) : null}
           </div>
@@ -845,10 +860,14 @@ export function TrainerDailyReportForm({
           <button
             type="submit"
             disabled={pending || !isSubmittable}
-            className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white shadow-xs transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <ClipboardCheck className="size-4" />
-            {pending ? 'Submitting...' : 'Submit daily report'}
+            {pending ? (
+              <LoaderCircle className="size-3.5 animate-spin" />
+            ) : (
+              <ClipboardCheck className="size-3.5" />
+            )}
+            {pending ? 'Submitting Report...' : 'Submit Daily Report'}
           </button>
         </div>
       </form>

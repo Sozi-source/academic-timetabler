@@ -135,27 +135,9 @@ export function distributeTopicsAcrossWeeks(
   const N = normalizedTopics.length;
 
   if (N === 0) {
-    for (const w of teachingWeeks) {
-      let defaultTopic = `Instructional Module Week ${w}`;
-      let defaultSub = 'Core competency mastery and practical illustrations';
-      if (w === 1) {
-        defaultTopic = 'Unit Orientation & Fundamental Concepts';
-        defaultSub = 'Course outline review · Learning outcomes · Diagnostic evaluation';
-      } else if (w === 13) {
-        defaultTopic = 'Comprehensive Syllabus Revision & Tutorial Clinic';
-        defaultSub = 'Remediation · Past paper drills · Competency review';
-      }
-
-      result.push({
-        weekNumber: w,
-        topicTitle: defaultTopic,
-        subTopics: [defaultSub],
-        specificLearningOutcomes: synthesizeLearningObjectives(defaultTopic, [defaultSub]),
-        learningActivities: defaultActivities(w, defaultTopic, [defaultSub]),
-        resourcesAndReferences: cleanInstructionalResources('Course Textbooks · Handouts · Reference Manuals'),
-        assessmentAndRemarks: '',
-      });
-    }
+    // Purge synthetic topics when curriculum content is not yet available.
+    // Never fabricate placeholder weeks or synthetic topics.
+    return [];
   } else if (N === T) {
     // Exact match: 1 topic per teaching week
     for (let i = 0; i < T; i++) {

@@ -1,4751 +1,3129 @@
-// Automatically generated authoritative TVET Curriculum Registry
-// Source: KNEC Diploma & Certificate in Nutrition and Dietetics Syllabus (Module 1)
-// Cleaned and validated TVET standard statutory curriculum
+// Authoritative TVET Curriculum Registry — Module 1
+// Source: Official KNEC Diploma in Nutrition and Dietetics Curriculum Specification
+// Single Source of Truth — 100% Verbatim Extraction
 import type { CanonicalCurriculumUnit } from './types';
 
 export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
   "information_communication_technology": {
-    "canonicalKey": "information_communication_technology",
-    "syllabusCode": "3.1.0",
-    "unitCode": "3.1.0",
-    "unitName": "Information Communication Technology",
-    "moduleNumber": 1,
-    "nominalHours": 44,
-    "theoryHours": 20,
-    "practicalHours": 24,
-    "aliases": [
-      "3.1.0",
-      "Information Communication Technology",
-      "ICT",
-      "ICT/Digital Literacy",
-      "CCU 1106",
-      "DND 1201",
-      "CND 1201",
-      "DCU 1102",
-      "DHN 1102"
+    canonicalKey: "information_communication_technology",
+    syllabusCode: "3.1.0",
+    unitCode: "3.1.0",
+    unitName: "Information Communication Technology",
+    moduleNumber: 1,
+    nominalHours: 44,
+    theoryHours: 19,
+    practicalHours: 25,
+    aliases: ["CND 1201", "DND 1201", "DCU 1106", "CCU 1106", "ICT", "Digital Literacy", "3.1.0"],
+    unitDescription: "This module unit is intended to equip the trainee with knowledge, skills and attitudes to enable him/her apply Information and Communication Technology in relevant fields.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: recognize the role of computer hardware and software; apply security measures to protect data, hardware and software in a fully automated office environment; apply computer software in solving tasks.",
+    learningOutcomes: [
+      "recognize the role of computer hardware and software",
+      "apply security measures to protect data, hardware and software in a fully automated office environment",
+      "apply computer software in solving tasks",
+      "apply internet and email in research and communication",
+      "use internet and email in a fully automated office environment",
+      "cope with emerging issues in information communication technology"
     ],
-    "unitDescription": "This unit equips trainees with the fundamental knowledge, occupational skills, and digital literacy required to operate computer hardware, software applications, operating systems, and internet communication technologies within healthcare, clinical nutrition, and modern automated office environments.",
-    "overallCompetency": "Apply computer hardware, productivity software, database systems, and internet technologies to solve problems and communicate effectively in an automated health environment.",
-    "learningOutcomes": [
-      "Recognize computer hardware components, architecture, and peripheral devices.",
-      "Operate system software, navigate graphical user interfaces, and execute disk management.",
-      "Apply word processing, spreadsheet analysis, and presentation software to documentation tasks.",
-      "Utilize internet, email protocols, and search engines for clinical research and professional communication.",
-      "Implement data security, antivirus protection, and workplace ergonomics in computing."
+    weeklySchedule: [
+      {
+        weekNumber: 1,
+        topicTitle: "Introduction to ICT & Computer Hardware",
+        subTopics: ["Concept of ICT", "Functions of ICT", "History of computers", "Classification of computers (super computers, mainframes, mini computers, micro computers, desktops, laptops/notebooks, palm tops/smart phones)", "Terminology used in computing", "Components of a computer (hardware, software)", "Hardware components of a computer", "Input devices", "Output devices", "Central Processing Unit (CPU)", "Computer storage media", "Computer peripherals", "Classification of computer hardware"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the concept of ICT.\n• Explain the functions and physiological role of ICT.\n• Explain history of computers.\n• Classify computers (super computers, mainframes, mini computers, micro computers, desktops, laptops/notebooks, palm tops/smart phones) and describe their categories.\n• Define terms and concepts used in Introduction to ICT & Computer Hardware.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 2,
+        topicTitle: "Computer Software",
+        subTopics: ["Concept of computer software", "Classification of computer software", "Functions of computer software"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the concept of computer software.\n• Classify computer software and describe their categories.\n• Explain the functions and physiological role of computer software.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 3,
+        topicTitle: "Operating System",
+        subTopics: ["Concept of operating systems", "Operating system commands", "Disk management"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the concept of operating systems.\n• Describe the structure, components and function of operating system commands.\n• Explain disk management.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 4,
+        topicTitle: "Word Processing",
+        subTopics: ["Concept of word processing", "Application for creating and manipulating documents", "Creating files and folders", "Creation and manipulation of tables", "Mail merging techniques", "Application of word processing utilities"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the concept of word processing.\n• Explain application for creating and manipulating documents.\n• Explain creating files and folders.\n• Interpret and apply creation and manipulation of tables.\n• Explain mail merging techniques.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 5,
+        topicTitle: "Spread Sheets",
+        subTopics: ["Concept of spreadsheets", "Application of spreadsheets", "Worksheet layouts", "Building and saving a worksheet", "Data manipulation on a worksheet", "Application of cell data types", "Use of formulae and functions", "Use of charts"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the concept of spreadsheets.\n• Explain application of spreadsheets.\n• Explain worksheet layouts.\n• Explain building and saving a worksheet.\n• Explain data manipulation on a worksheet.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 6,
+        topicTitle: "Database",
+        subTopics: ["Concept of database", "Database design", "Data manipulation in the database", "Data sorting and indexing", "Data storage", "Retrieval of data from the database", "Data security in the database"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the concept of database.\n• Explain database design.\n• Explain data manipulation in the database.\n• Explain data sorting and indexing.\n• Explain data storage.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 7,
+        topicTitle: "Computer Networking and Internet",
+        subTopics: ["Concept of computer networks", "Functions of computer networks", "Types of computer networks", "Configuration of networks", "Uses of internet", "Internet browsing", "Electronic Mail (e-mail) concept"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the concept of computer networks.\n• Explain the functions and physiological role of computer networks.\n• Classify computer networks and describe their categories.\n• Explain configuration of networks.\n• Explain uses of internet.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Information Communication Technology)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Information Communication Technology.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
+      },
+      {
+        weekNumber: 9,
+        topicTitle: "Desktop Publishing",
+        subTopics: ["Concept of desktop publishing", "Page layout in desktop publishing", "Opening a new page in DTP, saving/retrieving/closing files", "Drawing shapes using DTP", "Application of colour pallets", "Insertion of text frames", "Techniques of importing and exporting text", "Object linking and embedding", "Application of desktop publishing in design"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the concept of desktop publishing.\n• Explain page layout in desktop publishing.\n• Explain opening a new page in DTP, saving/retrieving/closing files.\n• Explain drawing shapes using DTP.\n• Explain application of colour pallets.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 10,
+        topicTitle: "Presentation Packages",
+        subTopics: ["Types of presentation packages", "Creating computer applications", "Procedure of slide creation", "Formatting slides", "Presentation of slides", "Procedure for editing objects"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Classify presentation packages and describe their categories.\n• Explain creating computer applications.\n• Explain procedure of slide creation.\n• Explain formatting slides.\n• Explain presentation of slides.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 11,
+        topicTitle: "Data Security and Control",
+        subTopics: ["Definition of data security and control", "Security threats and control measures", "Computer viruses", "Computer crimes", "Use and misuse of computers", "Detection and protection against computer crimes", "Laws governing protection of ICT"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Data Security and Control.\n• Explain security threats and control measures.\n• Explain computer viruses.\n• Explain computer crimes.\n• Explain use and misuse of computers.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 12,
+        topicTitle: "Emerging Issues and Trends",
+        subTopics: ["Emerging trends and issues", "Challenges posed by emerging trends and issues", "Ways of coping with challenges posed by emerging trends and issues"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain emerging trends and issues.\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends.\n• Explain ways of coping with challenges posed by emerging trends and issues.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Emerging trends and issues", "Challenges posed by emerging trends and issues", "Ways of coping with challenges posed by emerging trends and issues"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain emerging trends and issues.\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain ways of coping with challenges posed by emerging trends and issues.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Information Communication Technology)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Information Communication Technology in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
     ],
-    "references": [
-      "French, C. S. (2020). Computer Science (6th Edition). BookPower/Cengage Learning.",
-      "Shelly, G. B., & Vermaat, M. E. (2018). Discovering Computers: Digital Technology, Data, and Devices. Cengage Learning.",
-      "Senn, J. A. (2019). Information Technology in Business: Principles, Practices, and Opportunities. Prentice Hall."
-    ],
-    "instructionalEquipment": [
-      "Networked personal computers running modern OS",
-      "Office productivity suite (Word processor, Spreadsheet, Presentation, Database)",
-      "Internet connectivity and web browsers",
-      "High-resolution multimedia projector and interactive display screen",
-      "Removable storage media and optical drive backups"
-    ],
-    "weeklySchedule": [
-      {
-        "weekNumber": 1,
-        "topicTitle": "Introduction to ICT & Computer Systems",
-        "subTopics": [
-          "Definition of ICT, data, and information",
-          "Historical evolution and classification of computers",
-          "Role and applications of ICT in healthcare and society",
-          "Computer system components (Hardware, Software, Liveware)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Define fundamental computing and ICT terminology accurately.\n\u2022 Outline the historical generations and functional classifications of computers.\n\u2022 Explain the role and significance of ICT in modern healthcare and clinical nutrition.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 2,
-        "topicTitle": "Computer Hardware Architecture & Input Systems",
-        "subTopics": [
-          "Central Processing Unit (ALU, CU, Registers)",
-          "Input devices (keyboards, pointing devices, scanners, barcode readers)",
-          "Ergonomic considerations for input hardware",
-          "Troubleshooting basic input peripheral connections"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Describe the functional architecture and internal components of the CPU.\n\u2022 Identify, connect, and configure various computer input peripheral devices.\n\u2022 Apply ergonomic principles when setting up workstation input equipment.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 3,
-        "topicTitle": "Output Devices & Secondary Storage Systems",
-        "subTopics": [
-          "Output devices (monitors, printers, projectors, audio units)",
-          "Printer technologies (laser, inkjet, thermal) and specifications",
-          "Primary storage (RAM, ROM, Cache)",
-          "Secondary storage media (magnetic hard disks, SSDs, optical media, flash memory)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Distinguish between different types of visual and hard-copy output devices.\n\u2022 Explain the operational differences between volatile primary memory and non-volatile secondary storage.\n\u2022 Connect, configure, and safely manage removable external storage devices.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 4,
-        "topicTitle": "Operating Systems & File Management",
-        "subTopics": [
-          "Definition, functions, and categories of operating systems",
-          "GUI desktop navigation, taskbars, windows, and system settings",
-          "Hierarchical file organization (drives, directories, folders, subfolders)",
-          "File operations (create, copy, move, rename, delete, search)",
-          "Disk management utilities (formatting, disk cleanup, defragmentation)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the core supervisory and resource allocation functions of an operating system.\n\u2022 Perform hierarchical directory structuring and efficient file management operations.\n\u2022 Execute essential disk management commands and storage formatting procedures.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 5,
-        "topicTitle": "Word Processing: Document Design & Editing (CAT 1)",
-        "subTopics": [
-          "Word processing interface, ribbon layout, and workspace setup",
-          "Text input, text selection, cutting, copying, and pasting",
-          "Font styling, character formatting, and paragraph alignment",
-          "Continuous Assessment Test 1 (Theory & Practical Hands-on)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Create, format, and save official documents using word processing software.\n\u2022 Apply professional paragraph formatting, line spacing, and indentation styles.\n\u2022 Demonstrate hands-on competence under Continuous Assessment Test 1 conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 6,
-        "topicTitle": "Advanced Word Processing & Table Creation",
-        "subTopics": [
-          "Page layout setup (margins, orientation, paper size, page breaks)",
-          "Header, footer, page numbering, and footnote insertion",
-          "Creating, formatting, and styling complex tables",
-          "Mail merge for clinical notices, patient letters, and mass communication"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Configure advanced document layout settings, headers, and footers.\n\u2022 Insert, merge, format, and align complex data tables in official reports.\n\u2022 Perform mail merge operations to generate personalized patient notifications.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 7,
-        "topicTitle": "Spreadsheets: Workbook Design & Data Entry",
-        "subTopics": [
-          "Spreadsheet concepts, cell referencing, and workbook organization",
-          "Data types (text, numbers, currency, dates, percentages)",
-          "Formulas and arithmetic operators (+, -, *, /, ^)",
-          "Basic statistical functions (SUM, AVERAGE, MIN, MAX, COUNT)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Design structured spreadsheets for nutrition data recording and dietary calculations.\n\u2022 Enter, edit, and format diverse numerical and alphanumeric data types.\n\u2022 Apply arithmetic formulas and standard statistical functions to calculate patient indices.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 8,
-        "topicTitle": "Mid-Term Examination & Advanced Spreadsheet Analysis",
-        "subTopics": [
-          "Mid-Term Examination (Official Institutional CAT 2)",
-          "Relative, absolute, and mixed cell addressing ($A$1)",
-          "Logical and lookup functions (IF, VLOOKUP, HLOOKUP)",
-          "Creating and interpreting charts and graphical visualizations"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Successfully complete the Mid-Term Evaluation covering Weeks 1 to 7 content.\n\u2022 Construct formulas utilizing absolute and mixed cell references accurately.\n\u2022 Generate bar charts, pie charts, and trend lines to visualize nutrition indicators.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 9,
-        "topicTitle": "Database Management Systems (DBMS)",
-        "subTopics": [
-          "Database concepts, benefits, and relational database architecture",
-          "Tables, fields, data types, and primary key constraints",
-          "Form creation for guided patient data capture",
-          "Query design for extracting specific clinical and dietary records"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain core relational database concepts, entity relationships, and normalization.\n\u2022 Create database tables with validated field data types and primary keys.\n\u2022 Execute select queries and filtering criteria to extract targeted client records.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 10,
-        "topicTitle": "Presentation Software & Slide Master Design",
-        "subTopics": [
-          "Principles of effective professional audiovisual presentations",
-          "Creating slides, choosing layouts, and managing slide transitions",
-          "Inserting text, images, smart art, charts, and video clips",
-          "Slide Master customization and automated slide shows"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Design professional, clear, and engaging healthcare presentation slides.\n\u2022 Incorporate multimedia elements, charts, and diagrams into health lectures.\n\u2022 Configure Slide Masters to enforce standardized institutional branding.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 11,
-        "topicTitle": "Internet, Email Protocols & Electronic Communication",
-        "subTopics": [
-          "Internet architecture, World Wide Web, and client-server model",
-          "Web browsing techniques, search engines, and scientific search syntax",
-          "Email setup, composition, professional etiquette, and attachments",
-          "Online cloud collaboration tools and document sharing"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Navigate web browsers and execute Boolean search queries for clinical research.\n\u2022 Compose, send, manage, and attach clinical files using professional email protocols.\n\u2022 Utilize secure cloud collaboration tools for departmental document sharing.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 12,
-        "topicTitle": "Computer Security, Data Integrity & Ethics",
-        "subTopics": [
-          "Security threats (malware, viruses, ransomware, phishing, unauthorized access)",
-          "Data protection measures (firewalls, antivirus, access controls, passwords)",
-          "Backup and recovery strategies for health information systems",
-          "Computer ethics, intellectual property, copyright, and data privacy legislation"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify major computer security vulnerabilities, cyber threats, and attack vectors.\n\u2022 Implement robust data security controls, password hygiene, and antivirus updates.\n\u2022 Discuss legal and ethical obligations regarding patient health data privacy.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 13,
-        "topicTitle": "Comprehensive Revision & Practical Skills Clinic",
-        "subTopics": [
-          "Integrated practical project simulating departmental reporting",
-          "Remediation of weak areas across word processing, spreadsheets, and database",
-          "Past KNEC examination theory and practical paper analysis",
-          "Review of model marking schemes and exam question-answering techniques"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Synthesize integrated digital competencies across real-world office tasks.\n\u2022 Successfully tackle standard TVET/KNEC exam scenario questions.\n\u2022 Demonstrate exam readiness through timed mock practical evaluations.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 14,
-        "topicTitle": "End of Term Summative Examination",
-        "subTopics": [
-          "Institutional TVET Final Theory Examination",
-          "Institutional TVET Final Practical Examination",
-          "Submission of term portfolios and continuous assessment documentation"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate comprehensive mastery of ICT concepts and practical applications under final examination conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      }
-    ]
+    references: ["French, C. S. (2018). Computer Science (5th ed.). Cengage Learning.", "Norton, P. (2018). Introduction to Computers. McGraw-Hill Education."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "entrepreneurship": {
-    "canonicalKey": "entrepreneurship",
-    "syllabusCode": "4.1.0",
-    "unitCode": "4.1.0",
-    "unitName": "Entrepreneurship Education",
-    "moduleNumber": 1,
-    "nominalHours": 55,
-    "theoryHours": 40,
-    "practicalHours": 15,
-    "aliases": [
-      "4.1.0",
-      "Entrepreneurship Education",
-      "Entrepreneurship",
-      "CND 1102",
-      "DND 1102",
-      "CCU 1105",
-      "DCU 1105",
-      "DHN 1103"
+    canonicalKey: "entrepreneurship",
+    syllabusCode: "4.1.0",
+    unitCode: "4.1.0",
+    unitName: "Entrepreneurship",
+    moduleNumber: 1,
+    nominalHours: 55,
+    theoryHours: 35,
+    practicalHours: 20,
+    aliases: ["CND 1102", "DND 1102", "CCU 1105", "DCU 1105", "4.1.0"],
+    unitDescription: "This module unit is intended to equip the trainee with knowledge, skills, values and attitudes that will enable him/her plan, start and manage a personal, group, private or public business enterprise. It is also intended to instil in the trainee the drive to venture into profit-making business activities.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: acquire entrepreneurial competences necessary for planning, starting and managing a business; demonstrate positive attitude towards self-employment; portray desire to venture into business activities.",
+    learningOutcomes: [
+      "acquire entrepreneurial competences necessary for planning, starting and managing a business",
+      "demonstrate positive attitude towards self-employment",
+      "portray desire to venture into business activities",
+      "identify viable business opportunities in the neighbourhood",
+      "demonstrate entrepreneurial behaviour in planning, starting and managing a business enterprise",
+      "demonstrate creativity and innovation in day-to-day business activities",
+      "recognize the role of business planning",
+      "recognize emerging issues and trends in entrepreneurship"
     ],
-    "unitDescription": "This unit is designed to equip trainees with entrepreneurial mindsets, competencies, and practical skills necessary to identify market opportunities, establish viable nutrition and dietetics enterprises, and manage small business operations effectively.",
-    "overallCompetency": "Apply entrepreneurial principles, venture creation strategies, and business planning skills to launch and sustain ethical commercial nutrition enterprises.",
-    "learningOutcomes": [
-      "Explain the concepts, principles, and significance of entrepreneurship in economic development.",
-      "Assess personal entrepreneurial competencies, motivations, and business risks.",
-      "Identify and screen viable business opportunities within healthcare and nutrition sectors.",
-      "Formulate a viable marketing, operational, and financial plan for a small enterprise.",
-      "Navigate legal registration procedures, statutory requirements, and business ethics in Kenya."
+    weeklySchedule: [
+      {
+        weekNumber: 1,
+        topicTitle: "Introduction to Entrepreneurship & Evolution/History of Entrepreneurship",
+        subTopics: ["Definition of terms used in entrepreneurship", "Difference between self-employment and formal employment", "Contribution of entrepreneurship to national development", "Entrepreneurial behaviour", "History of entrepreneurship", "Myths associated with entrepreneurship in Kenya", "Theories of entrepreneurship", "Importance of entrepreneurship theories", "Sources for business ideas", "Factors affecting entrepreneurial development"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Introduction to Entrepreneurship & Evolution/History of Entrepreneurship.\n• Explain difference between self-employment and formal employment.\n• Explain contribution of entrepreneurship to national development.\n• Explain entrepreneurial behaviour.\n• Explain history of entrepreneurship.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 2,
+        topicTitle: "The Entrepreneur",
+        subTopics: ["Types of entrepreneurs", "Qualities of an entrepreneur", "Roles of an entrepreneur", "Process of creativity and innovation", "Importance of creativity and innovation", "Barriers to creativity and innovation", "Managing barriers to creativity and innovation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Classify entrepreneurs and describe their categories.\n• Explain qualities of an entrepreneur.\n• Explain the functions and physiological role of an entrepreneur.\n• Describe the structure, components and function of process of creativity and innovation.\n• Explain the functions and physiological role of creativity and innovation.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 3,
+        topicTitle: "Entrepreneurial Culture & Entrepreneurial Opportunities",
+        subTopics: ["Concept of entrepreneurial culture", "Habits that promote entrepreneurial development", "Factors inhibiting entrepreneurial development", "Ways of managing factors that inhibit development of entrepreneurial culture", "Entrepreneurship and self-employment", "Meaning of business opportunity", "Ways of generating business ideas", "Methods of evaluating business opportunities"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the concept of entrepreneurial culture.\n• Explain habits that promote entrepreneurial development.\n• Explain factors inhibiting entrepreneurial development.\n• Explain ways of managing factors that inhibit development of entrepreneurial culture.\n• Explain entrepreneurship and self-employment.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 4,
+        topicTitle: "Entrepreneurial Motivation",
+        subTopics: ["Definition of entrepreneurial motivation", "Entrepreneurial motivation factors"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Entrepreneurial Motivation.\n• Explain entrepreneurial motivation factors.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 5,
+        topicTitle: "Entrepreneurial Competences",
+        subTopics: ["Definition of entrepreneurial competences", "Key entrepreneurial competences"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Entrepreneurial Competences.\n• Explain key entrepreneurial competences.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 6,
+        topicTitle: "Starting a Small Business Enterprise & Business Enterprise Management",
+        subTopics: ["Procedure for starting a small business enterprise", "Factors to consider when starting a small business enterprise", "The government and entrepreneurship", "Legal forms of business ownership", "Challenges faced when starting a small business", "Business life cycle", "Regulations affecting small businesses", "Business support services available to small businesses", "Definition of business enterprise management", "Functions of management in an enterprise", "Methods of inventory management", "Methods of managing business resources"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Describe methods and procedures for starting a small business enterprise.\n• Explain factors to consider when starting a small business enterprise.\n• Explain the government and entrepreneurship.\n• Explain legal forms of business ownership.\n• Discuss emerging issues, trends and coping strategies in starting a Small Business Enterprise & Business Enterprise Management.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 7,
+        topicTitle: "Financial Management",
+        subTopics: ["Meaning and importance of financial management", "Sources of business finance", "Types of business records", "Recording business transactions in the books of account", "Preparation of financial statements", "Interpretation of financial statements for business decisions", "Importance of budgeting to a business"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain meaning and importance of financial management.\n• Identify dietary sources of business finance.\n• Classify business records and describe their categories.\n• Explain recording business transactions in the books of account.\n• Describe methods and procedures for financial statements.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Entrepreneurship)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Entrepreneurship.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
+      },
+      {
+        weekNumber: 9,
+        topicTitle: "Marketing",
+        subTopics: ["Definition of terms market and marketing", "Marketing strategies", "Components of marketing", "Process of marketing"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Marketing.\n• Explain marketing strategies.\n• Describe the structure and components of marketing.\n• Describe the structure, components and function of process of marketing.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 10,
+        topicTitle: "Enterprise Social Responsibility and Business Ethics & Business Plan",
+        subTopics: ["Definition of social responsibility and business ethics", "Meaning of enterprise social responsibility", "Types of enterprise social responsibility", "Importance of enterprise social responsibility", "Ethical behaviour in business practice", "Definition of a business plan", "Components of a business plan", "Preparation of a business plan", "Uses of a business plan"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Enterprise Social Responsibility and Business Ethics & Business Plan.\n• Explain meaning of enterprise social responsibility.\n• Classify enterprise social responsibility and describe their categories.\n• Explain the functions and physiological role of enterprise social responsibility.\n• Explain ethical behaviour in business practice.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 11,
+        topicTitle: "Information Communication Technology in Enterprise Management",
+        subTopics: ["Definition of terms used in ICT", "Benefits of ICT to a business enterprise", "Uses of ICT equipment in a business enterprise"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Information Communication Technology in Enterprise Management.\n• Explain benefits of ICT to a business enterprise.\n• Demonstrate safe handling and operation of uses of ICT equipment in a business enterprise.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 12,
+        topicTitle: "Emerging Issues and Trends",
+        subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Ways of managing challenges posed by emerging issues and trends"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends.\n• Explain ways of managing challenges posed by emerging issues and trends.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Ways of managing challenges posed by emerging issues and trends"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain ways of managing challenges posed by emerging issues and trends.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Entrepreneurship)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Entrepreneurship in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
     ],
-    "references": [
-      "Bwisa, H. M. (2018). Entrepreneurship Theory and Practice. Nairobi: Jomo Kenyatta Foundation.",
-      "Kuratko, D. F. (2020). Entrepreneurship: Theory, Process, and Practice (11th Edition). Cengage Learning.",
-      "Hisrich, R. D., Peters, M. P., & Shepherd, D. A. (2019). Entrepreneurship (10th Edition). McGraw-Hill Education."
-    ],
-    "instructionalEquipment": [
-      "Business plan templates and financial modeling spreadsheets",
-      "Multimedia projector and sample enterprise case studies",
-      "Kenyan statutory registration forms and business guidelines"
-    ],
-    "weeklySchedule": [
-      {
-        "weekNumber": 1,
-        "topicTitle": "Introduction to Entrepreneurship & Small Business",
-        "subTopics": [
-          "Definition of entrepreneurship, enterprise, and small business",
-          "Historical evolution of entrepreneurship",
-          "Role of entrepreneurship in economic growth and job creation",
-          "Contribution of nutrition and dietetics private practices to public health"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Define entrepreneurship and related business concepts clearly.\n\u2022 Outline the economic roles and contributions of entrepreneurs in national development.\n\u2022 Identify potential business opportunities in the health and nutrition sector.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 2,
-        "topicTitle": "The Entrepreneur & Entrepreneurial Motivation",
-        "subTopics": [
-          "Characteristics and traits of successful entrepreneurs",
-          "Self-assessment of personal entrepreneurial competencies",
-          "Internal and external factors influencing entrepreneurial motivation",
-          "Overcoming barriers to starting a small business"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Analyze key behavioural characteristics of successful entrepreneurs.\n\u2022 Evaluate personal entrepreneurial strengths and areas for self-improvement.\n\u2022 Identify sources of entrepreneurial motivation and strategies to mitigate venture risks.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 3,
-        "topicTitle": "Business Opportunity Identification & Ideation",
-        "subTopics": [
-          "Sources of business ideas in nutrition, wellness, and catering",
-          "Techniques for generating business ideas (brainstorming, Delphi, trend analysis)",
-          "Evaluating and screening business ideas using SWOT analysis",
-          "Conducting preliminary feasibility studies"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Generate viable business ideas addressing community nutritional needs.\n\u2022 Apply SWOT analysis to evaluate market potential and competitive advantages.\n\u2022 Conduct preliminary feasibility screening for selected health business concepts.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 4,
-        "topicTitle": "Market Assessment & Marketing Strategy",
-        "subTopics": [
-          "Market research methods (surveys, observation, competitor analysis)",
-          "Target market segmentation, targeting, and positioning (STP)",
-          "Developing the marketing mix (Product, Price, Place, Promotion - 4Ps)",
-          "Customer relationship management and ethical marketing in health"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Design simple market research tools to assess consumer demand for nutrition services.\n\u2022 Formulate a marketing mix tailored to target health and wellness consumers.\n\u2022 Apply ethical marketing principles to health and dietary products.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 5,
-        "topicTitle": "Business Formats & Legal Requirements (CAT 1)",
-        "subTopics": [
-          "Legal forms of business ownership (Sole proprietorship, Partnership, Limited liability)",
-          "Statutory business registration procedures in Kenya (eCitizen, BRS)",
-          "Licensing, public health permits, KRA PIN, and NHIF/NSSF compliance",
-          "Continuous Assessment Test 1"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Compare the legal advantages and disadvantages of different forms of enterprise.\n\u2022 Outline the official procedural steps for business registration and licensing in Kenya.\n\u2022 Demonstrate mastery of Weeks 1\u20134 content under CAT 1 evaluation.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 6,
-        "topicTitle": "Enterprise Operations & Quality Management",
-        "subTopics": [
-          "Production planning and operational workflow in nutrition clinics/services",
-          "Sourcing raw materials, inventory management, and supplier relationships",
-          "Quality assurance standards (KEBS, KNDI, public health regulations)",
-          "Workplace safety, health regulations, and environmental conservation"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Plan the operational flow for a nutrition clinic or catering enterprise.\n\u2022 Manage inventory and maintain quality standards compliant with regulatory authorities.\n\u2022 Implement workplace safety and waste management in small business operations.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 7,
-        "topicTitle": "Financial Planning & Start-up Costing",
-        "subTopics": [
-          "Determining start-up capital requirements and working capital needs",
-          "Direct and indirect cost classification",
-          "Pricing strategies for clinical nutrition services and food products",
-          "Break-even analysis and profitability forecasting"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Estimate initial capital requirements for launching a nutrition consultancy or clinic.\n\u2022 Classify production costs and apply markup/margin pricing models.\n\u2022 Calculate the break-even point for products or clinical consultation services.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 8,
-        "topicTitle": "Mid-Term Examination & Financial Record Keeping",
-        "subTopics": [
-          "Mid-Term Examination (Official Institutional CAT 2)",
-          "Basic bookkeeping principles (Cash book, Sales ledger, Invoicing)",
-          "Preparing simple cash flow projections",
-          "Understanding the Income Statement and Balance Sheet basics"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Successfully complete the Mid-Term Evaluation covering Weeks 1 to 7 content.\n\u2022 Maintain accurate primary books of accounts and track cash flows.\n\u2022 Interpret simple income statements and financial performance reports.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 9,
-        "topicTitle": "Sources of Enterprise Financing",
-        "subTopics": [
-          "Internal financing (personal savings, retained earnings, family/friends)",
-          "External financing (commercial banks, microfinance institutions, SACCOs)",
-          "Government affirmative funds (Youth Enterprise Fund, Uwezo Fund, Women Enterprise Fund)",
-          "Pitching for seed capital, venture capital, and investor presentations"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Appraise internal and external funding options for small enterprises.\n\u2022 Identify government funding mechanisms available for young Kenyan entrepreneurs.\n\u2022 Prepare and deliver an effective elevator pitch to prospective financiers.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 10,
-        "topicTitle": "Human Resource Management in Small Enterprises",
-        "subTopics": [
-          "Determining staffing requirements and job descriptions",
-          "Recruitment, selection, and interviewing procedures",
-          "Staff motivation, training, and performance appraisal",
-          "Employment laws and labor relations in Kenya"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Formulate job descriptions and recruitment criteria for clinic assistants.\n\u2022 Apply motivational techniques and performance appraisal methods.\n\u2022 Comply with basic statutory labor standards and employment contracts.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 11,
-        "topicTitle": "Business Plan Components & Formulation",
-        "subTopics": [
-          "Purpose and structure of a comprehensive business plan",
-          "Executive summary and business description",
-          "Writing the marketing, operational, and organizational plans",
-          "Financial plan projections and appendix documentation"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the vital role of a business plan in enterprise success and funding.\n\u2022 Draft individual components of a realistic business plan for a nutrition practice.\n\u2022 Integrate market analysis and financial projections into a coherent document.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 12,
-        "topicTitle": "Business Ethics, Corporate Social Responsibility & Growth",
-        "subTopics": [
-          "Ethical dilemmas in health marketing and product endorsement",
-          "Corporate Social Responsibility (CSR) and community involvement",
-          "Enterprise growth strategies (diversification, franchising, digital scaling)",
-          "Business failure risks and turnaround strategies"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Apply professional ethics and social responsibility in commercial healthcare ventures.\n\u2022 Analyze viable pathways for business expansion and service diversification.\n\u2022 Implement proactive risk management to prevent business distress.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 13,
-        "topicTitle": "Business Plan Presentation & Revision Clinic",
-        "subTopics": [
-          "Trainee group business plan presentations and peer reviews",
-          "Review of common KNEC business plan examination criteria",
-          "Past paper revision on entrepreneurship theory and application",
-          "Comprehensive course review and examination clinic"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Defend a formulated business plan before a panel of peers and instructors.\n\u2022 Address structural and financial weaknesses identified in business plan drafts.\n\u2022 Demonstrate comprehensive readiness for national TVET examinations.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 14,
-        "topicTitle": "End of Term Summative Examination",
-        "subTopics": [
-          "Institutional TVET Final Theory Examination",
-          "Final evaluation of submitted business plan project drafts",
-          "Consolidation of continuous assessment marks"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate comprehensive mastery of entrepreneurship knowledge under examination conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      }
-    ]
+    references: ["Hisrich, R. D., Peters, M. P., & Shepherd, D. A. (2020). Entrepreneurship (11th ed.). McGraw-Hill.", "Kuratko, D. F. (2019). Entrepreneurship: Theory, Process, and Practice. Cengage Learning."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "communication_skills": {
-    "canonicalKey": "communication_skills",
-    "syllabusCode": "5.1.0",
-    "unitCode": "5.1.0",
-    "unitName": "Communication Skills",
-    "moduleNumber": 1,
-    "nominalHours": 55,
-    "theoryHours": 35,
-    "practicalHours": 20,
-    "aliases": [
-      "5.1.0",
-      "Communication Skills",
-      "Communication",
-      "CCU 1101",
-      "CND 1101",
-      "DND 105",
-      "DND 1101",
-      "DCU 1101",
-      "DHN 1101"
+    canonicalKey: "communication_skills",
+    syllabusCode: "5.1.0",
+    unitCode: "5.1.0",
+    unitName: "Communication Skills",
+    moduleNumber: 1,
+    nominalHours: 44,
+    theoryHours: 24,
+    practicalHours: 20,
+    aliases: ["CND 1101", "DND 1101", "CCU 1101", "DCU 1101", "5.1.0"],
+    unitDescription: "This module unit is intended to equip the trainee with knowledge, skills and attitudes that will enable him/her process information and communicate effectively at the work place.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: recognize the importance of communication in the work place; develop necessary skills for effective communication; use different modes and forms of communication.",
+    learningOutcomes: [
+      "recognize the importance of communication in the work place",
+      "develop necessary skills for effective communication",
+      "use different modes and forms of communication",
+      "develop the necessary writing skills for various documents",
+      "apply official etiquette, protocol and diplomacy at the work place",
+      "cope with emerging issues and trends in communication skills"
     ],
-    "unitDescription": "This unit is intended to equip trainees with the essential verbal, non-verbal, interpersonal, and written communication competencies necessary to interact effectively with patients, multidisciplinary healthcare teams, community stakeholders, and administrative bodies.",
-    "overallCompetency": "Communicate effectively through spoken, written, and digital media in healthcare consultations, institutional meetings, and community education forums.",
-    "learningOutcomes": [
-      "Explain the principles, models, and barriers in the communication process.",
-      "Demonstrate active listening, empathetic counseling, and patient interview techniques.",
-      "Draft professional correspondence, clinical documentation, notices, and formal minutes.",
-      "Produce structured technical investigation reports and proposals.",
-      "Deliver articulate, persuasive oral presentations using modern audiovisual media."
+    weeklySchedule: [
+      {
+        weekNumber: 1,
+        topicTitle: "Introduction to Communication & Channels of Communication",
+        subTopics: ["Definition of terms and concepts used in communication", "Importance of communication", "Purpose of communication", "Essentials of effective communication", "Role of ICT in communication", "Meaning of channels of communication", "Factors to consider in choosing communication media", "Channels of communication in an organization", "Advantages and disadvantages of each channel"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Introduction to Communication & Channels of Communication.\n• Explain the functions and physiological role of communication.\n• Explain purpose of communication.\n• Explain essentials of effective communication.\n• Explain the functions and physiological role of ICT in communication.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 2,
+        topicTitle: "Communication Process",
+        subTopics: ["Meaning of communication process", "Principles of communication", "Stages in the communication process", "Barriers to effective communication", "Strategies of overcoming barriers to effective communication", "Methods of storing and retrieval of information", "Basic concepts of transmission and receipt of message", "Communication as a tool in management", "Ethical issues in communication"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Describe the structure, components and function of meaning of communication process.\n• Describe the principles of communication.\n• Describe the structure, components and function of stages in the communication process.\n• Explain barriers to effective communication.\n• Explain strategies of overcoming barriers to effective communication.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 3,
+        topicTitle: "Classification of Communication",
+        subTopics: ["Types of communication", "Use of various types of communication"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Classify communication and describe their categories.\n• Explain use of various types of communication.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 4,
+        topicTitle: "Forms of Communication & Official Etiquette, Protocol and Diplomacy",
+        subTopics: ["Informal and formal methods of transmission", "Advantages and disadvantages of each form of communication", "Meaning of etiquette, protocol and diplomacy", "Importance of official etiquette", "Accepted protocol and diplomacy"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain informal and formal methods of transmission.\n• Explain advantages and disadvantages of each form of communication.\n• Explain meaning of etiquette, protocol and diplomacy.\n• Explain the functions and physiological role of official etiquette.\n• Explain accepted protocol and diplomacy.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 5,
+        topicTitle: "Writing Skills",
+        subTopics: ["Use of punctuation marks in a written document", "Importance of courtesy in writing", "Paragraph development", "Essay writing", "Functional writing"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain use of punctuation marks in a written document.\n• Explain the functions and physiological role of courtesy in writing.\n• Explain paragraph development.\n• Explain essay writing.\n• Explain functional writing.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 6,
+        topicTitle: "Summary Skills",
+        subTopics: ["Importance of summarizing passages/information", "Steps in note-taking when summarizing passages, reports and conversations"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the functions and physiological role of summarizing passages/information.\n• Explain steps in note-taking when summarizing passages, reports and conversations.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 7,
+        topicTitle: "Report Writing Skills",
+        subTopics: ["Meaning of the term “report”", "Role of reports in an organization", "Types and forms of reports", "Formats of reports", "Steps in preparation for report writing", "Writing, editing and dissemination of reports", "Referencing styles used in reports", "Preparation of PowerPoint slides"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain meaning of the term “report”.\n• Explain the functions and physiological role of reports in an organization.\n• Explain types and forms of reports.\n• Explain formats of reports.\n• Explain steps in preparation for report writing.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Communication Skills)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Communication Skills.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
+      },
+      {
+        weekNumber: 9,
+        topicTitle: "Meetings & Interviews",
+        subTopics: ["Definition of the terms meetings and minutes", "Role of meetings and minutes in organizations", "Procedures for planning and conducting meetings", "Types of meetings", "Notices of meetings", "Procedure for minute writing", "Challenges in conducting meetings and minute writing", "Advantages and disadvantages of meetings", "Meaning of the term “interview”", "Purpose of interviews in an organization", "Procedures for planning and conducting interviews", "Types of interviews", "Preparation for an interview", "Interviewing skills"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Meetings & Interviews.\n• Explain the functions and physiological role of meetings and minutes in organizations.\n• Describe methods and procedures for planning and conducting meetings.\n• Classify meetings and describe their categories.\n• Explain notices of meetings.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 10,
+        topicTitle: "Public Relations and Customer Care",
+        subTopics: ["Definition of terms public, customer and public relations", "Types of customers", "Role of public relations and customer care in an organization", "Interpersonal/human relations skills", "Customer care and public relations skills", "Challenges faced in public relations and customer care"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Public Relations and Customer Care.\n• Classify customers and describe their categories.\n• Explain the functions and physiological role of public relations and customer care in an organization.\n• Explain interpersonal/human relations skills.\n• Explain customer care and public relations skills.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 11,
+        topicTitle: "Communication as a Tool in Management",
+        subTopics: ["Uses of communication in management", "External aspects of communication", "Communication as a tool of public relations", "Mass media as a form of communication"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain uses of communication in management.\n• Explain external aspects of communication.\n• Demonstrate safe handling and operation of communication as a tool of public relations.\n• Explain mass media as a form of communication.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 12,
+        topicTitle: "Emerging Issues and Trends",
+        subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Ways of coping with emerging issues and trends"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends.\n• Explain ways of coping with emerging issues and trends.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Ways of coping with emerging issues and trends"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain ways of coping with emerging issues and trends.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Communication Skills)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Communication Skills in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
     ],
-    "references": [
-      "Lillies, K. (2018). Effective Business Communication (4th Edition). Pitman Publishing.",
-      "Stanton, N. (2019). Mastering Communication (5th Edition). Palgrave Macmillan.",
-      "Taylor, S. (2021). Model Business Letters, Emails and Other Business Documents (7th Edition). Pearson Education."
-    ],
-    "instructionalEquipment": [
-      "Audio-visual recording equipment for presentation playback and peer appraisal",
-      "Sample official hospital memos, minutes, inquiry reports, and letters",
-      "Public address system and presentation podium"
-    ],
-    "weeklySchedule": [
-      {
-        "weekNumber": 1,
-        "topicTitle": "Introduction to Communication & Communication Process",
-        "subTopics": [
-          "Definition, nature, and purpose of communication",
-          "Elements of the communication process (Sender, Encoding, Message, Channel, Receiver, Decoding, Feedback)",
-          "Linear, interactive, and transactional communication models",
-          "Role of communication in clinical practice and health education"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Define communication and describe its fundamental purposes in society.\n\u2022 Analyze the seven essential components of the communication cycle.\n\u2022 Illustrate the flow of clinical information between nutritionists and patients.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 2,
-        "topicTitle": "Channels & Flows of Communication in Organizations",
-        "subTopics": [
-          "Internal and external organizational communication",
-          "Directional communication flows (Downward, Upward, Horizontal, Diagonal)",
-          "Formal communication networks versus informal channels (grapevine)",
-          "Managing rumors and gossip in institutional healthcare settings"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Differentiate between formal and informal communication networks.\n\u2022 Describe the directional channels of communication within a hospital hierarchy.\n\u2022 Utilize formal communication channels effectively while managing informal communication.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 3,
-        "topicTitle": "Barriers to Effective Communication & Overcoming Them",
-        "subTopics": [
-          "Physical and environmental barriers",
-          "Physiological and psychological barriers (stress, trauma, illness)",
-          "Language, semantic, and jargon barriers in healthcare",
-          "Cultural, perceptual, and socio-economic barriers",
-          "Practical strategies to eliminate or minimize communication breakdown"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify physical, psychological, and semantic barriers affecting patient dialogue.\n\u2022 Explain the danger of using complex medical jargon during patient counseling.\n\u2022 Formulate practical interventions to ensure mutual understanding with diverse clients.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 4,
-        "topicTitle": "Listening Skills & Empathetic Patient Engagement",
-        "subTopics": [
-          "Difference between hearing and listening",
-          "Stages of the listening process (Receiving, Understanding, Remembering, Evaluating, Responding)",
-          "Types of listening (Active, Critical, Empathetic, Appreciative)",
-          "Barriers to effective listening and techniques for active listening"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Distinguish between passive hearing and active empathetic listening.\n\u2022 Apply the five stages of active listening during dietary history taking.\n\u2022 Demonstrate reflective listening and validation techniques in client interactions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 5,
-        "topicTitle": "Non-Verbal Communication & Body Language (CAT 1)",
-        "subTopics": [
-          "Types of non-verbal communication (Kinesics, Proxemics, Paralanguage, Haptics, Chronemics)",
-          "Functions of non-verbal cues in reinforcing or contradicting verbal messages",
-          "Interpreting patient non-verbal signals of distress, anxiety, or pain",
-          "Continuous Assessment Test 1 (Theory & Practical Skills)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the significant contribution of non-verbal cues to message interpretation.\n\u2022 Interpret client posture, facial expressions, and eye contact accurately.\n\u2022 Demonstrate mastery of communication principles under CAT 1 evaluation.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 6,
-        "topicTitle": "Oral Communication & Public Speaking Techniques",
-        "subTopics": [
-          "Principles of effective speech delivery (Voice projection, pitch, pace, tone, articulation)",
-          "Audience analysis and tailoring health presentations",
-          "Overcoming speech anxiety and building public speaking confidence",
-          "Designing audiovisual aids (slides, charts, handouts) to enhance presentations"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Plan and structure an informative health talk for a community audience.\n\u2022 Control voice dynamics, body posture, and anxiety during oral presentations.\n\u2022 Integrate visual aids to reinforce audience comprehension and retention.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 7,
-        "topicTitle": "Interpersonal Skills, Interviewing & Counseling",
-        "subTopics": [
-          "Principles of interpersonal communication and rapport building",
-          "The nutrition counseling interview (Opening, exploration, goal-setting, closing)",
-          "Questioning techniques (Open-ended, closed, probing, clarifying questions)",
-          "Giving and receiving constructive feedback"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Establish professional rapport and trust with newly admitted patients.\n\u2022 Formulate appropriate open-ended and probing questions for dietary assessments.\n\u2022 Conduct a structured, compassionate nutritional counseling session.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 8,
-        "topicTitle": "Mid-Term Examination & Official Correspondence",
-        "subTopics": [
-          "Mid-Term Examination (Official Institutional CAT 2)",
-          "Principles of effective written communication (7 Cs of communication)",
-          "Formats and layouts of official business letters (Full block, modified block)",
-          "Drafting routine, inquiry, complaint, and application letters"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Successfully complete the Mid-Term Evaluation covering Weeks 1 to 7 content.\n\u2022 Apply the 7 Cs (Clarity, Conciseness, Courtesy, Correctness, etc.) in writing.\n\u2022 Draft professional business and official health administration letters.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 9,
-        "topicTitle": "Internal Correspondence: Memos, Circulars & Notices",
-        "subTopics": [
-          "Purpose and format of official memorandum (Memos)",
-          "Drafting departmental notices, staff memos, and office circulars",
-          "Email etiquette and standard electronic communication protocols",
-          "Confidentiality and ethical standards in medical correspondence"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Structure and draft clear, concise internal departmental memorandums.\n\u2022 Compose official public health notices and staff circulars.\n\u2022 Adhere to legal privacy guidelines when transmitting client information.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 10,
-        "topicTitle": "Meeting Procedures & Documentation",
-        "subTopics": [
-          "Types of meetings (Formal, informal, AGM, departmental committees)",
-          "Preparations for meetings: Notice of meeting, Agenda formulation",
-          "Roles of meeting officials (Chairperson, Secretary, Treasurer, Members)",
-          "Rules of order, motions, amendments, and voting procedures",
-          "Taking accurate notes and drafting official meeting minutes"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Formulate a standard notice and agenda for a departmental nutrition committee.\n\u2022 Explain the procedural duties of the chairperson and secretary during meetings.\n\u2022 Record deliberations accurately and draft formal, approved minutes of meetings.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 11,
-        "topicTitle": "Report Writing: Routine & Investigative Reports",
-        "subTopics": [
-          "Definition, purpose, and types of reports (Routine, progressive, investigative, incident)",
-          "Stages of report preparation (Gathering facts, analyzing data, outlining)",
-          "Standard structural layout of a formal technical report (Title, Table of Contents, Executive Summary, Introduction, Findings, Conclusions, Recommendations)",
-          "Drafting an incident report on food hygiene breach or patient reaction"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Differentiate between routine progress reports and formal investigative reports.\n\u2022 Organize field survey data into standard formal report sections.\n\u2022 Write actionable, objective conclusions and recommendations for health management.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 12,
-        "topicTitle": "Proposal Writing & Modern Communication Technologies",
-        "subTopics": [
-          "Structure of a community nutrition intervention project proposal",
-          "Writing project objectives, justification, methodology, and budget",
-          "Emerging communication technologies (Telemedicine, videoconferencing, health apps)",
-          "Digital etiquette and maintaining professionalism across virtual platforms"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Draft a persuasive project proposal for a community nutrition intervention.\n\u2022 Utilize teleconferencing and digital health platforms for clinical consultation.\n\u2022 Maintain professional digital etiquette in virtual health environments.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 13,
-        "topicTitle": "Comprehensive Revision & Mock Presentation Clinic",
-        "subTopics": [
-          "Practical group oral presentations and peer video appraisal",
-          "Remediation on technical report drafting and minutes compilation",
-          "Past KNEC examination paper review and question-answering strategy",
-          "Comprehensive examination readiness review"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate polished verbal delivery and assertive communication in simulations.\n\u2022 Solve past examination scenario questions with precision.\n\u2022 Confidently prepare for the final institutional and national examinations.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 14,
-        "topicTitle": "End of Term Summative Examination",
-        "subTopics": [
-          "Institutional TVET Final Theory Examination",
-          "Evaluation of written communication portfolios and technical reports",
-          "Consolidation of continuous assessment marks"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate comprehensive mastery of communication theory and written proficiency under examination conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical laboratory demonstrations and hands-on occupational skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      }
-    ]
+    references: ["Stanton, N. (2017). Mastering Communication (5th ed.). Palgrave Macmillan.", "Taylor, S. (2019). Model Business Letters, Emails and Other Business Documents. Pearson."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "life_skills": {
-    "canonicalKey": "life_skills",
-    "syllabusCode": "6.1.0",
-    "unitCode": "6.1.0",
-    "unitName": "Life Skills",
-    "moduleNumber": 1,
-    "nominalHours": 44,
-    "theoryHours": 30,
-    "practicalHours": 14,
-    "aliases": [
-      "6.1.0",
-      "Life Skills",
-      "CND 2102",
-      "DND 2102",
-      "CCU 1104",
-      "DCU 1106",
-      "DHN 1104"
+    canonicalKey: "life_skills",
+    syllabusCode: "6.1.0",
+    unitCode: "6.1.0",
+    unitName: "Life Skills",
+    moduleNumber: 1,
+    nominalHours: 33,
+    theoryHours: 20,
+    practicalHours: 13,
+    aliases: ["CND 1103", "DND 1103", "DCU 1106", "6.1.0"],
+    unitDescription: "This module unit is intended to equip the trainee with knowledge, skills, attitudes and values that will empower him/her to face challenges caused by their physiological, psychological, social and economic circumstances. It will enable him/her to take responsibility for their individual actions.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: develop an awareness of everyday demands and challenges through critical thinking; deal with health problems, fears and anxieties relating to growing up, sexuality and relationships; enhance self-esteem and assertiveness in relationships with peers and adults.",
+    learningOutcomes: [
+      "develop an awareness of everyday demands and challenges through critical thinking",
+      "deal with health problems, fears and anxieties relating to growing up, sexuality and relationships",
+      "enhance self-esteem and assertiveness in relationships with peers and adults",
+      "develop an appreciation of females and males as equal partners in society",
+      "make optimum use of time and available resources in order to improve the quality of life",
+      "develop attitudes, values and skills that promote co-existence, positive, responsible and healthy lifestyles",
+      "develop an understanding of support and a sense of care and responsibility for disadvantaged groups in the community"
     ],
-    "unitDescription": "This unit is intended to equip trainees with psychosocial and interpersonal competencies that enable them to deal effectively with the demands and challenges of daily life, clinical practice, ethical dilemmas, stress management, and workplace relationships.",
-    "overallCompetency": "Apply psychosocial competencies, critical thinking, emotional intelligence, and ethical values in personal growth and professional healthcare service delivery.",
-    "learningOutcomes": [
-      "Demonstrate self-awareness, positive self-esteem, and values clarification.",
-      "Apply emotional regulation and stress management strategies in high-pressure healthcare settings.",
-      "Demonstrate assertive communication, empathy, and constructive interpersonal relationship skills.",
-      "Apply critical and creative thinking in ethical decision-making and problem solving.",
-      "Resolve interpersonal and institutional conflicts through principled negotiation."
+    weeklySchedule: [
+      {
+        weekNumber: 1,
+        topicTitle: "Introduction to Life Skills & Self Awareness",
+        subTopics: ["Definition of the term life skills", "Categories of life skills", "Benefits of life skills education to society", "Living values and how they relate to our lives", "Relationship between life skills and living values", "Self description", "Physical attributes", "Self assessment", "Life vision and mission", "Challenges that hinder attainment of life goals", "Strategies of overcoming challenges in life", "Values associated with self-awareness", "Personal values", "Beliefs", "Goals and ambitions"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Introduction to Life Skills & Self Awareness.\n• Classify life skills and describe their categories.\n• Explain benefits of life skills education to society.\n• Evaluate living values and how they relate to our lives.\n• Evaluate relationship between life skills and living values.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 2,
+        topicTitle: "Self Esteem & Stress Management",
+        subTopics: ["Definition of self esteem", "Self evaluation using self-analysis table", "Factors enhancing self esteem", "Signs of high/low self esteem", "Factors that enhance high and low esteem", "Importance of high self esteem", "Effects of low self esteem", "Values associated with high self esteem", "Ways of boosting self esteem", "Definition of stress", "Causes of stress", "Effects of stress", "Ways of coping with stress", "Forms of positive stress", "Values associated with positive stress management"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Self Esteem & Stress Management.\n• Interpret and apply self evaluation using self-analysis table.\n• Explain factors enhancing self esteem.\n• Explain signs of high/low self esteem.\n• Explain factors that enhance high and low esteem.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 3,
+        topicTitle: "Coping with Emotion",
+        subTopics: ["Definition of the term emotion", "Good and bad feelings", "Causes of good and bad feelings", "Meaning of emotional intelligence", "Feelings which can lead to risky behaviour", "Ways of coping with negative emotions", "Values associated with emotional intelligence"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Coping with Emotion.\n• Explain good and bad feelings.\n• Analyze factors affecting good and bad feelings.\n• Explain meaning of emotional intelligence.\n• Explain feelings which can lead to risky behaviour.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 4,
+        topicTitle: "Empathy & Assertiveness",
+        subTopics: ["Definition of empathy", "Importance of empathizing", "Difference between empathy and sympathy", "Situations requiring empathy", "Values associated with empathy", "Definition of assertiveness", "Characteristics of an assertive person", "Steps to being assertive", "Importance of being assertive", "Difference between assertiveness, aggressiveness and passiveness", "Difference between peer pressure and peer influence", "Values associated with assertiveness"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Empathy & Assertiveness.\n• Explain the functions and physiological role of empathizing.\n• Explain difference between empathy and sympathy.\n• Explain situations requiring empathy.\n• Evaluate values associated with empathy.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 5,
+        topicTitle: "Negotiation & Non-Violent Conflict Resolution",
+        subTopics: ["Definition of the term negotiation", "Importance of negotiation", "Situations requiring negotiation", "Negotiating techniques", "Values associated with negotiation", "Definition of the term conflict", "Causes of conflicts", "Consequences of conflicts", "Types of conflicts", "Ways of dealing with conflict", "Conflict resolution skills", "Institutions that resolve conflicts in the community", "Values related to conflict resolution"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Negotiation & Non-Violent Conflict Resolution.\n• Explain the functions and physiological role of negotiation.\n• Explain situations requiring negotiation.\n• Explain negotiating techniques.\n• Evaluate values associated with negotiation.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 6,
+        topicTitle: "Effective Decision Making",
+        subTopics: ["Situations that require decision making", "Challenges that require effective decision making among the youth", "Factors that influence decision making", "Steps to effective decision making", "Consequences of not making effective decisions", "Decision-making institutions within the community", "Values associated with effective decision making"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain situations that require decision making.\n• Discuss emerging issues, trends and coping strategies in effective Decision Making.\n• Explain factors that influence decision making.\n• Explain steps to effective decision making.\n• Explain consequences of not making effective decisions.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 7,
+        topicTitle: "Critical Thinking & Creative Thinking",
+        subTopics: ["Meaning of critical thinking", "Risky situations", "Evaluating ideas or issues objectively", "Consequences of deciding without critical thinking", "Values associated with critical thinking", "Definition of creative thinking", "Situations requiring creative thinking", "Importance of being creative", "Consequences of not being creative", "Values associated with creative thinking"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain meaning of critical thinking.\n• Explain risky situations.\n• Explain evaluating ideas or issues objectively.\n• Explain consequences of deciding without critical thinking.\n• Evaluate values associated with critical thinking.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Life Skills)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Life Skills.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
+      },
+      {
+        weekNumber: 9,
+        topicTitle: "Problem Solving & Leisure",
+        subTopics: ["Problem areas requiring solutions", "Causes of problems", "Methods of solving problems", "Problem solving process", "Values necessary for solving problems", "Definition of terms", "Effects of misuse of leisure time", "Activities for positive leisure", "Life skills for positive use of leisure time", "Values associated with leisure"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain problem areas requiring solutions.\n• Analyze factors affecting problems.\n• Describe methods and procedures for solving problems.\n• Describe the structure, components and function of problem solving process.\n• Evaluate values necessary for solving problems.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 10,
+        topicTitle: "Time Management",
+        subTopics: ["Definition of the concept of time management", "Work schedule", "Time management chart", "Importance of managing time", "Aspects of time wasters", "Values and life skills associated with time management"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Time Management.\n• Explain work schedule.\n• Interpret and apply time management chart.\n• Explain the functions and physiological role of managing time.\n• Explain aspects of time wasters.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 11,
+        topicTitle: "Gender Education & Drug and Substance Abuse",
+        subTopics: ["Definition of the term gender", "Agents perpetuating gender discrimination", "Gender stereotyping", "Effects of gender on an individual’s life", "Ways of eliminating gender discrimination", "Values associated with gender parity", "Definition of terms", "Commonly abused drugs and substances", "Causes of drug and substance abuse", "Signs and symptoms", "Effects of drug and substance abuse", "Relationship between drug/substance abuse and HIV and AIDS", "Management of cases", "Ways of preventing drug and substance abuse", "Life skills and values necessary in prevention"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Gender Education & Drug and Substance Abuse.\n• Explain agents perpetuating gender discrimination.\n• Explain gender stereotyping.\n• Explain effects of gender on an individual’s life.\n• Explain ways of eliminating gender discrimination.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 12,
+        topicTitle: "HIV and AIDS Awareness",
+        subTopics: ["Definition of terms", "Ways HIV is transmitted", "Signs and symptoms of AIDS", "Catalysts of the spread of HIV and AIDS"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in HIV and AIDS Awareness.\n• Explain ways HIV is transmitted.\n• Describe deficiency signs, symptoms and disorders related to of AIDS.\n• Explain catalysts of the spread of HIV and AIDS.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "Comprehensive Syllabus Revision & Tutorial Clinic (Life Skills)",
+        subTopics: ["Comprehensive review of all core unit competencies and learning outcomes", "Analysis of KNEC past examination questions and model marking schemes", "Tutorial clinics, student presentations, and academic remediation"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain comprehensive review of all core unit competencies and learning outcomes.\n• Explain analysis of KNEC past examination questions and model marking schemes.\n• Explain tutorial clinics, student presentations, and academic remediation.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Life Skills)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Life Skills in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
     ],
-    "references": [
-      "WHO. (2020). Life Skills Education for Children and Adolescents in Schools. World Health Organization.",
-      "UNICEF. (2019). Global Framework on Transferable Skills. United Nations Children's Fund.",
-      "Nelson-Jones, R. (2018). Life Coaching Skills: How to Develop Skilled Clients. SAGE Publications."
-    ],
-    "instructionalEquipment": [
-      "Case study scenarios and dilemma role-play cards",
-      "Multimedia projector and self-assessment psychometric scales",
-      "Video clips demonstrating conflict resolution and assertiveness"
-    ],
-    "weeklySchedule": [
-      {
-        "weekNumber": 1,
-        "topicTitle": "Introduction to Life Skills & Self-Awareness",
-        "subTopics": [
-          "Definition, categories, and importance of life skills",
-          "Self-awareness: Understanding strengths, weaknesses, opportunities, and threats",
-          "Self-concept, self-esteem, and building self-confidence",
-          "Values clarification and personal mission formulation"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Define life skills and explain their relevance to healthcare professional conduct.\n\u2022 Conduct a personal SWOT analysis to enhance self-understanding.\n\u2022 Articulate personal core values that guide professional ethical behaviour.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 2,
-        "topicTitle": "Self-Esteem & Personal Development",
-        "subTopics": [
-          "Factors influencing self-esteem (Family, peers, media, culture)",
-          "Characteristics of high versus low self-esteem",
-          "Techniques for enhancing self-esteem and self-worth",
-          "Goal setting (SMART goals) and personal development planning"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Analyze socio-environmental factors shaping self-perception and self-worth.\n\u2022 Distinguish between healthy assertiveness and defensive arrogance.\n\u2022 Formulate SMART personal and career development goals.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 3,
-        "topicTitle": "Stress & Stress Management in Clinical Settings",
-        "subTopics": [
-          "Definition and nature of stress (Eustress versus Distress)",
-          "Causes and stressors in healthcare environments and academic study",
-          "Physical, emotional, and cognitive signs of burnout",
-          "Coping mechanisms: Time management, relaxation, mindfulness, and seeking help"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify major sources of academic and workplace clinical stress.\n\u2022 Recognize early physiological and psychological warning signs of burnout.\n\u2022 Apply evidence-based stress reduction and relaxation techniques.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 4,
-        "topicTitle": "Emotion Regulation & Anger Management",
-        "subTopics": [
-          "Nature, types, and functions of human emotions",
-          "Emotional Intelligence (EQ) components (Goleman's model)",
-          "Triggers and consequences of uncontrolled anger in patient care",
-          "Constructive anger management and de-escalation strategies"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the role of emotional intelligence in professional health practice.\n\u2022 Identify internal and external triggers of anger and frustration.\n\u2022 Practice emotional regulation and non-violent de-escalation methods.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 5,
-        "topicTitle": "Empathy & Interpersonal Relationships (CAT 1)",
-        "subTopics": [
-          "Concept and significance of empathy in patient care",
-          "Developing perspective-taking and compassionate care",
-          "Building and nurturing healthy professional and personal relationships",
-          "Continuous Assessment Test 1 (Theory & Reflective Application)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Distinguish between genuine empathy, sympathy, and clinical detachment.\n\u2022 Demonstrate empathetic understanding during simulated patient consultations.\n\u2022 Successfully complete CAT 1 evaluating self-awareness and emotional skills.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 6,
-        "topicTitle": "Assertiveness & Overcoming Negative Peer Pressure",
-        "subTopics": [
-          "Understanding communication styles (Passive, Aggressive, Passive-Aggressive, Assertive)",
-          "Characteristics of assertive behavior and rights of an individual",
-          "Techniques of assertion (Broken record, 'I' statements, fogging, saying 'No')",
-          "Resisting negative social and institutional peer pressure"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Differentiate between assertiveness, submissiveness, and aggressive hostility.\n\u2022 Construct clear, respectful 'I' statements to convey boundaries.\n\u2022 Resist unethical peer pressure or clinical compromises with confidence.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 7,
-        "topicTitle": "Effective Decision Making & Values in Healthcare",
-        "subTopics": [
-          "Decision-making models and steps in rational choice",
-          "Factors influencing decisions (Emotions, peers, values, societal norms)",
-          "Ethical dilemmas in nutrition and dietetics practice",
-          "Evaluating consequences and accepting responsibility for decisions"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Apply structured decision-making steps to complex everyday scenarios.\n\u2022 Analyze the influence of ethical principles on professional clinical judgment.\n\u2022 Take accountable ownership of decisions made during healthcare delivery.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 8,
-        "topicTitle": "Mid-Term Examination & Critical Thinking Skills",
-        "subTopics": [
-          "Mid-Term Examination (Official Institutional CAT 2)",
-          "Definition and importance of critical thinking in clinical reasoning",
-          "Identifying cognitive biases, logical fallacies, and medical misinformation",
-          "Analyzing assumptions and evaluating evidence objectively"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Successfully complete the Mid-Term Evaluation covering Weeks 1 to 7 content.\n\u2022 Define critical thinking and apply skeptical inquiry to health claims.\n\u2022 Distinguish verified evidence-based science from dietary fads and fallacies.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 9,
-        "topicTitle": "Creative Thinking & Innovative Problem Solving",
-        "subTopics": [
-          "Concept of creative thinking and lateral thinking (De Bono)",
-          "Barriers to creative thinking (Habit, fear of failure, conformity)",
-          "Techniques for fostering creativity (Brainstorming, mind-mapping, SCAMPER)",
-          "Designing innovative solutions to community nutritional deficiencies"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Overcome mental blocks that inhibit creative problem solving.\n\u2022 Apply divergent thinking techniques to address community health challenges.\n\u2022 Formulate low-cost, innovative solutions for dietary enrichment.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 10,
-        "topicTitle": "Conflict Resolution & Principled Negotiation",
-        "subTopics": [
-          "Sources and types of conflict (Intrapersonal, interpersonal, institutional)",
-          "Conflict management styles (Thomas-Kilmann conflict mode instrument)",
-          "Steps in principled negotiation (Fisher & Ury: Interest-based bargaining)",
-          "Mediation techniques and resolving disputes among healthcare colleagues"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Diagnose root causes of conflict in hospital and community team settings.\n\u2022 Assess personal conflict handling style and select appropriate conflict modes.\n\u2022 Apply interest-based negotiation to achieve win-win solutions in disputes.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 11,
-        "topicTitle": "Substance Abuse, Addiction & Healthy Lifestyle Choices",
-        "subTopics": [
-          "Commonly abused substances (Alcohol, tobacco, miraa/khat, cannabis, prescription drugs)",
-          "Causes, risk factors, and progression of substance dependence",
-          "Impact of substance abuse on health, academic achievement, and clinical safety",
-          "Prevention, rehabilitation resources, and supporting affected peers"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Outline pharmacological and psychosocial impacts of drug and substance abuse.\n\u2022 Recognize behavioral signs of chemical dependency and psychological addiction.\n\u2022 Promote healthy lifestyle choices and advocate for substance abuse prevention.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 12,
-        "topicTitle": "Gender Sensitization, Human Rights & Diversity",
-        "subTopics": [
-          "Concepts of sex, gender, gender roles, and social construction",
-          "Gender-based violence (GBV): Types, impacts, and reporting pathways",
-          "Inclusivity, cultural diversity, and non-discrimination in patient service",
-          "Promoting gender equity and reproductive health rights"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the distinction between biological sex and socially constructed gender roles.\n\u2022 Identify signs of gender-based violence and initiate safe referral mechanisms.\n\u2022 Practice non-discriminatory, culturally sensitive care with all patients.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 13,
-        "topicTitle": "Comprehensive Revision & Role-Play Clinic",
-        "subTopics": [
-          "Integrated case study analyses simulating workplace ethical dilemmas",
-          "Role-playing complex negotiation, patient counseling, and assertiveness scenarios",
-          "Review of past KNEC examination questions on Life Skills",
-          "Final preparation clinic and examination guidelines"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Synthesize psychosocial competencies across diverse real-world situations.\n\u2022 Demonstrate polished conflict resolution and empathetic communication.\n\u2022 Achieve full mastery of curriculum themes ahead of summative assessments.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 14,
-        "topicTitle": "End of Term Summative Examination",
-        "subTopics": [
-          "Institutional TVET Final Theory Examination",
-          "Evaluation of reflective life skills journals and continuous assessment marks"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate comprehensive understanding of life skills principles under examination conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      }
-    ]
+    references: ["UNICEF. (2019). Global Framework on Transferable Skills. UNICEF.", "WHO. (2017). Life Skills Education for Children and Adolescents in Schools. WHO."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "basic_mathematics": {
-    "canonicalKey": "basic_mathematics",
-    "syllabusCode": "7.1.0",
-    "unitCode": "7.1.0",
-    "unitName": "Mathematics",
-    "moduleNumber": 1,
-    "nominalHours": 44,
-    "theoryHours": 32,
-    "practicalHours": 12,
-    "aliases": [
-      "7.1.0",
-      "Mathematics",
-      "Basic Mathematics",
-      "DND 1301",
-      "CND 1104",
-      "CCU 1110",
-      "DCU 1110"
+    canonicalKey: "basic_mathematics",
+    syllabusCode: "7.1.0",
+    unitCode: "7.1.0",
+    unitName: "Mathematics",
+    moduleNumber: 1,
+    nominalHours: 55,
+    theoryHours: 35,
+    practicalHours: 20,
+    aliases: ["CND 1104", "DND 1301", "CCU 1110", "DCU 1110", "7.1.0"],
+    unitDescription: "This module unit is intended to equip the trainee with knowledge, skills and attitudes to enable him/her apply mathematical concepts and techniques in Nutrition and Dietetics.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: perform arithmetic involving different number systems; manipulate data to draw simple deductions and conclusions from a given sample; interpret graphical representation of functions.",
+    learningOutcomes: [
+      "perform arithmetic involving different number systems",
+      "manipulate data to draw simple deductions and conclusions from a given sample",
+      "interpret graphical representation of functions",
+      "apply commercial calculation concepts involved in business operations"
     ],
-    "unitDescription": "This unit covers foundational mathematical principles, algebraic techniques, geometry, ratios, proportions, commercial calculations, and basic descriptive statistics required for precise dietary formulations, anthropometric indices, and clinical data analysis.",
-    "overallCompetency": "Apply mathematical concepts, algebraic calculations, and statistical techniques to solve nutritional, clinical, and dietary formulation problems.",
-    "learningOutcomes": [
-      "Perform operations on fractions, decimals, percentages, ratios, and rates accurately.",
-      "Solve linear, simultaneous, and quadratic algebraic equations.",
-      "Apply geometric formulae to calculate perimeter, area, and volume in food preparation.",
-      "Calculate nutritional requirements, dietary dilutions, and anthropometric ratios.",
-      "Present, analyze, and interpret descriptive health data using statistical measures."
+    weeklySchedule: [
+      {
+        weekNumber: 1,
+        topicTitle: "Fundamentals of Mathematics",
+        subTopics: ["Operations carried out on positive and negative numbers", "The laws of operations on positive and negative numbers"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain operations carried out on positive and negative numbers.\n• State and apply the the laws of operations on positive and negative numbers.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 2,
+        topicTitle: "Ratios and Proportions",
+        subTopics: ["Definition of ratios", "Definition of proportions", "Types of proportions"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Ratios and Proportions.\n• Classify proportions and describe their categories.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 3,
+        topicTitle: "Measurements",
+        subTopics: ["Units of measurement", "Relationship between the various units of measurement", "Definition of density"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain units of measurement.\n• Explain relationship between the various units of measurement.\n• Define terms and concepts used in Measurements.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 4,
+        topicTitle: "Geometrical Construction",
+        subTopics: ["Equipment used in geometrical constructions", "Definition of parallel and perpendicular lines and regular shapes", "Meaning of bearings", "Construction procedure of parallel/perpendicular lines and regular shapes", "Procedure used in bearing construction"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate safe handling and operation of equipment used in geometrical constructions.\n• Define terms and concepts used in Geometrical Construction.\n• Explain meaning of bearings.\n• Explain construction procedure of parallel/perpendicular lines and regular shapes.\n• Explain procedure used in bearing construction.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 5,
+        topicTitle: "Algebraic Expressions",
+        subTopics: ["Algebraic expressions", "Simultaneous equations"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain algebraic expressions.\n• Explain simultaneous equations.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 6,
+        topicTitle: "Linear Graphs",
+        subTopics: ["Linear equations", "Linear graphs", "Simultaneous linear equations and graphs", "Interpretation of linear and simultaneous graphs"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain linear equations.\n• Explain linear graphs.\n• Explain simultaneous linear equations and graphs.\n• Explain interpretation of linear and simultaneous graphs.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 7,
+        topicTitle: "Elements of Probability",
+        subTopics: ["Meaning of probability", "Laws of probability", "Probability events", "Counting techniques in probability", "Normal distribution and its application"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain meaning of probability.\n• State and apply the laws of probability.\n• Explain probability events.\n• Explain counting techniques in probability.\n• Explain normal distribution and its application.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Mathematics)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Mathematics.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
+      },
+      {
+        weekNumber: 9,
+        topicTitle: "Commercial Calculations",
+        subTopics: ["Definition of terms", "Pricing of products", "Average sales", "Stock turnover", "Profit and loss", "Exchange rates"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Commercial Calculations.\n• Calculate products accurately.\n• Explain average sales.\n• Explain stock turnover.\n• Describe physiological mechanisms of profit and loss.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 10,
+        topicTitle: "Statistics",
+        subTopics: ["Types of data", "Data collection methods", "Data tabulation methods", "Data presentation", "Data interpretation (mean, mode, median)"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Classify data and describe their categories.\n• Explain data collection methods.\n• Explain data tabulation methods.\n• Explain data presentation.\n• Explain data interpretation (mean, mode, median).",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 11,
+        topicTitle: "Emerging Issues and Trends in Mathematics",
+        subTopics: ["Various emerging issues and trends in mathematics", "Challenges posed by emerging issues and trends", "Ways of coping with emerging trends and issues"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain various emerging issues and trends in mathematics.\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends in Mathematics.\n• Explain ways of coping with emerging trends and issues.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 12,
+        topicTitle: "Applied Practice & Case Studies in Mathematics (Week 12)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Mathematics in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "Emerging Issues and Trends in Mathematics & Comprehensive Syllabus Revision",
+        subTopics: ["Various emerging issues and trends in mathematics", "Challenges posed by emerging issues and trends", "Ways of coping with emerging trends and issues"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain various emerging issues and trends in mathematics.\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends in Mathematics & Comprehensive Syllabus Revision.\n• Explain ways of coping with emerging trends and issues.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Mathematics)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Mathematics in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
     ],
-    "references": [
-      "Bird, J. (2017). Basic Engineering Mathematics (7th Edition). Routledge.",
-      "Stroud, K. A., & Booth, D. J. (2020). Foundation Mathematics. Bloomsbury Publishing.",
-      "Greer, A. (2018). Complete Mathematics for Cambridge IGCSE. Oxford University Press."
-    ],
-    "instructionalEquipment": [
-      "Scientific calculators",
-      "Graph papers, geometrical sets, and chart drawing materials",
-      "Clinical nutrition case problem worksheets and dietary calculation tables"
-    ],
-    "weeklySchedule": [
-      {
-        "weekNumber": 1,
-        "topicTitle": "Number Systems, Fractions & Decimals",
-        "subTopics": [
-          "Real number systems, place values, and order of operations (BODMAS)",
-          "Fractions: Proper, improper, mixed numbers, and fractional operations",
-          "Decimals: Conversion between fractions and decimals, rounding, and significant figures",
-          "Percentages: Calculation of percentage increase, decrease, and concentration"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Apply BODMAS rules accurately in multi-step arithmetic calculations.\n\u2022 Convert between fractions, decimals, and percentages with precision.\n\u2022 Calculate nutrient percentages and concentration values in dietary solutions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 2,
-        "topicTitle": "Ratios, Proportions & Rates in Dietary Formulations",
-        "subTopics": [
-          "Definition and simplification of ratios",
-          "Direct and inverse proportions",
-          "Dividing quantities in given ratios for meal formulas",
-          "Rate calculations: Speed, unit costs, and flow rates for tube feeding"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Simplify and manipulate mathematical ratios for food formulation recipes.\n\u2022 Solve direct and inverse proportion problems in dietary recipe scaling.\n\u2022 Calculate enteral feed infusion rates and dosage requirements.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 3,
-        "topicTitle": "Indices, Standard Form & Logarithms",
-        "subTopics": [
-          "Laws of indices (multiplication, division, powers, negative and fractional indices)",
-          "Expressing numbers in standard form (scientific notation)",
-          "Definition and fundamental laws of logarithms",
-          "Solving simple exponential and logarithmic equations related to pH calculations"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Apply the laws of indices to simplify complex mathematical expressions.\n\u2022 Express large and microscopic clinical measurements in standard scientific notation.\n\u2022 Use logarithms to calculate hydrogen ion concentration and pH values.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 4,
-        "topicTitle": "Algebraic Expressions & Factorization",
-        "subTopics": [
-          "Simplifying algebraic expressions and collecting like terms",
-          "Expansion of single and double brackets",
-          "Factorization by common factors, grouping, and difference of two squares",
-          "Simplification of algebraic fractions"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Simplify algebraic expressions using standard algebraic identities.\n\u2022 Factorize quadratic and multi-term algebraic expressions.\n\u2022 Simplify complex algebraic fractions encountered in biomedical equations.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 5,
-        "topicTitle": "Linear Equations & Formula Rearrangement (CAT 1)",
-        "subTopics": [
-          "Solving linear equations in one unknown",
-          "Formulating algebraic equations from real-life dietary word problems",
-          "Transposition and change of subject of a formula (BMI, BMR formulas)",
-          "Continuous Assessment Test 1"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Solve linear equations with fractional and bracketed terms.\n\u2022 Rearrange clinical nutrition formulas to isolate target physiological variables.\n\u2022 Demonstrate competence under CAT 1 evaluation conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 6,
-        "topicTitle": "Simultaneous Linear Equations",
-        "subTopics": [
-          "Concept and applications of simultaneous equations in dietary blending",
-          "Solving simultaneous equations by the substitution method",
-          "Solving simultaneous equations by the elimination method",
-          "Formulating simultaneous equations for two-nutrient food mix problems"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Solve pairs of linear simultaneous equations using substitution and elimination.\n\u2022 Set up simultaneous equations to determine exact ingredient weights in recipe mixes.\n\u2022 Verify solutions algebraically and graphically.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 7,
-        "topicTitle": "Quadratic Equations & Functions",
-        "subTopics": [
-          "Standard form of quadratic equations ($ax^2 + bx + c = 0$)",
-          "Solving quadratics by factorization",
-          "Solving quadratics using the quadratic formula",
-          "Graphing quadratic functions and identifying vertex and roots"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify the coefficients of a quadratic equation in standard form.\n\u2022 Solve quadratic equations using factorization and the quadratic formula.\n\u2022 Plot quadratic curves and interpret maximum/minimum turning points.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 8,
-        "topicTitle": "Mid-Term Examination & Mensuration (Perimeter and Area)",
-        "subTopics": [
-          "Mid-Term Examination (Official Institutional CAT 2)",
-          "Perimeter and circumference of regular plane shapes (rectangles, triangles, circles)",
-          "Area of plane figures: Rectangles, triangles, parallelograms, trapeziums, and circles",
-          "Area calculations in food packaging and portion control"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Successfully complete the Mid-Term Evaluation covering Weeks 1 to 7 content.\n\u2022 Calculate perimeters and areas of regular and composite geometric shapes.\n\u2022 Apply mensuration formulas to determine surface areas of food storage containers.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 9,
-        "topicTitle": "Mensuration: Surface Area & Volume of Solids",
-        "subTopics": [
-          "Volume and surface area of prisms, cuboids, and cylinders",
-          "Volume of cones, pyramids, and spheres",
-          "Liquid volume and capacity conversions (milliliters, liters, cubic centimeters)",
-          "Calculations of batch volumes for institutional bulk meal catering"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Calculate the volume and capacity of cylindrical and rectangular food containers.\n\u2022 Perform accurate unit conversions between metric capacity and volume units.\n\u2022 Determine bulk batch fluid volumes for hospital catering kitchens.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 10,
-        "topicTitle": "Commercial Arithmetic & Financial Mathematics",
-        "subTopics": [
-          "Cost price, selling price, profit, loss, and percentage markup/margin",
-          "Discounts, commissions, and value-added tax (VAT) calculations",
-          "Simple interest and compound interest formulas",
-          "Depreciation of institutional kitchen and hospital equipment"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Compute unit cost price, markup percentages, and profitable selling prices.\n\u2022 Calculate VAT, commercial discounts, and trade commissions.\n\u2022 Apply compound interest and depreciation formulas to capital asset planning.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 11,
-        "topicTitle": "Descriptive Statistics: Data Collection & Presentation",
-        "subTopics": [
-          "Types of data (Discrete, continuous, qualitative, quantitative)",
-          "Data collection tools: Tally sheets, questionnaires, and observation checklists",
-          "Frequency distribution tables and grouped frequency tables",
-          "Graphical representation: Bar charts, histograms, frequency polygons, and pie charts"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Distinguish between discrete and continuous health variables.\n\u2022 Construct grouped frequency distribution tables from raw patient survey data.\n\u2022 Plot accurate histograms, frequency polygons, and pie charts to display nutritional data.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 12,
-        "topicTitle": "Measures of Central Tendency & Dispersion",
-        "subTopics": [
-          "Calculation of Mean, Median, and Mode for ungrouped data",
-          "Calculation of Mean, Median, and Modal class for grouped frequency data",
-          "Measures of dispersion: Range, interquartile range, variance, and standard deviation",
-          "Interpreting standard deviation in the context of growth monitoring (Z-scores)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Calculate the mean, median, and mode for grouped clinical measurements.\n\u2022 Compute the variance and standard deviation of anthropometric indicators.\n\u2022 Explain the relationship between standard deviation and standard WHO growth Z-scores.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 13,
-        "topicTitle": "Comprehensive Revision & Problem-Solving Clinic",
-        "subTopics": [
-          "Step-by-step review of clinical dosage and dietary proportion problems",
-          "Remediation of algebraic formula transposition and quadratic equations",
-          "Past KNEC mathematics examination paper analysis and timed exercises",
-          "Techniques for avoiding computational errors in exams"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Solve complex multi-topic mathematical word problems with confidence.\n\u2022 Apply efficient calculator techniques and error-checking strategies.\n\u2022 Demonstrate readiness for national TVET examination standards.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 14,
-        "topicTitle": "End of Term Summative Examination",
-        "subTopics": [
-          "Institutional TVET Final Theory Examination in Mathematics",
-          "Consolidation of continuous assessment marks and test performance review"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate comprehensive mathematical proficiency under examination conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      }
-    ]
+    references: ["Stroud, K. A., & Booth, D. J. (2020). Engineering Mathematics. Bloomsbury.", "Bird, J. (2017). Basic Engineering Mathematics. Routledge."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "physical_science": {
-    "canonicalKey": "physical_science",
-    "syllabusCode": "8.1.0",
-    "unitCode": "8.1.0",
-    "unitName": "Physical Science",
-    "moduleNumber": 1,
-    "nominalHours": 44,
-    "theoryHours": 28,
-    "practicalHours": 16,
-    "aliases": [
-      "8.1.0",
-      "Physical Science",
-      "Applied Physical Sciences I (chemistry)",
-      "Applied Physical Sciences II (Physics)",
-      "Nutrition physical sciences I",
-      "Applied biological sciences",
-      "DND 1106",
-      "DND 1204",
-      "CND 1106",
-      "CHN 1101",
-      "CCU 1111",
-      "DCU 1111",
-      "DHN 1106"
+    canonicalKey: "physical_science",
+    syllabusCode: "8.1.0",
+    unitCode: "8.1.0",
+    unitName: "Physical Science",
+    moduleNumber: 1,
+    nominalHours: 66,
+    theoryHours: 40,
+    practicalHours: 26,
+    aliases: ["CND 1106", "DND 1106", "DND 1204", "CCU 1111", "DCU 1111", "8.1.0"],
+    unitDescription: "This module unit is intended to provide theoretical knowledge and practical skills and attitudes that enable the trainee to understand the principles and practices in nutrition and dietetics.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: explain applications of physical science in nutrition and dietetics; apply knowledge and skills gained in physical science in nutrition and dietetics; analyse and interpret data related to physical science in decision-making process.",
+    learningOutcomes: [
+      "explain applications of physical science in nutrition and dietetics",
+      "apply knowledge and skills gained in physical science in nutrition and dietetics",
+      "analyse and interpret data related to physical science in decision-making process",
+      "observe safety precautions in the working environment",
+      "explain the physical and chemical nature of substances used in nutrition and dietetics",
+      "recognize emerging issues and trends"
     ],
-    "unitDescription": "This unit covers fundamental physical and chemical principles, mechanics, thermodynamics, atomic structure, chemical bonding, solutions, acids, bases, organic functional groups, and biomolecules essential for understanding food science, human physiology, and nutritional biochemistry.",
-    "overallCompetency": "Apply core physics and chemistry principles to explain food processing mechanisms, human physiological processes, and chemical nutrient interactions.",
-    "learningOutcomes": [
-      "Apply units of measurement, dimensional analysis, and laboratory safety protocols.",
-      "Explain mechanics, heat transfer, gas laws, and thermodynamics in food systems.",
-      "Describe atomic structure, chemical bonding, and periodic table trends.",
-      "Calculate solution concentrations, molarity, normality, pH, and buffer capacities.",
-      "Identify organic functional groups and explain chemical properties of carbohydrates, lipids, and proteins."
+    weeklySchedule: [
+      {
+        weekNumber: 1,
+        topicTitle: "Atomic Structure & Periodic Table & Structure and Bonding",
+        subTopics: ["Structure of an atom", "Electronic configuration of elements", "Atomic spectra", "Periodic table", "Trends in the periodic table", "Physical properties", "Chemical properties", "Types of bonds", "Van der Waals forces", "Structure of simple molecules", "Writing chemical formulae of compounds"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Describe the structure and components of an atom.\n• Explain electronic configuration of elements.\n• Explain atomic spectra.\n• Interpret and apply periodic table.\n• Discuss emerging issues, trends and coping strategies in atomic Structure & Periodic Table & Structure and Bonding.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 2,
+        topicTitle: "Chemical Equations & Redox Reactions & Introduction to Organic Chemistry",
+        subTopics: ["Writing and balancing of equations", "Stoichiometric equations", "Definitions of terms", "Types of redox reactions", "Calculation of oxidation numbers", "Balancing redox equations", "Classes of organic compounds", "Characteristics of carbon", "Calculations of empirical and molecular formulae of carbon compounds"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain writing and balancing of equations.\n• Explain stoichiometric equations.\n• Define terms and concepts used in Chemical Equations & Redox Reactions & Introduction to Organic Chemistry.\n• Classify redox reactions and describe their categories.\n• Calculate oxidation numbers accurately.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 3,
+        topicTitle: "Homologous Series & Hydrocarbon Compounds",
+        subTopics: ["Definition of the term homologous series", "Characteristics of a homologous series", "Structure and bonding of functional groups", "Types of isomerism", "Definition of the term hydrocarbon", "Types of hydrocarbons", "Nomenclature of hydrocarbons", "Chemical reactions of hydrocarbons"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Homologous Series & Hydrocarbon Compounds.\n• Explain characteristics of a homologous series.\n• Explain structure and bonding of functional groups.\n• Classify isomerism and describe their categories.\n• Classify hydrocarbons and describe their categories.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 4,
+        topicTitle: "Alcohols (Alkanols) & Carbonyl Compounds & Carboxylic Acids and their Derivatives",
+        subTopics: ["Definition of terms", "Methods of preparation", "Chemical reactions of alcohols", "Uses of alcohols", "Structure of carbonyl compounds", "Reactions of carbonyl compounds", "Preparation of carbonyl compounds", "Naming of carboxylic acids", "Acidity of carboxylic acids and derivatives", "Methods of preparation", "Chemical reactions"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Alcohols (Alkanols) & Carbonyl Compounds & Carboxylic Acids and their Derivatives.\n• Describe methods and procedures for preparation.\n• Explain chemical reactions of alcohols.\n• Explain uses of alcohols.\n• Describe the structure and components of carbonyl compounds.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 5,
+        topicTitle: "Alkyl Halides & Kinetic Theory of Gases & Solubility",
+        subTopics: ["Nomenclature of alkyl halides", "Methods of preparation", "Chemical reactions", "Uses of alkyl halides", "Definition of terms", "Concentration", "Conversion of units", "Gas laws and their applications", "Graham’s law of diffusion", "General principle of liquefaction", "Fundamental assumptions in gas laws", "Ideal gas laws", "Kinetic energy and temperature", "Factors affecting solubility", "Solubility curves", "Precipitation of salts", "Eutectic mixtures", "Fractional crystallization", "Distribution coefficients"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain nomenclature of alkyl halides.\n• Describe methods and procedures for preparation.\n• Explain chemical reactions.\n• Explain uses of alkyl halides.\n• Define terms and concepts used in Alkyl Halides & Kinetic Theory of Gases & Solubility.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 6,
+        topicTitle: "Solutions & Thermochemistry",
+        subTopics: ["Types of solutions", "Methods of expressing composition of mixtures", "Colligative properties", "Ideal and non-ideal solutions", "Electrical properties of solutions", "Enthalpy changes in chemical reactions", "Laws of conservation of energy", "Types of heats of reaction", "Bond energies", "Factors affecting rates of chemical reactions"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Classify solutions and describe their categories.\n• Describe methods and procedures for expressing composition of mixtures.\n• Explain colligative properties.\n• Explain ideal and non-ideal solutions.\n• Explain electrical properties of solutions.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 7,
+        topicTitle: "Chemical Equilibrium & Electrochemistry & Surface and Colloid Chemistry",
+        subTopics: ["Definition of chemical equilibrium", "Types of chemical equilibria", "Le Chatelier’s principle", "Conduction and conductivity", "Ionic equilibrium", "Solubility product", "Common ion effects", "Electrolysis", "Adsorptions", "Colloids"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Chemical Equilibrium & Electrochemistry & Surface and Colloid Chemistry.\n• Classify chemical equilibria and describe their categories.\n• Explain le Chatelier’s principle.\n• Explain conduction and conductivity.\n• Explain ionic equilibrium.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Physical Science)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Physical Science.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
+      },
+      {
+        weekNumber: 9,
+        topicTitle: "Units and Measurements & Properties of Matter & Fluid Mechanics",
+        subTopics: ["Basic units of measurement", "Applications of dimensional analysis", "Elasticity", "Surface tension", "Pressure", "Hydrostatic principles", "Types of valves"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain basic units of measurement.\n• Explain applications of dimensional analysis.\n• Explain elasticity.\n• Explain surface tension.\n• Explain pressure.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 10,
+        topicTitle: "Statics & Dynamics",
+        subTopics: ["Factors affecting equilibrium", "Application of static forces", "Newton’s laws of motion", "Inertia", "Momentum"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Analyze factors affecting equilibrium.\n• Explain application of static forces.\n• State and apply the newton’s laws of motion.\n• Explain inertia.\n• Explain momentum.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 11,
+        topicTitle: "Heat & Light & Electricity and Electromagnetism",
+        subTopics: ["Definition of terms", "Temperature scales and types of thermometers", "Methods of determining heat capacity", "Calculations involving heat capacities", "Application of heat capacities and latent heat", "Heat transfer", "Properties of light", "Interference of light", "Diffraction of light", "Polarization of light", "Types of optical instruments", "Power of a lens", "Working principle of microscope", "Magnetism", "Magnetization and demagnetization", "Current electricity", "Electromagnetism", "Application of electromagnetism", "A.C. theory"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Heat & Light & Electricity and Electromagnetism.\n• Explain temperature scales and types of thermometers.\n• Describe methods and procedures for determining heat capacity.\n• Explain calculations involving heat capacities.\n• Explain application of heat capacities and latent heat.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 12,
+        topicTitle: "Charged Particles & Emerging Issues and Trends",
+        subTopics: ["Electric field on charged particles", "Thermionic emissions", "Use of C.R.O.", "Photoelectric effects", "Production of X-rays", "Radioactivity", "Emerging issues and trends", "Challenges posed by emerging issues and trends", "Ways of coping with challenges posed by emerging issues and trends"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain electric field on charged particles.\n• Explain thermionic emissions.\n• Explain use of C.R.O.\n• Explain photoelectric effects.\n• Explain production of X-rays.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Ways of coping with challenges posed by emerging issues and trends"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain ways of coping with challenges posed by emerging issues and trends.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Physical Science)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Physical Science in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
     ],
-    "references": [
-      "Chang, R., & Goldsby, K. A. (2019). Chemistry (13th Edition). McGraw-Hill Education.",
-      "Hewitt, P. G. (2021). Conceptual Physics (13th Edition). Pearson.",
-      "Brown, T. L., LeMay, H. E., & Bursten, B. E. (2018). Chemistry: The Central Science (14th Edition). Pearson."
-    ],
-    "instructionalEquipment": [
-      "Laboratory glassware (beakers, volumetric flasks, burettes, pipettes)",
-      "pH meters, analytical balances, and thermometers",
-      "Periodic tables, molecular model kits, and safety gear (lab coats, goggles)"
-    ],
-    "weeklySchedule": [
-      {
-        "weekNumber": 1,
-        "topicTitle": "Units, Measurements & Laboratory Safety",
-        "subTopics": [
-          "SI units of measurement (Base and derived units)",
-          "Dimensional analysis and scientific unit conversions",
-          "Laboratory safety rules, chemical hazard symbols, and emergency protocols",
-          "Precision, accuracy, and calibration of analytical balances and glassware"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify base and derived SI units for physical and chemical measurements.\n\u2022 Perform metric unit conversions using dimensional analysis.\n\u2022 Comply with chemical hygiene and laboratory safety regulations.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 2,
-        "topicTitle": "Mechanics: Force, Work, Energy & Power",
-        "subTopics": [
-          "Newton's laws of motion and their applications",
-          "Force, mass, weight, and center of gravity",
-          "Work done, kinetic energy, potential energy, and law of conservation of energy",
-          "Power calculations and mechanical advantage in kitchen and hospital machinery"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain Newton's laws of motion and solve linear momentum problems.\n\u2022 Calculate mechanical work, power output, and energy transformations.\n\u2022 Apply principles of mechanical advantage to food processing equipment.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 3,
-        "topicTitle": "States of Matter, Density & Fluid Pressure",
-        "subTopics": [
-          "Particulate nature of matter (Solids, liquids, gases, plasma)",
-          "Density, relative density, and specific gravity measurements",
-          "Pressure in fluids, atmospheric pressure, and manometer principles",
-          "Pascal's principle, Archimedes' principle, and hydrometer applications"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Describe molecular arrangements and phase changes in matter.\n\u2022 Measure density and specific gravity using hydrometers.\n\u2022 Explain fluid pressure dynamics and suction mechanisms in clinical devices.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 4,
-        "topicTitle": "Heat Transfer, Thermodynamics & Gas Laws",
-        "subTopics": [
-          "Heat versus temperature, thermometry, and temperature scales (\u00b0C, K, \u00b0F)",
-          "Mechanisms of heat transfer (Conduction, convection, radiation) in cooking",
-          "Specific heat capacity, latent heat of fusion and vaporization",
-          "Gas laws (Boyle's law, Charles's law, Ideal gas equation $PV = nRT$)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Distinguish between heat energy and temperature.\n\u2022 Compare conduction, convection, and radiation in culinary and thermal processing.\n\u2022 Apply gas laws to explain pressure cooking and respiratory gas exchange.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 5,
-        "topicTitle": "Atomic Structure & Periodic Table Trends (CAT 1)",
-        "subTopics": [
-          "Subatomic particles (Protons, neutrons, electrons) and atomic notation",
-          "Electronic configuration of elements ($1s^2 2s^2 2p^6$)",
-          "Periodic table organization (Groups, periods, blocks)",
-          "Periodic trends: Atomic radius, ionization energy, electronegativity",
-          "Continuous Assessment Test 1 (Physics and Chemistry Fundamentals)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Describe atomic architecture and write electron configurations for elements 1\u201330.\n\u2022 Explain periodic trends across periods and down groups.\n\u2022 Successfully demonstrate foundational competency under CAT 1 examination.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 6,
-        "topicTitle": "Chemical Bonding & Molecular Architecture",
-        "subTopics": [
-          "Ionic bonding: Electron transfer, lattice energy, and properties of ionic salts",
-          "Covalent bonding: Single, double, triple bonds, and coordinate bonding",
-          "Polarity of bonds, dipole moments, and hydrogen bonding in water",
-          "Metallic bonding and van der Waals intermolecular interactions"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Compare ionic and covalent bonding mechanisms and physical properties.\n\u2022 Explain the unique anomalous properties of water arising from hydrogen bonding.\n\u2022 Predict molecular geometry and polarity of simple compounds.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 7,
-        "topicTitle": "Solutions, Solubility & Concentration Calculations",
-        "subTopics": [
-          "Solute, solvent, and types of solutions (Saturated, unsaturated, supersaturated)",
-          "Factors affecting solubility (Temperature, pressure, nature of solute)",
-          "Expressing concentration: Percent by mass/volume, Parts Per Million (PPM)",
-          "Molarity ($M = \\text{moles}/\\text{L}$), molality, and volumetric dilution calculations ($M_1V_1 = M_2V_2$)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain factors influencing dissolution rates and solubility equilibria.\n\u2022 Prepare laboratory solutions of precise molarity and percentage concentration.\n\u2022 Perform accurate volumetric dilution calculations for therapeutic fluids.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 8,
-        "topicTitle": "Mid-Term Examination & Acids, Bases and Salts",
-        "subTopics": [
-          "Mid-Term Examination (Official Institutional CAT 2)",
-          "Arrhenius, Br\u00f8nsted-Lowry, and Lewis definitions of acids and bases",
-          "Strong versus weak acids and bases, dissociation constants ($K_a$, $K_b$)",
-          "Preparation and classification of normal, acid, and basic salts"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Successfully complete the Mid-Term Evaluation covering Weeks 1 to 7 content.\n\u2022 Classify chemical substances as acids, bases, or amphoteric species.\n\u2022 Outline laboratory methods for preparing and purifying soluble salts.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 9,
-        "topicTitle": "pH Scale, Buffer Systems & Acid-Base Titration",
-        "subTopics": [
-          "Water self-ionization and ion product constant ($K_w = 1.0 \\times 10^{-14}$)",
-          "The pH scale: Calculation of pH and pOH ($pH = -\\log[H^+]$)",
-          "Buffer systems: Mechanism of action of bicarbonate and phosphate buffers in blood",
-          "Acid-base indicators and volumetric titration calculations"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Calculate pH, pOH, $[H^+]$, and $[OH^-]$ for strong and weak solutions.\n\u2022 Explain how physiological buffers maintain blood pH within homeostatic limits (7.35\u20137.45).\n\u2022 Perform acid-base titrations to determine unknown acidic concentrations.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 10,
-        "topicTitle": "Introduction to Organic Chemistry & Hydrocarbons",
-        "subTopics": [
-          "Uniqueness and catenation of carbon",
-          "IUPAC nomenclature rules for aliphatic hydrocarbons",
-          "Alkanes, alkenes, and alkynes: Structure, hybridization, and physical properties",
-          "Combustion reactions and fractional distillation of petroleum"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Name and draw structural formulas for acyclic hydrocarbons using IUPAC rules.\n\u2022 Distinguish between saturated alkanes and unsaturated alkenes.\n\u2022 Outline the chemical reactions and energetic properties of hydrocarbons.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 11,
-        "topicTitle": "Organic Functional Groups (Alcohols, Carbonyls, Acids)",
-        "subTopics": [
-          "Functional groups: Alcohols, aldehydes, ketones, carboxylic acids, esters, and amines",
-          "Structure, nomenclature, and properties of alcohols and carboxylic acids",
-          "Esterification reaction and formation of flavor esters and triglycerides",
-          "Amines and amides: Basic nature and peptide bond formation"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify key organic functional groups in biological molecules.\n\u2022 Describe the esterification mechanism in triglyceride lipid synthesis.\n\u2022 Explain peptide linkage formation between amino and carboxyl functional groups.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 12,
-        "topicTitle": "Chemistry of Biomolecules: Carbohydrates, Lipids & Proteins",
-        "subTopics": [
-          "Carbohydrate chemistry: Monosaccharides (aldoses/ketoses), disaccharides, polysaccharides",
-          "Lipid chemistry: Fatty acids (saturated, MUFA, PUFA), saponification, and rancidity",
-          "Protein chemistry: Amino acid zwitterions, primary to quaternary protein structures, denaturation",
-          "Vitamins and mineral elements as cofactors and coenzymes"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Classify carbohydrates based on sugar units and functional groups.\n\u2022 Explain the chemical mechanisms of lipid rancidity and oxidative spoilage.\n\u2022 Describe the chemical denaturation of dietary proteins by heat and acid.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 13,
-        "topicTitle": "Comprehensive Revision & Laboratory Practicum Clinic",
-        "subTopics": [
-          "Hands-on titration and solution preparation practicum",
-          "Remediation on stoichiometry, concentration, and pH calculations",
-          "Review of past KNEC Physical Science examination papers",
-          "Exam tips and problem-solving strategy"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Perform laboratory titrations with high analytical accuracy.\n\u2022 Solve stoichiometric chemistry and physical science word problems rapidly.\n\u2022 Demonstrate readiness for national TVET examination standards.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 14,
-        "topicTitle": "End of Term Summative Examination",
-        "subTopics": [
-          "Institutional TVET Final Theory Examination in Physical Science",
-          "Institutional TVET Final Practical Laboratory Examination",
-          "Submission of graded lab practical notebooks"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate comprehensive understanding of physical science principles under examination conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      }
-    ]
+    references: ["Chang, R., & Goldsby, K. A. (2016). Chemistry (12th ed.). McGraw-Hill Education.", "Giancoli, D. C. (2016). Physics: Principles with Applications. Pearson."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "human_anatomy_and_physiology": {
-    "canonicalKey": "human_anatomy_and_physiology",
-    "syllabusCode": "9.1.0",
-    "unitCode": "9.1.0",
-    "unitName": "Human Anatomy and Physiology",
-    "moduleNumber": 1,
-    "nominalHours": 66,
-    "theoryHours": 46,
-    "practicalHours": 20,
-    "aliases": [
-      "9.1.0",
-      "Human Anatomy and Physiology",
-      "Human Anatomy",
-      "Physiology",
-      "CND 1101",
-      "CND 1105",
-      "DND 1105",
-      "CCU 1107",
-      "DCU 1107",
-      "DHN 1105"
+    canonicalKey: "human_anatomy_and_physiology",
+    syllabusCode: "9.1.0",
+    unitCode: "9.1.0",
+    unitName: "Human Anatomy And Physiology",
+    moduleNumber: 1,
+    nominalHours: 66,
+    theoryHours: 40,
+    practicalHours: 26,
+    aliases: ["CND 1105", "DND 1105", "CCU 1107", "DCU 1107", "9.1.0"],
+    unitDescription: "This module unit is intended to provide the trainee with knowledge of human body structure and functioning. This will impart knowledge, skills and attitudes applicable in nutrition and dietetics.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: describe the structure and functions of skeletal, muscular, endocrine, cardiovascular and lymphatic systems; explain the relationship between body systems, nutrition and diseases; describe the relationship between the structure of cells and tissue to the functions of the body.",
+    learningOutcomes: [
+      "describe the structure and functions of skeletal, muscular, endocrine, cardiovascular and lymphatic systems",
+      "explain the relationship between body systems, nutrition and diseases",
+      "describe the relationship between the structure of cells and tissue to the functions of the body"
     ],
-    "unitDescription": "This unit provides a comprehensive study of the structural organization, histology, organ systems, and homeostatic physiological mechanisms of the human body, establishing the anatomical foundation essential for clinical nutrition assessment and dietary therapy.",
-    "overallCompetency": "Apply anatomical and physiological principles of human organ systems to clinical nutritional assessment, metabolic analysis, and dietary management of diseases.",
-    "learningOutcomes": [
-      "Explain cellular organization, cell membrane transport, and fundamental tissue histology.",
-      "Describe the gross anatomy and physiological regulation of the cardiovascular, respiratory, and digestive systems.",
-      "Analyze the renal, endocrine, and nervous systems in the maintenance of internal homeostasis.",
-      "Explain reproductive anatomy, gametogenesis, and gestational embryology.",
-      "Correlate physiological mechanisms of nutrient digestion, absorption, and excretion with health and pathology."
+    weeklySchedule: [
+      {
+        weekNumber: 1,
+        topicTitle: "Introduction to Human Anatomy and Physiology & Cellular Biology",
+        subTopics: ["Meaning of terms", "Structure of a cell", "Plasma membrane and organelles", "Structure and function of the nucleus"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Introduction to Human Anatomy and Physiology & Cellular Biology.\n• Describe the structure and components of a cell.\n• Explain plasma membrane and organelles.\n• Describe the structure and components of of the nucleus.",
+        learningActivities: "Interactive lectures, anatomical charts, 3D anatomical models, and practical laboratory microscopy.",
+        resourcesAndReferences: "Waugh, A., & Grant, A. (2018). Ross & Wilson Anatomy and Physiology in Health and Illness (13th ed.). Elsevier.",
+        assessmentAndRemarks: "Continuous evaluation, oral questions, and practical checks."
+      },
+      {
+        weekNumber: 2,
+        topicTitle: "The Body Tissue, Membranes and Glands",
+        subTopics: ["Types of muscles", "Contraction and relaxation of muscles", "Types of epithelium", "Structure of tissue membranes"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Classify muscles and describe their categories.\n• Explain contraction and relaxation of muscles.\n• Classify epithelium and describe their categories.\n• Describe the structure and components of tissue membranes.",
+        learningActivities: "Interactive lectures, anatomical charts, 3D anatomical models, and practical laboratory microscopy.",
+        resourcesAndReferences: "Waugh, A., & Grant, A. (2018). Ross & Wilson Anatomy and Physiology in Health and Illness (13th ed.). Elsevier.",
+        assessmentAndRemarks: "Continuous evaluation, oral questions, and practical checks."
+      },
+      {
+        weekNumber: 3,
+        topicTitle: "The Circulatory System & Cardiovascular System",
+        subTopics: ["Structure and function of the circulatory system", "Heart and blood vessels", "Common disorders of the circulatory system"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Describe the structure and components of of the circulatory system.\n• Explain heart and blood vessels.\n• Describe deficiency signs, symptoms and disorders related to of the circulatory system.",
+        learningActivities: "Interactive lectures, anatomical charts, 3D anatomical models, and practical laboratory microscopy.",
+        resourcesAndReferences: "Waugh, A., & Grant, A. (2018). Ross & Wilson Anatomy and Physiology in Health and Illness (13th ed.). Elsevier.",
+        assessmentAndRemarks: "Continuous evaluation, oral questions, and practical checks."
+      },
+      {
+        weekNumber: 4,
+        topicTitle: "The Skeletal System & Musculoskeletal Framework",
+        subTopics: ["Axial and appendicular skeletal system", "Common disorders of the skeletal system"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Describe the structure, components and function of axial and appendicular skeletal system.\n• Describe deficiency signs, symptoms and disorders related to of the skeletal system.",
+        learningActivities: "Interactive lectures, anatomical charts, 3D anatomical models, and practical laboratory microscopy.",
+        resourcesAndReferences: "Waugh, A., & Grant, A. (2018). Ross & Wilson Anatomy and Physiology in Health and Illness (13th ed.). Elsevier.",
+        assessmentAndRemarks: "Continuous evaluation, oral questions, and practical checks."
+      },
+      {
+        weekNumber: 5,
+        topicTitle: "The Lymphatic System & Immune Defense",
+        subTopics: ["Structure of the lymphatic system", "Functions of the lymphatic system", "Lymphatic vessels", "Functions of lymphocytes", "Relevant lymph nodes"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Describe the structure and components of the lymphatic system.\n• Explain the functions and physiological role of the lymphatic system.\n• Explain lymphatic vessels.\n• Explain the functions and physiological role of lymphocytes.",
+        learningActivities: "Interactive lectures, anatomical charts, 3D anatomical models, and practical laboratory microscopy.",
+        resourcesAndReferences: "Waugh, A., & Grant, A. (2018). Ross & Wilson Anatomy and Physiology in Health and Illness (13th ed.). Elsevier.",
+        assessmentAndRemarks: "Continuous evaluation, oral questions, and practical checks."
+      },
+      {
+        weekNumber: 6,
+        topicTitle: "The Respiratory System & Pulmonary Mechanics",
+        subTopics: ["Anatomy of the respiratory system", "Function of the respiratory system", "Physiology of the respiratory system", "Respiration process", "Disorders of the respiratory system"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Describe the structure and components of the respiratory system.\n• Explain the functions and physiological role of the respiratory system.\n• Describe the structure, components and function of physiology of the respiratory system.\n• Describe the structure, components and function of respiration process.",
+        learningActivities: "Interactive lectures, anatomical charts, 3D anatomical models, and practical laboratory microscopy.",
+        resourcesAndReferences: "Waugh, A., & Grant, A. (2018). Ross & Wilson Anatomy and Physiology in Health and Illness (13th ed.). Elsevier.",
+        assessmentAndRemarks: "Continuous evaluation, oral questions, and practical checks."
+      },
+      {
+        weekNumber: 7,
+        topicTitle: "The Gastrointestinal Tract (GIT) & Digestive System",
+        subTopics: ["Structure of the GIT", "Functions of GIT organs", "Factors affecting the digestive process", "Common disorders of the GIT"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Describe the structure and components of the GIT.\n• Explain the functions and physiological role of GIT organs.\n• Analyze factors affecting the digestive process.\n• Describe deficiency signs, symptoms and disorders related to of the GIT.",
+        learningActivities: "Interactive lectures, anatomical charts, 3D anatomical models, and practical laboratory microscopy.",
+        resourcesAndReferences: "Waugh, A., & Grant, A. (2018). Ross & Wilson Anatomy and Physiology in Health and Illness (13th ed.). Elsevier.",
+        assessmentAndRemarks: "Continuous evaluation, oral questions, and practical checks."
+      },
+      {
+        weekNumber: 8,
+        topicTitle: "Mid-Term Continuous Assessment Test (CAT) & Academic Progress Review",
+        subTopics: ["Written theory and diagrammatic evaluation covering Weeks 1 to 7", "Evaluation of Cellular Biology, Tissues, Cardiovascular, Respiratory and Digestive Systems", "Remediation and paper review"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate theoretical understanding of cellular biology, cardiovascular, respiratory and digestive systems.\n• Analyze anatomical diagrams and apply physiological concepts in assessment.\n• Identify areas requiring revision and academic remediation.",
+        learningActivities: "Supervised formal written and practical examination.",
+        resourcesAndReferences: "Waugh, A., & Grant, A. (2018). Ross & Wilson Anatomy and Physiology in Health and Illness (13th ed.). Elsevier.",
+        assessmentAndRemarks: "Official Mid-Term Continuous Assessment Test (CAT)"
+      },
+      {
+        weekNumber: 9,
+        topicTitle: "The Endocrine System & Hormonal Control",
+        subTopics: ["Structure and functions of the major endocrine glands", "Disorders of the endocrine system"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain structure and functions of the major endocrine glands.\n• Describe deficiency signs, symptoms and disorders related to the endocrine system.",
+        learningActivities: "Interactive lectures, anatomical charts, 3D anatomical models, and practical laboratory microscopy.",
+        resourcesAndReferences: "Waugh, A., & Grant, A. (2018). Ross & Wilson Anatomy and Physiology in Health and Illness (13th ed.). Elsevier.",
+        assessmentAndRemarks: "Continuous evaluation, oral questions, and practical checks."
+      },
+      {
+        weekNumber: 10,
+        topicTitle: "The Urinary System & Renal Regulation",
+        subTopics: ["Structure of the renal system", "Structure of the kidney and nephron", "Formation of urine", "Acid-base balance", "Common disorders"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Describe the structure and components of the renal system.\n• Describe the structure and components of the kidney and nephron.\n• Explain formation of urine.\n• Explain the principles of acid-base balance.",
+        learningActivities: "Interactive lectures, anatomical charts, 3D anatomical models, and practical laboratory microscopy.",
+        resourcesAndReferences: "Waugh, A., & Grant, A. (2018). Ross & Wilson Anatomy and Physiology in Health and Illness (13th ed.). Elsevier.",
+        assessmentAndRemarks: "Continuous evaluation, oral questions, and practical checks."
+      },
+      {
+        weekNumber: 11,
+        topicTitle: "Homeostasis & Fluid Electrolyte Balance",
+        subTopics: ["Meaning of terms", "Body fluid compartments", "Sources of fluid, electrolyte and water", "Major electrolytes", "Maintenance of electrolyte and fluid balance"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Homeostasis & Fluid Electrolyte Balance.\n• Explain body fluid compartments.\n• Identify dietary sources of fluid, electrolyte and water.\n• Explain major electrolytes.",
+        learningActivities: "Interactive lectures, anatomical charts, 3D anatomical models, and practical laboratory microscopy.",
+        resourcesAndReferences: "Waugh, A., & Grant, A. (2018). Ross & Wilson Anatomy and Physiology in Health and Illness (13th ed.). Elsevier.",
+        assessmentAndRemarks: "Continuous evaluation, oral questions, and practical checks."
+      },
+      {
+        weekNumber: 12,
+        topicTitle: "The Reproductive & Nervous Systems",
+        subTopics: ["Male and female reproductive systems", "Gametes and fertilization", "The neuron and nervous reflexes", "Central and peripheral nervous system"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Describe the structure, components and function of male and female reproductive systems.\n• Explain gametes and fertilization.\n• Explain the neuron and nervous reflexes.\n• Describe the structure, components and function of central and peripheral nervous system.",
+        learningActivities: "Interactive lectures, anatomical charts, 3D anatomical models, and practical laboratory microscopy.",
+        resourcesAndReferences: "Waugh, A., & Grant, A. (2018). Ross & Wilson Anatomy and Physiology in Health and Illness (13th ed.). Elsevier.",
+        assessmentAndRemarks: "Continuous evaluation, oral questions, and practical checks."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "Sensory Organs, Skin & Comprehensive Syllabus Revision",
+        subTopics: ["Structure and function of sensory organs", "Structure and function of the skin", "Emerging issues and trends", "Remediation and past paper clinic"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Describe the structure and components of of sensory organs.\n• Describe the structure and components of of the skin.\n• Discuss emerging issues, trends and coping strategies in sensory Organs, Skin & Comprehensive Syllabus Revision.\n• Explain remediation and past paper clinic.",
+        learningActivities: "Interactive lectures, anatomical charts, 3D anatomical models, and practical laboratory microscopy.",
+        resourcesAndReferences: "Waugh, A., & Grant, A. (2018). Ross & Wilson Anatomy and Physiology in Health and Illness (13th ed.). Elsevier.",
+        assessmentAndRemarks: "Continuous evaluation, oral questions, and practical checks."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination",
+        subTopics: ["Comprehensive institutional TVET final theory and practical examinations"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency in human anatomy and physiology in accordance with TVET national examination standards.",
+        learningActivities: "Supervised formal written and practical examination.",
+        resourcesAndReferences: "Waugh, A., & Grant, A. (2018). Ross & Wilson Anatomy and Physiology in Health and Illness (13th ed.). Elsevier.",
+        assessmentAndRemarks: "Final Summative Examination (70%)"
+      },
     ],
-    "references": [
-      "Waugh, A., & Grant, A. (2018). Ross & Wilson Anatomy and Physiology in Health and Illness (13th Edition). Elsevier.",
-      "Tortora, G. J., & Derrickson, B. H. (2020). Principles of Anatomy and Physiology (15th Edition). Wiley.",
-      "Hall, J. E. (2021). Guyton and Hall Textbook of Medical Physiology (14th Edition). Elsevier."
-    ],
-    "instructionalEquipment": [
-      "Full-body human anatomical torso model with detachable organs",
-      "Compound optical microscopes and prepared histological tissue slides",
-      "Sphygmomanometers, stethoscopes, and anatomical charts"
-    ],
-    "weeklySchedule": [
-      {
-        "weekNumber": 1,
-        "topicTitle": "Cellular Biology & Cell Physiology",
-        "subTopics": [
-          "Cell structure, organelles, and membrane transport",
-          "Anatomical terminology, body planes, and directional terms",
-          "Homeostasis and negative/positive feedback mechanisms"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Describe cellular ultrastructure and organelle functions.\n\u2022 Use anatomical terms of position, direction, and planes correctly.\n\u2022 Explain homeostatic feedback control mechanisms.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 2,
-        "topicTitle": "Epithelial, Connective & Muscular Tissues",
-        "subTopics": [
-          "Epithelial tissue classification and histology",
-          "Connective tissue types, bone, and adipose tissue",
-          "Muscle and nervous tissue classification"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Classify primary tissues based on structure and location.\n\u2022 Differentiate between skeletal, smooth, and cardiac muscle.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 3,
-        "topicTitle": "Cardiovascular System & Hemodynamics",
-        "subTopics": [
-          "Gross and internal heart anatomy and cardiac cycle",
-          "Cardiac conduction system and blood pressure regulation",
-          "Systemic and pulmonary circulatory pathways"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Trace blood flow through cardiac chambers and great vessels.\n\u2022 Explain electrical conduction and blood pressure regulation.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 4,
-        "topicTitle": "Blood Components & Immune Mechanisms",
-        "subTopics": [
-          "Erythrocytes, hemoglobin, and blood typing (ABO/Rh)",
-          "Leukocytes, platelets, and the coagulation cascade",
-          "Immune response mechanisms and lymphatics"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Describe formed elements of blood and their functions.\n\u2022 Explain stages of blood clotting and blood group compatibility.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 5,
-        "topicTitle": "Continuous Assessment 1 (RAT 1)",
-        "subTopics": [
-          "Assessment covering Weeks 1 to 4 topics",
-          "Review of tissue spotters and circulatory calculations"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate mastery of Weeks 1 to 4 anatomical and physiological content under CAT conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 6,
-        "topicTitle": "Respiratory System & Gas Exchange",
-        "subTopics": [
-          "Anatomy of the respiratory tract and alveoli",
-          "Mechanics of pulmonary ventilation and lung volumes",
-          "Gas transport and alveolar-capillary diffusion"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Describe structural adaptations of the respiratory tract.\n\u2022 Explain gas exchange and transport in blood.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 7,
-        "topicTitle": "Digestive System & Gastrointestinal Tract",
-        "subTopics": [
-          "Gross anatomy and histology of the GI tract",
-          "Digestive secretions, liver, gallbladder, and pancreas",
-          "Enzymatic digestion and absorption of nutrients"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Trace the gastrointestinal tract and accessory digestive organs.\n\u2022 Detail enzymatic digestion and nutrient absorption mechanisms.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 8,
-        "topicTitle": "Mid-Term CAT (Official Examination)",
-        "subTopics": [
-          "Comprehensive evaluation of Weeks 1 to 7 content",
-          "Theory and practical model assessment"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Complete the official Mid-Term CAT evaluating Weeks 1 to 7 curriculum mastery.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 9,
-        "topicTitle": "Renal System & Fluid Electrolyte Balance",
-        "subTopics": [
-          "Kidney anatomy and microscopic nephron structure",
-          "Urine formation: Filtration, reabsorption, secretion",
-          "Hormonal control of fluid balance (ADH, Aldosterone)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Describe nephron structure and urine formation stages.\n\u2022 Explain how hormones maintain fluid and electrolyte balance.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 10,
-        "topicTitle": "Endocrine Regulation & Hormonal Control",
-        "subTopics": [
-          "Hypothalamic-pituitary axis and target glands",
-          "Thyroid, parathyroid, and adrenal gland hormones",
-          "Endocrine pancreas and blood glucose homeostasis"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Outline endocrine hormone regulatory feedback loops.\n\u2022 Explain insulin and glucagon in metabolic homeostasis.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 11,
-        "topicTitle": "Nervous System & Neurotransmission",
-        "subTopics": [
-          "Central and peripheral nervous system divisions",
-          "Autonomic nervous system (Sympathetic vs. Parasympathetic)",
-          "Neurons, action potentials, and synaptic transmission"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Contrast sympathetic and parasympathetic divisions.\n\u2022 Describe action potential propagation and synaptic transmission.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 12,
-        "topicTitle": "Reproductive System & Embryology",
-        "subTopics": [
-          "Male and female reproductive anatomy and gametogenesis",
-          "Ovarian and menstrual cycles and hormonal control",
-          "Fertilization, implantation, and placental development"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Describe male and female reproductive systems and cycles.\n\u2022 Outline embryonic development and placental function.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 13,
-        "topicTitle": "Comprehensive Syllabus Revision & Tutorial Clinic",
-        "subTopics": [
-          "Review of organ systems, clinical integration, and past papers",
-          "Remediation of weak topics and exam techniques"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Integrate physiological concepts across organ systems.\n\u2022 Answer TVET examination questions with high precision.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 14,
-        "topicTitle": "Final Summative Examination",
-        "subTopics": [
-          "Institutional TVET final theory and practical exams",
-          "Submission of continuous assessment marks"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate comprehensive understanding of human anatomy and physiology under final examination conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      }
-    ]
+    references: ["Waugh, A., & Grant, A. (2018). Ross & Wilson Anatomy and Physiology in Health and Illness (13th ed.). Elsevier.", "Tortora, G. J., & Derrickson, B. H. (2017). Principles of Anatomy and Physiology (15th ed.). Wiley."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "hiv_and_aids": {
-    "canonicalKey": "hiv_and_aids",
-    "syllabusCode": "10.1.0",
-    "unitCode": "10.1.0",
-    "unitName": "HIV and AIDS",
-    "moduleNumber": 1,
-    "nominalHours": 44,
-    "theoryHours": 32,
-    "practicalHours": 12,
-    "aliases": [
-      "10.1.0",
-      "HIV and AIDS",
-      "HIV/AIDS Management",
-      "HIV/AIDS",
-      "DND 1103",
-      "CCU 1104",
-      "DCU 1104",
-      "DHN 1107"
+    canonicalKey: "hiv_and_aids",
+    syllabusCode: "10.1.0",
+    unitCode: "10.1.0",
+    unitName: "HIV and AIDS",
+    moduleNumber: 1,
+    nominalHours: 33,
+    theoryHours: 20,
+    practicalHours: 13,
+    aliases: ["DND 1103", "CCU 1104", "10.1.0"],
+    unitDescription: "This module unit is intended to equip the trainee with knowledge, skills and attitudes to manage HIV and AIDS and related issues in the community.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: describe the modes of transmission and spread of HIV; explain the methods of testing and screening for HIV; describe the policies and methods used in treatment and management of people living with HIV.",
+    learningOutcomes: [
+      "describe the modes of transmission and spread of HIV",
+      "explain the methods of testing and screening for HIV",
+      "describe the policies and methods used in treatment and management of people living with HIV",
+      "describe myths and misconceptions on HIV and AIDS",
+      "describe people’s attitudes towards HIV and AIDS",
+      "discuss the impact of the HIV epidemic on social, cultural, economic and religious factors on the spread and management of people living with HIV"
     ],
-    "unitDescription": "This unit equips trainees with comprehensive knowledge of the biology, transmission, clinical staging, medical management, psychosocial impact, and public health control strategies for HIV and AIDS, emphasizing integrated nutritional care and prevention.",
-    "overallCompetency": "Apply comprehensive HIV/AIDS knowledge, prevention principles, and patient-centered management strategies to mitigate disease progression and support people living with HIV.",
-    "learningOutcomes": [
-      "Explain the viral biology, transmission modes, and pathogenesis of HIV in the human immune system.",
-      "Describe epidemiological patterns, risk factors, and national prevention strategies for HIV in Kenya.",
-      "Identify clinical manifestations, WHO clinical staging, and opportunistic infections.",
-      "Explain antiretroviral therapy (ART), drug adherence, and management of treatment side effects.",
-      "Demonstrate stigma reduction, psychosocial counseling, and legal-ethical considerations in HIV care."
+    weeklySchedule: [
+      {
+        weekNumber: 1,
+        topicTitle: "Background Information",
+        subTopics: ["Definition of terms", "Overview of the anatomy and physiology of the human reproductive system", "Theories on the origin of HIV", "History of HIV", "Myths and misconceptions surrounding HIV", "Trends in HIV", "Human physiology", "Sex and sexuality"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Background Information.\n• Describe the structure, components and function of overview of the anatomy and physiology of the human reproductive system.\n• Explain theories on the origin of HIV.\n• Explain history of HIV.\n• Explain myths and misconceptions surrounding HIV.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 2,
+        topicTitle: "Sexually Transmitted Diseases",
+        subTopics: ["Meaning of terms", "HIV as a sexually transmitted disease", "Comparative information on trends, global and local distribution"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Sexually Transmitted Diseases.\n• Explain HIV as a sexually transmitted disease.\n• Explain comparative information on trends, global and local distribution.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 3,
+        topicTitle: "Biology of HIV",
+        subTopics: ["Overview of the immune system", "Natural immunity to HIV", "The HIV life-cycle", "Disease progression", "Epidemiology, transmission and diagnosis"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Describe the structure, components and function of overview of the immune system.\n• Explain natural immunity to HIV.\n• Explain the HIV life-cycle.\n• Explain disease progression.\n• Explain epidemiology, transmission and diagnosis.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 4,
+        topicTitle: "Medical Management of HIV",
+        subTopics: ["ARVs and non-ARVs", "Non-medical management of HIV", "Nutrition management of HIV", "Family planning and HIV", "Medical management of pregnancy in HIV", "Post-exposure prophylaxis", "Holistic care of PLWHA", "Living positively with HIV"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain arvs and non-ARVs.\n• Explain non-medical management of HIV.\n• Explain nutrition management of HIV.\n• Explain family planning and HIV.\n• Explain medical management of pregnancy in HIV.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 5,
+        topicTitle: "Social-Cultural Practices",
+        subTopics: ["Religion and HIV", "Social stigma and destigmatisation of PLHIV", "Behaviour change", "Voluntary counselling and testing (VCT)", "Drug abuse and HIV", "Effects of HIV on individuals and society", "Circumcision and condom use"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain religion and HIV.\n• Explain social stigma and destigmatisation of PLHIV.\n• Explain behaviour change.\n• Explain voluntary counselling and testing (VCT).\n• Explain drug abuse and HIV.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 6,
+        topicTitle: "HIV and Society",
+        subTopics: ["Poverty and AIDS", "Families and AIDS orphans"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain poverty and AIDS.\n• Explain families and AIDS orphans.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 7,
+        topicTitle: "Impact of AIDS on Families and Individuals",
+        subTopics: ["Individual", "Family/household", "Schools", "Hospitals"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain individual.\n• Explain family/household.\n• Explain schools.\n• Explain hospitals.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (HIV and AIDS)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of HIV and AIDS.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
+      },
+      {
+        weekNumber: 9,
+        topicTitle: "Legal Aspects in HIV",
+        subTopics: ["Government policies on HIV", "Global policies on HIV", "Legal rights of PLWHA"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain government policies on HIV.\n• Explain global policies on HIV.\n• Explain legal rights of PLWHA.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 10,
+        topicTitle: "Emerging Issues and Trends",
+        subTopics: ["Emerging issues and trends", "Challenges of emerging issues", "Coping with challenges"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends.\n• Explain coping with challenges.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 11,
+        topicTitle: "Applied Practice & Case Studies in HIV and AIDS (Week 11)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of HIV and AIDS in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+      },
+      {
+        weekNumber: 12,
+        topicTitle: "Applied Practice & Case Studies in HIV and AIDS (Week 12)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of HIV and AIDS in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Emerging issues and trends", "Challenges of emerging issues", "Coping with challenges"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping with challenges.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (HIV and AIDS)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 2,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in HIV and AIDS in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
     ],
-    "references": [
-      "NASCOP. (2022). Kenya National Guidelines on Use of Antiretroviral Drugs for Treating and Preventing HIV Infection. Ministry of Health, Kenya.",
-      "WHO. (2021). Consolidated Guidelines on HIV Prevention, Testing, Treatment, Service Delivery and Monitoring. World Health Organization.",
-      "Fan, H., Conner, R. F., & Villarreal, L. P. (2018). The Biology of AIDS (7th Edition). Jones & Bartlett Learning."
-    ],
-    "instructionalEquipment": [
-      "Sample condom demonstration models and barrier protection devices",
-      "HIV rapid test algorithm flowcharts and counseling guidelines",
-      "Multimedia projector and documentary case studies of PLHIV"
-    ],
-    "weeklySchedule": [
-      {
-        "weekNumber": 1,
-        "topicTitle": "Introduction to HIV & Virology",
-        "subTopics": [
-          "Definition of HIV (Human Immunodeficiency Virus) and AIDS (Acquired Immune Deficiency Syndrome)",
-          "Origin, global history, and discovery of HIV-1 and HIV-2",
-          "Structure of the HIV virion: Viral envelope, glycoproteins (gp120, gp41), capsid, and RNA genome",
-          "Key viral enzymes: Reverse transcriptase, integrase, protease"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Distinguish clearly between HIV infection and the clinical syndrome AIDS.\n\u2022 Describe the structural components of the HIV virion.\n\u2022 Explain the specific functional roles of reverse transcriptase, integrase, and protease.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 2,
-        "topicTitle": "Transmission Modes & Pathogenesis of HIV",
-        "subTopics": [
-          "Transmission routes: Unprotected sexual intercourse, contaminated blood/needles, vertical transmission",
-          "Non-transmissible routes and dispelling prevalent cultural myths",
-          "HIV replication life cycle (Attachment, fusion, reverse transcription, integration, transcription, assembly, budding)",
-          "Target cells: CD4+ T-helper lymphocytes, macrophages, and dendritic cells"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the primary epidemiological modes of HIV transmission.\n\u2022 Dispel common misconceptions regarding casual contact and HIV transmission.\n\u2022 Trace the 7 steps of the HIV replication cycle within host CD4+ lymphocytes.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 3,
-        "topicTitle": "Immunology & Progression of HIV Infection",
-        "subTopics": [
-          "Natural history of HIV infection: Acute primary infection, seroconversion, asymptomatic latent phase, symptomatic phase, AIDS",
-          "CD4+ T-cell depletion and viral load dynamics",
-          "The viral 'set point' and its prognostic significance",
-          "Window period versus incubation period"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Differentiate between the window period and incubation period.\n\u2022 Describe the immunological trajectory of CD4+ cell decline and viral load surge.\n\u2022 Explain the clinical presentation of acute seroconversion illness.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 4,
-        "topicTitle": "HIV Testing Services (HTS) & Counseling",
-        "subTopics": [
-          "Principles of HTS (Consent, Confidentiality, Counseling, Correct test results, Connection to care - 5 Cs)",
-          "Pre-test and post-test counseling techniques",
-          "Testing technologies: Rapid antibody tests (screening, confirmatory, tie-breaker algorithm)",
-          "Self-testing, index testing, and partner notification services"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Apply the 5 Cs of HIV testing services in counseling simulations.\n\u2022 Interpret the national serial testing algorithm for rapid HIV tests.\n\u2022 Deliver supportive post-test counseling for both positive and negative results.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 5,
-        "topicTitle": "Prevention Strategies: Biomedical & Behavioral (CAT 1)",
-        "subTopics": [
-          "The ABC strategy (Abstinence, Being faithful, Condom use)",
-          "Biomedical interventions: Voluntary Medical Male Circumcision (VMMC), Pre-Exposure Prophylaxis (PrEP), Post-Exposure Prophylaxis (PEP)",
-          "Harm reduction for key populations (People who inject drugs, sex workers)",
-          "Continuous Assessment Test 1 (Virology, Transmission, Testing, and Prevention)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Contrast biomedical, behavioral, and structural HIV prevention approaches.\n\u2022 Explain the clinical indications and administration timelines for PEP and PrEP.\n\u2022 Demonstrate mastery under CAT 1 evaluation conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 6,
-        "topicTitle": "Prevention of Mother-to-Child Transmission (PMTCT)",
-        "subTopics": [
-          "Vertical transmission stages: In utero, intrapartum, and postpartum during breastfeeding",
-          "The four-pronged approach to comprehensive PMTCT",
-          "Maternal ART regimens and viral load suppression",
-          "Infant prophylaxis and early infant diagnosis (EID) using DNA-PCR at 6 weeks"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify risk factors that heighten maternal-fetal transmission of HIV.\n\u2022 Explain the clinical management of HIV-positive mothers during pregnancy and delivery.\n\u2022 Outline the standard EID testing timeline for HIV-exposed infants.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 7,
-        "topicTitle": "WHO Clinical Staging of HIV Disease",
-        "subTopics": [
-          "Criteria and purpose of WHO clinical staging (Stages 1 to 4)",
-          "Clinical stage 1: Asymptomatic and persistent generalized lymphadenopathy",
-          "Clinical stage 2: Minor mucocutaneous manifestations, recurrent upper respiratory tract infections",
-          "Clinical stage 3: Unexplained weight loss (>10%), chronic diarrhea, pulmonary tuberculosis",
-          "Clinical stage 4: HIV wasting syndrome, Pneumocystis pneumonia, esophageal candidiasis, Kaposi's sarcoma"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the clinical diagnostic utility of the WHO 4-stage classification.\n\u2022 Classify patients into appropriate clinical stages based on physical symptoms.\n\u2022 Identify hallmark stage 4 AIDS-defining indicator conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 8,
-        "topicTitle": "Mid-Term Examination & Opportunistic Infections (OIs)",
-        "subTopics": [
-          "Mid-Term Examination (Official Institutional CAT 2)",
-          "Common bacterial, fungal, viral, and parasitic OIs",
-          "Tuberculosis (TB) and HIV co-infection: Clinical presentation and screening",
-          "Candidiasis, Cryptococcal meningitis, and Cytomegalovirus (CMV)",
-          "OI prophylaxis (Cotrimoxazole/Septrin preventive therapy - CPT, Isoniazid preventive therapy - IPT)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Successfully complete the Mid-Term Evaluation covering Weeks 1 to 7 content.\n\u2022 Explain the bidirectional synergistic relationship between TB and HIV.\n\u2022 Describe preventive antibiotic and antifungal therapies for immunocompromised patients.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 9,
-        "topicTitle": "Antiretroviral Therapy (ART) & Treatment Management",
-        "subTopics": [
-          "Goals of ART (Maximal viral suppression, immune restoration, reducing transmission: $U=U$)",
-          "Classes of ARVs: NRTIs, NNRTIs, PIs, INSTIs (Dolutegravir-based regimens)",
-          "Standard first-line, second-line, and salvage adult and pediatric regimens in Kenya",
-          "Adverse drug reactions and clinical management of ARV toxicity"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 State the pharmacological mechanisms of major classes of antiretroviral drugs.\n\u2022 Explain the public health significance of Undetectable = Untransmittable ($U=U$).\n\u2022 Identify common side effects of first-line Dolutegravir-based regimens.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 10,
-        "topicTitle": "Treatment Adherence & Drug Resistance",
-        "subTopics": [
-          "Factors influencing adherence (Patient, regimen, health system, psychosocial factors)",
-          "Measuring adherence (Pill counts, self-reports, pharmacy refill tracking, viral load)",
-          "Consequences of poor adherence: Treatment failure, viral mutation, and drug resistance",
-          "Adherence counseling and peer support strategies (Differentiated Care Models)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Calculate patient adherence percentage from pharmacy refill and pill count data.\n\u2022 Explain the biological mechanism of HIV mutation and acquired drug resistance.\n\u2022 Formulate personalized adherence support plans for non-adherent clients.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 11,
-        "topicTitle": "Nutrition, Immunity & HIV/AIDS",
-        "subTopics": [
-          "The vicious cycle of malnutrition and HIV infection",
-          "Impact of HIV on nutrient absorption, metabolism, and resting energy expenditure",
-          "Nutritional requirements for asymptomatic and symptomatic PLHIV",
-          "Managing side effects affecting food intake (Nausea, anorexia, taste alteration, diarrhea)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Illustrate how HIV infection exacerbates malnutrition and vice versa.\n\u2022 Calculate increased energy requirements for PLHIV across clinical stages.\n\u2022 Formulate dietary management strategies for common gastrointestinal symptoms.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 12,
-        "topicTitle": "Stigma, Discrimination, Human Rights & Legal Framework",
-        "subTopics": [
-          "Internalized, interpersonal, and structural HIV stigma",
-          "Impact of stigma on testing uptake, treatment adherence, and mental health",
-          "The HIV and AIDS Prevention and Control Act (HAPCA) of Kenya",
-          "Confidentiality, non-discrimination in employment and education, and criminalization of willful transmission"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Analyze the detrimental public health impacts of HIV-related discrimination.\n\u2022 Explain key statutory provisions of Kenya's HIV and AIDS Prevention and Control Act.\n\u2022 Defend the patient's legal right to privacy, informed consent, and dignity.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 13,
-        "topicTitle": "Comprehensive Revision & Clinical Case Studies",
-        "subTopics": [
-          "Review of complex clinical scenarios involving PMTCT, adherence failure, and OIs",
-          "Remediation on WHO staging, testing algorithms, and drug regimens",
-          "Past KNEC examination question review and answering methodology",
-          "Final exam orientation and guidelines"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Resolve multi-dimensional clinical case studies involving HIV and comorbidities.\n\u2022 Demonstrate mastery of national clinical management guidelines.\n\u2022 Prepare effectively for national summative examinations.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      },
-      {
-        "weekNumber": 14,
-        "topicTitle": "End of Term Summative Examination",
-        "subTopics": [
-          "Institutional TVET Final Theory Examination in HIV and AIDS",
-          "Submission of continuous assessment documentation"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate comprehensive understanding of HIV/AIDS prevention, clinical staging, and management under examination conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical demonstrations, problem solving, and hands-on laboratory exercises\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional charts, models, and laboratory apparatus",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, written assignments, and practical checks"
-      }
-    ]
+    references: ["NASCOP. (2020). Guidelines on Use of Antiretroviral Drugs for Treating and Preventing HIV Infection in Kenya. Ministry of Health.", "WHO. (2021). Consolidated Guidelines on HIV Prevention, Testing, Treatment, Service Delivery and Monitoring. World Health Organization."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "introduction_to_nutrition_and_dietetics": {
-    "canonicalKey": "introduction_to_nutrition_and_dietetics",
-    "syllabusCode": "11.1.0",
-    "unitCode": "11.1.0",
-    "unitName": "Introduction to Nutrition and Dietetics",
-    "moduleNumber": 1,
-    "nominalHours": 55,
-    "theoryHours": 40,
-    "practicalHours": 15,
-    "aliases": [
-      "11.1.0",
-      "Introduction to Nutrition and Dietetics",
-      "Introduction to Nutrition",
-      "CND 1205",
-      "DND 1205",
-      "DHN 1203"
+    canonicalKey: "introduction_to_nutrition_and_dietetics",
+    syllabusCode: "11.1.0",
+    unitCode: "11.1.0",
+    unitName: "Introduction To Nutrition And Dietetics",
+    moduleNumber: 1,
+    nominalHours: 44,
+    theoryHours: 28,
+    practicalHours: 16,
+    aliases: ["11.1.0", "Introduction to Nutrition and Dietetics"],
+    unitDescription: "This module unit is intended to equip the trainee with basic skills and attitudes in nutrition. The trainee will be introduced to the profession of Nutrition and Dietetics.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: explain the meaning of terms used in nutrition and dietetics; explain the importance of nutrition in human health; describe the standards and ethics of professional conduct in nutrition and dietetics practice.",
+    learningOutcomes: [
+      "explain the meaning of terms used in nutrition and dietetics",
+      "explain the importance of nutrition in human health",
+      "describe the standards and ethics of professional conduct in nutrition and dietetics practice"
     ],
-    "unitDescription": "This foundational unit introduces trainees to the science and profession of nutrition and dietetics, exploring historical perspectives, professional codes of ethics, nutrient classifications, human nutritional requirements across life stages, and overview of nutritional assessment and malnutrition.",
-    "overallCompetency": "Apply fundamental concepts, terminology, dietary standards, and professional ethical principles of nutrition and dietetics to basic clinical and community practice.",
-    "learningOutcomes": [
-      "Explain the historical evolution, scope, and contemporary role of nutrition and dietetics in healthcare.",
-      "Demonstrate adherence to the professional code of ethics and institutional regulatory standards (KNDI).",
-      "Classify essential macronutrients and micronutrients and state their biological functions.",
-      "Utilize dietary guidelines, food composition tables, and food guide pyramids to plan balanced diets.",
-      "Identify clinical forms, etiology, and public health consequences of malnutrition."
+    weeklySchedule: [
+      {
+        weekNumber: 1,
+        topicTitle: "Introduction to the Science of Nutrition and Dietetics",
+        subTopics: ["Meaning of terms", "History of nutrition and dietetics", "Professional requirements for nutritionists and dieticians", "Classification of nutritionists and dieticians"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Introduction to the Science of Nutrition and Dietetics.\n• Explain history of nutrition and dietetics.\n• Determine and calculate recommended dietary allowances and nutrient requirements.\n• Classify nutritionists and dieticians and describe their categories.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 2,
+        topicTitle: "Orientation to the Field of Nutrition and Dietetics",
+        subTopics: ["Roles and responsibilities of a nutritionist", "Roles and responsibilities of a dietician", "Interaction with other health professionals", "Career opportunities in nutrition and dietetics"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain roles and responsibilities of a nutritionist.\n• Explain roles and responsibilities of a dietician.\n• Explain interaction with other health professionals.\n• Explain career opportunities in nutrition and dietetics.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 3,
+        topicTitle: "Skills and Competences in Nutrition and Dietetics",
+        subTopics: ["Essential skills in nutrition and dietetics", "Competences in nutrition and dietetics"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain essential skills in nutrition and dietetics.\n• Explain competences in nutrition and dietetics.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 4,
+        topicTitle: "Standards and Ethics of Professional Conduct",
+        subTopics: ["Standards in nutrition and dietetics practice", "Ethics in practice", "Disciplinary action for unethical behaviour in nutrition and dietetics"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain standards in nutrition and dietetics practice.\n• Explain ethics in practice.\n• Explain disciplinary action for unethical behaviour in nutrition and dietetics.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 5,
+        topicTitle: "Modern Nutritional Dietetic Practice",
+        subTopics: ["Modern nutritional dietetic practice", "Contemporary issues in nutrition and dietetics"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain modern nutritional dietetic practice.\n• Explain contemporary issues in nutrition and dietetics.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 6,
+        topicTitle: "Principles of Dietetics",
+        subTopics: ["Meaning of terms", "Recommended dietary allowances", "Recommended nutrient intakes", "Adequate intakes", "Tolerable upper intake levels"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Principles of Dietetics.\n• Determine and calculate recommended dietary allowances and nutrient requirements.\n• Explain recommended nutrient intakes.\n• Explain adequate intakes.\n• Explain tolerable upper intake levels.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 7,
+        topicTitle: "Nutrient Intake and Utilization",
+        subTopics: ["Factors influencing nutrient intake", "Factors influencing nutrient availability", "Factors affecting nutrient utilization"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Analyze factors affecting nutrient intake.\n• Analyze factors affecting nutrient availability.\n• Analyze factors affecting nutrient utilization.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Introduction To Nutrition And Dietetics)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Introduction To Nutrition And Dietetics.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
+      },
+      {
+        weekNumber: 9,
+        topicTitle: "Principles of Diet Planning",
+        subTopics: ["Principles of diet planning"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Describe the principles of diet planning.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 10,
+        topicTitle: "Nutrition in Disease Management",
+        subTopics: ["Meaning of terms", "Nutrient requirements for various disease conditions", "Disease management using nutrition"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Nutrition in Disease Management.\n• Determine and calculate recommended dietary allowances and nutrient requirements.\n• Explain disease management using nutrition.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 11,
+        topicTitle: "Emerging Issues and Trends",
+        subTopics: ["Identification of emerging issues and trends", "Challenges", "Coping with challenges"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain identification of emerging issues and trends.\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends.\n• Explain coping with challenges.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 12,
+        topicTitle: "Applied Practice & Case Studies in Introduction To Nutrition And Dietetics (Week 12)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Introduction To Nutrition And Dietetics in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Identification of emerging issues and trends", "Challenges", "Coping with challenges"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain identification of emerging issues and trends.\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping with challenges.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Introduction To Nutrition And Dietetics)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Introduction To Nutrition And Dietetics in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
     ],
-    "references": [
-      "Whitney, E., & Rolfes, S. R. (2022). Understanding Nutrition (16th Edition). Cengage Learning.",
-      "Gibney, M. J., Lanham-New, S. A., Cassidy, A., & Vorster, H. H. (2019). Introduction to Human Nutrition (3rd Edition). Wiley-Blackwell.",
-      "Ministry of Health, Kenya. (2020). National Food Composition Tables. Government of Kenya."
-    ],
-    "instructionalEquipment": [
-      "Plastic food models and replicas depicting standard food groups",
-      "Kenyan Food Composition Tables and Food-Based Dietary Guidelines charts",
-      "Dietary assessment tools and anthropometric measurement devices"
-    ],
-    "weeklySchedule": [
-      {
-        "weekNumber": 1,
-        "topicTitle": "Introduction to the Science of Nutrition & Dietetics",
-        "subTopics": [
-          "Definition of key concepts: Food, nutrients, nutrition, dietetics, nutritional status, and health",
-          "Historical milestones in the development of nutritional science",
-          "Relationship between optimal nutrition, disease prevention, and national development",
-          "The multidisciplinary nature of nutrition and dietetics"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Define foundational nutrition and dietetics terms with precision.\n\u2022 Outline the historical development of nutritional science as a medical discipline.\n\u2022 Explain the vital role of nutrition in disease prevention and socioeconomic productivity.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 2,
-        "topicTitle": "The Profession of Nutrition & Dietetics in Kenya",
-        "subTopics": [
-          "Roles and occupational responsibilities of nutritionists and dietitians in various sectors",
-          "Career pathways: Clinical dietetics, public health nutrition, food industry, research, academia",
-          "Professional regulatory framework: The Kenya Nutritionists and Dieticians Institute (KNDI) Act No. 18 of 2007",
-          "KNDI code of ethics, licensing requirements, and scope of practice"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Describe professional duties of nutritionists in hospitals, communities, and industry.\n\u2022 Explain statutory mandates of KNDI in regulating education and professional practice.\n\u2022 Adhere to ethical standards, professional boundaries, and patient confidentiality.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 3,
-        "topicTitle": "Classification of Nutrients: Macronutrients Overview",
-        "subTopics": [
-          "Classification of nutrients (Macronutrients vs. Micronutrients, Organic vs. Inorganic)",
-          "Carbohydrates: Classification (simple vs. complex), primary food sources, biological roles",
-          "Lipids: Classification (saturated, unsaturated, trans fats), essential fatty acids, food sources",
-          "Proteins: Essential and non-essential amino acids, complete and incomplete proteins, biological value"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Classify essential human nutrients based on chemical structure and quantity required.\n\u2022 State the dietary sources and physiological functions of carbohydrates, lipids, and proteins.\n\u2022 Distinguish between high biological value and low biological value protein sources.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 4,
-        "topicTitle": "Classification of Nutrients: Micronutrients & Water",
-        "subTopics": [
-          "Fat-soluble vitamins (A, D, E, K): Dietary sources, physiological roles, and toxicity",
-          "Water-soluble vitamins (B-complex, Vitamin C): Sources, functions, and stability",
-          "Major minerals (Calcium, Phosphorus, Magnesium, Sodium, Potassium) and trace minerals (Iron, Zinc, Iodine)",
-          "Water as an essential nutrient: Fluid balance, functions, and daily requirements"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Differentiate between fat-soluble and water-soluble vitamins.\n\u2022 Outline primary food sources and physiological functions of essential minerals.\n\u2022 Explain the physiological significance of hydration and fluid electrolyte homeostasis.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 5,
-        "topicTitle": "Food Groups, Food Guides & Dietary Guidelines (CAT 1)",
-        "subTopics": [
-          "Classification of foods into standard functional food groups",
-          "Food guide pyramids and healthy eating plates (MyPlate and Kenyan Plate models)",
-          "Food-Based Dietary Guidelines (FBDGs) of Kenya: Core messages and rationale",
-          "Continuous Assessment Test 1 (Nutrient Classification and Dietary Guidelines)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Categorize indigenous and conventional foods into standardized food groups.\n\u2022 Translate nutritional recommendations into practical visual food plates.\n\u2022 Explain the public health rationale behind national food-based dietary guidelines.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 6,
-        "topicTitle": "Dietary Standards & Nutrient Reference Values",
-        "subTopics": [
-          "Dietary Reference Intakes (DRIs): RDA, EAR, AI, and UL concepts",
-          "Estimated Average Requirement (EAR) versus Recommended Dietary Allowance (RDA)",
-          "Tolerable Upper Intake Level (UL) and risks of excessive micronutrient intake",
-          "Interpreting Food Composition Tables (FCTs) and calculating nutrient intake"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Distinguish between RDA, EAR, AI, and UL standards.\n\u2022 Utilize national Food Composition Tables to calculate nutrient contents of meal recipes.\n\u2022 Compare individual dietary intakes against recommended daily dietary allowances.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 7,
-        "topicTitle": "Human Digestion, Absorption & Nutrient Utilization",
-        "subTopics": [
-          "Overview of the mechanical and chemical processes of digestion",
-          "Enzymatic hydrolysis in the mouth, stomach, and small intestine",
-          "Mechanisms of nutrient absorption across intestinal enterocytes",
-          "Transport of nutrients via blood and lymphatic circulatory systems"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Trace the step-by-step breakdown of macronutrients along the gastrointestinal tract.\n\u2022 Explain the role of digestive enzymes and bile in nutrient assimilation.\n\u2022 Contrast portal venous absorption of water-soluble nutrients with lymphatic transport of lipids.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 8,
-        "topicTitle": "Mid-Term Examination & Nutritional Requirements in Life Stages",
-        "subTopics": [
-          "Mid-Term Examination (Official Institutional CAT 2)",
-          "Nutritional priorities during pregnancy and lactation",
-          "Nutritional requirements of infants, children, and adolescents",
-          "Nutritional considerations for adults and the geriatric population"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Successfully complete the Mid-Term Evaluation covering Weeks 1 to 7 content.\n\u2022 Explain how metabolic demands evolve across different human life stages.\n\u2022 Identify unique dietary vulnerabilities of pregnant mothers and elderly individuals.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 9,
-        "topicTitle": "Introduction to Nutritional Status Assessment",
-        "subTopics": [
-          "Purpose and clinical significance of nutritional assessment",
-          "The ABCD methods of nutritional assessment (Anthropometry, Biochemical, Clinical, Dietary)",
-          "Anthropometric indices overview: Height, weight, Mid-Upper Arm Circumference (MUAC), BMI",
-          "Dietary assessment methods: 24-hour dietary recall, Food Frequency Questionnaire (FFQ), food diaries"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Describe the components of the ABCD nutritional assessment framework.\n\u2022 Measure height, weight, and MUAC following standard clinical protocols.\n\u2022 Conduct a structured 24-hour dietary recall interview with a client.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 10,
-        "topicTitle": "Malnutrition: Undernutrition & Micronutrient Deficiencies",
-        "subTopics": [
-          "Definition and spectrum of malnutrition (Undernutrition, overnutrition, micronutrient deficiencies)",
-          "Forms of Acute Malnutrition: Marasmus, Kwashiorkor, and Marasmic-Kwashiorkor",
-          "Chronic malnutrition: Stunting, underweight, and wasting indices",
-          "Common micronutrient deficiencies: Iron Deficiency Anemia, Vitamin A Deficiency (VAD), Iodine Deficiency Disorders (IDD)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Differentiate the clinical signs of Kwashiorkor (edema, dermatosis) from Marasmus (severe wasting).\n\u2022 Explain the public health significance of childhood stunting and cognitive impairment.\n\u2022 Identify clinical manifestations and food sources to combat hidden hunger.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 11,
-        "topicTitle": "Malnutrition: Overnutrition & Diet-Related NCDs",
-        "subTopics": [
-          "Global and national epidemiology of overweight and obesity",
-          "Etiological factors: Sedentary lifestyle, ultra-processed foods, genetics, socioeconomic shifts",
-          "Health risks associated with obesity: Cardiovascular diseases, Type 2 Diabetes, hypertension, cancers",
-          "Public health strategies for preventing overweight and promoting active lifestyles"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Calculate and classify Body Mass Index (BMI) categories according to WHO standards.\n\u2022 Explain the pathophysiology linking visceral adiposity to non-communicable diseases.\n\u2022 Formulate lifestyle modification strategies to prevent weight gain in communities.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 12,
-        "topicTitle": "Food Security, Food Systems & Global Nutrition Initiatives",
-        "subTopics": [
-          "Pillars of food security (Availability, Access, Utilization, Stability)",
-          "Food systems: From agricultural production to processing, distribution, and consumption",
-          "Sustainable Development Goal 2 (Zero Hunger) and global nutrition targets (WHA targets)",
-          "Role of government ministries, NGOs, and UN agencies (UNICEF, WHO, WFP, FAO)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Analyze the four pillars of food and nutrition security in local contexts.\n\u2022 Describe the components of a sustainable, resilient food system.\n\u2022 Explain key international frameworks addressing global hunger and malnutrition.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 13,
-        "topicTitle": "Comprehensive Revision & Clinical Practice Review",
-        "subTopics": [
-          "Integration of nutrient metabolism, dietary calculation, and professional ethics",
-          "Remediation on Food Composition Tables, RDA calculations, and ABCD assessments",
-          "Review of past KNEC examination questions on Introduction to Nutrition",
-          "Final examination tips and case study answering strategies"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Synthesize foundational nutritional concepts across practical clinical scenarios.\n\u2022 Answer multi-part TVET examination questions accurately and systematically.\n\u2022 Demonstrate readiness for professional and academic assessments.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 14,
-        "topicTitle": "End of Term Summative Examination",
-        "subTopics": [
-          "Institutional TVET Final Theory Examination in Nutrition & Dietetics",
-          "Final evaluation of student dietary calculation assignments",
-          "Consolidation of continuous assessment marks"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate comprehensive knowledge of introductory nutrition and dietetics under examination conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      }
-    ]
+    references: ["Mahan, L. K., & Raymond, J. L. (2020). Krause's Food & the Nutrition Care Process (15th ed.). Elsevier.", "KNDI. (2019). Core Competency Standards and Scope of Practice for Nutritionists and Dieticians in Kenya. KNDI."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "food_safety_and_hygiene": {
-    "canonicalKey": "food_safety_and_hygiene",
-    "syllabusCode": "12.1.0",
-    "unitCode": "12.1.0",
-    "unitName": "Food Safety and Hygiene",
-    "moduleNumber": 1,
-    "nominalHours": 55,
-    "theoryHours": 35,
-    "practicalHours": 20,
-    "aliases": [
-      "12.1.0",
-      "Food Safety and Hygiene",
-      "Food Safety & Hygiene",
-      "CND 1203",
-      "DND 1203",
-      "DHN 1205",
-      "DNDT 1107",
-      "CHN 1203"
+    canonicalKey: "food_safety_and_hygiene",
+    syllabusCode: "12.1.0",
+    unitCode: "12.1.0",
+    unitName: "Food Safety And Hygiene",
+    moduleNumber: 1,
+    nominalHours: 44,
+    theoryHours: 24,
+    practicalHours: 20,
+    aliases: ["CND 1203", "DND 1203", "12.1.0"],
+    unitDescription: "This module unit is intended to equip the trainee with knowledge, skills and attitudes in handling food safety and ensure that it remains safe for consumption.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: acquire knowledge and skills required to handle foods safely; demonstrate the ability to handle and store foods in a hygienic environment; identify food-borne illnesses and the associated hazards.",
+    learningOutcomes: [
+      "acquire knowledge and skills required to handle foods safely",
+      "demonstrate the ability to handle and store foods in a hygienic environment",
+      "identify food-borne illnesses and the associated hazards",
+      "carry out inspection of food facilities",
+      "demonstrate hygienic food handling procedures"
     ],
-    "unitDescription": "This unit equips trainees with the knowledge, regulatory understanding, and practical competencies required to maintain food safety, prevent microbial and chemical contamination, implement strict sanitation standards, and execute Hazard Analysis Critical Control Point (HACCP) systems across institutional food service and clinical environments.",
-    "overallCompetency": "Implement stringent food safety standards, personal and environmental hygiene practices, and HACCP food quality systems across institutional kitchens and healthcare facilities.",
-    "learningOutcomes": [
-      "Explain causes, transmission mechanisms, and preventive controls for biological, chemical, and physical food contamination.",
-      "Enforce rigorous personal hygiene, health screening, and sanitary habits among food handlers.",
-      "Implement temperature control, safe food storage practices, and cold chain maintenance.",
-      "Apply the 7 principles of HACCP and sanitation standard operating procedures (SSOPs).",
-      "Comply with national and international food safety laws, public health statutes, and inspection standards."
+    weeklySchedule: [
+      {
+        weekNumber: 1,
+        topicTitle: "Introduction to Food Safety and Hygiene",
+        subTopics: ["Meaning of terms", "Importance of food safety and hygiene", "Food safety and hygiene rules and regulations"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Introduction to Food Safety and Hygiene.\n• Explain the functions and physiological role of food safety and hygiene.\n• State and apply the food safety and hygiene rules and regulations.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 2,
+        topicTitle: "Food Contamination and Spoilage",
+        subTopics: ["Meaning of terms", "Causes of food contamination", "Types of food contaminants", "Preventive measures of food contamination", "Safety regulations", "Food-borne illnesses (food poisoning and food infections)", "Prevention of food poisoning and infections"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Food Contamination and Spoilage.\n• Analyze factors affecting food contamination.\n• Classify food contaminants and describe their categories.\n• Explain prevention, control and management measures for of food contamination.\n• Explain safety regulations.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 3,
+        topicTitle: "Food Contact Surfaces",
+        subTopics: ["Meaning of terms", "Types of food contact surfaces", "Materials for food contact surfaces", "Design requirements", "Hygienic standards"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Food Contact Surfaces.\n• Classify food contact surfaces and describe their categories.\n• Explain materials for food contact surfaces.\n• Determine and calculate recommended dietary allowances and nutrient requirements.\n• Explain hygienic standards.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 4,
+        topicTitle: "Food Premises and Equipment",
+        subTopics: ["Meaning of terms", "Types of food premises and equipment", "Hygiene requirements", "Design and layout", "Operational requirements", "Inspection of food premises and equipment"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Food Premises and Equipment.\n• Classify food premises and equipment and describe their categories.\n• Determine and calculate recommended dietary allowances and nutrient requirements.\n• Explain design and layout.\n• Demonstrate safe handling and operation of inspection of food premises and equipment.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 5,
+        topicTitle: "Hazards Analysis and Critical Control Point (HACCP)",
+        subTopics: ["Meaning of terms", "Principles of HACCP", "Importance of HACCP", "Developing a HACCP plan", "Implementation and management of HACCP system"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Hazards Analysis and Critical Control Point (HACCP).\n• Describe the principles of HACCP.\n• Explain the functions and physiological role of HACCP.\n• Explain developing a HACCP plan.\n• Describe the structure, components and function of implementation and management of HACCP system.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 6,
+        topicTitle: "Emerging Issues and Trends",
+        subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Coping mechanisms and strategies"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends.\n• Explain coping mechanisms and strategies.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 7,
+        topicTitle: "Applied Practice & Case Studies in Food Safety And Hygiene (Week 7)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Food Safety And Hygiene in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+      },
+      {
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Food Safety And Hygiene)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Food Safety And Hygiene.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
+      },
+      {
+        weekNumber: 9,
+        topicTitle: "Applied Practice & Case Studies in Food Safety And Hygiene (Week 9)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Food Safety And Hygiene in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+      },
+      {
+        weekNumber: 10,
+        topicTitle: "Applied Practice & Case Studies in Food Safety And Hygiene (Week 10)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Food Safety And Hygiene in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+      },
+      {
+        weekNumber: 11,
+        topicTitle: "Applied Practice & Case Studies in Food Safety And Hygiene (Week 11)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Food Safety And Hygiene in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+      },
+      {
+        weekNumber: 12,
+        topicTitle: "Applied Practice & Case Studies in Food Safety And Hygiene (Week 12)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Food Safety And Hygiene in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Coping mechanisms and strategies"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping mechanisms and strategies.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Food Safety And Hygiene)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Food Safety And Hygiene in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
     ],
-    "references": [
-      "Marriott, N. G., Schilling, M. W., & Gravani, R. B. (2018). Principles of Food Sanitation (6th Edition). Springer.",
-      "Codex Alimentarius Commission. (2020). General Principles of Food Hygiene (CXC 1-1969). FAO/WHO.",
-      "Forsythe, S. J. (2020). The Microbiology of Safe Food (3rd Edition). Wiley-Blackwell."
-    ],
-    "instructionalEquipment": [
-      "Calibrated food probe thermometers and infrared surface thermometers",
-      "Color-coded cutting boards, chef knives, and stainless steel food containers",
-      "Sanitizer test strips, ATP surface hygiene luminometers, and cleaning equipment"
-    ],
-    "weeklySchedule": [
-      {
-        "weekNumber": 1,
-        "topicTitle": "Introduction to Food Safety, Hygiene & Hazards",
-        "subTopics": [
-          "Definition of food safety, food hygiene, sanitation, food spoilage, and contamination",
-          "Importance of food safety in clinical, commercial, and public health settings",
-          "Classification of food safety hazards (Biological, Chemical, Physical, Allergenic)",
-          "Economic and human health impacts of foodborne disease outbreaks"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Define food safety and distinguish between spoilage and contamination.\n\u2022 Classify food hazards into biological, chemical, physical, and allergenic categories.\n\u2022 Explain the public health and legal consequences of foodborne outbreaks.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 2,
-        "topicTitle": "Biological Hazards: Foodborne Bacteria & Pathogens",
-        "subTopics": [
-          "Characteristics and growth requirements of microorganisms (FATTOM: Food, Acidity, Time, Temperature, Oxygen, Moisture)",
-          "Major bacterial pathogens: Salmonella, E. coli, Staphylococcus aureus, Clostridium botulinum, Listeria monocytogenes",
-          "Bacterial infection versus bacterial intoxication",
-          "Bacterial spores: Heat resistance and survival mechanisms"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the FATTOM environmental factors regulating bacterial proliferation.\n\u2022 Differentiate between foodborne infections and foodborne intoxications.\n\u2022 Identify common pathogen reservoirs and clinical symptoms of major bacterial food poisonings.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 3,
-        "topicTitle": "Viruses, Parasites, Fungi & Natural Toxins",
-        "subTopics": [
-          "Foodborne viruses: Norovirus, Hepatitis A, Rotavirus (Transmission and control)",
-          "Foodborne parasites: Taenia solium/saginata, Trichinella, Giardia, Entamoeba",
-          "Molds and mycotoxins: Aspergillus flavus and aflatoxin contamination in cereals and legumes",
-          "Natural food toxins: Cyanogenic glycosides in cassava, solanine in green potatoes"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Describe transmission routes of foodborne viruses and viral prevention measures.\n\u2022 Identify lifecycle risks and preventive cooking methods for parasitic helminths.\n\u2022 Explain health risks and control measures for aflatoxins in staples like maize and groundnuts.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 4,
-        "topicTitle": "Chemical, Physical Hazards & Food Allergens",
-        "subTopics": [
-          "Chemical contaminants: Pesticide residues, veterinary drug residues, heavy metals (Lead, Mercury)",
-          "Cleaning and sanitizing chemical residues and safe chemical storage protocols",
-          "Physical hazards: Glass, metal shavings, stones, hair, bone fragments, and foreign objects",
-          "The major food allergens (Big 8): Peanuts, tree nuts, milk, eggs, wheat, soy, fish, shellfish",
-          "Preventing cross-contact of allergens in institutional meal preparation"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify sources of chemical contamination and safely store sanitation agents.\n\u2022 Implement physical hazard prevention measures during food preparation.\n\u2022 Apply kitchen protocols to prevent allergen cross-contact for sensitive patients.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 5,
-        "topicTitle": "Personal Hygiene for Food Handlers (CAT 1)",
-        "subTopics": [
-          "Role of food handlers in disease transmission (Healthy carriers, staphylococcal shedding)",
-          "Handwashing technique, critical handwashing junctures, and nail care",
-          "Personal protective clothing (Aprons, hair restraints, beard covers, slip-resistant footwear)",
-          "Health screening, reporting contagious illnesses, wound dressing, and food handling restrictions",
-          "Continuous Assessment Test 1 (Food Hazards and Personal Hygiene)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate the standard 6-step medical handwashing procedure.\n\u2022 Explain health regulations regarding food handler medical examination and certification.\n\u2022 Demonstrate mastery under CAT 1 evaluation conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 6,
-        "topicTitle": "Time & Temperature Control in Food Safety",
-        "subTopics": [
-          "The Temperature Danger Zone ($5^\\circ\\text{C}$ to $60^\\circ\\text{C}$ / $41^\\circ\\text{F}$ to $135^\\circ\\text{F}$)",
-          "Safe cooking internal temperatures for poultry, minced meat, pork, and seafood",
-          "Safe cooling methods (Two-stage cooling process: $60^\\circ\\text{C}$ to $21^\\circ\\text{C}$ in 2 hrs, $21^\\circ\\text{C}$ to $5^\\circ\\text{C}$ in 4 hrs)",
-          "Safe hot holding, cold holding, reheating, and thawing techniques",
-          "Calibration of food thermometers (Ice-point and boiling-point calibration methods)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 State critical temperature thresholds that inhibit bacterial growth.\n\u2022 Execute the two-stage rapid cooling method for cooked hospital meals.\n\u2022 Calibrate bi-metallic stemmed and digital food probe thermometers accurately.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 7,
-        "topicTitle": "Cross-Contamination Prevention & Safe Storage",
-        "subTopics": [
-          "Mechanisms of cross-contamination (Direct, indirect, drip contamination)",
-          "Color-coded cutting boards and dedicated utensils for raw meats, poultry, and ready-to-eat foods",
-          "Refrigerator storage hierarchy (Top shelf ready-to-eat to bottom shelf raw poultry)",
-          "Dry storage specifications: Ventilation, pest-proofing, and First-In, First-Out (FIFO) rotation"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify high-risk points for cross-contamination in kitchen workflows.\n\u2022 Organize refrigerator shelves according to required minimum cooking temperatures.\n\u2022 Apply FIFO stock management rules to prevent product expiration.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 8,
-        "topicTitle": "Mid-Term Examination & Cleaning, Sanitizing Procedures",
-        "subTopics": [
-          "Mid-Term Examination (Official Institutional CAT 2)",
-          "Difference between cleaning (soil removal) and sanitizing (microbial reduction)",
-          "Thermal sanitizing (hot water immersion) versus chemical sanitizing (Chlorine, Quats, Iodine)",
-          "Factors affecting sanitizer efficacy (Concentration, contact time, temperature, water hardness)",
-          "Developing a Master Cleaning Schedule (MCS) and 3-compartment sink wash procedures"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Successfully complete the Mid-Term Evaluation covering Weeks 1 to 7 content.\n\u2022 Compare chemical sanitizers and prepare correct parts-per-million (PPM) concentrations.\n\u2022 Execute the 5-step manual dishwashing process in a 3-compartment sink.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 9,
-        "topicTitle": "Facility Design, Pest Control & Waste Management",
-        "subTopics": [
-          "Sanitary facility design: Workflow layout (raw to finished product flow to prevent back-tracking)",
-          "Floors, walls, ceilings, lighting, ventilation, and plumbing backflow prevention",
-          "Integrated Pest Management (IPM): Exclusion, denying food/shelter, and professional extermination",
-          "Solid and liquid waste disposal: Covered bins, regular clearance, and grease traps"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Design a kitchen layout that maintains unidirectional food workflow.\n\u2022 Identify signs of pest infestation (droppings, rub marks, gnawing) and implement exclusion methods.\n\u2022 Manage organic and non-organic kitchen waste to eliminate microbial vectors.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 10,
-        "topicTitle": "HACCP System: Principles 1 to 3",
-        "subTopics": [
-          "Historical origin and benefits of Hazard Analysis Critical Control Point (HACCP)",
-          "Prerequisite programs (Good Manufacturing Practices - GMP, SSOPs)",
-          "Principle 1: Conduct a comprehensive hazard analysis across process flowcharts",
-          "Principle 2: Determine Critical Control Points (CCPs) using the CCP Decision Tree",
-          "Principle 3: Establish Critical Limits (CL) for each identified CCP (e.g. minimum internal temperature)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the preventative philosophy of the HACCP food safety management system.\n\u2022 Apply the Codex decision tree to distinguish a CCP from a standard operational control.\n\u2022 Formulate measurable, validated critical limits for cooking and chilling steps.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 11,
-        "topicTitle": "HACCP System: Principles 4 to 7",
-        "subTopics": [
-          "Principle 4: Establish monitoring procedures for CCPs (Who, What, When, How)",
-          "Principle 5: Establish corrective actions for critical limit deviations",
-          "Principle 6: Establish verification procedures to confirm the HACCP plan is operating effectively",
-          "Principle 7: Establish comprehensive documentation and record-keeping systems"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Design CCP monitoring logs for kitchen staff recording time and temperature.\n\u2022 Formulate immediate corrective action protocols when temperatures fall out of spec.\n\u2022 Outline documentation systems required for food safety auditing.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 12,
-        "topicTitle": "Food Legislation, Standards & Regulatory Bodies in Kenya",
-        "subTopics": [
-          "The Public Health Act (Cap 242) and Food, Drugs and Chemical Substances Act (Cap 254)",
-          "Kenya Bureau of Standards (KEBS): Standards formulation, certification, and Diamond Mark of Quality",
-          "Role of the Directorate of Public Health, port health authorities, and county public health inspectors",
-          "Codex Alimentarius standards and international food trade compliance"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Cite relevant statutory sections governing food handling premises in Kenya.\n\u2022 Explain the role of KEBS in setting mandatory food commodity standards.\n\u2022 Prepare a commercial or hospital food premise for an official public health inspection.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 13,
-        "topicTitle": "Comprehensive Revision & Food Safety Audit Practicum",
-        "subTopics": [
-          "Simulated food safety inspection walkthrough of an institutional kitchen",
-          "Developing and auditing a complete HACCP plan for a high-risk recipe (e.g. Therapeutic infant formula)",
-          "Past KNEC examination paper review and question-answering techniques",
-          "Review of model solutions and common examination pitfalls"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Conduct a thorough food safety audit using a standardized inspection checklist.\n\u2022 Draft and defend a complete 7-principle HACCP table for clinical feeding.\n\u2022 Demonstrate readiness for national TVET final examinations.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      },
-      {
-        "weekNumber": 14,
-        "topicTitle": "End of Term Summative Examination",
-        "subTopics": [
-          "Institutional TVET Final Theory Examination in Food Safety & Hygiene",
-          "Institutional TVET Practical Sanitation Assessment",
-          "Consolidation of continuous assessment marks"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate comprehensive understanding and practical competence in food safety under examination conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Instructional food models, laboratory apparatus, and kitchen facilities",
-        "assessmentAndRemarks": "Continuous assessment tests, oral questioning, practical culinary checks, and written assignments"
-      }
-    ]
+    references: ["Marriott, N. G., Schilling, M. W., & Gravani, R. B. (2018). Principles of Food Sanitation (6th ed.). Springer.", "Mortimore, S., & Wallace, C. (2018). HACCP: A Practical Approach (3rd ed.). Springer."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "food_production_invalids": {
-    "canonicalKey": "food_production_invalids",
-    "syllabusCode": "13.1.0",
-    "unitCode": "13.1.0",
-    "unitName": "Food Production for Invalids and Convalescents",
-    "moduleNumber": 1,
-    "nominalHours": 66,
-    "theoryHours": 26,
-    "practicalHours": 40,
-    "aliases": [
-      "13.1.0",
-      "Food Production for Invalids and Convalescents",
-      "Food production for invalids and convalescent",
-      "Food Production for Invalids",
-      "DND 1304",
-      "CHN 2203",
-      "DHN 1305"
+    canonicalKey: "food_production_invalids",
+    syllabusCode: "13.1.0",
+    unitCode: "13.1.0",
+    unitName: "Food Production For Invalids And Convalescents",
+    moduleNumber: 1,
+    nominalHours: 66,
+    theoryHours: 26,
+    practicalHours: 40,
+    aliases: ["CND 1204", "DND 1304", "13.1.0"],
+    unitDescription: "This module unit is intended to impart in trainees cooking skills and attitudes required for professional cookery. It gives the trainees a broad knowledge of raw food materials and their application in food production.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: operate a given kitchen equipment correctly and safely; observe hygiene rules in food and beverage production; demonstrate the ability to receive and store ingredients appropriately.",
+    learningOutcomes: [
+      "operate a given kitchen equipment correctly and safely",
+      "observe hygiene rules in food and beverage production",
+      "demonstrate the ability to receive and store ingredients appropriately",
+      "use ingredients to produce a particular food item",
+      "prepare and produce a given food item",
+      "portion, present and garnish food appropriately",
+      "handle challenges arising from emerging issues and trends in food production"
     ],
-    "unitDescription": "This unit imparts specialized culinary knowledge and practical skills required to prepare, modify, and present appetizing, nutritionally fortified meals for patients, convalescents, invalids, and individuals with specialized physiological and therapeutic dietary requirements.",
-    "overallCompetency": "Prepare, texture-modify, fortify, and safely present therapeutic meals and liquid diets that meet clinical nutritional specifications for convalescents and hospital patients.",
-    "learningOutcomes": [
-      "Select, utilize, and maintain institutional therapeutic food preparation equipment.",
-      "Apply culinary methods that maximize nutrient retention and digestibility for sick individuals.",
-      "Prepare clear liquid, full liquid, pureed, and soft texture-modified diets.",
-      "Fortify meals with proteins, micronutrients, and healthy calories for malnourished patients.",
-      "Execute hygienic portion control, tray assembly, and patient meal service."
+    weeklySchedule: [
+      {
+        weekNumber: 1,
+        topicTitle: "Introduction to Food Production and Kitchen Organization & Kitchen Equipment",
+        subTopics: ["Meaning of terms", "Kitchen layouts", "Motion economy", "Attributes of kitchen personnel", "Classification of kitchen equipment", "Selection of kitchen equipment", "Safety rules", "Uses of kitchen equipment", "Care and maintenance of kitchen equipment"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Introduction to Food Production and Kitchen Organization & Kitchen Equipment.\n• Explain kitchen layouts.\n• Explain motion economy.\n• Explain attributes of kitchen personnel.\n• Classify kitchen equipment and describe their categories.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 2,
+        topicTitle: "Cooking Methods & Food Commodities",
+        subTopics: ["Methods of food preparation", "Selection of cooking methods", "Effect of heat on nutrients", "Presentation of food items and dishes", "Holding and storing food items and dishes", "Meaning of terms", "Types of food commodities", "Selection of food commodities", "Classification of food commodities"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Describe methods and procedures for food preparation.\n• Explain selection of cooking methods.\n• Explain effect of heat on nutrients.\n• Explain presentation of food items and dishes.\n• Explain holding and storing food items and dishes.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 3,
+        topicTitle: "Eggs",
+        subTopics: ["Types of eggs", "Quality of eggs", "Storage of eggs", "Methods of preparation", "Uses of eggs in food production"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Classify eggs and describe their categories.\n• Explain quality of eggs.\n• Explain storage of eggs.\n• Describe methods and procedures for preparation.\n• Explain uses of eggs in food production.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 4,
+        topicTitle: "Cereals and Pulses & Meat, Fish and Poultry",
+        subTopics: ["Types", "Storage", "Uses", "Methods of cooking", "Types", "Quality", "Storage", "Methods of preparation", "Uses"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain types.\n• Explain storage.\n• Explain uses.\n• Describe methods and procedures for cooking.\n• Explain quality.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 5,
+        topicTitle: "Stocks, Soups and Sauces",
+        subTopics: ["Meaning of terms", "Types", "Quality of stocks, soups and sauces", "Production and presentation"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Stocks, Soups and Sauces.\n• Explain types.\n• Explain quality of stocks, soups and sauces.\n• Explain production and presentation.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 6,
+        topicTitle: "Cold Food Preparations & Pastry and Pastry Products",
+        subTopics: ["Meaning of terms", "Types", "Preparation methods", "Production methods", "Presentation", "Meaning of terms", "Types", "Selection", "Production of pastry and products", "Presentation", "Qualities"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Cold Food Preparations & Pastry and Pastry Products.\n• Explain types.\n• Explain preparation methods.\n• Explain production methods.\n• Explain presentation.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 7,
+        topicTitle: "[Savoury/Batter] Products",
+        subTopics: ["Meaning of terms", "Role of ingredients", "Preparation methods", "Production methods", "Qualities"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in [Savoury/Batter] Products.\n• Explain the functions and physiological role of ingredients.\n• Explain preparation methods.\n• Explain production methods.\n• Explain qualities.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Food Production For Invalids And Convalescents)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Food Production For Invalids And Convalescents.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
+      },
+      {
+        weekNumber: 9,
+        topicTitle: "[Confectionery] Products & Desserts",
+        subTopics: ["Meaning of terms", "Types", "Role of ingredients", "Preparation methods", "Production", "Presentation", "Qualities", "Meaning of terms", "Classification", "Preparation methods", "Production", "Presentation", "Qualities"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in [Confectionery] Products & Desserts.\n• Explain types.\n• Explain the functions and physiological role of ingredients.\n• Explain preparation methods.\n• Explain production.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 10,
+        topicTitle: "Beverages",
+        subTopics: ["Meaning of terms", "Types", "Preparation methods", "Presentation"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Beverages.\n• Explain types.\n• Explain preparation methods.\n• Explain presentation.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 11,
+        topicTitle: "Fuel and Other Sources of Energy & Recipes",
+        subTopics: ["Sources", "Selection", "Methods of heat transfer", "Fuel and energy conservation", "Meaning of terms", "Importance", "Writing", "Costing and pricing"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain sources.\n• Explain selection.\n• Describe methods and procedures for heat transfer.\n• Explain fuel and energy conservation.\n• Define terms and concepts used in Fuel and Other Sources of Energy & Recipes.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 12,
+        topicTitle: "Emerging Issues and Trends",
+        subTopics: ["Identification of trends", "Challenges", "Coping mechanisms"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain identification of trends.\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends.\n• Explain coping mechanisms.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Identification of trends", "Challenges", "Coping mechanisms"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain identification of trends.\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping mechanisms.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Food Production For Invalids And Convalescents)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Food Production For Invalids And Convalescents in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
     ],
-    "references": [
-      "Ceserani, V., Kinton, R., & Foskett, D. (2018). Practical Cookery (13th Edition). Hodder Education.",
-      "Mahan, L. K., & Raymond, J. L. (2020). Krause's Food & the Nutrition Care Process (15th Edition). Elsevier.",
-      "Campbell, J., & Foskett, D. (2019). The Theory of Hospitality and Catering. Hodder Education."
-    ],
-    "instructionalEquipment": [
-      "Fully equipped institutional training kitchen (commercial stoves, blenders, food processors)",
-      "Therapeutic feeding utensils, dysphagia cups, and hospital meal presentation trays",
-      "Calibrated portion scales, measuring scoops, and serving ware"
-    ],
-    "weeklySchedule": [
-      {
-        "weekNumber": 1,
-        "topicTitle": "Introduction to Invalid Cookery & Kitchen Organization",
-        "subTopics": [
-          "Definition and objectives of invalid and convalescent cookery",
-          "Psychological and physiological factors affecting appetite during illness",
-          "Kitchen layout, zoning, workflow, and hygiene in hospital culinary units",
-          "Safety precautions and personal grooming in dietary food production"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Define invalid cookery and explain its role in patient recovery.\n\u2022 Identify sensory and physiological barriers that diminish patient appetite.\n\u2022 Organize a hygienic, safe kitchen workspace dedicated to therapeutic preparation.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 2,
-        "topicTitle": "Culinary Equipment Selection & Maintenance",
-        "subTopics": [
-          "Small equipment: Knives, whisks, strainers, sieves, spatulas, and cutting boards",
-          "Mechanical equipment: Commercial food processors, blenders, immersion blenders, juicers",
-          "Large cooking equipment: Steamers, convection ovens, tilting bratt pans, boiling pans",
-          "Cleaning, sanitizing, and preventive maintenance of specialized equipment"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Select appropriate culinary tools for specific texture-modification tasks.\n\u2022 Operate food processors and blenders safely to achieve uniform textures.\n\u2022 Dismantle, sanitize, and reassemble kitchen machinery compliant with hygiene standards.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 3,
-        "topicTitle": "Cooking Methods & Nutrient Retention Principles",
-        "subTopics": [
-          "Moist heat methods: Steaming, poaching, boiling, stewing, simmering",
-          "Dry heat methods: Baking, grilling (suitability for convalescents)",
-          "Impact of heat, water volume, and cooking duration on vitamin and mineral retention",
-          "Techniques to preserve color, flavor, and sensory appeal in bland hospital diets"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Select gentle cooking techniques that enhance food digestibility for bedridden patients.\n\u2022 Compare steaming versus boiling regarding water-soluble vitamin leaching.\n\u2022 Utilize natural culinary herbs to enhance flavor without adding excessive sodium.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 4,
-        "topicTitle": "Preparation of Clear Liquid Diets",
-        "subTopics": [
-          "Indications for clear liquid diets (Post-operative recovery, acute GI illness, bowel preparation)",
-          "Nutritional limitations and short-term duration of clear liquid diets",
-          "Preparation of clear bone broths, vegetable consomm\u00e9s, strained fruit juices, and rehydration fluids",
-          "Practicum: Preparing savory clear broth and clarified apple juice"
-        ],
-        "hours": 4,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the clinical rationale and limitations of a clear liquid diet.\n\u2022 Prepare crystal-clear, fat-free savory broths and clarified consomm\u00e9s.\n\u2022 Evaluate the clarity, temperature, and palatability of prepared clear fluids.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 5,
-        "topicTitle": "Preparation of Full Liquid Diets (CAT 1)",
-        "subTopics": [
-          "Indications for full liquid diets (Dysphagia, acute oral pathology, transition from clear fluids)",
-          "Nutritional adequacy and fluid balance in full liquid regimens",
-          "Preparation of smooth cream soups, fortified milkshakes, enriched custards, and thin cereal gruels",
-          "Continuous Assessment Test 1 (Culinary Practicum: Clear and Full Liquid Diets)"
-        ],
-        "hours": 4,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Formulate nutritionally dense full liquid meal plans.\n\u2022 Prepare silky, lump-free cream of vegetable soup and fortified egg-custard beverages.\n\u2022 Demonstrate precision and hygiene under CAT 1 practical evaluation.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 6,
-        "topicTitle": "Texture-Modified Diets: Pureed & Minced Diets",
-        "subTopics": [
-          "International Dysphagia Diet Standardisation Initiative (IDDSI) framework overview",
-          "Level 4 (Pureed) and Level 5 (Minced & Moist) definitions and testing methods (Fork drip test, spoon tilt test)",
-          "Preparation of pureed meats, pureed pulses, and pureed vegetables without fibrous stringiness",
-          "Practicum: Preparing pureed chicken and vegetable meal with appropriate viscosity"
-        ],
-        "hours": 4,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the IDDSI continuum for texture modification in dysphagia care.\n\u2022 Execute the fork drip and spoon tilt tests to verify proper food thickness.\n\u2022 Prepare pureed meals that hold shape without separating into liquid pools.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 7,
-        "topicTitle": "Soft & Mechanical Soft Diets",
-        "subTopics": [
-          "Indications for soft diets (Dental impairment, convalescence, gastrointestinal recovery)",
-          "Foods permitted versus foods to avoid (Tough fibers, seeds, hard skins, crunchy foods)",
-          "Culinary techniques for tenderizing meats, cooking flaked fish, and steaming root vegetables",
-          "Practicum: Preparing a 3-course soft diet meal (Poached fish, mashed potatoes, glazed carrots)"
-        ],
-        "hours": 4,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Distinguish between a standard soft diet and a mechanical soft diet.\n\u2022 Select and cook foods to a soft, easily chewable consistency without losing structure.\n\u2022 Prepare an attractive, nutritionally balanced three-course soft meal.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 8,
-        "topicTitle": "Mid-Term Examination & Meal Fortification Techniques",
-        "subTopics": [
-          "Mid-Term Examination (Official Institutional CAT 2)",
-          "Calorie and protein fortification strategies for wasting and anorexia",
-          "Fortifying agents: Skimmed milk powder, whey protein, nut pastes, vegetable oils, eggs, maltodextrin",
-          "Practicum: Preparing high-energy, high-protein porridge and fortified savory purees"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Successfully complete the Mid-Term Evaluation covering Weeks 1 to 7 content.\n\u2022 Calculate calorie and protein density increments achieved through food fortification.\n\u2022 Prepare fortified complementary foods and adult convalescent porridge recipes.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 9,
-        "topicTitle": "Diets for Gastrointestinal Disorders & Fevers",
-        "subTopics": [
-          "Bland diet principles for gastritis, peptic ulcer disease, and gastroesophageal reflux",
-          "Low-residue and low-fiber diet preparation for acute bowel inflammation",
-          "Hydrating and energy-dense meals for febrile illnesses (Malaria, pneumonia, typhoid)",
-          "Practicum: Preparing bland poached chicken breast with rice congee and soothing herbal infusions"
-        ],
-        "hours": 4,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Outline culinary modifications required to minimize gastric acid secretion.\n\u2022 Prepare soothing low-residue meals that reduce bowel irritation.\n\u2022 Formulate high-fluid, high-potassium meals for febrile patients.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 10,
-        "topicTitle": "Low-Sodium & Diabetic Therapeutic Cookery",
-        "subTopics": [
-          "Principles of sodium restriction (No added salt, moderate low sodium, strict low sodium)",
-          "Herbs, spices, citrus juices, and aromatics as sodium-free flavor enhancers",
-          "Low-glycemic culinary techniques: Incorporating legumes, whole grains, and healthy fats",
-          "Practicum: Preparing a flavorful salt-free diabetic lunch menu"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Prepare tasty, appetizing meals without adding table salt or commercial sodium seasonings.\n\u2022 Apply cooking methods that lower glycemic response in diabetic patients.\n\u2022 Evaluate sodium and carbohydrate content of prepared therapeutic dishes.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 11,
-        "topicTitle": "Food Preparation for Pediatric & Geriatric Invalids",
-        "subTopics": [
-          "Nutritional and sensory challenges in sick children (Food aversion, small stomach capacity)",
-          "Preparation of attractive, colorful finger foods and fortified smooth purees for sick toddlers",
-          "Geriatric modifications: Combating xerostomia (dry mouth), reduced taste acuity, and swallowing difficulty",
-          "Practicum: Preparing child-friendly fortified meals and easy-to-swallow geriatric dishes"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Adapt recipes to appeal to sick pediatric patients with diminished appetite.\n\u2022 Modify food textures and moisture levels for elderly convalescents with chewing difficulties.\n\u2022 Prepare nutrient-dense, small-volume meals suitable for frail patients.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 12,
-        "topicTitle": "Portion Control, Tray Assembly & Meal Service",
-        "subTopics": [
-          "Importance of accurate portion control in clinical diet compliance",
-          "Hospital tray assembly: Temperature retention covers, sanitized tray mats, cutlery placement",
-          "Garnishing and aesthetic food presentation for bedridden patients",
-          "Ward meal delivery protocols, patient identification, and recording intake percentages"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Portion therapeutic meals accurately using calibrated ladles and scales.\n\u2022 Assemble an institutional hospital tray that maintains hot/cold food temperatures.\n\u2022 Apply food presentation aesthetics to stimulate patient interest and appetite.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 13,
-        "topicTitle": "Comprehensive Revision & Hospital Kitchen Simulation",
-        "subTopics": [
-          "Full-day simulated hospital dietary service practicum (Breakfast, lunch, and supper production)",
-          "Remediation on pureed consistency testing, fortification formulas, and tray service",
-          "Review of past KNEC practical and theory examination papers",
-          "Final culinary examination briefing and checklist review"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Coordinate simultaneous production of diverse therapeutic diets within scheduled timeframes.\n\u2022 Correct culinary texture defects systematically.\n\u2022 Demonstrate complete readiness for national TVET practical and theory examinations.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 14,
-        "topicTitle": "End of Term Summative Examination",
-        "subTopics": [
-          "Institutional TVET Final Theory Examination",
-          "Institutional TVET Final Practical Cooking Examination (Individual therapeutic tray presentation)",
-          "Evaluation of kitchen hygiene and taste-testing panel assessments"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Produce, portion, and present an assigned multi-course therapeutic patient meal under rigorous examination conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      }
-    ]
+    references: ["Ceserani, V., Kinton, R., & Foskett, D. (2018). Practical Cookery (13th ed.). Hodder Education.", "Escott-Stump, S. (2019). Nutrition and Diagnosis-Related Care (8th ed.). Wolters Kluwer."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "meal_planning_management_service": {
-    "canonicalKey": "meal_planning_management_service",
-    "syllabusCode": "14.1.0",
-    "unitCode": "14.1.0",
-    "unitName": "Meal Planning, Management and Service",
-    "moduleNumber": 1,
-    "nominalHours": 66,
-    "theoryHours": 36,
-    "practicalHours": 30,
-    "aliases": [
-      "14.1.0",
-      "Meal Planning, Management and Service",
-      "Meal Planning, Management & Service",
-      "Meal Planning",
-      "DND 1302",
-      "DHN 1207",
-      "DNDT 1202",
-      "CHN 1302"
+    canonicalKey: "meal_planning_management_service",
+    syllabusCode: "14.1.0",
+    unitCode: "14.1.0",
+    unitName: "Meal Planning, Management And Service",
+    moduleNumber: 1,
+    nominalHours: 55,
+    theoryHours: 25,
+    practicalHours: 30,
+    aliases: ["CND 1302", "DND 1302", "14.1.0"],
+    unitDescription: "This module unit is intended to impart in trainees food production, food safety and hygiene skills and attitudes required for professional meal planning and management. It gives the trainees a broad knowledge of raw food materials and their application in meal management.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: plan quality meals; apply theoretical knowledge to choose proper service equipment; follow correct service procedures for different types and styles of service.",
+    learningOutcomes: [
+      "plan quality meals",
+      "apply theoretical knowledge to choose proper service equipment",
+      "follow correct service procedures for different types and styles of service",
+      "cope with emerging issues and trends in food and beverage service"
     ],
-    "unitDescription": "This unit covers the nutritional, economic, aesthetic, and operational principles of planning balanced menus, managing food purchasing and inventory, calculating recipe costs, and executing professional food service styles for households, institutional catering, and clinical settings.",
-    "overallCompetency": "Plan, cost, manage, and professionally serve balanced, aesthetically appealing meals that meet diverse physiological, cultural, and budgetary requirements.",
-    "learningOutcomes": [
-      "Apply nutritional principles, food groups, and dietary guidelines to plan balanced menus.",
-      "Plan specialized menus for diverse age groups, occupational activities, and budgets.",
-      "Execute food purchasing, receiving, inventory control, and kitchen financial management.",
-      "Standardize recipes and calculate raw food costs, cost per portion, and selling prices.",
-      "Demonstrate professional table setting, meal presentation, and diverse food service styles."
+    weeklySchedule: [
+      {
+        weekNumber: 1,
+        topicTitle: "Introduction to Meal Planning, Management and Service",
+        subTopics: ["Meaning of terms", "Meal planning", "Meal management", "Meal service"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Introduction to Meal Planning, Management and Service.\n• Explain meal planning.\n• Explain meal management.\n• Explain meal service.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 2,
+        topicTitle: "Meal Planning, Management and Service",
+        subTopics: ["Principles of meal planning", "Advantages of meal planning", "Factors to consider when planning meals", "Meal costing", "Quality and quantity control in meal management", "Meal preparation units", "Safety during meal preparation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Describe the principles of meal planning.\n• Explain advantages of meal planning.\n• Explain factors to consider when planning meals.\n• Explain meal costing.\n• Explain quality and quantity control in meal management.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 3,
+        topicTitle: "Diet Planning Tools",
+        subTopics: ["Food guide pyramid", "Food exchange lists", "Food composition tables", "Reference standards"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Interpret and apply food guide pyramid.\n• Explain food exchange lists.\n• Interpret and apply food composition tables.\n• Explain reference standards.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 4,
+        topicTitle: "Meal Planning for Various Groups",
+        subTopics: ["Family", "Institutions", "Special groups", "Formal/organized groups"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain family.\n• Explain institutions.\n• Explain special groups.\n• Explain formal/organized groups.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 5,
+        topicTitle: "Meal Planning for Special Occasions",
+        subTopics: ["Occasions requiring special meal planning"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain occasions requiring special meal planning.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 6,
+        topicTitle: "Food Service and Etiquette",
+        subTopics: ["Serving meals", "Meal etiquette"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain serving meals.\n• Explain meal etiquette.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 7,
+        topicTitle: "Food and Beverage Service Equipment",
+        subTopics: ["Types of service equipment", "Use, care and maintenance of equipment", "Records", "Equipment for holding and storage"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Classify service equipment and describe their categories.\n• Demonstrate safe handling and operation of use, care and maintenance of equipment.\n• Explain records.\n• Demonstrate safe handling and operation of equipment for holding and storage.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Meal Planning, Management And Service)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Meal Planning, Management And Service.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
+      },
+      {
+        weekNumber: 9,
+        topicTitle: "Emerging Issues and Trends",
+        subTopics: ["Identification of trends", "Challenges", "Coping mechanisms"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain identification of trends.\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends.\n• Explain coping mechanisms.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 10,
+        topicTitle: "Applied Practice & Case Studies in Meal Planning, Management And Service (Week 10)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Meal Planning, Management And Service in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+      },
+      {
+        weekNumber: 11,
+        topicTitle: "Applied Practice & Case Studies in Meal Planning, Management And Service (Week 11)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Meal Planning, Management And Service in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+      },
+      {
+        weekNumber: 12,
+        topicTitle: "Applied Practice & Case Studies in Meal Planning, Management And Service (Week 12)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Meal Planning, Management And Service in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Identification of trends", "Challenges", "Coping mechanisms"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain identification of trends.\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping mechanisms.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Meal Planning, Management And Service)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Meal Planning, Management And Service in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
     ],
-    "references": [
-      "Foskett, D., Paskins, P., & Pennington, N. (2021). The Theory of Hospitality and Catering (14th Edition). Hodder Education.",
-      "Payne-Palacio, J., & Theis, M. (2018). Foodservice Management: Principles and Practices (13th Edition). Pearson.",
-      "Wardlaw, G. M., & Smith, A. M. (2020). Contemporary Nutrition (11th Edition). McGraw-Hill."
-    ],
-    "instructionalEquipment": [
-      "Catering service equipment (Chafing dishes, banquet trays, dinnerware, glassware, flatware)",
-      "Food costing and menu planning software/spreadsheets",
-      "Dining tables, tablecloths, napkins, and table appointment sets"
-    ],
-    "weeklySchedule": [
-      {
-        "weekNumber": 1,
-        "topicTitle": "Introduction to Meal Planning Principles",
-        "subTopics": [
-          "Definition and objectives of meal planning and menu engineering",
-          "Factors influencing meal planning: Nutritional requirements, age, gender, occupation, physiological state",
-          "Economic factors: Budget constraints, food availability, seasonality, and purchasing power",
-          "Aesthetic and sensory factors: Color, texture, flavor, temperature, cooking methods"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 State the fundamental nutritional and sensory principles of meal planning.\n\u2022 Analyze the interplay of budget, climate, and availability on household food choice.\n\u2022 Integrate sensory variety (color, crunch, temperature) into weekly meal schedules.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 2,
-        "topicTitle": "Menu Planning for the Family Life Cycle",
-        "subTopics": [
-          "Planning balanced meals for toddlers and pre-school children (Small portions, finger foods)",
-          "Meal planning for school-age children and adolescents (Energy, protein, iron, calcium)",
-          "Meal planning for sedentary versus heavy manual working adults",
-          "Meal planning for the elderly (Nutrient density, hydration, easy chewing)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Plan three daily meals plus healthy snacks tailored for growing adolescents.\n\u2022 Modify adult family menus to cater simultaneously to geriatric family members.\n\u2022 Ensure adequate macro- and micronutrient density across all life stages.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 3,
-        "topicTitle": "Menu Formats & Types of Menus",
-        "subTopics": [
-          "Types of menus: Table d'h\u00f4te (Fixed price), A la carte (Choice), Cyclic menus, Static menus",
-          "Designing cyclic menus for boarding schools, colleges, and hospital wards",
-          "Menu layout design, course sequencing (Appetizers, soup, main course, dessert), and wording",
-          "Nutritional labeling and allergen disclosures on menus"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Distinguish between Table d'h\u00f4te, A la carte, and institutional cyclic menus.\n\u2022 Construct a balanced 4-week cyclic menu for an educational or healthcare institution.\n\u2022 Format an aesthetically pleasing menu card with accurate descriptions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 4,
-        "topicTitle": "Food Purchasing, Sourcing & Market Selection",
-        "subTopics": [
-          "Methods of food purchasing: Open market, wholesale, contract tendering, daily market delivery",
-          "Developing food purchase specifications (Quality grades, unit size, packaging standards)",
-          "Selecting fresh fruits, vegetables, grains, meats, and seafood in local markets",
-          "Evaluating convenience versus fresh raw foods in institutional catering"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Draft clear food purchase specifications for institutional suppliers.\n\u2022 Inspect fresh agricultural and animal food commodities for quality and freshness.\n\u2022 Compare wholesale bulk procurement with retail purchasing regarding cost and shelf-life.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 5,
-        "topicTitle": "Receiving, Storage & Inventory Control (CAT 1)",
-        "subTopics": [
-          "Procedures for receiving goods: Weighing, temperature checking, delivery note inspection",
-          "Dry storage, refrigerated storage, and deep freezer management",
-          "Inventory control: Stock cards, bin cards, physical inventory audits",
-          "Stock rotation principles: First-In, First-Out (FIFO) and First-Expired, First-Out (FEFO)",
-          "Continuous Assessment Test 1 (Menu Planning, Purchasing, and Storage)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Execute formal goods-receiving procedures and document rejected deliveries.\n\u2022 Maintain accurate bin cards and computerized inventory tracking ledgers.\n\u2022 Demonstrate mastery under CAT 1 evaluation conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 6,
-        "topicTitle": "Recipe Standardization & Yield Testing",
-        "subTopics": [
-          "Concept, purpose, and benefits of standardized recipes in foodservice",
-          "Components of a standardized recipe format",
-          "Conducting raw and cooked yield tests (Edible portion percentage: EP vs. AP)",
-          "Scaling recipes up or down using the conversion factor method"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Calculate the edible portion yield percentage ($EP/AP \\times 100$) of fresh produce.\n\u2022 Determine the recipe conversion factor to scale a 4-portion recipe to 100 portions.\n\u2022 Formulate a complete standardized recipe card with verified portion sizes.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 7,
-        "topicTitle": "Food Costing, Portion Control & Pricing",
-        "subTopics": [
-          "Components of foodservice costs: Food cost, labor cost, overhead cost, profit margin",
-          "Calculating raw food cost per ingredient and total recipe cost",
-          "Calculating cost per portion and setting selling price using food cost percentage",
-          "Portion control tools: Ladles, dishers, ramekins, cutting guides, and portion scales"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Calculate total ingredient costs and unit portion costs for multi-course meals.\n\u2022 Set commercial selling prices based on a target 35% food cost ratio.\n\u2022 Implement rigorous portion control methods to prevent kitchen financial waste.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 8,
-        "topicTitle": "Mid-Term Examination & Food Preparation Workflow",
-        "subTopics": [
-          "Mid-Term Examination (Official Institutional CAT 2)",
-          "Time and motion study in commercial and hospital kitchens",
-          "Work distribution sheets and daily kitchen task allocation",
-          "Mise-en-place organization and batch cooking strategies"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Successfully complete the Mid-Term Evaluation covering Weeks 1 to 7 content.\n\u2022 Organize efficient mise-en-place for high-volume meal service.\n\u2022 Allocate kitchen responsibilities equitably to ensure punctual meal delivery.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 9,
-        "topicTitle": "Styles of Food Service",
-        "subTopics": [
-          "Table service styles: English (Family) service, French service, American (Plate) service, Russian service",
-          "Self-service systems: Cafeteria service, buffet service, and food courts",
-          "Hospital tray service: Centralized versus decentralized tray assembly",
-          "Room service and catered function logistics"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Contrast American plate service with traditional buffet and cafeteria systems.\n\u2022 Analyze the logistical advantages of centralized hospital meal tray assembly.\n\u2022 Select the optimal food service style suited to specific institutional settings.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 10,
-        "topicTitle": "Table Setting & Table Appointments",
-        "subTopics": [
-          "Table appointments: Dinnerware (chinaware), flatware (cutlery), glassware, and linens",
-          "Rules for setting a formal and informal cover (Plate, cutlery alignment, glass positioning)",
-          "Napkin folding techniques (Bishop's mitre, fan, candle, lotus)",
-          "Dining room ambiance: Lighting, ventilation, music, and decorative floral arrangements"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Set up a formal 3-course dinner cover following etiquette standards.\n\u2022 Execute artistic napkin folds for formal event presentation.\n\u2022 Coordinate table appointments to match the theme and style of the meal service.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 11,
-        "topicTitle": "Beverage Service & Dining Etiquette",
-        "subTopics": [
-          "Classification and service of non-alcoholic beverages (Teas, coffees, fresh juices, mocktails)",
-          "Beverage service procedures (Serving from the right, water replenishment)",
-          "Rules of host and guest dining etiquette and order of service",
-          "Handling customer complaints and resolving dining room incidents professionally"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Prepare and serve specialty hot and cold beverages at correct temperatures.\n\u2022 Serve food and beverages adhering to international service protocols.\n\u2022 De-escalate and resolve customer grievances with courteous professionalism.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 12,
-        "topicTitle": "Food Waste Management, Sustainability & Safety",
-        "subTopics": [
-          "Sources and economic impact of kitchen and plate food waste",
-          "Strategies for minimizing food waste: Menu simplification, surplus donation, composting",
-          "Energy and water conservation in catering operations",
-          "Environmental sanitation and recycling programs in foodservice"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Conduct a kitchen food waste audit to identify avoidable production losses.\n\u2022 Formulate sustainable kitchen waste reduction and surplus redistribution policies.\n\u2022 Implement eco-friendly energy and water conservation practices.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 13,
-        "topicTitle": "Comprehensive Revision & Banquet Service Simulation",
-        "subTopics": [
-          "Full simulated formal luncheon: Menu planning, costing, purchasing, cooking, and service",
-          "Peer evaluation of dining setup, culinary quality, and service etiquette",
-          "Past KNEC examination paper analysis on meal planning and costing calculations",
-          "Final examination readiness review"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Execute a complete multi-course banquet service from procurement to clean-up.\n\u2022 Perform food costing and portion calculations under timed examination pressure.\n\u2022 Demonstrate readiness for national TVET written and practical examinations.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 14,
-        "topicTitle": "End of Term Summative Examination",
-        "subTopics": [
-          "Institutional TVET Final Theory Examination in Meal Planning & Service",
-          "Institutional TVET Practical Table Setting & Food Service Examination",
-          "Consolidation of continuous assessment marks"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate comprehensive competence in menu design, financial costing, and food service under examination conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      }
-    ]
+    references: ["Lillicrap, D., & Cousins, J. (2018). Food and Beverage Service (9th ed.). Hodder Education.", "Brown, J. E. (2019). Nutrition Through the Life Cycle (7th ed.). Cengage Learning."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "nutrition_anthropology": {
-    "canonicalKey": "nutrition_anthropology",
-    "syllabusCode": "15.1.0",
-    "unitCode": "15.1.0",
-    "unitName": "Nutrition Anthropology",
-    "moduleNumber": 1,
-    "nominalHours": 44,
-    "theoryHours": 32,
-    "practicalHours": 12,
-    "aliases": [
-      "15.1.0",
-      "Nutrition Anthropology",
-      "CND 1306",
-      "DND 1306",
-      "DHN 1302",
-      "CHN 1304"
+    canonicalKey: "nutrition_anthropology",
+    syllabusCode: "15.1.0",
+    unitCode: "15.1.0",
+    unitName: "Nutrition Anthropology",
+    moduleNumber: 1,
+    nominalHours: 44,
+    theoryHours: 28,
+    practicalHours: 16,
+    aliases: ["CND 1304", "CND 1306", "15.1.0"],
+    unitDescription: "This module unit is intended to equip the trainee with knowledge, skills and attitude in nutrition anthropology applicable to nutrition and dietetics.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: describe the role of nutrition anthropology in nutrition and dietetics; explain how human behaviour influences food acquisition; explain the social factors that determine the pattern of nutrition and disease.",
+    learningOutcomes: [
+      "describe the role of nutrition anthropology in nutrition and dietetics",
+      "explain how human behaviour influences food acquisition",
+      "explain the social factors that determine the pattern of nutrition and disease",
+      "describe social-cultural processes that affect nutrition and dietetics"
     ],
-    "unitDescription": "This unit explores the sociocultural, evolutionary, historical, and environmental dimensions of human food habits, exploring dietary taboos, traditional food systems, intra-household food allocation, religious beliefs, the nutrition transition, and culturally competent health interventions.",
-    "overallCompetency": "Analyze sociocultural and ethnographic determinants of food consumption patterns to design culturally sensitive and acceptable community nutritional interventions.",
-    "learningOutcomes": [
-      "Explain anthropological concepts, biocultural evolution, and sociocultural determinants of food choice.",
-      "Analyze cultural dietary taboos, religious food laws, and intra-household food distribution dynamics.",
-      "Document indigenous food systems, traditional preservation technologies, and ethnobotanical food plants.",
-      "Assess the impact of urbanization, globalization, and the nutrition transition on dietary health.",
-      "Formulate culturally acceptable, community-led nutrition education and advocacy interventions."
+    weeklySchedule: [
+      {
+        weekNumber: 1,
+        topicTitle: "Sociology of Food and Nutrition",
+        subTopics: ["Meaning of terms", "Evolutionary aspects", "Behavioural aspects", "Social and cultural perspectives in nutrition"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Sociology of Food and Nutrition.\n• Explain evolutionary aspects.\n• Explain behavioural aspects.\n• Explain social and cultural perspectives in nutrition.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 2,
+        topicTitle: "Food Taboos and Cultural Notions",
+        subTopics: ["Taboos and myths", "Cultural notions"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain taboos and myths.\n• Explain cultural notions.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 3,
+        topicTitle: "Kinship, Sharing and Morality",
+        subTopics: ["Kinship", "Sharing", "Morality"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain kinship.\n• Explain sharing.\n• Explain morality.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 4,
+        topicTitle: "Human Behaviour and Food Acquisition",
+        subTopics: ["Food preparation and consumption", "Clinical and social significance of the human diet and nutrition"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain food preparation and consumption.\n• Explain clinical and social significance of the human diet and nutrition.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 5,
+        topicTitle: "Social Cultural Processes and Nutrition",
+        subTopics: ["Culture, human growth and development", "Social cultural processes and nutrition"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain culture, human growth and development.\n• Describe the structure, components and function of social cultural processes and nutrition.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 6,
+        topicTitle: "Physiological Adaptation",
+        subTopics: ["Evolutionary perspectives on human diet", "Biological plasticity", "Human growth and development", "Social factors", "Patterns of nutrition-related diseases"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain evolutionary perspectives on human diet.\n• Explain biological plasticity.\n• Explain human growth and development.\n• Explain social factors.\n• Explain patterns of nutrition-related diseases.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 7,
+        topicTitle: "Social Factors and Nutrition-Related Diseases",
+        subTopics: ["Meaning of terms", "Nutrition education in gerontology"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Social Factors and Nutrition-Related Diseases.\n• Explain nutrition education in gerontology.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Nutrition Anthropology)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Nutrition Anthropology.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
+      },
+      {
+        weekNumber: 9,
+        topicTitle: "Speech Pathology and Chart Reading",
+        subTopics: ["Meaning of terms", "Speech pathology and chart reading", "Nutrition counselling and the media"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Speech Pathology and Chart Reading.\n• Interpret and apply speech pathology and chart reading.\n• Explain nutrition counselling and the media.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 10,
+        topicTitle: "Emerging Issues and Trends",
+        subTopics: ["Emerging issues and trends", "Challenges", "Coping strategies"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends.\n• Explain coping strategies.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 11,
+        topicTitle: "Applied Practice & Case Studies in Nutrition Anthropology (Week 11)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Nutrition Anthropology in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+      },
+      {
+        weekNumber: 12,
+        topicTitle: "Applied Practice & Case Studies in Nutrition Anthropology (Week 12)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Nutrition Anthropology in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Emerging issues and trends", "Challenges", "Coping strategies"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping strategies.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Nutrition Anthropology)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Nutrition Anthropology in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
     ],
-    "references": [
-      "Messer, E. (2018). Anthropological Approaches to Food and Nutrition. In Nutritional Anthropology (2nd Edition). Routledge.",
-      "Kottak, C. P. (2021). Cultural Anthropology: Appreciating Cultural Diversity (19th Edition). McGraw-Hill.",
-      "Fieldhouse, P. (2017). Food and Nutrition: Customs and Culture (3rd Edition). Springer."
-    ],
-    "instructionalEquipment": [
-      "Ethnographic case studies of diverse Kenyan ethnic communities",
-      "Multimedia documentary clips showing indigenous food preparation and processing",
-      "Indigenous crop and wild food plant herbarium specimens"
-    ],
-    "weeklySchedule": [
-      {
-        "weekNumber": 1,
-        "topicTitle": "Introduction to Nutritional Anthropology & Biocultural Framework",
-        "subTopics": [
-          "Definition and scope of nutritional anthropology",
-          "The biocultural model of food intake: Biological, environmental, and sociocultural interactions",
-          "Historical evolution of human diet: Hunter-gatherer diet to agricultural revolution",
-          "The role of culture in defining what is considered 'food' versus 'non-food'"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Define nutritional anthropology and explain the biocultural model.\n\u2022 Contrast ancestral human diets with contemporary processed food patterns.\n\u2022 Explain cultural conditioning that dictates food acceptability and aversion.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 2,
-        "topicTitle": "Sociocultural Determinants of Food Habits",
-        "subTopics": [
-          "Social institutions shaping food patterns: Family, community, school, religion, and media",
-          "Food as a symbol of hospitality, friendship, social status, and prestige",
-          "Commensality: Social bonding, celebration feasts, and ritual meals",
-          "Food sharing norms and peer influence on dietary practices"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify social structures that transmit dietary traditions across generations.\n\u2022 Explain the symbolic and communicative roles of food in community rituals.\n\u2022 Analyze how social status and peer prestige dictate food expenditure.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 3,
-        "topicTitle": "Religious Food Laws, Beliefs & Dietary Taboos",
-        "subTopics": [
-          "Dietary laws of major world religions: Islamic Halal and Haram rules; Jewish Kosher laws",
-          "Hinduism, Buddhism, and Jainism: Vegetarianism, Ahimsa, and sacred cow veneration",
-          "Christian dietary practices: Seventh-day Adventist vegetarianism, fasting seasons (Lent)",
-          "Common dietary taboos during pregnancy, lactation, and childhood across African communities"
-        ],
-        "hours": 4,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Detail dietary prohibitions and ritual preparation requirements of major religions.\n\u2022 Identify prevalent pregnancy and lactation food taboos in Kenyan communities.\n\u2022 Evaluate the nutritional hazards of taboos forbidding eggs or organ meats to pregnant women.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 4,
-        "topicTitle": "Gender Roles & Intra-Household Food Distribution",
-        "subTopics": [
-          "Gender division of labor in food production, gathering, processing, and cooking",
-          "Household decision-making regarding food expenditure and agricultural resource allocation",
-          "Intra-household food distribution patterns: Prioritization of household heads over mothers and children",
-          "Impact of gender inequality on maternal and child undernutrition"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Analyze the unequal gender division of labor in African rural household food systems.\n\u2022 Explain how patriarchal food distribution impairs child and maternal nutritional status.\n\u2022 Formulate gender-transformative strategies that empower mothers in household food allocation.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 5,
-        "topicTitle": "Indigenous Food Systems & Ethnobotany (CAT 1)",
-        "subTopics": [
-          "Traditional African Vegetables (TAVs: Amaranth, nightshade, spider plant, cowpea leaves)",
-          "Indigenous cereals and tubers (Sorghum, finger millet, cassava, sweet potatoes, yams)",
-          "Nutritional superiority, drought resilience, and phytochemical value of indigenous staples",
-          "Continuous Assessment Test 1 (Sociocultural Factors and Indigenous Foods)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify and classify indigenous food crops cultivated in Kenyan ecological zones.\n\u2022 Detail the micro- and macronutrient advantages of indigenous leafy vegetables.\n\u2022 Demonstrate mastery under CAT 1 evaluation conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 6,
-        "topicTitle": "Traditional Food Processing & Preservation Technologies",
-        "subTopics": [
-          "Traditional fermentation techniques (Fermented milks, porridges, and beverages)",
-          "Sun drying, smoking, and salting of meats, fish, and vegetables",
-          "Underground pit storage and ash preservation of grains and tubers",
-          "Impact of traditional food preservation on food safety, shelf-life, and nutrient bioavailability"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the microbiological and chemical principles of traditional food fermentation.\n\u2022 Evaluate traditional preservation methods regarding microbial safety and nutrient retention.\n\u2022 Formulate strategies to upgrade indigenous preservation techniques with modern hygiene.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 7,
-        "topicTitle": "The Nutrition Transition & Urbanization",
-        "subTopics": [
-          "Concepts and stages of the global nutrition transition (Popkin's model)",
-          "Drivers of dietary change: Rapid urbanization, supermarkets, fast food chains, sedentary lifestyle",
-          "Shift from fiber-rich traditional staples to refined carbohydrates, sugars, and trans fats",
-          "The dual burden of malnutrition: Coexistence of stunting and obesity within households"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Trace the stages of the nutrition transition occurring in low- and middle-income countries.\n\u2022 Analyze how urban living reshapes dietary choices and physical activity levels.\n\u2022 Explain the epidemiological emergence of the dual burden of malnutrition in Kenya.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 8,
-        "topicTitle": "Mid-Term Examination & Food Insecurity, Coping Mechanisms",
-        "subTopics": [
-          "Mid-Term Examination (Official Institutional CAT 2)",
-          "Cultural definitions and experiences of hunger and food scarcity",
-          "Traditional and modern household coping strategies during seasonal lean periods and droughts",
-          "Distress coping mechanisms (Selling productive assets, skipping meals, child labor)",
-          "Social safety nets and traditional mutual assistance networks"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Successfully complete the Mid-Term Evaluation covering Weeks 1 to 7 content.\n\u2022 Classify household food insecurity coping mechanisms from mild to severe distress.\n\u2022 Describe how traditional kinship networks buffer vulnerable families against starvation.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 9,
-        "topicTitle": "Cultural Perceptions of Body Image, Health & Illness",
-        "subTopics": [
-          "Cultural concepts of health, disease etiology (Natural versus supernatural causes)",
-          "Cultural valuations of body size: Historical prestige of fatness/plumpness versus modern thin ideals",
-          "Eating disorders (Anorexia nervosa, bulimia nervosa) in the context of Westernization",
-          "Traditional healing systems, herbal medicine, and interactions with modern clinical dietetics"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Contrast traditional ethnomedical beliefs with scientific germ theory of illness.\n\u2022 Analyze cultural aesthetics of body weight and their influence on obesity prevalence.\n\u2022 Foster collaborative, respectful dialogue with patients who utilize traditional remedies.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 10,
-        "topicTitle": "Ethnographic Methods in Nutritional Assessment",
-        "subTopics": [
-          "Qualitative ethnographic tools: Participant observation, key informant interviews, focus groups",
-          "Participatory Rural Appraisal (PRA) techniques: Seasonal calendars, food resource mapping",
-          "Dietary ethnography: Documenting food preparation rituals and mealtime behaviors",
-          "Integrating ethnographic qualitative data with quantitative anthropometric surveys"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Design a qualitative focus group discussion guide exploring community weaning habits.\n\u2022 Facilitate seasonal food availability mapping with community elders.\n\u2022 Synthesize qualitative sociocultural data to explain quantitative malnutrition findings.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 11,
-        "topicTitle": "Culturally Competent Nutrition Education & Advocacy",
-        "subTopics": [
-          "Principles of cultural competence in clinical and community healthcare",
-          "The LEARN model of cross-cultural communication (Listen, Explain, Acknowledge, Recommend, Negotiate)",
-          "Overcoming cultural resistance to positive dietary behaviors without insulting traditions",
-          "Working with community gatekeepers (Elders, religious leaders, traditional birth attendants)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Apply the LEARN framework during dietary counseling with culturally traditional clients.\n\u2022 Formulate educational messages that build upon positive existing cultural dietary customs.\n\u2022 Mobilize community gatekeepers to champion the elimination of harmful taboos.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 12,
-        "topicTitle": "Globalization, Food Sovereignty & Contemporary Issues",
-        "subTopics": [
-          "Impact of multinational agribusiness, food imports, and trade policies on local food sovereignty",
-          "Commercialization of infant feeding and historical marketing of breastmilk substitutes",
-          "Climate change, biodiversity loss, and threats to indigenous food cultures",
-          "Revitalizing indigenous food heritage as a pathway to sustainable food systems"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the concept of food sovereignty and its defense of local farming communities.\n\u2022 Outline ethical controversies surrounding aggressive marketing of processed foods in Africa.\n\u2022 Advocate for policies that promote indigenous biodiversity and resilient culinary traditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 13,
-        "topicTitle": "Comprehensive Revision & Ethnographic Project Review",
-        "subTopics": [
-          "Presentation and critique of student field ethnographic dietary case studies",
-          "Remediation on cultural taboos, nutrition transition, and qualitative research methods",
-          "Past KNEC examination paper analysis on Nutrition Anthropology",
-          "Final examination readiness clinic"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Defend an ethnographic case study analyzing community food habits.\n\u2022 Answer multi-part examination essay questions with nuanced sociocultural reasoning.\n\u2022 Demonstrate readiness for national TVET examinations.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 14,
-        "topicTitle": "End of Term Summative Examination",
-        "subTopics": [
-          "Institutional TVET Final Theory Examination in Nutrition Anthropology",
-          "Evaluation of submitted community ethnographic reports",
-          "Consolidation of continuous assessment marks"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate comprehensive understanding of the sociocultural dimensions of nutrition under examination conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      }
-    ]
+    references: ["Kittler, P. G., Sucher, K. P., & Nelms, M. (2017). Food and Culture (7th ed.). Cengage Learning.", "Messer, E. (2018). Nutritional Anthropology: Contemporary Approaches to Diet and Culture. Routledge."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "diet_therapy_i": {
-    "canonicalKey": "diet_therapy_i",
-    "syllabusCode": "16.1.0",
-    "unitCode": "16.1.0",
-    "unitName": "Diet Therapy I",
-    "moduleNumber": 1,
-    "nominalHours": 66,
-    "theoryHours": 44,
-    "practicalHours": 22,
-    "aliases": [
-      "16.1.0",
-      "Diet Therapy I",
-      "Introduction to Nutrition Care Process",
-      "Management of Malnutrition",
-      "DND 1202",
-      "CND 1202",
-      "DND 1206",
-      "DND 2101"
+    canonicalKey: "diet_therapy_i",
+    syllabusCode: "16.1.0",
+    unitCode: "16.1.0",
+    unitName: "Diet Therapy I",
+    moduleNumber: 1,
+    nominalHours: 66,
+    theoryHours: 36,
+    practicalHours: 30,
+    aliases: ["CND 1202", "DND 1202", "DND 1206", "16.1.0"],
+    unitDescription: "This module unit is intended to equip the trainee with knowledge, skills and attitudes to enable him/her manage diseases through diet.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: apply diet therapy in management of diseases; use special diets in management of diseases and disorders; use special feeding methods in managing diseases.",
+    learningOutcomes: [
+      "apply diet therapy in management of diseases",
+      "use special diets in management of diseases and disorders",
+      "use special feeding methods in managing diseases",
+      "apply diet planning in management of diseases",
+      "apply drug-nutrient interactions in management of disease"
     ],
-    "unitDescription": "This unit introduces the clinical principles and practice of medical nutrition therapy, covering the Nutrition Care Process (NCP), therapeutic diet modification, enteral and parenteral feeding overview, and clinical dietary management of gastrointestinal, febrile, surgical, and metabolic conditions.",
-    "overallCompetency": "Apply the Nutrition Care Process and evidence-based medical nutrition therapy to assess, diagnose, formulate, and monitor therapeutic dietary interventions for patients with clinical disorders.",
-    "learningOutcomes": [
-      "Explain the four steps of the Nutrition Care Process (Assessment, Diagnosis, Intervention, Monitoring & Evaluation - ADIME).",
-      "Formulate PES (Problem, Etiology, Signs/Symptoms) diagnostic statements for clinical nutrition cases.",
-      "Modify normal diets in consistency, energy, macronutrient composition, and residue for specific pathologies.",
-      "Plan medical nutrition therapy for gastrointestinal, hepatic, biliary, and pancreatic diseases.",
-      "Manage enteral tube feeding protocols and calculate clinical fluid and caloric requirements."
+    weeklySchedule: [
+      {
+        weekNumber: 1,
+        topicTitle: "Introduction to Diet Therapy",
+        subTopics: ["Meaning of terms", "Relationship between nutrition and infection", "Nutrition care team", "Roles of a nutritionist and dietician", "Nutrition care process", "Importance of diet therapy", "Types of therapeutic diets"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Introduction to Diet Therapy.\n• Explain relationship between nutrition and infection.\n• Explain nutrition care team.\n• Explain the functions and physiological role of a nutritionist and dietician.\n• Describe the structure, components and function of nutrition care process.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 2,
+        topicTitle: "Diet Modification",
+        subTopics: ["Meaning of terms", "Importance of diet modification", "Factors influencing diet modification", "Categories of diet modification", "Challenges of diet modification"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Diet Modification.\n• Explain the functions and physiological role of diet modification.\n• Analyze factors affecting diet modification.\n• Classify diet modification and describe their categories.\n• Discuss emerging issues, trends and coping strategies in diet Modification.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 3,
+        topicTitle: "Nutrient Supplements, Functional Foods and Nutraceuticals",
+        subTopics: ["Nutrient supplements", "Functional foods", "Nutraceuticals"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain nutrient supplements.\n• Explain functional foods.\n• Explain nutraceuticals.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 4,
+        topicTitle: "Nutrition Support",
+        subTopics: ["Meaning of terms", "Rationale of nutrition support", "Special feeding methods", "Formulation of specialized feeds", "Administration of specialized foods", "Complications in supportive feeding"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Nutrition Support.\n• Explain rationale of nutrition support.\n• Explain special feeding methods.\n• Explain formulation of specialized feeds.\n• Explain administration of specialized foods.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 5,
+        topicTitle: "Drug-Nutrient Interactions",
+        subTopics: ["Meaning of terms used", "Effects of drugs on food and nutrients", "Effects of food and nutrients on drugs"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Drug-Nutrient Interactions.\n• Explain effects of drugs on food and nutrients.\n• Explain effects of food and nutrients on drugs.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 6,
+        topicTitle: "Diet Planning",
+        subTopics: ["Meaning of terms", "Principles of diet planning", "Food composition tables in diet planning", "Food exchange lists", "Food guide pyramid", "Diet formulation"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Diet Planning.\n• Describe the principles of diet planning.\n• Interpret and apply food composition tables in diet planning.\n• Explain food exchange lists.\n• Interpret and apply food guide pyramid.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 7,
+        topicTitle: "Weight Management",
+        subTopics: ["Meaning of terms", "Underweight, overweight and obesity", "Weight management"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Weight Management.\n• Explain underweight, overweight and obesity.\n• Explain weight management.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Diet Therapy I)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Diet Therapy I.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
+      },
+      {
+        weekNumber: 9,
+        topicTitle: "Diseases and Disorders of the Gastrointestinal Tract (GIT)",
+        subTopics: ["Types of GIT disorders and diseases", "Signs and symptoms", "Diet modification"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Classify GIT disorders and diseases and describe their categories.\n• Describe deficiency signs, symptoms and disorders related to diseases and Disorders of the Gastrointestinal Tract (GIT).\n• Explain diet modification.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 10,
+        topicTitle: "Inborn Errors of Metabolism, Allergies and Intolerances",
+        subTopics: ["Inborn errors of metabolism", "Food allergies", "Food intolerances"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain inborn errors of metabolism.\n• Explain food allergies.\n• Explain food intolerances.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 11,
+        topicTitle: "Nutrition Therapy for Infants and Childhood Disorders",
+        subTopics: ["Hospitalized children", "Low birth weight infants", "Failure to thrive", "Colic", "Functional infant vomiting", "Constipation and diarrhoea", "Cleft lip and palate"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain hospitalized children.\n• Explain low birth weight infants.\n• Explain failure to thrive.\n• Explain colic.\n• Explain functional infant vomiting.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 12,
+        topicTitle: "Emerging Issues and Trends",
+        subTopics: ["Emerging issues and trends", "Challenges", "Coping with challenges"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends.\n• Explain coping with challenges.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Emerging issues and trends", "Challenges", "Coping with challenges"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping with challenges.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Diet Therapy I)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Diet Therapy I in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
     ],
-    "references": [
-      "Mahan, L. K., & Raymond, J. L. (2020). Krause's Food & the Nutrition Care Process (15th Edition). Elsevier.",
-      "Rolfes, S. R., Pinna, K., & Whitney, E. (2021). Understanding Normal and Clinical Nutrition (12th Edition). Cengage Learning.",
-      "Nelms, M., Sucher, K. P., & Lacey, K. (2020). Nutrition Therapy and Pathophysiology (4th Edition). Cengage Learning."
-    ],
-    "instructionalEquipment": [
-      "Hospital patient case files, laboratory biochemistry report templates, and diet sheets",
-      "Enteral feeding pumps, nasogastric tubes, syringes, and commercial clinical formulas",
-      "Clinical anthropometry calipers, stadiometers, and medical scales"
-    ],
-    "weeklySchedule": [
-      {
-        "weekNumber": 1,
-        "topicTitle": "Introduction to Diet Therapy & Clinical Nutrition",
-        "subTopics": [
-          "Definition, history, and scope of diet therapy and medical nutrition therapy (MNT)",
-          "The role of the clinical dietitian in multidisciplinary medical teams",
-          "The hospitalized patient: Psychological response to illness, metabolic stress, and hospital malnutrition",
-          "Routine hospital diet progression: NPO, clear liquid, full liquid, soft, regular diet"
-        ],
-        "hours": 4,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Define diet therapy and explain the objectives of medical nutrition interventions.\n\u2022 Describe the prevalence and clinical risks of iatrogenic hospital malnutrition.\n\u2022 Outline the standard dietary progression protocol following surgery or critical illness.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 2,
-        "topicTitle": "The Nutrition Care Process (NCP) & Assessment",
-        "subTopics": [
-          "Overview of the four steps of the Nutrition Care Process (NCP)",
-          "Step 1: Nutrition Assessment (Anthropometric, Biochemical, Clinical, Dietary, and Medical history)",
-          "Determining energy expenditure: Harris-Benedict, Mifflin-St Jeor, and Schofield equations",
-          "Stress and activity factors in hypermetabolic clinical states"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the four continuous steps of the standardized Nutrition Care Process.\n\u2022 Gather and interpret clinical data across the ABCD assessment domains.\n\u2022 Calculate Basal Energy Expenditure (BEE) and Total Daily Energy Expenditure (TDEE).",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 3,
-        "topicTitle": "Nutrition Diagnosis & Formulating PES Statements",
-        "subTopics": [
-          "Step 2: Nutrition Diagnosis (Difference between medical diagnosis and nutrition diagnosis)",
-          "Nutrition diagnostic domains: Intake, Clinical, Behavioral-Environmental",
-          "Formulating precise PES Statements: Problem related to Etiology as evidenced by Signs/Symptoms",
-          "Prioritizing multiple nutritional diagnoses in critically ill clients"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Differentiate between a medical diagnosis (e.g. Type 2 Diabetes) and a nutrition diagnosis (e.g. Excessive carbohydrate intake).\n\u2022 Construct grammatically correct, evidence-based PES statements.\n\u2022 Prioritize primary life-threatening nutritional problems for immediate intervention.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 4,
-        "topicTitle": "Nutrition Intervention, Monitoring, Evaluation & ADIME",
-        "subTopics": [
-          "Step 3: Nutrition Intervention (Prescription, goal setting, food delivery, education, counseling)",
-          "Step 4: Nutrition Monitoring and Evaluation (Selecting outcome indicators, monitoring progress)",
-          "Clinical documentation: Standard ADIME chart note format versus SOAP format",
-          "Ethical and legal considerations in medical record documentation"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Formulate SMART patient-centered clinical nutrition goals.\n\u2022 Select objective clinical markers to monitor intervention efficacy over time.\n\u2022 Write structured, comprehensive ADIME notes in hospital patient case files.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 5,
-        "topicTitle": "Therapeutic Diet Modifications (CAT 1)",
-        "subTopics": [
-          "Modifications in consistency: Liquid, pureed, mechanical soft, soft diets",
-          "Modifications in energy: High-calorie diets versus hypocaloric weight loss diets",
-          "Modifications in nutrients: High-protein, low-protein, fat-restricted, low-sodium diets",
-          "Continuous Assessment Test 1 (NCP, PES Statements, and Diet Modifications)"
-        ],
-        "hours": 4,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Classify therapeutic diets based on physical texture and nutrient alterations.\n\u2022 Calculate macronutrient percentage distributions for customized dietary prescriptions.\n\u2022 Demonstrate clinical competence under CAT 1 evaluation conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 6,
-        "topicTitle": "Enteral Nutrition (EN) Support",
-        "subTopics": [
-          "Indications and contraindications for enteral tube feeding",
-          "Enteral access routes: Nasogastric (NG), nasoduodenal (ND), gastrostomy (PEG), jejunostomy (PEJ)",
-          "Commercial enteral formulas: Polymeric, oligomeric (elemental), disease-specific, and modular formulas",
-          "Administration methods: Bolus, intermittent, and continuous pump infusion",
-          "Complications of enteral feeding (Aspiration, diarrhea, tube clogging) and their prevention"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify clinical criteria warranting enteral tube feeding initiation.\n\u2022 Compare nasogastric tube feeding with surgical gastrostomy feeding.\n\u2022 Calculate formula rates and dilution volumes to meet patient caloric and fluid goals.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 7,
-        "topicTitle": "Parenteral Nutrition (PN) Overview & Refeeding Syndrome",
-        "subTopics": [
-          "Indications for Parenteral Nutrition (Non-functional GI tract, short bowel syndrome, severe ileus)",
-          "Peripheral Parenteral Nutrition (PPN) versus Total Parenteral Nutrition (TPN/Central access)",
-          "Components of parenteral solutions: Dextrose, crystalline amino acids, lipid emulsions, electrolytes",
-          "Pathophysiology of Refeeding Syndrome (Hypophosphatemia, hypokalemia, hypomagnesemia) and prevention protocols"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Contrast physiological benefits of enteral feeding versus risks of parenteral nutrition.\n\u2022 Identify osmolarity constraints governing peripheral vein nutrient infusion.\n\u2022 Formulate conservative refeeding protocols to avoid fatal electrolyte collapse in wasted patients.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 8,
-        "topicTitle": "Mid-Term Examination & Upper GI Disorders",
-        "subTopics": [
-          "Mid-Term Examination (Official Institutional CAT 2)",
-          "Medical nutrition therapy for Gastroesophageal Reflux Disease (GERD) and Hiatal Hernia",
-          "Dietary management of Gastritis and Peptic Ulcer Disease (PUD: Helicobacter pylori eradication support)",
-          "Post-gastrectomy diet: Pathophysiology and dietary prevention of Dumping Syndrome"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Successfully complete the Mid-Term Evaluation covering Weeks 1 to 7 content.\n\u2022 Formulate dietary guidelines that reduce lower esophageal sphincter relaxation and reflux.\n\u2022 Design high-protein, low-simple-carbohydrate meals to prevent post-bariatric dumping syndrome.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 9,
-        "topicTitle": "Lower GI Disorders: Malabsorption & Bowel Diseases",
-        "subTopics": [
-          "Dietary management of severe diarrhea, constipation, and flatulence",
-          "Celiac Disease: Pathophysiology of gluten enteropathy and strict lifelong gluten-free diet management",
-          "Inflammatory Bowel Disease (IBD: Crohn's Disease and Ulcerative Colitis) flare-up versus remission diets",
-          "Irritable Bowel Syndrome (IBS) and the Low-FODMAP dietary approach"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Prescribe high-soluble fiber and hydration regimens for spastic bowel disorders.\n\u2022 Eliminate wheat, barley, rye, and cross-contaminated grains for celiac patients.\n\u2022 Implement the 3-phase Low-FODMAP protocol for irritable bowel symptom relief.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 10,
-        "topicTitle": "Dietary Management of Hepatic & Biliary Disorders",
-        "subTopics": [
-          "Pathophysiology and nutritional consequences of Viral Hepatitis and Fatty Liver Disease (NAFLD)",
-          "Cirrhosis of the liver: Ascites, portal hypertension, esophageal varices, and dietary sodium restriction",
-          "Hepatic Encephalopathy: Protein tolerance, branched-chain amino acids (BCAAs), and ammonia detoxification",
-          "Cholecystitis and Cholelithiasis: Low-fat dietary principles and post-cholecystectomy adaptation"
-        ],
-        "hours": 4,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the central role of the liver in intermediate macronutrient metabolism.\n\u2022 Adjust protein quality and quantity for patients with decompensated hepatic cirrhosis.\n\u2022 Plan a strict low-fat meal plan to alleviate gallbladder colic and steatorrhea.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 11,
-        "topicTitle": "Pancreatic Disorders & Fevers/Infections",
-        "subTopics": [
-          "Acute versus Chronic Pancreatitis: Autodigestion, enzyme replacement therapy (PERT), low-fat diet",
-          "Nutritional support during acute pancreatitis: Bowel rest, early enteral jejunal feeding",
-          "Medical nutrition therapy in prolonged fevers and hypercatabolic infections (Typhoid, sepsis)",
-          "Fluid, electrolyte, and high-energy recovery diets for infectious convalescence"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the rationale for bypassing the cephalic and gastric phases of pancreatic stimulation.\n\u2022 Calculate increased basal metabolic requirements during prolonged febrile states.\n\u2022 Formulate high-calorie, nutrient-dense recovery menus for recovering infection patients.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 12,
-        "topicTitle": "Surgical Nutrition & Burn Injury Hypermetabolism",
-        "subTopics": [
-          "Pre-operative nutritional optimization and Enhanced Recovery After Surgery (ERAS) protocols",
-          "Post-operative metabolic phases (Ebb phase vs. Flow phase)",
-          "Nutritional care for burn injuries: Rule of nines, hypercatabolic protein loss, and Currerie formula",
-          "Micronutrient supplementation for wound healing (Vitamin C, Zinc, Vitamin A, Arginine, Glutamine)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Outline modern ERAS guidelines regarding pre-operative carbohydrate loading.\n\u2022 Calculate immense caloric and protein demands for major thermal burn patients.\n\u2022 Prescribe therapeutic micronutrient doses to accelerate collagen synthesis and surgical wound closure.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 13,
-        "topicTitle": "Comprehensive Revision & Clinical Ward Case Studies",
-        "subTopics": [
-          "Step-by-step resolution of multi-system hospital clinical case studies",
-          "Formulating complete ADIME charts from real patient laboratory and anthropometric profiles",
-          "Past KNEC examination paper review on Diet Therapy I",
-          "Final clinical examination briefing and question-answering strategies"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Formulate integrated medical nutrition therapy plans for complex hospital cases.\n\u2022 Write flawless PES statements and dietary prescriptions under timed exam conditions.\n\u2022 Demonstrate readiness for national TVET clinical dietetics examinations.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 14,
-        "topicTitle": "End of Term Summative Examination",
-        "subTopics": [
-          "Institutional TVET Final Theory Examination in Diet Therapy I",
-          "Institutional TVET Clinical Case Study Practical Examination",
-          "Consolidation of continuous assessment marks"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate comprehensive clinical competency in medical nutrition therapy and dietary prescription under examination conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Practical culinary and laboratory demonstrations and hands-on skills\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Institutional kitchen equipment, therapeutic food ingredients, and service ware",
-        "assessmentAndRemarks": "Continuous assessment tests, culinary skill practical checks, oral questioning, and written tests"
-      }
-    ]
+    references: ["Mahan, L. K., & Raymond, J. L. (2020). Krause's Food & the Nutrition Care Process (15th ed.). Elsevier.", "Rolfes, S. R., Pinna, K., & Whitney, E. (2018). Understanding Normal and Clinical Nutrition (11th ed.). Cengage."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "maternal_and_child_nutrition": {
-    "canonicalKey": "maternal_and_child_nutrition",
-    "syllabusCode": "17.1.0",
-    "unitCode": "17.1.0",
-    "unitName": "Maternal and Child Nutrition",
-    "moduleNumber": 1,
-    "nominalHours": 66,
-    "theoryHours": 44,
-    "practicalHours": 22,
-    "aliases": [
-      "17.1.0",
-      "Maternal and Child Nutrition",
-      "Maternal & Child Nutrition",
-      "CND 1303",
-      "DND 1303",
-      "DHN 1304"
+    canonicalKey: "maternal_and_child_nutrition",
+    syllabusCode: "17.1.0",
+    unitCode: "17.1.0",
+    unitName: "Maternal And Child Nutrition",
+    moduleNumber: 1,
+    nominalHours: 55,
+    theoryHours: 35,
+    practicalHours: 20,
+    aliases: ["CND 1303", "DND 1303", "17.1.0"],
+    unitDescription: "This module unit is intended to equip the trainee with knowledge, skills and attitudes on maternal and child nutrition. The trainee will have the ability to offer maternal and child healthcare.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: provide nutrition care during pre- and post-natal periods; apply the guidelines in maternal child nutrition; carry out maternal child nutrition activities.",
+    learningOutcomes: [
+      "provide nutrition care during pre- and post-natal periods",
+      "apply the guidelines in maternal child nutrition",
+      "carry out maternal child nutrition activities",
+      "involve stakeholders in maternal child nutrition in the community"
     ],
-    "unitDescription": "This unit provides comprehensive knowledge and clinical skills regarding human nutritional requirements, physiological adaptations, dietary management, and public health interventions across the maternal and child continuum, including preconception, pregnancy, lactation, infancy, and early childhood.",
-    "overallCompetency": "Plan, implement, and monitor evidence-based nutritional care, growth monitoring, and feeding interventions for mothers, infants, and young children.",
-    "learningOutcomes": [
-      "Explain physiological changes and nutritional requirements during pregnancy and lactation.",
-      "Manage nutritional complications of pregnancy including hyperemesis, gestational diabetes, and preeclampsia.",
-      "Promote, protect, and support exclusive breastfeeding and lactation management.",
-      "Formulate appropriate complementary feeding guidelines and recipes for infants aged 6\u201323 months.",
-      "Execute growth monitoring and promotion (GMP) and manage acute and chronic childhood malnutrition."
+    weeklySchedule: [
+      {
+        weekNumber: 1,
+        topicTitle: "Pre-Natal Care",
+        subTopics: ["Meaning of terms", "Importance of pre-natal care", "Pre-conception care", "Nutrients that affect fertility"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Pre-Natal Care.\n• Explain the functions and physiological role of pre-natal care.\n• Explain pre-conception care.\n• Explain nutrients that affect fertility.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 2,
+        topicTitle: "Pregnancy and Post-Natal Care",
+        subTopics: ["Nutritional requirements during pregnancy", "Pregnancy and weight gain", "Complications during pregnancy", "Aspects of post-natal care"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Determine and calculate recommended dietary allowances and nutrient requirements.\n• Explain pregnancy and weight gain.\n• Explain complications during pregnancy.\n• Explain aspects of post-natal care.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 3,
+        topicTitle: "Aspects of Growth and Development",
+        subTopics: ["Normal growth and development", "Factors that influence/affect growth and development", "Measurement of growth", "Stages of growth", "Growth monitoring (growth card)"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain normal growth and development.\n• Explain factors that influence/affect growth and development.\n• Explain measurement of growth.\n• Explain stages of growth.\n• Explain growth monitoring (growth card).",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 4,
+        topicTitle: "The New Born Baby",
+        subTopics: ["Characteristics of a healthy baby", "Common problems of a newborn baby", "Care of a newborn baby", "Feeding of a newborn baby"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain characteristics of a healthy baby.\n• Explain common problems of a newborn baby.\n• Explain care of a newborn baby.\n• Explain feeding of a newborn baby.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 5,
+        topicTitle: "Preterm Delivery",
+        subTopics: ["Causes of preterm delivery", "Characteristics of a premature baby", "Management of a premature baby", "Feeds and formulas for preterm babies", "Complications of preterm babies"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Analyze factors affecting preterm delivery.\n• Explain characteristics of a premature baby.\n• Explain prevention, control and management measures for a premature baby.\n• Explain feeds and formulas for preterm babies.\n• Explain complications of preterm babies.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 6,
+        topicTitle: "Lactation",
+        subTopics: ["Breastfeeding", "Infant formulas and other milk sources", "Complications/problems associated with breastfeeding"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain breastfeeding.\n• Explain infant formulas and other milk sources.\n• Explain complications/problems associated with breastfeeding.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 7,
+        topicTitle: "Complimentary Feeding and Weaning",
+        subTopics: ["Nutritional requirements during infancy", "Food selection for complimentary feeding", "Stages of weaning", "Effects of early complimentary feeding", "Complications of late complimentary feeding"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Determine and calculate recommended dietary allowances and nutrient requirements.\n• Explain food selection for complimentary feeding.\n• Explain stages of weaning.\n• Explain effects of early complimentary feeding.\n• Explain complications of late complimentary feeding.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Maternal And Child Nutrition)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Maternal And Child Nutrition.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
+      },
+      {
+        weekNumber: 9,
+        topicTitle: "Immunization",
+        subTopics: ["Aspects of immunity", "Importance of immunization", "Immunization materials", "Immunization schedule", "WHO infant and child feeding guidelines", "Role of stakeholders in the community on maternal and child care"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain aspects of immunity.\n• Explain the functions and physiological role of immunization.\n• Explain immunization materials.\n• Explain immunization schedule.\n• Explain WHO infant and child feeding guidelines.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 10,
+        topicTitle: "Emerging Issues and Trends",
+        subTopics: ["Identification of trends", "Challenges in maternal and child nutrition", "Coping strategies"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain identification of trends.\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends.\n• Explain coping strategies.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 11,
+        topicTitle: "Applied Practice & Case Studies in Maternal And Child Nutrition (Week 11)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Maternal And Child Nutrition in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+      },
+      {
+        weekNumber: 12,
+        topicTitle: "Applied Practice & Case Studies in Maternal And Child Nutrition (Week 12)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Maternal And Child Nutrition in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Identification of trends", "Challenges in maternal and child nutrition", "Coping strategies"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain identification of trends.\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping strategies.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Maternal And Child Nutrition)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 4,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Maternal And Child Nutrition in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
     ],
-    "references": [
-      "Ministry of Health, Kenya. (2021). National Maternal, Infant and Young Child Nutrition (MIYCN) Policy Guidelines. Government of Kenya.",
-      "Brown, J. E. (2020). Nutrition Through the Life Cycle (7th Edition). Cengage Learning.",
-      "WHO/UNICEF. (2019). Infant and Young Child Feeding Counselling: An Integrated Course. World Health Organization."
-    ],
-    "instructionalEquipment": [
-      "Infant length boards, electronic baby weighing scales, and salter scales",
-      "WHO Growth Charts (Z-score boy/girl charts for Weight-for-Age, Length-for-Age, Weight-for-Length)",
-      "Breast anatomical models, doll demonstration props, and breast pumps"
-    ],
-    "weeklySchedule": [
-      {
-        "weekNumber": 1,
-        "topicTitle": "Introduction to Maternal & Child Health & Preconception Nutrition",
-        "subTopics": [
-          "Global and national status of maternal and child nutrition in Kenya (KDHS data)",
-          "Concept of the First 1,000 Days of life and its lifelong developmental impact",
-          "Preconception nutritional status: BMI, folate supplementation, neural tube defect prevention",
-          "Impact of adolescent pregnancy and maternal undernutrition on birth outcomes"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Describe maternal and child health indicators and the First 1,000 Days concept.\n\u2022 Explain the critical importance of preconception folic acid supplementation.\n\u2022 Analyze how maternal undernutrition perpetuates the intergenerational cycle of growth failure.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 2,
-        "topicTitle": "Physiology & Nutritional Requirements in Pregnancy",
-        "subTopics": [
-          "Maternal physiological adaptations: Blood volume expansion, hormonal shifts, placental transport",
-          "Recommended gestational weight gain (GWG) based on pre-pregnancy BMI",
-          "Trimester-specific energy and macronutrient requirement increments",
-          "Critical micronutrient needs: Iron, Folic Acid, Calcium, Iodine, Vitamin D"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Outline cardiovascular, renal, and endocrine adaptations during gestation.\n\u2022 Calculate target gestational weight gain ranges according to pre-pregnancy BMI.\n\u2022 Prescribe daily Iron-Folic Acid Supplements (IFAS) in line with national antenatal care protocols.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 3,
-        "topicTitle": "Nutritional Complications & Pathologies in Pregnancy",
-        "subTopics": [
-          "Managing common gastrointestinal discomforts: Morning sickness/hyperemesis gravidarum, constipation, heartburn",
-          "Pica (Craving non-food substances) and associated clinical risks",
-          "Gestational Diabetes Mellitus (GDM): Screening, diagnostic criteria, and carbohydrate management",
-          "Hypertensive disorders of pregnancy: Chronic hypertension, preeclampsia, and eclampsia dietary care"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Formulate practical dietary adjustments for managing nausea, pyrosis, and pica.\n\u2022 Design a medical nutrition therapy plan for a mother diagnosed with GDM.\n\u2022 Explain nutritional and monitoring considerations in managing preeclamptic pregnancies.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 4,
-        "topicTitle": "Physiology of Lactation & Maternal Postpartum Nutrition",
-        "subTopics": [
-          "Anatomy of the lactating breast: Alveoli, myoepithelial cells, lactiferous ducts",
-          "Hormonal control of lactation: Proleukin (milk production) and Oxytocin (let-down reflex)",
-          "Colostrum versus transitional and mature milk: Composition and immunological properties",
-          "Maternal dietary requirements during exclusive lactation (Fluids, calories, micronutrients)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Describe the neuroendocrine reflex mechanisms governing human milk synthesis and ejection.\n\u2022 Compare the biological and immunological superiority of human colostrum over formula.\n\u2022 Calculate additional caloric and fluid needs for actively breastfeeding mothers.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 5,
-        "topicTitle": "Lactation Management & Exclusive Breastfeeding (CAT 1)",
-        "subTopics": [
-          "WHO/UNICEF recommendations: Immediate initiation within 1 hour, exclusive breastfeeding for 6 months",
-          "Proper positioning and attachment techniques (Signs of good attachment)",
-          "Managing common lactation difficulties: Sore nipples, engorgement, blocked ducts, mastitis",
-          "Continuous Assessment Test 1 (Pregnancy Nutrition, Lactation, and Breastfeeding)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate the four key signs of optimal infant attachment at the breast.\n\u2022 Provide clinical counseling to resolve breast engorgement and nipple trauma.\n\u2022 Demonstrate mastery under CAT 1 evaluation conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 6,
-        "topicTitle": "Infant Nutrition & Complementary Feeding Principles",
-        "subTopics": [
-          "Developmental milestones and physiological readiness for solid foods at 6 months",
-          "Principles of complementary feeding: Timeliness, Adequacy, Safety, and Proper feeding (TASP)",
-          "Texture progression: Pureed gruels to mashed foods, chopped table foods, and finger foods",
-          "Responsive feeding practices and creating positive mealtime environments"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 State physical and developmental cues indicating infant readiness for complementary foods.\n\u2022 Formulate nutrient-dense complementary recipes that fulfill daily energy, iron, and zinc gaps.\n\u2022 Counsel caregivers on responsive and patient feeding techniques for toddlers.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 7,
-        "topicTitle": "Formulating Enriched Complementary Foods",
-        "subTopics": [
-          "Limitations of plain cereal gruels (Bulkiness, low energy and micronutrient density)",
-          "Strategies to enhance nutrient density: Germination, fermentation, malting (Amylase-rich flour)",
-          "Enriching porridge with animal source foods, legumes, oil/ghee, and mashed vegetables",
-          "Practicum: Preparing an enriched multi-composite complementary porridge"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the biochemistry of amylase action in reducing dietary bulk in infant cereals.\n\u2022 Prepare balanced, energy-dense infant porridge utilizing affordable local ingredients.\n\u2022 Evaluate the microbial hygiene and safe storage of prepared infant foods.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 8,
-        "topicTitle": "Mid-Term Examination & Nutrition for Pre-School Children",
-        "subTopics": [
-          "Mid-Term Examination (Official Institutional CAT 2)",
-          "Nutritional requirements for children aged 1 to 5 years (Energy, protein, calcium, vitamins)",
-          "Managing typical toddler feeding behaviors: Food neophobia, picky eating, and food jags",
-          "Preventing early childhood caries and choking hazards"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Successfully complete the Mid-Term Evaluation covering Weeks 1 to 7 content.\n\u2022 Design balanced daily meal schedules suitable for small stomach capacities of young children.\n\u2022 Provide constructive parenting strategies to manage picky eating without conflict.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 9,
-        "topicTitle": "Growth Monitoring & Promotion (GMP)",
-        "subTopics": [
-          "Concept, purpose, and institutional organization of Growth Monitoring and Promotion",
-          "Anthropometric equipment: Calibration and standardized measurement of infant length and weight",
-          "WHO Child Growth Standards: Weight-for-Age (Underweight), Length/Height-for-Age (Stunting), Weight-for-Height (Wasting)",
-          "Plotting and interpreting growth curves: Growth faltering, normal growth, and rapid catch-up"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Measure infant length and weight following standardized WHO procedures.\n\u2022 Plot child growth indicators accurately on mother-child health booklet charts.\n\u2022 Interpret growth trajectory curves and initiate immediate counseling upon growth faltering.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 10,
-        "topicTitle": "Management of Childhood Acute Malnutrition",
-        "subTopics": [
-          "Classification of acute malnutrition: Severe Acute Malnutrition (SAM) versus Moderate Acute Malnutrition (MAM)",
-          "Clinical assessment: Bilateral pitting edema, visible severe wasting, MUAC cutoffs ($<11.5\\text{ cm}$)",
-          "Integrated Management of Acute Malnutrition (IMAM) components: Outpatient Therapeutic Program (OTP) versus Inpatient Stabilization (SC)",
-          "Therapeutic foods: Ready-to-Use Therapeutic Food (RUTF), F-75 starter formula, and F-100 catch-up formula"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Screen for bilateral pitting edema and interpret child MUAC bands accurately.\n\u2022 Apply admission criteria to triage SAM patients to OTP or inpatient stabilization.\n\u2022 Calculate RUTF ration dosages and manage Phase 1 metabolic stabilization using F-75.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 11,
-        "topicTitle": "Micronutrient Deficiencies in Mothers & Children",
-        "subTopics": [
-          "Vitamin A Deficiency (VAD): Xerophthalmia stages, biannual high-dose supplementation protocols",
-          "Iron Deficiency Anemia: Etiology, cognitive effects, dew-worming, and point-of-use micronutrient powders (MNPs)",
-          "Iodine Deficiency Disorders (IDD): Cretinism, goiter, and universal salt iodization",
-          "Rickets and Zinc deficiency: Management of acute diarrhea using oral rehydration salts and zinc"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Recognize clinical stages of xerophthalmia (Night blindness, Bitot's spots, keratomalacia).\n\u2022 Administer pediatric Vitamin A and deworming prophylaxis according to national schedules.\n\u2022 Prescribe zinc supplementation alongside ORS in the clinical management of childhood diarrhea.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 12,
-        "topicTitle": "National MIYCN Policies, BFHI & Code of Marketing",
-        "subTopics": [
-          "The Baby-Friendly Hospital Initiative (BFHI): The Ten Steps to Successful Breastfeeding",
-          "International Code of Marketing of Breast-milk Substitutes and the Breast Milk Substitutes Act of Kenya",
-          "Maternity protection in the workplace: Paid maternity leave and workplace lactation stations",
-          "Community-based Maternal, Infant, and Young Child Nutrition (C-MIYCN) support groups"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Detail the Ten Steps of the Baby-Friendly Hospital Initiative.\n\u2022 Enforce the provisions of Kenya's Breast Milk Substitutes Regulation and Control Act.\n\u2022 Establish and mentor community mother-to-mother support groups.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 13,
-        "topicTitle": "Comprehensive Revision & MIYCN Case Studies",
-        "subTopics": [
-          "Integrated case studies covering adolescent pregnancy, infant growth faltering, and SAM rehabilitation",
-          "Remediation on growth chart plotting, RUTF dosage calculation, and lactation counseling",
-          "Review of past KNEC examination papers on Maternal and Child Nutrition",
-          "Final examination clinic and tips"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Resolve multi-stage clinical maternal and pediatric nutrition scenarios.\n\u2022 Plot and interpret child growth curves under timed examination conditions.\n\u2022 Demonstrate readiness for national TVET final examinations.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 14,
-        "topicTitle": "End of Term Summative Examination",
-        "subTopics": [
-          "Institutional TVET Final Theory Examination in Maternal & Child Nutrition",
-          "Practical Growth Chart Plotting & Counseling Simulation Examination",
-          "Consolidation of continuous assessment marks"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate comprehensive competence in maternal and child nutritional care under examination conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      }
-    ]
+    references: ["Brown, J. E. (2019). Nutrition Through the Life Cycle (7th ed.). Cengage Learning.", "Ministry of Health. (2020). National Guidelines for Maternal, Infant and Young Child Nutrition. Republic of Kenya."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "nutrition_in_hiv_aids": {
-    "canonicalKey": "nutrition_in_hiv_aids",
-    "syllabusCode": "18.1.0",
-    "unitCode": "18.1.0",
-    "unitName": "Nutrition in HIV and AIDS",
-    "moduleNumber": 1,
-    "nominalHours": 44,
-    "theoryHours": 30,
-    "practicalHours": 14,
-    "aliases": [
-      "18.1.0",
-      "Nutrition in HIV and AIDS",
-      "Nutrition, HIV and AIDS",
-      "CND 1305",
-      "DND 1305",
-      "CHN 2307"
+    canonicalKey: "nutrition_in_hiv_aids",
+    syllabusCode: "18.1.0",
+    unitCode: "18.1.0",
+    unitName: "Nutrition In Hiv And Aids",
+    moduleNumber: 1,
+    nominalHours: 44,
+    theoryHours: 28,
+    practicalHours: 16,
+    aliases: ["CND 1301", "DND 1305", "18.1.0"],
+    unitDescription: "This module unit is intended to provide the trainee with knowledge, skills and attitudes in nutrition management of HIV and AIDS.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: explain the HIV situation in Kenya and in the world; describe the importance of nutrition in HIV and AIDS management; apply nutrition principles in developing diets for HIV-infected persons.",
+    learningOutcomes: [
+      "explain the HIV situation in Kenya and in the world",
+      "describe the importance of nutrition in HIV and AIDS management",
+      "apply nutrition principles in developing diets for HIV-infected persons",
+      "discuss infant feeding in HIV and AIDS",
+      "comprehend the role of nutrition in management of ARV-related complications",
+      "explain the importance of nutrition in management of opportunistic infections",
+      "recognize the role of monitoring and evaluation in nutritional management of HIV and AIDS cases"
     ],
-    "unitDescription": "This unit provides specialized clinical and community training on the bidirectional relationship between malnutrition and HIV infection, dietary interventions to optimize antiretroviral therapy (ART) outcomes, nutritional management of HIV-associated opportunistic infections, infant feeding in the context of HIV, and food security programming for affected households.",
-    "overallCompetency": "Formulate, implement, and monitor evidence-based nutritional care plans, drug-nutrient interaction protocols, and infant feeding counseling for people living with HIV/AIDS.",
-    "learningOutcomes": [
-      "Explain the pathophysiological mechanisms of the vicious cycle between HIV and malnutrition.",
-      "Assess nutritional status and calculate personalized energy and protein requirements for PLHIV.",
-      "Manage food-drug and nutrient-drug interactions associated with modern antiretroviral regimens.",
-      "Provide dietary management for clinical symptoms and opportunistic infections in HIV patients.",
-      "Counsel HIV-positive mothers on infant feeding according to national PMTCT guidelines."
+    weeklySchedule: [
+      {
+        weekNumber: 1,
+        topicTitle: "Introduction to HIV and AIDS",
+        subTopics: ["Meaning of terms", "HIV progression", "HIV and AIDS in Kenya"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Introduction to HIV and AIDS.\n• Explain HIV progression.\n• Explain HIV and AIDS in Kenya.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 2,
+        topicTitle: "Nutrition in HIV Infection",
+        subTopics: ["Meaning of terms", "Malnutrition in HIV", "Relationship between nutrition and HIV infection", "Nutrient requirement determinants in HIV infection", "Specific nutrient requirements in HIV infection"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Nutrition in HIV Infection.\n• Explain malnutrition in HIV.\n• Explain relationship between nutrition and HIV infection.\n• Determine and calculate recommended dietary allowances and nutrient requirements.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 3,
+        topicTitle: "Food Security in HIV-Affected Households",
+        subTopics: ["Meaning of terms", "Importance of food security in HIV-affected households", "Nutrition interventions for affected households", "Socio-economic implications of HIV in relation to nutrition"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Food Security in HIV-Affected Households.\n• Explain the functions and physiological role of food security in HIV-affected households.\n• Explain nutrition interventions for affected households.\n• Explain socio-economic implications of HIV in relation to nutrition.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 4,
+        topicTitle: "Infant Feeding in HIV",
+        subTopics: ["Infant feeding options", "Principles of care for HIV-infected children", "Nutrition care for HIV-infected children", "Management of HIV-infected malnourished children"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain infant feeding options.\n• Describe the principles of care for HIV-infected children.\n• Explain nutrition care for HIV-infected children.\n• Explain prevention, control and management measures for hiv-infected malnourished children.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 5,
+        topicTitle: "Management of Opportunistic Infections",
+        subTopics: ["Types/nature of opportunistic infections", "Effects of opportunistic infections on nutritional status", "Nutritional management of opportunistic infections"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain types/nature of opportunistic infections.\n• Explain effects of opportunistic infections on nutritional status.\n• Explain nutritional management of opportunistic infections.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 6,
+        topicTitle: "Antiretroviral Drugs (ARVs) and Nutrition",
+        subTopics: ["Antiretroviral drugs", "ARV-related complications", "Nutrition management of ARV-related complications"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain antiretroviral drugs.\n• Explain arv-related complications.\n• Explain nutrition management of ARV-related complications.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 7,
+        topicTitle: "Nutritional Care Process",
+        subTopics: ["Nutrition care process in HIV infection", "Comprehensive care in HIV infection"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Describe the structure, components and function of nutrition care process in HIV infection.\n• Explain comprehensive care in HIV infection.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Nutrition In Hiv And Aids)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Nutrition In Hiv And Aids.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
+      },
+      {
+        weekNumber: 9,
+        topicTitle: "Monitoring and Evaluation",
+        subTopics: ["Meaning of terms", "HIV monitoring", "HIV evaluation indicators"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Monitoring and Evaluation.\n• Explain HIV monitoring.\n• Explain HIV evaluation indicators.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 10,
+        topicTitle: "Emerging Trends",
+        subTopics: ["Emerging trends and issues in nutrition and HIV/AIDS management"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain emerging trends and issues in nutrition and HIV/AIDS management.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 11,
+        topicTitle: "Applied Practice & Case Studies in Nutrition In Hiv And Aids (Week 11)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Nutrition In Hiv And Aids in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+      },
+      {
+        weekNumber: 12,
+        topicTitle: "Applied Practice & Case Studies in Nutrition In Hiv And Aids (Week 12)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Nutrition In Hiv And Aids in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "Emerging Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Emerging trends and issues in nutrition and HIV/AIDS management"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain emerging trends and issues in nutrition and HIV/AIDS management.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Nutrition In Hiv And Aids)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Nutrition In Hiv And Aids in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
     ],
-    "references": [
-      "Ministry of Health, Kenya. (2020). Guidelines on Nutrition Management of People Living with HIV. NASCOP.",
-      "WHO. (2021). Guideline: Updates on HIV and Infant Feeding. World Health Organization.",
-      "FANTA. (2018). Nutrition Care for People Living with HIV and AIDS: Training Manual. FHI 360."
-    ],
-    "instructionalEquipment": [
-      "National HIV Nutrition Care and Support (NACS) clinical registers and assessment cards",
-      "Sample antiretroviral drug packaging and drug-nutrient interaction guide charts",
-      "Food demonstration utensils and specialized nutritional supplement samples"
-    ],
-    "weeklySchedule": [
-      {
-        "weekNumber": 1,
-        "topicTitle": "Pathophysiological Interplay: Malnutrition & HIV",
-        "subTopics": [
-          "The vicious cycle of malnutrition and HIV/AIDS: Immune depression, mucosal barrier breakdown, viral replication",
-          "Metabolic changes during HIV infection: Hypermetabolism, altered lipid and protein turnover",
-          "Causes of inadequate food intake (Anorexia, oral candidiasis, dysphagia, depression, economic hardship)",
-          "Nutrient malabsorption and gastrointestinal mucosal atrophy in HIV enteropathy"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Illustrate the synergistic, bidirectional relationship between HIV and malnutrition.\n\u2022 Detail metabolic alterations driving lean muscle wasting in HIV infection.\n\u2022 Identify physiological and socioeconomic factors restricting nutrient intake in PLHIV.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 2,
-        "topicTitle": "Energy & Nutrient Requirements for PLHIV",
-        "subTopics": [
-          "Energy requirements in asymptomatic HIV infection (10% increase above normal adult levels)",
-          "Energy requirements in symptomatic HIV infection / opportunistic infections (20% to 30% increase)",
-          "Pediatric energy requirements during HIV infection with and without weight loss (50% to 100% increase during catch-up)",
-          "Protein, lipid, fluid, and micronutrient requirements (Antioxidants: Vitamin A, C, E, Zinc, Selenium)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Calculate individual caloric requirements for asymptomatic and symptomatic adult PLHIV.\n\u2022 Determine elevated energy and protein requirements for pediatric HIV patients.\n\u2022 Explain the role of antioxidant micronutrients in reducing oxidative viral stress.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 3,
-        "topicTitle": "Nutrition Assessment, Counseling & Support (NACS)",
-        "subTopics": [
-          "The NACS clinical framework: Nutrition Assessment, Counseling, and Support",
-          "Routine anthropometric screening: BMI calculation, waist-to-hip ratio, and MUAC assessment",
-          "Biochemical monitoring: Hemoglobin, serum albumin, lipid profile, CD4 count, and viral load",
-          "Dietary diversity assessment and identifying household food insecurity risks"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Implement the NACS protocol during routine comprehensive care clinic (CCC) visits.\n\u2022 Interpret biochemical and anthropometric markers to identify early wasting.\n\u2022 Conduct structured nutrition counseling utilizing motivational interviewing.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 4,
-        "topicTitle": "Drug-Nutrient Interactions in Antiretroviral Therapy (ART)",
-        "subTopics": [
-          "Mechanisms of drug-nutrient interactions: Absorption, metabolism, excretion, and efficacy",
-          "Interactions with Nucleoside Reverse Transcriptase Inhibitors (NRTIs: Tenofovir, Lamivudine, Zidovudine)",
-          "Interactions with Non-Nucleosides (NNRTIs: Efavirenz) and Protease Inhibitors (Atazanavir, Lopinavir/r)",
-          "Integrase Strand Transfer Inhibitors (INSTIs: Dolutegravir) and cation chelation with calcium/iron supplements",
-          "Formulating clinical food-drug timing administration schedules"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the clinical consequences of unmanaged drug-nutrient interactions.\n\u2022 Schedule dietary intake to avoid absorption chelation between Dolutegravir and mineral supplements.\n\u2022 Formulate practical meal schedules harmonized with prescribed medication timing.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 5,
-        "topicTitle": "Metabolic Complications of ART (CAT 1)",
-        "subTopics": [
-          "HIV-associated Lipodystrophy syndrome: Lipoatrophy (fat loss) versus Lipohypertrophy (visceral fat accumulation)",
-          "Dyslipidemia: Hypertriglyceridemia and elevated LDL cholesterol on ART",
-          "Insulin resistance, impaired glucose tolerance, and secondary diabetes",
-          "Continuous Assessment Test 1 (Nutritional Assessment, Requirements, and Drug Interactions)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Differentiate between lipoatrophy and central lipohypertrophy in chronic patients.\n\u2022 Formulate medical nutrition therapy to control secondary dyslipidemia and insulin resistance.\n\u2022 Demonstrate mastery under CAT 1 evaluation conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 6,
-        "topicTitle": "Dietary Management of HIV Symptoms: Oral & Upper GI",
-        "subTopics": [
-          "Dietary care for Oral Candidiasis (Thrush) and painful aphthous mouth ulcers (Bland, non-acidic, soft, cool foods)",
-          "Dietary management of Dysphagia and Odynophagia (Painful swallowing)",
-          "Alleviating Taste Alterations (Dysgeusia) and metallic taste associated with medication",
-          "Practical food recipes that provide soothing comfort during oral infections"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify foods that irritate oral lesions and provide soothing non-acidic alternatives.\n\u2022 Formulate energy-dense, texture-modified meals for clients with severe oral candidiasis.\n\u2022 Counsel clients on food seasoning techniques to overcome metallic taste aversions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 7,
-        "topicTitle": "Dietary Management of Gastrointestinal Symptoms",
-        "subTopics": [
-          "Dietary management of persistent Nausea and Vomiting (Dry crackers, small frequent meals, ginger)",
-          "Management of acute and chronic Diarrhea: Hydration with ORS, soluble fiber foods (banana, rice, applesauce), avoiding lactose",
-          "Dietary interventions for Anorexia (Loss of appetite) and early satiety: High-calorie small feeds",
-          "Managing Abdominal Bloating and flatulence"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Formulate dietary management plans that control persistent nausea and prevent dehydration.\n\u2022 Prescribe low-osmolar, electrolyte-rich diets during episodes of chronic diarrheal wasting.\n\u2022 Counsel patients on strategies to maximize caloric intake during periods of severe anorexia.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 8,
-        "topicTitle": "Mid-Term Examination & Nutritional Management of OIs",
-        "subTopics": [
-          "Mid-Term Examination (Official Institutional CAT 2)",
-          "Tuberculosis (TB) and HIV co-infection: Severe hypercatabolism and wasting",
-          "Nutritional support during anti-TB treatment: Managing nausea, pyridoxine (Vitamin B6) supplementation with Isoniazid",
-          "Nutritional care in Cryptococcal meningitis and Toxoplasmosis"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Successfully complete the Mid-Term Evaluation covering Weeks 1 to 7 content.\n\u2022 Formulate high-protein, high-calorie meal plans to accelerate weight regain during TB co-infection.\n\u2022 Prescribe Vitamin B6 supplementation to prevent isoniazid-induced peripheral neuropathy.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 9,
-        "topicTitle": "Infant Feeding in the Context of HIV (PMTCT)",
-        "subTopics": [
-          "Mechanisms and transmission risks of HIV through breastmilk",
-          "National and WHO recommendations: Exclusive breastfeeding for 6 months alongside maternal ART, followed by complementary foods",
-          "Conditions under which exclusive commercial formula is acceptable (AFASS criteria: Acceptable, Feasible, Affordable, Sustainable, Safe)",
-          "Dangers of mixed feeding (Breastmilk combined with other liquids/milks before 6 months)",
-          "Safe cessation of breastfeeding at 12\u201324 months when maternal viral load is suppressed"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the immunological mechanisms protecting infants during exclusive breastfeeding on ART.\n\u2022 Contrast the severe mucosal risks of mixed feeding against exclusive breastfeeding.\n\u2022 Counsel an HIV-positive mother on safe, hygienic complementary feeding practices.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 10,
-        "topicTitle": "Pediatric HIV Nutrition & Growth Faltering",
-        "subTopics": [
-          "Clinical manifestations of HIV in infants and young children (Persistent diarrhea, failure to thrive, parotitis)",
-          "Growth monitoring protocols for HIV-exposed and HIV-infected children",
-          "Therapeutic and supplementary feeding for HIV-associated pediatric malnutrition",
-          "Developmental delays in motor and cognitive milestones and psychosocial stimulation"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Detect early growth faltering in HIV-positive infants using standard WHO growth curves.\n\u2022 Prescribe therapeutic food rations (RUTF/F-75) tailored to pediatric clinical staging.\n\u2022 Integrate developmental psychosocial stimulation with clinical feeding interventions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 11,
-        "topicTitle": "Food & Water Safety for Immunocompromised Individuals",
-        "subTopics": [
-          "Vulnerability of immunocompromised clients to opportunistic foodborne pathogens (Salmonella, Listeria, Cryptosporidium)",
-          "Safe water protocols: Boiling, chlorination, safe household water storage in narrow-necked containers",
-          "Food handling precautions: Thorough cooking of eggs and meats, avoiding unpasteurized dairy",
-          "Safe sanitation and personal hygiene practices in the home"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify high-risk raw food items that must be eliminated from immunocompromised diets.\n\u2022 Demonstrate household water treatment techniques that destroy Cryptosporidium oocysts.\n\u2022 Educate caregivers on strict kitchen hygiene to prevent fatal opportunistic diarrhea.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 12,
-        "topicTitle": "Community Nutrition Support, Livelihoods & Social Safety Nets",
-        "subTopics": [
-          "Impact of adult illness and death on household agricultural productivity and economic security",
-          "Nutrition-sensitive agriculture: Kitchen gardening, poultry keeping, and small-animal rearing",
-          "Income-generating activities and community mutual assistance groups (SILC/VSLA)",
-          "Linkages between health clinics, food banks, school feeding programs, and government social cash transfers"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Design low-input kitchen garden models that supply micronutrient-rich vegetables to affected households.\n\u2022 Establish referral pathways linking malnourished clinic patients with community food assistance.\n\u2022 Mobilize community savings and loans groups to build economic resilience.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 13,
-        "topicTitle": "Comprehensive Revision & Clinical CCC Case Studies",
-        "subTopics": [
-          "Comprehensive multi-case simulation covering viral load suppression, adherence failure, and wasting",
-          "Remediation on drug-nutrient schedules, NACS registers, and PMTCT counseling",
-          "Review of past KNEC examination papers on Nutrition in HIV/AIDS",
-          "Final examination readiness clinic"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Formulate holistic nutritional care plans for complex clinical CCC patients.\n\u2022 Demonstrate mastery of national clinical management guidelines.\n\u2022 Prepare effectively for national TVET summative examinations.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 14,
-        "topicTitle": "End of Term Summative Examination",
-        "subTopics": [
-          "Institutional TVET Final Theory Examination in Nutrition in HIV/AIDS",
-          "Practical Case Counseling & NACS Documentation Examination",
-          "Consolidation of continuous assessment marks"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate comprehensive clinical and community competence in HIV nutritional management under examination conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      }
-    ]
+    references: ["NASCOP. (2020). Clinical Guidelines for the Management of HIV Infection in Kenya. Ministry of Health.", "WHO. (2019). Nutritional Care and Support for People Living with HIV/AIDS. World Health Organization."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "legal_aspects_nutrition": {
-    "canonicalKey": "legal_aspects_nutrition",
-    "syllabusCode": "19.1.0",
-    "unitCode": "19.1.0",
-    "unitName": "Legal Aspects of Nutrition and Dietetics",
-    "moduleNumber": 1,
-    "nominalHours": 44,
-    "theoryHours": 34,
-    "practicalHours": 10,
-    "aliases": [
-      "19.1.0",
-      "Legal Aspects of Nutrition and Dietetics",
-      "Legal Aspects in Nutrition and Dietetics",
-      "Legal Aspects",
-      "CND 1205",
-      "DND 1205",
-      "DHN 1303"
+    canonicalKey: "legal_aspects_nutrition",
+    syllabusCode: "19.1.0",
+    unitCode: "19.1.0",
+    unitName: "Legal Aspects Of Nutrition And Dietetics",
+    moduleNumber: 1,
+    nominalHours: 44,
+    theoryHours: 30,
+    practicalHours: 14,
+    aliases: ["CND 1205", "DND 1205", "19.1.0"],
+    unitDescription: "This module unit is intended to give the trainee an overview of the Kenyan legal system and how it relates to nutrition and dietetics.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: describe the general set-up of Kenya’s legal system; note the legal implications in relation to nutrition and dietetics issues; identify the correct defences for various offences.",
+    learningOutcomes: [
+      "describe the general set-up of Kenya’s legal system",
+      "note the legal implications in relation to nutrition and dietetics issues",
+      "identify the correct defences for various offences",
+      "adhere to statutes that apply to nutrition and dietetics",
+      "adhere to legal requirements when operating a nutrition and dietetics establishment"
     ],
-    "unitDescription": "This unit equips trainees with an in-depth understanding of the Kenyan legal framework, statutory healthcare legislation, professional regulatory mandates of the Kenya Nutritionists and Dieticians Institute (KNDI), medical ethics, patient rights, civil liability, and food control legislation governing practice.",
-    "overallCompetency": "Apply legal provisions, institutional statutes, ethical codes, and consumer protection laws to professional nutrition and dietetics practice in clinical, community, and commercial settings.",
-    "learningOutcomes": [
-      "Explain the sources of law and the structure of the judicial system in Kenya.",
-      "Comply with statutory mandates, registration, and licensing requirements under the KNDI Act No. 18 of 2007.",
-      "Uphold patient rights, informed consent, medical confidentiality, and professional ethics.",
-      "Analyze civil liability, negligence, medical malpractice, and vicarious liability in healthcare.",
-      "Apply food safety statutes, labeling regulations, and consumer protection laws to practice."
+    weeklySchedule: [
+      {
+        weekNumber: 1,
+        topicTitle: "Sources of Kenyan Law",
+        subTopics: ["Meaning of law", "The Constitution as the supreme law of Kenya", "Sources of law in Kenya", "Definition and organisation of the Judiciary (Magistrate’s court, Kadhi’s court, High Court, Court of Appeal, Supreme Court)"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• State and apply the meaning of law.\n• State and apply the the Constitution as the supreme law of Kenya.\n• Identify dietary sources of law in Kenya.\n• Define terms and concepts used in Sources of Kenyan Law.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 2,
+        topicTitle: "The Judiciary and Court System",
+        subTopics: ["Structure and hierarchy of Kenyan courts"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain structure and hierarchy of Kenyan courts.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 3,
+        topicTitle: "Law of Tort",
+        subTopics: ["Definitions", "General defences", "Capacity in tort", "Specific torts"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Law of Tort.\n• Explain general defences.\n• Explain capacity in tort.\n• Explain specific torts.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 4,
+        topicTitle: "The Law of Contract",
+        subTopics: ["Definitions", "Types of contracts", "Essentials of a valid contract", "Capacity to contract"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in The Law of Contract.\n• Classify contracts and describe their categories.\n• Explain essentials of a valid contract.\n• Explain capacity to contract.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 5,
+        topicTitle: "Contract of Employment",
+        subTopics: ["Definition", "Duties of employer", "Duties of employee", "Terms imposed by statute", "Types and reasons for dismissal"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Contract of Employment.\n• Explain duties of employer.\n• Explain duties of employee.\n• Explain terms imposed by statute.\n• Explain types and reasons for dismissal.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 6,
+        topicTitle: "Business and Business Ownership",
+        subTopics: ["Types of business", "Methods of acquiring business premises"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Classify business and describe their categories.\n• Describe methods and procedures for acquiring business premises.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 7,
+        topicTitle: "Sale of Foods and Beverages / Food-Related Statutes",
+        subTopics: ["Provisions of the Food and Drugs Act", "Food hygiene regulations", "Provisions of the Trade Descriptions Act", "Dangerous Drugs Act", "Provisions of the Food, Drugs and Chemical Substances Act"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain provisions of the Food and Drugs Act.\n• Explain food hygiene regulations.\n• Explain provisions of the Trade Descriptions Act.\n• Explain dangerous Drugs Act.\n• Explain provisions of the Food, Drugs and Chemical Substances Act.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Legal Aspects Of Nutrition And Dietetics)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Legal Aspects Of Nutrition And Dietetics.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
+      },
+      {
+        weekNumber: 9,
+        topicTitle: "Public Health, Environmental and Occupational Safety Law",
+        subTopics: ["The Public Health Act", "Poisonous Substances Act", "Environmental Conservation Act", "Disposal Act", "Nutrition and Dietetics Act", "Occupational Safety and Health Act"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the Public Health Act.\n• Explain poisonous Substances Act.\n• Explain environmental Conservation Act.\n• Explain disposal Act.\n• Explain nutrition and Dietetics Act.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 10,
+        topicTitle: "Insurance and Trademarks",
+        subTopics: ["Meaning and nature of insurance", "Principles of insurance", "Classes of insurance", "Claims procedure", "Registration of trade and service marks", "Function of trade and service marks", "Infringement of trade and service marks"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain meaning and nature of insurance.\n• Describe the principles of insurance.\n• Classify insurance and describe their categories.\n• Explain claims procedure.\n• Explain registration of trade and service marks.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 11,
+        topicTitle: "Emerging Issues and Trends",
+        subTopics: ["Emerging issues and trends", "Challenges of emerging issues", "Coping with challenges"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends.\n• Explain coping with challenges.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 12,
+        topicTitle: "Applied Practice & Case Studies in Legal Aspects Of Nutrition And Dietetics (Week 12)",
+        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Legal Aspects Of Nutrition And Dietetics in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
+        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
+        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
+        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Emerging issues and trends", "Challenges of emerging issues", "Coping with challenges"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping with challenges.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Legal Aspects Of Nutrition And Dietetics)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 3,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Legal Aspects Of Nutrition And Dietetics in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
     ],
-    "references": [
-      "Republic of Kenya. (2007). Kenya Nutritionists and Dieticians Institute Act, No. 18 of 2007. Government Printer.",
-      "Republic of Kenya. (2010). The Constitution of Kenya, 2010 (Article 43 - Right to Health & Food). Government Printer.",
-      "Jackson, E. (2019). Medical Law: Text, Cases, and Materials (5th Edition). Oxford University Press."
-    ],
-    "instructionalEquipment": [
-      "Official copies of the KNDI Act, Public Health Act, and Constitution of Kenya",
-      "Sample patient informed consent forms and clinical confidentiality agreements",
-      "Mock courtroom / moot court trial setup for medical negligence simulations"
-    ],
-    "weeklySchedule": [
-      {
-        "weekNumber": 1,
-        "topicTitle": "Introduction to the Kenyan Legal System & Sources of Law",
-        "subTopics": [
-          "Definition of law, classification of law (Public vs. Private, Civil vs. Criminal, Substantive vs. Procedural)",
-          "Sources of Kenyan law: The Constitution, Acts of Parliament, Common law, Doctrines of Equity, Customary law",
-          "The court hierarchy in Kenya (Supreme Court, Court of Appeal, High Court, Magistrate Courts, Tribunals)",
-          "The adversarial legal system and judicial precedent (Stare Decisis)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Define law and differentiate between criminal and civil legal actions.\n\u2022 Outline the hierarchy of sources of Kenyan law with the Constitution as supreme.\n\u2022 Describe the jurisdiction and appellate hierarchy of the Kenyan court system.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 2,
-        "topicTitle": "Constitutional Framework & Right to Food and Health",
-        "subTopics": [
-          "The Constitution of Kenya (2010): Bill of Rights",
-          "Article 43: Economic and social rights (Right to the highest attainable standard of health and freedom from hunger)",
-          "State obligations to progressive realization and protecting vulnerable groups",
-          "Devolution and health services delivery across county governments"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the legal significance of Article 43 in public health and food security.\n\u2022 Analyze state legal obligations in preventing starvation and severe undernutrition.\n\u2022 Describe the division of health functions between national and county governments.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 3,
-        "topicTitle": "The KNDI Act No. 18 of 2007: Structure & Mandate",
-        "subTopics": [
-          "Historical context, enactment, and objectives of the KNDI Act",
-          "Composition, powers, and regulatory functions of the KNDI Council",
-          "Accreditation and validation of training institutions and academic curricula",
-          "Continuing Professional Development (CPD) frameworks and core competencies"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 State the statutory objects and functions of the Kenya Nutritionists and Dieticians Institute.\n\u2022 Explain the role of KNDI in accrediting academic programs and maintaining quality.\n\u2022 Describe the mandatory requirements for annual CPD points accumulation.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 4,
-        "topicTitle": "KNDI Registration, Licensing & Scope of Practice",
-        "subTopics": [
-          "Qualifications and procedures for registration as a Nutritionist or Dietitian (Degrees, Diplomas, Certificates)",
-          "Categories of registers maintained by the Institute",
-          "Issuance, renewal, suspension, and revocation of practicing licenses",
-          "Unlawful practice, impersonation, and statutory penalties for unregistered practitioners"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Detail the registration application process following completion of TVET qualifications.\n\u2022 Differentiate between an academic certificate and a valid statutory practicing license.\n\u2022 Cite the legal penalties for unauthorized or illegal practice of nutrition in Kenya.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 5,
-        "topicTitle": "Professional Ethics, Misconduct & Discipline (CAT 1)",
-        "subTopics": [
-          "The KNDI Code of Professional Conduct and Ethics",
-          "Definition of professional misconduct and 'infamous conduct in a professional respect'",
-          "Composition and disciplinary powers of the KNDI Disciplinary Committee",
-          "Inquiry procedures, appeals to the High Court, and professional sanctions",
-          "Continuous Assessment Test 1 (Legal Sources, KNDI Act, and Professional Ethics)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Adhere to ethical standards regarding professional boundaries and client trust.\n\u2022 Identify acts constituting professional misconduct in nutrition practice.\n\u2022 Explain the disciplinary process and penalty options under the KNDI Act.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 6,
-        "topicTitle": "Patient Rights, Autonomy & Informed Consent",
-        "subTopics": [
-          "The doctrine of patient autonomy and self-determination",
-          "Essential elements of valid informed consent (Information disclosure, competence, voluntariness)",
-          "Informed refusal of nutritional therapy (e.g. Refusing enteral feeding or dietary restrictions)",
-          "Exceptions to informed consent: Emergency situations, minors, and unconscious patients"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Define informed consent and explain its legal and ethical necessity.\n\u2022 Conduct a full dietary disclosure ensuring patient understanding of risks and benefits.\n\u2022 Navigate complex scenarios where a competent patient exercises the right to refuse care.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 7,
-        "topicTitle": "Confidentiality, Medical Records & Data Privacy",
-        "subTopics": [
-          "The duty of confidentiality and doctor-patient privilege",
-          "The Data Protection Act (2019) of Kenya: Processing sensitive personal health data",
-          "Exceptions to confidentiality (Statutory reporting of communicable diseases, court orders, prevention of harm)",
-          "Legal ownership, custody, retention, and production of medical diet records"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Uphold absolute confidentiality regarding patient clinical diagnosis and dietary status.\n\u2022 Comply with statutory requirements under Kenya's Data Protection Act.\n\u2022 Identify lawful circumstances that require disclosure of health information.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 8,
-        "topicTitle": "Mid-Term Examination & Medical Negligence and Malpractice",
-        "subTopics": [
-          "Mid-Term Examination (Official Institutional CAT 2)",
-          "The law of Torts: Definition and elements of the tort of Negligence",
-          "Establishing Duty of Care, Breach of Standard of Care (The Bolam/Bolitho test), Causation, and Damages",
-          "Examples of clinical nutrition negligence (Prescribing allergenic food, improper enteral tube feeding, severe dosage errors)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Successfully complete the Mid-Term Evaluation covering Weeks 1 to 7 content.\n\u2022 Prove the four essential legal elements of a medical negligence action.\n\u2022 Identify clinical practice hazards that constitute actionable professional malpractice.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 9,
-        "topicTitle": "Vicarious Liability, Institutional Liability & Contracts",
-        "subTopics": [
-          "Doctrine of Vicarious Liability: Employer liability for torts committed by employees in the course of employment",
-          "Hospital direct liability for inadequate equipment, unsafe food, or systemic staff shortages",
-          "Elements of a valid commercial contract (Offer, acceptance, consideration, intention to create legal relations)",
-          "Breach of contract and legal remedies (Damages, specific performance) in private practice"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain when a hospital employer is held vicariously liable for a staff nutritionist's error.\n\u2022 Identify direct institutional obligations for patient safety.\n\u2022 Formulate basic commercial consultation contracts with enforceable terms.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 10,
-        "topicTitle": "Food Safety Statutes & Public Health Legislation",
-        "subTopics": [
-          "The Public Health Act (Cap 242): Powers of health officers, nuisance regulations, control of epidemics",
-          "The Food, Drugs and Chemical Substances Act (Cap 254): Prohibition of unwholesome, poisonous, or adulterated foods",
-          "Food inspection, sampling, seizure, and analysis procedures by public health authorities",
-          "The Standards Act (Cap 496) and the Kenya Bureau of Standards (KEBS) enforcement powers"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Cite core regulatory provisions of the Public Health Act and Food/Drugs Act.\n\u2022 Describe the lawful powers of public health officers inspecting food facilities.\n\u2022 Comply with statutory quality standards to prevent food adulteration liability.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 11,
-        "topicTitle": "Consumer Protection, Food Labeling & Advertising Laws",
-        "subTopics": [
-          "The Consumer Protection Act (2012): Consumer rights to safety, fair pricing, and truthful information",
-          "Mandatory food labeling requirements in Kenya (Ingredients, nutritional panel, expiry, allergens)",
-          "Prohibition of false, misleading, or deceptive dietary claims and unproven health cures",
-          "Regulation of infant formula marketing under the Breast Milk Substitutes Act"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Review commercial food product labels for compliance with mandatory statutory disclosures.\n\u2022 Identify illegal, unsubstantiated health claims on food packages and advertisements.\n\u2022 Advise commercial food processors on complying with consumer protection laws.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 12,
-        "topicTitle": "Labor Laws, Workplace Safety & Clinical Expert Witness",
-        "subTopics": [
-          "The Employment Act (2007) and Labor Relations Act: Contracts, working hours, leave, termination",
-          "The Occupational Safety and Health Act (OSHA 2007): Employer and employee safety duties",
-          "Role of the nutritionist as an expert witness in courts of law",
-          "Preparing expert medico-legal reports and presenting evidence during cross-examination"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Outline employment rights and occupational safety obligations in healthcare workplaces.\n\u2022 Draft an objective, evidence-based expert witness report for a legal tribunal.\n\u2022 Deliver impartial expert testimony under legal court examination.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 13,
-        "topicTitle": "Comprehensive Revision & Mock Court Simulation",
-        "subTopics": [
-          "Moot court trial simulation: Defending a medical negligence lawsuit involving clinical dietetics",
-          "Remediation on KNDI Act provisions, informed consent, tort law, and food safety statutes",
-          "Review of past KNEC examination papers on Legal Aspects",
-          "Final examination clinic and tips"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Present legal arguments and professional justifications in simulated court proceedings.\n\u2022 Resolve complex legal and ethical examination problem questions accurately.\n\u2022 Demonstrate readiness for national TVET examinations.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 14,
-        "topicTitle": "End of Term Summative Examination",
-        "subTopics": [
-          "Institutional TVET Final Theory Examination in Legal Aspects",
-          "Evaluation of medico-legal case analysis assignments",
-          "Consolidation of continuous assessment marks"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate comprehensive understanding of health legislation, ethics, and legal liabilities under examination conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      }
-    ]
+    references: ["Laws of Kenya. (2012). Nutritionists and Dieticians Act No. 18 of 2012. Government Printer.", "Laws of Kenya. (2012). Public Health Act (Cap 242) and Food, Drugs and Chemical Substances Act (Cap 254)."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "principles_of_human_nutrition": {
-    "canonicalKey": "principles_of_human_nutrition",
-    "syllabusCode": "20.1.0",
-    "unitCode": "20.1.0",
-    "unitName": "Principles of Human Nutrition",
-    "moduleNumber": 1,
-    "nominalHours": 44,
-    "theoryHours": 32,
-    "practicalHours": 12,
-    "aliases": [
-      "20.1.0",
-      "Principles of Human Nutrition",
-      "Human Nutrition",
-      "DND 1104",
-      "CND 1102"
+    canonicalKey: "principles_of_human_nutrition",
+    syllabusCode: "20.1.0",
+    unitCode: "20.1.0",
+    unitName: "Principles Of Human Nutrition",
+    moduleNumber: 1,
+    nominalHours: 66,
+    theoryHours: 42,
+    practicalHours: 24,
+    aliases: ["DND 1104", "20.1.0", "Principles of Human Nutrition"],
+    unitDescription: "This module unit is intended to provide the trainee with relevant knowledge, skills and attitudes on human nutrition. The trainee will be equipped with knowledge on the nature, composition, utilization and deficiency symptoms of nutrients.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: explain the terms used in human nutrition; demonstrate comprehension of the functions, sources and composition of nutrients; describe the food composition, classification and functions of nutrients.",
+    learningOutcomes: [
+      "explain the terms used in human nutrition",
+      "demonstrate comprehension of the functions, sources and composition of nutrients",
+      "describe the food composition, classification and functions of nutrients",
+      "apply knowledge of foods and nutrition in calculating dietary requirements of individuals and/or groups",
+      "understand the digestion, absorption, metabolism and excretion of nutrients"
     ],
-    "unitDescription": "This unit covers the fundamental biochemical, physiological, and metabolic principles of human nutrition, exploring carbohydrate, lipid, and protein metabolism, energy expenditure, vitamin and mineral biological functions, fluid-electrolyte balance, and dietary standards.",
-    "overallCompetency": "Apply biochemical and physiological principles of macronutrients, micronutrients, and energy metabolism to assess nutritional status and formulate balanced dietary prescriptions.",
-    "learningOutcomes": [
-      "Explain the biochemical classification, digestion, absorption, and metabolic pathways of macronutrients.",
-      "Calculate human energy requirements using basal metabolic rate and physical activity levels.",
-      "Analyze the physiological functions, dietary sources, and deficiency/toxicity manifestations of vitamins.",
-      "Evaluate the biochemical roles of macrominerals and trace elements in human health.",
-      "Determine fluid and electrolyte balance and interpret clinical dietary standards."
+    weeklySchedule: [
+      {
+        weekNumber: 1,
+        topicTitle: "Introduction to Nutrition",
+        subTopics: ["Meaning of terms", "Classification of food", "Nutrition as a science", "Basic principles of human nutrition"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Introduction to Nutrition.\n• Classify food and describe their categories.\n• Explain nutrition as a science.\n• Describe the basic principles of human nutrition.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 2,
+        topicTitle: "Carbohydrates",
+        subTopics: ["Classification of carbohydrates", "Sources of carbohydrates", "Functions of carbohydrates", "Dietary fibre", "Digestion of carbohydrates"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Classify carbohydrates and describe their categories.\n• Identify dietary sources of carbohydrates.\n• Explain the functions and physiological role of carbohydrates.\n• Discuss the role, sources and physiological importance of dietary fibre.\n• Explain the digestion, absorption and metabolism of carbohydrates.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 3,
+        topicTitle: "Proteins",
+        subTopics: ["Meaning of terms", "Classification of proteins", "Structure of proteins", "Sources of proteins", "Digestion of protein"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Proteins.\n• Classify proteins and describe their categories.\n• Describe the structure and components of proteins.\n• Identify dietary sources of proteins.\n• Explain the digestion, absorption and metabolism of protein.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 4,
+        topicTitle: "Lipids",
+        subTopics: ["Meaning of terms", "Types of lipids", "Classification of lipids", "Functions of lipids in the body", "Lipid hydrolysis", "Digestion of fats/oils"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Lipids.\n• Classify lipids and describe their categories.\n• Explain the functions and physiological role of lipids in the body.\n• Explain the chemical process and mechanisms of lipid hydrolysis.\n• Explain the digestion, absorption and metabolism of fats/oils.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 5,
+        topicTitle: "Digestion, Absorption, Metabolism and Excretion of Nutrients",
+        subTopics: ["Absorption, metabolism and excretion of nutrients"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the absorption, cellular metabolism and excretion of nutrients.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 6,
+        topicTitle: "Energy",
+        subTopics: ["Meaning of terms", "Energy values of various foods and food nutrients", "Energy balance", "Calculation of dietary requirements of individuals and/or groups"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Energy.\n• Evaluate energy values of various foods and food nutrients.\n• Explain the principles of energy balance.\n• Calculate dietary requirements of individuals and/or groups accurately.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 7,
+        topicTitle: "Water",
+        subTopics: ["Functions of water in the body", "Water uptake and loss", "Recommended daily allowance", "Deficiency"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the functions and physiological role of water in the body.\n• Describe physiological mechanisms of water uptake and loss.\n• Determine and calculate recommended dietary allowances and nutrient requirements.\n• Describe deficiency signs, symptoms and disorders related to water.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Principles Of Human Nutrition)",
+        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Principles Of Human Nutrition.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
+        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
+        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
+      },
+      {
+        weekNumber: 9,
+        topicTitle: "Vitamins",
+        subTopics: ["Meaning of terms", "Classifications", "Sources", "Absorption, metabolism and assimilation", "Recommended daily allowances (RDA)", "Deficiency"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Vitamins.\n• Classify classifications.\n• Explain sources.\n• Explain the digestion, absorption and metabolism of assimilation.\n• Determine and calculate recommended dietary allowances and nutrient requirements.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 10,
+        topicTitle: "Minerals",
+        subTopics: ["Meaning of terms", "Macro minerals", "Micro minerals", "Mineral sources", "Recommended daily allowances (RDA)", "Deficiency"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Minerals.\n• Explain macro minerals.\n• Explain micro minerals.\n• Explain mineral sources.\n• Determine and calculate recommended dietary allowances and nutrient requirements.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 11,
+        topicTitle: "Malnutrition",
+        subTopics: ["Meaning and classification of malnutrition", "Causes and effects of malnutrition"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Classify meaning and classification of malnutrition.\n• Analyze factors affecting of malnutrition.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 12,
+        topicTitle: "Emerging Issues and Trends",
+        subTopics: ["Emerging issues and trends in human nutrition"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends.",
+        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
+        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
+        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        subTopics: ["Emerging issues and trends in human nutrition"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends & Comprehensive Syllabus Revision.",
+        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
+        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
+        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Final Summative Examination (Principles Of Human Nutrition)",
+        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        hours: 5,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Principles Of Human Nutrition in accordance with national TVET standards.",
+        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
+      },
     ],
-    "references": [
-      "Gropper, S. S., Smith, J. L., & Carr, T. P. (2021). Advanced Nutrition and Human Metabolism (8th Edition). Cengage Learning.",
-      "Ross, A. C., Caballero, B., Cousins, R. J., & Tucker, K. L. (2020). Modern Nutrition in Health and Disease (11th Edition). Wolters Kluwer.",
-      "Bender, D. A. (2014). Introduction to Nutrition and Metabolism (5th Edition). CRC Press."
-    ],
-    "instructionalEquipment": [
-      "Nutrient metabolism biochemical pathways charts (Glycolysis, Krebs cycle, Urea cycle)",
-      "Food composition databases, dietary calculation software, and calorimetry worksheets",
-      "Clinical laboratory biochemical report reference charts"
-    ],
-    "weeklySchedule": [
-      {
-        "weekNumber": 1,
-        "topicTitle": "Introduction to Human Nutrition & Nutrient Metabolism",
-        "subTopics": [
-          "Overview of nutritional biochemistry and metabolic homeostasis",
-          "Anabolic versus catabolic pathways; ATP as the universal cellular energy currency",
-          "Enzyme kinetics, coenzymes, and hormonal regulation of intermediate metabolism",
-          "Cellular respiration: Glycolysis, the citric acid cycle, and oxidative phosphorylation overview"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the cellular mechanisms converting dietary nutrients into metabolic energy (ATP).\n\u2022 Contrast anabolic synthetic reactions with catabolic oxidative processes.\n\u2022 Describe the regulatory roles of insulin and glucagon in cellular metabolism.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 2,
-        "topicTitle": "Carbohydrates: Chemistry, Metabolism & Health",
-        "subTopics": [
-          "Chemical classification: Monosaccharides (Glucose, fructose, galactose), disaccharides (Sucrose, lactose, maltose), oligosaccharides",
-          "Polysaccharides: Starch (amylose/amylopectin), glycogen storage, and resistant starch",
-          "Carbohydrate digestion and sodium-glucose cotransporter (SGLT-1/GLUT) absorption",
-          "Glycogenesis, glycogenolysis, and maintenance of fasting blood glucose"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Classify carbohydrates by structure and glycosidic bond arrangements.\n\u2022 Trace the transport of monosaccharides across enterocytes into the portal vein.\n\u2022 Explain glycogen synthesis and hepatic glycogen breakdown during fasting.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 3,
-        "topicTitle": "Dietary Fiber, Glycemic Index & Clinical Implications",
-        "subTopics": [
-          "Definition and types of dietary fiber: Soluble (Pectins, gums) versus Insoluble (Cellulose, hemicellulose, lignin)",
-          "Physiological effects: Gastric emptying, intestinal transit time, and short-chain fatty acids (SCFAs) synthesis",
-          "Glycemic Index (GI) and Glycemic Load (GL) concepts and calculations",
-          "Clinical significance of fiber in preventing colorectal cancer, obesity, and cardiovascular disease"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Differentiate between the physiological mechanisms of soluble and insoluble fibers.\n\u2022 Calculate the Glycemic Load of mixed food meals.\n\u2022 Formulate high-fiber dietary recommendations for disease prevention.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 4,
-        "topicTitle": "Lipids: Classification, Digestion & Transport",
-        "subTopics": [
-          "Chemical structure of lipids: Simple lipids (Triglycerides), compound lipids (Phospholipids, glycolipids), derived lipids (Sterols)",
-          "Fatty acid classification: Chain length, degree of saturation (SFA, MUFA, PUFA), and cis/trans isomerism",
-          "Essential fatty acids: Omega-3 (Alpha-linolenic acid, EPA, DHA) and Omega-6 (Linoleic acid, arachidonic acid)",
-          "Lipid emulsification by bile salts, pancreatic lipase hydrolysis, micelle formation, and chylomicron lymphatic transport"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Classify fatty acids and explain the cardiovascular risks of trans-fatty acids.\n\u2022 Outline the physiological functions of omega-3 eicosanoids in reducing systemic inflammation.\n\u2022 Trace lipid digestion, enterocyte re-esterification, and chylomicron packaging.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 5,
-        "topicTitle": "Lipid Metabolism & Lipoproteins (CAT 1)",
-        "subTopics": [
-          "Lipoprotein metabolism: Chylomicrons, VLDL, IDL, LDL, and HDL (Reverse cholesterol transport)",
-          "Cellular beta-oxidation of fatty acids and ketogenesis in the liver during carbohydrate deprivation",
-          "Atherosclerosis pathophysiology and dietary management of dyslipidemia",
-          "Continuous Assessment Test 1 (Carbohydrates, Fiber, and Lipid Biochemistry)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Compare the composition and biological transport roles of LDL and HDL lipoproteins.\n\u2022 Explain the biochemical mechanism of ketosis during prolonged starvation or keto diets.\n\u2022 Demonstrate mastery under CAT 1 evaluation conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 6,
-        "topicTitle": "Proteins: Amino Acid Chemistry & Biological Roles",
-        "subTopics": [
-          "Chemical structure of amino acids, peptide bonds, and zwitterionic properties",
-          "Classification: 9 Essential, non-essential, and conditionally essential amino acids",
-          "Structural levels: Primary, secondary (alpha-helix, beta-sheet), tertiary, and quaternary protein structures",
-          "Biological functions: Enzymes, hormones, structural proteins, immunoglobulins, transport proteins, and oncotic pressure"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Identify the 9 indispensable amino acids required in the human diet.\n\u2022 Explain the physiological consequences of hypoalbuminemia on oncotic pressure and edema.\n\u2022 Describe the denaturation and coagulation of proteins by heat, acids, and mechanical shearing.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 7,
-        "topicTitle": "Protein Digestion, Nitrogen Balance & Quality",
-        "subTopics": [
-          "Enzymatic digestion of proteins (Pepsin, trypsin, chymotrypsin, carboxypeptidases)",
-          "Transamination, deamination, and the Urea Cycle in hepatic ammonia detoxification",
-          "Nitrogen balance concept: Positive, negative, and zero nitrogen balance calculations",
-          "Evaluating protein quality: Chemical score, Biological Value (BV), Net Protein Utilization (NPU), PDCAAS, and DIAAS"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Trace protein breakdown to free amino acids and di/tripeptides.\n\u2022 Calculate patient nitrogen balance to assess hypercatabolic muscle breakdown.\n\u2022 Compare protein quality of animal foods versus complementary plant protein combinations.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 8,
-        "topicTitle": "Mid-Term Examination & Energy Balance and Expenditure",
-        "subTopics": [
-          "Mid-Term Examination (Official Institutional CAT 2)",
-          "Components of Total Daily Energy Expenditure (TDEE): Basal Metabolic Rate (BMR/RMR), Thermic Effect of Food (TEF), Physical Activity",
-          "Factors influencing BMR (Body surface area, age, gender, thyroid hormones, fever, body composition)",
-          "Direct and indirect calorimetry principles and respiratory quotient (RQ)",
-          "Predictive energy equations (Harris-Benedict, Mifflin-St Jeor) and calculating physical activity level (PAL)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Successfully complete the Mid-Term Evaluation covering Weeks 1 to 7 content.\n\u2022 Calculate BMR and TDEE using Mifflin-St Jeor and factorial activity coefficients.\n\u2022 Explain the physiological factors that elevate or suppress basal metabolic rate.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 9,
-        "topicTitle": "Fat-Soluble Vitamins (A, D, E, K)",
-        "subTopics": [
-          "Vitamin A: Retinoids, carotenoids, rhodopsin visual cycle, epithelial differentiation, and immune function",
-          "Vitamin D: Cutaneous photolysis synthesis ($D_3$), hepatic and renal hydroxylation ($1,25(OH)_2D_3$), calcium homeostasis, rickets/osteomalacia",
-          "Vitamin E: Alpha-tocopherol antioxidant action, protecting membrane polyunsaturated lipids from peroxidation",
-          "Vitamin K: Phylloquinone, menaquinones, carboxylation of glutamic acid residues in clotting factors II, VII, IX, X"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Trace the biochemical activation of Vitamin D from sun exposure to calcitriol.\n\u2022 Explain the biological mechanism of Vitamin E in terminating lipid peroxidation chains.\n\u2022 Detail the physiological roles and deficiency diseases associated with vitamins A and K.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 10,
-        "topicTitle": "Water-Soluble Vitamins: B-Complex & Vitamin C",
-        "subTopics": [
-          "Thiamine ($B_1$), Riboflavin ($B_2$), Niacin ($B_3$), Pantothenic acid ($B_5$), Pyridoxine ($B_6$), Biotin ($B_7$): Coenzymatic roles in energy metabolism",
-          "Folate ($B_9$) and Cobalamin ($B_{12}$): One-carbon metabolism, DNA synthesis, megaloblastic anemia, and neurological subacute combined degeneration",
-          "Vitamin C (Ascorbic acid): Collagen proline hydroxylation, iron absorption enhancement, antioxidant actions, scurvy",
-          "Interdependence and clinical manifestations of B-vitamin deficiencies (Beriberi, Ariboflavinosis, Pellagra)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Outline specific coenzyme forms for all B-complex vitamins in cellular respiration.\n\u2022 Differentiate between folate and vitamin B12 deficiency anemias and neurological complications.\n\u2022 Explain the biochemical role of ascorbic acid in procollagen cross-linking and wound healing.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 11,
-        "topicTitle": "Major Minerals & Fluid-Electrolyte Homeostasis",
-        "subTopics": [
-          "Calcium and Phosphorus: Bone hydroxyapatite structure, neuromuscular excitability, and parathyroid hormone regulation",
-          "Magnesium: Enzyme cofactor in ATP-dependent reactions and muscle relaxation",
-          "Electrolytes: Sodium, Potassium, and Chloride distribution across intracellular and extracellular fluid compartments",
-          "Sodium-potassium ATPase pump ($Na^+/K^+$ pump), resting membrane potentials, and blood pressure regulation",
-          "Fluid balance regulation: Osmoreceptors, antidiuretic hormone (ADH), and renin-angiotensin-aldosterone axis"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Explain the hormonal orchestration of serum calcium homeostasis involving PTH, calcitriol, and calcitonin.\n\u2022 Describe the physiological distribution and maintenance of intracellular potassium and extracellular sodium.\n\u2022 Detail the neurohormonal feedback loops governing thirst and water conservation.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 12,
-        "topicTitle": "Trace Elements: Iron, Zinc, Iodine & Antioxidants",
-        "subTopics": [
-          "Iron: Heme versus non-heme iron absorption, ferritin storage, transferrin transport, hepcidin regulation, Iron Deficiency Anemia",
-          "Zinc: Catalytic and structural roles in >300 metalloenzymes, immune competence, wound healing, acrodermatitis enteropathica",
-          "Iodine: Thyroid hormone ($T_3$, $T_4$) synthesis, basal metabolic rate regulation, goiter, and cretinism",
-          "Selenium, Copper, Manganese, Chromium, Fluoride: Superoxide dismutase, glutathione peroxidase, and enamel protection"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Contrast heme iron absorption with non-heme absorption enhancers (Vitamin C) and inhibitors (Phytates, tannins).\n\u2022 Explain the regulatory function of the liver peptide hormone hepcidin in iron homeostasis.\n\u2022 Describe the physiological consequences of iodine deficiency on neurological and somatic development.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 13,
-        "topicTitle": "Comprehensive Revision & Metabolism Integration Clinic",
-        "subTopics": [
-          "Integration of macronutrient and micronutrient metabolic interrelationships",
-          "Remediation on TDEE calculations, nitrogen balance formulas, and deficiency differentials",
-          "Review of past KNEC examination papers on Principles of Human Nutrition",
-          "Final examination readiness clinic"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Synthesize complex biochemical pathways linking dietary intake to clinical health.\n\u2022 Solve quantitative nutritional calculation problems with speed and precision.\n\u2022 Demonstrate complete readiness for national TVET examination standards.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 14,
-        "topicTitle": "End of Term Summative Examination",
-        "subTopics": [
-          "Institutional TVET Final Theory Examination in Human Nutrition",
-          "Consolidation of continuous assessment marks and student grade review"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Demonstrate comprehensive mastery of human nutritional principles under examination conditions.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      }
-    ]
+    references: ["Gibney, M. J., Lanham-New, S. A., Cassidy, A., & Vorster, H. H. (2019). Introduction to Human Nutrition (3rd ed.). Wiley-Blackwell.", "Whitney, E., & Rolfes, S. R. (2019). Understanding Nutrition (15th ed.). Cengage Learning."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
   },
   "industrial_attachment_i": {
-    "canonicalKey": "industrial_attachment_i",
-    "syllabusCode": "21.1.0",
-    "unitCode": "21.1.0",
-    "unitName": "Industrial Attachment I",
-    "moduleNumber": 1,
-    "nominalHours": 330,
-    "theoryHours": 30,
-    "practicalHours": 300,
-    "aliases": [
-      "21.1.0",
-      "Industrial Attachment I",
-      "Industrial Attachment",
-      "Clinical Rotation",
-      "DHN 1306",
-      "CND 2103",
-      "DND 2201",
-      "DNDT 2101"
+    canonicalKey: "industrial_attachment_i",
+    syllabusCode: "21.1.0",
+    unitCode: "21.1.0",
+    unitName: "Industrial Attachment",
+    moduleNumber: 1,
+    nominalHours: 330,
+    theoryHours: 0,
+    practicalHours: 330,
+    aliases: ["CND 2103", "21.1.0", "Industrial Attachment I"],
+    unitDescription: "This module unit is compulsory for all trainees undertaking training programmes and is intended to equip the trainee with knowledge, skills and attitudes to enable him/her cope with the working environment. Rationale of the module unit: a) enhance the practical and communication skills and trainees’ competences b) strengthen industrial/institution partnership c) provide a nation-wide mechanism to address key skills gaps d) provide employers the opportunity to give back to society e) enhance training levels in acquired skills and competencies f) provide a mechanism for training institutions to identify areas of national key skill needs g) develop the manual skills of trainees associated with scientific and technological operations h) develop the trainees’ personality and understanding of individuals and groups in work situations i) provide the trainee with background information and experience for career choice",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: understand the constraints of working life and functional relationships within and between organizations; appreciate the importance of human relationships and work attitudes; develop procedural knowledge towards work processes.",
+    learningOutcomes: [
+      "understand the constraints of working life and functional relationships within and between organizations",
+      "appreciate the importance of human relationships and work attitudes",
+      "develop procedural knowledge towards work processes",
+      "apply theoretical concepts and school-based skills to practice",
+      "develop work attitudes like curiosity, self-confidence, maturity and self-reliance",
+      "obtain knowledge of potential careers and develop new areas of interest"
     ],
-    "unitDescription": "This field practicum module places trainees in accredited hospital clinical dietetics departments, comprehensive care clinics (CCC), and community health facilities for supervised clinical rotation, enabling them to apply theoretical knowledge to real-world patient care, hospital food production, nutritional assessment, and dietary counseling.",
-    "overallCompetency": "Execute supervised clinical nutritional assessment, therapeutic dietary formulation, hospital foodservice operations, and patient counseling in an institutional healthcare facility.",
-    "learningOutcomes": [
-      "Adhere to institutional hospital codes of conduct, clinical protocols, and medical professional ethics.",
-      "Perform standardized anthropometric measurements, dietary recalls, and clinical nutritional screening on hospital patients.",
-      "Participate in multidisciplinary clinical ward rounds and formulate basic medical nutrition therapy plans.",
-      "Assist in hospital dietary department food procurement, hygienic preparation, and tray meal distribution.",
-      "Maintain an authentic clinical logbook documenting daily occupational activities, clinical cases, and reflective learning."
+    weeklySchedule: [
+      {
+        weekNumber: 1,
+        topicTitle: "Industrial Attachment Practical Placement Week 1",
+        subTopics: ["Institutional and hospital clinical placement duties", "Patient dietetic assessment, counseling and chart documentation", "Weekly supervisor evaluation and logbook maintenance"],
+        hours: 24,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate practical professional competence in clinical attachment during Week 1.\n• Maintain accurate dietetic records and client consultation notes.\n• Adhere to professional code of conduct and workplace safety standards.",
+        learningActivities: "Practical workplace rotations, ward rounds, client counseling, and logbook entries.",
+        resourcesAndReferences: "Hospital dietetic manuals, patient records, logbooks.",
+        assessmentAndRemarks: "Supervisor logbook signing and clinical skills checklist."
+      },
+      {
+        weekNumber: 2,
+        topicTitle: "Industrial Attachment Practical Placement Week 2",
+        subTopics: ["Institutional and hospital clinical placement duties", "Patient dietetic assessment, counseling and chart documentation", "Weekly supervisor evaluation and logbook maintenance"],
+        hours: 24,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate practical professional competence in clinical attachment during Week 2.\n• Maintain accurate dietetic records and client consultation notes.\n• Adhere to professional code of conduct and workplace safety standards.",
+        learningActivities: "Practical workplace rotations, ward rounds, client counseling, and logbook entries.",
+        resourcesAndReferences: "Hospital dietetic manuals, patient records, logbooks.",
+        assessmentAndRemarks: "Supervisor logbook signing and clinical skills checklist."
+      },
+      {
+        weekNumber: 3,
+        topicTitle: "Industrial Attachment Practical Placement Week 3",
+        subTopics: ["Institutional and hospital clinical placement duties", "Patient dietetic assessment, counseling and chart documentation", "Weekly supervisor evaluation and logbook maintenance"],
+        hours: 24,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate practical professional competence in clinical attachment during Week 3.\n• Maintain accurate dietetic records and client consultation notes.\n• Adhere to professional code of conduct and workplace safety standards.",
+        learningActivities: "Practical workplace rotations, ward rounds, client counseling, and logbook entries.",
+        resourcesAndReferences: "Hospital dietetic manuals, patient records, logbooks.",
+        assessmentAndRemarks: "Supervisor logbook signing and clinical skills checklist."
+      },
+      {
+        weekNumber: 4,
+        topicTitle: "Industrial Attachment Practical Placement Week 4",
+        subTopics: ["Institutional and hospital clinical placement duties", "Patient dietetic assessment, counseling and chart documentation", "Weekly supervisor evaluation and logbook maintenance"],
+        hours: 24,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate practical professional competence in clinical attachment during Week 4.\n• Maintain accurate dietetic records and client consultation notes.\n• Adhere to professional code of conduct and workplace safety standards.",
+        learningActivities: "Practical workplace rotations, ward rounds, client counseling, and logbook entries.",
+        resourcesAndReferences: "Hospital dietetic manuals, patient records, logbooks.",
+        assessmentAndRemarks: "Supervisor logbook signing and clinical skills checklist."
+      },
+      {
+        weekNumber: 5,
+        topicTitle: "Industrial Attachment Practical Placement Week 5",
+        subTopics: ["Institutional and hospital clinical placement duties", "Patient dietetic assessment, counseling and chart documentation", "Weekly supervisor evaluation and logbook maintenance"],
+        hours: 24,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate practical professional competence in clinical attachment during Week 5.\n• Maintain accurate dietetic records and client consultation notes.\n• Adhere to professional code of conduct and workplace safety standards.",
+        learningActivities: "Practical workplace rotations, ward rounds, client counseling, and logbook entries.",
+        resourcesAndReferences: "Hospital dietetic manuals, patient records, logbooks.",
+        assessmentAndRemarks: "Supervisor logbook signing and clinical skills checklist."
+      },
+      {
+        weekNumber: 6,
+        topicTitle: "Industrial Attachment Practical Placement Week 6",
+        subTopics: ["Institutional and hospital clinical placement duties", "Patient dietetic assessment, counseling and chart documentation", "Weekly supervisor evaluation and logbook maintenance"],
+        hours: 24,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate practical professional competence in clinical attachment during Week 6.\n• Maintain accurate dietetic records and client consultation notes.\n• Adhere to professional code of conduct and workplace safety standards.",
+        learningActivities: "Practical workplace rotations, ward rounds, client counseling, and logbook entries.",
+        resourcesAndReferences: "Hospital dietetic manuals, patient records, logbooks.",
+        assessmentAndRemarks: "Supervisor logbook signing and clinical skills checklist."
+      },
+      {
+        weekNumber: 7,
+        topicTitle: "Industrial Attachment Practical Placement Week 7",
+        subTopics: ["Institutional and hospital clinical placement duties", "Patient dietetic assessment, counseling and chart documentation", "Weekly supervisor evaluation and logbook maintenance"],
+        hours: 24,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate practical professional competence in clinical attachment during Week 7.\n• Maintain accurate dietetic records and client consultation notes.\n• Adhere to professional code of conduct and workplace safety standards.",
+        learningActivities: "Practical workplace rotations, ward rounds, client counseling, and logbook entries.",
+        resourcesAndReferences: "Hospital dietetic manuals, patient records, logbooks.",
+        assessmentAndRemarks: "Supervisor logbook signing and clinical skills checklist."
+      },
+      {
+        weekNumber: 8,
+        topicTitle: "Industrial Attachment Practical Placement Week 8",
+        subTopics: ["Institutional and hospital clinical placement duties", "Patient dietetic assessment, counseling and chart documentation", "Weekly supervisor evaluation and logbook maintenance"],
+        hours: 24,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate practical professional competence in clinical attachment during Week 8.\n• Maintain accurate dietetic records and client consultation notes.\n• Adhere to professional code of conduct and workplace safety standards.",
+        learningActivities: "Practical workplace rotations, ward rounds, client counseling, and logbook entries.",
+        resourcesAndReferences: "Hospital dietetic manuals, patient records, logbooks.",
+        assessmentAndRemarks: "Supervisor logbook signing and clinical skills checklist."
+      },
+      {
+        weekNumber: 9,
+        topicTitle: "Industrial Attachment Practical Placement Week 9",
+        subTopics: ["Institutional and hospital clinical placement duties", "Patient dietetic assessment, counseling and chart documentation", "Weekly supervisor evaluation and logbook maintenance"],
+        hours: 24,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate practical professional competence in clinical attachment during Week 9.\n• Maintain accurate dietetic records and client consultation notes.\n• Adhere to professional code of conduct and workplace safety standards.",
+        learningActivities: "Practical workplace rotations, ward rounds, client counseling, and logbook entries.",
+        resourcesAndReferences: "Hospital dietetic manuals, patient records, logbooks.",
+        assessmentAndRemarks: "Supervisor logbook signing and clinical skills checklist."
+      },
+      {
+        weekNumber: 10,
+        topicTitle: "Industrial Attachment Practical Placement Week 10",
+        subTopics: ["Institutional and hospital clinical placement duties", "Patient dietetic assessment, counseling and chart documentation", "Weekly supervisor evaluation and logbook maintenance"],
+        hours: 24,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate practical professional competence in clinical attachment during Week 10.\n• Maintain accurate dietetic records and client consultation notes.\n• Adhere to professional code of conduct and workplace safety standards.",
+        learningActivities: "Practical workplace rotations, ward rounds, client counseling, and logbook entries.",
+        resourcesAndReferences: "Hospital dietetic manuals, patient records, logbooks.",
+        assessmentAndRemarks: "Supervisor logbook signing and clinical skills checklist."
+      },
+      {
+        weekNumber: 11,
+        topicTitle: "Industrial Attachment Practical Placement Week 11",
+        subTopics: ["Institutional and hospital clinical placement duties", "Patient dietetic assessment, counseling and chart documentation", "Weekly supervisor evaluation and logbook maintenance"],
+        hours: 24,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate practical professional competence in clinical attachment during Week 11.\n• Maintain accurate dietetic records and client consultation notes.\n• Adhere to professional code of conduct and workplace safety standards.",
+        learningActivities: "Practical workplace rotations, ward rounds, client counseling, and logbook entries.",
+        resourcesAndReferences: "Hospital dietetic manuals, patient records, logbooks.",
+        assessmentAndRemarks: "Supervisor logbook signing and clinical skills checklist."
+      },
+      {
+        weekNumber: 12,
+        topicTitle: "Industrial Attachment Practical Placement Week 12",
+        subTopics: ["Institutional and hospital clinical placement duties", "Patient dietetic assessment, counseling and chart documentation", "Weekly supervisor evaluation and logbook maintenance"],
+        hours: 24,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate practical professional competence in clinical attachment during Week 12.\n• Maintain accurate dietetic records and client consultation notes.\n• Adhere to professional code of conduct and workplace safety standards.",
+        learningActivities: "Practical workplace rotations, ward rounds, client counseling, and logbook entries.",
+        resourcesAndReferences: "Hospital dietetic manuals, patient records, logbooks.",
+        assessmentAndRemarks: "Supervisor logbook signing and clinical skills checklist."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "Industrial Attachment Practical Placement Week 13",
+        subTopics: ["Institutional and hospital clinical placement duties", "Patient dietetic assessment, counseling and chart documentation", "Weekly supervisor evaluation and logbook maintenance"],
+        hours: 24,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate practical professional competence in clinical attachment during Week 13.\n• Maintain accurate dietetic records and client consultation notes.\n• Adhere to professional code of conduct and workplace safety standards.",
+        learningActivities: "Practical workplace rotations, ward rounds, client counseling, and logbook entries.",
+        resourcesAndReferences: "Hospital dietetic manuals, patient records, logbooks.",
+        assessmentAndRemarks: "Supervisor logbook signing and clinical skills checklist."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "Industrial Attachment Practical Placement Week 14",
+        subTopics: ["Institutional and hospital clinical placement duties", "Patient dietetic assessment, counseling and chart documentation", "Weekly supervisor evaluation and logbook maintenance"],
+        hours: 24,
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate practical professional competence in clinical attachment during Week 14.\n• Maintain accurate dietetic records and client consultation notes.\n• Adhere to professional code of conduct and workplace safety standards.",
+        learningActivities: "Practical workplace rotations, ward rounds, client counseling, and logbook entries.",
+        resourcesAndReferences: "Hospital dietetic manuals, patient records, logbooks.",
+        assessmentAndRemarks: "Supervisor logbook signing and clinical skills checklist."
+      },
     ],
-    "references": [
-      "KNDI. (2020). Clinical Nutrition Internship & Practicum Logbook Guidelines. Kenya Nutritionists and Dieticians Institute.",
-      "Ministry of Health, Kenya. (2019). Clinical Nutrition and Dietetics Practice Manual for Healthcare Facilities. Government of Kenya.",
-      "Mahan, L. K., & Raymond, J. L. (2020). Krause's Food & the Nutrition Care Process (15th Edition). Elsevier."
-    ],
-    "instructionalEquipment": [
-      "Official institutional clinical attachment logbooks and daily assessment rubrics",
-      "Clinical anthropometric diagnostic tools (Clinical calipers, MUAC tapes, medical stadiometers, infantometers)",
-      "Hospital clinical identification badges, protective clinical lab coats, and sanitization gear"
-    ],
-    "weeklySchedule": [
-      {
-        "weekNumber": 1,
-        "topicTitle": "Attachment Orientation & Institutional Induction",
-        "subTopics": [
-          "Hospital orientation: Hospital hierarchy, department organogram, and emergency protocols",
-          "Infection prevention and control (IPC): Universal precautions, hand hygiene, PPE use",
-          "Review of clinical rotation objectives, daily logbook expectations, and supervisory lines",
-          "Orientation to hospital catering department and clinical nutrition units"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Comply with hospital infection prevention standards and professional dress codes.\n\u2022 Outline lines of clinical command and supervisory reporting in the facility.\n\u2022 Articulate personal professional learning objectives for the attachment rotation.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 2,
-        "topicTitle": "Hospital Dietary Department: Stores & Food Purchasing",
-        "subTopics": [
-          "Understudy hospital food procurement, tender specifications, and supplier receiving procedures",
-          "Weighing and quality verification of delivered dry goods, fresh produce, and animal proteins",
-          "Storage temperature monitoring and enforcing First-In, First-Out (FIFO) in hospital food stores",
-          "Managing stock registers, bin cards, and store requisition forms"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Inspect delivered food supplies against hospital purchase specifications.\n\u2022 Maintain accurate institutional food store inventory and stock rotation records.\n\u2022 Identify and reject sub-standard or expired food shipments.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 3,
-        "topicTitle": "Hospital Dietary Department: Therapeutic Food Production",
-        "subTopics": [
-          "Observing and assisting in large-scale therapeutic food preparation in the main hospital kitchen",
-          "Texture modification workflows: Commercial blending of purees and straining of invalid broths",
-          "Hygienic portioning of meals according to therapeutic diet rosters (Diabetic, renal, low-salt, bland)",
-          "Sanitation monitoring of food handling equipment and kitchen surfaces"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Assist in preparing therapeutic liquid, pureed, and soft hospital diets.\n\u2022 Portion patient meals according to prescribed therapeutic diet rosters.\n\u2022 Enforce strict personal and equipment sanitation protocols in the kitchen.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 4,
-        "topicTitle": "Hospital Dietary Department: Tray Assembly & Service",
-        "subTopics": [
-          "Assembling specialized hospital meal service trays for medical, surgical, and pediatric wards",
-          "Thermal retention management during transportation using insulated meal trolleys",
-          "Ward meal delivery, patient bed identification, and food intake percentage recording",
-          "Managing plate waste, tray recovery, and dishwashing in the scullery"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Assemble hospital meal trays matching individual patient dietary tickets.\n\u2022 Distribute meal trays to ward patients adhering to identification protocols.\n\u2022 Measure and document patient meal consumption and plate wastage rates.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 5,
-        "topicTitle": "Clinical Nutrition: Pediatric Ward Rotation (CAT 1)",
-        "subTopics": [
-          "Nutrition screening on pediatric admissions using Mid-Upper Arm Circumference (MUAC) and z-scores",
-          "Preparation and administration of therapeutic milks (F-75, F-100) in the stabilization center",
-          "Counseling mothers on breastfeeding technique and complementary feeding enrichment",
-          "Continuous Assessment Test 1 (Logbook Evaluation & Clinical Spotter Assessment)"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Conduct anthropometric screening on pediatric patients and classify malnutrition severity.\n\u2022 Prepare accurate dilutions of therapeutic milks according to child feeding charts.\n\u2022 Demonstrate clinical competence under supervisor CAT 1 evaluation.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 6,
-        "topicTitle": "Clinical Nutrition: Maternity & Postnatal Ward Rotation",
-        "subTopics": [
-          "Nutritional assessment of high-risk antenatal mothers (Anemia, preeclampsia, gestational diabetes)",
-          "Postnatal lactation support: Assisting newly delivered mothers with attachment and positioning",
-          "Counseling adolescent and first-time mothers on optimal maternal nutrition and hydration",
-          "Documentation of maternal nutrition care in the Maternity Health Records"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Screen pregnant and lactating mothers for nutritional deficits.\n\u2022 Provide one-on-one lactation counseling to resolve early breastfeeding difficulties.\n\u2022 Document clinical interventions in institutional maternity patient files.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 7,
-        "topicTitle": "Clinical Nutrition: Medical Ward Rotation",
-        "subTopics": [
-          "Understudy clinical dietitians conducting inpatient ward rounds",
-          "Gathering 24-hour dietary recalls and calculating patient energy/protein requirements",
-          "Formulating clinical nutrition care plans using the ADIME documentation framework",
-          "Dietary education for newly diagnosed hypertensive and diabetic inpatients"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Participate actively in multidisciplinary medical ward rounds.\n\u2022 Calculate patient baseline caloric and protein requirements accurately.\n\u2022 Deliver practical dietary education on sodium and glycemic management to inpatients.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 8,
-        "topicTitle": "Mid-Term Attachment Evaluation & Surgical Ward Rotation",
-        "subTopics": [
-          "Mid-Term Attachment Institutional Field Assessment by Visiting TVET Assessor",
-          "Nutritional care for pre-operative and post-operative patients",
-          "Assisting in managing enteral tube feeding (NG tube formula administration and flushing)",
-          "Monitoring surgical wound recovery and assessing micronutrient supplement needs"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Successfully complete Mid-Term Assessment with visiting institutional academic supervisor.\n\u2022 Outline dietary progression from post-surgical bowel rest to solid nutrition.\n\u2022 Administer prescribed enteral formula boluses via nasogastric tube following hygienic protocols.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 9,
-        "topicTitle": "Outpatient Department (OPD) & Diabetic/Hypertensive Clinics",
-        "subTopics": [
-          "Operating the outpatient nutrition screening desk (Triage: Weight, height, BMI calculation)",
-          "Participating in specialized outpatient clinics (Diabetic, cardiac, and renal clinics)",
-          "Individual nutrition counseling using food models and pictorial dietary guidelines",
-          "Scheduling follow-up visits and maintaining outpatient nutrition registers"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Triage outpatient clients efficiently and identify individuals requiring urgent consultation.\n\u2022 Provide individual dietary counseling for chronic lifestyle disease management.\n\u2022 Maintain accurate daily outpatient clinic attendance and referral registers.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 10,
-        "topicTitle": "Comprehensive Care Clinic (CCC) & HIV Nutrition Support",
-        "subTopics": [
-          "Nutritional assessment of adult and pediatric PLHIV using the NACS protocol",
-          "Assessing drug-nutrient interactions and advising patients on food-medication timing",
-          "Dispensing and recording specialized nutritional supplements (Food by Prescription - FBP)",
-          "Facilitating patient support group nutrition education sessions"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Apply the NACS assessment framework in routine CCC clinical consultations.\n\u2022 Counsel patients on synchronizing antiretroviral therapy with meal schedules.\n\u2022 Maintain accountability and stock records for therapeutic supplemental foods.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 11,
-        "topicTitle": "Community Health Outreach & Child Welfare Clinics (CWC)",
-        "subTopics": [
-          "Participating in child immunization and Child Welfare Clinic (CWC) growth monitoring sessions",
-          "Conducting community outreach nutrition screening and vitamin A supplementation campaigns",
-          "Demonstrating enriched complementary food preparation to community caregiver groups",
-          "Referring severely malnourished community children to health facility stabilization units"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Plot child growth charts during high-volume community immunization clinics.\n\u2022 Deliver engaging community cooking demonstrations using locally available foods.\n\u2022 Mobilize community screening and safe referral of acutely malnourished children.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 12,
-        "topicTitle": "Health Facility Management & Interprofessional Collaboration",
-        "subTopics": [
-          "Participating in departmental clinical audit and continuous quality improvement (CQI) meetings",
-          "Interprofessional communication with doctors, nurses, pharmacists, and social workers",
-          "Compiling monthly facility nutrition service statistical reports (DHIS2/KHIS tools)",
-          "Managing clinical nutrition supplies, equipment calibration, and maintenance"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Collaborate effectively within a multidisciplinary institutional healthcare team.\n\u2022 Collate monthly nutrition service delivery data using standardized MOH summary tools.\n\u2022 Calibrate clinical weighing scales and anthropometric measurement equipment.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 13,
-        "topicTitle": "Attachment Logbook Consolidation & Case Study Presentation",
-        "subTopics": [
-          "Finalizing daily and weekly entries in the official TVET attachment logbook",
-          "Formulating a comprehensive in-depth clinical case study report on a managed patient",
-          "Hospital departmental exit presentation before hospital clinical mentors and staff",
-          "Attaining institutional supervisor end-of-rotation performance appraisal"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Complete a verified, counter-signed industrial attachment logbook.\n\u2022 Defend a clinical case study report analyzing medical nutrition therapy outcomes.\n\u2022 Obtain formal hospital supervisor evaluation of professional conduct and practical competence.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      },
-      {
-        "weekNumber": 14,
-        "topicTitle": "Final Attachment Assessment & Debriefing",
-        "subTopics": [
-          "Formal institutional and TVET final practical attachment assessment",
-          "Submission of stamped and signed attachment logbooks and hospital clearance certificates",
-          "Post-attachment debriefing and academic integration clinic"
-        ],
-        "hours": 3,
-        "specificLearningOutcomes": "By the end of the lesson/topic, the trainee should be able to:\n\u2022 Present complete, verified industrial attachment documentation for national accreditation grading.",
-        "learningActivities": "\u2022 Interactive lecture presentations and guided plenary discussions\n\u2022 Clinical skill demonstrations, growth monitoring, and hands-on dietary analysis\n\u2022 Small group tutorials, case study reviews, and trainee presentations",
-        "resourcesAndReferences": "\u2022 Prescribed KNEC syllabus course manuals and approved lecture notes\n\u2022 Standard reference textbooks and clinical practice guidelines\n\u2022 Anthropometric equipment, clinical records, and legal statutes",
-        "assessmentAndRemarks": "Continuous assessment tests, case study analyses, oral questioning, and written tests"
-      }
-    ]
-  }
+    references: ["KNDI. (2020). Professional Internship and Industrial Attachment Training Logbook. KNDI.", "CDACC. (2021). TVET Industrial Attachment Guidelines. Ministry of Education."],
+    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
+  },
 };

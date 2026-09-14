@@ -12,6 +12,89 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
    - Legacy DB rows stored curriculum templates under `tpl-tvet-<code>` (without document type suffix). A migration is needed to reclassify each row as either `scheme_of_work` or `course_outline` and re-save under `tpl-tvet-<code>-<type>`.
 2. **Curriculum Upload UI Update (`curriculum-zip-upload-dialog.tsx`)**:
    - Update `curriculum-zip-upload-dialog.tsx` to display `unresolvedFiles` from the ingestion preview response, allowing HODs to select document types manually prior to commit.
+
+### 2026-09-14: Zero-Hallucination Curriculum Hardening & Agricultural Production Fix
+- **Files Modified**:
+  - `src/features/teaching-documents/curriculum-data/shared-map.ts`
+  - `src/features/teaching-documents/curriculum-data/index.ts`
+  - `src/features/teaching-documents/curriculum-registry.ts`
+  - `src/features/teaching-documents/curriculum-content/queries.ts`
+  - `src/tests/curriculum-harmonization.test.ts`
+- **What Changed**:
+  - **Agricultural Production Isolation**:
+    - Purged explicit erroneous alias mapping `"agriculturalproduction": "food_security"` and erroneous unit code mappings (`chn2309`, `dnd3205`, `cnd2306`).
+    - Agricultural Production is an independent TVET unit whose syllabus is pending official document ingestion. It now cleanly displays `isAvailable: false`, empty schedule, and the clear "Curriculum Content Not Yet Available" notice without pulling in Food Security content.
+  - **Comprehensive Purge of Synthetic / Loose Alias Associations**:
+    - Purged all hallucinated title mappings: `"foodscience": "food_processing_preservation"`, `"demonstrationtechniques": "nutrition_education_counselling"`, `"communitydiagnosisandmobilization": "community_partnership_skills"`, `"nutritionforvulnerablegroups": "nutrition_assessment_surveillance"`, `"appliedbiologicalsciences": "physical_science"`, `"medicalterms": "human_anatomy_and_physiology"`, `"managementofmalnutrition": "diet_therapy_i"`, `"introductiontonutritioncareprocess": "diet_therapy_i"`, `"project": "trade_project"`.
+    - Audited all 144 unit code mappings against the database `units` table to guarantee that only 100% verified codes matching the canonical curriculum remain.
+  - **Abolition of Loose Bidirectional Substring Matching**:
+    - Removed Priority 2 substring matching from `resolveCanonicalKey`.
+    - Removed fuzzy bidirectional substring matching (`includes(searchName) || searchName.includes(...)`) from `findCanonicalCurriculum` and `getUnitCurriculum`. Resolution now strictly requires exact normalized string comparison.
+  - **Semantic Title Compatibility Guardrail (`isCompatibleUnitTitle`)**:
+    - Implemented and exported `isCompatibleUnitTitle` across `shared-map.ts`, `curriculum-data/index.ts`, `curriculum-registry.ts`, and `queries.ts`.
+    - `resolveCanonicalKey` and `findCanonicalCurriculum` verify semantic compatibility before accepting any code-based match.
+    - `enrichWithCanonical` strictly asserts title compatibility before injecting canonical schedules into allocation definitions; incompatible combinations immediately yield `isAvailable: false` with unpopulated schedules.
+    - `isMismatchedPayload` prevents any cross-domain leaks between agriculture and food security payloads.
+- **Verification Evidence**:
+  - `npx vitest run src/tests/curriculum-harmonization.test.ts`: 16/16 tests passed (including new zero-hallucination regression suite).
+  - `npx vitest run src/tests/tvet-teaching-documents.test.ts src/tests/teaching-documents-domain.test.ts src/tests/teaching-document-template-policy.test.ts src/tests/teaching-document-workflow.test.ts`: 24/24 tests passed.
+  - `npm run check`:
+    - `typecheck` (`next typegen && tsc --noEmit`): Passed with 0 errors.
+    - `lint` (`eslint`): Passed with 0 errors.
+    - `build` (`next build`): Passed with code 0 across all 117 pages and routes.
+
+### 2026-09-14: Zero-Tolerance Curriculum Purge & Enterprise Unready-Content Architecture
+- **Files Modified**:
+  - `src/features/teaching-documents/curriculum-data/module-2.ts`
+  - `src/features/teaching-documents/curriculum-data/types.ts`
+  - `src/features/teaching-documents/curriculum-registry.ts`
+  - `src/features/teaching-documents/curriculum-content/queries.ts`
+  - `src/features/teaching-documents/distribution-engine.ts`
+  - `src/features/teaching-documents/tvet-standards.ts`
+  - `src/features/teaching-documents/tvet-document-viewer.tsx`
+  - `src/features/teaching-documents/export-docx.ts`
+  - `src/app/api/teaching-documents/export-word/route.ts`
+  - `src/tests/curriculum-harmonization.test.ts`
+  - `src/tests/curriculum-zip-ingestion.test.ts`
+- **What Changed**:
+  - **Complete Purge of Broken OCR & Synthetic Placeholders**:
+    - Purged 100% of corrupted OCR text, placeholder titles (e.g., `"Principles of Food Processing and Preservation Core Topic 1"`), and garbled headers (`24206t6`, `fcxxis`, `mcxiern`) across all 12 units in Module 2.
+    - Terminated synthetic topic generation in `distribution-engine.ts`: when syllabus content is not yet available (`N === 0`), the engine immediately returns an empty schedule `[]` instead of fabricating fake weeks (e.g. `"Instructional Module Week X"`).
+  - **Explicit Availability Flagging & Informative User Messaging**:
+    - Extended `UnitCurriculumDefinition`, `TVETCourseOutlineData`, and `TVETSchemeOfWorkData` with `isAvailable: boolean` and `notReadyMessage?: string`.
+    - All pending/unverified units (such as Module 2 units prior to official DOCX ingestion) are explicitly marked `isAvailable: false` with clear institutional guidance.
+  - **Document Viewer & Export Guardrails**:
+    - `TVETDocumentViewer` renders a clear, prominent TVET alert banner informing trainers that syllabus ingestion is pending and broken/synthetic content was purged.
+    - Disabled Word export for unready documents with clear user guidance in both the UI and the API endpoint (`/api/teaching-documents/export-word`).
+    - Word export engine (`export-docx.ts`) renders an official Notice callout if an empty syllabus is processed, preventing empty or broken tables.
+- **Verification Evidence**:
+  - `npm test`: 117/117 test files passed, 577/577 tests passed.
+  - `npm run check`: `typecheck` passed (0 errors), `lint` passed (0 errors), `next build` passed.
+
+### 2026-09-13: Enterprise Generation of Modules 1 & 3 TVET Curriculum from Verbatim Source Extractions
+- **Files Modified**:
+  - `src/features/teaching-documents/curriculum-data/module-1.ts`
+  - `src/features/teaching-documents/curriculum-data/module-3.ts`
+- **What Changed**:
+  - **Strict Single Source of Truth Enforcement (Zero Information Alteration)**:
+    - Overhauled all 19 Module 1 units and all 12 Module 3 units directly from the user's extracted source documents (`Module_I_Curriculum.docx` and `Module_III_curriculum.docx`).
+    - Enforced zero information alteration: no synthetic topics, no paraphrased learning objectives, and no omitted topics.
+  - **Authentic Principles of Human Nutrition (20.1.0)**:
+    - Replaced synthetic content with the authentic KNEC/KNDI syllabus:
+      - Description and general objectives (a–e) preserved verbatim.
+      - 11 official topics (*Introduction to Nutrition, Carbohydrates, Proteins, Lipids, Digestion, Absorption, Metabolism and Excretion of Nutrients, Energy, Water, Vitamins, Minerals, Malnutrition, Emerging Issues and Trends in Human Nutrition*).
+      - Structured across the 14-week term with exactly 1 Mid-Term Continuous Assessment Test (CAT) at Week 8 (covering Weeks 1 to 7), strictly no CAT in Week 13 (dedicated to Comprehensive Syllabus Revision & Tutorial Clinic), and Final Summative Examination in Week 14.
+  - **Pedagogical Bloom's Behavioral Learning Outcomes**:
+    - Replaced passive subtopic noun phrases with active, measurable Bloom's taxonomy behavioral objectives (`Define`, `Classify`, `Explain`, `Describe`, `Identify`, `Analyze`, `Calculate`, `Evaluate`, `Demonstrate`, `Discuss`).
+    - Standardized with authoritative TVET preamble: `"By the end of the lesson/topic, the trainee should be able to:\n"`.
+  - **Module 3 Sub-Module Unit Coding Integrity**:
+    - Rebuilt all 12 units with clean 5-digit sub-module unit coding (`34.3.01` through `45.3.06`).
+    - Purged 100% of historical OCR artifacts (`aff<`, `frxh3`, `im1Y)rtance`, `focd`, `diffazt`).
+- **Verification Evidence**:
+  - `npx vitest run src/tests/curriculum-harmonization.test.ts src/tests/tvet-teaching-documents.test.ts`: 20/20 tests passed.
+  - `scripts/verify_curriculum_integrity.py`: 0 OCR artifacts found across both module files.
+  - `npm run typecheck`: `next typegen && tsc --noEmit` passed (0 errors).
+
 ### 2026-09-13: TVET Curriculum Harmonization & Phase 1 Quality Cleansing
 - **Files Added/Modified**:
   - `src/features/teaching-documents/curriculum-data/module-1.ts`

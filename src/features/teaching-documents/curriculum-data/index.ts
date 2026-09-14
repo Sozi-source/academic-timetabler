@@ -9,7 +9,7 @@
 import { MODULE_1_CURRICULUM } from './module-1';
 import { MODULE_2_CURRICULUM } from './module-2';
 import { MODULE_3_CURRICULUM } from './module-3';
-import { resolveCanonicalKey } from './shared-map';
+import { resolveCanonicalKey, isCompatibleUnitTitle } from './shared-map';
 import type { CanonicalCurriculumUnit, UnitCurriculumDefinition } from './types';
 
 export * from './types';
@@ -45,6 +45,7 @@ export function getCanonicalCurriculumByKey(canonicalKey: string): CanonicalCurr
  * Finds a canonical curriculum unit using code and/or unit title.
  * Automatically resolves shared aliases between CND and DND so both programs
  * share the exact same underlying curriculum resources.
+ * Strictly enforces zero-hallucination exact matching.
  */
 export function findCanonicalCurriculum(
   unitCode: string,
@@ -53,26 +54,35 @@ export function findCanonicalCurriculum(
   // 1. Resolve via shared alias map
   const canonicalKey = resolveCanonicalKey(unitCode, unitName);
   if (canonicalKey && MASTER_CURRICULUM_REGISTRY[canonicalKey]) {
-    return MASTER_CURRICULUM_REGISTRY[canonicalKey];
+    const candidate = MASTER_CURRICULUM_REGISTRY[canonicalKey];
+    if (unitName && !isCompatibleUnitTitle(unitName, candidate.unitName)) {
+      return undefined;
+    }
+    return candidate;
   }
 
   // 2. Direct key lookup if unitCode itself is a canonicalKey
   if (MASTER_CURRICULUM_REGISTRY[unitCode]) {
-    return MASTER_CURRICULUM_REGISTRY[unitCode];
+    const candidate = MASTER_CURRICULUM_REGISTRY[unitCode];
+    if (unitName && !isCompatibleUnitTitle(unitName, candidate.unitName)) {
+      return undefined;
+    }
+    return candidate;
   }
 
-  // 3. Fallback fuzzy search across unitName and aliases
-  const searchName = (unitName || unitCode).toLowerCase().trim();
+  // 3. Fallback exact normalized search across unitName and aliases (NO loose bidirectional substring)
+  const normSearch = (unitName || unitCode).toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (!normSearch) return undefined;
+
   for (const unit of Object.values(MASTER_CURRICULUM_REGISTRY)) {
-    if (
-      unit.unitName.toLowerCase() === searchName ||
-      unit.unitName.toLowerCase().includes(searchName) ||
-      searchName.includes(unit.unitName.toLowerCase())
-    ) {
+    if (unit.unitName.toLowerCase().replace(/[^a-z0-9]/g, '') === normSearch) {
       return unit;
     }
     for (const alias of unit.aliases) {
-      if (alias.toLowerCase() === searchName) {
+      if (alias.toLowerCase().replace(/[^a-z0-9]/g, '') === normSearch) {
+        if (unitName && !isCompatibleUnitTitle(unitName, unit.unitName)) {
+          continue;
+        }
         return unit;
       }
     }

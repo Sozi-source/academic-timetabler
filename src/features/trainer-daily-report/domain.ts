@@ -26,6 +26,20 @@ export function normalizeDailyReportDate(
   return Number.isNaN(parsed.getTime()) ? today : value;
 }
 
+export function shiftDailyReportDate(value: string, days: number): string {
+  const norm = normalizeDailyReportDate(value);
+  const d = new Date(`${norm}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'UTC',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(d);
+  const getPart = (type: string) => parts.find((p) => p.type === type)?.value ?? '';
+  return `${getPart('year')}-${getPart('month')}-${getPart('day')}`;
+}
+
 export function formatDailyReportDate(value?: string | null): string {
   if (!value) return '';
   try {

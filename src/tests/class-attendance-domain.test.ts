@@ -5,6 +5,7 @@ import {
 } from 'vitest';
 
 import {
+  ABSENT_CIRCUMSTANCES,
   canCompleteClassAttendance,
   classAttendanceOptions,
   classAttendanceStatusLabel,
@@ -14,6 +15,12 @@ import {
 } from '@/features/class-attendance/domain';
 
 describe('class attendance domain', () => {
+  it('provides predefined unavoidable absence circumstances', () => {
+    expect(ABSENT_CIRCUMSTANCES).toContain('Leave of absence');
+    expect(ABSENT_CIRCUMSTANCES).toContain('Pending unit registration');
+    expect(ABSENT_CIRCUMSTANCES).toContain('Medical / Sickness');
+    expect(ABSENT_CIRCUMSTANCES).toContain('Official college duty');
+  });
   it('uses only present and absent as final attendance states', () => {
     expect(
       classAttendanceOptions,

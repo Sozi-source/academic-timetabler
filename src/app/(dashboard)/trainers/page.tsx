@@ -204,90 +204,99 @@ export default async function StaffManagementPage() {
             <p className="mt-2 text-xs font-semibold text-gray-900">No trainer records found</p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-100">
-            {accessRecords.map((record) => (
-              <article
-                key={record.trainerId}
-                className="grid gap-3 px-5 py-3.5 md:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)_9rem_auto] md:items-center transition hover:bg-gray-50/50"
-              >
-                <div className="min-w-0">
-                  <Link
-                    href={`/trainers/${record.trainerId}`}
-                    className="truncate text-xs font-bold text-gray-900 transition hover:text-[#033B36] hover:underline block"
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs min-w-[760px]">
+              <thead className="border-b border-gray-100 bg-gray-50/75 text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                <tr>
+                  <th scope="col" className="px-5 py-3 w-[28%]">Trainer</th>
+                  <th scope="col" className="px-5 py-3 w-[32%]">Workspace Details</th>
+                  <th scope="col" className="px-5 py-3 w-[16%]">Access Status</th>
+                  <th scope="col" className="px-5 py-3 w-[24%] text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {accessRecords.map((record) => (
+                  <tr
+                    key={record.trainerId}
+                    className="transition hover:bg-gray-50/50"
                   >
-                    {record.fullName}
-                  </Link>
-                  <p className="mt-0.5 truncate text-[11px] text-gray-500">
-                    {record.email ?? 'No email specified'}
-                  </p>
-                </div>
+                    <td className="px-5 py-3.5 align-middle">
+                      <Link
+                        href={`/trainers/${record.trainerId}`}
+                        className="truncate text-xs font-bold text-gray-900 transition hover:text-[#033B36] hover:underline block"
+                      >
+                        {record.fullName}
+                      </Link>
+                      <p className="mt-0.5 truncate text-[11px] text-gray-500">
+                        {record.email ?? 'No email specified'}
+                      </p>
+                    </td>
 
-                <div className="min-w-0">
-                  <p className="text-xs font-medium text-gray-700">
-                    {trainerAccessDetail(record)}
-                  </p>
-                  {record.profileRole ? (
-                    <p className="mt-0.5 text-[10px] text-gray-400">
-                      Profile Role: <span className="font-semibold text-gray-600">{record.profileRole}</span>
-                    </p>
-                  ) : null}
-                </div>
+                    <td className="px-5 py-3.5 align-middle">
+                      <p className="text-xs font-medium text-gray-700">
+                        {trainerAccessDetail(record)}
+                      </p>
+                      {record.profileRole ? (
+                        <p className="mt-0.5 text-[10px] text-gray-400">
+                          Profile Role: <span className="font-semibold text-gray-600">{record.profileRole}</span>
+                        </p>
+                      ) : null}
+                    </td>
 
-                <div>
-                  <Badge
-                    variant={
-                      record.accessState === 'linked'
-                        ? 'success'
-                        : record.accessState === 'ready_to_link'
-                          ? 'primary'
-                          : 'neutral'
-                    }
-                  >
-                    {trainerAccessLabel(record.accessState)}
-                  </Badge>
-                </div>
+                    <td className="px-5 py-3.5 align-middle whitespace-nowrap">
+                      <Badge
+                        variant={
+                          record.accessState === 'linked'
+                            ? 'success'
+                            : record.accessState === 'ready_to_link'
+                              ? 'primary'
+                              : 'neutral'
+                        }
+                        className="inline-flex items-center gap-1"
+                      >
+                        {record.accessState === 'linked' ? (
+                          <CheckCircle2 className="size-3 text-emerald-600" aria-hidden="true" />
+                        ) : null}
+                        {record.accessState === 'linked' ? 'Active' : trainerAccessLabel(record.accessState)}
+                      </Badge>
+                    </td>
 
-                <div className="flex flex-wrap items-center gap-2 md:justify-self-end">
-                  {canProvisionTrainerAccess(record.accessState) ? (
-                    <TrainerAccessAction trainerId={record.trainerId} />
-                  ) : record.accessState === 'linked' ? (
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 mr-1">
-                      <CheckCircle2 className="size-3.5 text-emerald-600" />
-                      Active
-                    </span>
-                  ) : record.accessState === 'email_required' ? (
-                    <Link
-                      href={`/timetable/trainers/${record.trainerId}/edit`}
-                      className="text-xs font-semibold text-[#033B36] hover:underline"
-                    >
-                      Add email
-                    </Link>
-                  ) : (
-                    <span className="text-xs text-gray-400 italic">
-                      Awaiting setup
-                    </span>
-                  )}
+                    <td className="px-5 py-3.5 align-middle text-right whitespace-nowrap">
+                      <div className="inline-flex items-center justify-end gap-2">
+                        {canProvisionTrainerAccess(record.accessState) ? (
+                          <TrainerAccessAction trainerId={record.trainerId} />
+                        ) : record.accessState === 'email_required' ? (
+                          <Link
+                            href={`/timetable/trainers/${record.trainerId}/edit`}
+                            className="inline-flex h-8 items-center justify-center rounded-lg border border-gray-200 bg-white px-2.5 text-xs font-semibold text-[#033B36] transition hover:bg-gray-50 hover:border-gray-300 shadow-2xs"
+                          >
+                            Add email
+                          </Link>
+                        ) : null}
 
-                  {record.email ? (
-                    <ResetTrainerPassword
-                      trainerId={record.trainerId}
-                      trainerName={record.fullName}
-                      trainerEmail={record.email}
-                      buttonVariant="outline"
-                      buttonSize="sm"
-                      buttonLabel="Password"
-                    />
-                  ) : null}
+                        {record.email ? (
+                          <ResetTrainerPassword
+                            trainerId={record.trainerId}
+                            trainerName={record.fullName}
+                            trainerEmail={record.email}
+                            buttonVariant="outline"
+                            buttonSize="sm"
+                            buttonLabel="Password"
+                          />
+                        ) : null}
 
-                  <Link
-                    href={`/trainers/${record.trainerId}`}
-                    className="inline-flex h-8 items-center justify-center rounded-lg border border-gray-200 bg-white px-2.5 text-xs font-medium text-gray-700 transition hover:bg-gray-50 hover:border-gray-300"
-                  >
-                    Profile
-                  </Link>
-                </div>
-              </article>
-            ))}
+                        <Link
+                          href={`/trainers/${record.trainerId}`}
+                          className="inline-flex h-8 items-center justify-center rounded-lg border border-gray-200 bg-white px-2.5 text-xs font-medium text-gray-700 transition hover:bg-gray-50 hover:border-gray-300 shadow-2xs"
+                        >
+                          Profile
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </section>

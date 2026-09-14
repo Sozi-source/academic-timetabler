@@ -19,8 +19,11 @@ function revalidateTrainerPages(
 ) {
   revalidatePath('/dashboard');
   revalidatePath('/timetable/trainers');
+  revalidatePath('/trainers');
 
   if (id) {
+    revalidatePath(`/trainers/${id}`);
+    revalidatePath(`/timetable/trainers/${id}`);
     revalidatePath(
       `/timetable/trainers/${id}/edit`,
     );

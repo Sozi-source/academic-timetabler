@@ -5,8 +5,10 @@ import {
   AlertCircle,
   ArrowLeft,
   Briefcase,
-  CalendarCheck,
+  CalendarCheck2,
+  CalendarX2,
   CheckCircle2,
+  CircleOff,
   Clock,
   Eye,
   GraduationCap,
@@ -24,6 +26,10 @@ import { Progress } from '@/components/ui/progress';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { getTrainerAccessRegister } from '@/features/trainer-access/queries';
 import { TrainerAccessAction } from '@/features/trainer-access/trainer-access-action';
+import {
+  setTrainerActiveAction,
+  setTrainerTimetableAvailabilityAction,
+} from '@/features/trainers/actions';
 import { ResetTrainerPassword } from '@/features/trainers/reset-trainer-password';
 import {
   getTrainerAllocations,
@@ -67,17 +73,6 @@ function formatEmploymentType(type: string): string {
       return 'Other';
     default:
       return type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-  }
-}
-
-function formatAvailabilityMode(mode: string): string {
-  switch (mode) {
-    case 'generally_available':
-      return 'Generally Available';
-    case 'selected_slots_only':
-      return 'Selected Slots Only';
-    default:
-      return mode.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
   }
 }
 
@@ -134,18 +129,18 @@ export default async function TrainerDetailsPage({
   const utilizationPercentage = Math.round((totalAllocatedHours / targetHours) * 100);
 
   return (
-    <div className="space-y-6">
-      {/* 1. Top Navigation & Action Toolbar (Unified, Zero Duplication) */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+    <div className="space-y-4">
+      {/* 1. Executive Top Navigation & Management Toolbar */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Link
           href="/trainers"
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-900 transition"
         >
           <ArrowLeft className="size-3.5" />
-          Back to Staff Directory
+          Staff Directory
         </Link>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           {accessState === 'ready_to_link' && (
             <TrainerAccessAction trainerId={trainer.id} />
           )}
@@ -154,58 +149,116 @@ export default async function TrainerDetailsPage({
             asChild
             variant="primary"
             size="sm"
-            className="bg-[#033B36] text-white hover:bg-[#022A26] shadow-xs"
+            className="bg-[#033B36] text-white hover:bg-[#022A26] shadow-2xs h-8 text-xs font-semibold"
           >
             <Link href={`/trainers/${trainer.id}/portal-view`}>
               <Eye className="size-3.5 mr-1.5" aria-hidden="true" />
-              <span>View Staff Portal</span>
+              Staff Portal
             </Link>
           </Button>
 
-          <ResetTrainerPassword
-            trainerId={trainer.id}
-            trainerName={trainer.fullName}
-            trainerEmail={trainer.email}
-            buttonVariant="outline"
-            buttonSize="sm"
-            buttonLabel="Reset Password"
-          />
-
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="outline" size="sm" className="h-8 text-xs font-semibold">
             <Link href={`/timetable/trainers/${trainer.id}/edit`}>
               <Pencil className="size-3.5 mr-1.5" aria-hidden="true" />
               Edit Profile
             </Link>
           </Button>
 
-          <Button asChild variant="outline" size="sm">
-            <Link href="/timetable/trainers/availability">
-              <CalendarCheck className="size-3.5 mr-1.5" aria-hidden="true" />
-              Availability
-            </Link>
-          </Button>
+          {/* Timetable Availability Action */}
+          {trainer.isActive ? (
+            <form action={setTrainerTimetableAvailabilityAction}>
+              <input type="hidden" name="id" value={trainer.id} />
+              <input
+                type="hidden"
+                name="isTimetableAvailable"
+                value={trainer.isTimetableAvailable ? 'false' : 'true'}
+              />
+              <Button
+                type="submit"
+                variant="outline"
+                size="sm"
+                className={`h-8 text-xs font-semibold ${
+                  trainer.isTimetableAvailable
+                    ? 'text-gray-700 hover:text-amber-800'
+                    : 'text-emerald-700 border-emerald-300 bg-emerald-50/60'
+                }`}
+                title={trainer.isTimetableAvailable ? 'Mark unavailable for timetabling' : 'Make available for timetabling'}
+              >
+                {trainer.isTimetableAvailable ? (
+                  <>
+                    <CalendarX2 className="size-3.5 mr-1.5 text-gray-400" aria-hidden="true" />
+                    Disable Timetable
+                  </>
+                ) : (
+                  <>
+                    <CalendarCheck2 className="size-3.5 mr-1.5 text-emerald-600" aria-hidden="true" />
+                    Enable Timetable
+                  </>
+                )}
+              </Button>
+            </form>
+          ) : null}
+
+          {/* Active / Deactivate Action */}
+          <form action={setTrainerActiveAction}>
+            <input type="hidden" name="id" value={trainer.id} />
+            <input type="hidden" name="isActive" value={trainer.isActive ? 'false' : 'true'} />
+            <Button
+              type="submit"
+              variant="outline"
+              size="sm"
+              className={`h-8 text-xs font-semibold ${
+                trainer.isActive
+                  ? 'text-gray-700 hover:text-rose-700 hover:border-rose-200'
+                  : 'text-emerald-700 border-emerald-300 bg-emerald-50/60'
+              }`}
+              title={trainer.isActive ? 'Deactivate trainer record' : 'Activate trainer record'}
+            >
+              {trainer.isActive ? (
+                <>
+                  <CircleOff className="size-3.5 mr-1.5 text-rose-500" aria-hidden="true" />
+                  Deactivate
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="size-3.5 mr-1.5 text-emerald-600" aria-hidden="true" />
+                  Activate
+                </>
+              )}
+            </Button>
+          </form>
+
+          {trainer.email ? (
+            <ResetTrainerPassword
+              trainerId={trainer.id}
+              trainerName={trainer.fullName}
+              trainerEmail={trainer.email}
+              buttonVariant="outline"
+              buttonSize="sm"
+              buttonLabel="Password"
+            />
+          ) : null}
         </div>
       </div>
 
-      {/* 2. Unified Hero Card: Identity, Badges & Workload Telemetry */}
+      {/* 2. Compact Executive Hero Card */}
       <section
         aria-label="Trainer Profile Overview"
-        className="rounded-2xl border border-gray-200 bg-white p-6 shadow-xs"
+        className="rounded-xl border border-gray-200 bg-white p-5 shadow-xs"
       >
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          {/* Identity & Status */}
-          <div className="flex items-start gap-4">
-            <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-[#033B36] text-base font-bold text-white shadow-xs">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-3.5">
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-[#033B36] text-sm font-bold text-white shadow-2xs">
               {getInitials(trainer.fullName)}
             </div>
 
-            <div className="space-y-1.5">
-              <div className="flex flex-wrap items-center gap-2.5">
-                <h1 className="text-xl font-bold text-gray-900 tracking-tight sm:text-2xl">
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-lg font-bold text-gray-900 tracking-tight">
                   {trainer.fullName}
                 </h1>
                 {trainer.staffNumber && (
-                  <span className="rounded-md bg-gray-100 px-2 py-0.5 font-mono text-xs font-semibold text-gray-700">
+                  <span className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-gray-700">
                     {trainer.staffNumber}
                   </span>
                 )}
@@ -217,13 +270,12 @@ export default async function TrainerDetailsPage({
                 <span>{trainer.homeDepartment || 'Human Nutrition & Dietetics'}</span>
               </p>
 
-              {/* Status Chips Row */}
-              <div className="flex flex-wrap items-center gap-2 pt-1">
-                {/* Active Staff */}
+              {/* Status Badges Row */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
                 <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                  className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold ${
                     trainer.isActive
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/70'
                       : 'bg-gray-100 text-gray-600 border border-gray-200'
                   }`}
                 >
@@ -232,54 +284,62 @@ export default async function TrainerDetailsPage({
                       trainer.isActive ? 'bg-emerald-500' : 'bg-gray-400'
                     }`}
                   />
-                  {trainer.isActive ? 'Active Staff' : 'Inactive'}
+                  {trainer.isActive ? 'Active' : 'Inactive'}
                 </span>
 
-                {/* Workspace State */}
+                <span
+                  className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold ${
+                    trainer.isTimetableAvailable
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/70'
+                      : 'bg-amber-50 text-amber-800 border border-amber-200'
+                  }`}
+                >
+                  <span
+                    className={`size-1.5 rounded-full ${
+                      trainer.isTimetableAvailable ? 'bg-emerald-500' : 'bg-amber-500'
+                    }`}
+                  />
+                  {trainer.isTimetableAvailable ? 'Timetable Available' : 'Timetable Unavailable'}
+                </span>
+
                 {accessState === 'linked' ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-200/60">
-                    <CheckCircle2 className="size-3 text-emerald-600" />
-                    Portal Linked ({trainer.email})
+                  <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 border border-emerald-200/70">
+                    <CheckCircle2 className="size-2.5 text-emerald-600" />
+                    Portal Active
                   </span>
                 ) : accessState === 'ready_to_link' ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-800 border border-amber-200">
-                    <KeyRound className="size-3 text-amber-600" />
-                    Pending Link ({trainer.email})
+                  <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800 border border-amber-200">
+                    <KeyRound className="size-2.5 text-amber-600" />
+                    Link Ready
                   </span>
                 ) : accessState === 'account_required' ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-semibold text-gray-700 border border-gray-200">
-                    <Clock className="size-3 text-gray-500" />
-                    Registration Pending
+                  <span className="inline-flex items-center gap-1 rounded-md bg-gray-50 px-2 py-0.5 text-[10px] font-semibold text-gray-600 border border-gray-200">
+                    <Clock className="size-2.5 text-gray-400" />
+                    Pending Signup
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-0.5 text-[11px] font-semibold text-rose-700 border border-rose-200">
-                    <AlertCircle className="size-3 text-rose-600" />
+                  <span className="inline-flex items-center gap-1 rounded-md bg-rose-50 px-2 py-0.5 text-[10px] font-semibold text-rose-700 border border-rose-200">
+                    <AlertCircle className="size-2.5 text-rose-600" />
                     Email Required
                   </span>
                 )}
-
-                {/* Timetable Availability */}
-                <span className="inline-flex items-center gap-1 rounded-full bg-gray-50 px-2.5 py-0.5 text-[11px] font-semibold text-gray-600 border border-gray-200">
-                  <CalendarCheck className="size-3 text-gray-400" />
-                  {formatAvailabilityMode(trainer.availabilityMode)}
-                </span>
               </div>
             </div>
           </div>
 
-          {/* Workload Progress Gauge */}
-          <div className="flex flex-col gap-2 rounded-xl border border-gray-100 bg-gray-50/70 p-4 lg:min-w-[260px]">
+          {/* Compact Workload Gauge */}
+          <div className="flex flex-col gap-1.5 rounded-xl border border-gray-100 bg-gray-50/80 p-3 lg:min-w-[240px]">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-gray-600">Workload Target</span>
-              <span className="font-bold text-gray-900">
-                {totalAllocatedHours} / {targetHours} hrs/wk
+              <span className="font-semibold text-gray-600">Weekly Workload</span>
+              <span className="font-bold text-gray-900 font-mono">
+                {totalAllocatedHours} / {targetHours} hrs
               </span>
             </div>
 
             <Progress
               value={utilizationPercentage}
               max={100}
-              className="h-2 bg-gray-200"
+              className="h-1.5 bg-gray-200"
               indicatorClassName={
                 utilizationPercentage > 100
                   ? 'bg-amber-600'
@@ -289,114 +349,82 @@ export default async function TrainerDetailsPage({
               }
             />
 
-            <div className="flex items-center justify-between text-[11px] text-gray-500">
+            <div className="flex items-center justify-between text-[10px] text-gray-500 font-medium">
               <span>{utilizationPercentage}% Allocated</span>
-              <span>Max {trainer.maximumDailyHours}h / day</span>
+              <span>Max {trainer.maximumDailyHours}h/day</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 3. Main Content: Allocations (Left) & Credentials (Right) */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+      {/* 3. Main Content: Allocations & Details */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
         {/* Approved Teaching Allocations (col-span-8) */}
-        <div className="space-y-6 lg:col-span-8">
+        <div className="space-y-4 lg:col-span-8">
           <section
             aria-labelledby="teaching-allocations-heading"
-            className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xs"
+            className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xs"
           >
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 bg-gray-50/60 px-5 py-3.5">
-              <div className="flex items-center gap-2.5">
-                <span className="flex size-8 items-center justify-center rounded-lg bg-[#033B36]/10 text-[#033B36]">
-                  <Presentation className="size-4.5" aria-hidden="true" />
+            <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50/70 px-4 py-2.5">
+              <div className="flex items-center gap-2">
+                <h2
+                  id="teaching-allocations-heading"
+                  className="text-xs font-bold uppercase tracking-wider text-gray-900"
+                >
+                  Teaching Allocations
+                </h2>
+                <span className="rounded-full bg-gray-200/80 px-2 py-0.2 text-[10px] font-bold text-gray-700">
+                  {allocations.length}
                 </span>
-                <div>
-                  <h2
-                    id="teaching-allocations-heading"
-                    className="text-sm font-bold text-gray-900"
-                  >
-                    Approved Timetable Allocations
-                  </h2>
-                  <p className="text-xs text-gray-500">
-                    {allocations.length}{' '}
-                    {allocations.length === 1 ? 'unit' : 'units'} active
-                    {allocations[0]?.academicPeriodName
-                      ? ` · ${allocations[0].academicPeriodName}`
-                      : ''}
-                  </p>
-                </div>
               </div>
 
               <Link
                 href="/timetable/teaching-allocations"
-                className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 text-xs font-semibold text-gray-700 shadow-2xs transition hover:bg-gray-50 hover:text-gray-900"
+                className="inline-flex h-7 items-center gap-1 rounded-lg border border-gray-200 bg-white px-2.5 text-xs font-semibold text-gray-700 shadow-2xs transition hover:bg-gray-50"
               >
-                <Plus className="size-3.5 text-gray-500" />
+                <Plus className="size-3 text-gray-500" />
                 Assign Unit
               </Link>
             </div>
 
             {allocations.length === 0 ? (
-              <div className="px-5 py-12 text-center">
-                <Presentation
-                  className="mx-auto size-7 text-gray-300"
-                  aria-hidden="true"
-                />
-                <p className="mt-2.5 text-xs font-semibold text-gray-900">
-                  No approved units assigned
-                </p>
-                <p className="mt-1 text-xs text-gray-500 max-w-sm mx-auto">
-                  Assign teaching units from the allocations dashboard to schedule
-                  classes for this trainer.
-                </p>
-                <div className="mt-4">
-                  <Button asChild variant="outline" size="sm">
-                    <Link href="/timetable/teaching-allocations">
-                      Assign Teaching Unit
-                    </Link>
-                  </Button>
-                </div>
+              <div className="py-8 px-4 text-center text-xs text-gray-500">
+                No units currently assigned to this trainer.
               </div>
             ) : (
               <div className="divide-y divide-gray-100">
                 {allocations.map((item) => (
                   <article
                     key={item.id}
-                    className="flex flex-col gap-2 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between transition hover:bg-gray-50/60"
+                    className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between transition hover:bg-gray-50/50"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-bold text-gray-900">
-                        <span className="font-mono text-[#033B36] mr-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs font-bold text-[#033B36]">
                           {item.unitCode}
                         </span>
-                        <span>{item.unitName}</span>
+                        <span className="text-xs font-semibold text-gray-900 truncate">
+                          {item.unitName}
+                        </span>
                         {item.deliveryMode &&
                           item.deliveryMode.toLowerCase() !== 'theory' && (
-                            <span className="ml-2 rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-amber-700 border border-amber-200">
+                            <span className="rounded bg-amber-50 px-1.5 py-0.2 text-[9px] font-semibold uppercase text-amber-700 border border-amber-200">
                               {item.deliveryMode}
                             </span>
                           )}
+                      </div>
+                      <p className="mt-0.5 text-[11px] text-gray-500">
+                        {item.cohortName} · {item.cohortSize} students
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-6 sm:shrink-0">
-                      <div className="text-left sm:w-36">
-                        <p className="text-xs font-semibold text-gray-800">
-                          {item.cohortName}
-                        </p>
-                        <p className="text-[11px] text-gray-400">
-                          {item.cohortSize} students
-                        </p>
-                      </div>
-
-                      <div className="text-right sm:w-28">
-                        <p className="text-xs font-bold text-gray-900">
-                          {item.weeklyHours} hrs / wk
-                        </p>
-                        <p className="text-[11px] text-gray-400">
-                          {item.weeklySessions} session{item.weeklySessions === 1 ? '' : 's'}
-                        </p>
-                      </div>
+                    <div className="flex items-center gap-4 sm:shrink-0 text-right">
+                      <span className="font-mono text-xs font-bold text-gray-900">
+                        {item.weeklyHours}h / wk
+                      </span>
+                      <span className="text-[11px] text-gray-400">
+                        {item.weeklySessions} session{item.weeklySessions === 1 ? '' : 's'}
+                      </span>
                     </div>
                   </article>
                 ))}
@@ -406,20 +434,20 @@ export default async function TrainerDetailsPage({
         </div>
 
         {/* Credentials & Administrative Information (col-span-4) */}
-        <div className="space-y-6 lg:col-span-4">
+        <div className="space-y-4 lg:col-span-4">
           <section
             aria-labelledby="contact-credentials-heading"
-            className="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs space-y-4"
+            className="rounded-xl border border-gray-200 bg-white p-4 shadow-xs space-y-3"
           >
             <h2
               id="contact-credentials-heading"
-              className="text-xs font-bold uppercase tracking-wider text-gray-500 border-b border-gray-100 pb-2.5"
+              className="text-xs font-bold uppercase tracking-wider text-gray-500 border-b border-gray-100 pb-2"
             >
-              Contact & Credentials
+              Staff Profile Details
             </h2>
 
-            <div className="space-y-3.5 text-xs">
-              <div className="flex items-center justify-between py-1 border-b border-gray-50">
+            <div className="space-y-2.5 text-xs">
+              <div className="flex items-center justify-between py-0.5">
                 <span className="text-gray-500 flex items-center gap-1.5">
                   <Mail className="size-3.5 text-gray-400" />
                   Email
@@ -432,11 +460,11 @@ export default async function TrainerDetailsPage({
                     {trainer.email}
                   </a>
                 ) : (
-                  <span className="text-red-500 font-medium italic">Not set</span>
+                  <span className="text-rose-600 font-medium text-[11px]">Not set</span>
                 )}
               </div>
 
-              <div className="flex items-center justify-between py-1 border-b border-gray-50">
+              <div className="flex items-center justify-between py-0.5">
                 <span className="text-gray-500 flex items-center gap-1.5">
                   <Phone className="size-3.5 text-gray-400" />
                   Phone
@@ -449,11 +477,11 @@ export default async function TrainerDetailsPage({
                     {trainer.phoneNumber}
                   </a>
                 ) : (
-                  <span className="text-gray-400 italic">Not set</span>
+                  <span className="text-gray-400 text-[11px]">—</span>
                 )}
               </div>
 
-              <div className="flex items-center justify-between py-1 border-b border-gray-50">
+              <div className="flex items-center justify-between py-0.5">
                 <span className="text-gray-500 flex items-center gap-1.5">
                   <Briefcase className="size-3.5 text-gray-400" />
                   Employment
@@ -463,7 +491,7 @@ export default async function TrainerDetailsPage({
                 </span>
               </div>
 
-              <div className="flex items-center justify-between py-1 border-b border-gray-50">
+              <div className="flex items-center justify-between py-0.5">
                 <span className="text-gray-500 flex items-center gap-1.5">
                   <GraduationCap className="size-3.5 text-gray-400" />
                   Specialization
@@ -473,13 +501,13 @@ export default async function TrainerDetailsPage({
                 </span>
               </div>
 
-              <div className="flex items-start justify-between py-1">
+              <div className="flex items-start justify-between py-0.5">
                 <span className="text-gray-500 flex items-center gap-1.5 shrink-0 pt-0.5">
                   <ShieldCheck className="size-3.5 text-gray-400" />
                   Qualifications
                 </span>
-                <span className="font-semibold text-gray-900 text-right leading-relaxed max-w-[200px]">
-                  {trainer.qualifications || 'Recorded on file'}
+                <span className="font-semibold text-gray-900 text-right leading-snug max-w-[180px]">
+                  {trainer.qualifications || 'On file'}
                 </span>
               </div>
             </div>
@@ -489,13 +517,13 @@ export default async function TrainerDetailsPage({
           {trainer.notes && (
             <section
               aria-labelledby="admin-notes-heading"
-              className="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs"
+              className="rounded-xl border border-gray-200 bg-white p-4 shadow-xs"
             >
               <h2
                 id="admin-notes-heading"
-                className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2"
+                className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5"
               >
-                Administrative Notes
+                Notes
               </h2>
               <p className="text-xs text-gray-700 whitespace-pre-wrap leading-relaxed">
                 {trainer.notes}

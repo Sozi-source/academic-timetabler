@@ -13,6 +13,76 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 2. **Curriculum Upload UI Update (`curriculum-zip-upload-dialog.tsx`)**:
    - Update `curriculum-zip-upload-dialog.tsx` to display `unresolvedFiles` from the ingestion preview response, allowing HODs to select document types manually prior to commit.
 
+### 2026-09-14: Trainer Table Action Cleanliness & Premium Trainer Profile Redesign
+- **Files Modified**:
+  - `src/features/trainers/trainer-table.tsx`
+  - `src/features/trainers/actions.ts`
+  - `src/app/(dashboard)/trainers/[id]/page.tsx`
+- **What Changed**:
+  - **Trainer Table Streamlining**:
+    - Removed the three circular action buttons (`Edit`, `Toggle Availability`, `Deactivate / Activate`) and `Staff Portal` eye icon from the table rows.
+    - Replaced with a single clean, high-density `Profile` button on each row, eliminating visual clutter across the 26+ trainer directory rows.
+  - **Executive Trainer Profile Page ([id])**:
+    - Integrated direct management actions inside the `trainer/[id]` toolbar:
+      - `Edit Profile` (Pencil icon)
+      - `Staff Portal` (Eye icon)
+      - `Timetable Availability` toggle (`Enable / Disable Timetable`)
+      - `Staff Status` toggle (`Activate / Deactivate`)
+      - `Reset Password` (Password modal trigger)
+      - `Link Account` (if ready to link)
+    - Redesigned the page to be premium, executive, and high-density with significantly less text:
+      - Compact avatar with initials, crisp identity line (Staff ID, Role, Department).
+      - Streamlined status badges in a single row (`Active / Inactive`, `Timetable Available / Unavailable`, `Portal Status`).
+      - Compact workload gauge with clean target bar and daily limit metric.
+      - Clean 2-column layout for teaching allocations and staff credentials with zero wordiness.
+  - **Cache Revalidation**:
+    - Enhanced `revalidateTrainerPages` in `actions.ts` to revalidate `/trainers`, `/trainers/${id}`, and `/timetable/trainers/${id}` whenever availability or active status is toggled.
+- **Verification Evidence**:
+  - `npm test`: 117/117 test files passed, 585/585 tests passed.
+  - `npm run check`: Typecheck, ESLint, and Next.js 16 production build passed with 0 errors across all 117 routes.
+
+### 2026-09-14: Staff Workspace Access & Account Approvals Table Alignment Fix
+- **Files Modified**:
+  - `src/app/(dashboard)/trainers/page.tsx`
+  - `src/app/(dashboard)/timetable/trainers/access/page.tsx`
+- **What Changed**:
+  - Replaced the ragged CSS grid layout with a semantic HTML `<table>` with explicit column headers (`Trainer`, `Workspace Details`, `Access Status`, `Actions`).
+  - Fixed column width tracks (`w-[28%]`, `w-[32%]`, `w-[16%]`, `w-[24%]`) to ensure 100% straight vertical alignment down every column.
+  - Eliminated redundant inline status spans (`Active` text) in the actions column, consolidating the account state into the dedicated **Access Status** column as a clear, uniform badge (`Active`, `Email Required`, `Ready to Link`, etc.).
+  - Right-aligned all action buttons with uniform height (`h-8`) and borders (`Add Email`, `Password`, `Profile`) so they no longer shift or stagger horizontally.
+  - Added horizontal scroll wrapper (`min-w-[760px]`) to maintain straight alignment on all screen sizes.
+- **Verification Evidence**:
+  - `npm run check`: Typecheck, ESLint, and Next.js 16 production build passed with 0 errors across all routes.
+
+### 2026-09-14: Daily Report UI Polish & Frictionless Default-Present Attendance Architecture
+- **Files Modified**:
+  - `src/features/class-attendance/domain.ts`
+  - `src/features/class-attendance/attendance-editor.tsx`
+  - `src/features/trainer-daily-report/domain.ts`
+  - `src/features/trainer-daily-report/trainer-form.tsx`
+  - `src/app/(staff)/staff/daily-report/page.tsx`
+  - `src/tests/class-attendance-domain.test.ts`
+  - `src/tests/trainer-daily-report-domain.test.ts`
+- **What Changed**:
+  - **Frictionless Class Attendance Workflow**:
+    - Purged the need for trainers to manually click "Present" 30–50 times per class session.
+    - Defaulted active enrolled students to **Present** upon session opening (unless flagged as not reported for the semester).
+    - Introduced high-density, single-click toggle between **Present** (emerald) and **Absent** (rose).
+    - Added instant **Unavoidable Circumstance Chips** (`Leave of absence`, `Pending unit registration`, `Medical / Sickness`, `Official college duty`, `Fee clearance / Admin`) visible only when a student is marked Absent, pre-populating circumstances into notes with 1 click.
+    - Added instant student search (by name or admission number) and filter tabs (`All`, `Absent`, `Present`, `Not Reported`).
+    - Added "Reset All to Present" quick action button for instant reset.
+  - **Executive Daily Report Interface & Wordiness Purge**:
+    - Purged repetitive and wordy notices across `trainer-form.tsx` and `page.tsx`.
+    - Consolidated overdue attendance into a concise, actionable alert banner.
+    - Elevated scheduled lessons section with refined card layout, clean status badges (`Completed`, `In Progress`, `Not Recorded`, `Cancelled`), and metric pills with colored indicators.
+    - Replaced wordy absentee descriptions with a streamlined **Absentee Register** displaying recognized circumstance tags.
+    - Streamlined non-teaching day guidance and form inputs with character counters and concise microcopy.
+    - Upgraded Daily Report page header with an executive date navigation stepper (`‹ Prev Day`, native date picker, `Next Day ›`, and `Today` quick jump shortcut).
+- **Verification Evidence**:
+  - `npx vitest run src/tests/class-attendance-domain.test.ts src/tests/trainer-daily-report-domain.test.ts`: 9/9 passed.
+  - `npm test`: 117/117 test files passed, 585/585 tests passed.
+  - `npm run check`: Typecheck, ESLint, and Next.js 16 production build passed with 0 errors across all routes.
+
 ### 2026-09-14: Zero-Hallucination Curriculum Hardening & Agricultural Production Fix
 - **Files Modified**:
   - `src/features/teaching-documents/curriculum-data/shared-map.ts`

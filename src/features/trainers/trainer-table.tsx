@@ -2,12 +2,6 @@
 
 import type { ColumnDef } from '@tanstack/react-table';
 import {
-  CalendarCheck2,
-  CalendarX2,
-  CheckCircle2,
-  CircleOff,
-  Eye,
-  Pencil,
   RotateCcw,
   UserRound,
 } from 'lucide-react';
@@ -20,8 +14,6 @@ import { DataTable } from '@/components/ui/data-table';
 import { Select } from '@/components/ui/select';
 
 import {
-  setTrainerActiveAction,
-  setTrainerTimetableAvailabilityAction,
   setTrainerWorkloadRoleAction,
 } from './actions';
 import {
@@ -137,68 +129,13 @@ const columns: ColumnDef<Trainer>[] = [
     enableSorting: false,
     header: '',
     cell: ({ row }) => (
-      <div className="flex items-center justify-end gap-1">
+      <div className="flex items-center justify-end">
         <Link
-          href={`/trainers/${row.original.id}/portal-view`}
-          aria-label={`View staff portal for ${row.original.fullName}`}
-          title="View Staff Portal"
-          className="inline-flex size-8 items-center justify-center rounded-lg border border-[#033B36]/20 bg-[#033B36]/10 text-[#033B36] transition hover:bg-[#033B36] hover:text-white"
+          href={`/trainers/${row.original.id}`}
+          className="inline-flex h-8 items-center justify-center rounded-lg border border-border-strong bg-white px-2.5 text-xs font-medium text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary shadow-2xs"
         >
-          <Eye className="size-3.5" aria-hidden="true" />
+          Profile
         </Link>
-
-        <Link
-          href={`/timetable/trainers/${row.original.id}/edit`}
-          aria-label={`Edit ${row.original.fullName}`}
-          title="Edit"
-          className="inline-flex size-8 items-center justify-center rounded-lg border border-border-strong bg-surface text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
-        >
-          <Pencil className="size-3.5" aria-hidden="true" />
-        </Link>
-
-        {row.original.isActive ? (
-          <form action={setTrainerTimetableAvailabilityAction}>
-            <input type="hidden" name="id" value={row.original.id} />
-            <input
-              type="hidden"
-              name="isTimetableAvailable"
-              value={row.original.isTimetableAvailable ? 'false' : 'true'}
-            />
-            <Button
-              type="submit"
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              aria-label={row.original.isTimetableAvailable ? 'Remove availability' : 'Make available'}
-              title={row.original.isTimetableAvailable ? 'Remove availability' : 'Make available'}
-            >
-              {row.original.isTimetableAvailable ? (
-                <CalendarX2 className="size-3.5" aria-hidden="true" />
-              ) : (
-                <CalendarCheck2 className="size-3.5" aria-hidden="true" />
-              )}
-            </Button>
-          </form>
-        ) : null}
-
-        <form action={setTrainerActiveAction}>
-          <input type="hidden" name="id" value={row.original.id} />
-          <input type="hidden" name="isActive" value={row.original.isActive ? 'false' : 'true'} />
-          <Button
-            type="submit"
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            aria-label={row.original.isActive ? 'Deactivate trainer' : 'Activate trainer'}
-            title={row.original.isActive ? 'Deactivate' : 'Activate'}
-          >
-            {row.original.isActive ? (
-              <CircleOff className="size-3.5" aria-hidden="true" />
-            ) : (
-              <CheckCircle2 className="size-3.5" aria-hidden="true" />
-            )}
-          </Button>
-        </form>
       </div>
     ),
   },

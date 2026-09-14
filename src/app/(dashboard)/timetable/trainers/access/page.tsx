@@ -138,87 +138,88 @@ export default async function TrainerAccessPage() {
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-border">
-            {records.map(
-              (
-                record,
-              ) => (
-                <article
-                  key={
-                    record.trainerId
-                  }
-                  className="grid gap-3 px-4 py-3.5 md:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)_10rem_auto] md:items-center"
-                >
-                  <div className="min-w-0">
-                    <Link
-                      href={`/trainers/${record.trainerId}`}
-                      className="truncate text-xs font-semibold text-text-primary transition hover:text-header-blue hover:underline block"
-                    >
-                      {record.fullName}
-                    </Link>
-
-                    <p className="mt-0.5 truncate text-[10px] text-text-muted">
-                      {record.email ?? 'No email'}
-                    </p>
-                  </div>
-
-                  <div className="min-w-0">
-                    <p className="text-[11px] font-medium text-text-secondary">
-                      {trainerAccessDetail(record)}
-                    </p>
-
-                    {record.profileRole ? (
-                      <p className="mt-0.5 text-[10px] text-text-muted">
-                        Profile: {record.profileRole}
-                      </p>
-                    ) : null}
-                  </div>
-
-                  <div>
-                    <Badge
-                      variant={
-                        record.accessState === 'linked'
-                          ? 'success'
-                          : record.accessState === 'ready_to_link'
-                            ? 'primary'
-                            : 'neutral'
-                      }
-                    >
-                      {trainerAccessLabel(record.accessState)}
-                    </Badge>
-                  </div>
-
-                  <div className="flex items-center gap-2 md:justify-self-end">
-                    {canProvisionTrainerAccess(record.accessState) ? (
-                      <TrainerAccessAction trainerId={record.trainerId} />
-                    ) : record.accessState === 'linked' ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700">
-                        <CheckCircle2 className="size-3.5 text-emerald-600" />
-                        Approved
-                      </span>
-                    ) : record.accessState === 'email_required' ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs min-w-[760px]">
+              <thead className="border-b border-border bg-surface-subtle/60 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+                <tr>
+                  <th scope="col" className="px-4 py-3 w-[28%]">Trainer</th>
+                  <th scope="col" className="px-4 py-3 w-[32%]">Workspace Details</th>
+                  <th scope="col" className="px-4 py-3 w-[16%]">Access Status</th>
+                  <th scope="col" className="px-4 py-3 w-[24%] text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {records.map((record) => (
+                  <tr
+                    key={record.trainerId}
+                    className="transition hover:bg-surface-subtle/40"
+                  >
+                    <td className="px-4 py-3.5 align-middle">
                       <Link
-                        href={`/timetable/trainers/${record.trainerId}/edit`}
-                        className="text-[11px] font-semibold text-header-blue hover:underline"
+                        href={`/trainers/${record.trainerId}`}
+                        className="truncate text-xs font-semibold text-text-primary transition hover:text-header-blue hover:underline block"
                       >
-                        Add email
+                        {record.fullName}
                       </Link>
-                    ) : (
-                      <span className="text-[10px] font-medium text-text-muted">
-                        Pending registration
-                      </span>
-                    )}
+                      <p className="mt-0.5 truncate text-[10px] text-text-muted">
+                        {record.email ?? 'No email'}
+                      </p>
+                    </td>
 
-                    <Link
-                      href={`/trainers/${record.trainerId}`}
-                      className="inline-flex h-8 items-center justify-center rounded-lg border border-border-strong bg-white px-2.5 text-[11px] font-medium text-text-secondary transition hover:bg-surface-subtle"
-                    >
-                      Profile
-                    </Link>
-                  </div>
-                </article>
-              ),
-            )}
+                    <td className="px-4 py-3.5 align-middle">
+                      <p className="text-[11px] font-medium text-text-secondary">
+                        {trainerAccessDetail(record)}
+                      </p>
+                      {record.profileRole ? (
+                        <p className="mt-0.5 text-[10px] text-text-muted">
+                          Profile: {record.profileRole}
+                        </p>
+                      ) : null}
+                    </td>
+
+                    <td className="px-4 py-3.5 align-middle whitespace-nowrap">
+                      <Badge
+                        variant={
+                          record.accessState === 'linked'
+                            ? 'success'
+                            : record.accessState === 'ready_to_link'
+                              ? 'primary'
+                              : 'neutral'
+                        }
+                        className="inline-flex items-center gap-1"
+                      >
+                        {record.accessState === 'linked' ? (
+                          <CheckCircle2 className="size-3 text-emerald-600" aria-hidden="true" />
+                        ) : null}
+                        {record.accessState === 'linked' ? 'Active' : trainerAccessLabel(record.accessState)}
+                      </Badge>
+                    </td>
+
+                    <td className="px-4 py-3.5 align-middle text-right whitespace-nowrap">
+                      <div className="inline-flex items-center justify-end gap-2">
+                        {canProvisionTrainerAccess(record.accessState) ? (
+                          <TrainerAccessAction trainerId={record.trainerId} />
+                        ) : record.accessState === 'email_required' ? (
+                          <Link
+                            href={`/timetable/trainers/${record.trainerId}/edit`}
+                            className="inline-flex h-8 items-center justify-center rounded-lg border border-border bg-white px-2.5 text-[11px] font-semibold text-header-blue transition hover:bg-surface-subtle shadow-2xs"
+                          >
+                            Add email
+                          </Link>
+                        ) : null}
+
+                        <Link
+                          href={`/trainers/${record.trainerId}`}
+                          className="inline-flex h-8 items-center justify-center rounded-lg border border-border-strong bg-white px-2.5 text-[11px] font-medium text-text-secondary transition hover:bg-surface-subtle shadow-2xs"
+                        >
+                          Profile
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </section>

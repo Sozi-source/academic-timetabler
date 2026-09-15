@@ -144,26 +144,20 @@ export default async function DailyReportsPrintPage({
               </p>
             </div>
 
-            <table className="mt-2 w-full border-collapse text-[8.5px]">
+            <table className="mt-2 w-full border-collapse text-[8.5px] table-fixed">
               <thead>
                 <tr className="bg-gray-100">
-                  <th className="border border-black px-2 py-1.5 text-left">
-                    Time
+                  <th className="w-[26%] border border-black px-2 py-1.5 text-left">
+                    Unit & Time
                   </th>
-                  <th className="border border-black px-2 py-1.5 text-left">
-                    Unit
-                  </th>
-                  <th className="border border-black px-2 py-1.5 text-left">
-                    Class
-                  </th>
-                  <th className="border border-black px-2 py-1.5 text-center">
+                  <th className="w-[6%] border border-black px-2 py-1.5 text-center">
                     Present
                   </th>
-                  <th className="border border-black px-2 py-1.5 text-center">
+                  <th className="w-[6%] border border-black px-2 py-1.5 text-center">
                     Absent
                   </th>
-                  <th className="border border-black px-2 py-1.5 text-left">
-                    Absentee students
+                  <th className="w-[62%] border border-black px-2 py-1.5 text-left">
+                    Absentee Students
                   </th>
                 </tr>
               </thead>
@@ -171,31 +165,63 @@ export default async function DailyReportsPrintPage({
               <tbody>
                 {report.lessons.map((lesson) => (
                   <tr key={lesson.scheduledSessionId}>
-                    <td className="whitespace-nowrap border border-black px-2 py-1.5 align-top">
-                      {formatDailyReportTime(lesson.startsAt)}–
-                      {formatDailyReportTime(lesson.endsAt)}
-                    </td>
                     <td className="border border-black px-2 py-1.5 align-top">
-                      {lesson.unitCode} · {lesson.unitName}
+                      <div className="font-bold">
+                        {lesson.unitName}
+                      </div>
+                      {lesson.unitCode ? (
+                        <div className="mt-0.5 font-mono text-[8px] font-semibold text-gray-800">
+                          {lesson.unitCode}
+                        </div>
+                      ) : null}
+                      <div className="mt-0.5 font-mono text-[7.5px] text-gray-700">
+                        {formatDailyReportTime(lesson.startsAt)}–{formatDailyReportTime(lesson.endsAt)}
+                      </div>
                     </td>
-                    <td className="border border-black px-2 py-1.5 align-top">
-                      {lesson.cohortName}
-                    </td>
-                    <td className="border border-black px-2 py-1.5 text-center align-top">
+                    <td className="border border-black px-2 py-1.5 text-center align-top font-mono">
                       {lesson.presentCount}
                     </td>
-                    <td className="border border-black px-2 py-1.5 text-center align-top">
+                    <td className="border border-black px-2 py-1.5 text-center align-top font-bold font-mono">
                       {lesson.absentCount}
                     </td>
                     <td className="border border-black px-2 py-1.5 align-top">
-                      {lesson.absentees.length > 0
-                        ? lesson.absentees
-                            .map(
-                              (student) =>
-                                `${student.fullName} (${student.admissionNumber})`,
-                            )
-                            .join('; ')
-                        : 'None'}
+                      {lesson.absentees.length > 0 ? (
+                        <div
+                          className={`grid gap-x-3 gap-y-0.5 text-[8px] leading-tight ${
+                            lesson.absentees.length > 20
+                              ? 'grid-cols-4'
+                              : lesson.absentees.length > 10
+                              ? 'grid-cols-3'
+                              : lesson.absentees.length > 4
+                              ? 'grid-cols-2'
+                              : 'grid-cols-1'
+                          }`}
+                        >
+                          {lesson.absentees.map((student, idx) => (
+                            <div
+                              key={`${student.studentId || student.admissionNumber}-${idx}`}
+                              className="flex items-start gap-1 py-0.2"
+                            >
+                              <span className="shrink-0 text-gray-700">•</span>
+                              <div className="flex flex-wrap items-baseline gap-x-1">
+                                <span className="font-semibold text-black">
+                                  {student.fullName}
+                                </span>
+                                <span className="font-mono text-[7.5px] text-gray-700">
+                                  ({student.admissionNumber})
+                                </span>
+                                {student.note ? (
+                                  <span className="text-[7px] italic text-gray-600">
+                                    [{student.note}]
+                                  </span>
+                                ) : null}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="italic text-gray-600">None (100% Present)</span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -203,7 +229,7 @@ export default async function DailyReportsPrintPage({
                 {report.lessons.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={4}
                       className="border border-black px-2 py-2 text-center"
                     >
                       No scheduled lesson recorded for this department.

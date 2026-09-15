@@ -29,6 +29,7 @@ import { submitTrainerDailyReportAction } from './actions';
 import { formatDailyReportDate, formatDailyReportTime } from './domain';
 import type {
   PastUnrecordedSession,
+  PastUnsubmittedReportDate,
   TrainerDailyReportLesson,
   TrainerDailyReportWorkspace,
 } from './types';
@@ -210,17 +211,21 @@ function SessionExceptionDialog({
 
 function PastUnrecordedBanner({
   sessions,
+  unsubmittedReports = [],
   onRecordPast,
   onLogException,
 }: {
   sessions: PastUnrecordedSession[];
+  unsubmittedReports?: PastUnsubmittedReportDate[];
   reportDate: string;
   onRecordPast: (session: PastUnrecordedSession) => void;
   onLogException: (session: PastUnrecordedSession) => void;
 }) {
   const [isOpen, setIsOpen] = useState(true);
 
-  if (sessions.length === 0) return null;
+  if (sessions.length === 0 && unsubmittedReports.length === 0) return null;
+
+  const totalOverdue = sessions.length + unsubmittedReports.length;
 
   return (
     <section className="overflow-hidden rounded-xl border border-amber-300 bg-amber-50/90 shadow-xs">
@@ -228,10 +233,10 @@ function PastUnrecordedBanner({
         <div className="flex items-center gap-2">
           <AlertCircle className="size-4 shrink-0 text-amber-700" />
           <h3 className="text-xs font-bold text-amber-950">
-            Overdue Attendance ({sessions.length})
+            Overdue Attendance & Reports ({totalOverdue})
           </h3>
           <span className="hidden text-xs text-amber-800 sm:inline">
-            — Record attendance or log an exception to submit today&apos;s report.
+            — You must resolve previous unrecorded sessions or reports before taking today&apos;s classes.
           </span>
         </div>
 
@@ -240,12 +245,43 @@ function PastUnrecordedBanner({
           onClick={() => setIsOpen(!isOpen)}
           className="self-start text-[11px] font-semibold text-amber-900 underline hover:text-amber-950 sm:self-center"
         >
-          {isOpen ? 'Hide Classes' : 'Show Classes'}
+          {isOpen ? 'Hide Pending' : 'Show Pending'}
         </button>
       </div>
 
       {isOpen ? (
         <div className="divide-y divide-amber-200/60 bg-white/80">
+          {unsubmittedReports.map((report) => (
+            <div
+              key={report.reportDate}
+              className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between bg-amber-50/40"
+            >
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-text-primary">
+                    Daily Report Unsubmitted
+                  </span>
+                  <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[9px] font-bold text-rose-800">
+                    {report.daysOverdue}d overdue
+                  </span>
+                </div>
+                <p className="mt-0.5 text-[11px] text-text-muted">
+                  {report.dayOfWeek}, {report.reportDate} · {report.lessonCount} class(es) recorded, report not yet submitted.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Link
+                  href={`/staff/daily-report?date=${report.reportDate}`}
+                  className="inline-flex items-center gap-1 rounded-lg bg-primary px-2.5 py-1 text-[11px] font-semibold text-white transition hover:bg-primary-hover shadow-xs"
+                >
+                  <ClipboardCheck className="size-3" />
+                  Submit {report.dayOfWeek}&apos;s Report
+                </Link>
+              </div>
+            </div>
+          ))}
+
           {sessions.map((session) => (
             <div
               key={`${session.scheduledSessionId}-${session.sessionDate}`}
@@ -338,8 +374,13 @@ function ScheduledLessonsSection({
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="text-xs font-bold text-text-primary">
-                    {lesson.unitCode ? `${lesson.unitCode} · ` : ''}{lesson.unitName || 'Lesson'}
+                    {lesson.unitName || 'Lesson'}
                   </p>
+                  {lesson.unitCode ? (
+                    <span className="font-mono text-[10.5px] text-text-muted">
+                      ({lesson.unitCode})
+                    </span>
+                  ) : null}
                   <AttendanceBadge status={lesson.attendanceStatus} />
                 </div>
 
@@ -390,6 +431,30 @@ function ScheduledLessonsSection({
                     <CheckCircle2 className="size-3.5 text-emerald-600" />
                     View Register
                   </button>
+                ) : lesson.attendanceStatus === 'cancelled' ? (
+                  <span className="text-[11px] font-medium text-text-muted italic">
+                    Did Not Take Place
+                  </span>
+                ) : workspace.hasOverduePastSessions ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const firstSession = workspace.pastUnrecordedSessions?.[0];
+                      const firstReport = workspace.unsubmittedPastReportDates?.[0];
+                      const dateText = firstSession
+                        ? `${firstSession.sessionDate} (${firstSession.unitName})`
+                        : firstReport
+                        ? `${firstReport.dayOfWeek}, ${firstReport.reportDate}`
+                        : 'a previous date';
+                      alert(
+                        `Enforcement Notice: Please record attendance or submit your previous report for ${dateText} before taking attendance for today's classes.`
+                      );
+                    }}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3.5 py-1.5 text-xs font-semibold text-amber-900 shadow-2xs transition hover:bg-amber-100"
+                  >
+                    <AlertTriangle className="size-3.5 text-amber-600" />
+                    Past Report Required
+                  </button>
                 ) : lesson.attendanceStatus === 'open' ? (
                   <button
                     type="button"
@@ -399,10 +464,6 @@ function ScheduledLessonsSection({
                     <AlertTriangle className="size-3.5 text-amber-600" />
                     Continue Register
                   </button>
-                ) : lesson.attendanceStatus === 'cancelled' ? (
-                  <span className="text-[11px] font-medium text-text-muted italic">
-                    Did Not Take Place
-                  </span>
                 ) : (
                   <button
                     type="button"
@@ -462,8 +523,11 @@ function ClassAttendanceSummaryTable({
                 <td className="whitespace-nowrap px-4 py-2 text-text-muted font-mono text-[11px]">
                   {formatDailyReportTime(l.startsAt)}–{formatDailyReportTime(l.endsAt)}
                 </td>
-                <td className="px-4 py-2 font-semibold text-text-primary">
-                  {l.unitCode ? `${l.unitCode} · ` : ''}{l.unitName}
+                <td className="px-4 py-2 text-text-primary">
+                  <div className="font-semibold">{l.unitName}</div>
+                  {l.unitCode ? (
+                    <div className="font-mono text-[10.5px] text-text-muted">{l.unitCode}</div>
+                  ) : null}
                 </td>
                 <td className="px-4 py-2 text-text-secondary">
                   {l.cohortName}
@@ -559,8 +623,11 @@ function AbsenteesTableSection({
                   <td className="px-4 py-2 text-text-secondary">
                     {s.cohortName}
                   </td>
-                  <td className="px-4 py-2 text-text-muted">
-                    {s.unitCode ? `${s.unitCode} · ` : ''}{s.unitName}
+                  <td className="px-4 py-2 text-text-secondary">
+                    <div className="font-medium text-text-primary">{s.unitName}</div>
+                    {s.unitCode ? (
+                      <div className="font-mono text-[10.5px] text-text-muted">{s.unitCode}</div>
+                    ) : null}
                   </td>
                   <td className="px-4 py-2">
                     {s.note ? (
@@ -677,7 +744,9 @@ export function TrainerDailyReportForm({
 
   const isNonTeachingDay = (workspace?.lessons ?? []).length === 0;
   const hasText = otherActivity.trim().length > 0 || concern.trim().length > 0;
-  const isSubmittable = isNonTeachingDay ? hasText : Boolean(workspace?.readyToSubmit);
+  const isSubmittable = isNonTeachingDay
+    ? hasText && !workspace.hasOverduePastSessions
+    : Boolean(workspace?.readyToSubmit);
 
   if (workspace.status === 'submitted') {
     return (
@@ -735,6 +804,7 @@ export function TrainerDailyReportForm({
     <>
       <PastUnrecordedBanner
         sessions={workspace.pastUnrecordedSessions ?? []}
+        unsubmittedReports={workspace.unsubmittedPastReportDates ?? []}
         reportDate={workspace.reportDate}
         onRecordPast={handleRecordPastAttendance}
         onLogException={handleOpenExceptionDialog}
@@ -750,7 +820,7 @@ export function TrainerDailyReportForm({
       <form
         action={action}
         onSubmit={(e) => {
-          if (isNonTeachingDay && !hasText) {
+          if ((isNonTeachingDay && !hasText) || workspace.hasOverduePastSessions) {
             e.preventDefault();
           }
         }}
@@ -767,16 +837,19 @@ export function TrainerDailyReportForm({
         <ClassAttendanceSummaryTable lessons={workspace.lessons} />
         <AbsenteesTableSection lessons={workspace.lessons} />
 
-        {/* Pending Attendance Action Banner */}
-        {!workspace.readyToSubmit && !isNonTeachingDay ? (
+        {/* Pending Attendance & Overdue Action Banner */}
+        {!workspace.readyToSubmit ? (
           <section className="flex items-start gap-2.5 rounded-xl border border-amber-300 bg-amber-50/90 p-3.5 shadow-xs">
             <AlertTriangle className="size-4 shrink-0 text-amber-600 mt-0.5" />
             <div className="flex-1">
               <p className="text-xs font-bold text-amber-950">
-                Attendance Pending Before Submission
+                {workspace.hasOverduePastSessions
+                  ? 'Previous Unrecorded Sessions or Reports Pending'
+                  : 'Attendance Pending Before Submission'}
               </p>
               <p className="mt-0.5 text-[11px] text-amber-800">
-                {workspace.blockingReason || 'Complete register for all scheduled classes above to enable report submission.'}
+                {workspace.blockingReason ||
+                  'Complete register for all scheduled classes above to enable report submission.'}
               </p>
             </div>
           </section>

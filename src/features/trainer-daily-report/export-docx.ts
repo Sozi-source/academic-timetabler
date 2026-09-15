@@ -33,6 +33,7 @@ function p(
   text: string,
   options: {
     bold?: boolean;
+    italics?: boolean;
     size?: number;
     color?: string;
     align?: (typeof AlignmentType)[keyof typeof AlignmentType];
@@ -48,6 +49,7 @@ function p(
         text,
         font: FONT,
         bold: options.bold ?? false,
+        italics: options.italics ?? false,
         size: options.size ?? 19, // 9.5pt in half-points
         color: options.color ?? '111827',
       }),
@@ -238,34 +240,45 @@ export async function buildTrainerDailyReportDocx(
           new TableRow({
             tableHeader: true,
             children: [
-              cell('Time', { bold: true, bg: 'F3F4F6', widthPercent: 15 }),
-              cell('Unit', { bold: true, bg: 'F3F4F6', widthPercent: 28 }),
-              cell('Cohort / Class', { bold: true, bg: 'F3F4F6', widthPercent: 20 }),
-              cell('Present', { bold: true, bg: 'F3F4F6', align: AlignmentType.CENTER, widthPercent: 10 }),
-              cell('Absent', { bold: true, bg: 'F3F4F6', align: AlignmentType.CENTER, widthPercent: 10 }),
-              cell('Absentee Students', { bold: true, bg: 'F3F4F6', widthPercent: 17 }),
+              cell('Unit & Session Time', { bold: true, bg: 'F3F4F6', widthPercent: 26 }),
+              cell('Present', { bold: true, bg: 'F3F4F6', align: AlignmentType.CENTER, widthPercent: 7 }),
+              cell('Absent', { bold: true, bg: 'F3F4F6', align: AlignmentType.CENTER, widthPercent: 7 }),
+              cell('Absentee Students', { bold: true, bg: 'F3F4F6', widthPercent: 60 }),
             ],
           }),
         ];
 
         for (const lesson of lessons) {
-          const absenteeText = (lesson.absentees ?? []).length > 0
-            ? lesson.absentees.map((a) => `${a.fullName} (${a.admissionNumber})`).join('; ')
-            : 'None';
+          const absenteeCellContent =
+            (lesson.absentees ?? []).length > 0
+              ? lesson.absentees.map((a) => {
+                  const noteSuffix = a.note ? ` [${a.note}]` : '';
+                  return p(`• ${a.fullName} (${a.admissionNumber})${noteSuffix}`, {
+                    size: 15,
+                    color: '111827',
+                    after: 15,
+                  });
+                })
+              : [p('None (100% Present)', { size: 16, color: '059669', italics: true, after: 0 })];
 
           lessonRows.push(
             new TableRow({
               children: [
-                cell(`${formatDailyReportTime(lesson.startsAt)} - ${formatDailyReportTime(lesson.endsAt)}`),
-                cell(`${lesson.unitCode ? `${lesson.unitCode} - ` : ''}${lesson.unitName}`, { bold: true }),
-                cell(lesson.cohortName || 'Class'),
-                cell(String(lesson.presentCount || 0), { align: AlignmentType.CENTER }),
+                cell([
+                  p(lesson.unitName, { bold: true, size: 17, after: 15 }),
+                  ...(lesson.unitCode
+                    ? [p(lesson.unitCode, { bold: true, size: 15, color: '374151', after: 15 })]
+                    : []),
+                  p(`${formatDailyReportTime(lesson.startsAt)} - ${formatDailyReportTime(lesson.endsAt)}`, { size: 15, color: '6B7280', after: 0 }),
+                ]),
+                cell(String(lesson.presentCount || 0), { align: AlignmentType.CENTER, size: 17 }),
                 cell(String(lesson.absentCount || 0), {
                   bold: (lesson.absentCount || 0) > 0,
                   color: (lesson.absentCount || 0) > 0 ? 'B91C1C' : '111827',
                   align: AlignmentType.CENTER,
+                  size: 17,
                 }),
-                cell(absenteeText, { size: 17 }),
+                cell(absenteeCellContent),
               ],
             }),
           );

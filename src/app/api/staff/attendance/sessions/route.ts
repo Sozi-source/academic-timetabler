@@ -62,6 +62,31 @@ export async function POST(
   const adminDb =
     createAdminClient();
 
+  // Enforce resolution of earlier unrecorded sessions before opening attendance for a later date
+  try {
+    const { getStaffClassAttendanceSchedule } = await import('@/features/class-attendance/queries');
+    const schedule = await getStaffClassAttendanceSchedule().catch(() => []);
+    const { detectPastUnrecordedSessions } = await import('@/features/trainer-daily-report/queries');
+    const pastUnrecorded = await detectPastUnrecordedSessions({
+      supabase,
+      schedule,
+      reportDate: payload.sessionDate,
+    });
+
+    const earlierUnrecorded = pastUnrecorded.filter((p) => p.sessionDate < payload.sessionDate);
+    if (earlierUnrecorded.length > 0) {
+      const oldest = earlierUnrecorded[earlierUnrecorded.length - 1];
+      return NextResponse.json(
+        {
+          message: `Please record attendance or log an exception for your earlier session on ${oldest.sessionDate} (${oldest.unitName}) before recording new sessions.`,
+        },
+        { status: 400 },
+      );
+    }
+  } catch (checkErr) {
+    console.warn('Attendance session overdue pre-check warning:', checkErr);
+  }
+
   // 1. Ensure session exists in scheduled_sessions table with all required foreign keys
   const { data: existingSession } = await (adminDb as any)
     .from('scheduled_sessions')

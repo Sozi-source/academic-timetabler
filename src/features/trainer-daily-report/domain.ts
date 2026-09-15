@@ -70,3 +70,19 @@ export function formatDailyReportTime(value?: string | null): string {
     return String(value || '--:--');
   }
 }
+
+export function getAbsenteeColumnClass(count: number): string {
+  if (count > 16) return 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4';
+  if (count > 8) return 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+  if (count > 3) return 'grid-cols-1 sm:grid-cols-2';
+  return 'grid-cols-1';
+}
+
+export function formatAbsenteeLine(student: {
+  fullName: string;
+  admissionNumber: string;
+  note?: string | null;
+}): string {
+  const noteSuffix = student.note ? ` [${student.note}]` : '';
+  return `${student.fullName} (${student.admissionNumber})${noteSuffix}`;
+}

@@ -47,6 +47,13 @@ export interface PastUnrecordedSession {
   status: 'not_started' | 'open';
 }
 
+export interface PastUnsubmittedReportDate {
+  reportDate: string;
+  dayOfWeek: string;
+  daysOverdue: number;
+  lessonCount: number;
+}
+
 export interface TrainerDailyReportWorkspace {
   reportDate: string;
   trainerId: string;
@@ -63,6 +70,7 @@ export interface TrainerDailyReportWorkspace {
   blockingReason: string | null;
   lessons: TrainerDailyReportLesson[];
   pastUnrecordedSessions?: PastUnrecordedSession[];
+  unsubmittedPastReportDates?: PastUnsubmittedReportDate[];
   hasOverduePastSessions?: boolean;
 }
 

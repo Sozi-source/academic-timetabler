@@ -9,22 +9,32 @@ import { createClient } from '@/lib/supabase/server';
 import type {
   DepartmentDailyReportWorkspace,
   PastUnrecordedSession,
+  PastUnsubmittedReportDate,
   TrainerDailyReportWorkspace,
 } from './types';
 import type { ClassAttendanceScheduleItem } from '@/features/class-attendance/types';
 
-export async function detectPastUnrecordedSessions({
+export async function detectPastUnrecordedReportsAndSessions({
   supabase,
   schedule,
   reportDate,
+  trainerProfileId,
+  trainerId,
   lookbackDays = 14,
 }: {
   supabase: any;
   schedule: ClassAttendanceScheduleItem[];
   reportDate: string;
+  trainerProfileId?: string;
+  trainerId?: string;
   lookbackDays?: number;
-}): Promise<PastUnrecordedSession[]> {
-  if (schedule.length === 0) return [];
+}): Promise<{
+  unrecordedSessions: PastUnrecordedSession[];
+  unsubmittedReportDates: PastUnsubmittedReportDate[];
+}> {
+  if (schedule.length === 0) {
+    return { unrecordedSessions: [], unsubmittedReportDates: [] };
+  }
 
   const targetDateObj = new Date(`${reportDate}T00:00:00Z`);
   const pastDates: Array<{ dateStr: string; dayOfWeek: string; daysOverdue: number }> = [];
@@ -72,7 +82,9 @@ export async function detectPastUnrecordedSessions({
     }
   }
 
-  if (scheduledOnDates.length === 0) return [];
+  if (scheduledOnDates.length === 0) {
+    return { unrecordedSessions: [], unsubmittedReportDates: [] };
+  }
 
   const scheduledSessionIds = [...new Set(scheduledOnDates.map((s) => s.scheduledSessionId))];
   const dates = [...new Set(scheduledOnDates.map((s) => s.sessionDate))];
@@ -88,11 +100,28 @@ export async function detectPastUnrecordedSessions({
     recordedMap.set(`${cs.scheduled_session_id}:${cs.session_date}`, cs.status);
   }
 
-  const unrecorded: PastUnrecordedSession[] = [];
+  const unrecordedSessions: PastUnrecordedSession[] = [];
+  const dateSessionsMap = new Map<
+    string,
+    { total: number; recorded: number; dayOfWeek: string; daysOverdue: number }
+  >();
+
   for (const s of scheduledOnDates) {
     const status = recordedMap.get(`${s.scheduledSessionId}:${s.sessionDate}`);
-    if (!status || status === 'open') {
-      unrecorded.push({
+    const isRecorded = status === 'completed' || status === 'cancelled';
+
+    const cur = dateSessionsMap.get(s.sessionDate) || {
+      total: 0,
+      recorded: 0,
+      dayOfWeek: s.dayOfWeek,
+      daysOverdue: s.daysOverdue,
+    };
+    cur.total++;
+    if (isRecorded) cur.recorded++;
+    dateSessionsMap.set(s.sessionDate, cur);
+
+    if (!isRecorded) {
+      unrecordedSessions.push({
         scheduledSessionId: s.scheduledSessionId,
         sessionDate: s.sessionDate,
         dayOfWeek: s.dayOfWeek,
@@ -107,7 +136,55 @@ export async function detectPastUnrecordedSessions({
     }
   }
 
-  return unrecorded.sort((a, b) => b.daysOverdue - a.daysOverdue);
+  // Check for unsubmitted past daily reports
+  const unsubmittedReportDates: PastUnsubmittedReportDate[] = [];
+  try {
+    let query = (supabase as any)
+      .from('trainer_daily_reports')
+      .select('report_date, status')
+      .in('report_date', dates)
+      .eq('status', 'submitted');
+
+    if (trainerId && trainerProfileId) {
+      query = query.or(`trainer_id.eq.${trainerId},trainer_profile_id.eq.${trainerProfileId}`);
+    } else if (trainerProfileId) {
+      query = query.eq('trainer_profile_id', trainerProfileId);
+    } else if (trainerId) {
+      query = query.eq('trainer_id', trainerId);
+    }
+
+    const { data: submittedReports } = await query;
+    const submittedDatesSet = new Set((submittedReports ?? []).map((r: any) => r.report_date));
+
+    // Only dates where all classes are recorded but daily report was never submitted
+    for (const [dateStr, info] of dateSessionsMap.entries()) {
+      if (info.total > 0 && info.recorded === info.total && !submittedDatesSet.has(dateStr)) {
+        unsubmittedReportDates.push({
+          reportDate: dateStr,
+          dayOfWeek: info.dayOfWeek,
+          daysOverdue: info.daysOverdue,
+          lessonCount: info.total,
+        });
+      }
+    }
+  } catch (err) {
+    console.warn('detectPastUnrecordedReportsAndSessions reports check warning:', err);
+  }
+
+  unrecordedSessions.sort((a, b) => b.daysOverdue - a.daysOverdue);
+  unsubmittedReportDates.sort((a, b) => b.daysOverdue - a.daysOverdue);
+
+  return { unrecordedSessions, unsubmittedReportDates };
+}
+
+export async function detectPastUnrecordedSessions(args: {
+  supabase: any;
+  schedule: ClassAttendanceScheduleItem[];
+  reportDate: string;
+  lookbackDays?: number;
+}): Promise<PastUnrecordedSession[]> {
+  const res = await detectPastUnrecordedReportsAndSessions(args);
+  return res.unrecordedSessions;
 }
 
 export async function getTrainerDailyReportWorkspace(
@@ -125,24 +202,29 @@ export async function getTrainerDailyReportWorkspace(
     if (!error && data && Array.isArray(data.lessons)) {
       const { getStaffClassAttendanceSchedule } = await import('@/features/class-attendance/queries');
       const attendanceSchedule = await getStaffClassAttendanceSchedule().catch(() => []);
-      const pastUnrecordedSessions = await detectPastUnrecordedSessions({
+      const { unrecordedSessions, unsubmittedReportDates } = await detectPastUnrecordedReportsAndSessions({
         supabase,
         schedule: attendanceSchedule,
         reportDate,
+        trainerProfileId: profile.id,
       });
-      const hasOverduePastSessions = pastUnrecordedSessions.some((p) => p.daysOverdue > 2);
+
+      const hasOverduePastSessions = unrecordedSessions.length > 0 || unsubmittedReportDates.length > 0;
       const readyToSubmit = Boolean(data.readyToSubmit) && !hasOverduePastSessions;
       const blockingReason = !data.readyToSubmit
         ? data.blockingReason
-        : hasOverduePastSessions
-        ? 'You have overdue unrecorded past classes (>48h). Record past attendance or log an exception note to submit.'
+        : unrecordedSessions.length > 0
+        ? `You have ${unrecordedSessions.length} unrecorded past class session(s). Please record attendance or log an exception for ${unrecordedSessions[0].sessionDate} (${unrecordedSessions[0].unitName}) before submitting.`
+        : unsubmittedReportDates.length > 0
+        ? `You have ${unsubmittedReportDates.length} unsubmitted previous daily report(s). Please submit your report for ${unsubmittedReportDates[0].dayOfWeek}, ${unsubmittedReportDates[0].reportDate} before submitting.`
         : null;
 
       return {
         ...data,
         readyToSubmit,
         blockingReason,
-        pastUnrecordedSessions,
+        pastUnrecordedSessions: unrecordedSessions,
+        unsubmittedPastReportDates: unsubmittedReportDates,
         hasOverduePastSessions,
       } as TrainerDailyReportWorkspace;
     }
@@ -165,10 +247,12 @@ export async function getTrainerDailyReportWorkspace(
       getStaffClassAttendanceSchedule().catch(() => []),
     ]);
 
-    const pastUnrecordedSessions = await detectPastUnrecordedSessions({
+    const { unrecordedSessions, unsubmittedReportDates } = await detectPastUnrecordedReportsAndSessions({
       supabase,
       schedule: attendanceSchedule,
       reportDate,
+      trainerProfileId: profile.id,
+      trainerId: workspace.trainerId,
     });
 
     const reportDayOfWeek = new Intl.DateTimeFormat('en-GB', {
@@ -290,13 +374,18 @@ export async function getTrainerDailyReportWorkspace(
       // Table query fallback
     }
 
-    const lessonsComplete = lessons.length === 0 || lessons.every((l) => l.attendanceStatus === 'completed' || l.attendanceStatus === 'cancelled');
-    const hasOverduePastSessions = pastUnrecordedSessions.some((p) => p.daysOverdue > 2);
+    const lessonsComplete =
+      lessons.length === 0 ||
+      lessons.every((l) => l.attendanceStatus === 'completed' || l.attendanceStatus === 'cancelled');
+
+    const hasOverduePastSessions = unrecordedSessions.length > 0 || unsubmittedReportDates.length > 0;
     const readyToSubmit = lessonsComplete && !hasOverduePastSessions;
     const blockingReason = !lessonsComplete
       ? 'Complete attendance for all scheduled lessons before submitting the daily report.'
-      : hasOverduePastSessions
-      ? 'You have overdue unrecorded past classes (>48h). Record past attendance or log an exception note to submit.'
+      : unrecordedSessions.length > 0
+      ? `You have ${unrecordedSessions.length} unrecorded past class session(s). Please record attendance or log an exception for ${unrecordedSessions[0].sessionDate} (${unrecordedSessions[0].unitName}) before submitting.`
+      : unsubmittedReportDates.length > 0
+      ? `You have ${unsubmittedReportDates.length} unsubmitted previous daily report(s). Please submit your report for ${unsubmittedReportDates[0].dayOfWeek}, ${unsubmittedReportDates[0].reportDate} before submitting.`
       : null;
 
     return {
@@ -314,7 +403,8 @@ export async function getTrainerDailyReportWorkspace(
       readyToSubmit,
       blockingReason,
       lessons,
-      pastUnrecordedSessions,
+      pastUnrecordedSessions: unrecordedSessions,
+      unsubmittedPastReportDates: unsubmittedReportDates,
       hasOverduePastSessions,
     };
   } catch (fallbackErr) {
@@ -348,6 +438,26 @@ export async function getDepartmentDailyReports(
 ): Promise<DepartmentDailyReportWorkspace> {
   const profile = await requireHodAccess();
   const supabase = await createClient();
+  const departmentId = profile.activeDepartmentId || '';
+  const departmentName = profile.departmentName || 'Department';
+
+  const { createAdminClient } = await import('@/lib/supabase/admin');
+  const adminDb = createAdminClient();
+
+  // 1. Only include trainers belonging to the active department (Department of Human Nutrition)
+  let deptTrainersQuery = (adminDb as any)
+    .from('trainers')
+    .select('id, full_name, staff_number, department_id, home_department')
+    .eq('is_active', true);
+
+  if (departmentId) {
+    deptTrainersQuery = deptTrainersQuery.or(`department_id.eq.${departmentId},home_department.ilike.%nutrition%`);
+  } else {
+    deptTrainersQuery = deptTrainersQuery.ilike('home_department', '%nutrition%');
+  }
+
+  const { data: deptTrainersData } = await deptTrainersQuery;
+  const deptTrainerIdSet = new Set((deptTrainersData ?? []).map((t: any) => String(t.id)));
 
   try {
     const { data, error } = await (supabase as any).rpc(
@@ -356,67 +466,159 @@ export async function getDepartmentDailyReports(
     );
 
     if (!error && data && Array.isArray(data.reports)) {
-      return data as DepartmentDailyReportWorkspace;
+      // Defensively filter to only trainers who belong to this department
+      const filteredReports = (data.reports as any[]).filter((r) => {
+        if (deptTrainerIdSet.size > 0) {
+          return deptTrainerIdSet.has(String(r.trainerId));
+        }
+        return (
+          r.homeDepartmentId === departmentId ||
+          (r.homeDepartmentName && /nutrition/i.test(r.homeDepartmentName))
+        );
+      });
+
+      const filteredPending = (data.pendingTrainers as any[]).filter((t) => {
+        if (deptTrainerIdSet.size > 0) {
+          return deptTrainerIdSet.has(String(t.trainerId));
+        }
+        return false;
+      });
+
+      const scheduledLessons = filteredReports.reduce(
+        (sum, r) => sum + (r.lessons?.length || 0),
+        0
+      );
+      const recordedAbsences = filteredReports.reduce(
+        (sum, r) =>
+          sum +
+          (r.lessons || []).reduce((lSum: number, l: any) => lSum + (Number(l.absentCount) || 0), 0),
+        0
+      );
+      const totalConcerns = filteredReports.filter((r) => Boolean(r.concern?.trim())).length;
+
+      return {
+        reportDate,
+        departmentId: data.departmentId || departmentId,
+        departmentName: data.departmentName || departmentName,
+        generatedAt: data.generatedAt || new Date().toISOString(),
+        summary: {
+          expectedTrainers: filteredReports.length + filteredPending.length,
+          submittedReports: filteredReports.length,
+          pendingReports: filteredPending.length,
+          scheduledLessons,
+          recordedAbsences,
+          concerns: totalConcerns,
+        },
+        pendingTrainers: filteredPending,
+        reports: filteredReports,
+      };
     }
   } catch (err) {
     console.warn('get_department_trainer_daily_reports RPC warning:', err);
   }
 
-  // Fallback: Direct database query
+  // Fallback: Direct database query scoped strictly to department trainers
   try {
-    const { createAdminClient } = await import('@/lib/supabase/admin');
-    const adminDb = createAdminClient();
-
-    const departmentId = profile.activeDepartmentId || '';
-    const departmentName = profile.departmentName || 'Department';
-
-    // 1. Get all active trainers
-    const { data: trainers } = await (adminDb as any)
-      .from('trainers')
-      .select('id, full_name')
-      .eq('is_active', true);
-
-    const activeTrainers = (trainers ?? []).map((t: any) => ({
+    const activeTrainers = (deptTrainersData ?? []).map((t: any) => ({
       trainerId: String(t.id),
       trainerName: String(t.full_name),
+      staffNumber: t.staff_number ? String(t.staff_number) : null,
     }));
 
-    // 2. Get submitted reports for this date
+    // Get submitted reports for this date
     const { data: reportsData } = await (adminDb as any)
       .from('trainer_daily_reports')
-      .select('id, trainer_id, trainer_profile_id, status, submitted_at, other_activity, concern')
-      .eq('report_date', reportDate);
+      .select('id, trainer_id, trainer_profile_id, trainer_name_snapshot, trainer_number_snapshot, home_department_id, home_department_name_snapshot, status, submitted_at, other_activity, concern')
+      .eq('report_date', reportDate)
+      .eq('status', 'submitted');
 
-    const reportMap = new Map<string, Record<string, any>>();
-    for (const r of (reportsData ?? [])) {
-      if (r.trainer_id) reportMap.set(String(r.trainer_id), r);
-      if (r.trainer_profile_id) reportMap.set(String(r.trainer_profile_id), r);
+    // Filter submitted reports strictly to this department's trainers
+    const filteredReportsData = (reportsData ?? []).filter((r: any) => {
+      if (r.home_department_id && departmentId && r.home_department_id === departmentId) return true;
+      if (r.trainer_id && deptTrainerIdSet.has(String(r.trainer_id))) return true;
+      if (r.home_department_name_snapshot && /nutrition/i.test(r.home_department_name_snapshot)) return true;
+      return false;
+    });
+
+    const reportIds = filteredReportsData.map((r: any) => r.id);
+    const lessonsByReport = new Map<string, any[]>();
+
+    if (reportIds.length > 0) {
+      const { data: lessonsData } = await (adminDb as any)
+        .from('trainer_daily_report_lessons')
+        .select('*')
+        .in('report_id', reportIds)
+        .order('starts_at', { ascending: true });
+
+      for (const l of lessonsData ?? []) {
+        const list = lessonsByReport.get(l.report_id) || [];
+        list.push({
+          id: l.id,
+          departmentId: l.department_id,
+          departmentName: l.department_name_snapshot,
+          timetableVersionId: l.timetable_version_id,
+          timetableVersionNumber: l.timetable_version_number,
+          timetableTitle: l.timetable_title,
+          scheduledSessionId: l.scheduled_session_id,
+          teachingAllocationId: l.teaching_allocation_id,
+          academicPeriodId: l.academic_period_id,
+          cohortId: l.cohort_id,
+          unitId: l.unit_id,
+          sessionNumber: l.session_number,
+          startsAt: l.starts_at,
+          endsAt: l.ends_at,
+          unitCode: l.unit_code_snapshot || '',
+          unitName: l.unit_name_snapshot,
+          cohortName: l.cohort_name_snapshot,
+          roomName: l.room_name_snapshot,
+          deliveryMode: l.delivery_mode_snapshot,
+          attendanceSessionId: l.attendance_session_id,
+          attendanceStatus: 'completed',
+          rosterCount: l.roster_count,
+          presentCount: l.present_count,
+          absentCount: l.absent_count,
+          absentees: l.absentees || [],
+        });
+        lessonsByReport.set(l.report_id, list);
+      }
     }
 
     const submittedReports: any[] = [];
     let totalConcerns = 0;
+    const submittedTrainerIds = new Set<string>();
 
-    for (const trainer of activeTrainers) {
-      const rep = reportMap.get(trainer.trainerId);
-      if (rep && rep.status === 'submitted') {
-        if (rep.concern) totalConcerns++;
+    for (const rep of filteredReportsData) {
+      submittedTrainerIds.add(String(rep.trainer_id));
+      if (rep.trainer_profile_id) submittedTrainerIds.add(String(rep.trainer_profile_id));
+      if (rep.concern?.trim()) totalConcerns++;
 
-        submittedReports.push({
-          reportId: String(rep.id),
-          trainerId: trainer.trainerId,
-          trainerName: trainer.trainerName,
-          trainerNumber: null,
-          homeDepartmentId: departmentId,
-          homeDepartmentName: departmentName,
-          submittedAt: String(rep.submitted_at || new Date().toISOString()),
-          otherActivity: String(rep.other_activity || ''),
-          concern: String(rep.concern || ''),
-          lessons: [],
-        });
-      }
+      const lessons = lessonsByReport.get(rep.id) || [];
+      submittedReports.push({
+        reportId: String(rep.id),
+        trainerId: String(rep.trainer_id),
+        trainerName: rep.trainer_name_snapshot || 'Trainer',
+        trainerNumber: rep.trainer_number_snapshot || null,
+        homeDepartmentId: rep.home_department_id || departmentId,
+        homeDepartmentName: rep.home_department_name_snapshot || departmentName,
+        submittedAt: String(rep.submitted_at || new Date().toISOString()),
+        otherActivity: String(rep.other_activity || ''),
+        concern: String(rep.concern || ''),
+        lessons,
+      });
     }
 
-    const pendingTrainers = activeTrainers.filter((t: any) => !reportMap.has(t.trainerId));
+    const pendingTrainers = activeTrainers
+      .filter((t: any) => !submittedTrainerIds.has(t.trainerId))
+      .map((t: any) => ({
+        trainerId: t.trainerId,
+        trainerName: t.trainerName,
+      }));
+
+    const scheduledLessons = submittedReports.reduce((sum, r) => sum + r.lessons.length, 0);
+    const recordedAbsences = submittedReports.reduce(
+      (sum, r) => sum + r.lessons.reduce((lSum: number, l: any) => lSum + (Number(l.absentCount) || 0), 0),
+      0
+    );
 
     return {
       reportDate,
@@ -427,8 +629,8 @@ export async function getDepartmentDailyReports(
         expectedTrainers: activeTrainers.length,
         submittedReports: submittedReports.length,
         pendingReports: pendingTrainers.length,
-        scheduledLessons: 0,
-        recordedAbsences: 0,
+        scheduledLessons,
+        recordedAbsences,
         concerns: totalConcerns,
       },
       pendingTrainers,

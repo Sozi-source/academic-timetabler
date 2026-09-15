@@ -13,6 +13,65 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 2. **Curriculum Upload UI Update (`curriculum-zip-upload-dialog.tsx`)**:
    - Update `curriculum-zip-upload-dialog.tsx` to display `unresolvedFiles` from the ingestion preview response, allowing HODs to select document types manually prior to commit.
 
+### 2026-09-15: Admin Sidebar Upgrade — Grouped Sections, Core Modules & Collision-Proof Matching
+- **Files Modified**:
+  - `src/components/layout/admin-sidebar.tsx`:
+    - **Structured Grouping**: Organized navigation into 4 logical, clean enterprise sections: *Operations* (Dashboard, Daily Operations, Class Attendance, Action Centre), *Academics & Quality* (Academic Planning, Unit Registration, Quality Assurance, Grading & Results, Reports), *Faculty & Students* (Staff & Trainers, Student Registry), and *System* (Settings).
+    - **Added Missing Core Modules**: Added direct 1-click links to **Class Attendance** (`/attendance-clinical/class-attendance`, icon: `CheckCircle2`), **Staff & Trainers** (`/trainers`, icon: `Users`), and **Student Registry** (`/students/registry`, icon: `UserCheck`).
+    - **Collision-Proof Active Route Matching**: Implemented `isNavItemActive` using longest-matching-prefix resolution. Solved active state route collision bugs where sub-routes (`/timetable/reports`, `/timetable/organization`, `/operations/action-center`) previously caused both the child and parent navigation items to highlight active simultaneously.
+    - **Trainer Portal Quick Link**: Added direct "My Trainer Workspace" (`/staff`) link in the sidebar footer directly above Sign Out, enabling HODs to jump to their teaching allocations with 1 click.
+    - **Refined Branding**: Updated header title from narrow "Academic Planning" to comprehensive "Department Management".
+  - `src/tests/admin-dashboard-design.test.ts`:
+    - Updated navigation specification test assertions to verify all 12 items, their target paths, and added comprehensive active route matching tests covering exact paths, sibling prefix disambiguation, and nested subroutes.
+
+### 2026-09-15: 80% College Minimum Attendance Policy & Student Portal Missed Lessons View
+- **Files Modified/Added**:
+  - `src/features/attendance-analytics/domain.ts`: Added `COLLEGE_MINIMUM_ATTENDANCE_PERCENT = 80.0` constant. Added `AttendanceStanding` type (`good` $\ge 85\%$, `borderline` $80\text{–}84.9\%$, `at_risk` $< 80\%$, `unrecorded`) and helper functions `getAttendanceStanding`, `getAttendanceStandingLabel`, and `getAttendanceBadgeVariant` enforcing the official college 80% minimum attendance policy for examination/CAT clearance.
+  - `src/tests/attendance-analytics-domain.test.ts`: Added unit tests verifying boundary classifications for the 80% college requirement (`79.9%` $\rightarrow$ `at_risk`, `80.0%` & `84.9%` $\rightarrow$ `borderline`, `85.0%` & `100%` $\rightarrow$ `good`).
+  - `src/features/attendance-analytics/hod-attendance-view.tsx` [NEW]: Created interactive dual-view client component for HOD analytics (`/attendance-clinical/class-attendance/analytics`), enabling switching between Student Attendance and Unit Overview. Includes student name/admission search, cohort filter, status filter chips (`All`, `At Risk < 80%` with direct warning count button, `Borderline 80–84%`, `Good Standing ≥ 85%`), attendance rate progress bars, and official college policy callout.
+  - `src/app/(dashboard)/attendance-clinical/class-attendance/analytics/page.tsx`: Embedded `HodAttendanceView` passing aggregated unit data and detailed student rosters, along with college attendance policy footnote.
+  - `src/components/student/student-portal-shell.tsx`: Temporarily hid the direct `Attendance` link from the student portal sidebar and mobile navigation drawer as instructed ("implement student view fully but first hide it"), keeping the portal uncluttered while retaining the route.
+  - `src/features/student-portal/student-attendance-view.tsx` [NEW]: Created comprehensive student attendance view showing overall attendance rate, 80% college exam clearance threshold indicator, unit-by-unit breakdown, and filterable session history (All Classes vs Missed Lessons).
+  - `src/app/student/attendance/page.tsx`: Updated student attendance page with full policy enforcement, badge indicators, and lesson filtering.
+  - `src/app/student/page.tsx`: Updated main student dashboard to display a high-priority **Missed Lessons Alert** card showing any class session marked absent (with date, time, unit, and cohort) and clear warning regarding the college 80% exam debarment threshold.
+
+### 2026-09-15: Unit Code Below Unit Name & Departmental Trainer Filtering for Daily Reports
+- **Files Modified**:
+  - `src/features/trainer-daily-report/hod-report-list.tsx`: Removed leading unit code prefix from the top line and positioned the unit code cleanly directly below the unit name in subtle monospace font, with the session time beneath.
+  - `src/app/(dashboard)/operations/daily-reports/print/page.tsx`: Updated print table unit cell to place unit name on top, unit code below, and session time underneath.
+  - `src/features/trainer-daily-report/export-docx.ts`: Updated Word export table to stack unit name, unit code, and session time into cleanly spaced separate paragraph lines.
+  - `src/features/trainer-daily-report/trainer-form.tsx`: Harmonized trainer daily report form review and summary tables to display unit name first with unit code underneath.
+  - `src/features/trainer-daily-report/queries.ts`: Filtered `getDepartmentDailyReports` so `expectedTrainers`, `submittedReports`, and `pendingTrainers` strictly include only trainers belonging to the active department (Department of Human Nutrition and Dietetics). Excluded all external trainers from other departments (Applied Sciences, Health Records, Perioperative Theatre, Health & Social Sciences) who teach service units or have unrelated allocations. Upgraded direct database fallback to load `trainer_daily_report_lessons` with full absentee student rosters.
+  - `supabase/migrations/20260914235000_filter_daily_reports_by_nutrition_department.sql`: Added PostgreSQL migration updating `public.get_department_trainer_daily_reports` function to restrict `expected`, `submitted`, `lesson_count`, `absence_count`, `concern_count`, and `reports_payload` to `trainer.department_id = active_department` and `report.home_department_id = active_department`.
+
+### 2026-09-14: Balanced Daily Report Table Design & Dynamic Multi-Column Absentee Scaling
+- **Files Modified**:
+  - `src/features/trainer-daily-report/domain.ts`: Updated `getAbsenteeColumnClass` to dynamically scale up to 4 columns (`grid-cols-1`, `sm:grid-cols-2`, `md:grid-cols-3`, `xl:grid-cols-4`) for large absentee populations ($\ge 17$ students), and updated `formatAbsenteeLine` for clean 1-line display.
+  - `src/features/trainer-daily-report/hod-report-list.tsx`: Streamlined table to 4 balanced columns (`Unit & Time` `w-[230px]`, `Present` `w-[60px]`, `Absent` `w-[60px]`, and `Absentees` remaining $\sim 70\%$ width). Removed the standalone `Class` column that previously ballooned row height across multi-cohort badges. Combined unit details and session time into a single structured cell. Removed truncation from student names so full names and admission numbers are visible in full.
+  - `src/app/(dashboard)/operations/daily-reports/print/page.tsx`: Updated print view table to 4 columns (`w-[26%]`, `w-[6%]`, `w-[6%]`, `w-[62%]`). Removed `Class` column. Formatted absentee students into 1–4 straight print columns with full names and admission numbers without truncation.
+  - `src/features/trainer-daily-report/export-docx.ts`: Updated Word export table headers and column widths (Unit & Time at 26%, Absentees at 60%). Combined unit and session time into a clean paragraph stack.
+  - `src/tests/trainer-daily-report-domain.test.ts`: Added unit tests verifying responsive column scaling for 0, 3, 5, 8, 12, 16, 17, and 32 absentees, and formatting of student details with circumstance notes.
+- **Verification Evidence**:
+  - `npx vitest run src/tests/trainer-daily-report-domain.test.ts`: 6/6 tests passed.
+  - `npm run check`: Typecheck, ESLint, and Next.js 16 production build passed with 0 errors across all routes.
+
+### 2026-09-14: Daily Report Template Upgrade & Trainer Past Report Enforcement
+- **Files Modified**:
+  - `src/features/trainer-daily-report/hod-report-list.tsx`: Upgraded HOD daily report view (`/operations/daily-reports`) with proportional table columns (`table-fixed`), maximized space allocation for absentees, and a straight multi-column absentee grid (`grid-cols-1`, `md:grid-cols-2`, `xl:grid-cols-3` depending on volume) ensuring each student's details occupy strictly 1 line per row per column with student name, monospace admission number, and circumstance note pill.
+  - `src/app/(dashboard)/operations/daily-reports/print/page.tsx`: Upgraded print view (`/operations/daily-reports/print`) with proportional table column widths (`w-[12%]`, `w-[18%]`, `w-[14%]`, `w-[6%]`, `w-[6%]`, `w-[44%]`), replacing semi-colon string blobs with crisp 1-3 straight print columns (`grid-cols-1`, `grid-cols-2`, `grid-cols-3`).
+  - `src/features/trainer-daily-report/export-docx.ts`: Adjusted Word document export table column widths (Absentee Students increased to 40%) and formatted each absentee student as a distinct bulleted line/paragraph in half-points with optional circumstance tags.
+  - `src/features/trainer-daily-report/types.ts`: Added `PastUnsubmittedReportDate` and updated `TrainerDailyReportWorkspace` to track unsubmitted past daily reports.
+  - `src/features/trainer-daily-report/domain.ts`: Added `getAbsenteeColumnClass` and `formatAbsenteeLine` utility helpers.
+  - `src/features/trainer-daily-report/queries.ts`: Implemented `detectPastUnrecordedReportsAndSessions` with strict overdue enforcement ($\ge 1$ day overdue, eliminating the 2-day bypass loophole) and tracked unsubmitted past daily reports.
+  - `src/features/trainer-daily-report/trainer-form.tsx`: Enhanced `PastUnrecordedBanner` to report both unsubmitted past reports and unrecorded sessions with 1-click resolution actions; guarded the "Take Attendance" button on new classes when previous reports/sessions are pending; enforced blocking on non-teaching days.
+  - `src/features/trainer-daily-report/actions.ts`: Enforced strict validation in `submitTrainerDailyReportAction` blocking any report submission if overdue unrecorded sessions or unsubmitted reports exist.
+  - `src/app/api/staff/attendance/sessions/route.ts`: Enforced chronological compliance in `POST /api/staff/attendance/sessions`, blocking creation of attendance sessions for new dates if older unrecorded sessions exist.
+  - `src/tests/trainer-daily-report-domain.test.ts`: Added unit tests covering absentee column classes and single-line student detail formatting.
+- **Verification Evidence**:
+  - `vitest run src/tests/trainer-daily-report-domain.test.ts`: 6/6 tests passed.
+  - `npm test`: 117/117 test files passed, 585/585 tests passed.
+  - `npm run check`: Typecheck, ESLint, and Next.js 16 production build passed with 0 errors across all routes.
+
 ### 2026-09-14: Trainer Table Action Cleanliness & Premium Trainer Profile Redesign
 - **Files Modified**:
   - `src/features/trainers/trainer-table.tsx`

@@ -35,7 +35,8 @@ const NAVIGATION_ITEMS: readonly NavigationItem[] = [
   { label: 'My Units', href: '/student/units', icon: BookOpenCheck },
   { label: 'Timetable', href: '/student/timetable', icon: CalendarDays },
   { label: 'Registration', href: '/student/unit-registration', icon: ClipboardCheck },
-  { label: 'Attendance', href: '/student/attendance', icon: CalendarCheck2 },
+  // Attendance view fully implemented, hidden from main navigation per management instruction
+  // { label: 'Attendance', href: '/student/attendance', icon: CalendarCheck2 },
   { label: 'Documents', href: '/student/documents', icon: FileText },
   { label: 'Profile', href: '/student/profile', icon: UserRound },
 ];

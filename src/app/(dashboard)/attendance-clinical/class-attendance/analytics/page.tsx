@@ -25,6 +25,7 @@ import {
   getDepartmentAttendanceAnalytics,
   getDepartmentStudentAttendanceAnalytics,
 } from '@/features/attendance-analytics/queries';
+import { HodAttendanceView } from '@/features/attendance-analytics/hod-attendance-view';
 import {
   requireHodAccess,
 } from '@/features/auth/authorization';
@@ -166,92 +167,11 @@ export default async function AttendanceAnalyticsPage() {
         />
       </section>
 
-      {aggregates.length ===
-      0 ? (
-        <EmptyState
-          icon={BarChart3}
-          title="No completed attendance"
-          description="Analytics will appear after trainers complete class attendance in the active academic period."
-        />
-      ) : (
-        <section className="overflow-hidden rounded-xl border border-border bg-white">
-          <div className="hidden border-b border-border bg-surface-subtle px-4 py-2.5 text-[10px] font-bold uppercase tracking-wide text-text-muted lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(8rem,.7fr)_minmax(8rem,.7fr)_6rem_7rem_7rem_7rem] lg:gap-3">
-            <span>Unit</span>
-            <span>Cohort</span>
-            <span>Trainer</span>
-            <span>Sessions</span>
-            <span>Present</span>
-            <span>Absent</span>
-            <span>Rate</span>
-          </div>
-
-          <div className="divide-y divide-border">
-            {aggregates.map(
-              (
-                item,
-              ) => (
-                <article
-                  key={`${item.cohortId}:${item.unitId}:${item.trainerId}`}
-                  className="grid gap-2 px-4 py-3 lg:grid-cols-[minmax(0,1.1fr)_minmax(8rem,.7fr)_minmax(8rem,.7fr)_6rem_7rem_7rem_7rem] lg:items-center lg:gap-3"
-                >
-                  <p className="text-xs font-semibold text-text-primary">
-                    {
-                      item.unitName
-                    }
-                  </p>
-
-                  <p className="text-[11px] text-text-secondary">
-                    {
-                      item.cohortName
-                    }
-                  </p>
-
-                  <p className="text-[11px] text-text-secondary">
-                    {
-                      item.trainerName
-                    }
-                  </p>
-
-                  <p className="text-[11px] font-semibold text-text-primary">
-                    {
-                      item.completedSessions
-                    }
-                  </p>
-
-                  <p className="text-[11px] text-text-secondary">
-                    {
-                      item.presentCount
-                    }
-                  </p>
-
-                  <p className="text-[11px] text-text-secondary">
-                    {
-                      item.absentCount
-                    }
-                  </p>
-
-                  <Badge
-                    variant={
-                      item.attendanceRate ===
-                      null
-                        ? 'neutral'
-                        : 'success'
-                    }
-                  >
-                    {attendanceRateLabel(
-                      item.attendanceRate,
-                    )}
-                  </Badge>
-                </article>
-              ),
-            )}
-          </div>
-        </section>
-      )}
+      <HodAttendanceView aggregates={aggregates} students={students} />
 
       <section className="rounded-xl border border-border bg-surface-subtle/60 px-4 py-3">
         <p className="text-[10px] leading-4 text-text-muted">
-          Rates use completed sessions only. Open or unmarked attendance never enters the denominator.
+          College minimum attendance policy requires 80.0% attendance across completed sessions for examination clearance. Open or unmarked attendance never enters the denominator.
         </p>
       </section>
     </div>

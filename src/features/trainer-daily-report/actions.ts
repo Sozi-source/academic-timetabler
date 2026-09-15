@@ -36,6 +36,16 @@ export async function submitTrainerDailyReportAction(
     const { getTrainerDailyReportWorkspace } = await import('./queries');
     const workspace = await getTrainerDailyReportWorkspace(reportDate);
 
+    // Enforce resolution of previous unrecorded sessions or unsubmitted past reports
+    if (workspace.hasOverduePastSessions) {
+      return {
+        status: 'error',
+        message:
+          workspace.blockingReason ||
+          'You have unrecorded previous sessions or unsubmitted past reports. Please resolve previous reports before submitting.',
+      };
+    }
+
     // If there are no scheduled lessons, require at least one activity or concern note
     if (workspace.lessons.length === 0 && !otherActivity && !concern) {
       return {
@@ -48,7 +58,9 @@ export async function submitTrainerDailyReportAction(
     if (workspace.lessons.length > 0 && !workspace.readyToSubmit) {
       return {
         status: 'error',
-        message: 'Please complete class attendance for all scheduled lessons before submitting.',
+        message:
+          workspace.blockingReason ||
+          'Please complete class attendance for all scheduled lessons before submitting.',
       };
     }
 

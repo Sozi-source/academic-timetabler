@@ -83,13 +83,20 @@ const EXCEPTION_REASONS = [
   'Other',
 ];
 
+interface ExceptionTargetSession {
+  scheduledSessionId: string;
+  sessionDate: string;
+  unitName: string;
+  cohortName: string;
+}
+
 function SessionExceptionDialog({
   session,
   open,
   onOpenChange,
   onSuccess,
 }: {
-  session: PastUnrecordedSession | null;
+  session: ExceptionTargetSession | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
@@ -330,10 +337,12 @@ function ScheduledLessonsSection({
   workspace,
   openingId,
   onRecordAttendance,
+  onLogException,
 }: {
   workspace: TrainerDailyReportWorkspace;
   openingId: string | null;
   onRecordAttendance: (lesson: TrainerDailyReportLesson) => void;
+  onLogException?: (lesson: TrainerDailyReportLesson) => void;
 }) {
   const lessons = workspace?.lessons ?? [];
 
@@ -465,19 +474,30 @@ function ScheduledLessonsSection({
                     Continue Register
                   </button>
                 ) : (
-                  <button
-                    type="button"
-                    disabled={isOpening}
-                    onClick={() => onRecordAttendance(lesson)}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-primary-hover disabled:opacity-50"
-                  >
-                    {isOpening ? (
-                      <LoaderCircle className="size-3.5 animate-spin" />
-                    ) : (
-                      <CalendarCheck2 className="size-3.5" />
-                    )}
-                    Take Attendance
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={isOpening}
+                      onClick={() => onRecordAttendance(lesson)}
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-primary-hover disabled:opacity-50"
+                    >
+                      {isOpening ? (
+                        <LoaderCircle className="size-3.5 animate-spin" />
+                      ) : (
+                        <CalendarCheck2 className="size-3.5" />
+                      )}
+                      Take Attendance
+                    </button>
+                    {onLogException ? (
+                      <button
+                        type="button"
+                        onClick={() => onLogException(lesson)}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-white px-2.5 py-1.5 text-xs font-medium text-text-secondary transition hover:bg-surface-subtle shadow-2xs"
+                      >
+                        Did Not Take Place
+                      </button>
+                    ) : null}
+                  </div>
                 )}
               </div>
             </article>
@@ -663,7 +683,7 @@ export function TrainerDailyReportForm({
   const [concern, setConcern] = useState(workspace?.concern || '');
   const [openingSessionId, setOpeningSessionId] = useState<string | null>(null);
 
-  const [exceptionSession, setExceptionSession] = useState<PastUnrecordedSession | null>(null);
+  const [exceptionSession, setExceptionSession] = useState<ExceptionTargetSession | null>(null);
   const [exceptionDialogOpen, setExceptionDialogOpen] = useState(false);
 
   const [state, action, pending] = useActionState(
@@ -739,6 +759,16 @@ export function TrainerDailyReportForm({
 
   function handleOpenExceptionDialog(pastSession: PastUnrecordedSession) {
     setExceptionSession(pastSession);
+    setExceptionDialogOpen(true);
+  }
+
+  function handleOpenLessonException(lesson: TrainerDailyReportLesson) {
+    setExceptionSession({
+      scheduledSessionId: lesson.scheduledSessionId,
+      sessionDate: workspace.reportDate,
+      unitName: lesson.unitName,
+      cohortName: lesson.cohortName,
+    });
     setExceptionDialogOpen(true);
   }
 
@@ -832,6 +862,7 @@ export function TrainerDailyReportForm({
           workspace={workspace}
           openingId={openingSessionId}
           onRecordAttendance={handleRecordAttendance}
+          onLogException={handleOpenLessonException}
         />
 
         <ClassAttendanceSummaryTable lessons={workspace.lessons} />

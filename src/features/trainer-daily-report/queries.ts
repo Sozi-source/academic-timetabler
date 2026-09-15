@@ -103,21 +103,27 @@ export async function detectPastUnrecordedReportsAndSessions({
   const unrecordedSessions: PastUnrecordedSession[] = [];
   const dateSessionsMap = new Map<
     string,
-    { total: number; recorded: number; dayOfWeek: string; daysOverdue: number }
+    { total: number; recorded: number; completed: number; cancelled: number; dayOfWeek: string; daysOverdue: number }
   >();
 
   for (const s of scheduledOnDates) {
     const status = recordedMap.get(`${s.scheduledSessionId}:${s.sessionDate}`);
     const isRecorded = status === 'completed' || status === 'cancelled';
+    const isCompleted = status === 'completed';
+    const isCancelled = status === 'cancelled';
 
     const cur = dateSessionsMap.get(s.sessionDate) || {
       total: 0,
       recorded: 0,
+      completed: 0,
+      cancelled: 0,
       dayOfWeek: s.dayOfWeek,
       daysOverdue: s.daysOverdue,
     };
     cur.total++;
     if (isRecorded) cur.recorded++;
+    if (isCompleted) cur.completed++;
+    if (isCancelled) cur.cancelled++;
     dateSessionsMap.set(s.sessionDate, cur);
 
     if (!isRecorded) {
@@ -156,9 +162,15 @@ export async function detectPastUnrecordedReportsAndSessions({
     const { data: submittedReports } = await query;
     const submittedDatesSet = new Set((submittedReports ?? []).map((r: any) => r.report_date));
 
-    // Only dates where all classes are recorded but daily report was never submitted
+    // Only dates where AT LEAST ONE class was completed/taught, all classes are recorded, but daily report was never submitted.
+    // Days where 100% of sessions were cancelled (did not take place) do not require a separate daily report.
     for (const [dateStr, info] of dateSessionsMap.entries()) {
-      if (info.total > 0 && info.recorded === info.total && !submittedDatesSet.has(dateStr)) {
+      if (
+        info.total > 0 &&
+        info.completed > 0 &&
+        info.recorded === info.total &&
+        !submittedDatesSet.has(dateStr)
+      ) {
         unsubmittedReportDates.push({
           reportDate: dateStr,
           dayOfWeek: info.dayOfWeek,
@@ -209,10 +221,49 @@ export async function getTrainerDailyReportWorkspace(
         trainerProfileId: profile.id,
       });
 
+      // Defensive check: Reconcile cancelled sessions from class_sessions directly
+      // in case database RPC lateral join excluded them
+      const scheduledSessionIds = data.lessons
+        .map((l: any) => l.scheduledSessionId)
+        .filter(Boolean);
+
+      if (scheduledSessionIds.length > 0) {
+        try {
+          const { data: realSessions } = await (supabase as any)
+            .from('class_sessions')
+            .select('id, scheduled_session_id, status, notes')
+            .in('scheduled_session_id', scheduledSessionIds)
+            .eq('session_date', reportDate);
+
+          const realStatusMap = new Map<string, { status: string; id: string }>(
+            (realSessions ?? []).map((cs: any) => [cs.scheduled_session_id, { status: cs.status, id: cs.id }])
+          );
+
+          for (const lesson of data.lessons) {
+            const sessionInfo = realStatusMap.get(lesson.scheduledSessionId);
+            if (sessionInfo) {
+              if (sessionInfo.status === 'cancelled') {
+                lesson.attendanceStatus = 'cancelled';
+                lesson.attendanceSessionId = sessionInfo.id;
+              } else if (sessionInfo.status === 'completed') {
+                lesson.attendanceStatus = 'completed';
+                lesson.attendanceSessionId = sessionInfo.id;
+              }
+            }
+          }
+        } catch (reconcileErr) {
+          console.warn('Cancelled session reconciliation warning:', reconcileErr);
+        }
+      }
+
+      const lessonsComplete =
+        data.lessons.length === 0 ||
+        data.lessons.every((l: any) => l.attendanceStatus === 'completed' || l.attendanceStatus === 'cancelled');
+
       const hasOverduePastSessions = unrecordedSessions.length > 0 || unsubmittedReportDates.length > 0;
-      const readyToSubmit = Boolean(data.readyToSubmit) && !hasOverduePastSessions;
-      const blockingReason = !data.readyToSubmit
-        ? data.blockingReason
+      const readyToSubmit = lessonsComplete && !hasOverduePastSessions;
+      const blockingReason = !lessonsComplete
+        ? 'Complete Class Attendance for all scheduled lessons before submitting the daily report.'
         : unrecordedSessions.length > 0
         ? `You have ${unrecordedSessions.length} unrecorded past class session(s). Please record attendance or log an exception for ${unrecordedSessions[0].sessionDate} (${unrecordedSessions[0].unitName}) before submitting.`
         : unsubmittedReportDates.length > 0
@@ -267,9 +318,21 @@ export async function getTrainerDailyReportWorkspace(
     const departmentId = profile.activeDepartmentId || '';
     const departmentName = profile.departmentName || 'Department';
 
-    const sessionIdsWithClassSession = daySessions
-      .map((s) => s.latestClassSessionId)
-      .filter((id): id is string => Boolean(id));
+    const scheduledIds = daySessions.map((s) => s.scheduledSessionId);
+    let dateClassSessions: any[] = [];
+    try {
+      const { data: csData } = await (supabase as any)
+        .from('class_sessions')
+        .select('id, scheduled_session_id, status, roster_count')
+        .in('scheduled_session_id', scheduledIds)
+        .eq('session_date', reportDate);
+      dateClassSessions = csData ?? [];
+    } catch (e) {
+      console.warn('Fallback class_sessions query warning:', e);
+    }
+
+    const dateCsMap = new Map((dateClassSessions ?? []).map((cs: any) => [cs.scheduled_session_id, cs]));
+    const sessionIdsWithClassSession = dateClassSessions.map((cs) => cs.id);
 
     const sessionStatsMap = new Map<string, {
       rosterCount: number;
@@ -325,11 +388,12 @@ export async function getTrainerDailyReportWorkspace(
     }
 
     const lessons = daySessions.map((s) => {
-      const attendanceStatus = (s.latestStatus as 'not_started' | 'open' | 'completed' | 'cancelled') || 'not_started';
-      const stats = s.latestClassSessionId ? sessionStatsMap.get(s.latestClassSessionId) : null;
+      const cs = dateCsMap.get(s.scheduledSessionId);
+      const attendanceStatus = (cs?.status as 'not_started' | 'open' | 'completed' | 'cancelled') || 'not_started';
+      const stats = cs ? sessionStatsMap.get(cs.id) : null;
 
       return {
-        id: s.latestClassSessionId || null,
+        id: cs?.id || null,
         departmentId,
         departmentName,
         timetableVersionId: '',
@@ -348,7 +412,7 @@ export async function getTrainerDailyReportWorkspace(
         cohortName: s.cohortName,
         roomName: null,
         deliveryMode: 'Teaching',
-        attendanceSessionId: s.latestClassSessionId || null,
+        attendanceSessionId: cs?.id || null,
         attendanceStatus,
         rosterCount: stats?.rosterCount ?? 0,
         presentCount: stats?.presentCount ?? 0,

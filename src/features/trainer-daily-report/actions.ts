@@ -68,16 +68,28 @@ export async function submitTrainerDailyReportAction(
 
     let submittedSuccessfully = false;
     try {
-      const { error: rpcError } = await (supabase as any).rpc(
-        'submit_trainer_daily_report',
+      const { error: rpcErrorV1 } = await (supabase as any).rpc(
+        'submit_trainer_daily_report_v1',
         {
           target_report_date: reportDate,
           target_other_activity: otherActivity || null,
           target_concern: concern || null,
         },
       );
-      if (!rpcError) {
+      if (!rpcErrorV1) {
         submittedSuccessfully = true;
+      } else {
+        const { error: rpcErrorV0 } = await (supabase as any).rpc(
+          'submit_trainer_daily_report',
+          {
+            target_report_date: reportDate,
+            target_other_activity: otherActivity || null,
+            target_concern: concern || null,
+          },
+        );
+        if (!rpcErrorV0) {
+          submittedSuccessfully = true;
+        }
       }
     } catch {
       submittedSuccessfully = false;
@@ -133,6 +145,45 @@ export async function submitTrainerDailyReportAction(
           status: 'error',
           message: upsertErr.message || 'Unable to submit the daily report. Please try again.',
         };
+      }
+
+      // If report was created directly, record lesson snapshots as well
+      if (insertedReport?.id && workspace.lessons.length > 0) {
+        try {
+          const lessonRows = workspace.lessons.map((lesson) => ({
+            report_id: insertedReport.id,
+            department_id: lesson.departmentId || departmentId,
+            department_name_snapshot: lesson.departmentName || departmentName,
+            timetable_version_id: lesson.timetableVersionId || null,
+            timetable_version_number: lesson.timetableVersionNumber || null,
+            timetable_title: lesson.timetableTitle || null,
+            scheduled_session_id: lesson.scheduledSessionId,
+            teaching_allocation_id: lesson.teachingAllocationId || null,
+            academic_period_id: lesson.academicPeriodId || null,
+            cohort_id: lesson.cohortId || null,
+            unit_id: lesson.unitId || null,
+            session_number: lesson.sessionNumber || 1,
+            starts_at: lesson.startsAt,
+            ends_at: lesson.endsAt,
+            unit_code_snapshot: lesson.unitCode || null,
+            unit_name_snapshot: lesson.unitName,
+            cohort_name_snapshot: lesson.cohortName,
+            room_name_snapshot: lesson.roomName || null,
+            delivery_mode_snapshot: lesson.deliveryMode || 'Teaching',
+            attendance_session_id: lesson.attendanceSessionId || null,
+            roster_count: lesson.rosterCount || 0,
+            present_count: lesson.presentCount || 0,
+            absent_count: lesson.absentCount || 0,
+            not_reported_count: lesson.notReportedCount || 0,
+            absentees: lesson.absentees || [],
+          }));
+
+          await (adminDb as any)
+            .from('trainer_daily_report_lessons')
+            .upsert(lessonRows, { onConflict: 'report_id,scheduled_session_id', ignoreDuplicates: true });
+        } catch (lessonInsertErr) {
+          console.warn('Fallback trainer_daily_report_lessons upsert warning:', lessonInsertErr);
+        }
       }
     }
 

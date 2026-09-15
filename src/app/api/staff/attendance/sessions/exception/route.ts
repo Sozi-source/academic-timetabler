@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { requireTrainerAccess } from '@/features/auth/authorization';
 import { createAdminClient } from '@/lib/supabase/admin';
 
@@ -59,6 +60,13 @@ export async function POST(request: Request) {
       );
     }
 
+    try {
+      revalidatePath('/staff/daily-report');
+      revalidatePath('/staff/attendance');
+    } catch {
+      // Revalidation warning ignored in non-blocking environments
+    }
+
     return NextResponse.json({ success: true, classSessionId: existingCs.id });
   }
 
@@ -76,6 +84,37 @@ export async function POST(request: Request) {
     );
   }
 
+  // Resolve trainer ID to ensure valid foreign key reference
+  const { data: trainerRow } = await (adminDb as any)
+    .from('trainers')
+    .select('id')
+    .eq('profile_id', profile.id)
+    .maybeSingle();
+
+  const trainerId = sessionData.trainer_id || trainerRow?.id || profile.id;
+
+  let startsAt = '08:00:00';
+  let endsAt = '10:00:00';
+
+  if (sessionData.start_time_slot_id) {
+    const { data: slot } = await (adminDb as any)
+      .from('time_slots')
+      .select('start_time, end_time')
+      .eq('id', sessionData.start_time_slot_id)
+      .maybeSingle();
+    if (slot?.start_time) startsAt = slot.start_time;
+    if (slot?.end_time) endsAt = slot.end_time;
+  }
+
+  if (sessionData.end_time_slot_id) {
+    const { data: endSlot } = await (adminDb as any)
+      .from('time_slots')
+      .select('end_time')
+      .eq('id', sessionData.end_time_slot_id)
+      .maybeSingle();
+    if (endSlot?.end_time) endsAt = endSlot.end_time;
+  }
+
   const { data: newCs, error: insertError } = await (adminDb as any)
     .from('class_sessions')
     .insert({
@@ -84,10 +123,10 @@ export async function POST(request: Request) {
       scheduled_session_id: payload.scheduledSessionId,
       cohort_id: sessionData.cohort_id,
       unit_id: sessionData.unit_id,
-      trainer_id: sessionData.trainer_id || profile.id,
+      trainer_id: trainerId,
       session_date: payload.sessionDate,
-      starts_at: '08:00:00',
-      ends_at: '10:00:00',
+      starts_at: startsAt,
+      ends_at: endsAt,
       status: 'cancelled',
       notes: formattedNotes.slice(0, 1000),
       opened_by: profile.id,
@@ -100,6 +139,13 @@ export async function POST(request: Request) {
       { message: insertError.message || 'Could not log session exception.' },
       { status: 500 }
     );
+  }
+
+  try {
+    revalidatePath('/staff/daily-report');
+    revalidatePath('/staff/attendance');
+  } catch {
+    // Revalidation warning ignored in non-blocking environments
   }
 
   return NextResponse.json({ success: true, classSessionId: newCs.id });

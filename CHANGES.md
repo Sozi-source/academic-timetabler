@@ -13,6 +13,28 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 2. **Curriculum Upload UI Update (`curriculum-zip-upload-dialog.tsx`)**:
    - Update `curriculum-zip-upload-dialog.tsx` to display `unresolvedFiles` from the ingestion preview response, allowing HODs to select document types manually prior to commit.
 
+### 2026-09-15: Fix Overdue Attendance Report "Submit Report" Persistence & Cancelled Session Flow
+- **Files Modified/Added**:
+  - `src/features/trainer-daily-report/queries.ts`:
+    - **Cleared Phantom Unsubmitted Reports**: Updated `detectPastUnrecordedReportsAndSessions` to require `info.completed > 0` before classifying past dates as unsubmitted daily reports. Historical dates where 100% of sessions were marked "Did Not Take Place" (`status = 'cancelled'`) no longer trigger phantom unsubmitted daily report blockers.
+    - **Reconciled Cancelled Sessions in Workspace**: Added direct reconciliation with `class_sessions` in `getTrainerDailyReportWorkspace` so cancelled sessions correctly reflect `attendanceStatus = 'cancelled'` (rather than being ignored as `not_started`), allowing daily reports with cancelled sessions to calculate `readyToSubmit = true`.
+  - `src/features/trainer-daily-report/trainer-form.tsx`:
+    - **Direct Session Exception Action**: Added a direct "Did Not Take Place" action button onto scheduled lesson cards, allowing trainers to log session exceptions immediately without waiting for sessions to become overdue.
+    - **Generalized Exception Dialog**: Expanded `SessionExceptionDialog` to accept both past unrecorded sessions and active lesson cards via `ExceptionTargetSession`.
+  - `src/app/api/staff/attendance/sessions/exception/route.ts`:
+    - **Robust Foreign Key Resolution**: Resolved `trainer_id` referencing `trainers.id` instead of raw user profile IDs.
+    - **Time Slot Resolution**: Resolved exact `starts_at` and `ends_at` from `time_slots` when available.
+    - **Cache Invalidation**: Added `revalidatePath('/staff/daily-report')` and `revalidatePath('/staff/attendance')`.
+  - `src/features/trainer-daily-report/actions.ts`:
+    - **Upgraded Submission Pipeline**: Added prioritized call to `submit_trainer_daily_report_v1` (which recognizes `status in ('completed', 'cancelled')`) with fallback to `submit_trainer_daily_report`.
+    - **Direct Fallback Roster Snapshots**: Ensured fallback upserts to `trainer_daily_reports` also populate `trainer_daily_report_lessons` with full roster, present, absent, not reported, and absentee snapshots.
+  - `supabase/migrations/20260915141000_fix_cancelled_sessions_in_daily_report_workspace.sql` [NEW]:
+    - Updated `get_trainer_daily_report_workspace` and `submit_trainer_daily_report_v1` to eliminate `and session.status <> 'cancelled'`, and added wrapper function `submit_trainer_daily_report`.
+- **Verification Evidence**:
+  - `npm test`: 117 test files, 589 tests passed.
+  - `npm run check`: Typecheck, ESLint, and Next.js 16 production build passed with 0 errors across all routes.
+  - Supabase database audit confirmed 16 past dates with cancelled sessions are no longer flagged as phantom unsubmitted reports.
+
 ### 2026-09-15: Admin Sidebar Upgrade — Grouped Sections, Core Modules & Collision-Proof Matching
 - **Files Modified**:
   - `src/components/layout/admin-sidebar.tsx`:

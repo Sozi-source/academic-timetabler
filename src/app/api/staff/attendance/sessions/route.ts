@@ -340,7 +340,7 @@ export async function POST(
             class_session_id: cs.id,
             student_id: st.studentId,
             cohort_id: st.cohortId || cs.cohort_id,
-            attendance_status: st.reportingStatus === 'reported' ? 'unmarked' : 'not_reported',
+            attendance_status: 'unmarked',
           }));
 
           await (adminDb as any)

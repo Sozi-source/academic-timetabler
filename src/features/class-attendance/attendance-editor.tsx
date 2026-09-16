@@ -51,7 +51,7 @@ export function ClassAttendanceEditor({
 }) {
   const router = useRouter();
 
-  // Initialize statuses: default all active students to 'present' unless explicitly absent, not reported, or already saved
+  // Registered students are present by default; trainers only mark exceptions absent.
   const [statuses, setStatuses] = useState<Record<string, ClassAttendanceStatus>>(() => {
     return Object.fromEntries(
       students.map((student) => {
@@ -61,16 +61,7 @@ export function ClassAttendanceEditor({
         if (student.attendanceStatus === 'present') {
           return [student.studentId, 'present'];
         }
-        if (student.attendanceStatus === 'not_reported') {
-          return [student.studentId, 'not_reported'];
-        }
-
-        // Student was unmarked: default to present unless semester not-reported
-        const isNotReported =
-          student.isReported === false ||
-          (student.reportingStatus && student.reportingStatus !== 'reported');
-
-        return [student.studentId, isNotReported ? 'not_reported' : 'present'];
+        return [student.studentId, 'present'];
       }),
     );
   });
@@ -82,7 +73,7 @@ export function ClassAttendanceEditor({
   });
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterTab, setFilterTab] = useState<'all' | 'absent' | 'present' | 'not_reported'>('all');
+  const [filterTab, setFilterTab] = useState<'all' | 'absent' | 'present'>('all');
 
   const [busy, setBusy] = useState<'save' | 'complete' | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -110,7 +101,6 @@ export function ClassAttendanceEditor({
 
       if (filterTab === 'absent' && currentStatus !== 'absent') return false;
       if (filterTab === 'present' && currentStatus !== 'present') return false;
-      if (filterTab === 'not_reported' && currentStatus !== 'not_reported') return false;
 
       if (!query) return true;
 
@@ -132,12 +122,7 @@ export function ClassAttendanceEditor({
     setStatuses((prev) => {
       const next = { ...prev };
       for (const student of students) {
-        const isNotReported =
-          student.isReported === false ||
-          (student.reportingStatus && student.reportingStatus !== 'reported');
-        if (!isNotReported) {
-          next[student.studentId] = 'present';
-        }
+        next[student.studentId] = 'present';
       }
       return next;
     });
@@ -270,28 +255,14 @@ export function ClassAttendanceEditor({
           </p>
         </div>
 
-        {summary.notReported > 0 ? (
-          <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-3 shadow-xs">
-            <div className="flex items-center justify-between">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-amber-800">
-                Not Reported
-              </p>
-              <span className="size-2 rounded-full bg-amber-500" />
-            </div>
-            <p className="mt-1 text-lg font-bold text-amber-900">
-              {summary.notReported}
-            </p>
-          </div>
-        ) : (
-          <div className="rounded-xl border border-slate-200/80 bg-white p-3 shadow-xs">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
-              Register Status
-            </p>
-            <p className="mt-1 text-xs font-semibold text-text-secondary">
-              {editable ? 'Mark absentees below' : 'Record Completed'}
-            </p>
-          </div>
-        )}
+        <div className="rounded-xl border border-slate-200/80 bg-white p-3 shadow-xs">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
+            Register Status
+          </p>
+          <p className="mt-1 text-xs font-semibold text-text-secondary">
+            {editable ? 'Mark absentees below' : 'Record Completed'}
+          </p>
+        </div>
       </section>
 
       {/* Concise Helper Banner */}
@@ -373,19 +344,6 @@ export function ClassAttendanceEditor({
             Present ({summary.present})
           </button>
 
-          {summary.notReported > 0 ? (
-            <button
-              type="button"
-              onClick={() => setFilterTab('not_reported')}
-              className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
-                filterTab === 'not_reported'
-                  ? 'bg-amber-600 text-white'
-                  : 'text-amber-700 hover:bg-amber-50'
-              }`}
-            >
-              Not Reported ({summary.notReported})
-            </button>
-          ) : null}
         </div>
       </section>
 
@@ -400,7 +358,6 @@ export function ClassAttendanceEditor({
             filteredStudents.map((student) => {
               const status = statuses[student.studentId] ?? 'present';
               const isAbsent = status === 'absent';
-              const isNotReported = status === 'not_reported';
               const noteText = notes[student.studentId] ?? '';
 
               return (
@@ -409,9 +366,7 @@ export function ClassAttendanceEditor({
                   className={`p-3.5 transition-colors ${
                     isAbsent
                       ? 'bg-rose-50/30'
-                      : isNotReported
-                        ? 'bg-amber-50/20'
-                        : 'hover:bg-slate-50/60'
+                      : 'hover:bg-slate-50/60'
                   }`}
                 >
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -424,12 +379,6 @@ export function ClassAttendanceEditor({
                         <span className="font-mono text-[10px] text-text-muted">
                           {student.admissionNumber}
                         </span>
-                        {student.isReported === false ||
-                        (student.reportingStatus && student.reportingStatus !== 'reported') ? (
-                          <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[9px] font-semibold text-amber-800">
-                            Semester: Not Reported
-                          </span>
-                        ) : null}
                       </div>
 
                       {/* Note display for present/completed students */}
@@ -484,28 +433,6 @@ export function ClassAttendanceEditor({
                             Absent
                           </button>
 
-                          {/* Not Reported Option if applicable */}
-                          {(student.isReported === false ||
-                            (student.reportingStatus && student.reportingStatus !== 'reported') ||
-                            isNotReported) ? (
-                            <button
-                              type="button"
-                              disabled={busy !== null}
-                              onClick={() => {
-                                setStatuses((prev) => ({
-                                  ...prev,
-                                  [student.studentId]: 'not_reported',
-                                }));
-                              }}
-                              className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-semibold transition ${
-                                isNotReported
-                                  ? 'bg-amber-600 text-white shadow-xs'
-                                  : 'text-text-muted hover:text-amber-700'
-                              }`}
-                            >
-                              Not Reported
-                            </button>
-                          ) : null}
                         </div>
                       ) : (
                         <Badge variant={classAttendanceStatusVariant(status)}>
@@ -513,9 +440,7 @@ export function ClassAttendanceEditor({
                             ? 'Present'
                             : status === 'absent'
                               ? 'Absent'
-                              : status === 'not_reported'
-                                ? 'Not Reported'
-                                : 'Unmarked'}
+                              : 'Unmarked'}
                         </Badge>
                       )}
                     </div>

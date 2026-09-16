@@ -50,8 +50,6 @@ export function classAttendanceStatusLabel(
       return 'Present';
     case 'absent':
       return 'Absent';
-    case 'not_reported':
-      return 'Not Reported';
     default:
       return 'Unmarked';
   }
@@ -65,8 +63,6 @@ export function classAttendanceStatusVariant(
       return 'success';
     case 'absent':
       return 'danger';
-    case 'not_reported':
-      return 'warning';
     default:
       return 'neutral';
   }
@@ -82,7 +78,6 @@ export function classAttendanceSummary(
     total: statuses.length,
     present: count('present'),
     absent: count('absent'),
-    notReported: count('not_reported'),
     unmarked: count('unmarked'),
   };
 }

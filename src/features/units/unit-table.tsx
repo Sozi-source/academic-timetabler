@@ -12,9 +12,6 @@ import {
   CalendarX2,
   CheckCircle2,
   CircleOff,
-  Clock3,
-  DoorOpen,
-  FlaskConical,
   Pencil,
   RotateCcw,
 } from 'lucide-react';
@@ -28,11 +25,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
 import { Select } from '@/components/ui/select';
-import {
-  roomTypeOptions,
-  type RoomType,
-} from '@/features/rooms/types';
-
 import {
   setUnitActiveAction,
   setUnitTimetableAvailabilityAction,
@@ -51,21 +43,6 @@ function getCategoryLabel(
       (option) =>
         option.value === category,
     )?.label ?? category
-  );
-}
-
-function getRoomTypeLabel(
-  roomType: RoomType | null,
-) {
-  if (!roomType) {
-    return 'None';
-  }
-
-  return (
-    roomTypeOptions.find(
-      (option) =>
-        option.value === roomType,
-    )?.label ?? roomType
   );
 }
 
@@ -454,7 +431,30 @@ export function UnitTable({
       initialPageSize={10}
       toolbarFilters={
         <div className="flex w-full flex-wrap items-center gap-2 lg:w-auto lg:flex-1 lg:flex-nowrap">
-<Select
+          <Select
+            aria-label="Filter by programme"
+            value={programmeId}
+            onChange={(event) => {
+              setProgrammeId(event.target.value);
+              setPeriodNumber('all');
+            }}
+            className="h-9 w-full text-xs sm:w-auto sm:min-w-36"
+          >
+            <option value="all">
+              All programmes
+            </option>
+
+            {programmeOptions.map((programme) => (
+              <option
+                key={programme.id}
+                value={programme.id}
+              >
+                {programme.code}
+              </option>
+            ))}
+          </Select>
+
+          <Select
             aria-label="Filter by year and semester"
             value={periodNumber}
             onChange={(event) => {

@@ -339,7 +339,6 @@ export async function getTrainerDailyReportWorkspace(
       rosterCount: number;
       presentCount: number;
       absentCount: number;
-      notReportedCount: number;
       absentees: Array<{ studentId: string; admissionNumber: string; fullName: string; note: string | null }>;
     }>();
 
@@ -360,7 +359,6 @@ export async function getTrainerDailyReportWorkspace(
             rosterCount: Number(cs.roster_count || 0),
             presentCount: 0,
             absentCount: 0,
-            notReportedCount: 0,
             absentees: [],
           });
         }
@@ -377,9 +375,6 @@ export async function getTrainerDailyReportWorkspace(
                 fullName: entry.students?.full_name || 'Student',
                 note: entry.note || null,
               });
-            }
-            if (entry.attendance_status === 'not_reported') {
-              stats.notReportedCount++;
             }
           }
         }
@@ -418,7 +413,6 @@ export async function getTrainerDailyReportWorkspace(
         rosterCount: stats?.rosterCount ?? 0,
         presentCount: stats?.presentCount ?? 0,
         absentCount: stats?.absentCount ?? 0,
-        notReportedCount: stats?.notReportedCount ?? 0,
         absentees: stats?.absentees ?? [],
       };
     });

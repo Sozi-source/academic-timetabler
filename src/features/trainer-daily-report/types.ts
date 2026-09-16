@@ -30,7 +30,6 @@ export interface TrainerDailyReportLesson {
   rosterCount: number;
   presentCount: number;
   absentCount: number;
-  notReportedCount: number;
   absentees: TrainerDailyReportAbsentee[];
 }
 

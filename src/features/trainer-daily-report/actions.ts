@@ -174,7 +174,6 @@ export async function submitTrainerDailyReportAction(
             roster_count: lesson.rosterCount || 0,
             present_count: lesson.presentCount || 0,
             absent_count: lesson.absentCount || 0,
-            not_reported_count: lesson.notReportedCount || 0,
             absentees: lesson.absentees || [],
           }));
 
@@ -343,7 +342,6 @@ export async function submitDailyReportDirectAction(
             roster_count: lesson.rosterCount || 0,
             present_count: lesson.presentCount || 0,
             absent_count: lesson.absentCount || 0,
-            not_reported_count: lesson.notReportedCount || 0,
             absentees: lesson.absentees || [],
           }));
 

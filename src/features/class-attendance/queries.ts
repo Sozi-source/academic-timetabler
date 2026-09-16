@@ -373,7 +373,7 @@ export async function getClassAttendanceWorkspace(
         class_session_id: cs.id,
         student_id: st.studentId,
         cohort_id: st.cohortId || cs.cohort_id,
-        attendance_status: st.reportingStatus === 'reported' ? 'unmarked' : 'not_reported',
+        attendance_status: 'unmarked',
       }));
 
       await (adminDb as any)
@@ -395,16 +395,12 @@ export async function getClassAttendanceWorkspace(
 
     const students = roster.students.map((st) => {
       const entry = existingEntriesMap.get(st.studentId);
-      const isReported = st.reportingStatus === 'reported';
-      const defaultStatus: ClassAttendanceStatus = isReported ? 'unmarked' : 'not_reported';
       return {
         studentId: st.studentId,
         admissionNumber: st.admissionNumber,
         fullName: st.fullName,
-        attendanceStatus: entry?.attendanceStatus ?? defaultStatus,
+        attendanceStatus: entry?.attendanceStatus ?? 'unmarked',
         note: entry?.note ?? null,
-        reportingStatus: st.reportingStatus ?? null,
-        isReported,
       };
     });
 

@@ -51,16 +51,9 @@ describe('class attendance domain', () => {
       'Present',
     );
 
-    expect(
-      classAttendanceStatusLabel(
-        'not_reported',
-      ),
-    ).toBe(
-      'Not Reported',
-    );
   });
 
-  it('summarises present, absent, not_reported and unmarked', () => {
+  it('summarises present, absent and unmarked attendance', () => {
     expect(
       classAttendanceSummary([
         'present',
@@ -75,46 +68,16 @@ describe('class attendance domain', () => {
         2,
       absent:
         1,
-      notReported:
-        0,
       unmarked:
         1,
-    });
-
-    expect(
-      classAttendanceSummary([
-        'present',
-        'not_reported',
-        'absent',
-      ]),
-    ).toEqual({
-      total:
-        3,
-      present:
-        1,
-      absent:
-        1,
-      notReported:
-        1,
-      unmarked:
-        0,
     });
   });
 
-  it('blocks completion until every student is marked or not_reported', () => {
+  it('blocks completion until every student is marked', () => {
     expect(
       canCompleteClassAttendance([
         'present',
         'absent',
-      ]),
-    ).toBe(
-      true,
-    );
-
-    expect(
-      canCompleteClassAttendance([
-        'present',
-        'not_reported',
       ]),
     ).toBe(
       true,

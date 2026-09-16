@@ -1,8 +1,7 @@
 export type ClassAttendanceStatus =
   | 'unmarked'
   | 'present'
-  | 'absent'
-  | 'not_reported';
+  | 'absent';
 
 export type ClassSessionStatus =
   | 'open'
@@ -42,7 +41,6 @@ export interface ClassAttendanceHistoryItem {
   rosterCount: number;
   presentCount: number;
   absentCount: number;
-  notReportedCount?: number;
   unmarkedCount: number;
 }
 
@@ -52,8 +50,6 @@ export interface ClassAttendanceStudent {
   fullName: string;
   attendanceStatus: ClassAttendanceStatus;
   note: string | null;
-  reportingStatus?: string | null;
-  isReported?: boolean;
 }
 
 export interface ClassAttendanceWorkspace {
@@ -70,7 +66,6 @@ export interface ClassAttendanceWorkspace {
   rosterCount: number;
   presentCount?: number;
   absentCount?: number;
-  notReportedCount?: number;
   unmarkedCount?: number;
   students: ClassAttendanceStudent[];
 }

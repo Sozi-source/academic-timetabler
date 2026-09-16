@@ -457,12 +457,6 @@ function ScheduledLessonsSection({
                       <span className="size-1.5 rounded-full bg-rose-500" />
                       Absent: {lesson.absentCount || 0}
                     </span>
-                    {lesson.notReportedCount > 0 ? (
-                      <span className="flex items-center gap-1 font-medium text-amber-700">
-                        <span className="size-1.5 rounded-full bg-amber-500" />
-                        Not Reported: {lesson.notReportedCount}
-                      </span>
-                    ) : null}
                   </div>
                 ) : null}
               </div>
@@ -570,7 +564,6 @@ function ClassAttendanceSummaryTable({
               <th className="px-3 py-2.5 text-center">Roster</th>
               <th className="px-3 py-2.5 text-center text-emerald-700">Present</th>
               <th className="px-3 py-2.5 text-center text-rose-700">Absent</th>
-              <th className="px-3 py-2.5 text-center text-amber-700">Not Reported</th>
               <th className="px-4 py-2.5 text-center">Status</th>
             </tr>
           </thead>
@@ -597,9 +590,6 @@ function ClassAttendanceSummaryTable({
                 </td>
                 <td className="px-3 py-2 text-center font-bold text-rose-700 font-mono">
                   {l.absentCount || 0}
-                </td>
-                <td className="px-3 py-2 text-center text-amber-700 font-medium font-mono">
-                  {l.notReportedCount || 0}
                 </td>
                 <td className="px-4 py-2 text-center">
                   <AttendanceBadge status={l.attendanceStatus} />

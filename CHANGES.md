@@ -13,6 +13,37 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 2. **Curriculum Upload UI Update (`curriculum-zip-upload-dialog.tsx`)**:
    - Update `curriculum-zip-upload-dialog.tsx` to display `unresolvedFiles` from the ingestion preview response, allowing HODs to select document types manually prior to commit.
 
+### 2026-09-16: Unit Table Programme Filter Completion
+- **Files Modified**:
+  - `src/features/units/unit-table.tsx`
+  - `CHANGES.md`
+- **What Changed**:
+  - Added the supplied programme selector to the Units table toolbar, filtering by programme and resetting the dependent year/semester selection when the programme changes.
+  - Removed unused room-type helpers and icon imports left over from the table redesign.
+- **Breaking Changes / Manual Follow-ups**: None.
+
+### 2026-09-16: Registered-Student Attendance Roster Enforcement
+- **Files Added/Modified**:
+  - `supabase/migrations/20260916150000_registered_students_are_reported.sql` [NEW]
+  - `src/app/api/staff/attendance/sessions/route.ts`
+  - `src/features/class-attendance/attendance-editor.tsx`
+  - `src/features/class-attendance/domain.ts`
+  - `src/features/class-attendance/queries.ts`
+  - `src/features/class-attendance/types.ts`
+  - `src/features/trainer-daily-report/actions.ts`
+  - `src/features/trainer-daily-report/queries.ts`
+  - `src/features/trainer-daily-report/trainer-form.tsx`
+  - `src/features/trainer-daily-report/types.ts`
+  - `src/tests/class-attendance-domain.test.ts`
+  - `CHANGES.md`
+- **What Changed**:
+  - Unit registration is now the authoritative class-roster decision: existing and future registered students are automatically recorded as reported for their academic period.
+  - Class sessions reconcile every registered student into trainer attendance, class attendance sheets, and daily-report attendance. Students who do not attend should be unregistered from the unit rather than excluded by a separate reporting flag.
+  - Replaced the retired `Not Reported` attendance state with the two trainer choices, **Present** and **Absent**. All registered students start as Present; trainers mark only absences.
+  - Migrated legacy `not_reported` attendance and daily-report counts into Present, and added a database guard that normalizes any legacy writer still emitting that retired status.
+- **Breaking Changes / Manual Follow-ups**:
+  - Run `npx supabase db push` to apply `20260916150000_registered_students_are_reported.sql` before relying on the updated roster behavior in production.
+
 ### 2026-09-16: Fix Timetable vs Class Session Time Mismatch & Milkah Daily Reports
 - **Files Modified**:
   - `src/app/api/staff/attendance/sessions/route.ts`:

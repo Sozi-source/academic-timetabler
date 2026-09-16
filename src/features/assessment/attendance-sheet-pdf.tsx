@@ -111,20 +111,20 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   table: {
-    borderWidth: 0.75,
+    borderWidth: 1,
     borderColor: '#0f172a',
     marginBottom: 8,
   },
   tableHeaderRow: {
     flexDirection: 'row',
     backgroundColor: '#f1f5f9',
-    borderBottomWidth: 0.75,
+    borderBottomWidth: 1,
     borderBottomColor: '#0f172a',
   },
   tableRow: {
     flexDirection: 'row',
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#cbd5e1',
+    borderBottomWidth: 0.75,
+    borderBottomColor: '#0f172a',
     minHeight: 14,
     alignItems: 'center',
   },
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     paddingHorizontal: 2,
     textAlign: 'center',
-    borderRightWidth: 0.5,
+    borderRightWidth: 0.75,
     borderRightColor: '#0f172a',
     justifyContent: 'center',
   },
@@ -148,12 +148,17 @@ const styles = StyleSheet.create({
     fontSize: 6.8,
     paddingVertical: 2,
     paddingHorizontal: 3,
-    borderRightWidth: 0.5,
-    borderRightColor: '#cbd5e1',
+    borderRightWidth: 0.75,
+    borderRightColor: '#0f172a',
     justifyContent: 'center',
   },
   cellNoBorderRight: {
     borderRightWidth: 0,
+  },
+  classDateHeader: {
+    fontSize: 6,
+    textAlign: 'left',
+    paddingLeft: 2,
   },
   centerText: {
     textAlign: 'center',
@@ -450,8 +455,7 @@ export async function generateAttendanceSheetPdf(
                         s === 7 ? styles.cellNoBorderRight : {},
                       ]}
                     >
-                      <Text>Session {s + 1}</Text>
-                      <Text style={{ fontSize: 5.5, color: '#64748b' }}>Date: _____</Text>
+                      <Text style={styles.classDateHeader}>Date: __________</Text>
                     </View>
                   ))}
                 </View>

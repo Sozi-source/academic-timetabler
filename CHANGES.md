@@ -44,6 +44,44 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 - **Breaking Changes / Manual Follow-ups**:
   - Run `npx supabase db push` to apply `20260916150000_registered_students_are_reported.sql` before relying on the updated roster behavior in production.
 
+### 2026-09-16: PDF-Only Attendance Sheets & Print Contrast Upgrade
+- **Files Modified**:
+  - `src/app/api/staff/units/[allocationId]/attendance-sheet/[type]/route.ts`
+  - `src/app/(staff)/staff/units/[allocationId]/page.tsx`
+  - `src/app/(staff)/staff/units/[allocationId]/documents/page.tsx`
+  - `src/features/assessment/attendance-sheet-pdf.tsx`
+  - `src/features/assessment/printable-signing-sheet.tsx`
+  - `src/features/class-attendance/printable-class-register.tsx`
+  - `src/features/staff-downloads/staff-downloads-view.tsx`
+  - `src/tests/operations-attendance-oversight.test.ts`
+  - `CHANGES.md`
+- **What Changed**:
+  - Removed Word downloads for class, CAT, and examination attendance sheets. The export endpoint now always produces a PDF, including requests made through legacy DOCX links.
+  - Updated every trainer-facing sheet action to use PDF download.
+  - Refined the class attendance PDF header cells by removing `Session 1` through `Session 8`, leaving left-aligned `Date` writing space instead.
+  - Strengthened PDF table outlines and internal grid lines to dark, high-contrast borders suitable for black-and-white printing.
+- **Breaking Changes / Manual Follow-ups**: None.
+
+### 2026-09-16: Controlled Cross-Stage Student Unit Registration
+- **Files Added/Modified**:
+  - `supabase/migrations/20260916160000_controlled_cross_stage_unit_registration.sql` [NEW]
+  - `src/app/(dashboard)/students/unit-registration/batch/page.tsx`
+  - `src/app/(dashboard)/students/unit-registration/register/[studentId]/page.tsx`
+  - `src/features/student-unit-registration/actions.ts`
+  - `src/features/student-unit-registration/batch-actions.ts`
+  - `src/features/student-unit-registration/batch-queries.ts`
+  - `src/features/student-unit-registration/batch-types.ts`
+  - `src/features/student-unit-registration/batch-unit-registration.tsx`
+  - `src/features/student-unit-registration/queries.ts`
+  - `CHANGES.md`
+- **What Changed**:
+  - Preserved programme-stage bindings as the standard, automatic registration path while adding an HOD-controlled override path for missed, repeat/carry-over, and approved future-stage units.
+  - Individual registration no longer requires a current stage before the programme curriculum can be selected. Selecting any off-stage unit requires a recorded HOD reason.
+  - Batch registration now includes an **Additional / cross-stage units** mode for selected students or an entire cohort. It offers all active departmental curriculum units, registers only same-programme matches, auto-provisions cohort offerings, and records the override reason on every registration.
+  - Kept lifecycle and department authorization safeguards: only admitted/active students in a current cohort and units belonging to their programme can be processed.
+- **Breaking Changes / Manual Follow-ups**:
+  - Run `npx supabase db push` to apply `20260916160000_controlled_cross_stage_unit_registration.sql` before using batch cross-stage registration in production.
+
 ### 2026-09-16: Fix Timetable vs Class Session Time Mismatch & Milkah Daily Reports
 - **Files Modified**:
   - `src/app/api/staff/attendance/sessions/route.ts`:

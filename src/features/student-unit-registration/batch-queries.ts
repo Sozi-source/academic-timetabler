@@ -13,6 +13,7 @@ export async function getBatchRegistrationContext(): Promise<BatchRegistrationCo
       period: null,
       cohorts: [],
       students: [],
+      units: [],
     };
   }
 
@@ -57,6 +58,7 @@ export async function getBatchRegistrationContext(): Promise<BatchRegistrationCo
         : null,
       cohorts: [],
       students: [],
+      units: [],
     };
   }
 
@@ -88,19 +90,6 @@ export async function getBatchRegistrationContext(): Promise<BatchRegistrationCo
     );
   }
 
-  const stageIds = [
-    ...new Set(
-      (students ?? [])
-        .flatMap((student) => {
-          const cohort = Array.isArray(student.current_cohort)
-            ? student.current_cohort[0]
-            : student.current_cohort;
-          return [student.current_stage_id, cohort?.current_stage_id];
-        })
-        .filter((value): value is string => Boolean(value)),
-    ),
-  ];
-
   const cohortIds = [
     ...new Set(
       (students ?? [])
@@ -109,13 +98,10 @@ export async function getBatchRegistrationContext(): Promise<BatchRegistrationCo
     ),
   ];
 
-  const [stageUnitResult, offeringResult] = await Promise.all([
-    stageIds.length > 0
-      ? supabase
-          .from('programme_stage_units')
-          .select('stage_id, unit_id')
-          .in('stage_id', stageIds)
-      : Promise.resolve({ data: [], error: null }),
+  const [stageUnitResult, offeringResult, allStageResult, unitResult] = await Promise.all([
+    supabase
+      .from('programme_stage_units')
+      .select('stage_id, unit_id'),
     period && cohortIds.length > 0
       ? supabase
           .from('unit_offerings')
@@ -125,6 +111,16 @@ export async function getBatchRegistrationContext(): Promise<BatchRegistrationCo
           .neq('status', 'cancelled')
           .in('cohort_id', cohortIds)
       : Promise.resolve({ data: [], error: null }),
+    supabase
+      .from('programme_stages')
+      .select('id, name, sequence_number')
+      .in('programme_id', programmeIds),
+    supabase
+      .from('units')
+      .select('id, code, name, programme_id, academic_period_number')
+      .in('programme_id', programmeIds)
+      .eq('is_active', true)
+      .order('code', { ascending: true }),
   ]);
 
   if (stageUnitResult.error) {
@@ -136,6 +132,12 @@ export async function getBatchRegistrationContext(): Promise<BatchRegistrationCo
   if (offeringResult.error) {
     throw new Error(
       `Unable to load units on offer: ${offeringResult.error.message}`,
+    );
+  }
+
+  if (allStageResult.error || unitResult.error) {
+    throw new Error(
+      `Unable to load override units: ${allStageResult.error?.message ?? unitResult.error?.message}`,
     );
   }
 
@@ -237,6 +239,7 @@ export async function getBatchRegistrationContext(): Promise<BatchRegistrationCo
             : reportingByStudent.get(student.id) ?? 'pending'
       ) as 'pending' | 'reported' | 'deferred' | 'dropped_out',
       expectedUnits,
+      canRegister: lifecycleEligible && Boolean(student.current_cohort_id),
       eligible:
         lifecycleEligible &&
         Boolean(student.current_cohort_id) &&
@@ -274,5 +277,21 @@ export async function getBatchRegistrationContext(): Promise<BatchRegistrationCo
       a.name.localeCompare(b.name),
     ),
     students: mappedStudents,
+    units: (unitResult.data ?? []).map((unit) => {
+      const stageUnit = (stageUnitResult.data ?? []).find(
+        (binding) => binding.unit_id === unit.id,
+      );
+      const stage = (allStageResult.data ?? []).find(
+        (item) => item.id === stageUnit?.stage_id,
+      );
+
+      return {
+        id: unit.id,
+        code: unit.code,
+        name: unit.name,
+        programmeCode: programmeCode.get(unit.programme_id) ?? '-',
+        stageName: stage?.name ?? (unit.academic_period_number ? `Semester ${unit.academic_period_number}` : null),
+      };
+    }),
   };
 }

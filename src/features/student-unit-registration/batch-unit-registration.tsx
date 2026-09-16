@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
 import {
+  batchRegisterOverrideUnits,
   batchRegisterExpectedUnits,
   confirmReportedStudents,
   dropUnconfirmedStudentUnits,
@@ -54,6 +55,10 @@ function formatBatchErrorMessage(error: string): string {
       return 'An active academic period is required before unit registration can run.';
     case 'mode':
       return 'Please select a valid registration mode (Entire cohort or Selected students).';
+    case 'override_selection':
+      return 'Select at least one student and one additional unit.';
+    case 'override_reason':
+      return 'Provide an HOD reason for the additional or cross-stage registration.';
     case 'stage_selection_required':
       return 'Please select an academic stage before setting the cohort stage.';
     default:
@@ -85,6 +90,8 @@ export function BatchUnitRegistration({
   notice,
 }: BatchUnitRegistrationProps) {
   const [mode, setMode] = useState<'cohort' | 'selected'>('cohort');
+  const [registrationPath, setRegistrationPath] = useState<'expected' | 'override'>('expected');
+  const [selectedUnitIds, setSelectedUnitIds] = useState<Set<string>>(new Set());
   const [cohortId, setCohortId] = useState(initialCohortId ?? '');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => {
     if (!initialCohortId) return new Set();
@@ -122,6 +129,11 @@ export function BatchUnitRegistration({
     0,
   );
 
+  const canSelectStudent = (student: typeof context.students[number]) =>
+    registrationPath === 'override'
+      ? student.canRegister
+      : student.eligible;
+
 
   const toggleStudent = (studentId: string) => {
     setSelectedIds((current) => {
@@ -142,10 +154,19 @@ export function BatchUnitRegistration({
     setSelectedIds(
       new Set(
         context.students
-          .filter((student) => student.eligible)
+          .filter(canSelectStudent)
           .map((student) => student.id),
       ),
     );
+  };
+
+  const toggleUnit = (unitId: string) => {
+    setSelectedUnitIds((current) => {
+      const next = new Set(current);
+      if (next.has(unitId)) next.delete(unitId);
+      else next.add(unitId);
+      return next;
+    });
   };
 
   const clearSelection = () => {
@@ -284,7 +305,7 @@ export function BatchUnitRegistration({
               </h1>
 
               <p className="mt-0.5 text-sm text-slate-600">
-                Register expected units by cohort or selected students.
+                Register stage curriculum or HOD-approved additional units by cohort or selected students.
               </p>
             </div>
           </div>
@@ -340,7 +361,11 @@ export function BatchUnitRegistration({
       ) : null}
 
       <form
-        action={batchRegisterExpectedUnits}
+        action={
+          registrationPath === 'override'
+            ? batchRegisterOverrideUnits
+            : batchRegisterExpectedUnits
+        }
         className="space-y-4"
       >
         {context.period ? (
@@ -353,10 +378,39 @@ export function BatchUnitRegistration({
 
         <input type="hidden" name="mode" value={mode} />
 
+        {registrationPath === 'override'
+          ? [...selectedUnitIds].map((unitId) => (
+              <input key={unitId} type="hidden" name="unitIds" value={unitId} />
+            ))
+          : null}
+
         <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
           <h2 className="text-sm font-semibold text-slate-950">
-            Registration scope
+            Registration approach
           </h2>
+
+          <div className="mt-3 grid max-w-2xl gap-2.5 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => setRegistrationPath('expected')}
+              className={registrationPath === 'expected'
+                ? 'rounded-lg border-2 border-slate-950 bg-slate-50 p-3 text-left'
+                : 'rounded-lg border border-slate-200 p-3 text-left transition hover:bg-slate-50'}
+            >
+              <span className="block text-sm font-semibold text-slate-950">Stage curriculum</span>
+              <span className="mt-0.5 block text-xs leading-5 text-slate-500">Register the normal units bound to each student&apos;s current stage.</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setRegistrationPath('override')}
+              className={registrationPath === 'override'
+                ? 'rounded-lg border-2 border-primary bg-primary/5 p-3 text-left'
+                : 'rounded-lg border border-slate-200 p-3 text-left transition hover:bg-slate-50'}
+            >
+              <span className="block text-sm font-semibold text-slate-950">Additional / cross-stage units</span>
+              <span className="mt-0.5 block text-xs leading-5 text-slate-500">Add missed, repeat, or future-stage units with a recorded HOD reason.</span>
+            </button>
+          </div>
 
           <div className="mt-3 grid max-w-xl gap-2.5 sm:grid-cols-2">
             <button
@@ -415,7 +469,7 @@ export function BatchUnitRegistration({
                     .filter(
                       (student) =>
                         student.cohortId === nextCohortId &&
-                        student.eligible,
+                        canSelectStudent(student),
                     )
                     .map((student) => student.id);
 
@@ -440,7 +494,7 @@ export function BatchUnitRegistration({
                     cohortId={cohortId}
                     setups={cohortStageSetups}
                   />
-                  {cohortStageSetups.find((s) => s.cohortId === cohortId && !s.currentStageId) ? (
+                  {registrationPath === 'expected' && cohortStageSetups.find((s) => s.cohortId === cohortId && !s.currentStageId) ? (
                     <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50/80 p-2.5 text-xs text-amber-900 flex items-start gap-2">
                       <span className="mt-0.5 size-1.5 rounded-full bg-amber-500 shrink-0" />
                       <div>
@@ -484,6 +538,33 @@ export function BatchUnitRegistration({
             </div>
           )}
         </section>
+
+        {registrationPath === 'override' ? (
+          <section className="rounded-xl border border-primary/30 bg-primary/5 p-4 shadow-sm sm:p-5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h2 className="text-sm font-semibold text-text-primary">Units to add</h2>
+                <p className="mt-0.5 text-xs text-text-secondary">Only units in each selected student&apos;s programme are registered. Off-stage units are recorded as HOD-approved overrides.</p>
+              </div>
+              <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-primary ring-1 ring-primary/20">{selectedUnitIds.size} selected</span>
+            </div>
+            <div className="mt-3 grid max-h-72 gap-2 overflow-y-auto pr-1 sm:grid-cols-2 lg:grid-cols-3">
+              {context.units.map((unit) => (
+                <label key={unit.id} className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-border bg-white p-2.5 hover:border-primary/50">
+                  <input type="checkbox" checked={selectedUnitIds.has(unit.id)} onChange={() => toggleUnit(unit.id)} className="mt-0.5 size-4 accent-primary" />
+                  <span className="min-w-0 text-xs">
+                    <span className="block font-semibold text-text-primary">{unit.name}</span>
+                    <span className="mt-0.5 block text-text-muted"><span className="font-mono">{unit.code}</span> · {unit.programmeCode}{unit.stageName ? ` · ${unit.stageName}` : ''}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+            <label className="mt-4 block text-xs font-semibold text-text-secondary">
+              HOD override reason
+              <textarea name="overrideReason" required rows={2} maxLength={1000} placeholder="E.g. missed in an earlier term, approved repeat, or approved accelerated study." className="mt-1.5 w-full resize-none rounded-lg border border-border bg-white px-3 py-2 text-xs outline-none focus:border-primary" />
+            </label>
+          </section>
+        ) : null}
 
         <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 sm:px-5">
@@ -584,7 +665,7 @@ export function BatchUnitRegistration({
                   </span>
 
                   <span className="flex flex-col items-start gap-1">
-                    {student.eligibilityReason === 'ready' ? (
+                    {canSelectStudent(student) ? (
                       <span className="inline-flex rounded-full bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-800 ring-1 ring-inset ring-emerald-200">
                         {eligibilityLabel(
                           student.eligibilityReason,
@@ -652,11 +733,14 @@ export function BatchUnitRegistration({
             disabled={
               !context.period ||
               (mode === 'cohort' && !cohortId) ||
-              selectedIds.size === 0
+              selectedIds.size === 0 ||
+              (registrationPath === 'override' && selectedUnitIds.size === 0)
             }
             className="inline-flex min-h-10 items-center justify-center rounded-full bg-[#cbd5e1] px-5 text-sm font-medium text-white transition hover:bg-[#94a3b8] disabled:cursor-not-allowed disabled:bg-[#cbd5e1]"
           >
-            {`Register Units (${selectedIds.size})`}
+            {registrationPath === 'override'
+              ? `Add selected units (${selectedIds.size})`
+              : `Register Units (${selectedIds.size})`}
           </button>
         </div>
       </form>

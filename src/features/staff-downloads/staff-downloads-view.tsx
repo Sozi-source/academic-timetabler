@@ -163,12 +163,12 @@ export function StaffDownloadsView({
                         Print
                       </Link>
                       <a
-                        href={`/api/staff/units/${alloc.allocationId}/attendance-sheet/class`}
+                        href={`/api/staff/units/${alloc.allocationId}/attendance-sheet/class?format=pdf`}
                         className="inline-flex h-7 items-center gap-1 rounded border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
-                        title="Download Word format"
+                        title="Download PDF"
                       >
                         <Download className="size-3" />
-                        .docx
+                        PDF
                       </a>
                     </div>
                   </div>
@@ -191,12 +191,12 @@ export function StaffDownloadsView({
                         Print
                       </Link>
                       <a
-                        href={`/api/staff/units/${alloc.allocationId}/attendance-sheet/cat`}
+                        href={`/api/staff/units/${alloc.allocationId}/attendance-sheet/cat?format=pdf`}
                         className="inline-flex h-7 items-center gap-1 rounded border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
-                        title="Download Word format"
+                        title="Download PDF"
                       >
                         <Download className="size-3" />
-                        .docx
+                        PDF
                       </a>
                     </div>
                   </div>
@@ -219,12 +219,12 @@ export function StaffDownloadsView({
                         Print
                       </Link>
                       <a
-                        href={`/api/staff/units/${alloc.allocationId}/attendance-sheet/exam`}
+                        href={`/api/staff/units/${alloc.allocationId}/attendance-sheet/exam?format=pdf`}
                         className="inline-flex h-7 items-center gap-1 rounded border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
-                        title="Download Word format"
+                        title="Download PDF"
                       >
                         <Download className="size-3" />
-                        .docx
+                        PDF
                       </a>
                     </div>
                   </div>

@@ -126,14 +126,6 @@ export function PrintableSigningSheet({
           </span>
 
           <a
-            href={`/api/staff/units/${allocationId}/attendance-sheet/${type}`}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-white px-3.5 py-1.5 text-xs font-semibold text-text-secondary shadow-xs transition hover:bg-surface-subtle"
-          >
-            <Download className="size-3.5" />
-            Download Word (.docx)
-          </a>
-
-          <a
             href={`/api/staff/units/${allocationId}/attendance-sheet/${type}?format=pdf`}
             download
             className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-primary-hover"

@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Batch Unit Registration | Academic Management',
   description:
-    'Register expected units for selected students or an entire cohort.',
+    'Register stage curriculum or HOD-approved additional units for selected students or an entire cohort.',
 };
 
 interface BatchPageProps {

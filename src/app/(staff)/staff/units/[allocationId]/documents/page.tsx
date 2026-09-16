@@ -80,7 +80,7 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
                 Outcomes, schedule, grading, and references.
               </p>
             </div>
-            <div className="mt-4 pt-3 border-t border-border flex gap-2">
+            <div className="mt-4 flex gap-2 border-t border-border pt-3">
               <Link
                 href={`/staff/units/${allocationId}/documents/course-outline`}
                 className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-white hover:bg-primary-hover"
@@ -210,6 +210,13 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
                 <Printer className="size-3.5" />
                 View & Print
               </Link>
+              <a
+                href={`/api/staff/units/${allocationId}/attendance-sheet/class?format=pdf`}
+                className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
+              >
+                <Download className="size-3.5" />
+                Download PDF
+              </a>
             </div>
           </Card>
 
@@ -238,11 +245,11 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
                 Preview
               </Link>
               <a
-                href={`/api/staff/units/${allocationId}/attendance-sheet/cat`}
+                href={`/api/staff/units/${allocationId}/attendance-sheet/cat?format=pdf`}
                 className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-white hover:bg-primary-hover"
               >
                 <Download className="size-3.5" />
-                Word
+                Download PDF
               </a>
             </div>
           </Card>
@@ -272,11 +279,11 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
                 Preview
               </Link>
               <a
-                href={`/api/staff/units/${allocationId}/attendance-sheet/exam`}
+                href={`/api/staff/units/${allocationId}/attendance-sheet/exam?format=pdf`}
                 className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-white hover:bg-primary-hover"
               >
                 <Download className="size-3.5" />
-                Word
+                Download PDF
               </a>
             </div>
           </Card>

@@ -120,8 +120,8 @@ export default async function DepartmentStudentUnitRegistrationPage({
             <h2 className="text-sm font-bold text-text-primary">Current units</h2>
             <p className="mt-1 text-xs text-text-muted">
               {context.student.currentStageName
-                ? `${context.student.currentStageName} units are selected automatically.`
-                : 'Select the student stage first.'}
+                ? `${context.student.currentStageName} units are selected automatically. Additional or cross-stage units require a reason.`
+                : 'Select any programme units as an approved override; provide the reason below.'}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -142,7 +142,7 @@ export default async function DepartmentStudentUnitRegistrationPage({
           </div>
         </div>
 
-{context.student.currentStageId ? (() => {
+{(() => {
           const expectedUnits = context.units.filter((u) => u.isExpected);
           const otherOfferedUnits = context.units.filter((u) => !u.isExpected && u.category === 'offered');
           const curriculumUnits = context.units.filter((u) => !u.isExpected && u.category !== 'offered');
@@ -254,7 +254,7 @@ export default async function DepartmentStudentUnitRegistrationPage({
                     </span>
                   </summary>
                   <p className="mb-3 mt-1.5 text-[11px] text-text-muted">
-                    Select any unit from earlier stages for retakes/carry-overs or other curriculum requirements. Offerings are auto-provisioned.
+                    Select units from any programme stage for retakes, carry-overs, missed units, or approved accelerated study. Offerings are auto-provisioned and an override reason is required whenever an off-stage unit is selected.
                   </p>
                   <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {curriculumUnits.map((unit) => (
@@ -288,7 +288,7 @@ export default async function DepartmentStudentUnitRegistrationPage({
 
               <div>
                 <label htmlFor="registrationNote" className="text-xs font-semibold text-text-secondary">
-                  Note <span className="font-normal text-text-muted">(optional; defaults to department authorization)</span>
+                  HOD registration note <span className="font-normal text-text-muted">(required for additional or cross-stage units)</span>
                 </label>
                 <textarea
                   id="registrationNote"
@@ -296,7 +296,7 @@ export default async function DepartmentStudentUnitRegistrationPage({
                   defaultValue={context.existingNote ?? ''}
                   rows={2}
                   maxLength={1000}
-                  placeholder="Reason for any unit exception or custom selection (optional)"
+                  placeholder="Reason for any additional, repeat, missed, or future-stage unit"
                   className="mt-1.5 w-full resize-none rounded-lg border border-border px-3 py-2 text-xs outline-none focus:border-primary"
                 />
               </div>
@@ -327,11 +327,7 @@ export default async function DepartmentStudentUnitRegistrationPage({
               </div>
             </form>
           );
-        })() : (
-          <div className="mt-4 rounded-lg bg-surface-subtle px-3 py-3 text-xs text-text-muted">
-            Select the student&apos;s academic stage to load the expected units.
-          </div>
-        )}
+        })()}
       </Card>
     </div>
   );

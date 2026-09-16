@@ -164,7 +164,11 @@ export async function getDepartmentRegistrationEditor(
       lifecycle_status,
       current_stage:programme_stages!students_current_stage_id_fkey(id, name, code, sequence_number),
       programme:programmes!students_programme_id_fkey(code),
-      current_cohort:cohorts!students_current_cohort_id_fkey(name, current_stage_id)
+      current_cohort:cohorts!students_current_cohort_id_fkey(
+        name,
+        current_stage_id,
+        current_stage:programme_stages!cohorts_current_stage_id_fkey(id, name, code, sequence_number)
+      )
     `)
     .eq('id', studentId)
     .maybeSingle();
@@ -289,6 +293,9 @@ export async function getDepartmentRegistrationEditor(
 
   const programme = Array.isArray(student.programme) ? student.programme[0] : student.programme;
   const currentStage = Array.isArray(student.current_stage) ? student.current_stage[0] : student.current_stage;
+  const cohortStage = Array.isArray((cohort as any)?.current_stage)
+    ? (cohort as any).current_stage[0]
+    : (cohort as any)?.current_stage;
 
   const categoryRank: Record<string, number> = {
     expected: 0,
@@ -316,8 +323,8 @@ export async function getDepartmentRegistrationEditor(
       fullName: student.full_name,
       programmeCode: programme?.code ?? '-',
       cohortName: cohort?.name ?? '-',
-      currentStageId: student.current_stage_id,
-      currentStageName: currentStage?.name ?? null,
+      currentStageId: effectiveStageId,
+      currentStageName: currentStage?.name ?? cohortStage?.name ?? null,
     },
     stageOptions: (stageResult.data ?? []).map((stage) => ({
       id: stage.id,

@@ -102,6 +102,75 @@ export async function batchRegisterExpectedUnits(
   );
 }
 
+export async function batchRegisterOverrideUnits(
+  formData: FormData,
+) {
+  await requireHodAccess();
+
+  const academicPeriodId = formData.get('academicPeriodId');
+  const studentIds = selectedStudentIds(formData);
+  const unitIds = formData
+    .getAll('unitIds')
+    .filter(
+      (value): value is string =>
+        typeof value === 'string' && value.length > 0,
+    );
+  const reasonValue = formData.get('overrideReason');
+  const overrideReason =
+    typeof reasonValue === 'string'
+      ? reasonValue.trim()
+      : '';
+
+  if (typeof academicPeriodId !== 'string' || !academicPeriodId) {
+    redirect('/students/unit-registration/batch?error=period');
+  }
+
+  if (studentIds.length === 0 || unitIds.length === 0) {
+    redirect('/students/unit-registration/batch?error=override_selection');
+  }
+
+  if (overrideReason.length < 3) {
+    redirect('/students/unit-registration/batch?error=override_reason');
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc(
+    'batch_register_override_units',
+    {
+      target_academic_period_id: academicPeriodId,
+      target_student_ids: studentIds,
+      selected_unit_ids: unitIds,
+      override_reason: overrideReason,
+    },
+  );
+
+  if (error) {
+    redirect(
+      `/students/unit-registration/batch?error=${encodeURIComponent(error.message)}`,
+    );
+  }
+
+  const summary =
+    data && typeof data === 'object'
+      ? data as Record<string, unknown>
+      : {};
+
+  const params = new URLSearchParams({
+    success: '1',
+    selected: String(summary.selected_students ?? 0),
+    eligible: String(summary.eligible_students ?? 0),
+    created: String(summary.registrations_created ?? 0),
+    skipped: String(summary.existing_registrations_skipped ?? 0),
+    attention: String(summary.attention_students ?? 0),
+  });
+
+  revalidatePath('/students/unit-registration');
+  revalidatePath('/students/unit-registration/batch');
+  revalidatePath('/student/unit-registration');
+
+  redirect(`/students/unit-registration/batch?${params.toString()}`);
+}
+
 function selectedStudentIds(formData: FormData): string[] {
   return formData
     .getAll('studentIds')

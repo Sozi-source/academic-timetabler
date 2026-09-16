@@ -14,6 +14,7 @@ export async function verifyStudentUnitRegistration(formData: FormData) {
   const noteValue = formData.get('verificationNote');
   const note = typeof noteValue === 'string' ? noteValue.trim() : '';
   const supabase = await createClient();
+
   const { error } = await supabase.rpc('verify_student_unit_registration', {
     target_submission_id: submissionId,
     decision_note: note || null,
@@ -61,6 +62,29 @@ export async function registerStudentUnitsByDepartment(formData: FormData) {
   }
 
   const supabase = await createClient();
+
+  const { data: stageContext } = await supabase
+    .from('students')
+    .select('current_stage_id, current_cohort:cohorts!students_current_cohort_id_fkey(current_stage_id)')
+    .eq('id', studentId)
+    .maybeSingle();
+
+  const cohort = Array.isArray(stageContext?.current_cohort)
+    ? stageContext.current_cohort[0]
+    : stageContext?.current_cohort;
+  const stageId = stageContext?.current_stage_id || cohort?.current_stage_id || null;
+  const { data: stageUnits } = stageId
+    ? await supabase
+        .from('programme_stage_units')
+        .select('unit_id')
+        .eq('stage_id', stageId)
+    : { data: [] };
+  const expectedUnitIds = new Set((stageUnits ?? []).map((unit) => unit.unit_id));
+  const hasOverride = !stageId || unitIds.some((unitId) => !expectedUnitIds.has(unitId));
+
+  if (hasOverride && note.length < 3) {
+    redirect(`/students/unit-registration/register/${studentId}?error=${encodeURIComponent('Provide a reason for additional or cross-stage units.')}`);
+  }
 
   // Ensure every selected unit has an active unit offering in this period for registration validity
   const { data: student } = await supabase

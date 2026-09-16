@@ -82,6 +82,16 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 - **Breaking Changes / Manual Follow-ups**:
   - Run `npx supabase db push` to apply `20260916160000_controlled_cross_stage_unit_registration.sql` before using batch cross-stage registration in production.
 
+### 2026-09-16: Global Readability Typography
+- **Files Modified**:
+  - `src/app/globals.css`
+  - `CHANGES.md`
+- **What Changed**:
+  - Standardized the application on a modern, platform-native UI font stack, prioritizing Inter when it is already available and falling back to each operating system's clearest system font without a network dependency.
+  - Added legibility defaults for body copy and controls: consistent line height, kerning, numeric rendering, and platform font smoothing.
+  - Added a dedicated monospaced stack with tabular numerals for codes, identifiers, and other structured data.
+- **Breaking Changes / Manual Follow-ups**: None.
+
 ### 2026-09-16: Fix Timetable vs Class Session Time Mismatch & Milkah Daily Reports
 - **Files Modified**:
   - `src/app/api/staff/attendance/sessions/route.ts`:

@@ -99,20 +99,40 @@ export async function POST(request: Request) {
   if (sessionData.start_time_slot_id) {
     const { data: slot } = await (adminDb as any)
       .from('time_slots')
-      .select('start_time, end_time')
+      .select('starts_at, ends_at')
       .eq('id', sessionData.start_time_slot_id)
       .maybeSingle();
-    if (slot?.start_time) startsAt = slot.start_time;
-    if (slot?.end_time) endsAt = slot.end_time;
+    if (slot?.starts_at) startsAt = slot.starts_at;
+    if (slot?.ends_at) endsAt = slot.ends_at;
   }
 
   if (sessionData.end_time_slot_id) {
     const { data: endSlot } = await (adminDb as any)
       .from('time_slots')
-      .select('end_time')
+      .select('ends_at')
       .eq('id', sessionData.end_time_slot_id)
       .maybeSingle();
-    if (endSlot?.end_time) endsAt = endSlot.end_time;
+    if (endSlot?.ends_at) endsAt = endSlot.ends_at;
+  }
+
+  // Fallback to published timetable snapshot
+  if (startsAt === '08:00:00' && endsAt === '10:00:00') {
+    const { data: versions } = await (adminDb as any)
+      .from('timetable_versions')
+      .select('snapshot')
+      .eq('status', 'published')
+      .order('version_number', { ascending: false })
+      .limit(3);
+
+    for (const v of versions ?? []) {
+      const snapshot = Array.isArray(v.snapshot) ? v.snapshot : [];
+      const snapshotMatch = snapshot.find((item: any) => String(item.id) === payload.scheduledSessionId);
+      if (snapshotMatch?.startTime && snapshotMatch?.endTime) {
+        startsAt = snapshotMatch.startTime;
+        endsAt = snapshotMatch.endTime;
+        break;
+      }
+    }
   }
 
   const { data: newCs, error: insertError } = await (adminDb as any)

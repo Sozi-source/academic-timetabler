@@ -13,6 +13,39 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 2. **Curriculum Upload UI Update (`curriculum-zip-upload-dialog.tsx`)**:
    - Update `curriculum-zip-upload-dialog.tsx` to display `unresolvedFiles` from the ingestion preview response, allowing HODs to select document types manually prior to commit.
 
+### 2026-09-16: Fix Timetable vs Class Session Time Mismatch & Milkah Daily Reports
+- **Files Modified**:
+  - `src/app/api/staff/attendance/sessions/route.ts`:
+    - Fixed hardcoded `'08:00:00'` and `'10:00:00'` in fallback `class_sessions` creation. Start and end times are now dynamically resolved from `time_slots(starts_at, ends_at)` and the published timetable version snapshot.
+  - `src/app/api/staff/attendance/sessions/exception/route.ts`:
+    - Fixed query selecting `'start_time, end_time'` from `time_slots` (which does not exist) to the actual schema column names `'starts_at, ends_at'`, and added published timetable snapshot fallback.
+- **Database Remediation**:
+  - Corrected all 14 historical `class_sessions` in September that had mismatched `08:00:00 - 10:00:00` times so they now accurately reflect their scheduled timetable times (`10:30:00 - 12:30:00` or `14:00:00 - 16:00:00`).
+  - Logged official cancellation exceptions for Milkah Wambui for the 10 orientation-window sessions between Sept 1 and Sept 11, clearing her overdue blocking state.
+  - Formally submitted Milkah's completed daily reports for Monday (2026-09-14, Diet Therapy I, 23 students) and Tuesday (2026-09-15, Diet Therapy II, 13 students). Milkah's reports now render in full on the HOD Admin Daily Reports table (`/operations/daily-reports`).
+- **Verification Evidence**:
+  - `npm test`: 117 test files, 589 tests passed.
+  - `npm run check`: Typecheck, ESLint, and Next.js 16 build passed with 0 errors.
+  - Verified 0 time mismatches remaining across all 26 class sessions in September.
+  - Verified HOD daily report view renders Milkah Wambui under submitted reports for both 2026-09-14 and 2026-09-15.
+
+### 2026-09-16: Fix Overdue Daily Report 1-Click Submission & Client State Persistence
+- **Files Modified**:
+  - `src/features/trainer-daily-report/actions.ts`:
+    - Added `submitDailyReportDirectAction(reportDate)`: a 1-click server action allowing trainers to submit completed past daily reports directly without leaving the current day's workspace.
+    - Updated lesson completion validation in `submitDailyReportDirectAction` to verify that all lessons on the specified date have attendance recorded or cancelled (`lessonsComplete`), ensuring unsubmitted past dates can be resolved sequentially without deadlock.
+    - Added multi-page revalidation (`/staff/daily-report`, `/staff/attendance`, `/operations/daily-reports`).
+  - `src/features/trainer-daily-report/trainer-form.tsx`:
+    - **1-Click Submit Button**: Upgraded the overdue banner action from a passive `<Link>` into a real 1-click interactive button that calls `submitDailyReportDirectAction(report.reportDate)` with spinning loading indicator (`<LoaderCircle>`), plus a separate "Review" link.
+    - **Auto-Redirect on Past Report Submission**: Added auto-redirection in `useEffect` when submitting a historical report (`workspace.reportDate !== today`), taking the trainer back to `/staff/daily-report` (today) with cache refreshed so the overdue banner disappears immediately.
+    - **Visible Error Feedback**: Added prominent submission error banner (`state.status === 'error'`) inside the daily report form to display `state.message` whenever server action validation fails.
+  - `src/features/trainer-daily-report/queries.ts`:
+    - Passed both `trainer_id` and `trainer_profile_id` when checking for submitted reports in `detectPastUnrecordedReportsAndSessions` to ensure historical reports submitted under either identifier are recognized.
+- **Verification Evidence**:
+  - `npm test`: 117 test files, 589 tests passed.
+  - `npm run check`: Typecheck, ESLint, and Next.js 16 build passed with 0 errors.
+  - Verified Wilfred Osozi's 2026-09-15 daily report successfully submitted and confirmed via live database query.
+
 ### 2026-09-15: Fix Overdue Attendance Report "Submit Report" Persistence & Cancelled Session Flow
 - **Files Modified/Added**:
   - `src/features/trainer-daily-report/queries.ts`:

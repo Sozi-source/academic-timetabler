@@ -227,6 +227,43 @@ export async function POST(
           throw new Error('Scheduled session record could not be found.');
         }
 
+        let startsAt = '08:00:00';
+        let endsAt = '10:00:00';
+
+        if (sessionData.start_time_slot_id || sessionData.end_time_slot_id) {
+          const { data: slots } = await (adminDb as any)
+            .from('time_slots')
+            .select('id, starts_at, ends_at')
+            .in('id', [sessionData.start_time_slot_id, sessionData.end_time_slot_id].filter(Boolean));
+
+          const startSlot = (slots ?? []).find((s: any) => s.id === sessionData.start_time_slot_id);
+          const endSlot = (slots ?? []).find((s: any) => s.id === sessionData.end_time_slot_id);
+
+          if (startSlot?.starts_at) startsAt = startSlot.starts_at;
+          if (endSlot?.ends_at) endsAt = endSlot.ends_at;
+          else if (startSlot?.ends_at) endsAt = startSlot.ends_at;
+        }
+
+        // Fallback to published timetable snapshot if time slots did not provide custom times
+        if (startsAt === '08:00:00' && endsAt === '10:00:00') {
+          const { data: versions } = await (adminDb as any)
+            .from('timetable_versions')
+            .select('snapshot')
+            .eq('status', 'published')
+            .order('version_number', { ascending: false })
+            .limit(3);
+
+          for (const v of versions ?? []) {
+            const snapshot = Array.isArray(v.snapshot) ? v.snapshot : [];
+            const snapshotMatch = snapshot.find((item: any) => String(item.id) === payload.scheduledSessionId);
+            if (snapshotMatch?.startTime && snapshotMatch?.endTime) {
+              startsAt = snapshotMatch.startTime;
+              endsAt = snapshotMatch.endTime;
+              break;
+            }
+          }
+        }
+
         const { data: newCs, error: insertError } = await (adminDb as any)
           .from('class_sessions')
           .insert({
@@ -237,8 +274,8 @@ export async function POST(
             unit_id: sessionData.unit_id,
             trainer_id: sessionData.trainer_id,
             session_date: payload.sessionDate,
-            starts_at: '08:00:00',
-            ends_at: '10:00:00',
+            starts_at: startsAt,
+            ends_at: endsAt,
             status: 'open',
           })
           .select('id')

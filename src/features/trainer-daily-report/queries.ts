@@ -219,6 +219,7 @@ export async function getTrainerDailyReportWorkspace(
         schedule: attendanceSchedule,
         reportDate,
         trainerProfileId: profile.id,
+        trainerId: data.trainerId,
       });
 
       // Defensive check: Reconcile cancelled sessions from class_sessions directly

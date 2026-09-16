@@ -25,8 +25,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ABSENT_CIRCUMSTANCES } from '@/features/class-attendance/domain';
-import { submitTrainerDailyReportAction } from './actions';
-import { formatDailyReportDate, formatDailyReportTime } from './domain';
+import { submitTrainerDailyReportAction, submitDailyReportDirectAction } from './actions';
+import { formatDailyReportDate, formatDailyReportTime, nairobiToday } from './domain';
 import type {
   PastUnrecordedSession,
   PastUnsubmittedReportDate,
@@ -221,18 +221,31 @@ function PastUnrecordedBanner({
   unsubmittedReports = [],
   onRecordPast,
   onLogException,
+  onSubmitReportDirect,
 }: {
   sessions: PastUnrecordedSession[];
   unsubmittedReports?: PastUnsubmittedReportDate[];
   reportDate: string;
   onRecordPast: (session: PastUnrecordedSession) => void;
   onLogException: (session: PastUnrecordedSession) => void;
+  onSubmitReportDirect?: (reportDate: string) => Promise<void>;
 }) {
   const [isOpen, setIsOpen] = useState(true);
+  const [submittingDate, setSubmittingDate] = useState<string | null>(null);
 
   if (sessions.length === 0 && unsubmittedReports.length === 0) return null;
 
   const totalOverdue = sessions.length + unsubmittedReports.length;
+
+  async function handleDirectSubmit(dateStr: string) {
+    if (!onSubmitReportDirect) return;
+    setSubmittingDate(dateStr);
+    try {
+      await onSubmitReportDirect(dateStr);
+    } finally {
+      setSubmittingDate(null);
+    }
+  }
 
   return (
     <section className="overflow-hidden rounded-xl border border-amber-300 bg-amber-50/90 shadow-xs">
@@ -278,12 +291,36 @@ function PastUnrecordedBanner({
               </div>
 
               <div className="flex items-center gap-2">
+                {onSubmitReportDirect ? (
+                  <button
+                    type="button"
+                    disabled={submittingDate === report.reportDate}
+                    onClick={() => handleDirectSubmit(report.reportDate)}
+                    className="inline-flex items-center gap-1 rounded-lg bg-primary px-2.5 py-1 text-[11px] font-semibold text-white transition hover:bg-primary-hover shadow-xs disabled:opacity-50"
+                  >
+                    {submittingDate === report.reportDate ? (
+                      <LoaderCircle className="size-3 animate-spin" />
+                    ) : (
+                      <ClipboardCheck className="size-3" />
+                    )}
+                    {submittingDate === report.reportDate
+                      ? 'Submitting...'
+                      : `Submit ${report.dayOfWeek}'s Report`}
+                  </button>
+                ) : (
+                  <Link
+                    href={`/staff/daily-report?date=${report.reportDate}`}
+                    className="inline-flex items-center gap-1 rounded-lg bg-primary px-2.5 py-1 text-[11px] font-semibold text-white transition hover:bg-primary-hover shadow-xs"
+                  >
+                    <ClipboardCheck className="size-3" />
+                    Submit {report.dayOfWeek}&apos;s Report
+                  </Link>
+                )}
                 <Link
                   href={`/staff/daily-report?date=${report.reportDate}`}
-                  className="inline-flex items-center gap-1 rounded-lg bg-primary px-2.5 py-1 text-[11px] font-semibold text-white transition hover:bg-primary-hover shadow-xs"
+                  className="text-[11px] text-text-secondary hover:text-text-primary underline px-1"
                 >
-                  <ClipboardCheck className="size-3" />
-                  Submit {report.dayOfWeek}&apos;s Report
+                  Review
                 </Link>
               </div>
             </div>
@@ -693,9 +730,27 @@ export function TrainerDailyReportForm({
 
   useEffect(() => {
     if (state.status === 'success') {
+      const today = nairobiToday();
+      if (workspace.reportDate !== today) {
+        router.push('/staff/daily-report');
+      }
       router.refresh();
     }
-  }, [router, state.status]);
+  }, [router, state.status, workspace.reportDate]);
+
+  async function handleDirectSubmitReport(dateToSubmit: string) {
+    try {
+      const res = await submitDailyReportDirectAction(dateToSubmit);
+      if (res.success) {
+        router.refresh();
+      } else {
+        alert(res.message);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to submit daily report.';
+      alert(msg);
+    }
+  }
 
   async function handleRecordAttendance(lesson: TrainerDailyReportLesson) {
     const returnUrl = encodeURIComponent(`/staff/daily-report?date=${workspace.reportDate}`);
@@ -838,6 +893,7 @@ export function TrainerDailyReportForm({
         reportDate={workspace.reportDate}
         onRecordPast={handleRecordPastAttendance}
         onLogException={handleOpenExceptionDialog}
+        onSubmitReportDirect={handleDirectSubmitReport}
       />
 
       <SessionExceptionDialog
@@ -857,6 +913,16 @@ export function TrainerDailyReportForm({
         className="space-y-4"
       >
         <input type="hidden" name="reportDate" value={workspace.reportDate} />
+
+        {state.status === 'error' && state.message ? (
+          <section className="flex items-start gap-2.5 rounded-xl border border-rose-300 bg-rose-50 p-3.5 shadow-xs">
+            <AlertCircle className="size-4 shrink-0 text-rose-600 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-xs font-bold text-rose-950">Submission Failed</p>
+              <p className="mt-0.5 text-[11px] text-rose-800">{state.message}</p>
+            </div>
+          </section>
+        ) : null}
 
         <ScheduledLessonsSection
           workspace={workspace}

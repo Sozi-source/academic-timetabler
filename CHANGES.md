@@ -19,8 +19,9 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
   - When a user visited `/student/activate` or `/student/login` with an expired, revoked, or stale `ams_student_session` cookie (e.g. from previous tests), `getStudentPortalSession()` encountered `!data || data.revoked_at` and called `store.delete(COOKIE_NAME)`.
   - Because `/student/activate` is a Server Component, this threw an unhandled 500 error that bubbled to the root `src/app/error.tsx` ("Something went wrong"). The cookie was never deleted because the response aborted, causing the error to loop indefinitely on page reload.
 - **Files Added**:
-  - `src/app/student/error.tsx`: Dedicated error boundary specifically for student portal routes (`/student/*`), offering student-friendly recovery options ("Try again", "Return to Student Sign In", "Activate Account") instead of the admin dashboard fallback.
   - `src/app/student/logout/route.ts`: Dedicated GET route handler (`/student/logout`) that cleanly deletes `ams_student_session` and redirects to `/student/login`.
+- **Note on Error Boundaries**:
+  - Removed `src/app/student/error.tsx` because in Next.js App Router, placing an `error.tsx` directly in a route segment catches server-side `redirect()` calls (which throw internal `NEXT_REDIRECT` exceptions), blocking automatic redirect from `/student` to `/student/login`. Root `src/app/error.tsx` and Next.js navigation handle errors outside of intentional redirects.
 - **Files Modified**:
   - `src/features/student-portal/session.ts`:
     - Added `safeDeleteCookie()` utility that gracefully catches cookie mutations during Server Component rendering.

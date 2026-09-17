@@ -13,6 +13,17 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 2. **Curriculum Upload UI Update (`curriculum-zip-upload-dialog.tsx`)**:
    - Update `curriculum-zip-upload-dialog.tsx` to display `unresolvedFiles` from the ingestion preview response, allowing HODs to select document types manually prior to commit.
 
+### 2026-09-17: Fix Student Portal Dashboard Crash Due to Undefined Navigation Icon in Mobile Nav
+- **Root Cause**:
+  - In `src/components/student/student-portal-shell.tsx`, `MOBILE_NAV_ITEMS` was deriving its items via index lookups into `NAVIGATION_ITEMS` (`{ ...NAVIGATION_ITEMS[6], tabKey: 'profile' }`).
+  - When the Attendance navigation item was commented out in `NAVIGATION_ITEMS`, the array length reduced from 7 to 6 items (indices 0 to 5), causing `NAVIGATION_ITEMS[6]` to evaluate to `undefined`.
+  - In mobile viewports, rendering `<Icon />` where `Icon` was `undefined` threw React's fatal element error (`Element type is invalid: expected a string or a class/function but got: undefined`).
+  - This error specifically occurred for authenticated students because admin portal preview (`isAdminPreview = true`) returns an un-shelled container early and skips mobile navigation rendering entirely.
+- **Files Modified**:
+  - `src/components/student/student-portal-shell.tsx`:
+    - Defined `MobileNavigationItem` interface and replaced brittle array indexing with explicit declarations for all 4 mobile nav entries (`Dashboard`, `Registration`, `Timetable`, `Profile`).
+    - Adjusted mobile navigation bar grid container from `grid-cols-4` to `grid-cols-5` to cleanly accommodate the 4 navigation links plus the "More" drawer toggle button.
+
 ### 2026-09-17: Fix Student Portal Activation Crash on Stale Session Cookies & Add Student Error Boundary
 - **Root Cause**:
   - In Next.js App Router (React Server Components), modifying cookies during rendering via `cookies().delete()` or `cookies().set()` throws an invariant exception: `Cookies can only be modified in a Server Action or Route Handler`.

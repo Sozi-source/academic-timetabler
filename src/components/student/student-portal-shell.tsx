@@ -41,11 +41,15 @@ const NAVIGATION_ITEMS: readonly NavigationItem[] = [
   { label: 'Profile', href: '/student/profile', icon: UserRound },
 ];
 
-const MOBILE_NAV_ITEMS = [
-  { ...NAVIGATION_ITEMS[0], tabKey: 'dashboard' },
-  { ...NAVIGATION_ITEMS[3], tabKey: 'registration' },
-  { ...NAVIGATION_ITEMS[2], tabKey: 'timetable' },
-  { ...NAVIGATION_ITEMS[6], tabKey: 'profile' },
+interface MobileNavigationItem extends NavigationItem {
+  tabKey: string;
+}
+
+const MOBILE_NAV_ITEMS: readonly MobileNavigationItem[] = [
+  { label: 'Dashboard', href: '/student', icon: LayoutDashboard, tabKey: 'dashboard' },
+  { label: 'Registration', href: '/student/unit-registration', icon: ClipboardCheck, tabKey: 'registration' },
+  { label: 'Timetable', href: '/student/timetable', icon: CalendarDays, tabKey: 'timetable' },
+  { label: 'Profile', href: '/student/profile', icon: UserRound, tabKey: 'profile' },
 ];
 
 function getInitials(fullName: string) {
@@ -277,7 +281,7 @@ export function StudentPortalShell({
 
         {/* Mobile Bottom Bar Navigation */}
         <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_rgba(11,79,74,.08)] backdrop-blur-xl lg:hidden">
-          <div className="mx-auto grid h-[3.625rem] max-w-md grid-cols-4">
+          <div className="mx-auto grid h-[3.625rem] max-w-md grid-cols-5">
             {MOBILE_NAV_ITEMS.map((item) => {
               const active = isRouteActive(item.href, item.tabKey);
               const Icon = item.icon;

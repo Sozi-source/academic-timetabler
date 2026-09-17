@@ -42,6 +42,8 @@ as $$
 $$;
 
 -- 2. Resilient student portal access register
+drop function if exists public.get_student_portal_access_register();
+
 create or replace function public.get_student_portal_access_register()
 returns table (
   student_id uuid,
@@ -105,6 +107,9 @@ end;
 $$;
 
 -- 3. Robust set_unit_offering_approval with graceful session handling
+-- Drop existing function first because changing the return type (integer -> jsonb) is not allowed with CREATE OR REPLACE FUNCTION alone
+drop function if exists public.set_unit_offering_approval(uuid[], boolean, text);
+
 create or replace function public.set_unit_offering_approval(
   p_offering_ids uuid[],
   p_approve      boolean,
@@ -266,3 +271,7 @@ $$;
 
 revoke all on function public.set_unit_offering_approval(uuid[], boolean, text) from public;
 grant  execute on function public.set_unit_offering_approval(uuid[], boolean, text) to authenticated;
+
+revoke all on function public.get_student_portal_access_register() from public;
+grant  execute on function public.get_student_portal_access_register() to authenticated;
+

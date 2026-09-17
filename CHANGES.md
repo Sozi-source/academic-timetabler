@@ -16,6 +16,7 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 ### 2026-09-17: Fix Drop Offering Authorization & Student Portal Access Route
 - **Files Added**:
   - `supabase/migrations/20260917140000_fix_drop_offering_and_student_portal_access.sql`:
+    - Added explicit `drop function if exists` for `set_unit_offering_approval` and `get_student_portal_access_register` to accommodate PostgreSQL's restriction on altering return types (from `integer` to `jsonb`) in `CREATE OR REPLACE FUNCTION`.
     - Updated `current_user_can_access_department()` to unconditionally allow `system_admin` role, preventing department lockouts when profile `active_department_id` is null or re-selected.
     - Updated `get_student_portal_access_register()` with fallback to first manageable department if user's primary department is unset.
     - Updated `set_unit_offering_approval()` to:

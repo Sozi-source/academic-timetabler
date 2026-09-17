@@ -8,16 +8,26 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
+import { Alert } from '@/components/ui/alert';
 import { PageHeader } from '@/components/ui/page-header';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { StudentPortalAccessManager } from '@/features/student-access/access-manager';
 import { studentPortalAccessSummary } from '@/features/student-access/domain';
 import { getStudentPortalAccessRegister } from '@/features/student-access/queries';
+import type { StudentPortalAccessRow } from '@/features/student-access/types';
 
 export default async function StudentPortalAccessPage() {
   await requireHodAccess();
 
-  const rows = await getStudentPortalAccessRegister();
+  let rows: StudentPortalAccessRow[] = [];
+  let loadError: string | null = null;
+
+  try {
+    rows = await getStudentPortalAccessRegister();
+  } catch (error) {
+    loadError = error instanceof Error ? error.message : 'Unable to load student portal access.';
+  }
+
   const summary = studentPortalAccessSummary(rows);
 
   return (
@@ -36,6 +46,12 @@ export default async function StudentPortalAccessPage() {
           </Link>
         }
       />
+
+      {loadError ? (
+        <Alert variant="danger" title="Portal access notice">
+          {loadError}
+        </Alert>
+      ) : null}
 
       {/* Summary Telemetry Strip */}
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

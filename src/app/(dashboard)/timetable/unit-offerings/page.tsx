@@ -71,6 +71,7 @@ export default async function UnitOfferingsPage({ searchParams }: PageProps<'/ti
       />
 
       {query.approvalError ? <Alert variant="danger" title="Offering authorization failed">{String(query.approvalError)}</Alert> : null}
+      {query.approvalWarning ? <Alert variant="warning" title="Notice">{String(query.approvalWarning)}</Alert> : null}
       {query.approved ? (
         <Alert variant="success" title="Cohort offering(s) included in timetable">
           {String(query.approved)} offering(s) included and ready for teaching allocations and timetable generation.

@@ -13,6 +13,32 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 2. **Curriculum Upload UI Update (`curriculum-zip-upload-dialog.tsx`)**:
    - Update `curriculum-zip-upload-dialog.tsx` to display `unresolvedFiles` from the ingestion preview response, allowing HODs to select document types manually prior to commit.
 
+### 2026-09-17: Fix Drop Offering Authorization & Student Portal Access Route
+- **Files Added**:
+  - `supabase/migrations/20260917140000_fix_drop_offering_and_student_portal_access.sql`:
+    - Updated `current_user_can_access_department()` to unconditionally allow `system_admin` role, preventing department lockouts when profile `active_department_id` is null or re-selected.
+    - Updated `get_student_portal_access_register()` with fallback to first manageable department if user's primary department is unset.
+    - Updated `set_unit_offering_approval()` to:
+      1) Accept any department the user is authorized to manage (`programme.department_id = active_department OR current_user_can_manage_department(programme.department_id)`).
+      2) Safely cancel live timetable draft sessions for dropped units rather than aborting the entire transaction when sessions exist.
+      3) Return a structured JSONB payload (`changed`, `blocked`, `blocked_ids`, `message`) instead of an all-or-nothing runtime exception.
+- **Files Modified**:
+  - `src/features/unit-offerings/approval-actions.ts`:
+    - Handled the `set_unit_offering_approval` JSONB return structure.
+    - Surfaced detailed warning/partial success alerts when specific offerings are skipped.
+    - Removed duplicate `addCohortUnitOfferingAction` declaration.
+  - `src/app/(dashboard)/timetable/unit-offerings/page.tsx`:
+    - Added `approvalWarning` Alert banner to display partial authorization feedback.
+  - `src/app/(dashboard)/students/access/page.tsx`:
+    - Wrapped `getStudentPortalAccessRegister()` in resilient try/catch block to render an informative error alert banner rather than crashing to Next.js `error.tsx` root boundary.
+  - `src/lib/validation/environment.ts`:
+    - Added fallback to `NEXT_PUBLIC_SUPABASE_ANON_KEY` if `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` is not present, preventing unexpected configuration crashes across diverse hosting setups.
+  - `.env.example`:
+    - Documented both `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` and legacy alias `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- **Manual Follow-up**:
+  - Run the SQL migration `supabase/migrations/20260917140000_fix_drop_offering_and_student_portal_access.sql` in the Supabase SQL Editor.
+  - Ensure Vercel and Cloudflare environment variables have been updated with the new `SUPABASE_SERVICE_ROLE_KEY` and redeployed.
+
 ### 2026-09-17: Strict Single-Line Admission Number Formatting Across All Sheets & Exports
 - **Files Modified**:
   - `src/features/assessment/attendance-sheet-pdf.tsx`:

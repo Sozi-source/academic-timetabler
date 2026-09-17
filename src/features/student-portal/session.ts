@@ -119,160 +119,195 @@ export async function createStudentPortalSession(
   );
 }
 
-export async function getStudentPortalSession() {
-  const store =
-    await cookies();
-
-  const token =
-    store.get(
-      COOKIE_NAME,
-    )?.value;
-
-  if (!token) {
-    return null;
+function safeDeleteCookie(
+  store: Awaited<ReturnType<typeof cookies>>,
+  name: string,
+) {
+  try {
+    store.delete(name);
+  } catch {
+    /*
+     * In Next.js Server Components, cookies cannot be mutated during render.
+     * Ignore safely to prevent uncaught invariant crash (500 error boundary).
+     */
   }
-
-  const admin =
-    createAdminClient();
-
-  const {
-    data,
-    error,
-  } =
-    await admin
-      .from(
-        'student_portal_sessions',
-      )
-      .select(
-        'id, student_id, expires_at, revoked_at',
-      )
-      .eq(
-        'token_hash',
-        tokenHash(
-          token,
-        ),
-      )
-      .maybeSingle();
-
-  if (
-    error ||
-    !data ||
-    data.revoked_at ||
-    new Date(
-      data.expires_at,
-    ).getTime() <=
-      Date.now()
-  ) {
-    store.delete(
-      COOKIE_NAME,
-    );
-    return null;
-  }
-
-  const {
-    data: student,
-    error:
-      studentError,
-  } =
-    await admin
-      .from(
-        'students',
-      )
-      .select(
-        'id, lifecycle_status',
-      )
-      .eq(
-        'id',
-        data.student_id,
-      )
-      .maybeSingle();
-
-  if (
-    studentError ||
-    !student ||
-    ![
-      'admitted',
-      'active',
-    ].includes(
-      student.lifecycle_status,
-    )
-  ) {
-    await admin
-      .from(
-        'student_portal_sessions',
-      )
-      .update({
-        revoked_at:
-          new Date()
-            .toISOString(),
-      })
-      .eq(
-        'id',
-        data.id,
-      );
-
-    store.delete(
-      COOKIE_NAME,
-    );
-
-    return null;
-  }
-
-  await admin
-    .from(
-      'student_portal_sessions',
-    )
-    .update({
-      last_seen_at:
-        new Date()
-          .toISOString(),
-    })
-    .eq(
-      'id',
-      data.id,
-    );
-
-  return {
-    id:
-      data.id as
-        string,
-    studentId:
-      data.student_id as
-        string,
-  };
 }
 
-export async function revokeStudentPortalSession() {
-  const store =
-    await cookies();
+export async function getStudentPortalSession() {
+  try {
+    const store =
+      await cookies();
 
-  const token =
-    store.get(
-      COOKIE_NAME,
-    )?.value;
+    const token =
+      store.get(
+        COOKIE_NAME,
+      )?.value;
 
-  if (token) {
+    if (!token) {
+      return null;
+    }
+
     const admin =
       createAdminClient();
 
-    await admin
-      .from(
-        'student_portal_sessions',
-      )
-      .update({
-        revoked_at:
-          new Date()
-            .toISOString(),
-      })
-      .eq(
-        'token_hash',
-        tokenHash(
-          token,
-        ),
-      );
-  }
+    const {
+      data,
+      error,
+    } =
+      await admin
+        .from(
+          'student_portal_sessions',
+        )
+        .select(
+          'id, student_id, expires_at, revoked_at',
+        )
+        .eq(
+          'token_hash',
+          tokenHash(
+            token,
+          ),
+        )
+        .maybeSingle();
 
-  store.delete(
-    COOKIE_NAME,
-  );
+    if (
+      error ||
+      !data ||
+      data.revoked_at ||
+      new Date(
+        data.expires_at,
+      ).getTime() <=
+        Date.now()
+    ) {
+      safeDeleteCookie(
+        store,
+        COOKIE_NAME,
+      );
+      return null;
+    }
+
+    const {
+      data: student,
+      error:
+        studentError,
+    } =
+      await admin
+        .from(
+          'students',
+        )
+        .select(
+          'id, lifecycle_status',
+        )
+        .eq(
+          'id',
+          data.student_id,
+        )
+        .maybeSingle();
+
+    if (
+      studentError ||
+      !student ||
+      ![
+        'admitted',
+        'active',
+      ].includes(
+        student.lifecycle_status,
+      )
+    ) {
+      try {
+        await admin
+          .from(
+            'student_portal_sessions',
+          )
+          .update({
+            revoked_at:
+              new Date()
+                .toISOString(),
+          })
+          .eq(
+            'id',
+            data.id,
+          );
+      } catch {
+        // Ignore background session revocation failure
+      }
+
+      safeDeleteCookie(
+        store,
+        COOKIE_NAME,
+      );
+
+      return null;
+    }
+
+    try {
+      await admin
+        .from(
+          'student_portal_sessions',
+        )
+        .update({
+          last_seen_at:
+            new Date()
+              .toISOString(),
+        })
+        .eq(
+          'id',
+          data.id,
+        );
+    } catch {
+      // Ignore background timestamp update failure
+    }
+
+    return {
+      id:
+        data.id as
+          string,
+      studentId:
+        data.student_id as
+          string,
+    };
+  } catch (err) {
+    console.error('getStudentPortalSession caught error, returning null safely:', err);
+    return null;
+  }
 }
+
+export async function revokeStudentPortalSession() {
+  try {
+    const store =
+      await cookies();
+
+    const token =
+      store.get(
+        COOKIE_NAME,
+      )?.value;
+
+    if (token) {
+      const admin =
+        createAdminClient();
+
+      await admin
+        .from(
+          'student_portal_sessions',
+        )
+        .update({
+          revoked_at:
+            new Date()
+              .toISOString(),
+        })
+        .eq(
+          'token_hash',
+          tokenHash(
+            token,
+          ),
+        );
+    }
+
+    safeDeleteCookie(
+      store,
+      COOKIE_NAME,
+    );
+  } catch (err) {
+    console.error('revokeStudentPortalSession error:', err);
+  }
+}
+

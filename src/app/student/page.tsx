@@ -41,12 +41,12 @@ export default async function StudentPortalPage() {
   }
 
   const [student, period, registration, timetable, results, documents, attendance] = await Promise.all([
-    getStudentPortalIdentity(session.studentId),
-    getActiveStudentPortalPeriod(),
-    getStudentPortalRegistrationContext(session.studentId),
-    getStudentPortalTimetable(session.studentId),
-    getStudentPortalResults(session.studentId),
-    getStudentPortalDocuments(session.studentId),
+    getStudentPortalIdentity(session.studentId).catch(() => null),
+    getActiveStudentPortalPeriod().catch(() => null),
+    getStudentPortalRegistrationContext(session.studentId).catch(() => null),
+    getStudentPortalTimetable(session.studentId).catch(() => []),
+    getStudentPortalResults(session.studentId).catch(() => []),
+    getStudentPortalDocuments(session.studentId).catch(() => []),
     getStudentPortalAttendance(session.studentId).catch(() => null),
   ]);
 

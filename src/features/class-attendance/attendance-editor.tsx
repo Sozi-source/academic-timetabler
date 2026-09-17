@@ -391,50 +391,95 @@ export function ClassAttendanceEditor({
                       ) : null}
                     </div>
 
-                    {/* Attendance Status Action Control: Present and Absent all on the 1 line */}
+                    {/* Attendance Status Action Control */}
                     <div className="flex shrink-0 items-center">
                       {editable ? (
-                        <div className="inline-flex rounded-lg border border-slate-200/90 bg-slate-100 p-0.5 shadow-2xs">
-                          {/* Present Toggle Button */}
-                          <button
-                            type="button"
-                            disabled={busy !== null}
-                            onClick={() => {
-                              setStatuses((prev) => ({
-                                ...prev,
-                                [student.studentId]: 'present',
-                              }));
-                            }}
-                            className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-bold transition active:scale-95 ${
-                              status === 'present'
-                                ? 'bg-emerald-600 text-white shadow-xs'
-                                : 'text-slate-600 hover:text-slate-900'
-                            }`}
-                          >
-                            <Check className="size-3 stroke-[2.5]" />
-                            <span>Present</span>
-                          </button>
+                        <>
+                          {/* Small Screen: Single Compact Toggle Button (Naturally Present/Green, turns Red/Absent on tap) */}
+                          <div className="sm:hidden">
+                            <button
+                              type="button"
+                              disabled={busy !== null}
+                              onClick={() => {
+                                setStatuses((prev) => ({
+                                  ...prev,
+                                  [student.studentId]: isAbsent ? 'present' : 'absent',
+                                }));
+                                if (isAbsent) {
+                                  setNotes((prev) => ({
+                                    ...prev,
+                                    [student.studentId]: '',
+                                  }));
+                                }
+                              }}
+                              className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-bold transition-all active:scale-95 shadow-2xs ${
+                                isAbsent
+                                  ? 'bg-rose-600 text-white shadow-rose-600/25'
+                                  : 'bg-emerald-600 text-white shadow-emerald-600/25'
+                              }`}
+                              aria-label={`Mark ${student.fullName} as ${isAbsent ? 'present' : 'absent'}`}
+                            >
+                              {isAbsent ? (
+                                <>
+                                  <UserX className="size-3 stroke-[2.5]" />
+                                  <span>Absent</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Check className="size-3 stroke-[2.5]" />
+                                  <span>Present</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
 
-                          {/* Absent Toggle Button */}
-                          <button
-                            type="button"
-                            disabled={busy !== null}
-                            onClick={() => {
-                              setStatuses((prev) => ({
-                                ...prev,
-                                [student.studentId]: 'absent',
-                              }));
-                            }}
-                            className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-bold transition active:scale-95 ${
-                              isAbsent
-                                ? 'bg-rose-600 text-white shadow-xs'
-                                : 'text-slate-600 hover:text-rose-700'
-                            }`}
-                          >
-                            <UserX className="size-3 stroke-[2.5]" />
-                            <span>Absent</span>
-                          </button>
-                        </div>
+                          {/* Desktop / Tablet Screens (sm+): Dual Segmented Control */}
+                          <div className="hidden sm:inline-flex rounded-lg border border-slate-200/90 bg-slate-100 p-0.5 shadow-2xs">
+                            {/* Present Toggle Button */}
+                            <button
+                              type="button"
+                              disabled={busy !== null}
+                              onClick={() => {
+                                setStatuses((prev) => ({
+                                  ...prev,
+                                  [student.studentId]: 'present',
+                                }));
+                                setNotes((prev) => ({
+                                  ...prev,
+                                  [student.studentId]: '',
+                                }));
+                              }}
+                              className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-bold transition active:scale-95 ${
+                                status === 'present'
+                                  ? 'bg-emerald-600 text-white shadow-xs'
+                                  : 'text-slate-600 hover:text-slate-900'
+                              }`}
+                            >
+                              <Check className="size-3 stroke-[2.5]" />
+                              <span>Present</span>
+                            </button>
+
+                            {/* Absent Toggle Button */}
+                            <button
+                              type="button"
+                              disabled={busy !== null}
+                              onClick={() => {
+                                setStatuses((prev) => ({
+                                  ...prev,
+                                  [student.studentId]: 'absent',
+                                }));
+                              }}
+                              className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-bold transition active:scale-95 ${
+                                isAbsent
+                                  ? 'bg-rose-600 text-white shadow-xs'
+                                  : 'text-slate-600 hover:text-rose-700'
+                              }`}
+                            >
+                              <UserX className="size-3 stroke-[2.5]" />
+                              <span>Absent</span>
+                            </button>
+                          </div>
+                        </>
                       ) : (
                         <Badge variant={classAttendanceStatusVariant(status)}>
                           {status === 'present'

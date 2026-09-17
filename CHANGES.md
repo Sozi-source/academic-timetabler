@@ -32,6 +32,7 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
     - Re-exported `formatStudentTwoNames`.
   - `src/features/class-attendance/attendance-editor.tsx`:
     - Updated student roster item to native 1-line layout: student 2 names on top, smaller admission number below, and Present/Absent toggle controls aligned horizontally on the same line.
+    - Implemented a single compact toggle button for small screens (`sm:hidden`) that defaults to green "Present" and turns red "Absent" on tap, giving maximum horizontal width for the student's name on a single line without wrapping. Larger screens (`sm+`) retain the dual segmented toggle.
     - Added left accent border (`border-l-[3px] border-l-rose-500`) and compact circumstance selector when marked absent.
   - `src/features/trainer-daily-report/trainer-form.tsx`:
     - Updated ScheduledLessonsSection with native pill badges for roster, present, and absent counts.

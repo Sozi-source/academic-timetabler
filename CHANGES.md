@@ -13,6 +13,21 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 2. **Curriculum Upload UI Update (`curriculum-zip-upload-dialog.tsx`)**:
    - Update `curriculum-zip-upload-dialog.tsx` to display `unresolvedFiles` from the ingestion preview response, allowing HODs to select document types manually prior to commit.
 
+### 2026-09-17: Fix Student Portal Activation Crash on Stale Session Cookies & Add Student Error Boundary
+- **Root Cause**:
+  - In Next.js App Router (React Server Components), modifying cookies during rendering via `cookies().delete()` or `cookies().set()` throws an invariant exception: `Cookies can only be modified in a Server Action or Route Handler`.
+  - When a user visited `/student/activate` or `/student/login` with an expired, revoked, or stale `ams_student_session` cookie (e.g. from previous tests), `getStudentPortalSession()` encountered `!data || data.revoked_at` and called `store.delete(COOKIE_NAME)`.
+  - Because `/student/activate` is a Server Component, this threw an unhandled 500 error that bubbled to the root `src/app/error.tsx` ("Something went wrong"). The cookie was never deleted because the response aborted, causing the error to loop indefinitely on page reload.
+- **Files Added**:
+  - `src/app/student/error.tsx`: Dedicated error boundary specifically for student portal routes (`/student/*`), offering student-friendly recovery options ("Try again", "Return to Student Sign In", "Activate Account") instead of the admin dashboard fallback.
+  - `src/app/student/logout/route.ts`: Dedicated GET route handler (`/student/logout`) that cleanly deletes `ams_student_session` and redirects to `/student/login`.
+- **Files Modified**:
+  - `src/features/student-portal/session.ts`:
+    - Added `safeDeleteCookie()` utility that gracefully catches cookie mutations during Server Component rendering.
+    - Wrapped `getStudentPortalSession()` and `revokeStudentPortalSession()` in resilient `try/catch` blocks returning `null` safely upon any unexpected session or database lookup failure.
+  - `src/app/student/page.tsx`:
+    - Added individual `.catch()` handlers to all parallel queries in `Promise.all()` to prevent a single query failure from taking down the entire student dashboard.
+
 ### 2026-09-17: Fix Drop Offering Authorization & Student Portal Access Route
 - **Files Added**:
   - `supabase/migrations/20260917140000_fix_drop_offering_and_student_portal_access.sql`:

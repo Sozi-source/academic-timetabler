@@ -8,6 +8,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { ProgressionForm } from '@/features/students/progression-form';
 import { EditAdmissionNumberDialog } from '@/features/students/edit-admission-number-dialog';
+import { ResetStudentPasswordDialog } from '@/features/students/reset-student-password-dialog';
 import { getStudentById, getStudentCohortOptions, getStudentLifecycleEvents } from '@/features/students/queries';
 import type { StudentLifecycleEventType, StudentLifecycleStatus } from '@/features/students/types';
 
@@ -67,6 +68,11 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
               studentId={student.id}
               studentName={student.full_name}
               currentAdmissionNumber={student.admission_number}
+            />
+            <ResetStudentPasswordDialog
+              studentId={student.id}
+              studentName={student.full_name}
+              admissionNumber={student.admission_number}
             />
             <Link
               href={`/students/registry/${student.id}/portal-view`}

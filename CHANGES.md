@@ -18,6 +18,31 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 2. **Curriculum Upload UI Update (`curriculum-zip-upload-dialog.tsx`)**:
    - Update `curriculum-zip-upload-dialog.tsx` to display `unresolvedFiles` from the ingestion preview response, allowing HODs to select document types manually prior to commit.
 
+### 2026-09-17: Fix "Network error resetting student password" (404 on `/api/admin/students/[id]/reset-password`)
+
+- **Root Cause**:
+  - The "Reset student password" dialog in the UI calls `/api/admin/students/[id]/reset-password`. Because only `api/admin/trainers/[id]/reset-password` existed, calls for students failed with HTTP 404 (`Failed to load resource: the server responded with a status of 404 ()`), manifesting as `"Network error resetting student password."`
+  - Additionally, student credentials in `student_portal_credentials` are hashed using bcrypt via `pgcrypto`, whereas legacy `set_student_portal_pin` only permitted 6-digit numeric PINs.
+- **Files Added**:
+  - `src/app/api/admin/students/[id]/reset-password/route.ts`:
+    - POST handler gated behind HOD / system_admin authorization (`getAuthenticatedProfile`).
+    - Accepts optional custom password (`password`, `customPassword`, `newPassword`, or `pin`), minimum 4 characters.
+    - If blank or omitted, auto-generates a human-readable institutional temporary password (e.g. `Icmhs@xxxx`).
+    - Primary write via `reset_student_portal_password` RPC, with automatic fallback to `activate_student_portal_account` RPC (which hashes with bcrypt) and `set_student_portal_pin` (if 6 digits).
+    - Returns `{ success: true, password, pin, message }`.
+  - `supabase/migrations/20260917220000_admin_reset_student_portal_password.sql`:
+    - Added `reset_student_portal_password(target_student_id, plain_password)` RPC using `extensions.crypt(..., extensions.gen_salt('bf'))`.
+  - `src/app/api/students/[studentId]/reset-password/route.ts`:
+    - Aliased/delegated to the admin student reset handler to support both endpoint conventions seamlessly.
+  - `src/features/students/reset-student-password-dialog.tsx`:
+    - Client-side dialog matching production design: student name + admission number in header, optional custom password input, help text with `Icmhs@xxxx` example, copy button on success.
+    - Targets `/api/admin/students/${studentId}/reset-password`.
+- **Files Modified**:
+  - `src/app/(dashboard)/students/registry/[studentId]/page.tsx`:
+    - Added `<ResetStudentPasswordDialog>` button into the `PageHeader` actions alongside `EditAdmissionNumberDialog` and "View as Student".
+- **Manual Follow-up**:
+  - Run SQL migration `supabase/migrations/20260917220000_admin_reset_student_portal_password.sql` in Supabase SQL Editor.
+
 ### 2026-09-17: Native Mobile UI Polish for Class Attendance & Trainer Daily Report
 - **User Requirements & Design Implemented**:
   - Render student name formatted to two primary names (`formatStudentTwoNames`), with admission number placed directly below the name in smaller font.

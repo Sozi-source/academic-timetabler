@@ -4,6 +4,11 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 
 > **Instruction for AI Agents & Developers**: Any time you update, refactor, or migrate code in this project, append a summary of your changes under [Recent Architectural Updates](#recent-architectural-updates) following the standard format below.
 
+> [!CAUTION]
+> **NON-NEGOTIABLE CORE POLICY — ZERO REGRESSION & WORKING CODE PROTECTION**:
+> **Never alter, break, or degrade working code when fixing a different issue.**
+> Targeted bugfixes and feature updates must strictly limit modifications to the designated scope. Before modifying shared components, data contracts, or layout structures, agents and developers must audit all consumer sites, verify that existing features remain untouched, and prevent unintended regressions or collateral damage.
+
 ---
 
 ## Active Pending Actions & Technical Debt
@@ -12,6 +17,31 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
    - Legacy DB rows stored curriculum templates under `tpl-tvet-<code>` (without document type suffix). A migration is needed to reclassify each row as either `scheme_of_work` or `course_outline` and re-save under `tpl-tvet-<code>-<type>`.
 2. **Curriculum Upload UI Update (`curriculum-zip-upload-dialog.tsx`)**:
    - Update `curriculum-zip-upload-dialog.tsx` to display `unresolvedFiles` from the ingestion preview response, allowing HODs to select document types manually prior to commit.
+
+### 2026-09-17: Native Mobile UI Polish for Class Attendance & Trainer Daily Report
+- **User Requirements & Design Implemented**:
+  - Render student name formatted to two primary names (`formatStudentTwoNames`), with admission number placed directly below the name in smaller font.
+  - Present and Absent toggle controls aligned strictly on the SAME horizontal line/row as student info (`flex items-center justify-between`) across all devices (mobile and desktop).
+  - Native tactile segmented toggle buttons for Present and Absent (`active:scale-95`, solid emerald for Present, solid rose for Absent).
+  - Responsive native card layout for the Absentees Register in the Trainer Daily Report and HOD Daily Report lists.
+  - Codified non-negotiable Zero-Regression & Working Code Protection Policy across `CHANGES.md` and `AGENTS.md`.
+- **Files Modified**:
+  - `src/features/class-attendance/domain.ts`:
+    - Added `formatStudentTwoNames(fullName?: string | null): string`.
+  - `src/features/trainer-daily-report/domain.ts`:
+    - Re-exported `formatStudentTwoNames`.
+  - `src/features/class-attendance/attendance-editor.tsx`:
+    - Updated student roster item to native 1-line layout: student 2 names on top, smaller admission number below, and Present/Absent toggle controls aligned horizontally on the same line.
+    - Added left accent border (`border-l-[3px] border-l-rose-500`) and compact circumstance selector when marked absent.
+  - `src/features/trainer-daily-report/trainer-form.tsx`:
+    - Updated ScheduledLessonsSection with native pill badges for roster, present, and absent counts.
+    - Updated AbsenteesTableSection with responsive native mobile card layout and clean desktop table combining student 2 names and admission number in 1 cell.
+  - `src/features/trainer-daily-report/hod-report-list.tsx`:
+    - Updated `AbsenteeList` to display student 2 names with admission number below in smaller font.
+  - `src/tests/class-attendance-domain.test.ts`:
+    - Added unit test cases verifying `formatStudentTwoNames`.
+  - `AGENTS.md` & `CHANGES.md`:
+    - Added non-negotiable regression prevention rule.
 
 ### 2026-09-17: Fix Student Portal Dashboard Crash Due to Undefined Navigation Icon in Mobile Nav
 - **Root Cause**:

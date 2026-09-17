@@ -119,3 +119,20 @@ export function shortTime(
       5,
     );
 }
+
+/**
+ * Formats a student's full name to two primary names (e.g. Surname and First Name)
+ * for compact, native mobile attendance and daily report displays.
+ * e.g., "OCHIENG, BRIDGITE ATIENO" -> "OCHIENG BRIDGITE"
+ * e.g., "MARY WANJIKU KAMAU" -> "MARY WANJIKU"
+ */
+export function formatStudentTwoNames(fullName?: string | null): string {
+  if (!fullName) return '';
+  const parts = fullName
+    .replace(/,/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (parts.length <= 2) return parts.join(' ');
+  return `${parts[0]} ${parts[1]}`;
+}

@@ -26,7 +26,12 @@ import {
 } from '@/components/ui/dialog';
 import { ABSENT_CIRCUMSTANCES } from '@/features/class-attendance/domain';
 import { submitTrainerDailyReportAction, submitDailyReportDirectAction } from './actions';
-import { formatDailyReportDate, formatDailyReportTime, nairobiToday } from './domain';
+import {
+  formatDailyReportDate,
+  formatDailyReportTime,
+  formatStudentTwoNames,
+  nairobiToday,
+} from './domain';
 import type {
   PastUnrecordedSession,
   PastUnsubmittedReportDate,
@@ -445,15 +450,15 @@ function ScheduledLessonsSection({
                 </div>
 
                 {lesson.attendanceStatus === 'completed' ? (
-                  <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px]">
-                    <span className="text-slate-600">
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
+                    <span className="rounded-md bg-slate-100 px-2 py-0.5 font-medium text-slate-700">
                       Roster: <strong>{lesson.rosterCount || 0}</strong>
                     </span>
-                    <span className="flex items-center gap-1 font-semibold text-emerald-700">
+                    <span className="inline-flex items-center gap-1 rounded-md border border-emerald-200/60 bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-800">
                       <span className="size-1.5 rounded-full bg-emerald-500" />
                       Present: {lesson.presentCount || 0}
                     </span>
-                    <span className="flex items-center gap-1 font-semibold text-rose-700">
+                    <span className="inline-flex items-center gap-1 rounded-md border border-rose-200/60 bg-rose-50 px-2 py-0.5 font-semibold text-rose-800">
                       <span className="size-1.5 rounded-full bg-rose-500" />
                       Absent: {lesson.absentCount || 0}
                     </span>
@@ -644,15 +649,60 @@ function AbsenteesTableSection({
         </span>
       </div>
 
-      <div className="overflow-x-auto">
+      {/* Mobile Native Card / List View */}
+      <div className="divide-y divide-rose-100/60 sm:hidden">
+        {allAbsentees.map((s) => {
+          const isKnownCircumstance = (ABSENT_CIRCUMSTANCES as readonly string[]).includes(s.note || '');
+          return (
+            <article
+              key={`${s.studentId}-${s.unitCode}`}
+              className="p-3 bg-white hover:bg-rose-50/30 transition-colors"
+            >
+              <div className="flex items-center justify-between gap-2.5">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-bold text-text-primary" title={s.fullName}>
+                    {formatStudentTwoNames(s.fullName)}
+                  </p>
+                  <p className="font-mono text-[10px] text-text-muted mt-0.5">
+                    {s.admissionNumber}
+                  </p>
+                </div>
+                {s.note ? (
+                  isKnownCircumstance ? (
+                    <span className="shrink-0 rounded-full bg-rose-100 px-2 py-0.5 text-[9.5px] font-semibold text-rose-900 border border-rose-200/60">
+                      {s.note}
+                    </span>
+                  ) : (
+                    <span className="shrink-0 max-w-[130px] truncate text-[10px] italic text-text-muted">
+                      {s.note}
+                    </span>
+                  )
+                ) : (
+                  <span className="shrink-0 rounded-full bg-rose-50 px-2 py-0.5 text-[9.5px] font-medium text-rose-700 border border-rose-200/60">
+                    Absent
+                  </span>
+                )}
+              </div>
+              <div className="mt-1 flex flex-wrap items-center gap-x-1.5 text-[10.5px] text-text-muted">
+                <span className="font-medium text-text-secondary">{s.cohortName}</span>
+                <span>·</span>
+                <span className="truncate">{s.unitName}</span>
+                {s.unitCode ? <span className="font-mono text-[10px]">({s.unitCode})</span> : null}
+              </div>
+            </article>
+          );
+        })}
+      </div>
+
+      {/* Tablet/Desktop Native Clean Table */}
+      <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-left text-xs">
           <thead className="border-b border-rose-100 bg-rose-50/40 text-[10px] font-semibold uppercase tracking-wider text-rose-900/80">
             <tr>
-              <th className="px-4 py-2">Student Name</th>
-              <th className="px-4 py-2">Admission No.</th>
-              <th className="px-4 py-2">Cohort</th>
-              <th className="px-4 py-2">Unit</th>
-              <th className="px-4 py-2">Circumstance / Remarks</th>
+              <th className="px-4 py-2.5">Student</th>
+              <th className="px-4 py-2.5">Cohort</th>
+              <th className="px-4 py-2.5">Unit</th>
+              <th className="px-4 py-2.5">Circumstance / Remarks</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -661,29 +711,33 @@ function AbsenteesTableSection({
 
               return (
                 <tr key={`${s.studentId}-${s.unitCode}`} className="hover:bg-slate-50/50">
-                  <td className="px-4 py-2 font-semibold text-text-primary">
-                    {s.fullName}
+                  <td className="px-4 py-2.5">
+                    <div className="min-w-0">
+                      <p className="font-bold text-text-primary text-xs" title={s.fullName}>
+                        {formatStudentTwoNames(s.fullName)}
+                      </p>
+                      <p className="font-mono text-[10px] text-text-muted mt-0.5">
+                        {s.admissionNumber}
+                      </p>
+                    </div>
                   </td>
-                  <td className="px-4 py-2 font-mono text-[11px] text-text-secondary whitespace-nowrap">
-                    {s.admissionNumber}
-                  </td>
-                  <td className="px-4 py-2 text-text-secondary">
+                  <td className="px-4 py-2.5 text-text-secondary">
                     {s.cohortName}
                   </td>
-                  <td className="px-4 py-2 text-text-secondary">
+                  <td className="px-4 py-2.5 text-text-secondary">
                     <div className="font-medium text-text-primary">{s.unitName}</div>
                     {s.unitCode ? (
                       <div className="font-mono text-[10.5px] text-text-muted">{s.unitCode}</div>
                     ) : null}
                   </td>
-                  <td className="px-4 py-2">
+                  <td className="px-4 py-2.5">
                     {s.note ? (
                       isKnownCircumstance ? (
-                        <span className="inline-block rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-semibold text-rose-900">
+                        <span className="inline-block rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-semibold text-rose-900 border border-rose-200/60">
                           {s.note}
                         </span>
                       ) : (
-                        <span className="italic text-text-muted">{s.note}</span>
+                        <span className="italic text-text-muted text-[11px]">{s.note}</span>
                       )
                     ) : (
                       <span className="text-text-muted/60">—</span>

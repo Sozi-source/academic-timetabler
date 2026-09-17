@@ -11,6 +11,7 @@ import {
   classAttendanceStatusLabel,
   classAttendanceStatusVariant,
   classAttendanceSummary,
+  formatStudentTwoNames,
   weekdayLabel,
 } from '@/features/class-attendance/domain';
 
@@ -117,5 +118,14 @@ describe('class attendance domain', () => {
     ).toBe(
       'Wednesday',
     );
+  });
+
+  it('formats student names to two primary names for native mobile display', () => {
+    expect(formatStudentTwoNames('OCHIENG, BRIDGITE ATIENO')).toBe('OCHIENG BRIDGITE');
+    expect(formatStudentTwoNames('Mary Wanjiku Kamau')).toBe('Mary Wanjiku');
+    expect(formatStudentTwoNames('KIPKORIR JOHN')).toBe('KIPKORIR JOHN');
+    expect(formatStudentTwoNames('MERCY')).toBe('MERCY');
+    expect(formatStudentTwoNames('')).toBe('');
+    expect(formatStudentTwoNames(null)).toBe('');
   });
 });

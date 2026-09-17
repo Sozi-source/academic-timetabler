@@ -5,7 +5,11 @@ import {
   UserRound,
 } from 'lucide-react';
 
-import { formatDailyReportTime, getAbsenteeColumnClass } from './domain';
+import {
+  formatDailyReportTime,
+  formatStudentTwoNames,
+  getAbsenteeColumnClass,
+} from './domain';
 import type { DepartmentDailyReportWorkspace, TrainerDailyReportLesson } from './types';
 
 function AbsenteeList({
@@ -25,25 +29,27 @@ function AbsenteeList({
   const colClass = getAbsenteeColumnClass(absentees.length);
 
   return (
-    <div className={`grid ${colClass} gap-x-4 gap-y-1.5`}>
+    <div className={`grid ${colClass} gap-x-4 gap-y-2`}>
       {absentees.map((student, idx) => (
         <div
           key={`${student.studentId || student.admissionNumber}-${idx}`}
-          className="flex items-start gap-1.5 py-0.5 text-[10.5px] leading-snug"
+          className="flex items-start gap-2 py-0.5 text-[10.5px] leading-snug"
         >
-          <span className="mt-1 size-1.5 rounded-full bg-rose-500 shrink-0" />
-          <div className="flex flex-wrap items-baseline gap-x-1">
-            <span className="font-semibold text-text-primary">
-              {student.fullName}
-            </span>
-            <span className="font-mono text-[9.5px] text-text-muted">
-              ({student.admissionNumber})
-            </span>
-            {student.note ? (
-              <span className="rounded bg-rose-50 px-1.5 py-0.2 text-[8.5px] font-medium text-rose-700 border border-rose-200/70">
-                {student.note}
+          <span className="mt-1.5 size-1.5 rounded-full bg-rose-500 shrink-0" />
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="font-bold text-text-primary text-xs" title={student.fullName}>
+                {formatStudentTwoNames(student.fullName)}
               </span>
-            ) : null}
+              {student.note ? (
+                <span className="rounded-full bg-rose-50 px-1.5 py-0.2 text-[9px] font-semibold text-rose-700 border border-rose-200/70">
+                  {student.note}
+                </span>
+              ) : null}
+            </div>
+            <span className="block font-mono text-[9.5px] text-text-muted mt-0.5">
+              {student.admissionNumber}
+            </span>
           </div>
         </div>
       ))}

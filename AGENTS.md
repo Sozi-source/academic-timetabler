@@ -60,6 +60,13 @@ npm test
 ```
 Never declare success without concrete runtime/build verification evidence!
 
+### D. Zero-Regression & Working Code Protection Policy
+**NEVER alter, break, or degrade working code when addressing a different or unrelated issue.**
+1. Targeted bugfixes must strictly limit changes to the designated problem.
+2. Before modifying shared utilities, interfaces, or shell layouts, audit all existing invocation and rendering sites.
+3. Preserve all existing working UI layouts, responsive breakpoints, and business logic paths without introducing collateral damage.
+
+
 ---
 
 ## 3. Database & Supabase Safety Rules

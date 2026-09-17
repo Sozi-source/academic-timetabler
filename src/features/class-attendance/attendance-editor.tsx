@@ -31,6 +31,7 @@ import {
   canCompleteClassAttendance,
   classAttendanceStatusVariant,
   classAttendanceSummary,
+  formatStudentTwoNames,
 } from './domain';
 import type {
   ClassAttendanceStatus,
@@ -363,36 +364,37 @@ export function ClassAttendanceEditor({
               return (
                 <article
                   key={student.studentId}
-                  className={`p-3.5 transition-colors ${
+                  className={`p-3 sm:px-4 sm:py-3 transition-colors ${
                     isAbsent
-                      ? 'bg-rose-50/30'
-                      : 'hover:bg-slate-50/60'
+                      ? 'bg-rose-50/40 border-l-[3px] border-l-rose-500'
+                      : 'hover:bg-slate-50/70 border-l-[3px] border-l-transparent'
                   }`}
                 >
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    {/* Student Info */}
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-xs font-bold text-text-primary">
-                          {student.fullName}
-                        </p>
-                        <span className="font-mono text-[10px] text-text-muted">
-                          {student.admissionNumber}
-                        </span>
-                      </div>
+                  <div className="flex items-center justify-between gap-2.5">
+                    {/* Student Info: 2 names on top, admission number below in smaller font */}
+                    <div className="min-w-0 flex-1 pr-1">
+                      <p
+                        className="truncate text-xs sm:text-[13px] font-bold tracking-tight text-text-primary"
+                        title={student.fullName}
+                      >
+                        {formatStudentTwoNames(student.fullName)}
+                      </p>
+                      <p className="mt-0.5 font-mono text-[10px] sm:text-[10.5px] text-text-muted tracking-tight leading-none">
+                        {student.admissionNumber}
+                      </p>
 
                       {/* Note display for present/completed students */}
                       {!isAbsent && noteText ? (
-                        <p className="mt-1 text-[11px] italic text-text-muted">
+                        <p className="mt-1 truncate text-[10.5px] italic text-text-muted">
                           Note: {noteText}
                         </p>
                       ) : null}
                     </div>
 
-                    {/* Attendance Status Action Control */}
-                    <div className="flex shrink-0 items-center gap-2">
+                    {/* Attendance Status Action Control: Present and Absent all on the 1 line */}
+                    <div className="flex shrink-0 items-center">
                       {editable ? (
-                        <div className="inline-flex rounded-lg border border-border bg-slate-100 p-0.5 shadow-2xs">
+                        <div className="inline-flex rounded-lg border border-slate-200/90 bg-slate-100 p-0.5 shadow-2xs">
                           {/* Present Toggle Button */}
                           <button
                             type="button"
@@ -403,14 +405,14 @@ export function ClassAttendanceEditor({
                                 [student.studentId]: 'present',
                               }));
                             }}
-                            className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-semibold transition ${
+                            className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-bold transition active:scale-95 ${
                               status === 'present'
-                                ? 'bg-white text-emerald-700 shadow-xs'
-                                : 'text-text-muted hover:text-text-primary'
+                                ? 'bg-emerald-600 text-white shadow-xs'
+                                : 'text-slate-600 hover:text-slate-900'
                             }`}
                           >
-                            <Check className="size-3" />
-                            Present
+                            <Check className="size-3 stroke-[2.5]" />
+                            <span>Present</span>
                           </button>
 
                           {/* Absent Toggle Button */}
@@ -423,16 +425,15 @@ export function ClassAttendanceEditor({
                                 [student.studentId]: 'absent',
                               }));
                             }}
-                            className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-semibold transition ${
+                            className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-bold transition active:scale-95 ${
                               isAbsent
                                 ? 'bg-rose-600 text-white shadow-xs'
-                                : 'text-text-muted hover:text-rose-700'
+                                : 'text-slate-600 hover:text-rose-700'
                             }`}
                           >
-                            <UserX className="size-3" />
-                            Absent
+                            <UserX className="size-3 stroke-[2.5]" />
+                            <span>Absent</span>
                           </button>
-
                         </div>
                       ) : (
                         <Badge variant={classAttendanceStatusVariant(status)}>
@@ -448,10 +449,10 @@ export function ClassAttendanceEditor({
 
                   {/* Absent Circumstance Selector (Visible only when marked Absent) */}
                   {isAbsent && editable ? (
-                    <div className="mt-3 rounded-lg border border-rose-200 bg-white p-2.5 shadow-2xs">
+                    <div className="mt-2.5 rounded-lg border border-rose-200 bg-white/95 p-2.5 shadow-2xs">
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-rose-900">
-                          Circumstance:
+                        <span className="text-[9.5px] font-bold uppercase tracking-wider text-rose-900">
+                          Reason:
                         </span>
                         {ABSENT_CIRCUMSTANCES.map((circ) => {
                           const isSelected = noteText === circ;
@@ -460,10 +461,10 @@ export function ClassAttendanceEditor({
                               key={circ}
                               type="button"
                               onClick={() => handleSelectCircumstance(student.studentId, circ)}
-                              className={`rounded-full px-2 py-0.5 text-[10px] font-medium transition ${
+                              className={`rounded-full px-2 py-0.5 text-[9.5px] font-semibold transition active:scale-95 ${
                                 isSelected
-                                  ? 'bg-rose-600 text-white font-semibold'
-                                  : 'border border-rose-200 bg-rose-50 text-rose-800 hover:bg-rose-100'
+                                  ? 'bg-rose-600 text-white shadow-2xs'
+                                  : 'border border-rose-200 bg-rose-50/80 text-rose-800 hover:bg-rose-100'
                               }`}
                             >
                               {circ}
@@ -483,8 +484,8 @@ export function ClassAttendanceEditor({
                               [student.studentId]: e.target.value,
                             }))
                           }
-                          placeholder="Specific notes (e.g., Leave of absence approved until next week)..."
-                          className="h-8 w-full rounded-md border border-slate-200 bg-slate-50/50 px-2.5 text-xs text-text-primary outline-none placeholder:text-text-muted focus:border-primary focus:bg-white focus:ring-1 focus:ring-primary/20"
+                          placeholder="Specific remarks (e.g. Approved sick off until Friday)..."
+                          className="h-7.5 w-full rounded-md border border-slate-200 bg-slate-50/60 px-2.5 text-xs text-text-primary outline-none placeholder:text-text-muted focus:border-primary focus:bg-white focus:ring-1 focus:ring-primary/20"
                         />
                       </div>
                     </div>

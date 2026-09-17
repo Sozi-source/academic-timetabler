@@ -339,25 +339,25 @@ export async function generateAttendanceSheetPdf(
   }
 
   // Column width constants for Landscape Class Attendance
-  const COL_CLASS_NO = 24;
-  const COL_CLASS_ADM = 92;
-  const COL_CLASS_NAME = 196;
-  const COL_CLASS_SESSION = 59.5; // 8 sessions * 59.5 = 476. Total = 788pt
+  const COL_CLASS_NO = 22;
+  const COL_CLASS_ADM = 126;
+  const COL_CLASS_NAME = 166;
+  const COL_CLASS_SESSION = 59.25; // 8 sessions * 59.25 = 474. Total = 788pt
 
   // Column width constants for Portrait CAT / Exam Attendance
-  const COL_EXAM_NO = 24;
-  const COL_EXAM_ADM = 108;
-  const COL_EXAM_NAME = 208;
+  const COL_EXAM_NO = 22;
+  const COL_EXAM_ADM = 126;
+  const COL_EXAM_NAME = 192;
   const COL_EXAM_BOOKLET = 86;
   const COL_EXAM_SIGN = 58;
   const COL_EXAM_DATE = 58; // Total = 542pt
 
-  const COL_CAT_NO = 24;
-  const COL_CAT_ADM = 112;
-  const COL_CAT_NAME = 216;
+  const COL_CAT_NO = 22;
+  const COL_CAT_ADM = 126;
+  const COL_CAT_NAME = 202;
   const COL_CAT_SIGN = 90;
-  const COL_CAT_SCORE = 50;
-  const COL_CAT_DATE = 50; // Total = 542pt
+  const COL_CAT_SCORE = 51;
+  const COL_CAT_DATE = 51; // Total = 542pt
 
   const doc = (
     <Document

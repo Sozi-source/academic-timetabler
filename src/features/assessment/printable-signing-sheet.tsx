@@ -196,7 +196,7 @@ export function PrintableSigningSheet({
               <table className="w-full table-fixed border-collapse border border-slate-900 text-left text-[11px]">
                 <colgroup>
                   <col className="w-10" />
-                  <col className="w-36" />
+                  <col className="w-44" />
                   <col />
                   {isExam ? <col className="w-32" /> : null}
                   <col className="w-32" />

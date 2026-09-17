@@ -159,5 +159,41 @@ describe(
         ).toBe(false);
       },
     );
+
+    it(
+      'marks approved offerings as included and eligible for the timetable generator',
+      () => {
+        const offering = createOffering({
+          approvalStatus: 'approved',
+          selectionState: 'included',
+          isTimetableEnabled: true,
+          approvedBy: 'user-hod',
+          approvedAt: '2026-08-02T10:00:00.000Z',
+        });
+
+        expect(offering.approvalStatus).toBe('approved');
+        expect(offering.selectionState).toBe('included');
+        expect(offering.isTimetableEnabled).toBe(true);
+      },
+    );
+
+    it(
+      'marks dropped offerings as withdrawn and excluded from timetable generation',
+      () => {
+        const offering = createOffering({
+          approvalStatus: 'withdrawn',
+          selectionState: 'excluded',
+          isTimetableEnabled: false,
+          withdrawnBy: 'user-hod',
+          withdrawnAt: '2026-08-02T11:00:00.000Z',
+          withdrawalReason: 'Excluded from active cohort teaching plan',
+        });
+
+        expect(offering.approvalStatus).toBe('withdrawn');
+        expect(offering.selectionState).toBe('excluded');
+        expect(offering.isTimetableEnabled).toBe(false);
+        expect(offering.withdrawalReason).toBe('Excluded from active cohort teaching plan');
+      },
+    );
   },
 );

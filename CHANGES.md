@@ -13,6 +13,67 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 2. **Curriculum Upload UI Update (`curriculum-zip-upload-dialog.tsx`)**:
    - Update `curriculum-zip-upload-dialog.tsx` to display `unresolvedFiles` from the ingestion preview response, allowing HODs to select document types manually prior to commit.
 
+### 2026-09-17: Strict Single-Line Admission Number Formatting Across All Sheets & Exports
+- **Files Modified**:
+  - `src/features/assessment/attendance-sheet-pdf.tsx`:
+    - Widened admission number column width constants across all PDF orientations/layouts: `COL_CLASS_ADM` from 92pt to 126pt (+34pt, 37% increase; compensated by adjusting name and index column proportions), `COL_EXAM_ADM` to 126pt, and `COL_CAT_ADM` to 126pt.
+    - Preserved zero-hyphenation behavior via `Font.registerHyphenationCallback((word) => [word])`.
+  - `src/features/assessment/attendance-sheet-docx.ts`:
+    - Widened Word document admission number column widths from 1900/2000 dxa to 2200/2300 dxa in Exam and CAT attendance tables.
+  - `src/features/assessment/printable-signing-sheet.tsx`:
+    - Widened admission number colgroup width from `w-36` to `w-44` (176px) and added `whitespace-nowrap font-semibold` to table cells.
+  - `src/features/class-attendance/printable-class-register.tsx`:
+    - Widened `<col className="w-32" />` to `<col className="w-44" />` (176px) and applied `whitespace-nowrap font-semibold`.
+  - `src/features/assessment/markbook-generator.ts`:
+    - In `createCohortSheet`, increased admission column width to 28 and configured `row.eachCell` to set `wrapText: colNumber !== 2` so Excel does not wrap admission numbers at hyphens or slashes.
+    - In historical/online markbook sheet, increased admission column width from 18 to 28 and disabled `wrapText` on column 2.
+  - `src/features/assessment/marks/workbook.ts`:
+    - Increased `Admn No.` column widths from 20 and 22 to 28 in both exam and CAT marks workbooks.
+    - Updated `bodyCellStyle` to accept column numbers and set `wrapText: colNumber !== 2`.
+  - `src/features/assessment/signing-sheet-generator.ts`:
+    - Increased admission number column width from 20 to 28 in Excel signing sheets and updated `row.eachCell` to enforce `wrapText: colNumber !== 2`.
+  - `src/app/api/assessment/[assessmentId]/attendance-sheet/route.ts`:
+    - Widened Excel admission column from 24 to 28 and disabled `wrapText` on column 2.
+  - `src/app/api/assessment/analysis/[assessmentId]/export/route.ts`:
+    - Widened student results admission number column to 28.
+  - `src/app/api/attendance-clinical/class-attendance/export/route.ts`:
+    - Increased admission number column width from 22 to 28 and disabled `wrapText` for column 2.
+  - `src/app/api/students/export/route.ts`:
+    - Increased admission column width from 24 to 28.
+  - `src/app/api/students/reports/export/route.ts`:
+    - Increased admission column width from 24 to 28 and disabled `wrapText` for column 1.
+  - `src/app/api/students/portal-access/issue/route.ts`:
+    - Increased admission column width from 24 to 28.
+  - `src/app/(dashboard)/assessment/population/[assessmentId]/page.tsx`:
+    - Added `whitespace-nowrap font-mono` to admission number cells and headers.
+  - `src/features/staff-assessment/online-marks-editor.tsx`:
+    - Added `whitespace-nowrap font-mono` to admission number badges.
+  - `src/features/students/student-registry-table.tsx`:
+    - Added `whitespace-nowrap` to admission number text.
+  - `src/features/trainer-daily-report/trainer-form.tsx`:
+    - Added `whitespace-nowrap` to absentee roster admission numbers.
+  - `src/features/student-reporting-sync/reporting-sync-dialog.tsx`:
+    - Added `whitespace-nowrap` to sync preview rows.
+  - `src/app/(dashboard)/assessment/marks/import/[batchId]/page.tsx`:
+    - Added `whitespace-nowrap font-mono` to marks import table cells.
+- **Verification Evidence**:
+  - `npm test`: All 117 test files and 589 unit tests passing.
+  - `npm run check`: `tsc --noEmit`, ESLint, and Next.js 16 production build passed with 0 errors.
+
+### 2026-09-17: Fix Batch Cross-Stage Registration Cohort Selection & Enum Casting
+- **Files Modified / Deployed**:
+  - `supabase/migrations/20260916170000_fix_cross_stage_registration_offering_enums.sql`:
+    - Deployed to remote Supabase database (`npx supabase db push --yes`). Fixed runtime PostgreSQL error `column "selection_state" is of type public.unit_offering_selection_state but expression is of type text` by adding explicit enum casts to `batch_register_override_units`.
+  - `src/features/student-unit-registration/batch-actions.ts`:
+    - Added cohort-mode fallback in `batchRegisterOverrideUnits`: when registering in "Entire cohort" mode, if explicit student checkbox IDs are not posted, the action queries and registers all active/admitted students in that cohort automatically.
+  - `src/features/student-unit-registration/batch-unit-registration.tsx`:
+    - Fixed state synchronization when switching between "Stage curriculum" and "Additional / cross-stage units": student selection set now automatically recalculates based on the active path (`canRegister` vs `eligible`).
+    - Upgraded primary registration submit button styling with clear high-contrast primary action colors (`bg-primary text-white`).
+- **Verification Evidence**:
+  - `npm test`: 117 test files, 589 tests passed.
+  - `npm run check`: Typecheck, ESLint, and Next.js 16 build passed with 0 errors.
+  - Live database integration test for `batch_register_override_units` and `add_special_unit_offering` executed with 100% success.
+
 ### 2026-09-16: Unit Table Programme Filter Completion
 - **Files Modified**:
   - `src/features/units/unit-table.tsx`
@@ -81,6 +142,16 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
   - Kept lifecycle and department authorization safeguards: only admitted/active students in a current cohort and units belonging to their programme can be processed.
 - **Breaking Changes / Manual Follow-ups**:
   - Run `npx supabase db push` to apply `20260916160000_controlled_cross_stage_unit_registration.sql` before using batch cross-stage registration in production.
+
+### 2026-09-16: Fix Cross-Stage Batch Registration Enum Writes
+- **Files Added/Modified**:
+  - `supabase/migrations/20260916170000_fix_cross_stage_registration_offering_enums.sql` [NEW]
+  - `CHANGES.md`
+- **What Changed**:
+  - Replaced the batch cross-stage registration RPC with explicit PostgreSQL enum casts for unit-offering state, status, type, origin, and student registration status.
+  - This fixes the runtime error raised when PostgreSQL interpreted the `INSERT ... SELECT` literals as plain text instead of the required enum values.
+- **Breaking Changes / Manual Follow-ups**:
+  - Run `npx supabase db push` to apply `20260916170000_fix_cross_stage_registration_offering_enums.sql`. It is safe to apply after the original cross-stage registration migration.
 
 ### 2026-09-16: Global Readability Typography
 - **Files Modified**:

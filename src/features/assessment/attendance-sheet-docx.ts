@@ -315,7 +315,7 @@ export async function generateAttendanceSheetDocx(
       ];
     } else if (isExam) {
       // Exam Attendance & Script Register
-      columnWidths = [550, 1900, 3100, 1400, 1550, 750];
+      columnWidths = [550, 2200, 2800, 1400, 1550, 750];
       rows = [
         new TableRow({
           tableHeader: true,
@@ -360,7 +360,7 @@ export async function generateAttendanceSheetDocx(
       ];
     } else {
       // CAT Attendance List (No booklet number)
-      columnWidths = [600, 2000, 3800, 1900, 900];
+      columnWidths = [600, 2300, 3500, 1900, 900];
       rows = [
         new TableRow({
           tableHeader: true,

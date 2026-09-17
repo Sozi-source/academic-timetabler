@@ -561,7 +561,7 @@ export function StudentRegistryTable({
                     <p className="font-bold text-text-primary group-hover:text-primary transition">
                       {student.full_name}
                     </p>
-                    <p className="mt-0.5 font-mono text-[11px] text-text-muted">
+                    <p className="mt-0.5 font-mono text-[11px] text-text-muted whitespace-nowrap">
                       {student.admission_number}
                     </p>
                   </Link>

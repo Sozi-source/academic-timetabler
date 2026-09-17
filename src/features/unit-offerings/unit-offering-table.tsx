@@ -32,30 +32,31 @@ function titleCase(value: string) {
 }
 
 function stateLabel(offering: UnitOffering) {
-  if (offering.approvalStatus === 'review_required') return 'Review required';
-  if (offering.approvalStatus === 'withdrawn') return 'Withdrawn';
-  if (offering.selectionState === 'excluded') return 'Excluded';
+  if (offering.approvalStatus === 'withdrawn' || offering.selectionState === 'excluded') {
+    return 'Dropped';
+  }
   if (!offering.isTimetableEnabled) return 'Disabled';
+  if (offering.approvalStatus === 'approved') {
+    return offering.status === 'active' ? 'Active' : 'In Timetable';
+  }
+  if (offering.approvalStatus === 'review_required') return 'Review required';
   if (offering.status === 'draft') return 'Draft';
-  if (offering.status === 'active') return 'Active';
   return titleCase(offering.status);
 }
 
 function stateClass(offering: UnitOffering) {
   const label = stateLabel(offering);
 
-  if (label === 'Active') {
-    return 'border-success/20 bg-success-subtle text-success';
+  if (label === 'Active' || label === 'In Timetable') {
+    return 'border-emerald-200 bg-emerald-50 text-emerald-800 font-semibold';
   }
 
-  if (label === 'Draft') {
-    return 'border-warning/20 bg-warning-subtle text-warning';
+  if (label === 'Draft' || label === 'Review required') {
+    return 'border-amber-200 bg-amber-50 text-amber-800 font-semibold';
   }
 
-  if (label === 'Review required') return 'border-warning/20 bg-warning-subtle text-warning';
-
-  if (label === 'Excluded' || label === 'Disabled') {
-    return 'border-border bg-surface-subtle text-text-muted';
+  if (label === 'Dropped' || label === 'Disabled') {
+    return 'border-slate-200 bg-slate-100 text-slate-600 font-medium';
   }
 
   return 'border-border bg-surface-subtle text-text-secondary';
@@ -116,11 +117,14 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
           programme?.code,
         ].some((value) => normalize(value).includes(query));
 
+      const isDropped = offering.approvalStatus === 'withdrawn' || offering.selectionState === 'excluded';
+      const isIncluded = offering.approvalStatus === 'approved' && offering.selectionState === 'included';
+
       const matchesState =
         state === 'all' ||
-        (state === 'included' && offering.selectionState === 'included') ||
-        (state === 'excluded' && offering.selectionState === 'excluded') ||
-        (state === 'draft' && offering.status === 'draft') ||
+        (state === 'included' && isIncluded) ||
+        (state === 'excluded' && isDropped) ||
+        (state === 'draft' && (offering.status === 'draft' || offering.approvalStatus === 'review_required')) ||
         (state === 'active' && offering.status === 'active') ||
         (state === 'disabled' && !offering.isTimetableEnabled);
 
@@ -132,6 +136,18 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
       );
     });
   }, [cohortId, offerings, programmeId, search, state]);
+
+  const visibleIds = useMemo(() => filtered.map((o) => o.id), [filtered]);
+  const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.includes(id));
+  const someVisibleSelected = visibleIds.some((id) => selectedIds.includes(id)) && !allVisibleSelected;
+
+  function toggleSelectAll() {
+    if (allVisibleSelected) {
+      setSelectedIds((current) => current.filter((id) => !visibleIds.includes(id)));
+    } else {
+      setSelectedIds((current) => Array.from(new Set([...current, ...visibleIds])));
+    }
+  }
 
   const filtersActive =
     Boolean(search) ||
@@ -199,11 +215,11 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
             className="h-9 w-full text-[12px] xl:text-sm"
           >
             <option value="all">All states</option>
-            <option value="included">Included</option>
-            <option value="active">Active</option>
-            <option value="draft">Draft</option>
-            <option value="disabled">Disabled</option>
-            <option value="excluded">Excluded</option>
+            <option value="included">In Timetable (Included)</option>
+            <option value="excluded">Dropped (Excluded)</option>
+            <option value="draft">Pending Review / Draft</option>
+            <option value="active">Active (Allocated)</option>
+            <option value="disabled">Timetable Disabled</option>
           </Select>
 
           {filtersActive ? (
@@ -225,115 +241,206 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
       </section>
 
       <form action={approveUnitOfferingsAction} className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-surface px-3 py-2">
-          <p className="text-xs text-text-muted">
-            Approve units this cohort will study, or withdraw units that should not be offered this session.
-          </p>
-          <div className="flex items-center gap-2">
+        <input
+          type="hidden"
+          name="reason"
+          value="Dropped from cohort teaching plan for this academic period"
+        />
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-surface px-4 py-3 shadow-xs">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-bold text-text-primary">
+              Timetable Selection:
+            </span>
+            {selectedIds.length > 0 ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
+                {selectedIds.length} unit{selectedIds.length === 1 ? '' : 's'} selected
+              </span>
+            ) : (
+              <span className="text-xs text-text-muted">
+                Use checkboxes to select units to include in or drop from the timetable.
+              </span>
+            )}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {selectedIds.length > 0 ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedIds([])}
+                className="text-xs text-text-muted hover:text-text-primary"
+              >
+                Clear
+              </Button>
+            ) : null}
             <Button
               type="submit"
               formAction={withdrawUnitOfferingAction}
               size="sm"
               variant="outline"
               disabled={selectedIds.length === 0}
-              className="text-rose-700 hover:bg-rose-50 border-rose-300"
+              className="border-rose-300 font-semibold text-rose-700 hover:bg-rose-50"
             >
-              Withdraw selected ({selectedIds.length})
+              Drop from Timetable ({selectedIds.length})
             </Button>
-            <Button type="submit" size="sm" disabled={selectedIds.length === 0} leadingIcon={<CheckCircle2 className="size-4" />}>
-              Approve selected ({selectedIds.length})
+            <Button
+              type="submit"
+              size="sm"
+              disabled={selectedIds.length === 0}
+              leadingIcon={<CheckCircle2 className="size-4" />}
+              className="font-semibold"
+            >
+              Include in Timetable ({selectedIds.length})
             </Button>
           </div>
         </div>
-      <section className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
-        {filtered.length === 0 ? (
-          <div className="px-4 py-10 text-center">
-            <p className="font-semibold text-text-primary">No matching units</p>
-            <p className="mt-1 text-xs text-text-muted">Adjust the filters.</p>
-          </div>
-        ) : (
-          <div className="w-full overflow-hidden">
-            <table className="w-full table-fixed border-collapse text-left">
-              <thead className="border-t-[3px] border-institutional-yellow bg-primary text-[10px] uppercase tracking-wide text-white/85 xl:text-xs">
-                <tr>
-                  <th className="w-[5%] px-3 py-2">Pick</th>
-                  <th className="w-[29%] px-3 py-2">Unit</th>
-                  <th className="w-[26%] px-3 py-2">Class</th>
-                  <th className="w-[20%] px-3 py-2">Sessions</th>
-                  <th className="w-[20%] px-3 py-2">Authorization</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border-soft">
-                {filtered.map((offering) => {
-                  const programme = offering.cohort?.programme ?? offering.unit?.programme;
 
-                  return (
-                    <tr key={offering.id} className="align-top transition hover:bg-surface-subtle/60">
-                      <td className="px-3 py-3">
-                        {offering.approvalStatus !== 'approved' ? (
-                          <input name="offeringId" value={offering.id} type="checkbox" checked={selectedIds.includes(offering.id)} onChange={(event) => setSelectedIds((current) => event.target.checked ? [...current, offering.id] : current.filter((id) => id !== offering.id))} aria-label={`Select ${offering.unit?.name ?? 'unit'}`} />
-                        ) : null}
-                      </td>
-                      <td className="px-3 py-2.5">
-                        <p className="break-words text-[12px] font-semibold leading-5 text-text-primary xl:text-sm">
-                          {offering.unit?.name ?? '—'}
-                        </p>
-                        <p className="mt-0.5 text-[10px] text-text-muted xl:text-xs">
-                          {offering.unit?.code ?? '—'} · {titleCase(offering.offeringType)}
-                        </p>
-                      </td>
+        <section className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
+          {filtered.length === 0 ? (
+            <div className="px-4 py-10 text-center">
+              <p className="font-semibold text-text-primary">No matching units</p>
+              <p className="mt-1 text-xs text-text-muted">Adjust the filters.</p>
+            </div>
+          ) : (
+            <div className="w-full overflow-hidden">
+              <table className="w-full table-fixed border-collapse text-left">
+                <thead className="border-t-[3px] border-institutional-yellow bg-primary text-[10px] uppercase tracking-wide text-white/85 xl:text-xs">
+                  <tr>
+                    <th className="w-[5%] px-3 py-2.5 text-center">
+                      <input
+                        type="checkbox"
+                        checked={allVisibleSelected}
+                        ref={(el) => {
+                          if (el) el.indeterminate = someVisibleSelected;
+                        }}
+                        onChange={toggleSelectAll}
+                        aria-label="Select all visible units"
+                        className="size-3.5 cursor-pointer rounded border-white/40 bg-white/20 text-primary accent-institutional-yellow"
+                      />
+                    </th>
+                    <th className="w-[29%] px-3 py-2">Unit</th>
+                    <th className="w-[26%] px-3 py-2">Class</th>
+                    <th className="w-[18%] px-3 py-2">Sessions</th>
+                    <th className="w-[22%] px-3 py-2">Timetable Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border-soft">
+                  {filtered.map((offering) => {
+                    const programme = offering.cohort?.programme ?? offering.unit?.programme;
+                    const isDropped = offering.approvalStatus === 'withdrawn' || offering.selectionState === 'excluded';
+                    const isApproved = offering.approvalStatus === 'approved' && offering.selectionState === 'included';
 
-                      <td className="px-3 py-2.5">
-                        <p className="break-words text-[12px] font-medium leading-5 text-text-primary xl:text-sm">
-                          {offering.cohort?.name ?? '—'}
-                        </p>
-                        <p className="mt-0.5 break-words text-[10px] text-text-muted xl:text-xs">
-                          {programme?.shortName ?? programme?.name ?? '—'}
-                        </p>
-                      </td>
+                    return (
+                      <tr key={offering.id} className="align-top transition hover:bg-surface-subtle/60">
+                        <td className="px-3 py-3 text-center">
+                          <input
+                            name="offeringId"
+                            value={offering.id}
+                            type="checkbox"
+                            checked={selectedIds.includes(offering.id)}
+                            onChange={(event) =>
+                              setSelectedIds((current) =>
+                                event.target.checked
+                                  ? [...current, offering.id]
+                                  : current.filter((id) => id !== offering.id),
+                              )
+                            }
+                            aria-label={`Select ${offering.unit?.name ?? 'unit'} for ${offering.cohort?.name ?? 'cohort'}`}
+                            className="size-4 cursor-pointer rounded border-border-strong text-primary accent-primary"
+                          />
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <p className="break-words text-[12px] font-semibold leading-5 text-text-primary xl:text-sm">
+                            {offering.unit?.name ?? '—'}
+                          </p>
+                          <p className="mt-0.5 text-[10px] text-text-muted xl:text-xs">
+                            {offering.unit?.code ?? '—'} · {titleCase(offering.offeringType)}
+                          </p>
+                        </td>
 
-                      <td className="px-3 py-2.5 text-[12px] text-text-secondary xl:text-sm">
-                        <p>
-                          {offering.weeklySessions ?? '—'} × {offering.sessionDurationMinutes ?? '—'} min
-                        </p>
-                      </td>
+                        <td className="px-3 py-2.5">
+                          <p className="break-words text-[12px] font-medium leading-5 text-text-primary xl:text-sm">
+                            {offering.cohort?.name ?? '—'}
+                          </p>
+                          <p className="mt-0.5 break-words text-[10px] text-text-muted xl:text-xs">
+                            {programme?.shortName ?? programme?.name ?? '—'}
+                          </p>
+                        </td>
 
-                      <td className="px-3 py-2.5">
-                        <span className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold xl:text-xs ${stateClass(offering)}`}>
-                          {stateLabel(offering)}
-                        </span>
-                        {offering.approvalStatus === 'approved' ? (
-                          <div className="mt-2 flex gap-1">
-                            <input form={`withdraw-${offering.id}`} name="reason" required placeholder="Withdrawal reason" className="min-w-0 rounded border border-border px-2 py-1 text-[10px]" />
-                            <Button form={`withdraw-${offering.id}`} type="submit" name="offeringId" value={offering.id} size="sm" variant="ghost">Withdraw</Button>
-                          </div>
-                        ) : offering.approvalStatus !== 'withdrawn' ? (
-                          <div className="mt-1.5">
-                            <button
-                              form={`withdraw-${offering.id}`}
-                              type="submit"
-                              className="text-[11px] font-medium text-rose-600 hover:text-rose-800 hover:underline"
-                            >
-                              Drop from cohort
-                            </button>
-                          </div>
-                        ) : null}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
+                        <td className="px-3 py-2.5 text-[12px] text-text-secondary xl:text-sm">
+                          <p>
+                            {offering.weeklySessions ?? '—'} × {offering.sessionDurationMinutes ?? '—'} min
+                          </p>
+                        </td>
+
+                        <td className="px-3 py-2.5">
+                          <span className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold xl:text-xs ${stateClass(offering)}`}>
+                            {stateLabel(offering)}
+                          </span>
+                          {isApproved ? (
+                            <div className="mt-1.5">
+                              <button
+                                form={`withdraw-${offering.id}`}
+                                type="submit"
+                                className="text-[11px] font-semibold text-rose-600 hover:text-rose-800 hover:underline"
+                              >
+                                Drop from timetable
+                              </button>
+                            </div>
+                          ) : isDropped ? (
+                            <div className="mt-1.5">
+                              <button
+                                form={`approve-${offering.id}`}
+                                type="submit"
+                                className="text-[11px] font-semibold text-emerald-700 hover:text-emerald-900 hover:underline"
+                              >
+                                Include in timetable
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="mt-1.5 flex items-center gap-2">
+                              <button
+                                form={`approve-${offering.id}`}
+                                type="submit"
+                                className="text-[11px] font-semibold text-emerald-700 hover:text-emerald-900 hover:underline"
+                              >
+                                Approve
+                              </button>
+                              <span className="text-[10px] text-text-muted">·</span>
+                              <button
+                                form={`withdraw-${offering.id}`}
+                                type="submit"
+                                className="text-[11px] font-medium text-rose-600 hover:text-rose-800 hover:underline"
+                              >
+                                Drop
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
       </form>
-      {offerings.map((offering) => (
-        <form key={offering.id} id={`withdraw-${offering.id}`} action={withdrawUnitOfferingAction}>
-          <input type="hidden" name="offeringId" value={offering.id} />
-          <input type="hidden" name="reason" value="Dropped from cohort teaching plan for this academic period" />
-        </form>
-      ))}
+
+      {/* Hidden single-action forms for instant 1-click row triggers */}
+      <div className="hidden">
+        {offerings.map((offering) => (
+          <div key={offering.id}>
+            <form id={`withdraw-${offering.id}`} action={withdrawUnitOfferingAction}>
+              <input type="hidden" name="offeringId" value={offering.id} />
+              <input type="hidden" name="reason" value="Dropped from cohort teaching plan for this academic period" />
+            </form>
+            <form id={`approve-${offering.id}`} action={approveUnitOfferingsAction}>
+              <input type="hidden" name="offeringId" value={offering.id} />
+            </form>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

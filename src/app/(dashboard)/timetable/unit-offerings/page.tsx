@@ -71,9 +71,17 @@ export default async function UnitOfferingsPage({ searchParams }: PageProps<'/ti
       />
 
       {query.approvalError ? <Alert variant="danger" title="Offering authorization failed">{String(query.approvalError)}</Alert> : null}
-      {query.approved ? <Alert variant="success" title="Cohort offerings approved">{String(query.approved)} offering(s) can now proceed to allocation and scheduling.</Alert> : null}
-      {query.withdrawn ? <Alert variant="success" title="Offering withdrawn">Its editable allocations have been disabled.</Alert> : null}
-      {query.added ? <Alert variant="success" title="Unit added for review">Approve it below when you are satisfied that it belongs in the cohort teaching plan.</Alert> : null}
+      {query.approved ? (
+        <Alert variant="success" title="Cohort offering(s) included in timetable">
+          {String(query.approved)} offering(s) included and ready for teaching allocations and timetable generation.
+        </Alert>
+      ) : null}
+      {query.withdrawn ? (
+        <Alert variant="success" title="Cohort offering(s) dropped from timetable">
+          {String(query.withdrawn)} offering(s) dropped. They will not be picked by the timetabler or teaching allocations.
+        </Alert>
+      ) : null}
+      {query.added ? <Alert variant="success" title="Unit added for review">Approve or include it below when you are satisfied that it belongs in the cohort teaching plan.</Alert> : null}
 
       {!activePeriod ? (
         <Alert

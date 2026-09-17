@@ -602,7 +602,7 @@ export function OnlineMarksEditor({
                       <p className="text-xs font-bold text-slate-900 line-clamp-1">
                         {row.student.fullName}
                       </p>
-                      <p className="text-[10px] font-medium text-slate-600">
+                      <p className="text-[10px] font-medium font-mono text-slate-600 whitespace-nowrap">
                         {row.student.admissionNumber}
                       </p>
                       {row.student.attendanceStatus === 'absent' ? (

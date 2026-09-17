@@ -434,7 +434,7 @@ function createCohortSheet(
       row.height = 20;
 
       row.eachCell(
-        (cell) => {
+        (cell, colNumber) => {
           cell.font = {
             size: 9,
             color: {
@@ -444,7 +444,7 @@ function createCohortSheet(
 
           cell.alignment = {
             vertical: 'middle',
-            wrapText: true,
+            wrapText: colNumber !== 2,
           };
 
           applyThinBorder(
@@ -534,7 +534,7 @@ function createCohortSheet(
     },
     {
       key: 'admission',
-      width: 20,
+      width: 28,
     },
     {
       key: 'name',
@@ -680,9 +680,9 @@ function createOnlineMarksReportSheet(
       student.attendanceStatus === 'absent' ? 'AB' : final,
     ];
     row.height = 20;
-    row.eachCell((cell) => {
+    row.eachCell((cell, colNumber) => {
       cell.font = { size: 9, color: { argb: 'FF111827' } };
-      cell.alignment = { vertical: 'middle', wrapText: true };
+      cell.alignment = { vertical: 'middle', wrapText: colNumber !== 2 };
       applyThinBorder(cell);
     });
     for (let column = 1; column <= 11; column += 1) {
@@ -702,7 +702,7 @@ function createOnlineMarksReportSheet(
 
   sheet.columns = [
     { width: 6 },
-    { width: 18 },
+    { width: 28 },
     { width: 28 },
     { width: 12 },
     { width: 13 },

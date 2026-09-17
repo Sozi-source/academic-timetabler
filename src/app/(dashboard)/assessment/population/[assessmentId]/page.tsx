@@ -277,7 +277,7 @@ export default async function AssessmentPopulationPage({
                     Student
                   </th>
 
-                  <th className="px-4 py-2.5">
+                  <th className="px-4 py-2.5 whitespace-nowrap">
                     Admission No.
                   </th>
 
@@ -310,7 +310,7 @@ export default async function AssessmentPopulationPage({
                         </p>
                       </td>
 
-                      <td className="px-4 py-3 text-text-secondary">
+                      <td className="px-4 py-3 text-text-secondary whitespace-nowrap font-mono">
                         {
                           student.admissionNumber
                         }

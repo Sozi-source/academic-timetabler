@@ -477,7 +477,7 @@ export async function generateAssessmentSigningSheet(
           25;
 
         row.eachCell(
-          (cell) => {
+          (cell, colNumber) => {
             cell.font = {
               size: 9,
             };
@@ -486,7 +486,7 @@ export async function generateAssessmentSigningSheet(
               vertical:
                 'middle',
               wrapText:
-                true,
+                colNumber !== 2,
             };
 
             applyBorder(
@@ -565,7 +565,7 @@ export async function generateAssessmentSigningSheet(
         width: 7,
       },
       {
-        width: 20,
+        width: 28,
       },
       {
         width: 32,

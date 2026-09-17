@@ -125,7 +125,27 @@ export async function batchRegisterOverrideUnits(
     redirect('/students/unit-registration/batch?error=period');
   }
 
-  if (studentIds.length === 0 || unitIds.length === 0) {
+  const mode = formData.get('mode');
+  const cohortId = formData.get('cohortId');
+  let effectiveStudentIds = studentIds;
+
+  const supabase = await createClient();
+
+  if (
+    effectiveStudentIds.length === 0 &&
+    mode === 'cohort' &&
+    typeof cohortId === 'string' &&
+    cohortId
+  ) {
+    const { data: cohortStudents } = await supabase
+      .from('students')
+      .select('id')
+      .eq('current_cohort_id', cohortId)
+      .in('lifecycle_status', ['admitted', 'active']);
+    effectiveStudentIds = (cohortStudents ?? []).map((s) => s.id);
+  }
+
+  if (effectiveStudentIds.length === 0 || unitIds.length === 0) {
     redirect('/students/unit-registration/batch?error=override_selection');
   }
 
@@ -133,12 +153,11 @@ export async function batchRegisterOverrideUnits(
     redirect('/students/unit-registration/batch?error=override_reason');
   }
 
-  const supabase = await createClient();
   const { data, error } = await supabase.rpc(
     'batch_register_override_units',
     {
       target_academic_period_id: academicPeriodId,
-      target_student_ids: studentIds,
+      target_student_ids: effectiveStudentIds,
       selected_unit_ids: unitIds,
       override_reason: overrideReason,
     },

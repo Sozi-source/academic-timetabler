@@ -183,8 +183,8 @@ function headerStyle(row: ExcelJS.Row) {
   });
 }
 
-function bodyCellStyle(cell: ExcelJS.Cell) {
-  cell.alignment = { vertical: 'middle', wrapText: true };
+function bodyCellStyle(cell: ExcelJS.Cell, colNumber?: number) {
+  cell.alignment = { vertical: 'middle', wrapText: colNumber !== 2 };
   cell.border = {
     top: { style: 'hair', color: { argb: 'FFD8E2E0' } },
     bottom: { style: 'hair', color: { argb: 'FFD8E2E0' } },
@@ -320,7 +320,7 @@ export async function buildAssessmentMarksWorkbook(context: WorkbookAssessmentCo
         const row = sheet.getRow(rowNo);
         row.values = [index + 1, student.admissionNumber, student.fullName, null, null, null, null, student.attendanceStatus === 'absent' ? 'AB' : null, null, null, null];
         row.height = 21;
-        for (let col = 1; col <= 11; col += 1) bodyCellStyle(row.getCell(col));
+        for (let col = 1; col <= 11; col += 1) bodyCellStyle(row.getCell(col), col);
         for (const col of [4, 5, 6, 7]) row.getCell(col).protection = { locked: false };
         row.getCell(4).dataValidation = { type: 'decimal', operator: 'between', formulae: [0, 5], allowBlank: true, showErrorMessage: true, error: 'Enter a mark from 0 to 5.' };
         row.getCell(5).dataValidation = { type: 'decimal', operator: 'between', formulae: [0, 10], allowBlank: true, showErrorMessage: true, error: 'Enter a mark from 0 to 10.' };
@@ -337,7 +337,7 @@ export async function buildAssessmentMarksWorkbook(context: WorkbookAssessmentCo
         if (student.attendanceStatus === 'absent') row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF4E5' } };
       });
       const lastStudentRow = ASSESSMENT_MARKS_FIRST_STUDENT_ROW + cohortStudents.length - 1;
-      sheet.columns = [7, 20, 34, 14, 20, 11, 11, 18, 14, 9, 16].map((width) => ({ width }));
+      sheet.columns = [7, 28, 34, 14, 20, 11, 11, 18, 14, 9, 16].map((width) => ({ width }));
       protectIdentityAndFormulaCells(sheet, ASSESSMENT_MARKS_FIRST_STUDENT_ROW, lastStudentRow, 'exam');
       addCohortSummary(sheet, ASSESSMENT_MARKS_FIRST_STUDENT_ROW, lastStudentRow, 'exam');
     } else {
@@ -349,7 +349,7 @@ export async function buildAssessmentMarksWorkbook(context: WorkbookAssessmentCo
         const row = sheet.getRow(rowNo);
         row.values = [index + 1, student.admissionNumber, student.fullName, student.attendanceStatus === 'absent' ? 'AB' : null, null, null];
         row.height = 22;
-        for (let col = 1; col <= 6; col += 1) bodyCellStyle(row.getCell(col));
+        for (let col = 1; col <= 6; col += 1) bodyCellStyle(row.getCell(col), col);
         if (student.attendanceStatus !== 'absent') {
           row.getCell(4).protection = { locked: false };
           row.getCell(4).dataValidation = { type: 'decimal', operator: 'between', formulae: [0, context.maxMark], allowBlank: false, showErrorMessage: true, error: `Enter a mark from 0 to ${context.maxMark}.` };
@@ -359,7 +359,7 @@ export async function buildAssessmentMarksWorkbook(context: WorkbookAssessmentCo
         if (student.attendanceStatus === 'absent') row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF4E5' } };
       });
       const lastStudentRow = ASSESSMENT_MARKS_FIRST_STUDENT_ROW + cohortStudents.length - 1;
-      sheet.columns = [7, 22, 36, 18, 10, 14].map((width) => ({ width }));
+      sheet.columns = [7, 28, 36, 18, 10, 14].map((width) => ({ width }));
       protectIdentityAndFormulaCells(sheet, ASSESSMENT_MARKS_FIRST_STUDENT_ROW, lastStudentRow, 'cat');
       addCohortSummary(sheet, ASSESSMENT_MARKS_FIRST_STUDENT_ROW, lastStudentRow, 'cat', context.maxMark);
     }

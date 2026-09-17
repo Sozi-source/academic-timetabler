@@ -59,7 +59,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ ass
   const students = workbook.addWorksheet('Student Results');
   students.addRow(['Admission Number', 'Student Name', 'Cohort', 'Attendance', 'Total Mark', 'Grade', 'Comment']);
   for (const student of analysis.students) students.addRow([student.admissionNumber, student.fullName, student.cohortName || student.cohortCode, student.attendanceStatus, student.attendanceStatus === 'absent' ? 'AB' : student.totalMark ?? '', student.grade ?? '', student.comment ?? '']);
-  formatSheet(students, [24, 34, 28, 14, 14, 10, 18]);
+  formatSheet(students, [28, 34, 28, 14, 14, 10, 18]);
 
   const output = await workbook.xlsx.writeBuffer();
   const fileName = safeFile(`${analysis.event.unit?.code ?? 'unit'}-${analysis.event.title}-analysis.xlsx`);

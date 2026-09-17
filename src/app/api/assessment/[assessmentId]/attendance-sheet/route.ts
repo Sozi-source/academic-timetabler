@@ -70,12 +70,12 @@ export async function GET(_request: Request, { params }: { params: Promise<{ ass
     students.forEach((student, index) => {
       const row = sheet.addRow([index + 1, student.admissionNumber, student.fullName, '']);
       row.height = 25;
-      row.eachCell((cell) => {
-        cell.alignment = { vertical: 'middle', wrapText: true };
+      row.eachCell((cell, colNumber) => {
+        cell.alignment = { vertical: 'middle', wrapText: colNumber !== 2 };
         cell.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } };
       });
     });
-    sheet.columns = [{ width: 8 }, { width: 24 }, { width: 38 }, { width: 28 }];
+    sheet.columns = [{ width: 8 }, { width: 28 }, { width: 38 }, { width: 28 }];
   }
 
   const buffer = await workbook.xlsx.writeBuffer();

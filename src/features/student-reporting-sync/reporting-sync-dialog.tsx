@@ -518,7 +518,7 @@ export function ReportingSyncDialog({ trigger, onSuccess }: ReportingSyncDialogP
                                 />
                               ) : null}
                             </td>
-                            <td className="px-3 py-2 font-mono font-bold text-text-primary">
+                            <td className="px-3 py-2 font-mono font-bold text-text-primary whitespace-nowrap">
                               {item.admissionNumber}
                             </td>
                             <td className="px-3 py-2 font-medium text-text-primary">

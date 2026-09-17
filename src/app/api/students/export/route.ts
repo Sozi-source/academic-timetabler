@@ -26,7 +26,7 @@ export async function GET() {
   workbook.creator = 'Academic Planning System';
   const sheet = workbook.addWorksheet('Students', { views: [{ state: 'frozen', ySplit: 1 }] });
   sheet.columns = [
-    { header: 'Admission Number', width: 24 },
+    { header: 'Admission Number', width: 28 },
     { header: 'Full Name', width: 34 },
     { header: 'Programme', width: 18 },
     { header: 'Admission Cohort', width: 24 },

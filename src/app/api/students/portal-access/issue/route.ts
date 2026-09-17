@@ -58,7 +58,7 @@ export async function POST(request: Request) {
   const sheet = workbook.addWorksheet('Student Access PINs');
 
   sheet.columns = [
-    { width: 24 },
+    { width: 28 },
     { width: 36 },
     { width: 16 },
   ];

@@ -55,12 +55,12 @@ function styleSheet(
 
   sheet.eachRow(
     (row) => {
-      row.alignment = {
-        vertical:
-          'top',
-        wrapText:
-          true,
-      };
+      row.eachCell((cell, colNumber) => {
+        cell.alignment = {
+          vertical: 'top',
+          wrapText: colNumber !== 2,
+        };
+      });
     },
   );
 }
@@ -215,7 +215,7 @@ export async function GET() {
       header:
         'Admission Number',
       width:
-        22,
+        28,
     },
     {
       header:

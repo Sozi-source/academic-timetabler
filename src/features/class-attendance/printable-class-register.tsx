@@ -222,7 +222,7 @@ export function PrintableClassRegister({
                 <table className="w-full table-fixed border-collapse border border-slate-900 text-left text-[10.5px]">
                   <colgroup>
                     <col className="w-9" />
-                    <col className="w-32" />
+                    <col className="w-44" />
                     <col className="w-48" />
                     {Array.from({ length: sessionCount }, (_, i) => (
                       <col key={i} />

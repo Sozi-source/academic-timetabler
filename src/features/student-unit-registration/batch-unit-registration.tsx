@@ -392,7 +392,19 @@ export function BatchUnitRegistration({
           <div className="mt-3 grid max-w-2xl gap-2.5 sm:grid-cols-2">
             <button
               type="button"
-              onClick={() => setRegistrationPath('expected')}
+              onClick={() => {
+                setRegistrationPath('expected');
+                if (cohortId) {
+                  const eligibleIds = context.students
+                    .filter(
+                      (student) =>
+                        student.cohortId === cohortId &&
+                        student.eligible,
+                    )
+                    .map((student) => student.id);
+                  setSelectedIds(new Set(eligibleIds));
+                }
+              }}
               className={registrationPath === 'expected'
                 ? 'rounded-lg border-2 border-slate-950 bg-slate-50 p-3 text-left'
                 : 'rounded-lg border border-slate-200 p-3 text-left transition hover:bg-slate-50'}
@@ -402,7 +414,19 @@ export function BatchUnitRegistration({
             </button>
             <button
               type="button"
-              onClick={() => setRegistrationPath('override')}
+              onClick={() => {
+                setRegistrationPath('override');
+                if (cohortId) {
+                  const eligibleIds = context.students
+                    .filter(
+                      (student) =>
+                        student.cohortId === cohortId &&
+                        student.canRegister,
+                    )
+                    .map((student) => student.id);
+                  setSelectedIds(new Set(eligibleIds));
+                }
+              }}
               className={registrationPath === 'override'
                 ? 'rounded-lg border-2 border-primary bg-primary/5 p-3 text-left'
                 : 'rounded-lg border border-slate-200 p-3 text-left transition hover:bg-slate-50'}
@@ -736,7 +760,7 @@ export function BatchUnitRegistration({
               selectedIds.size === 0 ||
               (registrationPath === 'override' && selectedUnitIds.size === 0)
             }
-            className="inline-flex min-h-10 items-center justify-center rounded-full bg-[#cbd5e1] px-5 text-sm font-medium text-white transition hover:bg-[#94a3b8] disabled:cursor-not-allowed disabled:bg-[#cbd5e1]"
+            className="inline-flex min-h-10 items-center justify-center rounded-full bg-primary px-5 text-sm font-medium text-white shadow-sm transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
           >
             {registrationPath === 'override'
               ? `Add selected units (${selectedIds.size})`

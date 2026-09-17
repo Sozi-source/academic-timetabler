@@ -664,7 +664,7 @@ function AbsenteesTableSection({
                   <td className="px-4 py-2 font-semibold text-text-primary">
                     {s.fullName}
                   </td>
-                  <td className="px-4 py-2 font-mono text-[11px] text-text-secondary">
+                  <td className="px-4 py-2 font-mono text-[11px] text-text-secondary whitespace-nowrap">
                     {s.admissionNumber}
                   </td>
                   <td className="px-4 py-2 text-text-secondary">

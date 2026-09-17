@@ -28,7 +28,9 @@ function styleHeader(row: ExcelJS.Row) {
 function styleSheet(sheet: ExcelJS.Worksheet) {
   sheet.views = [{ state: 'frozen', ySplit: 1 }];
   sheet.eachRow((row, index) => {
-    row.alignment = { vertical: 'top', wrapText: true };
+    row.eachCell((cell, colNumber) => {
+      cell.alignment = { vertical: 'top', wrapText: colNumber !== 1 };
+    });
     if (index > 1 && index % 2 === 0) {
       row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF7FAF9' } };
     }
@@ -116,7 +118,7 @@ export async function GET() {
 
   const studentSheet = workbook.addWorksheet('Student Register');
   studentSheet.columns = [
-    { header: 'Admission Number', width: 24 }, { header: 'Full Name', width: 34 }, { header: 'Programme', width: 18 },
+    { header: 'Admission Number', width: 28 }, { header: 'Full Name', width: 34 }, { header: 'Programme', width: 18 },
     { header: 'Admission Cohort', width: 28 }, { header: 'Current Cohort', width: 28 }, { header: 'Lifecycle Status', width: 18 },
     { header: 'Academic Phase', width: 20 }, { header: 'Details Verified', width: 18 },
   ];

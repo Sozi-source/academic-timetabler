@@ -2,8 +2,11 @@ import urllib.request
 import json
 import os
 
-url = "https://craousiqgyhmyyxjdvol.supabase.co"
-key = "sb_secret_w45d6DZyZ4u-6tfme7t1pw_nOjy9ucZ"
+# SECURITY: Never hardcode credentials. Set these environment variables before running:
+#   set SUPABASE_URL=https://<project-ref>.supabase.co
+#   set SUPABASE_SERVICE_ROLE_KEY=<your-new-secret-key>
+url = os.environ["SUPABASE_URL"]
+key = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
 
 def query_supabase(table, query_params=""):
     req = urllib.request.Request(

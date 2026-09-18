@@ -17,6 +17,81 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
    - Legacy DB rows stored curriculum templates under `tpl-tvet-<code>` (without document type suffix). A migration is needed to reclassify each row as either `scheme_of_work` or `course_outline` and re-save under `tpl-tvet-<code>-<type>`.
 2. **Curriculum Upload UI Update (`curriculum-zip-upload-dialog.tsx`)**:
    - Update `curriculum-zip-upload-dialog.tsx` to display `unresolvedFiles` from the ingestion preview response, allowing HODs to select document types manually prior to commit.
+3. **Units Without Source Materials** (reported to HOD, no curriculum content to add):
+   - Clinical Rotation (`CHN 1308`, `CND 2103`, `DHN 1306`, `DND 2103`) — clinical placement; no KNEC lecture syllabus.
+   - Medical Terminologies (`CCU 1113`, `DHN 1301`) — no standalone outline or scheme found in provided materials.
+
+---
+
+### 2026-09-18: Full TVET Curriculum Registry Standardisation
+
+**Summary**: All TVET Module 2 units populated from the official KNEC curriculum. 8 CHN/CND certificate programme units added as a new canonical registry. Trade Project fully restructured to authentic fieldwork-based schedule with no synthetic assessments.
+
+#### A. module-3.ts — Trade Project Restructured
+- Replaced synthetic CAT/revision/exam weeks with an authentic 14-week TVET fieldwork schedule.
+- Weeks 1–6: Topic formulation, proposal writing (Chapters 1–3), literature review, methodology, instruments, proposal defense.
+- Weeks 7–9: Dedicated primary data collection / fieldwork.
+- Weeks 10–12: Data processing, statistical analysis, discussion, draft compilation.
+- Weeks 13–14: Draft revisions, binding, final submission, oral viva voce defense.
+- `assessmentApproaches` explicitly states: **"NO CAT, NO RAT, NO written summative examination"**.
+- Aliases expanded: `CND 2307`, `DHN 3205`, `CHN 2206`, `DND 3206`, `DNDT 1305`, `Trade project & Business Plan`.
+
+#### B. module-2.ts — All 12 Units Fully Populated
+All 12 Module 2 units changed from `isAvailable: false` (empty) to `isAvailable: true` with complete 14-week TVET schedules. Sources: Official KNEC Diploma in Nutrition and Dietetics Curriculum Specification (syllabus codes 22.2.0 – 33.2.0).
+
+| Key | Syllabus Code | Unit Name | Hours |
+|-----|--------------|-----------|-------|
+| `intro_microbiology` | 22.2.0 | Introduction to Microbiology | 66 hrs |
+| `diet_therapy_ii` | 23.2.0 | Diet Therapy II | 66 hrs |
+| `food_processing_preservation` | 24.2.0 | Principles of Food Processing and Preservation | 66 hrs |
+| `intro_biostatistics` | 25.2.0 | Introduction to Biostatistics | 66 hrs |
+| `basic_biochemistry` | 26.2.0 | Basic Biochemistry | 66 hrs |
+| `nutrition_in_lifespan` | 27.2.0 | Nutrition in the Lifespan | 66 hrs |
+| `nutrition_and_behaviour` | 28.2.0 | Principles of Nutrition and Behaviour | 66 hrs |
+| `primary_health_care` | 29.2.0 | Introduction to Primary Health Care | 44 hrs |
+| `first_aid` | 30.2.0 | First Aid | 55 hrs |
+| `business_plan` | 31.2.0 | Business Plan | 44 hrs |
+| `research_methods` | 32.2.0 | Research Methods | 44 hrs |
+| `industrial_attachment_ii` | 33.2.0 | Industrial Attachment II | 330 hrs |
+
+All units: Week 8 = CAT. Week 14 = Final Summative Examination. Complete `aliases[]`, `references[]`, `instructionalEquipment[]`, `learningOutcomes[]`.
+
+#### C. certificate-units.ts [NEW FILE]
+Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` with 8 canonical units for CHN Certificate in Nutrition (and shared CND/DND aliases). Sources: Department course outlines and schemes of work (Wilfred Osozi / Fiona Kwamboka / Patrick Mwirigi).
+
+| Key | Unit Code | Unit Name | Hours |
+|-----|-----------|-----------|-------|
+| `demonstration_techniques` | CHN 2306 / CND 2304 | Demonstration Techniques | 40 hrs |
+| `nutrition_for_vulnerable_groups` | CHN 2308 / CND 2305 | Nutrition for Vulnerable Groups | 40 hrs |
+| `community_diagnosis_mobilization` | CHN 2305 / CND 2303 | Community Diagnosis and Mobilization | 40 hrs |
+| `nutrition_care_process` | CHN 1304 / CND 1206 / DND 1206 | Introduction to Nutrition Care Process | 40 hrs |
+| `management_of_malnutrition` | CHN 2202 / CND 2101 / DND 2101 | Management of Malnutrition | 40 hrs |
+| `agricultural_production` | CHN 2309 / CND 2306 / DND 3205 | Agricultural Production | 40 hrs |
+| `applied_biological_sciences` | CHN 1303 / CND 2107 | Applied Biological Sciences | 40 hrs |
+| `food_science` | CHN 1202 / CND 2106 | Food Science | 40 hrs |
+
+#### D. shared-map.ts — Certificate Unit Aliases Added; Guard Fixed
+- Added 40+ alias entries for the 8 new certificate units (normalised unit codes and full title strings).
+- **Fixed**: Removed blanket `isVulnerable` guard that blocked `nutrition_for_vulnerable_groups` from ever resolving. Guard now correctly allows matches to canonical nutrition/vulnerable group keys.
+
+#### E. index.ts — CERTIFICATE_CURRICULUM Integrated
+- Added import: `import { CERTIFICATE_CURRICULUM } from './certificate-units'`
+- Spread into `MASTER_CURRICULUM_REGISTRY`: `...CERTIFICATE_CURRICULUM`
+- Added re-export for consumers.
+
+#### Files Modified
+- `src/features/teaching-documents/curriculum-data/module-2.ts` — full 12-unit population (151 KB, 2053 lines)
+- `src/features/teaching-documents/curriculum-data/module-3.ts` — Trade Project restructured (lines 1803–end)
+- `src/features/teaching-documents/curriculum-data/certificate-units.ts` — **NEW** (108 KB, 1453 lines)
+- `src/features/teaching-documents/curriculum-data/shared-map.ts` — aliases added, isVulnerable guard fixed
+- `src/features/teaching-documents/curriculum-data/index.ts` — CERTIFICATE_CURRICULUM import and spread
+- `CHANGES.md` — this entry
+
+#### No Breaking Changes
+- All existing Module 1 and Module 3 units are untouched (zero-regression policy).
+- MASTER_CURRICULUM_REGISTRY is additive — all existing canonical keys preserved.
+
+
 
 ### 2026-09-18: Enterprise Unit Offering Lifecycle Synchronization & Ghost Clash Elimination
 

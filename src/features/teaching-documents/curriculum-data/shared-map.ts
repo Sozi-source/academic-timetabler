@@ -376,7 +376,61 @@ export const SHARED_UNIT_ALIAS_MAP: Record<string, string> = {
   "dndt1304": "industrial_organization_management",
   "dndt1305": "trade_project",
   "dndt1306": "product_development_marketing_sales",
-  "dndt2101": "industrial_attachment_i"
+  "dndt2101": "industrial_attachment_i",
+
+  // ─── CHN Certificate in Nutrition — Unique Units ──────────────────────────
+
+  // Demonstration Techniques (CHN 2306 / CND 2304)
+  "demonstrationtechniques": "demonstration_techniques",
+  "demonstrationtechnique": "demonstration_techniques",
+  "chn2306": "demonstration_techniques",
+  "cnd2304": "demonstration_techniques",
+
+  // Nutrition for Vulnerable Groups (CHN 2308 / CND 2305)
+  "nutritionforvulnerablegroups": "nutrition_for_vulnerable_groups",
+  "vulnerablegroupsnutrition": "nutrition_for_vulnerable_groups",
+  "nutritionvulnerablegroups": "nutrition_for_vulnerable_groups",
+  "chn2308": "nutrition_for_vulnerable_groups",
+  "cnd2305": "nutrition_for_vulnerable_groups",
+
+  // Community Diagnosis and Mobilization (CHN 2305 / CND 2303)
+  "communitydiagnosisandmobilization": "community_diagnosis_mobilization",
+  "communitydiagnosismobilization": "community_diagnosis_mobilization",
+  "communitydiagnosis": "community_diagnosis_mobilization",
+  "chn2305": "community_diagnosis_mobilization",
+  "cnd2303": "community_diagnosis_mobilization",
+
+  // Introduction to Nutrition Care Process (CHN 1304 / CND 1206 / DND 1206)
+  "introductiontonutritioncareprocess": "nutrition_care_process",
+  "nutritioncareprocess": "nutrition_care_process",
+  "chn1304": "nutrition_care_process",
+  "cnd1206": "nutrition_care_process",
+  "dnd1206": "nutrition_care_process",
+
+  // Management of Malnutrition (CHN 2202 / CND 2101 / DND 2101)
+  "managementofmalnutrition": "management_of_malnutrition",
+  "malnutritionmanagement": "management_of_malnutrition",
+  "chn2202": "management_of_malnutrition",
+  "cnd2101": "management_of_malnutrition",
+  "dnd2101": "management_of_malnutrition",
+
+  // Agricultural Production (CHN 2309 / CND 2306 / DND 3205)
+  "agriculturalproduction": "agricultural_production",
+  "agriculture": "agricultural_production",
+  "chn2309": "agricultural_production",
+  "cnd2306": "agricultural_production",
+  "dnd3205": "agricultural_production",
+
+  // Applied Biological Sciences (CHN 1303 / CND 2107)
+  "appliedbiologicalsciences": "applied_biological_sciences",
+  "biologicalsciences": "applied_biological_sciences",
+  "chn1303": "applied_biological_sciences",
+  "cnd2107": "applied_biological_sciences",
+
+  // Food Science (CHN 1202 / CND 2106)
+  "foodscience": "food_science",
+  "chn1202": "food_science",
+  "cnd2106": "food_science"
 };
 
 /**
@@ -422,8 +476,11 @@ export function isCompatibleUnitTitle(requestedTitle?: string, canonicalKeyOrTit
   const isCounsel = canonTokens.some((t) => t.includes('counsel') || t.includes('counsell'));
   if (isDemo && isCounsel) return false;
 
+  // Note: 'nutrition_for_vulnerable_groups' IS a valid unit — removed blanket isVulnerable block.
+  // Cross-domain guard only applies if 'vulnerable' is being matched to a non-nutrition canonical key.
   const isVulnerable = reqTokens.some((t) => t.includes('vulnerab'));
-  if (isVulnerable) return false;
+  const isNutritionCanon = canonTokens.some((t) => t.includes('nutrition') || t.includes('vulnerable') || t.includes('group'));
+  if (isVulnerable && !isNutritionCanon) return false;
 
   return reqTokens.some((t) => canonTokens.includes(t));
 }

@@ -1809,158 +1809,262 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     nominalHours: 110,
     theoryHours: 20,
     practicalHours: 90,
-    aliases: ["CND 2306", "45.3.0", "Trade Project"],
-    unitDescription: "The module unit is intended to develop the trainee's ability to carry out project work.",
-    overallCompetency: "By the end of the module unit, the trainee should be able to: carry out a project; apply various methodologies in data collection for different types of projects; analyze and interpret project data and make conclusions based on the subject matter.",
+    aliases: ["CND 2306", "CND 2307", "45.3.0", "Trade Project", "DHN 3205", "CHN 2206", "DND 3206", "DNDT 1305", "Trade project & Business Plan"],
+    unitDescription: "This module unit is intended to develop the trainee's ability to identify real-world nutrition and health challenges, design and execute empirical project work, collect primary data in community and clinical settings, and present an authoritative TVET technical report.",
+    overallCompetency: "By the end of the module unit, the trainee should be able to: identify and formulate viable nutrition project topics; write and defend a standard scientific research proposal; execute rigorous field data collection; analyze and interpret empirical findings; and present a bound technical project report in accordance with national TVET standards.",
     learningOutcomes: [
-      "carry out a project",
-      "apply various methodologies in data collection for different types of projects",
-      "analyze and interpret project data and make conclusions based on the subject matter",
-      "present a project report in an organized manner, taking into consideration quality of materials, neatness and the standard format(s)"
+      "identify and conceptualize a nutrition and dietetics researchable project topic",
+      "develop, write, and defend a comprehensive TVET project proposal",
+      "design and pilot valid data collection instruments",
+      "conduct empirical fieldwork and primary data collection ethically in community and clinical settings",
+      "process, clean, analyze, and interpret project data",
+      "compile, format, bind, and defend a professional project report to TVET and KNEC examination standards"
     ],
+    teachingLearningApproaches: "One-on-one supervisor consultations, seminar presentations, independent fieldwork, data collection practicals, and data analysis workshops.",
+    assessmentApproaches: "100% Project-Based TVET Evaluation: Research Proposal Defense (20%), Fieldwork Execution & Logbook Verification (20%), Final Bound Project Report & Oral Defense (60%). In accordance with KNEC TVET regulations, Trade Project has NO Continuous Assessment Test (CAT), NO Random Assessment Test (RAT), and NO written summative theory examination.",
     weeklySchedule: [
       {
         weekNumber: 1,
-        topicTitle: "45.3.01 Introduction to Research Project Work",
-        subTopics: ["Meaning of project work", "Importance of project work", "Types of projects"],
+        topicTitle: "45.3.01 Introduction to Research Project Work & Topic Formulation",
+        subTopics: [
+          "Meaning and purpose of TVET trade project work",
+          "Role of empirical research in solving nutrition and public health challenges",
+          "Types of research projects: descriptive, exploratory, experimental, operational, and community-based",
+          "Criteria for selecting viable and feasible project topics: relevance, scope, resources, data availability",
+          "Formulation of tentative project titles and preliminary scope outline"
+        ],
         hours: 8,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain meaning of project work.\n• Explain the functions and physiological role of project work.\n• Classify projects and describe their categories.",
-        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
-        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
-        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define project work and explain its significance in TVET nutrition practice.\n• Differentiate between types of research projects.\n• Formulate viable project topics aligned with national nutrition priorities.",
+        learningActivities: "Interactive seminar on research identification, brainstorm sessions on community nutrition gaps, individual topic pitch.",
+        resourcesAndReferences: "KNEC Guidelines for Trade Projects in Technical Examinations; Mugenda & Mugenda (2019) Research Methods.",
+        assessmentAndRemarks: "Submission and vetting of three candidate project topics (No RAT/No CAT)."
       },
       {
         weekNumber: 2,
-        topicTitle: "45.3.02 Research Project Proposal",
-        subTopics: ["Types of research projects", "Importance of a research project proposal", "Factors to consider in selecting a research project: type of project; sources of data; quality specifications; available technology; personnel requirements", "Research project objectives", "Preparation of a research project proposal"],
+        topicTitle: "45.3.02 Research Project Proposal: Problem Formulation & Objectives",
+        subTopics: [
+          "Components and standard structure of a TVET research proposal",
+          "Background to the study: establishing nutritional context and rationale",
+          "Problem statement formulation: articulating the discrepancy, consequences, and urgency",
+          "Significance and justification of the study to stakeholders and community",
+          "Formulation of SMART general and specific research objectives",
+          "Formulation of research questions and operational hypotheses"
+        ],
         hours: 8,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Classify research projects and describe their categories.\n• Explain the functions and physiological role of a research project proposal.\n• Determine and calculate recommended dietary allowances and nutrient requirements.\n• Explain research project objectives.\n• Describe methods and procedures for a research project proposal.",
-        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
-        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
-        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Structure a standard TVET proposal in accordance with institutional guidelines.\n• Write a clear problem statement grounded in epidemiological and nutritional evidence.\n• Formulate SMART objectives and corresponding research questions.",
+        learningActivities: "One-on-one supervisor consultation, peer review of problem statements, formulation workshops.",
+        resourcesAndReferences: "TVET Project Guidelines; Kothari, C. R. (2014) Research Methodology: Methods and Techniques.",
+        assessmentAndRemarks: "Draft submission of Chapter 1 (Introduction and Problem Statement) to supervisor."
       },
       {
         weekNumber: 3,
-        topicTitle: "45.3.03 Methodologies",
-        subTopics: ["Sampling", "Instruments for data collection", "Data collection", "Methods of data analysis", "Procedure in carrying out different types of research projects"],
+        topicTitle: "45.3.02 Research Project Proposal: Literature Review & Conceptual Framework",
+        subTopics: [
+          "Literature searching techniques using academic databases and grey literature",
+          "Critical synthesis of empirical studies on nutrition, dietary practices, and clinical outcomes",
+          "Identification of research knowledge gaps in existing literature",
+          "Development of theoretical and conceptual frameworks linking independent, intervening, and dependent variables",
+          "Scientific referencing and citation rules (APA 7th Edition) and prevention of plagiarism"
+        ],
         hours: 8,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain sampling.\n• Explain instruments for data collection.\n• Explain data collection.\n• Describe methods and procedures for data analysis.\n• Explain procedure in carrying out different types of research projects.",
-        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
-        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
-        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Conduct systematic literature searches and synthesize findings.\n• Construct a clear conceptual framework illustrating variable relationships.\n• Apply APA 7th edition citation style accurately.",
+        learningActivities: "Literature search practical in digital library, drafting conceptual models, citation management tutorials.",
+        resourcesAndReferences: "APA Publication Manual (7th ed.); Kenya National Nutrition Action Plan (NNAP); WHO Nutrition Guidelines.",
+        assessmentAndRemarks: "Submission of Chapter 2 (Literature Review and Conceptual Framework) draft."
       },
       {
         weekNumber: 4,
-        topicTitle: "45.3.04 Data Collection",
-        subTopics: ["Sources of research project data", "Data collection methods/procedures"],
+        topicTitle: "45.3.03 Research Methodologies & Study Design",
+        subTopics: [
+          "Selection and justification of research design: cross-sectional, descriptive, analytical, intervention",
+          "Study location description: geographical, demographic, and nutritional profile",
+          "Target population, accessible population, and study subjects",
+          "Inclusion and exclusion criteria",
+          "Sample size determination methods (formulae for finite and infinite populations)",
+          "Sampling techniques: probability (simple random, stratified, cluster) vs. non-probability (purposive, convenience)"
+        ],
         hours: 8,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Identify dietary sources of research project data.\n• Explain data collection methods/procedures.",
-        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
-        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
-        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Justify the chosen research design based on study objectives.\n• Define study boundaries and eligible participant criteria.\n• Calculate required sample size and design a rigorous sampling procedure.",
+        learningActivities: "Methodology formulation clinic, sample size calculation exercises, supervisor consultation.",
+        resourcesAndReferences: "Mugenda & Mugenda (2019); Saunders, M. et al. (2019) Research Methods for Business Students.",
+        assessmentAndRemarks: "Draft submission of Methodology section (Study design, target population, sampling framework)."
       },
       {
         weekNumber: 5,
-        topicTitle: "45.3.05 Data Presentation, Analysis and Interpretation",
-        subTopics: ["Data presentation", "Data analysis", "Data interpretation process"],
+        topicTitle: "45.3.03 Research Instruments Design, Pre-Testing & Ethical Protocols",
+        subTopics: [
+          "Design of primary data collection instruments: structured questionnaires, key informant guides, focus group discussion (FGD) guides",
+          "Design of standardized anthropometric and dietary intake record forms (24-hour recalls, FFQs)",
+          "Validity testing (content, construct, face validity) and reliability measures (test-retest, Cronbach's alpha)",
+          "Pre-testing / piloting instruments in a comparable non-sampled population and revising ambiguous items",
+          "Research ethics: informed consent, participant confidentiality, voluntary participation, child protection, ethical review requirements"
+        ],
         hours: 8,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain data presentation.\n• Explain data analysis.\n• Describe the structure, components and function of data interpretation process.",
-        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
-        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
-        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Design valid, objective, and culturally appropriate data collection tools.\n• Execute tool piloting and incorporate validity revisions.\n• Draft participant informed consent forms and ethical compliance statements.",
+        learningActivities: "Instrument critique workshop, questionnaire pilot testing exercise, ethical protocol drafting.",
+        resourcesAndReferences: "Gibson, R. S. (2005) Principles of Nutritional Assessment; National Commission for Science, Technology and Innovation (NACOSTI) Ethical Guidelines.",
+        assessmentAndRemarks: "Review and approval of complete research instruments and consent documentation."
       },
       {
         weekNumber: 6,
-        topicTitle: "45.3.06 Report Writing",
-        subTopics: ["Project report", "Presentation of report"],
+        topicTitle: "45.3.02 Proposal Defense, Departmental Vetting & Institutional Clearance",
+        subTopics: [
+          "Compilation and binding of complete Research Proposal (Chapters 1, 2, and 3 with tools and budget)",
+          "Oral proposal presentation before the Departmental Academic Project Committee",
+          "Defense of project feasibility, methodology, ethical considerations, and nutritional relevance",
+          "Addressing committee recommendations and incorporating required amendments",
+          "Supervisor sign-off, departmental approval, and issuance of official Fieldwork Introductory Clearance Letter"
+        ],
         hours: 8,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain project report.\n• Explain presentation of report.",
-        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
-        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
-        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Defend the scientific merit, feasibility, and methodology of the project proposal.\n• Respond professionally to technical critique from the academic panel.\n• Secure official departmental clearance and research introduction credentials.",
+        learningActivities: "Formal proposal defense presentations, plenary question-and-answer sessions, revision clinics.",
+        resourcesAndReferences: "TVET Departmental Proposal Defense Assessment Rubric.",
+        assessmentAndRemarks: "Official Departmental Proposal Defense Assessment (Graded: 20% of final project mark; No written exam)."
       },
       {
         weekNumber: 7,
-        topicTitle: "45.3.07 Emerging Issues and Trends",
-        subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Coping with challenges posed by emerging issues and trends"],
+        topicTitle: "45.3.04 Fieldwork & Primary Data Collection Phase I (Site Entry & Sampling)",
+        subTopics: [
+          "Protocol for entry into study sites: community leadership courtesy calls, health facility in-charges, institutional permissions",
+          "Sensitization and recruitment of eligible participants according to sampling frame",
+          "Administration of questionnaires and structured interviews in the field/hospital/community",
+          "Conducting dietary assessments (24-hour dietary recalls, food frequency checks)",
+          "Maintenance of the Official Daily Project Field Logbook: participant tally, challenges encountered, daily solutions"
+        ],
         hours: 8,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 45.3.07 Emerging Issues and Trends.\n• Explain coping with challenges posed by emerging issues and trends.",
-        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
-        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
-        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Execute field entry and community mobilization with high ethical and professional standards.\n• Administer primary data collection instruments methodically.\n• Keep systematic daily entries in the official fieldwork logbook.",
+        learningActivities: "Active on-site field data collection, participant interviewing, daily logbook documentation.",
+        resourcesAndReferences: "Project Field Manual; Approved Questionnaire and Consent Forms; Field Logbook.",
+        assessmentAndRemarks: "Continuous field data collection (No CAT / No RAT - Dedicated fieldwork period)."
       },
       {
         weekNumber: 8,
-        topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Trade Project)",
-        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        topicTitle: "45.3.04 Fieldwork & Primary Data Collection Phase II (Anthropometry & Deep Survey)",
+        subTopics: [
+          "Intensive data collection in designated study clusters, households, or clinical wards",
+          "Execution of standardized anthropometric measurements (weight, height/length, MUAC, edema verification)",
+          "Conducting Key Informant Interviews (KII) and Focus Group Discussions (FGD)",
+          "Field quality control: on-the-spot questionnaire checking for missing values, ambiguous responses, and calibration verification",
+          "Managing non-responses, replacement protocols, and field logistics"
+        ],
         hours: 8,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Trade Project.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
-        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
-        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
-        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Conduct anthropometric measurements adhering to strict WHO measurement protocols.\n• Facilitate qualitative interviews and record field observations accurately.\n• Verify data completeness at point of collection to prevent data loss.",
+        learningActivities: "Active field measurement and interviewing, tool auditing, supervisor interim phone/site consultation.",
+        resourcesAndReferences: "WHO Anthropometric Calibration Guides; Fieldwork Logbook.",
+        assessmentAndRemarks: "Active field data collection (No CAT / No RAT - Uninterrupted data collection week)."
       },
       {
         weekNumber: 9,
-        topicTitle: "Applied Practice & Case Studies in Trade Project (Week 9)",
-        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        topicTitle: "45.3.04 Fieldwork Completion, Data Quality Audit & Supervisor Progress Review",
+        subTopics: [
+          "Finalization of remaining participant quotas and sampling follow-ups",
+          "Formal study exit: debriefing community leaders and participating institutions",
+          "Comprehensive field data auditing: cross-checking total collected instruments against target sample size",
+          "Organization and indexing of completed survey forms, recording audio files, and signed consent sheets",
+          "Supervisor Progress Consultation: presentation of completed tools and submission of signed Field Logbook"
+        ],
         hours: 8,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Trade Project in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
-        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
-        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
-        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Complete target sampling quota and execute ethical exit protocols.\n• Conduct comprehensive post-field data quality audits.\n• Present verified primary data tools and signed logbook to project supervisor.",
+        learningActivities: "Fieldwork conclusion, tool verification, supervisor progress consultation meeting.",
+        resourcesAndReferences: "Completed Fieldwork Tool Portfolios; Signed Daily Project Field Logbooks.",
+        assessmentAndRemarks: "Fieldwork Execution & Logbook Verification Assessment (Graded: 20% of final project mark; No written exam)."
       },
       {
         weekNumber: 10,
-        topicTitle: "Applied Practice & Case Studies in Trade Project (Week 10)",
-        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        topicTitle: "45.3.05 Data Processing, Cleaning & Electronic Database Entry",
+        subTopics: [
+          "Development of codebooks: defining variables, variable labels, value codes, and measurement scales",
+          "Creation of electronic data entry template using statistical software (SPSS / Epi-Info / Excel)",
+          "Data entry of completed questionnaires and records",
+          "Data cleaning and screening: identifying data entry errors, outliers, range violations, and missing values",
+          "Data transformation: computation of composite indices (e.g. Dietary Diversity Scores, z-scores via WHO Anthro)"
+        ],
         hours: 8,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Trade Project in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
-        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
-        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
-        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Develop a comprehensive research codebook.\n• Enter primary field data accurately into statistical software.\n• Clean data, resolve recording anomalies, and compute standard nutritional indices.",
+        learningActivities: "Computer laboratory data entry workshop, data cleaning exercises, WHO Anthro practicals.",
+        resourcesAndReferences: "SPSS / Excel Data Processing Manuals; WHO Anthro Software.",
+        assessmentAndRemarks: "Supervisor review and sign-off on clean electronic dataset (No CAT)."
       },
       {
         weekNumber: 11,
-        topicTitle: "Applied Practice & Case Studies in Trade Project (Week 11)",
-        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        topicTitle: "45.3.05 Data Presentation, Statistical Analysis & Interpretation",
+        subTopics: [
+          "Descriptive statistical analysis: frequencies, percentages, cross-tabulations, measures of central tendency and dispersion",
+          "Inferential statistical analysis where applicable: Chi-square tests of association, t-tests, ANOVA, correlation",
+          "Qualitative data analysis: verbatim transcription, coding, category generation, and thematic synthesis",
+          "Data presentation: designing professional scientific tables, bar graphs, pie charts, and trend line plots",
+          "Interpretation of statistical findings directly in relation to the study objectives and research questions"
+        ],
         hours: 8,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Trade Project in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
-        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
-        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
-        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Perform relevant descriptive and inferential statistical analyses aligned with project objectives.\n• Present research results through well-labeled tables and charts following TVET standards.\n• Interpret analytical findings accurately without subjective speculation.",
+        learningActivities: "Statistical analysis clinic, chart formatting sessions, supervisor review of preliminary findings.",
+        resourcesAndReferences: "Statistical analysis software; TVET Technical Report Writing Manual.",
+        assessmentAndRemarks: "Submission and review of draft Chapter 4 (Results, Findings, and Analysis)."
       },
       {
         weekNumber: 12,
-        topicTitle: "Applied Practice & Case Studies in Trade Project (Week 12)",
-        subTopics: ["Practical laboratory demonstration and applied exercises", "Group case study analysis and interactive student presentations", "Individual tutorial assignment and competency evaluation"],
+        topicTitle: "45.3.06 Report Writing: Discussion, Conclusions, Recommendations & Draft Review",
+        subTopics: [
+          "Drafting Chapter 5: Discussion of findings in the context of published local and international literature",
+          "Drawing conclusions that directly address the stated study objectives",
+          "Formulation of practical, evidence-based recommendations for community, policy, and clinical practice",
+          "Identifying study limitations and suggesting priorities for future research",
+          "Compilation of complete first draft: Preliminary pages, Chapters 1–5, References, and Appendices",
+          "Submission of complete draft to designated supervisor for comprehensive editorial review"
+        ],
         hours: 8,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply theoretical principles of Trade Project in practical and clinical scenarios.\n• Analyze occupational case studies and present clinical recommendations.",
-        learningActivities: "Practical demonstrations, case study discussions, and tutorial problem solving.",
-        resourcesAndReferences: "Prescribed textbook references and clinical laboratory guides.",
-        assessmentAndRemarks: "Practical checklist assessment and tutor feedback."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss findings critically by comparing and contrasting with existing empirical literature.\n• Synthesize logical, objective-based conclusions.\n• Formulate actionable recommendations and submit full first draft for review.",
+        learningActivities: "Discussion writing workshop, individual supervisor consultation on draft findings.",
+        resourcesAndReferences: "Sample accredited TVET project reports; Academic journal papers.",
+        assessmentAndRemarks: "Formal submission of Complete First Draft of Project Report to project supervisor."
       },
       {
         weekNumber: 13,
-        topicTitle: "45.3.07 Emerging Issues and Trends & Comprehensive Syllabus Revision",
-        subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Coping with challenges posed by emerging issues and trends"],
+        topicTitle: "45.3.06 Draft Revisions, Document Formatting & Professional Binding",
+        subTopics: [
+          "Systematic integration of supervisor feedback, editorial corrections, and structural amendments",
+          "Formatting adherence to TVET and KNEC specifications: margin dimensions, line spacing, font consistency, pagination",
+          "Finalization of preliminary pages: Title page, Declaration, Dedication, Acknowledgements, Abstract, Table of Contents, Lists of Tables/Figures, Abbreviations",
+          "Plagiarism checking and similarity index certification in accordance with institutional policy",
+          "Final printing, proofreading, and binding (three spiral/hard-bound copies as prescribed)"
+        ],
         hours: 8,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 45.3.07 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in 45.3.07 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping with challenges posed by emerging issues and trends.",
-        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
-        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
-        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Revise project document thoroughly in response to supervisor commentary.\n• Format document to exact TVET technical publishing standards.\n• Produce professionally bound project report copies ready for external examination.",
+        learningActivities: "Formatting and layout clinic, final proofreading, document binding verification.",
+        resourcesAndReferences: "KNEC Project Submission Format Guidelines; Institutional Plagiarism Policy.",
+        assessmentAndRemarks: "Supervisor final sign-off and approval for submission (No CAT / No RAT)."
       },
       {
         weekNumber: 14,
-        topicTitle: "Final Summative Examination (Trade Project)",
-        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        topicTitle: "45.3.06 Final Bound Project Submission & Oral Defense / Presentation",
+        subTopics: [
+          "Formal submission of three bound copies of the Trade Project Report to the Head of Department",
+          "Preparation of digital slide presentation (background, problem, objectives, methodology, key findings, conclusions, recommendations)",
+          "Final oral defense before the TVET / KNEC Academic Project Examination Panel",
+          "Oral defense questioning, viva voce examination, and demonstration of vocational competency",
+          "Compilation of final project examination scores and institutional archiving"
+        ],
         hours: 8,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Trade Project in accordance with national TVET standards.",
-        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
-        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
-        assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
-      },
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Present project findings coherently, persuasively, and within allotted time limits.\n• Defend methodology, data interpretation, and conclusions authoritatively under panel scrutiny.\n• Demonstrate mastery of vocational competence, professional ethics, and TVET scholarship.",
+        learningActivities: "Formal project defense presentations, panel viva voce examination, award of marks.",
+        resourcesAndReferences: "TVET Final Project Defense Rubric; External Examination Score Sheets.",
+        assessmentAndRemarks: "Final Project Report & Oral Defense Evaluation (Graded: 60% of final project mark; NO written theory examination)."
+      }
     ],
-    references: ["KNEC. (2021). Guidelines for Trade Projects in Technical Examinations. Kenya National Examinations Council.", "Mugenda, O. M., & Mugenda, A. G. (2019). Research Methods: Quantitative and Qualitative Approaches. ACTS Press."],
-    instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
+    references: [
+      "KNEC. (2021). Guidelines for Trade Projects in Technical Examinations. Kenya National Examinations Council, Nairobi.",
+      "Mugenda, O. M., & Mugenda, A. G. (2019). Research Methods: Quantitative and Qualitative Approaches. ACTS Press, Nairobi.",
+      "Kothari, C. R., & Garg, G. (2019). Research Methodology: Methods and Techniques (4th ed.). New Age International Publishers.",
+      "Gibson, R. S. (2005). Principles of Nutritional Assessment (2nd ed.). Oxford University Press.",
+      "Ministry of Health, Kenya. (2018). National Food and Nutrition Security Policy Implementation Framework. Government of Kenya."
+    ],
+    instructionalEquipment: [
+      "Whiteboard and dry-erase markers",
+      "Multimedia LCD projector, projection screen, and laptop",
+      "Statistical software package (SPSS / Epi-Info / Microsoft Excel)",
+      "Anthropometric equipment for fieldwork (calibrated digital weighing scales, stadiometers, MUAC tapes)",
+      "Standardized questionnaire booklets, consent forms, and clipboard folders",
+      "Official TVET Project Logbooks and Departmental Assessment Rubrics"
+    ]
   },
 };

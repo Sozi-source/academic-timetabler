@@ -99,6 +99,161 @@ export async function bulkLockTimetableSessionsAction(formData: FormData): Promi
   refreshEditor();
 }
 
+function getRelVal<T extends Record<string, unknown>>(
+  rel: unknown,
+  key: string,
+): string | undefined {
+  if (!rel || typeof rel !== 'object') return undefined;
+  if (Array.isArray(rel)) {
+    const first = rel[0];
+    return first && typeof first === 'object' && key in first ? String((first as Record<string, unknown>)[key]) : undefined;
+  }
+  return key in rel ? String((rel as Record<string, unknown>)[key]) : undefined;
+}
+
+async function diagnoseScheduleClash(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  params: {
+    allocationId: string;
+    workingDayId: string;
+    startTimeSlotId: string;
+    endTimeSlotId: string;
+    trainerId?: string;
+    roomId?: string;
+    fallbackError: string;
+  },
+): Promise<string> {
+  try {
+    const { data: allocation } = await supabase
+      .from('teaching_allocations')
+      .select('academic_period_id, cohort_id, participant_cohort_ids, teaching_offering_id')
+      .eq('id', params.allocationId)
+      .maybeSingle();
+
+    if (!allocation) return params.fallbackError;
+
+    const { data: startSlot } = await supabase
+      .from('time_slots')
+      .select('starts_at, ends_at')
+      .eq('id', params.startTimeSlotId)
+      .maybeSingle();
+
+    const { data: endSlot } = await supabase
+      .from('time_slots')
+      .select('starts_at, ends_at')
+      .eq('id', params.endTimeSlotId)
+      .maybeSingle();
+
+    if (!startSlot || !endSlot) return params.fallbackError;
+
+    const targetStart = startSlot.starts_at;
+    const targetEnd = endSlot.ends_at;
+
+    const allParticipantIds = new Set<string>();
+    if (allocation.cohort_id) allParticipantIds.add(allocation.cohort_id);
+    if (Array.isArray(allocation.participant_cohort_ids)) {
+      allocation.participant_cohort_ids.forEach((id: string) => allParticipantIds.add(id));
+    }
+
+    if (allocation.teaching_offering_id) {
+      const { data: participants } = await supabase
+        .from('teaching_offering_participants')
+        .select('cohort_id')
+        .eq('teaching_offering_id', allocation.teaching_offering_id);
+      participants?.forEach((p) => {
+        if (p.cohort_id) allParticipantIds.add(p.cohort_id);
+      });
+    }
+
+    const participantIdArray = Array.from(allParticipantIds);
+
+    const { data: overlappingSessions } = await supabase
+      .from('scheduled_sessions')
+      .select(`
+        id,
+        cohort_id,
+        trainer_id,
+        room_id,
+        participant_cohort_ids,
+        cohorts ( code, name ),
+        units ( code, name ),
+        trainers ( full_name ),
+        rooms ( name, code ),
+        time_slots:start_time_slot_id ( starts_at ),
+        end_time_slots:end_time_slot_id ( ends_at )
+      `)
+      .eq('academic_period_id', allocation.academic_period_id)
+      .eq('working_day_id', params.workingDayId)
+      .in('status', ['draft', 'confirmed', 'locked']);
+
+    const validOverlapping = (overlappingSessions || []).filter((s) => {
+      const sStart = getRelVal(s.time_slots, 'starts_at');
+      const sEnd = getRelVal(s.end_time_slots, 'ends_at') ?? sStart;
+      if (!sStart || !sEnd) return false;
+      return sStart < targetEnd && targetStart < sEnd;
+    });
+
+    // Check cohort clash
+    for (const session of validOverlapping) {
+      const sessionCohortIds = new Set<string>([
+        session.cohort_id,
+        ...(Array.isArray(session.participant_cohort_ids) ? session.participant_cohort_ids : []),
+      ]);
+
+      for (const targetCohortId of participantIdArray) {
+        if (sessionCohortIds.has(targetCohortId)) {
+          const { data: targetCohort } = await supabase
+            .from('cohorts')
+            .select('code')
+            .eq('id', targetCohortId)
+            .maybeSingle();
+
+          const clashingCohortCode = targetCohort?.code ?? getRelVal(session.cohorts, 'code') ?? 'Cohort';
+          const isSharedPartner = targetCohortId !== allocation.cohort_id;
+          const unitCode = getRelVal(session.units, 'code') ?? 'Unit';
+          const unitName = getRelVal(session.units, 'name') ?? '';
+          const trainerName = getRelVal(session.trainers, 'full_name') ?? 'Unassigned';
+          const roomName = getRelVal(session.rooms, 'name');
+          const roomPart = roomName ? ` in ${roomName}` : '';
+
+          if (isSharedPartner) {
+            return `Cohort clash: Shared partner cohort "${clashingCohortCode}" (participating in this unit) already has ${unitCode} (${unitName}) with ${trainerName}${roomPart} at this time. All participating cohorts must be free.`;
+          }
+          return `Cohort clash: Cohort "${clashingCohortCode}" already has ${unitCode} (${unitName}) with ${trainerName}${roomPart} at this time.`;
+        }
+      }
+    }
+
+    // Check trainer clash
+    if (params.trainerId) {
+      const clashingTrainerSession = validOverlapping.find((s) => s.trainer_id === params.trainerId);
+      if (clashingTrainerSession) {
+        const trainerName = getRelVal(clashingTrainerSession.trainers, 'full_name') ?? 'The selected trainer';
+        const unitCode = getRelVal(clashingTrainerSession.units, 'code') ?? 'Unit';
+        const cohortCode = getRelVal(clashingTrainerSession.cohorts, 'code') ?? 'another cohort';
+        const roomName = getRelVal(clashingTrainerSession.rooms, 'name');
+        const roomPart = roomName ? ` in ${roomName}` : '';
+        return `Trainer clash: ${trainerName} is already scheduled for ${unitCode} (${cohortCode})${roomPart} at this time.`;
+      }
+    }
+
+    // Check room clash
+    if (params.roomId) {
+      const clashingRoomSession = validOverlapping.find((s) => s.room_id === params.roomId);
+      if (clashingRoomSession) {
+        const roomName = getRelVal(clashingRoomSession.rooms, 'name') ?? 'The selected room';
+        const unitCode = getRelVal(clashingRoomSession.units, 'code') ?? 'Unit';
+        const cohortCode = getRelVal(clashingRoomSession.cohorts, 'code') ?? 'another cohort';
+        return `Room clash: Room ${roomName} is already occupied by ${unitCode} (${cohortCode}) at this time.`;
+      }
+    }
+  } catch (diagError) {
+    console.error('Error diagnosing timetable clash:', diagError);
+  }
+
+  return params.fallbackError;
+}
+
 export async function scheduleAllocationSessionAction(
   _previousState: EditorActionState,
   formData: FormData,
@@ -134,7 +289,16 @@ export async function scheduleAllocationSessionAction(
   });
 
   if (error) {
-    return { status: 'error', message: error.message };
+    const detailedMessage = await diagnoseScheduleClash(supabase, {
+      allocationId: parsed.data.allocationId,
+      workingDayId: parsed.data.workingDayId,
+      startTimeSlotId: parsed.data.startTimeSlotId,
+      endTimeSlotId: parsed.data.endTimeSlotId,
+      trainerId: parsed.data.trainerId,
+      roomId: parsed.data.roomId,
+      fallbackError: error.message,
+    });
+    return { status: 'error', message: detailedMessage };
   }
 
   refreshEditor();

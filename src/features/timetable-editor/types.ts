@@ -67,6 +67,9 @@ export interface EditorData {
     trainerId: string | null;
     missingSessionCount: number;
     expectedSessionCount: number;
+    participantCohortIds: string[];
+    participantCohortCodes: string[];
+    isSharedClass: boolean;
   }>;
   workingDays: Array<EditorOption & { sequenceNumber: number }>;
   timeSlots: Array<EditorOption & { startsAt: string; endsAt: string; sequenceNumber: number }>;

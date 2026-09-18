@@ -173,6 +173,15 @@ export const getTimetableEditorData = cache(async (
     const expectedSessionCount = Number(allocation.weeklySessions);
     const missingSessionCount = Math.max(0, expectedSessionCount - activeSessionCount);
 
+    const participantIds = Array.from(new Set([
+      ...(allocation.participantCohortIds ?? []),
+      allocation.cohortId,
+    ]));
+    const participantCodes = participantIds
+      .map((id) => cohortDirectory.get(id)?.code)
+      .filter((code): code is string => Boolean(code));
+    const isSharedClass = participantCodes.length > 1;
+
     return missingSessionCount > 0
       ? [{
           id: allocation.id,
@@ -185,6 +194,9 @@ export const getTimetableEditorData = cache(async (
           trainerId: allocation.trainerId,
           missingSessionCount,
           expectedSessionCount,
+          participantCohortIds: participantIds,
+          participantCohortCodes: participantCodes,
+          isSharedClass,
         }]
       : [];
   });

@@ -88,9 +88,16 @@ export function TimetableEditorWorkspace({
                 <div>
                   <div className="flex items-center justify-between gap-1">
                     <span className="font-bold text-xs text-primary">{allocation.unitCode}</span>
-                    <span className="text-[10px] font-semibold text-text-muted bg-surface-subtle px-1.5 py-0.5 rounded border border-border-soft">
-                      {allocation.cohortCode}
-                    </span>
+                    <div className="flex items-center gap-1">
+                      {allocation.isSharedClass ? (
+                        <span className="text-[9px] font-bold text-primary bg-primary-soft/50 px-1.5 py-0.5 rounded border border-primary/20" title={`Shared with ${allocation.participantCohortCodes.join(', ')}`}>
+                          Shared
+                        </span>
+                      ) : null}
+                      <span className="text-[10px] font-semibold text-text-muted bg-surface-subtle px-1.5 py-0.5 rounded border border-border-soft">
+                        {allocation.cohortCode}
+                      </span>
+                    </div>
                   </div>
                   <p className="mt-1.5 font-bold text-text-primary text-xs leading-snug line-clamp-2" title={allocation.unitName}>
                     {allocation.unitName}

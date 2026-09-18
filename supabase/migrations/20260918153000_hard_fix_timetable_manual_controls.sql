@@ -99,6 +99,7 @@ declare
   next_session_num smallint;
   clash_record record;
   new_session_id uuid;
+  effective_participant_cohort_ids uuid[] := '{}'::uuid[];
 begin
   if not public.current_user_has_role(array['hod','system_admin']::public.app_role[]) then
     raise exception using errcode = '42501', message = 'You are not authorized to schedule timetable sessions.';
@@ -165,9 +166,18 @@ begin
     end if;
 
     -- Check for Trainer clash
-    select existing.id, t.full_name into clash_record
+    select
+      existing.id,
+      t.full_name as trainer_name,
+      u.code as unit_code,
+      c.code as cohort_code,
+      r.name as room_name
+    into clash_record
     from public.scheduled_sessions existing
     join public.trainers t on t.id = existing.trainer_id
+    join public.units u on u.id = existing.unit_id
+    join public.cohorts c on c.id = existing.cohort_id
+    left join public.rooms r on r.id = existing.room_id
     join public.time_slots existing_start on existing_start.id = existing.start_time_slot_id
     join public.time_slots existing_end on existing_end.id = existing.end_time_slot_id
     where existing.academic_period_id = selected_allocation.academic_period_id
@@ -179,14 +189,39 @@ begin
     limit 1;
 
     if clash_record.id is not null then
-      raise exception using errcode = '23P01', message = 'Trainer ' || clash_record.full_name || ' is already scheduled for another class at this time.';
+      raise exception using errcode = '23P01',
+        message = format('Trainer clash: %s is already scheduled to teach %s (%s)%s at this time.',
+          clash_record.trainer_name, clash_record.unit_code, clash_record.cohort_code,
+          case when clash_record.room_name is not null then ' in ' || clash_record.room_name else '' end
+        );
     end if;
   end if;
 
+  -- Resolve all participant cohort IDs (including shared offerings)
+  effective_participant_cohort_ids := public.resolve_participant_cohort_ids(
+    selected_allocation.cohort_id,
+    selected_allocation.teaching_offering_id
+  );
+
+  if cardinality(effective_participant_cohort_ids) = 0 then
+    effective_participant_cohort_ids := array[selected_allocation.cohort_id];
+  end if;
+
   -- Check for Cohort clash
-  select existing.id, c.code into clash_record
+  select
+    existing.id,
+    c.code as cohort_code,
+    u.code as unit_code,
+    u.name as unit_name,
+    t.full_name as trainer_name,
+    r.name as room_name,
+    (c.id <> selected_allocation.cohort_id) as is_partner_cohort
+  into clash_record
   from public.scheduled_sessions existing
   join public.cohorts c on c.id = existing.cohort_id
+  join public.units u on u.id = existing.unit_id
+  left join public.trainers t on t.id = existing.trainer_id
+  left join public.rooms r on r.id = existing.room_id
   join public.time_slots existing_start on existing_start.id = existing.start_time_slot_id
   join public.time_slots existing_end on existing_end.id = existing.end_time_slot_id
   where existing.academic_period_id = selected_allocation.academic_period_id
@@ -194,11 +229,36 @@ begin
     and existing.status not in ('cancelled','archived')
     and existing_start.starts_at < end_time
     and existing_end.ends_at > start_time
-    and existing.cohort_id = selected_allocation.cohort_id
+    and (
+      existing.cohort_id = any(effective_participant_cohort_ids)
+      or coalesce(existing.participant_cohort_ids, '{}'::uuid[]) && effective_participant_cohort_ids
+    )
   limit 1;
 
   if clash_record.id is not null then
-    raise exception using errcode = '23P01', message = 'Cohort ' || clash_record.code || ' is already scheduled for another class at this time.';
+    if clash_record.is_partner_cohort then
+      raise exception using
+        errcode = '23P01',
+        message = format(
+          'Cohort clash: Shared partner cohort "%s" (participating in this unit) already has %s (%s) with %s%s during this time. All participating cohorts must be free simultaneously.',
+          clash_record.cohort_code,
+          clash_record.unit_code,
+          clash_record.unit_name,
+          coalesce(clash_record.trainer_name, 'Unassigned trainer'),
+          case when clash_record.room_name is not null then ' in ' || clash_record.room_name else '' end
+        );
+    else
+      raise exception using
+        errcode = '23P01',
+        message = format(
+          'Cohort clash: Cohort "%s" already has %s (%s) with %s%s during this time.',
+          clash_record.cohort_code,
+          clash_record.unit_code,
+          clash_record.unit_name,
+          coalesce(clash_record.trainer_name, 'Unassigned trainer'),
+          case when clash_record.room_name is not null then ' in ' || clash_record.room_name else '' end
+        );
+    end if;
   end if;
 
   -- Check for Room clash & capacity
@@ -212,9 +272,16 @@ begin
       raise exception using errcode = '23514', message = format('Room capacity (%s) is below cohort size (%s).', selected_room.capacity, selected_allocation.cohort_actual_size);
     end if;
 
-    select existing.id, r.name into clash_record
+    select
+      existing.id,
+      r.name as room_name,
+      u.code as unit_code,
+      c.code as cohort_code
+    into clash_record
     from public.scheduled_sessions existing
     join public.rooms r on r.id = existing.room_id
+    join public.units u on u.id = existing.unit_id
+    join public.cohorts c on c.id = existing.cohort_id
     join public.time_slots existing_start on existing_start.id = existing.start_time_slot_id
     join public.time_slots existing_end on existing_end.id = existing.end_time_slot_id
     where existing.academic_period_id = selected_allocation.academic_period_id
@@ -226,7 +293,9 @@ begin
     limit 1;
 
     if clash_record.id is not null then
-      raise exception using errcode = '23P01', message = 'Room ' || clash_record.name || ' is already occupied at this time.';
+      raise exception using errcode = '23P01',
+        message = format('Room clash: Room %s is already booked for %s (%s) at this time.',
+          clash_record.room_name, clash_record.unit_code, clash_record.cohort_code);
     end if;
   end if;
 
@@ -282,7 +351,7 @@ begin
     'clear'::public.scheduled_session_conflict_state,
     target_is_locked,
     nullif(trim(target_notes), ''),
-    selected_allocation.participant_cohort_ids,
+    effective_participant_cohort_ids,
     selected_allocation.combined_cohort_size,
     auth.uid(),
     auth.uid()
@@ -360,5 +429,221 @@ grant execute on function public.unschedule_session_safely(uuid) to authenticate
 
 comment on function public.unschedule_session_safely(uuid) is
   'Safely removes a timetable session, returning the allocation back to the unplaced list.';
+
+-- 4. Enhanced System-Wide Collision Trigger with Informative Clash Messages
+create or replace function public.validate_scheduled_session_conflicts()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  selected_start_slot public.time_slots%rowtype;
+  selected_end_slot public.time_slots%rowtype;
+  selected_trainer public.trainers%rowtype;
+  approved_full_day boolean := false;
+  selected_participant_cohort_ids uuid[] := '{}'::uuid[];
+  session_duration_minutes integer;
+  existing_daily_minutes integer;
+  existing_weekly_minutes integer;
+  clashing_record record;
+begin
+  if new.status in ('cancelled', 'archived') then
+    new.conflict_state := 'clear';
+    return new;
+  end if;
+
+  select *
+  into selected_start_slot
+  from public.time_slots
+  where id = new.start_time_slot_id;
+
+  select *
+  into selected_end_slot
+  from public.time_slots
+  where id = new.end_time_slot_id;
+
+  select *
+  into selected_trainer
+  from public.trainers
+  where id = new.trainer_id;
+
+  select
+    coalesce(allocation.is_full_day_session, false),
+    public.resolve_participant_cohort_ids(
+      allocation.cohort_id,
+      allocation.teaching_offering_id
+    )
+  into
+    approved_full_day,
+    selected_participant_cohort_ids
+  from public.teaching_allocations allocation
+  where allocation.id = new.teaching_allocation_id;
+
+  if cardinality(selected_participant_cohort_ids) = 0 then
+    selected_participant_cohort_ids := array[new.cohort_id];
+  end if;
+
+  session_duration_minutes :=
+    extract(epoch from (
+      selected_end_slot.ends_at - selected_start_slot.starts_at
+    ))::integer / 60;
+
+  -- Trainer clash
+  if new.trainer_id is not null then
+    select
+      existing.id,
+      t.full_name as trainer_name,
+      u.code as unit_code,
+      c.code as cohort_code
+    into clashing_record
+    from public.scheduled_sessions existing
+    join public.trainers t on t.id = existing.trainer_id
+    join public.units u on u.id = existing.unit_id
+    join public.cohorts c on c.id = existing.cohort_id
+    join public.time_slots existing_start
+      on existing_start.id = existing.start_time_slot_id
+    join public.time_slots existing_end
+      on existing_end.id = existing.end_time_slot_id
+    where existing.id <> new.id
+      and existing.academic_period_id = new.academic_period_id
+      and existing.working_day_id = new.working_day_id
+      and existing.trainer_id = new.trainer_id
+      and existing.status not in ('cancelled', 'archived')
+      and existing_start.starts_at < selected_end_slot.ends_at
+      and selected_start_slot.starts_at < existing_end.ends_at
+    limit 1;
+
+    if clashing_record.id is not null then
+      raise exception using
+        errcode = '23P01',
+        message = format('Trainer clash: Trainer %s already has session %s (%s) during the selected time.', clashing_record.trainer_name, clashing_record.unit_code, clashing_record.cohort_code);
+    end if;
+  end if;
+
+  -- Cohort clash
+  select
+    existing.id,
+    c.code as cohort_code,
+    u.code as unit_code,
+    u.name as unit_name
+  into clashing_record
+  from public.scheduled_sessions existing
+  join public.cohorts c on c.id = existing.cohort_id
+  join public.units u on u.id = existing.unit_id
+  join public.time_slots existing_start
+    on existing_start.id = existing.start_time_slot_id
+  join public.time_slots existing_end
+    on existing_end.id = existing.end_time_slot_id
+  where existing.id <> new.id
+    and existing.academic_period_id = new.academic_period_id
+    and existing.working_day_id = new.working_day_id
+    and array_append(
+      coalesce(existing.participant_cohort_ids, '{}'::uuid[]),
+      existing.cohort_id
+    ) && selected_participant_cohort_ids
+    and existing.status not in ('cancelled', 'archived')
+    and existing_start.starts_at < selected_end_slot.ends_at
+    and selected_start_slot.starts_at < existing_end.ends_at
+  limit 1;
+
+  if clashing_record.id is not null then
+    raise exception using
+      errcode = '23P01',
+      message = format('Cohort clash: Participating cohort %s already has %s (%s) during the selected time.', clashing_record.cohort_code, clashing_record.unit_code, clashing_record.unit_name);
+  end if;
+
+  -- Room clash
+  if new.room_id is not null then
+    select
+      existing.id,
+      r.name as room_name,
+      u.code as unit_code,
+      c.code as cohort_code
+    into clashing_record
+    from public.scheduled_sessions existing
+    join public.rooms r on r.id = existing.room_id
+    join public.units u on u.id = existing.unit_id
+    join public.cohorts c on c.id = existing.cohort_id
+    join public.time_slots existing_start
+      on existing_start.id = existing.start_time_slot_id
+    join public.time_slots existing_end
+      on existing_end.id = existing.end_time_slot_id
+    where existing.id <> new.id
+      and existing.academic_period_id = new.academic_period_id
+      and existing.working_day_id = new.working_day_id
+      and existing.room_id = new.room_id
+      and existing.status not in ('cancelled', 'archived')
+      and existing_start.starts_at < selected_end_slot.ends_at
+      and selected_start_slot.starts_at < existing_end.ends_at
+    limit 1;
+
+    if clashing_record.id is not null then
+      raise exception using
+        errcode = '23P01',
+        message = format('Room clash: Room %s already has session %s (%s) during the selected time.', clashing_record.room_name, clashing_record.unit_code, clashing_record.cohort_code);
+    end if;
+  end if;
+
+  select coalesce(
+    sum(
+      extract(epoch from (
+        existing_end.ends_at - existing_start.starts_at
+      ))::integer / 60
+    ),
+    0
+  )
+  into existing_daily_minutes
+  from public.scheduled_sessions existing
+  join public.time_slots existing_start
+    on existing_start.id = existing.start_time_slot_id
+  join public.time_slots existing_end
+    on existing_end.id = existing.end_time_slot_id
+  where existing.id <> new.id
+    and existing.academic_period_id = new.academic_period_id
+    and existing.working_day_id = new.working_day_id
+    and existing.trainer_id = new.trainer_id
+    and existing.status not in ('cancelled', 'archived');
+
+  if not approved_full_day
+    and selected_trainer.id is not null
+    and existing_daily_minutes + session_duration_minutes
+      > selected_trainer.maximum_daily_hours * 60 then
+    raise exception using
+      errcode = 'P0001',
+      message = 'The scheduled session would exceed the trainer maximum daily workload';
+  end if;
+
+  select coalesce(
+    sum(
+      extract(epoch from (
+        existing_end.ends_at - existing_start.starts_at
+      ))::integer / 60
+    ),
+    0
+  )
+  into existing_weekly_minutes
+  from public.scheduled_sessions existing
+  join public.time_slots existing_start
+    on existing_start.id = existing.start_time_slot_id
+  join public.time_slots existing_end
+    on existing_end.id = existing.end_time_slot_id
+  where existing.id <> new.id
+    and existing.academic_period_id = new.academic_period_id
+    and existing.trainer_id = new.trainer_id
+    and existing.status not in ('cancelled', 'archived');
+
+  if selected_trainer.id is not null
+    and existing_weekly_minutes + session_duration_minutes
+      > selected_trainer.maximum_weekly_hours * 60 then
+    raise exception using
+      errcode = 'P0001',
+      message = 'The scheduled session would exceed the trainer maximum weekly workload';
+  end if;
+
+  new.conflict_state := 'clear';
+  return new;
+end;
+$$;
 
 commit;

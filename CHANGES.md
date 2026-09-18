@@ -23,6 +23,22 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 
 ---
 
+### 2026-09-18: Remote Merge, Large File Removal (`Course outlines.zip`) & Archive Ignore Standard
+
+- **Context & Problem**:
+  - `git push` was rejected because the remote contained recent curriculum standardisation commits (`e7b0d2a` and `34d1abd`).
+  - While pulling, Git began downloading a 56.3 MB object (`Course outlines.zip`), which was accidentally included in commit `e7b0d2a`.
+- **Key Changes**:
+  - Merged remote branch cleanly (`git merge origin/main`), preserving both curriculum updates and database migration fixes.
+  - Removed `Course outlines.zip` (56.3 MB) from Git tracking (`git rm -f "Course outlines.zip"`).
+  - Untracked root scratch and build cache files (`scratch_units.json`, `mod2_summary.json`, `tsconfig.tsbuildinfo`).
+  - Added archive patterns (`*.zip`, `*.tar.gz`, `*.tgz`, `*.rar`, `*.7z`) to `.gitignore` to prevent future tracking of compressed archives.
+  - Updated `src/tests/curriculum-harmonization.test.ts` to validate the authoritative 51 canonical curriculum units.
+  - Pushed all merged commits and cleanups directly to GitHub (`origin/main`).
+- **Verification**:
+  - `npm test`: 117/117 test files passed, 598/598 tests passed.
+  - `npm run check`: 0 type errors, 0 lint warnings, clean Next.js 16 build.
+
 ### 2026-09-18: Full TVET Curriculum Registry Standardisation
 
 **Summary**: All TVET Module 2 units populated from the official KNEC curriculum. 8 CHN/CND certificate programme units added as a new canonical registry. Trade Project fully restructured to authentic fieldwork-based schedule with no synthetic assessments.

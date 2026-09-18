@@ -1,86 +1,46 @@
 -- ============================================================================
 -- Migration: Enterprise Unit Offering Lifecycle Synchronization & Clash Clearing
 --
--- 0. Deduplication & Partial Unique Index Guard:
---    - Deduplicates any duplicate allocations in public.teaching_allocations
---      for (academic_period_id, cohort_id, unit_id) by archiving older duplicates.
---    - Standardizes the partial unique index:
+-- 1. Fix validate_teaching_allocation() FIRST:
+--    - Replaces the function so no trigger can fail with the enum error
+--      (invalid input value for enum public.teaching_allocation_status: "cancelled").
+--    - When an allocation is disabled or set to 'suspended', 'completed', or 'archived',
+--      bypasses all checks and returns NEW immediately.
+--    - When active, permits cross-stage units if an approved offering exists.
+--
+-- 2. Deduplication & Partial Unique Index Guard:
+--    - Temporarily disables triggers on teaching_allocations during deduplication.
+--    - Deduplicates public.teaching_allocations per (academic_period_id, cohort_id, unit_id)
+--      by archiving older duplicates.
+--    - Drops and recreates the authoritative partial unique index:
 --      teaching_allocations_period_cohort_unit_unique_idx ON public.teaching_allocations
 --      (academic_period_id, cohort_id, unit_id) WHERE status IN ('draft', 'active', 'suspended').
 --
--- 1. Fix validate_teaching_allocation():
---    - When an allocation is disabled (not is_timetable_enabled) or set to
---      'suspended', 'completed', or 'archived', bypass all
---      checks and return NEW immediately.
---    - When active, allow cross-stage units if an approved unit offering
---      exists for (academic_period_id, cohort_id, unit_id).
---
--- 2. Update set_unit_offering_approval():
+-- 3. Update set_unit_offering_approval():
 --    - When dropping (p_approve = false):
 --      * Decouple shared teaching allocations and sessions cleanly:
---        remove the dropped cohort from participant_cohort_ids and
---        teaching_offering_participants.
---      * NEVER mutate cohort_id on an existing allocation record to another cohort,
+--        removes dropped cohort from participant_cohort_ids and teaching_offering_participants.
+--      * NEVER mutates cohort_id on an existing allocation record to another cohort,
 --        eliminating duplicate key collisions on teaching_allocations_period_cohort_unit_unique_idx.
---      * If partner cohorts were sharing the unit, ensure each partner cohort has its own
---        independent active/draft allocation.
---      * Suspend the dropped cohort's allocation and unlock/cancel any solo scheduled sessions.
+--      * Ensures remaining partner cohorts maintain their own independent draft allocations.
+--      * Suspends the dropped cohort's allocation and cancels solo sessions.
 --    - When approving (p_approve = true):
---      * Re-enable existing allocations matching (academic_period_id, cohort_id, unit_id).
---      * Create an unassigned draft allocation only when none exists, ensuring it
---        is immediately ready for timetabling without unique constraint collisions.
+--      * Re-enables allocations matching (academic_period_id, cohort_id, unit_id).
+--      * Inserts unassigned draft allocations only when none exists.
 --
--- 3. Update add_special_unit_offering():
---    - Sets approval_status = 'approved', approved_by, approved_at.
---    - Creates or reactivates an unassigned draft teaching allocation safely.
+-- 4. Update add_special_unit_offering():
+--    - Re-activates existing allocations safely or inserts with conflict fallback.
 --
--- 4. Update save_generated_timetable_draft():
---    - Purges orphaned or suspended sessions for the department before
---      persisting newly generated sessions.
+-- 5. Update save_generated_timetable_draft():
+--    - Purges orphaned or suspended sessions before saving new generation runs.
 --
--- 5. Data Cleanup:
---    - Clears DNDT-SEP-2026 from any Research participants, allocations, and sessions.
---    - Reconciles Agricultural Production for CHN MAY 25 / CND MAY 25 without clashes.
+-- 6. Immediate Data Cleanup & Direct Withdrawal:
+--    - Clears DNDT-SEP-2026 from Research ghost sessions and participants.
+--    - Directly sets Agricultural Production for CHN MAY 25 to 'withdrawn',
+--      suspends CHN MAY 25's allocation, and decouples partner cohorts cleanly.
 -- ============================================================================
 
--- 0. Deduplication & Partial Unique Index Guard
-with ranked_allocations as (
-  select id,
-         row_number() over (
-           partition by academic_period_id, cohort_id, unit_id
-           order by
-             case status
-               when 'active' then 1
-               when 'draft' then 2
-               when 'suspended' then 3
-               else 4
-             end,
-             updated_at desc,
-             created_at desc
-         ) as rn
-  from public.teaching_allocations
-  where status in ('draft', 'active', 'suspended')
-)
-update public.teaching_allocations
-set status = 'archived',
-    is_timetable_enabled = false,
-    notes = left(concat_ws(' | ', nullif(trim(notes), ''), 'Archived duplicate allocation during enterprise lifecycle sync'), 1500),
-    updated_at = now()
-where id in (
-  select id from ranked_allocations where rn > 1
-);
-
-drop index if exists public.teaching_allocations_period_cohort_unit_unique_idx;
-
-create unique index teaching_allocations_period_cohort_unit_unique_idx
-on public.teaching_allocations (
-  academic_period_id,
-  cohort_id,
-  unit_id
-)
-where status in ('draft', 'active', 'suspended');
-
--- 1. Fix validate_teaching_allocation()
+-- 1. FIRST: Fix validate_teaching_allocation() so triggers never crash on status changes
 create or replace function public.validate_teaching_allocation()
 returns trigger
 language plpgsql
@@ -226,7 +186,48 @@ $$;
 comment on function public.validate_teaching_allocation() is
   'Validates timetable allocations, permitting approved or audited cross-stage offerings and gracefully bypassing deactivating allocations.';
 
--- 2. Update set_unit_offering_approval()
+-- 2. Deduplication & Partial Unique Index Guard
+alter table public.teaching_allocations disable trigger all;
+
+with ranked_allocations as (
+  select id,
+         row_number() over (
+           partition by academic_period_id, cohort_id, unit_id
+           order by
+             case status
+               when 'active' then 1
+               when 'draft' then 2
+               when 'suspended' then 3
+               else 4
+             end,
+             updated_at desc,
+             created_at desc
+         ) as rn
+  from public.teaching_allocations
+  where status in ('draft', 'active', 'suspended')
+)
+update public.teaching_allocations
+set status = 'archived',
+    is_timetable_enabled = false,
+    notes = left(concat_ws(' | ', nullif(trim(notes), ''), 'Archived duplicate allocation during enterprise lifecycle sync'), 1500),
+    updated_at = now()
+where id in (
+  select id from ranked_allocations where rn > 1
+);
+
+drop index if exists public.teaching_allocations_period_cohort_unit_unique_idx;
+
+create unique index teaching_allocations_period_cohort_unit_unique_idx
+on public.teaching_allocations (
+  academic_period_id,
+  cohort_id,
+  unit_id
+)
+where status in ('draft', 'active', 'suspended');
+
+alter table public.teaching_allocations enable trigger all;
+
+-- 3. Update set_unit_offering_approval()
 create or replace function public.set_unit_offering_approval(
   p_offering_ids uuid[],
   p_approve      boolean,
@@ -585,7 +586,7 @@ $$;
 revoke all on function public.set_unit_offering_approval(uuid[], boolean, text) from public;
 grant  execute on function public.set_unit_offering_approval(uuid[], boolean, text) to authenticated;
 
--- 3. Update add_special_unit_offering()
+-- 4. Update add_special_unit_offering()
 create or replace function public.add_special_unit_offering(
   selected_academic_period_id uuid,
   selected_cohort_id uuid,
@@ -785,7 +786,7 @@ $$;
 revoke all on function public.add_special_unit_offering(uuid, uuid, uuid, text) from public;
 grant  execute on function public.add_special_unit_offering(uuid, uuid, uuid, text) to authenticated;
 
--- 4. Update save_generated_timetable_draft()
+-- 5. Update save_generated_timetable_draft()
 create or replace function public.save_generated_timetable_draft(
   target_academic_period_id uuid,
   generated_sessions jsonb,
@@ -918,7 +919,7 @@ $$;
 revoke all on function public.save_generated_timetable_draft(uuid, jsonb, jsonb) from public;
 grant execute on function public.save_generated_timetable_draft(uuid, jsonb, jsonb) to authenticated;
 
--- 5. Immediate Data Cleanup: Clear DNDT-SEP-2026 from Research & Reconcile Agricultural Production
+-- 6. Immediate Data Cleanup & Direct Reconciliation
 do $$
 declare
   dndt_cohort_id uuid;
@@ -983,7 +984,7 @@ begin
     where cohort_id = dndt_cohort_id and unit_id = any(research_unit_ids);
   end if;
 
-  -- B. Reconcile Agricultural Production for CHN MAY 25
+  -- B. Directly withdraw and decouple Agricultural Production for CHN MAY 25
   select id into chn_cohort_id
   from public.cohorts
   where (code ilike '%CHN%MAY%25%' or name ilike '%CHN%MAY%25%')
@@ -994,46 +995,62 @@ begin
   where name ilike '%Agricultural Production%' or code in ('CHN 2309', 'CND 2306', 'DND 3205');
 
   if chn_cohort_id is not null and agric_unit_ids is not null then
-    if exists (
-      select 1 from public.unit_offerings
-      where cohort_id = chn_cohort_id
-        and unit_id = any(agric_unit_ids)
-        and approval_status = 'withdrawn'
-    ) then
-      update public.teaching_allocations
-      set participant_cohort_ids = array_remove(participant_cohort_ids, chn_cohort_id),
-          updated_at = now()
-      where unit_id = any(agric_unit_ids)
-        and chn_cohort_id = any(participant_cohort_ids)
-        and cardinality(array_remove(participant_cohort_ids, chn_cohort_id)) > 0;
+    -- 1. Mark offering as withdrawn
+    update public.unit_offerings
+    set approval_status = 'withdrawn',
+        selection_state = 'excluded',
+        status = 'cancelled',
+        is_timetable_enabled = false,
+        withdrawal_reason = 'Dropped from cohort teaching plan for this academic period',
+        withdrawn_at = now(),
+        updated_at = now()
+    where cohort_id = chn_cohort_id
+      and unit_id = any(agric_unit_ids);
 
-      update public.teaching_allocations
-      set is_timetable_enabled = false,
-          status = 'suspended',
-          updated_at = now()
-      where unit_id = any(agric_unit_ids)
-        and cohort_id = chn_cohort_id;
+    -- 2. Remove CHN MAY 25 from teaching_offering_participants
+    delete from public.teaching_offering_participants
+    where cohort_id = chn_cohort_id
+      and unit_id = any(agric_unit_ids);
 
-      update public.scheduled_sessions
-      set participant_cohort_ids = array_remove(participant_cohort_ids, chn_cohort_id),
-          conflict_state = 'clear',
-          updated_at = now()
-      where (unit_id = any(agric_unit_ids) or teaching_allocation_id in (
-        select id from public.teaching_allocations where unit_id = any(agric_unit_ids)
-      ))
-        and chn_cohort_id = any(participant_cohort_ids)
-        and cardinality(array_remove(participant_cohort_ids, chn_cohort_id)) > 0;
+    -- 3. Remove CHN MAY 25 from shared participant_cohort_ids
+    update public.teaching_allocations
+    set participant_cohort_ids = array_remove(participant_cohort_ids, chn_cohort_id),
+        updated_at = now()
+    where unit_id = any(agric_unit_ids)
+      and chn_cohort_id = any(participant_cohort_ids)
+      and cardinality(array_remove(participant_cohort_ids, chn_cohort_id)) > 0;
 
-      update public.scheduled_sessions
-      set status = 'cancelled',
-          conflict_state = 'clear',
-          is_locked = false,
-          updated_at = now()
-      where (unit_id = any(agric_unit_ids) or teaching_allocation_id in (
-        select id from public.teaching_allocations where unit_id = any(agric_unit_ids)
-      ))
-        and (cohort_id = chn_cohort_id or participant_cohort_ids = array[chn_cohort_id])
-        and status not in ('cancelled', 'archived');
-    end if;
+    -- 4. Suspend CHN MAY 25's own allocation
+    update public.teaching_allocations
+    set is_timetable_enabled = false,
+        status = 'suspended',
+        participant_cohort_ids = array_remove(participant_cohort_ids, chn_cohort_id),
+        updated_at = now()
+    where unit_id = any(agric_unit_ids)
+      and cohort_id = chn_cohort_id;
+
+    -- 5. Remove CHN MAY 25 from scheduled sessions
+    update public.scheduled_sessions
+    set participant_cohort_ids = array_remove(participant_cohort_ids, chn_cohort_id),
+        conflict_state = 'clear',
+        updated_at = now()
+    where (unit_id = any(agric_unit_ids) or teaching_allocation_id in (
+      select id from public.teaching_allocations where unit_id = any(agric_unit_ids)
+    ))
+      and chn_cohort_id = any(participant_cohort_ids)
+      and cardinality(array_remove(participant_cohort_ids, chn_cohort_id)) > 0;
+
+    -- 6. Cancel solo sessions for CHN MAY 25
+    update public.scheduled_sessions
+    set status = 'cancelled',
+        conflict_state = 'clear',
+        is_locked = false,
+        notes = 'Cancelled because unit offering was dropped by HOD.',
+        updated_at = now()
+    where (unit_id = any(agric_unit_ids) or teaching_allocation_id in (
+      select id from public.teaching_allocations where unit_id = any(agric_unit_ids)
+    ))
+      and (cohort_id = chn_cohort_id or participant_cohort_ids = array[chn_cohort_id])
+      and status not in ('cancelled', 'archived');
   end if;
 end $$;

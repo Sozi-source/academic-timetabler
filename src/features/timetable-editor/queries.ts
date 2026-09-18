@@ -180,6 +180,9 @@ export const getTimetableEditorData = cache(async (
           unitName: allocation.unit?.name ?? 'Unknown unit',
           cohortCode: allocation.cohort?.code ?? 'Unknown cohort',
           trainerName: allocation.trainer?.fullName ?? 'Unassigned trainer',
+          cohortId: allocation.cohortId,
+          unitId: allocation.unitId,
+          trainerId: allocation.trainerId,
           missingSessionCount,
           expectedSessionCount,
         }]

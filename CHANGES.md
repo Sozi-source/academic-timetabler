@@ -18,6 +18,39 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 2. **Curriculum Upload UI Update (`curriculum-zip-upload-dialog.tsx`)**:
    - Update `curriculum-zip-upload-dialog.tsx` to display `unresolvedFiles` from the ingestion preview response, allowing HODs to select document types manually prior to commit.
 
+### 2026-09-18: Hard-Fix Master Timetable & Surgical Manual Scheduling Controls
+
+- **Context & Problem**:
+  - The HOD possesses an authoritative physical master timetable for `SEP-DEC-26` that is fixed and free of collisions.
+  - Running the automated generator on draft sessions caused heuristics-based repositioning ("placing units anyhowly") and left unplaced sessions with conflict warnings.
+  - The timetable editor lacked a bulk lock mechanism (requiring clicking individual padlocks up to 75 times) and provided no way to place missing allocations manually into a designated Day, Time Slot, and Room without triggering the auto-generator.
+- **Files Added**:
+  - `supabase/migrations/20260918153000_hard_fix_timetable_manual_controls.sql`:
+    - `bulk_lock_department_timetable_sessions(target_academic_period_id uuid, target_lock_state boolean)`: Atomically locks/unlocks all active sessions for the working department, recording changes in `timetable_session_change_log`.
+    - `schedule_allocation_session_safely(...)`: Atomically schedules an unplaced allocation to a specific working day, time slot, and room with full trainer, cohort, and room clash detection and immediate lock support.
+    - `unschedule_session_safely(target_session_id uuid)`: Safely removes a placed session from the grid and returns the allocation to the unplaced pool for manual reassignment.
+  - `src/features/timetable-editor/schedule-allocation-dialog.tsx`:
+    - Interactive dialog component allowing the HOD to select a Day of Week, Time Slot, Room, and Trainer for any missing allocation, with an immediate "Hard-fix / Lock" toggle.
+- **Files Modified**:
+  - `src/features/timetable-editor/validation.ts`:
+    - Added `bulkLockSchema` and `scheduleAllocationSchema` with Zod validation.
+  - `src/features/timetable-editor/types.ts`:
+    - Updated `missingAllocations` in `EditorData` to include `cohortId`, `unitId`, and `trainerId`.
+  - `src/features/timetable-editor/queries.ts`:
+    - Populated `cohortId`, `unitId`, and `trainerId` in `missingAllocations`.
+  - `src/features/timetable-editor/actions.ts`:
+    - Exported `bulkLockTimetableSessionsAction`, `scheduleAllocationSessionAction`, and `unscheduleSessionAction`.
+  - `src/features/timetable-editor/session-editor-card.tsx`:
+    - Updated locked card view with a distinct "Hard-Fixed" badge and 1-click "Unlock" button.
+    - Added an "Unschedule" button in the edit dialog to remove misplaced sessions.
+  - `src/features/timetable-editor/editor-workspace.tsx`:
+    - Added a lock status badge (`X of Y Hard-Fixed`) and one-click "Lock All Sessions" / "Unlock All Sessions" buttons in the header.
+    - Embedded `ScheduleAllocationDialog` on each card in "Units missing from timetable", enabling 1-click manual placement directly matching the physical timetable.
+  - `src/tests/timetable-editor/validation.test.ts`:
+    - Added unit test coverage for `bulkLockSchema` and `scheduleAllocationSchema`.
+- **Manual Follow-up**:
+  - Apply migration `supabase/migrations/20260918153000_hard_fix_timetable_manual_controls.sql` in the Supabase SQL Editor.
+
 ### 2026-09-18: Permanent Fix for Trainer Daily Report Visibility on HOD / Admin Operations
 
 - **Root Causes**:

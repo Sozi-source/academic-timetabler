@@ -6,7 +6,7 @@ import { requireHodAccess } from '@/features/auth/authorization';
 import { createClient } from '@/lib/supabase/server';
 
 import type { EditorActionState } from './types';
-import { moveSessionSchema, sessionIdSchema } from './validation';
+import { bulkLockSchema, moveSessionSchema, scheduleAllocationSchema, sessionIdSchema } from './validation';
 
 function refreshEditor() {
   revalidatePath('/timetable/editor');
@@ -82,6 +82,78 @@ export async function toggleScheduledSessionLockAction(formData: FormData): Prom
   refreshEditor();
 }
 
+export async function bulkLockTimetableSessionsAction(formData: FormData): Promise<void> {
+  await requireHodAccess();
+  const parsed = bulkLockSchema.safeParse({
+    academicPeriodId: formData.get('academicPeriodId'),
+    lock: formData.get('lock'),
+  });
+  if (!parsed.success) throw new Error('Invalid bulk lock request.');
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc('bulk_lock_department_timetable_sessions', {
+    target_academic_period_id: parsed.data.academicPeriodId,
+    target_lock_state: parsed.data.lock,
+  });
+  if (error) throw new Error(error.message);
+  refreshEditor();
+}
+
+export async function scheduleAllocationSessionAction(
+  _previousState: EditorActionState,
+  formData: FormData,
+): Promise<EditorActionState> {
+  await requireHodAccess();
+
+  const slotId = formData.get('timeSlotId') || formData.get('startTimeSlotId');
+  const parsed = scheduleAllocationSchema.safeParse({
+    allocationId: formData.get('allocationId'),
+    workingDayId: formData.get('workingDayId'),
+    startTimeSlotId: slotId,
+    endTimeSlotId: formData.get('endTimeSlotId') || slotId,
+    roomId: formData.get('roomId'),
+    trainerId: formData.get('trainerId'),
+    notes: formData.get('notes') || undefined,
+    isLocked: formData.get('isLocked') ?? 'true',
+  });
+
+  if (!parsed.success) {
+    return { status: 'error', message: 'Review the selected day, slot, and room.' };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc('schedule_allocation_session_safely', {
+    target_allocation_id: parsed.data.allocationId,
+    target_working_day_id: parsed.data.workingDayId,
+    target_start_time_slot_id: parsed.data.startTimeSlotId,
+    target_end_time_slot_id: parsed.data.endTimeSlotId,
+    target_room_id: parsed.data.roomId || null,
+    target_notes: parsed.data.notes ?? null,
+    target_trainer_id: parsed.data.trainerId || null,
+    target_is_locked: parsed.data.isLocked,
+  });
+
+  if (error) {
+    return { status: 'error', message: error.message };
+  }
+
+  refreshEditor();
+  return { status: 'success', message: 'Session placed and locked on the timetable.' };
+}
+
+export async function unscheduleSessionAction(formData: FormData): Promise<void> {
+  await requireHodAccess();
+  const id = sessionIdSchema.safeParse(formData.get('sessionId'));
+  if (!id.success) throw new Error('Invalid scheduled session.');
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc('unschedule_session_safely', {
+    target_session_id: id.data,
+  });
+  if (error) throw new Error(error.message);
+  refreshEditor();
+}
+
 export async function undoLastTimetableEditAction(formData: FormData): Promise<void> {
   await requireHodAccess();
   const academicPeriodId = sessionIdSchema.safeParse(formData.get('academicPeriodId'));
@@ -94,3 +166,4 @@ export async function undoLastTimetableEditAction(formData: FormData): Promise<v
   if (error) throw new Error(error.message);
   refreshEditor();
 }
+

@@ -11,6 +11,7 @@ import {
   MapPin,
   FileText,
   Settings,
+  Trash2,
 } from 'lucide-react';
 import { useActionState, useState, useEffect, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
@@ -30,7 +31,7 @@ import {
 } from '@/components/ui/dialog';
 
 import { cn } from '@/lib/utils/cn';
-import { moveScheduledSessionAction, toggleScheduledSessionLockAction } from './actions';
+import { moveScheduledSessionAction, toggleScheduledSessionLockAction, unscheduleSessionAction } from './actions';
 import { initialEditorActionState, type EditorData, type EditorSession } from './types';
 
 export function formatTrainerAbbreviation(fullName: string): string {
@@ -161,10 +162,24 @@ export function SessionEditorCard({
 
       <div className="mt-4 pt-3 border-t border-border-soft flex items-center justify-between gap-2">
         {session.isLocked ? (
-          <span className="inline-flex items-center gap-1.5 text-xs text-text-muted py-1">
-            <Lock className="size-3" />
-            Protected from edits
-          </span>
+          <div className="flex items-center justify-between w-full">
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary py-1">
+              <Lock className="size-3.5 text-primary" />
+              Hard-Fixed
+            </span>
+            <form action={toggleScheduledSessionLockAction}>
+              <input type="hidden" name="sessionId" value={session.id} />
+              <Button
+                type="submit"
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs text-text-muted hover:text-text-primary px-2"
+                leadingIcon={<LockOpen className="size-3" />}
+              >
+                Unlock
+              </Button>
+            </form>
+          </div>
         ) : (
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
@@ -323,28 +338,40 @@ export function SessionEditorCard({
                     ) : null}
                   </DialogBody>
 
-                  <DialogFooter>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setIsOpen(false)}
-                      disabled={pending}
-                    >
-                      Cancel
-                    </Button>
+                  <DialogFooter className="flex items-center justify-between gap-2 sm:justify-between">
                     <Button
                       type="submit"
-                      disabled={pending}
-                      leadingIcon={
-                        pending ? (
-                          <LoaderCircle className="size-4 animate-spin" />
-                        ) : (
-                          <MoveRight className="size-4" />
-                        )
-                      }
+                      formAction={unscheduleSessionAction}
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs text-danger hover:bg-danger-surface hover:text-danger"
+                      leadingIcon={<Trash2 className="size-3.5" />}
                     >
-                      {pending ? 'Saving...' : 'Save Changes'}
+                      Unschedule
                     </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setIsOpen(false)}
+                        disabled={pending}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={pending}
+                        leadingIcon={
+                          pending ? (
+                            <LoaderCircle className="size-4 animate-spin" />
+                          ) : (
+                            <MoveRight className="size-4" />
+                          )
+                        }
+                      >
+                        {pending ? 'Saving...' : 'Save Changes'}
+                      </Button>
+                    </div>
                   </DialogFooter>
                 </form>
               </DialogContent>

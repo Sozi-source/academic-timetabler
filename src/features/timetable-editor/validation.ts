@@ -11,3 +11,19 @@ export const moveSessionSchema = z.object({
 });
 
 export const sessionIdSchema = z.string().uuid();
+
+export const bulkLockSchema = z.object({
+  academicPeriodId: z.string().uuid(),
+  lock: z.enum(['true', 'false']).transform((val) => val === 'true'),
+});
+
+export const scheduleAllocationSchema = z.object({
+  allocationId: z.string().uuid(),
+  workingDayId: z.string().uuid(),
+  startTimeSlotId: z.string().uuid(),
+  endTimeSlotId: z.string().uuid(),
+  roomId: z.union([z.string().uuid(), z.literal('')]),
+  trainerId: z.union([z.string().uuid(), z.literal('')]).optional(),
+  notes: z.string().trim().max(1000).optional(),
+  isLocked: z.enum(['true', 'false']).optional().default('true').transform((val) => val !== 'false'),
+});

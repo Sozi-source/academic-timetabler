@@ -62,6 +62,9 @@ export interface EditorData {
     unitName: string;
     cohortCode: string;
     trainerName: string;
+    cohortId: string;
+    unitId: string;
+    trainerId: string | null;
     missingSessionCount: number;
     expectedSessionCount: number;
   }>;

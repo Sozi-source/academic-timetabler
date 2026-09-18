@@ -32,7 +32,7 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
     4. In `add_special_unit_offering()`, newly added cohort units were not given `approval_status = 'approved'`, leaving them in review-required state and without an unassigned draft teaching allocation.
 - **Key Changes**:
   - `supabase/migrations/20260918183000_enterprise_unit_offering_lifecycle_sync.sql`:
-    - Updated `public.validate_teaching_allocation()`: Bypasses all checks and immediately returns when an allocation is disabled or set to `suspended`, `completed`, `archived`, or `cancelled`. For active allocations, permits cross-stage units if an approved offering exists for `(academic_period_id, cohort_id, unit_id)` or if audited.
+    - Updated `public.validate_teaching_allocation()`: Bypasses all checks and immediately returns when an allocation is disabled or set to `suspended`, `completed`, or `archived`. For active allocations, permits cross-stage units if an approved offering exists for `(academic_period_id, cohort_id, unit_id)` or if audited.
     - Updated `public.set_unit_offering_approval()`:
       - **When dropping (`p_approve = false`)**: Removes the dropped cohort from `teaching_offering_participants`. In shared allocations, reassigns primary cohort if necessary, removes dropped cohort from `participant_cohort_ids`, and recalculates `combined_cohort_size`. In solo allocations, suspends the allocation. In scheduled sessions, removes the dropped cohort from shared sessions and unlocks/cancels solo sessions (`status = 'cancelled'`, `is_locked = false`).
       - **When approving (`p_approve = true`)**: Re-enables allocations and automatically inserts an unassigned draft allocation if none exists.

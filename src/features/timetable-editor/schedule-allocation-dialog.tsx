@@ -202,16 +202,16 @@ export function ScheduleAllocationDialog({
       </DialogTrigger>
 
       {isOpen ? (
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Place Unit on Timetable</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="max-w-md max-h-[calc(100dvh-2rem)] flex flex-col p-0 overflow-hidden">
+          <DialogHeader className="px-5 py-3.5 pr-12 border-b border-border shrink-0">
+            <DialogTitle className="text-base font-bold text-text-primary">Place Unit on Timetable</DialogTitle>
+            <DialogDescription className="mt-0.5 text-xs text-text-muted">
               Assign this session directly to a Day, Time Slot, and Room based on your physical master timetable.
             </DialogDescription>
           </DialogHeader>
 
-          <form action={action}>
-            <DialogBody className="space-y-4">
+          <form action={action} className="flex flex-col min-h-0 flex-1 overflow-hidden">
+            <DialogBody className="px-5 py-3.5 space-y-3.5 overflow-y-auto flex-1 min-h-0">
               <input type="hidden" name="allocationId" value={allocation.id} />
 
               <div className="rounded-xl border border-border-soft bg-surface-subtle/50 p-3 text-xs space-y-2">
@@ -407,7 +407,7 @@ export function ScheduleAllocationDialog({
               ) : null}
             </DialogBody>
 
-            <DialogFooter>
+            <DialogFooter className="px-5 py-3 border-t border-border bg-surface shrink-0 flex flex-row items-center justify-end gap-2">
               <Button
                 type="button"
                 variant="outline"

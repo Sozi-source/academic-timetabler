@@ -194,13 +194,13 @@ export function SessionEditorCard({
             </DialogTrigger>
 
             {isOpen ? (
-              <DialogContent className="max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Move or Edit Session</DialogTitle>
+              <DialogContent className="max-w-md max-h-[calc(100dvh-2rem)] flex flex-col p-0 overflow-hidden">
+                <DialogHeader className="px-5 py-3.5 pr-12 border-b border-border shrink-0">
+                  <DialogTitle className="text-base font-bold text-text-primary">Move or Edit Session</DialogTitle>
                 </DialogHeader>
 
-                <form action={action}>
-                  <DialogBody className="space-y-4">
+                <form action={action} className="flex flex-col min-h-0 flex-1 overflow-hidden">
+                  <DialogBody className="px-5 py-3.5 space-y-3.5 overflow-y-auto flex-1 min-h-0">
                     <input type="hidden" name="sessionId" value={session.id} />
                     <input type="hidden" name="originalWorkingDayId" value={session.workingDayId} />
                     <input type="hidden" name="originalStartTimeSlotId" value={session.startTimeSlotId} />
@@ -338,7 +338,7 @@ export function SessionEditorCard({
                     ) : null}
                   </DialogBody>
 
-                  <DialogFooter className="flex items-center justify-between gap-2 sm:justify-between">
+                  <DialogFooter className="px-5 py-3 border-t border-border bg-surface shrink-0 flex items-center justify-between gap-2 sm:justify-between">
                     <Button
                       type="submit"
                       formAction={unscheduleSessionAction}

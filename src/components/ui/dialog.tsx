@@ -64,8 +64,8 @@ export const DialogContent = forwardRef<
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
-          'fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2',
-          'rounded-2xl border border-border bg-surface shadow-lg',
+          'fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-lg max-h-[calc(100dvh-2rem)] -translate-x-1/2 -translate-y-1/2',
+          'rounded-2xl border border-border bg-surface shadow-lg flex flex-col overflow-hidden',
           'data-[state=open]:animate-in data-[state=closed]:animate-out',
           'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
           'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
@@ -78,7 +78,7 @@ export const DialogContent = forwardRef<
         {!hideCloseButton ? (
           <DialogPrimitive.Close
             aria-label="Close dialog"
-            className="absolute right-4 top-4 flex size-9 items-center justify-center rounded-lg text-text-muted transition hover:bg-surface-subtle hover:text-text-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-focus-ring/35"
+            className="absolute right-4 top-4 z-10 flex size-9 items-center justify-center rounded-lg text-text-muted transition hover:bg-surface-subtle hover:text-text-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-focus-ring/35"
           >
             <X
               className="size-4"
@@ -101,7 +101,7 @@ export function DialogHeader({
   return (
     <div
       className={cn(
-        'border-b border-border-soft px-6 py-5 pr-14',
+        'border-b border-border-soft px-6 py-4 pr-14 shrink-0',
         className,
       )}
     >
@@ -156,7 +156,7 @@ export function DialogBody({
   className?: string;
 }) {
   return (
-    <div className={cn('px-6 py-5', className)}>
+    <div className={cn('px-6 py-4 overflow-y-auto flex-1 min-h-0', className)}>
       {children}
     </div>
   );
@@ -172,7 +172,7 @@ export function DialogFooter({
   return (
     <div
       className={cn(
-        'flex flex-col-reverse gap-2 border-t border-border-soft px-6 py-4 sm:flex-row sm:justify-end',
+        'flex flex-col-reverse gap-2 border-t border-border-soft px-6 py-3.5 sm:flex-row sm:justify-end shrink-0 bg-surface',
         className,
       )}
     >

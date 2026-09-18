@@ -18,6 +18,32 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 2. **Curriculum Upload UI Update (`curriculum-zip-upload-dialog.tsx`)**:
    - Update `curriculum-zip-upload-dialog.tsx` to display `unresolvedFiles` from the ingestion preview response, allowing HODs to select document types manually prior to commit.
 
+### 2026-09-18: Timetable Cohort Clash Diagnosis, Real-Time Conflict Detection & Shared Class Transparency
+
+- **Context & Problem**:
+  - Placing unit `DCU 1104 First Aid` for cohort `DHN-JAN-MAR-2025` threw an uninformative error: `Cohort clash: a participating cohort already has another session during the selected time`.
+  - The HOD noted that `DHN-JAN-MAR-2025` had no class on Friday at 10:30.
+  - The root cause was that `DCU 1104` is a **Shared Class** (`teaching_offerings`) taken jointly by multiple cohorts (e.g. `DHN` + `DND`). The DB trigger rejected placement because a partner cohort (or clinical rotation) was already occupied at that time, but the error message failed to identify which cohort was clashing.
+  - Additionally, uncontrolled `<Select defaultValue=...>` inputs in `ScheduleAllocationDialog` reset back to `Monday` and `Morning Session · 08:00` upon error re-render.
+- **Key Changes**:
+  - `src/features/timetable-editor/schedule-allocation-dialog.tsx`:
+    - Converted all inputs (`workingDayId`, `timeSlotId`, `trainerId`, `roomId`, `notes`, `isLocked`) to controlled React state so selections persist across errors.
+    - Implemented instant client-side collision detection against all timetable sessions (`data.sessions`).
+    - Explicitly detects and highlights whether the clash is with the primary cohort or a shared partner cohort (naming cohort code, unit code, trainer, and room).
+    - Displays a "Shared Class" badge listing all participating cohorts when a unit is shared across multiple cohorts.
+    - Added live availability indicator (`✓ Slot is completely available`) and blocked submission when a clash is present.
+  - `src/features/timetable-editor/types.ts` & `src/features/timetable-editor/queries.ts`:
+    - Extended `missingAllocations` in `EditorData` to include `participantCohortIds`, `participantCohortCodes`, and `isSharedClass`.
+  - `src/features/timetable-editor/editor-workspace.tsx`:
+    - Added a `Shared` badge on missing allocation cards to visually flag shared classes.
+  - `src/features/timetable-editor/actions.ts`:
+    - Added `diagnoseScheduleClash()` to perform comprehensive diagnostic queries whenever an allocation placement error occurs, returning human-readable conflict details (cohort code, unit code, trainer, room).
+  - `supabase/migrations/20260918153000_hard_fix_timetable_manual_controls.sql`:
+    - Updated `schedule_allocation_session_safely` to resolve all participant cohorts via `resolve_participant_cohort_ids` and return specific cohort/unit/trainer details upon clash.
+    - Updated `validate_scheduled_session_conflicts()` trigger function to include specific cohort, unit, trainer, and room names in error messages system-wide.
+- **Manual Follow-up**:
+  - Run the updated `20260918153000_hard_fix_timetable_manual_controls.sql` in Supabase SQL editor if not already executed.
+
 ### 2026-09-18: Hard-Fix Master Timetable & Surgical Manual Scheduling Controls
 
 - **Context & Problem**:

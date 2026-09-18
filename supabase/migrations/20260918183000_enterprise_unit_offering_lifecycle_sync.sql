@@ -991,14 +991,17 @@ begin
   where name ilike '%Agricultural Production%' or code in ('CHN 2309', 'CND 2306', 'DND 3205');
 
   if chn_cohort_id is not null and agric_unit_ids is not null then
-    -- 1. Mark offering as withdrawn
+    -- 1. Mark offering as withdrawn adhering to unit_offerings_approval_metadata_check
     update public.unit_offerings
     set approval_status = 'withdrawn',
         selection_state = 'excluded',
         status = 'cancelled',
         is_timetable_enabled = false,
         withdrawal_reason = 'Dropped from cohort teaching plan for this academic period',
+        withdrawn_by = coalesce(approved_by, (select id from auth.users order by created_at limit 1)),
         withdrawn_at = now(),
+        approved_by = null,
+        approved_at = null,
         updated_at = now()
     where cohort_id = chn_cohort_id
       and unit_id = any(agric_unit_ids);

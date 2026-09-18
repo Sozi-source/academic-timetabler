@@ -1,0 +1,1112 @@
+[
+  {
+    "id": "b7309ef8-6f2f-4eb0-a156-571a3e84bfa6",
+    "code": "CCU 1101",
+    "name": "Communication Skills",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "b5cce6c4-136d-467b-aa81-feec5f0d7371",
+    "code": "CCU 1102",
+    "name": "Entrepreneurship",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "2034b317-fb39-42f8-ac27-2989a1cc51ed",
+    "code": "CCU 1105",
+    "name": "HIV/AIDS Management",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "ba0943ef-0ac4-4f01-a346-231c5141525d",
+    "code": "CCU 1106",
+    "name": "ICT/Digital Literacy",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "2e6dad78-5c0a-4512-9644-4b0052ac9780",
+    "code": "CCU 1107",
+    "name": "Human Anatomy and Physiology",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "35bddd2a-f0e5-4662-9694-287e406ba920",
+    "code": "CCU 1110",
+    "name": "Life Skill",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "cbcec966-31cd-46b8-896b-4c64410dcead",
+    "code": "CCU 1111",
+    "name": "Basic Mathematics/Numeracy Skills",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "12dde8ba-44f0-4f28-8860-5bfeda25526d",
+    "code": "CCU 1113",
+    "name": "Medical Terminologies",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "c4bdd898-4a37-4ba8-b045-1eedb6d400f5",
+    "code": "CHN 1101",
+    "name": "Nutrition physical sciences I",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "cecf8eb6-d9d3-43db-b440-f725526d8368",
+    "code": "CHN 1103",
+    "name": "Introduction to Nutrition and Dietetics",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "9fc1f1f6-b432-4951-952d-aa3efd3eaf62",
+    "code": "CHN 1201",
+    "name": "Principles of Human Nutrition",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "4cd70f07-428c-4ee7-8e48-3fcb1494f1e4",
+    "code": "CHN 1202",
+    "name": "Food Science",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "54b1b921-6fe5-44b1-a80d-9d82179ccef4",
+    "code": "CHN 1203",
+    "name": "Food Safety and Hygiene",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "44cb5ec3-2905-40bc-806d-01ec76c8270a",
+    "code": "CHN 1204",
+    "name": "Nutrition Physical Science II",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "14435305-f4d7-404e-ba0b-4d2af9bf848d",
+    "code": "CHN 1206",
+    "name": "Meal Planning, Management and Service",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "e30a3c77-ebb6-47a2-ac67-fe06a92ed413",
+    "code": "CHN 1301",
+    "name": "Diet Therapy Theory",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "8a3711ec-8664-4b9f-b487-906c9a18444a",
+    "code": "CHN 1303",
+    "name": "Applied biological sciences",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "4cffb09e-433e-4cff-806c-b2a5e29d7589",
+    "code": "CHN 1304",
+    "name": "Introduction to the nutrition care process",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "88bb5907-dfac-4df2-864a-58b7215ead0f",
+    "code": "CHN 1305",
+    "name": "Introduction to Primary Health Care",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "9838702d-c0b9-4641-bd27-012ca9cb1693",
+    "code": "CHN 1306",
+    "name": "Legal Aspects in Nutrition and Dietetics",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "a50c9a81-5a52-4277-8e0d-fc4f3ff66cbf",
+    "code": "CHN 1308",
+    "name": "Clinical Rotation",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "d21b81ba-dacf-4a6f-b948-e017b31ad944",
+    "code": "CHN 2101",
+    "name": "Industrial attachment(Clinical setting)",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "2e25400e-5fa7-42af-b0d2-529356de01ba",
+    "code": "CHN 2201",
+    "name": "Introduction to Behavioral Science",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "a0b21778-14fe-4b3f-93fb-3b7cf1e96669",
+    "code": "CHN 2202",
+    "name": "Management of Malnutrition",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "7e039be5-a48b-483a-bd30-c7babdce8951",
+    "code": "CHN 2203",
+    "name": "Food Production for Invalids and Convalescents",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "63712c87-fedb-4f4b-91a7-6fe71612a574",
+    "code": "CHN 2204",
+    "name": "Nutrition in the Lifecycle",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "1c5413e0-d852-4d62-8cb6-f970c6664800",
+    "code": "CHN 2205",
+    "name": "Maternal and Child Nutrition",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "541cbab8-72b4-4c14-a414-9585bcb48822",
+    "code": "CHN 2206",
+    "name": "Trade Project",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "9454133b-3d05-4246-9eda-6c16feda3bbb",
+    "code": "CHN 2207",
+    "name": "Introduction to Nutrition Assessment and Surveillance",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "4ca91ec4-fb39-4ecf-b45b-55839765796a",
+    "code": "CHN 2302",
+    "name": "Nutrition Anthropology",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "56d29d62-7f7e-499a-9c2d-86d63815b25a",
+    "code": "CHN 2304",
+    "name": "Nutrition in Emergencies",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "cf4e9885-9c74-42ad-93a3-a91aed015fcd",
+    "code": "CHN 2305",
+    "name": "Community Diagnosis and Mobilization",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "2c5e0276-c286-492b-96fe-d6f2c3f648d9",
+    "code": "CHN 2306",
+    "name": "Demonstration Techniques",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "193d0264-6566-427a-96de-a65117c4850f",
+    "code": "CHN 2307",
+    "name": "Nutrition in HIV and AIDS",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "0e726e0b-de63-40fa-8df9-e24ab0506b58",
+    "code": "CHN 2308",
+    "name": "Nutrition for Vulnerable Groups",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "b19c53d4-1c88-46a3-84e9-75e357b09c63",
+    "code": "CHN 2309",
+    "name": "Agricultural Production",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "f559b556-06da-46fe-b673-f9e6cfd2ef1f",
+    "code": "CND 1101",
+    "name": "Communication Skills",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "b0b9fde8-50a3-46c8-bc59-16174bf72973",
+    "code": "CND 1102",
+    "name": "Entrepreneurship",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "1dc35160-aa4f-4c11-9b51-3fb350f6ace6",
+    "code": "CND 1103",
+    "name": "HIV/AIDS Management",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "44c8da6d-8f31-43c0-8914-452dbd3ce8f0",
+    "code": "CND 1104",
+    "name": "Principles of Human Nutrition",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "04fd0309-5ac7-4229-a5b8-4a242e8d06db",
+    "code": "CND 1105",
+    "name": "Human Anatomy and Physiology",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "a7522570-fbfe-4fbf-908f-dc040b394648",
+    "code": "CND 1106",
+    "name": "Applied Physical Sciences I (chemistry)",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "589fd9b2-d048-426e-b632-6b1ed4221d24",
+    "code": "CND 1201",
+    "name": "ICT",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "2db7ed51-a011-4e18-9b07-a9ef87625bc8",
+    "code": "CND 1202",
+    "name": "Diet Therapy I",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "de6976c6-e1a9-45c2-b4a0-57a4af4be8f8",
+    "code": "CND 1203",
+    "name": "Food Safety and Hygiene",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "9cb5ac74-a383-4492-bb63-42f72c8da062",
+    "code": "CND 1204",
+    "name": "Applied Physical Sciences II (Physics)",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "06efa33c-ff9a-407e-9a80-47d75e49c3e4",
+    "code": "CND 1205",
+    "name": "Legal Aspects in Nutrition and Dietetics",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "3b30d744-64bb-42e2-ad3c-4ceb1d1d8832",
+    "code": "CND 1206",
+    "name": "Introduction to Nutrition Care Process",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "abe329df-2e38-49ee-bbaf-c26b246312ba",
+    "code": "CND 1301",
+    "name": "Basic Mathematics",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "577f6a01-4d7f-4897-adfb-e6c4ce69c405",
+    "code": "CND 1302",
+    "name": "Meal Planning, Management and Service",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "aa929d22-d695-4201-9464-7516aafd85eb",
+    "code": "CND 1303",
+    "name": "Maternal and Child Nutrition",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "6368bf1f-b5e6-41cc-b2d9-377c8c4105cd",
+    "code": "CND 1304",
+    "name": "Food Production for Invalids and Convalescents",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "aae8e1dd-fdb0-406c-8fc1-f50396ce9dd0",
+    "code": "CND 1305",
+    "name": "Nutrition in HIV and AIDS",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "cbb87ecf-6124-4729-a83d-edb65e951359",
+    "code": "CND 1306",
+    "name": "Nutrition Anthropology",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "912bbc09-f875-4079-bbcd-7abef80985cd",
+    "code": "CND 1307",
+    "name": "Introduction to Primary Health Care",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "7c4ae15c-415e-4f66-a01f-7cdd35852993",
+    "code": "CND 2101",
+    "name": "Management of Malnutrition",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "b59006a3-4409-474f-9599-b757276a2e09",
+    "code": "CND 2102",
+    "name": "Life Skills",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "9f4c3a86-fa9d-4f59-b8be-5fb633c7ab26",
+    "code": "CND 2103",
+    "name": "Clinical Rotation",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "160a6468-6802-4f77-b99a-7e9c5a3637e1",
+    "code": "CND 2104",
+    "name": "Nutrition in the Lifespan",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "86d8e179-50a6-4ead-ba18-887b434d4039",
+    "code": "CND 2105",
+    "name": "Introduction to Behavioral Science",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "092bac80-c7ae-4765-b8ad-2eb8de5796a7",
+    "code": "CND 2106",
+    "name": "Food Science",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "c3d674f8-bf1d-46de-bd90-57f1116abdf7",
+    "code": "CND 2107",
+    "name": "Applied biological sciences",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "43a7a8c2-f9a2-4f16-a552-b49436589ab9",
+    "code": "CND 2201",
+    "name": "Industrial attachment(Clinical setting)",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "de4482d4-3c85-43aa-b8cd-96452c7ae3aa",
+    "code": "CND 2301",
+    "name": "Nutrition in Emergencies",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "85397794-1edd-4f7f-b3f4-cb879b4dec8d",
+    "code": "CND 2302",
+    "name": "Nutrition Assessment & Surveillance",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "c2a7fd53-d980-4493-affd-774eafb66e1e",
+    "code": "CND 2303",
+    "name": "Community Diagnosis and Mobilization",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "619cce5a-5e83-40c5-b257-54afc258a747",
+    "code": "CND 2304",
+    "name": "Demonstration Techniques",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "524f47e4-35fe-43e9-b771-0ca8977ec9ab",
+    "code": "CND 2305",
+    "name": "Nutrition for Vulnerable Groups",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "d2aa4182-535f-43b6-bb3e-5d1152cef1b5",
+    "code": "CND 2306",
+    "name": "Agricultural Production",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "bee9faa6-50d0-4d6c-b8c9-7e275482f6be",
+    "code": "CND 2307",
+    "name": "Trade project & Business Plan",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "c7806f44-3c27-4e63-9a80-3df8d83a1775",
+    "code": "DCU 1101",
+    "name": "Communication Skills",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "a6871fa8-9fad-42fd-b821-2b77e5ae2a42",
+    "code": "DCU 1102",
+    "name": "Entrepreneurship",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "28bbb320-bf36-4d8a-ae0b-bcda1f4efb78",
+    "code": "DCU 1104",
+    "name": "First Aid",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "9e10d045-d451-4f84-bf29-e9ba2028fdab",
+    "code": "DCU 1105",
+    "name": "HIV/AIDS Management",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "67c51ba4-edb0-4e56-a1b3-a8f9b2ce5c66",
+    "code": "DCU 1106",
+    "name": "ICT/Digital Literacy",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "bad16e6d-e228-4c44-ba93-1adad0ad82c3",
+    "code": "DCU 1107",
+    "name": "Human Anatomy and Physiology",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "dbb562b8-bed6-4992-807d-0b7fec8dbf3b",
+    "code": "DCU 1110",
+    "name": "Life Skills",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "ca281a46-375c-4fb7-b0b1-80b6204eb09f",
+    "code": "DCU 1111",
+    "name": "Basic Mathematics/Numeracy Skills",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "53fabe83-5192-4636-8ad2-45181f57cfce",
+    "code": "DHN 1101",
+    "name": "Nutrition Physical Sciences I (Chemistry)",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "5d0e3622-6839-4762-ac0e-7c43dabeeb28",
+    "code": "DHN 1103",
+    "name": "Introduction to Nutrition and Dietetics",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "bccbb505-ca25-4b0d-a77a-0bdceaa8dc9b",
+    "code": "DHN 1203",
+    "name": "Diet Therapy I",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "83ecf742-118a-4ca7-8402-27b5b7516a14",
+    "code": "DHN 1205",
+    "name": "Nutrition in HIV and AIDS",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "4ae66c8d-efe9-4786-87b0-b8309aa16cb5",
+    "code": "DHN 1206",
+    "name": "Food Safety and Hygiene",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "8d37b456-a70f-415c-aa8b-af215a8dace8",
+    "code": "DHN 1207",
+    "name": "Principles of Human Nutrition",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "ef82a7c8-bd89-4910-a569-5f6799687b71",
+    "code": "DHN 1208",
+    "name": "Nutrition Physical Sciences II (Physics)",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "51032968-1e8f-41cd-8498-feeb23974df8",
+    "code": "DHN 1209",
+    "name": "Meal Planning, Management and Service",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "6ec7667b-f636-4f6f-8de5-04ee6a46d6ef",
+    "code": "DHN 1301",
+    "name": "Medical terms",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "2120b2bb-32de-47ad-a6f7-09a7b9f667cb",
+    "code": "DHN 1302",
+    "name": "Nutrition Anthropology",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "660fd960-451e-4867-866a-b9c48e87a06d",
+    "code": "DHN 1303",
+    "name": "Legal Aspects in Nutrition and Dietetics",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "8f21ec40-d2f9-43e3-a260-41d0b4f3181e",
+    "code": "DHN 1304",
+    "name": "Maternal and Child Nutrition",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "4b089b9e-3917-47b9-aa45-0288dce77edc",
+    "code": "DHN 1305",
+    "name": "Food production for invalids and convalescent",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "fb5264b9-e4d3-4f4f-9227-84ecd11dabab",
+    "code": "DHN 1306",
+    "name": "Clinical Rotation",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "0bdf1ca0-5ff2-4583-ab2f-4891e72d71a2",
+    "code": "DHN 2101",
+    "name": "Industrial attachment 1 (Clinical setting)",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "6a2a9478-c2d2-404b-aa5e-fa8a432781c6",
+    "code": "DHN 2201",
+    "name": "Introduction to Microbiology",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "a9dfb5c0-2d8b-4f7c-9afe-49c6d10066b1",
+    "code": "DHN 2202",
+    "name": "Introduction to Biostatistics",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "7a092869-9df3-4f5d-8fff-eca953bdd51a",
+    "code": "DHN 2203",
+    "name": "Biochemistry I",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "9d375035-efb5-4856-b900-569c7348e0fc",
+    "code": "DHN 2204",
+    "name": "Principles of Food Processing and Preservation",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "cb2b1aa8-03f2-47f7-8da4-fde8262aaa04",
+    "code": "DHN 2205",
+    "name": "Diet Therapy II",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "3c993e6e-34a8-43d7-a77c-93eddf7b1541",
+    "code": "DHN 2207",
+    "name": "Introduction to Primary Health Care",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "8806fc2f-c3ed-42bb-8125-1e5c60864b29",
+    "code": "DHN 2302",
+    "name": "Nutrition in the Lifespan",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "b4081689-acff-4b9d-96a8-b1272137aa9c",
+    "code": "DHN 2303",
+    "name": "Non-Communicable Diseases",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "cad29f59-7252-4d68-b47d-fbc7f1be03b3",
+    "code": "DHN 2304",
+    "name": "Biochemistry II",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "a408372e-6be8-44af-a608-ec5bb160611a",
+    "code": "DHN 2305",
+    "name": "Principles of Nutrition and Behaviour",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "e121f57f-d21a-413b-94dd-25de75dddc68",
+    "code": "DHN 2307",
+    "name": "Research Methods",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "e6ca3c6b-354d-4502-8758-97681afee493",
+    "code": "DHN 3101",
+    "name": "Communicable Diseases",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "6d2ca386-36e2-4f2b-82df-dbf78bbb924e",
+    "code": "DHN 3102",
+    "name": "Food Security",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "5debf920-d6e3-4adc-bd22-6b0fc23d271d",
+    "code": "DHN 3103",
+    "name": "Food Microbiology and Parasitology",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "52bd7494-a1d1-4b0b-a45a-634e5f24c35e",
+    "code": "DHN 3104",
+    "name": "Diet Therapy III",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "407f864b-8769-4f70-a9bb-dc68d5b8d3df",
+    "code": "DHN 3105",
+    "name": "Nutrition Education and Counselling",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "695c41dd-3d64-4aa8-b27e-d2fd4a016244",
+    "code": "DHN 3106",
+    "name": "Nutrition Assessment and Surveillance",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "52f19c27-844f-4e32-ac4d-b8838b1b4bc1",
+    "code": "DHN 3201",
+    "name": "Product Development, Marketing and Sales",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "2936a422-5439-4b18-b6e5-0af2976d94a4",
+    "code": "DHN 3202",
+    "name": "Industrial Organization and Management",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "0796836f-b0a9-4b4f-8ad9-409c5bbc3b9e",
+    "code": "DHN 3203",
+    "name": "Nutrition Epidemiology",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "ed429515-e16f-4523-907c-92597b338f90",
+    "code": "DHN 3204",
+    "name": "Nutrition in Emergencies",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "fb36aca7-dc7a-4d9c-976c-e749eb31934d",
+    "code": "DHN 3205",
+    "name": "Trade Project",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "65698523-1249-416e-bbd8-48b38f0bc265",
+    "code": "DHN 3206",
+    "name": "Community Partnership Skills",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "06dc2b6b-aa96-417b-952c-84b45a621062",
+    "code": "DND 105",
+    "name": "Communication Skills",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "43cbd755-e132-4f79-8e14-089787fcc087",
+    "code": "DND 1102",
+    "name": "Entrepreneurship",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "77e9742f-4cd8-4410-b3d7-f9b6c5f8d6c8",
+    "code": "DND 1103",
+    "name": "HIV/AIDS Management",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "511b6ba2-b0fd-42f9-b318-a600571e6e30",
+    "code": "DND 1104",
+    "name": "Principles of Human Nutrition",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "946c407f-0b38-4eba-b384-8f051a68cfb2",
+    "code": "DND 1105",
+    "name": "Human Anatomy and Physiology",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "c5d79866-9e35-4435-93f5-7c040215de93",
+    "code": "DND 1106",
+    "name": "Applied Physical Sciences I (chemistry)",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "39b4688e-1262-488a-9a10-e79695ac7064",
+    "code": "DND 1201",
+    "name": "ICT",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "c11345b8-a7c8-44f0-a157-8b0a5fe2504f",
+    "code": "DND 1202",
+    "name": "Diet Therapy I",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "14ec732f-fa1e-42a8-bad1-01af57ea0936",
+    "code": "DND 1203",
+    "name": "Food Safety and Hygiene",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "7510c4e5-b17c-40e8-a29e-fcb050f29e81",
+    "code": "DND 1204",
+    "name": "Applied Physical Sciences II (Physics)",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "9610f977-fada-44a6-8d3d-be57a47551cf",
+    "code": "DND 1205",
+    "name": "Legal Aspects in Nutrition and Dietetics",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "f3f570cf-cc6d-46ed-9c5f-435ff23aaed3",
+    "code": "DND 1206",
+    "name": "Introduction to Nutrition Care Process",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "e6ca9ecb-6e99-4c91-a772-0b3a44ee98f9",
+    "code": "DND 1301",
+    "name": "Basic Mathematics",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "ba6bee6e-e91b-4171-b938-62c03927a553",
+    "code": "DND 1302",
+    "name": "Meal Planning, Management and Service",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "8cafb10c-3191-4101-aea0-da6e4871d715",
+    "code": "DND 1303",
+    "name": "Maternal and Child Nutrition",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "3932e9f9-13e3-440b-a664-702da0c5b90e",
+    "code": "DND 1304",
+    "name": "Food Production for Invalids and Convalescents",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "17efbec1-6527-4433-99ca-19672704e1d6",
+    "code": "DND 1305",
+    "name": "Nutrition in HIV and AIDS",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "01a4d9f8-aad8-491c-8ca0-aca487f84f19",
+    "code": "DND 1306",
+    "name": "Nutrition Anthropology",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "faa894a7-cc16-4efa-a806-67f7a761f91d",
+    "code": "DND 1307",
+    "name": "Introduction to Primary Health Care",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "4bad7c6f-88fd-4815-a82e-e190e86a5010",
+    "code": "DND 2101",
+    "name": "Management of Malnutrition",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "4c315079-28be-477c-abf8-5dccd5a421a4",
+    "code": "DND 2102",
+    "name": "Life Skills",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "995c2e9f-8862-4aba-ba54-42a762c69a4b",
+    "code": "DND 2103",
+    "name": "Clinical Rotation",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "aa2bb326-1fc6-41d3-8d0e-e342628adc05",
+    "code": "DND 2104",
+    "name": "Nutrition in the Lifespan",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "5611c217-d606-482a-b3de-9af2826036be",
+    "code": "DND 2105",
+    "name": "Diet Therapy II",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "daf18101-35b5-458d-85ca-26dd7f91f9fb",
+    "code": "DND 2106",
+    "name": "Principles of Food Processing and Preservation",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "c6b98dcb-960d-445f-9f27-36541dbe37d2",
+    "code": "DND 2107",
+    "name": "First Aid",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "e53fed2e-2b52-4052-82e7-b783b1c05deb",
+    "code": "DND 2201",
+    "name": "Industrial Attachment I",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "a9bf2570-4272-4b1d-96b9-a54be9f116e6",
+    "code": "DND 2301",
+    "name": "Nutrition in Emergencies",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "96e37ba6-6896-4d12-80b0-acc199e20b8f",
+    "code": "DND 2302",
+    "name": "Nutrition Assessment & Surveillance",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "600e806b-7600-4b27-ab18-c543fb12c2cd",
+    "code": "DND 2303",
+    "name": "Introduction to Microbiology",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "f5b483f8-d50b-4e03-bb29-a3f68f3b00ff",
+    "code": "DND 2304",
+    "name": "Introduction to Biostatistics",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "c7631dd3-bc26-4353-a4db-0ace4db61af1",
+    "code": "DND 2305",
+    "name": "Biochemistry I",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "0d7d70fc-5a83-497f-a29a-ce4cecd6ebc9",
+    "code": "DND 2306",
+    "name": "Research Methods",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "e3328e1f-61a5-4622-9878-75f3b9ba52e7",
+    "code": "DND 2307",
+    "name": "Principles of Nutrition and Behaviour",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "b38d025c-253d-47d4-b11d-d1eef7d4343b",
+    "code": "DND 3101",
+    "name": "Food Security",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "a57a51d8-fb90-48d2-b1a6-4080a80d7290",
+    "code": "DND 3102",
+    "name": "Communicable Disease",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "4c06c4a3-f3bc-41ac-b612-04db9da24fb1",
+    "code": "DND 3103",
+    "name": "Food Microbiology and Parasitology",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "3d180ab9-6118-4fce-b78e-3ab4804f04c2",
+    "code": "DND 3104",
+    "name": "Diet Therapy III",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "88983aa4-25fc-4e66-b7d5-f3862a300302",
+    "code": "DND 3105",
+    "name": "Community Partnership Skills",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "66d96d77-8ef8-495b-956b-12afffecce54",
+    "code": "DND 3106",
+    "name": "Biochemistry II",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "23e57cf1-cb18-462e-80bb-eff423ba339d",
+    "code": "DND 3201",
+    "name": "Product Development, Marketing and Sales",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "6b313854-3d57-4c03-adde-3cdbcf395868",
+    "code": "DND 3202",
+    "name": "Industrial Organization and Management",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "f7baa32e-3b54-49df-b718-2e23271658b7",
+    "code": "DND 3203",
+    "name": "Nutrition Epidemiology",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "4e89ee58-efcc-4fdd-a58d-41a951ee408a",
+    "code": "DND 3204",
+    "name": "Nutrition Education and Counselling",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "bf4452b0-30a1-48f9-9498-e6de9ad13b71",
+    "code": "DND 3205",
+    "name": "Agricultural Production",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "5a0e1603-8893-4e9e-8334-d4a8fdd5a127",
+    "code": "DND 3206",
+    "name": "Trade project & Business Plan",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "d19d3bcb-1e7b-4fec-9b26-55e078a7d4fa",
+    "code": "DND 3207",
+    "name": "Non- communicable Disease",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "86d90be7-47b4-4452-8fae-eb032133f6fc",
+    "code": "DND 3301",
+    "name": "Industrial Attachment II",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "ef63ce1f-517f-40cf-ba44-e894ed98eaf6",
+    "code": "DNDT 1101",
+    "name": "First Aid",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "f7191893-66f9-4c16-9872-05b7a1b88a49",
+    "code": "DNDT 1102",
+    "name": "Introduction to Biostatistics",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "89f99904-f6f6-4867-9fc3-b3a771d3f76e",
+    "code": "DNDT 1103",
+    "name": "Introduction to Microbiology",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "bdb4637b-afa3-4536-a8b1-8d4c8352d161",
+    "code": "DNDT 1104",
+    "name": "Diet Therapy II",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "2e3c54b8-55b7-4d62-a04a-6566f2115377",
+    "code": "DNDT 1105",
+    "name": "Biochemistry I",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "369ca15a-ed84-429e-963e-6ab146aa3d4d",
+    "code": "DNDT 1106",
+    "name": "Principles of Food Processing and Preservation",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "32a89b32-29ea-49a0-a0c9-d7145e44090c",
+    "code": "DNDT 1107",
+    "name": "Research Methods",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "9e016acb-031b-4933-ad5c-497c4f1e9d03",
+    "code": "DNDT 1201",
+    "name": "Communicable Diseases",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "8233e662-3449-4c68-a87d-59a33d6663e4",
+    "code": "DNDT 1202",
+    "name": "Principles of Nutrition and Behavior",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "a14b07b7-8b88-4cd6-8c8d-e59ba216ab02",
+    "code": "DNDT 1203",
+    "name": "Food Security",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "de2e22c2-89e2-4286-ba67-e250093a48f8",
+    "code": "DNDT 1204",
+    "name": "Diet Therapy III",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "2cab8127-caef-42c4-9727-39be0fe5d351",
+    "code": "DNDT 1205",
+    "name": "Community Partnership Skills",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "2de95da3-bf3d-4ca1-97d7-95c907256388",
+    "code": "DNDT 1206",
+    "name": "Non-Communicable Diseases",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "f7d0116b-c151-413b-b640-c93190c5dbed",
+    "code": "DNDT 1207",
+    "name": "Biochemistry II",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "8a3bd58f-f46d-4f80-a37e-5c3c21bfae5b",
+    "code": "DNDT 1301",
+    "name": "Nutrition Education & Counseling",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "dead13fc-5d58-4782-8891-5f5c9d2eb60c",
+    "code": "DNDT 1302",
+    "name": "Food Microbiology & Parasitology",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "21e40ba6-95b6-4781-a303-13407c0620ea",
+    "code": "DNDT 1303",
+    "name": "Nutrition Epidemiology",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "dfa38225-9745-48e5-bd42-afc2c2e1f5f1",
+    "code": "DNDT 1304",
+    "name": "Industrial Organization & Management",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "40fbb715-2103-49ea-883c-58beb2ba3a6d",
+    "code": "DNDT 1305",
+    "name": "Trade Project",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "8804a717-4131-44b4-9617-7c83cddfabb1",
+    "code": "DNDT 1306",
+    "name": "Product Development, Marketing &Sales",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  },
+  {
+    "id": "c242b708-6242-47c5-b6d0-8a926b2b59ae",
+    "code": "DNDT 2101",
+    "name": "Industrial Attachment",
+    "department_id": "5dad2236-def0-4270-96f8-2dfca48fed64"
+  }
+]

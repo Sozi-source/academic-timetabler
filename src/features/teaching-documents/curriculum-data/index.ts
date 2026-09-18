@@ -9,6 +9,7 @@
 import { MODULE_1_CURRICULUM } from './module-1';
 import { MODULE_2_CURRICULUM } from './module-2';
 import { MODULE_3_CURRICULUM } from './module-3';
+import { CERTIFICATE_CURRICULUM } from './certificate-units';
 import { resolveCanonicalKey, isCompatibleUnitTitle } from './shared-map';
 import type { CanonicalCurriculumUnit, UnitCurriculumDefinition } from './types';
 
@@ -17,14 +18,17 @@ export * from './shared-map';
 export { MODULE_1_CURRICULUM } from './module-1';
 export { MODULE_2_CURRICULUM } from './module-2';
 export { MODULE_3_CURRICULUM } from './module-3';
+export { CERTIFICATE_CURRICULUM } from './certificate-units';
 
 /**
- * Authoritative master registry of all 43 canonical curriculum units
+ * Authoritative master registry of all canonical curriculum units across all modules
+ * and certificate programmes (CHN/CND certificate unique units).
  */
 export const MASTER_CURRICULUM_REGISTRY: Record<string, CanonicalCurriculumUnit> = {
   ...MODULE_1_CURRICULUM,
   ...MODULE_2_CURRICULUM,
   ...MODULE_3_CURRICULUM,
+  ...CERTIFICATE_CURRICULUM,
 };
 
 /**

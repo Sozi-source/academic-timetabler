@@ -60,6 +60,14 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
   - `npm test`: 117/117 test files passed, 598/598 tests passed.
   - `npm run check`: 0 type errors, 0 lint warnings, clean Next.js 16 build.
 
+### 2026-09-19: Deploy Live Unit Offering Drop RPC Fix
+
+- **Files Modified**:
+  - `supabase/migrations/20260919090000_fix_live_unit_offering_drop_rpc.sql`
+  - `CHANGES.md`
+- Added a new migration because the prior lifecycle migration was already applied remotely.
+- The drop RPC now cancels sessions before suspending their allocations, preventing the session authority trigger from rejecting an invalid withdrawn-offering state.
+
 ### 2026-09-18: Remote Merge, Large File Removal (`Course outlines.zip`) & Archive Ignore Standard
 
 - **Context & Problem**:

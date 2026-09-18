@@ -21,7 +21,42 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
    - Clinical Rotation (`CHN 1308`, `CND 2103`, `DHN 1306`, `DND 2103`) — clinical placement; no KNEC lecture syllabus.
    - Medical Terminologies (`CCU 1113`, `DHN 1301`) — no standalone outline or scheme found in provided materials.
 
----
+### 2026-09-18: Enterprise Unit Offering Lifecycle Sync & Unique Constraint Collision Resolution
+
+- **Context & Problem**:
+  - When HOD attempted to drop or authorize unit offerings (e.g. dropping *Agricultural Production* from `CHN MAY 25`), the operation failed with:
+    `Offering authorization failed duplicate key value violates unique constraint "teaching_allocations_period_cohort_unit_unique_idx"`.
+  - Root cause:
+    1. The drop branch in `set_unit_offering_approval()` attempted to mutate the primary `cohort_id` on existing teaching allocations to remaining partner cohorts (`update ... set cohort_id = rem_cohort`). Whenever a partner cohort already possessed an allocation (or an archived record) for that unit and academic period, changing `cohort_id` triggered a duplicate key violation.
+    2. Furthermore, existing duplicate allocations in remote Supabase tables could cause collisions if partial indexing wasn't uniformly enforced.
+- **Architectural Solutions & Changes**:
+  - **`supabase/migrations/20260918183000_enterprise_unit_offering_lifecycle_sync.sql`**:
+    - **Step 0 — Deduplication & Partial Unique Index Guard**:
+      - Deduplicates any duplicate allocations in `public.teaching_allocations` by archiving older duplicates.
+      - Standardizes the partial unique index:
+        `CREATE UNIQUE INDEX teaching_allocations_period_cohort_unit_unique_idx ON public.teaching_allocations (academic_period_id, cohort_id, unit_id) WHERE status IN ('draft', 'active', 'suspended')`.
+    - **Step 1 — Resilient Allocation Validation (`validate_teaching_allocation`)**:
+      - Gracefully bypasses validation checks for suspended, archived, or disabled allocations (`new.is_timetable_enabled = false`).
+      - Permits cross-stage units when an approved offering or audited legacy/special exception exists.
+    - **Step 2 — Zero-Mutation Offering Drop & Re-enable Lifecycle (`set_unit_offering_approval`)**:
+      - **Drop Branch (`p_approve = false`)**:
+        - Completely eliminated the `update ... set cohort_id = rem_cohort` reassignment mutation.
+        - The dropping cohort's allocation is cleanly suspended (`status = 'suspended'`, `is_timetable_enabled = false`).
+        - The dropping cohort is removed from all `participant_cohort_ids` across shared allocations.
+        - For each remaining partner cohort, its independent allocation is kept active/draft; if none existed, an unassigned draft is created.
+        - Scheduled sessions decouple cleanly: shared sessions retain partner cohorts while solo sessions are cancelled and unlocked.
+      - **Approve Branch (`p_approve = true`)**:
+        - Targets and reactivates any existing allocation record (`status = 'draft'`, `is_timetable_enabled = true`).
+        - Inserts an unassigned draft allocation only if no allocation exists at all for `(academic_period_id, cohort_id, unit_id)`.
+    - **Step 3 — Special Unit Offering Protection (`add_special_unit_offering`)**:
+      - Re-activates existing allocations safely or inserts with conflict fallback.
+    - **Step 4 — Clean Timetable Draft Generation (`save_generated_timetable_draft`)**:
+      - Clears orphaned and suspended sessions before persisting new generation runs.
+    - **Step 5 — Targeted Data Cleanup**:
+      - Reconciles `Research` (clearing `DNDT-SEP-2026` ghost sessions) and `Agricultural Production` (cleaning `CHN MAY 25` and `CND MAY 25` shared allocations).
+- **Verification**:
+  - `npm test`: 117/117 test files passed, 598/598 tests passed.
+  - `npm run check`: 0 type errors, 0 lint warnings, clean Next.js 16 build.
 
 ### 2026-09-18: Remote Merge, Large File Removal (`Course outlines.zip`) & Archive Ignore Standard
 

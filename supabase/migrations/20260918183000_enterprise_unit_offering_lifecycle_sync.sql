@@ -1,6 +1,13 @@
 -- ============================================================================
 -- Migration: Enterprise Unit Offering Lifecycle Synchronization & Clash Clearing
 --
+-- 0. Deduplication & Partial Unique Index Guard:
+--    - Deduplicates any duplicate allocations in public.teaching_allocations
+--      for (academic_period_id, cohort_id, unit_id) by archiving older duplicates.
+--    - Standardizes the partial unique index:
+--      teaching_allocations_period_cohort_unit_unique_idx ON public.teaching_allocations
+--      (academic_period_id, cohort_id, unit_id) WHERE status IN ('draft', 'active', 'suspended').
+--
 -- 1. Fix validate_teaching_allocation():
 --    - When an allocation is disabled (not is_timetable_enabled) or set to
 --      'suspended', 'completed', or 'archived', bypass all
@@ -13,16 +20,19 @@
 --      * Decouple shared teaching allocations and sessions cleanly:
 --        remove the dropped cohort from participant_cohort_ids and
 --        teaching_offering_participants.
---      * If the allocation was solo or had only this cohort, suspend it.
---      * Unlock and cancel any solo scheduled sessions.
+--      * NEVER mutate cohort_id on an existing allocation record to another cohort,
+--        eliminating duplicate key collisions on teaching_allocations_period_cohort_unit_unique_idx.
+--      * If partner cohorts were sharing the unit, ensure each partner cohort has its own
+--        independent active/draft allocation.
+--      * Suspend the dropped cohort's allocation and unlock/cancel any solo scheduled sessions.
 --    - When approving (p_approve = true):
 --      * Re-enable existing allocations matching (academic_period_id, cohort_id, unit_id).
---      * Create an unassigned draft allocation if none exists, ensuring it
---        is immediately ready for timetabling.
+--      * Create an unassigned draft allocation only when none exists, ensuring it
+--        is immediately ready for timetabling without unique constraint collisions.
 --
 -- 3. Update add_special_unit_offering():
 --    - Sets approval_status = 'approved', approved_by, approved_at.
---    - Creates or reactivates an unassigned draft teaching allocation.
+--    - Creates or reactivates an unassigned draft teaching allocation safely.
 --
 -- 4. Update save_generated_timetable_draft():
 --    - Purges orphaned or suspended sessions for the department before
@@ -30,7 +40,45 @@
 --
 -- 5. Data Cleanup:
 --    - Clears DNDT-SEP-2026 from any Research participants, allocations, and sessions.
+--    - Reconciles Agricultural Production for CHN MAY 25 / CND MAY 25 without clashes.
 -- ============================================================================
+
+-- 0. Deduplication & Partial Unique Index Guard
+with ranked_allocations as (
+  select id,
+         row_number() over (
+           partition by academic_period_id, cohort_id, unit_id
+           order by
+             case status
+               when 'active' then 1
+               when 'draft' then 2
+               when 'suspended' then 3
+               else 4
+             end,
+             updated_at desc,
+             created_at desc
+         ) as rn
+  from public.teaching_allocations
+  where status in ('draft', 'active', 'suspended')
+)
+update public.teaching_allocations
+set status = 'archived',
+    is_timetable_enabled = false,
+    notes = left(concat_ws(' | ', nullif(trim(notes), ''), 'Archived duplicate allocation during enterprise lifecycle sync'), 1500),
+    updated_at = now()
+where id in (
+  select id from ranked_allocations where rn > 1
+);
+
+drop index if exists public.teaching_allocations_period_cohort_unit_unique_idx;
+
+create unique index teaching_allocations_period_cohort_unit_unique_idx
+on public.teaching_allocations (
+  academic_period_id,
+  cohort_id,
+  unit_id
+)
+where status in ('draft', 'active', 'suspended');
 
 -- 1. Fix validate_teaching_allocation()
 create or replace function public.validate_teaching_allocation()
@@ -273,21 +321,32 @@ begin
   get diagnostics changed = row_count;
 
   if p_approve then
-    -- A. Re-link and re-enable existing allocations
+    -- A. Re-link and re-enable existing allocations (draft, suspended, or archived)
     update public.teaching_allocations allocation
     set    source_unit_offering_id = offering.id,
            is_timetable_enabled    = (offering.offering_type not in ('attachment', 'clinical_rotation', 'examination')),
-           status                  = case when allocation.status = 'suspended' then 'draft' else allocation.status end,
+           status                  = case when allocation.status in ('suspended', 'archived') then 'draft' else allocation.status end,
            updated_by              = auth.uid(),
            updated_at              = now()
     from   public.unit_offerings offering
     where  offering.id = any(p_offering_ids)
       and  not (offering.id = any(coalesce(blocked_ids, '{}'::uuid[])))
-      and  allocation.academic_period_id = offering.academic_period_id
-      and  allocation.cohort_id          = offering.cohort_id
-      and  allocation.unit_id            = offering.unit_id;
+      and  allocation.id = (
+             select a2.id from public.teaching_allocations a2
+             where a2.academic_period_id = offering.academic_period_id
+               and a2.cohort_id          = offering.cohort_id
+               and a2.unit_id            = offering.unit_id
+             order by case a2.status
+                        when 'active' then 1
+                        when 'draft' then 2
+                        when 'suspended' then 3
+                        else 4
+                      end,
+                      a2.updated_at desc
+             limit 1
+           );
 
-    -- B. For any approved offering that has NO teaching allocation yet, insert an unassigned draft allocation
+    -- B. For approved offerings that still have NO teaching allocation at all, insert an unassigned draft
     insert into public.teaching_allocations (
       academic_period_id,
       cohort_id,
@@ -334,7 +393,6 @@ begin
         where alloc.academic_period_id = offering.academic_period_id
           and alloc.cohort_id = offering.cohort_id
           and alloc.unit_id = offering.unit_id
-          and alloc.status in ('draft', 'active', 'suspended')
       )
     on conflict (academic_period_id, cohort_id, unit_id) where status in ('draft', 'active', 'suspended')
     do update set
@@ -363,72 +421,89 @@ begin
            )
          );
 
-      -- 2. Handle teaching_allocations where this cohort is primary cohort
+      -- 2. Handle partner cohorts that were co-enrolled/sharing this unit
       for rem_cohort in
-        select unnest(array_remove(a.participant_cohort_ids, r.cohort_id))
+        select distinct unnest(array_remove(a.participant_cohort_ids, r.cohort_id))
         from public.teaching_allocations a
-        where (a.source_unit_offering_id = r.offering_id
-               or (a.academic_period_id = r.academic_period_id and a.cohort_id = r.cohort_id and a.unit_id = r.unit_id))
+        where a.academic_period_id = r.academic_period_id
+          and a.unit_id = r.unit_id
+          and r.cohort_id = any(a.participant_cohort_ids)
           and cardinality(array_remove(a.participant_cohort_ids, r.cohort_id)) > 0
-        limit 1
       loop
-        -- Check if rem_cohort already has an active, draft, or suspended allocation for this unit
-        if not exists (
-          select 1 from public.teaching_allocations existing
-          where existing.academic_period_id = r.academic_period_id
-            and existing.cohort_id = rem_cohort
-            and existing.unit_id = r.unit_id
-            and existing.status in ('draft', 'active', 'suspended')
-        ) then
-          -- Safe to transfer primary ownership to rem_cohort
-          update public.teaching_allocations
-          set cohort_id = rem_cohort,
-              participant_cohort_ids = array_remove(participant_cohort_ids, r.cohort_id),
-              combined_cohort_size = (
-                select coalesce(sum(c.actual_size), 0)
-                from public.cohorts c
-                where c.id = any(array_remove(teaching_allocations.participant_cohort_ids, r.cohort_id))
-              ),
-              updated_by = auth.uid(),
-              updated_at = now()
-          where (source_unit_offering_id = r.offering_id
-                 or (academic_period_id = r.academic_period_id and cohort_id = r.cohort_id and unit_id = r.unit_id));
-        else
-          -- rem_cohort ALREADY has its own allocation!
-          -- Enable rem_cohort's allocation and ensure it has other cohorts if needed
-          update public.teaching_allocations
-          set is_timetable_enabled = true,
-              status = case when status = 'suspended' then 'draft' else status end,
-              updated_by = auth.uid(),
-              updated_at = now()
-          where academic_period_id = r.academic_period_id
-            and cohort_id = rem_cohort
-            and unit_id = r.unit_id;
+        -- If rem_cohort has an existing allocation, ensure it remains active/draft and clean its participants
+        update public.teaching_allocations
+        set is_timetable_enabled = true,
+            status = case when status in ('suspended', 'archived') then 'draft' else status end,
+            participant_cohort_ids = array_remove(participant_cohort_ids, r.cohort_id),
+            combined_cohort_size = (
+              select coalesce(sum(c.actual_size), 0)
+              from public.cohorts c
+              where c.id = any(array_remove(teaching_allocations.participant_cohort_ids, r.cohort_id))
+            ),
+            updated_by = auth.uid(),
+            updated_at = now()
+        where academic_period_id = r.academic_period_id
+          and cohort_id = rem_cohort
+          and unit_id = r.unit_id;
 
-          -- Suspend r.cohort_id's allocation since r.cohort_id is dropping it
-          update public.teaching_allocations
-          set is_timetable_enabled = false,
-              status = 'suspended',
-              participant_cohort_ids = array_remove(participant_cohort_ids, r.cohort_id),
-              updated_by = auth.uid(),
-              updated_at = now()
-          where (source_unit_offering_id = r.offering_id
-                 or (academic_period_id = r.academic_period_id and cohort_id = r.cohort_id and unit_id = r.unit_id));
+        -- If rem_cohort has NO allocation of its own, create an unassigned draft for rem_cohort
+        if not found then
+          insert into public.teaching_allocations (
+            academic_period_id,
+            cohort_id,
+            unit_id,
+            trainer_id,
+            source_unit_offering_id,
+            delivery_mode,
+            weekly_sessions,
+            session_duration_minutes,
+            status,
+            is_timetable_enabled,
+            participant_cohort_ids,
+            combined_cohort_size,
+            notes,
+            created_by,
+            updated_by
+          )
+          select
+            r.academic_period_id,
+            rem_cohort,
+            r.unit_id,
+            null,
+            (select o.id from public.unit_offerings o where o.academic_period_id = r.academic_period_id and o.cohort_id = rem_cohort and o.unit_id = r.unit_id limit 1),
+            'theory'::public.teaching_delivery_mode,
+            coalesce(u.weekly_sessions, 1),
+            120,
+            'draft',
+            true,
+            array[rem_cohort],
+            coalesce(c.actual_size, 0),
+            'Allocation maintained after partner cohort withdrew unit',
+            auth.uid(),
+            auth.uid()
+          from public.units u
+          join public.cohorts c on c.id = rem_cohort
+          where u.id = r.unit_id
+          on conflict (academic_period_id, cohort_id, unit_id) where status in ('draft', 'active', 'suspended')
+          do update set
+            is_timetable_enabled = true,
+            status = 'draft',
+            updated_by = auth.uid(),
+            updated_at = now();
         end if;
       end loop;
 
-      -- If no other participants remain, suspend the allocation
+      -- 3. Suspend r.cohort_id's allocation (NEVER update cohort_id to another cohort!)
       update public.teaching_allocations allocation
       set is_timetable_enabled = false,
           status = 'suspended',
+          participant_cohort_ids = array_remove(participant_cohort_ids, r.cohort_id),
           updated_by = auth.uid(),
           updated_at = now()
       where (allocation.source_unit_offering_id = r.offering_id
-             or (allocation.academic_period_id = r.academic_period_id and allocation.cohort_id = r.cohort_id and allocation.unit_id = r.unit_id))
-        and (allocation.participant_cohort_ids is null
-             or cardinality(array_remove(allocation.participant_cohort_ids, r.cohort_id)) = 0);
+             or (allocation.academic_period_id = r.academic_period_id and allocation.cohort_id = r.cohort_id and allocation.unit_id = r.unit_id));
 
-      -- If this cohort was a co-attending participant in someone else's allocation, remove them
+      -- 4. Clean participant_cohort_ids across all allocations for this unit where r.cohort_id participated
       update public.teaching_allocations allocation
       set participant_cohort_ids = array_remove(participant_cohort_ids, r.cohort_id),
           combined_cohort_size = (
@@ -440,10 +515,9 @@ begin
           updated_at = now()
       where allocation.academic_period_id = r.academic_period_id
         and allocation.unit_id = r.unit_id
-        and r.cohort_id = any(allocation.participant_cohort_ids)
-        and allocation.cohort_id <> r.cohort_id;
+        and r.cohort_id = any(allocation.participant_cohort_ids);
 
-      -- 3. Handle scheduled sessions:
+      -- 5. Handle scheduled sessions:
       -- A. Shared sessions with other cohorts: remove this cohort from participant_cohort_ids
       update public.scheduled_sessions session
       set participant_cohort_ids = array_remove(participant_cohort_ids, r.cohort_id),
@@ -652,7 +726,7 @@ begin
   update public.teaching_allocations
   set source_unit_offering_id = result.id,
       is_timetable_enabled = true,
-      status = case when status = 'suspended' then 'draft' else status end,
+      status = 'draft',
       updated_by = auth.uid(),
       updated_at = now()
   where academic_period_id = selected_academic_period_id
@@ -844,12 +918,15 @@ $$;
 revoke all on function public.save_generated_timetable_draft(uuid, jsonb, jsonb) from public;
 grant execute on function public.save_generated_timetable_draft(uuid, jsonb, jsonb) to authenticated;
 
--- 5. Immediate Data Cleanup: Clear DNDT-SEP-2026 from Research ghost participants/sessions
+-- 5. Immediate Data Cleanup: Clear DNDT-SEP-2026 from Research & Reconcile Agricultural Production
 do $$
 declare
   dndt_cohort_id uuid;
   research_unit_ids uuid[];
+  chn_cohort_id uuid;
+  agric_unit_ids uuid[];
 begin
+  -- A. Clear DNDT-SEP-2026 from Research ghost participants/sessions
   select id into dndt_cohort_id
   from public.cohorts
   where code ilike '%DNDT%' or name ilike '%DNDT%'
@@ -860,7 +937,7 @@ begin
   where name ilike '%research%' or code ilike '%research%';
 
   if dndt_cohort_id is not null and research_unit_ids is not null then
-    -- A. Remove DNDT from participant_cohort_ids in shared scheduled_sessions
+    -- Remove DNDT from participant_cohort_ids in shared scheduled_sessions
     update public.scheduled_sessions session
     set participant_cohort_ids = array_remove(participant_cohort_ids, dndt_cohort_id),
         conflict_state = 'clear',
@@ -871,7 +948,7 @@ begin
       and dndt_cohort_id = any(participant_cohort_ids)
       and cardinality(array_remove(participant_cohort_ids, dndt_cohort_id)) > 0;
 
-    -- B. Cancel any solo session for DNDT on Research
+    -- Cancel any solo session for DNDT on Research
     update public.scheduled_sessions session
     set status = 'cancelled',
         conflict_state = 'clear',
@@ -884,7 +961,7 @@ begin
       and (cohort_id = dndt_cohort_id or participant_cohort_ids = array[dndt_cohort_id])
       and session.status not in ('cancelled', 'archived');
 
-    -- C. Remove DNDT from teaching_allocations participant_cohort_ids
+    -- Remove DNDT from teaching_allocations participant_cohort_ids
     update public.teaching_allocations allocation
     set participant_cohort_ids = array_remove(participant_cohort_ids, dndt_cohort_id),
         updated_at = now()
@@ -892,7 +969,7 @@ begin
       and dndt_cohort_id = any(participant_cohort_ids)
       and cardinality(array_remove(participant_cohort_ids, dndt_cohort_id)) > 0;
 
-    -- D. Suspend any solo allocation for DNDT on Research
+    -- Suspend any solo allocation for DNDT on Research
     update public.teaching_allocations allocation
     set is_timetable_enabled = false,
         status = 'suspended',
@@ -901,8 +978,62 @@ begin
       and cohort_id = dndt_cohort_id
       and (participant_cohort_ids is null or participant_cohort_ids = array[dndt_cohort_id]);
 
-    -- E. Delete from teaching_offering_participants
+    -- Delete from teaching_offering_participants
     delete from public.teaching_offering_participants
     where cohort_id = dndt_cohort_id and unit_id = any(research_unit_ids);
+  end if;
+
+  -- B. Reconcile Agricultural Production for CHN MAY 25
+  select id into chn_cohort_id
+  from public.cohorts
+  where (code ilike '%CHN%MAY%25%' or name ilike '%CHN%MAY%25%')
+  order by created_at desc limit 1;
+
+  select array_agg(id) into agric_unit_ids
+  from public.units
+  where name ilike '%Agricultural Production%' or code in ('CHN 2309', 'CND 2306', 'DND 3205');
+
+  if chn_cohort_id is not null and agric_unit_ids is not null then
+    if exists (
+      select 1 from public.unit_offerings
+      where cohort_id = chn_cohort_id
+        and unit_id = any(agric_unit_ids)
+        and approval_status = 'withdrawn'
+    ) then
+      update public.teaching_allocations
+      set participant_cohort_ids = array_remove(participant_cohort_ids, chn_cohort_id),
+          updated_at = now()
+      where unit_id = any(agric_unit_ids)
+        and chn_cohort_id = any(participant_cohort_ids)
+        and cardinality(array_remove(participant_cohort_ids, chn_cohort_id)) > 0;
+
+      update public.teaching_allocations
+      set is_timetable_enabled = false,
+          status = 'suspended',
+          updated_at = now()
+      where unit_id = any(agric_unit_ids)
+        and cohort_id = chn_cohort_id;
+
+      update public.scheduled_sessions
+      set participant_cohort_ids = array_remove(participant_cohort_ids, chn_cohort_id),
+          conflict_state = 'clear',
+          updated_at = now()
+      where (unit_id = any(agric_unit_ids) or teaching_allocation_id in (
+        select id from public.teaching_allocations where unit_id = any(agric_unit_ids)
+      ))
+        and chn_cohort_id = any(participant_cohort_ids)
+        and cardinality(array_remove(participant_cohort_ids, chn_cohort_id)) > 0;
+
+      update public.scheduled_sessions
+      set status = 'cancelled',
+          conflict_state = 'clear',
+          is_locked = false,
+          updated_at = now()
+      where (unit_id = any(agric_unit_ids) or teaching_allocation_id in (
+        select id from public.teaching_allocations where unit_id = any(agric_unit_ids)
+      ))
+        and (cohort_id = chn_cohort_id or participant_cohort_ids = array[chn_cohort_id])
+        and status not in ('cancelled', 'archived');
+    end if;
   end if;
 end $$;

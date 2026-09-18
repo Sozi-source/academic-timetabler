@@ -103,10 +103,12 @@ export function ScheduleAllocationDialog({
   const [selectedCohortIds, setSelectedCohortIds] = useState<string[]>(() =>
     availableCohorts.map((c) => c.id)
   );
+  const [prevAllocationId, setPrevAllocationId] = useState(allocation.id);
 
-  useEffect(() => {
+  if (prevAllocationId !== allocation.id) {
+    setPrevAllocationId(allocation.id);
     setSelectedCohortIds(availableCohorts.map((c) => c.id));
-  }, [availableCohorts]);
+  }
 
   // Real-time client-side clash detection against current timetable sessions
   const conflicts = useMemo(() => {

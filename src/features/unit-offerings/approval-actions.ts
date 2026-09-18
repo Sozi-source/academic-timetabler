@@ -41,6 +41,10 @@ export async function approveUnitOfferingsAction(formData: FormData) {
   revalidatePath('/timetable/teaching-allocations');
   revalidatePath('/timetable/readiness');
   revalidatePath('/timetable/generator');
+  revalidatePath('/timetable/editor');
+  revalidatePath('/timetable/conflicts');
+  revalidatePath('/timetable/published');
+  revalidatePath('/timetable/reports');
 
   // Partial success: some were blocked but some succeeded
   if (result.blocked > 0 && result.message) {
@@ -85,6 +89,10 @@ export async function withdrawUnitOfferingAction(formData: FormData) {
   revalidatePath('/timetable/teaching-allocations');
   revalidatePath('/timetable/readiness');
   revalidatePath('/timetable/generator');
+  revalidatePath('/timetable/editor');
+  revalidatePath('/timetable/conflicts');
+  revalidatePath('/timetable/published');
+  revalidatePath('/timetable/reports');
 
   // Partial success: some blocked, some dropped
   if (result.blocked > 0 && result.message) {
@@ -112,5 +120,12 @@ export async function addCohortUnitOfferingAction(formData: FormData) {
   });
   if (error) redirect(`${path}?approvalError=${encodeURIComponent(error.message)}`);
   revalidatePath(path);
+  revalidatePath('/timetable/teaching-allocations');
+  revalidatePath('/timetable/readiness');
+  revalidatePath('/timetable/generator');
+  revalidatePath('/timetable/editor');
+  revalidatePath('/timetable/conflicts');
+  revalidatePath('/timetable/published');
+  revalidatePath('/timetable/reports');
   redirect(`${path}?added=1`);
 }

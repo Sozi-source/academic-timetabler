@@ -314,6 +314,10 @@ export function createAutomaticPlannerInput({
   const existingSessions =
     sourceData.existingSessions
       .filter((session) => {
+        if (session.status === 'cancelled') {
+          return false;
+        }
+
         if (!overwriteExisting) {
           return true;
         }

@@ -18,6 +18,71 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 2. **Curriculum Upload UI Update (`curriculum-zip-upload-dialog.tsx`)**:
    - Update `curriculum-zip-upload-dialog.tsx` to display `unresolvedFiles` from the ingestion preview response, allowing HODs to select document types manually prior to commit.
 
+### 2026-09-18: Enterprise Unit Offering Lifecycle Synchronization & Ghost Clash Elimination
+
+- **Context & Problem**:
+  - The HOD encountered an error when attempting to drop **Agricultural Production** from cohort `CHN MAY 25`:
+    `The unit does not belong to the cohort current programme period`
+  - The HOD previously dropped **Research** from cohort `DNDT SEP 26`, but the timetable continued to read it and report clashes against other units.
+  - The HOD required that whenever a unit is dropped from or added to a cohort, subsequent timetable generations and manual scheduling reflect the change atomically and reliably under enterprise standards.
+  - **Root Causes**:
+    1. In `validate_teaching_allocation()`, the PostgreSQL trigger checked `selected_unit.academic_period_number` against the cohort's current semester even during deactivation (`status = 'suspended'`, `is_timetable_enabled = false`). Because the offering was set to `is_timetable_enabled = false` immediately before the allocation update, the exception query failed and blocked dropping the unit.
+    2. In `set_unit_offering_approval()`, dropping an offering only searched allocations linked via `source_unit_offering_id` (ignoring legacy allocations linked by `(academic_period_id, cohort_id, unit_id)`). For shared classes, it did not delete the cohort from `teaching_offering_participants`, `teaching_allocations.participant_cohort_ids`, or `scheduled_sessions.participant_cohort_ids`. Because the cohort remained in `participant_cohort_ids` of the session, the clash detector continued to see the cohort as occupied.
+    3. Old locked sessions for dropped units were preserved by `save_generated_timetable_draft()`, preventing generator runs from cleaning them up.
+    4. In `add_special_unit_offering()`, newly added cohort units were not given `approval_status = 'approved'`, leaving them in review-required state and without an unassigned draft teaching allocation.
+- **Key Changes**:
+  - `supabase/migrations/20260918183000_enterprise_unit_offering_lifecycle_sync.sql`:
+    - Updated `public.validate_teaching_allocation()`: Bypasses all checks and immediately returns when an allocation is disabled or set to `suspended`, `completed`, `archived`, or `cancelled`. For active allocations, permits cross-stage units if an approved offering exists for `(academic_period_id, cohort_id, unit_id)` or if audited.
+    - Updated `public.set_unit_offering_approval()`:
+      - **When dropping (`p_approve = false`)**: Removes the dropped cohort from `teaching_offering_participants`. In shared allocations, reassigns primary cohort if necessary, removes dropped cohort from `participant_cohort_ids`, and recalculates `combined_cohort_size`. In solo allocations, suspends the allocation. In scheduled sessions, removes the dropped cohort from shared sessions and unlocks/cancels solo sessions (`status = 'cancelled'`, `is_locked = false`).
+      - **When approving (`p_approve = true`)**: Re-enables allocations and automatically inserts an unassigned draft allocation if none exists.
+    - Updated `public.add_special_unit_offering()`: Marks offerings as approved by the active HOD and ensures an unassigned draft teaching allocation is created or enabled.
+    - Updated `public.save_generated_timetable_draft()`: Automatically purges any orphaned, suspended, or cancelled sessions belonging to the department before persisting fresh timetable sessions.
+    - Immediate Data Cleanup: Removed `DNDT-SEP-2026` from Research participants, allocations, and sessions; reconciled cancelled/solo sessions.
+  - `src/features/unit-offerings/approval-actions.ts`:
+    - Added `revalidatePath` calls for `/timetable/editor`, `/timetable/conflicts`, `/timetable/published`, and `/timetable/reports` in `approveUnitOfferingsAction`, `withdrawUnitOfferingAction`, and `addCohortUnitOfferingAction`.
+  - `src/features/timetable-generator/data-adapter.ts`:
+    - In `createAutomaticPlannerInput`, excluded any existing sessions with `status === 'cancelled'` from being preserved.
+- **Verification**:
+  - `npm test`: 117/117 test files passed, 598/598 unit tests passed.
+  - `npm run check`: TypeScript typecheck, ESLint, and Next.js 16 production build passed with 0 errors and 0 warnings.
+- **Manual Follow-up**:
+  - Run migration `supabase/migrations/20260918183000_enterprise_unit_offering_lifecycle_sync.sql` in the Supabase SQL Editor.
+
+### 2026-09-18: Food Safety & Hygiene Cohort Correction & Selective/Standalone Timetable Scheduling Controls
+
+- **Context & Problem**:
+  - The HOD attempted to schedule **First Aid** (`DCU 1104` or equivalent) on **Friday 10:30** for cohort `DHN-JAN-MAR-2025`.
+  - The editor blocked placement with:
+    `Shared Partner Conflict: Cohort DND-SEP-2025: Partner cohort DND-SEP-2025 (sharing this unit) already has CND 1203 Food Safety and Hygiene with Fiona Kwamboka in THK 2-03 at this time.`
+  - Domain truth established by the HOD: **Food Safety (`CND 1203`) belongs ONLY to `CND` and `DND-MAY-2026`**; it does not belong to `DND-SEP-2025` and must never affect First Aid groups.
+  - Root cause: In the database, `DND-SEP-2025` was erroneously linked as a participant cohort to `CND 1203 Food Safety and Hygiene`. Because `CND 1203` was already scheduled at Friday 10:30, `DND-SEP-2025` was marked as occupied. First Aid had `DND-SEP-2025` in its shared offering, so the conflict detector blocked placing First Aid.
+  - Furthermore, the timetable editor lacked manual controls to decouple partner cohorts or schedule a standalone session for `DHN-JAN-MAR-2025` alone.
+- **Key Changes**:
+  - `supabase/migrations/20260918173000_correct_food_safety_cohort_participants.sql`:
+    - Cleaned `DND-SEP-2025` out of `teaching_offering_participants`, `teaching_allocations`, and `scheduled_sessions` for `CND 1203 Food Safety and Hygiene`.
+    - Recalculated `combined_cohort_size` and synchronized participant contexts.
+    - Updated `public.schedule_allocation_session_safely` to accept optional `target_participant_cohort_ids uuid[] default null`.
+    - Updated `public.validate_scheduled_session_conflicts()` to evaluate clashes against explicit `new.participant_cohort_ids`.
+  - `src/features/timetable-editor/schedule-allocation-dialog.tsx`:
+    - Added interactive **Participating Cohorts selector** with individual cohort checkboxes for shared classes.
+    - Added one-click toggle: `"Only {allocation.cohortCode}"` / `"Include All Shared"`.
+    - Added quick-action button in the conflict warning: `"Exclude partner cohorts & place for {allocation.cohortCode} only"` to instantly clear partner clashes.
+    - Conflict calculations evaluate real-time clashes strictly against the active selected cohorts.
+    - Complies with React 19 prop adjustment patterns (zero cascading renders).
+  - `src/features/timetable-editor/types.ts` & `src/features/timetable-editor/queries.ts`:
+    - Added `participantCohorts: Array<{ id: string; code: string }>` to `EditorData['missingAllocations']` mapping cohort IDs to codes.
+  - `src/features/timetable-editor/validation.ts`:
+    - Extended `scheduleAllocationSchema` to parse optional JSON string array `participantCohortIds`.
+  - `src/features/timetable-editor/actions.ts`:
+    - Forwarded `target_participant_cohort_ids` to `supabase.rpc('schedule_allocation_session_safely')`.
+    - Restricted `diagnoseScheduleClash` to evaluate conflicts exclusively against the chosen participant cohorts.
+- **Verification**:
+  - `npm test`: 117/117 test files passed, 598/598 unit tests passed.
+  - `npm run check`: Typecheck, ESLint, and Next.js 16 build passed with 0 errors and 0 warnings.
+- **Manual Follow-up**:
+  - Run migration `supabase/migrations/20260918173000_correct_food_safety_cohort_participants.sql` in Supabase SQL editor to apply the database participant correction.
+
 ### 2026-09-18: Timetable Cohort Clash Diagnosis, Real-Time Conflict Detection & Shared Class Transparency
 
 - **Context & Problem**:

@@ -32,4 +32,13 @@ __pycache__/
 *.pyc
 *.pyo
 .venv/
+
+# TypeScript build cache (generated — never commit)
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# Scratch / debug files at project root
+scratch_units.json
+mod2_summary.json
+extracted_curriculum_raw.txt
 venv/

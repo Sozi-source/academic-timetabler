@@ -2,6 +2,9 @@
 -- The previous migration is already applied remotely, so this replacement must
 -- be delivered as a new migration.
 
+drop function if exists public.set_unit_offering_approval(uuid[], boolean, text);
+drop function if exists public.set_unit_offering_approval(uuid[], boolean);
+
 create or replace function public.set_unit_offering_approval(
   p_offering_ids uuid[],
   p_approve boolean,
@@ -184,9 +187,29 @@ begin
            )
          );
 
+      with ranked_own_allocations as (
+        select allocation.id,
+               row_number() over (
+                 partition by allocation.academic_period_id, allocation.cohort_id, allocation.unit_id
+                 order by
+                   case allocation.status
+                     when 'active' then 1
+                     when 'draft' then 2
+                     when 'suspended' then 3
+                     else 4
+                   end,
+                   allocation.updated_at desc
+               ) as rn
+        from public.teaching_allocations allocation
+        where allocation.id = any(affected_allocation_ids)
+          and (
+            allocation.cohort_id = offering_row.cohort_id
+            or allocation.source_unit_offering_id = offering_row.offering_id
+          )
+      )
       update public.teaching_allocations allocation
       set is_timetable_enabled = false,
-          status = 'suspended'::public.teaching_allocation_status,
+          status = case when ranked.rn = 1 then 'suspended'::public.teaching_allocation_status else 'archived'::public.teaching_allocation_status end,
           participant_cohort_ids = array_remove(
             coalesce(allocation.participant_cohort_ids, '{}'::uuid[]),
             offering_row.cohort_id
@@ -199,11 +222,8 @@ begin
           ),
           updated_by = auth.uid(),
           updated_at = now()
-      where allocation.id = any(affected_allocation_ids)
-        and (
-          allocation.cohort_id = offering_row.cohort_id
-          or allocation.source_unit_offering_id = offering_row.offering_id
-        );
+      from ranked_own_allocations ranked
+      where allocation.id = ranked.id;
 
       update public.teaching_allocations allocation
       set participant_cohort_ids = array_remove(

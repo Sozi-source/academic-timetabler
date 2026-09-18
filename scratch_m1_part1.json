@@ -1,0 +1,731 @@
+[
+  {
+    "canonicalKey": "information_communication_technology",
+    "syllabusCode": "3.1.0",
+    "unitCode": "3.1.0",
+    "unitName": "Information Communication Technology",
+    "moduleNumber": 1,
+    "nominalHours": 44,
+    "theoryHours": 19,
+    "practicalHours": 25,
+    "aliases": [
+      "CND 1201",
+      "DND 1201",
+      "DCU 1106",
+      "CCU 1106",
+      "ICT",
+      "Digital Literacy",
+      "3.1.0"
+    ],
+    "unitDescription": "Equips the trainee with knowledge, skills and attitudes to appreciate and apply Information and Communication Technology in health and nutrition fields.",
+    "overallCompetency": "Operate computer hardware and software, manage health information systems, apply internet and email in research and communication, and maintain office data security.",
+    "learningOutcomes": [
+      "Recognize the role of computer hardware and software in healthcare and nutrition.",
+      "Apply security measures to protect data, hardware and software.",
+      "Apply word processing, spreadsheet and database software in clinical and community nutrition tasks.",
+      "Use internet and email in research, client tracking and professional communication.",
+      "Cope with emerging issues in information communication technology."
+    ],
+    "weeklySchedule": [
+      {
+        "weekNumber": 1,
+        "topicTitle": "Introduction to ICT & Computer Systems",
+        "subTopics": [
+          "Concept of ICT",
+          "Functions of ICT",
+          "History and classification of computers",
+          "Components of a computer system"
+        ],
+        "hours": 3,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Introduction to ICT & Computer Systems.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Norton, P. (2018). Introduction to Computers. McGraw-Hill Education.",
+        "assessmentAndRemarks": "Diagnostic quiz and oral questions."
+      },
+      {
+        "weekNumber": 2,
+        "topicTitle": "Computer Hardware & Peripheral Interfacing",
+        "subTopics": [
+          "Input devices",
+          "Output devices",
+          "Central Processing Unit (CPU)",
+          "Storage media",
+          "Connecting peripherals"
+        ],
+        "hours": 3,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Computer Hardware & Peripheral Interfacing.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Norton, P. (2018). Introduction to Computers. McGraw-Hill Education.",
+        "assessmentAndRemarks": "Practical observation and connection checklist."
+      },
+      {
+        "weekNumber": 3,
+        "topicTitle": "Computer Software & Operating Systems",
+        "subTopics": [
+          "System software vs application software",
+          "Functions of an operating system",
+          "Operating system commands",
+          "Disk management and file directory navigation"
+        ],
+        "hours": 3,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Computer Software & Operating Systems.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Norton, P. (2018). Introduction to Computers. McGraw-Hill Education.",
+        "assessmentAndRemarks": "Folder management lab task."
+      },
+      {
+        "weekNumber": 4,
+        "topicTitle": "Word Processing Fundamentals & Document Formatting",
+        "subTopics": [
+          "Concept of word processing",
+          "Creating and editing documents",
+          "Formatting text, paragraphs and tables",
+          "Page layout and styling"
+        ],
+        "hours": 3,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Word Processing Fundamentals & Document Formatting.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Norton, P. (2018). Introduction to Computers. McGraw-Hill Education.",
+        "assessmentAndRemarks": "Word processing formatting exercise."
+      },
+      {
+        "weekNumber": 5,
+        "topicTitle": "Advanced Word Processing & Mail Merging (RAT 1)",
+        "subTopics": [
+          "Mail merging client appointment letters",
+          "Application of word processing utilities",
+          "Continuous Assessment 1 (RAT 1)"
+        ],
+        "hours": 3,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Advanced Word Processing & Mail Merging (RAT 1).",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Norton, P. (2018). Introduction to Computers. McGraw-Hill Education.",
+        "assessmentAndRemarks": "Continuous Assessment Test 1 (RAT 1)."
+      },
+      {
+        "weekNumber": 6,
+        "topicTitle": "Spreadsheet Principles & Data Entry",
+        "subTopics": [
+          "Worksheet layouts and cell addresses",
+          "Building and saving workbooks",
+          "Entering text, numerical values and dates",
+          "Data manipulation on a worksheet"
+        ],
+        "hours": 3,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Spreadsheet Principles & Data Entry.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Norton, P. (2018). Introduction to Computers. McGraw-Hill Education.",
+        "assessmentAndRemarks": "Worksheet structure check."
+      },
+      {
+        "weekNumber": 7,
+        "topicTitle": "Spreadsheet Formulas, Functions & Charting",
+        "subTopics": [
+          "Application of cell data types",
+          "Mathematical and statistical functions (SUM, AVERAGE, IF, VLOOKUP)",
+          "Nutritional index calculations (BMI, Z-scores)",
+          "Generating graphical charts"
+        ],
+        "hours": 3,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Spreadsheet Formulas, Functions & Charting.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Norton, P. (2018). Introduction to Computers. McGraw-Hill Education.",
+        "assessmentAndRemarks": "Spreadsheet calculation assignment."
+      },
+      {
+        "weekNumber": 8,
+        "topicTitle": "Mid-Term Examination (CAT)",
+        "subTopics": [
+          "Comprehensive Mid-Term Continuous Assessment Test (CAT)",
+          "Practical evaluation of Hardware, Word Processing and Spreadsheets"
+        ],
+        "hours": 3,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Mid-Term Examination (CAT).",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Norton, P. (2018). Introduction to Computers. McGraw-Hill Education.",
+        "assessmentAndRemarks": "Official Mid-Term CAT."
+      },
+      {
+        "weekNumber": 9,
+        "topicTitle": "Database Management Systems (DBMS)",
+        "subTopics": [
+          "Concept of database",
+          "Database design and table structures",
+          "Data types and field properties",
+          "Data entry, sorting and indexing"
+        ],
+        "hours": 3,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Database Management Systems (DBMS).",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Norton, P. (2018). Introduction to Computers. McGraw-Hill Education.",
+        "assessmentAndRemarks": "Table creation and field validation exercise."
+      },
+      {
+        "weekNumber": 10,
+        "topicTitle": "Computer Networking & Internet Research",
+        "subTopics": [
+          "Concept and types of computer networks (LAN, WAN)",
+          "Configuration of network devices",
+          "Internet browsing and health search strategies",
+          "Electronic mail (email) communication protocols"
+        ],
+        "hours": 3,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Computer Networking & Internet Research.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Norton, P. (2018). Introduction to Computers. McGraw-Hill Education.",
+        "assessmentAndRemarks": "Literature search query exercise."
+      },
+      {
+        "weekNumber": 11,
+        "topicTitle": "Presentation Packages & Health Communication",
+        "subTopics": [
+          "Types of presentation packages",
+          "Slide creation, design and layout principles",
+          "Inserting multimedia, tables and charts",
+          "Delivering health education slide presentations"
+        ],
+        "hours": 3,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Presentation Packages & Health Communication.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Norton, P. (2018). Introduction to Computers. McGraw-Hill Education.",
+        "assessmentAndRemarks": "Peer presentation evaluation."
+      },
+      {
+        "weekNumber": 12,
+        "topicTitle": "Data Security, Computer Crimes & ICT Ethics",
+        "subTopics": [
+          "Data security and control measures",
+          "Computer viruses, malware and antivirus management",
+          "Computer crimes and cyber hygiene",
+          "Laws governing data protection and client confidentiality"
+        ],
+        "hours": 3,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Data Security, Computer Crimes & ICT Ethics.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Norton, P. (2018). Introduction to Computers. McGraw-Hill Education.",
+        "assessmentAndRemarks": "Written case study report."
+      },
+      {
+        "weekNumber": 13,
+        "topicTitle": "Emerging Issues in ICT & Syllabus Revision",
+        "subTopics": [
+          "Tele-nutrition and mobile health (mHealth) applications",
+          "Artificial intelligence in clinical decision support",
+          "Remediation and revision drills"
+        ],
+        "hours": 3,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Emerging Issues in ICT & Syllabus Revision.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Norton, P. (2018). Introduction to Computers. McGraw-Hill Education.",
+        "assessmentAndRemarks": "Remediation and past paper analysis."
+      },
+      {
+        "weekNumber": 14,
+        "topicTitle": "Final Summative Examination",
+        "subTopics": [
+          "Summative theory examination",
+          "Final practical skill demonstration"
+        ],
+        "hours": 3,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Final Summative Examination.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Norton, P. (2018). Introduction to Computers. McGraw-Hill Education.",
+        "assessmentAndRemarks": "Final Summative Examination (70% weighting)."
+      }
+    ],
+    "references": [
+      "Norton, P. (2018). Introduction to Computers. McGraw-Hill Education.",
+      "Shelly, G. B., & Vermaat, M. E. (2020). Discovering Computers & Microsoft Office. Cengage Learning."
+    ],
+    "instructionalEquipment": [
+      "Computer Laboratory with networked PC workstations",
+      "Multimedia Projector",
+      "UPS backup",
+      "Office productivity suite"
+    ]
+  },
+  {
+    "canonicalKey": "entrepreneurship",
+    "syllabusCode": "4.1.0",
+    "unitCode": "4.1.0",
+    "unitName": "Entrepreneurship",
+    "moduleNumber": 1,
+    "nominalHours": 55,
+    "theoryHours": 28,
+    "practicalHours": 27,
+    "aliases": [
+      "CND 1102",
+      "DND 1102",
+      "DCU 1102",
+      "CCU 1102",
+      "Entrepreneurship Education",
+      "4.1.0"
+    ],
+    "unitDescription": "Equips the trainee with knowledge, skills, values and attitudes to plan, start and manage a successful personal or group business enterprise in health and nutrition.",
+    "overallCompetency": "Identify viable business opportunities, formulate comprehensive business proposals, and apply innovative management principles in operating health and nutrition ventures.",
+    "learningOutcomes": [
+      "Acquire entrepreneurial competencies necessary for planning, starting and managing a business.",
+      "Demonstrate positive attitudes towards self-employment and venture creation.",
+      "Identify viable business opportunities in community and clinical nutrition sectors.",
+      "Demonstrate creativity, innovation and ethical practices in business operations.",
+      "Formulate bankable business plans and apply financial management principles."
+    ],
+    "weeklySchedule": [
+      {
+        "weekNumber": 1,
+        "topicTitle": "Introduction to Entrepreneurship & Economic Role",
+        "subTopics": [
+          "Definition of terms used in entrepreneurship",
+          "Self-employment vs formal employment",
+          "Contribution of entrepreneurship to national development",
+          "Entrepreneurial mindset in health"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Introduction to Entrepreneurship & Economic Role.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Kuratko, D. F. (2019). Entrepreneurship: Theory, Process, Practice. Cengage Learning.",
+        "assessmentAndRemarks": "Short answer quiz."
+      },
+      {
+        "weekNumber": 2,
+        "topicTitle": "Evolution & Theories of Entrepreneurship",
+        "subTopics": [
+          "History of entrepreneurship in Kenya",
+          "Myths associated with entrepreneurship in Kenya",
+          "Theories of entrepreneurship",
+          "Sources of business ideas"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Evolution & Theories of Entrepreneurship.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Kuratko, D. F. (2019). Entrepreneurship: Theory, Process, Practice. Cengage Learning.",
+        "assessmentAndRemarks": "Concept mapping exercise."
+      },
+      {
+        "weekNumber": 3,
+        "topicTitle": "The Entrepreneur & Entrepreneurial Competences",
+        "subTopics": [
+          "Types of entrepreneurs",
+          "Qualities and characteristics of an entrepreneur",
+          "Roles of an entrepreneur in an enterprise",
+          "Assessment of personal entrepreneurial potential"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of The Entrepreneur & Entrepreneurial Competences.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Kuratko, D. F. (2019). Entrepreneurship: Theory, Process, Practice. Cengage Learning.",
+        "assessmentAndRemarks": "Self-assessment profile rubric."
+      },
+      {
+        "weekNumber": 4,
+        "topicTitle": "Creativity & Innovation in Nutrition Ventures",
+        "subTopics": [
+          "Concepts of creativity and innovation",
+          "The creative process",
+          "Barriers to creativity and innovation",
+          "Managing barriers to creativity in food product development"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Creativity & Innovation in Nutrition Ventures.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Kuratko, D. F. (2019). Entrepreneurship: Theory, Process, Practice. Cengage Learning.",
+        "assessmentAndRemarks": "Product ideation presentation."
+      },
+      {
+        "weekNumber": 5,
+        "topicTitle": "Entrepreneurial Culture & Motivation (RAT 1)",
+        "subTopics": [
+          "Concept of entrepreneurial culture",
+          "Habits that promote venture growth",
+          "Internal and external motivation factors",
+          "Continuous Assessment 1 (RAT 1)"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Entrepreneurial Culture & Motivation (RAT 1).",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Kuratko, D. F. (2019). Entrepreneurship: Theory, Process, Practice. Cengage Learning.",
+        "assessmentAndRemarks": "Continuous Assessment Test 1 (RAT 1)."
+      },
+      {
+        "weekNumber": 6,
+        "topicTitle": "Business Opportunity Identification & Market Scanning",
+        "subTopics": [
+          "Environmental scanning techniques",
+          "Methods of generating business ideas",
+          "Evaluation criteria for business opportunities (SWOT, PESTEL)",
+          "Feasibility analysis"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Business Opportunity Identification & Market Scanning.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Kuratko, D. F. (2019). Entrepreneurship: Theory, Process, Practice. Cengage Learning.",
+        "assessmentAndRemarks": "Opportunity evaluation matrix report."
+      },
+      {
+        "weekNumber": 7,
+        "topicTitle": "Starting a Small Business & Legal Forms",
+        "subTopics": [
+          "Procedure for starting a business enterprise in Kenya",
+          "Factors to consider when selecting business location",
+          "Legal forms of business ownership",
+          "Business registration and licensing requirements"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Starting a Small Business & Legal Forms.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Kuratko, D. F. (2019). Entrepreneurship: Theory, Process, Practice. Cengage Learning.",
+        "assessmentAndRemarks": "Business registration procedural workflow."
+      },
+      {
+        "weekNumber": 8,
+        "topicTitle": "Mid-Term Examination (CAT)",
+        "subTopics": [
+          "Mid-Term Continuous Assessment Test (CAT)",
+          "Comprehensive examination of Weeks 1 to 7 modules"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Mid-Term Examination (CAT).",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Kuratko, D. F. (2019). Entrepreneurship: Theory, Process, Practice. Cengage Learning.",
+        "assessmentAndRemarks": "Official Mid-Term Examination (CAT)."
+      },
+      {
+        "weekNumber": 9,
+        "topicTitle": "Business Enterprise & Operations Management",
+        "subTopics": [
+          "Functions of management in an enterprise (Planning, Organizing, Leading, Controlling)",
+          "Inventory management techniques in nutrition clinics and food stores",
+          "Managing business resources"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Business Enterprise & Operations Management.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Kuratko, D. F. (2019). Entrepreneurship: Theory, Process, Practice. Cengage Learning.",
+        "assessmentAndRemarks": "Inventory card practical task."
+      },
+      {
+        "weekNumber": 10,
+        "topicTitle": "Financial Management & Record Keeping",
+        "subTopics": [
+          "Sources of business finance",
+          "Types of business records and books of account",
+          "Preparation of basic financial statements (Cash Flow, Balance Sheet)",
+          "Break-even analysis and pricing strategies"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Financial Management & Record Keeping.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Kuratko, D. F. (2019). Entrepreneurship: Theory, Process, Practice. Cengage Learning.",
+        "assessmentAndRemarks": "Cash flow and break-even problem set."
+      },
+      {
+        "weekNumber": 11,
+        "topicTitle": "Marketing Strategies & Customer Relations",
+        "subTopics": [
+          "Marketing concept and marketing mix (4Ps/7Ps)",
+          "Market segmentation and targeting in clinical and wellness nutrition",
+          "Promotional tools and digital health marketing",
+          "Customer service and retention strategies"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Marketing Strategies & Customer Relations.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Kuratko, D. F. (2019). Entrepreneurship: Theory, Process, Practice. Cengage Learning.",
+        "assessmentAndRemarks": "Promotional campaign design task."
+      },
+      {
+        "weekNumber": 12,
+        "topicTitle": "The Business Plan Formulation",
+        "subTopics": [
+          "Purpose and components of a standard TVET business plan",
+          "Executive summary, marketing plan, operational plan, management plan, financial plan",
+          "Packaging and presenting a business proposal"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of The Business Plan Formulation.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Kuratko, D. F. (2019). Entrepreneurship: Theory, Process, Practice. Cengage Learning.",
+        "assessmentAndRemarks": "Draft business plan section evaluation."
+      },
+      {
+        "weekNumber": 13,
+        "topicTitle": "Emerging Issues in Entrepreneurship & Revision",
+        "subTopics": [
+          "E-commerce and online health consultations",
+          "Green entrepreneurship and sustainable food packaging",
+          "Remediation and past paper revision clinics"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Emerging Issues in Entrepreneurship & Revision.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Kuratko, D. F. (2019). Entrepreneurship: Theory, Process, Practice. Cengage Learning.",
+        "assessmentAndRemarks": "Remediation review and mock exam feedback."
+      },
+      {
+        "weekNumber": 14,
+        "topicTitle": "Final Summative Examination",
+        "subTopics": [
+          "Institutional final theory examination",
+          "Business plan defense submission"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Final Summative Examination.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Kuratko, D. F. (2019). Entrepreneurship: Theory, Process, Practice. Cengage Learning.",
+        "assessmentAndRemarks": "Final Summative Examination (70% weighting)."
+      }
+    ],
+    "references": [
+      "Kuratko, D. F. (2019). Entrepreneurship: Theory, Process, Practice. Cengage Learning.",
+      "Scarborough, N. M. (2018). Essentials of Entrepreneurship and Small Business Management. Pearson."
+    ],
+    "instructionalEquipment": [
+      "Business plan guidebooks",
+      "Multimedia projector",
+      "Sample financial accounting registers",
+      "Internet-enabled workstations"
+    ]
+  },
+  {
+    "canonicalKey": "communication_skills",
+    "syllabusCode": "5.1.0",
+    "unitCode": "5.1.0",
+    "unitName": "Communication Skills",
+    "moduleNumber": 1,
+    "nominalHours": 55,
+    "theoryHours": 24,
+    "practicalHours": 31,
+    "aliases": [
+      "CND 1101",
+      "DND 105",
+      "DCU 1101",
+      "CCU 1101",
+      "Communication Skills I",
+      "5.1.0"
+    ],
+    "unitDescription": "Equips the trainee with knowledge, skills and attitudes to process information and communicate effectively at the workplace, in clinical counselling, and in community outreach.",
+    "overallCompetency": "Apply official etiquette, manage interpersonal and organizational communication channels, conduct professional interviews and meetings, and write technical reports.",
+    "learningOutcomes": [
+      "Recognize the importance of communication in the healthcare workplace.",
+      "Develop effective listening, speaking, reading and writing skills.",
+      "Use different modes and channels of communication appropriately.",
+      "Draft clear institutional correspondence, memoranda, minutes and technical reports.",
+      "Apply official etiquette, protocol and diplomacy in professional interactions."
+    ],
+    "weeklySchedule": [
+      {
+        "weekNumber": 1,
+        "topicTitle": "Introduction to Communication & Principles",
+        "subTopics": [
+          "Definition of terms used in communication",
+          "Importance and purpose of communication",
+          "Essentials of effective communication (7Cs)",
+          "Role of ICT in communication"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Introduction to Communication & Principles.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Stanton, N. (2018). Mastering Communication. Palgrave Macmillan.",
+        "assessmentAndRemarks": "Short written test and oral questioning."
+      },
+      {
+        "weekNumber": 2,
+        "topicTitle": "Communication Process & Barriers",
+        "subTopics": [
+          "Stages in the communication process",
+          "Barriers to effective communication",
+          "Strategies of overcoming communication barriers"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Communication Process & Barriers.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Stanton, N. (2018). Mastering Communication. Palgrave Macmillan.",
+        "assessmentAndRemarks": "Barrier analysis worksheet."
+      },
+      {
+        "weekNumber": 3,
+        "topicTitle": "Channels & Classification of Communication",
+        "subTopics": [
+          "Internal vs external communication channels",
+          "Upward, downward, horizontal and diagonal channels",
+          "Formal vs informal networks (Grapevine)",
+          "Media selection"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Channels & Classification of Communication.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Stanton, N. (2018). Mastering Communication. Palgrave Macmillan.",
+        "assessmentAndRemarks": "Channel selection case study."
+      },
+      {
+        "weekNumber": 4,
+        "topicTitle": "Forms of Communication (Verbal & Non-Verbal)",
+        "subTopics": [
+          "Oral communication principles",
+          "Non-verbal communication (Kinesics, proxemics, paralanguage)",
+          "Significance of body language in patient counselling"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Forms of Communication (Verbal & Non-Verbal).",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Stanton, N. (2018). Mastering Communication. Palgrave Macmillan.",
+        "assessmentAndRemarks": "Non-verbal simulation rubric."
+      },
+      {
+        "weekNumber": 5,
+        "topicTitle": "Written Communication: Letters & Memos (RAT 1)",
+        "subTopics": [
+          "Structure of formal business letters",
+          "Internal memoranda formatting",
+          "Email etiquette in health institutions",
+          "Continuous Assessment 1 (RAT 1)"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Written Communication: Letters & Memos (RAT 1).",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Stanton, N. (2018). Mastering Communication. Palgrave Macmillan.",
+        "assessmentAndRemarks": "Continuous Assessment Test 1 (RAT 1)."
+      },
+      {
+        "weekNumber": 6,
+        "topicTitle": "Official Etiquette, Protocol & Diplomacy",
+        "subTopics": [
+          "Meaning of etiquette, protocol and diplomacy",
+          "Importance of etiquette in hospital wards and health facilities",
+          "Telephone etiquette and customer care protocol",
+          "Diplomatic conflict resolution"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Official Etiquette, Protocol & Diplomacy.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Stanton, N. (2018). Mastering Communication. Palgrave Macmillan.",
+        "assessmentAndRemarks": "Telephone etiquette practical observation."
+      },
+      {
+        "weekNumber": 7,
+        "topicTitle": "Report Writing Fundamentals",
+        "subTopics": [
+          "Meaning and purpose of reports in healthcare",
+          "Types of reports (Routine, investigative, clinical case reports)",
+          "Format and sections of a formal technical report",
+          "Data presentation in reports"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Report Writing Fundamentals.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Stanton, N. (2018). Mastering Communication. Palgrave Macmillan.",
+        "assessmentAndRemarks": "Report outline grading rubric."
+      },
+      {
+        "weekNumber": 8,
+        "topicTitle": "Mid-Term Examination (CAT)",
+        "subTopics": [
+          "Mid-Term Continuous Assessment Test (CAT)",
+          "Comprehensive examination of Weeks 1 to 7 modules"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Mid-Term Examination (CAT).",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Stanton, N. (2018). Mastering Communication. Palgrave Macmillan.",
+        "assessmentAndRemarks": "Official Mid-Term Examination (CAT)."
+      },
+      {
+        "weekNumber": 9,
+        "topicTitle": "Meeting Procedures & Documentation",
+        "subTopics": [
+          "Purpose and types of meetings in health institutions",
+          "Notice and agenda preparation",
+          "Role of Chairman and Secretary",
+          "Drafting accurate minutes and resolutions"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Meeting Procedures & Documentation.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Stanton, N. (2018). Mastering Communication. Palgrave Macmillan.",
+        "assessmentAndRemarks": "Minutes draft evaluation."
+      },
+      {
+        "weekNumber": 10,
+        "topicTitle": "Interviewing Skills & Techniques",
+        "subTopics": [
+          "Meaning and purpose of interviews",
+          "Types of interviews (Employment, nutritional assessment, counselling)",
+          "Interview stages (Pre-interview, interview, post-interview)",
+          "Handling difficult questions"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Interviewing Skills & Techniques.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Stanton, N. (2018). Mastering Communication. Palgrave Macmillan.",
+        "assessmentAndRemarks": "Mock interview performance score."
+      },
+      {
+        "weekNumber": 11,
+        "topicTitle": "Public Speaking & Presentation Skills",
+        "subTopics": [
+          "Principles of effective public speaking",
+          "Audience analysis and speech preparation",
+          "Voice modulation, eye contact and stage presence",
+          "Delivering health talks to community groups"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Public Speaking & Presentation Skills.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Stanton, N. (2018). Mastering Communication. Palgrave Macmillan.",
+        "assessmentAndRemarks": "Speech delivery practical rubric."
+      },
+      {
+        "weekNumber": 12,
+        "topicTitle": "Customer Care & Conflict Management",
+        "subTopics": [
+          "Concept of internal and external customers in healthcare",
+          "Customer feedback mechanisms",
+          "Causes of interpersonal conflict in clinical teams",
+          "Conflict resolution and negotiation strategies"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Customer Care & Conflict Management.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Stanton, N. (2018). Mastering Communication. Palgrave Macmillan.",
+        "assessmentAndRemarks": "Case study resolution write-up."
+      },
+      {
+        "weekNumber": 13,
+        "topicTitle": "Emerging Issues in Communication & Revision",
+        "subTopics": [
+          "Digital communication, telemedicine and social media ethics",
+          "Cross-cultural communication in humanitarian settings",
+          "Remediation and past KNEC paper analysis"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Emerging Issues in Communication & Revision.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Stanton, N. (2018). Mastering Communication. Palgrave Macmillan.",
+        "assessmentAndRemarks": "Past paper revision feedback."
+      },
+      {
+        "weekNumber": 14,
+        "topicTitle": "Final Summative Examination",
+        "subTopics": [
+          "Final theory examination",
+          "Oral communication portfolio review"
+        ],
+        "hours": 4,
+        "specificLearningOutcomes": "Demonstrate practical and theoretical understanding of Final Summative Examination.",
+        "learningActivities": "Lecture presentations, group discussions, practical demonstrations, and laboratory analysis.",
+        "resourcesAndReferences": "Stanton, N. (2018). Mastering Communication. Palgrave Macmillan.",
+        "assessmentAndRemarks": "Final Summative Examination (70% weighting)."
+      }
+    ],
+    "references": [
+      "Stanton, N. (2018). Mastering Communication. Palgrave Macmillan.",
+      "Taylor, S. (2019). Model Business Letters, Emails and Other Business Documents. Pearson."
+    ],
+    "instructionalEquipment": [
+      "Multimedia projector",
+      "Audio recording/playback equipment",
+      "Meeting and interview simulation props",
+      "Sample report archives"
+    ]
+  }
+]

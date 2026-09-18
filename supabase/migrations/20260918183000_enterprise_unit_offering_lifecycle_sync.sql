@@ -187,8 +187,6 @@ comment on function public.validate_teaching_allocation() is
   'Validates timetable allocations, permitting approved or audited cross-stage offerings and gracefully bypassing deactivating allocations.';
 
 -- 2. Deduplication & Partial Unique Index Guard
-alter table public.teaching_allocations disable trigger all;
-
 with ranked_allocations as (
   select id,
          row_number() over (
@@ -224,8 +222,6 @@ on public.teaching_allocations (
   unit_id
 )
 where status in ('draft', 'active', 'suspended');
-
-alter table public.teaching_allocations enable trigger all;
 
 -- 3. Update set_unit_offering_approval()
 create or replace function public.set_unit_offering_approval(

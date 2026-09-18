@@ -29,6 +29,7 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
   - Root cause:
     1. The drop branch in `set_unit_offering_approval()` attempted to mutate the primary `cohort_id` on existing teaching allocations to remaining partner cohorts (`update ... set cohort_id = rem_cohort`). Whenever a partner cohort already possessed an allocation (or an archived record) for that unit and academic period, changing `cohort_id` triggered a duplicate key violation.
     2. Furthermore, existing duplicate allocations in remote Supabase tables could cause collisions if partial indexing wasn't uniformly enforced.
+    3. Existing partner allocations could still reference the withdrawn offering; re-enabling them then failed the authoritative approved-offering trigger.
 - **Architectural Solutions & Changes**:
   - **`supabase/migrations/20260918183000_enterprise_unit_offering_lifecycle_sync.sql`**:
     - **Step 0 — Deduplication & Partial Unique Index Guard**:
@@ -45,6 +46,7 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
         - The dropping cohort is removed from all `participant_cohort_ids` across shared allocations.
         - For each remaining partner cohort, its independent allocation is kept active/draft; if none existed, an unassigned draft is created.
         - Scheduled sessions decouple cleanly: shared sessions retain partner cohorts while solo sessions are cancelled and unlocked.
+        - Existing partner allocations are re-linked to the partner cohort's approved offering before they are re-enabled.
       - **Approve Branch (`p_approve = true`)**:
         - Targets and reactivates any existing allocation record (`status = 'draft'`, `is_timetable_enabled = true`).
         - Inserts an unassigned draft allocation only if no allocation exists at all for `(academic_period_id, cohort_id, unit_id)`.

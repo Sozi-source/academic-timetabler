@@ -429,7 +429,22 @@ begin
       loop
         -- If rem_cohort has an existing allocation, ensure it remains active/draft and clean its participants
         update public.teaching_allocations
-        set is_timetable_enabled = true,
+        set source_unit_offering_id = coalesce(
+              (
+                select partner_offering.id
+                from public.unit_offerings partner_offering
+                where partner_offering.academic_period_id = r.academic_period_id
+                  and partner_offering.cohort_id = rem_cohort
+                  and partner_offering.unit_id = r.unit_id
+                  and partner_offering.approval_status = 'approved'
+                  and partner_offering.selection_state = 'included'
+                  and partner_offering.is_timetable_enabled = true
+                order by partner_offering.updated_at desc
+                limit 1
+              ),
+              source_unit_offering_id
+            ),
+            is_timetable_enabled = true,
             status = case when status in ('suspended', 'archived') then 'draft' else status end,
             participant_cohort_ids = array_remove(participant_cohort_ids, r.cohort_id),
             combined_cohort_size = (

@@ -110,12 +110,17 @@ export async function submitTrainerDailyReportAction(
       let departmentId = trainer?.department_id || profile.activeDepartmentId;
 
       if (!departmentId) {
-        const { data: firstDept } = await (adminDb as any)
-          .from('departments')
-          .select('id, name')
-          .limit(1)
-          .maybeSingle();
-        departmentId = firstDept?.id;
+        const lessonDept = workspace.lessons.find((l) => l.departmentId);
+        if (lessonDept?.departmentId) {
+          departmentId = lessonDept.departmentId;
+        } else {
+          const { data: firstDept } = await (adminDb as any)
+            .from('departments')
+            .select('id, name')
+            .limit(1)
+            .maybeSingle();
+          departmentId = firstDept?.id;
+        }
       }
 
       const trainerName = trainer?.full_name || workspace.trainerName || profile.fullName || 'Trainer';
@@ -278,12 +283,17 @@ export async function submitDailyReportDirectAction(
       let departmentId = trainer?.department_id || profile.activeDepartmentId;
 
       if (!departmentId) {
-        const { data: firstDept } = await (adminDb as any)
-          .from('departments')
-          .select('id, name')
-          .limit(1)
-          .maybeSingle();
-        departmentId = firstDept?.id;
+        const lessonDept = workspace.lessons.find((l) => l.departmentId);
+        if (lessonDept?.departmentId) {
+          departmentId = lessonDept.departmentId;
+        } else {
+          const { data: firstDept } = await (adminDb as any)
+            .from('departments')
+            .select('id, name')
+            .limit(1)
+            .maybeSingle();
+          departmentId = firstDept?.id;
+        }
       }
 
       const trainerName = trainer?.full_name || workspace.trainerName || profile.fullName || 'Trainer';

@@ -91,6 +91,13 @@ export interface DepartmentDailyReportItem {
   lessons: TrainerDailyReportLesson[];
 }
 
+export interface DepartmentRecentSubmissionDay {
+  reportDate: string;
+  submittedCount: number;
+  recordedAbsences: number;
+  concerns: number;
+}
+
 export interface DepartmentDailyReportWorkspace {
   reportDate: string;
   departmentId: string;
@@ -106,6 +113,7 @@ export interface DepartmentDailyReportWorkspace {
   };
   pendingTrainers: DepartmentDailyReportTrainer[];
   reports: DepartmentDailyReportItem[];
+  recentSubmissions?: DepartmentRecentSubmissionDay[];
 }
 
 export interface TrainerDailyReportActionState {

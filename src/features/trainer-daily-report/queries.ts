@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/server';
 
 import type {
   DepartmentDailyReportWorkspace,
+  DepartmentRecentSubmissionDay,
   PastUnrecordedSession,
   PastUnsubmittedReportDate,
   TrainerDailyReportWorkspace,
@@ -497,22 +498,65 @@ export async function getDepartmentDailyReports(
 ): Promise<DepartmentDailyReportWorkspace> {
   const profile = await requireHodAccess();
   const supabase = await createClient();
+  const isSysAdmin = profile.role === 'system_admin';
   const departmentId = profile.activeDepartmentId || '';
   const departmentName = profile.departmentName || 'Department';
 
   const { createAdminClient } = await import('@/lib/supabase/admin');
   const adminDb = createAdminClient();
 
-  // 1. Only include trainers belonging to the active department (Department of Human Nutrition)
+  // Query recent submission dates across the last 7 days for HOD alerts
+  const recentSubmissions: DepartmentRecentSubmissionDay[] = [];
+  try {
+    const { nairobiToday, shiftDailyReportDate } = await import('./domain');
+    const today = nairobiToday();
+    const lookbackDates: string[] = [];
+    for (let i = 1; i <= 7; i++) {
+      lookbackDates.push(shiftDailyReportDate(today, -i));
+    }
+
+    const { data: recentReports } = await (adminDb as any)
+      .from('trainer_daily_reports')
+      .select('report_date, id, concern, home_department_id')
+      .in('report_date', lookbackDates)
+      .eq('status', 'submitted');
+
+    if (recentReports && recentReports.length > 0) {
+      const countsByDate = new Map<string, { count: number; concerns: number }>();
+      for (const rep of recentReports) {
+        if (!isSysAdmin && departmentId && rep.home_department_id && rep.home_department_id !== departmentId) {
+          continue;
+        }
+        const prev = countsByDate.get(rep.report_date) || { count: 0, concerns: 0 };
+        prev.count++;
+        if (rep.concern?.trim()) prev.concerns++;
+        countsByDate.set(rep.report_date, prev);
+      }
+
+      for (const d of lookbackDates) {
+        const info = countsByDate.get(d);
+        if (info && info.count > 0) {
+          recentSubmissions.push({
+            reportDate: d,
+            submittedCount: info.count,
+            recordedAbsences: 0,
+            concerns: info.concerns,
+          });
+        }
+      }
+    }
+  } catch (recentErr) {
+    console.warn('Failed to load recentSubmissions in getDepartmentDailyReports:', recentErr);
+  }
+
+  // 1. Resolve trainers belonging to the active department
   let deptTrainersQuery = (adminDb as any)
     .from('trainers')
     .select('id, full_name, staff_number, department_id, home_department')
     .eq('is_active', true);
 
-  if (departmentId) {
-    deptTrainersQuery = deptTrainersQuery.or(`department_id.eq.${departmentId},home_department.ilike.%nutrition%`);
-  } else {
-    deptTrainersQuery = deptTrainersQuery.ilike('home_department', '%nutrition%');
+  if (departmentId && !isSysAdmin) {
+    deptTrainersQuery = deptTrainersQuery.or(`department_id.eq.${departmentId},home_department.ilike.%${departmentName}%`);
   }
 
   const { data: deptTrainersData } = await deptTrainersQuery;
@@ -525,18 +569,18 @@ export async function getDepartmentDailyReports(
     );
 
     if (!error && data && Array.isArray(data.reports)) {
-      // Defensively filter to only trainers who belong to this department
+      // Defensively filter to only trainers who belong to this department or taught department lessons
       const filteredReports = (data.reports as any[]).filter((r) => {
-        if (deptTrainerIdSet.size > 0) {
-          return deptTrainerIdSet.has(String(r.trainerId));
-        }
-        return (
-          r.homeDepartmentId === departmentId ||
-          (r.homeDepartmentName && /nutrition/i.test(r.homeDepartmentName))
-        );
+        if (isSysAdmin) return true;
+        if (r.homeDepartmentId && departmentId && r.homeDepartmentId === departmentId) return true;
+        if (deptTrainerIdSet.has(String(r.trainerId))) return true;
+        if (Array.isArray(r.lessons) && r.lessons.some((l: any) => l.departmentId === departmentId)) return true;
+        if (r.homeDepartmentName && departmentName && r.homeDepartmentName.toLowerCase().includes(departmentName.toLowerCase())) return true;
+        return false;
       });
 
       const filteredPending = (data.pendingTrainers as any[]).filter((t) => {
+        if (isSysAdmin) return true;
         if (deptTrainerIdSet.size > 0) {
           return deptTrainerIdSet.has(String(t.trainerId));
         }
@@ -570,13 +614,14 @@ export async function getDepartmentDailyReports(
         },
         pendingTrainers: filteredPending,
         reports: filteredReports,
+        recentSubmissions,
       };
     }
   } catch (err) {
     console.warn('get_department_trainer_daily_reports RPC warning:', err);
   }
 
-  // Fallback: Direct database query scoped strictly to department trainers
+  // Fallback: Direct database query scoped to department trainers and lessons
   try {
     const activeTrainers = (deptTrainersData ?? []).map((t: any) => ({
       trainerId: String(t.id),
@@ -591,11 +636,25 @@ export async function getDepartmentDailyReports(
       .eq('report_date', reportDate)
       .eq('status', 'submitted');
 
-    // Filter submitted reports strictly to this department's trainers
+    // Also check lessons for this date to ensure service trainers teaching in this department are included
+    const allReportIds = (reportsData ?? []).map((r: any) => r.id);
+    let deptLessonReportIds = new Set<string>();
+    if (allReportIds.length > 0 && departmentId && !isSysAdmin) {
+      const { data: deptLessons } = await (adminDb as any)
+        .from('trainer_daily_report_lessons')
+        .select('report_id')
+        .in('report_id', allReportIds)
+        .eq('department_id', departmentId);
+      deptLessonReportIds = new Set((deptLessons ?? []).map((l: any) => l.report_id));
+    }
+
+    // Filter submitted reports strictly to this department's trainers and lessons
     const filteredReportsData = (reportsData ?? []).filter((r: any) => {
+      if (isSysAdmin) return true;
       if (r.home_department_id && departmentId && r.home_department_id === departmentId) return true;
+      if (deptLessonReportIds.has(r.id)) return true;
       if (r.trainer_id && deptTrainerIdSet.has(String(r.trainer_id))) return true;
-      if (r.home_department_name_snapshot && /nutrition/i.test(r.home_department_name_snapshot)) return true;
+      if (r.home_department_name_snapshot && departmentName && r.home_department_name_snapshot.toLowerCase().includes(departmentName.toLowerCase())) return true;
       return false;
     });
 

@@ -18,6 +18,33 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 2. **Curriculum Upload UI Update (`curriculum-zip-upload-dialog.tsx`)**:
    - Update `curriculum-zip-upload-dialog.tsx` to display `unresolvedFiles` from the ingestion preview response, allowing HODs to select document types manually prior to commit.
 
+### 2026-09-18: Permanent Fix for Trainer Daily Report Visibility on HOD / Admin Operations
+
+- **Root Causes**:
+  1. The HOD operations page (`/operations/daily-reports`) defaulted strictly to `nairobiToday()`. When opening the portal the morning after a report was submitted, the view queried today's empty schedule by default, without any alert indicating reports had been submitted for yesterday.
+  2. The database RPC `get_department_trainer_daily_reports` and backend queries strictly checked `report.home_department_id = active_department`. When a trainer taught lessons for the active department but had a `NULL` or external `department_id`, their submitted reports were completely filtered out from the HOD view.
+  3. The `trainer_daily_reports_read` RLS policy previously only verified `current_user_can_manage_department(home_department_id)` without permitting access based on individual lesson department assignments.
+  4. The TypeScript action fallback resolved `departmentId` to `firstDept?.id` when `trainer.department_id` was `NULL`, instead of inferring it from the day's scheduled lessons.
+- **Files Added**:
+  - `supabase/migrations/20260918070000_permanent_trainer_daily_report_visibility.sql`:
+    - Updated `get_department_trainer_daily_reports` RPC so an HOD sees reports where `report.home_department_id = active_department` OR `EXISTS (SELECT 1 FROM trainer_daily_report_lessons WHERE report_id = report.id AND department_id = active_department)`.
+    - Added full cross-department visibility for `system_admin`.
+    - Updated `submit_trainer_daily_report_v1` with a `LEFT JOIN` on `departments` and automated inference of `department_id` from the day's scheduled sessions if null.
+    - Updated `trainer_daily_reports_read` RLS policy to permit access if the user can manage any lesson's department in that report.
+- **Files Modified**:
+  - `src/features/trainer-daily-report/types.ts`:
+    - Added `DepartmentRecentSubmissionDay` interface and `recentSubmissions?: DepartmentRecentSubmissionDay[]` to `DepartmentDailyReportWorkspace`.
+  - `src/features/trainer-daily-report/queries.ts`:
+    - Added query for `recentSubmissions` across the last 7 days.
+    - Upgraded `getDepartmentDailyReports` filtering so reports containing lessons in the active department are never filtered out. Removed hardcoded `%nutrition%` string, using dynamic department matching.
+  - `src/features/trainer-daily-report/actions.ts`:
+    - When `trainer.department_id` is missing during submission fallback, dynamically inspects `workspace.lessons` to assign the proper department rather than defaulting to arbitrary first department.
+  - `src/app/(dashboard)/operations/daily-reports/page.tsx`:
+    - Added date navigation controls (`<`, `>`, `Yesterday`, `Today`, status pill) matching the trainer portal.
+    - Added an alert banner notifying the HOD of reports submitted on recent dates (e.g. yesterday) awaiting review, with one-click navigation to view them.
+- **Manual Follow-up**:
+  - Apply migration `supabase/migrations/20260918070000_permanent_trainer_daily_report_visibility.sql` in the Supabase SQL Editor.
+
 ### 2026-09-17: Fix "Network error resetting student password" (404 on `/api/admin/students/[id]/reset-password`)
 
 - **Root Cause**:

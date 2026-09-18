@@ -32,6 +32,11 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
     - Explicitly detects and highlights whether the clash is with the primary cohort or a shared partner cohort (naming cohort code, unit code, trainer, and room).
     - Displays a "Shared Class" badge listing all participating cohorts when a unit is shared across multiple cohorts.
     - Added live availability indicator (`✓ Slot is completely available`) and blocked submission when a clash is present.
+    - Resolved modal viewport overflow: Configured `DialogContent` with `max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden`, pinned `DialogHeader` and `DialogFooter` (`shrink-0`), and enabled smooth internal scrolling on `DialogBody` (`overflow-y-auto flex-1 min-h-0`). Dialog title, close button, and footer action buttons ("Cancel", "Schedule & Lock") remain 100% visible on all laptop resolutions.
+  - `src/components/ui/dialog.tsx`:
+    - Updated core `DialogContent` with `max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden`, pinned header/footer with `shrink-0`, and made `DialogBody` scrollable by default with `overflow-y-auto flex-1 min-h-0`.
+  - `src/features/timetable-editor/session-editor-card.tsx`:
+    - Updated session Move/Edit dialog to match the same viewport containment standards.
   - `src/features/timetable-editor/types.ts` & `src/features/timetable-editor/queries.ts`:
     - Extended `missingAllocations` in `EditorData` to include `participantCohortIds`, `participantCohortCodes`, and `isSharedClass`.
   - `src/features/timetable-editor/editor-workspace.tsx`:

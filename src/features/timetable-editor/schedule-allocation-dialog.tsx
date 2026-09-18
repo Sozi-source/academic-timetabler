@@ -82,6 +82,32 @@ export function ScheduleAllocationDialog({
     return data.rooms.find((r) => r.id === roomId);
   }, [data.rooms, roomId]);
 
+  const availableCohorts = useMemo(() => {
+    if (allocation.participantCohorts && allocation.participantCohorts.length > 0) {
+      return allocation.participantCohorts;
+    }
+    const set = new Map<string, string>();
+    set.set(allocation.cohortId, allocation.cohortCode);
+    (allocation.participantCohortIds || []).forEach((id, idx) => {
+      set.set(id, allocation.participantCohortCodes?.[idx] ?? 'Cohort');
+    });
+    return Array.from(set.entries()).map(([id, code]) => ({ id, code }));
+  }, [
+    allocation.cohortId,
+    allocation.cohortCode,
+    allocation.participantCohortIds,
+    allocation.participantCohortCodes,
+    allocation.participantCohorts,
+  ]);
+
+  const [selectedCohortIds, setSelectedCohortIds] = useState<string[]>(() =>
+    availableCohorts.map((c) => c.id)
+  );
+
+  useEffect(() => {
+    setSelectedCohortIds(availableCohorts.map((c) => c.id));
+  }, [availableCohorts]);
+
   // Real-time client-side clash detection against current timetable sessions
   const conflicts = useMemo(() => {
     if (!selectedSlot || !workingDayId) return null;
@@ -97,11 +123,10 @@ export function ScheduleAllocationDialog({
       return sessionStart.startsAt < candidateEnd && candidateStart < sessionEnd.endsAt;
     });
 
-    // 1. Cohort clash
-    const targetCohortIds = new Set([
-      allocation.cohortId,
-      ...(allocation.participantCohortIds || []),
-    ]);
+    // 1. Cohort clash - evaluated strictly against selected cohorts
+    const targetCohortIds = new Set(
+      selectedCohortIds.length > 0 ? selectedCohortIds : [allocation.cohortId]
+    );
 
     let cohortClash: {
       cohortCode: string;
@@ -181,8 +206,8 @@ export function ScheduleAllocationDialog({
     data.timeSlots,
     workingDayId,
     selectedSlot,
+    selectedCohortIds,
     allocation.cohortId,
-    allocation.participantCohortIds,
     trainerId,
     selectedTrainer?.fullName,
     roomId,
@@ -213,6 +238,7 @@ export function ScheduleAllocationDialog({
           <form action={action} className="flex flex-col min-h-0 flex-1 overflow-hidden">
             <DialogBody className="px-5 py-3.5 space-y-3.5 overflow-y-auto flex-1 min-h-0">
               <input type="hidden" name="allocationId" value={allocation.id} />
+              <input type="hidden" name="participantCohortIds" value={JSON.stringify(selectedCohortIds)} />
 
               <div className="rounded-xl border border-border-soft bg-surface-subtle/50 p-3 text-xs space-y-2">
                 <div className="flex items-center justify-between gap-2">
@@ -226,12 +252,66 @@ export function ScheduleAllocationDialog({
                   Default Trainer: <span className="font-medium text-text-primary">{allocation.trainerName}</span> · Missing: {allocation.missingSessionCount} session{allocation.missingSessionCount === 1 ? '' : 's'}
                 </p>
 
-                {allocation.isSharedClass && allocation.participantCohortCodes.length > 1 ? (
-                  <div className="flex items-center gap-1.5 rounded-lg border border-primary/20 bg-primary-soft/30 px-2.5 py-1.5 text-[11px] font-medium text-primary">
-                    <Users className="size-3.5 shrink-0" />
-                    <span>
-                      Shared Class across {allocation.participantCohortCodes.length} cohorts: <strong>{allocation.participantCohortCodes.join(', ')}</strong>
-                    </span>
+                {allocation.isSharedClass && availableCohorts.length > 1 ? (
+                  <div className="space-y-2 rounded-lg border border-primary/20 bg-primary-soft/20 p-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-bold text-text-primary flex items-center gap-1.5">
+                        <Users className="size-3.5 text-primary" />
+                        Participating Cohorts ({selectedCohortIds.length}/{availableCohorts.length})
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (selectedCohortIds.length === 1 && selectedCohortIds[0] === allocation.cohortId) {
+                            setSelectedCohortIds(availableCohorts.map((c) => c.id));
+                          } else {
+                            setSelectedCohortIds([allocation.cohortId]);
+                          }
+                        }}
+                        className="text-[11px] font-semibold text-primary hover:underline cursor-pointer"
+                      >
+                        {selectedCohortIds.length === 1 && selectedCohortIds[0] === allocation.cohortId
+                          ? 'Include All Shared'
+                          : `Only ${allocation.cohortCode}`}
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-text-muted">
+                      Uncheck partner cohorts to schedule a standalone session for {allocation.cohortCode} without partner conflicts.
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 pt-0.5">
+                      {availableCohorts.map((c) => {
+                        const isSelected = selectedCohortIds.includes(c.id);
+                        const isPrimary = c.id === allocation.cohortId;
+                        return (
+                          <label
+                            key={c.id}
+                            className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-medium border cursor-pointer select-none transition-colors ${
+                              isSelected
+                                ? 'bg-primary-soft/90 border-primary/50 text-primary font-bold'
+                                : 'bg-surface border-border-soft text-text-muted hover:border-border'
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              disabled={isPrimary && selectedCohortIds.length === 1}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedCohortIds((prev) => Array.from(new Set([...prev, c.id])));
+                                } else {
+                                  if (selectedCohortIds.length > 1) {
+                                    setSelectedCohortIds((prev) => prev.filter((id) => id !== c.id));
+                                  }
+                                }
+                              }}
+                              className="size-3 rounded border-border-strong text-primary accent-primary"
+                            />
+                            <span>{c.code}</span>
+                            {isPrimary ? <span className="text-[10px] text-primary/70 font-normal">(Primary)</span> : null}
+                          </label>
+                        );
+                      })}
+                    </div>
                   </div>
                 ) : null}
               </div>
@@ -348,7 +428,7 @@ export function ScheduleAllocationDialog({
 
               {/* Real-time clash status indicator */}
               {conflicts?.cohortClash ? (
-                <div className="rounded-xl border border-danger/40 bg-danger/10 p-3 text-xs text-danger space-y-1">
+                <div className="rounded-xl border border-danger/40 bg-danger/10 p-3 text-xs text-danger space-y-2">
                   <div className="flex items-center gap-1.5 font-bold">
                     <AlertTriangle className="size-4 shrink-0 text-danger" />
                     {conflicts.cohortClash.isSharedPartner
@@ -368,9 +448,21 @@ export function ScheduleAllocationDialog({
                       </>
                     )}
                   </p>
-                  <p className="text-[11px] text-danger/85 font-medium">
-                    All participating cohorts must be free simultaneously. Please choose an alternative slot or day.
-                  </p>
+                  {conflicts.cohortClash.isSharedPartner ? (
+                    <div className="pt-0.5">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCohortIds([allocation.cohortId])}
+                        className="inline-flex items-center gap-1 rounded-lg bg-danger/20 hover:bg-danger/30 text-danger text-[11px] font-bold px-2.5 py-1.5 transition-colors border border-danger/30 cursor-pointer"
+                      >
+                        Exclude partner cohorts & place for {allocation.cohortCode} only
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="text-[11px] text-danger/85 font-medium">
+                      All participating cohorts must be free simultaneously. Please choose an alternative slot or day.
+                    </p>
+                  )}
                 </div>
               ) : conflicts?.trainerClash ? (
                 <div className="rounded-xl border border-danger/40 bg-danger/10 p-3 text-xs text-danger space-y-1">

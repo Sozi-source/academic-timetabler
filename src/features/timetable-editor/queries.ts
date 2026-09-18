@@ -177,9 +177,13 @@ export const getTimetableEditorData = cache(async (
       ...(allocation.participantCohortIds ?? []),
       allocation.cohortId,
     ]));
-    const participantCodes = participantIds
-      .map((id) => cohortDirectory.get(id)?.code)
-      .filter((code): code is string => Boolean(code));
+    const participantCohorts = participantIds
+      .map((id) => {
+        const c = cohortDirectory.get(id);
+        return c ? { id: c.id, code: c.code } : null;
+      })
+      .filter((c): c is { id: string; code: string } => Boolean(c));
+    const participantCodes = participantCohorts.map((c) => c.code);
     const isSharedClass = participantCodes.length > 1;
 
     return missingSessionCount > 0
@@ -196,6 +200,7 @@ export const getTimetableEditorData = cache(async (
           expectedSessionCount,
           participantCohortIds: participantIds,
           participantCohortCodes: participantCodes,
+          participantCohorts,
           isSharedClass,
         }]
       : [];

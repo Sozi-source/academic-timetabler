@@ -26,4 +26,13 @@ export const scheduleAllocationSchema = z.object({
   trainerId: z.union([z.string().uuid(), z.literal('')]).optional(),
   notes: z.string().trim().max(1000).optional(),
   isLocked: z.enum(['true', 'false']).optional().default('true').transform((val) => val !== 'false'),
+  participantCohortIds: z.string().optional().transform((val) => {
+    if (!val) return undefined;
+    try {
+      const parsed = JSON.parse(val);
+      return Array.isArray(parsed) ? (parsed.filter((id) => typeof id === 'string' && id.length > 0) as string[]) : undefined;
+    } catch {
+      return undefined;
+    }
+  }),
 });

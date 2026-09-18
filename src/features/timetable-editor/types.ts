@@ -69,6 +69,7 @@ export interface EditorData {
     expectedSessionCount: number;
     participantCohortIds: string[];
     participantCohortCodes: string[];
+    participantCohorts: Array<{ id: string; code: string }>;
     isSharedClass: boolean;
   }>;
   workingDays: Array<EditorOption & { sequenceNumber: number }>;

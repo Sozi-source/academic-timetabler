@@ -120,6 +120,7 @@ async function diagnoseScheduleClash(
     endTimeSlotId: string;
     trainerId?: string;
     roomId?: string;
+    participantCohortIds?: string[];
     fallbackError: string;
   },
 ): Promise<string> {
@@ -150,19 +151,24 @@ async function diagnoseScheduleClash(
     const targetEnd = endSlot.ends_at;
 
     const allParticipantIds = new Set<string>();
-    if (allocation.cohort_id) allParticipantIds.add(allocation.cohort_id);
-    if (Array.isArray(allocation.participant_cohort_ids)) {
-      allocation.participant_cohort_ids.forEach((id: string) => allParticipantIds.add(id));
-    }
+    if (params.participantCohortIds && params.participantCohortIds.length > 0) {
+      params.participantCohortIds.forEach((id: string) => allParticipantIds.add(id));
+      if (allocation.cohort_id) allParticipantIds.add(allocation.cohort_id);
+    } else {
+      if (allocation.cohort_id) allParticipantIds.add(allocation.cohort_id);
+      if (Array.isArray(allocation.participant_cohort_ids)) {
+        allocation.participant_cohort_ids.forEach((id: string) => allParticipantIds.add(id));
+      }
 
-    if (allocation.teaching_offering_id) {
-      const { data: participants } = await supabase
-        .from('teaching_offering_participants')
-        .select('cohort_id')
-        .eq('teaching_offering_id', allocation.teaching_offering_id);
-      participants?.forEach((p) => {
-        if (p.cohort_id) allParticipantIds.add(p.cohort_id);
-      });
+      if (allocation.teaching_offering_id) {
+        const { data: participants } = await supabase
+          .from('teaching_offering_participants')
+          .select('cohort_id')
+          .eq('teaching_offering_id', allocation.teaching_offering_id);
+        participants?.forEach((p) => {
+          if (p.cohort_id) allParticipantIds.add(p.cohort_id);
+        });
+      }
     }
 
     const participantIdArray = Array.from(allParticipantIds);
@@ -270,6 +276,7 @@ export async function scheduleAllocationSessionAction(
     trainerId: formData.get('trainerId'),
     notes: formData.get('notes') || undefined,
     isLocked: formData.get('isLocked') ?? 'true',
+    participantCohortIds: formData.get('participantCohortIds') || undefined,
   });
 
   if (!parsed.success) {
@@ -286,6 +293,7 @@ export async function scheduleAllocationSessionAction(
     target_notes: parsed.data.notes ?? null,
     target_trainer_id: parsed.data.trainerId || null,
     target_is_locked: parsed.data.isLocked,
+    target_participant_cohort_ids: parsed.data.participantCohortIds ?? null,
   });
 
   if (error) {
@@ -296,6 +304,7 @@ export async function scheduleAllocationSessionAction(
       endTimeSlotId: parsed.data.endTimeSlotId,
       trainerId: parsed.data.trainerId,
       roomId: parsed.data.roomId,
+      participantCohortIds: parsed.data.participantCohortIds,
       fallbackError: error.message,
     });
     return { status: 'error', message: detailedMessage };

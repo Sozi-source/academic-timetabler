@@ -37,123 +37,74 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const profile = await getAuthenticatedProfile();
-
-  if (!profile || (profile.role !== 'system_admin' && profile.role !== 'hod')) {
-    return NextResponse.json(
-      {
-        error: 'Unauthorized: HOD or administrator credentials required.',
-        message: 'Unauthorized: HOD or administrator credentials required.',
-      },
-      { status: 401 },
-    );
-  }
-
-  const { id: studentId } = await params;
-
-  // 1. Parse optional custom password from request body
-  let rawBody: Record<string, unknown> = {};
   try {
-    rawBody = (await request.json()) as Record<string, unknown>;
-  } catch {
-    // Empty or non-JSON body is acceptable; will auto-generate
-    rawBody = {};
-  }
+    const profile = await getAuthenticatedProfile();
 
-  const parsed = resetPasswordSchema.safeParse(rawBody);
-  if (!parsed.success) {
-    const errorMsg = parsed.error.issues[0]?.message ?? 'Invalid password format.';
-    return NextResponse.json(
-      { error: errorMsg, message: errorMsg },
-      { status: 400 },
-    );
-  }
+    if (!profile || (profile.role !== 'system_admin' && profile.role !== 'hod')) {
+      return NextResponse.json(
+        {
+          error: 'Unauthorized: HOD or administrator credentials required.',
+          message: 'Unauthorized: HOD or administrator credentials required.',
+        },
+        { status: 401 },
+      );
+    }
 
-  const requestedPassword =
-    parsed.data.password ||
-    parsed.data.customPassword ||
-    parsed.data.newPassword ||
-    parsed.data.pin ||
-    '';
+    const { id: studentId } = await params;
 
-  const passwordToSet =
-    requestedPassword.length >= 4
-      ? requestedPassword
-      : generateStudentPassword();
+    // 1. Parse optional custom password from request body
+    let rawBody: Record<string, unknown> = {};
+    try {
+      rawBody = (await request.json()) as Record<string, unknown>;
+    } catch {
+      // Empty or non-JSON body is acceptable; will auto-generate
+      rawBody = {};
+    }
 
-  const supabaseAdmin = createAdminClient();
+    const parsed = resetPasswordSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      const errorMsg = parsed.error.issues[0]?.message ?? 'Invalid password format.';
+      return NextResponse.json(
+        { error: errorMsg, message: errorMsg },
+        { status: 400 },
+      );
+    }
 
-  // 2. Look up the student record
-  const { data: student, error: studentError } = await supabaseAdmin
-    .from('students')
-    .select('id, admission_number, full_name, phone_number, department_id, lifecycle_status')
-    .eq('id', studentId)
-    .maybeSingle();
+    const requestedPassword =
+      parsed.data.password ||
+      parsed.data.customPassword ||
+      parsed.data.newPassword ||
+      parsed.data.pin ||
+      '';
 
-  if (studentError || !student) {
-    return NextResponse.json(
-      { error: 'Student record not found.', message: 'Student record not found.' },
-      { status: 404 },
-    );
-  }
+    const passwordToSet =
+      requestedPassword.length >= 4
+        ? requestedPassword
+        : generateStudentPassword();
 
-  // 3. Attempt primary RPC: reset_student_portal_password
-  const { error: rpcError } = await supabaseAdmin.rpc('reset_student_portal_password', {
-    target_student_id: student.id,
-    plain_password: passwordToSet,
-  });
+    const supabaseAdmin = createAdminClient();
 
-  if (!rpcError) {
-    return NextResponse.json(
-      {
-        success: true,
-        password: passwordToSet,
-        pin: passwordToSet,
-        message: `Temporary password set successfully for ${student.full_name}. Student can now log in at /student/login.`,
-      },
-      {
-        headers: { 'Cache-Control': 'no-store' },
-      },
-    );
-  }
+    // 2. Look up the student record
+    const { data: student, error: studentError } = await supabaseAdmin
+      .from('students')
+      .select('id, admission_number, full_name, phone_number, department_id, lifecycle_status')
+      .eq('id', studentId)
+      .maybeSingle();
 
-  // 4. Fallback: activate_student_portal_account RPC (hashes new_pin with bcrypt)
-  const phoneToUse =
-    student.phone_number && student.phone_number.trim().length >= 4
-      ? student.phone_number.trim()
-      : '0700000000';
+    if (studentError || !student) {
+      return NextResponse.json(
+        { error: 'Student record not found.', message: 'Student record not found.' },
+        { status: 404 },
+      );
+    }
 
-  const { error: activateError } = await supabaseAdmin.rpc(
-    'activate_student_portal_account',
-    {
-      supplied_admission_number: student.admission_number,
-      supplied_phone_number: phoneToUse,
-      new_pin: passwordToSet,
-    },
-  );
-
-  if (!activateError) {
-    return NextResponse.json(
-      {
-        success: true,
-        password: passwordToSet,
-        pin: passwordToSet,
-        message: `Temporary password set successfully for ${student.full_name}. Student can now log in at /student/login.`,
-      },
-      {
-        headers: { 'Cache-Control': 'no-store' },
-      },
-    );
-  }
-
-  // 5. Fallback 2: if password is 6 digits, try set_student_portal_pin
-  if (/^\d{6}$/.test(passwordToSet)) {
-    const { error: pinError } = await supabaseAdmin.rpc('set_student_portal_pin', {
+    // 3. Attempt primary RPC: reset_student_portal_password
+    const { error: rpcError } = await supabaseAdmin.rpc('reset_student_portal_password', {
       target_student_id: student.id,
-      plain_pin: passwordToSet,
+      plain_password: passwordToSet,
     });
 
-    if (!pinError) {
+    if (!rpcError) {
       return NextResponse.json(
         {
           success: true,
@@ -161,19 +112,73 @@ export async function POST(
           pin: passwordToSet,
           message: `Temporary password set successfully for ${student.full_name}. Student can now log in at /student/login.`,
         },
-        {
-          headers: { 'Cache-Control': 'no-store' },
-        },
+        { headers: { 'Cache-Control': 'no-store' } },
       );
     }
+
+    // 4. Fallback: activate_student_portal_account RPC (hashes new_pin with bcrypt)
+    const phoneToUse =
+      student.phone_number && student.phone_number.trim().length >= 4
+        ? student.phone_number.trim()
+        : '0700000000';
+
+    const { error: activateError } = await supabaseAdmin.rpc(
+      'activate_student_portal_account',
+      {
+        supplied_admission_number: student.admission_number,
+        supplied_phone_number: phoneToUse,
+        new_pin: passwordToSet,
+      },
+    );
+
+    if (!activateError) {
+      return NextResponse.json(
+        {
+          success: true,
+          password: passwordToSet,
+          pin: passwordToSet,
+          message: `Temporary password set successfully for ${student.full_name}. Student can now log in at /student/login.`,
+        },
+        { headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
+
+    // 5. Fallback 2: if password is 6 digits, try set_student_portal_pin
+    if (/^\d{6}$/.test(passwordToSet)) {
+      const { error: pinError } = await supabaseAdmin.rpc('set_student_portal_pin', {
+        target_student_id: student.id,
+        plain_pin: passwordToSet,
+      });
+
+      if (!pinError) {
+        return NextResponse.json(
+          {
+            success: true,
+            password: passwordToSet,
+            pin: passwordToSet,
+            message: `Temporary password set successfully for ${student.full_name}. Student can now log in at /student/login.`,
+          },
+          { headers: { 'Cache-Control': 'no-store' } },
+        );
+      }
+    }
+
+    // All attempts failed — return the specific database error
+    const finalError =
+      activateError?.message || rpcError?.message || 'Unable to update student credentials.';
+
+    return NextResponse.json(
+      { error: finalError, message: finalError },
+      { status: 500 },
+    );
+  } catch (err) {
+    // Catch any unhandled exception and return JSON so the dialog shows
+    // the real error instead of the generic "Network error" fallback.
+    const message = err instanceof Error ? err.message : String(err);
+    console.error('[reset-student-password] Unhandled error:', err);
+    return NextResponse.json(
+      { error: message, message },
+      { status: 500 },
+    );
   }
-
-  // If all attempts failed, report the specific database error
-  const finalError =
-    activateError?.message || rpcError?.message || 'Unable to update student credentials.';
-
-  return NextResponse.json(
-    { error: finalError, message: finalError },
-    { status: 500 },
-  );
 }

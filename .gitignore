@@ -42,3 +42,10 @@ scratch_units.json
 mod2_summary.json
 extracted_curriculum_raw.txt
 venv/
+
+# Archives & compressed folders (never commit to repo)
+*.zip
+*.tar.gz
+*.tgz
+*.rar
+*.7z

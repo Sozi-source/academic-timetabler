@@ -25,6 +25,11 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
    - `exchange-repair.ts`'s `warningCount` (scoring tiebreaker only, not a suggestion gate) still compares against the simulation's absolute count rather than baseline-relative — low severity, flagged for confirmation.
    - The relaxed recovery search added below only runs for the primary `no_valid_placement` path; the `no_rooms` case and the "linked fixed session" sub-case don't yet get suggestions.
    - Not build-verified: this environment's upload has no `package.json`/`tsconfig`, so changes were reviewed manually (plus a brace/paren balance check) rather than compiled. Run `tsc --noEmit` before merging.
+5. **Lock Future Academic Periods from Placement/Editing** (requested 2026-09-19, awaiting scope confirmation):
+   - HOD asked that future semesters be locked, after the orphaned-allocation fix above surfaced a `September-December 2029` offering sitting alongside the `2026` one for the same cohort/unit. This is a deliberate access-control change, not a bug fix — not started pending one decision:
+     - Option A: only the single currently-`active` academic period is editable/placeable; every other period (`planned` or otherwise) is locked until explicitly activated.
+     - Option B: a near-term planning window (current period + the next one) stays editable; only periods further out are locked.
+   - Likely implementation shape once decided: tighten the period-status check already present in `validate_scheduled_session_relationships()` / `validate_pending_scheduled_session()` (currently `not in ('planned','active')`, fixed by `20260919160000`) and the equivalent app-layer guards in `unit_offerings` approval/placement actions, rather than a new mechanism from scratch.
 
 ### 2026-09-19: Orphaned Allocations Left Behind by Shared-Class Merges
 

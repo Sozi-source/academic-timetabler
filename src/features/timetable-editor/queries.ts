@@ -179,12 +179,12 @@ export const getTimetableEditorData = cache(async (
   );
 
   const missingAllocations = timetableAllocations.flatMap((allocation) => {
-    const activeSessionCount = (sessionResult.data ?? []).filter(
-      (session) => session.teaching_allocation_id === allocation.id,
-    ).length;
-    const expectedSessionCount = Number(allocation.weeklySessions);
-    const missingSessionCount = Math.max(0, expectedSessionCount - activeSessionCount);
-
+    // Resolved before the session count: a cohort's own teaching_allocation can be
+    // fully covered by a session owned by a shared-class partner (e.g. Food Production
+    // placed once for CND-JAN-MAR-2026 also covers DND-JAN-MAR-2026 as a participant).
+    // Counting only teaching_allocation_id ownership left the partner cohort's card
+    // stuck at "N of N sessions missing" forever, even though nothing further needed
+    // to be scheduled for it.
     const participantIds = participantResolver.sanitize(
       allocation.cohortId,
       participantResolver.offeringIdForAllocation(allocation.id),
@@ -193,6 +193,23 @@ export const getTimetableEditorData = cache(async (
         allocation.cohortId,
       ])),
     );
+
+    const activeSessionCount = (sessionResult.data ?? []).filter((session) => {
+      if (session.teaching_allocation_id === allocation.id) return true;
+      const sessionOwnerCohort = first(session.cohorts as Relation<{
+        id: string;
+        code: string;
+        name: string;
+        actual_size: number;
+      }>);
+      const sessionParticipantIds = new Set([
+        ...((session.participant_cohort_ids as string[] | null) ?? []),
+        ...(sessionOwnerCohort?.id ? [sessionOwnerCohort.id] : []),
+      ]);
+      return participantIds.some((id) => sessionParticipantIds.has(id));
+    }).length;
+    const expectedSessionCount = Number(allocation.weeklySessions);
+    const missingSessionCount = Math.max(0, expectedSessionCount - activeSessionCount);
     const participantCohorts = participantIds
       .map((id) => {
         const c = cohortDirectory.get(id);

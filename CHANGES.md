@@ -21,18 +21,20 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
    - Clinical Rotation (`CHN 1308`, `CND 2103`, `DHN 1306`, `DND 2103`) — clinical placement; no KNEC lecture syllabus.
    - Medical Terminologies (`CCU 1113`, `DHN 1301`) — no standalone outline or scheme found in provided materials.
 
-### 2026-09-19: Scheduled Session Lifecycle Decoupling & Inactive Session Validation
+### 2026-09-19: Zero-Deletion Unit Offering Lifecycle & Equivalent Unit Decoupling
 
 - **Context & Problem**:
-  - When decoupling shared unit offerings (e.g. dropping *Agricultural Production* from `CHN MAY 25`), scheduled session triggers threw:
-    `ERROR P0001: Only draft or active teaching allocations may be scheduled`.
+  - Dropping *Agricultural Production* for `CHN MAY 25` threw:
+    `ERROR: 23503: update or delete on table "scheduled_sessions" violates foreign key constraint "class_sessions_scheduled_session_id_fkey" on table "class_sessions"`.
   - Root Cause:
-    1. Shared sessions originally attached to the dropping cohort's allocation retained `session.teaching_allocation_id` pointing to the dropping cohort. When that allocation was suspended, any subsequent update to the shared session failed validation because the session referenced a suspended allocation.
-    2. `validate_scheduled_session_relationships()` and `validate_pending_scheduled_session()` lacked an immediate bypass for `new.status IN ('cancelled', 'archived')`, attempting full relationship validation even when cancelling a session.
+    1. Previous scripts attempted `DELETE FROM public.scheduled_sessions`. In TVET/attendance architecture, `public.class_sessions` references `scheduled_sessions(id)` via `class_sessions_scheduled_session_id_fkey` (`ON DELETE RESTRICT`). Deletion is structurally prohibited.
+    2. Shared classes across programmes (`CHN 2309` for CHN MAY 25 vs `CND 2306` for CND MAY 25) rely on `public.unit_equivalence_members`. When decoupling, updating `cohort_id` alone without updating `unit_id` caused allocation-session unit mismatches.
+    3. Triggers `validate_scheduled_session_relationships`, `validate_pending_scheduled_session`, and `set_shared_session_context` lacked graceful deactivation handlers when an allocation is suspended.
 - **Architectural Solutions & Changes**:
-  - Updated `validate_scheduled_session_relationships()` and `validate_pending_scheduled_session()` to return `NEW` immediately with `conflict_state = 'clear'` when `new.status IN ('cancelled', 'archived')`.
-  - Updated `set_unit_offering_approval()` to re-link shared sessions to the remaining partner cohort's draft/active allocation and decouple sessions BEFORE suspending the dropping cohort's allocation.
-  - Delivered via migration `supabase/migrations/20260919090000_fix_live_unit_offering_drop_rpc.sql`.
+  - **Zero Deletion Policy**: Replaced all deletions on `public.scheduled_sessions` with state transitions to `status = 'cancelled'::public.scheduled_session_status`, and updated open `class_sessions` to `cancelled`.
+  - **Unit-Equivalence Aware Decoupling**: Re-links shared sessions across equivalent units, atomically updating `teaching_allocation_id`, `cohort_id`, and `unit_id` to the surviving partner cohort.
+  - **Graceful Deactivation Fallback**: When an allocation is deactivated during a cascade, triggers auto-transition orphaned sessions to `cancelled` instead of aborting the transaction with `P0001`.
+  - **Delivered in `supabase/migrations/20260919090000_fix_live_unit_offering_drop_rpc.sql`**.
 
 ### 2026-09-18: Enterprise Unit Offering Lifecycle Sync & Unique Constraint Collision Resolution
 

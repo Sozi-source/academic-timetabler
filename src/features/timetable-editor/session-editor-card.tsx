@@ -33,6 +33,7 @@ import {
 import { cn } from '@/lib/utils/cn';
 import { moveScheduledSessionAction, toggleScheduledSessionLockAction, unscheduleSessionAction } from './actions';
 import { initialEditorActionState, type EditorData, type EditorSession } from './types';
+import { QuickEditPanel } from '@/features/timetable-quick-edit/quick-edit-panel';
 
 export function formatTrainerAbbreviation(fullName: string): string {
   if (!fullName || fullName === 'Unassigned trainer' || fullName === 'Unassigned') {
@@ -181,12 +182,13 @@ export function SessionEditorCard({
             </form>
           </div>
         ) : (
+          <div className="flex items-center gap-1.5 w-full">
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full h-8 text-xs font-bold rounded-lg border-primary/20 text-primary bg-white hover:bg-primary-soft hover:border-primary/40 transition-colors"
+                className="flex-1 h-8 text-xs font-bold rounded-lg border-primary/20 text-primary bg-white hover:bg-primary-soft hover:border-primary/40 transition-colors"
                 leadingIcon={<Settings className="size-3.5" />}
               >
                 Move / Edit
@@ -377,6 +379,8 @@ export function SessionEditorCard({
               </DialogContent>
             ) : null}
           </Dialog>
+          <QuickEditPanel session={session} data={data} />
+          </div>
         )}
       </div>
     </article>

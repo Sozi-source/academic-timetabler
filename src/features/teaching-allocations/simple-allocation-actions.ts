@@ -260,6 +260,13 @@ export async function confirmSharedOfferingAction(formData: FormData) {
   if (memberOfferings && memberOfferings.length > 0) {
     const durations = new Set(memberOfferings.map(m => m.session_duration_minutes ?? 120));
     if (durations.size > 1) {
+      // A saved full-day (08:00–16:00) rotation must never be downgraded to a
+      // 120-minute session just to force a merge. Stop with a clear message; the
+      // database would reject the mixed durations anyway.
+      if (memberOfferings.some(m => m.is_full_day_session)) {
+        query.set('allocationError', 'A full-day clinical rotation can only be combined with other full-day sessions.');
+        redirect(`${path}?${query.toString()}`);
+      }
       await db
         .from('unit_offerings')
         .update({ session_duration_minutes: 120, is_full_day_session: false })

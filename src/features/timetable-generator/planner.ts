@@ -2,10 +2,16 @@ import {
   detectTimetableConflicts,
 } from './conflict-detector';
 import {
+  createPlacementCandidates,
+} from './candidate-factory';
+import {
   scorePlacement,
   scorePlacements,
   type PlacementScoreResult,
 } from './scorer';
+import {
+  suggestAlternativePlacements,
+} from './suggestions';
 import {
   getIntervalDurationMinutes,
   parseTimeToMinutes,
@@ -140,14 +146,20 @@ function sessionSatisfiesRequest({
   const fixedTimeSlotId =
     allocation.fixedTimeSlotIds?.[sessionNumber - 1] ?? null;
 
-  if (!fixedTimeSlotId) {
+  const fixedWorkingDayId =
+    allocation.fixedWorkingDayIds?.[sessionNumber - 1] ??
+    (sessionNumber === 1 || fixedTimeSlotId ? allocation.fixedWorkingDayId : null) ??
+    null;
+
+  if (!fixedTimeSlotId && !fixedWorkingDayId) {
     return true;
   }
 
-  const fixedWorkingDayId =
-    allocation.fixedWorkingDayIds?.[sessionNumber - 1] ??
-    allocation.fixedWorkingDayId ??
-    null;
+  if (!fixedTimeSlotId) {
+    // Day-only pin: no specific time slot required, but the session
+    // must fall on the pinned working day.
+    return session.workingDayId === fixedWorkingDayId;
+  }
 
   return (
     session.startTimeSlotId === fixedTimeSlotId &&
@@ -758,16 +770,15 @@ function createCandidateSessions({
   const fixedWorkingDayIds =
     allocation.fixedWorkingDayIds ?? [];
 
-  const fixedWorkingDayId = fixedTimeSlotId
-    ? fixedWorkingDayIds[sessionNumber - 1] ??
-      allocation.fixedWorkingDayId ??
-      null
-    : null;
+  const fixedWorkingDayId =
+    fixedWorkingDayIds[sessionNumber - 1] ??
+    (sessionNumber === 1 || fixedTimeSlotId ? allocation.fixedWorkingDayId : null) ??
+    null;
 
   const configuredFixedDays = fixedTimeSlotIds.map(
-    (_, index) =>
+    (slotId, index) =>
       fixedWorkingDayIds[index] ??
-      allocation.fixedWorkingDayId ??
+      (index === 0 || slotId ? allocation.fixedWorkingDayId : null) ??
       null,
   );
 
@@ -1437,6 +1448,9 @@ export function generateTimetablePlan(
   const unscheduled:
   UnscheduledPlanningSession[] = [];
 
+  const suggestions:
+  PlanningSuggestion[] = [];
+
   const cohortLookup =
     buildLookup(input.cohorts);
 
@@ -1740,6 +1754,63 @@ export function generateTimetablePlan(
         }
       }
 
+      const conflictId = `${allocation.id}:${sessionNumber}`;
+
+      // Relaxed recovery search: unlike the strict candidate pass above
+      // (which only ever tries the allocation's single preferred room, or
+      // none — see getEligibleRooms), this searches every active,
+      // timetable-available room in the department, on every enabled
+      // working day, ignoring any fixed day/time pin that may have caused
+      // the failure. Trainer stays fixed to the allocation's assigned
+      // trainer — reassigning trainers is a separate, curated feature
+      // (see findTrainerExchangeSuggestions in exchange-repair.ts).
+      const recoverySession: PlanningSession = {
+        id: `unscheduled-request:${conflictId}`,
+        academicPeriodId: allocation.academicPeriodId,
+        teachingAllocationId: allocation.id,
+        cohortId: allocation.cohortId,
+        unitId: allocation.unitId,
+        trainerId: allocation.trainerId,
+        workingDayId: '',
+        startTimeSlotId: '',
+        endTimeSlotId: '',
+        // Truthy sentinel (never a real room id): tells createPlacementCandidates
+        // to search `rooms` rather than treat this as a roomless session.
+        roomId: 'requires-room-search',
+        sessionNumber,
+        deliveryMode: allocation.deliveryMode,
+        status: 'draft',
+        source: 'generator',
+        conflictState: 'unchecked',
+        isLocked: false,
+        participantCohortIds: allocation.participantCohortIds,
+        combinedCohortSize: allocation.combinedCohortSize,
+      };
+
+      const recoveryCandidates = createPlacementCandidates({
+        session: recoverySession,
+        workingDays,
+        timeRanges,
+        rooms: input.rooms,
+      }).slice(0, candidateLimit);
+
+      const recoverySuggestions = suggestAlternativePlacements({
+        conflictId,
+        session: recoverySession,
+        candidates: recoveryCandidates,
+        existingSessions: [...existingSessions, ...selectedSessions],
+        workingDays: input.workingDays,
+        timeSlots: input.timeSlots,
+        trainers: input.trainers,
+        cohorts: input.cohorts,
+        rooms: input.rooms,
+        units: input.units,
+        constraints: input.constraints,
+        limit: 3,
+      });
+
+      suggestions.push(...recoverySuggestions);
+
       unscheduled.push({
         teachingAllocationId:
           allocation.id,
@@ -1793,9 +1864,6 @@ export function generateTimetablePlan(
       constraints:
         input.constraints,
     });
-
-  const suggestions:
-  PlanningSuggestion[] = [];
 
   const statistics =
     calculateStatistics({

@@ -250,6 +250,47 @@ export function GeneratorUnscheduledList({
                   </section>
                 ) : null}
 
+                {session.placementSuggestions.length > 0 ? (
+                  <section className="mt-4 rounded-xl border border-primary-soft bg-surface p-4">
+                    <div className="flex items-start gap-2">
+                      <Sparkles
+                        className="mt-0.5 size-4 shrink-0 text-primary"
+                        aria-hidden="true"
+                      />
+                      <div>
+                        <h4 className="text-sm font-semibold text-text-primary">
+                          Alternative placements
+                        </h4>
+                        <p className="mt-1 text-xs leading-5 text-text-muted">
+                          These were found by relaxing this session&apos;s fixed day/time and searching every active, available room — review and apply manually.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 grid gap-2">
+                      {session.placementSuggestions.map((suggestion) => (
+                        <article
+                          key={suggestion.id}
+                          className="rounded-lg border border-border bg-surface-subtle p-3 text-xs leading-5 text-text-secondary"
+                        >
+                          <p className="font-semibold text-text-primary">
+                            {[
+                              suggestion.proposedWorkingDayName,
+                              suggestion.proposedTimeLabel,
+                              suggestion.proposedRoomName,
+                            ]
+                              .filter(Boolean)
+                              .join(' · ') || suggestion.message}
+                          </p>
+                          <p className="mt-1 text-text-muted">
+                            {suggestion.message}
+                          </p>
+                        </article>
+                      ))}
+                    </div>
+                  </section>
+                ) : null}
+
                 {session.exchangeSuggestions.length > 0 ? (
                   <section className="mt-4 rounded-xl border border-primary-soft bg-surface p-4">
                     <div className="flex items-start gap-2">

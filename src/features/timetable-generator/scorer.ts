@@ -155,6 +155,15 @@ function getRoomCapacityAdjustment({
     requiredCapacity /
     room.capacity;
 
+  if (utilization > 1) {
+    return {
+      factor: 'room_capacity',
+      points: -20,
+      message:
+        'The room is too small for the cohort size.',
+    };
+  }
+
   if (utilization >= 0.7) {
     return {
       factor: 'room_capacity',

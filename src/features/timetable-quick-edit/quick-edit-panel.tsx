@@ -171,7 +171,12 @@ export function QuickEditPanel({
           )}
 
           {activeState.status === 'success' ? (
-            <form action={quickUndoLastChangeAction} className="px-4 pb-3 -mt-1">
+            <form
+              action={async (formData: FormData) => {
+                await quickUndoLastChangeAction(formData);
+              }}
+              className="px-4 pb-3 -mt-1"
+            >
               <input type="hidden" name="academicPeriodId" value={session.academicPeriodId} />
               <button type="submit" className="text-[11px] font-semibold text-text-muted hover:text-primary underline underline-offset-2">
                 Undo this change

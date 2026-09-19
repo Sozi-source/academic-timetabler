@@ -754,6 +754,21 @@ function mapUnscheduledSessions({
       sourceData.units,
     );
 
+  const workingDaysById =
+    buildLookup(
+      sourceData.workingDays,
+    );
+
+  const timeSlotsById =
+    buildLookup(
+      sourceData.timeSlots,
+    );
+
+  const roomsById =
+    buildLookup(
+      sourceData.rooms,
+    );
+
   return plannerResult.unscheduled.map(
     (unscheduled) => {
       const allocation =
@@ -782,6 +797,9 @@ function mapUnscheduledSessions({
               allocation.unitId,
             )
           : undefined;
+
+      const conflictId =
+        `${unscheduled.teachingAllocationId}:${unscheduled.sessionNumber}`;
 
       return {
         teachingAllocationId:
@@ -817,6 +835,37 @@ function mapUnscheduledSessions({
         conflictTypes:
           unscheduled.conflictTypes,
         blockers: unscheduled.blockers,
+        placementSuggestions:
+          plannerResult.suggestions
+            .filter((suggestion) =>
+              suggestion.conflictId === conflictId,
+            )
+            .map((suggestion) => {
+              const day = suggestion.proposedWorkingDayId
+                ? workingDaysById.get(suggestion.proposedWorkingDayId)
+                : undefined;
+              const startSlot = suggestion.proposedStartTimeSlotId
+                ? timeSlotsById.get(suggestion.proposedStartTimeSlotId)
+                : undefined;
+              const endSlot = suggestion.proposedEndTimeSlotId
+                ? timeSlotsById.get(suggestion.proposedEndTimeSlotId)
+                : undefined;
+              const room = suggestion.proposedRoomId
+                ? roomsById.get(suggestion.proposedRoomId)
+                : undefined;
+
+              return {
+                id: suggestion.id,
+                message: suggestion.message,
+                score: suggestion.score,
+                proposedWorkingDayName: day?.dayOfWeek ?? null,
+                proposedTimeLabel:
+                  startSlot && endSlot
+                    ? `${startSlot.startsAt}–${endSlot.endsAt}`
+                    : null,
+                proposedRoomName: room?.name ?? null,
+              };
+            }),
         exchangeSuggestions:
           exchangeSuggestions
             .filter((suggestion) =>

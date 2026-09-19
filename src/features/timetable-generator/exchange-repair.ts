@@ -171,9 +171,16 @@ export function evaluateTrainerExchangeSuggestion({
   );
   const partnerUnscheduledCount =
     countUnscheduledForAllocation(simulation, partner.id);
-  const blockedConflictCount = simulation.conflicts.filter(
+  const baselineBlockedConflictCount = baseline.conflicts.filter(
     (conflict) => conflict.severity === 'blocked',
   ).length;
+  const simulationBlockedConflictCount = simulation.conflicts.filter(
+    (conflict) => conflict.severity === 'blocked',
+  ).length;
+  const newBlockedConflictCount = Math.max(
+    0,
+    simulationBlockedConflictCount - baselineBlockedConflictCount,
+  );
   const resolvedSessionCount =
     baseline.unscheduled.length - simulation.unscheduled.length;
 
@@ -181,14 +188,21 @@ export function evaluateTrainerExchangeSuggestion({
     targetStillUnscheduled ||
     partnerUnscheduledCount > 0 ||
     resolvedSessionCount <= 0 ||
-    blockedConflictCount > 0
+    newBlockedConflictCount > 0
   ) {
     return null;
   }
 
-  const warningCount = simulation.conflicts.filter(
+  const baselineWarningCount = baseline.conflicts.filter(
     (conflict) => conflict.severity === 'warning',
   ).length;
+  const simulationWarningCount = simulation.conflicts.filter(
+    (conflict) => conflict.severity === 'warning',
+  ).length;
+  const warningCount = Math.max(
+    0,
+    simulationWarningCount - baselineWarningCount,
+  );
 
   return {
     id: [

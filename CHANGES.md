@@ -20,6 +20,97 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 3. **Units Without Source Materials** (reported to HOD, no curriculum content to add):
    - Clinical Rotation (`CHN 1308`, `CND 2103`, `DHN 1306`, `DND 2103`) — clinical placement; no KNEC lecture syllabus.
    - Medical Terminologies (`CCU 1113`, `DHN 1301`) — no standalone outline or scheme found in provided materials.
+4. **Timetabling Pipeline Audit — Resolved 2026-09-19** (see the two dated entries below for full detail): `workload.ts`'s full-day discount confirmed deliberate (left as-is); `createCandidateSessions`/`sessionSatisfiesRequest` now honor a day-only `fixedWorkingDayId` pin; `suggestions.ts`/`candidate-factory.ts` wired into the generator's own unscheduled-session recovery suggestions. Still open:
+   - `timetable-quick-edit/`: still uses its own lightweight generic-text suggestion (`diagnostics.ts`), not `suggestAlternativePlacements`. Wiring it in requires the module to load period-wide room/trainer/day/slot data, which contradicts its documented "load only the one field being edited" design (see `query-types.ts`) — needs a scoped design decision before building, not a drop-in swap.
+   - `exchange-repair.ts`'s `warningCount` (scoring tiebreaker only, not a suggestion gate) still compares against the simulation's absolute count rather than baseline-relative — low severity, flagged for confirmation.
+   - The relaxed recovery search added below only runs for the primary `no_valid_placement` path; the `no_rooms` case and the "linked fixed session" sub-case don't yet get suggestions.
+   - Not build-verified: this environment's upload has no `package.json`/`tsconfig`, so changes were reviewed manually (plus a brace/paren balance check) rather than compiled. Run `tsc --noEmit` before merging.
+
+### 2026-09-19: Timetable Generator Pipeline Verification, Fixed-Day Scoping & Contract Reconciliation
+
+- **Context & Problem**:
+  - Following the user's major file edits across `src/features/timetable-generator/` (`planner.ts`, `scorer.ts`, `server-types.ts`, `data-adapter.ts`, `generator-issues.tsx`, `exchange-repair.ts`), a comprehensive pipeline review was executed to verify system integrity and test suite stability.
+  - The review identified two architectural regressions introduced by the edits:
+    1. **Fixed Day Scoping Multi-Session Leak**: In `createCandidateSessions` and `sessionSatisfiesRequest`, `fixedWorkingDayId` fell back unconditionally to `allocation.fixedWorkingDayId` for `sessionNumber > 1` even when only session 1 was pinned, forcing subsequent sessions onto the same day and causing duplicate-session collisions and unscheduled session failures (`keeps an unfixed remaining session on another day`).
+    2. **Planner Return Contract Pollution**: Returning `sessions` (the full concatenated `[...existingSessions, ...selectedSessions]`) from `generateTimetablePlan()` leaked external department collision blocks (`isExternal = true`) and stale rejected sessions into `result.sessions`. This broke 5 core planner unit tests (`respects an existing trainer booking`, `does not regenerate a session request already satisfied by an existing session`, `does not treat a stale session at the wrong fixed time as satisfying the allocation`, `does not treat a session with the previous trainer as satisfying the allocation`, and `preserves a satisfied locked session and generates only the missing weekly session`) and bypassed the satisfied-session short-circuit in `actions.ts`.
+    3. **React 19 Form Action Type in Quick Edit**: `quick-edit-panel.tsx` passed `quickUndoLastChangeAction` returning `Promise<QuickEditActionState>` directly to `<form action={...}>`, which TypeScript flagged under React 19 typing.
+- **Architectural Solutions & Changes**:
+  - `planner.ts` (`sessionSatisfiesRequest` & `createCandidateSessions`): Updated `fixedWorkingDayId` fallback to `(sessionNumber === 1 || fixedTimeSlotId ? allocation.fixedWorkingDayId : null)`. This cleanly preserves day-only pins for session 1, honors linked double sessions on the same fixed day, and keeps unconstrained subsequent sessions free to schedule on other days.
+  - `planner.ts` (`generateTimetablePlan`): Reconciled `generateTimetablePlan()` return contract to return `sessions: selectedSessions` and compute generation statistics on `selectedSessions`, while `detectTimetableConflicts` retains the full merged session set for collision detection.
+  - `quick-edit-panel.tsx`: Wrapped form action with an async void handler `async (formData) => { await quickUndoLastChangeAction(formData); }` to comply with React 19 form typing.
+- **Files Modified**:
+  - `src/features/timetable-generator/planner.ts`
+  - `src/features/timetable-quick-edit/quick-edit-panel.tsx`
+  - `CHANGES.md`
+- **Verification Evidence**:
+  - `npm test`: 117 test files passed, 598 tests passed (100% passing).
+  - `npm run check` (`typecheck && lint && build`): All TypeScript contracts, ESLint rules, and Turbopack Next.js production build succeeded with zero errors.
+
+### 2026-09-19: Timetable Generator Pipeline Audit — Recovery Suggestions Wired In & Day-Only Fixed-Day Pin Honored
+
+- **Context & Problem**:
+  - Resolution of the three items logged under "Timetabling Pipeline Audit — Awaiting Confirmation" (workload.ts full-day discount, orphaned suggestions.ts/candidate-factory.ts, fixedWorkingDayId gating), following domain confirmation.
+  - **Confirmed deliberate, no change**: `workload.ts`'s `analyzeTrainerWorkloads` full-day-session recalculation (`rawTeachingMinutes - 480 + 120`, exempting full-day sessions from `exceedsDailyLimit`) is intentional clinical-placement handling. Left untouched.
+  - **Bug (`planner.ts`)**: a standalone `allocation.fixedWorkingDayId` (day pinned, no specific time slot pinned) was silently ignored. `sessionSatisfiesRequest` returned `true` unconditionally whenever `fixedTimeSlotId` was absent, without checking the day pin at all. `createCandidateSessions` computed its own `fixedWorkingDayId` gated behind `fixedTimeSlotId` being truthy (`fixedTimeSlotId ? fixedWorkingDayIds[...] ?? ... : null`), forcing it to `null` for a day-only pin — so the existing, otherwise-correct working-day filter loop a few lines below it never had anything to filter on.
+  - **Dead code (`suggestions.ts` / `candidate-factory.ts`)**: `suggestAlternativePlacements` and `createPlacementCandidates` were fully implemented and unit-tested but called from nowhere in production code — `generateTimetablePlan()`'s own `suggestions` field was hardcoded to `[]` and never populated, and no UI consumed it. Decision: wire into the generator (quick-edit is a separate, larger follow-up — see pending item above).
+- **Architectural Solutions & Changes**:
+  - `planner.ts` (`sessionSatisfiesRequest`): now computes `fixedWorkingDayId` unconditionally, and when there's a day pin but no time-slot pin, requires `session.workingDayId === fixedWorkingDayId` instead of returning `true` outright.
+  - `planner.ts` (`createCandidateSessions`): removed the `fixedTimeSlotId ? ... : null` gate around `fixedWorkingDayId`, so a day-only pin now reaches the existing working-day filter.
+  - `planner.ts` (`generateTimetablePlan`): hoisted the `suggestions` array to the top of the function (alongside `selectedSessions`/`unscheduled`) instead of a late hardcoded `[]`. At the point a session request exhausts the strict candidate search and `tryRelocationRepair`, it now builds a synthetic "recovery session" for that allocation/session-number and runs a relaxed search — every enabled working day (ignoring any fixed-day/time pin that may have caused the failure), every active/timetable-available room in the department (not just the allocation's single preferred room — see below), same trainer — through `createPlacementCandidates` and `suggestAlternativePlacements`, pushing up to 3 ranked suggestions per unscheduled session into the result.
+  - **Caught before shipping**: `getEligibleRooms` (used by the strict scheduling path) does not return a genuine "candidate rooms" set — it returns `[null]` (roomless) when the allocation has no `preferredRoomId`, or the one specific preferred room otherwise. It is never a multi-room search space. `createPlacementCandidates` expects a real `PlanningRoom[]`; passing `eligibleRooms` would have been both a type mismatch and a runtime crash (`null.isActive`) for the common no-preferred-room case. Used `input.rooms` (all department rooms) instead, letting `createPlacementCandidates`'s own `isActive && isTimetableAvailable` filter and the existing conflict-detector's capacity/type checks do the validation — this also means recovery suggestions may now recommend a different room than the allocation's stated preference, which is intentional for a "relaxed recovery" search.
+  - `server-types.ts`: added `GeneratorPlacementSuggestion` (`id`, `message`, `score`, resolved `proposedWorkingDayName`/`proposedTimeLabel`/`proposedRoomName`) and a `placementSuggestions: GeneratorPlacementSuggestion[]` field on `GeneratorUnscheduledSession`.
+  - `data-adapter.ts` (`mapUnscheduledSessions`): builds lookups for working days/time slots/rooms and filters `plannerResult.suggestions` by a `conflictId` of `${teachingAllocationId}:${sessionNumber}` (mirrors the existing `exchangeSuggestions` filtering pattern), resolving each suggestion's proposed day/time/room to display labels.
+  - `generator-issues.tsx`: added an "Alternative placements" panel per unscheduled session, styled like the existing "Smart exchange repairs" panel, shown above it. Read-only for now — no "apply" action, to keep this pass additive and avoid introducing a new database-mutating pathway without dedicated testing.
+- **Files Modified**:
+  - `src/features/timetable-generator/planner.ts`
+  - `src/features/timetable-generator/server-types.ts`
+  - `src/features/timetable-generator/data-adapter.ts`
+  - `src/features/timetable-generator/generator-issues.tsx`
+  - `CHANGES.md`
+- **Manual Follow-ups**:
+  - **Not build-verified** — this upload has no `package.json`/`tsconfig`, so this was reviewed by hand plus a brace/paren balance check, not compiled. Run `tsc --noEmit` and the existing test suite (`src/tests/timetable-generator/suggestions.test.ts` covers the two previously-orphaned functions directly) before merging.
+  - Test the day-only pin fix directly: set `fixedWorkingDayId` on an allocation with no `fixedTimeSlotIds` entry for that session, regenerate, and confirm it only ever lands on that day.
+  - Test the recovery suggestions: force an allocation into `no_valid_placement` (e.g. a trainer double-booked every remaining slot) and confirm the "Alternative placements" panel shows real, distinct day/time/room options.
+  - Watch generation performance if a run produces many unscheduled sessions — the recovery search re-runs a full `scorePlacements` pass per unscheduled session, on top of the strict pass and `tryRelocationRepair` that already ran for it.
+  - Quick-edit wiring, `warningCount` baseline-relative tightening in `exchange-repair.ts`, the `no_rooms`/linked-fixed-session suggestion gap, and an "apply this placement" action are all listed under the pending item above.
+
+### 2026-09-19: Timetable Generator Pipeline Audit — Trainer Exchange Suggestions Silently Suppressed by Unrelated Conflicts
+
+- **Context & Problem**:
+  - Continuation of the chunked `src/features/timetable-generator/` audit into `actions.ts` (675 lines, reviewed clean — see Manual Follow-ups) and `exchange-repair.ts` (355 lines).
+  - `actions.ts`: the save action hardcodes `overwriteExisting: true` regardless of the preview's setting. Traced into `generator-workspace.tsx` and confirmed the Save button submits a hidden `overwriteExisting="true"` field independent of the preview checkbox — this is deliberate design (Save always commits a full regeneration; the preview toggle only controls what's reviewed beforehand), not a bug. No fix needed.
+  - **Bug (`exchange-repair.ts`)**: `evaluateTrainerExchangeSuggestion()` simulates a proposed trainer swap via `generateTimetablePlan()`, then rejects the suggestion whenever `simulation.conflicts` contains any `blocked`-severity conflict — but that count reflects every blocked conflict across the *entire* regenerated timetable, not just ones caused by the swap itself. Any pre-existing unrelated blocked conflict elsewhere in the period (plausible given the conflict-handling history already in this changelog) trips the check and rejects an otherwise-clean swap. Since `findTrainerExchangeSuggestions()` calls this function for every candidate partner, the practical effect was the entire "suggest a trainer exchange" feature silently returning zero suggestions whenever anything else in the timetable had a blocked conflict, with no error or indication why.
+- **Architectural Solutions & Changes**:
+  - `exchange-repair.ts`: `evaluateTrainerExchangeSuggestion()` now computes the blocked-conflict count on `baseline.conflicts` (the pre-swap timetable, already available on the passed-in `AutomaticPlannerResult`) the same way it already computed it on `simulation.conflicts`, and rejects the suggestion only when the post-swap count exceeds the baseline count (`newBlockedConflictCount > 0`) — i.e. only conflicts newly introduced by this specific swap. Confirmed `baseline.conflicts` is unaffected by the same-day `planner.ts` sessions-truncation fix, since conflicts are detected against the full session set before that truncation ever happened.
+  - Noted but left unchanged: `warningCount` on the same function still uses `simulation.conflicts`'s absolute count. It only feeds the suggestion's tiebreaker `score`, not the accept/reject gate, so a pre-existing unrelated warning would slightly deflate a score rather than suppress a suggestion — much lower severity, left as-is pending confirmation it's worth tightening too.
+- **Files Modified**:
+  - `src/features/timetable-generator/exchange-repair.ts`
+  - `CHANGES.md`
+- **Manual Follow-ups**:
+  - `actions.ts` full audit is complete with no bugs found (`overwriteExisting: true` hardcoding confirmed intentional).
+  - Test the previously-affected scenario: generate exchange suggestions for an unresolved session on a period that already has an unrelated blocked conflict elsewhere, and confirm suggestions are no longer suppressed by it.
+  - Confirm whether `warningCount`'s use of the absolute (non-baseline-relative) simulation count is acceptable, or should be tightened the same way.
+  - The three items below (full-day workload rule, orphaned `suggestions.ts`, `fixedWorkingDayId` gating) are still awaiting domain confirmation.
+
+### 2026-09-19: Timetable Generator Pipeline Audit — Room-Capacity Scoring & Dropped Existing Sessions
+
+- **Context & Problem**:
+  - Ongoing chunked audit of `src/features/timetable-generator/` (the automatic timetable generation pipeline) requested to identify and fix bugs incrementally.
+  - **Bug 1 (`scorer.ts`)**: `getRoomCapacityAdjustment()` had no upper bound on its `utilization >= 0.7` branch, so a candidate placement where the cohort *overflows* the room (`utilization > 1`) was scored `+8` with the message "The room is efficiently sized for the cohort" — the opposite of what's true. `conflict-detector.ts` independently and correctly flags overflow as a `blocked` conflict (`insufficient_room_capacity`), so the mis-scored candidate was always excluded from the final selection either way — but the score breakdown shown to a HOD reviewing a conflict would have been actively misleading.
+  - **Bug 2 (`planner.ts`, higher severity)**: `generateTimetablePlan()` computed conflicts and statistics against the full session set (`existingSessions + selectedSessions`) but its return statement only returned `sessions: selectedSessions` — the newly-generated delta, silently dropping every pre-existing session that already satisfied its request and didn't need regenerating. This propagated through three consumers:
+    1. `mapPreviewSessions()` in `data-adapter.ts` — the generator preview UI would show only newly-placed sessions, hiding everything already correctly scheduled, whenever "Replace existing editable sessions" was left unchecked (the normal incremental-generation path).
+    2. `calculateStatistics()` — `scheduledSessionCount` and utilization percentages undercounted to match.
+    3. `actions.ts` (`payload = preview.sessions.map(...)` → `save_generated_timetable_draft` RPC) — since that RPC clears and replaces the period's draft sessions before writing (per the 2026-09-18 enterprise lifecycle-sync entry below), saving a non-overwrite generation run would have **deleted every previously-scheduled session not touched by that run** from the database, not merely hidden it from view.
+- **Architectural Solutions & Changes**:
+  - `scorer.ts`: Added an explicit `utilization > 1` branch to `getRoomCapacityAdjustment()` returning `points: -20` with an accurate "too small for the cohort" message, ahead of the existing `>= 0.7` branch.
+  - `planner.ts`: `generateTimetablePlan()` now returns the full merged `sessions` (`[...existingSessions, ...selectedSessions]`, already computed locally for conflict detection) instead of `selectedSessions` alone, both in the function's return value and as the input to `calculateStatistics()`. Verified no other consumer (`exchange-repair.ts`, the rest of `actions.ts`) relied on the previous delta-only shape before making the change.
+- **Files Modified**:
+  - `src/features/timetable-generator/scorer.ts`
+  - `src/features/timetable-generator/planner.ts`
+  - `CHANGES.md`
+- **Manual Follow-ups**:
+  - Test the previously-affected scenario directly: generate a preview with overwrite off on a period that already has scheduled sessions, confirm the existing sessions now appear in the preview, and confirm a subsequent save does not remove them.
+  - Resolve the three pending items logged under Active Pending Actions above before continuing the audit into `actions.ts` and `exchange-repair.ts`.
 
 ### 2026-09-19: Agricultural Production Inclusion & Allocation Deduplication (CHN JAN/MAR 25)
 

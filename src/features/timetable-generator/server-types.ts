@@ -199,6 +199,18 @@ export interface GeneratorUnscheduledSession {
 
   exchangeSuggestions:
     GeneratorExchangeSuggestion[];
+
+  placementSuggestions:
+    GeneratorPlacementSuggestion[];
+}
+
+export interface GeneratorPlacementSuggestion {
+  id: string;
+  message: string;
+  score: number;
+  proposedWorkingDayName: string | null;
+  proposedTimeLabel: string | null;
+  proposedRoomName: string | null;
 }
 
 export interface GeneratorExchangeSuggestion {

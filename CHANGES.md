@@ -26,6 +26,22 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
    - The relaxed recovery search added below only runs for the primary `no_valid_placement` path; the `no_rooms` case and the "linked fixed session" sub-case don't yet get suggestions.
    - Not build-verified: this environment's upload has no `package.json`/`tsconfig`, so changes were reviewed manually (plus a brace/paren balance check) rather than compiled. Run `tsc --noEmit` before merging.
 
+### 2026-09-19: Orphaned Allocations Left Behind by Shared-Class Merges
+
+- **Context & Problem**:
+  - HOD reported placing `CHN 2202 Management of Malnutrition` for `CHN-MAY-2025` (Sept–Dec 2026) blocked by "Cohort Conflict: CHN-MAY-2025 already has DND 2101 Management of Malnutrition with Fiona Kwamboka in PHYSIOGYM at this time" — naming the **same** cohort, not a partner. Diagnosed interactively via direct SQL against the live data (not from a build/test run), ruling out both the phantom-participant-array defect (20260919160000) and a cross-period leak before finding the actual cause.
+  - **Root cause**: `unit_offerings` row `6d6ac895` (this cohort/unit/period) already had `allocation_status = 'allocated'`, `confirmed_shared_offering_id = e63c1b7d` — the same shared `teaching_offering` `DND 2101`/`CND 2101` were merged into. But `teaching_allocations` row `e87b70b0` for the identical cohort/unit/period was never updated to match: `teaching_offering_id` still `null`, `status` still `draft`, `is_timetable_enabled` still `true`, zero `scheduled_sessions` of its own. `public.confirm_shared_unit_offerings()` (`20260816005000`) only ever writes to `unit_offerings` and `teaching_offering_participants`; it assumes no `teaching_allocation` exists yet for a unit being merged. When the ordinary single-cohort approval path had already created one independently, the merge left it behind — still listed as "missing from timetable," still independently placeable, and correctly rejected on placement because the cohort was already inside the class it should have joined.
+- **Architectural Solutions & Changes**:
+  - New migration `20260919190000_retire_orphaned_allocations_after_merge.sql`:
+    1. One-off repair: retires (`status = suspended`, `is_timetable_enabled = false`, `teaching_offering_id` linked, note appended) every `teaching_allocations` row currently in this orphaned state.
+    2. `public.retire_orphaned_allocation_after_merge()` — `AFTER UPDATE` trigger on `unit_offerings`: whenever an offering's merge state changes (`confirmed_shared_offering_id` newly set or `allocation_status` becomes `allocated`), retires any pre-existing standalone allocation for the same cohort/unit/period that has no sessions of its own, in the same transaction as the merge. Wrapped so a retirement failure can never block the merge/approval that triggered it (same defensive pattern as the `20260919160000` propagation triggers).
+    3. `public.audit_orphaned_merged_allocations(academic_period_id)` for verification and ongoing monitoring, mirroring `public.audit_phantom_session_participants()`.
+- **Files Modified**:
+  - `supabase/migrations/20260919190000_retire_orphaned_allocations_after_merge.sql` (new)
+  - `CHANGES.md`
+- **Verification Evidence**: Not build-verified in this environment (no installed `node_modules`, no live DB access); the migration's dollar-quote/`begin`-`commit` balance was checked (4 `$$` = 2 balanced functions, one `begin`/`commit` pair). Run `supabase db push`, then `select * from public.audit_orphaned_merged_allocations();` — expect zero rows — then retry the originally reported placement.
+- **Raised separately, not yet built**: HOD asked that future academic periods be locked from placement/editing entirely (a distinct access-control decision, not a bug fix) — open question on exact scope (only the single active period editable vs. a near-term planning window) before implementing.
+
 ### 2026-09-19: Phantom Cohort Conflicts — Authoritative Shared-Class Membership
 
 - **Context & Problem**:

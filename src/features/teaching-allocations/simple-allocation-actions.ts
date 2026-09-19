@@ -251,19 +251,64 @@ export async function confirmSharedOfferingAction(formData: FormData) {
   }
   const db=await createClient();
 
-  // Normalize differing durations across candidates before merging
+  // Synchronize duration and fixed schedule configuration across candidates before merging
   const { data: memberOfferings } = await db
     .from('unit_offerings')
-    .select('id, session_duration_minutes, is_full_day_session')
+    .select(
+      'id, session_duration_minutes, is_full_day_session, fixed_schedule_required, fixed_working_day_id, fixed_time_slot_id, full_day_end_time_slot_id, weekly_sessions',
+    )
     .in('id', offeringIds);
 
   if (memberOfferings && memberOfferings.length > 0) {
-    const durations = new Set(memberOfferings.map(m => m.session_duration_minutes ?? 120));
-    if (durations.size > 1) {
+    const templateWithFixed = memberOfferings.find(
+      (m) => m.fixed_schedule_required && m.fixed_working_day_id,
+    );
+
+    if (templateWithFixed) {
       await db
         .from('unit_offerings')
-        .update({ session_duration_minutes: 120, is_full_day_session: false })
+        .update({
+          fixed_schedule_required: true,
+          fixed_working_day_id: templateWithFixed.fixed_working_day_id,
+          fixed_time_slot_id: templateWithFixed.fixed_time_slot_id,
+          is_full_day_session: templateWithFixed.is_full_day_session ?? false,
+          full_day_end_time_slot_id: templateWithFixed.full_day_end_time_slot_id ?? null,
+          session_duration_minutes: templateWithFixed.session_duration_minutes ?? 120,
+          weekly_sessions: templateWithFixed.weekly_sessions ?? 1,
+        })
         .in('id', offeringIds);
+
+      const { data: templateSlots } = await db
+        .from('unit_offering_fixed_slots')
+        .select('working_day_id, time_slot_id, sequence_number')
+        .eq('unit_offering_id', templateWithFixed.id)
+        .order('sequence_number', { ascending: true });
+
+      if (templateSlots && templateSlots.length > 0) {
+        await db
+          .from('unit_offering_fixed_slots')
+          .delete()
+          .in('unit_offering_id', offeringIds);
+
+        const newSlotsToInsert = offeringIds.flatMap((targetId) =>
+          templateSlots.map((slot) => ({
+            unit_offering_id: targetId,
+            working_day_id: slot.working_day_id,
+            time_slot_id: slot.time_slot_id,
+            sequence_number: slot.sequence_number,
+          })),
+        );
+        await db.from('unit_offering_fixed_slots').insert(newSlotsToInsert);
+      }
+    } else {
+      const durations = new Set(memberOfferings.map((m) => m.session_duration_minutes ?? 120));
+      const hasFullDay = memberOfferings.some((m) => m.is_full_day_session);
+      if (durations.size > 1 || hasFullDay) {
+        await db
+          .from('unit_offerings')
+          .update({ session_duration_minutes: 120, is_full_day_session: false })
+          .in('id', offeringIds);
+      }
     }
   }
 

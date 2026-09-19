@@ -31,6 +31,37 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
      - Option B: a near-term planning window (current period + the next one) stays editable; only periods further out are locked.
    - Likely implementation shape once decided: tighten the period-status check already present in `validate_scheduled_session_relationships()` / `validate_pending_scheduled_session()` (currently `not in ('planned','active')`, fixed by `20260919160000`) and the equivalent app-layer guards in `unit_offerings` approval/placement actions, rather than a new mechanism from scratch.
 
+### 2026-09-20: Curriculum Weekly Sessions Alignment & Fixed Schedule Form Gating
+
+- **Context & Problem**:
+  - HOD reported: *"i dont know why clinical rotations indicate 1 session yet i set 3 sessions, do not open 2 or 3 session for a unit with 1 session, fix that part with you have opened"*.
+  - **Root Cause**:
+    1. When a unit offering was created or triggered for Clinical Rotation, `unit_offerings.weekly_sessions` defaulted to 1 (or was set to 1 for full-day blocks). Even though the user set **Weekly sessions: 3** in the unit's master curriculum definition (`units.weekly_sessions = 3`), `src/app/(dashboard)/timetable/teaching-allocations/page.tsx` was only reading `o.weekly_sessions` from `unit_offerings` and did not select or fall back to `units.weekly_sessions`.
+    2. Editing a unit's `weekly_sessions` in Master Setup -> Units (`updateUnitAction`) updated the `units` table but did not propagate the change to unallocated `unit_offerings` in active/planned periods.
+    3. In `FixedScheduleForm`, gating was completely removed in an earlier pass, allowing 2nd and 3rd sessions to be open even for units that only require 1 weekly session.
+- **Architectural Solutions & Changes**:
+  - **Restored Strict Form Gating (`src/features/teaching-allocations/fixed-schedule-form.tsx`)**:
+    - Re-introduced `secondSessionAvailable = weeklySessions >= 2` and `thirdSessionAvailable = weeklySessions >= 3`.
+    - Dropdowns for Second day / Second session and Third day / Third session are now strictly disabled for units with only 1 weekly session (`weeklySessions = 1`).
+    - Units with 2 sessions open only the second session. Units with 3 sessions open all 3 sessions.
+    - Updated workload text dynamically: `Saved: ... (${savedPatterns.length * 2}.0h workload)`.
+  - **Curriculum-Aware Session Resolution (`src/app/(dashboard)/timetable/teaching-allocations/page.tsx`)**:
+    - Added `weekly_sessions` to `UnitSummary` type and selected `units(code,name,weekly_sessions,...)` in the Supabase query.
+    - Implemented `getOfferingWeeklySessions = (o: Offering) => o.is_full_day_session ? 1 : Math.max(o.weekly_sessions ?? 1, o.units?.weekly_sessions ?? 1);`.
+    - Unit offering cards now display the authoritatively configured weekly session count (e.g. `3 session(s)` for Clinical Rotation when standard mode is used) and supply this count to `FixedScheduleForm`.
+    - Ensured approved equivalent units are always grouped in the "Approved equivalents available for shared delivery" suggestion banner (`key = equivalence ? 'equiv:' + equivalence : ...`).
+  - **Propagate Unit Updates to Offerings (`src/features/units/actions.ts`)**:
+    - In `updateUnitAction`, when updating a unit, synchronizes `weekly_sessions` to all unallocated, non-full-day `unit_offerings` of that unit.
+    - Added cache revalidations for `/timetable/teaching-allocations` and `/timetable/unit-offerings`.
+  - **Shared Class Schedule Synchronization (`src/features/teaching-allocations/simple-allocation-actions.ts`)**:
+    - In `confirmSharedOfferingAction`, when merging equivalent units into a shared class, if any unit has a fixed schedule configured, synchronizes that fixed schedule and clones its `unit_offering_fixed_slots` to all units in the group prior to calling the RPC, preventing `"Fixed day and sessions must match for every shared unit"` RPC failures.
+- **Files Modified**:
+  - `src/features/teaching-allocations/fixed-schedule-form.tsx`
+  - `src/app/(dashboard)/timetable/teaching-allocations/page.tsx`
+  - `src/features/units/actions.ts`
+  - `src/features/teaching-allocations/simple-allocation-actions.ts`
+  - `CHANGES.md`
+
 ### 2026-09-19: Timetable Regeneration Venue Retention & Transparent Move Lock Handling
 
 - **Context & Problem**:

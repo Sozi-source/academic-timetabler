@@ -18,6 +18,8 @@ function revalidateUnitPages(
 ) {
   revalidatePath('/dashboard');
   revalidatePath('/timetable/units');
+  revalidatePath('/timetable/unit-offerings');
+  revalidatePath('/timetable/teaching-allocations');
 
   if (id) {
     revalidatePath(
@@ -323,6 +325,18 @@ export async function updateUnitAction(
           error.message,
         ),
     };
+  }
+
+  if (parsed.data.weeklySessions !== undefined) {
+    await supabase
+      .from('unit_offerings')
+      .update({
+        weekly_sessions: parsed.data.weeklySessions,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('unit_id', idResult.data)
+      .eq('allocation_status', 'unallocated')
+      .eq('is_full_day_session', false);
   }
 
   revalidateUnitPages(

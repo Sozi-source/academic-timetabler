@@ -60,11 +60,8 @@ export function FixedScheduleForm({
   );
 
   const secondSessionAvailable = weeklySessions >= 2;
-  // Gated the same as the second slot, not on `weeklySessions >= 3`: weekly_sessions
-  // is derived FROM how many day/slot pairs get filled in on save (see
-  // setFixedScheduleAction), so requiring it to already be 3 before letting anyone
-  // pick a third slot would make it impossible to ever reach 3 in the first place.
-  const thirdSessionAvailable = secondSessionAvailable;
+  const thirdSessionAvailable = weeklySessions >= 3;
+
   const orderedSlots = [...slots].sort(
     (first, second) => first.sequence_number - second.sequence_number,
   );
@@ -279,7 +276,7 @@ export function FixedScheduleForm({
         </p>
       ) : savedPatterns.length > 0 ? (
         <p className="text-xs font-medium text-primary">
-          Saved: {savedPatterns.join(' + ')} (2.0h workload)
+          Saved: {savedPatterns.join(' + ')} ({savedPatterns.length * 2}.0h workload)
         </p>
       ) : (
         <p className="text-xs text-text-muted">

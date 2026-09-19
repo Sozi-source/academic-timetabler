@@ -1644,6 +1644,28 @@ export function generateTimetablePlan(
         candidateLimit,
       );
 
+    // TEMPORARY DIAGNOSTIC — remove after the zero-candidate investigation
+    // for allocation.id === '9a536347-96d6-415f-aee3-f9f7bc81e2b2' is done.
+    if (candidates.length === 0) {
+      console.error('[zero-candidates]', {
+        allocationId: allocation.id,
+        sessionNumber,
+        fixedWorkingDayId: allocation.fixedWorkingDayId,
+        fixedWorkingDayIds: allocation.fixedWorkingDayIds,
+        fixedTimeSlotIds: allocation.fixedTimeSlotIds,
+        isFullDaySession: allocation.isFullDaySession,
+        sessionDurationMinutes: allocation.sessionDurationMinutes,
+        preferredRoomId: allocation.preferredRoomId,
+        eligibleRoomsPassedIn: eligibleRooms.map((r) => r?.id ?? null),
+        workingDayIdsInScope: workingDays.map((d) => d.id),
+        timeRangesInScope: timeRanges.map((r) => ({
+          start: r.startTimeSlotId,
+          end: r.endTimeSlotId,
+          minutes: r.durationMinutes,
+        })),
+      });
+    }
+
     const scores =
       scorePlacements({
         candidates,

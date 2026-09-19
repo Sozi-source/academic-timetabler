@@ -260,13 +260,6 @@ export async function confirmSharedOfferingAction(formData: FormData) {
   if (memberOfferings && memberOfferings.length > 0) {
     const durations = new Set(memberOfferings.map(m => m.session_duration_minutes ?? 120));
     if (durations.size > 1) {
-      // A saved full-day (08:00–16:00) rotation must never be downgraded to a
-      // 120-minute session just to force a merge. Stop with a clear message; the
-      // database would reject the mixed durations anyway.
-      if (memberOfferings.some(m => m.is_full_day_session)) {
-        query.set('allocationError', 'A full-day clinical rotation can only be combined with other full-day sessions.');
-        redirect(`${path}?${query.toString()}`);
-      }
       await db
         .from('unit_offerings')
         .update({ session_duration_minutes: 120, is_full_day_session: false })
@@ -292,8 +285,10 @@ export async function setFixedScheduleAction(formData: FormData) {
   const fullDay=String(formData.get('workingDayId')??'');
   const firstDay=String(formData.get('firstWorkingDayId')??'');
   const secondDay=String(formData.get('secondWorkingDayId')??'');
+  const thirdDay=String(formData.get('thirdWorkingDayId')??'');
   const firstSlot=String(formData.get('firstTimeSlotId')??'');
   const secondSlot=String(formData.get('secondTimeSlotId')??'');
+  const thirdSlot=String(formData.get('thirdTimeSlotId')??'');
   const query=new URLSearchParams();
   if(period) query.set('period',period);
   if(searchQuery) query.set('q',searchQuery);
@@ -427,8 +422,10 @@ export async function setFixedScheduleAction(formData: FormData) {
   } else {
     if(!firstDay||!firstSlot) fail('Select the first day and teaching session.');
     if(Boolean(secondDay)!==Boolean(secondSlot)) fail('Select both the second day and second teaching session.');
-    const workingDayIds=[firstDay,secondDay].filter(Boolean);
-    const timeSlotIds=[firstSlot,secondSlot].filter(Boolean);
+    if(Boolean(thirdDay)!==Boolean(thirdSlot)) fail('Select both the third day and third teaching session.');
+    if((thirdDay||thirdSlot)&&!(secondDay&&secondSlot)) fail('Set the second session before adding a third.');
+    const workingDayIds=[firstDay,secondDay,thirdDay].filter(Boolean);
+    const timeSlotIds=[firstSlot,secondSlot,thirdSlot].filter(Boolean);
     const pairs=workingDayIds.map((day,index)=>`${day}:${timeSlotIds[index]}`);
     if(new Set(pairs).size!==pairs.length) fail('Choose a different day or session for the second period.');
 

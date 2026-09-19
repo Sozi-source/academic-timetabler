@@ -60,6 +60,11 @@ export function FixedScheduleForm({
   );
 
   const secondSessionAvailable = weeklySessions >= 2;
+  // Gated the same as the second slot, not on `weeklySessions >= 3`: weekly_sessions
+  // is derived FROM how many day/slot pairs get filled in on save (see
+  // setFixedScheduleAction), so requiring it to already be 3 before letting anyone
+  // pick a third slot would make it impossible to ever reach 3 in the first place.
+  const thirdSessionAvailable = secondSessionAvailable;
   const orderedSlots = [...slots].sort(
     (first, second) => first.sequence_number - second.sequence_number,
   );
@@ -73,6 +78,8 @@ export function FixedScheduleForm({
   const firstSavedDayId = fixedWorkingDayIds[0] ?? fixedDayId ?? '';
   const secondSavedDayId =
     fixedWorkingDayIds[1] ?? (fixedSlotIds[1] ? fixedDayId ?? '' : '');
+  const thirdSavedDayId =
+    fixedWorkingDayIds[2] ?? (fixedSlotIds[2] ? fixedDayId ?? '' : '');
 
   const savedPatterns = fixedSlotIds
     .map((slotId, index) => {
@@ -158,7 +165,7 @@ export function FixedScheduleForm({
           </button>
         </div>
       ) : (
-        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-[repeat(4,minmax(0,1fr))_auto]">
+        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-[repeat(6,minmax(0,1fr))_auto]">
           <label className="text-xs font-medium text-text-muted">
             First day
             <select
@@ -216,6 +223,38 @@ export function FixedScheduleForm({
               defaultValue={fixedSlotIds[1] ?? ''}
               className="mt-1 h-8 w-full rounded-xl border border-border bg-surface px-2 text-xs text-text-primary disabled:cursor-not-allowed disabled:opacity-60"
               disabled={disabled || !secondSessionAvailable}
+            >
+              <option value="">Not fixed</option>
+              {slots.map((slot) => (
+                <option key={slot.id} value={slot.id}>
+                  {slot.name} ({formatClock(slot.starts_at)}–{formatClock(slot.ends_at)})
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="text-xs font-medium text-text-muted">
+            Third day
+            <select
+              name="thirdWorkingDayId"
+              defaultValue={thirdSavedDayId}
+              className="mt-1 h-8 w-full rounded-xl border border-border bg-surface px-2 text-xs text-text-primary disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={disabled || !thirdSessionAvailable}
+            >
+              <option value="">Not fixed</option>
+              {days.map((day) => (
+                <option key={day.id} value={day.id}>
+                  {formatDay(day.day_of_week)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="text-xs font-medium text-text-muted">
+            Third session
+            <select
+              name="thirdTimeSlotId"
+              defaultValue={fixedSlotIds[2] ?? ''}
+              className="mt-1 h-8 w-full rounded-xl border border-border bg-surface px-2 text-xs text-text-primary disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={disabled || !thirdSessionAvailable}
             >
               <option value="">Not fixed</option>
               {slots.map((slot) => (

@@ -320,6 +320,19 @@ export async function scheduleAllocationSessionAction(
   return { status: 'success', message: 'Session placed and locked on the timetable.' };
 }
 
+export async function combineMatchingUnitsAction(formData: FormData): Promise<void> {
+  await requireHodAccess();
+  const academicPeriodId = sessionIdSchema.safeParse(formData.get('academicPeriodId'));
+  if (!academicPeriodId.success) throw new Error('Invalid Academic Period.');
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc('merge_matching_unit_offerings', {
+    p_academic_period_id: academicPeriodId.data,
+  });
+  if (error) throw new Error(error.message);
+  refreshEditor();
+}
+
 export async function unscheduleSessionAction(formData: FormData): Promise<void> {
   await requireHodAccess();
   const id = sessionIdSchema.safeParse(formData.get('sessionId'));

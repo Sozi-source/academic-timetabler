@@ -1,9 +1,9 @@
 import Link from 'next/link';
-import { AlertTriangle, History, Lock, LockOpen, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, GitMerge, History, Lock, LockOpen, ShieldCheck } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
-import { bulkLockTimetableSessionsAction, undoLastTimetableEditAction } from './actions';
+import { bulkLockTimetableSessionsAction, combineMatchingUnitsAction, undoLastTimetableEditAction } from './actions';
 import { ScheduleAllocationDialog } from './schedule-allocation-dialog';
 import { SessionEditorCard } from './session-editor-card';
 import type { EditorData } from './types';
@@ -75,9 +75,23 @@ export function TimetableEditorWorkspace({
                 These allocations are not yet placed on the grid. Click <strong>Place on Timetable</strong> to assign their Day, Slot, and Room directly from your physical master timetable.
               </p>
             </div>
-            <Link href="/timetable/generator" className="text-xs font-semibold text-primary hover:underline">
-              Review generator diagnosis
-            </Link>
+            <div className="flex items-center gap-3">
+              <form action={combineMatchingUnitsAction}>
+                <input type="hidden" name="academicPeriodId" value={academicPeriodId} />
+                <Button
+                  type="submit"
+                  variant="outline"
+                  size="sm"
+                  leadingIcon={<GitMerge className="size-3.5" />}
+                  title="Combines unallocated units across cohorts that share a canonical title — an HOD-approved equivalence (see Unit equivalence review) or an exact-normalized title — into one shared class."
+                >
+                  Combine matching units
+                </Button>
+              </form>
+              <Link href="/timetable/generator" className="text-xs font-semibold text-primary hover:underline">
+                Review generator diagnosis
+              </Link>
+            </div>
           </div>
           <div className="mt-3.5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {data.missingAllocations.map((allocation) => (

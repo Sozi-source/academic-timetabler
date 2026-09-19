@@ -132,6 +132,7 @@ export function ScheduleAllocationDialog({
 
     let cohortClash: {
       cohortCode: string;
+      ownerCohortCode: string;
       unitCode: string;
       unitName: string;
       trainerName: string;
@@ -147,6 +148,7 @@ export function ScheduleAllocationDialog({
           const cohortCode = clashingPartner?.code ?? session.cohortCode;
           cohortClash = {
             cohortCode,
+            ownerCohortCode: session.cohortCode,
             unitCode: session.unitCode,
             unitName: session.unitName,
             trainerName: session.trainerName,
@@ -413,11 +415,10 @@ export function ScheduleAllocationDialog({
               </div>
 
               <div className="flex items-center gap-2 rounded-xl border border-primary/20 bg-primary-soft/30 p-3 text-xs">
+                <input type="hidden" name="isLocked" value={isLocked ? 'true' : 'false'} />
                 <input
                   type="checkbox"
                   id={`lock-${allocation.id}`}
-                  name="isLocked"
-                  value="true"
                   checked={isLocked}
                   onChange={(e) => setIsLocked(e.target.checked)}
                   className="size-4 rounded border-border-strong text-primary accent-primary focus:ring-primary"
@@ -447,6 +448,9 @@ export function ScheduleAllocationDialog({
                       <>
                         Cohort <strong>{conflicts.cohortClash.cohortCode}</strong> already has{' '}
                         <strong>{conflicts.cohortClash.unitCode} {conflicts.cohortClash.unitName}</strong> with {conflicts.cohortClash.trainerName} in {conflicts.cohortClash.roomName} at this time.
+                        {conflicts.cohortClash.ownerCohortCode !== conflicts.cohortClash.cohortCode ? (
+                          <> That session is a shared class led by <strong>{conflicts.cohortClash.ownerCohortCode}</strong>.</>
+                        ) : null}
                       </>
                     )}
                   </p>

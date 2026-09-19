@@ -6,6 +6,7 @@ import { getAuthenticatedProfile } from '@/features/auth/queries';
 import { getTimetableEnabledAllocations } from '@/features/teaching-allocations/queries';
 import { createClient } from '@/lib/supabase/server';
 
+import { loadParticipantResolver } from './participant-integrity';
 import type { EditorData, EditorSession } from './types';
 
 type Relation<T> = T | T[] | null;
@@ -17,6 +18,8 @@ export const getTimetableEditorData = cache(async (
   academicPeriodId: string,
 ): Promise<EditorData> => {
   const supabase = await createClient();
+
+  const participantResolver = await loadParticipantResolver(supabase, academicPeriodId);
 
   const [
     profile,
@@ -117,10 +120,19 @@ export const getTimetableEditorData = cache(async (
     const trainer = first(row.trainers as Relation<{ id: string; full_name: string; normal_weekly_hours: number | string }>);
     const room = first(row.rooms as Relation<{ name: string; code: string }>);
 
-    const participantIds = Array.from(new Set([
+    const storedParticipantIds = Array.from(new Set([
       ...((row.participant_cohort_ids as string[] | null) ?? []),
       ...(cohort?.id ? [cohort.id] : []),
     ]));
+    // Ignore cohorts that no longer hold a live unit offering for this shared class —
+    // a stale entry here is reported to the HOD as a phantom "cohort already has" clash.
+    const participantIds = cohort?.id
+      ? participantResolver.sanitize(
+          cohort.id,
+          participantResolver.offeringIdForAllocation(row.teaching_allocation_id),
+          storedParticipantIds,
+        )
+      : storedParticipantIds;
     const participantCohorts = participantIds
       .map((id) => cohortDirectory.get(id))
       .filter((participant): participant is {
@@ -173,10 +185,14 @@ export const getTimetableEditorData = cache(async (
     const expectedSessionCount = Number(allocation.weeklySessions);
     const missingSessionCount = Math.max(0, expectedSessionCount - activeSessionCount);
 
-    const participantIds = Array.from(new Set([
-      ...(allocation.participantCohortIds ?? []),
+    const participantIds = participantResolver.sanitize(
       allocation.cohortId,
-    ]));
+      participantResolver.offeringIdForAllocation(allocation.id),
+      Array.from(new Set([
+        ...(allocation.participantCohortIds ?? []),
+        allocation.cohortId,
+      ])),
+    );
     const participantCohorts = participantIds
       .map((id) => {
         const c = cohortDirectory.get(id);

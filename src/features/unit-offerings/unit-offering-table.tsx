@@ -21,6 +21,10 @@ type StateFilter =
   | 'active'
   | 'disabled';
 
+// Opens on the actionable subset (pending review / draft) rather than
+// everything at once — see the `state` useState below.
+const DEFAULT_STATE_FILTER: StateFilter = 'draft';
+
 function normalize(value: string | null | undefined) {
   return value?.trim().toLocaleLowerCase() ?? '';
 }
@@ -62,11 +66,38 @@ function stateClass(offering: UnitOffering) {
   return 'border-border bg-surface-subtle text-text-secondary';
 }
 
+/**
+ * Lower sorts first. Units still needing a decision surface at the top of
+ * the table by default so the reviewer never has to hunt for them among
+ * units that are already settled (Active / In Timetable / Dropped).
+ */
+function statePriority(offering: UnitOffering): number {
+  const label = stateLabel(offering);
+  switch (label) {
+    case 'Review required':
+    case 'Draft':
+      return 0;
+    case 'Active':
+    case 'In Timetable':
+      return 1;
+    case 'Disabled':
+      return 2;
+    case 'Dropped':
+      return 3;
+    default:
+      return 4;
+  }
+}
+
 export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
   const [search, setSearch] = useState('');
   const [programmeId, setProgrammeId] = useState('all');
   const [cohortId, setCohortId] = useState('all');
-  const [state, setState] = useState<StateFilter>('all');
+  // Default to the actionable view: units still needing a decision. "All
+  // states" (including settled Active/In Timetable/Dropped units) is one
+  // click away via the filter, but isn't the default so the page doesn't
+  // open crowded with units that need no attention.
+  const [state, setState] = useState<StateFilter>(DEFAULT_STATE_FILTER);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const programmes = useMemo(() => {
@@ -134,8 +165,39 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
         (cohortId === 'all' || offering.cohortId === cohortId) &&
         matchesState
       );
+    }).sort((first, second) => {
+      const priorityDiff = statePriority(first) - statePriority(second);
+      if (priorityDiff !== 0) return priorityDiff;
+      return (first.unit?.name ?? '').localeCompare(second.unit?.name ?? '');
     });
   }, [cohortId, offerings, programmeId, search, state]);
+
+  // Compact status breakdown for the currently selected programme/cohort,
+  // independent of the state filter — lets the reviewer see the full shape
+  // of the list (e.g. "12 pending · 6 active · 3 dropped") without having
+  // to switch the filter back and forth to count them.
+  const stateCounts = useMemo(() => {
+    const scoped = offerings.filter((offering) => {
+      const programme = offering.cohort?.programme ?? offering.unit?.programme;
+      return (
+        (programmeId === 'all' || programme?.id === programmeId) &&
+        (cohortId === 'all' || offering.cohortId === cohortId)
+      );
+    });
+
+    let pending = 0;
+    let settled = 0;
+    let dropped = 0;
+
+    for (const offering of scoped) {
+      const label = stateLabel(offering);
+      if (label === 'Review required' || label === 'Draft') pending += 1;
+      else if (label === 'Dropped') dropped += 1;
+      else settled += 1;
+    }
+
+    return { total: scoped.length, pending, settled, dropped };
+  }, [cohortId, offerings, programmeId]);
 
   const visibleIds = useMemo(() => filtered.map((o) => o.id), [filtered]);
   const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.includes(id));
@@ -153,13 +215,13 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
     Boolean(search) ||
     programmeId !== 'all' ||
     cohortId !== 'all' ||
-    state !== 'all';
+    state !== DEFAULT_STATE_FILTER;
 
   function clearFilters() {
     setSearch('');
     setProgrammeId('all');
     setCohortId('all');
-    setState('all');
+    setState(DEFAULT_STATE_FILTER);
   }
 
   return (
@@ -235,8 +297,17 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
           ) : null}
         </div>
 
-        <p className="mt-2 text-[11px] text-text-muted xl:text-xs">
-          {filtered.length} of {offerings.length} units
+        <p className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] text-text-muted xl:text-xs">
+          <span>{filtered.length} of {offerings.length} units</span>
+          {stateCounts.pending > 0 ? (
+            <span className="text-amber-700">· {stateCounts.pending} pending review</span>
+          ) : null}
+          {stateCounts.settled > 0 ? (
+            <span>· {stateCounts.settled} settled</span>
+          ) : null}
+          {stateCounts.dropped > 0 ? (
+            <span>· {stateCounts.dropped} dropped</span>
+          ) : null}
         </p>
       </section>
 

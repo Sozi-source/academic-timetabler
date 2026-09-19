@@ -26,6 +26,35 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
    - The relaxed recovery search added below only runs for the primary `no_valid_placement` path; the `no_rooms` case and the "linked fixed session" sub-case don't yet get suggestions.
    - Not build-verified: this environment's upload has no `package.json`/`tsconfig`, so changes were reviewed manually (plus a brace/paren balance check) rather than compiled. Run `tsc --noEmit` before merging.
 
+### 2026-09-19: Phantom Cohort Conflicts — Authoritative Shared-Class Membership
+
+- **Context & Problem**:
+  - HOD reported the master-timetable placement dialog refusing valid slots: placing Agriculture for `CHN-JAN-MAR-2025` was blocked by "Cohort Conflict: CHN-JAN-MAR-2025 already has CHN 2207 Introduction to Nutrition Assessment and Surveillance", and placing Industrial Organization for `DHN-MAY-2024` on Tuesday 10:30 was blocked by "DHN 3104 Diet Therapy III" — neither cohort takes the blocking unit.
+  - **Root cause**: shared-class membership is denormalised into `teaching_allocations.participant_cohort_ids` and `scheduled_sessions.participant_cohort_ids`. Nothing propagated membership changes (unit-offering drops/withdrawals/exclusions, cohort merges, re-imports, cross-stage registration repairs) back into those arrays: `refresh_shared_class_participant_context()` was only ever invoked by hand inside one-off migrations, and there was no trigger on `teaching_offering_participants` or on `unit_offerings` status changes. Worse, `resolve_participant_cohort_ids()` accepted **every** `teaching_offering_participants` row for an offering with no check that the cohort still held a live unit offering. A cohort that had dropped a unit therefore stayed inside every session's participant array and collided with every future placement. The prior DNDT / CHN-MAY-2025 / DND-SEP-2025 "correct participants" migrations were per-cohort symptom repairs of this same defect.
+  - Secondary defects found in the same path: (a) the cohort-clash message reported the *owning* cohort of the clashing session rather than the cohort that actually overlapped, so the text named a cohort/unit pairing that does not exist; (b) inflated `combined_cohort_size` from phantom participants could trip the room-capacity guard; (c) in `schedule-allocation-dialog.tsx`, unchecking "Hard-fix / Lock this session immediately" submitted nothing, and `formData.get('isLocked') ?? 'true'` re-defaulted it to locked.
+- **Architectural Solutions & Changes**:
+  - New migration `20260919160000_authoritative_participant_cohort_conflicts.sql`:
+    - `public.cohort_has_live_unit_offering()` / `public.cohort_offerings_are_managed()` — authoritative membership predicates (offering `status in (draft,active)`, `is_timetable_enabled`, `approval_status = approved`, `selection_state = included`), matching the gate already used by `getTimetableEnabledAllocations`.
+    - `public.resolve_participant_cohort_ids()` now filters participants through those predicates. Cohorts with no unit offerings at all in the period are treated as unmanaged (legacy/manual shared classes) and keep their historical membership — deliberately conservative, so no working shared class is silently dissolved.
+    - Triggers `teaching_offering_participants_propagate_membership` and `unit_offerings_propagate_membership` refresh participant context automatically; both swallow refresh failures as warnings so membership sync can never block the drop/approval operation that triggered it.
+    - One-off repair of drifted data. **Shrink-only by construction**: allocations are only rewritten when the new set is a subset of the stored set, and sessions are intersected with live membership, so deliberate standalone/subset placements made through `target_participant_cohort_ids` survive and no new conflict can be introduced by the repair itself.
+    - `schedule_allocation_session_safely()` and `validate_scheduled_session_conflicts()` now resolve the clash via a `lateral` intersection and name the cohort that genuinely overlaps, adding "That session is a shared class led by X" when the owner differs.
+    - `public.audit_phantom_session_participants(academic_period_id)` for before/after verification and ongoing monitoring.
+  - `src/features/timetable-editor/participant-integrity.ts` (new): mirrors the SQL resolution in TypeScript so the editor UI stops trusting stale arrays even before the migration runs. `sanitize()` never widens a stored set.
+  - `src/features/timetable-editor/queries.ts`: session and unplaced-allocation participant lists are sanitized through the resolver.
+  - `src/features/timetable-editor/actions.ts`: `diagnoseScheduleClash` resolves both sides through the resolver and reports the shared-class owner.
+  - `src/features/timetable-editor/schedule-allocation-dialog.tsx`: clash panel names the owning cohort; lock state submitted via a hidden field so "unlocked" placements are honoured.
+- **Files Modified**:
+  - `supabase/migrations/20260919160000_authoritative_participant_cohort_conflicts.sql` (new)
+  - `src/features/timetable-editor/participant-integrity.ts` (new)
+  - `src/features/timetable-editor/queries.ts`
+  - `src/features/timetable-editor/actions.ts`
+  - `src/features/timetable-editor/schedule-allocation-dialog.tsx`
+  - `CHANGES.md`
+- **Verification Evidence**:
+  - Not build-verified in this environment (no installed `node_modules`): the four TypeScript/TSX files were parse-checked with esbuild and reviewed manually; the SQL was reviewed and dollar-quote/`begin`-`commit` balanced. Run `npm run check` and `npm test`, then `supabase db push`, before merging.
+  - Post-deploy verification: `select * from public.audit_phantom_session_participants('<academic_period_id>');` should return zero rows, and the two reported placements should show "Slot is completely available".
+
 ### 2026-09-19: Timetable Generator Pipeline Verification, Fixed-Day Scoping & Contract Reconciliation
 
 - **Context & Problem**:

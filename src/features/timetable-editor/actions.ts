@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { createClient } from '@/lib/supabase/server';
 
+import { loadParticipantResolver } from './participant-integrity';
 import type { EditorActionState } from './types';
 import { bulkLockSchema, moveSessionSchema, scheduleAllocationSchema, sessionIdSchema } from './validation';
 
@@ -133,6 +134,13 @@ async function diagnoseScheduleClash(
 
     if (!allocation) return params.fallbackError;
 
+    // Authoritative shared-class membership: a cohort that has dropped the unit must not
+    // be reported as clashing, whichever stale array it still appears in.
+    const participantResolver = await loadParticipantResolver(
+      supabase,
+      allocation.academic_period_id,
+    );
+
     const { data: startSlot } = await supabase
       .from('time_slots')
       .select('starts_at, ends_at')
@@ -150,34 +158,23 @@ async function diagnoseScheduleClash(
     const targetStart = startSlot.starts_at;
     const targetEnd = endSlot.ends_at;
 
-    const allParticipantIds = new Set<string>();
-    if (params.participantCohortIds && params.participantCohortIds.length > 0) {
-      params.participantCohortIds.forEach((id: string) => allParticipantIds.add(id));
-      if (allocation.cohort_id) allParticipantIds.add(allocation.cohort_id);
-    } else {
-      if (allocation.cohort_id) allParticipantIds.add(allocation.cohort_id);
-      if (Array.isArray(allocation.participant_cohort_ids)) {
-        allocation.participant_cohort_ids.forEach((id: string) => allParticipantIds.add(id));
-      }
-
-      if (allocation.teaching_offering_id) {
-        const { data: participants } = await supabase
-          .from('teaching_offering_participants')
-          .select('cohort_id')
-          .eq('teaching_offering_id', allocation.teaching_offering_id);
-        participants?.forEach((p) => {
-          if (p.cohort_id) allParticipantIds.add(p.cohort_id);
-        });
-      }
-    }
-
-    const participantIdArray = Array.from(allParticipantIds);
+    const participantIdArray =
+      params.participantCohortIds && params.participantCohortIds.length > 0
+        ? participantResolver.sanitize(
+            allocation.cohort_id,
+            allocation.teaching_offering_id,
+            Array.from(new Set([...params.participantCohortIds, allocation.cohort_id])),
+          )
+        : Array.from(
+            participantResolver.resolve(allocation.cohort_id, allocation.teaching_offering_id),
+          );
 
     const { data: overlappingSessions } = await supabase
       .from('scheduled_sessions')
       .select(`
         id,
         cohort_id,
+        teaching_allocation_id,
         trainer_id,
         room_id,
         participant_cohort_ids,
@@ -201,10 +198,13 @@ async function diagnoseScheduleClash(
 
     // Check cohort clash
     for (const session of validOverlapping) {
-      const sessionCohortIds = new Set<string>([
-        session.cohort_id,
-        ...(Array.isArray(session.participant_cohort_ids) ? session.participant_cohort_ids : []),
-      ]);
+      const sessionCohortIds = new Set<string>(
+        participantResolver.sanitize(
+          session.cohort_id,
+          participantResolver.offeringIdForAllocation(session.teaching_allocation_id),
+          Array.isArray(session.participant_cohort_ids) ? session.participant_cohort_ids : [],
+        ),
+      );
 
       for (const targetCohortId of participantIdArray) {
         if (sessionCohortIds.has(targetCohortId)) {
@@ -222,10 +222,16 @@ async function diagnoseScheduleClash(
           const roomName = getRelVal(session.rooms, 'name');
           const roomPart = roomName ? ` in ${roomName}` : '';
 
+          const ownerCode = getRelVal(session.cohorts, 'code');
+          const sharedPart =
+            ownerCode && ownerCode !== clashingCohortCode
+              ? ` That session is a shared class led by ${ownerCode}.`
+              : '';
+
           if (isSharedPartner) {
-            return `Cohort clash: Shared partner cohort "${clashingCohortCode}" (participating in this unit) already has ${unitCode} (${unitName}) with ${trainerName}${roomPart} at this time. All participating cohorts must be free.`;
+            return `Cohort clash: Shared partner cohort "${clashingCohortCode}" (participating in this unit) already has ${unitCode} (${unitName}) with ${trainerName}${roomPart} at this time. All participating cohorts must be free.${sharedPart}`;
           }
-          return `Cohort clash: Cohort "${clashingCohortCode}" already has ${unitCode} (${unitName}) with ${trainerName}${roomPart} at this time.`;
+          return `Cohort clash: Cohort "${clashingCohortCode}" already has ${unitCode} (${unitName}) with ${trainerName}${roomPart} at this time.${sharedPart}`;
         }
       }
     }

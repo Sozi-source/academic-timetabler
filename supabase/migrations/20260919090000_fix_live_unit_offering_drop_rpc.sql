@@ -343,6 +343,26 @@ begin
   from public.teaching_allocations
   where id = new.teaching_allocation_id;
 
+  -- If the referenced allocation is missing or inactive, check if an active partner allocation can back this session
+  if selected_allocation.id is null or selected_allocation.status not in ('draft', 'active') or not selected_allocation.is_timetable_enabled then
+    select a.* into selected_allocation
+    from public.teaching_allocations a
+    where a.academic_period_id = new.academic_period_id
+      and a.unit_id = coalesce(new.unit_id, selected_allocation.unit_id)
+      and (
+        a.cohort_id = any(coalesce(new.participant_cohort_ids, '{}'::uuid[]))
+        or a.cohort_id = new.cohort_id
+      )
+      and a.status in ('draft', 'active')
+      and a.is_timetable_enabled = true
+    order by case a.status when 'active' then 1 else 2 end, a.updated_at desc
+    limit 1;
+
+    if selected_allocation.id is not null then
+      new.teaching_allocation_id := selected_allocation.id;
+    end if;
+  end if;
+
   if selected_allocation.id is null then
     raise exception using errcode = 'P0002', message = 'Teaching allocation not found';
   end if;
@@ -535,6 +555,26 @@ begin
   end if;
 
   select * into selected_allocation from public.teaching_allocations where id = new.teaching_allocation_id;
+  -- If the referenced allocation is missing or inactive, check if an active partner allocation can back this session
+  if selected_allocation.id is null or selected_allocation.status not in ('draft', 'active') or not selected_allocation.is_timetable_enabled then
+    select a.* into selected_allocation
+    from public.teaching_allocations a
+    where a.academic_period_id = new.academic_period_id
+      and a.unit_id = coalesce(new.unit_id, selected_allocation.unit_id)
+      and (
+        a.cohort_id = any(coalesce(new.participant_cohort_ids, '{}'::uuid[]))
+        or a.cohort_id = new.cohort_id
+      )
+      and a.status in ('draft', 'active')
+      and a.is_timetable_enabled = true
+    order by case a.status when 'active' then 1 else 2 end, a.updated_at desc
+    limit 1;
+
+    if selected_allocation.id is not null then
+      new.teaching_allocation_id := selected_allocation.id;
+    end if;
+  end if;
+
   if selected_allocation.id is null then
     raise exception using errcode = 'P0002', message = 'Teaching allocation not found';
   end if;

@@ -21,6 +21,19 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
    - Clinical Rotation (`CHN 1308`, `CND 2103`, `DHN 1306`, `DND 2103`) — clinical placement; no KNEC lecture syllabus.
    - Medical Terminologies (`CCU 1113`, `DHN 1301`) — no standalone outline or scheme found in provided materials.
 
+### 2026-09-19: Scheduled Session Lifecycle Decoupling & Inactive Session Validation
+
+- **Context & Problem**:
+  - When decoupling shared unit offerings (e.g. dropping *Agricultural Production* from `CHN MAY 25`), scheduled session triggers threw:
+    `ERROR P0001: Only draft or active teaching allocations may be scheduled`.
+  - Root Cause:
+    1. Shared sessions originally attached to the dropping cohort's allocation retained `session.teaching_allocation_id` pointing to the dropping cohort. When that allocation was suspended, any subsequent update to the shared session failed validation because the session referenced a suspended allocation.
+    2. `validate_scheduled_session_relationships()` and `validate_pending_scheduled_session()` lacked an immediate bypass for `new.status IN ('cancelled', 'archived')`, attempting full relationship validation even when cancelling a session.
+- **Architectural Solutions & Changes**:
+  - Updated `validate_scheduled_session_relationships()` and `validate_pending_scheduled_session()` to return `NEW` immediately with `conflict_state = 'clear'` when `new.status IN ('cancelled', 'archived')`.
+  - Updated `set_unit_offering_approval()` to re-link shared sessions to the remaining partner cohort's draft/active allocation and decouple sessions BEFORE suspending the dropping cohort's allocation.
+  - Delivered via migration `supabase/migrations/20260919090000_fix_live_unit_offering_drop_rpc.sql`.
+
 ### 2026-09-18: Enterprise Unit Offering Lifecycle Sync & Unique Constraint Collision Resolution
 
 - **Context & Problem**:

@@ -31,6 +31,54 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
      - Option B: a near-term planning window (current period + the next one) stays editable; only periods further out are locked.
    - Likely implementation shape once decided: tighten the period-status check already present in `validate_scheduled_session_relationships()` / `validate_pending_scheduled_session()` (currently `not in ('planned','active')`, fixed by `20260919160000`) and the equivalent app-layer guards in `unit_offerings` approval/placement actions, rather than a new mechanism from scratch.
 
+### 2026-09-19: Timetable Editor Button Sizing & Compact Typography Optimization (Zero-Truncation Fix)
+
+- **Context & Problem**:
+  - In the 5-day grid view on laptops and standard screens, buttons in the session card footer truncated to "M..." and "Quic..." due to `Button` component responsive overrides (`xl:px-3`, `xl:text-xs`, `gap-2`) taking excessive horizontal width, combined with 10-character text in "Quick Edit".
+  - Additionally, locked sessions returned `null` from `QuickEditPanel`, leaving an empty second column in the 2-column grid and constraining "Move" to 50% width even when Quick Edit was hidden.
+- **Architectural Solutions & Changes**:
+  - **Uniform Card Height Equalization (`session-editor-card.tsx`)**:
+    - Applied uniform `min-h-[255px]` on the root card article with `justify-between` and `mt-auto` on the action footer, guaranteeing all cards in the grid align horizontally at the exact same base line.
+    - Added an invisible header spacer (`<div className="mt-1 h-3.5" aria-hidden="true" />`) on unlocked sessions matching the height of the `Hard-Fixed` badge, ensuring time slots and titles start at the exact same vertical coordinates across all cards.
+    - Set `line-clamp-2 min-h-[2.25rem]` on the unit title block so single-line titles (such as "ICT") occupy the same standard 2-line height as multi-line titles without collapsing the card.
+    - Tightened details rows spacing (`mt-2.5 space-y-1.5 pt-2.5`) for clean breathing room.
+  - **Compact Button Sizing & Constraints**:
+    - Reduced button height and padding to ultra-compact dimensions (`h-7 min-h-7 xl:min-h-7 2xl:min-h-7 px-1.5 xl:px-1.5 2xl:px-1.5 py-0 xl:py-0`).
+    - Tightened gap to `gap-1 xl:gap-1` and reduced settings icon to `size-2.5 shrink-0`.
+    - Set typography to `text-[10px] xl:text-[10px] 2xl:text-[10px] font-semibold/bold leading-none whitespace-nowrap` across all breakpoints, preventing larger desktop overrides from forcing truncation.
+  - **Text Shortening & Locked Session Handling**:
+    - Shortened Quick Edit label from `"Quick Edit"` to **`"Quick"`** (saving ~30px of width).
+    - When `session.isLocked` is true, rendered a disabled compact `Quick` button with tooltip (`"Session is locked. Unlock in top-right to edit."`, `cursor-not-allowed opacity-50`), maintaining a consistent, balanced dual-action footer across all cards from Monday through Friday without blank gaps.
+- **Files Modified**:
+  - `src/features/timetable-editor/session-editor-card.tsx`
+  - `src/features/timetable-quick-edit/quick-edit-panel.tsx`
+  - `CHANGES.md`
+
+### 2026-09-19: Timetable Editor Session Card Sizing & Period Separation (Small Screen Optimization)
+
+- **Context & Problem**:
+  - On standard and smaller laptop screens (~200px day-column card width), the card footer buttons ("Move / Edit" and "Quick Edit") fought for limited horizontal space (~70–75px each), causing label truncation and clipping.
+  - In the card header, the "Hard-Fixed" status badge competed for space with the unit code and the lock action icon, leading to awkward truncation.
+  - Additionally, sessions within a day column lacked clear visual demarcations across academic periods (Morning, Mid-morning, Afternoon).
+- **Architectural Solutions & Changes**:
+  - **Header Structure (`session-editor-card.tsx`)**: Placed the unit code on the first line with the lock icon button on the top right, and positioned `Hard-Fixed` on its own dedicated sub-line beneath the unit code (`text-[9px] font-semibold text-primary`).
+  - **Dual Equal Footer Actions (`session-editor-card.tsx` & `quick-edit-panel.tsx`)**:
+    - Retained a full-width 2-column grid (`grid w-full grid-cols-2 gap-1.5`) reserving equal space for both actions.
+    - Shortened the primary dialog trigger button to **"Move"** (`leadingIcon={<Settings className="size-3 shrink-0" />}`, `<span className="truncate">Move</span>`) with `w-full min-w-0 truncate`.
+    - Constrained `QuickEditPanel`'s button with dense sizing (`h-8 w-full min-w-0 max-w-full truncate text-[11px] leading-none whitespace-nowrap overflow-hidden`) so both buttons cleanly fit narrow card widths without truncation or fighting for space.
+    - Cleaned up duplicate/corrupted nested markup fragments at the bottom of `session-editor-card.tsx`.
+  - **Academic Period Demarcation (`editor-workspace.tsx`)**:
+    - Grouped sessions into periods: Morning (before 10:30), Mid-morning (10:30–13:59), and Afternoon (14:00 onwards).
+    - Rendered `SessionPeriodSection` with compact uppercase dividers and count badges, suppressing empty periods to keep days compact.
+- **Files Modified**:
+  - `src/features/timetable-editor/session-editor-card.tsx`
+  - `src/features/timetable-editor/editor-workspace.tsx`
+  - `src/features/timetable-quick-edit/quick-edit-panel.tsx`
+  - `CHANGES.md`
+- **Verification Evidence**:
+  - `npm test`: 117 test files passed, 598 tests passed (100%).
+  - `npm run check` (`typecheck && lint && build`): All TypeScript types, ESLint rules, and Next.js Turbopack production build succeeded with zero errors.
+
 ### 2026-09-19: Orphaned Allocations Left Behind by Shared-Class Merges
 
 - **Context & Problem**:

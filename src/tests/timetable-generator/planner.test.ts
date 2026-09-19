@@ -1330,5 +1330,152 @@ describe('generateTimetablePlan', () => {
     expect(flex1Session?.workingDayId).not.toBe('day-1');
     expect(flex2Session?.workingDayId).not.toBe('day-1');
   });
+
+  it('retains previous venue when an unlocked session is regenerated on the same day and time slot', () => {
+    const input = createPlannerInput({
+      allocations: [
+        {
+          ...baseAllocation,
+          id: 'alloc-retain',
+          fixedWorkingDayId: 'day-1',
+          fixedTimeSlotIds: ['slot-1'],
+          preferredRoomId: null,
+        },
+      ],
+    });
+
+    input.previousSessions = [
+      {
+        id: 'prev-session-1',
+        academicPeriodId: 'period-1',
+        teachingAllocationId: 'alloc-retain',
+        cohortId: 'cohort-1',
+        unitId: 'unit-1',
+        trainerId: 'trainer-1',
+        workingDayId: 'day-1',
+        startTimeSlotId: 'slot-1',
+        endTimeSlotId: 'slot-2',
+        roomId: 'room-1',
+        sessionNumber: 1,
+        deliveryMode: 'theory',
+        status: 'draft',
+        source: 'generator',
+        conflictState: 'clear',
+        isLocked: false,
+      },
+    ];
+
+    const result = generateTimetablePlan(input);
+
+    expect(result.unscheduled).toHaveLength(0);
+    expect(result.sessions).toHaveLength(1);
+    expect(result.sessions[0].workingDayId).toBe('day-1');
+    expect(result.sessions[0].startTimeSlotId).toBe('slot-1');
+    expect(result.sessions[0].roomId).toBe('room-1');
+  });
+
+  it('does NOT retain previous venue when a session is moved to a different day or time slot', () => {
+    const input = createPlannerInput({
+      allocations: [
+        {
+          ...baseAllocation,
+          id: 'alloc-moved',
+          fixedWorkingDayId: 'day-2',
+          fixedTimeSlotIds: ['slot-1'],
+          preferredRoomId: null,
+        },
+      ],
+    });
+
+    input.previousSessions = [
+      {
+        id: 'prev-session-1',
+        academicPeriodId: 'period-1',
+        teachingAllocationId: 'alloc-moved',
+        cohortId: 'cohort-1',
+        unitId: 'unit-1',
+        trainerId: 'trainer-1',
+        workingDayId: 'day-1',
+        startTimeSlotId: 'slot-1',
+        endTimeSlotId: 'slot-2',
+        roomId: 'room-1',
+        sessionNumber: 1,
+        deliveryMode: 'theory',
+        status: 'draft',
+        source: 'generator',
+        conflictState: 'clear',
+        isLocked: false,
+      },
+    ];
+
+    const result = generateTimetablePlan(input);
+
+    expect(result.unscheduled).toHaveLength(0);
+    expect(result.sessions).toHaveLength(1);
+    expect(result.sessions[0].workingDayId).toBe('day-2');
+    expect(result.sessions[0].startTimeSlotId).toBe('slot-1');
+    expect(result.sessions[0].roomId).toBeNull();
+  });
+
+  it('avoids assigning previous room if it conflicts with an existing locked session in that room', () => {
+    const input = createPlannerInput({
+      allocations: [
+        {
+          ...baseAllocation,
+          id: 'alloc-flex',
+          preferredRoomId: null,
+        },
+      ],
+    });
+
+    // Session already locked in room-1 on day-1, slot-1
+    input.existingSessions = [
+      {
+        id: 'locked-session',
+        academicPeriodId: 'period-1',
+        teachingAllocationId: 'alloc-locked',
+        cohortId: 'cohort-2',
+        unitId: 'unit-2',
+        trainerId: 'trainer-2',
+        workingDayId: 'day-1',
+        startTimeSlotId: 'slot-1',
+        endTimeSlotId: 'slot-2',
+        roomId: 'room-1',
+        sessionNumber: 1,
+        deliveryMode: 'theory',
+        status: 'locked',
+        source: 'manual',
+        conflictState: 'clear',
+        isLocked: true,
+      },
+    ];
+
+    input.previousSessions = [
+      {
+        id: 'prev-flex',
+        academicPeriodId: 'period-1',
+        teachingAllocationId: 'alloc-flex',
+        cohortId: 'cohort-1',
+        unitId: 'unit-1',
+        trainerId: 'trainer-1',
+        workingDayId: 'day-1',
+        startTimeSlotId: 'slot-1',
+        endTimeSlotId: 'slot-2',
+        roomId: 'room-1',
+        sessionNumber: 1,
+        deliveryMode: 'theory',
+        status: 'draft',
+        source: 'generator',
+        conflictState: 'clear',
+        isLocked: false,
+      },
+    ];
+
+    const result = generateTimetablePlan(input);
+
+    expect(result.unscheduled).toHaveLength(0);
+    const roomOverlap = result.conflicts.filter((c) => c.type === 'room_overlap');
+    expect(roomOverlap).toHaveLength(0);
+  });
 });
 

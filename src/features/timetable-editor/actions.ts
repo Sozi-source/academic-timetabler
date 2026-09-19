@@ -39,6 +39,23 @@ export async function moveScheduledSessionAction(
   }
 
   const supabase = await createClient();
+
+  // If the session was hard-fixed / locked, manage the lock transparently
+  // so HOD can reassign rooms or move slots without manual unlock friction.
+  const { data: targetSession } = await supabase
+    .from('scheduled_sessions')
+    .select('is_locked, status')
+    .eq('id', parsed.data.sessionId)
+    .maybeSingle();
+
+  const wasLocked = Boolean(targetSession?.is_locked || targetSession?.status === 'locked');
+
+  if (wasLocked) {
+    await supabase.rpc('toggle_scheduled_session_lock', {
+      target_session_id: parsed.data.sessionId,
+    });
+  }
+
   const originalNotes = formData.get('originalNotes');
   const roomOnlyChange =
     formData.get('originalWorkingDayId') === parsed.data.workingDayId &&
@@ -61,6 +78,12 @@ export async function moveScheduledSessionAction(
         target_notes: parsed.data.notes ?? null,
         target_trainer_id: parsed.data.trainerId || null,
       });
+
+  if (wasLocked) {
+    await supabase.rpc('toggle_scheduled_session_lock', {
+      target_session_id: parsed.data.sessionId,
+    });
+  }
 
   if (error) {
     return { status: 'error', message: error.message };

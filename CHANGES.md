@@ -31,6 +31,33 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
      - Option B: a near-term planning window (current period + the next one) stays editable; only periods further out are locked.
    - Likely implementation shape once decided: tighten the period-status check already present in `validate_scheduled_session_relationships()` / `validate_pending_scheduled_session()` (currently `not in ('planned','active')`, fixed by `20260919160000`) and the equivalent app-layer guards in `unit_offerings` approval/placement actions, rather than a new mechanism from scratch.
 
+### 2026-09-19: Timetable Regeneration Venue Retention & Transparent Move Lock Handling
+
+- **Context & Problem**:
+  - When regenerating an existing timetable, unlocked sessions were being wiped and re-planned without preserving previously assigned venues/rooms, forcing HODs to manually reassign rooms to sessions that had not even changed days or time slots.
+  - Furthermore, attempting to edit or assign a room to a locked session inside the Move dialog threw a runtime RPC error: `"Unlock this session before assigning a room"`.
+- **Architectural Solutions & Changes**:
+  - **Venue Retention for Unmoved Sessions (`src/features/timetable-generator/`)**:
+    - `data-adapter.ts`: Updated `createAutomaticPlannerInput` to map and supply `previousSessions` (all active/draft/locked sessions present in `sourceData.existingSessions` prior to regeneration).
+    - `planner.ts`:
+      - Added `findPreviousSessionVenue`: Detects if an allocation/session was previously placed at `(workingDayId, startTimeSlotId)` with a valid, active, timetable-available room meeting cohort capacity.
+      - Updated `createCandidateSessions`: When evaluating candidate placements on an unmoved slot (`workingDayId` and `startTimeSlotId` matching the previous schedule), injects the previous room as a primary candidate alongside flexible options.
+      - Wired `previousSessions`, `cohort`, and `allRooms` into candidate generation across both the primary planning loop and displacement/relocation repair (`tryRelocationRepair`).
+      - Implemented `reconcilePreviousVenuesForUnmovedSessions`: A post-planning safeguard that verifies all unmoved sessions with unassigned rooms receive their previous venues provided no collisions exist with existing/locked sessions or other newly scheduled sessions.
+      - Ensured sessions that *were moved* (different day or time slot) do *not* retain previous venues, strictly following the unmoved retention policy.
+  - **Transparent Move Dialog Lock Handling (`src/features/timetable-editor/actions.ts`)**:
+    - In `moveScheduledSessionAction`: When an HOD saves changes to a hard-fixed / locked session, the server action automatically manages the session lock around the `assign_scheduled_session_room_safely` or `move_scheduled_session_safely` RPC call, restoring the lock state upon completion without requiring manual unlock/relock friction or throwing errors.
+  - **Unit Tests (`src/tests/timetable-generator/planner.test.ts`)**:
+    - Added tests confirming unmoved sessions retain their previous venue (`roomId`).
+    - Added tests confirming moved sessions do not retain previous venues.
+    - Added tests confirming sessions avoid room collisions when a locked session occupies the previous room.
+- **Files Modified**:
+  - `src/features/timetable-generator/planner.ts`
+  - `src/features/timetable-generator/data-adapter.ts`
+  - `src/features/timetable-editor/actions.ts`
+  - `src/tests/timetable-generator/planner.test.ts`
+  - `CHANGES.md`
+
 ### 2026-09-19: Timetable Editor Executive Header & Compact Toolbar (Zero-Clutter Refinement)
 
 - **Context & Problem**:

@@ -329,6 +329,10 @@ export function createAutomaticPlannerInput({
       })
       .map(mapExistingSession);
 
+  const previousSessions = sourceData.existingSessions
+    .filter((session) => session.status !== 'cancelled')
+    .map(mapExistingSession);
+
   return {
     academicPeriodId:
       sourceData.academicPeriod.id,
@@ -338,6 +342,7 @@ export function createAutomaticPlannerInput({
         mapAllocation,
       ),
     existingSessions,
+    previousSessions,
     workingDays:
       sourceData.workingDays.map(
         mapWorkingDay,

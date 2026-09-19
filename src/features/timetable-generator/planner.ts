@@ -65,6 +65,7 @@ export interface AutomaticPlannerInput {
   activeDepartmentId?: string | null;
   allocations: PlanningAllocation[];
   existingSessions?: PlanningSession[];
+  previousSessions?: PlanningSession[];
   workingDays: PlanningWorkingDay[];
   timeSlots: PlanningTimeSlot[];
   constraints?: PlanningConstraint[];
@@ -738,6 +739,85 @@ function getEligibleRooms({
   );
 }
 
+function findPreviousSessionVenue({
+  allocation,
+  sessionNumber,
+  workingDayId,
+  startTimeSlotId,
+  previousSessions,
+  cohort,
+  rooms,
+}: {
+  allocation: PlanningAllocation;
+  sessionNumber: number;
+  workingDayId: string;
+  startTimeSlotId: string;
+  previousSessions?: PlanningSession[];
+  cohort?: PlanningCohort;
+  rooms: PlanningRoom[];
+}): PlanningRoom | null {
+  if (!previousSessions || previousSessions.length === 0) {
+    return null;
+  }
+
+  const matchingSlotSessions = previousSessions.filter(
+    (s) =>
+      s.workingDayId === workingDayId &&
+      s.startTimeSlotId === startTimeSlotId &&
+      s.roomId !== null,
+  );
+
+  if (matchingSlotSessions.length === 0) {
+    return null;
+  }
+
+  // 1. Exact match on allocation and session number
+  let matched = matchingSlotSessions.find(
+    (s) =>
+      s.teachingAllocationId === allocation.id &&
+      s.sessionNumber === sessionNumber,
+  );
+
+  // 2. Match on same allocation at this day & slot
+  if (!matched) {
+    matched = matchingSlotSessions.find(
+      (s) => s.teachingAllocationId === allocation.id,
+    );
+  }
+
+  // 3. Fallback: match by cohort and unit at this day & slot
+  if (!matched) {
+    matched = matchingSlotSessions.find(
+      (s) =>
+        s.cohortId === allocation.cohortId &&
+        s.unitId === allocation.unitId,
+    );
+  }
+
+  if (!matched || !matched.roomId) {
+    return null;
+  }
+
+  const room = rooms.find(
+    (r) =>
+      r.id === matched?.roomId &&
+      r.isActive &&
+      r.isTimetableAvailable,
+  );
+
+  if (!room) {
+    return null;
+  }
+
+  const requiredCapacity =
+    allocation.combinedCohortSize ?? cohort?.actualSize ?? 0;
+  if (requiredCapacity > 0 && room.capacity < requiredCapacity) {
+    return null;
+  }
+
+  return room;
+}
+
 function createCandidateSessions({
   request,
   workingDays,
@@ -745,6 +825,9 @@ function createCandidateSessions({
   rooms,
   selectedSessions,
   allowSameAllocationMultipleSessionsPerDay,
+  previousSessions,
+  cohort,
+  allRooms,
 }: {
   request: SessionRequest;
   workingDays: PlanningWorkingDay[];
@@ -752,6 +835,9 @@ function createCandidateSessions({
   rooms: Array<PlanningRoom | null>;
   selectedSessions: PlanningSession[];
   allowSameAllocationMultipleSessionsPerDay: boolean;
+  previousSessions?: PlanningSession[];
+  cohort?: PlanningCohort;
+  allRooms?: PlanningRoom[];
 }): PlanningSession[] {
   const {
     allocation,
@@ -835,7 +921,23 @@ function createCandidateSessions({
         continue;
       }
 
-      for (const room of candidateRooms) {
+      const previousRoom = allRooms && previousSessions
+        ? findPreviousSessionVenue({
+            allocation,
+            sessionNumber,
+            workingDayId: workingDay.id,
+            startTimeSlotId: range.startTimeSlotId,
+            previousSessions,
+            cohort,
+            rooms: allRooms,
+          })
+        : null;
+
+      const slotCandidateRooms = previousRoom
+        ? [previousRoom, ...candidateRooms.filter((r) => r?.id !== previousRoom.id)]
+        : candidateRooms;
+
+      for (const room of slotCandidateRooms) {
         candidates.push({
           id: createCandidateId({
             allocationId:
@@ -919,6 +1021,7 @@ function tryRelocationRepair({
   candidateLimit,
   allowSameDay,
   allocationLookup,
+  previousSessions,
 }: {
   request: SessionRequest;
   candidateScores: PlacementScoreResult[];
@@ -934,6 +1037,7 @@ function tryRelocationRepair({
   candidateLimit: number;
   allowSameDay: boolean;
   allocationLookup: Map<string, PlanningAllocation>;
+  previousSessions?: PlanningSession[];
 }): RelocationRepairResult | null {
   const selectedById = new Map(selectedSessions.map((s) => [s.id, s]));
 
@@ -1078,6 +1182,9 @@ function tryRelocationRepair({
         rooms: eligibleRooms,
         selectedSessions: activeSessionsForRelocation,
         allowSameAllocationMultipleSessionsPerDay: allowSameDay,
+        previousSessions,
+        cohort: cohorts.find((c) => c.id === alloc.cohortId),
+        allRooms: rooms,
       }).slice(0, candidateLimit);
 
       const relocationScores = scorePlacements({
@@ -1379,6 +1486,148 @@ function calculateStatistics({
   };
 }
 
+function sessionsTimeOverlap(
+  first: PlanningSession,
+  second: PlanningSession,
+  timeSlotsMap: Map<string, PlanningTimeSlot>,
+): boolean {
+  if (first.workingDayId !== second.workingDayId) {
+    return false;
+  }
+
+  const firstStart = timeSlotsMap.get(first.startTimeSlotId);
+  const firstEnd = timeSlotsMap.get(first.endTimeSlotId);
+  const secondStart = timeSlotsMap.get(second.startTimeSlotId);
+  const secondEnd = timeSlotsMap.get(second.endTimeSlotId);
+
+  if (!firstStart || !firstEnd || !secondStart || !secondEnd) {
+    return (
+      first.startTimeSlotId === second.startTimeSlotId ||
+      first.endTimeSlotId === second.endTimeSlotId
+    );
+  }
+
+  const start1 = parseTimeToMinutes(firstStart.startsAt);
+  const end1 = parseTimeToMinutes(firstEnd.endsAt);
+  const start2 = parseTimeToMinutes(secondStart.startsAt);
+  const end2 = parseTimeToMinutes(secondEnd.endsAt);
+
+  return start1 < end2 && end1 > start2;
+}
+
+export function reconcilePreviousVenuesForUnmovedSessions({
+  sessions,
+  existingSessions = [],
+  previousSessions,
+  rooms,
+  cohorts,
+  allocations,
+  timeSlots,
+}: {
+  sessions: PlanningSession[];
+  existingSessions?: PlanningSession[];
+  previousSessions?: PlanningSession[];
+  rooms: PlanningRoom[];
+  cohorts: PlanningCohort[];
+  allocations: PlanningAllocation[];
+  timeSlots: PlanningTimeSlot[];
+}): PlanningSession[] {
+  if (!previousSessions || previousSessions.length === 0) {
+    return sessions;
+  }
+
+  const availableRoomsMap = new Map(
+    rooms
+      .filter((room) => room.isActive && room.isTimetableAvailable)
+      .map((room) => [room.id, room]),
+  );
+  const cohortsMap = new Map(cohorts.map((c) => [c.id, c]));
+  const allocationsMap = new Map(allocations.map((a) => [a.id, a]));
+  const timeSlotsMap = new Map(timeSlots.map((s) => [s.id, s]));
+
+  const reconciled: PlanningSession[] = [];
+
+  for (const session of sessions) {
+    // If the session already has a room assigned, keep it
+    if (session.roomId) {
+      reconciled.push(session);
+      continue;
+    }
+
+    // Check if this session corresponds to an unmoved previous session
+    const matchingPrev = previousSessions.find((prev) => {
+      if (
+        prev.workingDayId !== session.workingDayId ||
+        prev.startTimeSlotId !== session.startTimeSlotId
+      ) {
+        return false;
+      }
+      if (!prev.roomId) {
+        return false;
+      }
+      if (prev.teachingAllocationId === session.teachingAllocationId) {
+        return (
+          prev.sessionNumber === session.sessionNumber ||
+          sessions.filter((s) => s.teachingAllocationId === session.teachingAllocationId).length === 1
+        );
+      }
+      if (prev.cohortId === session.cohortId && prev.unitId === session.unitId) {
+        return true;
+      }
+      return false;
+    });
+
+    if (!matchingPrev || !matchingPrev.roomId) {
+      reconciled.push(session);
+      continue;
+    }
+
+    const room = availableRoomsMap.get(matchingPrev.roomId);
+    if (!room) {
+      reconciled.push(session);
+      continue;
+    }
+
+    const allocation = allocationsMap.get(session.teachingAllocationId);
+    const cohort = cohortsMap.get(session.cohortId);
+    const requiredCapacity =
+      allocation?.combinedCohortSize ?? cohort?.actualSize ?? 0;
+    if (requiredCapacity > 0 && room.capacity < requiredCapacity) {
+      reconciled.push(session);
+      continue;
+    }
+
+    const candidateSession: PlanningSession = {
+      ...session,
+      roomId: room.id,
+    };
+
+    // Verify room has no conflict with any already scheduled session (including locked/existing sessions)
+    const allOtherSessions = [
+      ...existingSessions,
+      ...reconciled,
+      ...sessions.filter((s) => s.id !== session.id),
+    ];
+
+    const hasCollision = allOtherSessions.some(
+      (other) =>
+        other.id !== session.id &&
+        other.roomId === room.id &&
+        isActiveSession(other) &&
+        sessionsTimeOverlap(candidateSession, other, timeSlotsMap),
+    );
+
+    if (hasCollision) {
+      reconciled.push(session);
+      continue;
+    }
+
+    reconciled.push(candidateSession);
+  }
+
+  return reconciled;
+}
+
 export function generateTimetablePlan(
   input: AutomaticPlannerInput,
 ): AutomaticPlannerResult {
@@ -1639,6 +1888,9 @@ export function generateTimetablePlan(
         ],
         allowSameAllocationMultipleSessionsPerDay:
           allowSameDay,
+        previousSessions: input.previousSessions,
+        cohort,
+        allRooms: input.rooms,
       }).slice(
         0,
         candidateLimit,
@@ -1712,6 +1964,7 @@ export function generateTimetablePlan(
         candidateLimit,
         allowSameDay,
         allocationLookup,
+        previousSessions: input.previousSessions,
       });
 
       if (repairResult) {
@@ -1863,9 +2116,19 @@ export function generateTimetablePlan(
     );
   }
 
+  const reconciledSessions = reconcilePreviousVenuesForUnmovedSessions({
+    sessions: selectedSessions,
+    existingSessions,
+    previousSessions: input.previousSessions,
+    rooms: input.rooms,
+    cohorts: input.cohorts,
+    allocations: input.allocations,
+    timeSlots: input.timeSlots,
+  });
+
   const sessions = [
     ...existingSessions,
-    ...selectedSessions,
+    ...reconciledSessions,
   ];
 
   const conflicts =
@@ -1894,7 +2157,7 @@ export function generateTimetablePlan(
       requestedSessionCount:
         requests.length,
       sessions:
-        selectedSessions,
+        reconciledSessions,
       unscheduledCount:
         unscheduled.length,
       conflicts,
@@ -1911,7 +2174,7 @@ export function generateTimetablePlan(
     });
 
   return {
-    sessions: selectedSessions,
+    sessions: reconciledSessions,
     unscheduled,
     conflicts,
     suggestions,

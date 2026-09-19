@@ -31,6 +31,25 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
      - Option B: a near-term planning window (current period + the next one) stays editable; only periods further out are locked.
    - Likely implementation shape once decided: tighten the period-status check already present in `validate_scheduled_session_relationships()` / `validate_pending_scheduled_session()` (currently `not in ('planned','active')`, fixed by `20260919160000`) and the equivalent app-layer guards in `unit_offerings` approval/placement actions, rather than a new mechanism from scratch.
 
+### 2026-09-19: Timetable Editor Executive Header & Compact Toolbar (Zero-Clutter Refinement)
+
+- **Context & Problem**:
+  - The top of `/timetable/editor` was cluttered with 3 stacked cards consuming vertical space before the timetable grid.
+  - Tutorial-like and wordy phrasing ("STEP 3 OF 4", "Review and edit", "Move a lesson or room only when needed — clashes are flagged automatically", "Safe editing", "Locked sessions cannot be moved or altered by the auto-generator...") created visual noise and looked unpolished.
+- **Architectural Solutions & Changes**:
+  - **Unified Executive PageHeader (`src/app/(dashboard)/timetable/editor/page.tsx`)**:
+    - Renamed page to **`Timetable Editor`** with a concise, professional description ("Interactive session placement and allocation management.").
+    - Removed the "STEP 3 OF 4" eyebrow and "Safe editing" badge.
+    - Integrated the **Academic Period** selector dropdown directly into the `PageHeader.actions` slot, completely eliminating the bulky standalone second card.
+  - **Sleek Workspace Command Toolbar (`src/features/timetable-editor/editor-workspace.tsx`)**:
+    - Removed the verbose 2-sentence explanatory paragraph.
+    - Rendered a compact, single-row metrics bar: `{totalCount} Sessions · {lockedCount} Hard-Fixed` in clean typography and pill badges.
+    - Streamlined action button labels to punchy, executive commands: `Lock All` / `Unlock All`, `Undo`, and `Generator` (with preserved query params `?academicPeriodId=...`).
+- **Files Modified**:
+  - `src/app/(dashboard)/timetable/editor/page.tsx`
+  - `src/features/timetable-editor/editor-workspace.tsx`
+  - `CHANGES.md`
+
 ### 2026-09-19: Timetable Editor Button Sizing & Compact Typography Optimization (Zero-Truncation Fix)
 
 - **Context & Problem**:

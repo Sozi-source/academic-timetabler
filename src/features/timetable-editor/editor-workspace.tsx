@@ -208,51 +208,43 @@ export function TimetableEditorWorkspace({
           items-center
           justify-between
           gap-3
-          rounded-2xl
+          rounded-xl
           border
           border-border
           bg-surface
-          p-4
-          shadow-sm
+          px-4
+          py-2.5
+          shadow-xs
         "
       >
-        {/* Left */}
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="text-sm font-bold text-text-primary">
-              {totalCount} Timetable Sessions
-            </h1>
+        {/* Left: Summary Metrics */}
+        <div className="flex items-center gap-2.5">
+          <span className="text-sm font-bold tracking-tight text-text-primary">
+            {totalCount} Sessions
+          </span>
 
-            <span
-              className="
-                inline-flex
-                items-center
-                gap-1
-                rounded-md
-                border
-                border-primary/20
-                bg-primary-soft/60
-                px-2
-                py-0.5
-                text-xs
-                font-bold
-                text-primary
-              "
-            >
-              <Lock className="size-3" />
+          <span className="text-border-strong select-none">·</span>
 
-              {lockedCount} of {totalCount} Hard-Fixed
-            </span>
-          </div>
-
-          <p className="mt-1 text-xs text-text-muted">
-            Locked sessions cannot be moved or altered by the
-            auto-generator. Moves are checked atomically
-            against clashes.
-          </p>
+          <span
+            className="
+              inline-flex
+              items-center
+              gap-1.5
+              rounded-md
+              bg-primary-soft/70
+              px-2
+              py-0.5
+              text-xs
+              font-bold
+              text-primary
+            "
+          >
+            <Lock className="size-3" />
+            {lockedCount} Hard-Fixed
+          </span>
         </div>
 
-        {/* Right */}
+        {/* Right: Actions */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Lock / unlock all */}
           {totalCount > 0 ? (
@@ -283,15 +275,15 @@ export function TimetableEditorWorkspace({
                 size="sm"
                 leadingIcon={
                   allLocked ? (
-                    <LockOpen className="size-4" />
+                    <LockOpen className="size-3.5" />
                   ) : (
-                    <Lock className="size-4" />
+                    <Lock className="size-3.5" />
                   )
                 }
               >
                 {allLocked
-                  ? 'Unlock All Sessions'
-                  : 'Lock All Sessions'}
+                  ? 'Unlock All'
+                  : 'Lock All'}
               </Button>
             </form>
           ) : null}
@@ -309,38 +301,28 @@ export function TimetableEditorWorkspace({
               variant="outline"
               size="sm"
               leadingIcon={
-                <History className="size-4" />
+                <History className="size-3.5" />
               }
             >
-              Undo last edit
+              Undo
             </Button>
           </form>
 
           {/* Generator */}
-          <Link
-            href="/timetable/generator"
-            className="
-              inline-flex
-              h-9
-              items-center
-              gap-2
-              rounded-lg
-              border
-              border-border
-              bg-surface-subtle
-              px-3
-              text-xs
-              font-semibold
-              text-text-secondary
-              transition-colors
-              hover:bg-surface
-              hover:text-text-primary
-            "
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            leadingIcon={
+              <ShieldCheck className="size-3.5" />
+            }
           >
-            <ShieldCheck className="size-4" />
-
-            Generator Workspace
-          </Link>
+            <Link
+              href={`/timetable/generator?academicPeriodId=${academicPeriodId}`}
+            >
+              Generator
+            </Link>
+          </Button>
         </div>
       </div>
 

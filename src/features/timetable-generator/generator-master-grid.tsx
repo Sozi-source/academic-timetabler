@@ -52,7 +52,12 @@ export function GeneratorMasterGrid({ preview }: { preview: GeneratorPreview }) 
                         {sessions.map((session) => (
                           <article key={session.id} className="rounded-lg border border-primary-soft bg-primary-subtle p-2 leading-4">
                             <p className="font-semibold text-text-primary">{session.unitName}</p>
-                            <p className="text-text-secondary">{session.cohortCode}</p>
+                            <p className="text-text-secondary">
+                              {session.participantCohortCodes.join(' + ')}
+                              {session.participantCohortCount > session.participantCohortCodes.length
+                                ? ` +${session.participantCohortCount - session.participantCohortCodes.length} more`
+                                : ''}
+                            </p>
                             <p className="truncate text-text-muted">{session.trainerName}</p>
                             <p className="text-text-muted">
                               {session.roomCode ?? 'No room'} · {session.startsAt.slice(0, 5)}–{session.endsAt.slice(0, 5)}

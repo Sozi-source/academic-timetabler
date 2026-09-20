@@ -152,6 +152,16 @@ export function GeneratorSessionTable({
                         <p className="mt-0.5 text-xs text-text-muted">
                           {session.cohortCode}
                         </p>
+
+                        {session.participantCohortCount > 1 ? (
+                          <p className="mt-0.5 text-xs font-medium text-primary">
+                            Shared class ·{' '}
+                            {session.participantCohortCodes.join(' + ')}
+                            {session.participantCohortCount > session.participantCohortCodes.length
+                              ? ` +${session.participantCohortCount - session.participantCohortCodes.length} more`
+                              : ''}
+                          </p>
+                        ) : null}
                       </div>
                     </div>
                   </td>

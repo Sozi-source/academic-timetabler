@@ -109,6 +109,10 @@ export interface GeneratorPreviewSession {
   cohortId: string;
   cohortCode: string;
   cohortName: string;
+  /** Every cohort this session is delivered to (primary first). */
+  participantCohortCodes: string[];
+  /** Includes cohorts outside the loaded department, so it can exceed the codes shown. */
+  participantCohortCount: number;
 
   unitId: string;
   unitCode: string;

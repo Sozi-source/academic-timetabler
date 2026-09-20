@@ -55,6 +55,43 @@ function isUuid(value: string) {
   );
 }
 
+/**
+ * A shared class must be delivered by exactly one live allocation. If the
+ * database ever holds two, the generator would place the class twice and it
+ * would collide with itself, so generation and saving stop with a clear message.
+ */
+async function findDuplicateSharedAllocationMessage(
+  academicPeriodId: string,
+): Promise<string | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc(
+    'audit_duplicate_shared_allocations',
+    { p_academic_period_id: academicPeriodId },
+  );
+
+  if (error) {
+    throw new Error(
+      `Unable to verify shared-class allocations: ${error.message}`,
+    );
+  }
+
+  const rows = (data ?? []) as Array<{
+    unit_code: string;
+    cohort_code: string;
+    keep_rank: number;
+  }>;
+
+  if (rows.length === 0) {
+    return null;
+  }
+
+  const listed = rows
+    .map((row) => `${row.unit_code} (${row.cohort_code})`)
+    .join(', ');
+
+  return `A shared class has more than one live allocation: ${listed}. Retire the duplicate (run retire_duplicate_shared_allocations) before generating or saving.`;
+}
+
 export async function clearTimetableHistoryAction(
   _previousState: GeneratorResetActionState,
   formData: FormData,
@@ -130,6 +167,18 @@ export async function generateTimetablePreviewAction(
   }
 
   try {
+    const duplicateAllocationMessage =
+      await findDuplicateSharedAllocationMessage(
+        parsed.data.academicPeriodId,
+      );
+
+    if (duplicateAllocationMessage) {
+      return {
+        status: 'error',
+        message: duplicateAllocationMessage,
+      };
+    }
+
     const sourceData =
       await getGeneratorSourceData(
         parsed.data.academicPeriodId,
@@ -536,6 +585,12 @@ export async function saveGeneratedTimetableDraftAction(
   }
 
   try {
+    const duplicateAllocationMessage =
+      await findDuplicateSharedAllocationMessage(parsed.data.academicPeriodId);
+    if (duplicateAllocationMessage) {
+      return { status: 'error', message: duplicateAllocationMessage };
+    }
+
     const sourceData = await getGeneratorSourceData(parsed.data.academicPeriodId);
     if (!sourceData) {
       return { status: 'error', message: 'The selected Academic Period could not be found.' };

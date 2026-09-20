@@ -669,6 +669,28 @@ function mapPreviewSessions({
           cohort.code,
         cohortName:
           cohort.name,
+        participantCohortCodes:
+          Array.from(
+            new Set([
+              cohort.code,
+              ...(
+                session.participantCohortIds ?? []
+              ).map(
+                (participantId) =>
+                  cohorts.get(participantId)?.code,
+              ),
+            ]),
+          ).filter(
+            (code): code is string =>
+              Boolean(code),
+          ),
+        participantCohortCount:
+          new Set([
+            cohort.id,
+            ...(
+              session.participantCohortIds ?? []
+            ),
+          ]).size,
 
         unitId:
           unit.id,

@@ -31,6 +31,22 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
      - Option B: a near-term planning window (current period + the next one) stays editable; only periods further out are locked.
    - Likely implementation shape once decided: tighten the period-status check already present in `validate_scheduled_session_relationships()` / `validate_pending_scheduled_session()` (currently `not in ('planned','active')`, fixed by `20260919160000`) and the equivalent app-layer guards in `unit_offerings` approval/placement actions, rather than a new mechanism from scratch.
 
+### 2026-09-20: Fix Overdue Attendance Banner — Daily Report Multi-Key Matching
+
+- **Context & Problem**:
+  - Trainers still saw 7 "Overdue Attendance & Reports" entries after `supabase db push` of migration `20260920150000`. Sessions correctly recorded as "Did Not Take Place" (cancelled) were re-appearing as overdue for all trainers.
+  - **Root Cause**: The lateral join in `get_trainer_daily_report_workspace` (and completeness check in `submit_trainer_daily_report_v1`) matched `class_sessions` exclusively by `scheduled_session_id`. Once migration `20260920150000` decoupled the FK (`ON DELETE SET NULL`), cancelled sessions whose `scheduled_session_id` drifted to `NULL` were invisible to the lookup — so the overdue detection treated them as completely unrecorded.
+- **Fix**: New migration `supabase/migrations/20260920172000_fix_daily_report_attendance_multi_key.sql` upgrades:
+  - `get_trainer_daily_report_workspace`: Lateral join now matches by `scheduled_session_id` **OR** `(scheduled_session_id IS NULL AND teaching_allocation_id = schedule.teaching_allocation_id)`, with priority to the exact session ID match.
+  - `submit_trainer_daily_report_v1`: Completeness check uses the same multi-key logic, so cancelled sessions with a detached FK are always counted as recorded.
+  - `submit_trainer_daily_report` public alias re-exposed.
+- **Files Modified/Added**:
+  - `supabase/migrations/20260920172000_fix_daily_report_attendance_multi_key.sql` (NEW)
+  - `CHANGES.md` (MODIFIED)
+- **Manual Follow-up**: Run `npx supabase db push` to apply.
+
+---
+
 ### 2026-09-20: Resilient Class Attendance Pipeline & Historical Attendance Restoration
 
 - **Context & Problem**:

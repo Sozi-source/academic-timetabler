@@ -138,7 +138,8 @@ function sessionSatisfiesRequest({
     session.cohortId !== allocation.cohortId ||
     session.unitId !== allocation.unitId ||
     session.trainerId !== allocation.trainerId ||
-    (allocation.preferredRoomId !== null &&
+    (!session.isLocked &&
+      allocation.preferredRoomId !== null &&
       session.roomId !== allocation.preferredRoomId)
   ) {
     return false;

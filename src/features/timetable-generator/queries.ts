@@ -210,9 +210,34 @@ export const getExistingScheduledSessions =
         );
       }
 
+      const {
+        data: protectedIds,
+        error: protectedError,
+      } = await supabase.rpc(
+        'get_attendance_protected_session_ids',
+        {
+          target_academic_period_id:
+            academicPeriodId,
+        },
+      );
+
+      if (protectedError) {
+        throw new Error(
+          `Unable to load attendance-protected sessions: ${protectedError.message}`,
+        );
+      }
+
+      const attendanceProtected = new Set<string>(
+        (protectedIds ?? []) as string[],
+      );
+
       return (
-        data ?? []
-      ) as ExistingScheduledSessionRow[];
+        (data ?? []) as ExistingScheduledSessionRow[]
+      ).map((row) => ({
+        ...row,
+        has_attendance:
+          attendanceProtected.has(row.id),
+      }));
     },
   );
 

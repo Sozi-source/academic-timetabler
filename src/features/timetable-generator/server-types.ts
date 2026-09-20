@@ -326,6 +326,8 @@ export interface ExistingScheduledSessionRow {
     ScheduledSessionConflictState;
   is_locked: boolean;
   is_external?: boolean;
+  /** Unlocked draft/confirmed session that already has attendance recorded. */
+  has_attendance?: boolean;
   participant_cohort_ids: string[];
   combined_cohort_size: number;
   notes: string | null;

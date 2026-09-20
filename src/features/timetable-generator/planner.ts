@@ -131,6 +131,17 @@ function sessionSatisfiesRequest({
   allocation: PlanningAllocation;
   sessionNumber: number;
 }) {
+  if (session.hasAttendance) {
+    // Attendance is already recorded against this placement. Keep it exactly as
+    // it is (even if it was moved manually or the room/pin config changed) and
+    // never generate a competing session for the same slot number.
+    return (
+      session.teachingAllocationId === allocation.id &&
+      session.sessionNumber === sessionNumber &&
+      session.academicPeriodId === allocation.academicPeriodId
+    );
+  }
+
   if (
     session.teachingAllocationId !== allocation.id ||
     session.sessionNumber !== sessionNumber ||

@@ -188,6 +188,8 @@ export interface PlanningSession {
   conflictState: ScheduledSessionConflictState;
   isLocked: boolean;
   isExternal?: boolean;
+  /** Attendance already recorded: history is fixed, never regenerate. */
+  hasAttendance?: boolean;
   participantCohortIds?: string[];
   combinedCohortSize?: number;
 }

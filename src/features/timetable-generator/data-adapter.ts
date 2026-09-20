@@ -290,10 +290,15 @@ function mapExistingSession(
       row.source,
     conflictState:
       row.conflict_state,
+    // Attendance history is fixed: the planner must route around it and the
+    // save must never re-insert it.
     isLocked:
-      row.is_locked,
+      row.is_locked ||
+      row.has_attendance === true,
     isExternal:
       row.is_external ?? false,
+    hasAttendance:
+      row.has_attendance ?? false,
     participantCohortIds:
       normalizeParticipantCohortIds({
         cohortId: row.cohort_id,
@@ -324,7 +329,8 @@ export function createAutomaticPlannerInput({
 
         return (
           session.is_locked ||
-          session.status === 'locked'
+          session.status === 'locked' ||
+          session.has_attendance === true
         );
       })
       .map(mapExistingSession);

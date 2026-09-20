@@ -517,6 +517,8 @@ interface SaveGeneratedTimetableResult {
   saved_session_count: number;
   locked_session_count: number;
   unscheduled_session_count: number;
+  skipped_overflow_session_count?: number;
+  skipped_overflow_allocation_ids?: string[];
 }
 
 export async function saveGeneratedTimetableDraftAction(
@@ -656,9 +658,15 @@ export async function saveGeneratedTimetableDraftAction(
     revalidatePath('/timetable/published');
     revalidatePath('/timetable/reports');
 
+    const skippedOverflowCount = result.skipped_overflow_session_count ?? 0;
+    const skippedOverflowAllocationIds = result.skipped_overflow_allocation_ids ?? [];
+    const overflowNote = skippedOverflowCount > 0
+      ? ` ${skippedOverflowCount} generated session${skippedOverflowCount === 1 ? '' : 's'} could not be saved because ${skippedOverflowAllocationIds.length === 1 ? 'a teaching allocation' : 'some teaching allocations'} already had all required weekly sessions scheduled — check allocation${skippedOverflowAllocationIds.length === 1 ? '' : 's'} ${skippedOverflowAllocationIds.join(', ')}.`
+      : '';
+
     return {
       status: 'success',
-      message: `${result.saved_session_count} generated session${result.saved_session_count === 1 ? '' : 's'} saved as a draft. ${result.locked_session_count} locked session${result.locked_session_count === 1 ? '' : 's'} preserved.`,
+      message: `${result.saved_session_count} generated session${result.saved_session_count === 1 ? '' : 's'} saved as a draft. ${result.locked_session_count} locked session${result.locked_session_count === 1 ? '' : 's'} preserved.${overflowNote}`,
       generationRunId: result.generation_run_id,
       savedSessionCount: result.saved_session_count,
       lockedSessionCount: result.locked_session_count,

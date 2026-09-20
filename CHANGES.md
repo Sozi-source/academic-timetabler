@@ -156,6 +156,22 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
   - `npm test`: 117 test files passed, 598 tests passed (100%).
   - `npm run check` (`typecheck && lint && build`): All TypeScript types, ESLint rules, and Next.js Turbopack production build succeeded with zero errors.
 
+### 2026-09-19: Hard-Fixed Room Choices Not Persisting Across Regenerations
+
+- **Context & Problem**:
+  - HOD reported: 6 sessions hard-fixed via "Place Unit on Timetable" (confirmed no conflict, timetable published) reappeared as "unresolved" on the very next regeneration, as if never placed.
+  - **Root cause**: `src/features/timetable-generator/planner.ts`, `sessionSatisfiesRequest()` requires an existing session's room to exactly match `allocation.preferredRoomId` before treating that slot as already satisfied. A hard-fixed session commonly uses a *different* room than the allocation's stored preference (the normal reason to hard-fix by hand: the preferred room didn't work). None of `schedule_allocation_session_safely()` ("Place Unit on Timetable"), `move_scheduled_session_safely()` ("Move/Edit", Quick Edit), or `assign_scheduled_session_room_safely()` (Quick Edit room-only swap) ever wrote a manually-chosen room back onto `teaching_allocations.preferred_room_id` — unlike a manually-chosen **trainer**, which all already sync correctly. Every regeneration therefore re-requested a duplicate session for an already-fulfilled slot, collided with the real one, and reported it unresolved — permanently, regardless of how many times it was re-fixed.
+- **Architectural Solutions & Changes**:
+  - New migration `20260919200000_persist_hard_fixed_room_choice.sql`:
+    1. All three RPCs above now sync a manually-chosen room onto `teaching_allocations.preferred_room_id` when it differs, mirroring the existing trainer-sync pattern exactly. Rebuilt by programmatically patching the exact currently-applied function bodies (not retyped from memory) to guarantee the `20260919160000` shared-class clash-message wording ("That session is a shared class led by X") was not regressed — verified present in the final file.
+    2. One-off repair: every currently-placed, non-cancelled session's allocation is realigned to the room it is actually sitting in.
+  - No `planner.ts` change was needed — `sessionSatisfiesRequest()`'s exact-match check is correct as written; it only needed the underlying data kept in sync, which the RPCs now do.
+- **Files Modified**:
+  - `supabase/migrations/20260919200000_persist_hard_fixed_room_choice.sql` (new)
+  - `CHANGES.md`
+- **Verification Evidence**: Not build/DB-verified in this environment. Dollar-quote balance (6 = 3 functions) and transaction (`begin`/`commit`) balance checked programmatically. Run `supabase db push`, then reopen the timetable generator and regenerate — the previously hard-fixed sessions should no longer appear under "Units missing from timetable."
+- **Still open from the same conversation, not yet built**: clinical-rotation display cap (max 2 sessions per allocation card), general "unit merging efficiency" hardening (needs more specific repro from HOD), and the future-semester locking decision (Option A vs B, still awaiting HOD's answer).
+
 ### 2026-09-19: Orphaned Allocations Left Behind by Shared-Class Merges
 
 - **Context & Problem**:

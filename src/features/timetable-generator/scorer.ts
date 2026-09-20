@@ -1,6 +1,5 @@
 import {
   detectTimetableConflicts,
-  detectCandidateConflicts,
   type DetectTimetableConflictsInput,
 } from './conflict-detector';
 import {
@@ -82,8 +81,34 @@ function isActiveSession(
   ].includes(session.status);
 }
 
-function getCandidateConflicts(input: ScorePlacementInput) {
-  return detectCandidateConflicts(input);
+function getCandidateConflicts({
+  candidate,
+  existingSessions,
+  workingDays,
+  timeSlots,
+  trainers,
+  cohorts,
+  rooms,
+  units,
+  constraints,
+}: ScorePlacementInput) {
+  return detectTimetableConflicts({
+    sessions: [
+      ...existingSessions,
+      candidate,
+    ],
+    workingDays,
+    timeSlots,
+    trainers,
+    cohorts,
+    rooms,
+    units,
+    constraints,
+  }).filter((conflict) =>
+    conflict.sessionIds.includes(
+      candidate.id,
+    ),
+  );
 }
 
 function getRoomCapacityAdjustment({
@@ -391,34 +416,13 @@ function getTrainerWorkloadAdjustment({
   | 'workingDays'
   | 'timeSlots'
 >): PlacementScoreAdjustment {
-  if (!candidate.trainerId) {
-    return {
-      factor: 'trainer_workload',
-      points: 0,
-      message: 'Trainer workload balance could not be calculated.',
-    };
-  }
-
-  const targetTrainer = trainers.find((t) => t.id === candidate.trainerId);
-  if (!targetTrainer || targetTrainer.normalWeeklyHours <= 0) {
-    return {
-      factor: 'trainer_workload',
-      points: 0,
-      message: 'Trainer workload balance could not be calculated.',
-    };
-  }
-
-  const relevantSessions = [
-    ...existingSessions.filter(
-      (s) => isActiveSession(s) && s.trainerId === candidate.trainerId,
-    ),
-    candidate,
-  ];
-
   const analysis =
     analyzeTrainerWorkloads({
-      sessions: relevantSessions,
-      trainers: [targetTrainer],
+      sessions: [
+        ...existingSessions,
+        candidate,
+      ],
+      trainers,
       workingDays,
       timeSlots,
     }).find(

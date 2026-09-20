@@ -30,6 +30,11 @@ interface FixedScheduleFormProps {
   fixedWorkingDayIds: string[];
   fixedSlotIds: string[];
   isFullDaySession: boolean;
+  /** Clinical Rotation offerings are always scheduled as a full 08:00–16:00
+   * day. When true, the standard/full-day toggle is hidden and only the
+   * full-day picker is shown, so this can never be saved as separate
+   * weekly sessions again. */
+  isClinicalRotation?: boolean;
   disabled?: boolean;
 }
 
@@ -53,14 +58,14 @@ export function FixedScheduleForm({
   fixedWorkingDayIds,
   fixedSlotIds,
   isFullDaySession,
+  isClinicalRotation = false,
   disabled = false,
 }: FixedScheduleFormProps) {
   const [scheduleMode, setScheduleMode] = useState<'standard' | 'full_day'>(
-    isFullDaySession ? 'full_day' : 'standard',
+    isClinicalRotation || isFullDaySession ? 'full_day' : 'standard',
   );
 
   const secondSessionAvailable = weeklySessions >= 2;
-  const thirdSessionAvailable = weeklySessions >= 3;
 
   const orderedSlots = [...slots].sort(
     (first, second) => first.sequence_number - second.sequence_number,
@@ -75,8 +80,6 @@ export function FixedScheduleForm({
   const firstSavedDayId = fixedWorkingDayIds[0] ?? fixedDayId ?? '';
   const secondSavedDayId =
     fixedWorkingDayIds[1] ?? (fixedSlotIds[1] ? fixedDayId ?? '' : '');
-  const thirdSavedDayId =
-    fixedWorkingDayIds[2] ?? (fixedSlotIds[2] ? fixedDayId ?? '' : '');
 
   const savedPatterns = fixedSlotIds
     .map((slotId, index) => {
@@ -103,34 +106,40 @@ export function FixedScheduleForm({
         <span className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">
           Schedule format
         </span>
-        <div className="inline-flex rounded-lg border border-border bg-surface p-0.5 text-xs">
-          <button
-            type="button"
-            onClick={() => setScheduleMode('standard')}
-            className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-              scheduleMode === 'standard'
-                ? 'bg-primary text-primary-contrast shadow-xs'
-                : 'text-text-muted hover:text-text-primary'
-            }`}
-          >
-            Morning / Fixed (120 min)
-          </button>
-          <button
-            type="button"
-            onClick={() => setScheduleMode('full_day')}
-            className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-              scheduleMode === 'full_day'
-                ? 'bg-primary text-primary-contrast shadow-xs'
-                : 'text-text-muted hover:text-text-primary'
-            }`}
-          >
+        {isClinicalRotation ? (
+          <span className="rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-contrast shadow-xs">
             Full day block ({fullDayLabel})
-          </button>
-        </div>
+          </span>
+        ) : (
+          <div className="inline-flex rounded-lg border border-border bg-surface p-0.5 text-xs">
+            <button
+              type="button"
+              onClick={() => setScheduleMode('standard')}
+              className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                scheduleMode === 'standard'
+                  ? 'bg-primary text-primary-contrast shadow-xs'
+                  : 'text-text-muted hover:text-text-primary'
+              }`}
+            >
+              Morning / Fixed (120 min)
+            </button>
+            <button
+              type="button"
+              onClick={() => setScheduleMode('full_day')}
+              className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                scheduleMode === 'full_day'
+                  ? 'bg-primary text-primary-contrast shadow-xs'
+                  : 'text-text-muted hover:text-text-primary'
+              }`}
+            >
+              Full day block ({fullDayLabel})
+            </button>
+          </div>
+        )}
       </div>
 
       {scheduleMode === 'full_day' ? (
-        <div className="grid gap-2 sm:grid-cols-[repeat(2,minmax(0,1fr))_auto]">
+        <div className="grid grid-cols-1 items-end gap-2 sm:grid-cols-[1fr_1.4fr_auto]">
           <label className="text-xs font-medium text-text-muted">
             Day
             <select
@@ -156,13 +165,13 @@ export function FixedScheduleForm({
           </div>
           <button
             disabled={disabled}
-            className="h-8 self-end whitespace-nowrap rounded-xl border border-border bg-surface px-3 text-xs font-semibold text-text-primary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-60"
+            className="h-8 whitespace-nowrap rounded-xl border border-border bg-surface px-3 text-xs font-semibold text-text-primary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-60"
           >
             Save full day
           </button>
         </div>
       ) : (
-        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-[repeat(6,minmax(0,1fr))_auto]">
+        <div className="grid grid-cols-2 items-end gap-2 sm:grid-cols-[1fr_1fr_1fr_1fr_auto]">
           <label className="text-xs font-medium text-text-muted">
             First day
             <select
@@ -229,41 +238,9 @@ export function FixedScheduleForm({
               ))}
             </select>
           </label>
-          <label className="text-xs font-medium text-text-muted">
-            Third day
-            <select
-              name="thirdWorkingDayId"
-              defaultValue={thirdSavedDayId}
-              className="mt-1 h-8 w-full rounded-xl border border-border bg-surface px-2 text-xs text-text-primary disabled:cursor-not-allowed disabled:opacity-60"
-              disabled={disabled || !thirdSessionAvailable}
-            >
-              <option value="">Not fixed</option>
-              {days.map((day) => (
-                <option key={day.id} value={day.id}>
-                  {formatDay(day.day_of_week)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="text-xs font-medium text-text-muted">
-            Third session
-            <select
-              name="thirdTimeSlotId"
-              defaultValue={fixedSlotIds[2] ?? ''}
-              className="mt-1 h-8 w-full rounded-xl border border-border bg-surface px-2 text-xs text-text-primary disabled:cursor-not-allowed disabled:opacity-60"
-              disabled={disabled || !thirdSessionAvailable}
-            >
-              <option value="">Not fixed</option>
-              {slots.map((slot) => (
-                <option key={slot.id} value={slot.id}>
-                  {slot.name} ({formatClock(slot.starts_at)}–{formatClock(slot.ends_at)})
-                </option>
-              ))}
-            </select>
-          </label>
           <button
             disabled={disabled}
-            className="h-8 self-end whitespace-nowrap rounded-xl border border-border bg-surface px-3 text-xs font-semibold text-text-primary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-60"
+            className="col-span-2 h-8 whitespace-nowrap rounded-xl border border-border bg-surface px-3 text-xs font-semibold text-text-primary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1"
           >
             Save fixed session
           </button>

@@ -528,15 +528,14 @@ function calculateConstraintPriority({
       sessionNumber - 1
     ] ?? allocation.fixedWorkingDayId;
 
-  const isFullDay = Boolean(
-    allocation.isFullDaySession &&
+  const hasFixedTimeAndDay = Boolean(
     fixedTimeSlotId &&
     fixedWorkingDayId,
   );
 
-  const hasFixedTimeAndDay = Boolean(
-    fixedTimeSlotId &&
-    fixedWorkingDayId,
+  const isFullDay = Boolean(
+    allocation.isFullDaySession &&
+    hasFixedTimeAndDay,
   );
 
   const isOtherDepartmentTrainer = Boolean(
@@ -554,36 +553,57 @@ function calculateConstraintPriority({
   );
 
   const participantCohortCount = allocation.participantCohortIds?.length ?? 1;
-  const isLargeSharedClass = participantCohortCount >= 3;
   const isSharedClass = participantCohortCount >= 2;
 
-  // Level 7: Full day fixed sessions
+  const isFlexibleFullDay = Boolean(
+    allocation.isFullDaySession ||
+    allocation.sessionDurationMinutes >= 480,
+  );
+
+  // Level 10: Fixed full-day sessions (08:00–16:00 on an exact day)
   if (isFullDay) {
+    return 10;
+  }
+
+  // Level 9: Other department / guest trainer with exact fixed day and time slot
+  if (isOtherDepartmentTrainer && hasFixedTimeAndDay) {
+    return 9;
+  }
+
+  // Level 8: Internal trainer with exact fixed day and time slot
+  if (hasFixedTimeAndDay) {
+    return 8;
+  }
+
+  // Level 7: Multi-cohort full-day clinical rotations (>= 2 cohorts, 480m)
+  // Must claim an empty day before individual 2-hour classes fragment all cohort weekdays
+  if (isFlexibleFullDay && isSharedClass) {
     return 7;
   }
 
-  // Level 6: Other department / guest trainer with fixed slot or restricted availability (e.g. Brian Ondieki)
-  if (isOtherDepartmentTrainer && (hasFixedTimeAndDay || hasRestrictedAvailability)) {
+  // Level 6: Standalone full-day clinical rotations (480m)
+  // Must claim an empty day before individual 2-hour classes fragment the single cohort's weekdays
+  if (isFlexibleFullDay) {
     return 6;
   }
 
-  // Level 5: All multi-cohort shared classes (>= 2 cohorts, e.g. Nutrition in the Lifespan)
-  if (isSharedClass) {
+  // Level 5: Large multi-cohort shared classes (>= 4 cohorts, e.g. CND 1105, DHN 2302)
+  if (participantCohortCount >= 4) {
     return 5;
   }
 
-  // Level 4: Other department / guest trainers (always prioritized ahead of internal flexible trainers)
-  if (isOtherDepartmentTrainer) {
+  // Level 4: Multi-cohort shared classes with 3 cohorts (e.g. DCU 1104 First Aid)
+  if (participantCohortCount === 3) {
     return 4;
   }
 
-  // Level 3: Fixed schedule sessions (exact day + time slot)
-  if (hasFixedTimeAndDay) {
+  // Level 3: Multi-cohort shared classes with 2 cohorts (e.g. DHN 3205 Trade Project)
+  if (participantCohortCount === 2) {
     return 3;
   }
 
-  // Level 2: Internal trainers with restricted availability (selected slots only)
-  if (hasRestrictedAvailability) {
+  // Level 2: Other department / guest trainers or trainers with restricted available slots
+  if (isOtherDepartmentTrainer || hasRestrictedAvailability) {
     return 2;
   }
 
@@ -715,9 +735,13 @@ function hasAllocationOnDay({
 function getEligibleRooms({
   allocation,
   rooms,
+  cohort,
+  unit,
 }: {
   allocation: PlanningAllocation;
   rooms: PlanningRoom[];
+  cohort?: PlanningCohort;
+  unit?: PlanningUnit;
 }): Array<PlanningRoom | null> {
   const availableRooms =
     rooms.filter(
@@ -732,11 +756,32 @@ function getEligibleRooms({
     return [null];
   }
 
-  return availableRooms.filter(
-    (room) =>
-      room.id ===
-      allocation.preferredRoomId,
+  const preferred = availableRooms.find(
+    (room) => room.id === allocation.preferredRoomId,
   );
+
+  if (!preferred) {
+    return [null];
+  }
+
+  const requiredCapacity =
+    allocation.combinedCohortSize ?? cohort?.actualSize ?? 0;
+
+  if (requiredCapacity <= 0 || preferred.capacity >= requiredCapacity) {
+    return [preferred];
+  }
+
+  const fittingRooms = availableRooms.filter(
+    (room) =>
+      room.capacity >= requiredCapacity &&
+      (!unit?.preferredRoomType || room.roomType === unit.preferredRoomType),
+  );
+
+  if (fittingRooms.length > 0) {
+    return [preferred, ...fittingRooms.filter((r) => r.id !== preferred.id)];
+  }
+
+  return [preferred];
 }
 
 function findPreviousSessionVenue({
@@ -1042,11 +1087,14 @@ function tryRelocationRepair({
   const selectedById = new Map(selectedSessions.map((s) => [s.id, s]));
 
   // Sort candidate placements by fewest blocked conflicts, then highest placement score
-  const sortedCandidates = [...candidateScores].sort((first, second) => {
-    const firstBlocked = first.conflicts.filter((c) => c.severity === 'blocked').length;
-    const secondBlocked = second.conflicts.filter((c) => c.severity === 'blocked').length;
-    return firstBlocked - secondBlocked || second.score - first.score;
-  });
+  const sortedCandidates = [...candidateScores]
+    .filter((s) => !s.isValid)
+    .sort((first, second) => {
+      const firstBlocked = first.conflicts.filter((c) => c.severity === 'blocked').length;
+      const secondBlocked = second.conflicts.filter((c) => c.severity === 'blocked').length;
+      return firstBlocked - secondBlocked || second.score - first.score;
+    })
+    .slice(0, 15);
 
   for (const placementScore of sortedCandidates) {
     const blockedConflicts = placementScore.conflicts.filter((c) => c.severity === 'blocked');
@@ -1141,6 +1189,8 @@ function tryRelocationRepair({
         break;
       }
 
+      const displacedCohort = cohorts.find((c) => c.id === alloc.cohortId);
+
       const displacedRequest: SessionRequest = {
         allocation: alloc,
         sessionNumber: displaced.sessionNumber,
@@ -1151,6 +1201,7 @@ function tryRelocationRepair({
       const eligibleRooms = getEligibleRooms({
         allocation: alloc,
         rooms,
+        cohort: displacedCohort,
       });
 
       if (eligibleRooms.length === 0) {
@@ -1183,9 +1234,9 @@ function tryRelocationRepair({
         selectedSessions: activeSessionsForRelocation,
         allowSameAllocationMultipleSessionsPerDay: allowSameDay,
         previousSessions,
-        cohort: cohorts.find((c) => c.id === alloc.cohortId),
+        cohort: displacedCohort,
         allRooms: rooms,
-      }).slice(0, candidateLimit);
+      }).slice(0, Math.min(candidateLimit, 50));
 
       const relocationScores = scorePlacements({
         candidates: candidateSessions,
@@ -1715,7 +1766,7 @@ export function generateTimetablePlan(
   const candidateLimit =
     input.options
       ?.candidateLimitPerRequest ??
-    5000;
+    250;
 
   const allowSameDay =
     input.options
@@ -1858,6 +1909,8 @@ export function generateTimetablePlan(
       getEligibleRooms({
         allocation,
         rooms: input.rooms,
+        cohort,
+        unit,
       });
 
     if (eligibleRooms.length === 0) {
@@ -2067,7 +2120,7 @@ export function generateTimetablePlan(
         workingDays,
         timeRanges,
         rooms: input.rooms,
-      }).slice(0, candidateLimit);
+      }).slice(0, Math.min(candidateLimit, 150));
 
       const recoverySuggestions = suggestAlternativePlacements({
         conflictId,

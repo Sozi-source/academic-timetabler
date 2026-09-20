@@ -1477,5 +1477,156 @@ describe('generateTimetablePlan', () => {
     const roomOverlap = result.conflicts.filter((c) => c.type === 'room_overlap');
     expect(roomOverlap).toHaveLength(0);
   });
+
+  it('places a flexible 480-minute clinical rotation without a fixed day alongside multiple 2-hour sessions', () => {
+    const input = createPlannerInput({
+      allocations: [
+        {
+          ...baseAllocation,
+          id: 'alloc-theory-1',
+          weeklySessions: 1,
+          sessionDurationMinutes: 120,
+        },
+        {
+          ...baseAllocation,
+          id: 'alloc-theory-2',
+          weeklySessions: 1,
+          sessionDurationMinutes: 120,
+        },
+        {
+          ...baseAllocation,
+          id: 'alloc-clinical',
+          deliveryMode: 'clinical',
+          weeklySessions: 1,
+          sessionDurationMinutes: 480,
+          isFullDaySession: true,
+        },
+      ],
+    });
+
+    input.workingDays = [
+      { id: 'day-1', academicPeriodId: 'period-1', dayOfWeek: 'monday', sequenceNumber: 1, isEnabled: true },
+      { id: 'day-2', academicPeriodId: 'period-1', dayOfWeek: 'tuesday', sequenceNumber: 2, isEnabled: true },
+      { id: 'day-3', academicPeriodId: 'period-1', dayOfWeek: 'wednesday', sequenceNumber: 3, isEnabled: true },
+    ];
+
+    input.timeSlots = [
+      { id: 'slot-morning', academicPeriodId: 'period-1', code: 'MORN', name: 'Morning', slotType: 'teaching', startsAt: '08:00:00', endsAt: '10:00:00', sequenceNumber: 1, isEnabled: true },
+      { id: 'slot-mid', academicPeriodId: 'period-1', code: 'MID', name: 'Mid-Morning', slotType: 'teaching', startsAt: '10:30:00', endsAt: '12:30:00', sequenceNumber: 2, isEnabled: true },
+      { id: 'slot-afternoon', academicPeriodId: 'period-1', code: 'AFT', name: 'Afternoon', slotType: 'teaching', startsAt: '14:00:00', endsAt: '16:00:00', sequenceNumber: 3, isEnabled: true },
+    ];
+
+    const result = generateTimetablePlan(input);
+
+    expect(result.unscheduled).toHaveLength(0);
+    expect(result.sessions).toHaveLength(3);
+
+    const clinicalSession = result.sessions.find((s) => s.teachingAllocationId === 'alloc-clinical');
+    expect(clinicalSession).toBeDefined();
+    expect(clinicalSession?.startTimeSlotId).toBe('slot-morning');
+    expect(clinicalSession?.endTimeSlotId).toBe('slot-afternoon');
+
+    const otherSessions = result.sessions.filter((s) => s.teachingAllocationId !== 'alloc-clinical');
+    expect(otherSessions.every((s) => s.workingDayId !== clinicalSession?.workingDayId)).toBe(true);
+  });
+
+  it('places a 4-cohort shared class alongside individual single-cohort sessions', () => {
+    const cohorts = [
+      { id: 'c1', programmeId: 'p1', code: 'CND1', name: 'CND 1', actualSize: 25, currentAcademicPeriodNumber: 1, status: 'active' as const, isTimetableAvailable: true },
+      { id: 'c2', programmeId: 'p1', code: 'CND2', name: 'CND 2', actualSize: 25, currentAcademicPeriodNumber: 1, status: 'active' as const, isTimetableAvailable: true },
+      { id: 'c3', programmeId: 'p1', code: 'DHN1', name: 'DHN 1', actualSize: 25, currentAcademicPeriodNumber: 1, status: 'active' as const, isTimetableAvailable: true },
+      { id: 'c4', programmeId: 'p1', code: 'DHN2', name: 'DHN 2', actualSize: 25, currentAcademicPeriodNumber: 1, status: 'active' as const, isTimetableAvailable: true },
+    ];
+
+    const trainers = [
+      { id: 'trainer-shared', staffNumber: 'TR01', fullName: 'Shared Trainer', normalWeeklyHours: 20, maximumWeeklyHours: 30, maximumDailyHours: 8, departmentId: 'department-1', isActive: true, isTimetableAvailable: true },
+      { id: 'trainer-c1', staffNumber: 'TR02', fullName: 'Trainer 1', normalWeeklyHours: 20, maximumWeeklyHours: 30, maximumDailyHours: 8, departmentId: 'department-1', isActive: true, isTimetableAvailable: true },
+      { id: 'trainer-c2', staffNumber: 'TR03', fullName: 'Trainer 2', normalWeeklyHours: 20, maximumWeeklyHours: 30, maximumDailyHours: 8, departmentId: 'department-1', isActive: true, isTimetableAvailable: true },
+      { id: 'trainer-c3', staffNumber: 'TR04', fullName: 'Trainer 3', normalWeeklyHours: 20, maximumWeeklyHours: 30, maximumDailyHours: 8, departmentId: 'department-1', isActive: true, isTimetableAvailable: true },
+      { id: 'trainer-c4', staffNumber: 'TR05', fullName: 'Trainer 4', normalWeeklyHours: 20, maximumWeeklyHours: 30, maximumDailyHours: 8, departmentId: 'department-1', isActive: true, isTimetableAvailable: true },
+    ];
+
+    const input = createPlannerInput({
+      allocations: [
+        // 4-cohort shared class
+        {
+          ...baseAllocation,
+          id: 'alloc-shared-4',
+          cohortId: 'c1',
+          trainerId: 'trainer-shared',
+          participantCohortIds: ['c1', 'c2', 'c3', 'c4'],
+          combinedCohortSize: 100,
+          weeklySessions: 1,
+          sessionDurationMinutes: 120,
+        },
+        // Individual single-cohort classes
+        { ...baseAllocation, id: 'alloc-c1', cohortId: 'c1', trainerId: 'trainer-c1', weeklySessions: 1, sessionDurationMinutes: 120 },
+        { ...baseAllocation, id: 'alloc-c2', cohortId: 'c2', trainerId: 'trainer-c2', weeklySessions: 1, sessionDurationMinutes: 120 },
+        { ...baseAllocation, id: 'alloc-c3', cohortId: 'c3', trainerId: 'trainer-c3', weeklySessions: 1, sessionDurationMinutes: 120 },
+        { ...baseAllocation, id: 'alloc-c4', cohortId: 'c4', trainerId: 'trainer-c4', weeklySessions: 1, sessionDurationMinutes: 120 },
+      ],
+    });
+
+    input.cohorts = cohorts;
+    input.trainers = trainers;
+    input.workingDays = [
+      { id: 'day-1', academicPeriodId: 'period-1', dayOfWeek: 'monday', sequenceNumber: 1, isEnabled: true },
+      { id: 'day-2', academicPeriodId: 'period-1', dayOfWeek: 'tuesday', sequenceNumber: 2, isEnabled: true },
+      { id: 'day-3', academicPeriodId: 'period-1', dayOfWeek: 'wednesday', sequenceNumber: 3, isEnabled: true },
+    ];
+
+    input.timeSlots = [
+      { id: 'slot-morning', academicPeriodId: 'period-1', code: 'MORN', name: 'Morning', slotType: 'teaching', startsAt: '08:00:00', endsAt: '10:00:00', sequenceNumber: 1, isEnabled: true },
+      { id: 'slot-afternoon', academicPeriodId: 'period-1', code: 'AFT', name: 'Afternoon', slotType: 'teaching', startsAt: '14:00:00', endsAt: '16:00:00', sequenceNumber: 2, isEnabled: true },
+    ];
+
+    const result = generateTimetablePlan(input);
+
+    expect(result.unscheduled).toHaveLength(0);
+    expect(result.sessions).toHaveLength(5);
+    const sharedSession = result.sessions.find((s) => s.teachingAllocationId === 'alloc-shared-4');
+    expect(sharedSession).toBeDefined();
+    expect(sharedSession?.participantCohortIds).toEqual(['c1', 'c2', 'c3', 'c4']);
+  });
+
+  it('falls back to a suitable room when an allocation preferred room is smaller than combined cohort size', () => {
+    const input = createPlannerInput({
+      allocations: [
+        {
+          ...baseAllocation,
+          preferredRoomId: 'small-room',
+          participantCohortIds: ['cohort-1', 'cohort-2'],
+          combinedCohortSize: 80,
+        },
+      ],
+    });
+
+    input.rooms = [
+      {
+        id: 'small-room',
+        code: 'R-SMALL',
+        name: 'Small Room',
+        roomType: 'lecture_room',
+        capacity: 35,
+        isActive: true,
+        isTimetableAvailable: true,
+      },
+      {
+        id: 'large-hall',
+        code: 'LH-1',
+        name: 'Lecture Hall 1',
+        roomType: 'lecture_room',
+        capacity: 100,
+        isActive: true,
+        isTimetableAvailable: true,
+      },
+    ];
+
+    const result = generateTimetablePlan(input);
+
+    expect(result.unscheduled).toHaveLength(0);
+    expect(result.sessions).toHaveLength(1);
+    expect(result.sessions[0].roomId).toBe('large-hall');
+  });
 });
 

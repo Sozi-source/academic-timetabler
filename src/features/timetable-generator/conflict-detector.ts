@@ -1092,3 +1092,224 @@ export function detectTimetableConflicts(
     );
   });
 }
+
+export interface DetectCandidateConflictsInput {
+  candidate: PlanningSession;
+  existingSessions: PlanningSession[];
+  workingDays: PlanningWorkingDay[];
+  timeSlots: PlanningTimeSlot[];
+  trainers: PlanningTrainer[];
+  cohorts: PlanningCohort[];
+  rooms: PlanningRoom[];
+  units: PlanningUnit[];
+  constraints?: PlanningConstraint[];
+}
+
+export function detectCandidateConflicts(
+  input: DetectCandidateConflictsInput,
+): PlanningConflict[] {
+  const {
+    candidate,
+    existingSessions,
+    workingDays,
+    timeSlots,
+    trainers,
+    cohorts,
+    rooms,
+    units,
+    constraints = [],
+  } = input;
+
+  const workingDaysMap = buildLookup(workingDays);
+  const timeSlotsMap = buildLookup(timeSlots);
+  const trainersMap = buildLookup(trainers);
+  const cohortsMap = buildLookup(cohorts);
+  const roomsMap = buildLookup(rooms);
+  const unitsMap = buildLookup(units);
+
+  const participantCohortIds = normalizeParticipantCohortIds({
+    cohortId: candidate.cohortId,
+    participantCohortIds: candidate.participantCohortIds,
+  });
+
+  const candidateContext: SessionContext = {
+    session: candidate,
+    workingDay: workingDaysMap.get(candidate.workingDayId),
+    startTimeSlot: timeSlotsMap.get(candidate.startTimeSlotId),
+    endTimeSlot: timeSlotsMap.get(candidate.endTimeSlotId),
+    trainer: candidate.trainerId ? trainersMap.get(candidate.trainerId) : undefined,
+    cohort: cohortsMap.get(candidate.cohortId),
+    room: candidate.roomId ? roomsMap.get(candidate.roomId) : undefined,
+    unit: unitsMap.get(candidate.unitId),
+    participantCohortIds,
+    unavailableParticipantCohortIds: participantCohortIds.filter((cohortId) => {
+      const p = cohortsMap.get(cohortId);
+      return !p || !p.isTimetableAvailable;
+    }),
+    requiredTimeSlotIds: [],
+  };
+
+  if (candidateContext.startTimeSlot && candidateContext.endTimeSlot) {
+    candidateContext.requiredTimeSlotIds = timeSlots
+      .filter(
+        (slot) =>
+          slot.academicPeriodId === candidate.academicPeriodId &&
+          slot.isEnabled &&
+          slot.slotType === 'teaching' &&
+          slot.sequenceNumber >= candidateContext.startTimeSlot!.sequenceNumber &&
+          slot.sequenceNumber <= candidateContext.endTimeSlot!.sequenceNumber,
+      )
+      .map((slot) => slot.id);
+
+    try {
+      candidateContext.interval = resolveSessionInterval({
+        session: candidate,
+        timeSlots: timeSlotsMap,
+      });
+    } catch {
+      candidateContext.interval = undefined;
+    }
+  }
+
+  const conflicts: PlanningConflict[] = [
+    ...detectCalendarConflicts(candidateContext),
+    ...detectResourceAvailabilityConflicts(candidateContext),
+    ...detectRoomSuitabilityConflicts(candidateContext),
+    ...detectSchedulingConstraintConflicts(candidateContext, constraints),
+  ];
+
+  for (const existing of existingSessions) {
+    if (!isActiveSession(existing)) {
+      continue;
+    }
+
+    const sameNumberedSession =
+      existing.teachingAllocationId === candidate.teachingAllocationId &&
+      existing.sessionNumber === candidate.sessionNumber;
+
+    const samePlacement =
+      existing.academicPeriodId === candidate.academicPeriodId &&
+      existing.teachingAllocationId === candidate.teachingAllocationId &&
+      existing.workingDayId === candidate.workingDayId &&
+      existing.startTimeSlotId === candidate.startTimeSlotId &&
+      existing.endTimeSlotId === candidate.endTimeSlotId &&
+      existing.roomId === candidate.roomId;
+
+    if (sameNumberedSession || samePlacement) {
+      conflicts.push(
+        createConflict({
+          type: 'duplicate_session',
+          severity: 'blocked',
+          message: sameNumberedSession
+            ? 'The same numbered weekly session is registered more than once for this teaching allocation.'
+            : 'The same teaching allocation has an identical timetable placement.',
+          sessionIds: [existing.id, candidate.id],
+          workingDayId: candidate.workingDayId,
+          resourceId: candidate.teachingAllocationId,
+        }),
+      );
+    }
+
+    if (
+      existing.workingDayId !== candidate.workingDayId ||
+      !candidateContext.interval
+    ) {
+      continue;
+    }
+
+    let existingInterval: TimeInterval | undefined;
+    try {
+      existingInterval = resolveSessionInterval({
+        session: existing,
+        timeSlots: timeSlotsMap,
+      });
+    } catch {
+      continue;
+    }
+
+    if (
+      !existingInterval ||
+      !timeIntervalsOverlap(candidateContext.interval, existingInterval)
+    ) {
+      continue;
+    }
+
+    const sessionIds = [candidate.id, existing.id];
+
+    if (
+      candidate.trainerId !== null &&
+      candidate.trainerId === existing.trainerId
+    ) {
+      conflicts.push(
+        createConflict({
+          type: 'trainer_overlap',
+          severity: 'blocked',
+          message: 'The trainer has overlapping sessions.',
+          sessionIds,
+          resourceId: candidate.trainerId,
+          resourceLabel: candidateContext.trainer?.fullName,
+          workingDayId: candidate.workingDayId,
+        }),
+      );
+    }
+
+    const overlappingCohort = findOverlappingParticipantCohortId({
+      firstCohortId: candidate.cohortId,
+      firstParticipantCohortIds: candidate.participantCohortIds,
+      secondCohortId: existing.cohortId,
+      secondParticipantCohortIds: existing.participantCohortIds,
+    });
+
+    if (overlappingCohort) {
+      conflicts.push(
+        createConflict({
+          type: 'cohort_overlap',
+          severity: 'blocked',
+          message: 'The cohort has overlapping sessions.',
+          sessionIds,
+          resourceId: overlappingCohort,
+          resourceLabel: candidateContext.cohort?.name,
+          workingDayId: candidate.workingDayId,
+        }),
+      );
+    }
+
+    if (
+      candidate.roomId !== null &&
+      candidate.roomId === existing.roomId
+    ) {
+      conflicts.push(
+        createConflict({
+          type: 'room_overlap',
+          severity: 'blocked',
+          message: 'The room has overlapping sessions.',
+          sessionIds,
+          resourceId: candidate.roomId,
+          resourceLabel: candidateContext.room?.name,
+          workingDayId: candidate.workingDayId,
+        }),
+      );
+    }
+  }
+
+  if (candidate.trainerId) {
+    const targetTrainer = trainersMap.get(candidate.trainerId);
+    if (targetTrainer) {
+      const trainerRelevantSessions = [
+        ...existingSessions.filter(
+          (s) => isActiveSession(s) && s.trainerId === candidate.trainerId,
+        ),
+        candidate,
+      ];
+      const workloadConflicts = detectTrainerWorkloadConflicts({
+        sessions: trainerRelevantSessions,
+        trainers: [targetTrainer],
+        workingDays,
+        timeSlots,
+      }).filter((conflict) => conflict.sessionIds.includes(candidate.id));
+      conflicts.push(...workloadConflicts);
+    }
+  }
+
+  return deduplicateConflicts(conflicts);
+}

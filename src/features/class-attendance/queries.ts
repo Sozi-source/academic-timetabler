@@ -148,23 +148,50 @@ export async function getStaffClassAttendanceSchedule(): Promise<ClassAttendance
         }
       }
 
-      // Attach latest class sessions if any exist
-      const sessionIds = items.map((i) => i.scheduledSessionId);
-      const { data: classSessions } = await (supabase as any)
+      // Attach latest class sessions if any exist (querying by both scheduled_session_id and allocation IDs)
+      const sessionIds = items.map((i) => i.scheduledSessionId).filter(Boolean);
+      const allocIds = [...new Set(items.map((i) => i.teachingAllocationId).filter(Boolean))];
+      const unitIds = [...new Set(items.map((i) => i.unitId).filter(Boolean))];
+
+      let csQuery = (supabase as any)
         .from('class_sessions')
-        .select('id, scheduled_session_id, session_date, status')
-        .in('scheduled_session_id', sessionIds)
+        .select('id, scheduled_session_id, teaching_allocation_id, unit_id, cohort_id, session_date, status')
         .order('session_date', { ascending: false });
 
-      const csMap = new Map();
+      if (sessionIds.length > 0 && allocIds.length > 0) {
+        csQuery = csQuery.or(`scheduled_session_id.in.(${sessionIds.join(',')}),teaching_allocation_id.in.(${allocIds.join(',')})`);
+      } else if (sessionIds.length > 0) {
+        csQuery = csQuery.in('scheduled_session_id', sessionIds);
+      } else if (allocIds.length > 0) {
+        csQuery = csQuery.in('teaching_allocation_id', allocIds);
+      }
+
+      const { data: classSessions } = await csQuery;
+
+      const csBySessionId = new Map();
+      const csByAllocUnit = new Map();
+      const csByUnitCohort = new Map();
+
       for (const cs of classSessions ?? []) {
-        if (!csMap.has(cs.scheduled_session_id)) {
-          csMap.set(cs.scheduled_session_id, cs);
+        if (cs.scheduled_session_id && !csBySessionId.has(cs.scheduled_session_id)) {
+          csBySessionId.set(cs.scheduled_session_id, cs);
+        }
+        const allocKey = `${cs.teaching_allocation_id}:${cs.unit_id}`;
+        if (cs.teaching_allocation_id && !csByAllocUnit.has(allocKey)) {
+          csByAllocUnit.set(allocKey, cs);
+        }
+        const unitCohortKey = `${cs.unit_id}:${cs.cohort_id}`;
+        if (cs.unit_id && cs.cohort_id && !csByUnitCohort.has(unitCohortKey)) {
+          csByUnitCohort.set(unitCohortKey, cs);
         }
       }
 
       for (const item of items) {
-        const cs = csMap.get(item.scheduledSessionId);
+        const cs =
+          csBySessionId.get(item.scheduledSessionId) ||
+          csByAllocUnit.get(`${item.teachingAllocationId}:${item.unitId}`) ||
+          csByUnitCohort.get(`${item.unitId}:${item.cohortId}`);
+
         if (cs) {
           item.latestClassSessionId = String(cs.id);
           item.latestSessionDate = String(cs.session_date);

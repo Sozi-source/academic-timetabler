@@ -31,6 +31,48 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
      - Option B: a near-term planning window (current period + the next one) stays editable; only periods further out are locked.
    - Likely implementation shape once decided: tighten the period-status check already present in `validate_scheduled_session_relationships()` / `validate_pending_scheduled_session()` (currently `not in ('planned','active')`, fixed by `20260919160000`) and the equivalent app-layer guards in `unit_offerings` approval/placement actions, rather than a new mechanism from scratch.
 
+### 2026-09-20: Resilient Class Attendance Pipeline & Historical Attendance Restoration
+
+- **Context & Problem**:
+  - HOD reported: *"Restore all the recorded class attendance logged by trainers and also optimise the timetabler -attendance pipeline to be flexible while maintaining data integrity incase of timetable adjustments."*
+  - **Root Causes**:
+    1. **Strict Foreign Key `ON DELETE RESTRICT` Lock**: `class_sessions.scheduled_session_id` was `NOT NULL REFERENCES scheduled_sessions(id) ON DELETE RESTRICT`. When an HOD regenerated the timetable or unscheduled a session in the editor, Postgres aborted with foreign key violations or blocked the edit (`"Cannot unschedule a session that already has recorded class attendance"`).
+    2. **Ephemeral Session ID Disconnection**: Whenever a timetable was adjusted, re-generated, or republished, new `scheduled_sessions` rows were created with new UUIDs. UI queries (`getStaffClassAttendanceSchedule` and `detectPastUnrecordedSessions`) queried `class_sessions` strictly by `scheduled_session_id in (current_snapshot_session_ids)`. Because historical attendance rows retained earlier session IDs, `latestClassSessionId` evaluated to `null`. The dashboard displayed "No sessions recorded", making it appear all attendance had been wiped out, and triggered false "past unrecorded session" locks that blocked trainers from recording new attendance.
+    3. **RLS Blindspots from Allocation Status Gating**: `trainer_can_access_allocation` required `allocation.status in ('active', 'completed')`. When allocations were in `'draft'` or retired to `'suspended'` by shared-class merges, `trainer_can_access_allocation` returned `false`. In `current_user_can_access_class_session` and `get_staff_class_attendance_history`, this filtered out trainers from viewing their own logged class attendance.
+    4. **Service Unit Oversight Blindspot**: `get_department_class_attendance_overview` filtered by `unit.department_id = active_department`, hiding service units taken by departmental cohorts.
+    5. **Inner Join in `_trainer_daily_schedule_v1`**: Dropped snapshot sessions if live `scheduled_sessions` were draft or modified.
+- **Architectural Solutions & Changes**:
+  - **Database Migration (`supabase/migrations/20260920150000_resilient_class_attendance_pipeline.sql`)**:
+    - Altered `class_sessions.scheduled_session_id` to allow `NULL` and replaced foreign key constraint with `ON DELETE SET NULL`. Historical attendance records permanently survive timetable generation, session moves, and draft replacements without data loss.
+    - Added partial unique index `class_sessions_semantic_unique_idx` on `(teaching_allocation_id, session_date, starts_at) WHERE status <> 'cancelled'` to prevent duplicate sessions for the same class and date even if timetable session IDs shift.
+    - Upgraded `trainer_can_access_allocation` to include `'draft'`, `'active'`, `'completed'`, and `'suspended'` (for retired shared-class partners), plus shared offering partners.
+    - Upgraded `current_user_can_access_class_session` to grant access if the user is `session.trainer_id`, `session.opened_by`, `session.completed_by`, HOD of programme/unit/allocation department, or system admin.
+    - Upgraded `get_staff_class_attendance_history` to return all sessions where `session.trainer_id = current_trainer_id() OR session.opened_by = auth.uid() OR trainer_can_access_allocation(session.teaching_allocation_id)`, with multi-cohort aggregated names and exception visibility.
+    - Upgraded `get_department_class_attendance_overview` to include sessions where unit, programme, or allocation belongs to the active department.
+    - Added `reconcile_attendance_to_scheduled_sessions(target_academic_period_id)` to re-link unattached/drifted `class_sessions` to active timetable slots automatically.
+    - Upgraded `unschedule_session_safely` and `save_generated_timetable_draft` to detach `class_sessions.scheduled_session_id = NULL` non-destructively and automatically reconcile attendance after inserting new sessions.
+    - Upgraded `open_class_attendance_session` to reconnect to existing attendance sessions by `(teaching_allocation_id, session_date, starts_at)` and fall back to timetable version snapshots.
+    - Converted `_trainer_daily_schedule_v1` to `LEFT JOIN` on `scheduled_sessions`.
+    - Executed one-off data repair re-linking orphaned/suspended allocations and reconciling existing unlinked `class_sessions`.
+  - **Application-Layer Hardening**:
+    - `src/features/class-attendance/queries.ts` (`getStaffClassAttendanceSchedule`): Queries and maps `class_sessions` by both `scheduled_session_id` AND `teaching_allocation_id` / `unit_id`, immediately resolving past attendance even if session IDs shifted.
+    - `src/features/trainer-daily-report/queries.ts` (`detectPastUnrecordedSessions`): Evaluates attendance by `scheduledSessionId`, `teachingAllocationId`, and `unitId:date`, preventing false-positive overdue locks.
+    - `src/app/api/staff/attendance/sessions/route.ts`: Gracefully reconnects to existing `class_sessions` by allocation and date.
+    - `src/app/api/staff/attendance/sessions/exception/route.ts`: Added published timetable snapshot fallback.
+  - **Unit Tests (`src/tests/resilient-class-attendance.test.ts`)**:
+    - Added tests confirming resolution of class attendance when session IDs shift, elimination of false overdue locks, and exception recording resilience.
+- **Files Modified/Added**:
+  - `supabase/migrations/20260920150000_resilient_class_attendance_pipeline.sql` (NEW - includes explicit `DROP FUNCTION IF EXISTS` to prevent 42P13 errors, and casts `wd.day_of_week::text` in reconciliation to prevent SQLSTATE 42883)
+  - `src/tests/resilient-class-attendance.test.ts` (NEW)
+  - `src/features/class-attendance/queries.ts` (MODIFIED)
+  - `src/features/trainer-daily-report/queries.ts` (MODIFIED)
+  - `src/app/api/staff/attendance/sessions/route.ts` (MODIFIED)
+  - `src/app/api/staff/attendance/sessions/exception/route.ts` (MODIFIED)
+  - `CHANGES.md` (MODIFIED)
+- **Verification Evidence**:
+  - `npm test`: 119/119 test files passed, 609/609 tests passed (100%).
+  - `npm run check` (`typecheck && lint && build`): All TypeScript types, ESLint rules, and Turbopack Next.js production build succeeded with zero errors across all 127 routes.
+
 ### 2026-09-20: Authoritative Bulk Course Outline Upload System & Zero-Synthetic Infiltration
 
 - **Context & Problem**:

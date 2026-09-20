@@ -207,15 +207,36 @@ export async function POST(
   if (error) {
     // If RPC fails (e.g. date outside period or day mismatch), use direct class_sessions insert / retrieval fallback with admin client
     try {
-      const { data: existingCs } = await (adminDb as any)
+      let existingCs: any = null;
+      const { data: csBySched } = await (adminDb as any)
         .from('class_sessions')
         .select('id, academic_period_id, unit_id, cohort_id, teaching_allocation_id')
         .eq('scheduled_session_id', payload.scheduledSessionId)
         .eq('session_date', payload.sessionDate)
         .maybeSingle();
 
+      existingCs = csBySched;
+
+      if (!existingCs) {
+        // Fallback: check by teaching_allocation_id and date
+        const allocIdToCheck = existingSession?.teaching_allocation_id;
+        if (allocIdToCheck) {
+          const { data: csByAlloc } = await (adminDb as any)
+            .from('class_sessions')
+            .select('id, academic_period_id, unit_id, cohort_id, teaching_allocation_id')
+            .eq('teaching_allocation_id', allocIdToCheck)
+            .eq('session_date', payload.sessionDate)
+            .maybeSingle();
+          existingCs = csByAlloc;
+        }
+      }
+
       if (existingCs) {
         classSessionId = existingCs.id;
+        await (adminDb as any)
+          .from('class_sessions')
+          .update({ scheduled_session_id: payload.scheduledSessionId, updated_at: new Date().toISOString() })
+          .eq('id', existingCs.id);
       } else {
         const { data: sessionData } = await (adminDb as any)
           .from('scheduled_sessions')

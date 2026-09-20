@@ -77,7 +77,47 @@ export async function POST(request: Request) {
     .eq('id', payload.scheduledSessionId)
     .maybeSingle();
 
-  if (!sessionData) {
+  let resolvedSession = sessionData;
+
+  if (!resolvedSession) {
+    const { data: versions } = await (adminDb as any)
+      .from('timetable_versions')
+      .select('academic_period_id, snapshot')
+      .eq('status', 'published')
+      .order('version_number', { ascending: false });
+
+    for (const v of versions ?? []) {
+      const snapshot = Array.isArray(v.snapshot) ? v.snapshot : [];
+      const match = snapshot.find((item: any) => String(item.id) === payload.scheduledSessionId);
+      if (match) {
+        let allocId = match.teachingAllocationId || match.allocationId;
+        if (!allocId) {
+          const { data: ta } = await (adminDb as any)
+            .from('teaching_allocations')
+            .select('id')
+            .eq('academic_period_id', v.academic_period_id)
+            .eq('unit_id', match.unitId)
+            .limit(1)
+            .maybeSingle();
+          allocId = ta?.id;
+        }
+
+        resolvedSession = {
+          id: payload.scheduledSessionId,
+          academic_period_id: v.academic_period_id,
+          teaching_allocation_id: allocId,
+          cohort_id: match.cohortId,
+          unit_id: match.unitId,
+          trainer_id: match.trainerId,
+          startTime: match.startTime,
+          endTime: match.endTime,
+        };
+        break;
+      }
+    }
+  }
+
+  if (!resolvedSession) {
     return NextResponse.json(
       { message: 'Scheduled session was not found.' },
       { status: 404 }
@@ -91,7 +131,7 @@ export async function POST(request: Request) {
     .eq('profile_id', profile.id)
     .maybeSingle();
 
-  const trainerId = sessionData.trainer_id || trainerRow?.id || profile.id;
+  const trainerId = resolvedSession.trainer_id || trainerRow?.id || profile.id;
 
   let startsAt = '08:00:00';
   let endsAt = '10:00:00';

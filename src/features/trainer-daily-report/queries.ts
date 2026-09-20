@@ -52,6 +52,9 @@ export async function detectPastUnrecordedReportsAndSessions({
 
   const scheduledOnDates: Array<{
     scheduledSessionId: string;
+    teachingAllocationId: string;
+    unitId: string;
+    cohortId: string;
     sessionDate: string;
     dayOfWeek: string;
     unitCode: string;
@@ -70,6 +73,9 @@ export async function detectPastUnrecordedReportsAndSessions({
 
         scheduledOnDates.push({
           scheduledSessionId: item.scheduledSessionId,
+          teachingAllocationId: item.teachingAllocationId,
+          unitId: item.unitId,
+          cohortId: item.cohortId,
           sessionDate: dateItem.dateStr,
           dayOfWeek: dateItem.dayOfWeek,
           unitCode: '',
@@ -87,18 +93,39 @@ export async function detectPastUnrecordedReportsAndSessions({
     return { unrecordedSessions: [], unsubmittedReportDates: [] };
   }
 
-  const scheduledSessionIds = [...new Set(scheduledOnDates.map((s) => s.scheduledSessionId))];
+  const scheduledSessionIds = [...new Set(scheduledOnDates.map((s) => s.scheduledSessionId).filter(Boolean))];
+  const allocationIds = [...new Set(scheduledOnDates.map((s) => s.teachingAllocationId).filter(Boolean))];
   const dates = [...new Set(scheduledOnDates.map((s) => s.sessionDate))];
 
-  const { data: recordedSessions } = await (supabase as any)
+  let csQuery = (supabase as any)
     .from('class_sessions')
-    .select('id, scheduled_session_id, session_date, status')
-    .in('scheduled_session_id', scheduledSessionIds)
+    .select('id, scheduled_session_id, teaching_allocation_id, unit_id, cohort_id, session_date, status')
     .in('session_date', dates);
+
+  if (scheduledSessionIds.length > 0 && allocationIds.length > 0) {
+    csQuery = csQuery.or(`scheduled_session_id.in.(${scheduledSessionIds.join(',')}),teaching_allocation_id.in.(${allocationIds.join(',')})`);
+  } else if (scheduledSessionIds.length > 0) {
+    csQuery = csQuery.in('scheduled_session_id', scheduledSessionIds);
+  } else if (allocationIds.length > 0) {
+    csQuery = csQuery.in('teaching_allocation_id', allocationIds);
+  }
+
+  const { data: recordedSessions } = await csQuery;
 
   const recordedMap = new Map<string, string>();
   for (const cs of recordedSessions ?? []) {
-    recordedMap.set(`${cs.scheduled_session_id}:${cs.session_date}`, cs.status);
+    if (cs.scheduled_session_id) {
+      recordedMap.set(`${cs.scheduled_session_id}:${cs.session_date}`, cs.status);
+    }
+    if (cs.teaching_allocation_id) {
+      recordedMap.set(`${cs.teaching_allocation_id}:${cs.session_date}`, cs.status);
+    }
+    if (cs.unit_id && cs.cohort_id) {
+      recordedMap.set(`${cs.unit_id}:${cs.cohort_id}:${cs.session_date}`, cs.status);
+    }
+    if (cs.unit_id) {
+      recordedMap.set(`${cs.unit_id}:${cs.session_date}`, cs.status);
+    }
   }
 
   const unrecordedSessions: PastUnrecordedSession[] = [];
@@ -108,7 +135,12 @@ export async function detectPastUnrecordedReportsAndSessions({
   >();
 
   for (const s of scheduledOnDates) {
-    const status = recordedMap.get(`${s.scheduledSessionId}:${s.sessionDate}`);
+    const status =
+      recordedMap.get(`${s.scheduledSessionId}:${s.sessionDate}`) ||
+      recordedMap.get(`${s.teachingAllocationId}:${s.sessionDate}`) ||
+      recordedMap.get(`${s.unitId}:${s.cohortId}:${s.sessionDate}`) ||
+      recordedMap.get(`${s.unitId}:${s.sessionDate}`);
+
     const isRecorded = status === 'completed' || status === 'cancelled';
     const isCompleted = status === 'completed';
     const isCancelled = status === 'cancelled';

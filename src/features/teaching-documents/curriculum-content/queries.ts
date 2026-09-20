@@ -60,6 +60,7 @@ function enrichWithCanonical(
   def: UnitCurriculumDefinition,
   lookupCode: string,
   lookupName?: string,
+  isAuthoritative = false,
 ): UnitCurriculumDefinition {
   const canonical = findCanonicalCurriculum(lookupCode, lookupName);
   if (!canonical) return def;
@@ -100,23 +101,28 @@ function enrichWithCanonical(
     (w) => isCorruptedText(w.topicTitle) || isCorruptedText(w.specificLearningOutcomes)
   );
 
-  // Harmonize weekly schedule: if def schedule is missing, corrupted, or has only single-line outcomes without multi-bullet depth, upgrade to canonical
+  // Authoritative schedules (uploaded by user/HOD or trainer) MUST NOT be overwritten by canonical defaults
   let weeklySchedule = def.weeklySchedule;
   const canonicalSchedule = canonical.weeklySchedule;
-  const canonicalHasRichSLOs =
-    canonicalSchedule &&
-    canonicalSchedule.length > 0 &&
-    canonicalSchedule.some((w) => Boolean(w.specificLearningOutcomes && w.specificLearningOutcomes.includes('\n•')));
 
-  if (
-    !weeklySchedule ||
-    weeklySchedule.length === 0 ||
-    isScheduleCorrupt ||
-    (canonicalHasRichSLOs &&
-      weeklySchedule.every((w) => !w.specificLearningOutcomes || !w.specificLearningOutcomes.includes('\n•')))
-  ) {
-    if (canonicalSchedule && canonicalSchedule.length > 0) {
-      weeklySchedule = canonicalSchedule;
+  if (isAuthoritative && weeklySchedule && weeklySchedule.length > 0 && !isScheduleCorrupt) {
+    // Retain verbatim authoritative schedule
+  } else {
+    const canonicalHasRichSLOs =
+      canonicalSchedule &&
+      canonicalSchedule.length > 0 &&
+      canonicalSchedule.some((w) => Boolean(w.specificLearningOutcomes && w.specificLearningOutcomes.includes('\n•')));
+
+    if (
+      !weeklySchedule ||
+      weeklySchedule.length === 0 ||
+      isScheduleCorrupt ||
+      (canonicalHasRichSLOs &&
+        weeklySchedule.every((w) => !w.specificLearningOutcomes || !w.specificLearningOutcomes.includes('\n•')))
+    ) {
+      if (canonicalSchedule && canonicalSchedule.length > 0) {
+        weeklySchedule = canonicalSchedule;
+      }
     }
   }
 
@@ -272,7 +278,7 @@ export const getApprovedCurriculumForUnitCode = cache(
                   resourcesAndReferences: cleanResourceField(row.resources),
                   assessmentAndRemarks: row.assessment || undefined,
                 })),
-              }, resolvedCode || unitCode, resolvedName || unitName);
+              }, resolvedCode || unitCode, resolvedName || unitName, true);
             }
           }
         }
@@ -329,7 +335,7 @@ export const getApprovedCurriculumForUnitCode = cache(
                   resourcesAndReferences: cleanResourceField(row.resources),
                   assessmentAndRemarks: row.assessment || undefined,
                 })),
-              }, resolvedCode || unitCode, resolvedName || unitName);
+              }, resolvedCode || unitCode, resolvedName || unitName, true);
             }
           }
         }
@@ -391,7 +397,7 @@ export const getApprovedCurriculumForUnitCode = cache(
                     resourcesAndReferences: cleanResourceField(row.resources),
                     assessmentAndRemarks: row.assessment || undefined,
                   })),
-                }, resolvedCode || unitCode, resolvedName || unitName);
+                }, resolvedCode || unitCode, resolvedName || unitName, true);
               }
             }
           }
@@ -453,7 +459,7 @@ export const getApprovedCurriculumForUnitCode = cache(
                   instructionalEquipment: [],
                   teachingLearningApproaches: family.teaching_learning_approaches ?? undefined,
                   assessmentApproaches: family.assessment_approaches ?? undefined,
-                }, resolvedCode || unitCode, resolvedName || unitName);
+                }, resolvedCode || unitCode, resolvedName || unitName, true);
               }
             }
           }

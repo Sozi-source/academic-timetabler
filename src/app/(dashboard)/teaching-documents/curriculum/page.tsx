@@ -28,6 +28,9 @@ import {
 import {
   ClearDocumentsButton,
 } from '@/features/teaching-documents/clear-documents-button';
+import {
+  BulkCourseOutlineUploadDialog,
+} from '@/features/teaching-documents/bulk-upload-dialog';
 
 function documentLabel(
   value:
@@ -132,12 +135,14 @@ export default async function CurriculumContentPage() {
 
             <ClearDocumentsButton />
 
+            <BulkCourseOutlineUploadDialog />
+
             <Link
               href="/teaching-documents/curriculum/editor"
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3.5 text-xs font-semibold text-white shadow-sm hover:bg-primary-hover transition"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-white px-3.5 text-xs font-semibold text-text-primary shadow-2xs hover:bg-surface-subtle transition"
             >
-              <Sparkles className="size-3.5" />
-              Upload Word (.docx)
+              <Sparkles className="size-3.5 text-primary" />
+              Online Builder
             </Link>
           </div>
         }
@@ -152,15 +157,16 @@ export default async function CurriculumContentPage() {
             No curriculum published
           </div>
           <p className="text-[11px] text-text-muted">
-            Upload a Word syllabus — topics distribute automatically across 14 weeks.
+            Upload an Excel workbook or Word ZIP archive — topics distribute automatically across 14 weeks.
           </p>
-          <div>
+          <div className="flex items-center justify-center gap-2">
+            <BulkCourseOutlineUploadDialog />
             <Link
               href="/teaching-documents/curriculum/editor"
-              className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-white shadow-sm"
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-white px-3 text-xs font-semibold text-text-primary shadow-2xs hover:bg-surface-subtle"
             >
-              <Sparkles className="size-3.5" />
-              Upload Word (.docx)
+              <Sparkles className="size-3.5 text-primary" />
+              Online Builder
             </Link>
           </div>
         </section>

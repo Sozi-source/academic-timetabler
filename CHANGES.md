@@ -31,6 +31,41 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
      - Option B: a near-term planning window (current period + the next one) stays editable; only periods further out are locked.
    - Likely implementation shape once decided: tighten the period-status check already present in `validate_scheduled_session_relationships()` / `validate_pending_scheduled_session()` (currently `not in ('planned','active')`, fixed by `20260919160000`) and the equivalent app-layer guards in `unit_offerings` approval/placement actions, rather than a new mechanism from scratch.
 
+### 2026-09-20: Authoritative Bulk Course Outline Upload System & Zero-Synthetic Infiltration
+
+- **Context & Problem**:
+  - HOD reported: *"i need away to upload course outlines contents in bulk which will be authoritative in terms of content but the layout and format we retain the current one on the system. this is because i have identified several synthetic contents which i did not provided. you can guide on the most appropriate way to handle this."*
+  - **Root Cause**:
+    1. Units without custom database versions fell back to hardcoded registry seed files (`module-1.ts`, `module-2.ts`, `module-3.ts`, `certificate-units.ts`), which contained placeholder / synthetic text (e.g. *"functions and physiological role of ICT"*, boilerplate references).
+    2. In `queries.ts`, `enrichWithCanonical` contained logic (`canonicalHasRichSLOs`) that silently discarded an uploaded outline's weekly schedule if it lacked multi-line bullets and replaced it with synthetic canonical topics.
+    3. The curriculum library UI lacked an accessible bulk upload tool, forcing single-unit edits or leaving units to synthetic defaults.
+- **Architectural Solutions & Changes**:
+  - **Authoritative Bulk Ingestion Engine (`src/features/teaching-documents/bulk-curriculum-parser.ts`, `bulk-curriculum-actions.ts`)**:
+    - Built a robust dual-mode parser supporting:
+      1. **Excel Workbooks (`.xlsx`)**: Multi-unit spreadsheet matching official TVET syllabus structures (`Units` and `Course Outline Topics` sheets).
+      2. **Word ZIP Archives (`.zip`)**: Bulk batch upload of individual `.docx` course outlines, parsed using `parseDocxSyllabus`.
+    - Automatically matches unit codes and names against the active department's database units (`is_active = true`), detecting matches and unmapped units.
+    - Server action `commitBulkCourseOutlinesAction`: Atomically stores outlines in `curriculum_document_versions` with status `'active'`, superseding older versions and updating in-memory cache.
+  - **Dynamic Department-Prefilled Template (`src/app/api/curriculum/template/route.ts`)**:
+    - Updated template download route to query active units for the authenticated user's department and pre-fill unit codes and unit names in the Excel template.
+  - **Harden Retrieval & Prevent Synthetic Overwrites (`src/features/teaching-documents/curriculum-content/queries.ts`)**:
+    - Updated `enrichWithCanonical` to accept `isAuthoritative`. When an active database version exists in `curriculum_document_versions`, the user's weekly schedule, description, competencies, and references are treated as strictly authoritative and are NEVER replaced by canonical seed defaults.
+  - **Bulk Upload UI Modal (`src/features/teaching-documents/bulk-upload-dialog.tsx`)**:
+    - Mounted on the Curriculum Content page (`/teaching-documents/curriculum`) in both the header action bar and the empty state.
+    - Features 1-click template download, file dropzone for `.xlsx` or `.zip`, live preview of extracted units and topics, and one-click commit.
+  - **100% Retained Layout & Format**:
+    - All document presentation components (`TVETDocumentViewer`, `generateTVETCourseOutline`, Word export `.docx`, print styles) remain 100% identical and unchanged.
+- **Files Modified/Added**:
+  - `src/features/teaching-documents/bulk-curriculum-parser.ts` (NEW)
+  - `src/features/teaching-documents/bulk-curriculum-actions.ts` (NEW)
+  - `src/features/teaching-documents/bulk-upload-dialog.tsx` (NEW)
+  - `src/app/api/teaching-documents/curriculum/bulk-upload/route.ts` (NEW)
+  - `src/tests/bulk-course-outline-upload.test.ts` (NEW)
+  - `src/app/api/curriculum/template/route.ts` (MODIFIED)
+  - `src/features/teaching-documents/curriculum-content/queries.ts` (MODIFIED)
+  - `src/app/(dashboard)/teaching-documents/curriculum/page.tsx` (MODIFIED)
+  - `CHANGES.md` (MODIFIED)
+
 ### 2026-09-20: Curriculum Weekly Sessions Alignment & Fixed Schedule Form Gating
 
 - **Context & Problem**:

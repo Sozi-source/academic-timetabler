@@ -3,19 +3,17 @@
 import { useMemo, useState } from 'react';
 import {
   AlertTriangle,
-  BookOpenCheck,
   CalendarCheck2,
   CheckCircle2,
   Clock,
-  Filter,
+  ShieldCheck,
 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
-import { MetricCard } from '@/components/ui/metric-card';
+import { Progress } from '@/components/ui/progress';
 import {
-  attendanceRateLabel,
-  COLLEGE_MINIMUM_ATTENDANCE_PERCENT,
   getAttendanceBadgeVariant,
   getAttendanceStanding,
 } from '@/features/attendance-analytics/domain';
@@ -25,6 +23,13 @@ import { formatPortalClock } from './domain';
 interface StudentAttendanceViewProps {
   attendance: StudentPortalAttendanceSnapshot;
 }
+
+const STANDING_COPY: Record<string, { icon: typeof ShieldCheck; text: string; tone: string }> = {
+  at_risk: { icon: AlertTriangle, text: 'Action needed', tone: 'rose' },
+  borderline: { icon: AlertTriangle, text: 'Watch closely', tone: 'amber' },
+  good: { icon: ShieldCheck, text: 'Good standing', tone: 'emerald' },
+  unrecorded: { icon: ShieldCheck, text: 'No data yet', tone: 'slate' },
+};
 
 export function StudentAttendanceView({
   attendance,
@@ -38,62 +43,79 @@ export function StudentAttendanceView({
   const displayedSessions = sessionFilter === 'missed' ? missedSessions : attendance.sessions;
 
   const standing = getAttendanceStanding(attendance.attendanceRate);
-  const isBelowMinimum = standing === 'at_risk';
+  const { icon: StandingIcon, text: standingText, tone } = STANDING_COPY[standing];
+  const totalSessions = attendance.presentCount + attendance.absentCount;
 
   return (
     <div className="space-y-4">
-      {/* Policy Banner */}
-      {isBelowMinimum ? (
-        <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50/80 p-4 text-xs text-rose-900 shadow-2xs">
-          <AlertTriangle className="mt-0.5 size-4.5 shrink-0 text-rose-600" />
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <p className="font-bold text-rose-950">Attendance Debarment Risk</p>
-              <span className="rounded bg-rose-200/80 px-1.5 py-0.2 text-[10px] font-bold text-rose-900">
-                Below {COLLEGE_MINIMUM_ATTENDANCE_PERCENT}% Minimum
-              </span>
-            </div>
-            <p className="text-[11.5px] leading-relaxed text-rose-800">
-              Your overall attendance is <strong>{attendanceRateLabel(attendance.attendanceRate)}</strong>. The college requires a minimum of <strong>{COLLEGE_MINIMUM_ATTENDANCE_PERCENT}%</strong> attendance across completed sessions for examination clearance.
+      {/* Status strip — one line, no paragraph */}
+      <div
+        className={`flex items-center justify-between rounded-xl border px-4 py-2.5 text-xs ${
+          tone === 'rose'
+            ? 'border-rose-200 bg-rose-50/80 text-rose-900'
+            : tone === 'amber'
+              ? 'border-amber-200 bg-amber-50/80 text-amber-900'
+              : tone === 'emerald'
+                ? 'border-emerald-200 bg-emerald-50/70 text-emerald-900'
+                : 'border-border bg-surface-subtle text-text-secondary'
+        }`}
+      >
+        <div className="flex items-center gap-2">
+          <StandingIcon className="size-4 shrink-0" />
+          <span className="font-semibold">{standingText}</span>
+        </div>
+        <span className="font-bold font-mono">
+          {attendance.absentCount} missed
+        </span>
+      </div>
+
+      {/* Hero + supporting stats */}
+      <section className="grid grid-cols-1 gap-3 sm:grid-cols-[1.1fr_1fr]">
+        <Card
+          className={`flex items-center justify-between gap-4 p-5 ${
+            tone === 'rose'
+              ? 'border-rose-200 bg-rose-50/40'
+              : tone === 'amber'
+                ? 'border-amber-200 bg-amber-50/40'
+                : ''
+          }`}
+        >
+          <div>
+            <p className="text-xs font-semibold tracking-wide text-text-muted">
+              Lessons missed
+            </p>
+            <p className="mt-1 text-4xl font-bold tracking-tight text-text-primary">
+              {attendance.absentCount}
             </p>
           </div>
-        </div>
-      ) : (
-        <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50/70 px-4 py-2.5 text-xs text-emerald-900">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
-            <span className="font-medium">
-              Good Standing: Meets the college minimum requirement of {COLLEGE_MINIMUM_ATTENDANCE_PERCENT}% attendance.
+          <span
+            className={`flex size-11 items-center justify-center rounded-full ${
+              tone === 'rose'
+                ? 'bg-rose-100 text-rose-600'
+                : tone === 'amber'
+                  ? 'bg-amber-100 text-amber-600'
+                  : 'bg-emerald-100 text-emerald-600'
+            }`}
+          >
+            <StandingIcon className="size-5" />
+          </span>
+        </Card>
+
+        <Card className="flex flex-col justify-center gap-3 p-5">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-semibold text-text-secondary">Present</span>
+            <span className="font-mono font-bold text-text-primary">
+              {attendance.presentCount} / {totalSessions}
             </span>
           </div>
-          <span className="font-bold text-emerald-800 font-mono">
-            {attendanceRateLabel(attendance.attendanceRate)}
-          </span>
-        </div>
-      )}
-
-      {/* Metric Cards Grid */}
-      <section className="portal-metric-grid grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <MetricCard
-          label="Attendance rate"
-          value={attendanceRateLabel(attendance.attendanceRate)}
-          icon={CalendarCheck2}
-          description={`College target: ≥${COLLEGE_MINIMUM_ATTENDANCE_PERCENT}%`}
-        />
-
-        <MetricCard
-          label="Present"
-          value={String(attendance.presentCount)}
-          icon={CalendarCheck2}
-          description="Completed sessions attended"
-        />
-
-        <MetricCard
-          label="Absent"
-          value={String(attendance.absentCount)}
-          icon={CalendarCheck2}
-          description="Missed class sessions"
-        />
+          <Progress
+            value={attendance.presentCount}
+            max={Math.max(totalSessions, 1)}
+            indicatorClassName={
+              tone === 'rose' ? 'bg-rose-500' : tone === 'amber' ? 'bg-amber-500' : 'bg-emerald-500'
+            }
+          />
+        </Card>
       </section>
 
       {attendance.units.length === 0 ? (
@@ -106,49 +128,42 @@ export function StudentAttendanceView({
         <>
           {/* Unit Breakdown */}
           <section className="overflow-hidden rounded-xl border border-border bg-white shadow-2xs">
-            <div className="border-b border-border px-4 py-3 flex items-center justify-between">
+            <div className="border-b border-border px-4 py-3">
               <h2 className="text-xs font-bold uppercase tracking-wider text-text-muted">
-                Attendance By Unit
+                By Unit
               </h2>
-              <span className="text-[11px] text-text-muted">
-                Target: {COLLEGE_MINIMUM_ATTENDANCE_PERCENT}%
-              </span>
             </div>
 
             <div className="divide-y divide-border">
               {attendance.units.map((unit) => {
                 const unitStanding = getAttendanceStanding(unit.attendanceRate);
                 const isUnitRisk = unitStanding === 'at_risk';
+                const unitTotal = unit.presentCount + unit.absentCount;
 
                 return (
                   <article
                     key={unit.unitId}
-                    className="grid gap-2 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_6rem_7rem_7rem] sm:items-center hover:bg-slate-50/50 transition-colors"
+                    className="grid gap-2.5 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_9rem_5.5rem] sm:items-center hover:bg-slate-50/50 transition-colors"
                   >
-                    <div>
-                      <p className="text-xs font-semibold text-text-primary">
+                    <div className="min-w-0">
+                      <p className="truncate text-xs font-semibold text-text-primary">
                         {unit.unitName}
                       </p>
-                      {isUnitRisk ? (
-                        <span className="mt-0.5 inline-flex items-center gap-1 text-[10px] font-bold text-rose-600">
-                          <AlertTriangle className="size-2.5" /> Below {COLLEGE_MINIMUM_ATTENDANCE_PERCENT}% threshold
-                        </span>
-                      ) : null}
+                      <p className="text-[10px] text-text-muted">
+                        {unit.completedSessions} session{unit.completedSessions === 1 ? '' : 's'}
+                      </p>
                     </div>
 
-                    <p className="text-[11px] font-mono text-text-muted">
-                      {unit.completedSessions} session{unit.completedSessions === 1 ? '' : 's'}
-                    </p>
-
-                    <p className="text-[11px] font-mono text-text-muted">
-                      <span className="text-emerald-700 font-bold">{unit.presentCount} P</span>
-                      {' · '}
-                      <span className="text-rose-700 font-bold">{unit.absentCount} A</span>
-                    </p>
+                    <Progress
+                      value={unit.presentCount}
+                      max={Math.max(unitTotal, 1)}
+                      className="h-1.5"
+                      indicatorClassName={isUnitRisk ? 'bg-rose-500' : 'bg-emerald-500'}
+                    />
 
                     <div className="sm:text-right">
                       <Badge variant={getAttendanceBadgeVariant(unit.attendanceRate)}>
-                        {attendanceRateLabel(unit.attendanceRate)}
+                        {unit.absentCount} missed
                       </Badge>
                     </div>
                   </article>
@@ -174,7 +189,7 @@ export function StudentAttendanceView({
                       : 'bg-white text-text-secondary border border-border hover:bg-surface-subtle'
                   }`}
                 >
-                  All Classes ({attendance.sessions.length})
+                  All ({attendance.sessions.length})
                 </button>
 
                 <button
@@ -186,7 +201,7 @@ export function StudentAttendanceView({
                       : 'bg-rose-50 text-rose-800 border border-rose-200 hover:bg-rose-100'
                   }`}
                 >
-                  Missed Lessons ({missedSessions.length})
+                  Missed ({missedSessions.length})
                 </button>
               </div>
             </div>
@@ -196,8 +211,7 @@ export function StudentAttendanceView({
                 {sessionFilter === 'missed' ? (
                   <div className="flex flex-col items-center gap-2">
                     <CheckCircle2 className="size-8 text-emerald-500" />
-                    <p className="font-bold text-text-primary">No Missed Lessons</p>
-                    <p>You have attended 100% of recorded classes!</p>
+                    <p className="font-bold text-text-primary">No missed lessons</p>
                   </div>
                 ) : (
                   'No class sessions recorded.'

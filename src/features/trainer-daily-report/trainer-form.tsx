@@ -25,7 +25,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ABSENT_CIRCUMSTANCES } from '@/features/class-attendance/domain';
-import { submitTrainerDailyReportAction, submitDailyReportDirectAction } from './actions';
+import { submitTrainerDailyReportAction, submitDailyReportDirectAction, dismissOverdueReportAction } from './actions';
 import {
   formatDailyReportDate,
   formatDailyReportTime,
@@ -233,6 +233,7 @@ function PastUnrecordedBanner({
   onRecordPast,
   onLogException,
   onSubmitReportDirect,
+  onDismissDate,
 }: {
   sessions: PastUnrecordedSession[];
   unsubmittedReports?: PastUnsubmittedReportDate[];
@@ -240,9 +241,11 @@ function PastUnrecordedBanner({
   onRecordPast: (session: PastUnrecordedSession) => void;
   onLogException: (session: PastUnrecordedSession) => void;
   onSubmitReportDirect?: (reportDate: string) => Promise<void>;
+  onDismissDate?: (reportDate: string) => Promise<void>;
 }) {
   const [isOpen, setIsOpen] = useState(true);
   const [submittingDate, setSubmittingDate] = useState<string | null>(null);
+  const [dismissingDate, setDismissingDate] = useState<string | null>(null);
 
   if (sessions.length === 0 && unsubmittedReports.length === 0) return null;
 
@@ -258,6 +261,19 @@ function PastUnrecordedBanner({
     }
   }
 
+  async function handleDismiss(dateStr: string) {
+    if (!onDismissDate) return;
+    if (!confirm(`Hide the ${dateStr} reminder? This just removes it from your list — it does not submit a report.`)) {
+      return;
+    }
+    setDismissingDate(dateStr);
+    try {
+      await onDismissDate(dateStr);
+    } finally {
+      setDismissingDate(null);
+    }
+  }
+
   return (
     <section className="overflow-hidden rounded-xl border border-amber-300 bg-amber-50/90 shadow-xs">
       <div className="flex flex-col gap-2 border-b border-amber-200/80 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
@@ -267,7 +283,7 @@ function PastUnrecordedBanner({
             Overdue Attendance & Reports ({totalOverdue})
           </h3>
           <span className="hidden text-xs text-amber-800 sm:inline">
-            — You must resolve previous unrecorded sessions or reports before taking today&apos;s classes.
+            — For your records: catch these up when convenient. They no longer block today&apos;s classes or report.
           </span>
         </div>
 
@@ -333,6 +349,16 @@ function PastUnrecordedBanner({
                 >
                   Review
                 </Link>
+                {onDismissDate ? (
+                  <button
+                    type="button"
+                    disabled={dismissingDate === report.reportDate}
+                    onClick={() => handleDismiss(report.reportDate)}
+                    className="text-[11px] text-text-muted hover:text-rose-700 underline px-1 disabled:opacity-50"
+                  >
+                    {dismissingDate === report.reportDate ? 'Hiding...' : 'Hide'}
+                  </button>
+                ) : null}
               </div>
             </div>
           ))}
@@ -372,6 +398,16 @@ function PastUnrecordedBanner({
                 >
                   Did Not Take Place
                 </button>
+                {onDismissDate ? (
+                  <button
+                    type="button"
+                    disabled={dismissingDate === session.sessionDate}
+                    onClick={() => handleDismiss(session.sessionDate)}
+                    className="text-[11px] text-text-muted hover:text-rose-700 underline px-1 disabled:opacity-50"
+                  >
+                    {dismissingDate === session.sessionDate ? 'Hiding...' : 'Hide'}
+                  </button>
+                ) : null}
               </div>
             </div>
           ))}
@@ -486,26 +522,6 @@ function ScheduledLessonsSection({
                   <span className="text-[11px] font-medium text-text-muted italic">
                     Did Not Take Place
                   </span>
-                ) : workspace.hasOverduePastSessions ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const firstSession = workspace.pastUnrecordedSessions?.[0];
-                      const firstReport = workspace.unsubmittedPastReportDates?.[0];
-                      const dateText = firstSession
-                        ? `${firstSession.sessionDate} (${firstSession.unitName})`
-                        : firstReport
-                        ? `${firstReport.dayOfWeek}, ${firstReport.reportDate}`
-                        : 'a previous date';
-                      alert(
-                        `Enforcement Notice: Please record attendance or submit your previous report for ${dateText} before taking attendance for today's classes.`
-                      );
-                    }}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3.5 py-1.5 text-xs font-semibold text-amber-900 shadow-2xs transition hover:bg-amber-100"
-                  >
-                    <AlertTriangle className="size-3.5 text-amber-600" />
-                    Past Report Required
-                  </button>
                 ) : lesson.attendanceStatus === 'open' ? (
                   <button
                     type="button"
@@ -802,6 +818,20 @@ export function TrainerDailyReportForm({
     }
   }
 
+  async function handleDismissBacklogDate(dateToDismiss: string) {
+    try {
+      const res = await dismissOverdueReportAction(dateToDismiss);
+      if (res.success) {
+        router.refresh();
+      } else {
+        alert(res.message);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to hide this item.';
+      alert(msg);
+    }
+  }
+
   async function handleRecordAttendance(lesson: TrainerDailyReportLesson) {
     const returnUrl = encodeURIComponent(`/staff/daily-report?date=${workspace.reportDate}`);
 
@@ -883,7 +913,7 @@ export function TrainerDailyReportForm({
   const isNonTeachingDay = (workspace?.lessons ?? []).length === 0;
   const hasText = otherActivity.trim().length > 0 || concern.trim().length > 0;
   const isSubmittable = isNonTeachingDay
-    ? hasText && !workspace.hasOverduePastSessions
+    ? hasText
     : Boolean(workspace?.readyToSubmit);
 
   if (workspace.status === 'submitted') {
@@ -947,6 +977,7 @@ export function TrainerDailyReportForm({
         onRecordPast={handleRecordPastAttendance}
         onLogException={handleOpenExceptionDialog}
         onSubmitReportDirect={handleDirectSubmitReport}
+        onDismissDate={handleDismissBacklogDate}
       />
 
       <SessionExceptionDialog
@@ -959,7 +990,7 @@ export function TrainerDailyReportForm({
       <form
         action={action}
         onSubmit={(e) => {
-          if ((isNonTeachingDay && !hasText) || workspace.hasOverduePastSessions) {
+          if (isNonTeachingDay && !hasText) {
             e.preventDefault();
           }
         }}
@@ -993,9 +1024,7 @@ export function TrainerDailyReportForm({
             <AlertTriangle className="size-4 shrink-0 text-amber-600 mt-0.5" />
             <div className="flex-1">
               <p className="text-xs font-bold text-amber-950">
-                {workspace.hasOverduePastSessions
-                  ? 'Previous Unrecorded Sessions or Reports Pending'
-                  : 'Attendance Pending Before Submission'}
+                Attendance Pending Before Submission
               </p>
               <p className="mt-0.5 text-[11px] text-amber-800">
                 {workspace.blockingReason ||

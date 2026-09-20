@@ -228,10 +228,33 @@ export async function detectPastUnrecordedReportsAndSessions({
     console.warn('detectPastUnrecordedReportsAndSessions reports check warning:', err);
   }
 
-  unrecordedSessions.sort((a, b) => b.daysOverdue - a.daysOverdue);
-  unsubmittedReportDates.sort((a, b) => b.daysOverdue - a.daysOverdue);
+  // Exclude dates the trainer has explicitly hidden from the backlog banner.
+  let dismissedDates = new Set<string>();
+  try {
+    let dismissQuery = (supabase as any)
+      .from('trainer_backlog_dismissals')
+      .select('report_date')
+      .in('report_date', dates);
+    if (trainerId) dismissQuery = dismissQuery.eq('trainer_id', trainerId);
+    const { data: dismissed } = await dismissQuery;
+    dismissedDates = new Set((dismissed ?? []).map((d: any) => d.report_date));
+  } catch (err) {
+    // Table may not exist yet if the migration hasn't been applied — treat
+    // as "nothing dismissed" rather than failing the whole workspace load.
+    console.warn('trainer_backlog_dismissals lookup warning:', err);
+  }
 
-  return { unrecordedSessions, unsubmittedReportDates };
+  const filteredUnrecordedSessions = dismissedDates.size
+    ? unrecordedSessions.filter((s) => !dismissedDates.has(s.sessionDate))
+    : unrecordedSessions;
+  const filteredUnsubmittedReportDates = dismissedDates.size
+    ? unsubmittedReportDates.filter((r) => !dismissedDates.has(r.reportDate))
+    : unsubmittedReportDates;
+
+  filteredUnrecordedSessions.sort((a, b) => b.daysOverdue - a.daysOverdue);
+  filteredUnsubmittedReportDates.sort((a, b) => b.daysOverdue - a.daysOverdue);
+
+  return { unrecordedSessions: filteredUnrecordedSessions, unsubmittedReportDates: filteredUnsubmittedReportDates };
 }
 
 export async function detectPastUnrecordedSessions(args: {
@@ -318,14 +341,13 @@ export async function getTrainerDailyReportWorkspace(
         data.lessons.length === 0 ||
         data.lessons.every((l: any) => l.attendanceStatus === 'completed' || l.attendanceStatus === 'cancelled');
 
+      // Past overdue items are informational only — they no longer gate
+      // submission of TODAY's report. Only today's own attendance
+      // completeness determines readyToSubmit.
       const hasOverduePastSessions = unrecordedSessions.length > 0 || unsubmittedReportDates.length > 0;
-      const readyToSubmit = lessonsComplete && !hasOverduePastSessions;
+      const readyToSubmit = lessonsComplete;
       const blockingReason = !lessonsComplete
         ? 'Complete Class Attendance for all scheduled lessons before submitting the daily report.'
-        : unrecordedSessions.length > 0
-        ? `You have ${unrecordedSessions.length} unrecorded past class session(s). Please record attendance or log an exception for ${unrecordedSessions[0].sessionDate} (${unrecordedSessions[0].unitName}) before submitting.`
-        : unsubmittedReportDates.length > 0
-        ? `You have ${unsubmittedReportDates.length} unsubmitted previous daily report(s). Please submit your report for ${unsubmittedReportDates[0].dayOfWeek}, ${unsubmittedReportDates[0].reportDate} before submitting.`
         : null;
 
       return {
@@ -494,14 +516,12 @@ export async function getTrainerDailyReportWorkspace(
       lessons.length === 0 ||
       lessons.every((l) => l.attendanceStatus === 'completed' || l.attendanceStatus === 'cancelled');
 
+    // Past overdue items are informational only — they no longer gate
+    // submission of TODAY's report.
     const hasOverduePastSessions = unrecordedSessions.length > 0 || unsubmittedReportDates.length > 0;
-    const readyToSubmit = lessonsComplete && !hasOverduePastSessions;
+    const readyToSubmit = lessonsComplete;
     const blockingReason = !lessonsComplete
       ? 'Complete attendance for all scheduled lessons before submitting the daily report.'
-      : unrecordedSessions.length > 0
-      ? `You have ${unrecordedSessions.length} unrecorded past class session(s). Please record attendance or log an exception for ${unrecordedSessions[0].sessionDate} (${unrecordedSessions[0].unitName}) before submitting.`
-      : unsubmittedReportDates.length > 0
-      ? `You have ${unsubmittedReportDates.length} unsubmitted previous daily report(s). Please submit your report for ${unsubmittedReportDates[0].dayOfWeek}, ${unsubmittedReportDates[0].reportDate} before submitting.`
       : null;
 
     return {

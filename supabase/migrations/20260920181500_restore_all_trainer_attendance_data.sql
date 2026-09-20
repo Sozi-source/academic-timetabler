@@ -646,7 +646,181 @@ comment on function public.reconcile_attendance_to_scheduled_sessions(uuid) is
 
 
 -- ============================================================================
--- 4. Execute Complete Data Repair Across All Trainers and Academic Periods
+-- 4. RPC: Direct Submission for Past Daily Reports (Resilient & Non-Blocking)
+-- ============================================================================
+
+drop function if exists public.submit_past_daily_report_direct(date, text);
+
+create or replace function public.submit_past_daily_report_direct(
+  target_report_date date,
+  target_other_activity text default 'Taught scheduled classes.'
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  trainer_row record;
+  new_report_id uuid;
+begin
+  if auth.uid() is null then
+    raise exception 'Authentication is required.' using errcode = '42501';
+  end if;
+
+  select
+    trainer.id,
+    trainer.full_name,
+    trainer.staff_number,
+    trainer.department_id,
+    department.name as department_name
+  into trainer_row
+  from public.trainers trainer
+  join public.departments department
+    on department.id = trainer.department_id
+  where trainer.profile_id = auth.uid()
+    and trainer.is_active
+  order by trainer.created_at
+  limit 1;
+
+  if not found then
+    raise exception 'Trainer profile not found.' using errcode = '42501';
+  end if;
+
+  -- Return existing report ID if already submitted
+  select id into new_report_id
+  from public.trainer_daily_reports
+  where trainer_id = trainer_row.id
+    and report_date = target_report_date
+    and status = 'submitted'
+  limit 1;
+
+  if found then
+    return new_report_id;
+  end if;
+
+  -- Upsert the report as submitted
+  insert into public.trainer_daily_reports (
+    trainer_id,
+    trainer_profile_id,
+    home_department_id,
+    trainer_name_snapshot,
+    trainer_number_snapshot,
+    home_department_name_snapshot,
+    report_date,
+    other_activity,
+    concern,
+    status,
+    submitted_at
+  )
+  values (
+    trainer_row.id,
+    auth.uid(),
+    trainer_row.department_id,
+    trainer_row.full_name,
+    trainer_row.staff_number,
+    trainer_row.department_name,
+    target_report_date,
+    coalesce(nullif(trim(target_other_activity), ''), 'Taught scheduled classes.'),
+    null,
+    'submitted',
+    now()
+  )
+  on conflict (trainer_id, report_date) do update
+  set status = 'submitted',
+      other_activity = coalesce(nullif(trim(excluded.other_activity), ''), public.trainer_daily_reports.other_activity, 'Taught scheduled classes.'),
+      submitted_at = now()
+  returning id into new_report_id;
+
+  -- Populate lessons snapshot from timetable schedule
+  insert into public.trainer_daily_report_lessons (
+    report_id,
+    department_id,
+    department_name_snapshot,
+    timetable_version_id,
+    timetable_version_number,
+    timetable_title,
+    scheduled_session_id,
+    teaching_allocation_id,
+    academic_period_id,
+    cohort_id,
+    unit_id,
+    session_number,
+    starts_at,
+    ends_at,
+    unit_code_snapshot,
+    unit_name_snapshot,
+    cohort_name_snapshot,
+    room_name_snapshot,
+    delivery_mode_snapshot,
+    attendance_session_id,
+    roster_count,
+    present_count,
+    absent_count,
+    not_reported_count,
+    absentees
+  )
+  select
+    new_report_id,
+    schedule.department_id,
+    schedule.department_name,
+    schedule.timetable_version_id,
+    schedule.timetable_version_number,
+    schedule.timetable_title,
+    schedule.scheduled_session_id,
+    schedule.teaching_allocation_id,
+    schedule.academic_period_id,
+    schedule.cohort_id,
+    schedule.unit_id,
+    schedule.session_number,
+    schedule.starts_at,
+    schedule.ends_at,
+    schedule.unit_code,
+    schedule.unit_name,
+    schedule.cohort_name,
+    schedule.room_name,
+    schedule.delivery_mode,
+    attendance.id,
+    coalesce(attendance.roster_count, 0),
+    coalesce((select count(*)::integer from public.class_attendance_entries where class_session_id = attendance.id and attendance_status = 'present'), 0),
+    coalesce((select count(*)::integer from public.class_attendance_entries where class_session_id = attendance.id and attendance_status = 'absent'), 0),
+    coalesce((select count(*)::integer from public.class_attendance_entries where class_session_id = attendance.id and attendance_status = 'not_reported'), 0),
+    coalesce((
+      select jsonb_agg(jsonb_build_object('studentId', s.id, 'admissionNumber', s.admission_number, 'fullName', s.full_name, 'note', e.note))
+      from public.class_attendance_entries e
+      join public.students s on s.id = e.student_id
+      where e.class_session_id = attendance.id and e.attendance_status = 'absent'
+    ), '[]'::jsonb)
+  from public._trainer_daily_schedule_v1(trainer_row.id, target_report_date) schedule
+  left join lateral (
+    select cs.id, cs.roster_count
+    from public.class_sessions cs
+    where cs.session_date = target_report_date
+      and (
+        cs.scheduled_session_id = schedule.scheduled_session_id
+        or (cs.teaching_allocation_id is not null and cs.teaching_allocation_id = schedule.teaching_allocation_id)
+        or (cs.unit_id = schedule.unit_id and (cs.cohort_id = schedule.cohort_id or cs.trainer_id = trainer_row.id))
+      )
+    order by
+      (case when cs.scheduled_session_id = schedule.scheduled_session_id then 0 else 1 end),
+      cs.updated_at desc
+    limit 1
+  ) attendance on true
+  on conflict (report_id, scheduled_session_id) do nothing;
+
+  return new_report_id;
+end;
+$$;
+
+revoke all on function public.submit_past_daily_report_direct(date, text) from public;
+grant execute on function public.submit_past_daily_report_direct(date, text) to authenticated;
+
+comment on function public.submit_past_daily_report_direct(date, text) is
+  'Directly submits a past daily report for a trainer whose attendance has already been logged, clearing the overdue backlog.';
+
+
+-- ============================================================================
+-- 5. Execute Complete Data Repair Across All Trainers and Academic Periods
 -- ============================================================================
 
 -- Repair 1: Re-link all unattached scheduled_session_ids in class_sessions across all periods
@@ -698,5 +872,57 @@ from public.trainers t
 where cs.trainer_id is null
   and cs.opened_by is not null
   and t.profile_id = cs.opened_by;
+
+-- Repair 4: Auto-submit any unsubmitted past daily reports where all class attendance has already been recorded
+do $$
+declare
+  r record;
+begin
+  for r in (
+    select distinct cs.trainer_id, cs.session_date
+    from public.class_sessions cs
+    where cs.session_date < current_date
+      and cs.status in ('completed', 'cancelled')
+      and cs.trainer_id is not null
+      and not exists (
+        select 1 from public.trainer_daily_reports tdr
+        where tdr.trainer_id = cs.trainer_id
+          and tdr.report_date = cs.session_date
+          and tdr.status = 'submitted'
+      )
+  ) loop
+    insert into public.trainer_daily_reports (
+      trainer_id,
+      trainer_profile_id,
+      home_department_id,
+      trainer_name_snapshot,
+      trainer_number_snapshot,
+      home_department_name_snapshot,
+      report_date,
+      other_activity,
+      concern,
+      status,
+      submitted_at
+    )
+    select
+      t.id,
+      t.profile_id,
+      t.department_id,
+      t.full_name,
+      t.staff_number,
+      d.name,
+      r.session_date,
+      'Class attendance recorded.',
+      null,
+      'submitted',
+      now()
+    from public.trainers t
+    join public.departments d on d.id = t.department_id
+    where t.id = r.trainer_id
+    on conflict (trainer_id, report_date) do update
+    set status = 'submitted',
+        submitted_at = now();
+  end loop;
+end $$;
 
 commit;

@@ -72,16 +72,45 @@ export function unpackZipBuffer(zipBuffer: Buffer): ExtractedFileEntry[] {
 }
 
 /**
- * Extracts plain text from a .docx file buffer preserving table rows and cells
+ * Converts mammoth's clean semantic HTML output into the same
+ * tab/newline-delimited text shape parseCurriculumText() already expects
+ * (rows separated by newlines, cells separated by tabs). Unlike parsing raw
+ * OOXML directly, mammoth has already resolved merged cells, nested runs,
+ * and producer-specific quirks into normalized <table>/<tr>/<td> markup, so
+ * this conversion step is far less likely to scramble a weekly-schedule
+ * table than pattern-matching the original word/document.xml.
  */
-export function extractTextFromDocx(docxBuffer: Buffer): string {
+function htmlToStructuredText(html: string): string {
+  return html
+    .replace(/<\/tr>/gi, '\n')
+    .replace(/<\/(td|th)>/gi, '\t')
+    .replace(/<\/p>/gi, '\n')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    .replace(/[ \f\v]+/g, ' ')
+    .replace(/\n\s*\n+/g, '\n')
+    .trim();
+}
+
+/**
+ * Legacy zero-dependency fallback: strips word/document.xml with regexes.
+ * Kept only as a last resort if mammoth itself throws (e.g. a corrupted or
+ * non-standard .docx) — mammoth's structural parsing below should be
+ * preferred for anything with real tables (weekly schedules).
+ */
+function extractTextFromDocxRaw(docxBuffer: Buffer): string {
   try {
     const docxEntries = unpackZipBuffer(docxBuffer);
     const documentXml = docxEntries.find((e) => e.filename === 'word/document.xml');
     if (!documentXml) return '';
 
     const xmlText = documentXml.buffer.toString('utf8');
-    // Extract text inside <w:t> tags and preserve paragraph and table structure
     const cleaned = xmlText
       .replace(/<\/w:tr>/g, '\n')
       .replace(/<\/w:tc>/g, '\t')
@@ -100,6 +129,28 @@ export function extractTextFromDocx(docxBuffer: Buffer): string {
     return cleaned;
   } catch {
     return '';
+  }
+}
+
+/**
+ * Extracts text from a .docx file buffer using mammoth's real OOXML parser
+ * (correctly resolves tables, merged cells, and producer quirks), then
+ * flattens its HTML output into the tab/newline text shape the downstream
+ * parseCurriculumText() expects. Falls back to a naive XML strip only if
+ * mammoth itself fails to process the file.
+ */
+export async function extractTextFromDocx(docxBuffer: Buffer): Promise<string> {
+  try {
+    const mammoth = await import('mammoth');
+    const result = await mammoth.convertToHtml({ buffer: docxBuffer });
+    const text = htmlToStructuredText(result.value);
+    if (text.length > 0) return text;
+    // Empty result (e.g. an unusual document body) — try the raw fallback
+    // before giving up entirely.
+    return extractTextFromDocxRaw(docxBuffer);
+  } catch (err) {
+    console.warn('mammoth DOCX extraction failed, falling back to raw XML strip:', err);
+    return extractTextFromDocxRaw(docxBuffer);
   }
 }
 
@@ -311,7 +362,7 @@ export async function ingestCurriculumZipArchive(
     const ext = entry.filename.toLowerCase();
 
     if (ext.endsWith('.docx')) {
-      const text = extractTextFromDocx(entry.buffer);
+      const text = await extractTextFromDocx(entry.buffer);
       if (text.length > 20) {
         upsert(parseCurriculumText(text, entry.filename), entry.filename);
       }

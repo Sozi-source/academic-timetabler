@@ -77,6 +77,63 @@ export async function commitIngestedCurriculumAction(
     };
   }
 
+  const { normalizeUnitCodeKey } = await import('./curriculum-registry');
+
+  // Schemes of work are built FROM course outlines, so a scheme should never
+  // be committed for a unit that has no course outline yet — otherwise a
+  // trainer can end up viewing a scheme of work with nothing behind it.
+  // A unit satisfies this either because its course outline is already
+  // active in the database, or because its course outline is included in
+  // this very same batch.
+  const schemeUnits = units.filter((u) => u.documentType === 'scheme_of_work');
+
+  if (schemeUnits.length > 0) {
+    const codeKeysInThisBatch = new Set(
+      units
+        .filter((u) => u.documentType === 'course_outline')
+        .map((u) => normalizeUnitCodeKey(u.unitCode))
+    );
+
+    const { createAdminClient } = await import('@/lib/supabase/admin');
+    const admin = createAdminClient();
+
+    const candidateIds = schemeUnits.map(
+      (u) => `tpl-tvet-${normalizeUnitCodeKey(u.unitCode)}-course_outline`
+    );
+
+    const { data: existingOutlines, error: lookupError } = await admin
+      .from('teaching_document_templates')
+      .select('id')
+      .in('id', candidateIds)
+      .eq('status', 'active');
+
+    if (lookupError) {
+      return {
+        ok: false,
+        count: 0,
+        error: `Could not verify existing course outlines before committing: ${lookupError.message}`,
+      };
+    }
+
+    const existingIds = new Set((existingOutlines ?? []).map((row) => row.id));
+
+    const missingOutline = schemeUnits.filter((u) => {
+      const codeKey = normalizeUnitCodeKey(u.unitCode);
+      const hasExisting = existingIds.has(`tpl-tvet-${codeKey}-course_outline`);
+      const hasInBatch = codeKeysInThisBatch.has(codeKey);
+      return !hasExisting && !hasInBatch;
+    });
+
+    if (missingOutline.length > 0) {
+      const list = missingOutline.map((u) => u.unitCode).join(', ');
+      return {
+        ok: false,
+        count: 0,
+        error: `${missingOutline.length} scheme(s) of work have no course outline to build on yet (${list}). Import the course outline for these units first, or include it in this same batch.`,
+      };
+    }
+  }
+
   const { persistUnitCurriculumToDatabase } = await import('./curriculum-registry');
 
   for (const unit of units) {

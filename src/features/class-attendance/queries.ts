@@ -148,7 +148,7 @@ export async function getStaffClassAttendanceSchedule(): Promise<ClassAttendance
         }
       }
 
-      // Attach latest class sessions if any exist (querying by both scheduled_session_id and allocation IDs)
+      // Attach latest class sessions if any exist (querying by scheduled_session_id, allocation IDs, and unit IDs)
       const sessionIds = items.map((i) => i.scheduledSessionId).filter(Boolean);
       const allocIds = [...new Set(items.map((i) => i.teachingAllocationId).filter(Boolean))];
       const unitIds = [...new Set(items.map((i) => i.unitId).filter(Boolean))];
@@ -158,12 +158,15 @@ export async function getStaffClassAttendanceSchedule(): Promise<ClassAttendance
         .select('id, scheduled_session_id, teaching_allocation_id, unit_id, cohort_id, session_date, status')
         .order('session_date', { ascending: false });
 
-      if (sessionIds.length > 0 && allocIds.length > 0) {
-        csQuery = csQuery.or(`scheduled_session_id.in.(${sessionIds.join(',')}),teaching_allocation_id.in.(${allocIds.join(',')})`);
-      } else if (sessionIds.length > 0) {
-        csQuery = csQuery.in('scheduled_session_id', sessionIds);
-      } else if (allocIds.length > 0) {
-        csQuery = csQuery.in('teaching_allocation_id', allocIds);
+      const orParts: string[] = [];
+      if (sessionIds.length > 0) orParts.push(`scheduled_session_id.in.(${sessionIds.join(',')})`);
+      if (allocIds.length > 0) orParts.push(`teaching_allocation_id.in.(${allocIds.join(',')})`);
+      if (unitIds.length > 0) orParts.push(`unit_id.in.(${unitIds.join(',')})`);
+      if (workspace.trainerId) orParts.push(`trainer_id.eq.${workspace.trainerId}`);
+      if (profile.id) orParts.push(`opened_by.eq.${profile.id}`);
+
+      if (orParts.length > 0) {
+        csQuery = csQuery.or(orParts.join(','));
       }
 
       const { data: classSessions } = await csQuery;
@@ -171,6 +174,7 @@ export async function getStaffClassAttendanceSchedule(): Promise<ClassAttendance
       const csBySessionId = new Map();
       const csByAllocUnit = new Map();
       const csByUnitCohort = new Map();
+      const csByUnit = new Map();
 
       for (const cs of classSessions ?? []) {
         if (cs.scheduled_session_id && !csBySessionId.has(cs.scheduled_session_id)) {
@@ -184,13 +188,17 @@ export async function getStaffClassAttendanceSchedule(): Promise<ClassAttendance
         if (cs.unit_id && cs.cohort_id && !csByUnitCohort.has(unitCohortKey)) {
           csByUnitCohort.set(unitCohortKey, cs);
         }
+        if (cs.unit_id && !csByUnit.has(cs.unit_id)) {
+          csByUnit.set(cs.unit_id, cs);
+        }
       }
 
       for (const item of items) {
         const cs =
           csBySessionId.get(item.scheduledSessionId) ||
           csByAllocUnit.get(`${item.teachingAllocationId}:${item.unitId}`) ||
-          csByUnitCohort.get(`${item.unitId}:${item.cohortId}`);
+          csByUnitCohort.get(`${item.unitId}:${item.cohortId}`) ||
+          csByUnit.get(item.unitId);
 
         if (cs) {
           item.latestClassSessionId = String(cs.id);

@@ -93,6 +93,9 @@ interface ExceptionTargetSession {
   sessionDate: string;
   unitName: string;
   cohortName: string;
+  teachingAllocationId?: string;
+  unitId?: string;
+  cohortId?: string;
 }
 
 function SessionExceptionDialog({
@@ -127,6 +130,9 @@ function SessionExceptionDialog({
         body: JSON.stringify({
           scheduledSessionId: session.scheduledSessionId,
           sessionDate: session.sessionDate,
+          teachingAllocationId: session.teachingAllocationId,
+          unitId: session.unitId,
+          cohortId: session.cohortId,
           reason,
           notes,
         }),
@@ -867,6 +873,9 @@ export function TrainerDailyReportForm({
       sessionDate: workspace.reportDate,
       unitName: lesson.unitName,
       cohortName: lesson.cohortName,
+      teachingAllocationId: lesson.teachingAllocationId,
+      unitId: lesson.unitId,
+      cohortId: lesson.cohortId,
     });
     setExceptionDialogOpen(true);
   }

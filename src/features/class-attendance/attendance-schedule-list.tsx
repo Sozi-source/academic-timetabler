@@ -272,7 +272,7 @@ export function AttendanceScheduleList({
                   onClick={() => router.push(`/staff/attendance/${item.latestClassSessionId}`)}
                   className="mt-2 text-left text-[10px] font-semibold text-primary hover:underline"
                 >
-                  Latest record: {item.latestSessionDate} · {item.latestStatus === 'completed' ? 'Completed' : 'Open'}
+                  Latest record: {item.latestSessionDate} · {item.latestStatus === 'completed' ? 'Completed' : item.latestStatus === 'cancelled' ? 'Did Not Take Place' : 'In Progress'}
                 </button>
               ) : null}
             </article>

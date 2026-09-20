@@ -95,19 +95,23 @@ export async function detectPastUnrecordedReportsAndSessions({
 
   const scheduledSessionIds = [...new Set(scheduledOnDates.map((s) => s.scheduledSessionId).filter(Boolean))];
   const allocationIds = [...new Set(scheduledOnDates.map((s) => s.teachingAllocationId).filter(Boolean))];
+  const unitIds = [...new Set(scheduledOnDates.map((s) => s.unitId).filter(Boolean))];
   const dates = [...new Set(scheduledOnDates.map((s) => s.sessionDate))];
 
   let csQuery = (supabase as any)
     .from('class_sessions')
-    .select('id, scheduled_session_id, teaching_allocation_id, unit_id, cohort_id, session_date, status')
+    .select('id, scheduled_session_id, teaching_allocation_id, unit_id, cohort_id, session_date, status, starts_at, ends_at')
     .in('session_date', dates);
 
-  if (scheduledSessionIds.length > 0 && allocationIds.length > 0) {
-    csQuery = csQuery.or(`scheduled_session_id.in.(${scheduledSessionIds.join(',')}),teaching_allocation_id.in.(${allocationIds.join(',')})`);
-  } else if (scheduledSessionIds.length > 0) {
-    csQuery = csQuery.in('scheduled_session_id', scheduledSessionIds);
-  } else if (allocationIds.length > 0) {
-    csQuery = csQuery.in('teaching_allocation_id', allocationIds);
+  const orConditions: string[] = [];
+  if (scheduledSessionIds.length > 0) orConditions.push(`scheduled_session_id.in.(${scheduledSessionIds.join(',')})`);
+  if (allocationIds.length > 0) orConditions.push(`teaching_allocation_id.in.(${allocationIds.join(',')})`);
+  if (unitIds.length > 0) orConditions.push(`unit_id.in.(${unitIds.join(',')})`);
+  if (trainerId) orConditions.push(`trainer_id.eq.${trainerId}`);
+  if (trainerProfileId) orConditions.push(`opened_by.eq.${trainerProfileId}`);
+
+  if (orConditions.length > 0) {
+    csQuery = csQuery.or(orConditions.join(','));
   }
 
   const { data: recordedSessions } = await csQuery;
@@ -122,9 +126,15 @@ export async function detectPastUnrecordedReportsAndSessions({
     }
     if (cs.unit_id && cs.cohort_id) {
       recordedMap.set(`${cs.unit_id}:${cs.cohort_id}:${cs.session_date}`, cs.status);
+      if (cs.starts_at) {
+        recordedMap.set(`${cs.unit_id}:${cs.cohort_id}:${cs.session_date}:${cs.starts_at}`, cs.status);
+      }
     }
     if (cs.unit_id) {
       recordedMap.set(`${cs.unit_id}:${cs.session_date}`, cs.status);
+      if (cs.starts_at) {
+        recordedMap.set(`${cs.unit_id}:${cs.session_date}:${cs.starts_at}`, cs.status);
+      }
     }
   }
 
@@ -138,7 +148,9 @@ export async function detectPastUnrecordedReportsAndSessions({
     const status =
       recordedMap.get(`${s.scheduledSessionId}:${s.sessionDate}`) ||
       recordedMap.get(`${s.teachingAllocationId}:${s.sessionDate}`) ||
+      recordedMap.get(`${s.unitId}:${s.cohortId}:${s.sessionDate}:${s.startsAt}`) ||
       recordedMap.get(`${s.unitId}:${s.cohortId}:${s.sessionDate}`) ||
+      recordedMap.get(`${s.unitId}:${s.sessionDate}:${s.startsAt}`) ||
       recordedMap.get(`${s.unitId}:${s.sessionDate}`);
 
     const isRecorded = status === 'completed' || status === 'cancelled';
@@ -255,33 +267,45 @@ export async function getTrainerDailyReportWorkspace(
         trainerId: data.trainerId,
       });
 
-      // Defensive check: Reconcile cancelled sessions from class_sessions directly
+      // Defensive check: Reconcile cancelled & completed sessions from class_sessions directly
       // in case database RPC lateral join excluded them
       const scheduledSessionIds = data.lessons
         .map((l: any) => l.scheduledSessionId)
         .filter(Boolean);
+      const allocationIds = data.lessons
+        .map((l: any) => l.teachingAllocationId)
+        .filter(Boolean);
+      const unitIds = data.lessons
+        .map((l: any) => l.unitId)
+        .filter(Boolean);
 
-      if (scheduledSessionIds.length > 0) {
+      if (scheduledSessionIds.length > 0 || allocationIds.length > 0 || unitIds.length > 0) {
         try {
+          const orFilter: string[] = [];
+          if (scheduledSessionIds.length > 0) orFilter.push(`scheduled_session_id.in.(${scheduledSessionIds.join(',')})`);
+          if (allocationIds.length > 0) orFilter.push(`teaching_allocation_id.in.(${allocationIds.join(',')})`);
+          if (unitIds.length > 0) orFilter.push(`unit_id.in.(${unitIds.join(',')})`);
+
           const { data: realSessions } = await (supabase as any)
             .from('class_sessions')
-            .select('id, scheduled_session_id, status, notes')
-            .in('scheduled_session_id', scheduledSessionIds)
-            .eq('session_date', reportDate);
-
-          const realStatusMap = new Map<string, { status: string; id: string }>(
-            (realSessions ?? []).map((cs: any) => [cs.scheduled_session_id, { status: cs.status, id: cs.id }])
-          );
+            .select('id, scheduled_session_id, teaching_allocation_id, unit_id, status, notes')
+            .eq('session_date', reportDate)
+            .or(orFilter.join(','));
 
           for (const lesson of data.lessons) {
-            const sessionInfo = realStatusMap.get(lesson.scheduledSessionId);
-            if (sessionInfo) {
-              if (sessionInfo.status === 'cancelled') {
+            const match = (realSessions ?? []).find(
+              (cs: any) =>
+                (cs.scheduled_session_id && cs.scheduled_session_id === lesson.scheduledSessionId) ||
+                (cs.teaching_allocation_id && cs.teaching_allocation_id === lesson.teachingAllocationId) ||
+                (cs.unit_id && cs.unit_id === lesson.unitId)
+            );
+            if (match) {
+              if (match.status === 'cancelled') {
                 lesson.attendanceStatus = 'cancelled';
-                lesson.attendanceSessionId = sessionInfo.id;
-              } else if (sessionInfo.status === 'completed') {
+                lesson.attendanceSessionId = match.id;
+              } else if (match.status === 'completed') {
                 lesson.attendanceStatus = 'completed';
-                lesson.attendanceSessionId = sessionInfo.id;
+                lesson.attendanceSessionId = match.id;
               }
             }
           }

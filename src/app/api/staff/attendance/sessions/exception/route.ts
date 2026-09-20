@@ -5,6 +5,9 @@ import { createAdminClient } from '@/lib/supabase/admin';
 
 interface ExceptionPayload {
   scheduledSessionId?: unknown;
+  teachingAllocationId?: unknown;
+  unitId?: unknown;
+  cohortId?: unknown;
   sessionDate?: unknown;
   reason?: unknown;
   notes?: unknown;
@@ -31,17 +34,44 @@ export async function POST(request: Request) {
 
   const adminDb = createAdminClient();
 
-  // 1. Check if class_session already exists
-  const { data: existingCs } = await (adminDb as any)
+  const formattedNotes = payload.notes && typeof payload.notes === 'string' && payload.notes.trim()
+    ? `${payload.reason.trim()}: ${payload.notes.trim()}`
+    : payload.reason.trim();
+
+  // 1. Check if class_session already exists (by scheduled_session_id, allocation, or unit+cohort)
+  let existingCs: any = null;
+  const { data: bySessionId } = await (adminDb as any)
     .from('class_sessions')
     .select('id, status')
     .eq('scheduled_session_id', payload.scheduledSessionId)
     .eq('session_date', payload.sessionDate)
     .maybeSingle();
 
-  const formattedNotes = payload.notes && typeof payload.notes === 'string' && payload.notes.trim()
-    ? `${payload.reason.trim()}: ${payload.notes.trim()}`
-    : payload.reason.trim();
+  existingCs = bySessionId;
+
+  if (!existingCs && typeof payload.teachingAllocationId === 'string' && payload.teachingAllocationId) {
+    const { data: byAlloc } = await (adminDb as any)
+      .from('class_sessions')
+      .select('id, status')
+      .eq('teaching_allocation_id', payload.teachingAllocationId)
+      .eq('session_date', payload.sessionDate)
+      .maybeSingle();
+    existingCs = byAlloc;
+  }
+
+  if (!existingCs && typeof payload.unitId === 'string' && payload.unitId) {
+    let unitQuery = (adminDb as any)
+      .from('class_sessions')
+      .select('id, status')
+      .eq('unit_id', payload.unitId)
+      .eq('session_date', payload.sessionDate);
+
+    if (typeof payload.cohortId === 'string' && payload.cohortId) {
+      unitQuery = unitQuery.eq('cohort_id', payload.cohortId);
+    }
+    const { data: byUnit } = await unitQuery.maybeSingle();
+    existingCs = byUnit;
+  }
 
   if (existingCs) {
     const { error: updateError } = await (adminDb as any)
@@ -77,7 +107,7 @@ export async function POST(request: Request) {
     .eq('id', payload.scheduledSessionId)
     .maybeSingle();
 
-  let resolvedSession = sessionData;
+  let resolvedSession: any = sessionData;
 
   if (!resolvedSession) {
     const { data: versions } = await (adminDb as any)
@@ -90,13 +120,13 @@ export async function POST(request: Request) {
       const snapshot = Array.isArray(v.snapshot) ? v.snapshot : [];
       const match = snapshot.find((item: any) => String(item.id) === payload.scheduledSessionId);
       if (match) {
-        let allocId = match.teachingAllocationId || match.allocationId;
+        let allocId = match.teachingAllocationId || match.allocationId || (typeof payload.teachingAllocationId === 'string' ? payload.teachingAllocationId : null);
         if (!allocId) {
           const { data: ta } = await (adminDb as any)
             .from('teaching_allocations')
             .select('id')
             .eq('academic_period_id', v.academic_period_id)
-            .eq('unit_id', match.unitId)
+            .eq('unit_id', match.unitId || payload.unitId)
             .limit(1)
             .maybeSingle();
           allocId = ta?.id;
@@ -106,8 +136,8 @@ export async function POST(request: Request) {
           id: payload.scheduledSessionId,
           academic_period_id: v.academic_period_id,
           teaching_allocation_id: allocId,
-          cohort_id: match.cohortId,
-          unit_id: match.unitId,
+          cohort_id: match.cohortId || payload.cohortId,
+          unit_id: match.unitId || payload.unitId,
           trainer_id: match.trainerId,
           startTime: match.startTime,
           endTime: match.endTime,
@@ -133,10 +163,10 @@ export async function POST(request: Request) {
 
   const trainerId = resolvedSession.trainer_id || trainerRow?.id || profile.id;
 
-  let startsAt = '08:00:00';
-  let endsAt = '10:00:00';
+  let startsAt = resolvedSession.startTime || '08:00:00';
+  let endsAt = resolvedSession.endTime || '10:00:00';
 
-  if (sessionData.start_time_slot_id) {
+  if (sessionData?.start_time_slot_id) {
     const { data: slot } = await (adminDb as any)
       .from('time_slots')
       .select('starts_at, ends_at')
@@ -146,7 +176,7 @@ export async function POST(request: Request) {
     if (slot?.ends_at) endsAt = slot.ends_at;
   }
 
-  if (sessionData.end_time_slot_id) {
+  if (sessionData?.end_time_slot_id) {
     const { data: endSlot } = await (adminDb as any)
       .from('time_slots')
       .select('ends_at')
@@ -178,11 +208,11 @@ export async function POST(request: Request) {
   const { data: newCs, error: insertError } = await (adminDb as any)
     .from('class_sessions')
     .insert({
-      academic_period_id: sessionData.academic_period_id,
-      teaching_allocation_id: sessionData.teaching_allocation_id,
+      academic_period_id: resolvedSession.academic_period_id,
+      teaching_allocation_id: resolvedSession.teaching_allocation_id,
       scheduled_session_id: payload.scheduledSessionId,
-      cohort_id: sessionData.cohort_id,
-      unit_id: sessionData.unit_id,
+      cohort_id: resolvedSession.cohort_id,
+      unit_id: resolvedSession.unit_id,
       trainer_id: trainerId,
       session_date: payload.sessionDate,
       starts_at: startsAt,

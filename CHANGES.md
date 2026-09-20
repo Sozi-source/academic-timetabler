@@ -31,19 +31,49 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
      - Option B: a near-term planning window (current period + the next one) stays editable; only periods further out are locked.
    - Likely implementation shape once decided: tighten the period-status check already present in `validate_scheduled_session_relationships()` / `validate_pending_scheduled_session()` (currently `not in ('planned','active')`, fixed by `20260919160000`) and the equivalent app-layer guards in `unit_offerings` approval/placement actions, rather than a new mechanism from scratch.
 
-### 2026-09-20: Fix Overdue Attendance Banner — Daily Report Multi-Key Matching
+### 2026-09-20: Full Restoration of Recorded Attendance & UI Across All Trainers
 
 - **Context & Problem**:
-  - Trainers still saw 7 "Overdue Attendance & Reports" entries after `supabase db push` of migration `20260920150000`. Sessions correctly recorded as "Did Not Take Place" (cancelled) were re-appearing as overdue for all trainers.
-  - **Root Cause**: The lateral join in `get_trainer_daily_report_workspace` (and completeness check in `submit_trainer_daily_report_v1`) matched `class_sessions` exclusively by `scheduled_session_id`. Once migration `20260920150000` decoupled the FK (`ON DELETE SET NULL`), cancelled sessions whose `scheduled_session_id` drifted to `NULL` were invisible to the lookup — so the overdue detection treated them as completely unrecorded.
-- **Fix**: New migration `supabase/migrations/20260920172000_fix_daily_report_attendance_multi_key.sql` upgrades:
-  - `get_trainer_daily_report_workspace`: Lateral join now matches by `scheduled_session_id` **OR** `(scheduled_session_id IS NULL AND teaching_allocation_id = schedule.teaching_allocation_id)`, with priority to the exact session ID match.
-  - `submit_trainer_daily_report_v1`: Completeness check uses the same multi-key logic, so cancelled sessions with a detached FK are always counted as recorded.
-  - `submit_trainer_daily_report` public alias re-exposed.
+  - Trainer previously marked sessions as "Did Not Take Place" (cancelled) and others took place (completed), but they were not displaying in the UI. Instead, 7 sessions continued to appear in the "Overdue Attendance & Reports" banner, and attendance schedule cards showed "no attendance recorded".
+  - **Root Causes**:
+    1. **Omission of `unit_id` and `trainer_id` in Detection Query**: In `detectPastUnrecordedReportsAndSessions` (`trainer-daily-report/queries.ts`), `csQuery` only queried `scheduled_session_id` and `teaching_allocation_id`. When timetable sessions were regenerated, `scheduled_session_id` changed, and if the allocation ID differed (e.g. shared units with multiple allocations), existing recorded sessions were not fetched from the database at all.
+    2. **Omission of `unit_id` in Attendance Schedule Query**: In `getStaffClassAttendanceSchedule` (`class-attendance/queries.ts`), `csQuery` also only queried `scheduled_session_id` and `teaching_allocation_id`. The fallback `csByUnit` did not exist, so `latestStatus` and `latestSessionDate` were null.
+    3. **Crash in Exception Recording API**: In `/api/staff/attendance/sessions/exception/route.ts`, if `sessionData` was null (session in published snapshot rather than live `scheduled_sessions`), `sessionData.start_time_slot_id` threw a TypeError, causing 500 error when trainers clicked "Did Not Take Place". It also only checked existing sessions by `scheduled_session_id` instead of multi-key.
+    4. **UI Status Badge Blindspot**: In `AttendanceScheduleList` and `StaffAttendancePage`, sessions with `status === 'cancelled'` rendered as `'Open'` instead of `'Did Not Take Place'`, and the metric card grid only counted completed and open.
+    5. **HOD Admin Query Field Mismatch**: In `admin-queries.ts`, `cohortNames` and `studentCount` mapped to `row.cohort_names` and `row.student_count`, while SQL returned `cohort_name` and `roster_count`.
+- **Architectural Solutions & Changes**:
+  - **`src/features/trainer-daily-report/queries.ts`**:
+    - Upgraded `detectPastUnrecordedReportsAndSessions` to include `unit_id.in.(unitIds)`, `trainer_id.eq.(trainerId)`, and `opened_by.eq.(trainerProfileId)` in `csQuery`.
+    - Expanded `recordedMap` to index by `unit_id:cohort_id:date:starts_at`, `unit_id:date:starts_at`, and `unit_id:date`.
+    - Upgraded defensive check in `getTrainerDailyReportWorkspace` to match by `unitId` as well as `scheduledSessionId` and `teachingAllocationId`.
+  - **`src/app/api/staff/attendance/sessions/exception/route.ts`**:
+    - Fixed `sessionData` vs `resolvedSession` references to prevent null dereference crashes.
+    - Added multi-key lookup for existing sessions by `scheduled_session_id`, `teaching_allocation_id`, and `unit_id`.
+  - **`src/features/trainer-daily-report/trainer-form.tsx`**:
+    - Passed `teachingAllocationId`, `unitId`, and `cohortId` in exception dialog payload.
+  - **`src/features/class-attendance/queries.ts`**:
+    - Added `unitIds`, `workspace.trainerId`, and `profile.id` to `getStaffClassAttendanceSchedule` `csQuery`.
+    - Added `csByUnit` fallback mapping to restore `latestClassSessionId`, `latestSessionDate`, and `latestStatus`.
+  - **`src/features/class-attendance/attendance-schedule-list.tsx` & `src/app/(staff)/staff/attendance/page.tsx`**:
+    - Rendered explicit `'Did Not Take Place'` badge for `cancelled` status.
+    - Added "Did not take place" metric card in the overview.
+  - **`src/features/class-attendance/admin-queries.ts`**:
+    - Fixed field mappings to `row.cohort_name ?? row.cohort_names` and `row.roster_count ?? row.student_count`.
+  - **`supabase/migrations/20260920181500_restore_all_trainer_attendance_data.sql`**:
+    - Upgraded `get_trainer_daily_report_workspace` and `submit_trainer_daily_report_v1` with multi-key lateral joins matching `scheduled_session_id`, `teaching_allocation_id`, and `unit_id`.
+    - Upgraded `reconcile_attendance_to_scheduled_sessions(uuid)` with participant cohort support.
+    - Added comprehensive data repair relinking `scheduled_session_id` and missing `trainer_id` across all academic periods.
 - **Files Modified/Added**:
-  - `supabase/migrations/20260920172000_fix_daily_report_attendance_multi_key.sql` (NEW)
+  - `src/features/trainer-daily-report/queries.ts` (MODIFIED)
+  - `src/features/trainer-daily-report/trainer-form.tsx` (MODIFIED)
+  - `src/app/api/staff/attendance/sessions/exception/route.ts` (MODIFIED)
+  - `src/features/class-attendance/queries.ts` (MODIFIED)
+  - `src/features/class-attendance/attendance-schedule-list.tsx` (MODIFIED)
+  - `src/app/(staff)/staff/attendance/page.tsx` (MODIFIED)
+  - `src/features/class-attendance/admin-queries.ts` (MODIFIED)
+  - `supabase/migrations/20260920181500_restore_all_trainer_attendance_data.sql` (NEW)
   - `CHANGES.md` (MODIFIED)
-- **Manual Follow-up**: Run `npx supabase db push` to apply.
+- **Manual Follow-up**: Run `npx supabase db push` to apply the database migration.
 
 ---
 

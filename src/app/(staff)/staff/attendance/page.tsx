@@ -50,6 +50,13 @@ export default async function StaffAttendancePage() {
         'completed',
     ).length;
 
+  const cancelled =
+    history.filter(
+      (item) =>
+        item.status ===
+        'cancelled',
+    ).length;
+
   const open =
     history.filter(
       (item) =>
@@ -66,7 +73,7 @@ export default async function StaffAttendancePage() {
         icon={CalendarCheck2}
       />
 
-      <section className="portal-metric-grid" data-columns="3">
+      <section className="portal-metric-grid" data-columns="4">
         <MetricCard
           label="Weekly classes"
           value={String(
@@ -81,6 +88,14 @@ export default async function StaffAttendancePage() {
             completed,
           )}
           icon={CheckCircle2}
+        />
+
+        <MetricCard
+          label="Did not take place"
+          value={String(
+            cancelled,
+          )}
+          icon={CalendarCheck2}
         />
 
         <MetricCard
@@ -168,6 +183,9 @@ export default async function StaffAttendancePage() {
                         item.status ===
                         'completed'
                           ? 'success'
+                          : item.status ===
+                            'cancelled'
+                          ? 'neutral'
                           : 'warning'
                       }
                     >
@@ -175,6 +193,9 @@ export default async function StaffAttendancePage() {
                         item.status ===
                         'completed'
                           ? 'Completed'
+                          : item.status ===
+                            'cancelled'
+                          ? 'Did Not Take Place'
                           : 'Open'
                       }
                     </Badge>

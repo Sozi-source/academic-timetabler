@@ -149,7 +149,7 @@ export async function getDepartmentAttendanceSessions(
             'Unit',
           cohortNames:
             asString(
-              row.cohort_names,
+              row.cohort_name ?? row.cohort_names,
             ) ??
             'Cohort',
           trainerName:
@@ -169,7 +169,7 @@ export async function getDepartmentAttendanceSessions(
             '',
           studentCount:
             asNumber(
-              row.student_count,
+              row.roster_count ?? row.student_count,
             ),
           presentCount:
             asNumber(

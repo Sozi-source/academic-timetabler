@@ -141,7 +141,7 @@ function extractTextFromDocxRaw(docxBuffer: Buffer): string {
  */
 export async function extractTextFromDocx(docxBuffer: Buffer): Promise<string> {
   try {
-    const mammoth = await import('mammoth');
+    const mammoth = await import(/* webpackIgnore: true */ 'mammoth');
     const result = await mammoth.convertToHtml({ buffer: docxBuffer });
     const text = htmlToStructuredText(result.value);
     if (text.length > 0) return text;

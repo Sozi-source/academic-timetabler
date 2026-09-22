@@ -5,7 +5,10 @@ export type StudentLifecycleStatus =
   | 'dropped_out'
   | 'suspended'
   | 'completed'
-  | 'graduated';
+  | 'graduated'
+  | 'on_leave'
+  | 'withdrawn'
+  | 'discontinued';
 
 export type StudentLifecycleEventType =
   | 'admission'
@@ -17,7 +20,11 @@ export type StudentLifecycleEventType =
   | 'suspension'
   | 'programme_completion'
   | 'graduation'
-  | 'administrative_correction';
+  | 'administrative_correction'
+  | 'leave_started'
+  | 'leave_ended'
+  | 'withdrawal'
+  | 'discontinuation';
 
 export type StudentAcademicPhase =
   | 'in_class'

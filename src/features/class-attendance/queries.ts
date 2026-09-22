@@ -14,7 +14,7 @@ import type {
 } from './types';
 
 type UnknownRow =
-  Record<string, unknown>;
+  Record<string, any>;
 
 function asString(
   value:
@@ -130,7 +130,7 @@ export async function getStaffClassAttendanceSchedule(): Promise<ClassAttendance
       if (!unit || !cohort || !day || !startSlot || !endSlot) continue;
 
       seenIds.add(sessionId);
-      const dayStr = String(day.day_of_week || '');
+      const dayStr = String((day as any).day_of_week || '');
 
       items.push({
         scheduledSessionId: sessionId,
@@ -138,13 +138,13 @@ export async function getStaffClassAttendanceSchedule(): Promise<ClassAttendance
         academicPeriodId: String(raw.academic_period_id || alloc?.academicPeriodId || ''),
         academicPeriodName: alloc?.academicPeriodName || 'Current Term',
         cohortId,
-        cohortName: String(cohort.name || alloc?.cohortName || 'Cohort'),
+        cohortName: String((cohort as any).name || alloc?.cohortName || 'Cohort'),
         unitId,
-        unitName: String(unit.name || alloc?.unitName || 'Unit'),
+        unitName: String((unit as any).name || alloc?.unitName || 'Unit'),
         dayOfWeek: dayStr.charAt(0).toUpperCase() + dayStr.slice(1).toLowerCase(),
         daySequence: 1,
-        startsAt: String(startSlot.starts_at || '08:00'),
-        endsAt: String(endSlot.ends_at || '10:00'),
+        startsAt: String((startSlot as any).starts_at || '08:00'),
+        endsAt: String((endSlot as any).ends_at || '10:00'),
         sessionNumber: Number(raw.session_number || 0),
         teachingStartsOn: String(alloc?.teachingStartsOn || ''),
         teachingEndsOn: String(alloc?.teachingEndsOn || ''),

@@ -267,11 +267,180 @@ export async function detectPastUnrecordedSessions(args: {
   return res.unrecordedSessions;
 }
 
+// Builds the workspace for a PAST (non-today) date directly from what the
+// trainer actually recorded in class_sessions that day, instead of
+// re-projecting the CURRENT live timetable onto a past date. The timetable
+// can be edited/regenerated after the fact, so reprojection was silently
+// showing the wrong (or zero) lessons for past dates and made "catch up on
+// a missed report" fail or submit an empty report. This is the graceful,
+// ground-truth path for past dates. Returns null (caller falls through to
+// the normal path) once the report for that date is already submitted, so
+// the immutable submitted snapshot is always used for submitted reports.
+async function buildPastRecordedDailyReportWorkspace(
+  profile: any,
+  reportDate: string,
+): Promise<TrainerDailyReportWorkspace | null> {
+  const { createAdminClient } = await import('@/lib/supabase/admin');
+  const adminDb = createAdminClient();
+
+  const { data: trainer } = await (adminDb as any)
+    .from('trainers')
+    .select('id, full_name, staff_number, department_id, departments(id, name)')
+    .eq('profile_id', profile.id)
+    .eq('is_active', true)
+    .maybeSingle();
+
+  if (!trainer?.id) return null;
+
+  const trainerId = trainer.id;
+  const departmentId = trainer.department_id || profile.activeDepartmentId || '';
+  const departmentName = (trainer.departments as any)?.name || profile.departmentName || 'Department';
+
+  const { data: existingReport } = await (adminDb as any)
+    .from('trainer_daily_reports')
+    .select('id, status, other_activity, concern')
+    .eq('trainer_id', trainerId)
+    .eq('report_date', reportDate)
+    .maybeSingle();
+
+  if (existingReport?.status === 'submitted') return null;
+
+  const { data: daySessions } = await (adminDb as any)
+    .from('class_sessions')
+    .select(
+      'id, unit_id, cohort_id, teaching_allocation_id, academic_period_id, scheduled_session_id, starts_at, ends_at, status, roster_count',
+    )
+    .eq('session_date', reportDate)
+    .or(`trainer_id.eq.${trainerId},opened_by.eq.${profile.id}`);
+
+  const sessions = daySessions ?? [];
+  const unitIds = [...new Set(sessions.map((s: any) => s.unit_id).filter(Boolean))];
+  const cohortIds = [...new Set(sessions.map((s: any) => s.cohort_id).filter(Boolean))];
+
+  const [{ data: units }, { data: cohorts }] = await Promise.all([
+    unitIds.length
+      ? (adminDb as any).from('units').select('id, code, name').in('id', unitIds)
+      : Promise.resolve({ data: [] }),
+    cohortIds.length
+      ? (adminDb as any).from('cohorts').select('id, name').in('id', cohortIds)
+      : Promise.resolve({ data: [] }),
+  ]);
+  const unitMap = new Map((units ?? []).map((u: any) => [u.id, u]));
+  const cohortMap = new Map((cohorts ?? []).map((c: any) => [c.id, c]));
+
+  const sessionIds = sessions.map((s: any) => s.id);
+  const statsBySession = new Map<string, { present: number; absent: number; absentees: any[] }>();
+  if (sessionIds.length > 0) {
+    const { data: entries } = await (adminDb as any)
+      .from('class_attendance_entries')
+      .select('class_session_id, attendance_status, note, students(id, admission_number, full_name)')
+      .in('class_session_id', sessionIds);
+
+    for (const entry of entries ?? []) {
+      const cur = statsBySession.get(entry.class_session_id) || { present: 0, absent: 0, absentees: [] };
+      if (entry.attendance_status === 'present') cur.present++;
+      if (entry.attendance_status === 'absent') {
+        cur.absent++;
+        cur.absentees.push({
+          studentId: entry.students?.id || '',
+          admissionNumber: entry.students?.admission_number || '—',
+          fullName: entry.students?.full_name || 'Student',
+          note: entry.note || null,
+        });
+      }
+      statsBySession.set(entry.class_session_id, cur);
+    }
+  }
+
+  const lessons = sessions.map((s: any) => {
+    const unit = unitMap.get(s.unit_id) as any;
+    const cohort = cohortMap.get(s.cohort_id) as any;
+    const stats = statsBySession.get(s.id) || { present: 0, absent: 0, absentees: [] };
+    const attendanceStatus =
+      s.status === 'completed' || s.status === 'cancelled'
+        ? s.status
+        : s.status === 'open'
+          ? 'open'
+          : 'not_started';
+
+    return {
+      id: s.id,
+      departmentId,
+      departmentName,
+      timetableVersionId: '',
+      timetableVersionNumber: 1,
+      timetableTitle: '',
+      scheduledSessionId: s.scheduled_session_id || '',
+      teachingAllocationId: s.teaching_allocation_id || '',
+      academicPeriodId: s.academic_period_id || '',
+      cohortId: s.cohort_id || '',
+      unitId: s.unit_id || '',
+      sessionNumber: 1,
+      startsAt: s.starts_at,
+      endsAt: s.ends_at,
+      unitCode: unit?.code || '',
+      unitName: unit?.name || 'Unit',
+      cohortName: cohort?.name || 'Cohort',
+      roomName: null,
+      deliveryMode: 'Teaching',
+      attendanceSessionId: s.id,
+      attendanceStatus,
+      rosterCount: s.roster_count || 0,
+      presentCount: stats.present,
+      absentCount: stats.absent,
+      absentees: stats.absentees,
+    };
+  });
+
+  const anyOpen = sessions.some((s: any) => s.status === 'open');
+  const lessonsComplete =
+    lessons.length === 0 ||
+    lessons.every((l) => l.attendanceStatus === 'completed' || l.attendanceStatus === 'cancelled');
+
+  return {
+    reportDate,
+    trainerId,
+    trainerName: trainer.full_name || profile.fullName,
+    trainerNumber: trainer.staff_number || null,
+    homeDepartmentId: departmentId,
+    homeDepartmentName: departmentName,
+    status: 'draft',
+    reportId: existingReport?.id ? String(existingReport.id) : null,
+    submittedAt: null,
+    otherActivity: existingReport?.other_activity || '',
+    concern: existingReport?.concern || '',
+    readyToSubmit: lessonsComplete,
+    blockingReason: anyOpen
+      ? 'Finish the in-progress register for this date before submitting its report.'
+      : !lessonsComplete
+        ? 'Complete Class Attendance for all recorded lessons before submitting the daily report.'
+        : null,
+    lessons,
+    pastUnrecordedSessions: [],
+    unsubmittedPastReportDates: [],
+    hasOverduePastSessions: false,
+  } as TrainerDailyReportWorkspace;
+}
+
 export async function getTrainerDailyReportWorkspace(
   reportDate: string,
 ): Promise<TrainerDailyReportWorkspace> {
   const profile = await requireTrainerAccess();
   const supabase = await createClient();
+
+  // Past dates: build strictly from what was actually recorded that day.
+  // Never re-project the live/current timetable onto a past date — see
+  // buildPastRecordedDailyReportWorkspace for why that was unreliable.
+  const { nairobiToday } = await import('./domain');
+  if (reportDate < nairobiToday()) {
+    const pastWorkspace = await buildPastRecordedDailyReportWorkspace(profile, reportDate).catch(
+      (err) => {
+        console.warn('buildPastRecordedDailyReportWorkspace warning:', err);
+        return null;
+      },
+    );
+    if (pastWorkspace) return pastWorkspace;
+  }
 
   try {
     const { data, error } = await (supabase as any).rpc(
@@ -625,14 +794,18 @@ export async function getDepartmentDailyReports(
     console.warn('Failed to load recentSubmissions in getDepartmentDailyReports:', recentErr);
   }
 
-  // 1. Resolve trainers belonging to the active department
+  // 1. Resolve trainers belonging to the active department.
+  // Strict scope: trainer.department_id must equal the HOD's active
+  // department. No name-text fallback (home_department.ilike) — that
+  // fuzzy matching previously let trainers from other departments with
+  // overlapping name substrings leak into this list.
   let deptTrainersQuery = (adminDb as any)
     .from('trainers')
     .select('id, full_name, staff_number, department_id, home_department')
     .eq('is_active', true);
 
   if (departmentId && !isSysAdmin) {
-    deptTrainersQuery = deptTrainersQuery.or(`department_id.eq.${departmentId},home_department.ilike.%${departmentName}%`);
+    deptTrainersQuery = deptTrainersQuery.eq('department_id', departmentId);
   }
 
   const { data: deptTrainersData } = await deptTrainersQuery;
@@ -645,14 +818,14 @@ export async function getDepartmentDailyReports(
     );
 
     if (!error && data && Array.isArray(data.reports)) {
-      // Defensively filter to only trainers who belong to this department or taught department lessons
+      // Strictly scope to this department's own trainers (home department
+      // only). Deliberately no lesson-department or name-substring
+      // fallback here — those were the source of other departments'
+      // trainers leaking into this HOD's daily report list.
       const filteredReports = (data.reports as any[]).filter((r) => {
         if (isSysAdmin) return true;
-        if (r.homeDepartmentId && departmentId && r.homeDepartmentId === departmentId) return true;
-        if (deptTrainerIdSet.has(String(r.trainerId))) return true;
-        if (Array.isArray(r.lessons) && r.lessons.some((l: any) => l.departmentId === departmentId)) return true;
-        if (r.homeDepartmentName && departmentName && r.homeDepartmentName.toLowerCase().includes(departmentName.toLowerCase())) return true;
-        return false;
+        if (r.homeDepartmentId && departmentId) return r.homeDepartmentId === departmentId;
+        return deptTrainerIdSet.has(String(r.trainerId));
       });
 
       const filteredPending = (data.pendingTrainers as any[]).filter((t) => {
@@ -712,26 +885,13 @@ export async function getDepartmentDailyReports(
       .eq('report_date', reportDate)
       .eq('status', 'submitted');
 
-    // Also check lessons for this date to ensure service trainers teaching in this department are included
-    const allReportIds = (reportsData ?? []).map((r: any) => r.id);
-    let deptLessonReportIds = new Set<string>();
-    if (allReportIds.length > 0 && departmentId && !isSysAdmin) {
-      const { data: deptLessons } = await (adminDb as any)
-        .from('trainer_daily_report_lessons')
-        .select('report_id')
-        .in('report_id', allReportIds)
-        .eq('department_id', departmentId);
-      deptLessonReportIds = new Set((deptLessons ?? []).map((l: any) => l.report_id));
-    }
-
-    // Filter submitted reports strictly to this department's trainers and lessons
+    // Filter submitted reports strictly to this department's own trainers
+    // (home department only). No lesson-department or name-substring
+    // fallback — that previously leaked other departments' trainers in.
     const filteredReportsData = (reportsData ?? []).filter((r: any) => {
       if (isSysAdmin) return true;
-      if (r.home_department_id && departmentId && r.home_department_id === departmentId) return true;
-      if (deptLessonReportIds.has(r.id)) return true;
-      if (r.trainer_id && deptTrainerIdSet.has(String(r.trainer_id))) return true;
-      if (r.home_department_name_snapshot && departmentName && r.home_department_name_snapshot.toLowerCase().includes(departmentName.toLowerCase())) return true;
-      return false;
+      if (r.home_department_id && departmentId) return r.home_department_id === departmentId;
+      return Boolean(r.trainer_id && deptTrainerIdSet.has(String(r.trainer_id)));
     });
 
     const reportIds = filteredReportsData.map((r: any) => r.id);

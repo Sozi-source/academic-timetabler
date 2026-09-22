@@ -438,4 +438,69 @@ export async function batchReassignStudentCohortAction(
   };
 }
 
+/**
+ * Quick single-student status update for the inline status updater page.
+ * Accepts a virtualStatus ('in_class' | 'on_attachment' | lifecycle status)
+ * and maps it to the correct targetStatus + academicPlacement RPC calls.
+ * Returns a plain object (not a FormData-based action state).
+ */
+export async function quickUpdateStudentStatusAction(
+  studentId: string,
+  virtualStatus: string,
+  reportingStatus: 'reported' | 'not_reported',
+): Promise<{ success: boolean; message: string }> {
+  await requireHodAccess();
 
+  if (!studentId) return { success: false, message: 'No student selected.' };
+
+  // Map virtual status → lifecycle status + academic placement
+  let targetStatus: string;
+  let academicPlacement: string;
+
+  if (virtualStatus === 'in_class') {
+    targetStatus = 'active';
+    academicPlacement = 'in_class';
+  } else if (virtualStatus === 'on_attachment') {
+    targetStatus = 'active';
+    academicPlacement = 'attachment';
+  } else {
+    const allowed = ['active', 'deferred', 'dropped_out', 'suspended', 'completed', 'graduated'];
+    if (!allowed.includes(virtualStatus)) {
+      return { success: false, message: 'Invalid status selected.' };
+    }
+    targetStatus = virtualStatus;
+    academicPlacement = 'in_class';
+  }
+
+  const supabase = await createClient();
+  const today = new Date().toISOString().slice(0, 10);
+
+  const { error: statusErr } = await supabase.rpc('set_student_status', {
+    target_student_id: studentId,
+    target_status: targetStatus,
+    effective_date: today,
+  });
+  if (statusErr) return { success: false, message: progressionError(statusErr.message) };
+
+  const { error: placementErr } = await supabase.rpc('set_student_status', {
+    target_student_id: studentId,
+    target_status: academicPlacement,
+    effective_date: today,
+  });
+  if (placementErr) return { success: false, message: progressionError(placementErr.message) };
+
+  const { error: reportingErr } = await supabase.rpc('set_student_status', {
+    target_student_id: studentId,
+    target_status: reportingStatus,
+    effective_date: today,
+  });
+  if (reportingErr) return { success: false, message: progressionError(reportingErr.message) };
+
+  revalidatePath('/students');
+  revalidatePath('/students/registry');
+  revalidatePath('/students/status');
+  revalidatePath('/students/progression');
+  revalidatePath(`/students/registry/${studentId}`);
+
+  return { success: true, message: 'Status updated.' };
+}

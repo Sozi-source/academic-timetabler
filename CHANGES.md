@@ -1,3 +1,15 @@
+### 2026-09-22: Students — Inline Bulk Status Updater (`/students/status`)
+
+**Scope**: New page, new server action, new client component. No database schema changes.
+
+**What changed:**
+- `src/features/students/actions.ts` — Added `quickUpdateStudentStatusAction(studentId, virtualStatus, reportingStatus)`: a direct async server action (not a form-action) that maps the virtual `'in_class'` / `'on_attachment'` values to the correct `targetStatus` + `academicPlacement` RPC calls and revalidates relevant paths.
+- `src/features/students/inline-status-updater.tsx` — **[NEW]** `'use client'` component. Renders a searchable, filterable list of all students. Each row has a **Status** dropdown and a **Semester reporting** dropdown that auto-save on `onChange` via `startTransition` + `quickUpdateStudentStatusAction`. Uses `useOptimistic` for instant UI feedback, reverts on error, and fires a `sonner` toast on success or failure.
+- `src/app/(dashboard)/students/status/page.tsx` — **[NEW]** Server route page at `/students/status`. Fetches all students and passes them to `InlineStatusUpdater`. Marked `force-dynamic`.
+- `src/app/(dashboard)/students/page.tsx` — Added **"Update statuses"** card linking to `/students/status` in the module hub grid. Grid widened from `lg:grid-cols-4` to `lg:grid-cols-5`.
+
+**Verification**: `npm run check` passed (exit code 0) — typecheck, lint, and production build clean. `/students/status` appears as `ƒ` (dynamic) in the build manifest.
+
 ### 2026-09-22: Students — Split "Active" status into "In Class" and "On Attachment"
 
 **Scope**: UI/display-layer change only. No database schema or migration required.

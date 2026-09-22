@@ -840,39 +840,8 @@ export function TrainerDailyReportForm({
     : Boolean(workspace?.readyToSubmit);
 
   if (workspace.status === 'submitted') {
-    const lessons = workspace.lessons ?? [];
-    const totalPresent = lessons.reduce((sum, l) => sum + (l.presentCount || 0), 0);
-    const totalAbsent = lessons.reduce((sum, l) => sum + (l.absentCount || 0), 0);
-
     return (
       <div className="space-y-4">
-        <section className="rounded-xl border border-emerald-200 bg-emerald-50/80 px-4 py-3 shadow-xs">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-emerald-900">
-              <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
-              <div>
-                <p className="text-xs font-bold">Daily Report Submitted</p>
-                <p className="text-[11px] text-emerald-800">
-                  {formatDailyReportDate(workspace.reportDate)}
-                </p>
-              </div>
-            </div>
-            <span className="rounded-full bg-emerald-200/60 px-2.5 py-0.5 text-[10px] font-bold text-emerald-900">
-              Official Record
-            </span>
-          </div>
-
-          {lessons.length > 0 ? (
-            <div className="mt-2.5 flex flex-wrap items-center gap-2 text-[11px] font-semibold text-emerald-900">
-              <span className="rounded-md bg-white/70 px-2 py-0.5">
-                {lessons.length} lesson{lessons.length === 1 ? '' : 's'}
-              </span>
-              <span className="rounded-md bg-white/70 px-2 py-0.5">Present: {totalPresent}</span>
-              <span className="rounded-md bg-white/70 px-2 py-0.5">Absent: {totalAbsent}</span>
-            </div>
-          ) : null}
-        </section>
-
         <ScheduledLessonsSection
           workspace={workspace}
           openingId={null}

@@ -148,7 +148,7 @@ export async function getStaffClassAttendanceSchedule(): Promise<ClassAttendance
         }
       }
 
-      // Attach historical/latest records for display only. Take-attendance always calls the date-specific open endpoint.
+      // Attach latest class sessions if any exist (querying by scheduled_session_id, allocation IDs, and unit IDs)
       const sessionIds = items.map((i) => i.scheduledSessionId).filter(Boolean);
       const allocIds = [...new Set(items.map((i) => i.teachingAllocationId).filter(Boolean))];
       const unitIds = [...new Set(items.map((i) => i.unitId).filter(Boolean))];

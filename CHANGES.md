@@ -1,3 +1,10 @@
+### 2026-09-22: Trainer Daily Report — Single Compact Context Card
+
+- Consolidated the Daily Report header, date/trainer context, navigation controls, and submitted-record summary into one compact context card.
+- Removed the separate `Daily Report Submitted / Official Record` card so scheduled lessons become the dominant content immediately below the context.
+- Preserved the essential submitted metrics (lesson count, present, absent) as a compact inline status strip inside the same card.
+- Removed the duplicate submitted-status rendering from `src/features/trainer-daily-report/trainer-form.tsx`.
+
 # CHANGES.md — Architectural Delta Registry & Project Changelog
 
 This document tracks all architectural modifications, schema updates, bugfixes, breaking changes, and pending manual follow-up tasks across the codebase. 

@@ -39,12 +39,18 @@ export const getStudentSummary = cache(async (): Promise<StudentSummary> => {
   const rows = data ?? [];
   return {
     total: rows.length,
-    active: rows.filter((row) => row.lifecycle_status === 'active' || row.lifecycle_status === 'admitted').length,
+    inClass: rows.filter((row) =>
+      (row.lifecycle_status === 'active' || row.lifecycle_status === 'admitted') &&
+      row.academic_phase !== 'attachment',
+    ).length,
+    onAttachment: rows.filter((row) =>
+      (row.lifecycle_status === 'active' || row.lifecycle_status === 'admitted') &&
+      row.academic_phase === 'attachment',
+    ).length,
     deferred: rows.filter((row) => row.lifecycle_status === 'deferred').length,
     droppedOut: rows.filter((row) => row.lifecycle_status === 'dropped_out').length,
     completed: rows.filter((row) => row.lifecycle_status === 'completed').length,
     graduated: rows.filter((row) => row.lifecycle_status === 'graduated').length,
-    attachment: rows.filter((row) => row.lifecycle_status === 'active' && row.academic_phase === 'attachment').length,
   };
 });
 

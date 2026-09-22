@@ -38,8 +38,8 @@ export default async function StudentsModulePage() {
       />
 
       <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6">
-        <MetricCard label="Active" value={String(summary.active)} description="Current" icon={CheckCircle2} />
-        <MetricCard label="Attachment" value={String(summary.attachment)} description="Active phase" icon={Paperclip} />
+        <MetricCard label="In Class" value={String(summary.inClass)} description="Current" icon={CheckCircle2} />
+        <MetricCard label="On Attachment" value={String(summary.onAttachment)} description="Active phase" icon={Paperclip} />
         <MetricCard label="Deferred" value={String(summary.deferred)} description="Expected back" icon={History} />
         <MetricCard label="Dropped out" value={String(summary.droppedOut)} description="Follow-up" icon={AlertTriangle} />
         <MetricCard label="Completed" value={String(summary.completed)} description="Awaiting graduation" icon={GraduationCap} />

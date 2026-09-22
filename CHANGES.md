@@ -1,4 +1,21 @@
+### 2026-09-22: Students — Split "Active" status into "In Class" and "On Attachment"
+
+**Scope**: UI/display-layer change only. No database schema or migration required.
+
+**What changed:**
+- `src/features/students/types.ts` — `StudentSummary` interface: replaced `active` and `attachment` fields with `inClass` and `onAttachment`.
+- `src/features/students/queries.ts` — `getStudentSummary`: counts now split by `academic_phase === 'attachment'` for active/admitted students.
+- `src/features/students/student-registry-table.tsx` — `statusCounts`, `statusFiltered`, and `statusTabs`: the single "Active" tab is replaced by two tabs — **"In Class"** (active/admitted + phase ≠ attachment) and **"On Attachment"** (active/admitted + phase = attachment). Filter branches handle `in_class` and `on_attachment` as virtual query-param values.
+- `src/features/students/progression-form.tsx` — "Update student status" form: replaced the single "Active" dropdown option with "In Class" and "On Attachment". The form derives `targetStatus='active'` and the correct `academicPlacement` as hidden fields from the user's virtual selection. The separate "Academic placement" dropdown is removed (now implicit). Added helper functions `deriveTargetStatus`, `deriveAcademicPlacement`, `toVirtualStatus`.
+- `src/app/(dashboard)/students/page.tsx` — metric cards updated: "Active" → "In Class", "Attachment" → "On Attachment".
+- `src/app/(dashboard)/students/reports/page.tsx` — metric cards updated: same rename.
+- `supabase/migrations/src/app/(dashboard)/students/page.tsx` — same metric card rename (mirror copy).
+- `supabase/migrations/src/app/(dashboard)/students/reports/page.tsx` — same metric card rename (mirror copy).
+
+**Verification**: `npm run check` passed (exit code 0) — typecheck, lint, and production build all clean.
+
 ### 2026-09-22: Trainer Daily Report — Single Compact Context Card
+
 
 - Consolidated the Daily Report header, date/trainer context, navigation controls, and submitted-record summary into one compact context card.
 - Removed the separate `Daily Report Submitted / Official Record` card so scheduled lessons become the dominant content immediately below the context.

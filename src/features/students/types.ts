@@ -37,12 +37,12 @@ export type StudentAcademicPhase =
 
 export interface StudentSummary {
   total: number;
-  active: number;
+  inClass: number;
+  onAttachment: number;
   deferred: number;
   droppedOut: number;
   completed: number;
   graduated: number;
-  attachment: number;
 }
 
 export interface StudentRow {

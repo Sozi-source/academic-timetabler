@@ -67,11 +67,11 @@ export function StudentRegistryTable({
   const [activeModal, setActiveModal] = useState<BatchActionType | null>(null);
   const [bannerMessage, setBannerMessage] = useState<string | null>(null);
 
-  // Status Counts for Pill Badges
   const statusCounts = useMemo(() => {
     const counts = {
       all: students.length,
-      active: 0,
+      in_class: 0,
+      on_attachment: 0,
       deferred: 0,
       dropped_out: 0,
       suspended: 0,
@@ -81,8 +81,11 @@ export function StudentRegistryTable({
 
     for (const student of students) {
       const status = student.lifecycle_status;
-      if (status === 'active' || status === 'admitted') counts.active++;
-      else if (status === 'deferred') counts.deferred++;
+      const phase = student.academic_phase;
+      if (status === 'active' || status === 'admitted') {
+        if (phase === 'attachment') counts.on_attachment++;
+        else counts.in_class++;
+      } else if (status === 'deferred') counts.deferred++;
       else if (status === 'dropped_out') counts.dropped_out++;
       else if (status === 'suspended') counts.suspended++;
       else if (status === 'completed') counts.completed++;
@@ -96,13 +99,15 @@ export function StudentRegistryTable({
   const statusFiltered = useMemo(() => {
     if (!activeStatus) return students;
     return students.filter((student) => {
-      if (activeStatus === 'active') {
-        return (
-          student.lifecycle_status === 'active' ||
-          student.lifecycle_status === 'admitted'
-        );
+      const status = student.lifecycle_status;
+      const phase = student.academic_phase;
+      if (activeStatus === 'in_class') {
+        return (status === 'active' || status === 'admitted') && phase !== 'attachment';
       }
-      return student.lifecycle_status === activeStatus;
+      if (activeStatus === 'on_attachment') {
+        return (status === 'active' || status === 'admitted') && phase === 'attachment';
+      }
+      return status === activeStatus;
     });
   }, [students, activeStatus]);
 
@@ -259,7 +264,8 @@ export function StudentRegistryTable({
 
   const statusTabs = [
     { value: '', label: 'All', count: statusCounts.all },
-    { value: 'active', label: 'Active', count: statusCounts.active },
+    { value: 'in_class', label: 'In Class', count: statusCounts.in_class },
+    { value: 'on_attachment', label: 'On Attachment', count: statusCounts.on_attachment },
     { value: 'deferred', label: 'Deferred', count: statusCounts.deferred },
     {
       value: 'dropped_out',

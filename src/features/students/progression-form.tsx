@@ -19,14 +19,44 @@ interface ProgressionFormProps {
   cohorts?: StudentCohortOption[];
 }
 
-const statusOptions = [
-  ['active', 'Active'],
+/**
+ * Virtual status values used only in this form's UI.
+ * 'in_class' and 'on_attachment' both map to lifecycle_status='active'
+ * and differ only in academicPlacement.
+ */
+type VirtualStatus = StudentLifecycleStatus | 'in_class' | 'on_attachment';
+
+const statusOptions: [VirtualStatus, string][] = [
+  ['in_class', 'In Class'],
+  ['on_attachment', 'On Attachment'],
   ['deferred', 'Deferred'],
   ['dropped_out', 'Dropped Out'],
   ['suspended', 'Suspended'],
   ['completed', 'Completed'],
   ['graduated', 'Graduated'],
-] as const;
+];
+
+/** Map a VirtualStatus to the real lifecycle_status value sent to the server. */
+function deriveTargetStatus(virtual: VirtualStatus): StudentLifecycleStatus {
+  if (virtual === 'in_class' || virtual === 'on_attachment') return 'active';
+  return virtual as StudentLifecycleStatus;
+}
+
+/** Map a VirtualStatus to the academicPlacement value sent to the server. */
+function deriveAcademicPlacement(virtual: VirtualStatus): 'in_class' | 'attachment' {
+  return virtual === 'on_attachment' ? 'attachment' : 'in_class';
+}
+
+/** Convert current lifecycle_status + academic_phase to a VirtualStatus for initial form state. */
+function toVirtualStatus(
+  status: StudentLifecycleStatus,
+  phase: string | undefined | null,
+): VirtualStatus {
+  if (status === 'active' || status === 'admitted') {
+    return phase === 'attachment' ? 'on_attachment' : 'in_class';
+  }
+  return status;
+}
 
 export function ProgressionForm({
   studentId,
@@ -36,13 +66,9 @@ export function ProgressionForm({
   currentCohortId,
   cohorts,
 }: ProgressionFormProps) {
-  const effectiveAcademicPhase = academicPhase ?? 'in_class';
   const effectiveReportingStatus = reportingStatus ?? 'reported';
-  const [targetStatus, setTargetStatus] = useState<StudentLifecycleStatus>(
-    status === 'admitted' ? 'active' : status,
-  );
-  const [targetPlacement, setTargetPlacement] = useState<'in_class' | 'attachment'>(
-    effectiveAcademicPhase === 'attachment' ? 'attachment' : 'in_class',
+  const [virtualStatus, setVirtualStatus] = useState<VirtualStatus>(
+    toVirtualStatus(status, academicPhase),
   );
   const [targetReporting, setTargetReporting] = useState<'reported' | 'not_reported'>(
     effectiveReportingStatus === 'reported' ? 'reported' : 'not_reported',
@@ -53,10 +79,26 @@ export function ProgressionForm({
   );
   const options = useMemo(() => statusOptions, []);
 
+  const initialVirtual = toVirtualStatus(status, academicPhase);
+  const initialReporting: 'reported' | 'not_reported' =
+    effectiveReportingStatus === 'reported' ? 'reported' : 'not_reported';
+  const isUnchanged =
+    virtualStatus === initialVirtual && targetReporting === initialReporting;
+
+  // Derived hidden-input values
+  const derivedTargetStatus = deriveTargetStatus(virtualStatus);
+  const derivedPlacement = deriveAcademicPlacement(virtualStatus);
+
+  // suppress unused-var warnings — cohorts/currentCohortId reserved for future cohort selector
+  void currentCohortId;
+  void cohorts;
+
   return (
     <form action={formAction} className="space-y-3" noValidate>
       <input type="hidden" name="studentId" value={studentId} />
       <input type="hidden" name="eventType" value="status_update" />
+      <input type="hidden" name="targetStatus" value={derivedTargetStatus} />
+      <input type="hidden" name="academicPlacement" value={derivedPlacement} />
 
       {state.message ? (
         <FormStatusMessage
@@ -68,9 +110,9 @@ export function ProgressionForm({
       <label className="block text-xs font-semibold text-text-primary">
         Student status
         <Select
-          name="targetStatus"
-          value={targetStatus}
-          onChange={(event) => setTargetStatus(event.target.value as StudentLifecycleStatus)}
+          name="_virtualStatus"
+          value={virtualStatus}
+          onChange={(event) => setVirtualStatus(event.target.value as VirtualStatus)}
           className="mt-1 h-9 rounded-lg text-xs"
           hasError={Boolean(state.fieldErrors?.targetStatus?.[0])}
         >
@@ -82,52 +124,29 @@ export function ProgressionForm({
         </Select>
       </label>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        <label className="block text-xs font-semibold text-text-primary">
-          Academic placement
-          <Select
-            name="academicPlacement"
-            value={targetPlacement}
-            onChange={(event) =>
-              setTargetPlacement(event.target.value as 'in_class' | 'attachment')
-            }
-            className="mt-1 h-9 rounded-lg text-xs"
-          >
-            <option value="in_class">In Class</option>
-            <option value="attachment">Attachment</option>
-          </Select>
-        </label>
-        <label className="block text-xs font-semibold text-text-primary">
-          Semester reporting
-          <Select
-            name="reportingStatus"
-            value={targetReporting}
-            onChange={(event) =>
-              setTargetReporting(event.target.value as 'reported' | 'not_reported')
-            }
-            className="mt-1 h-9 rounded-lg text-xs"
-          >
-            <option value="reported">Reported</option>
-            <option value="not_reported">Not Reported</option>
-          </Select>
-        </label>
-      </div>
+      <label className="block text-xs font-semibold text-text-primary">
+        Semester reporting
+        <Select
+          name="reportingStatus"
+          value={targetReporting}
+          onChange={(event) =>
+            setTargetReporting(event.target.value as 'reported' | 'not_reported')
+          }
+          className="mt-1 h-9 rounded-lg text-xs"
+        >
+          <option value="reported">Reported</option>
+          <option value="not_reported">Not Reported</option>
+        </Select>
+      </label>
 
       <p className="text-[0.6875rem] text-text-muted">
-        Select the status, placement and reporting state, then save. No reason is required.
+        Select the status and reporting state, then save. No reason is required.
       </p>
 
       <div className="flex justify-end border-t border-border pt-3">
         <Button
           type="submit"
-          disabled={
-            pending ||
-            (targetStatus === status &&
-              targetPlacement ===
-                (effectiveAcademicPhase === 'attachment' ? 'attachment' : 'in_class') &&
-              targetReporting ===
-                (effectiveReportingStatus === 'reported' ? 'reported' : 'not_reported'))
-          }
+          disabled={pending || isUnchanged}
           size="sm"
           leadingIcon={
             pending ? (

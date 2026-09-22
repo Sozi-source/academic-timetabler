@@ -3,10 +3,8 @@ export type StudentLifecycleStatus =
   | 'active'
   | 'deferred'
   | 'dropped_out'
-  | 'on_leave'
+  | 'suspended'
   | 'completed'
-  | 'withdrawn'
-  | 'discontinued'
   | 'graduated';
 
 export type StudentLifecycleEventType =
@@ -16,10 +14,7 @@ export type StudentLifecycleEventType =
   | 'deferral'
   | 'resumption'
   | 'dropout'
-  | 'leave_started'
-  | 'leave_ended'
-  | 'withdrawal'
-  | 'discontinuation'
+  | 'suspension'
   | 'programme_completion'
   | 'graduation'
   | 'administrative_correction';
@@ -49,6 +44,7 @@ export interface StudentRow {
   full_name: string;
   lifecycle_status: StudentLifecycleStatus;
   academic_phase: StudentAcademicPhase;
+  reporting_status?: 'pending' | 'reported' | 'deferred' | 'dropped_out' | null;
   completion_date: string | null;
   graduation_date: string | null;
   admission_date: string | null;
@@ -97,6 +93,7 @@ export interface StudentProgressionActionState {
   fieldErrors?: {
     eventType?: string[];
     effectiveDate?: string[];
+    targetStatus?: string[];
     targetCohortId?: string[];
     expectedResumeDate?: string[];
     reason?: string[];

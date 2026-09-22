@@ -65,21 +65,14 @@ export function getStudentStatusLabel(
     return 'Deferred';
   }
 
+  if (lifecycle === 'suspended') {
+    return 'Suspended';
+  }
+
   if (lifecycle === 'dropped_out') {
     return 'Dropped out';
   }
 
-  if (lifecycle === 'on_leave') {
-    return 'On leave';
-  }
-
-  if (lifecycle === 'withdrawn') {
-    return 'Withdrawn';
-  }
-
-  if (lifecycle === 'discontinued') {
-    return 'Discontinued';
-  }
 
   if (
     lifecycle === 'active' ||

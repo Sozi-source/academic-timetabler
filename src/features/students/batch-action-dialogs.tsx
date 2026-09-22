@@ -36,6 +36,7 @@ export type BatchActionType =
   | 'confirm_reported'
   | 'defer'
   | 'dropout'
+  | 'suspend'
   | 'reassign_cohort';
 
 interface BatchActionDialogsProps {
@@ -112,7 +113,6 @@ export function BatchActionDialogs({
         onClose();
       } else if (openAction === 'defer') {
         formData.append('status', 'deferred');
-        formData.append('reason', reason);
         formData.append('expectedResumeDate', expectedResumeDate);
         const res = await batchUpdateStudentStatusAction(
           initialBatchStudentActionState,
@@ -128,7 +128,6 @@ export function BatchActionDialogs({
         onClose();
       } else if (openAction === 'dropout') {
         formData.append('status', 'dropped_out');
-        formData.append('reason', reason);
         const res = await batchUpdateStudentStatusAction(
           initialBatchStudentActionState,
           formData,
@@ -139,6 +138,17 @@ export function BatchActionDialogs({
           return;
         }
         onSuccess(res.message || `${count} student(s) marked as dropped out.`);
+        resetState();
+        onClose();
+      } else if (openAction === 'suspend') {
+        formData.append('status', 'suspended');
+        const res = await batchUpdateStudentStatusAction(initialBatchStudentActionState, formData);
+        if (res.status === 'error') {
+          setErrorMsg(res.message || 'Failed to suspend students.');
+          setSubmitting(false);
+          return;
+        }
+        onSuccess(res.message || `${count} student(s) suspended successfully.`);
         resetState();
         onClose();
       } else if (openAction === 'reassign_cohort') {

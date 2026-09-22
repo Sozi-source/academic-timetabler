@@ -2442,3 +2442,31 @@ When logging changes, copy and fill out the template below:
 - **Manual Follow-ups**:
   - Steps required by developers or admins (e.g. running `npx supabase db push`).
 ```
+
+## 2026-09-22 — Trainer attendance hardening
+
+- Added database concurrency locking to `open_class_attendance_session` so simultaneous opens for the same scheduled lesson/date cannot race into duplicate sessions.
+- Reasserted unique attendance-session backstops for scheduled-session/date and allocation/date/start-time combinations.
+- Added protection against changing the date of completed/cancelled historical attendance records.
+- Changed the staff attendance schedule to read current locked `scheduled_sessions` instead of published timetable snapshots, so trainer swaps/day/time changes are reflected without requiring a republish.
+- Included the live trainer daily-report schedule migration so current/future Daily Reports also follow live `scheduled_sessions`, while historical dates remain snapshot-based.
+
+No database or application runtime changes were executed while preparing this package.
+
+
+### 2026-09-22: Simplified Student Status Management
+
+- Added a simple Student Profile → Update progression control for the six operational statuses: Active, Deferred, Dropped Out, Suspended, Completed, and Graduated.
+- Status changes now require only selecting a status and saving; the system records the effective date automatically and writes a lifecycle audit event without asking the user for a reason or note.
+- New students default to Active; existing `admitted` records are normalized to Active.
+- Non-active lifecycle statuses are excluded from active-semester student reporting/registration through the existing authoritative lifecycle filters, while historical records remain stored.
+- Removed Withdrawn from the student status UI and added Suspended to registry filters and batch status actions.
+
+## 2026-09-22 — Attachment and Not Reported student status controls
+
+- Added independent **Academic placement** control on the Student Profile: `In Class` / `Attachment`.
+- Added independent **Semester reporting** control: `Reported` / `Not Reported`.
+- These controls do not replace the lifecycle statuses (`Active`, `Deferred`, `Dropped Out`, `Suspended`, `Completed`, `Graduated`).
+- `Attachment` is stored as the student's academic phase while retaining an Active lifecycle.
+- `Not Reported` applies to the current active academic period's reporting record; attendance continues to treat non-reported students as `not_reported`.
+- No reason or remarks are required; the existing save action records the change.

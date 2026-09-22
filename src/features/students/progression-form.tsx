@@ -5,157 +5,83 @@ import { useActionState, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { FormStatusMessage } from '@/components/ui/form-status-message';
-import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 
 import { recordStudentProgressionAction } from './actions';
-import {
-  initialStudentProgressionActionState,
-  type StudentCohortOption,
-  type StudentLifecycleStatus,
-} from './types';
+import { initialStudentProgressionActionState, type StudentLifecycleStatus } from './types';
 
 interface ProgressionFormProps {
   studentId: string;
   status: StudentLifecycleStatus;
-  currentCohortId: string | null;
-  cohorts: StudentCohortOption[];
+  academicPhase: 'in_class' | 'clinical_rotation' | 'attachment' | 'deferred' | 'dropped_out' | 'awaiting_graduation' | 'graduated';
+  reportingStatus: 'pending' | 'reported' | 'deferred' | 'dropped_out';
 }
 
-const labels = {
-  deferral: 'Defer studies',
-  resumption: 'Resume studies / Return to active cohort',
-  programme_completion: 'Mark completed',
-  graduation: 'Mark graduated',
-} as const;
+const statusOptions = [
+  ['active', 'Active'],
+  ['deferred', 'Deferred'],
+  ['dropped_out', 'Dropped Out'],
+  ['suspended', 'Suspended'],
+  ['completed', 'Completed'],
+  ['graduated', 'Graduated'],
+] as const;
 
-type Transition = keyof typeof labels;
-
-function availableTransitions(status: StudentLifecycleStatus): Transition[] {
-  if (status === 'admitted' || status === 'active') {
-    return ['deferral', 'programme_completion'];
-  }
-  if (status === 'deferred') return ['resumption'];
-  if (status === 'completed') return ['graduation', 'resumption'];
-  return [];
-}
-
-function FieldError({ message }: { message?: string }) {
-  if (!message) return null;
-  return <p className="mt-1 text-[0.6875rem] font-medium text-danger">{message}</p>;
-}
-
-export function ProgressionForm({ studentId, status, currentCohortId, cohorts }: ProgressionFormProps) {
-  const transitions = useMemo(() => availableTransitions(status), [status]);
-  const [eventType, setEventType] = useState<Transition | ''>(transitions[0] ?? '');
+export function ProgressionForm({ studentId, status, academicPhase, reportingStatus }: ProgressionFormProps) {
+  const [targetStatus, setTargetStatus] = useState<StudentLifecycleStatus>(status === 'admitted' ? 'active' : status);
+  const [targetPlacement, setTargetPlacement] = useState<'in_class' | 'attachment'>(academicPhase === 'attachment' ? 'attachment' : 'in_class');
+  const [targetReporting, setTargetReporting] = useState<'reported' | 'not_reported'>(reportingStatus === 'reported' ? 'reported' : 'not_reported');
   const [state, formAction, pending] = useActionState(
     recordStudentProgressionAction,
     initialStudentProgressionActionState,
   );
-
-  if (transitions.length === 0) {
-    return <p className="text-xs text-text-muted">No progression action is available for this status.</p>;
-  }
-
-  const needsReturnDate = eventType === 'deferral';
-  const needsCohort = eventType === 'resumption';
-  const needsReason = eventType === 'deferral';
+  const options = useMemo(() => statusOptions, []);
 
   return (
     <form action={formAction} className="space-y-3" noValidate>
       <input type="hidden" name="studentId" value={studentId} />
+      <input type="hidden" name="eventType" value="status_update" />
 
       {state.message ? (
         <FormStatusMessage status={state.status === 'success' ? 'success' : 'error'} message={state.message} />
       ) : null}
 
-      <div className="grid gap-3 md:grid-cols-2">
-        <label className="text-xs font-semibold text-text-primary">
-          Action
-          <Select
-            name="eventType"
-            value={eventType}
-            onChange={(event) => setEventType(event.target.value as Transition)}
-            className="mt-1 h-9 rounded-lg text-xs"
-            hasError={Boolean(state.fieldErrors?.eventType?.[0])}
-          >
-            {transitions.map((transition) => (
-              <option key={transition} value={transition}>{labels[transition]}</option>
-            ))}
-          </Select>
-          <FieldError message={state.fieldErrors?.eventType?.[0]} />
-        </label>
+      <label className="block text-xs font-semibold text-text-primary">
+        Student status
+        <Select
+          name="targetStatus"
+          value={targetStatus}
+          onChange={(event) => setTargetStatus(event.target.value as StudentLifecycleStatus)}
+          className="mt-1 h-9 rounded-lg text-xs"
+          hasError={Boolean(state.fieldErrors?.targetStatus?.[0])}
+        >
+          {options.map(([value, label]) => (
+            <option key={value} value={value}>{label}</option>
+          ))}
+        </Select>
+      </label>
 
-        <label className="text-xs font-semibold text-text-primary">
-          Effective date
-          <Input
-            type="date"
-            name="effectiveDate"
-            className="mt-1 h-9 rounded-lg text-xs"
-            hasError={Boolean(state.fieldErrors?.effectiveDate?.[0])}
-          />
-          <FieldError message={state.fieldErrors?.effectiveDate?.[0]} />
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="block text-xs font-semibold text-text-primary">
+          Academic placement
+          <Select name="academicPlacement" value={targetPlacement} onChange={(event) => setTargetPlacement(event.target.value as 'in_class' | 'attachment')} className="mt-1 h-9 rounded-lg text-xs">
+            <option value="in_class">In Class</option>
+            <option value="attachment">Attachment</option>
+          </Select>
+        </label>
+        <label className="block text-xs font-semibold text-text-primary">
+          Semester reporting
+          <Select name="reportingStatus" value={targetReporting} onChange={(event) => setTargetReporting(event.target.value as 'reported' | 'not_reported')} className="mt-1 h-9 rounded-lg text-xs">
+            <option value="reported">Reported</option>
+            <option value="not_reported">Not Reported</option>
+          </Select>
         </label>
       </div>
 
-      {needsCohort ? (
-        <label className="block text-xs font-semibold text-text-primary">
-          Study cohort
-          <Select
-            name="targetCohortId"
-            defaultValue={currentCohortId ?? ''}
-            className="mt-1 h-9 rounded-lg text-xs"
-            hasError={Boolean(state.fieldErrors?.targetCohortId?.[0])}
-          >
-            <option value="">Select cohort</option>
-            {cohorts.map((cohort) => (
-              <option key={cohort.id} value={cohort.id}>{cohort.name}</option>
-            ))}
-          </Select>
-          <FieldError message={state.fieldErrors?.targetCohortId?.[0]} />
-        </label>
-      ) : null}
-
-      {needsReturnDate ? (
-        <label className="block text-xs font-semibold text-text-primary">
-          Expected return
-          <Input
-            type="date"
-            name="expectedResumeDate"
-            className="mt-1 h-9 rounded-lg text-xs"
-            hasError={Boolean(state.fieldErrors?.expectedResumeDate?.[0])}
-          />
-          <FieldError message={state.fieldErrors?.expectedResumeDate?.[0]} />
-        </label>
-      ) : null}
-
-      {needsReason ? (
-        <label className="block text-xs font-semibold text-text-primary">
-          Reason
-          <Input
-            name="reason"
-            placeholder="Brief reason"
-            className="mt-1 h-9 rounded-lg text-xs"
-            hasError={Boolean(state.fieldErrors?.reason?.[0])}
-          />
-          <FieldError message={state.fieldErrors?.reason?.[0]} />
-        </label>
-      ) : null}
-
-      <label className="block text-xs font-semibold text-text-primary">
-        Note <span className="font-normal text-text-muted">(optional)</span>
-        <textarea
-          name="notes"
-          rows={2}
-          className="mt-1 w-full resize-none rounded-lg border border-border-strong bg-surface px-3 py-2 text-xs text-text-primary outline-none transition focus:border-focus-border focus:ring-4 focus:ring-focus-ring/25"
-          placeholder="Short administrative note"
-        />
-        <FieldError message={state.fieldErrors?.notes?.[0]} />
-      </label>
+      <p className="text-[0.6875rem] text-text-muted">Select the status, placement and reporting state, then save. No reason is required.</p>
 
       <div className="flex justify-end border-t border-border pt-3">
-        <Button type="submit" disabled={pending} size="sm" leadingIcon={pending ? <LoaderCircle className="size-3.5 animate-spin" /> : <Save className="size-3.5" />}>
-          {pending ? 'Saving' : 'Save progression'}
+        <Button type="submit" disabled={pending || (targetStatus === status && targetPlacement === (academicPhase === 'attachment' ? 'attachment' : 'in_class') && targetReporting === (reportingStatus === 'reported' ? 'reported' : 'not_reported'))} size="sm" leadingIcon={pending ? <LoaderCircle className="size-3.5 animate-spin" /> : <Save className="size-3.5" />}>
+          {pending ? 'Saving' : 'Save status'}
         </Button>
       </div>
     </form>

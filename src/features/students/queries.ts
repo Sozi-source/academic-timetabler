@@ -157,6 +157,20 @@ export const getStudentById = cache(async (studentId: string): Promise<StudentDe
   return data ? (data as unknown as StudentDetail) : null;
 });
 
+export const getStudentActiveReportingStatus = cache(async (studentId: string): Promise<'pending' | 'reported' | 'deferred' | 'dropped_out'> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('student_period_reporting')
+    .select('reporting_status, academic_periods!inner(status)')
+    .eq('student_id', studentId)
+    .eq('academic_periods.status', 'active')
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error(`Unable to load student reporting status: ${error.message}`);
+  return (data?.reporting_status as 'pending' | 'reported' | 'deferred' | 'dropped_out' | undefined) ?? 'pending';
+});
+
 export const getStudentLifecycleEvents = cache(async (studentId: string): Promise<StudentLifecycleEvent[]> => {
   const supabase = await createClient();
   const { data, error } = await supabase

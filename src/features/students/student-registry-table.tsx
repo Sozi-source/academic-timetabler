@@ -74,6 +74,7 @@ export function StudentRegistryTable({
       active: 0,
       deferred: 0,
       dropped_out: 0,
+      suspended: 0,
       completed: 0,
       graduated: 0,
     };
@@ -83,6 +84,7 @@ export function StudentRegistryTable({
       if (status === 'active' || status === 'admitted') counts.active++;
       else if (status === 'deferred') counts.deferred++;
       else if (status === 'dropped_out') counts.dropped_out++;
+      else if (status === 'suspended') counts.suspended++;
       else if (status === 'completed') counts.completed++;
       else if (status === 'graduated') counts.graduated++;
     }
@@ -264,6 +266,7 @@ export function StudentRegistryTable({
       label: 'Dropped out',
       count: statusCounts.dropped_out,
     },
+    { value: 'suspended', label: 'Suspended', count: statusCounts.suspended },
     { value: 'completed', label: 'Completed', count: statusCounts.completed },
     { value: 'graduated', label: 'Graduated', count: statusCounts.graduated },
   ];
@@ -706,6 +709,18 @@ export function StudentRegistryTable({
             >
               <UserX className="size-3.5" />
               Dropped Out
+            </Button>
+
+            {/* 5. Suspend */}
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() => setActiveModal('suspend')}
+              className="h-8 px-3 text-xs font-bold bg-slate-600 hover:bg-slate-500 text-white border-none shadow-xs"
+            >
+              <Clock className="size-3.5" />
+              Suspended
             </Button>
           </div>
         </div>

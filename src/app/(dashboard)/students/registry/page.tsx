@@ -11,7 +11,7 @@ import { StudentRegistryTable } from '@/features/students/student-registry-table
 export default async function StudentRegistryPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
   await requireHodAccess();
   const params = await searchParams;
-  const allowed = ['active', 'deferred', 'dropped_out', 'completed', 'graduated'] as const;
+  const allowed = ['active', 'deferred', 'dropped_out', 'suspended', 'completed', 'graduated'] as const;
   const status = allowed.includes(params.status as (typeof allowed)[number]) ? params.status as (typeof allowed)[number] : undefined;
   
   // Fetch full student roster and active cohort options concurrently

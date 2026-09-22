@@ -9,13 +9,13 @@ import { requireHodAccess } from '@/features/auth/authorization';
 import { ProgressionForm } from '@/features/students/progression-form';
 import { EditAdmissionNumberDialog } from '@/features/students/edit-admission-number-dialog';
 import { ResetStudentPasswordDialog } from '@/features/students/reset-student-password-dialog';
-import { getStudentById, getStudentCohortOptions, getStudentLifecycleEvents } from '@/features/students/queries';
+import { getStudentActiveReportingStatus, getStudentById, getStudentLifecycleEvents } from '@/features/students/queries';
 import type { StudentLifecycleEventType, StudentLifecycleStatus } from '@/features/students/types';
 
 function statusVariant(status: StudentLifecycleStatus) {
   if (status === 'active' || status === 'admitted' || status === 'completed' || status === 'graduated') return 'success' as const;
-  if (status === 'deferred' || status === 'on_leave') return 'warning' as const;
-  if (status === 'dropped_out' || status === 'withdrawn' || status === 'discontinued') return 'danger' as const;
+  if (status === 'deferred' || status === 'suspended') return 'warning' as const;
+  if (status === 'dropped_out') return 'danger' as const;
   return 'neutral' as const;
 }
 
@@ -25,10 +25,6 @@ const eventLabels: Partial<Record<StudentLifecycleEventType, string>> = {
   deferral: 'Deferred',
   resumption: 'Resumed',
   dropout: 'Dropped out',
-  leave_started: 'Leave started',
-  leave_ended: 'Leave ended',
-  withdrawal: 'Withdrawn',
-  discontinuation: 'Discontinued',
   programme_completion: 'Programme completed',
   graduation: 'Graduated',
   administrative_correction: 'Administrative correction',
@@ -45,10 +41,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   const student = await getStudentById(studentId);
   if (!student) notFound();
 
-  const [events, cohorts] = await Promise.all([
-    getStudentLifecycleEvents(student.id),
-    getStudentCohortOptions(student.programme_id),
-  ]);
+  const [events, reportingStatus] = await Promise.all([getStudentLifecycleEvents(student.id), getStudentActiveReportingStatus(student.id)]);
 
   return (
     <div className="space-y-4">
@@ -105,9 +98,9 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         <Card className="p-4">
           <div className="mb-3 flex items-center gap-2">
             <span className="flex size-8 items-center justify-center rounded-lg bg-institutional-yellow text-institutional-yellow-ink"><CalendarDays className="size-3.5" /></span>
-            <h2 className="text-sm font-bold text-text-primary">Update progression</h2>
+            <h2 className="text-sm font-bold text-text-primary">Update student status</h2>
           </div>
-          <ProgressionForm studentId={student.id} status={student.lifecycle_status} currentCohortId={student.current_cohort_id} cohorts={cohorts} />
+          <ProgressionForm studentId={student.id} status={student.lifecycle_status} academicPhase={student.academic_phase} reportingStatus={reportingStatus} />
         </Card>
 
         <Card className="overflow-hidden">
@@ -124,9 +117,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-xs font-semibold text-text-primary">{eventLabels[event.event_type] ?? event.event_type.replaceAll('_', ' ')}</p>
-                      {event.reason ? <p className="mt-0.5 text-[0.6875rem] text-text-secondary">{event.reason}</p> : null}
                       {event.to_cohort ? <p className="mt-1 text-[0.6875rem] text-text-muted">Cohort: {event.to_cohort.name}</p> : null}
-                      {event.expected_resume_date ? <p className="mt-1 text-[0.6875rem] text-text-muted">Expected return: {formatDate(event.expected_resume_date)}</p> : null}
                     </div>
                     <span className="shrink-0 text-[0.6875rem] font-medium text-text-muted">{formatDate(event.effective_date)}</span>
                   </div>

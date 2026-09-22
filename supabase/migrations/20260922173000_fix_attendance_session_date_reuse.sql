@@ -31,6 +31,16 @@ begin
     raise exception 'Class date is required.' using errcode = '22023';
   end if;
 
+  -- Serialize opens for the same scheduled lesson/date. The unique index
+  -- remains the database backstop, while this prevents concurrent callers
+  -- from racing through the lookup/create path.
+  perform pg_advisory_xact_lock(
+    hashtextextended(
+      target_scheduled_session_id::text || ':' || target_session_date::text,
+      0
+    )
+  );
+
   select
     scheduled.id, scheduled.academic_period_id, scheduled.teaching_allocation_id,
     scheduled.cohort_id, scheduled.participant_cohort_ids, scheduled.unit_id,

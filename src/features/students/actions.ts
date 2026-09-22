@@ -26,13 +26,10 @@ function optionalText(formData: FormData, name: string) {
 }
 
 function progressionError(message?: string) {
-  if (message?.includes('Only active or admitted')) return 'Only active or admitted students can perform this transition.';
-  if (message?.includes('Only deferred') || message?.includes('can resume')) return 'Only deferred, on-leave, or uncompleted students can resume.';
-  if (message?.includes('Resumption cohort must belong')) return 'The chosen cohort does not belong to the student’s programme.';
-  if (message?.includes('Resumption cohort must be planned or active')) return 'The target cohort is not available for resumption.';
-  if (message?.includes('future expected resumption date')) return 'A future return date is required.';
-  if (message?.includes('Only completed students')) return 'Only completed students can be marked graduated.';
-  return 'The progression change could not be saved.';
+  if (message?.includes('Only an HOD') || message?.includes('42501')) return 'You do not have permission to update this student.';
+  if (message?.includes('Student not found') || message?.includes('P0002')) return 'Student record not found.';
+  if (message?.includes('Invalid target status')) return 'Select a valid student status.';
+  return 'The student status could not be saved.';
 }
 
 export async function recordStudentProgressionAction(
@@ -44,43 +41,41 @@ export async function recordStudentProgressionAction(
   const parsed = studentProgressionSchema.safeParse({
     studentId: formData.get('studentId'),
     eventType: formData.get('eventType'),
-    effectiveDate: formData.get('effectiveDate'),
-    targetCohortId: optionalText(formData, 'targetCohortId'),
-    expectedResumeDate: optionalText(formData, 'expectedResumeDate'),
-    reason: optionalText(formData, 'reason'),
-    notes: optionalText(formData, 'notes'),
+    effectiveDate: new Date().toISOString().slice(0, 10),
+    targetStatus: formData.get('targetStatus'),
+    academicPlacement: formData.get('academicPlacement'),
+    reportingStatus: formData.get('reportingStatus'),
   });
 
   if (!parsed.success) {
-    return {
-      status: 'error',
-      message: 'Review the highlighted fields.',
-      fieldErrors: parsed.error.flatten().fieldErrors,
-    };
+    return { status: 'error', message: 'Select a valid student status.', fieldErrors: parsed.error.flatten().fieldErrors };
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.rpc('record_student_lifecycle_transition', {
+  const lifecycleResult = await supabase.rpc('set_student_status', {
     target_student_id: parsed.data.studentId,
-    transition_event: parsed.data.eventType,
-    transition_date: parsed.data.effectiveDate,
-    target_cohort_id: parsed.data.targetCohortId ?? null,
-    expected_resume_on: parsed.data.expectedResumeDate ?? null,
-    transition_reason: parsed.data.reason ?? null,
-    transition_notes: parsed.data.notes ?? null,
+    target_status: parsed.data.targetStatus,
   });
+  if (lifecycleResult.error) return { status: 'error', message: progressionError(lifecycleResult.error.message) };
 
-  if (error) {
-    return { status: 'error', message: progressionError(error.message) };
-  }
+  const placementResult = await supabase.rpc('set_student_status', {
+    target_student_id: parsed.data.studentId,
+    target_status: parsed.data.academicPlacement,
+  });
+  if (placementResult.error) return { status: 'error', message: progressionError(placementResult.error.message) };
+
+  const reportingResult = await supabase.rpc('set_student_status', {
+    target_student_id: parsed.data.studentId,
+    target_status: parsed.data.reportingStatus,
+  });
+  if (reportingResult.error) return { status: 'error', message: progressionError(reportingResult.error.message) };
 
   revalidatePath('/students');
   revalidatePath('/students/registry');
   revalidatePath('/students/progression');
   revalidatePath('/students/unit-registration');
   revalidatePath(`/students/registry/${parsed.data.studentId}`);
-
-  return { status: 'success', message: 'Progression updated.' };
+  return { status: 'success', message: 'Student status updated.' };
 }
 
 function admissionNumberError(message?: string) {
@@ -294,160 +289,30 @@ export async function batchUpdateStudentStatusAction(
   _previousState: BatchStudentActionState,
   formData: FormData,
 ): Promise<BatchStudentActionState> {
-  const profile = await requireHodAccess();
-
-  const studentIds = formData
-    .getAll('studentIds')
-    .filter((v): v is string => typeof v === 'string' && v.length > 0);
-  const status = formData.get('status');
-  const effectiveDate = formData.get('effectiveDate') || new Date().toISOString().slice(0, 10);
-  const reason = optionalText(formData, 'reason');
-  const expectedResumeDate = optionalText(formData, 'expectedResumeDate');
-
+  await requireHodAccess();
+  const studentIds = formData.getAll('studentIds').filter((v): v is string => typeof v === 'string' && v.length > 0);
   const parsed = batchUpdateStudentStatusSchema.safeParse({
     studentIds,
-    status,
-    effectiveDate,
-    reason,
-    expectedResumeDate,
+    status: formData.get('status'),
+    effectiveDate: formData.get('effectiveDate') || new Date().toISOString().slice(0, 10),
   });
-
-  if (!parsed.success) {
-    return {
-      status: 'error',
-      message: 'Please resolve the validation errors.',
-      fieldErrors: parsed.error.flatten().fieldErrors,
-    };
-  }
+  if (!parsed.success) return { status: 'error', message: 'Select a valid student status.', fieldErrors: parsed.error.flatten().fieldErrors };
 
   const supabase = await createClient();
-
-  // Try RPC first
-  const { data: rpcData, error: rpcError } = await supabase.rpc(
-    'batch_update_student_status',
-    {
-      target_student_ids: parsed.data.studentIds,
+  for (const studentId of parsed.data.studentIds) {
+    const { error } = await supabase.rpc('set_student_status', {
+      target_student_id: studentId,
       target_status: parsed.data.status,
       effective_date: parsed.data.effectiveDate,
-      reason: parsed.data.reason ?? null,
-      expected_resume_on: parsed.data.expectedResumeDate ?? null,
-    },
-  );
-
-  let updatedCount = parsed.data.studentIds.length;
-
-  if (rpcError) {
-    // Graceful fallback if RPC is not yet registered on remote Supabase
-    if (rpcError.code === 'PGRST202' || rpcError.message.includes('batch_update_student_status')) {
-      const targetPhase =
-        parsed.data.status === 'active'
-          ? 'in_class'
-          : parsed.data.status === 'deferred'
-          ? 'deferred'
-          : 'dropped_out';
-
-      const transEvent =
-        parsed.data.status === 'active'
-          ? 'resumption'
-          : parsed.data.status === 'deferred'
-          ? 'deferral'
-          : 'withdrawal';
-
-      // 1. Update students
-      const { error: updErr } = await supabase
-        .from('students')
-        .update({
-          lifecycle_status: parsed.data.status,
-          academic_phase: targetPhase,
-          updated_at: new Date().toISOString(),
-        })
-        .in('id', parsed.data.studentIds);
-
-      if (updErr) return { status: 'error', message: updErr.message };
-
-      // 2. Fetch current cohort IDs for accurate event logging
-      const { data: studentList } = await supabase
-        .from('students')
-        .select('id, department_id, current_cohort_id')
-        .in('id', parsed.data.studentIds);
-
-      // 3. Insert audit events
-      const events = (studentList ?? []).map((st) => ({
-        student_id: st.id,
-        event_type: transEvent,
-        effective_date: parsed.data.effectiveDate,
-        expected_resume_date: parsed.data.status === 'deferred' ? parsed.data.expectedResumeDate ?? null : null,
-        reason: parsed.data.reason ?? `Batch status update to ${parsed.data.status}`,
-        notes: 'Updated via Student Registry Batch Action',
-        from_cohort_id: st.current_cohort_id,
-        to_cohort_id: st.current_cohort_id,
-      }));
-
-      if (events.length > 0) {
-        await supabase.from('student_lifecycle_events').insert(events);
-      }
-
-      // 4. Sync reporting if active period is available
-      const { data: activePeriod } = await supabase
-        .from('academic_periods')
-        .select('id')
-        .eq('status', 'active')
-        .maybeSingle();
-
-      if (activePeriod && studentList && studentList.length > 0) {
-        if (parsed.data.status === 'active') {
-          for (const st of studentList) {
-            await supabase.from('student_period_reporting').upsert(
-              {
-                department_id: st.department_id,
-                student_id: st.id,
-                academic_period_id: activePeriod.id,
-                reporting_status: 'reported',
-                reported_on: parsed.data.effectiveDate,
-                confirmed_at: new Date().toISOString(),
-                confirmed_by: profile.id,
-                notes: parsed.data.reason ?? 'Reporting confirmed via batch action',
-              },
-              { onConflict: 'student_id,academic_period_id' },
-            );
-          }
-        } else {
-          await supabase
-            .from('student_period_reporting')
-            .update({
-              reporting_status: parsed.data.status === 'deferred' ? 'deferred' : 'dropped_out',
-              updated_at: new Date().toISOString(),
-            })
-            .in('student_id', parsed.data.studentIds)
-            .eq('academic_period_id', activePeriod.id);
-        }
-      }
-
-      updatedCount = studentList?.length ?? parsed.data.studentIds.length;
-    } else {
-      return { status: 'error', message: rpcError.message };
-    }
-  } else if (rpcData && typeof rpcData === 'object' && 'updated_count' in rpcData) {
-    updatedCount = Number(rpcData.updated_count) || updatedCount;
+    });
+    if (error) return { status: 'error', message: error.message };
   }
 
   revalidatePath('/students');
   revalidatePath('/students/registry');
   revalidatePath('/students/progression');
   revalidatePath('/students/unit-registration');
-
-  const statusLabel =
-    parsed.data.status === 'active'
-      ? 'Active / Confirmed Reported'
-      : parsed.data.status === 'deferred'
-      ? 'Deferred'
-      : 'Dropped Out';
-
-  return {
-    status: 'success',
-    message: `${updatedCount} student${updatedCount === 1 ? '' : 's'} marked as ${statusLabel}.`,
-    updatedCount,
-  };
+  return { status: 'success', message: `${parsed.data.studentIds.length} student(s) updated successfully.` };
 }
 
 export async function batchReassignStudentCohortAction(

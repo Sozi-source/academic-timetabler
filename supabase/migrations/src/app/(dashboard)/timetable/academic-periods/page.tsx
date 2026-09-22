@@ -1,0 +1,181 @@
+import { CrudModal } from '@/components/ui/crud-modal';
+import type { Metadata } from 'next';
+import {
+  ArrowLeft,
+  CalendarDays,
+  Plus,
+} from 'lucide-react';
+import Link from 'next/link';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  Drawer,
+  DrawerBody,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer';
+import { PageHeader } from '@/components/ui/page-header';
+import {
+  getAcademicYears,
+} from '@/features/academic-years/queries';
+import {
+  AcademicPeriodTable,
+} from '@/features/academic-periods/academic-period-table';
+import {
+  CreateAcademicPeriodForm,
+} from '@/features/academic-periods/create-academic-period-form';
+import {
+  getAcademicPeriods,
+} from '@/features/academic-periods/queries';
+
+export const metadata: Metadata = {
+  title: 'Academic Periods',
+  description:
+    'Create and manage institutional Academic Periods and teaching windows.',
+};
+
+export default async function AcademicPeriodsPage() {
+  const [
+    academicPeriods,
+    academicYears,
+  ] = await Promise.all([
+    getAcademicPeriods(),
+    getAcademicYears(),
+  ]);
+
+  const availableAcademicYears =
+    academicYears.filter(
+      (academicYear) =>
+        academicYear.status === 'active',
+    );
+
+  const activePeriod =
+    academicPeriods.find(
+      (period) => period.status === 'active',
+    );
+
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        eyebrow="Academic calendar"
+        title="Academic Periods"
+        description="Teaching periods and term dates."
+        context={
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="neutral">
+              {academicPeriods.length === 1
+                ? '1 Academic Period'
+                : `${academicPeriods.length} Academic Periods`}
+            </Badge>
+
+            {activePeriod ? (
+              <Badge variant="success" dot>
+                Active: {activePeriod.name}
+              </Badge>
+            ) : (
+              <Badge variant="warning" dot>
+                No active Academic Period
+              </Badge>
+            )}
+          </div>
+        }
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/dashboard"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+            >
+              <ArrowLeft className="size-4" aria-hidden="true" />
+              Dashboard
+            </Link>
+
+            <Link
+              href="/timetable/academic-years"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+            >
+              Years
+            </Link>
+
+            <Link
+              href="/timetable/time-slots"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+            >
+              Teaching Sessions
+            </Link>
+
+            <Link
+              href="/timetable/organization"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+            >
+              Departments
+            </Link>
+
+            <Drawer>
+              <DrawerTrigger asChild>
+                <Button
+                  leadingIcon={
+                    <Plus
+                      className="size-4"
+                      aria-hidden="true"
+                    />
+                  }
+                >
+                  Add Academic Period
+                </Button>
+              </DrawerTrigger>
+
+              <DrawerContent>
+                <DrawerHeader>
+                  <div className="flex items-center gap-3">
+                  <div className="flex size-10 items-center justify-center rounded-xl bg-primary-soft text-primary">
+                    <CalendarDays
+                      className="size-5"
+                      aria-hidden="true"
+                    />
+                  </div>
+
+                  <div>
+                    <DrawerTitle>
+                      Create Academic Period
+                    </DrawerTitle>
+                  </div>
+                </div>
+              </DrawerHeader>
+
+              <DrawerBody className="pb-10">
+                {availableAcademicYears.length >
+                0 ? (
+                  <CrudModal
+          title="Create Academic Period"
+          description="Add a teaching period to the academic calendar."
+          triggerLabel="Create Academic Period"
+          widthClassName="max-w-2xl"
+        >
+          <CreateAcademicPeriodForm
+                    academicYears={
+                      availableAcademicYears
+                    }
+                  />
+        </CrudModal>
+                ) : (
+                  <div className="rounded-xl border border-warning-border bg-warning-surface px-4 py-4 text-sm text-warning">
+                    Create an Academic Year before
+                    adding Academic Periods.
+                  </div>
+                )}
+              </DrawerBody>
+            </DrawerContent>
+          </Drawer>
+        </div>
+        }
+      />
+
+      <AcademicPeriodTable
+        academicPeriods={academicPeriods}
+      />
+    </div>
+  );
+}

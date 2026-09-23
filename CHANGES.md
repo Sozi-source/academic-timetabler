@@ -1,3 +1,24 @@
+### 2026-09-24: Fix — Attendance Register 100% Personal Timetable Parity (e.g. Wednesday Trade Project)
+
+**Root cause**:
+1. **Source-of-truth discrepancy**: `/staff/timetable` (and the trainer portal) reads from published `timetable_versions.snapshot`, whereas `/staff/attendance` only queried the `scheduled_sessions` table with `.eq('status', 'locked')`. Sessions in the published timetable snapshot (like Wednesday Trade Project) whose rows in `scheduled_sessions` were in `draft` or `confirmed` status, or were not yet materialized as locked scheduled sessions, were completely invisible in the trainer's class attendance register list.
+2. **Weekday filtering mismatch**: `AttendanceScheduleList` filtered sessions by strictly matching `item.dayOfWeek.toLowerCase() === selectedWeekday.toLowerCase()`. Any unnormalized weekday string (such as abbreviation, casing, or whitespace differences) caused sessions on that day to disappear.
+3. **Session creation fallback gaps**: In `POST /api/staff/attendance/sessions`, snapshot recovery was restricted to `.limit(1)` on rooms and threw an error if `sessionData` was missing from `scheduled_sessions`, preventing attendance session creation for snapshot-based classes.
+
+**Fix**:
+1. **Authoritative Snapshot & Live Synchronization**: `resolveTrainerAttendanceSchedule` in `src/features/class-attendance/queries.ts` now first loads the published timetable from `timetable_versions.snapshot` (the exact source of truth for personal timetables) and maps all trainer/allocation/unit sessions. It then supplements with any live scheduled sessions (`status != 'cancelled'`). This ensures 100% parity between personal timetables and attendance registers.
+2. **Normalized Weekday Matching**: Introduced `normalizeDayOfWeek` in `src/features/class-attendance/domain.ts` and integrated it across `queries.ts`, `attendance-schedule-list.tsx`, and `route.ts`. Wednesday Trade Project and all other days now match reliably.
+3. **Robust Attendance Opening**: Enhanced `POST /api/staff/attendance/sessions` with full room resolution, on-the-fly allocation provisioning, and fallback class session creation directly from snapshot data if a session row is missing.
+4. **HOD Impersonation Parity**: `getTrainerAttendanceScheduleForAdmin(profileId)` now delegates directly to `resolveTrainerAttendanceSchedule(profileId)`, ensuring HODs in `/trainers/[id]/portal-view` see the exact same 100% accurate register.
+
+**Files changed:**
+- `src/features/class-attendance/domain.ts` — Added `normalizeDayOfWeek` helper and updated `weekdayLabel`.
+- `src/features/class-attendance/attendance-schedule-list.tsx` — Normalized weekday comparisons in `displayedItems`.
+- `src/features/class-attendance/queries.ts` — Implemented `resolveTrainerAttendanceSchedule` unifying published snapshots and live sessions; unified `getStaffClassAttendanceSchedule` and `getTrainerAttendanceScheduleForAdmin`.
+- `src/app/api/staff/attendance/sessions/route.ts` — Day normalization, room resolution without limit, allocation recovery, and snapshot fallback for `sessionData`.
+
+**Verification**: `npm run check` passed (`next typegen && tsc --noEmit` + `eslint` + `next build`, Turbopack).
+
 ### 2026-09-24: Fix — Trainer attendance register missing sessions (e.g. Agricultural Production on Tuesday)
 
 **Root causes (three compounding bugs in `getStaffClassAttendanceSchedule`):**

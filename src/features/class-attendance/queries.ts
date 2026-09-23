@@ -5,6 +5,7 @@ import {
 } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getUnifiedUnitRoster } from '@/features/academic-roster/unified-roster';
+import { normalizeDayOfWeek } from './domain';
 
 import type {
   ClassAttendanceHistoryItem,
@@ -44,150 +45,189 @@ function asNumber(
     : 0;
 }
 
-export async function getStaffClassAttendanceSchedule(): Promise<ClassAttendanceScheduleItem[]> {
+export async function resolveTrainerAttendanceSchedule(
+  profileId: string,
+): Promise<ClassAttendanceScheduleItem[]> {
   try {
-    const { requireTrainerAccess } = await import('@/features/auth/authorization');
     const { getStaffWorkspace } = await import('@/features/staff-assessment/queries');
-
-    const profile = await requireTrainerAccess();
-    const workspace = await getStaffWorkspace(profile.id);
-
-    // Use admin client for ALL lookups to bypass department-scoped RLS.
-    // Trainers frequently teach service units owned by other departments (e.g. a
-    // trainer in Dept A teaching "Agricultural Production" owned by Dept B).
-    // The regular session-scoped client would return null for those unit/cohort
-    // name lookups, causing those sessions to be silently skipped.
+    const workspace = await getStaffWorkspace(profileId);
     const admin = createAdminClient();
 
     const allocationIds = workspace.allocations
       .map((a) => a.allocationId)
       .filter(Boolean);
 
-    // Dual-query strategy:
-    //  Query A — by trainer_id (primary link, fast path)
-    //  Query B — by teaching_allocation_id (catches sessions where trainer_id is
-    //             null or stale after a reassignment, or team-taught units)
-    // Both are filtered to status='locked' (live, published timetable only).
+    const allocMap = new Map<string, any>();
+    for (const alloc of workspace.allocations) {
+      allocMap.set(alloc.allocationId, alloc);
+      allocMap.set(`${alloc.unitId}:${alloc.cohortId}`, alloc);
+      allocMap.set(alloc.unitId, alloc);
+    }
+
+    // 1. Fetch academic periods for metadata
+    const { data: periodsData } = await (admin as any)
+      .from('academic_periods')
+      .select('id, name, teaching_starts_on, teaching_ends_on');
+
+    const periodMap = new Map<string, any>(
+      (periodsData ?? []).map((p: any) => [String(p.id), p]),
+    );
+
+    const items: ClassAttendanceScheduleItem[] = [];
+    const seenSessionIds = new Set<string>();
+
+    // 2. Load published timetable snapshots (exact same authoritative source as /staff/timetable)
+    const { data: publishedVersions } = await (admin as any)
+      .from('timetable_versions')
+      .select('id, academic_period_id, snapshot, status, version_number')
+      .eq('status', 'published')
+      .order('version_number', { ascending: false });
+
+    if (publishedVersions && publishedVersions.length > 0) {
+      for (const v of publishedVersions) {
+        const periodId = String(v.academic_period_id || '');
+        const period = periodMap.get(periodId);
+        const snapshot = Array.isArray(v.snapshot) ? v.snapshot : [];
+
+        for (const raw of snapshot) {
+          const sessionId = String(raw.id || '');
+          if (!sessionId || seenSessionIds.has(sessionId)) continue;
+
+          const rawTrainerId = String(raw.trainerId || '');
+          const rawAllocId = String(raw.teachingAllocationId || raw.allocationId || '');
+          const rawUnitId = String(raw.unitId || '');
+          const rawCohortId = String(raw.cohortId || '');
+
+          const isTrainerMatch = rawTrainerId && rawTrainerId === String(workspace.trainerId);
+          const isAllocMatch = rawAllocId && allocationIds.includes(rawAllocId);
+          const isUnitCohortMatch = allocMap.has(`${rawUnitId}:${rawCohortId}`);
+          const isUnitMatch = allocMap.has(rawUnitId);
+
+          if (isTrainerMatch || isAllocMatch || isUnitCohortMatch || isUnitMatch) {
+            seenSessionIds.add(sessionId);
+
+            const alloc = allocMap.get(rawAllocId) || allocMap.get(`${rawUnitId}:${rawCohortId}`) || allocMap.get(rawUnitId);
+            const unitName = String(raw.unitName || alloc?.unitName || 'Unit');
+            const cohortName = String(raw.cohortName || alloc?.cohortName || 'Cohort');
+            const dayOfWeek = normalizeDayOfWeek(raw.day || raw.dayOfWeek);
+
+            items.push({
+              scheduledSessionId: sessionId,
+              teachingAllocationId: rawAllocId || alloc?.allocationId || '',
+              academicPeriodId: periodId || alloc?.academicPeriodId || '',
+              academicPeriodName: period?.name || alloc?.academicPeriodName || 'Current Term',
+              cohortId: rawCohortId || alloc?.cohortId || '',
+              cohortName,
+              unitId: rawUnitId || alloc?.unitId || '',
+              unitName,
+              dayOfWeek,
+              daySequence: Number(raw.daySequence || 1),
+              startsAt: String(raw.startTime || '08:00'),
+              endsAt: String(raw.endTime || '10:00'),
+              sessionNumber: Number(raw.sessionNumber || 1),
+              teachingStartsOn: String(period?.teaching_starts_on || alloc?.teachingStartsOn || ''),
+              teachingEndsOn: String(period?.teaching_ends_on || alloc?.teachingEndsOn || ''),
+              latestClassSessionId: null,
+              latestSessionDate: null,
+              latestStatus: null,
+            });
+          }
+        }
+      }
+    }
+
+    // 3. Supplement with live scheduled sessions (draft, confirmed, or locked)
     const [byTrainerResult, byAllocationResult] = await Promise.all([
       (admin as any)
         .from('scheduled_sessions')
-        .select('id, academic_period_id, teaching_allocation_id, cohort_id, unit_id, trainer_id, working_day_id, start_time_slot_id, end_time_slot_id, session_number')
+        .select('id, academic_period_id, teaching_allocation_id, cohort_id, unit_id, trainer_id, working_day_id, start_time_slot_id, end_time_slot_id, session_number, status')
         .eq('trainer_id', workspace.trainerId)
-        .eq('status', 'locked'),
+        .neq('status', 'cancelled'),
       allocationIds.length > 0
         ? (admin as any)
             .from('scheduled_sessions')
-            .select('id, academic_period_id, teaching_allocation_id, cohort_id, unit_id, trainer_id, working_day_id, start_time_slot_id, end_time_slot_id, session_number')
+            .select('id, academic_period_id, teaching_allocation_id, cohort_id, unit_id, trainer_id, working_day_id, start_time_slot_id, end_time_slot_id, session_number, status')
             .in('teaching_allocation_id', allocationIds)
-            .eq('status', 'locked')
+            .neq('status', 'cancelled')
         : Promise.resolve({ data: [] }),
     ]);
 
-    if (byTrainerResult.error) throw byTrainerResult.error;
-
-    // Merge results from both queries, deduplicating by session ID.
-    const seenMergeIds = new Set<string>();
-    const sessions: UnknownRow[] = [];
+    const liveSessions: UnknownRow[] = [];
     for (const row of [
       ...((byTrainerResult.data ?? []) as UnknownRow[]),
       ...((byAllocationResult.data ?? []) as UnknownRow[]),
     ]) {
       const sid = String(row.id || '');
-      if (sid && !seenMergeIds.has(sid)) {
-        seenMergeIds.add(sid);
-        sessions.push(row);
+      if (sid && !seenSessionIds.has(sid)) {
+        seenSessionIds.add(sid);
+        liveSessions.push(row);
       }
     }
 
-    if (sessions.length === 0) return [];
+    if (liveSessions.length > 0) {
+      const unitIds = [...new Set(liveSessions.map((r) => String(r.unit_id || '')).filter(Boolean))];
+      const cohortIds = [...new Set(liveSessions.map((r) => String(r.cohort_id || '')).filter(Boolean))];
+      const workingDayIds = [...new Set(liveSessions.map((r) => String(r.working_day_id || '')).filter(Boolean))];
+      const timeSlotIds = [...new Set(
+        liveSessions.flatMap((r) => [String(r.start_time_slot_id || ''), String(r.end_time_slot_id || '')]).filter(Boolean),
+      )];
 
-    const unitIds = [...new Set(sessions.map((row) => String(row.unit_id || '')).filter(Boolean))];
-    const cohortIds = [...new Set(sessions.map((row) => String(row.cohort_id || '')).filter(Boolean))];
-    const workingDayIds = [...new Set(sessions.map((row) => String(row.working_day_id || '')).filter(Boolean))];
-    const timeSlotIds = [...new Set(
-      sessions.flatMap((row) => [String(row.start_time_slot_id || ''), String(row.end_time_slot_id || '')]).filter(Boolean),
-    )];
+      const [unitsResult, cohortsResult, daysResult, slotsResult] = await Promise.all([
+        unitIds.length ? (admin as any).from('units').select('id, name').in('id', unitIds) : Promise.resolve({ data: [] }),
+        cohortIds.length ? (admin as any).from('cohorts').select('id, name').in('id', cohortIds) : Promise.resolve({ data: [] }),
+        workingDayIds.length ? (admin as any).from('working_days').select('id, day_of_week, sequence_number').in('id', workingDayIds) : Promise.resolve({ data: [] }),
+        timeSlotIds.length ? (admin as any).from('time_slots').select('id, starts_at, ends_at').in('id', timeSlotIds) : Promise.resolve({ data: [] }),
+      ]);
 
-    // All lookups via admin client — bypasses RLS for cross-department units/cohorts.
-    const [unitsResult, cohortsResult, daysResult, slotsResult] = await Promise.all([
-      unitIds.length ? (admin as any).from('units').select('id, name').in('id', unitIds) : Promise.resolve({ data: [] }),
-      cohortIds.length ? (admin as any).from('cohorts').select('id, name').in('id', cohortIds) : Promise.resolve({ data: [] }),
-      workingDayIds.length ? (admin as any).from('working_days').select('id, day_of_week').in('id', workingDayIds) : Promise.resolve({ data: [] }),
-      timeSlotIds.length ? (admin as any).from('time_slots').select('id, starts_at, ends_at').in('id', timeSlotIds) : Promise.resolve({ data: [] }),
-    ]);
+      const unitMap = new Map<string, any>((unitsResult.data ?? []).map((r: any) => [String(r.id), r]));
+      const cohortMap = new Map<string, any>((cohortsResult.data ?? []).map((r: any) => [String(r.id), r]));
+      const dayMap = new Map<string, any>((daysResult.data ?? []).map((r: any) => [String(r.id), r]));
+      const slotMap = new Map<string, any>((slotsResult.data ?? []).map((r: any) => [String(r.id), r]));
 
-    const unitMap = new Map((unitsResult.data ?? []).map((row: any) => [String(row.id), row]));
-    const cohortMap = new Map((cohortsResult.data ?? []).map((row: any) => [String(row.id), row]));
-    const dayMap = new Map((daysResult.data ?? []).map((row: any) => [String(row.id), row]));
-    const slotMap = new Map((slotsResult.data ?? []).map((row: any) => [String(row.id), row]));
+      for (const raw of liveSessions) {
+        const sessionId = String(raw.id || '');
+        const allocationId = String(raw.teaching_allocation_id || '');
+        const unitId = String(raw.unit_id || '');
+        const cohortId = String(raw.cohort_id || '');
+        const periodId = String(raw.academic_period_id || '');
+        const period = periodMap.get(periodId);
+        const alloc = allocMap.get(allocationId) || allocMap.get(`${unitId}:${cohortId}`) || allocMap.get(unitId);
+        const day = dayMap.get(String(raw.working_day_id || ''));
+        const startSlot = slotMap.get(String(raw.start_time_slot_id || ''));
+        const endSlot = slotMap.get(String(raw.end_time_slot_id || ''));
+        const unit = unitMap.get(unitId);
+        const cohort = cohortMap.get(cohortId);
 
-    const allocMap = new Map<string, any>();
-    for (const alloc of workspace.allocations) {
-      allocMap.set(alloc.allocationId, alloc);
-      allocMap.set(`${alloc.unitId}:${alloc.cohortId}`, alloc);
-    }
+        const dayStr = day ? String(day.day_of_week || '') : 'Monday';
+        const dayOfWeek = normalizeDayOfWeek(dayStr);
+        const unitName = String(unit?.name || alloc?.unitName || 'Unit');
+        const cohortName = String(cohort?.name || alloc?.cohortName || 'Cohort');
 
-    const items: ClassAttendanceScheduleItem[] = [];
-    const seenIds = new Set<string>();
-
-    for (const raw of sessions) {
-      const sessionId = String(raw.id || '');
-      if (!sessionId || seenIds.has(sessionId)) continue;
-
-      const allocationId = String(raw.teaching_allocation_id || '');
-      const unitId = String(raw.unit_id || '');
-      const cohortId = String(raw.cohort_id || '');
-      const alloc = allocMap.get(allocationId) || allocMap.get(`${unitId}:${cohortId}`);
-      const day = dayMap.get(String(raw.working_day_id || ''));
-      const startSlot = slotMap.get(String(raw.start_time_slot_id || ''));
-      const endSlot = slotMap.get(String(raw.end_time_slot_id || ''));
-      const unit = unitMap.get(unitId);
-      const cohort = cohortMap.get(cohortId);
-
-      if (!unit || !cohort || !day || !startSlot || !endSlot) {
-        // Log missing lookups for traceability — no longer silently dropped.
-        console.warn(
-          `[attendance-schedule] Session ${sessionId} skipped — missing lookup data:`,
-          {
-            unitId,
-            cohortId,
-            unitFound: !!unit,
-            cohortFound: !!cohort,
-            dayFound: !!day,
-            startSlotFound: !!startSlot,
-            endSlotFound: !!endSlot,
-          },
-        );
-        continue;
+        items.push({
+          scheduledSessionId: sessionId,
+          teachingAllocationId: allocationId || alloc?.allocationId || '',
+          academicPeriodId: periodId || alloc?.academicPeriodId || '',
+          academicPeriodName: period?.name || alloc?.academicPeriodName || 'Current Term',
+          cohortId,
+          cohortName,
+          unitId,
+          unitName,
+          dayOfWeek,
+          daySequence: Number(day?.sequence_number || 1),
+          startsAt: String(startSlot?.starts_at || '08:00'),
+          endsAt: String(endSlot?.ends_at || '10:00'),
+          sessionNumber: Number(raw.session_number || 1),
+          teachingStartsOn: String(period?.teaching_starts_on || alloc?.teachingStartsOn || ''),
+          teachingEndsOn: String(period?.teaching_ends_on || alloc?.teachingEndsOn || ''),
+          latestClassSessionId: null,
+          latestSessionDate: null,
+          latestStatus: null,
+        });
       }
-
-      seenIds.add(sessionId);
-      const dayStr = String((day as any).day_of_week || '');
-
-      items.push({
-        scheduledSessionId: sessionId,
-        teachingAllocationId: allocationId,
-        academicPeriodId: String(raw.academic_period_id || alloc?.academicPeriodId || ''),
-        academicPeriodName: alloc?.academicPeriodName || 'Current Term',
-        cohortId,
-        cohortName: String((cohort as any).name || alloc?.cohortName || 'Cohort'),
-        unitId,
-        unitName: String((unit as any).name || alloc?.unitName || 'Unit'),
-        dayOfWeek: dayStr.charAt(0).toUpperCase() + dayStr.slice(1).toLowerCase(),
-        daySequence: 1,
-        startsAt: String((startSlot as any).starts_at || '08:00'),
-        endsAt: String((endSlot as any).ends_at || '10:00'),
-        sessionNumber: Number(raw.session_number || 0),
-        teachingStartsOn: String(alloc?.teachingStartsOn || ''),
-        teachingEndsOn: String(alloc?.teachingEndsOn || ''),
-        latestClassSessionId: null,
-        latestSessionDate: null,
-        latestStatus: null,
-      });
     }
 
     if (items.length > 0) {
-      // Resolve multi-cohort names — pass admin client so cross-dept units resolve.
+      // 4. Resolve multi-cohort names
       const unitPeriodKeys = [...new Set(items.map((i) => `${i.unitId}:${i.academicPeriodId}`).filter(Boolean))];
       const multiCohortMap = new Map<string, string>();
 
@@ -204,9 +244,9 @@ export async function getStaffClassAttendanceSchedule(): Promise<ClassAttendance
               multiCohortMap.set(key, roster.joinedCohortName);
             }
           } catch {
-            // Ignore failure, retain snapshot cohort name
+            // Ignore failure, retain cohort name
           }
-        })
+        }),
       );
 
       for (const item of items) {
@@ -216,8 +256,7 @@ export async function getStaffClassAttendanceSchedule(): Promise<ClassAttendance
         }
       }
 
-      // Attach latest class sessions (admin client — the class_sessions may be
-      // from multi-dept trainer_id so regular client RLS could miss them).
+      // 5. Attach latest class sessions from class_sessions
       const sessionIds = items.map((i) => i.scheduledSessionId).filter(Boolean);
       const allAllocIds = [...new Set(items.map((i) => i.teachingAllocationId).filter(Boolean))];
       const allUnitIds = [...new Set(items.map((i) => i.unitId).filter(Boolean))];
@@ -232,7 +271,7 @@ export async function getStaffClassAttendanceSchedule(): Promise<ClassAttendance
       if (allAllocIds.length > 0) orParts.push(`teaching_allocation_id.in.(${allAllocIds.join(',')})`);
       if (allUnitIds.length > 0) orParts.push(`unit_id.in.(${allUnitIds.join(',')})`);
       if (workspace.trainerId) orParts.push(`trainer_id.eq.${workspace.trainerId}`);
-      if (profile.id) orParts.push(`opened_by.eq.${profile.id}`);
+      if (profileId) orParts.push(`opened_by.eq.${profileId}`);
 
       if (orParts.length > 0) {
         csQuery = csQuery.or(orParts.join(','));
@@ -275,11 +314,27 @@ export async function getStaffClassAttendanceSchedule(): Promise<ClassAttendance
           item.latestStatus = cs.status as ClassSessionStatus;
         }
       }
-
-      return items;
     }
 
+    // Sort items by daySequence, then startsAt, then unitName
+    items.sort((a, b) => {
+      if (a.daySequence !== b.daySequence) return a.daySequence - b.daySequence;
+      if (a.startsAt !== b.startsAt) return a.startsAt.localeCompare(b.startsAt);
+      return a.unitName.localeCompare(b.unitName);
+    });
+
+    return items;
+  } catch (err) {
+    console.error('resolveTrainerAttendanceSchedule failed:', err);
     return [];
+  }
+}
+
+export async function getStaffClassAttendanceSchedule(): Promise<ClassAttendanceScheduleItem[]> {
+  try {
+    const { requireTrainerAccess } = await import('@/features/auth/authorization');
+    const profile = await requireTrainerAccess();
+    return await resolveTrainerAttendanceSchedule(profile.id);
   } catch (err) {
     console.error('getStaffClassAttendanceSchedule failed:', err);
     return [];
@@ -536,136 +591,7 @@ export async function getClassAttendanceWorkspace(
 export async function getTrainerAttendanceScheduleForAdmin(
   profileId: string,
 ): Promise<ClassAttendanceScheduleItem[]> {
-  try {
-    const { getStaffWorkspace } = await import('@/features/staff-assessment/queries');
-    const workspace = await getStaffWorkspace(profileId);
-    const supabase = await createClient();
-
-    const { data: liveSessions, error: liveSessionsError } = await (supabase as any)
-      .from('scheduled_sessions')
-      .select(`id, academic_period_id, teaching_allocation_id, cohort_id, unit_id, trainer_id,
-               working_day_id, start_time_slot_id, end_time_slot_id, session_number`)
-      .eq('trainer_id', workspace.trainerId)
-      .eq('status', 'locked');
-
-    if (liveSessionsError) throw liveSessionsError;
-
-    const sessions = (liveSessions ?? []) as UnknownRow[];
-    const unitIds = [...new Set(sessions.map((r) => String(r.unit_id || '')).filter(Boolean))];
-    const cohortIds = [...new Set(sessions.map((r) => String(r.cohort_id || '')).filter(Boolean))];
-    const workingDayIds = [...new Set(sessions.map((r) => String(r.working_day_id || '')).filter(Boolean))];
-    const timeSlotIds = [...new Set(
-      sessions.flatMap((r) => [String(r.start_time_slot_id || ''), String(r.end_time_slot_id || '')]).filter(Boolean),
-    )];
-
-    const [unitsResult, cohortsResult, daysResult, slotsResult] = await Promise.all([
-      unitIds.length ? (supabase as any).from('units').select('id, name').in('id', unitIds) : Promise.resolve({ data: [] }),
-      cohortIds.length ? (supabase as any).from('cohorts').select('id, name').in('id', cohortIds) : Promise.resolve({ data: [] }),
-      workingDayIds.length ? (supabase as any).from('working_days').select('id, day_of_week').in('id', workingDayIds) : Promise.resolve({ data: [] }),
-      timeSlotIds.length ? (supabase as any).from('time_slots').select('id, starts_at, ends_at').in('id', timeSlotIds) : Promise.resolve({ data: [] }),
-    ]);
-
-    const unitMap = new Map((unitsResult.data ?? []).map((r: any) => [String(r.id), r]));
-    const cohortMap = new Map((cohortsResult.data ?? []).map((r: any) => [String(r.id), r]));
-    const dayMap = new Map((daysResult.data ?? []).map((r: any) => [String(r.id), r]));
-    const slotMap = new Map((slotsResult.data ?? []).map((r: any) => [String(r.id), r]));
-
-    const allocMap = new Map<string, any>();
-    for (const alloc of workspace.allocations) {
-      allocMap.set(alloc.allocationId, alloc);
-      allocMap.set(`${alloc.unitId}:${alloc.cohortId}`, alloc);
-    }
-
-    const items: ClassAttendanceScheduleItem[] = [];
-    const seenIds = new Set<string>();
-
-    for (const raw of sessions) {
-      const sessionId = String(raw.id || '');
-      if (!sessionId || seenIds.has(sessionId)) continue;
-
-      const allocationId = String(raw.teaching_allocation_id || '');
-      const unitId = String(raw.unit_id || '');
-      const cohortId = String(raw.cohort_id || '');
-      const alloc = allocMap.get(allocationId) || allocMap.get(`${unitId}:${cohortId}`);
-      const day = dayMap.get(String(raw.working_day_id || ''));
-      const startSlot = slotMap.get(String(raw.start_time_slot_id || ''));
-      const endSlot = slotMap.get(String(raw.end_time_slot_id || ''));
-      const unit = unitMap.get(unitId);
-      const cohort = cohortMap.get(cohortId);
-
-      if (!unit || !cohort || !day || !startSlot || !endSlot) continue;
-
-      seenIds.add(sessionId);
-      const dayStr = String((day as any).day_of_week || '');
-
-      items.push({
-        scheduledSessionId: sessionId,
-        teachingAllocationId: allocationId,
-        academicPeriodId: String(raw.academic_period_id || alloc?.academicPeriodId || ''),
-        academicPeriodName: alloc?.academicPeriodName || 'Current Term',
-        cohortId,
-        cohortName: String((cohort as any).name || alloc?.cohortName || 'Cohort'),
-        unitId,
-        unitName: String((unit as any).name || alloc?.unitName || 'Unit'),
-        dayOfWeek: dayStr.charAt(0).toUpperCase() + dayStr.slice(1).toLowerCase(),
-        daySequence: 1,
-        startsAt: String((startSlot as any).starts_at || '08:00'),
-        endsAt: String((endSlot as any).ends_at || '10:00'),
-        sessionNumber: Number(raw.session_number || 0),
-        teachingStartsOn: String(alloc?.teachingStartsOn || ''),
-        teachingEndsOn: String(alloc?.teachingEndsOn || ''),
-        latestClassSessionId: null,
-        latestSessionDate: null,
-        latestStatus: null,
-      });
-    }
-
-    // Attach latest class sessions
-    if (items.length > 0) {
-      const sessionIds = items.map((i) => i.scheduledSessionId).filter(Boolean);
-      const allocIds = [...new Set(items.map((i) => i.teachingAllocationId).filter(Boolean))];
-      const uIds = [...new Set(items.map((i) => i.unitId).filter(Boolean))];
-      let csQuery = (supabase as any)
-        .from('class_sessions')
-        .select('id, scheduled_session_id, teaching_allocation_id, unit_id, cohort_id, session_date, status')
-        .order('session_date', { ascending: false });
-      const orParts: string[] = [];
-      if (sessionIds.length > 0) orParts.push(`scheduled_session_id.in.(${sessionIds.join(',')})`);
-      if (allocIds.length > 0) orParts.push(`teaching_allocation_id.in.(${allocIds.join(',')})`);
-      if (uIds.length > 0) orParts.push(`unit_id.in.(${uIds.join(',')})`);
-      if (workspace.trainerId) orParts.push(`trainer_id.eq.${workspace.trainerId}`);
-      if (orParts.length > 0) csQuery = csQuery.or(orParts.join(','));
-      const { data: classSessions } = await csQuery;
-      const csBySessionId = new Map();
-      const csByAllocUnit = new Map();
-      const csByUnitCohort = new Map();
-      const csByUnit = new Map();
-      for (const cs of classSessions ?? []) {
-        if (cs.scheduled_session_id && !csBySessionId.has(cs.scheduled_session_id)) csBySessionId.set(cs.scheduled_session_id, cs);
-        const ak = `${cs.teaching_allocation_id}:${cs.unit_id}`;
-        if (cs.teaching_allocation_id && !csByAllocUnit.has(ak)) csByAllocUnit.set(ak, cs);
-        const uck = `${cs.unit_id}:${cs.cohort_id}`;
-        if (cs.unit_id && cs.cohort_id && !csByUnitCohort.has(uck)) csByUnitCohort.set(uck, cs);
-        if (cs.unit_id && !csByUnit.has(cs.unit_id)) csByUnit.set(cs.unit_id, cs);
-      }
-      for (const item of items) {
-        const cs = csBySessionId.get(item.scheduledSessionId)
-          || csByAllocUnit.get(`${item.teachingAllocationId}:${item.unitId}`)
-          || csByUnitCohort.get(`${item.unitId}:${item.cohortId}`)
-          || csByUnit.get(item.unitId);
-        if (cs) {
-          item.latestClassSessionId = String(cs.id);
-          item.latestSessionDate = String(cs.session_date);
-          item.latestStatus = cs.status as ClassSessionStatus;
-        }
-      }
-    }
-
-    return items;
-  } catch (err) {
-    console.error('getTrainerAttendanceScheduleForAdmin failed:', err);
-    return [];
-  }
+  return await resolveTrainerAttendanceSchedule(profileId);
 }
 
 /**

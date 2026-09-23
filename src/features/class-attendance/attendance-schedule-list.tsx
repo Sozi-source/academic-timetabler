@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/button';
 
 import {
+  normalizeDayOfWeek,
   shortTime,
   weekdayLabel,
 } from './domain';
@@ -87,8 +88,9 @@ export function AttendanceScheduleList({
   // Filter items matching the selected day of the week
   const displayedItems = useMemo(() => {
     if (viewAll) return items;
+    const targetDay = normalizeDayOfWeek(selectedWeekday).toLowerCase();
     return items.filter(
-      (item) => item.dayOfWeek.toLowerCase() === selectedWeekday.toLowerCase()
+      (item) => normalizeDayOfWeek(item.dayOfWeek).toLowerCase() === targetDay
     );
   }, [items, selectedWeekday, viewAll]);
 

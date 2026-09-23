@@ -12,6 +12,7 @@ import {
   createClient,
 } from '@/lib/supabase/server';
 import { getUnifiedUnitRoster } from '@/features/academic-roster/unified-roster';
+import { normalizeDayOfWeek } from '@/features/class-attendance/domain';
 
 interface CreatePayload {
   scheduledSessionId?:
@@ -116,7 +117,7 @@ export async function POST(
 
     if (match && periodId) {
       // Lookup working_day, time_slots, and rooms to satisfy FK constraints
-      const dayStr = String(match.day || match.dayOfWeek || 'friday').toLowerCase();
+      const dayStr = normalizeDayOfWeek(match.day || match.dayOfWeek || 'wednesday').toLowerCase();
       const [
         { data: days },
         { data: slots },
@@ -125,7 +126,7 @@ export async function POST(
       ] = await Promise.all([
         (adminDb as any).from('working_days').select('id, day_of_week'),
         (adminDb as any).from('time_slots').select('id, starts_at, ends_at').order('starts_at', { ascending: true }),
-        (adminDb as any).from('rooms').select('id, name').limit(1),
+        (adminDb as any).from('rooms').select('id, name'),
         match.teachingAllocationId || match.allocationId
           ? (adminDb as any).from('teaching_allocations').select('*').eq('id', match.teachingAllocationId || match.allocationId).maybeSingle()
           : (adminDb as any).from('teaching_allocations').select('*')
@@ -155,6 +156,23 @@ export async function POST(
       const cohortId = match.cohortId || alloc?.cohort_id || alloc?.data?.cohort_id;
       const unitId = match.unitId || alloc?.unit_id || alloc?.data?.unit_id;
       const trainerId = match.trainerId || alloc?.trainer_id || alloc?.data?.trainer_id;
+
+      if (!teachingAllocId && trainerId && unitId && cohortId && periodId) {
+        const { data: createdAlloc } = await (adminDb as any)
+          .from('teaching_allocations')
+          .insert({
+            academic_period_id: periodId,
+            unit_id: unitId,
+            cohort_id: cohortId,
+            trainer_id: trainerId,
+            status: 'active',
+            weekly_sessions: 1,
+            session_duration_minutes: 120,
+          })
+          .select('id')
+          .maybeSingle();
+        teachingAllocId = createdAlloc?.id;
+      }
 
       if (workingDay && startSlot && endSlot && room && teachingAllocId && cohortId && unitId && trainerId) {
         await (adminDb as any).from('scheduled_sessions').upsert({
@@ -238,11 +256,39 @@ export async function POST(
           .update({ scheduled_session_id: payload.scheduledSessionId, updated_at: new Date().toISOString() })
           .eq('id', existingCs.id);
       } else {
-        const { data: sessionData } = await (adminDb as any)
+        const { data: initialSessionData } = await (adminDb as any)
           .from('scheduled_sessions')
           .select('*')
           .eq('id', payload.scheduledSessionId)
           .maybeSingle();
+
+        let sessionData: any = initialSessionData;
+
+        if (!sessionData) {
+          const { data: versions } = await (adminDb as any)
+            .from('timetable_versions')
+            .select('academic_period_id, snapshot')
+            .eq('status', 'published')
+            .order('version_number', { ascending: false })
+            .limit(3);
+
+          for (const v of versions ?? []) {
+            const snapshot = Array.isArray(v.snapshot) ? v.snapshot : [];
+            const snapshotMatch = snapshot.find((item: any) => String(item.id) === payload.scheduledSessionId);
+            if (snapshotMatch) {
+              sessionData = {
+                academic_period_id: v.academic_period_id,
+                teaching_allocation_id: snapshotMatch.teachingAllocationId || snapshotMatch.allocationId || null,
+                cohort_id: snapshotMatch.cohortId,
+                unit_id: snapshotMatch.unitId,
+                trainer_id: snapshotMatch.trainerId,
+                starts_at: snapshotMatch.startTime || '08:00:00',
+                ends_at: snapshotMatch.endTime || '10:00:00',
+              };
+              break;
+            }
+          }
+        }
 
         if (!sessionData) {
           throw new Error('Scheduled session record could not be found.');

@@ -97,16 +97,24 @@ export function canCompleteClassAttendance(
   );
 }
 
+export function normalizeDayOfWeek(value?: string | null): string {
+  if (!value) return 'Monday';
+  const clean = value.trim().toLowerCase();
+  if (clean.startsWith('mon')) return 'Monday';
+  if (clean.startsWith('tue')) return 'Tuesday';
+  if (clean.startsWith('wed')) return 'Wednesday';
+  if (clean.startsWith('thu')) return 'Thursday';
+  if (clean.startsWith('fri')) return 'Friday';
+  if (clean.startsWith('sat')) return 'Saturday';
+  if (clean.startsWith('sun')) return 'Sunday';
+  return clean.charAt(0).toUpperCase() + clean.slice(1);
+}
+
 export function weekdayLabel(
   value:
     string,
 ): string {
-  return value
-    .replace(
-      /^\w/,
-      (letter) =>
-        letter.toUpperCase(),
-    );
+  return normalizeDayOfWeek(value);
 }
 
 export function shortTime(

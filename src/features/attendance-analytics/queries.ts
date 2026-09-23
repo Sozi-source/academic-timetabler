@@ -435,9 +435,9 @@ export async function getStudentPortalAttendance(
         'academic_period_id',
         period.id,
       )
-      .eq(
+      .in(
         'status',
-        'completed',
+        ['completed', 'open'],
       );
 
   if (sessionError) {

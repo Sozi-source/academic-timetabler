@@ -51,33 +51,56 @@ export async function getStaffClassAttendanceSchedule(): Promise<ClassAttendance
 
     const profile = await requireTrainerAccess();
     const workspace = await getStaffWorkspace(profile.id);
-    const supabase = await createClient();
 
-    // Current/future attendance must follow the live locked timetable.
-    // Published snapshots are historical reporting data; they are not the
-    // source of truth for the trainer's current attendance register.
-    const { data: liveSessions, error: liveSessionsError } = await (supabase as any)
-      .from('scheduled_sessions')
-      .select(`
-        id,
-        academic_period_id,
-        teaching_allocation_id,
-        cohort_id,
-        unit_id,
-        trainer_id,
-        working_day_id,
-        start_time_slot_id,
-        end_time_slot_id,
-        session_number
-      `)
-      .eq('trainer_id', workspace.trainerId)
-      .eq('status', 'locked');
+    // Use admin client for ALL lookups to bypass department-scoped RLS.
+    // Trainers frequently teach service units owned by other departments (e.g. a
+    // trainer in Dept A teaching "Agricultural Production" owned by Dept B).
+    // The regular session-scoped client would return null for those unit/cohort
+    // name lookups, causing those sessions to be silently skipped.
+    const admin = createAdminClient();
 
-    if (liveSessionsError) {
-      throw liveSessionsError;
+    const allocationIds = workspace.allocations
+      .map((a) => a.allocationId)
+      .filter(Boolean);
+
+    // Dual-query strategy:
+    //  Query A — by trainer_id (primary link, fast path)
+    //  Query B — by teaching_allocation_id (catches sessions where trainer_id is
+    //             null or stale after a reassignment, or team-taught units)
+    // Both are filtered to status='locked' (live, published timetable only).
+    const [byTrainerResult, byAllocationResult] = await Promise.all([
+      (admin as any)
+        .from('scheduled_sessions')
+        .select('id, academic_period_id, teaching_allocation_id, cohort_id, unit_id, trainer_id, working_day_id, start_time_slot_id, end_time_slot_id, session_number')
+        .eq('trainer_id', workspace.trainerId)
+        .eq('status', 'locked'),
+      allocationIds.length > 0
+        ? (admin as any)
+            .from('scheduled_sessions')
+            .select('id, academic_period_id, teaching_allocation_id, cohort_id, unit_id, trainer_id, working_day_id, start_time_slot_id, end_time_slot_id, session_number')
+            .in('teaching_allocation_id', allocationIds)
+            .eq('status', 'locked')
+        : Promise.resolve({ data: [] }),
+    ]);
+
+    if (byTrainerResult.error) throw byTrainerResult.error;
+
+    // Merge results from both queries, deduplicating by session ID.
+    const seenMergeIds = new Set<string>();
+    const sessions: UnknownRow[] = [];
+    for (const row of [
+      ...((byTrainerResult.data ?? []) as UnknownRow[]),
+      ...((byAllocationResult.data ?? []) as UnknownRow[]),
+    ]) {
+      const sid = String(row.id || '');
+      if (sid && !seenMergeIds.has(sid)) {
+        seenMergeIds.add(sid);
+        sessions.push(row);
+      }
     }
 
-    const sessions = (liveSessions ?? []) as UnknownRow[];
+    if (sessions.length === 0) return [];
+
     const unitIds = [...new Set(sessions.map((row) => String(row.unit_id || '')).filter(Boolean))];
     const cohortIds = [...new Set(sessions.map((row) => String(row.cohort_id || '')).filter(Boolean))];
     const workingDayIds = [...new Set(sessions.map((row) => String(row.working_day_id || '')).filter(Boolean))];
@@ -85,19 +108,12 @@ export async function getStaffClassAttendanceSchedule(): Promise<ClassAttendance
       sessions.flatMap((row) => [String(row.start_time_slot_id || ''), String(row.end_time_slot_id || '')]).filter(Boolean),
     )];
 
+    // All lookups via admin client — bypasses RLS for cross-department units/cohorts.
     const [unitsResult, cohortsResult, daysResult, slotsResult] = await Promise.all([
-      unitIds.length
-        ? (supabase as any).from('units').select('id, name').in('id', unitIds)
-        : Promise.resolve({ data: [] }),
-      cohortIds.length
-        ? (supabase as any).from('cohorts').select('id, name').in('id', cohortIds)
-        : Promise.resolve({ data: [] }),
-      workingDayIds.length
-        ? (supabase as any).from('working_days').select('id, day_of_week').in('id', workingDayIds)
-        : Promise.resolve({ data: [] }),
-      timeSlotIds.length
-        ? (supabase as any).from('time_slots').select('id, starts_at, ends_at').in('id', timeSlotIds)
-        : Promise.resolve({ data: [] }),
+      unitIds.length ? (admin as any).from('units').select('id, name').in('id', unitIds) : Promise.resolve({ data: [] }),
+      cohortIds.length ? (admin as any).from('cohorts').select('id, name').in('id', cohortIds) : Promise.resolve({ data: [] }),
+      workingDayIds.length ? (admin as any).from('working_days').select('id, day_of_week').in('id', workingDayIds) : Promise.resolve({ data: [] }),
+      timeSlotIds.length ? (admin as any).from('time_slots').select('id, starts_at, ends_at').in('id', timeSlotIds) : Promise.resolve({ data: [] }),
     ]);
 
     const unitMap = new Map((unitsResult.data ?? []).map((row: any) => [String(row.id), row]));
@@ -128,7 +144,22 @@ export async function getStaffClassAttendanceSchedule(): Promise<ClassAttendance
       const unit = unitMap.get(unitId);
       const cohort = cohortMap.get(cohortId);
 
-      if (!unit || !cohort || !day || !startSlot || !endSlot) continue;
+      if (!unit || !cohort || !day || !startSlot || !endSlot) {
+        // Log missing lookups for traceability — no longer silently dropped.
+        console.warn(
+          `[attendance-schedule] Session ${sessionId} skipped — missing lookup data:`,
+          {
+            unitId,
+            cohortId,
+            unitFound: !!unit,
+            cohortFound: !!cohort,
+            dayFound: !!day,
+            startSlotFound: !!startSlot,
+            endSlotFound: !!endSlot,
+          },
+        );
+        continue;
+      }
 
       seenIds.add(sessionId);
       const dayStr = String((day as any).day_of_week || '');
@@ -156,7 +187,7 @@ export async function getStaffClassAttendanceSchedule(): Promise<ClassAttendance
     }
 
     if (items.length > 0) {
-      // Resolve multi-cohort names for each unit & academic period
+      // Resolve multi-cohort names — pass admin client so cross-dept units resolve.
       const unitPeriodKeys = [...new Set(items.map((i) => `${i.unitId}:${i.academicPeriodId}`).filter(Boolean))];
       const multiCohortMap = new Map<string, string>();
 
@@ -165,7 +196,7 @@ export async function getStaffClassAttendanceSchedule(): Promise<ClassAttendance
           const [uId, pId] = key.split(':');
           try {
             const roster = await getUnifiedUnitRoster({
-              supabase,
+              supabase: admin,
               unitId: uId,
               academicPeriodId: pId,
             });
@@ -185,20 +216,21 @@ export async function getStaffClassAttendanceSchedule(): Promise<ClassAttendance
         }
       }
 
-      // Attach latest class sessions if any exist (querying by scheduled_session_id, allocation IDs, and unit IDs)
+      // Attach latest class sessions (admin client — the class_sessions may be
+      // from multi-dept trainer_id so regular client RLS could miss them).
       const sessionIds = items.map((i) => i.scheduledSessionId).filter(Boolean);
-      const allocIds = [...new Set(items.map((i) => i.teachingAllocationId).filter(Boolean))];
-      const unitIds = [...new Set(items.map((i) => i.unitId).filter(Boolean))];
+      const allAllocIds = [...new Set(items.map((i) => i.teachingAllocationId).filter(Boolean))];
+      const allUnitIds = [...new Set(items.map((i) => i.unitId).filter(Boolean))];
 
-      let csQuery = (supabase as any)
+      let csQuery = (admin as any)
         .from('class_sessions')
         .select('id, scheduled_session_id, teaching_allocation_id, unit_id, cohort_id, session_date, status')
         .order('session_date', { ascending: false });
 
       const orParts: string[] = [];
       if (sessionIds.length > 0) orParts.push(`scheduled_session_id.in.(${sessionIds.join(',')})`);
-      if (allocIds.length > 0) orParts.push(`teaching_allocation_id.in.(${allocIds.join(',')})`);
-      if (unitIds.length > 0) orParts.push(`unit_id.in.(${unitIds.join(',')})`);
+      if (allAllocIds.length > 0) orParts.push(`teaching_allocation_id.in.(${allAllocIds.join(',')})`);
+      if (allUnitIds.length > 0) orParts.push(`unit_id.in.(${allUnitIds.join(',')})`);
       if (workspace.trainerId) orParts.push(`trainer_id.eq.${workspace.trainerId}`);
       if (profile.id) orParts.push(`opened_by.eq.${profile.id}`);
 

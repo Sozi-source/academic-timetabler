@@ -1,3 +1,31 @@
+### 2026-09-24: Fix — Trainer attendance register missing sessions (e.g. Agricultural Production on Tuesday)
+
+**Root causes (three compounding bugs in `getStaffClassAttendanceSchedule`):**
+
+1. **RLS silently dropped cross-department service units** — `units` and `cohorts` lookups used `createClient()` (the trainer's session-scoped client). Any unit managed by a different department (e.g. "Agricultural Production" owned by Dept B but taught by a trainer in Dept A) returned `null` from the RLS-filtered query. The guard `if (!unit || !cohort || ...) continue` then silently excluded the entire session with no error or log. Fixed by switching **all** DB reads in this function to `createAdminClient()`.
+
+2. **Trainer_id-only query missed allocation-linked sessions** — The scheduled sessions query was `WHERE trainer_id = workspace.trainerId`. If a session's `trainer_id` was `NULL` or had become stale (e.g. after a trainer reassignment), the session was completely invisible even though the allocation link was correct. Fixed by adding a **second query by `teaching_allocation_id IN (allocationIds)`** and merging+deduplicating by session ID.
+
+3. **`getUnifiedUnitRoster` also received the RLS-scoped client** — Multi-cohort name resolution for cross-department units also failed silently. Fixed by passing the `admin` client.
+
+**Bonus improvement**: The silent `continue` on missing lookups is now replaced with `console.warn` that logs the session ID and which specific lookup (unit/cohort/day/slot) failed — so future issues are immediately visible in server logs.
+
+**Files changed:**
+- `src/features/class-attendance/queries.ts` — `getStaffClassAttendanceSchedule()` rewritten: admin client throughout, dual-query strategy, diagnostic logging.
+
+**Verification**: `npm run check` passed (exit code 0). No schema changes required.
+
+### 2026-09-23: Fix — Student portal attendance percentage & missed lessons not showing
+
+**Root cause**: `getStudentPortalAttendance` in `src/features/attendance-analytics/queries.ts` fetched `class_sessions` with a hard filter `.eq('status', 'completed')`. Any session where the trainer opened the register and marked students but did not click **"Complete"** remained at `status = 'open'`. Those sessions were silently excluded, so affected students saw zero recorded sessions, no attendance percentage, and no missed lessons — even though their `present`/`absent` entries existed in `class_attendance_entries`.
+
+**Fix**: Changed `.eq('status', 'completed')` → `.in('status', ['completed', 'open'])` at line ~438 of `src/features/attendance-analytics/queries.ts`. Students now see their attendance data as soon as a trainer marks them (present or absent), regardless of whether the trainer has formally submitted the register.
+
+**Files changed:**
+- `src/features/attendance-analytics/queries.ts` — one-line status filter change (line ~438).
+
+**Verification**: `npm run check` passed (exit code 0). No schema changes required.
+
 ### 2026-09-23: Trainers — Full-Fidelity Portal View (`/trainers/[id]/portal-view`)
 
 **Scope**: Admin impersonation — HODs can now view a trainer's portal exactly as the trainer sees it. No database schema changes.

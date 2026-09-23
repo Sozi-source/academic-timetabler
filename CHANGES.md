@@ -1,4 +1,22 @@
-### 2026-09-22: Students — Remove `/students/progression`; replace sidebar nav item
+### 2026-09-23: Trainers — Full-Fidelity Portal View (`/trainers/[id]/portal-view`)
+
+**Scope**: Admin impersonation — HODs can now view a trainer's portal exactly as the trainer sees it. No database schema changes.
+
+**What changed:**
+- `src/features/class-attendance/queries.ts` — Added two new admin-safe query functions:
+  - `getTrainerAttendanceScheduleForAdmin(profileId)` — mirrors `getStaffClassAttendanceSchedule` but accepts an explicit `profileId` instead of reading from the session JWT.
+  - `getTrainerAttendanceHistoryForAdmin(trainerId, limit)` — queries `class_sessions` directly via admin client (bypassing RLS) by `trainer_id`, then joins with units/cohorts and computes present/absent/unmarked counts from `class_attendance_entries`.
+  - Added `createAdminClient` import.
+- `src/app/(dashboard)/trainers/[id]/portal-view/page.tsx` — **[FULL REWRITE]** Now renders 5 real-data tabs:
+  1. **Timetable** — Full weekly grid (desktop table + mobile day-by-day) using `getStaffPublishedTimetable(trainer.profileId)` + `mergeStaffTimetableSessions`. Identical layout to `/staff/timetable`.
+  2. **Teaching Units** — All allocated units via `getStaffWorkspace(trainer.profileId)`, with "Open Workspace" links to `/staff/units/[allocationId]` (accessible to HODs via `requireTrainerAccess` + allocation fallback path).
+  3. **Attendance** — Metrics (weekly classes, completed, cancelled, open) + scheduled sessions with "View Register" links to `/staff/attendance/[sessionId]` + full history list, all via the two new admin query functions.
+  4. **Documents** — Links to `/staff/units/[allocationId]/documents` for each allocated unit.
+  5. **Profile** — Full trainer parameters (name, staff number, email, employment type, hours, department, specialization, workspace link status).
+
+**Verification**: `npm run check` passed (exit code 0). `/trainers/[id]/portal-view` appears as `ƒ` (dynamic) in build manifest.
+
+### 2026-09-23: Students — Remove `/students/progression`; replace sidebar nav item
 
 - `src/components/layout/student-shell.tsx` — Replaced "Status & progression" nav item (`/students/progression`, `History` icon) with **"Update statuses"** (`/students/status`, `RefreshCw` icon). Swapped `History` import for `RefreshCw`.
 - `src/app/(dashboard)/students/progression/page.tsx` — **[DELETED]**. The old read-only exception list is superseded by the inline status updater at `/students/status`.

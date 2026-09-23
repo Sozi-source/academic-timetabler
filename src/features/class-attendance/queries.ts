@@ -3,6 +3,7 @@ import 'server-only';
 import {
   createClient,
 } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { getUnifiedUnitRoster } from '@/features/academic-roster/unified-roster';
 
 import type {
@@ -492,5 +493,222 @@ export async function getClassAttendanceWorkspace(
   } catch (err) {
     console.error('getClassAttendanceWorkspace failed:', err);
     return null;
+  }
+}
+
+/**
+ * Admin-safe version of getStaffClassAttendanceSchedule.
+ * Accepts an explicit profileId (the trainer's auth.users id) instead of
+ * reading from the session, enabling HOD impersonation in portal-view pages.
+ */
+export async function getTrainerAttendanceScheduleForAdmin(
+  profileId: string,
+): Promise<ClassAttendanceScheduleItem[]> {
+  try {
+    const { getStaffWorkspace } = await import('@/features/staff-assessment/queries');
+    const workspace = await getStaffWorkspace(profileId);
+    const supabase = await createClient();
+
+    const { data: liveSessions, error: liveSessionsError } = await (supabase as any)
+      .from('scheduled_sessions')
+      .select(`id, academic_period_id, teaching_allocation_id, cohort_id, unit_id, trainer_id,
+               working_day_id, start_time_slot_id, end_time_slot_id, session_number`)
+      .eq('trainer_id', workspace.trainerId)
+      .eq('status', 'locked');
+
+    if (liveSessionsError) throw liveSessionsError;
+
+    const sessions = (liveSessions ?? []) as UnknownRow[];
+    const unitIds = [...new Set(sessions.map((r) => String(r.unit_id || '')).filter(Boolean))];
+    const cohortIds = [...new Set(sessions.map((r) => String(r.cohort_id || '')).filter(Boolean))];
+    const workingDayIds = [...new Set(sessions.map((r) => String(r.working_day_id || '')).filter(Boolean))];
+    const timeSlotIds = [...new Set(
+      sessions.flatMap((r) => [String(r.start_time_slot_id || ''), String(r.end_time_slot_id || '')]).filter(Boolean),
+    )];
+
+    const [unitsResult, cohortsResult, daysResult, slotsResult] = await Promise.all([
+      unitIds.length ? (supabase as any).from('units').select('id, name').in('id', unitIds) : Promise.resolve({ data: [] }),
+      cohortIds.length ? (supabase as any).from('cohorts').select('id, name').in('id', cohortIds) : Promise.resolve({ data: [] }),
+      workingDayIds.length ? (supabase as any).from('working_days').select('id, day_of_week').in('id', workingDayIds) : Promise.resolve({ data: [] }),
+      timeSlotIds.length ? (supabase as any).from('time_slots').select('id, starts_at, ends_at').in('id', timeSlotIds) : Promise.resolve({ data: [] }),
+    ]);
+
+    const unitMap = new Map((unitsResult.data ?? []).map((r: any) => [String(r.id), r]));
+    const cohortMap = new Map((cohortsResult.data ?? []).map((r: any) => [String(r.id), r]));
+    const dayMap = new Map((daysResult.data ?? []).map((r: any) => [String(r.id), r]));
+    const slotMap = new Map((slotsResult.data ?? []).map((r: any) => [String(r.id), r]));
+
+    const allocMap = new Map<string, any>();
+    for (const alloc of workspace.allocations) {
+      allocMap.set(alloc.allocationId, alloc);
+      allocMap.set(`${alloc.unitId}:${alloc.cohortId}`, alloc);
+    }
+
+    const items: ClassAttendanceScheduleItem[] = [];
+    const seenIds = new Set<string>();
+
+    for (const raw of sessions) {
+      const sessionId = String(raw.id || '');
+      if (!sessionId || seenIds.has(sessionId)) continue;
+
+      const allocationId = String(raw.teaching_allocation_id || '');
+      const unitId = String(raw.unit_id || '');
+      const cohortId = String(raw.cohort_id || '');
+      const alloc = allocMap.get(allocationId) || allocMap.get(`${unitId}:${cohortId}`);
+      const day = dayMap.get(String(raw.working_day_id || ''));
+      const startSlot = slotMap.get(String(raw.start_time_slot_id || ''));
+      const endSlot = slotMap.get(String(raw.end_time_slot_id || ''));
+      const unit = unitMap.get(unitId);
+      const cohort = cohortMap.get(cohortId);
+
+      if (!unit || !cohort || !day || !startSlot || !endSlot) continue;
+
+      seenIds.add(sessionId);
+      const dayStr = String((day as any).day_of_week || '');
+
+      items.push({
+        scheduledSessionId: sessionId,
+        teachingAllocationId: allocationId,
+        academicPeriodId: String(raw.academic_period_id || alloc?.academicPeriodId || ''),
+        academicPeriodName: alloc?.academicPeriodName || 'Current Term',
+        cohortId,
+        cohortName: String((cohort as any).name || alloc?.cohortName || 'Cohort'),
+        unitId,
+        unitName: String((unit as any).name || alloc?.unitName || 'Unit'),
+        dayOfWeek: dayStr.charAt(0).toUpperCase() + dayStr.slice(1).toLowerCase(),
+        daySequence: 1,
+        startsAt: String((startSlot as any).starts_at || '08:00'),
+        endsAt: String((endSlot as any).ends_at || '10:00'),
+        sessionNumber: Number(raw.session_number || 0),
+        teachingStartsOn: String(alloc?.teachingStartsOn || ''),
+        teachingEndsOn: String(alloc?.teachingEndsOn || ''),
+        latestClassSessionId: null,
+        latestSessionDate: null,
+        latestStatus: null,
+      });
+    }
+
+    // Attach latest class sessions
+    if (items.length > 0) {
+      const sessionIds = items.map((i) => i.scheduledSessionId).filter(Boolean);
+      const allocIds = [...new Set(items.map((i) => i.teachingAllocationId).filter(Boolean))];
+      const uIds = [...new Set(items.map((i) => i.unitId).filter(Boolean))];
+      let csQuery = (supabase as any)
+        .from('class_sessions')
+        .select('id, scheduled_session_id, teaching_allocation_id, unit_id, cohort_id, session_date, status')
+        .order('session_date', { ascending: false });
+      const orParts: string[] = [];
+      if (sessionIds.length > 0) orParts.push(`scheduled_session_id.in.(${sessionIds.join(',')})`);
+      if (allocIds.length > 0) orParts.push(`teaching_allocation_id.in.(${allocIds.join(',')})`);
+      if (uIds.length > 0) orParts.push(`unit_id.in.(${uIds.join(',')})`);
+      if (workspace.trainerId) orParts.push(`trainer_id.eq.${workspace.trainerId}`);
+      if (orParts.length > 0) csQuery = csQuery.or(orParts.join(','));
+      const { data: classSessions } = await csQuery;
+      const csBySessionId = new Map();
+      const csByAllocUnit = new Map();
+      const csByUnitCohort = new Map();
+      const csByUnit = new Map();
+      for (const cs of classSessions ?? []) {
+        if (cs.scheduled_session_id && !csBySessionId.has(cs.scheduled_session_id)) csBySessionId.set(cs.scheduled_session_id, cs);
+        const ak = `${cs.teaching_allocation_id}:${cs.unit_id}`;
+        if (cs.teaching_allocation_id && !csByAllocUnit.has(ak)) csByAllocUnit.set(ak, cs);
+        const uck = `${cs.unit_id}:${cs.cohort_id}`;
+        if (cs.unit_id && cs.cohort_id && !csByUnitCohort.has(uck)) csByUnitCohort.set(uck, cs);
+        if (cs.unit_id && !csByUnit.has(cs.unit_id)) csByUnit.set(cs.unit_id, cs);
+      }
+      for (const item of items) {
+        const cs = csBySessionId.get(item.scheduledSessionId)
+          || csByAllocUnit.get(`${item.teachingAllocationId}:${item.unitId}`)
+          || csByUnitCohort.get(`${item.unitId}:${item.cohortId}`)
+          || csByUnit.get(item.unitId);
+        if (cs) {
+          item.latestClassSessionId = String(cs.id);
+          item.latestSessionDate = String(cs.session_date);
+          item.latestStatus = cs.status as ClassSessionStatus;
+        }
+      }
+    }
+
+    return items;
+  } catch (err) {
+    console.error('getTrainerAttendanceScheduleForAdmin failed:', err);
+    return [];
+  }
+}
+
+/**
+ * Admin-safe attendance history for a specific trainer, queried by trainerId
+ * (trainer table UUID). Uses admin client to bypass RLS.
+ * Replaces the session-scoped RPC used by getStaffClassAttendanceHistory.
+ */
+export async function getTrainerAttendanceHistoryForAdmin(
+  trainerId: string,
+  limit = 30,
+): Promise<ClassAttendanceHistoryItem[]> {
+  try {
+    const admin = createAdminClient();
+
+    const { data: sessions, error } = await (admin as any)
+      .from('class_sessions')
+      .select('id, teaching_allocation_id, session_date, status, starts_at, ends_at, unit_id, cohort_id, roster_count')
+      .eq('trainer_id', trainerId)
+      .order('session_date', { ascending: false })
+      .limit(limit);
+
+    if (error || !sessions?.length) return [];
+
+    const unitIds = [...new Set((sessions as any[]).map((r) => String(r.unit_id || '')).filter(Boolean))];
+    const cohortIds = [...new Set((sessions as any[]).map((r) => String(r.cohort_id || '')).filter(Boolean))];
+    const sessionIds = (sessions as any[]).map((r) => String(r.id)).filter(Boolean);
+
+    const [unitsRes, cohortsRes, entriesRes] = await Promise.all([
+      unitIds.length ? (admin as any).from('units').select('id, name').in('id', unitIds) : Promise.resolve({ data: [] }),
+      cohortIds.length ? (admin as any).from('cohorts').select('id, name').in('id', cohortIds) : Promise.resolve({ data: [] }),
+      sessionIds.length
+        ? (admin as any)
+            .from('class_attendance_entries')
+            .select('class_session_id, attendance_status')
+            .in('class_session_id', sessionIds)
+        : Promise.resolve({ data: [] }),
+    ]);
+
+    const unitMap = new Map<string, string>((unitsRes.data ?? []).map((r: any) => [String(r.id), String(r.name)]));
+    const cohortMap = new Map<string, string>((cohortsRes.data ?? []).map((r: any) => [String(r.id), String(r.name)]));
+
+    // Compute present/absent/unmarked counts per session
+    const presentMap = new Map<string, number>();
+    const absentMap = new Map<string, number>();
+    const unmarkedMap = new Map<string, number>();
+    for (const entry of entriesRes.data ?? []) {
+      const sid = String(entry.class_session_id);
+      if (entry.attendance_status === 'present') presentMap.set(sid, (presentMap.get(sid) ?? 0) + 1);
+      else if (entry.attendance_status === 'absent') absentMap.set(sid, (absentMap.get(sid) ?? 0) + 1);
+      else unmarkedMap.set(sid, (unmarkedMap.get(sid) ?? 0) + 1);
+    }
+
+    return (sessions as any[]).map((row): ClassAttendanceHistoryItem | null => {
+      const classSessionId = asString(row.id);
+      const teachingAllocationId = asString(row.teaching_allocation_id);
+      const sessionDate = asString(row.session_date);
+      const status = asString(row.status) as ClassSessionStatus | null;
+      if (!classSessionId || !teachingAllocationId || !sessionDate || !status) return null;
+      return {
+        classSessionId,
+        teachingAllocationId,
+        sessionDate,
+        status,
+        unitName: unitMap.get(String(row.unit_id)) ?? 'Unit',
+        cohortName: cohortMap.get(String(row.cohort_id)) ?? 'Cohort',
+        startsAt: asString(row.starts_at) ?? '',
+        endsAt: asString(row.ends_at) ?? '',
+        rosterCount: asNumber(row.roster_count),
+        presentCount: presentMap.get(classSessionId) ?? 0,
+        absentCount: absentMap.get(classSessionId) ?? 0,
+        unmarkedCount: unmarkedMap.get(classSessionId) ?? 0,
+      };
+    }).filter((item): item is ClassAttendanceHistoryItem => Boolean(item));
+  } catch (err) {
+    console.error('getTrainerAttendanceHistoryForAdmin failed:', err);
+    return [];
   }
 }

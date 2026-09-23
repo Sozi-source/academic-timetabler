@@ -5,11 +5,11 @@ import {
   BarChart3,
   BookOpenCheck,
   GraduationCap,
-  History,
   KeyRound,
   LayoutDashboard,
   LogOut,
   Menu,
+  RefreshCw,
   UsersRound,
   FileUp,
 } from 'lucide-react';
@@ -41,7 +41,7 @@ const navigation: readonly StudentNavigationItem[] = [
   { label: 'Student registry', href: '/students/registry', icon: UsersRound },
   { label: 'Student onboarding', href: '/students/registry/import', icon: FileUp },
   { label: 'Portal access', href: '/students/access', icon: KeyRound },
-  { label: 'Status & progression', href: '/students/progression', icon: History },
+  { label: 'Update statuses', href: '/students/status', icon: RefreshCw },
   { label: 'Unit registration', href: '/students/unit-registration', icon: BookOpenCheck },
   { label: 'Reports', href: '/students/reports', icon: BarChart3 },
 ];

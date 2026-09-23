@@ -1,3 +1,11 @@
+### 2026-09-22: Students — Remove `/students/progression`; replace sidebar nav item
+
+- `src/components/layout/student-shell.tsx` — Replaced "Status & progression" nav item (`/students/progression`, `History` icon) with **"Update statuses"** (`/students/status`, `RefreshCw` icon). Swapped `History` import for `RefreshCw`.
+- `src/app/(dashboard)/students/progression/page.tsx` — **[DELETED]**. The old read-only exception list is superseded by the inline status updater at `/students/status`.
+- `.next` cache cleared to purge stale generated type references to the deleted page.
+
+**Verification**: `npm run check` passed (exit code 0). `/students/progression` no longer appears in the build manifest.
+
 ### 2026-09-22: Students — Inline Bulk Status Updater (`/students/status`)
 
 **Scope**: New page, new server action, new client component. No database schema changes.

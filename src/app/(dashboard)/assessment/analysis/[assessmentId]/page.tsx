@@ -103,7 +103,7 @@ export default async function AssessmentAnalysisDetailPage({
       : 'Exam';
 
   return (
-    <div className="space-y-6">
+    <div className="admin-screen space-y-6">
       <PageHeader
         eyebrow={`Assessment · ${typeLabel}`}
         title={

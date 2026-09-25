@@ -65,7 +65,7 @@ export default async function TrainerImportPreviewPage({
       'completed_with_errors';
 
   return (
-    <div className="space-y-6">
+    <div className="admin-screen space-y-6">
       <PageHeader
         eyebrow="Bulk data import"
         title={

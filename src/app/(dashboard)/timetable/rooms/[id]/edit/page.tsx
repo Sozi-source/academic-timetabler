@@ -43,7 +43,7 @@ export default async function EditRoomPage({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="admin-screen space-y-6">
       <PageHeader
         eyebrow="Scheduling resources"
         title={`Edit ${room.code}`}

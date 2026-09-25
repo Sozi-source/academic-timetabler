@@ -17,7 +17,7 @@ export function Card({
   return (
     <article
       className={cn(
-        'relative overflow-hidden rounded-xl border border-border bg-surface shadow-sm',
+        'relative min-w-0 overflow-hidden rounded-[0.9rem] border border-border-soft bg-surface shadow-[0_1px_2px_rgba(15,23,42,0.035)]',
         className,
       )}
       {...props}
@@ -37,7 +37,7 @@ export function CardHeader({
   return (
     <div
       className={cn(
-        'border-b border-border-soft bg-surface-subtle/70 px-4 py-3.5',
+        'border-b border-border-soft bg-surface-subtle/55 px-4 py-3',
         className,
       )}
     >
@@ -54,7 +54,7 @@ export function CardContent({
   className?: string;
 }) {
   return (
-    <div className={cn('px-3 py-3 xl:px-4 xl:py-4 2xl:px-5 2xl:py-5', className)}>
+    <div className={cn('px-3.5 py-3.5 xl:px-4 xl:py-4 2xl:px-5 2xl:py-5', className)}>
       {children}
     </div>
   );

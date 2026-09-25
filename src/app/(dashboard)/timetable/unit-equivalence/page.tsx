@@ -22,7 +22,7 @@ export default async function UnitEquivalencePage({ searchParams }: PageProps<'/
   }
   const fuzzy = candidates.filter((row) => row.exact_group_size === 1 && !row.equivalence_group_id);
 
-  return <div className="space-y-5">
+  return <div className="admin-screen space-y-5">
     <PageHeader title="Unit equivalence review" description="Approve academic equivalence once; sharing remains a separate period-specific decision." actions={<Button asChild variant="outline"><Link href="/timetable/unit-offerings"><ArrowLeft className="size-4" />Units on offer</Link></Button>} />
     {params.error ? <Alert variant="danger" title="Equivalence was not approved">{String(params.error)}</Alert> : null}
     {params.approved ? <Alert variant="success" title="Canonical subject approved">Standardized {String(params.approved)} programme units while preserving their unique codes and identities.</Alert> : null}

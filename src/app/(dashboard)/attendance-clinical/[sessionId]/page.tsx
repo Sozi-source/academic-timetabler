@@ -53,7 +53,7 @@ export default async function HodAttendanceSessionPage({
   }
 
   return (
-    <div className="space-y-5">
+    <div className="admin-screen space-y-5">
       <PageHeader
         eyebrow="Class Attendance"
         title={

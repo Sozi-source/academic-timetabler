@@ -1,4 +1,4 @@
-import { ArrowLeft, Download, FileUp, KeyRound, UsersRound } from 'lucide-react';
+import { FileUp } from 'lucide-react';
 import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
@@ -21,31 +21,23 @@ export default async function StudentRegistryPage({ searchParams }: { searchPara
   ]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <PageHeader
+        backHref="/students"
+        backLabel="Students"
         eyebrow="Student Lifecycle"
         title="Student registry"
         description="Current and historical students."
-        icon={UsersRound}
         context={<Badge variant="neutral">{students.length} records</Badge>}
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <Link href="/students" className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle">
-              <ArrowLeft className="size-3.5" />
-              Students
-            </Link>
-            <Link href="/students/access" className="inline-flex h-9 items-center gap-2 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle">
-              <KeyRound className="size-3.5" />
-              Student access
-            </Link>
             <ReportingSyncDialog />
-            <Link href="/api/students/export" className="inline-flex h-9 items-center gap-2 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle">
-              <Download className="size-3.5" />
-              Export Excel
-            </Link>
-            <Link href="/students/registry/import" className="inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-3 text-xs font-semibold text-white hover:bg-primary-hover">
+            <Link
+              href="/students/registry/import"
+              className="inline-flex h-8.5 items-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-white shadow-xs transition hover:bg-primary-hover active:scale-95"
+            >
               <FileUp className="size-3.5" />
-              Import students
+              <span>Import students</span>
             </Link>
           </div>
         }

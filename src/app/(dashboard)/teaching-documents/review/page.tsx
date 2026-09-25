@@ -68,7 +68,7 @@ export default async function TeachingDocumentReviewPage() {
     await getTeachingDocumentReviewQueue();
 
   return (
-    <div className="space-y-5">
+    <div className="admin-screen space-y-5">
       <PageHeader
         title="Document Review"
         icon={FileCheck2}

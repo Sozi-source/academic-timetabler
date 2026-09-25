@@ -108,7 +108,7 @@ export default async function AssessmentAnalysisPage() {
     ).length;
 
   return (
-    <div className="space-y-6">
+    <div className="admin-screen space-y-6">
       <PageHeader
         eyebrow="Assessment"
         title="CAT & Exam analysis"

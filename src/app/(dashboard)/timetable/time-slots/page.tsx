@@ -117,7 +117,7 @@ export default async function TimetableCalendarPage({
     ).length;
 
   return (
-    <div className="space-y-6">
+    <div className="admin-screen space-y-6">
       <header className="flex flex-col gap-4 border-b border-border pb-5 lg:flex-row lg:items-end lg:justify-between">
         <div className="min-w-0">
           <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.17em] text-primary">
@@ -248,7 +248,7 @@ export default async function TimetableCalendarPage({
 
               <TabsContent
                 value="working-days"
-                className="space-y-5"
+                className="admin-screen space-y-5"
               >
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                   <div>

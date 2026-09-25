@@ -80,7 +80,7 @@ export default async function ImportUnitOfferingsPage() {
     );
 
   return (
-    <div className="space-y-6">
+    <div className="admin-screen space-y-6">
       <PageHeader
         eyebrow="Semester planning"
         title="Import Units on Offer"

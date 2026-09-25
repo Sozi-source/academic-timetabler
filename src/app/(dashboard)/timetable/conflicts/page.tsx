@@ -41,7 +41,7 @@ export default async function TimetableConflictsPage({
     : null;
 
   return (
-    <div className="space-y-5">
+    <div className="admin-screen space-y-5">
       <PageHeader
         eyebrow="Enterprise scheduling"
         title="Conflict resolution centre"

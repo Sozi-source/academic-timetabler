@@ -65,7 +65,7 @@ export default async function TimetableGeneratorPage() {
     : null;
 
   return (
-    <div className="space-y-6">
+    <div className="admin-screen space-y-6">
       <PageHeader
         eyebrow="Step 2 of 4"
         title="Generate timetable"

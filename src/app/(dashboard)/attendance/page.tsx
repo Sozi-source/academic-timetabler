@@ -52,7 +52,7 @@ export default async function DepartmentClassAttendancePage({ searchParams }: Pa
   const attendancePercentage = totalMarked > 0 ? Math.round((totalPresent / totalMarked) * 100) : 0;
 
   return (
-    <div className="space-y-5">
+    <div className="admin-screen space-y-5">
       <PageHeader
         eyebrow="Attendance"
         title="Department Class Attendance"

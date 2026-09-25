@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 
 export default function ImportTeachingAllocationsPage() {
   return (
-    <div className="space-y-6">
+    <div className="admin-screen space-y-6">
       <PageHeader
         eyebrow="Bulk data import"
         title="Import teaching allocations"

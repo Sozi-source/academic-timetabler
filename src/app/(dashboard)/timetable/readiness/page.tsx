@@ -33,7 +33,7 @@ export default async function TimetableReadinessPage({ searchParams }: { searchP
   if (!readiness) redirect('/timetable/academic-periods');
 
   return (
-    <div className="space-y-6">
+    <div className="admin-screen space-y-6">
       <PageHeader
         eyebrow="Step 1 of 4"
         title="Check your setup"

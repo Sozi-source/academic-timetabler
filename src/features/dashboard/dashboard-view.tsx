@@ -5,21 +5,12 @@ import {
   BarChart3,
   BookOpenCheck,
   CalendarDays,
-  CalendarRange,
   CheckCircle2,
   ChevronRight,
-  ClipboardCheck,
-  ClipboardList,
   Clock,
-  ExternalLink,
   FileText,
-  Folder,
   KeyRound,
-  Monitor,
   ShieldCheck,
-  Sparkles,
-  TrendingUp,
-  User,
   UserCheck,
   Users,
   Zap,
@@ -32,12 +23,22 @@ interface DashboardViewProps {
   snapshot: any;
 }
 
+/**
+ * Single-column, app-shell style home screen.
+ *
+ * Everything the old layout spread across a 4-tile metric grid, an 8-icon
+ * module grid, a 5-link quick-access bar AND a 4-card sidebar (many of
+ * which pointed at the same handful of destinations) is now four merged,
+ * native-app-style surfaces:
+ *   1. Hero banner  — status + the two actions people actually reach for
+ *   2. Stat strip   — one grouped card, divided like a mobile widget
+ *   3. Workspaces   — one icon-grid card (home-screen style, no per-tile borders)
+ *   4. Manage list  — one grouped list card for admin/approval actions
+ */
 export function DashboardView({
   activePeriodName,
   snapshot,
 }: DashboardViewProps) {
-  // Dynamic telemetry figures with design fallbacks
-  const studentsRegistered = snapshot?.students?.registered ?? 26;
   const studentsEligible = snapshot?.students?.eligible ?? 185;
   const studentsPortalActive = snapshot?.students?.portalActive ?? 65;
 
@@ -47,459 +48,188 @@ export function DashboardView({
   const attendanceCompleted = snapshot?.attendance?.completed ?? 0;
   const attendanceOpen = snapshot?.attendance?.open ?? 1;
 
+  const workspaces = [
+    { label: 'Daily Ops', href: '/operations/daily-reports', icon: Clock, tint: '#033B36' },
+    { label: 'Students', href: '/students/registry', icon: UserCheck, tint: '#033B36' },
+    { label: 'Timetable', href: '/timetable', icon: CalendarDays, tint: '#B45309' },
+    { label: 'Unit Reg.', href: '/students/unit-registration', icon: BookOpenCheck, tint: '#033B36' },
+    { label: 'Staff', href: '/trainers', icon: Users, tint: '#033B36' },
+    { label: 'Documents', href: '/teaching-documents', icon: FileText, tint: '#033B36' },
+    { label: 'Results', href: '/assessment', icon: BarChart3, tint: '#B45309' },
+  ] as const;
+
   return (
-    <div className="flex flex-col gap-6 2xl:flex-row 2xl:items-start">
-      {/* ========================================================= */}
-      {/* 1. Main Dashboard Canvas (Dense & Perfectly Proportioned) */}
-      {/* ========================================================= */}
-      <div className="min-w-0 flex-1 space-y-6">
-        {/* Operational Controls & Quick Action Strip */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-1 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-800">
-              <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Live Operational Hub
-            </span>
-          </div>
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 pb-6">
+      {/* ================================================================= */}
+      {/* 1. Hero banner — status pill + the two most-used actions          */}
+      {/* ================================================================= */}
+      <section className="relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-[#033B36] to-[#062f2c] px-5 py-5 text-white shadow-lg">
+        <div
+          className="pointer-events-none absolute -right-10 -top-14 size-40 rounded-full bg-white/10 blur-2xl"
+          aria-hidden="true"
+        />
+        <div
+          className="pointer-events-none absolute -bottom-16 -left-8 size-36 rounded-full bg-emerald-400/10 blur-2xl"
+          aria-hidden="true"
+        />
 
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              href="/operations/daily-reports"
-              className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-2xs transition-colors hover:bg-gray-50 hover:text-gray-900"
-            >
-              <ClipboardList className="size-3.5 text-gray-500" aria-hidden="true" />
-              <span>Daily Reports</span>
-            </Link>
-
-            <Link
-              href="/staff"
-              className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-2xs transition-colors hover:bg-gray-50 hover:text-gray-900"
-            >
-              <User className="size-3.5 text-gray-500" aria-hidden="true" />
-              <span>My Workspace</span>
-            </Link>
-
-            <Link
-              href="/operations/action-center"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-[#033B36] px-3 py-1.5 text-xs font-semibold text-white shadow-2xs transition-colors hover:bg-[#022A26]"
-            >
-              <Zap className="size-3.5 text-[#FACC15]" aria-hidden="true" />
-              <span>Action Centre</span>
-            </Link>
-          </div>
+        <div className="relative flex items-center justify-between gap-3">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-200 ring-1 ring-white/15">
+            <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Live Operational Hub
+          </span>
         </div>
 
-        {/* 4-Metric Telemetry Strip */}
-        <section aria-label="Department Metrics" className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Metric 1: ACTIVE TERM */}
-          <div className="flex flex-col justify-between rounded-xl border border-gray-200/90 bg-white p-4 shadow-xs transition hover:border-[#033B36]/30 hover:shadow-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
-                Active Term
-              </span>
-              <span className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-[#033B36]/10 text-[#033B36]">
-                <CalendarDays className="size-4 text-[#033B36]" aria-hidden="true" />
-              </span>
-            </div>
-            <div className="mt-2">
-              <p className="text-base font-bold text-gray-900 tracking-tight">
-                {activePeriodName}
-              </p>
-              <p className="text-[11px] text-gray-500 mt-0.5">Academic session</p>
-            </div>
-            <div className="mt-3 h-0.5 w-7 rounded-full bg-[#033B36]" />
-          </div>
+        <p className="relative mt-3 text-[11px] font-semibold uppercase tracking-wider text-white/50">
+          Academic session
+        </p>
+        <h1 className="relative text-xl font-bold tracking-tight text-white">
+          {activePeriodName}
+        </h1>
+        <p className="relative mt-1 text-[12px] text-white/60">
+          {publishedSessions > 0 ? `${publishedSessions} timetable sessions live` : 'Timetable in draft mode'}
+          <span className="mx-1.5 text-white/25">•</span>
+          {studentsPortalActive} portal accounts active
+        </p>
 
-          {/* Metric 2: STUDENTS PORTAL */}
+        <div className="relative mt-4 flex flex-wrap items-center gap-2">
           <Link
-            href="/students/registry"
-            className="group flex flex-col justify-between rounded-xl border border-gray-200/90 bg-white p-4 shadow-xs transition hover:border-[#033B36]/40 hover:shadow-sm"
+            href="/operations/action-center"
+            className="inline-flex items-center gap-1.5 rounded-full bg-[#FACC15] px-4 py-2 text-xs font-bold text-[#033B36] shadow-sm transition active:scale-[0.97]"
           >
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 group-hover:text-[#033B36]">
-                Students Portal
-              </span>
-              <span className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-[#033B36]/10 text-[#033B36] transition group-hover:bg-[#033B36] group-hover:text-white">
-                <Users className="size-4" aria-hidden="true" />
-              </span>
-            </div>
-            <div className="mt-2">
-              <p className="text-base font-bold text-gray-900 tracking-tight flex items-center justify-between">
-                <span>{studentsPortalActive} / {studentsEligible}</span>
-                <ArrowRight className="size-3.5 text-gray-400 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 text-[#033B36]" aria-hidden="true" />
-              </p>
-              <p className="text-[11px] text-gray-500 mt-0.5">
-                {studentsPortalActive} Accounts active
-              </p>
-            </div>
-            <div className="mt-3 h-0.5 w-7 rounded-full bg-[#033B36]" />
+            <Zap className="size-3.5" aria-hidden="true" />
+            Action Centre
           </Link>
+          <Link
+            href="/operations/daily-reports"
+            className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold text-white ring-1 ring-white/15 transition active:scale-[0.97]"
+          >
+            Daily Reports
+          </Link>
+          <Link
+            href="/staff"
+            className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold text-white ring-1 ring-white/15 transition active:scale-[0.97]"
+          >
+            My Workspace
+          </Link>
+        </div>
+      </section>
 
-          {/* Metric 3: TEACHING ALLOCATIONS */}
-          <div className="flex flex-col justify-between rounded-xl border border-gray-200/90 bg-white p-4 shadow-xs transition hover:border-[#033B36]/30 hover:shadow-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
-                Teaching Units
-              </span>
-              <span className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-[#033B36]/10 text-[#033B36]">
-                <Monitor className="size-4 text-[#033B36]" aria-hidden="true" />
-              </span>
-            </div>
-            <div className="mt-2">
-              <p className="text-base font-bold text-gray-900 tracking-tight">
-                {teachingUnits} Units
-              </p>
-              <p className="text-[11px] text-gray-500 mt-0.5">
-                {publishedSessions} published
-              </p>
-            </div>
-            <div className="mt-3 h-0.5 w-7 rounded-full bg-[#033B36]" />
-          </div>
-
-          {/* Metric 4: CLASS ATTENDANCE */}
-          <div className="flex flex-col justify-between rounded-xl border border-gray-200/90 bg-white p-4 shadow-xs transition hover:border-[#15803D]/30 hover:shadow-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
-                Class Attendance
-              </span>
-              <span className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
-                <CheckCircle2 className="size-4 text-emerald-600" aria-hidden="true" />
-              </span>
-            </div>
-            <div className="mt-2">
-              <p className="text-base font-bold text-gray-900 tracking-tight">
-                {attendanceCompleted} Completed
-              </p>
-              <p className="text-[11px] text-gray-500 mt-0.5">
-                {attendanceOpen} open today
-              </p>
-            </div>
-            <div className="mt-3 h-0.5 w-7 rounded-full bg-[#15803D]" />
-          </div>
-        </section>
-
-        {/* Department Modules Grid */}
-        <section aria-labelledby="department-modules-heading" className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 id="department-modules-heading" className="text-xs font-bold uppercase tracking-wider text-gray-700">
-              Core Modules
-            </h2>
-            <span className="text-[11px] font-medium text-gray-500">8 Workspaces</span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
-            {/* Module 1: Daily Operations */}
-            <Link
-              href="/operations/daily-reports"
-              className="group flex flex-col items-center justify-center rounded-xl border border-gray-200/90 bg-white px-2.5 py-4 text-center shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:border-[#033B36]/30 hover:shadow-sm"
-            >
-              <div className="flex size-10 items-center justify-center rounded-full bg-[#033B36] text-white shadow-2xs transition group-hover:scale-105">
-                <Clock className="size-4.5 text-white" aria-hidden="true" />
-              </div>
-              <p className="mt-2.5 text-[11px] font-bold text-[#033B36]">
-                Daily Operations
-              </p>
-              <div className="mt-2 h-0.5 w-6 rounded-full bg-[#033B36]" />
-            </Link>
-
-            {/* Module 2: Student Registry */}
-            <Link
-              href="/students/registry"
-              className="group flex flex-col items-center justify-center rounded-xl border border-gray-200/90 bg-white px-2.5 py-4 text-center shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:border-[#033B36]/30 hover:shadow-sm"
-            >
-              <div className="flex size-10 items-center justify-center rounded-full bg-[#033B36] text-white shadow-2xs transition group-hover:scale-105">
-                <UserCheck className="size-4.5 text-white" aria-hidden="true" />
-              </div>
-              <p className="mt-2.5 text-[11px] font-bold text-[#033B36]">
-                Student Registry
-              </p>
-              <div className="mt-2 h-0.5 w-6 rounded-full bg-[#033B36]" />
-            </Link>
-
-            {/* Module 3: Academic Planning */}
-            <Link
-              href="/timetable"
-              className="group flex flex-col items-center justify-center rounded-xl border border-gray-200/90 bg-white px-2.5 py-4 text-center shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:border-[#F59E0B]/30 hover:shadow-sm"
-            >
-              <div className="flex size-10 items-center justify-center rounded-full bg-[#F59E0B] text-white shadow-2xs transition group-hover:scale-105">
-                <CalendarDays className="size-4.5 text-white" aria-hidden="true" />
-              </div>
-              <p className="mt-2.5 text-[11px] font-bold text-[#B45309]">
-                Academic Planning
-              </p>
-              <div className="mt-2 h-0.5 w-6 rounded-full bg-[#F59E0B]" />
-            </Link>
-
-            {/* Module 4: Unit Registration */}
-            <Link
-              href="/students/unit-registration"
-              className="group flex flex-col items-center justify-center rounded-xl border border-gray-200/90 bg-white px-2.5 py-4 text-center shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:border-[#033B36]/30 hover:shadow-sm"
-            >
-              <div className="flex size-10 items-center justify-center rounded-full bg-[#033B36] text-white shadow-2xs transition group-hover:scale-105">
-                <BookOpenCheck className="size-4.5 text-white" aria-hidden="true" />
-              </div>
-              <p className="mt-2.5 text-[11px] font-bold text-[#033B36]">
-                Unit Registration
-              </p>
-              <div className="mt-2 h-0.5 w-6 rounded-full bg-[#033B36]" />
-            </Link>
-
-            {/* Module 4: Staff & Trainers */}
-            <Link
-              href="/trainers"
-              className="group flex flex-col items-center justify-center rounded-xl border border-gray-200/90 bg-white px-2.5 py-4 text-center shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:border-[#033B36]/30 hover:shadow-sm"
-            >
-              <div className="flex size-10 items-center justify-center rounded-full bg-[#033B36] text-white shadow-2xs transition group-hover:scale-105">
-                <Users className="size-4.5 text-white" aria-hidden="true" />
-              </div>
-              <p className="mt-2.5 text-[11px] font-bold text-[#033B36]">
-                Staff & Trainers
-              </p>
-              <div className="mt-2 h-0.5 w-6 rounded-full bg-[#033B36]" />
-            </Link>
-
-            {/* Module 5: Quality Assurance */}
-            <Link
-              href="/teaching-documents"
-              className="group flex flex-col items-center justify-center rounded-xl border border-gray-200/90 bg-white px-2.5 py-4 text-center shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:border-[#033B36]/30 hover:shadow-sm"
-            >
-              <div className="flex size-10 items-center justify-center rounded-full bg-[#033B36] text-white shadow-2xs transition group-hover:scale-105">
-                <FileText className="size-4.5 text-white" aria-hidden="true" />
-              </div>
-              <p className="mt-2.5 text-[11px] font-bold text-[#033B36]">
-                Quality Assurance
-              </p>
-              <div className="mt-2 h-0.5 w-6 rounded-full bg-[#033B36]" />
-            </Link>
-
-            {/* Module 6: Grading & Results */}
-            <Link
-              href="/assessment"
-              className="group flex flex-col items-center justify-center rounded-xl border border-gray-200/90 bg-white px-2.5 py-4 text-center shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:border-[#F59E0B]/30 hover:shadow-sm"
-            >
-              <div className="flex size-10 items-center justify-center rounded-full bg-[#F59E0B] text-white shadow-2xs transition group-hover:scale-105">
-                <BarChart3 className="size-4.5 text-white" aria-hidden="true" />
-              </div>
-              <p className="mt-2.5 text-[11px] font-bold text-[#B45309]">
-                Grading & Results
-              </p>
-              <div className="mt-2 h-0.5 w-6 rounded-full bg-[#F59E0B]" />
-            </Link>
-
-            {/* Module 7: Action Centre */}
-            <Link
-              href="/operations/action-center"
-              className="group flex flex-col items-center justify-center rounded-xl border border-gray-200/90 bg-white px-2.5 py-4 text-center shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:border-[#033B36]/30 hover:shadow-sm"
-            >
-              <div className="flex size-10 items-center justify-center rounded-full bg-[#033B36] text-white shadow-2xs transition group-hover:scale-105">
-                <Zap className="size-4.5 text-[#FACC15]" aria-hidden="true" />
-              </div>
-              <p className="mt-2.5 text-[11px] font-bold text-[#033B36]">
-                Action Centre
-              </p>
-              <div className="mt-2 h-0.5 w-6 rounded-full bg-[#033B36]" />
-            </Link>
-          </div>
-        </section>
-
-        {/* Quick Access Bar */}
-        <section aria-labelledby="quick-access-heading" className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 id="quick-access-heading" className="text-xs font-bold uppercase tracking-wider text-gray-700">
-              Quick Shortcuts
-            </h2>
-            <span className="text-[11px] font-medium text-gray-500">Quick Links</span>
-          </div>
-
-          <div className="overflow-hidden rounded-xl border border-gray-200/90 bg-white shadow-2xs">
-            <div className="grid grid-cols-2 divide-y sm:grid-cols-5 sm:divide-y-0 sm:divide-x divide-gray-200">
-              <Link
-                href="/timetable/reports"
-                className="flex items-center justify-center gap-2 px-3 py-3 text-xs font-medium text-gray-700 transition hover:bg-gray-50 hover:text-[#033B36]"
-              >
-                <CalendarDays className="size-3.5 text-gray-500 shrink-0" aria-hidden="true" />
-                <span className="truncate">Timetables</span>
-              </Link>
-
-              <Link
-                href="/timetable/teaching-allocations"
-                className="flex items-center justify-center gap-2 px-3 py-3 text-xs font-medium text-gray-700 transition hover:bg-gray-50 hover:text-[#033B36]"
-              >
-                <Users className="size-3.5 text-gray-500 shrink-0" aria-hidden="true" />
-                <span className="truncate">Allocations</span>
-              </Link>
-
-              <Link
-                href="/timetable/rooms"
-                className="flex items-center justify-center gap-2 px-3 py-3 text-xs font-medium text-gray-700 transition hover:bg-gray-50 hover:text-[#033B36]"
-              >
-                <Folder className="size-3.5 text-gray-500 shrink-0" aria-hidden="true" />
-                <span className="truncate">Rooms</span>
-              </Link>
-
-              <Link
-                href="/timetable/trainers"
-                className="flex items-center justify-center gap-2 px-3 py-3 text-xs font-medium text-gray-700 transition hover:bg-gray-50 hover:text-[#033B36]"
-              >
-                <UserCheck className="size-3.5 text-gray-500 shrink-0" aria-hidden="true" />
-                <span className="truncate">Trainers</span>
-              </Link>
-
-              <Link
-                href="/assessment"
-                className="flex items-center justify-center gap-2 px-3 py-3 text-xs font-medium text-gray-700 transition hover:bg-gray-50 hover:text-[#033B36] col-span-2 sm:col-span-1 border-t sm:border-t-0"
-              >
-                <TrendingUp className="size-3.5 text-gray-500 shrink-0" aria-hidden="true" />
-                <span className="truncate">Results</span>
-              </Link>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      {/* ========================================================= */}
-      {/* 2. Fixed Right Companion Sidebar (Only on 2xl+ Displays)  */}
-      {/* ========================================================= */}
-      <aside
-        aria-label="Operational Pulse & Shortcuts"
-        className="hidden 2xl:block 2xl:w-64 min-[1800px]:w-72 shrink-0 space-y-4"
+      {/* ================================================================= */}
+      {/* 2. Stat strip — one grouped card, divided like a mobile widget     */}
+      {/* ================================================================= */}
+      <section
+        aria-label="Department metrics"
+        className="grid grid-cols-3 divide-x divide-gray-100 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xs"
       >
-        {/* Card 1: Academic Session Pulse */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-xs">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-            <div className="flex items-center gap-2">
-              <span className="flex size-7 items-center justify-center rounded-lg bg-[#033B36]/10 text-[#033B36]">
-                <CalendarRange className="size-4" aria-hidden="true" />
-              </span>
-              <p className="text-xs font-bold text-gray-900">Academic Session</p>
-            </div>
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
-              <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Active
-            </span>
-          </div>
+        <Link href="/students/registry" className="group flex flex-col gap-1 px-3 py-3.5 text-left transition active:bg-gray-50">
+          <Users className="size-4 text-[#033B36]" aria-hidden="true" />
+          <p className="text-base font-bold leading-none text-gray-900">
+            {studentsPortalActive}
+            <span className="text-xs font-semibold text-gray-400">/{studentsEligible}</span>
+          </p>
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Students</p>
+        </Link>
 
-          <div className="mt-3 space-y-2">
-            <div>
-              <p className="text-[10px] font-medium uppercase tracking-wider text-gray-400">Current Term</p>
-              <p className="text-sm font-bold text-gray-900">{activePeriodName}</p>
-            </div>
-
-            <div className="flex items-center justify-between pt-1 text-[11px] text-gray-600">
-              <span>Timetable Status:</span>
-              <span className="font-semibold text-gray-900">
-                {publishedSessions > 0 ? `${publishedSessions} Sessions Live` : 'Draft Mode'}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between text-[11px] text-gray-600">
-              <span>Portal Accounts:</span>
-              <span className="font-semibold text-gray-900">{studentsPortalActive} Active</span>
-            </div>
-          </div>
+        <div className="flex flex-col gap-1 px-3 py-3.5">
+          <CalendarDays className="size-4 text-[#033B36]" aria-hidden="true" />
+          <p className="text-base font-bold leading-none text-gray-900">{teachingUnits}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Units</p>
         </div>
 
-        {/* Card 2: Staff & Account Management */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-xs">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-            <div className="flex items-center gap-2">
-              <span className="flex size-7 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
+        <Link href="/operations/daily-reports" className="group flex flex-col gap-1 px-3 py-3.5 text-left transition active:bg-gray-50">
+          <CheckCircle2 className="size-4 text-emerald-600" aria-hidden="true" />
+          <p className="text-base font-bold leading-none text-gray-900">{attendanceCompleted}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+            {attendanceOpen} open
+          </p>
+        </Link>
+      </section>
+
+      {/* ================================================================= */}
+      {/* 3. Workspaces — one home-screen style icon grid, no per-tile chrome */}
+      {/* ================================================================= */}
+      <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-xs">
+        <div className="flex items-center justify-between pb-3">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-gray-700">Workspaces</h2>
+          <span className="text-[11px] font-medium text-gray-400">{workspaces.length}</span>
+        </div>
+
+        <div className="grid grid-cols-4 gap-y-4">
+          {workspaces.map(({ label, href, icon: Icon, tint }) => (
+            <Link
+              key={href}
+              href={href}
+              className="group flex flex-col items-center gap-1.5 text-center transition active:scale-95"
+            >
+              <span
+                className="flex size-12 items-center justify-center rounded-2xl text-white shadow-sm transition group-active:scale-95"
+                style={{ backgroundColor: tint }}
+              >
+                <Icon className="size-5" aria-hidden="true" />
+              </span>
+              <span className="text-[10.5px] font-semibold leading-tight text-gray-700">
+                {label}
+              </span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* ================================================================= */}
+      {/* 4. Manage — one grouped list card (native settings-list pattern)  */}
+      {/* ================================================================= */}
+      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xs">
+        <p className="border-b border-gray-100 px-4 py-3 text-xs font-bold uppercase tracking-wider text-gray-700">
+          Manage &amp; Approvals
+        </p>
+
+        <div className="divide-y divide-gray-100">
+          <Link
+            href="/timetable/trainers/access"
+            className="flex items-center justify-between gap-3 px-4 py-3.5 transition active:bg-gray-50"
+          >
+            <span className="flex items-center gap-3">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-700">
                 <KeyRound className="size-4" aria-hidden="true" />
               </span>
-              <p className="text-xs font-bold text-gray-900">Staff & Approvals</p>
-            </div>
-            <Link
-              href="/timetable/trainers/access"
-              className="text-[10px] font-semibold text-[#033B36] hover:underline"
-            >
-              Manage
-            </Link>
-          </div>
+              <span className="text-xs font-semibold text-gray-800">Staff Workspace Access</span>
+            </span>
+            <ChevronRight className="size-4 shrink-0 text-gray-300" aria-hidden="true" />
+          </Link>
 
-          <div className="mt-3 space-y-2">
-            <Link
-              href="/timetable/trainers/access"
-              className="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50/70 p-2.5 text-xs font-medium text-gray-800 transition hover:bg-gray-100/80 hover:border-gray-200"
-            >
-              <div className="flex items-center gap-2">
-                <UserCheck className="size-4 text-emerald-600" />
-                <span>Staff Workspace Access</span>
-              </div>
-              <ChevronRight className="size-3.5 text-gray-400" />
-            </Link>
+          <Link
+            href="/trainers"
+            className="flex items-center justify-between gap-3 px-4 py-3.5 transition active:bg-gray-50"
+          >
+            <span className="flex items-center gap-3">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#033B36]/10 text-[#033B36]">
+                <Users className="size-4" aria-hidden="true" />
+              </span>
+              <span className="text-xs font-semibold text-gray-800">Trainer Directory &amp; Loads</span>
+            </span>
+            <ChevronRight className="size-4 shrink-0 text-gray-300" aria-hidden="true" />
+          </Link>
 
-            <Link
-              href="/timetable/trainers"
-              className="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50/70 p-2.5 text-xs font-medium text-gray-800 transition hover:bg-gray-100/80 hover:border-gray-200"
-            >
-              <div className="flex items-center gap-2">
-                <Users className="size-4 text-[#033B36]" />
-                <span>Trainer Directory & Loads</span>
-              </div>
-              <ChevronRight className="size-3.5 text-gray-400" />
-            </Link>
-          </div>
+          <Link
+            href="/assessment"
+            className="flex items-center justify-between gap-3 px-4 py-3.5 transition active:bg-gray-50"
+          >
+            <span className="flex items-center gap-3">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#033B36]/10 text-[#033B36]">
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </span>
+              <span className="text-xs font-semibold text-gray-800">Assessment Control Centre</span>
+            </span>
+            <ChevronRight className="size-4 shrink-0 text-gray-300" aria-hidden="true" />
+          </Link>
         </div>
 
-        {/* Card 3: Quick Operational Actions */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-xs">
-          <p className="text-xs font-bold text-gray-900 border-b border-gray-100 pb-2.5">
-            Operational Shortcuts
-          </p>
-
-          <div className="mt-3 space-y-1.5">
-            <Link
-              href="/timetable/readiness"
-              className="flex items-center justify-between rounded-lg p-2 text-xs font-medium text-gray-700 transition hover:bg-gray-50 hover:text-[#033B36]"
-            >
-              <span className="flex items-center gap-2">
-                <ClipboardCheck className="size-3.5 text-gray-500" />
-                Timetable Readiness
-              </span>
-              <ArrowRight className="size-3 text-gray-400" />
-            </Link>
-
-            <Link
-              href="/timetable/editor"
-              className="flex items-center justify-between rounded-lg p-2 text-xs font-medium text-gray-700 transition hover:bg-gray-50 hover:text-[#033B36]"
-            >
-              <span className="flex items-center gap-2">
-                <CalendarDays className="size-3.5 text-gray-500" />
-                Review & Edit Schedule
-              </span>
-              <ArrowRight className="size-3 text-gray-400" />
-            </Link>
-
-            <Link
-              href="/assessment"
-              className="flex items-center justify-between rounded-lg p-2 text-xs font-medium text-gray-700 transition hover:bg-gray-50 hover:text-[#033B36]"
-            >
-              <span className="flex items-center gap-2">
-                <BarChart3 className="size-3.5 text-gray-500" />
-                Assessment Control Center
-              </span>
-              <ArrowRight className="size-3 text-gray-400" />
-            </Link>
-
-            <Link
-              href="/operations/daily-reports"
-              className="flex items-center justify-between rounded-lg p-2 text-xs font-medium text-gray-700 transition hover:bg-gray-50 hover:text-[#033B36]"
-            >
-              <span className="flex items-center gap-2">
-                <Clock className="size-3.5 text-gray-500" />
-                Submit Daily Attendance
-              </span>
-              <ArrowRight className="size-3 text-gray-400" />
-            </Link>
-          </div>
+        <div className="flex items-center gap-2 border-t border-gray-100 bg-gray-50/70 px-4 py-2.5 text-[11px] text-gray-500">
+          <ShieldCheck className="size-3.5 shrink-0 text-emerald-600" aria-hidden="true" />
+          <span>HOD workspace authenticated · Active sync</span>
         </div>
-
-        {/* Card 4: System Security Badge */}
-        <div className="flex items-center gap-2.5 rounded-xl border border-gray-200 bg-gray-50/70 px-3.5 py-2.5 text-[11px] text-gray-500">
-          <ShieldCheck className="size-4 text-emerald-600 shrink-0" />
-          <span>HOD Workspace Authenticated · Active Sync</span>
-        </div>
-      </aside>
+      </section>
     </div>
   );
 }

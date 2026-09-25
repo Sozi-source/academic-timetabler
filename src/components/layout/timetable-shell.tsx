@@ -1,6 +1,7 @@
 'use client';
 
-import { LogOut, Menu } from 'lucide-react';
+import { ClipboardCheck, FileChartColumn, ListChecks, LogOut, Menu, PencilRuler } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 
@@ -9,6 +10,16 @@ import { logoutAction } from '@/features/auth/actions';
 import type { AuthenticatedProfile } from '@/features/auth/types';
 
 import { DashboardSidebar } from './dashboard-sidebar';
+import { MobileBottomNav } from './mobile-bottom-nav';
+
+// The four everyday timetabling steps; master-setup pages (rooms, offerings,
+// constraints, imports, etc.) stay one tap away behind "More".
+const BOTTOM_TABS = [
+  { label: 'Generate', href: '/timetable/readiness', icon: ClipboardCheck },
+  { label: 'Edit', href: '/timetable/editor', icon: PencilRuler },
+  { label: 'Published', href: '/timetable/published', icon: FileChartColumn },
+  { label: 'Reports', href: '/timetable/reports', icon: ListChecks },
+] as const;
 
 interface TimetableShellProps {
   profile: AuthenticatedProfile;
@@ -25,6 +36,7 @@ function getInitials(fullName: string) {
 }
 
 export function TimetableShell({ profile, children }: TimetableShellProps) {
+  const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const initials = getInitials(profile.fullName) || 'HD';
 
@@ -40,7 +52,7 @@ export function TimetableShell({ profile, children }: TimetableShellProps) {
       />
 
       <div className="min-w-0 overflow-x-clip lg:pl-[var(--sidebar-width)]">
-        <header className="sticky top-0 z-20 flex min-h-[var(--header-height)] items-center justify-between gap-2 border-b border-border xl:gap-3 2xl:gap-4 bg-surface/95 px-3 shadow-[0_1px_0_rgba(31,41,55,0.03)] backdrop-blur sm:px-4 xl:px-6 2xl:px-8">
+        <header className="admin-shell-header sticky top-0 z-40 flex min-h-[var(--header-height)] items-center justify-between gap-2 border-b border-border-soft bg-surface/95 px-[var(--content-gutter)] shadow-sm backdrop-blur-xl">
           <div className="flex min-w-0 items-center gap-3">
             <Button
               variant="outline"
@@ -54,21 +66,21 @@ export function TimetableShell({ profile, children }: TimetableShellProps) {
               <Menu className="size-5" aria-hidden="true" />
             </Button>
 
-            <span className="hidden h-8 w-1 shrink-0 rounded-full bg-institutional-yellow sm:block" aria-hidden="true" />
+            <span className="hidden h-7 w-0.5 shrink-0 rounded-full bg-institutional-yellow sm:block" aria-hidden="true" />
 
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <p className="truncate text-[12px] font-semibold text-text-primary xl:text-sm 2xl:text-[15px] min-[1920px]:text-base">Timetabling</p>
+                <p className="truncate text-sm font-bold text-text-primary">Timetabling</p>
               </div>
-              <p className="hidden truncate text-xs text-text-muted sm:block">
+              <p className="hidden max-w-[34rem] truncate text-[0.68rem] font-medium text-text-muted sm:block">
                 {profile.departmentName || 'No department assigned'}
               </p>
             </div>
           </div>
 
           <div className="flex min-w-0 items-center gap-2">
-            <div className="hidden min-w-0 border-l border-border pl-4 text-right md:block">
-              <p className="truncate text-[12px] font-semibold text-text-primary xl:text-sm 2xl:text-[15px] min-[1920px]:text-base">{profile.fullName}</p>
+            <div className="hidden min-w-0 max-w-48 border-l border-border pl-4 text-right md:block">
+              <p className="truncate text-sm font-bold text-text-primary">{profile.fullName}</p>
               <p className="truncate text-xs text-text-muted">
                 {profile.role === 'system_admin' ? 'System administrator' : 'Timetable administrator'}
               </p>
@@ -76,7 +88,7 @@ export function TimetableShell({ profile, children }: TimetableShellProps) {
 
             <div
               title={profile.fullName}
-              className="flex size-10 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-primary text-xs font-semibold text-white ring-2 ring-institutional-yellow/85 ring-offset-2 ring-offset-surface"
+              className="flex size-9 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-primary text-[0.68rem] font-bold text-white ring-2 ring-institutional-yellow/85 ring-offset-2 ring-offset-surface"
             >
               {initials}
             </div>
@@ -89,10 +101,21 @@ export function TimetableShell({ profile, children }: TimetableShellProps) {
           </div>
         </header>
 
-        <main className="mx-auto min-w-0 w-full max-w-none overflow-x-clip px-3 py-4 sm:px-4 md:px-6 lg:px-8 xl:px-10 xl:py-5 2xl:px-12 2xl:py-6 min-[1920px]:px-16">
+        <main className="admin-screen mx-auto min-w-0 w-full max-w-none overflow-x-clip px-[var(--content-gutter)] py-3.5 pb-20 sm:py-5 lg:py-6 lg:pb-6">
           {children}
         </main>
       </div>
+
+      {/* Android/iOS-style bottom tab bar — mobile & tablet only. */}
+      <MobileBottomNav
+        items={[
+          ...BOTTOM_TABS.map((tab) => ({
+            ...tab,
+            isActive: pathname === tab.href || pathname.startsWith(`${tab.href}/`),
+          })),
+          { label: 'More', icon: Menu, onClick: () => setMobileOpen(true) },
+        ]}
+      />
     </div>
   );
 }

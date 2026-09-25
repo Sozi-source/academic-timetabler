@@ -45,7 +45,7 @@ export default async function TrainerAccessPage() {
     );
 
   return (
-    <div className="space-y-5">
+    <div className="admin-screen space-y-5">
       <PageHeader
         eyebrow="Trainers"
         title="Staff Access"

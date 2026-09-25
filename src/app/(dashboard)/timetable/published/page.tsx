@@ -34,7 +34,7 @@ export default async function PublishedTimetablesPage({
   const selectedPeriod = periods.find((period) => period.id === selectedId) ?? null;
   const versions = selectedId ? await getTimetableVersions(selectedId) : [];
 
-  return <div className="space-y-5">
+  return <div className="admin-screen space-y-5">
     <PageHeader
       eyebrow="Step 4 of 4"
       title="Timetable publication"

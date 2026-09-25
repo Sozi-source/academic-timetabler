@@ -23,7 +23,7 @@ export default async function AttendanceHistoryPage({
   }
 
   return (
-    <div className="space-y-5">
+    <div className="admin-screen space-y-5">
       <PageHeader
         eyebrow="Attendance Audit"
         title="Session History"

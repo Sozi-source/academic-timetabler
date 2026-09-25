@@ -89,7 +89,7 @@ export default async function AttendanceAnalyticsPage() {
     'Active academic period';
 
   return (
-    <div className="space-y-5">
+    <div className="admin-screen space-y-5">
       <PageHeader
         eyebrow="Attendance & Clinical"
         title="Attendance analytics"

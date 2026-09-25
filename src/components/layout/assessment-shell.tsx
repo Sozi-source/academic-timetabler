@@ -18,6 +18,8 @@ import { logoutAction } from '@/features/auth/actions';
 import type { AuthenticatedProfile } from '@/features/auth/types';
 import { cn } from '@/lib/utils/cn';
 
+import { MobileBottomNav } from './mobile-bottom-nav';
+
 interface AssessmentShellProps {
   profile: AuthenticatedProfile;
   children: ReactNode;
@@ -44,28 +46,28 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
   const initials = getInitials(profile.fullName) || 'HD';
 
   const sidebar = (
-    <aside className="flex h-full w-[var(--sidebar-width)] shrink-0 flex-col bg-[#0b1727] text-slate-100 lg:sticky lg:top-0 lg:h-dvh lg:self-start lg:overflow-y-auto border-r border-[#1e293b]">
+    <aside className="flex h-full w-[var(--sidebar-width)] shrink-0 flex-col bg-[#081725] text-slate-100 lg:sticky lg:top-0 lg:h-dvh lg:self-start lg:overflow-y-auto border-r border-[#1e293b]">
       {/* Brand Header */}
-      <div className="border-b border-[#1e293b] px-4 py-3.5">
+      <div className="border-b border-[#1e293b] px-4 py-4">
         <Link href="/dashboard" className="flex items-center gap-2.5 group">
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#16273e] text-sky-400 border border-[#2b3d54] shadow-xs group-hover:scale-105 transition-transform">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#122a43] text-sky-400 border border-[#2b3d54] shadow-xs group-hover:scale-105 transition-transform">
             <GraduationCap className="size-4 text-sky-400" aria-hidden="true" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-bold leading-tight text-white tracking-tight">Results & Exams</p>
-            <p className="mt-0.5 truncate text-[10px] font-medium text-slate-400">Academic Analytics</p>
+            <p className="truncate text-[0.72rem] font-bold leading-tight text-white tracking-tight">Results & Exams</p>
+            <p className="mt-0.5 truncate text-[0.64rem] font-medium text-slate-400">Academic Analytics</p>
           </div>
         </Link>
       </div>
 
-      <nav className="flex min-h-0 flex-1 flex-col overflow-y-auto px-2.5 py-3.5">
+      <nav className="flex min-h-0 flex-1 flex-col overflow-y-auto px-2.5 py-4">
         <div className="space-y-3.5">
           <div>
             <p className="mb-1.5 px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">Navigation</p>
             <Link
               href="/dashboard"
               onClick={() => setMobileOpen(false)}
-              className="flex min-h-8.5 w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-300 transition hover:bg-[#16273e] hover:text-white"
+              className="flex min-h-10 w-full items-center gap-2 rounded-xl px-2.5 py-2 text-[0.72rem] font-semibold text-slate-300 transition hover:bg-[#16273e] hover:text-white"
             >
               <ArrowLeft className="size-3.5 shrink-0 text-slate-400" />
               <span className="truncate">Module Hub</span>
@@ -84,7 +86,7 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
                     href={item.href}
                     onClick={() => setMobileOpen(false)}
                     className={cn(
-                      'relative flex min-h-9 w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all duration-150',
+                      'relative flex min-h-10 w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-[0.72rem] font-semibold transition-all duration-150',
                       active
                         ? 'bg-[#16273e] text-white shadow-xs border-l-2 border-l-sky-400 font-bold'
                         : 'text-slate-300 hover:bg-[#16273e]/60 hover:text-white',
@@ -108,7 +110,7 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
           </span>
           <div className="min-w-0 flex-1">
             <p className="truncate text-xs font-bold text-white">{profile.fullName}</p>
-            <p className="truncate text-[10px] font-medium text-slate-400">{profile.departmentName || 'Department'}</p>
+            <p className="truncate text-[0.64rem] font-medium text-slate-400">{profile.departmentName || 'Department'}</p>
           </div>
           <form action={logoutAction}>
             <button
@@ -140,16 +142,16 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
               onClick={() => setMobileOpen(false)}
               aria-label="Close navigation"
             />
-            <div className="relative h-full w-[var(--sidebar-width)] max-w-[85vw]">{sidebar}</div>
+            <div className="admin-mobile-drawer relative h-full w-[var(--sidebar-width)] max-w-[88vw]">{sidebar}</div>
           </div>
         )}
         <div className="min-w-0 flex-1">
           {/* Header */}
-          <header className="sticky top-0 z-30 flex h-[3.5rem] items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 backdrop-blur-xl sm:px-6 lg:h-[4rem] shadow-2xs">
+          <header className="admin-shell-header sticky top-0 z-40 flex min-h-[var(--header-height)] items-center justify-between border-b border-border-soft bg-white/95 px-[var(--content-gutter)] shadow-sm backdrop-blur-xl">
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                className="flex size-8.5 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-xs lg:hidden active:scale-95"
+                className="touch-target size-9 rounded-[0.65rem] border border-slate-200 bg-white text-slate-700 shadow-sm lg:hidden active:scale-95"
                 onClick={() => setMobileOpen(true)}
                 aria-label="Open navigation"
               >
@@ -170,11 +172,23 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
             </div>
           </header>
 
-          <main className="mx-auto w-full max-w-[var(--content-max-width)] px-4 py-4 sm:px-6 lg:px-8 lg:py-5">
+          <main className="admin-screen mx-auto w-full max-w-[var(--content-max-width)] px-[var(--content-gutter)] py-3.5 pb-20 sm:py-5 lg:py-6 lg:pb-6">
             {children}
           </main>
         </div>
       </div>
+
+      {/* Android/iOS-style bottom tab bar — mobile & tablet only. */}
+      <MobileBottomNav
+        activeClassName="text-sky-600"
+        items={[
+          { label: 'Hub', href: '/dashboard', icon: ArrowLeft, isActive: false },
+          ...NAVIGATION_ITEMS.map((item) => ({
+            ...item,
+            isActive: pathname === item.href || (item.href !== '/assessment' && pathname.startsWith(item.href)),
+          })),
+        ]}
+      />
     </div>
   );
 }

@@ -43,7 +43,7 @@ export default async function ReleaseSignoffPage() {
   ]);
 
   return (
-    <div className="space-y-5">
+    <div className="admin-screen space-y-5">
       <PageHeader
         eyebrow="Release Candidate"
         title="Go-live sign-off"

@@ -82,7 +82,7 @@ export default async function UnitsPage() {
     );
 
   return (
-    <div className="space-y-6">
+    <div className="admin-screen space-y-6">
       <PageHeader
         eyebrow="Academic structure"
         title="Units"

@@ -103,7 +103,7 @@ export default async function OperationsPage() {
   ] as const;
 
   return (
-    <div className="space-y-5">
+    <div className="admin-screen space-y-5">
       <PageHeader
         eyebrow="Quality control"
         title="Operations & QA"
@@ -152,7 +152,33 @@ export default async function OperationsPage() {
       />
 
       {/* 1. Standardized Metric Telemetry Strip */}
-      <section aria-label="Operational Telemetry" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Mobile: one grouped card, divided like a native widget */}
+      <section
+        aria-label="Operational Telemetry"
+        className="grid grid-cols-2 divide-x divide-y divide-gray-100 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xs sm:hidden"
+      >
+        {cards.map((card) => {
+          const Icon = card.icon;
+          const needsAction = card.value > 0;
+          return (
+            <Link
+              key={card.label}
+              href={card.href}
+              className="flex min-h-[44px] flex-col gap-1 px-3.5 py-3.5 text-left transition active:bg-gray-50"
+            >
+              <span className="flex items-center gap-1.5">
+                <Icon className={`size-3.5 ${needsAction ? 'text-amber-600' : 'text-[#033B36]'}`} aria-hidden="true" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{card.label}</span>
+              </span>
+              <span className="text-lg font-bold leading-none tracking-tight text-gray-900">{card.value}</span>
+              <span className="text-[11px] text-gray-500">{card.description}</span>
+            </Link>
+          );
+        })}
+      </section>
+
+      {/* sm and up: original card grid */}
+      <section aria-label="Operational Telemetry" className="hidden gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((card) => {
           const Icon = card.icon;
           const needsAction = card.value > 0;
@@ -184,8 +210,34 @@ export default async function OperationsPage() {
         })}
       </section>
 
-      {/* 2. Operations Workspaces Grid */}
-      <section aria-label="Operations Workspaces" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      {/* 2. Operations Workspaces — mobile: one grouped list card */}
+      <section aria-label="Operations Workspaces" className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xs sm:hidden">
+        <p className="border-b border-gray-100 px-4 py-3 text-xs font-bold uppercase tracking-wider text-gray-700">
+          Workspaces
+        </p>
+        <div className="divide-y divide-gray-100">
+          {[
+            { href: '/operations/action-center', label: 'Action Center', sub: 'Prioritised release follow-up', icon: ListChecks, tint: '#033B36' },
+            { href: '/operations/incidents', label: 'Operational Incidents', sub: 'Production incident log', icon: AlertTriangle, tint: '#B45309' },
+            { href: '/operations/attendance', label: 'Attendance Oversight', sub: 'Audit class attendance registers', icon: ClipboardCheck, tint: '#033B36' },
+            { href: '/teaching-documents/releases', label: 'Student Documents', sub: 'Publish approved documents', icon: FileCheck2, tint: '#033B36' },
+            { href: '/assessment/reports', label: 'Academic Reports', sub: 'Assessment & marks summary', icon: ShieldCheck, tint: '#F59E0B' },
+          ].map(({ href, label, sub, icon: Icon, tint }) => (
+            <Link key={href} href={href} className="flex min-h-[44px] items-center gap-3 px-4 py-3.5 transition active:bg-gray-50">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-full text-white" style={{ backgroundColor: tint }}>
+                <Icon className="size-4" aria-hidden="true" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-xs font-semibold text-gray-800">{label}</span>
+                <span className="block text-[11px] text-gray-500">{sub}</span>
+              </span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* sm and up: icon card grid */}
+      <section aria-label="Operations Workspaces" className="hidden gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <Link
           href="/operations/action-center"
           className="group rounded-xl border border-gray-200 bg-white p-4 shadow-2xs transition hover:border-gray-300 hover:bg-gray-50/70"

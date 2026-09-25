@@ -27,7 +27,7 @@ export default async function ReleaseTestRunPage({ params }: PageProps) {
   const { run, cases } = workspace;
 
   return (
-    <div className="space-y-5">
+    <div className="admin-screen space-y-5">
       <PageHeader
         eyebrow={`Release Testing · Suite ${run.suiteVersion}`}
         title="UAT run"

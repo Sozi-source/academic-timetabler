@@ -109,7 +109,7 @@ export function HodDailyReportList({
             </p>
           </header>
 
-          <div className="overflow-x-auto">
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full min-w-[850px] text-left text-[11px] table-fixed">
               <thead className="bg-surface-subtle text-[9px] font-semibold uppercase tracking-wide text-text-muted border-b border-border">
                 <tr>
@@ -173,6 +173,59 @@ export function HodDailyReportList({
                 ) : null}
               </tbody>
             </table>
+          </div>
+
+          {/* Native-app card list — no horizontal scroll on small screens. */}
+          <div className="divide-y divide-border sm:hidden">
+            {report.lessons.length === 0 ? (
+              <p className="px-4 py-4 text-center text-[11px] text-text-muted">
+                No scheduled lesson in this department.
+              </p>
+            ) : (
+              report.lessons.map((lesson) => (
+                <div key={lesson.scheduledSessionId} className="px-4 py-3.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold leading-snug text-text-primary">
+                        {lesson.unitName}
+                      </p>
+                      {lesson.unitCode ? (
+                        <p className="mt-0.5 font-mono text-[10.5px] font-medium text-text-secondary">
+                          {lesson.unitCode}
+                        </p>
+                      ) : null}
+                      <div className="mt-1 flex items-center gap-1.5 font-mono text-[10px] text-text-muted">
+                        <Clock className="size-3 shrink-0 text-text-muted/70" />
+                        <span>
+                          {formatDailyReportTime(lesson.startsAt)}–{formatDailyReportTime(lesson.endsAt)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      <span className="inline-flex min-w-[28px] flex-col items-center rounded-lg bg-emerald-50 px-1.5 py-1 font-mono text-[10px] font-bold text-emerald-700">
+                        {lesson.presentCount}
+                        <span className="text-[7.5px] font-semibold uppercase tracking-wide text-emerald-600/80">In</span>
+                      </span>
+                      <span
+                        className={`inline-flex min-w-[28px] flex-col items-center rounded-lg px-1.5 py-1 font-mono text-[10px] font-bold ${
+                          lesson.absentCount > 0 ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-600'
+                        }`}
+                      >
+                        {lesson.absentCount}
+                        <span className="text-[7.5px] font-semibold uppercase tracking-wide opacity-80">Out</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {lesson.absentees.length > 0 ? (
+                    <div className="mt-2.5 border-t border-dashed border-border pt-2.5">
+                      <AbsenteeList absentees={lesson.absentees} />
+                    </div>
+                  ) : null}
+                </div>
+              ))
+            )}
           </div>
 
           {(report.otherActivity || report.concern) ? (

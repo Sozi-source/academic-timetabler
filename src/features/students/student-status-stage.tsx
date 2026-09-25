@@ -28,13 +28,13 @@ export function formatStudentStage(
     stageNumber === undefined ||
     !Number.isFinite(stageNumber)
   ) {
-    return 'â€”';
+    return '—';
   }
 
   const stage = Math.trunc(stageNumber);
 
   if (stage < 1) {
-    return 'â€”';
+    return '—';
   }
 
   const year = Math.floor((stage - 1) / 3) + 1;
@@ -116,6 +116,20 @@ export function getStudentStatusLabel(
     .replace(/\b\w/g, (letter) =>
       letter.toUpperCase(),
     );
+}
+
+export function getStatusBadgeVariant(
+  lifecycleStatus: string | null | undefined,
+  academicPhase: string | null | undefined,
+): 'success' | 'info' | 'warning' | 'danger' | 'neutral' | 'primary' {
+  const label = getStudentStatusLabel(lifecycleStatus, academicPhase);
+  if (label === 'In class') return 'success';
+  if (label === 'On attachment' || label === 'Clinical rotation') return 'info';
+  if (label === 'Deferred' || label === 'Suspended') return 'warning';
+  if (label === 'Dropped out') return 'danger';
+  if (label === 'Graduated') return 'neutral';
+  if (label === 'Awaiting graduation') return 'primary';
+  return 'neutral';
 }
 
 export function getStudentStageLabel(

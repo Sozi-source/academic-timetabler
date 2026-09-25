@@ -60,7 +60,7 @@ export default async function TimetableReportsPage({
     : undefined;
 
   return (
-    <div className="space-y-6">
+    <div className="admin-screen space-y-6">
       <PageHeader
         eyebrow="Enterprise reporting"
         title="Timetable reports"

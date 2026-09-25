@@ -221,7 +221,7 @@ export default async function AdminTrainerPortalViewPage({ params, searchParams 
 
       {/* ── Tab: Timetable ─────────────────────────────────────────────────── */}
       {tab === 'timetable' && (
-        <div className="space-y-5">
+        <div className="admin-screen space-y-5">
           {!trainer.profileId ? (
             <EmptyState
               icon={CalendarDays}

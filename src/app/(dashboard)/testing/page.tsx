@@ -41,7 +41,7 @@ export default async function SystemTestingPage() {
   const openDefects = defects.filter((defect) => defect.status !== 'closed').length;
 
   return (
-    <div className="space-y-5">
+    <div className="admin-screen space-y-5">
       <PageHeader
         eyebrow="Release Candidate"
         title="System Testing Center"

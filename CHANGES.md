@@ -1,3 +1,35 @@
+### 2026-09-25: Refactor — Student Registry Table & Profile Mobile UX Optimization
+
+**Summary of improvements:**
+1. **Student Registry Table (`student-registry-table.tsx`)**:
+   - Removed checkboxes (header, desktop rows, mobile rows) and the floating bulk action toolbar (`BatchActionDialogs`).
+   - Removed cohort names displayed below student names.
+   - Removed programme codes (e.g. CND, DND).
+   - Display strictly: **Name**, **Admission Number**, **Status** (with semantic badge), and **Stage** (e.g. Y1S1).
+   - Desktop layout streamlined into 3 clean columns: `Student`, `Status`, `Stage`, plus profile link arrow.
+   - Mobile rows rendered with clean 3-line layout: Name + chevron, font-mono Admission number, Status badge + Stage.
+   - Streamlined sizing across all toolbar inputs, selects, pills, and row heights for a much slimmer, compact interface.
+2. **Excel Export (`/api/students/export` & table toolbar)**:
+   - Added support for all active filters (`status`, `cohortId`, `search`) in `src/app/api/students/export/route.ts`.
+   - Wired live Excel export directly to active filter criteria in `StudentRegistryTable`.
+   - Removed redundant header export button from `src/app/(dashboard)/students/registry/page.tsx` to eliminate multiple export buttons.
+3. **Student Profile Page (`/students/registry/[studentId]`)**:
+   - Replaced awkward inline back button in header with clean, dedicated back navigation at the top left (`Back to student registry`).
+   - Slimmed down the student profile header card so the student name receives full width without being squished.
+   - Implemented single-student cohort reassignment (`ReassignCohortDialog`) on both the profile action bar and the "Current cohort" card with `Change` button.
+   - Redesigned profile action buttons on mobile into a clean, compact 2x2 grid with `whitespace-nowrap` labels (`Reassign`, `Edit Adm. No.`, `Reset Pwd`, `Student View`), eliminating awkward multi-line text wrapping.
+
+**Files changed:**
+- `src/features/students/student-registry-table.tsx` — Checkbox and bulk bar removed, columns simplified (Name, Adm No, Status, Stage), compact slim styling, dynamic Excel export.
+- `src/features/students/student-status-stage.tsx` — Fixed em-dash encoding, added `getStatusBadgeVariant`.
+- `src/app/api/students/export/route.ts` — Handled query filters (`status`, `cohortId`, `search`), added Status & Stage columns.
+- `src/app/(dashboard)/students/registry/page.tsx` — Removed unneeded "Student access" link, moved back button to left side, removed redundant duplicate export.
+- `src/app/(dashboard)/students/registry/[studentId]/page.tsx` — Back button placed at top left, slim header card, non-wrapping compact action buttons, cohort change trigger.
+- `src/features/students/reassign-cohort-dialog.tsx` — New component for single-student cohort reassignment.
+- `src/features/students/reset-student-password-dialog.tsx` — Added custom `trigger` prop support.
+
+**Verification**: `npm run check` passed (`next typegen && tsc --noEmit && npm run lint && next build`, code 0). Unit tests passed.
+
 ### 2026-09-24: Fix — Attendance Register 100% Personal Timetable Parity (e.g. Wednesday Trade Project)
 
 **Root cause**:
@@ -121,6 +153,78 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 > Targeted bugfixes and feature updates must strictly limit modifications to the designated scope. Before modifying shared components, data contracts, or layout structures, agents and developers must audit all consumer sites, verify that existing features remain untouched, and prevent unintended regressions or collateral damage.
 
 ---
+
+### 2026-09-25: Mobile-Native UI Pass — Batch 1 (Shared PageHeader + Operations Hub)
+
+**Scope**: First batch of the app-wide mobile-native UI pass. Establishes the shared-component fix first (per the working plan: fix shared components before sweeping individual pages), then applies the full pattern to the Operations hub page as the first section page.
+
+**What changed:**
+- `src/components/ui/page-header.tsx` — Typography hierarchy pass used by nearly every page in the app:
+  - Eyebrow label now hidden below `sm:` (was a 3-line stack of eyebrow + title + description at micro sizes on phones).
+  - Title bumped from `text-[1.05rem]` to `text-lg` on mobile with `leading-snug` for better legibility.
+  - Description clamped to a single line on mobile (`line-clamp-1`) at a slightly larger `13px`, expanding to the original 2-line clamp at `sm:` and up. Rationale: a short single subtitle reads cleaner on a phone than a cramped 2-line stack; full description remains visible at desktop widths.
+- `src/app/(dashboard)/operations/page.tsx` — Applied the dashboard/daily-reports pattern:
+  - The 4 separately-bordered metric cards are now a single divided 2x2 card (native widget style) below `sm:`, with the original 4-card grid preserved unchanged from `sm:` up.
+  - The 5-tile "Operations Workspaces" icon grid is now a single grouped list card (icon + label + sub-label, divided rows, ≥44px touch targets) below `sm:`, with the original icon-card grid preserved unchanged from `sm:` up.
+  - No data-fetching, query, or prop changes — visual only. Desktop (`sm:`/`lg:`/`xl:`) presentation is byte-for-byte the same JSX as before, just gated behind a `hidden sm:grid` / `hidden sm:block` instead of being the only version.
+
+**Not yet touched (flagged, not guessed at)**: this is a large, multi-page task (100+ routes under `src/app/(dashboard)/**` plus `trainer`, `student`, `(staff)`, `(auth)` areas). Remaining work, to be picked up section-by-section per the original plan (Operations → Timetable → Assessment → Students → Trainers → Teaching Documents; Staff/Student portals already largely done):
+- Operations: `action-center`, `attendance`, `audit`, `incidents`, `readiness`, `history`, `daily-reports/print` pages/components still need the table→card and badge→list-row passes.
+- Timetable, Assessment, Students, Teaching Documents, Testing, Trainers sections: not yet started in this pass.
+- Any `<table min-w-[...]>` components across `src/features/**` still need a `sm:hidden` stacked-card alternative per the `hod-report-list.tsx` reference pattern.
+
+**Verification**: Not build-verified in this environment (no installed `node_modules`/`package.json` present in this upload). Changes are additive/mobile-only (new `sm:hidden` / `hidden sm:...` blocks) and do not alter existing `lg:`/`xl:` markup, so desktop rendering is unchanged. Run `npm run check` before merging.
+
+### 2026-09-25: Mobile-Native UI Pass — Batch 2 (Students Registry)
+
+**Scope**: Follow-up batch covering `/students/registry`, called out by the HOD as not yet fixed.
+
+**What changed:**
+- `src/features/students/student-registry-table.tsx`:
+  - **Status filter pills**: were `flex flex-wrap`, wrapping unpredictably across lines on phones (the same anti-pattern flagged for badge clusters elsewhere). Now scroll horizontally in a single row below `sm:` (hidden scrollbar, `shrink-0` pills), reverting to the original wrapping layout unchanged from `sm:` up.
+  - **Student rows**: previously a bare CSS grid with no explicit mobile column template, so every field (checkbox, name, programme, cohort, status, chevron) stacked on its own line per student — a dense, unlabeled vertical dump on phones. Added a dedicated `md:hidden` native card list: checkbox + name/admission number on top, chevron top-right, programme code and cohort as one secondary line, and the existing `StudentStatusStage` badge on its own line below. The original dense grid-row markup is preserved byte-for-byte, now gated behind `hidden md:block` so tablet/desktop is unchanged.
+  - No changes to filtering, sorting, pagination, selection, or batch-action logic/props — visual only.
+- `src/app/(dashboard)/students/registry/page.tsx`: no changes needed beyond the shared `PageHeader` fix already shipped in Batch 1 (this page uses `PageHeader` directly).
+
+**Verification**: Not build-verified in this environment. Edits are additive (`md:hidden` / `hidden md:block` blocks) and do not touch the existing `md:`+ markup or any data/logic. Run `npm run check` before merging.
+
+### 2026-09-25: Mobile-Native UI Pass — Batch 2 fix (Students Registry status text size)
+
+**Context**: HOD-reported screenshot showed `Current & Historical Student Records` on `/students/registry` rendering the status label ("On attachment", "In class") as large, bold, heading-sized text on the new mobile cards from Batch 2 — clearly out of place next to the compact name/admission/programme lines above it.
+
+**Root cause**: `StudentStatusStage` (`src/features/students/student-status-stage.tsx`) sets no font-size class of its own on its status line (`font-medium text-text-primary`, no explicit size) — it relies on inheriting the ambient font size from whatever container it's dropped into. In the original desktop grid row it inherited `text-xs` from the row wrapper. The new Batch 2 mobile card wrapper (`src/features/students/student-registry-table.tsx`) had no base text size on its row container, so the status line rendered at the browser's default paragraph size instead.
+
+**Fix**: Added `text-xs` to the mobile card row container (matching the desktop row it was adapted from), and wrapped `<StudentStatusStage />` in a compact `inline-flex` pill (`rounded-md bg-surface-subtle px-2 py-1 text-[11px]`) instead of a bare block, so status/stage now reads as a small inline badge consistent with the rest of the card instead of a large stray heading.
+
+**Files changed**: `src/features/students/student-registry-table.tsx`.
+
+**Verification**: Not build-verified in this environment; visual-only change to className strings on the Batch 2 mobile card block, no logic touched.
+
+### 2026-09-25: Mobile-Native UI Pass — Batch 2 refinement (Students Registry — narrower, less crowded rows)
+
+**Context**: HOD asked for the `/students/registry` mobile rows to be narrower and clearer — the Batch 2 card had 4 separately-stacked blocks per student (name+admission, chevron, programme+cohort line, status pill), which still read as busy.
+
+**What changed** (`src/features/students/student-registry-table.tsx`, mobile card block only, `md:hidden`):
+- Reduced row padding/gaps (`py-3.5`→`py-3`, `gap-3`→`gap-2.5`) for a tighter, narrower row.
+- Every text field now `truncate`s on a single line instead of wrapping (name, admission/programme line, cohort name) — a long name or cohort no longer pushes the row taller or forces a second line.
+- Combined admission number + programme code onto one muted line (`ADM · CODE`) instead of two separate blocks.
+- Combined cohort name and the status/stage indicator onto one row, cohort left (truncating, flexible width) and status right (fixed pill, never wraps).
+- Replaced the stacked `<StudentStatusStage />` component (which renders two `block` spans — status label then stage code — and doesn't fit a single-line pill) with its own already-imported helper functions (`getStudentStatusLabel`, `getStudentStageLabel`) rendered inline in one compact pill: `In class · Y2S3`. The shared `StudentStatusStage` component itself is untouched and still used as-is in the unchanged desktop grid row (`hidden md:block`).
+- Net effect: 3 stacked lines instead of 4, nothing wraps to a second line under normal data, and the card reads as one coherent narrow row rather than a small stack of separate blocks.
+
+**Verification**: Not build-verified in this environment; visual-only change to the Batch 2 mobile card markup, no logic/data changes. Run `npm run check` before merging.
+
+### 2026-09-25: Mobile-Native UI Pass — Batch 2 fix (Students Registry — missing row dividers)
+
+**Context**: HOD asked for a faint gray separator between student rows on the mobile card list at `/students/registry`.
+
+**Root cause**: the outer table wrapper (`src/features/students/student-registry-table.tsx`) has `divide-y divide-border` on the container that holds the desktop column-title bar, the mobile card list, and the desktop grid list as its three direct children — so that divider only ever drew a line *between those three sections*, never between individual student cards inside the mobile list. The mobile `md:hidden` list itself had no `divide-y` of its own, so consecutive student cards had no visual separation beyond the (rare) selected-row background tint.
+
+**Fix**: added `divide-y divide-border/70` directly to the mobile card list container (`<div className="md:hidden">` → `<div className="divide-y divide-border/70 md:hidden">`), giving every student card a faint gray bottom border matching the app's existing `border` design token at 70% opacity. The desktop grid rows (`hidden md:block`) already had correct dividers via the outer wrapper and are untouched.
+
+**Files changed**: `src/features/students/student-registry-table.tsx`.
+
+**Verification**: Not build-verified in this environment; single className addition, no logic/data changes.
 
 ## Active Pending Actions & Technical Debt
 

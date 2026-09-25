@@ -257,3 +257,212 @@ code, kbd, samp, pre {
   color: var(--institutional-yellow-ink);
   border: 1px solid var(--institutional-accent-border);
 }
+
+/* ============================================================
+   Native admin workspace layer
+   UI-only: shared responsive rules for every admin module.
+   ============================================================ */
+
+:root {
+  --sidebar-width: 15rem;
+  --header-height: 3.75rem;
+  --content-gutter: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  :root { --content-gutter: 1.25rem; }
+}
+
+@media (min-width: 1024px) {
+  :root { --content-gutter: 1.5rem; }
+}
+
+@media (min-width: 1280px) {
+  :root { --content-gutter: 2rem; }
+}
+
+@media (min-width: 1536px) {
+  :root { --content-gutter: 2.5rem; }
+}
+
+/* Stat blocks behave like compact native dashboard tiles rather than full-width cards. */
+@media (max-width: 639px) {
+  section:has(> .admin-metric-card),
+  div:has(> .admin-metric-card) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  section:has(> .admin-metric-card),
+  div:has(> .admin-metric-card) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+  section:has(> .admin-metric-card),
+  div:has(> .admin-metric-card) {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  section:has(> .admin-metric-card),
+  div:has(> .admin-metric-card) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1536px) {
+  section:has(> .admin-metric-card),
+  div:has(> .admin-metric-card) {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+/* Keep dense admin workspaces readable on phones without changing component logic. */
+@media (max-width: 639px) {
+  main {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  h1 { font-size: 1.08rem; line-height: 1.2; }
+  h2 { font-size: 0.98rem; line-height: 1.25; }
+  h3 { font-size: 0.88rem; line-height: 1.3; }
+
+  table { min-width: 42rem; }
+
+  input, select, textarea {
+    max-width: 100%;
+  }
+}
+
+/* Premium but restrained surfaces. */
+.admin-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.admin-screen > * { min-width: 0; }
+
+.admin-screen .rounded-xl,
+.admin-screen .rounded-2xl {
+  border-color: var(--border-soft);
+}
+
+@media (min-width: 1024px) {
+  .admin-screen { gap: 1rem; }
+}
+
+/* ============================================================
+   ADMIN UI v2 — responsive native workspace layer
+   Presentation only. No data, routing or business logic.
+   ============================================================ */
+:root {
+  --admin-max: 96rem;
+  --admin-gutter: 0.75rem;
+  --admin-gap: 0.75rem;
+  --admin-control-h: 2.625rem;
+}
+@media (min-width:640px){:root{--admin-gutter:1rem;--admin-gap:1rem}}
+@media (min-width:1024px){:root{--admin-gutter:1.5rem;--admin-gap:1rem}}
+@media (min-width:1440px){:root{--admin-gutter:2rem;--admin-gap:1.125rem}}
+
+.admin-screen{
+  width:100%;
+  max-width:var(--admin-max);
+  margin-inline:auto;
+  min-width:0;
+  padding-bottom:2rem;
+}
+.admin-screen > *{min-width:0}
+.admin-screen article{min-width:0}
+.admin-screen .rounded-2xl,
+.admin-screen .rounded-xl{max-width:100%}
+
+/* Every metric component becomes a compact native dashboard tile. */
+.admin-metric-card{
+  position:relative;
+  overflow:hidden;
+  border:1px solid #e4e9e7 !important;
+  border-radius:1rem !important;
+  background:linear-gradient(180deg,#fff 0%,#fbfcfc 100%) !important;
+  box-shadow:0 1px 2px rgb(15 23 42/.035),0 8px 24px rgb(15 23 42/.025) !important;
+  transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease;
+}
+.admin-metric-card::after{
+  content:"";
+  position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:var(--primary);opacity:.0;transition:opacity .16s ease;
+}
+.admin-metric-card:hover{
+  border-color:#cbd9d6 !important;
+  box-shadow:0 8px 24px rgb(15 23 42/.07) !important;
+  transform:translateY(-1px);
+}
+.admin-metric-card:hover::after{opacity:.75}
+.admin-metric-icon{transition:transform .16s ease,background .16s ease}
+.admin-metric-card:hover .admin-metric-icon{transform:scale(1.04)}
+
+@media(max-width:639px){
+  .admin-screen{padding-top:.75rem}
+  .admin-screen .admin-metric-card{min-height:6.6rem;padding:.75rem}
+  .admin-screen .admin-metric-card p{max-width:100%}
+  .admin-screen .admin-metric-card .admin-metric-icon{width:1.75rem;height:1.75rem}
+  .admin-screen .admin-metric-card [class*="text-\\[1.7rem\\]"]{font-size:1.45rem}
+}
+
+/* Convert common metric grids to compact tiles even when pages used different grid markup. */
+.admin-screen .admin-metric-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:.625rem;
+}
+@media(min-width:768px){.admin-screen .admin-metric-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem}}
+@media(min-width:1200px){.admin-screen .admin-metric-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem}}
+
+/* Shared page hierarchy */
+.admin-screen h1{letter-spacing:-.025em}
+.admin-screen h2{letter-spacing:-.015em}
+.admin-screen button,.admin-screen a{touch-action:manipulation}
+.admin-screen :is(input,select,textarea){
+  min-height:2.5rem;
+}
+@media(max-width:639px){
+  .admin-screen :is(button,[role="button"]){min-height:2.5rem}
+}
+
+/* Tables become deliberate horizontal workspaces on small screens, never page overflow. */
+.admin-screen .overflow-x-auto{
+  scrollbar-width:thin;
+  -webkit-overflow-scrolling:touch;
+  border-radius:1rem;
+}
+.admin-screen table{font-size:.78rem}
+@media(max-width:639px){
+  .admin-screen table th,.admin-screen table td{padding:.625rem .75rem;white-space:nowrap}
+}
+
+/* Shell headers: compact, stable, native-like. */
+.admin-shell-header{
+  min-height:var(--header-height);
+  border-bottom:1px solid #e6ebe9;
+  background:rgb(255 255 255/.94);
+  backdrop-filter:blur(18px);
+}
+@media(max-width:639px){
+  .admin-shell-header{min-height:3.5rem}
+}
+
+/* Mobile drawer polish */
+.admin-mobile-drawer{
+  width:min(19rem,88vw);
+  box-shadow:18px 0 50px rgb(2 8 23/.18);
+}
+
+/* Avoid accidental horizontal expansion from long labels/cards. */
+.admin-screen :is(.flex,.grid){min-width:0}
+.admin-screen .truncate{min-width:0}

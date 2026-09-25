@@ -46,7 +46,7 @@ export default async function EditUnitPage({
   );
 
   return (
-    <div className="space-y-6">
+    <div className="admin-screen space-y-6">
       <PageHeader
         eyebrow="Academic structure"
         title={`Edit ${unit.code}`}

@@ -72,7 +72,7 @@ export default async function CurriculumVersionHistoryPage({
       : 'Scheme of Work versions';
 
   return (
-    <div className="space-y-5">
+    <div className="admin-screen space-y-5">
       <PageHeader
         eyebrow={`${first.unitCode} — ${first.unitName}`}
         title={title}

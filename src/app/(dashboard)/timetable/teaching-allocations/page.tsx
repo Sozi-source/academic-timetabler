@@ -76,7 +76,7 @@ export default async function Page({searchParams}:{searchParams:Promise<{period?
  const visibleOpen=searchText?representatives.filter(offering=>{const members=offering.confirmed_shared_offering_id?open.filter(item=>item.confirmed_shared_offering_id===offering.confirmed_shared_offering_id):[offering];return members.some(matchesSearch);}):representatives;
  const allocationTrainer=params.allocationTrainer??''; const allocationQuery=(params.allocationQ??'').trim(); const allocationSearch=allocationQuery.toLowerCase(); const visibleAllocations=currentAllocations.filter(allocation=>(!allocationTrainer||allocation.trainer_id===allocationTrainer)&&(!allocationSearch||[allocation.trainers?.full_name,allocation.trainers?.staff_number,allocation.units?.code,allocation.units?.name,allocation.cohorts?.code,allocation.cohorts?.name].some(value=>value?.toLowerCase().includes(allocationSearch))));
  const returnParams=new URLSearchParams(); if(period)returnParams.set('period',period); if(searchTerm)returnParams.set('q',searchTerm); const returnTo=`/timetable/teaching-allocations?${returnParams.toString()}`;
- return <div className="space-y-5">
+ return <div className="admin-screen space-y-5">
   <PageHeader
     eyebrow="Timetable preparation"
     title="Simple teaching allocation"

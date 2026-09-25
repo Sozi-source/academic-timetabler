@@ -91,7 +91,7 @@ describe('updateAdmissionNumberSchema', () => {
 
     expect(parsed.success).toBe(false);
     if (!parsed.success) {
-      expect(parsed.error.flatten().fieldErrors.reason?.[0]).toContain('below 500 characters');
+      expect(parsed.error.flatten().fieldErrors.reason?.[0]).toContain('500 characters');
     }
   });
 });

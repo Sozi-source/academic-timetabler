@@ -8,7 +8,10 @@ import {
   X,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import {
+  type ReactNode,
+  useState,
+} from 'react';
 
 import { Button } from '@/components/ui/button';
 
@@ -16,12 +19,14 @@ interface ResetStudentPasswordDialogProps {
   studentId: string;
   studentName: string;
   admissionNumber: string;
+  trigger?: ReactNode;
 }
 
 export function ResetStudentPasswordDialog({
   studentId,
   studentName,
   admissionNumber,
+  trigger,
 }: ResetStudentPasswordDialogProps) {
   const router = useRouter();
 
@@ -92,15 +97,21 @@ export function ResetStudentPasswordDialog({
 
   return (
     <>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={() => setOpen(true)}
-        leadingIcon={<KeyRound className="size-3.5" />}
-      >
-        Reset Password
-      </Button>
+      {trigger ? (
+        <span onClick={() => setOpen(true)} className="contents cursor-pointer">
+          {trigger}
+        </span>
+      ) : (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setOpen(true)}
+          leadingIcon={<KeyRound className="size-3.5" />}
+        >
+          Reset Password
+        </Button>
+      )}
 
       {open && (
         <div

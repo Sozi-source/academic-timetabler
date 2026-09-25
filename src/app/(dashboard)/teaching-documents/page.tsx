@@ -45,7 +45,7 @@ export default async function TeachingDocumentsPage() {
     ]);
 
   return (
-    <div className="space-y-5">
+    <div className="admin-screen space-y-5">
       <PageHeader
         eyebrow="Curriculum & QA"
         title="Teaching Documents"

@@ -27,7 +27,7 @@ export default async function AttendanceReviewPage({
   }
 
   return (
-    <div className="space-y-5">
+    <div className="admin-screen space-y-5">
       <PageHeader
         eyebrow="Class attendance"
         title={workspace.unitName}

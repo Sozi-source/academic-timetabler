@@ -74,7 +74,7 @@ export default async function TeachingDocumentReleasesPage() {
     published;
 
   return (
-    <div className="space-y-5">
+    <div className="admin-screen space-y-5">
       <PageHeader
         eyebrow="Teaching Documents"
         title="Student releases"

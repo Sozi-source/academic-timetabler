@@ -129,16 +129,6 @@ export default async function DepartmentStudentUnitRegistrationPage({
             <Badge variant={context.existingStatus === 'verified' ? 'success' : 'neutral'}>
               {context.existingStatus === 'verified' ? 'Verified' : 'Not verified'}
             </Badge>
-            {context.existingStatus !== 'not_submitted' || context.units.some((u) => u.isSelected) ? (
-              <UndoUnitRegistrationButton
-                studentId={context.student.id}
-                academicPeriodId={context.period.id}
-                studentName={context.student.fullName}
-                label="Unregister student"
-                variant="danger"
-                size="sm"
-              />
-            ) : null}
           </div>
         </div>
 
@@ -307,8 +297,8 @@ export default async function DepartmentStudentUnitRegistrationPage({
                     studentId={context.student.id}
                     academicPeriodId={context.period.id}
                     studentName={context.student.fullName}
-                    label="Unregister (Clear all units)"
-                    variant="outline"
+                    label="Unregister all units"
+                    variant="danger"
                     size="md"
                   />
                 ) : <div />}

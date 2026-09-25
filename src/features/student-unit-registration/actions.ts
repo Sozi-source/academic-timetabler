@@ -63,6 +63,21 @@ export async function registerStudentUnitsByDepartment(formData: FormData) {
 
   const supabase = await createClient();
 
+  const { data: eligibility } = await supabase
+    .from('students')
+    .select('academic_phase, lifecycle_status, current_cohort_id')
+    .eq('id', studentId)
+    .maybeSingle();
+
+  if (
+    !eligibility ||
+    eligibility.academic_phase === 'attachment' ||
+    !['admitted', 'active'].includes(eligibility.lifecycle_status) ||
+    !eligibility.current_cohort_id
+  ) {
+    redirect(`/students/unit-registration?error=${encodeURIComponent('This student is not currently eligible for unit registration.')}`);
+  }
+
   const { data: stageContext } = await supabase
     .from('students')
     .select('current_stage_id, current_cohort:cohorts!students_current_cohort_id_fkey(current_stage_id)')
@@ -156,6 +171,21 @@ export async function setStudentProgrammeStage(formData: FormData) {
   }
 
   const supabase = await createClient();
+  const { data: eligibility } = await supabase
+    .from('students')
+    .select('academic_phase, lifecycle_status, current_cohort_id')
+    .eq('id', studentId)
+    .maybeSingle();
+
+  if (
+    !eligibility ||
+    eligibility.academic_phase === 'attachment' ||
+    !['admitted', 'active'].includes(eligibility.lifecycle_status) ||
+    !eligibility.current_cohort_id
+  ) {
+    redirect(`/students/unit-registration?error=${encodeURIComponent('This student is not currently eligible for unit registration.')}`);
+  }
+
   const { error } = await supabase.rpc('set_student_programme_stage', {
     target_student_id: studentId,
     target_stage_id: stageId,

@@ -219,55 +219,57 @@ export function StudentRegistryTable({
   return (
     <div className="space-y-3">
       {/* STATUS FILTER PILLS & CONTROLS TOOLBAR */}
-      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
-        {/* Status filter — mobile: compact dropdown */}
-        <div className="flex items-center gap-1.5 rounded-lg border border-border-strong bg-surface px-2.5 h-8.5 text-xs sm:hidden">
-          <UsersRound className="size-3.5 shrink-0 text-text-muted" />
-          <select
-            value={activeStatus}
-            onChange={(e) => handleTabChange(e.target.value)}
-            className="w-full min-w-0 bg-transparent text-xs font-semibold text-text-primary outline-none"
-          >
-            {statusTabs.map((tab) => (
-              <option key={tab.label} value={tab.value}>
-                {tab.label} ({tab.count})
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="rounded-xl border border-border-soft bg-surface p-3 shadow-2xs sm:p-4">
+        <div className="flex flex-col gap-3">
+          {/* Status filter — mobile: compact dropdown */}
+          <div className="flex h-8.5 items-center gap-1.5 rounded-lg border border-border-strong bg-surface px-2.5 text-xs sm:hidden">
+            <UsersRound className="size-3.5 shrink-0 text-text-muted" />
+            <select
+              value={activeStatus}
+              onChange={(e) => handleTabChange(e.target.value)}
+              className="w-full min-w-0 bg-transparent text-xs font-semibold text-text-primary outline-none"
+            >
+              {statusTabs.map((tab) => (
+                <option key={tab.label} value={tab.value}>
+                  {tab.label} ({tab.count})
+                </option>
+              ))}
+            </select>
+          </div>
 
-        {/* Status Pills — sm: and up (Slim, compact styling) */}
-        <div className="hidden sm:flex sm:flex-wrap sm:gap-1.5">
-          {statusTabs.map((tab) => {
-            const isActive = activeStatus === tab.value;
-            return (
-              <button
-                key={tab.label}
-                type="button"
-                onClick={() => handleTabChange(tab.value)}
-                className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold transition cursor-pointer ${
-                  isActive
-                    ? 'border-primary bg-primary text-white shadow-xs'
-                    : 'border-border bg-surface text-text-secondary hover:border-primary/40 hover:bg-surface-subtle'
-                }`}
-              >
-                <span>{tab.label}</span>
-                <span
-                  className={`rounded-full px-1.5 py-0 text-[10px] font-bold ${
+          {/* Status Pills — sm: and up (Slim, compact styling) */}
+          <div className="hidden sm:flex sm:flex-wrap sm:gap-1.5">
+            {statusTabs.map((tab) => {
+              const isActive = activeStatus === tab.value;
+              return (
+                <button
+                  key={tab.label}
+                  type="button"
+                  onClick={() => handleTabChange(tab.value)}
+                  className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold transition cursor-pointer ${
                     isActive
-                      ? 'bg-white/20 text-white'
-                      : 'bg-surface-subtle text-text-muted'
+                      ? 'border-primary bg-primary text-white shadow-xs'
+                      : 'border-border bg-surface text-text-secondary hover:border-primary/40 hover:bg-surface-subtle'
                   }`}
                 >
-                  {tab.count}
-                </span>
-              </button>
-            );
-          })}
+                  <span>{tab.label}</span>
+                  <span
+                    className={`rounded-full px-1.5 py-0 text-[10px] font-bold ${
+                      isActive
+                        ? 'bg-white/20 text-white'
+                        : 'bg-surface-subtle text-text-muted'
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Filters: Cohort Selector, Search Input, and Single Excel Export */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="mt-3 flex flex-col gap-2 border-t border-border-soft pt-3 sm:flex-row sm:items-center">
           {/* Cohort Dropdown Filter */}
           {cohorts.length > 0 && (
             <div className="flex items-center gap-1.5 rounded-lg border border-border-strong bg-surface px-2 h-8.5 text-xs">
@@ -278,7 +280,7 @@ export function StudentRegistryTable({
                   setCohortFilter(e.target.value);
                   setPageIndex(0);
                 }}
-                className="bg-transparent text-xs font-semibold text-text-primary outline-none cursor-pointer max-w-[140px] sm:max-w-none"
+                className="max-w-[14rem] bg-transparent text-xs font-semibold text-text-primary outline-none cursor-pointer"
               >
                 <option value="">All Cohorts</option>
                 {cohorts.map((c) => (
@@ -291,7 +293,7 @@ export function StudentRegistryTable({
           )}
 
           {/* Search Input Box */}
-          <div className="relative w-full sm:w-56 md:w-64">
+          <div className="relative w-full min-w-0 sm:w-auto sm:min-w-48 sm:flex-1 lg:max-w-[28rem]">
             <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-text-muted" />
             <Input
               type="text"
@@ -392,7 +394,7 @@ export function StudentRegistryTable({
           {/* Desktop & Mobile Table View */}
           <div className="divide-y divide-border">
             {/* Desktop Column Titles with Sort Toggles (Slimmer height) */}
-            <div className="hidden border-b border-border bg-surface px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-text-muted md:grid md:grid-cols-[2fr_1fr_1fr_1.5rem] md:items-center md:gap-3">
+            <div className="hidden border-b border-border bg-surface px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.1em] text-text-muted md:grid md:grid-cols-[minmax(10rem,2fr)_minmax(11rem,1.5fr)_minmax(7rem,1fr)_minmax(6rem,0.8fr)_1.5rem] md:items-center md:gap-3">
               <button
                 type="button"
                 onClick={() => toggleSort('name')}
@@ -407,6 +409,8 @@ export function StudentRegistryTable({
                   )
                 ) : null}
               </button>
+
+              <span>Admission Number</span>
 
               <button
                 type="button"
@@ -453,7 +457,7 @@ export function StudentRegistryTable({
                     className="block"
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <p className="min-w-0 truncate text-[12.5px] font-bold text-text-primary leading-tight">
+                      <p className="min-w-0 truncate text-[12.5px] font-semibold leading-tight text-[#35534f]">
                         {student.full_name}
                       </p>
                       <ChevronRight className="size-3.5 shrink-0 text-text-muted" aria-hidden="true" />
@@ -480,23 +484,28 @@ export function StudentRegistryTable({
             </div>
 
             {/* Student Rows — md and up: dense slim grid rows */}
-            <div className="hidden md:block">
+            <div className="hidden divide-y divide-border/70 md:block">
               {paginatedStudents.map((student) => (
                 <div
                   key={student.id}
-                  className="grid items-center gap-3 px-3.5 py-1.75 text-xs transition hover:bg-surface-subtle/80 md:grid-cols-[2fr_1fr_1fr_1.5rem]"
+                  className="grid items-center gap-3 px-4 py-2.5 text-xs transition hover:bg-surface-subtle/80 md:grid-cols-[minmax(10rem,2fr)_minmax(11rem,1.5fr)_minmax(7rem,1fr)_minmax(6rem,0.8fr)_1.5rem]"
                 >
                   {/* Student Details Link */}
                   <Link
                     href={`/students/registry/${student.id}`}
                     className="min-w-0 group"
                   >
-                    <p className="font-bold text-text-primary group-hover:text-primary transition truncate leading-tight">
+                    <p className="font-semibold tracking-[0.005em] text-[#35534f] group-hover:text-primary transition truncate leading-tight">
                       {student.full_name}
                     </p>
-                    <p className="mt-0.5 font-mono text-[10.5px] text-text-muted whitespace-nowrap leading-tight">
-                      {student.admission_number}
-                    </p>
+                  </Link>
+
+                  {/* Admission Number */}
+                  <Link
+                    href={`/students/registry/${student.id}`}
+                    className="font-mono text-[11px] text-text-secondary whitespace-nowrap"
+                  >
+                    {student.admission_number}
                   </Link>
 
                   {/* Status */}

@@ -3,6 +3,7 @@
 import {
   ChevronLeft,
   ChevronRight,
+  Download,
   Eye,
   Filter,
   Search,
@@ -13,14 +14,22 @@ import { useMemo, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import type { RegistrationStudent } from './types';
-import { UndoUnitRegistrationButton } from './undo-registration-button';
 
 interface StudentUnitRegistrationTableProps {
   students: RegistrationStudent[];
   academicPeriodId?: string | null;
 }
 
-function statusBadge(status: string, hasException: boolean, selectedUnits: number, expectedUnits: number) {
+function statusBadge(student: RegistrationStudent) {
+  if (student.academicPhase === 'attachment') {
+    return (
+      <span className="inline-flex flex-col items-start gap-0.5">
+        <Badge variant="neutral">Not eligible</Badge>
+        <span className="text-[10px] text-text-muted">On attachment</span>
+      </span>
+    );
+  }
+  const { status, hasException, selectedUnits, expectedUnits } = student;
   if (status === 'verified') return <Badge variant="success">Verified</Badge>;
   if (status === 'submitted')
     return <Badge variant={hasException ? 'warning' : 'institutional'}>{hasException ? 'Review' : 'Submitted'}</Badge>;
@@ -36,7 +45,6 @@ function statusBadge(status: string, hasException: boolean, selectedUnits: numbe
 
 export function StudentUnitRegistrationTable({
   students,
-  academicPeriodId,
 }: StudentUnitRegistrationTableProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -66,6 +74,9 @@ export function StudentUnitRegistrationTable({
 
       // 2. Status Filter
       if (statusFilter !== 'all') {
+        if (statusFilter === 'ineligible' && student.academicPhase !== 'attachment') return false;
+        if (statusFilter === 'ineligible') return true;
+        if (student.academicPhase === 'attachment') return false;
         if (statusFilter === 'registered' && (student.selectedUnits < student.expectedUnits || student.expectedUnits === 0)) return false;
         if (statusFilter === 'pending' && (student.selectedUnits > 0 || student.status !== 'not_submitted')) return false;
         if (statusFilter === 'submitted' && student.status !== 'submitted') return false;
@@ -92,6 +103,15 @@ export function StudentUnitRegistrationTable({
   const paginatedStudents = useMemo(() => {
     return filteredStudents.slice(startIndex, endIndex);
   }, [filteredStudents, startIndex, endIndex]);
+
+  const exportUrl = useMemo(() => {
+    const params = new URLSearchParams();
+    if (searchQuery.trim()) params.set('search', searchQuery.trim());
+    if (statusFilter !== 'all') params.set('status', statusFilter);
+    if (cohortFilter !== 'all') params.set('cohort', cohortFilter);
+    const query = params.toString();
+    return `/api/students/unit-registration/export${query ? `?${query}` : ''}`;
+  }, [searchQuery, statusFilter, cohortFilter]);
 
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
@@ -140,6 +160,7 @@ export function StudentUnitRegistrationTable({
               className="bg-transparent text-xs font-medium text-text-primary outline-none cursor-pointer"
             >
               <option value="all">All Statuses</option>
+              <option value="ineligible">Not eligible (attachment)</option>
               <option value="registered">Registered</option>
               <option value="pending">Pending</option>
               <option value="submitted">Submitted</option>
@@ -180,6 +201,16 @@ export function StudentUnitRegistrationTable({
               <option value={50}>50</option>
             </select>
           </div>
+
+          <a
+            href={exportUrl}
+            download
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-surface px-3 text-xs font-semibold text-text-secondary shadow-2xs transition hover:bg-surface-subtle"
+            title="Export all matching unit registration records to Excel"
+          >
+            <Download className="size-3.5" aria-hidden="true" />
+            <span>Export Excel</span>
+          </a>
         </div>
       </div>
 
@@ -191,9 +222,9 @@ export function StudentUnitRegistrationTable({
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-border bg-surface shadow-2xs">
-          <div className="grid grid-cols-[1.3fr_1fr_0.7fr_0.7fr_1.6fr] gap-3 border-b border-border bg-surface-subtle px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-text-muted">
+          <div className="grid grid-cols-[1.3fr_1.15fr_0.7fr_0.7fr_1.6fr] gap-3 border-b border-border bg-surface-subtle px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-text-muted">
             <span>Student</span>
-            <span>Cohort / Programme</span>
+            <span>Admission Number</span>
             <span>Units</span>
             <span>Status</span>
             <span className="text-right">Action</span>
@@ -203,50 +234,41 @@ export function StudentUnitRegistrationTable({
             {paginatedStudents.map((student) => (
               <div
                 key={student.id}
-                className="grid grid-cols-[1.3fr_1fr_0.7fr_0.7fr_1.6fr] items-center gap-3 px-4 py-3 hover:bg-primary-subtle/20 transition-colors"
+                className="grid grid-cols-[1.3fr_1.15fr_0.7fr_0.7fr_1.6fr] items-center gap-3 px-4 py-3 hover:bg-primary-subtle/20 transition-colors"
               >
                 {/* Student Info */}
                 <div className="min-w-0">
                   <p className="truncate text-xs font-bold text-text-primary">{student.fullName}</p>
-                  <p className="mt-0.5 text-[11px] font-medium text-text-muted">{student.admissionNumber}</p>
                 </div>
 
-                {/* Cohort Info */}
-                <div className="min-w-0">
-                  <p className="truncate text-xs font-medium text-text-primary">
-                    {student.cohortName ?? 'No cohort'}
-                  </p>
-                  <p className="mt-0.5 text-[11px] text-text-muted">{student.programmeCode}</p>
+                {/* Admission Number */}
+                <div className="truncate font-mono text-xs text-text-secondary">
+                  {student.admissionNumber}
                 </div>
 
                 {/* Units Registered */}
                 <div>
-                  <p className="text-xs font-bold text-text-primary">
-                    {student.selectedUnits} / {student.expectedUnits}
-                  </p>
-                  <p className="text-[10px] text-text-muted">units assigned</p>
+                  {student.academicPhase === 'attachment' ? (
+                    <p className="text-xs text-text-muted">Not applicable</p>
+                  ) : (
+                    <>
+                      <p className="text-xs font-bold text-text-primary">
+                        {student.selectedUnits} / {student.expectedUnits}
+                      </p>
+                      <p className="text-[10px] text-text-muted">units assigned</p>
+                    </>
+                  )}
                 </div>
 
                 {/* Status Badge */}
-                <div>{statusBadge(student.status, student.hasException, student.selectedUnits, student.expectedUnits)}</div>
+                <div>{statusBadge(student)}</div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-wrap items-center justify-end gap-1.5 min-w-0">
-                  {academicPeriodId && (student.selectedUnits > 0 || student.status !== 'not_submitted') && (
-                    <UndoUnitRegistrationButton
-                      studentId={student.id}
-                      academicPeriodId={academicPeriodId}
-                      studentName={student.fullName}
-                      label="Unregister"
-                      variant="danger"
-                      size="sm"
-                    />
-                  )}
-
-                  {student.selectedUnits > 0 && (
+                <div className="flex min-w-0 flex-nowrap items-center justify-end gap-2">
+                  {student.academicPhase !== 'attachment' && student.selectedUnits > 0 && (
                     <Link
                       href={`/students/registry/${student.id}/portal-view`}
-                      className="inline-flex h-8 items-center gap-1 rounded-lg border border-border bg-surface px-2 text-[11px] font-bold text-text-secondary hover:bg-surface-subtle transition active:scale-95"
+                      className="inline-flex h-8 shrink-0 items-center gap-1 whitespace-nowrap rounded-lg border border-border bg-surface px-2 text-[11px] font-bold text-text-secondary hover:bg-surface-subtle transition active:scale-95"
                       title="View as Student (Portal Preview)"
                     >
                       <Eye className="size-3.5 text-primary" />
@@ -254,12 +276,16 @@ export function StudentUnitRegistrationTable({
                     </Link>
                   )}
 
-                  <Link
-                    href={`/students/unit-registration/register/${student.id}`}
-                    className="inline-flex h-8 items-center justify-center rounded-lg bg-primary px-3 text-[11px] font-bold text-white shadow-2xs hover:bg-primary-hover transition active:scale-95"
-                  >
-                    {student.status === 'verified' ? 'Manage Units' : 'Register Units'}
-                  </Link>
+                  {student.academicPhase !== 'attachment' ? (
+                    <Link
+                      href={`/students/unit-registration/register/${student.id}`}
+                      className="inline-flex h-8 shrink-0 items-center justify-center whitespace-nowrap rounded-lg bg-primary px-3 text-[11px] font-bold text-white shadow-2xs hover:bg-primary-hover transition active:scale-95"
+                    >
+                      {student.status === 'verified' ? 'Manage Units' : 'Register Units'}
+                    </Link>
+                  ) : (
+                    <span className="text-[11px] font-medium text-text-muted">Unavailable</span>
+                  )}
                 </div>
               </div>
             ))}

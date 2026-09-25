@@ -1,3 +1,5 @@
+import type { StudentAcademicPhase } from '@/features/students/types';
+
 export interface RegistrationPeriod {
   id: string;
   code: string;
@@ -10,6 +12,7 @@ export interface RegistrationStudent {
   id: string;
   admissionNumber: string;
   fullName: string;
+  academicPhase: StudentAcademicPhase;
   programmeCode: string;
   cohortId: string | null;
   cohortName: string | null;

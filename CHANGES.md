@@ -1,3 +1,75 @@
+### 2026-09-26: Change — Auto-verify registered unit rosters
+
+**Summary:** Existing unit registrations are backfilled as verified submissions, and each new registered unit row now creates or advances its student's period submission to verified and links the row to that submission. This applies across HOD, batch, and student self-service registration writes, so the unit registration export reports registered students as verified without manual cleanup.
+
+**Files changed:**
+- `supabase/migrations/20260926130000_auto_verify_registered_students.sql` — Backfills eligible existing rosters and adds a trigger that automatically verifies and links future registered-unit rows.
+
+**Breaking changes / manual follow-up:** Apply the new Supabase migration with `supabase db push`. Unit roster writes are now considered verified automatically.
+
+### 2026-09-26: Fix — Exclude attachment students from unit registration
+
+**Summary:** Students whose academic phase is attachment remain visible in the unit registration list, with a clear “Not eligible” status and no registration action. They are excluded from pending, eligible, submitted, verified, and exception counts; can be found with the “Not eligible (attachment)” filter; and are identified clearly in Excel exports. Registration and stage update server actions reject attachment students, the direct registration editor route no longer opens for them, and a database trigger blocks registration writes through direct RPC or table calls while preserving existing records.
+
+**Files changed:**
+- `src/features/student-unit-registration/types.ts` — Added the student's academic phase to registration records.
+- `src/features/student-unit-registration/queries.ts` — Loads phase data and excludes attachment students from registration metrics and editor access.
+- `src/features/student-unit-registration/student-unit-registration-table.tsx` — Shows an ineligible state, hides registration and portal actions, and adds a dedicated filter.
+- `src/features/student-unit-registration/actions.ts` — Blocks registration and stage changes for attachment students.
+- `src/app/(dashboard)/students/unit-registration/page.tsx` — Counts eligible students in the summary card.
+- `src/app/api/students/unit-registration/export/route.ts` — Adds attachment eligibility to export labels and filters.
+- `supabase/migrations/20260926120000_block_attachment_unit_registrations.sql` — Blocks new registered-unit rows for students on attachment.
+
+**Breaking changes / manual follow-up:** Apply the new Supabase migration with `supabase db push`.
+
+### 2026-09-26: Add — Unit Registration Excel Export
+
+**Summary:** Added an Excel export for all active-period unit registration records or the records matching the current search, status, and cohort filters. The export includes selected and expected unit counts, registration and submission statuses, cohort and programme details, and exception or verification notes. It exports the full filtered result, independent of the table's current page. The visible table now gives admission numbers their own column in place of Cohort / Programme, keeps each student on one line, and leaves unregistration in the per-student registration screen.
+
+**Files changed:**
+- `src/features/student-unit-registration/student-unit-registration-table.tsx` — Added an Export Excel control that carries active filters, replaced the Cohort / Programme table column with a dedicated Admission Number column, and simplified row actions to fit on one line.
+- `src/app/(dashboard)/students/unit-registration/register/[studentId]/page.tsx` — Kept one clearly labeled destructive unregister action inside the student's registration details.
+- `src/app/api/students/unit-registration/export/route.ts` — Added an HOD-authorized Excel export endpoint.
+
+**Breaking changes / manual follow-up:** None.
+
+### 2026-09-25: Simplify — Student Lifecycle Navigation
+
+**Summary:** Removed the duplicate Portal Access destination from the Student Lifecycle sidebar and mobile tabs. Portal access tools remain available from relevant operations actions.
+
+**Files changed:**
+- `src/components/layout/student-shell.tsx` — Removed the redundant `/students/access` navigation entry and mobile tab.
+
+**Breaking changes / manual follow-up:** None. The portal-access route and action links remain available.
+
+### 2026-09-25: Polish — Student Registry Filters and Name Hierarchy
+
+**Summary:** Grouped registry status filters and search/export controls into a single panel with a dedicated filter row. Reduced the visual weight of student names with a softer teal-gray treatment.
+
+**Files changed:**
+- `src/features/students/student-registry-table.tsx` — Reorganized the status and search toolbar and softened student-name typography on mobile and desktop.
+
+**Breaking changes / manual follow-up:** None.
+
+### 2026-09-25: Improve — Student Registry Desktop Table Readability
+
+**Summary:** Desktop and tablet student registry rows now show Admission Number in its own column instead of beneath the student name. Added visible separators and more vertical spacing between student rows. The compact stacked layout on phones is unchanged.
+
+**Files changed:**
+- `src/features/students/student-registry-table.tsx` — Added the admission number header and column, and row separators and spacing for the wide table view.
+
+**Breaking changes / manual follow-up:** None.
+
+### 2026-09-25: Fix — Restore responsive admin dashboard layouts
+
+**Summary:** Removed global CSS rules that forced unrelated sections and divs into metric-grid column counts, forced all tables wider than phone screens, and overrode page heading sizes. Metric grid columns now come from each page's responsive layout. The admin home keeps its compact mobile design, expands comfortably on tablet, and uses a full-width desktop layout with a white hero, a 3:1 Workspaces to Manage & Approvals split, and larger workspace icons.
+
+**Files changed:**
+- `src/app/globals.css` — Removed broad `:has()` grid overrides, global table minimum width and heading overrides, and a generic metric-grid override.
+- `src/features/dashboard/dashboard-view.tsx` — Expanded the dashboard's max width at tablet sizes, arranged its major panels for desktop, replaced the dark hero with a white card, and increased desktop icon, text, and row sizing. Workspaces uses 9 of 12 desktop columns; Manage & Approvals uses 3. The hero's right side now shows four live operational summary tiles on desktop, while the existing metric strip remains on smaller screens.
+
+**Breaking changes / manual follow-up:** None. No data, route, or database changes.
+
 ### 2026-09-25: Refactor — Student Registry Table & Profile Mobile UX Optimization
 
 **Summary of improvements:**

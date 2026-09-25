@@ -54,6 +54,7 @@ export const getUnitRegistrationContext = cache(async (): Promise<UnitRegistrati
         id,
         admission_number,
         full_name,
+        academic_phase,
         current_cohort_id,
         current_stage_id,
         programme:programmes!students_programme_id_fkey(code),
@@ -109,6 +110,7 @@ export const getUnitRegistrationContext = cache(async (): Promise<UnitRegistrati
       id: student.id,
       admissionNumber: student.admission_number,
       fullName: student.full_name,
+      academicPhase: student.academic_phase,
       programmeCode: programme?.code ?? '-',
       cohortId,
       cohortName: cohort?.name ?? null,
@@ -129,11 +131,11 @@ export const getUnitRegistrationContext = cache(async (): Promise<UnitRegistrati
   return {
     period: { id: period.id, code: period.code, name: period.name },
     students,
-    expectedUnitTotal: students.reduce((sum, student) => sum + student.expectedUnits, 0),
-    selectedUnitTotal: students.reduce((sum, student) => sum + student.selectedUnits, 0),
-    submittedCount: students.filter((student) => student.status === 'submitted').length,
-    verifiedCount: students.filter((student) => student.status === 'verified').length,
-    exceptionCount: students.filter((student) => student.hasException && ['submitted', 'verified'].includes(student.status)).length,
+    expectedUnitTotal: students.filter((student) => student.academicPhase !== 'attachment').reduce((sum, student) => sum + student.expectedUnits, 0),
+    selectedUnitTotal: students.filter((student) => student.academicPhase !== 'attachment').reduce((sum, student) => sum + student.selectedUnits, 0),
+    submittedCount: students.filter((student) => student.academicPhase !== 'attachment' && student.status === 'submitted').length,
+    verifiedCount: students.filter((student) => student.academicPhase !== 'attachment' && student.status === 'verified').length,
+    exceptionCount: students.filter((student) => student.academicPhase !== 'attachment' && student.hasException && ['submitted', 'verified'].includes(student.status)).length,
   };
 });
 
@@ -162,6 +164,7 @@ export async function getDepartmentRegistrationEditor(
       current_cohort_id,
       current_stage_id,
       lifecycle_status,
+      academic_phase,
       current_stage:programme_stages!students_current_stage_id_fkey(id, name, code, sequence_number),
       programme:programmes!students_programme_id_fkey(code),
       current_cohort:cohorts!students_current_cohort_id_fkey(
@@ -174,7 +177,12 @@ export async function getDepartmentRegistrationEditor(
     .maybeSingle();
 
   if (studentError) throw new Error(`Unable to load student: ${studentError.message}`);
-  if (!student || !['admitted', 'active'].includes(student.lifecycle_status) || !student.current_cohort_id) {
+  if (
+    !student ||
+    !['admitted', 'active'].includes(student.lifecycle_status) ||
+    student.academic_phase === 'attachment' ||
+    !student.current_cohort_id
+  ) {
     return null;
   }
 

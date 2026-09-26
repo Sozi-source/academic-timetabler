@@ -83,7 +83,7 @@ export default function BulkImportsPage() {
               <h2 className="text-sm font-semibold text-text-primary xl:text-base">
                 {item.title}
               </h2>
-              <p className="mt-1 text-[11px] leading-5 text-text-muted xl:text-xs 2xl:text-sm">
+              <p className="mt-1 text-[11px] leading-5 text-text-muted xl:text-xs">
                 Required · {item.required}
               </p>
             </div>

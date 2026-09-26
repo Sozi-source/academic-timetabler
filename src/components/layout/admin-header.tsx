@@ -17,7 +17,7 @@ interface AdminHeaderProps {
 export function AdminHeader({
   profile,
   title = 'Department Operations',
-  activePeriodName = 'Sep – Dec 2026',
+  activePeriodName = 'September-December 2026',
   onOpenMobileNav,
 }: AdminHeaderProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -52,7 +52,7 @@ export function AdminHeader({
         ) : null}
 
         <div>
-          <h1 className="truncate text-sm font-bold tracking-tight text-text-primary sm:text-base lg:text-lg">
+          <h1 className="truncate text-sm font-bold tracking-tight text-teal-900 sm:text-base lg:text-lg">
             {title}
           </h1>
           <p className="mt-0.5 hidden max-w-[38rem] truncate text-[0.68rem] font-medium leading-none text-text-muted sm:block">

@@ -18,7 +18,7 @@ export default async function StudentStatusPage() {
       <PageHeader
         eyebrow="Student Lifecycle"
         title="Update student statuses"
-        description="Change status and reporting for any student directly from this list — no navigation required."
+        description="Manage student status and semester reporting."
         icon={UsersRound}
         context={<Badge variant="neutral">{students.length} students</Badge>}
         actions={

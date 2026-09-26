@@ -43,7 +43,7 @@ export function PlatformShell({ profile, children }: PlatformShellProps) {
         <AdminHeader
           profile={profile}
           title="Department Operations"
-          activePeriodName="Sep – Dec 2026"
+          activePeriodName="September-December 2026"
           onOpenMobileNav={() => setMobileOpen(true)}
         />
 

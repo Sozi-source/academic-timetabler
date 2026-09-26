@@ -78,11 +78,12 @@ interface RowState {
 
 function InlineStatusRow({ student }: { student: StudentRow }) {
   const initialVirtual = toVirtualStatus(student.lifecycle_status, student.academic_phase);
+  const initialReporting = student.reporting_status === 'reported' ? 'reported' : 'not_reported';
 
   const [state, setOptimistic] = useOptimistic<RowState, Partial<RowState>>(
     {
       virtualStatus: initialVirtual,
-      reporting: 'reported',
+      reporting: initialReporting,
       saving: false,
       saved: false,
     },

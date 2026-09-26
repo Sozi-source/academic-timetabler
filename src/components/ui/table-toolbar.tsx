@@ -21,7 +21,7 @@ export function TableToolbar({
   return (
     <div className="border-b border-border bg-surface px-3 py-2.5 sm:px-4">
       <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
-        <div className="relative w-full shrink-0 lg:w-[18rem] xl:w-[20rem] 2xl:w-[22rem]">
+        <div className="relative w-full shrink-0 lg:w-[18rem] xl:w-[20rem]">
           <Search
             className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-muted"
             aria-hidden="true"

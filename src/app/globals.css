@@ -281,9 +281,6 @@ code, kbd, samp, pre {
   :root { --content-gutter: 2rem; }
 }
 
-@media (min-width: 1536px) {
-  :root { --content-gutter: 2.5rem; }
-}
 
 /* Keep dense admin workspaces readable on phones without changing component logic. */
 @media (max-width: 639px) {
@@ -315,7 +312,7 @@ code, kbd, samp, pre {
    Presentation only. No data, routing or business logic.
    ============================================================ */
 :root {
-  --admin-max: 96rem;
+  --admin-max: 90rem;
   --admin-gutter: 0.75rem;
   --admin-gap: 0.75rem;
   --admin-control-h: 2.625rem;

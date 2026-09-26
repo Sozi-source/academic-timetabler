@@ -89,9 +89,9 @@ const columns: ColumnDef<Cohort>[] = [
     size: 190,
     minSize: 160,
     cell: ({ row }) => (
-      <div className="w-max min-w-[10rem] sm:min-w-[10.5rem] lg:min-w-[11.5rem] xl:min-w-[12.5rem] 2xl:min-w-[13.5rem]">
+      <div className="w-max min-w-[10rem] sm:min-w-[10.5rem] lg:min-w-[11.5rem] xl:min-w-[12.5rem]">
         <p
-          className="whitespace-nowrap text-[10.5px] font-semibold leading-4 text-text-primary sm:text-[11px] md:text-xs lg:text-[12.5px] xl:text-[13px] 2xl:text-sm"
+          className="whitespace-nowrap text-[10.5px] font-semibold leading-4 text-text-primary sm:text-[11px] md:text-xs lg:text-[12.5px] xl:text-[13px]"
           title={row.original.name}
         >
           {row.original.name}

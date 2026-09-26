@@ -33,7 +33,7 @@ export const Select = forwardRef<
           : props['aria-invalid']
       }
       className={cn(
-        'h-9 w-full xl:h-10 2xl:h-11 rounded-xl border border-border-strong bg-surface px-3 text-[12px] xl:px-3.5 xl:text-[13px] 2xl:text-sm min-[1920px]:text-[15px] text-text-primary shadow-sm outline-none transition cursor-pointer',
+        'h-9 w-full xl:h-10 rounded-xl border border-border-strong bg-surface px-3 text-[12px] xl:px-3.5 xl:text-[13px] text-text-primary shadow-sm outline-none transition cursor-pointer',
         'hover:border-focus-border',
         'focus:border-focus-border focus:ring-4 focus:ring-focus-ring/25',
         'disabled:cursor-not-allowed disabled:bg-surface-muted disabled:text-text-muted',

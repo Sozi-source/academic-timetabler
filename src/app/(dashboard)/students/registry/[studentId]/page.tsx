@@ -71,7 +71,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-base sm:text-lg font-bold text-text-primary leading-tight">
+              <h1 className="text-base sm:text-lg font-bold text-[#033B36] leading-tight">
                 {student.full_name}
               </h1>
               <Badge variant={statusVariant(student.lifecycle_status)} className="text-[10px] px-2 py-0 min-h-5">
@@ -186,7 +186,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
             <span className="flex size-7 items-center justify-center rounded-lg bg-institutional-yellow text-institutional-yellow-ink">
               <CalendarDays className="size-3.5" />
             </span>
-            <h2 className="text-xs sm:text-sm font-bold text-text-primary">Update student status</h2>
+            <h2 className="text-xs sm:text-sm font-bold text-teal-900">Update student status</h2>
           </div>
           <ProgressionForm studentId={student.id} status={student.lifecycle_status} academicPhase={student.academic_phase} reportingStatus={reportingStatus} />
         </Card>
@@ -194,7 +194,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         <Card className="overflow-hidden shadow-2xs">
           <div className="flex items-center gap-2 border-b border-border px-3.5 py-2.5 bg-surface-subtle">
             <History className="size-3.5 text-primary" />
-            <h2 className="text-xs sm:text-sm font-bold text-text-primary">Timeline</h2>
+            <h2 className="text-xs sm:text-sm font-bold text-teal-900">Timeline</h2>
           </div>
           {events.length === 0 ? (
             <p className="px-3.5 py-4 text-xs text-text-muted">No lifecycle events yet.</p>

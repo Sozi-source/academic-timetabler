@@ -64,6 +64,8 @@ describe('Admin Portal Design Specification Verification', () => {
     expect(isNavItemActive('/trainers/wilfred-osozi', '/trainers', allHrefs)).toBe(true);
     expect(isNavItemActive('/students/registry/import', '/students/registry', allHrefs)).toBe(true);
     expect(isNavItemActive('/attendance-clinical/class-attendance/analytics', '/attendance-clinical/class-attendance', allHrefs)).toBe(true);
+    expect(isNavItemActive('/attendance', '/attendance-clinical/class-attendance', allHrefs)).toBe(true);
+    expect(isNavItemActive('/attendance/session-123', '/attendance-clinical/class-attendance', allHrefs)).toBe(true);
   });
 });
 

@@ -1,3 +1,40 @@
+### 2026-09-26: UI — Balanced Admin Dashboard Workspaces with Attendance Icon & Route Highlighting
+
+**Summary:** Added the **Attendance** icon to the Admin Dashboard Workspaces card to complete a balanced 8-icon, 4×2 grid. Enhanced `isNavItemActive` to recognize `/attendance` so navigating from the workspace tile or sidebar correctly highlights the "Class Attendance" item. Also expanded academic session formatting to full month names (e.g. `September-December 2026`) and updated heading text colors from stark black to institutional teal and refined gray.
+
+**Files changed:**
+- `src/features/dashboard/dashboard-view.tsx` — Added Attendance workspace icon (`CheckCircle2`, teal tint `#033B36`, linking to `/attendance-clinical/class-attendance`).
+- `src/components/layout/admin-sidebar.tsx` — Added `/attendance` route matching to `isNavItemActive` for Class Attendance navigation.
+- `src/tests/admin-dashboard-design.test.ts` — Added test assertions verifying active route detection for `/attendance` and subpaths.
+- `src/app/(dashboard)/dashboard/page.tsx` — Expanded semester abbreviation format to full month names (`September-December 2026`).
+- `src/components/layout/platform-shell.tsx` & `src/components/layout/admin-header.tsx` — Updated default period name fallback to `September-December 2026`.
+
+**Breaking changes / manual follow-up:** None.
+
+### 2026-09-26: Fix — Keep admin interface density steady on wide screens
+
+**Summary:** Removed extra-large viewport scaling from shared controls and common admin layouts so text, buttons, fields, cards, and table rows retain their laptop-sized proportions. Standardized the admin content width at 90rem and capped the page gutters.
+
+**Files changed:**
+- `src/app/globals.css` — Sets the shared admin width cap and removes additional wide-screen gutter growth.
+- `src/components/ui/` — Caps shared button, field, badge, table, card, filter, toolbar, and pagination sizing at the laptop breakpoint.
+- `src/app/(dashboard)/timetable/` — Keeps timetable import and trainer workload text at the shared maximum size.
+- `src/features/cohorts/cohort-table.tsx` — Caps cohort name sizing and width at the laptop breakpoint.
+
+**Breaking changes / manual follow-up:** None.
+
+### 2026-09-26: Fix — Load saved semester reporting and unify page headings
+
+**Summary:** The student status editor now loads the active period's saved reporting state instead of displaying every student as reported by default. Shortened its helper text and applied a consistent teal, semibold title style through the shared page header.
+
+**Files changed:**
+- `src/features/students/queries.ts` — Loads active-period reporting values with student rows.
+- `src/features/students/inline-status-updater.tsx` — Initializes each reporting control from its saved value.
+- `src/app/(dashboard)/students/status/page.tsx` — Replaced the long page description with concise copy.
+- `src/components/ui/page-header.tsx` — Uses the teal primary color and semibold title style for shared page headings.
+
+**Breaking changes / manual follow-up:** None.
+
 ### 2026-09-26: Change — Auto-verify registered unit rosters
 
 **Summary:** Existing unit registrations are backfilled as verified submissions, and each new registered unit row now creates or advances its student's period submission to verified and links the row to that submission. This applies across HOD, batch, and student self-service registration writes, so the unit registration export reports registered students as verified without manual cleanup.

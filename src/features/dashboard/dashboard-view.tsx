@@ -56,6 +56,7 @@ export function DashboardView({
     { label: 'Staff', href: '/trainers', icon: Users, tint: '#033B36' },
     { label: 'Documents', href: '/teaching-documents', icon: FileText, tint: '#033B36' },
     { label: 'Results', href: '/assessment', icon: BarChart3, tint: '#B45309' },
+    { label: 'Attendance', href: '/attendance-clinical/class-attendance', icon: CheckCircle2, tint: '#033B36' },
   ] as const;
 
   return (
@@ -82,10 +83,10 @@ export function DashboardView({
               </span>
             </div>
 
-            <p className="relative mt-3 text-[11px] font-semibold uppercase tracking-wider text-gray-500 lg:mt-4 lg:text-xs">
+            <p className="relative mt-3 text-[11px] font-semibold uppercase tracking-wider text-teal-800/80 lg:mt-4 lg:text-xs">
               Academic session
             </p>
-            <h1 className="relative text-xl font-bold tracking-tight text-gray-900 lg:text-3xl">
+            <h1 className="relative text-xl font-bold tracking-tight text-[#033B36] lg:text-3xl">
               {activePeriodName}
             </h1>
             <p className="relative mt-1 text-[12px] text-gray-600 lg:mt-2 lg:text-sm">
@@ -118,22 +119,22 @@ export function DashboardView({
           <div className="mt-6 hidden grid-cols-2 gap-3 lg:col-span-5 lg:mt-0 lg:grid" aria-label="Operational snapshot">
             <div className="rounded-xl border border-gray-200 bg-gray-50/90 p-4">
               <CalendarDays className="size-4 text-[#0f766e]" aria-hidden="true" />
-              <p className="mt-3 text-2xl font-bold leading-none text-gray-900">{publishedSessions}</p>
+              <p className="mt-3 text-2xl font-bold leading-none text-[#033B36]">{publishedSessions}</p>
               <p className="mt-1.5 text-xs font-medium text-gray-600">Live sessions</p>
             </div>
             <div className="rounded-xl border border-gray-200 bg-gray-50/90 p-4">
               <Users className="size-4 text-[#0f766e]" aria-hidden="true" />
-              <p className="mt-3 text-2xl font-bold leading-none text-gray-900">{studentsPortalActive}</p>
+              <p className="mt-3 text-2xl font-bold leading-none text-[#033B36]">{studentsPortalActive}</p>
               <p className="mt-1.5 text-xs font-medium text-gray-600">Active student portals</p>
             </div>
             <div className="rounded-xl border border-gray-200 bg-gray-50/90 p-4">
               <BookOpenCheck className="size-4 text-[#0f766e]" aria-hidden="true" />
-              <p className="mt-3 text-2xl font-bold leading-none text-gray-900">{teachingUnits}</p>
+              <p className="mt-3 text-2xl font-bold leading-none text-[#033B36]">{teachingUnits}</p>
               <p className="mt-1.5 text-xs font-medium text-gray-600">Active units</p>
             </div>
             <div className="rounded-xl border border-gray-200 bg-gray-50/90 p-4">
               <CheckCircle2 className="size-4 text-[#0f766e]" aria-hidden="true" />
-              <p className="mt-3 text-2xl font-bold leading-none text-gray-900">{attendanceCompleted}</p>
+              <p className="mt-3 text-2xl font-bold leading-none text-[#033B36]">{attendanceCompleted}</p>
               <p className="mt-1.5 text-xs font-medium text-gray-600">Completed · {attendanceOpen} open</p>
             </div>
           </div>
@@ -149,7 +150,7 @@ export function DashboardView({
       >
         <Link href="/students/registry" className="group flex flex-col gap-1 px-3 py-3.5 text-left transition active:bg-gray-50 lg:gap-2 lg:px-6 lg:py-5">
           <Users className="size-4 text-[#033B36] lg:size-5" aria-hidden="true" />
-          <p className="text-base font-bold leading-none text-gray-900 lg:text-2xl">
+          <p className="text-base font-bold leading-none text-[#033B36] lg:text-2xl">
             {studentsPortalActive}
             <span className="text-xs font-semibold text-gray-400 lg:text-sm">/{studentsEligible}</span>
           </p>
@@ -158,13 +159,13 @@ export function DashboardView({
 
         <div className="flex flex-col gap-1 px-3 py-3.5 lg:gap-2 lg:px-6 lg:py-5">
           <CalendarDays className="size-4 text-[#033B36] lg:size-5" aria-hidden="true" />
-          <p className="text-base font-bold leading-none text-gray-900 lg:text-2xl">{teachingUnits}</p>
+          <p className="text-base font-bold leading-none text-[#033B36] lg:text-2xl">{teachingUnits}</p>
           <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500 lg:text-xs">Units</p>
         </div>
 
         <Link href="/operations/daily-reports" className="group flex flex-col gap-1 px-3 py-3.5 text-left transition active:bg-gray-50 lg:gap-2 lg:px-6 lg:py-5">
           <CheckCircle2 className="size-4 text-emerald-600 lg:size-5" aria-hidden="true" />
-          <p className="text-base font-bold leading-none text-gray-900 lg:text-2xl">{attendanceCompleted}</p>
+          <p className="text-base font-bold leading-none text-[#033B36] lg:text-2xl">{attendanceCompleted}</p>
           <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500 lg:text-xs">
             {attendanceOpen} open
           </p>
@@ -176,7 +177,7 @@ export function DashboardView({
       {/* ================================================================= */}
       <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-xs lg:col-span-9 lg:p-6 xl:p-7">
         <div className="flex items-center justify-between pb-3 lg:pb-5">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-gray-700 lg:text-sm">Workspaces</h2>
+          <h2 className="text-xs font-bold uppercase tracking-wider text-teal-900 lg:text-sm">Workspaces</h2>
           <span className="text-[11px] font-medium text-gray-400 lg:text-xs">{workspaces.length}</span>
         </div>
 
@@ -205,7 +206,7 @@ export function DashboardView({
       {/* 4. Manage — one grouped list card (native settings-list pattern)  */}
       {/* ================================================================= */}
       <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xs lg:col-span-3">
-        <p className="border-b border-gray-100 px-4 py-3 text-xs font-bold uppercase tracking-wider text-gray-700 lg:px-4 lg:py-4 lg:text-sm">
+        <p className="border-b border-gray-100 px-4 py-3 text-xs font-bold uppercase tracking-wider text-teal-900 lg:px-4 lg:py-4 lg:text-sm">
           Manage &amp; Approvals
         </p>
 

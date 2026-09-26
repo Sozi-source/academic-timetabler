@@ -144,6 +144,13 @@ export function isNavItemActive(
     return true;
   }
 
+  if (
+    itemHref === '/attendance-clinical/class-attendance' &&
+    (pathname === '/attendance' || pathname.startsWith('/attendance/'))
+  ) {
+    return true;
+  }
+
   if (!pathname.startsWith(`${itemHref}/`)) {
     return false;
   }

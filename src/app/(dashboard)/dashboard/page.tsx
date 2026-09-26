@@ -3,18 +3,20 @@ import { DashboardView } from '@/features/dashboard/dashboard-view';
 import { getOperationsSnapshot } from '@/features/operations/queries';
 
 function formatPeriodDisplay(name: string | null | undefined): string {
-  if (!name) return 'Sep – Dec 2026';
+  if (!name) return 'September-December 2026';
   return name
-    .replace(/September/gi, 'Sep')
-    .replace(/December/gi, 'Dec')
-    .replace(/January/gi, 'Jan')
-    .replace(/February/gi, 'Feb')
-    .replace(/March/gi, 'Mar')
-    .replace(/April/gi, 'Apr')
-    .replace(/August/gi, 'Aug')
-    .replace(/October/gi, 'Oct')
-    .replace(/November/gi, 'Nov')
-    .replace(/[-–—]+/g, ' – ');
+    .replace(/\bSept?\b/gi, 'September')
+    .replace(/\bDec\b/gi, 'December')
+    .replace(/\bJan\b/gi, 'January')
+    .replace(/\bFeb\b/gi, 'February')
+    .replace(/\bMar\b/gi, 'March')
+    .replace(/\bApr\b/gi, 'April')
+    .replace(/\bJun\b/gi, 'June')
+    .replace(/\bJul\b/gi, 'July')
+    .replace(/\bAug\b/gi, 'August')
+    .replace(/\bOct\b/gi, 'October')
+    .replace(/\bNov\b/gi, 'November')
+    .replace(/\s*[-–—]\s*/g, '-');
 }
 
 export default async function DashboardPage() {

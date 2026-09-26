@@ -22,7 +22,7 @@ export function FilterBar({
     <section
       aria-label={title}
       className={cn(
-        'flex flex-col gap-2 rounded-xl border border-border bg-surface-subtle p-2.5 xl:gap-3 xl:p-3 2xl:p-4 sm:flex-row sm:items-center sm:justify-between',
+        'flex flex-col gap-2 rounded-xl border border-border bg-surface-subtle p-2.5 xl:gap-3 xl:p-3 sm:flex-row sm:items-center sm:justify-between',
         className,
       )}
     >

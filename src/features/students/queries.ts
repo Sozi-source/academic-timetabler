@@ -31,6 +31,13 @@ const studentSelection = `
   current_cohort:cohorts!students_current_cohort_id_fkey(id, code, name, current_academic_period_number)
 `;
 
+function normalizeReportingStatus(value: unknown): NonNullable<StudentRow['reporting_status']> {
+  if (value === 'reported' || value === 'deferred' || value === 'dropped_out') {
+    return value;
+  }
+  return 'pending';
+}
+
 export const getStudentSummary = cache(async (): Promise<StudentSummary> => {
   const supabase = await createClient();
   const { data, error } = await supabase.from('students').select('lifecycle_status,academic_phase');
@@ -95,28 +102,52 @@ export const getStudents = cache(async (
     ),
   ];
 
-  if (stageIds.length === 0) {
-    return rows;
-  }
+  const stageResult = stageIds.length > 0
+    ? await supabase
+        .from('programme_stages')
+        .select('id, sequence_number')
+        .in('id', stageIds)
+    : { data: [], error: null };
 
-  const { data: stageRows, error: stageError } =
-    await supabase
-      .from('programme_stages')
-      .select('id, sequence_number')
-      .in('id', stageIds);
-
-  if (stageError) {
+  if (stageResult.error) {
     throw new Error(
-      `Unable to load student stages: ${stageError.message}`,
+      `Unable to load student stages: ${stageResult.error.message}`,
     );
   }
 
   const stageById = new Map(
-    (stageRows ?? []).map((stage) => [
+    (stageResult.data ?? []).map((stage) => [
       stage.id,
       stage.sequence_number,
     ]),
   );
+
+  const { data: activePeriod, error: activePeriodError } = await supabase
+    .from('academic_periods')
+    .select('id')
+    .eq('status', 'active')
+    .maybeSingle();
+
+  if (activePeriodError) {
+    throw new Error(`Unable to load active academic period: ${activePeriodError.message}`);
+  }
+
+  const reportingResult = activePeriod && rows.length > 0
+    ? await supabase
+        .from('student_period_reporting')
+        .select('student_id, reporting_status')
+        .eq('academic_period_id', activePeriod.id)
+        .in('student_id', rows.map((student) => student.id))
+    : { data: [], error: null };
+
+  if (reportingResult.error) {
+    throw new Error(`Unable to load student semester reporting: ${reportingResult.error.message}`);
+  }
+
+  const reportingByStudent = new Map<string, NonNullable<StudentRow['reporting_status']>>();
+  for (const reporting of reportingResult.data ?? []) {
+    reportingByStudent.set(reporting.student_id, normalizeReportingStatus(reporting.reporting_status));
+  }
 
   return rows.map((student) => ({
     ...student,
@@ -125,6 +156,7 @@ export const getStudents = cache(async (
         ? stageById.get(student.current_stage_id) ??
           null
         : null,
+    reporting_status: reportingByStudent.get(student.id) ?? 'pending',
   }));
 });
 
@@ -268,4 +300,3 @@ export const getRegistryCohortOptions = cache(async (): Promise<RegistryCohortOp
     programmeCode: row.programme?.code ?? '',
   }));
 });
-

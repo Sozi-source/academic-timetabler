@@ -54,7 +54,7 @@ export function CardContent({
   className?: string;
 }) {
   return (
-    <div className={cn('px-3.5 py-3.5 xl:px-4 xl:py-4 2xl:px-5 2xl:py-5', className)}>
+    <div className={cn('px-3.5 py-3.5 xl:px-4 xl:py-4', className)}>
       {children}
     </div>
   );
@@ -73,4 +73,3 @@ export function CardTitle({
     </h3>
   );
 }
-

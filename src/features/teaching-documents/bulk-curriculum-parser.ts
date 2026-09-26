@@ -2,6 +2,7 @@ import ExcelJS from 'exceljs';
 import { unpackZipBuffer } from './zip-ingestion';
 import { parseDocxSyllabus } from './curriculum-editor/docx-parser';
 import { normalizeUnitCodeKey } from './curriculum-registry';
+import { hasTopicCoverageContamination } from './topic-coverage-validation';
 
 export interface BulkTopicItem {
   sequence: number;
@@ -136,7 +137,7 @@ export async function parseBulkCourseOutlineWorkbook(
       row.eachCell((cell, colNumber) => {
         const h = normalizeHeaderStr(cell.value);
         if (h.includes('unit code') || h === 'code' || h === 'unit') rowCols.unit_code = colNumber;
-        if (h.includes('unit name') || h === 'name' || h.includes('title')) rowCols.unit_name = colNumber;
+        if (h.includes('unit name') || h === 'name' || (h.includes('title') && !h.includes('topic'))) rowCols.unit_name = colNumber;
         if (h.includes('description') || h.includes('purpose') || h.includes('overview')) rowCols.description = colNumber;
         if (h.includes('outcome') || h.includes('competenc') || h.includes('objective')) rowCols.outcomes = colNumber;
         if (h.includes('teaching') || h.includes('approach') || h.includes('method')) rowCols.approaches = colNumber;
@@ -195,7 +196,7 @@ export async function parseBulkCourseOutlineWorkbook(
       row.eachCell((cell, colNumber) => {
         const h = normalizeHeaderStr(cell.value);
         if (h.includes('unit code') || h === 'code' || h === 'unit') rowCols.unit_code = colNumber;
-        if (h.includes('unit name') || h === 'name' || h.includes('title')) rowCols.unit_name = colNumber;
+        if (h.includes('unit name') || h === 'name' || (h.includes('title') && !h.includes('topic'))) rowCols.unit_name = colNumber;
         if (h.includes('seq') || h.includes('week') || h.includes('order')) rowCols.sequence = colNumber;
         const isSubtopic = h.includes('subtopic') || h.includes('sub topic') || h.includes('sub-topic') || h.includes('coverage') || h.includes('content');
         if (isSubtopic) {
@@ -285,6 +286,13 @@ export async function parseBulkCourseOutlineWorkbook(
       issues.push({
         severity: 'warning',
         message: `Unit "${unit.unitCode}" has no weekly topics listed in the Topics sheet.`,
+      });
+    }
+
+    if (hasTopicCoverageContamination(unit.topics)) {
+      issues.push({
+        severity: 'error',
+        message: `Unit "${unit.unitCode}" appears to have subtopic text mixed into its topic titles. Separate the topic heading from its coverage bullets before publishing.`,
       });
     }
 
@@ -395,6 +403,15 @@ export async function parseBulkCourseOutlineZip(
       issues.push({
         severity: 'warning',
         message: `Failed to parse ${entry.filename}: ${err instanceof Error ? err.message : 'Unknown error'}`,
+      });
+    }
+  }
+
+  for (const unit of parsedUnits) {
+    if (hasTopicCoverageContamination(unit.topics)) {
+      issues.push({
+        severity: 'error',
+        message: `Unit "${unit.unitCode}" appears to have subtopic text mixed into its topic titles. Separate the topic heading from its coverage bullets before publishing.`,
       });
     }
   }

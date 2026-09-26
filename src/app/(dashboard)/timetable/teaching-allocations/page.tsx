@@ -114,7 +114,7 @@ export default async function Page({searchParams}:{searchParams:Promise<{period?
    <form action={generateCurrentOfferingsAction}><input type="hidden" name="academicPeriodId" value={period}/><Button type="submit" disabled={!period}>Generate offering recommendations</Button></form>
    <form action={reconcilePreviousAssignmentsAction}><input type="hidden" name="academicPeriodId" value={period}/><Button type="submit" variant="outline" disabled={!period}>Repair separated allocations</Button></form>
   </div></Card>
-  <section className="grid gap-3 grid-cols-1 sm:grid-cols-3 xl:max-w-5xl">
+  <section className="grid gap-2 grid-cols-2 sm:grid-cols-3 xl:max-w-5xl">
    <MetricCard icon={BookOpenCheck} value={String(open.length)} label="Units awaiting trainer" description="Open units needing a trainer assigned"/>
    <MetricCard icon={Users} value={String((trainers??[]).length)} label="Available trainers" description="Active trainers in the institution pool"/>
    <MetricCard icon={BookOpenCheck} value={String(all.length-open.length)} label="Allocated and blocked" description="Units with a trainer or otherwise settled"/>

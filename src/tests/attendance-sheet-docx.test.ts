@@ -106,7 +106,7 @@ describe('attendance sheet Word document', () => {
     expect(xml).toContain('<w:tblBorders><w:top w:val="none"');
 
     // Verify underline border is applied to signature/writing lines
-    expect(xml).toContain('w:bottom w:val="single" w:color="1F2937"');
+    expect(xml).toContain('w:bottom w:val="single" w:color="94A3B8"');
   });
 });
 

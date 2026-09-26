@@ -8,7 +8,6 @@ import {
   FileCheck2,
   MapPin,
   Pencil,
-  Printer,
   UserCheck,
   X,
 } from 'lucide-react';
@@ -244,14 +243,6 @@ export function OnlineRecordOfWorkManager({ context }: { context: OnlineRecordOf
               </p>
             </div>
           </div>
-
-          <Link
-            href={`/staff/units/${context.allocationId}/documents/record-of-work/print`}
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition self-start sm:self-auto"
-          >
-            <Printer className="size-3.5" />
-            Print Log
-          </Link>
         </div>
 
         {/* Meta Row */}

@@ -225,11 +225,10 @@ export function parseSubTopics(input?: string | string[] | null): string[] {
     return input.flatMap((item) => parseSubTopics(item));
   }
   return input
-    .split(/[\n\r]+|[·;]+|(?<=[a-z0-9\)])\s*•\s*/i)
-    .map((s) => s.replace(/^[•·\s\d.-]+/, '').trim())
+    .split(/[\n\r]+|[;|]+|[\u00b7\u2022\u25cf\u25aa\u25e6]+/u)
+    .map((s) => s.replace(/^[\s\d.-]+/, '').trim())
     .filter((s) => s.length > 0);
 }
-
 /**
  * Parses learning activities into discrete lines
  */

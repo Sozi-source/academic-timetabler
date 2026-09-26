@@ -1,5 +1,4 @@
 import {
-  ArrowLeft,
   BookOpenCheck,
   Sparkles,
 } from 'lucide-react';
@@ -123,17 +122,13 @@ export default async function CurriculumContentPage() {
         title="Curriculum Content"
         description="Course Outlines and Schemes of Work."
         icon={BookOpenCheck}
+        backHref="/teaching-documents"
+        backLabel="Back"
         actions={
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href="/teaching-documents"
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle transition"
-            >
-              <ArrowLeft className="size-3.5" />
-              Back
-            </Link>
-
-            <ClearDocumentsButton />
+          <div className="flex items-center gap-2">
+            <span className="hidden sm:inline-flex">
+              <ClearDocumentsButton />
+            </span>
 
             <BulkCourseOutlineUploadDialog />
 

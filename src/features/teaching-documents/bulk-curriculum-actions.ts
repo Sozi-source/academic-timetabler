@@ -14,6 +14,7 @@ import {
   normalizeUnitCodeKey,
   TVET_CURRICULUM_REGISTRY,
 } from './curriculum-registry';
+import { hasTopicCoverageContamination } from './topic-coverage-validation';
 
 /**
  * Parses an uploaded file (either .xlsx or .zip) and returns the extracted units and matching status
@@ -87,6 +88,15 @@ export async function commitBulkCourseOutlinesAction(
 
   if (!units || units.length === 0) {
     return { success: false, count: 0, message: 'No units to commit.' };
+  }
+
+  const malformedUnit = units.find((item) => hasTopicCoverageContamination(item.topics));
+  if (malformedUnit) {
+    return {
+      success: false,
+      count: 0,
+      message: `Unit "${malformedUnit.unitCode}" has topic titles mixed with subtopic content. Correct the topic and coverage columns before publishing.`,
+    };
   }
 
   const admin = createAdminClient();

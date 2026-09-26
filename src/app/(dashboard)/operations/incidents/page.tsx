@@ -59,7 +59,7 @@ export default async function ProductionIncidentsPage() {
         }
       />
 
-      <section className="grid gap-3 sm:grid-cols-3">
+      <section className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         <MetricCard label="Open" value={String(open)} description="All unresolved incidents" icon={AlertTriangle} />
         <MetricCard label="Blocking" value={String(blocking)} description="Critical / High active" icon={ShieldAlert} />
         <MetricCard label="Production" value={String(production)} description="Unresolved Production incidents" icon={AlertTriangle} />

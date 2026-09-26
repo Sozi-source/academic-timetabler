@@ -1,3 +1,126 @@
+### 2026-09-26: Trainer QA Examination ZIP Export
+
+**Summary:** Added a department-scoped QA export workspace. HODs can select an academic period and download a ZIP grouped by trainer, with separate Course Outlines and Schemes of Work folders. The pack includes the exact approved revision, an Excel QA index listing missing or unavailable documents, and a README. The export uses the private document store and checks the active department before including allocations.
+
+**Files changed:**
+- `src/features/teaching-documents/qa-export.ts` — Loads period allocations, approved document revisions, creates the QA index, and assembles trainer folders.
+- `src/features/teaching-documents/zip-archive.ts` — Adds UTF-8 ZIP archive generation without a new runtime dependency.
+- `src/app/api/teaching-documents/qa-export/route.ts` — Adds the HOD-authorized ZIP download endpoint.
+- `src/app/(dashboard)/teaching-documents/qa-export/page.tsx` — Adds the academic-period selection, approval coverage summary, and download action.
+- `src/app/(dashboard)/teaching-documents/page.tsx` — Adds a direct link to the QA ZIP export workspace.
+- `src/features/staff-downloads/staff-downloads-view.tsx` — Restores the `Link` import required by existing links after the full check surfaced the missing import in this already-edited workspace file.
+
+**Limitations:** The export is limited to 200 MB of source documents per pack. It records missing approvals or unavailable stored revisions in the index rather than silently presenting the pack as complete. This export does not mark the external QA submission as completed.
+
+### 2026-09-26: Course Outline Topic and Coverage Integrity
+
+**Summary:** Fixed the course outline rendering and import paths so topic headings remain separate from subtopic coverage. A repeated-content validator now rejects uploads where multiple long topic titles substantially repeat their coverage text, and the server rechecks before publishing. Existing authoritative schedules with the same strong corruption pattern fall back to their canonical curriculum. The known malformed DCU 1102 Entrepreneurship upload is retired through a unit- and source-file-scoped migration; no other unit records are changed.
+
+**Files changed:**
+- `src/features/teaching-documents/topic-coverage-validation.ts` — Added a conservative multi-row contamination detector.
+- `src/features/teaching-documents/bulk-curriculum-parser.ts` — Validate XLSX and ZIP imports and surface blocking errors.
+- `src/features/teaching-documents/bulk-curriculum-actions.ts` — Repeat validation on the server before committing imported outlines.
+- `src/features/teaching-documents/bulk-upload-dialog.tsx` — Disable publishing when validation finds a topic/coverage mix-up.
+- `src/features/teaching-documents/curriculum-content/queries.ts` — Use canonical schedule data when an active authoritative schedule has the confirmed corruption pattern.
+- `src/features/teaching-documents/tvet-standards.ts` — Split newline, bullet, middle-dot, semicolon, and pipe-delimited subtopics consistently.
+- `src/features/teaching-documents/tvet-document-viewer.tsx` — Render each parsed subtopic as its own bullet.
+- `supabase/migrations/20260926160000_retire_malformed_dcu_entrepreneurship_outline.sql` — Retire only the identified malformed active DCU 1102 import.
+
+**Manual follow-up:** Apply the new Supabase migration in the target environment. No other database data is updated.
+
+### 2026-09-26: Curriculum & Teaching Documents — Universal Course Outline Data & Topic Distribution Engine Fix
+
+**Summary:** Resolved formatting flaws, topic concatenation, artificial compression, and template hallucinations across course outlines for all 51 TVET units:
+1. **Distribution Engine (`distribution-engine.ts`)**: Upgraded `isPureAssessmentTopic()` to systematically match and isolate all variations of Continuous Assessment Tests (CAT), Mid-Term Reviews, End of Term Examinations, and Supervised Summative Examinations from regular syllabus topics across all units. This eliminates unwanted concatenation of topics with assessment labels (e.g. `& Final Summative...`) and prevents artificial week compression. Exported `isPureAssessmentTopic` for direct consumption.
+2. **Module 1 Curriculum (`module-1.ts`)**:
+   - `entrepreneurship`: Verbatim overhaul according to KNEC TVET syllabus 4.1.0 into 12 structured teaching weeks + Week 8 CAT + Week 14 Final Exam. Removed all bizarre hallucinated phrases (such as *"dietary sources of business finance"* and *"physiological role of an entrepreneur"*).
+   - Replaced all inappropriate non-biological *"physiological role"* and *"dietary sources"* hallucinations across `information_communication_technology`, `communication_skills` (8 weeks repaired), `life_skills`, `food_safety_and_hygiene`, `food_production_invalids`, `diet_therapy_i`, `maternal_and_child_nutrition`, and `legal_aspects_nutrition`.
+   - Polished specific learning outcomes in `principles_of_human_nutrition` (Vitamins and Minerals) with authentic TVET Bloom's taxonomy outcomes.
+3. **Module 3 Curriculum (`module-3.ts`)**:
+   - Replaced non-biological *"physiological role"* and non-nutrition *"dietary sources"* across `food_microbiology_parasitology`, `food_security`, `nutrition_education_counselling`, `nutrition_epidemiology` (sources of mortality data, outbreak investigation), `nutrition_in_emergencies` (NGO/military roles, M&E SPHERE standards), `nutrition_assessment_surveillance` (anthropometric, surveillance systems), `product_development_marketing_sales` (sources of product ideas, feasibility), and `industrial_organization_management` (production requirements, material control stores, HR management).
+4. **Verification**: Comprehensive audit verified 0 remaining anomalies across all 4 registries (Module 1, Module 2, Module 3, Certificate). 100% of the 1,219 Vitest unit tests passed (239/239 test files) and `npm run check` (`typecheck && lint && build`) passed cleanly with zero errors.
+
+**Files changed:**
+- `src/features/teaching-documents/distribution-engine.ts` — Enhanced `isPureAssessmentTopic()` regex matcher and exported function.
+- `src/features/teaching-documents/curriculum-data/module-1.ts` — Comprehensive content fix and verbatim KNEC restructuring for Entrepreneurship, ICT, Communication Skills, Life Skills, Food Safety, and others.
+- `src/features/teaching-documents/curriculum-data/module-3.ts` — Fixed all outcome hallucinations in Food Security, Epidemiology, Emergencies, Assessment/Surveillance, Product Development, and Industrial Management.
+
+### 2026-09-26: UI — Microsoft Dynamics 365 Business Central ERP Design System & 2-Column Mobile Metric Grids
+
+**Summary:** Transitioned the administrative interface across all screens to the Microsoft Dynamics 365 Business Central ERP design language (Segoe UI typography, tabular figure alignment, neutral text and border palette, Business Central FastTab cards/tables, and Activity Cue tiles), and enforced a 2-column grid layout (`grid-cols-2 gap-2`) for metric cards on mobile viewports to prevent vertical card stacking.
+
+**Files changed:**
+- `src/app/globals.css` — Configured `--font-ui` to `"Segoe UI"`, `--font-code` to `"Segoe UI Mono"`, aligned design tokens to Microsoft Fluent ERP standards (`--background: #f3f2f1`, `--text-primary: #201f1e`, `--text-secondary: #605e5c`, `--border: #e1dfdd`, `--border-soft: #edebe9`), updated corner radius tokens to Business Central FastTab standards (`--radius-sm: 0.25rem`, `--radius-md: 0.375rem`, `--radius-lg: 0.5rem`), refined `.admin-metric-card` to Business Central Activity Cues with a 3px top accent bar, and styled tables to Business Central list layouts with tabular figures.
+- `src/components/ui/card.tsx` — Updated `Card`, `CardHeader`, and `CardTitle` to FastTab styling (`rounded-lg border-border shadow-[0_1px_2px_rgba(0,0,0,0.04)]`).
+- `src/components/ui/metric-card.tsx` — Styled Activity Cues with `tabular-nums`, clean Segoe UI weights, uppercase tracked labels, and restrained padding.
+- `src/components/ui/badge.tsx` — Aligned status badges to Fluent rounded tags (`rounded-md`, 4px radius) with tabular numerals.
+- `src/components/ui/button.tsx` — Updated button sizing classes to Business Central command buttons with clean `rounded-md` / `rounded-lg` borders.
+- `src/features/student-unit-registration/student-unit-registration-table.tsx` — Refined toolbar, search bar, dropdowns, and table borders to Business Central ERP styling.
+- `src/app/(dashboard)/students/unit-registration/page.tsx` — Replaced single-column vertical stack with `grid grid-cols-2 gap-2 sm:grid-cols-2 md:grid-cols-4`.
+- `src/app/(dashboard)/teaching-documents/page.tsx` — Updated telemetry strip to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
+- `src/app/(dashboard)/timetable/units/page.tsx` — Updated unit metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
+- `src/app/(dashboard)/timetable/teaching-allocations/page.tsx` — Updated allocation metrics to `grid gap-2 grid-cols-2 sm:grid-cols-3`.
+- `src/app/(dashboard)/timetable/cohorts/page.tsx` — Updated cohort metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
+- `src/app/(dashboard)/timetable/programmes/page.tsx` — Updated programme metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
+- `src/app/(dashboard)/students/reports/page.tsx` — Updated student reports metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6`.
+- `src/app/(dashboard)/assessment/analysis/page.tsx` — Updated assessment metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
+- `src/app/(dashboard)/attendance-clinical/class-attendance/analytics/page.tsx` — Updated attendance metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
+- `src/app/(dashboard)/operations/attendance/page.tsx` — Updated operations attendance metrics to `grid grid-cols-2 gap-2 sm:grid-cols-3`.
+- `src/app/(dashboard)/operations/action-center/page.tsx` — Updated action center metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
+- `src/app/(dashboard)/operations/incidents/page.tsx` — Updated incidents metrics to `grid grid-cols-2 gap-2 sm:grid-cols-3`.
+- `src/app/(dashboard)/testing/page.tsx` — Updated testing metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6`.
+- `src/app/(dashboard)/testing/sign-off/page.tsx` — Updated sign-off metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
+- `src/app/(dashboard)/testing/deployments/page.tsx` — Updated deployment metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
+- `src/app/(dashboard)/testing/defects/page.tsx` — Updated defects metrics to `grid grid-cols-2 gap-2 sm:grid-cols-3`.
+
+**Breaking changes / manual follow-up:** None.
+
+### 2026-09-26: UI — Move Status Column on Mobile to Student Details Page & Expand Name Column
+
+**Summary:** In the Unit Registration table (`/students/unit-registration`), the dedicated Status column is hidden on small screens (`<sm`) to relieve mobile crowding, allocating full horizontal space to student names and admission numbers so names are no longer truncated. Student names now link directly to their student details/profile page (`/students/registry/[studentId]`), and unavailable (attachment) students can tap the action label or name to view their profile. On the Student Details page, the status badge now displays the canonical lifecycle status and academic phase (e.g. "On attachment", "In class") via `getStudentStatusLabel` and `getStatusBadgeVariant`, with a direct `Unit Reg` action button. The Unit Registration Editor page also now displays the registration status badge directly in the page header with a shortcut to the student profile.
+
+**Files changed:**
+- `src/features/student-unit-registration/student-unit-registration-table.tsx` — Reconfigured mobile table layout to `grid-cols-[1fr_auto_auto]`, hid `Status` header and badge cells on mobile viewports (`hidden sm:inline` / `hidden sm:block`), linked student names to `/students/registry/[studentId]`, and linked "Unavailable" to student details.
+- `src/app/(dashboard)/students/registry/[studentId]/page.tsx` — Updated status badge to use canonical `getStudentStatusLabel(student.lifecycle_status, student.academic_phase)` and `getStatusBadgeVariant(...)`, and added a direct `Unit Reg` button for eligible students.
+- `src/app/(dashboard)/students/unit-registration/register/[studentId]/page.tsx` — Prominently placed registration verification status badge in `PageHeader` context and added `Student Profile` link.
+
+### 2026-09-26: UI — Student Overview Metric Cards 2-Column Mobile Grid & Compact Density
+
+**Summary:** Reconfigured the 6 metric cards on the Students dashboard (`/students`) from a tall single-column stack into a responsive 2-column grid (`grid-cols-2 gap-2`) on mobile viewports. Reduced minimum height to `5.25rem` and optimized padding and typography for higher mobile information density.
+
+**Files changed:**
+- `src/app/(dashboard)/students/page.tsx` — Added `grid-cols-2 gap-2` to mobile metric cards grid container, and compacted navigation cards.
+- `src/components/ui/metric-card.tsx` — Reduced mobile min-height from `6.9rem` to `5.25rem`, icon size to `size-6`, and font size.
+- `src/app/globals.css` — Updated `.admin-screen .admin-metric-card` mobile CSS rules to match compact density.
+
+### 2026-09-26: Fix — Prevent Bottom Navigation Bar from Obscuring the Last Card on Mobile
+
+**Summary:** Increased mobile bottom padding on `.admin-screen` and across all platform/module shell layouts (`StudentShell`, `PlatformShell`, `TimetableShell`, `AssessmentShell`, `StaffShell`, `StudentPortalShell`) to `calc(5.5rem + env(safe-area-inset-bottom, 0px))`. This guarantees the last card, button, or list row on any page scrolls fully into view above the fixed bottom navigation tab bar with comfortable breathing room.
+
+**Files changed:**
+- `src/app/globals.css` — Configured `.admin-screen` bottom padding to `calc(5.5rem + env(safe-area-inset-bottom, 0px))` on viewports `< 1024px`, reset nested `.admin-screen` padding to `0`, and kept `2rem` on desktop.
+- `src/components/layout/student-shell.tsx` — Updated `<main>` bottom padding to `pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]`.
+- `src/components/layout/platform-shell.tsx` — Updated `<main>` bottom padding to `pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]`.
+- `src/components/layout/timetable-shell.tsx` — Updated `<main>` bottom padding to `pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]`.
+- `src/components/layout/assessment-shell.tsx` — Updated `<main>` bottom padding to `pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]`.
+- `src/components/staff/staff-shell.tsx` — Updated `<main>` bottom padding to `pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]`.
+- `src/components/student/student-portal-shell.tsx` — Updated `<main>` bottom padding to `pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]`.
+
+**Breaking changes / manual follow-up:** None.
+
+### 2026-09-26: UI — Mobile Screen Density & Native Alignment Across Core Workspaces
+
+**Summary:** Optimised mobile layouts across Unit Registration, Department Attendance, Curriculum Content, and Trainer Management. Merged admission numbers directly beneath student names to free up horizontal width, eliminated action button collisions by hiding secondary desktop actions on small viewports, removed raw developer parameter prompt text, and introduced structured native mobile cards and compact telemetry grids.
+
+**Files changed:**
+- `src/features/student-unit-registration/student-unit-registration-table.tsx` — Placed admission numbers directly beneath student names, updated grid to 4 responsive columns, hid `Portal` preview button on mobile, and shortened action button label.
+- `src/app/(dashboard)/attendance/page.tsx` — Hoisted back link into `PageHeader` and removed raw URL query parameters instruction card.
+- `src/features/class-attendance/admin-table.tsx` — Transformed mobile vertical session list into native structured cards with labelled attendance statistics and right-aligned action buttons.
+- `src/app/(dashboard)/teaching-documents/curriculum/page.tsx` — Hoisted back navigation to `PageHeader` and hid destructive `Clear Documents` button on mobile.
+- `src/app/(dashboard)/trainers/page.tsx` — Converted 4 stacked full-height metric cards on mobile to a compact 2×2 grid and hid secondary desktop actions.
+
+**Breaking changes / manual follow-up:** None.
+
 ### 2026-09-26: UI — Balanced Admin Dashboard Workspaces with Attendance Icon & Route Highlighting
 
 **Summary:** Added the **Attendance** icon to the Admin Dashboard Workspaces card to complete a balanced 8-icon, 4×2 grid. Enhanced `isNavItemActive` to recognize `/attendance` so navigating from the workspace tile or sidebar correctly highlights the "Class Attendance" item. Also expanded academic session formatting to full month names (e.g. `September-December 2026`) and updated heading text colors from stark black to institutional teal and refined gray.

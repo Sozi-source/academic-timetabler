@@ -36,15 +36,30 @@ export default async function DepartmentStudentUnitRegistrationPage({
         title={context.student.fullName}
         description={`${context.student.admissionNumber} · ${context.student.programmeCode} · ${context.student.cohortName}`}
         icon={BookOpenCheck}
-        context={<Badge variant="institutional">{context.period.name}</Badge>}
+        context={
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Badge variant="institutional">{context.period.name}</Badge>
+            <Badge variant={context.existingStatus === 'verified' ? 'success' : 'neutral'}>
+              {context.existingStatus === 'verified' ? 'Verified' : 'Pending Verification'}
+            </Badge>
+          </div>
+        }
         actions={
-          <Link
-            href="/students/unit-registration"
-            className="inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle transition"
-          >
-            <ArrowLeft className="size-4" />
-            Back to Student List
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/students/registry/${studentId}`}
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle transition"
+            >
+              <span>Student Profile</span>
+            </Link>
+            <Link
+              href="/students/unit-registration"
+              className="inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle transition"
+            >
+              <ArrowLeft className="size-4" />
+              <span>Back to Student List</span>
+            </Link>
+          </div>
         }
       />
 

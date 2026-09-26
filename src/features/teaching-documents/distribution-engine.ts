@@ -50,16 +50,20 @@ function splitSubtopics(subtopics: string[], chunks: number): string[][] {
   return result;
 }
 
-function isPureAssessmentTopic(title: string): boolean {
+export function isPureAssessmentTopic(title: string): boolean {
   const t = title.toLowerCase().trim();
   return (
-    /^mid-term\s+(?:practical\s*&\s*theory\s+)?(?:examination|assessment|project\s+milestone\s+evaluation)/i.test(t) ||
-    /^(?:final|supervised\s+final|comprehensive\s+final)\s+(?:summative\s+)?(?:practical\s*&\s*theory\s+)?(?:examination|oral\s+project\s+defense)/i.test(t) ||
-    t === 'mid-term examination (cat)' ||
-    t === 'final summative examination' ||
-    t === 'final examination & course evaluation' ||
-    t === 'continuous assessment test (cat)' ||
-    t === 'end of term examination'
+    t.includes('continuous assessment test') ||
+    t.includes('summative examination') ||
+    t.includes('mid-term examination') ||
+    t.includes('mid-term review') ||
+    t.includes('end of term examination') ||
+    t.includes('supervised final') ||
+    t.includes('course evaluation') ||
+    /^cat\b/i.test(t) ||
+    /^rat\b/i.test(t) ||
+    /^mid-term\s+/i.test(t) ||
+    /^(?:final|supervised\s+final|comprehensive\s+final)/i.test(t)
   );
 }
 

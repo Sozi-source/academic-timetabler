@@ -191,7 +191,7 @@ export default async function UnitsPage() {
 
       <section
         aria-label="Unit metrics"
-        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+        className="grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4"
       >
         <MetricCard
           label="Registered units"

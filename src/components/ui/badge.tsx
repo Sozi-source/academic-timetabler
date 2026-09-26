@@ -47,7 +47,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        'inline-flex min-h-6 max-w-full items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-center text-[10px] font-semibold xl:text-[11px] leading-4 whitespace-normal break-words',
+        'inline-flex min-h-5 max-w-full items-center gap-1.5 rounded-md border px-2 py-0.5 text-center text-[10px] font-semibold tabular-nums xl:text-[11px] leading-4 whitespace-normal break-words',
         variantClasses[variant],
         className,
       )}

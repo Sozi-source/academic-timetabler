@@ -135,25 +135,25 @@ export function StudentUnitRegistrationTable({
 
   return (
     <div className="space-y-4">
-      {/* Control Bar: Search Input & Filter Dropdowns */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-surface p-3.5 shadow-2xs">
+      {/* Control Bar: Search Input & Filter Dropdowns (Business Central Command Bar) */}
+      <div className="flex flex-wrap items-center justify-between gap-2.5 rounded-lg border border-border bg-surface p-3 shadow-xs">
         {/* Search Bar */}
         <div className="relative flex-1 min-w-[240px]">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-muted" aria-hidden="true" />
+          <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-text-muted" aria-hidden="true" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="Search student name or admission no..."
-            className="h-9 w-full rounded-lg border border-border bg-surface pl-9 pr-3 text-xs text-text-primary placeholder:text-text-muted outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
+            className="h-8.5 w-full rounded-md border border-border bg-surface pl-8.5 pr-3 text-xs text-text-primary placeholder:text-text-muted outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
           />
         </div>
 
         {/* Filter Dropdowns */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Status Filter */}
-          <div className="flex items-center gap-1.5 rounded-lg border border-border bg-surface px-2.5 h-9 text-xs">
-            <Filter className="size-3.5 text-text-muted" aria-hidden="true" />
+          <div className="flex items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 h-8.5 text-xs">
+            <Filter className="size-3 text-text-muted" aria-hidden="true" />
             <select
               value={statusFilter}
               onChange={(e) => handleStatusChange(e.target.value)}
@@ -171,8 +171,8 @@ export function StudentUnitRegistrationTable({
 
           {/* Cohort Filter */}
           {cohortOptions.length > 0 && (
-            <div className="flex items-center gap-1.5 rounded-lg border border-border bg-surface px-2.5 h-9 text-xs">
-              <UsersRound className="size-3.5 text-text-muted" aria-hidden="true" />
+            <div className="flex items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 h-8.5 text-xs">
+              <UsersRound className="size-3 text-text-muted" aria-hidden="true" />
               <select
                 value={cohortFilter}
                 onChange={(e) => handleCohortChange(e.target.value)}
@@ -189,12 +189,12 @@ export function StudentUnitRegistrationTable({
           )}
 
           {/* Page Size Selector */}
-          <div className="flex items-center gap-1.5 rounded-lg border border-border bg-surface px-2.5 h-9 text-xs">
+          <div className="flex items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 h-8.5 text-xs">
             <span className="text-text-muted">Per page:</span>
             <select
               value={pageSize}
               onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-              className="bg-transparent text-xs font-bold text-text-primary outline-none cursor-pointer"
+              className="bg-transparent text-xs font-semibold text-text-primary outline-none cursor-pointer"
             >
               <option value={10}>10</option>
               <option value={25}>25</option>
@@ -205,10 +205,10 @@ export function StudentUnitRegistrationTable({
           <a
             href={exportUrl}
             download
-            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-surface px-3 text-xs font-semibold text-text-secondary shadow-2xs transition hover:bg-surface-subtle"
+            className="inline-flex h-8.5 items-center gap-1.5 rounded-md border border-border bg-surface px-3 text-xs font-semibold text-text-secondary shadow-xs transition hover:bg-surface-subtle"
             title="Export all matching unit registration records to Excel"
           >
-            <Download className="size-3.5" aria-hidden="true" />
+            <Download className="size-3" aria-hidden="true" />
             <span>Export Excel</span>
           </a>
         </div>
@@ -216,59 +216,60 @@ export function StudentUnitRegistrationTable({
 
       {/* Results Table */}
       {paginatedStudents.length === 0 ? (
-        <div className="rounded-xl border border-border bg-surface p-8 text-center">
+        <div className="rounded-lg border border-border bg-surface p-8 text-center">
           <p className="text-xs font-bold text-text-primary">No students match your filter criteria.</p>
           <p className="mt-1 text-[11px] text-text-muted">Try resetting your search query or status filter.</p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-border bg-surface shadow-2xs">
-          <div className="grid grid-cols-[1.3fr_1.15fr_0.7fr_0.7fr_1.6fr] gap-3 border-b border-border bg-surface-subtle px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-text-muted">
+        <div className="overflow-hidden rounded-lg border border-border bg-surface shadow-xs">
+          <div className="grid grid-cols-[1fr_auto_auto] sm:grid-cols-[2fr_1fr_1fr_1.3fr] items-center gap-2.5 sm:gap-3 border-b border-border bg-surface-subtle px-3 py-2 sm:px-4 sm:py-2.5 text-[10.5px] sm:text-[11px] font-semibold uppercase tracking-wider text-text-secondary">
             <span>Student</span>
-            <span>Admission Number</span>
-            <span>Units</span>
-            <span>Status</span>
+            <span className="text-center sm:text-left min-w-10 sm:min-w-0">Units</span>
+            <span className="hidden sm:inline">Status</span>
             <span className="text-right">Action</span>
           </div>
 
-          <div className="divide-y divide-border">
+          <div className="divide-y divide-border-soft">
             {paginatedStudents.map((student) => (
               <div
                 key={student.id}
-                className="grid grid-cols-[1.3fr_1.15fr_0.7fr_0.7fr_1.6fr] items-center gap-3 px-4 py-3 hover:bg-primary-subtle/20 transition-colors"
+                className="grid grid-cols-[1fr_auto_auto] sm:grid-cols-[2fr_1fr_1fr_1.3fr] items-center gap-2.5 sm:gap-3 px-3 py-2.5 sm:px-4 sm:py-3 hover:bg-primary-subtle/20 transition-colors"
               >
-                {/* Student Info */}
-                <div className="min-w-0">
-                  <p className="truncate text-xs font-bold text-text-primary">{student.fullName}</p>
-                </div>
-
-                {/* Admission Number */}
-                <div className="truncate font-mono text-xs text-text-secondary">
-                  {student.admissionNumber}
+                {/* Student Info: Name (links to student details page) + Admission Number underneath */}
+                <div className="min-w-0 pr-1">
+                  <Link
+                    href={`/students/registry/${student.id}`}
+                    className="truncate block text-xs font-bold text-text-primary hover:text-primary hover:underline transition-colors"
+                    title="View student profile & details"
+                  >
+                    {student.fullName}
+                  </Link>
+                  <p className="truncate font-mono text-[11px] text-text-muted">{student.admissionNumber}</p>
                 </div>
 
                 {/* Units Registered */}
-                <div>
+                <div className="text-center sm:text-left min-w-10 sm:min-w-0">
                   {student.academicPhase === 'attachment' ? (
-                    <p className="text-xs text-text-muted">Not applicable</p>
+                    <p className="text-[11px] text-text-muted sm:text-xs">N/A</p>
                   ) : (
                     <>
-                      <p className="text-xs font-bold text-text-primary">
+                      <p className="text-xs font-bold text-text-primary whitespace-nowrap">
                         {student.selectedUnits} / {student.expectedUnits}
                       </p>
-                      <p className="text-[10px] text-text-muted">units assigned</p>
+                      <p className="hidden text-[10px] text-text-muted sm:block">units assigned</p>
                     </>
                   )}
                 </div>
 
-                {/* Status Badge */}
-                <div>{statusBadge(student)}</div>
+                {/* Status Badge — hidden on small screen (viewable on student details page), visible on sm+ */}
+                <div className="hidden sm:block">{statusBadge(student)}</div>
 
                 {/* Action Buttons */}
-                <div className="flex min-w-0 flex-nowrap items-center justify-end gap-2">
+                <div className="flex min-w-0 flex-nowrap items-center justify-end gap-1.5 sm:gap-2">
                   {student.academicPhase !== 'attachment' && student.selectedUnits > 0 && (
                     <Link
                       href={`/students/registry/${student.id}/portal-view`}
-                      className="inline-flex h-8 shrink-0 items-center gap-1 whitespace-nowrap rounded-lg border border-border bg-surface px-2 text-[11px] font-bold text-text-secondary hover:bg-surface-subtle transition active:scale-95"
+                      className="hidden sm:inline-flex h-8 shrink-0 items-center gap-1 whitespace-nowrap rounded-lg border border-border bg-surface px-2 text-[11px] font-bold text-text-secondary hover:bg-surface-subtle transition active:scale-95"
                       title="View as Student (Portal Preview)"
                     >
                       <Eye className="size-3.5 text-primary" />
@@ -279,12 +280,19 @@ export function StudentUnitRegistrationTable({
                   {student.academicPhase !== 'attachment' ? (
                     <Link
                       href={`/students/unit-registration/register/${student.id}`}
-                      className="inline-flex h-8 shrink-0 items-center justify-center whitespace-nowrap rounded-lg bg-primary px-3 text-[11px] font-bold text-white shadow-2xs hover:bg-primary-hover transition active:scale-95"
+                      className="inline-flex h-8 shrink-0 items-center justify-center whitespace-nowrap rounded-lg bg-primary px-2.5 sm:px-3 text-[11px] font-bold text-white shadow-2xs hover:bg-primary-hover transition active:scale-95"
                     >
-                      {student.status === 'verified' ? 'Manage Units' : 'Register Units'}
+                      <span>{student.status === 'verified' ? 'Manage' : 'Register'}</span>
+                      <span className="hidden sm:inline">&nbsp;Units</span>
                     </Link>
                   ) : (
-                    <span className="text-[11px] font-medium text-text-muted">Unavailable</span>
+                    <Link
+                      href={`/students/registry/${student.id}`}
+                      className="text-[11px] font-medium text-text-muted hover:text-text-primary hover:underline transition-colors"
+                      title="View student profile & details"
+                    >
+                      Unavailable
+                    </Link>
                   )}
                 </div>
               </div>

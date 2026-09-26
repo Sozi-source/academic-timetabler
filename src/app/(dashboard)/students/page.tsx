@@ -37,7 +37,7 @@ export default async function StudentsModulePage() {
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 sm:gap-3">
         <MetricCard label="In Class" value={String(summary.inClass)} description="Current" icon={CheckCircle2} />
         <MetricCard label="On Attachment" value={String(summary.onAttachment)} description="Active phase" icon={Paperclip} />
         <MetricCard label="Deferred" value={String(summary.deferred)} description="Expected back" icon={History} />
@@ -46,43 +46,43 @@ export default async function StudentsModulePage() {
         <MetricCard label="Graduated" value={String(summary.graduated)} description="Historical" icon={GraduationCap} />
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <Card className="flex items-center justify-between gap-3 p-4">
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5 sm:gap-3">
+        <Card className="flex items-center justify-between gap-3 p-3 sm:p-4">
           <div className="flex items-center gap-3">
-            <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-white"><UsersRound className="size-4" /></span>
-            <div><p className="text-sm font-bold text-text-primary">Student registry</p><p className="text-xs text-text-muted">{summary.total} records</p></div>
+            <span className="flex size-8 sm:size-9 items-center justify-center rounded-lg bg-primary text-white"><UsersRound className="size-4" /></span>
+            <div><p className="text-xs sm:text-sm font-bold text-text-primary">Student registry</p><p className="text-[11px] sm:text-xs text-text-muted">{summary.total} records</p></div>
           </div>
           <Link href="/students/registry" className="text-xs font-semibold text-primary hover:underline">Open</Link>
         </Card>
 
-        <Card className="flex items-center justify-between gap-3 p-4">
+        <Card className="flex items-center justify-between gap-3 p-3 sm:p-4">
           <div className="flex items-center gap-3">
-            <span className="flex size-9 items-center justify-center rounded-lg bg-institutional-yellow text-institutional-yellow-ink"><RefreshCw className="size-4" /></span>
-            <div><p className="text-sm font-bold text-text-primary">Update statuses</p><p className="text-xs text-text-muted">Inline bulk update</p></div>
+            <span className="flex size-8 sm:size-9 items-center justify-center rounded-lg bg-institutional-yellow text-institutional-yellow-ink"><RefreshCw className="size-4" /></span>
+            <div><p className="text-xs sm:text-sm font-bold text-text-primary">Update statuses</p><p className="text-[11px] sm:text-xs text-text-muted">Inline bulk update</p></div>
           </div>
           <Link href="/students/status" className="text-xs font-semibold text-primary hover:underline">Open</Link>
         </Card>
 
-        <Card className="flex items-center justify-between gap-3 p-4">
+        <Card className="flex items-center justify-between gap-3 p-3 sm:p-4">
           <div className="flex items-center gap-3">
-            <span className="flex size-9 items-center justify-center rounded-lg bg-institutional-yellow text-institutional-yellow-ink"><BookOpenCheck className="size-4" /></span>
-            <div><p className="text-sm font-bold text-text-primary">Unit registration</p><p className="text-xs text-text-muted">Roster &amp; verification</p></div>
+            <span className="flex size-8 sm:size-9 items-center justify-center rounded-lg bg-institutional-yellow text-institutional-yellow-ink"><BookOpenCheck className="size-4" /></span>
+            <div><p className="text-xs sm:text-sm font-bold text-text-primary">Unit registration</p><p className="text-[11px] sm:text-xs text-text-muted">Roster &amp; verification</p></div>
           </div>
           <Link href="/students/unit-registration" className="text-xs font-semibold text-primary hover:underline">Open</Link>
         </Card>
 
-        <Card className="flex items-center justify-between gap-3 p-4">
+        <Card className="flex items-center justify-between gap-3 p-3 sm:p-4">
           <div className="flex items-center gap-3">
-            <span className="flex size-9 items-center justify-center rounded-lg bg-institutional-yellow text-institutional-yellow-ink"><FileUp className="size-4" /></span>
-            <div><p className="text-sm font-bold text-text-primary">Student onboarding</p><p className="text-xs text-text-muted">Excel import</p></div>
+            <span className="flex size-8 sm:size-9 items-center justify-center rounded-lg bg-institutional-yellow text-institutional-yellow-ink"><FileUp className="size-4" /></span>
+            <div><p className="text-xs sm:text-sm font-bold text-text-primary">Student onboarding</p><p className="text-[11px] sm:text-xs text-text-muted">Excel import</p></div>
           </div>
           <Link href="/students/registry/import" className="text-xs font-semibold text-primary hover:underline">Open</Link>
         </Card>
 
-        <Card className="flex items-center justify-between gap-3 p-4">
+        <Card className="flex items-center justify-between gap-3 p-3 sm:p-4">
           <div className="flex items-center gap-3">
-            <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-white"><BarChart3 className="size-4" /></span>
-            <div><p className="text-sm font-bold text-text-primary">Student reports</p><p className="text-xs text-text-muted">Census &amp; Excel</p></div>
+            <span className="flex size-8 sm:size-9 items-center justify-center rounded-lg bg-primary text-white"><BarChart3 className="size-4" /></span>
+            <div><p className="text-xs sm:text-sm font-bold text-text-primary">Student reports</p><p className="text-[11px] sm:text-xs text-text-muted">Census &amp; Excel</p></div>
           </div>
           <Link href="/students/reports" className="text-xs font-semibold text-primary hover:underline">Open</Link>
         </Card>

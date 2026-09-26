@@ -76,7 +76,7 @@ export default async function AttendanceOversightPage() {
         }
       />
 
-      <section className="grid gap-3 sm:grid-cols-3">
+      <section className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         <MetricCard
           label="Open"
           value={String(

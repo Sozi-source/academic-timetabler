@@ -73,7 +73,7 @@ export default async function StudentReportsPage() {
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
         <MetricCard label="In Class" value={String(summary.inClass)} description="Current students" icon={UserRoundCheck} />
         <MetricCard label="On Attachment" value={String(summary.onAttachment)} description="Active phase" icon={Paperclip} />
         <MetricCard label="Deferred" value={String(summary.deferred)} description="Expected to resume" icon={History} />

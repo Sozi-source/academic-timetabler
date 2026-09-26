@@ -75,7 +75,7 @@ export default async function ReleaseDeploymentsPage() {
         }
       />
 
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard label="Pilot" value={pilot?.versionLabel ?? 'None'} description="Current recorded Pilot" icon={Rocket} />
         <MetricCard label="Production" value={production?.versionLabel ?? 'None'} description="Current recorded Production" icon={ShieldCheck} />
         <MetricCard label="Deployments" value={String(deployments.length)} description="Immutable history" icon={Rocket} />

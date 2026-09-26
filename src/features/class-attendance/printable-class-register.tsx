@@ -195,7 +195,7 @@ export function PrintableClassRegister({
             </div>
 
             {/* Academic Details Block */}
-            <div className="mt-3 space-y-1 text-xs border-b border-slate-900 pb-2">
+            <div className="mt-3 space-y-1 text-xs border-b border-slate-300 pb-2">
               <p>
                 <span className="font-bold">School:</span> {schoolName}
               </p>
@@ -219,7 +219,7 @@ export function PrintableClassRegister({
             {/* Attendance Register Table & Sign-off Section (Unified Full-Width Landscape Container) */}
             <div className="mt-3 overflow-x-auto w-full">
               <div className="min-w-[900px] w-full space-y-8">
-                <table className="w-full table-fixed border-collapse border border-slate-900 text-left text-[10.5px]">
+                <table className="w-full table-fixed border-collapse border border-slate-400 text-left text-[10.5px]">
                   <colgroup>
                     <col className="w-9" />
                     <col className="w-44" />
@@ -231,14 +231,14 @@ export function PrintableClassRegister({
 
                   <thead>
                     {/* DATES Header Row */}
-                    <tr className="bg-slate-50 font-bold text-slate-900">
-                      <th colSpan={3} className="border border-slate-900 px-2 py-1 uppercase text-center tracking-wider">
+                    <tr className="bg-slate-50 font-bold text-slate-800">
+                      <th colSpan={3} className="border border-slate-300 px-2 py-1 uppercase text-center tracking-wider">
                         DATES
                       </th>
                       {Array.from({ length: sessionCount }, (_, i) => (
                         <th
                           key={i}
-                          className="border border-slate-900 px-0.5 py-1 text-center text-[9px]"
+                          className="border border-slate-300 px-0.5 py-1 text-center text-[9px]"
                         >
                           &nbsp;
                         </th>
@@ -246,14 +246,14 @@ export function PrintableClassRegister({
                     </tr>
 
                     {/* Column Titles */}
-                    <tr className="bg-slate-100 font-bold text-slate-900">
-                      <th className="border border-slate-900 px-1 py-1 text-center">No.</th>
-                      <th className="border border-slate-900 px-2 py-1">Adm No.</th>
-                      <th className="border border-slate-900 px-2 py-1">Name</th>
+                    <tr className="bg-slate-100/80 font-bold text-slate-800">
+                      <th className="border border-slate-300 px-1 py-1 text-center">No.</th>
+                      <th className="border border-slate-300 px-2 py-1">Adm No.</th>
+                      <th className="border border-slate-300 px-2 py-1">Name</th>
                       {Array.from({ length: sessionCount }, (_, i) => (
                         <th
                           key={i}
-                          className="border border-slate-900 px-1 py-1 text-center font-bold"
+                          className="border border-slate-300 px-1 py-1 text-center font-bold"
                         >
                           Sign
                         </th>
@@ -265,19 +265,19 @@ export function PrintableClassRegister({
                     {/* Registered Student Rows for this Cohort */}
                     {group.students.map((student, idx) => (
                       <tr key={student.studentId} className="h-6">
-                        <td className="border border-slate-900 px-1 py-0.5 text-center font-medium">
+                        <td className="border border-slate-300 px-1 py-0.5 text-center font-medium">
                           {idx + 1}.
                         </td>
-                        <td className="border border-slate-900 px-2 py-0.5 font-semibold whitespace-nowrap">
+                        <td className="border border-slate-300 px-2 py-0.5 font-semibold whitespace-nowrap">
                           {student.admissionNumber}
                         </td>
-                        <td className="border border-slate-900 px-2 py-0.5 font-bold uppercase truncate">
+                        <td className="border border-slate-300 px-2 py-0.5 font-bold uppercase truncate">
                           {student.fullName}
                         </td>
                         {Array.from({ length: sessionCount }, (_, i) => (
                           <td
                             key={i}
-                            className="border border-slate-900 p-0 text-center"
+                            className="border border-slate-300 p-0 text-center"
                           >
                             <div className="h-5 w-full" />
                           </td>
@@ -288,19 +288,19 @@ export function PrintableClassRegister({
                     {/* Blank Extra Rows for late adds */}
                     {Array.from({ length: blankRowsCount }, (_, i) => (
                       <tr key={`blank-${i}`} className="h-6">
-                        <td className="border border-slate-900 px-1 py-0.5 text-center font-medium">
+                        <td className="border border-slate-300 px-1 py-0.5 text-center font-medium">
                           {group.students.length + i + 1}.
                         </td>
-                        <td className="border border-slate-900 px-2 py-0.5 font-semibold">
+                        <td className="border border-slate-300 px-2 py-0.5 font-semibold">
                           &nbsp;
                         </td>
-                        <td className="border border-slate-900 px-2 py-0.5">
+                        <td className="border border-slate-300 px-2 py-0.5">
                           &nbsp;
                         </td>
                         {Array.from({ length: sessionCount }, (_, s) => (
                           <td
                             key={s}
-                            className="border border-slate-900 p-0 text-center"
+                            className="border border-slate-300 p-0 text-center"
                           >
                             <div className="h-5 w-full" />
                           </td>
@@ -311,33 +311,33 @@ export function PrintableClassRegister({
                 </table>
 
                 {/* Official Sign-off Footer - Full-Width & Well-Spaced Across Entire Landscape Register */}
-                <div className="pt-2 text-xs font-semibold text-slate-900 w-full">
+                <div className="pt-2 text-xs font-semibold text-slate-800 w-full">
                   <div className="grid grid-cols-[150px_1.2fr_70px_2.5fr_45px_1fr] items-center gap-x-3 gap-y-5 w-full">
                     {/* Row 1: Class Representative */}
                     <span className="font-bold whitespace-nowrap">Class Representative:</span>
-                    <span className="border-b border-slate-900 h-5 w-full" />
+                    <span className="border-b border-slate-400 h-5 w-full" />
                     <span className="font-bold text-right whitespace-nowrap">Comment:</span>
-                    <span className="border-b border-slate-900 h-5 w-full" />
+                    <span className="border-b border-slate-400 h-5 w-full" />
                     <span className="font-bold text-right whitespace-nowrap">Sign:</span>
-                    <span className="border-b border-slate-900 h-5 w-full" />
+                    <span className="border-b border-slate-400 h-5 w-full" />
 
                     {/* Row 2: Trainer */}
                     <span className="font-bold whitespace-nowrap">Trainer:</span>
-                    <span className="border-b border-slate-900 h-5 w-full flex items-end px-1 text-[11px] font-bold text-slate-800 truncate">
+                    <span className="border-b border-slate-400 h-5 w-full flex items-end px-1 text-[11px] font-bold text-slate-800 truncate">
                       {trainerName || ''}
                     </span>
                     <span className="font-bold text-right whitespace-nowrap">Comment:</span>
-                    <span className="border-b border-slate-900 h-5 w-full" />
+                    <span className="border-b border-slate-400 h-5 w-full" />
                     <span className="font-bold text-right whitespace-nowrap">Sign:</span>
-                    <span className="border-b border-slate-900 h-5 w-full" />
+                    <span className="border-b border-slate-400 h-5 w-full" />
 
                     {/* Row 3: HOD */}
                     <span className="font-bold whitespace-nowrap">HOD:</span>
-                    <span className="border-b border-slate-900 h-5 w-full" />
+                    <span className="border-b border-slate-400 h-5 w-full" />
                     <span className="font-bold text-right whitespace-nowrap">Comment:</span>
-                    <span className="border-b border-slate-900 h-5 w-full" />
+                    <span className="border-b border-slate-400 h-5 w-full" />
                     <span className="font-bold text-right whitespace-nowrap">Sign:</span>
-                    <span className="border-b border-slate-900 h-5 w-full" />
+                    <span className="border-b border-slate-400 h-5 w-full" />
                   </div>
                 </div>
               </div>

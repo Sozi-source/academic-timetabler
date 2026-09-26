@@ -70,7 +70,7 @@ export default async function UnitRegistrationPage() {
       />
 
       {/* Summary Metrics */}
-      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-2 md:grid-cols-4">
         <MetricCard label="Eligible Students" value={String(context.students.filter((student) => student.academicPhase !== 'attachment').length)} description="Available for unit registration" icon={UsersRound} />
         <MetricCard label="Submitted" value={String(context.submittedCount)} description="Awaiting review" icon={FileCheck2} />
         <MetricCard label="Verified Roster" value={String(context.verifiedCount)} description="Authoritative registration" icon={CheckCircle2} />

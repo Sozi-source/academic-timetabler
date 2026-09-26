@@ -48,7 +48,7 @@ export function PlatformShell({ profile, children }: PlatformShellProps) {
         />
 
         {/* Page Content */}
-        <main className="admin-screen mx-auto w-full max-w-[var(--content-max-width)] flex-1 px-[var(--content-gutter)] py-3.5 pb-20 sm:py-5 lg:py-6 lg:pb-6">
+        <main className="admin-screen mx-auto w-full max-w-[var(--content-max-width)] flex-1 px-[var(--content-gutter)] py-3.5 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] sm:py-5 lg:py-6 lg:pb-6">
           {children}
         </main>
       </div>

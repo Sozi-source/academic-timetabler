@@ -1,4 +1,4 @@
-import { ArrowLeft, BarChart3, CalendarCheck2 } from 'lucide-react';
+import { BarChart3, CalendarCheck2 } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/ui/page-header';
@@ -58,6 +58,8 @@ export default async function DepartmentClassAttendancePage({ searchParams }: Pa
         title="Department Class Attendance"
         description="Monitor trainer compliance and student attendance records."
         icon={CalendarCheck2}
+        backHref="/dashboard"
+        backLabel="Dashboard"
         context={
           <div className="flex gap-2">
             <Badge variant="neutral">{sessions.length} sessions</Badge>
@@ -67,17 +69,10 @@ export default async function DepartmentClassAttendancePage({ searchParams }: Pa
           </div>
         }
         actions={
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              href="/dashboard"
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
-            >
-              <ArrowLeft className="size-3.5" aria-hidden="true" />
-              Dashboard
-            </Link>
+          <div className="flex items-center gap-2">
             <Link
               href="/attendance/analytics"
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle transition"
             >
               <BarChart3 className="size-3.5" aria-hidden="true" />
               Analytics
@@ -85,13 +80,6 @@ export default async function DepartmentClassAttendancePage({ searchParams }: Pa
           </div>
         }
       />
-
-      {/* Basic Filters UI could be added here in a client component, but search params will drive data for now */}
-      <div className="rounded-xl border border-border bg-white px-4 py-3">
-         <p className="text-xs text-text-muted">
-           Use URL parameters (?academicPeriod=... &unit=... &cohort=... &trainer=... &date=... &status=...) to filter these results.
-         </p>
-      </div>
 
       <AttendanceAdminTable items={sessions} />
     </div>

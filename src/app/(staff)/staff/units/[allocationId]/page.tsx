@@ -7,7 +7,6 @@ import {
   Keyboard,
   Pencil,
   PlusCircle,
-  Printer,
   UsersRound,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -158,10 +157,10 @@ export default async function StaffUnitPage({
             <div className="mt-4 flex gap-2 border-t border-border pt-3">
               <Link
                 href={`/staff/units/${allocationId}/documents/course-outline`}
-                className="inline-flex h-8 flex-1 items-center justify-center gap-1 rounded-lg bg-primary px-2.5 text-xs font-semibold text-white transition hover:bg-primary-hover"
+                className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary px-2.5 text-xs font-semibold text-white transition hover:bg-primary-hover"
               >
-                <Printer className="size-3.5" />
-                View & Print
+                <BookOpen className="size-3.5" />
+                View Outline
               </Link>
               <Link
                 href={`/teaching-documents/curriculum/editor?unitId=${context.allocation.unitId}`}
@@ -191,10 +190,10 @@ export default async function StaffUnitPage({
             <div className="mt-4 flex gap-2 border-t border-border pt-3">
               <Link
                 href={`/staff/units/${allocationId}/documents/scheme-of-work`}
-                className="inline-flex h-8 flex-1 items-center justify-center gap-1 rounded-lg bg-primary px-2.5 text-xs font-semibold text-white transition hover:bg-primary-hover"
+                className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary px-2.5 text-xs font-semibold text-white transition hover:bg-primary-hover"
               >
-                <Printer className="size-3.5" />
-                View & Print
+                <FileSpreadsheet className="size-3.5" />
+                View Scheme
               </Link>
               <Link
                 href={`/teaching-documents/curriculum/editor?unitId=${context.allocation.unitId}`}
@@ -223,20 +222,13 @@ export default async function StaffUnitPage({
                 {uniqueWeeksCount}/14 weeks logged · {entriesCount} sessions
               </p>
             </div>
-            <div className="mt-4 flex gap-2 border-t border-primary/20 pt-3">
+            <div className="mt-4 border-t border-primary/20 pt-3">
               <Link
                 href={`/staff/units/${allocationId}/documents/record-of-work`}
-                className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary px-2.5 text-xs font-semibold text-white transition hover:bg-primary-hover"
+                className="inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-2.5 text-xs font-semibold text-white transition hover:bg-primary-hover"
               >
                 <PlusCircle className="size-3.5" />
                 Log Progress
-              </Link>
-              <Link
-                href={`/staff/units/${allocationId}/documents/record-of-work/print`}
-                className="inline-flex h-8 items-center justify-center gap-1 rounded-lg border border-border-strong bg-white px-2.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
-                title="Print Official Record"
-              >
-                <Printer className="size-3.5" />
               </Link>
             </div>
           </Card>
@@ -265,21 +257,15 @@ export default async function StaffUnitPage({
                 Monthly lesson roll
               </p>
             </div>
-            <div className="mt-3 flex gap-1.5 border-t border-slate-100 pt-2.5">
-              <Link
-                href={`/staff/units/${allocationId}/documents/class-attendance`}
-                className="inline-flex h-7 flex-1 items-center justify-center gap-1 rounded border border-slate-200 bg-white text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                <Printer className="size-3" />
-                Print
-              </Link>
+            <div className="mt-3 border-t border-slate-100 pt-2.5">
               <a
                 href={`/api/staff/units/${allocationId}/attendance-sheet/class?format=pdf`}
-                className="inline-flex h-7 items-center justify-center gap-1 rounded border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
-                title="Download PDF"
+                download
+                className="inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-white shadow-xs transition hover:bg-primary-hover active:scale-[0.99]"
+                title="Download Class Attendance PDF"
               >
-                <Download className="size-3" />
-                PDF
+                <Download className="size-3.5" />
+                Download PDF
               </a>
             </div>
           </Card>
@@ -299,21 +285,15 @@ export default async function StaffUnitPage({
                 Test signatures & marks
               </p>
             </div>
-            <div className="mt-3 flex gap-1.5 border-t border-slate-100 pt-2.5">
-              <Link
-                href={`/staff/units/${allocationId}/documents/cat-attendance`}
-                className="inline-flex h-7 flex-1 items-center justify-center gap-1 rounded border border-slate-200 bg-white text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                <Printer className="size-3" />
-                Print
-              </Link>
+            <div className="mt-3 border-t border-slate-100 pt-2.5">
               <a
                 href={`/api/staff/units/${allocationId}/attendance-sheet/cat?format=pdf`}
-                className="inline-flex h-7 items-center justify-center gap-1 rounded border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
-                title="Download PDF"
+                download
+                className="inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-white shadow-xs transition hover:bg-primary-hover active:scale-[0.99]"
+                title="Download CAT Attendance PDF"
               >
-                <Download className="size-3" />
-                PDF
+                <Download className="size-3.5" />
+                Download PDF
               </a>
             </div>
           </Card>
@@ -333,21 +313,15 @@ export default async function StaffUnitPage({
                 Scripts & candidate register
               </p>
             </div>
-            <div className="mt-3 flex gap-1.5 border-t border-slate-100 pt-2.5">
-              <Link
-                href={`/staff/units/${allocationId}/documents/exam-attendance`}
-                className="inline-flex h-7 flex-1 items-center justify-center gap-1 rounded border border-slate-200 bg-white text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                <Printer className="size-3" />
-                Print
-              </Link>
+            <div className="mt-3 border-t border-slate-100 pt-2.5">
               <a
                 href={`/api/staff/units/${allocationId}/attendance-sheet/exam?format=pdf`}
-                className="inline-flex h-7 items-center justify-center gap-1 rounded border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
-                title="Download PDF"
+                download
+                className="inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-white shadow-xs transition hover:bg-primary-hover active:scale-[0.99]"
+                title="Download Exam Attendance PDF"
               >
-                <Download className="size-3" />
-                PDF
+                <Download className="size-3.5" />
+                Download PDF
               </a>
             </div>
           </Card>

@@ -284,7 +284,7 @@ export function StaffShell({ profile, children }: StaffShellProps) {
         </header>
 
         {/* Page Content Body (with bottom padding for mobile nav) */}
-        <main className="portal-page-content flex-1 px-4 py-3.5 sm:px-6 lg:px-[1.625rem] lg:py-[1.625rem] pb-20 lg:pb-8 max-w-[var(--content-max-width)] w-full mx-auto print:max-w-none print:w-full print:p-0 print:m-0">
+        <main className="portal-page-content flex-1 px-4 py-3.5 sm:px-6 lg:px-[1.625rem] lg:py-[1.625rem] pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] lg:pb-8 max-w-[var(--content-max-width)] w-full mx-auto print:max-w-none print:w-full print:p-0 print:m-0">
           {children}
         </main>
 

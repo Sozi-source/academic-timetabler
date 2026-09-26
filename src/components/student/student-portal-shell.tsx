@@ -275,7 +275,7 @@ export function StudentPortalShell({
         </header>
 
         {/* Main Content Body */}
-        <main className="portal-page-content w-full max-w-[var(--content-max-width)] px-4 py-3.5 pb-20 sm:px-6 sm:py-7 lg:px-8 lg:pb-8">
+        <main className="portal-page-content w-full max-w-[var(--content-max-width)] px-4 py-3.5 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] sm:px-6 sm:py-7 lg:px-8 lg:pb-8">
           {children}
         </main>
 

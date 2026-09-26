@@ -33,6 +33,7 @@ export function BulkCourseOutlineUploadDialog() {
   const [parseResult, setParseResult] = useState<BulkParseResult | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const hasValidationErrors = parseResult?.issues.some((issue) => issue.severity === 'error') ?? false;
 
   const handleOpen = () => {
     setIsOpen(true);
@@ -309,7 +310,11 @@ export function BulkCourseOutlineUploadDialog() {
             {/* Modal Footer */}
             <div className="flex items-center justify-between border-t border-border px-6 py-3.5 bg-surface-subtle">
               <span className="text-[11px] text-text-muted">
-                {parseResult ? `${parseResult.units.length} unit(s) ready to publish` : 'Select a file to begin'}
+                {hasValidationErrors
+                  ? 'Resolve the topic and coverage issues before publishing'
+                  : parseResult
+                    ? `${parseResult.units.length} unit(s) ready to publish`
+                    : 'Select a file to begin'}
               </span>
 
               <div className="flex items-center gap-2">
@@ -326,7 +331,7 @@ export function BulkCourseOutlineUploadDialog() {
                   variant="primary"
                   size="sm"
                   onClick={handleCommit}
-                  disabled={!parseResult || parseResult.units.length === 0 || isCommitting || isParsing}
+                  disabled={!parseResult || parseResult.units.length === 0 || hasValidationErrors || isCommitting || isParsing}
                   leadingIcon={
                     isCommitting ? (
                       <Loader2 className="size-3.5 animate-spin" />

@@ -8,23 +8,23 @@
    ============================================================ */
 
 :root {
-  /* Application surfaces */
-  --background: #f3f6f5;
-  --foreground: #1f2937;
+  /* Application surfaces — Business Central ERP workbench */
+  --background: #f3f2f1;
+  --foreground: #201f1e;
 
   --surface: #ffffff;
-  --surface-subtle: #f8faf9;
-  --surface-muted: #eef3f2;
+  --surface-subtle: #faf9f8;
+  --surface-muted: #edebe9;
   --surface-raised: #ffffff;
 
-  /* Teal primary identity */
-  --primary: #0f766e;
-  --primary-hover: #0d655e;
-  --primary-active: #0b5c56;
-  --primary-deep: #0b4f4a;
-  --primary-deeper: #083d39;
-  --primary-soft: #e8f4f2;
-  --primary-subtle: #f2f8f7;
+  /* Teal primary identity — Business Central Petrol & Institutional Deep Teal */
+  --primary: #00756a;
+  --primary-hover: #006359;
+  --primary-active: #00524a;
+  --primary-deep: #00433c;
+  --primary-deeper: #00342f;
+  --primary-soft: #e6f4f2;
+  --primary-subtle: #f0f8f7;
   --primary-foreground: #ffffff;
 
   /* Institutional yellow accent */
@@ -37,64 +37,64 @@
 
   /* Navigation */
   --navigation-background: #ffffff;
-  --navigation-border: #dfe6e5;
-  --navigation-text: #52606d;
-  --navigation-hover: #f8faf9;
-  --navigation-active: #e8f4f2;
-  --navigation-active-text: #0f766e;
+  --navigation-border: #e1dfdd;
+  --navigation-text: #605e5c;
+  --navigation-hover: #f3f2f1;
+  --navigation-active: #e6f4f2;
+  --navigation-active-text: #00756a;
 
-  /* Typography Colors */
-  --text-primary: #17211f;
-  --text-secondary: #4d5b57;
-  --text-muted: #66736f;
-  --text-subtle: #87938f;
+  /* Typography Colors — Microsoft Dynamics 365 Business Central standard */
+  --text-primary: #201f1e;
+  --text-secondary: #605e5c;
+  --text-muted: #797775;
+  --text-subtle: #a19f9d;
   --text-inverse: #ffffff;
 
-  /* Borders & Dividers */
-  --border: #dfe6e5;
-  --border-soft: #e9eeed;
-  --border-strong: #cbd6d4;
+  /* Borders & Dividers — Microsoft Fluent standard */
+  --border: #e1dfdd;
+  --border-soft: #edebe9;
+  --border-strong: #c8c6c4;
 
   /* Focus & Controls */
   --focus-ring: #91c5c0;
-  --focus-border: #0f766e;
+  --focus-border: #00756a;
 
   /* Secondary & Muted Actions */
-  --secondary: #edf2f1;
-  --secondary-hover: #e2e9e8;
-  --secondary-foreground: #33413f;
+  --secondary: #f3f2f1;
+  --secondary-hover: #edebe9;
+  --secondary-foreground: #201f1e;
 
-  /* Semantic Feedback States */
-  --success: #2d6a4f;
-  --success-surface: #edf7f1;
-  --success-border: #c7e4d3;
+  /* Semantic Feedback States — Microsoft Fluent ERP */
+  --success: #107c41;
+  --success-surface: #dff6dd;
+  --success-border: #107c41;
 
   --warning: #8a641f;
-  --warning-surface: #fff8e7;
-  --warning-border: #ead8a6;
+  --warning-surface: #fff4ce;
+  --warning-border: #b48200;
 
-  --danger: #a34646;
-  --danger-surface: #fdf1f1;
-  --danger-border: #ebc8c8;
+  --danger: #a80000;
+  --danger-surface: #fde7e9;
+  --danger-border: #a80000;
 
-  --info: #0284c7;
-  --info-surface: #f0f9ff;
-  --info-border: #bae6fd;
+  --info: #0078d4;
+  --info-surface: #eff6fc;
+  --info-border: #0078d4;
 
-  /* Radius System */
-  --radius-sm: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.25rem;
+  /* Radius System — Restrained Business Central ERP FastTab & Card standards */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
 
   /* Layout Constraints */
   --content-max-width: 90rem;
   --sidebar-width: 14.5rem;
   --header-height: 4rem;
 
-  /* Native UI typography: sharp, fast-loading, and legible on every device. */
-  --font-ui: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-code: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  /* Microsoft Dynamics 365 Business Central typography: Segoe UI, tabular figures */
+  --font-ui: "Segoe UI", "Segoe UI Web (West European)", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+  --font-code: "Segoe UI Mono", "Cascadia Code", Consolas, "Liberation Mono", Menlo, monospace;
 }
 
 @theme inline {
@@ -326,43 +326,50 @@ code, kbd, samp, pre {
   max-width:var(--admin-max);
   margin-inline:auto;
   min-width:0;
-  padding-bottom:2rem;
+  padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 1024px) {
+  .admin-screen {
+    padding-bottom: 2rem;
+  }
+}
+.admin-screen .admin-screen {
+  padding-bottom: 0;
 }
 .admin-screen > *{min-width:0}
 .admin-screen article{min-width:0}
 .admin-screen .rounded-2xl,
 .admin-screen .rounded-xl{max-width:100%}
 
-/* Metric cards share a restrained surface treatment; their parent owns the grid. */
+/* Metric cards — Microsoft Dynamics 365 Business Central Activity Cues */
 .admin-metric-card{
   position:relative;
   overflow:hidden;
-  border:1px solid #e4e9e7 !important;
-  border-radius:1rem !important;
-  background:linear-gradient(180deg,#fff 0%,#fbfcfc 100%) !important;
-  box-shadow:0 1px 2px rgb(15 23 42/.035),0 8px 24px rgb(15 23 42/.025) !important;
+  border:1px solid var(--border) !important;
+  border-radius:var(--radius-lg) !important;
+  background:var(--surface) !important;
+  box-shadow:0 1px 2px rgba(0, 0, 0, 0.04) !important;
   transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease;
 }
 .admin-metric-card::after{
   content:"";
-  position:absolute;left:0;top:0;bottom:0;width:2px;
-  background:var(--primary);opacity:.0;transition:opacity .16s ease;
+  position:absolute;left:0;top:0;right:0;height:3px;
+  background:var(--primary);opacity:1;transition:opacity .16s ease;
 }
 .admin-metric-card:hover{
-  border-color:#cbd9d6 !important;
-  box-shadow:0 8px 24px rgb(15 23 42/.07) !important;
+  border-color:var(--border-strong) !important;
+  box-shadow:0 4px 12px rgba(0, 0, 0, 0.06) !important;
   transform:translateY(-1px);
 }
-.admin-metric-card:hover::after{opacity:.75}
 .admin-metric-icon{transition:transform .16s ease,background .16s ease}
 .admin-metric-card:hover .admin-metric-icon{transform:scale(1.04)}
 
 @media(max-width:639px){
   .admin-screen{padding-top:.75rem}
-  .admin-screen .admin-metric-card{min-height:6.6rem;padding:.75rem}
+  .admin-screen .admin-metric-card{min-height:5.25rem;padding:.625rem .75rem}
   .admin-screen .admin-metric-card p{max-width:100%}
-  .admin-screen .admin-metric-card .admin-metric-icon{width:1.75rem;height:1.75rem}
-  .admin-screen .admin-metric-card [class*="text-\\[1.7rem\\]"]{font-size:1.45rem}
+  .admin-screen .admin-metric-card .admin-metric-icon{width:1.5rem;height:1.5rem}
+  .admin-screen .admin-metric-card [class*="text-\\[1.7rem\\]"]{font-size:1.35rem}
 }
 
 /* Shared page hierarchy */
@@ -376,13 +383,33 @@ code, kbd, samp, pre {
   .admin-screen :is(button,[role="button"]){min-height:2.5rem}
 }
 
-/* Tables become deliberate horizontal workspaces on small screens, never page overflow. */
+/* Tables: Business Central ERP list page and FastTab layout */
 .admin-screen .overflow-x-auto{
   scrollbar-width:thin;
   -webkit-overflow-scrolling:touch;
-  border-radius:1rem;
+  border-radius:var(--radius-lg);
+  border:1px solid var(--border);
 }
-.admin-screen table{font-size:.78rem}
+.admin-screen table{
+  font-size:.8125rem;
+  font-variant-numeric:tabular-nums;
+}
+.admin-screen table thead{
+  background-color:var(--surface-subtle);
+  border-bottom:1px solid var(--border);
+  color:var(--text-secondary);
+  font-size:0.6875rem;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.05em;
+}
+.admin-screen table tbody tr{
+  border-bottom:1px solid var(--border-soft);
+  transition:background-color 0.12s ease;
+}
+.admin-screen table tbody tr:hover{
+  background-color:rgba(0, 117, 106, 0.035);
+}
 @media(max-width:639px){
   .admin-screen table th,.admin-screen table td{padding:.625rem .75rem;white-space:nowrap}
 }

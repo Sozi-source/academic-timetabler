@@ -7,7 +7,6 @@ import {
   FileSpreadsheet,
   FileText,
   GraduationCap,
-  Printer,
   Search,
   UsersRound,
   X,
@@ -155,20 +154,14 @@ export function StaffDownloadsView({
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <Link
-                        href={`/staff/units/${alloc.allocationId}/documents/class-attendance`}
-                        className="inline-flex h-7 items-center gap-1 rounded border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
-                      >
-                        <Printer className="size-3" />
-                        Print
-                      </Link>
                       <a
                         href={`/api/staff/units/${alloc.allocationId}/attendance-sheet/class?format=pdf`}
-                        className="inline-flex h-7 items-center gap-1 rounded border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
-                        title="Download PDF"
+                        download
+                        className="inline-flex h-7 items-center gap-1.5 rounded-md bg-primary px-2.5 text-[11px] font-semibold text-white shadow-2xs hover:bg-primary-hover active:scale-[0.99]"
+                        title="Download Class Attendance PDF"
                       >
                         <Download className="size-3" />
-                        PDF
+                        Download PDF
                       </a>
                     </div>
                   </div>
@@ -183,20 +176,14 @@ export function StaffDownloadsView({
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <Link
-                        href={`/staff/units/${alloc.allocationId}/documents/cat-attendance`}
-                        className="inline-flex h-7 items-center gap-1 rounded border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
-                      >
-                        <Printer className="size-3" />
-                        Print
-                      </Link>
                       <a
                         href={`/api/staff/units/${alloc.allocationId}/attendance-sheet/cat?format=pdf`}
-                        className="inline-flex h-7 items-center gap-1 rounded border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
-                        title="Download PDF"
+                        download
+                        className="inline-flex h-7 items-center gap-1.5 rounded-md bg-primary px-2.5 text-[11px] font-semibold text-white shadow-2xs hover:bg-primary-hover active:scale-[0.99]"
+                        title="Download CAT Attendance PDF"
                       >
                         <Download className="size-3" />
-                        PDF
+                        Download PDF
                       </a>
                     </div>
                   </div>
@@ -211,20 +198,14 @@ export function StaffDownloadsView({
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <Link
-                        href={`/staff/units/${alloc.allocationId}/documents/exam-attendance`}
-                        className="inline-flex h-7 items-center gap-1 rounded border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
-                      >
-                        <Printer className="size-3" />
-                        Print
-                      </Link>
                       <a
                         href={`/api/staff/units/${alloc.allocationId}/attendance-sheet/exam?format=pdf`}
-                        className="inline-flex h-7 items-center gap-1 rounded border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
-                        title="Download PDF"
+                        download
+                        className="inline-flex h-7 items-center gap-1.5 rounded-md bg-primary px-2.5 text-[11px] font-semibold text-white shadow-2xs hover:bg-primary-hover active:scale-[0.99]"
+                        title="Download Exam Attendance PDF"
                       >
                         <Download className="size-3" />
-                        PDF
+                        Download PDF
                       </a>
                     </div>
                   </div>

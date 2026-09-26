@@ -70,7 +70,7 @@ export default async function OperationsActionCenterPage() {
         }
       />
 
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard label="Actions" value={String(counts.total)} description="Active queue" icon={ListChecks} />
         <MetricCard label="Critical" value={String(counts.critical)} description="Critical blockers" icon={AlertTriangle} />
         <MetricCard label="Warnings" value={String(counts.warning)} description="Review items" icon={ShieldCheck} />

@@ -1,4 +1,4 @@
-import { ArrowLeft, CalendarDays, Eye, History, KeyRound, Pencil, UsersRound } from 'lucide-react';
+import { ArrowLeft, BookOpenCheck, CalendarDays, Eye, History, KeyRound, Pencil, UsersRound } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -16,14 +16,11 @@ import {
 } from '@/features/students/queries';
 import { ReassignCohortDialog } from '@/features/students/reassign-cohort-dialog';
 import { ResetStudentPasswordDialog } from '@/features/students/reset-student-password-dialog';
-import type { StudentLifecycleEventType, StudentLifecycleStatus } from '@/features/students/types';
-
-function statusVariant(status: StudentLifecycleStatus) {
-  if (status === 'active' || status === 'admitted' || status === 'completed' || status === 'graduated') return 'success' as const;
-  if (status === 'deferred' || status === 'suspended') return 'warning' as const;
-  if (status === 'dropped_out') return 'danger' as const;
-  return 'neutral' as const;
-}
+import {
+  getStatusBadgeVariant,
+  getStudentStatusLabel,
+} from '@/features/students/student-status-stage';
+import type { StudentLifecycleEventType } from '@/features/students/types';
 
 const eventLabels: Partial<Record<StudentLifecycleEventType, string>> = {
   admission: 'Admitted',
@@ -74,9 +71,17 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
               <h1 className="text-base sm:text-lg font-bold text-[#033B36] leading-tight">
                 {student.full_name}
               </h1>
-              <Badge variant={statusVariant(student.lifecycle_status)} className="text-[10px] px-2 py-0 min-h-5">
-                {student.lifecycle_status.replaceAll('_', ' ')}
+              <Badge
+                variant={getStatusBadgeVariant(student.lifecycle_status, student.academic_phase)}
+                className="text-[10px] px-2 py-0 min-h-5"
+              >
+                {getStudentStatusLabel(student.lifecycle_status, student.academic_phase)}
               </Badge>
+              {reportingStatus === 'reported' ? (
+                <Badge variant="success" className="text-[10px] px-2 py-0 min-h-5">
+                  Reported
+                </Badge>
+              ) : null}
             </div>
             <p className="mt-1 font-mono text-[11px] text-text-muted leading-tight">
               {student.admission_number}
@@ -89,6 +94,15 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
 
           {/* Slim, neatly aligned action buttons */}
           <div className="grid grid-cols-2 gap-1.5 sm:flex sm:w-auto sm:items-center sm:gap-2 shrink-0">
+            {student.academic_phase !== 'attachment' ? (
+              <Link
+                href={`/students/unit-registration/register/${student.id}`}
+                className="inline-flex h-8 w-full sm:w-auto items-center justify-center gap-1 rounded-lg border border-border bg-surface px-2.5 text-xs font-semibold text-text-secondary shadow-2xs transition hover:bg-surface-subtle whitespace-nowrap active:scale-95"
+              >
+                <BookOpenCheck className="size-3.5 text-primary" />
+                <span>Unit Reg</span>
+              </Link>
+            ) : null}
             <ReassignCohortDialog
               studentId={student.id}
               studentName={student.full_name}

@@ -30,7 +30,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "34.3.01 Introduction to Food Microbiology and Parasitology & 34.3.02 Role and Significance of Microorganisms",
         subTopics: ["Meaning of terms", "Background of food microbiology and parasitology", "Importance of food microbiology and parasitology", "Significance of microorganisms", "Role of microorganisms in the environment and human activities", "Primary sources of microorganisms found in food: soil and water; plants and plant products; intestinal tract of animals; food utensils; animal feeds and hides; air and dust", "Introduction to sampling methods", "Surface sampling techniques"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 34.3.01 Introduction to Food Microbiology and Parasitology & 34.3.02 Role and Significance of Microorganisms.\n• Explain background of food microbiology and parasitology.\n• Explain the functions and physiological role of food microbiology and parasitology.\n• Explain the functions and physiological role of microorganisms.\n• Explain the functions and physiological role of microorganisms in the environment and human activities.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define food microbiology and parasitology terms and concepts.\n• Explain the historical background and importance of food microbiology.\n• Explain the beneficial, spoilage and pathogenic roles of microorganisms in food systems.\n• Identify primary environmental sources of food contamination.\n• Demonstrate aseptic food and surface sampling techniques.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -355,7 +355,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "36.3.01 Introduction to Food Security",
         subTopics: ["Meaning of key terms used in food security", "Importance of food security", "Right to food and food sovereignty"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain meaning of key terms used in food security.\n• Explain the functions and physiological role of food security.\n• Explain right to food and food sovereignty.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define food security, food sovereignty, and nutrition security concepts.\n• Explain the four pillars and national importance of food security.\n• Analyze the human right to adequate food under national and international law.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -435,7 +435,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "36.3.08 Gender and Food Security",
         subTopics: ["Factors that determine the role of gender in food security in the society", "Role of gender in food security"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain factors that determine the role of gender in food security in the society.\n• Explain the functions and physiological role of gender in food security.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Analyze socio-cultural and economic factors determining gender roles in food production.\n• Explain the influence of women's empowerment, land rights, and resource access on household food security.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -445,7 +445,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "36.3.09 Stakeholders in Food Security",
         subTopics: ["Stakeholders in food security", "Role of the legislature in food security", "Role of the ministries", "Role played by NGOs, BOs, FBOs and other agencies in food security"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain stakeholders in food security.\n• Explain the functions and physiological role of the legislature in food security.\n• Explain the functions and physiological role of the ministries.\n• Explain role played by NGOs, BOs, FBOs and other agencies in food security.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Identify key public, private, and civil society stakeholders in food security.\n• Explain the legislative and policy oversight role of parliament in food security.\n• Explain the mandates of relevant government ministries and line departments.\n• Analyze the collaborative role of NGOs, CBOs, FBOs, and international agencies in food security.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -549,7 +549,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "37.3.04 Communication in Nutrition Education and Counselling",
         subTopics: ["Meaning of terms", "Importance of communication to nutrition education and counselling", "Components of communication", "Characteristics of a good health and nutrition educator and counsellor", "Methods of teaching and materials"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 37.3.04 Communication in Nutrition Education and Counselling.\n• Explain the functions and physiological role of communication to nutrition education and counselling.\n• Describe the structure and components of communication.\n• Explain characteristics of a good health and nutrition educator and counsellor.\n• Describe methods and procedures for teaching and materials.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in communication for nutrition education.\n• Explain the importance and role of communication in nutrition education and counselling.\n• Describe the components of the communication process.\n• Explain characteristics of an effective health and nutrition educator and counsellor.\n• Select appropriate teaching methods and instructional materials.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -559,7 +559,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "37.3.05 Nutrition Counselling",
         subTopics: ["Meaning of terms", "Importance of nutrition counselling", "Steps in nutrition counselling", "Counselling in multicultural settings", "Techniques in counselling", "Roles and qualities of a nutrition counsellor"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 37.3.05 Nutrition Counselling.\n• Explain the functions and physiological role of nutrition counselling.\n• Explain steps in nutrition counselling.\n• Explain counselling in multicultural settings.\n• Explain techniques in counselling.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in nutrition counselling.\n• Explain the importance and principles of nutrition counselling.\n• Outline the steps in the nutrition counselling process.\n• Apply counselling skills in multicultural settings.\n• Demonstrate effective counselling techniques and qualities of a nutrition counsellor.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -875,7 +875,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "39.3.05 Measures of Mortality",
         subTopics: ["Meaning of terms", "Importance of mortality data", "Measures of mortality", "Sources of mortality data"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 39.3.05 Measures of Mortality.\n• Explain the functions and physiological role of mortality data.\n• Explain measures of mortality.\n• Identify dietary sources of mortality data.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in measures of mortality.\n• Explain the importance and epidemiological applications of mortality data.\n• Calculate and interpret measures of mortality (crude death rate, cause-specific mortality, infant mortality).\n• Identify reliable sources of vital statistics and mortality data.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -905,7 +905,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "39.3.09 Population Screening",
         subTopics: ["Meaning of terms", "General aims of screening", "Population screening tools", "Characteristics of screening tools", "Considerations in establishing screening programmes"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 39.3.09 Population Screening.\n• Explain general aims of screening.\n• Demonstrate safe handling and operation of population screening tools.\n• Demonstrate safe handling and operation of characteristics of screening tools.\n• Explain considerations in establishing screening programmes.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in population screening.\n• Explain the general aims and principles of screening programmes.\n• Describe population screening tools and evaluate criteria for screening tools (sensitivity, specificity).\n• Explain epidemiological considerations in establishing screening programmes.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -925,7 +925,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "39.3.10 Outbreak Investigation",
         subTopics: ["Meaning of terms", "Importance of investigating an outbreak", "Steps of outbreak investigation"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 39.3.10 Outbreak Investigation.\n• Explain the functions and physiological role of investigating an outbreak.\n• Explain steps of outbreak investigation.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in disease outbreak investigation.\n• Explain the importance and objectives of investigating disease outbreaks.\n• Describe the systematic steps involved in an epidemiological outbreak investigation.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -1027,7 +1027,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "40.3.03 Roles and Responsibilities of Stakeholders in Humanitarian Activities",
         subTopics: ["Role of NGOs and FBOs", "Role of the military", "Socio-political factors surrounding emergencies"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the functions and physiological role of ngos and FBOs.\n• Explain the functions and physiological role of the military.\n• Explain socio-political factors surrounding emergencies.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the roles and humanitarian responsibilities of NGOs and FBOs.\n• Explain the civil-military coordination and role of the military in emergency logistics.\n• Analyze socio-political and security factors surrounding emergency operations.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -1067,7 +1067,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "40.3.07 Monitoring and Evaluation of Food and Nutrition Emergency Situations",
         subTopics: ["Meaning of terms", "Importance of monitoring and evaluation", "Challenges of monitoring and evaluation", "Sphere standards in monitoring and evaluation of food and nutrition responses in emergency responses"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 40.3.07 Monitoring and Evaluation of Food and Nutrition Emergency Situations.\n• Explain the functions and physiological role of monitoring and evaluation.\n• Discuss emerging issues, trends and coping strategies in 40.3.07 Monitoring and Evaluation of Food and Nutrition Emergency Situations.\n• Explain sphere standards in monitoring and evaluation of food and nutrition responses in emergency responses.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in monitoring and evaluation of emergency nutrition programs.\n• Explain the importance and key objectives of monitoring and evaluation in emergencies.\n• Identify operational challenges encountered in emergency M&E.\n• Apply SPHERE minimum standards and indicators in emergency nutrition response evaluation.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -1335,7 +1335,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "42.3.01 Introduction to Nutrition Assessment and Surveillance",
         subTopics: ["Meaning of terms", "Importance of nutrition assessment", "Application of nutrition assessment"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 42.3.01 Introduction to Nutrition Assessment and Surveillance.\n• Explain the functions and physiological role of nutrition assessment.\n• Explain application of nutrition assessment.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in nutrition assessment and surveillance.\n• Explain the importance, objectives, and role of nutrition assessment in clinical and community settings.\n• Explain key applications of nutrition assessment in healthcare delivery.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -1355,7 +1355,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "42.3.03 Anthropometric Assessment",
         subTopics: ["Importance of anthropometric assessment", "Types of anthropometric measurements", "Indices of anthropometric measurements"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the functions and physiological role of anthropometric assessment.\n• Classify anthropometric measurements and describe their categories.\n• Explain indices of anthropometric measurements.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the importance and role of anthropometric assessment in evaluating nutritional status.\n• Classify anthropometric measurements (weight, height/length, MUAC, head circumference, skinfold).\n• Calculate and interpret anthropometric indices (WAZ, HAZ, WHZ, BMI-for-age).",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -1395,7 +1395,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "42.3.07 Nutrition Surveillance",
         subTopics: ["Meaning of terms", "Importance of nutrition surveillance", "Characteristics of surveillance", "Principles of nutrition surveillance"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 42.3.07 Nutrition Surveillance.\n• Explain the functions and physiological role of nutrition surveillance.\n• Explain characteristics of surveillance.\n• Describe the principles of nutrition surveillance.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in nutrition surveillance.\n• Explain the importance, purpose, and role of nutrition surveillance in public health.\n• Outline the core characteristics of an effective surveillance system.\n• Describe the guiding principles of community and facility-based nutrition surveillance.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -1415,7 +1415,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "42.3.08 Surveillance Information",
         subTopics: ["Nutrition surveillance information", "Importance of nutrition surveillance information", "Principal users of surveillance information"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain nutrition surveillance information.\n• Explain the functions and physiological role of nutrition surveillance information.\n• Explain principal users of surveillance information.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Describe types and formats of nutrition surveillance information and reports.\n• Explain the importance and utilization of surveillance information in decision-making and early warning.\n• Identify principal users and stakeholders of nutrition surveillance information.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -1498,7 +1498,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "43.3.01 Introduction to Product Development",
         subTopics: ["Meaning of terms", "Importance of product development", "Levels of product development", "Product life cycle"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 43.3.01 Introduction to Product Development.\n• Explain the functions and physiological role of product development.\n• Explain levels of product development.\n• Explain product life cycle.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in food product development.\n• Explain the importance and business rationale for new product development.\n• Describe the levels of product development.\n• Explain the stages of the product life cycle.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -1508,7 +1508,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "43.3.02 Idea Generation and Concept Development",
         subTopics: ["Sources of ideas", "Processing of ideas", "Information gathering", "Information evaluation", "Feasibility analysis"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Identify dietary sources of ideas.\n• Describe the structure, components and function of processing of ideas.\n• Explain information gathering.\n• Explain information evaluation.\n• Explain feasibility analysis.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Identify internal and external sources of new product ideas.\n• Describe the screening and processing of product ideas.\n• Explain market information gathering methods.\n• Evaluate gathered market information.\n• Conduct preliminary technical and financial feasibility analysis.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -1681,7 +1681,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "44.3.04 Production",
         subTopics: ["Types of production", "Requirements", "Planning", "Control"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Classify production and describe their categories.\n• Determine and calculate recommended dietary allowances and nutrient requirements.\n• Explain planning.\n• Explain control.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Classify production systems (job, batch, continuous/mass production).\n• Identify production requirements (raw materials, plant machinery, labour).\n• Explain production planning techniques.\n• Describe production control mechanisms.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -1691,7 +1691,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "44.3.05 Material Control",
         subTopics: ["Sources of information", "Purchasing procedure", "Receiving procedure", "Types of stores", "Filing"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Identify dietary sources of information.\n• Explain purchasing procedure.\n• Explain receiving procedure.\n• Classify stores and describe their categories.\n• Explain filing.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Identify sources of procurement and market information.\n• Explain purchasing and requisitioning procedures.\n• Describe receiving and inspection procedures.\n• Classify stores layout and inventory storage categories.\n• Explain filing and record management systems in stores.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -1741,7 +1741,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "44.3.09 Human Resource Management",
         subTopics: ["Meaning of terms", "Functions of human resource manager", "Human resource process"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 44.3.09 Human Resource Management.\n• Explain the functions and physiological role of human resource manager.\n• Describe the structure, components and function of human resource process.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in human resource management.\n• Explain the core functions and responsibilities of a human resource manager.\n• Describe the stages of the human resource process (recruitment, selection, induction, training, performance appraisal).",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."

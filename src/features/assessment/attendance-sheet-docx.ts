@@ -49,7 +49,7 @@ const FONT = 'Arial';
 const thinBorder = {
   style: BorderStyle.SINGLE,
   size: 4,
-  color: '1F2937',
+  color: '94A3B8',
 } as const;
 
 const borders = {

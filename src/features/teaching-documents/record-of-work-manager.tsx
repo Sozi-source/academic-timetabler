@@ -6,7 +6,6 @@ import {
   ArrowLeft,
   CalendarCheck2,
   Plus,
-  Printer,
   Sparkles,
   Trash2,
 } from 'lucide-react';
@@ -143,13 +142,6 @@ export function RecordOfWorkManager({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Link
-            href={`/staff/units/${allocationId}/documents/record-of-work/print`}
-            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-white px-3.5 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
-          >
-            <Printer className="size-3.5" aria-hidden="true" />
-            Print Official Record
-          </Link>
           <button
             type="button"
             onClick={() => {

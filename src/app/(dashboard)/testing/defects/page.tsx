@@ -79,7 +79,7 @@ export default async function ReleaseDefectsPage({
         }
       />
 
-      <section className="grid gap-3 sm:grid-cols-3">
+      <section className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         <MetricCard label="Open" value={String(open)} description="All unresolved defects" icon={Bug} />
         <MetricCard label="Blocking" value={String(blocking)} description="Critical / High unresolved" icon={ShieldAlert} />
         <MetricCard label="Closed" value={String(closed)} description="Verified closure" icon={Bug} />

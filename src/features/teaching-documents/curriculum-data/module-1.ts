@@ -30,7 +30,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Introduction to ICT & Computer Hardware",
         subTopics: ["Concept of ICT", "Functions of ICT", "History of computers", "Classification of computers (super computers, mainframes, mini computers, micro computers, desktops, laptops/notebooks, palm tops/smart phones)", "Terminology used in computing", "Components of a computer (hardware, software)", "Hardware components of a computer", "Input devices", "Output devices", "Central Processing Unit (CPU)", "Computer storage media", "Computer peripherals", "Classification of computer hardware"],
         hours: 3,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the concept of ICT.\n• Explain the functions and physiological role of ICT.\n• Explain history of computers.\n• Classify computers (super computers, mainframes, mini computers, micro computers, desktops, laptops/notebooks, palm tops/smart phones) and describe their categories.\n• Define terms and concepts used in Introduction to ICT & Computer Hardware.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the concept of ICT.\n• Explain the functions and role of ICT in modern society and organizations.\n• Explain history of computers.\n• Classify computers (super computers, mainframes, mini computers, micro computers, desktops, laptops/notebooks, palm tops/smart phones) and describe their categories.\n• Define terms and concepts used in Introduction to ICT & Computer Hardware.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -40,7 +40,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Computer Software",
         subTopics: ["Concept of computer software", "Classification of computer software", "Functions of computer software"],
         hours: 3,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the concept of computer software.\n• Classify computer software and describe their categories.\n• Explain the functions and physiological role of computer software.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the concept of computer software.\n• Classify computer software and describe their categories.\n• Explain the functions, categories and applications of computer software.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -90,7 +90,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Computer Networking and Internet",
         subTopics: ["Concept of computer networks", "Functions of computer networks", "Types of computer networks", "Configuration of networks", "Uses of internet", "Internet browsing", "Electronic Mail (e-mail) concept"],
         hours: 3,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the concept of computer networks.\n• Explain the functions and physiological role of computer networks.\n• Classify computer networks and describe their categories.\n• Explain configuration of networks.\n• Explain uses of internet.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the concept of computer networks.\n• Explain the functions, topologies and applications of computer networks.\n• Classify computer networks and describe their categories.\n• Explain configuration of networks.\n• Explain uses of internet.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -195,143 +195,230 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       {
         weekNumber: 1,
         topicTitle: "Introduction to Entrepreneurship & Evolution/History of Entrepreneurship",
-        subTopics: ["Definition of terms used in entrepreneurship", "Difference between self-employment and formal employment", "Contribution of entrepreneurship to national development", "Entrepreneurial behaviour", "History of entrepreneurship", "Myths associated with entrepreneurship in Kenya", "Theories of entrepreneurship", "Importance of entrepreneurship theories", "Sources for business ideas", "Factors affecting entrepreneurial development"],
+        subTopics: [
+          "Definition of terms used in entrepreneurship",
+          "Difference between self-employment and formal employment",
+          "Contribution of entrepreneurship to national development",
+          "Entrepreneurial behaviour and mindset",
+          "Historical development of entrepreneurship",
+          "Theories and myths of entrepreneurship in Kenya",
+          "Factors affecting entrepreneurial development"
+        ],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Introduction to Entrepreneurship & Evolution/History of Entrepreneurship.\n• Explain difference between self-employment and formal employment.\n• Explain contribution of entrepreneurship to national development.\n• Explain entrepreneurial behaviour.\n• Explain history of entrepreneurship.",
-        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
-        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
-        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define fundamental terms and concepts used in entrepreneurship.\n• Distinguish between self-employment and salaried employment.\n• Explain the contribution of entrepreneurship to national economic development.\n• Analyze entrepreneurial behaviour and psychological traits.\n• Discuss historical development and dispel common myths surrounding entrepreneurship in Kenya.",
+        learningActivities: "Interactive lecture presentations, group discussions, analysis of Kenyan entrepreneurial case studies, and guided plenary discussion.",
+        resourcesAndReferences: "KNEC syllabus manuals, prescribed entrepreneurship textbooks, whiteboard, and LCD projector.",
+        assessmentAndRemarks: "Oral questioning, structured concept check, and short written reflection."
       },
       {
         weekNumber: 2,
-        topicTitle: "The Entrepreneur",
-        subTopics: ["Types of entrepreneurs", "Qualities of an entrepreneur", "Roles of an entrepreneur", "Process of creativity and innovation", "Importance of creativity and innovation", "Barriers to creativity and innovation", "Managing barriers to creativity and innovation"],
+        topicTitle: "The Entrepreneur, Creativity and Innovation",
+        subTopics: [
+          "Types and classifications of entrepreneurs",
+          "Qualities and characteristics of an entrepreneur",
+          "Roles and responsibilities of an entrepreneur",
+          "Process of creativity and innovation in business",
+          "Importance of creativity and innovation to enterprise growth",
+          "Barriers to creativity and innovation",
+          "Managing and overcoming barriers to creativity"
+        ],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Classify entrepreneurs and describe their categories.\n• Explain qualities of an entrepreneur.\n• Explain the functions and physiological role of an entrepreneur.\n• Describe the structure, components and function of process of creativity and innovation.\n• Explain the functions and physiological role of creativity and innovation.",
-        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
-        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
-        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Classify entrepreneurs into distinct vocational categories.\n• Explain the essential personal qualities and roles of an entrepreneur.\n• Apply the systematic stages of creativity and innovation in identifying business solutions.\n• Evaluate the importance of innovation in sustaining enterprise competitiveness.\n• Formulate strategies for overcoming personal and organizational barriers to creativity.",
+        learningActivities: "Small-group brainstorming exercises, innovation design challenges, and presentation of creative business ideas.",
+        resourcesAndReferences: "Entrepreneurship case studies, multimedia slides, prescribed textbooks, and worksheets.",
+        assessmentAndRemarks: "Evaluation of group innovation challenge output and oral question rubrics."
       },
       {
         weekNumber: 3,
-        topicTitle: "Entrepreneurial Culture & Entrepreneurial Opportunities",
-        subTopics: ["Concept of entrepreneurial culture", "Habits that promote entrepreneurial development", "Factors inhibiting entrepreneurial development", "Ways of managing factors that inhibit development of entrepreneurial culture", "Entrepreneurship and self-employment", "Meaning of business opportunity", "Ways of generating business ideas", "Methods of evaluating business opportunities"],
+        topicTitle: "Entrepreneurial Culture",
+        subTopics: [
+          "Concept of entrepreneurial culture",
+          "Habits that promote entrepreneurial development",
+          "Factors inhibiting development of entrepreneurial culture",
+          "Strategies for fostering entrepreneurial culture in society",
+          "Cultural dimensions influencing business ventures in Kenya"
+        ],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the concept of entrepreneurial culture.\n• Explain habits that promote entrepreneurial development.\n• Explain factors inhibiting entrepreneurial development.\n• Explain ways of managing factors that inhibit development of entrepreneurial culture.\n• Explain entrepreneurship and self-employment.",
-        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
-        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
-        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the concept and significance of entrepreneurial culture.\n• Identify habits, attitudes and practices that foster entrepreneurial growth.\n• Analyze socio-cultural and economic factors that inhibit entrepreneurial development.\n• Propose practical measures for nurturing an entrepreneurial culture in local communities.",
+        learningActivities: "Guided lecture, debate on cultural attitudes toward self-employment in Kenya, and personal self-assessment inventory.",
+        resourcesAndReferences: "Prescribed textbooks, journal articles on Kenyan SMEs, and digital slide decks.",
+        assessmentAndRemarks: "Class quiz and peer evaluation of debate arguments."
       },
       {
         weekNumber: 4,
-        topicTitle: "Entrepreneurial Motivation",
-        subTopics: ["Definition of entrepreneurial motivation", "Entrepreneurial motivation factors"],
+        topicTitle: "Entrepreneurial Opportunities",
+        subTopics: [
+          "Relationship between entrepreneurship and self-employment",
+          "Meaning and characteristics of a viable business opportunity",
+          "Techniques and sources for generating business ideas",
+          "Methods and criteria for evaluating business opportunities",
+          "Environmental scanning and market gap analysis"
+        ],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Entrepreneurial Motivation.\n• Explain entrepreneurial motivation factors.",
-        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
-        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
-        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the link between entrepreneurship, self-employment and wealth creation.\n• Define a business opportunity and distinguish it from a mere business idea.\n• Apply idea-generation techniques including brainstorming and environmental scanning.\n• Evaluate and screen business opportunities using market viability criteria.",
+        learningActivities: "Community market gap identification exercise, SWOT analysis on prospective business ideas, and group presentations.",
+        resourcesAndReferences: "Sample market survey data, business evaluation rubrics, and textbook handouts.",
+        assessmentAndRemarks: "Grading of business opportunity screening worksheets."
       },
       {
         weekNumber: 5,
-        topicTitle: "Entrepreneurial Competences",
-        subTopics: ["Definition of entrepreneurial competences", "Key entrepreneurial competences"],
+        topicTitle: "Entrepreneurial Motivation & Competences",
+        subTopics: [
+          "Definition and theories of entrepreneurial motivation",
+          "Internal and external motivating factors (push vs pull factors)",
+          "Definition of entrepreneurial competences",
+          "Key entrepreneurial competences (initiative, risk calculation, persistence, networking)",
+          "Competency assessment and personal development planning"
+        ],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Entrepreneurial Competences.\n• Explain key entrepreneurial competences.",
-        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
-        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
-        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain motivational drivers prompting individuals into entrepreneurship.\n• Differentiate between push and pull motivation factors in enterprise formation.\n• Define core entrepreneurial competences required for business success.\n• Assess personal entrepreneurial competences and outline areas for self-improvement.",
+        learningActivities: "Self-administered entrepreneurial competence inventory, role-play scenarios, and reflective writing.",
+        resourcesAndReferences: "Standardized competency self-assessment questionnaires and prescribed reference texts.",
+        assessmentAndRemarks: "Review of personal entrepreneurial profile portfolio."
       },
       {
         weekNumber: 6,
-        topicTitle: "Starting a Small Business Enterprise & Business Enterprise Management",
-        subTopics: ["Procedure for starting a small business enterprise", "Factors to consider when starting a small business enterprise", "The government and entrepreneurship", "Legal forms of business ownership", "Challenges faced when starting a small business", "Business life cycle", "Regulations affecting small businesses", "Business support services available to small businesses", "Definition of business enterprise management", "Functions of management in an enterprise", "Methods of inventory management", "Methods of managing business resources"],
+        topicTitle: "Starting a Small Business Enterprise",
+        subTopics: [
+          "Procedure and systematic steps for starting a small enterprise",
+          "Key factors to consider when starting a business",
+          "Role of government and regulatory agencies in enterprise support",
+          "Legal forms of business ownership (sole proprietorship, partnership, limited company, cooperative)",
+          "Regulations, licensing and compliance requirements affecting small businesses in Kenya",
+          "Support services and advisory organizations available to small businesses"
+        ],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Describe methods and procedures for starting a small business enterprise.\n• Explain factors to consider when starting a small business enterprise.\n• Explain the government and entrepreneurship.\n• Explain legal forms of business ownership.\n• Discuss emerging issues, trends and coping strategies in starting a Small Business Enterprise & Business Enterprise Management.",
-        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
-        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
-        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Outline the sequential procedure for registering and starting a small business in Kenya.\n• Analyze critical factors to consider before enterprise launch.\n• Compare legal forms of business ownership with their respective merits and demerits.\n• Identify statutory compliance, licensing procedures and support services accessible to start-ups.",
+        learningActivities: "Walkthrough of e-Citizen business registration procedures, legal form comparison matrix, and case problem-solving.",
+        resourcesAndReferences: "Official statutory registration guidelines, registrar of companies forms, and lecture presentations.",
+        assessmentAndRemarks: "Structured assignment on selecting appropriate legal ownership for a given enterprise scenario."
       },
       {
         weekNumber: 7,
-        topicTitle: "Financial Management",
-        subTopics: ["Meaning and importance of financial management", "Sources of business finance", "Types of business records", "Recording business transactions in the books of account", "Preparation of financial statements", "Interpretation of financial statements for business decisions", "Importance of budgeting to a business"],
+        topicTitle: "Business Enterprise Management",
+        subTopics: [
+          "Concept and importance of enterprise management",
+          "Key management functions (planning, organizing, leading, controlling)",
+          "Methods and best practices of inventory management",
+          "Management of physical, financial and human business resources",
+          "Time management and customer service in small enterprises"
+        ],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain meaning and importance of financial management.\n• Identify dietary sources of business finance.\n• Classify business records and describe their categories.\n• Explain recording business transactions in the books of account.\n• Describe methods and procedures for financial statements.",
-        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
-        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
-        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the core functions of management in sustaining a small business enterprise.\n• Apply inventory control techniques (stock cards, reorder levels, FIFO/LIFO).\n• Formulate strategies for optimal management of enterprise human, material and financial resources.\n• Establish standard operating procedures for daily enterprise operations.",
+        learningActivities: "Simulation of inventory control systems, problem sets on stock optimization, and small-group discussions.",
+        resourcesAndReferences: "Sample store ledger cards, inventory management templates, and reference textbooks.",
+        assessmentAndRemarks: "Inventory practical exercise and class test."
       },
       {
         weekNumber: 8,
         topicTitle: "Continuous Assessment Test (CAT) & Mid-Term Review (Entrepreneurship)",
-        subTopics: ["Supervised written theory evaluation covering Weeks 1 to 7", "Practical application, case study or laboratory assessment", "Post-examination question review, grading feedback and academic remediation"],
+        subTopics: [
+          "Supervised written theory evaluation covering Weeks 1 to 7",
+          "Practical application, case study or enterprise problem assessment",
+          "Post-examination question review, grading feedback and academic remediation"
+        ],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and practical concepts covered in Weeks 1 to 7 of Entrepreneurship.\n• Analyze continuous assessment feedback to identify conceptual gaps.\n• Formulate personalized academic revision plans.",
-        learningActivities: "Supervised written continuous assessment test followed by plenary question walkthrough and individual feedback.",
-        resourcesAndReferences: "Official continuous assessment test scripts, standard marking keys, and lecture course manuals.",
-        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark)."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate mastery of theoretical and applied entrepreneurial principles covered in Weeks 1 to 7.\n• Analyze assessment feedback to identify conceptual gaps and reinforce weak areas.",
+        learningActivities: "Supervised continuous assessment test followed by structured debrief and model answer review.",
+        resourcesAndReferences: "Official CAT scripts, standardized marking rubrics, and course manuals.",
+        assessmentAndRemarks: "Official Continuous Assessment Test (CAT coursework mark, weighted 30%)."
       },
       {
         weekNumber: 9,
-        topicTitle: "Marketing",
-        subTopics: ["Definition of terms market and marketing", "Marketing strategies", "Components of marketing", "Process of marketing"],
+        topicTitle: "Financial Management & Records",
+        subTopics: [
+          "Meaning, role and importance of financial management in small enterprises",
+          "Internal and external sources of business finance (equity, debt, grants, microfinance)",
+          "Types and purpose of prime books of accounts and business records",
+          "Recording business transactions in books of original entry",
+          "Basic financial statements (income statement, balance sheet, cash flow statement)",
+          "Interpretation of financial statements for operational decisions and budgeting"
+        ],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Marketing.\n• Explain marketing strategies.\n• Describe the structure and components of marketing.\n• Describe the structure, components and function of process of marketing.",
-        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
-        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
-        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the role and principles of sound financial management in business sustainability.\n• Identify appropriate short-term and long-term sources of business financing.\n• Prepare books of prime entry and record daily business transactions accurately.\n• Construct and interpret basic income statements and cash flow projections for business decisions.\n• Explain the importance of operational budgeting in cash flow management.",
+        learningActivities: "Practical financial ledger bookkeeping exercises, cash flow statement construction, and ratio interpretation workshop.",
+        resourcesAndReferences: "Sample accounting ledgers, cash book sheets, standard financial statements, and business calculators.",
+        assessmentAndRemarks: "Grading of accounting practical exercises and financial ledger accuracy check."
       },
       {
         weekNumber: 10,
-        topicTitle: "Enterprise Social Responsibility and Business Ethics & Business Plan",
-        subTopics: ["Definition of social responsibility and business ethics", "Meaning of enterprise social responsibility", "Types of enterprise social responsibility", "Importance of enterprise social responsibility", "Ethical behaviour in business practice", "Definition of a business plan", "Components of a business plan", "Preparation of a business plan", "Uses of a business plan"],
+        topicTitle: "Marketing Strategies & Market Analysis",
+        subTopics: [
+          "Definition of market, marketing and market orientation",
+          "Components of the marketing mix (the 4 Ps: Product, Price, Place, Promotion)",
+          "Market research and consumer behavior analysis",
+          "Developing effective marketing and promotional strategies",
+          "Digital marketing and social media promotion for small enterprises"
+        ],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Enterprise Social Responsibility and Business Ethics & Business Plan.\n• Explain meaning of enterprise social responsibility.\n• Classify enterprise social responsibility and describe their categories.\n• Explain the functions and physiological role of enterprise social responsibility.\n• Explain ethical behaviour in business practice.",
-        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
-        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
-        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define key marketing terminology and explain the marketing concept.\n• Apply the 4 Ps marketing mix framework to a selected product or service.\n• Conduct basic market research to ascertain customer needs and competitor strengths.\n• Design a targeted promotional campaign utilizing physical and digital marketing channels.",
+        learningActivities: "Marketing plan development workshop, product pitching presentations, and critique of local advertising campaigns.",
+        resourcesAndReferences: "Sample marketing plans, digital campaign case studies, and reference books.",
+        assessmentAndRemarks: "Evaluation of team marketing mix proposals and oral presentation marks."
       },
       {
         weekNumber: 11,
-        topicTitle: "Information Communication Technology in Enterprise Management",
-        subTopics: ["Definition of terms used in ICT", "Benefits of ICT to a business enterprise", "Uses of ICT equipment in a business enterprise"],
+        topicTitle: "Enterprise Social Responsibility and Business Ethics",
+        subTopics: [
+          "Concept and definition of enterprise social responsibility (ESR) and business ethics",
+          "Types and dimensions of enterprise social responsibility",
+          "Importance and benefits of ESR to businesses and host communities",
+          "Ethical behavior, integrity and fair trade in enterprise management",
+          "Managing ethical dilemmas and consumer protection obligations"
+        ],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Information Communication Technology in Enterprise Management.\n• Explain benefits of ICT to a business enterprise.\n• Demonstrate safe handling and operation of uses of ICT equipment in a business enterprise.",
-        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
-        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
-        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the concepts and significance of enterprise social responsibility and business ethics.\n• Differentiate between economic, legal, ethical, and philanthropic responsibilities of business.\n• Analyze the business benefits of adopting sustainable and socially responsible practices.\n• Resolve common ethical dilemmas encountered in commercial enterprise operations.",
+        learningActivities: "Case study analysis on ethical business dilemmas, group debate on corporate accountability, and lecture slides.",
+        resourcesAndReferences: "Business ethics case studies, consumer protection guidelines, and reference textbooks.",
+        assessmentAndRemarks: "Case study analysis report evaluation and peer contributions."
       },
       {
         weekNumber: 12,
-        topicTitle: "Emerging Issues and Trends",
-        subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Ways of managing challenges posed by emerging issues and trends"],
+        topicTitle: "Business Plan Formulation",
+        subTopics: [
+          "Definition, purpose and importance of a business plan",
+          "Key components of a standard business plan (executive summary, marketing, operations, financial plans)",
+          "Information requirements and preparation procedures for a business plan",
+          "Uses of a business plan in attracting investors, securing loans, and guiding operations",
+          "Common pitfalls in business plan preparation and how to avoid them"
+        ],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends.\n• Explain ways of managing challenges posed by emerging issues and trends.",
-        learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
-        resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
-        assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the purpose, audience and essential components of a formal business plan.\n• Gather necessary market, operational and financial data for business planning.\n• Compile a structured business plan adhering to TVET/KNEC standard guidelines.\n• Utilize the business plan as a management control tool and fundraising instrument.",
+        learningActivities: "Hands-on business plan template development, peer review of draft sections, and individual coaching.",
+        resourcesAndReferences: "KNEC business plan guidelines, standard business plan templates, and sample enterprise plans.",
+        assessmentAndRemarks: "Draft business plan chapter assessment and constructive feedback."
       },
       {
         weekNumber: 13,
-        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
-        subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Ways of managing challenges posed by emerging issues and trends"],
+        topicTitle: "ICT in Enterprise Management & Emerging Trends",
+        subTopics: [
+          "Role and benefits of ICT in modern enterprise management",
+          "Applications of ICT tools (e-commerce, digital payments, inventory software, CRM)",
+          "Cybersecurity, data protection and electronic record-keeping in small businesses",
+          "Emerging trends in entrepreneurship (green business, gig economy, social enterprise)",
+          "Challenges posed by emerging trends and strategies for business adaptation",
+          "Comprehensive syllabus review and examination readiness"
+        ],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain ways of managing challenges posed by emerging issues and trends.",
-        learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
-        resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
-        assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the role and competitive advantages of ICT in enterprise management.\n• Identify practical software and digital tools for business operations and electronic transactions.\n• Analyze emerging trends and disruptive innovations impacting small businesses in Kenya.\n• Synthesize all core course competences in preparation for summative examination.",
+        learningActivities: "Demonstration of e-commerce platforms and mobile money integration, review of past KNEC examination papers, and Q&A clinic.",
+        resourcesAndReferences: "KNEC past examination papers, digital enterprise case studies, and reference textbooks.",
+        assessmentAndRemarks: "Mock revision problems, class discussion evaluation, and final exam preparedness check."
       },
       {
         weekNumber: 14,
         topicTitle: "Final Summative Examination (Entrepreneurship)",
-        subTopics: ["Administration of official TVET institutional / KNEC summative examination", "Comprehensive assessment of all prescribed unit learning outcomes", "Evaluation of vocational competences, theory, and practical applications"],
+        subTopics: [
+          "Administration of official TVET institutional / KNEC summative examination",
+          "Comprehensive evaluation across all prescribed syllabus learning outcomes",
+          "Assessment of entrepreneurial knowledge, financial acumen, and enterprise planning competences"
+        ],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate overall professional competency and academic achievement in Entrepreneurship in accordance with national TVET standards.",
-        learningActivities: "Formal summative written and practical examinations administered under TVET examination regulations.",
-        resourcesAndReferences: "Official examination question papers, answer booklets, and examination rubrics.",
+        learningActivities: "Formal summative written examination administered under TVET examination regulations.",
+        resourcesAndReferences: "Official examination papers, answer booklets, and examination rubrics.",
         assessmentAndRemarks: "Final summative institutional/KNEC examination (weighted 70%)."
-      },
+      }
     ],
     references: ["Hisrich, R. D., Peters, M. P., & Shepherd, D. A. (2020). Entrepreneurship (11th ed.). McGraw-Hill.", "Kuratko, D. F. (2019). Entrepreneurship: Theory, Process, and Practice. Cengage Learning."],
     instructionalEquipment: ["Whiteboard and dry-erase markers", "Multimedia LCD projector and laptop", "TVET curriculum logbooks, charts and syllabus manuals"]
@@ -362,7 +449,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Introduction to Communication & Channels of Communication",
         subTopics: ["Definition of terms and concepts used in communication", "Importance of communication", "Purpose of communication", "Essentials of effective communication", "Role of ICT in communication", "Meaning of channels of communication", "Factors to consider in choosing communication media", "Channels of communication in an organization", "Advantages and disadvantages of each channel"],
         hours: 3,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Introduction to Communication & Channels of Communication.\n• Explain the functions and physiological role of communication.\n• Explain purpose of communication.\n• Explain essentials of effective communication.\n• Explain the functions and physiological role of ICT in communication.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in communication.\n• Explain the purpose and importance of communication in the workplace.\n• Describe the essentials of effective communication.\n• Explain the role and application of ICT in modern communication.\n• Evaluate channels of communication in an organization.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -372,7 +459,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Communication Process",
         subTopics: ["Meaning of communication process", "Principles of communication", "Stages in the communication process", "Barriers to effective communication", "Strategies of overcoming barriers to effective communication", "Methods of storing and retrieval of information", "Basic concepts of transmission and receipt of message", "Communication as a tool in management", "Ethical issues in communication"],
         hours: 3,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Describe the structure, components and function of meaning of communication process.\n• Describe the principles of communication.\n• Describe the structure, components and function of stages in the communication process.\n• Explain barriers to effective communication.\n• Explain strategies of overcoming barriers to effective communication.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the meaning and principles of the communication process.\n• Describe the sequential stages in the communication process.\n• Analyze barriers to effective communication and formulate coping strategies.\n• Explain information storage, retrieval, and ethical issues in communication.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -382,7 +469,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Classification of Communication",
         subTopics: ["Types of communication", "Use of various types of communication"],
         hours: 3,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Classify communication and describe their categories.\n• Explain use of various types of communication.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Classify communication into verbal, non-verbal, visual, and electronic forms.\n• Explain the appropriate use of various types of communication in different organizational contexts.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -392,7 +479,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Forms of Communication & Official Etiquette, Protocol and Diplomacy",
         subTopics: ["Informal and formal methods of transmission", "Advantages and disadvantages of each form of communication", "Meaning of etiquette, protocol and diplomacy", "Importance of official etiquette", "Accepted protocol and diplomacy"],
         hours: 3,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain informal and formal methods of transmission.\n• Explain advantages and disadvantages of each form of communication.\n• Explain meaning of etiquette, protocol and diplomacy.\n• Explain the functions and physiological role of official etiquette.\n• Explain accepted protocol and diplomacy.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Differentiate between formal and informal communication networks.\n• Analyze advantages and limitations of various communication media.\n• Explain the concepts and importance of official etiquette, protocol, and diplomacy.\n• Demonstrate accepted official etiquette and protocol in professional interactions.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -402,7 +489,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Writing Skills",
         subTopics: ["Use of punctuation marks in a written document", "Importance of courtesy in writing", "Paragraph development", "Essay writing", "Functional writing"],
         hours: 3,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain use of punctuation marks in a written document.\n• Explain the functions and physiological role of courtesy in writing.\n• Explain paragraph development.\n• Explain essay writing.\n• Explain functional writing.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Apply appropriate punctuation marks and grammar rules in written documents.\n• Explain the importance of courtesy, tone, and professional style in writing.\n• Demonstrate paragraph development, essay composition, and functional business writing.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -412,7 +499,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Summary Skills",
         subTopics: ["Importance of summarizing passages/information", "Steps in note-taking when summarizing passages, reports and conversations"],
         hours: 3,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the functions and physiological role of summarizing passages/information.\n• Explain steps in note-taking when summarizing passages, reports and conversations.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the importance and practical applications of summary skills in business.\n• Apply sequential note-taking steps to summarize texts, reports, and spoken conversations concisely.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -422,7 +509,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Report Writing Skills",
         subTopics: ["Meaning of the term “report”", "Role of reports in an organization", "Types and forms of reports", "Formats of reports", "Steps in preparation for report writing", "Writing, editing and dissemination of reports", "Referencing styles used in reports", "Preparation of PowerPoint slides"],
         hours: 3,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain meaning of the term “report”.\n• Explain the functions and physiological role of reports in an organization.\n• Explain types and forms of reports.\n• Explain formats of reports.\n• Explain steps in preparation for report writing.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define reports and explain their decision-making role in organizations.\n• Distinguish between various types, formats, and structures of reports.\n• Follow systematic steps in researching, drafting, editing, and disseminating professional reports.\n• Apply standardized referencing styles and design supporting presentation slides.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -442,7 +529,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Meetings & Interviews",
         subTopics: ["Definition of the terms meetings and minutes", "Role of meetings and minutes in organizations", "Procedures for planning and conducting meetings", "Types of meetings", "Notices of meetings", "Procedure for minute writing", "Challenges in conducting meetings and minute writing", "Advantages and disadvantages of meetings", "Meaning of the term “interview”", "Purpose of interviews in an organization", "Procedures for planning and conducting interviews", "Types of interviews", "Preparation for an interview", "Interviewing skills"],
         hours: 3,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Meetings & Interviews.\n• Explain the functions and physiological role of meetings and minutes in organizations.\n• Describe methods and procedures for planning and conducting meetings.\n• Classify meetings and describe their categories.\n• Explain notices of meetings.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the role, types, and procedures for planning and conducting formal meetings.\n• Draft statutory meeting notices, agendas, and accurate minutes of proceedings.\n• Explain the purpose, preparation procedures, and types of employment/informational interviews.\n• Demonstrate effective interview techniques as an interviewer and interviewee.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -452,7 +539,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Public Relations and Customer Care",
         subTopics: ["Definition of terms public, customer and public relations", "Types of customers", "Role of public relations and customer care in an organization", "Interpersonal/human relations skills", "Customer care and public relations skills", "Challenges faced in public relations and customer care"],
         hours: 3,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Public Relations and Customer Care.\n• Classify customers and describe their categories.\n• Explain the functions and physiological role of public relations and customer care in an organization.\n• Explain interpersonal/human relations skills.\n• Explain customer care and public relations skills.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define public relations, customer service, and customer categories.\n• Explain the strategic role of public relations and customer care in organizational success.\n• Apply interpersonal human relations and customer care skills in dealing with internal and external clients.\n• Formulate constructive approaches to overcome challenges in public relations.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -558,7 +645,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Empathy & Assertiveness",
         subTopics: ["Definition of empathy", "Importance of empathizing", "Difference between empathy and sympathy", "Situations requiring empathy", "Values associated with empathy", "Definition of assertiveness", "Characteristics of an assertive person", "Steps to being assertive", "Importance of being assertive", "Difference between assertiveness, aggressiveness and passiveness", "Difference between peer pressure and peer influence", "Values associated with assertiveness"],
         hours: 2,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Empathy & Assertiveness.\n• Explain the functions and physiological role of empathizing.\n• Explain difference between empathy and sympathy.\n• Explain situations requiring empathy.\n• Evaluate values associated with empathy.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define empathy and distinguish it from sympathy.\n• Explain the importance and practice of empathy in interpersonal relationships.\n• Identify situations requiring empathy and assertiveness.\n• Demonstrate assertive communication and resistance to negative peer pressure.\n• Evaluate core values associated with empathy and assertiveness.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -568,7 +655,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Negotiation & Non-Violent Conflict Resolution",
         subTopics: ["Definition of the term negotiation", "Importance of negotiation", "Situations requiring negotiation", "Negotiating techniques", "Values associated with negotiation", "Definition of the term conflict", "Causes of conflicts", "Consequences of conflicts", "Types of conflicts", "Ways of dealing with conflict", "Conflict resolution skills", "Institutions that resolve conflicts in the community", "Values related to conflict resolution"],
         hours: 2,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Negotiation & Non-Violent Conflict Resolution.\n• Explain the functions and physiological role of negotiation.\n• Explain situations requiring negotiation.\n• Explain negotiating techniques.\n• Evaluate values associated with negotiation.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define negotiation and conflict resolution concepts.\n• Explain the principles, stages and importance of negotiation in conflict resolution.\n• Analyze causes and consequences of conflicts in families and communities.\n• Apply non-violent conflict resolution techniques to resolve interpersonal disputes.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -618,7 +705,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Time Management",
         subTopics: ["Definition of the concept of time management", "Work schedule", "Time management chart", "Importance of managing time", "Aspects of time wasters", "Values and life skills associated with time management"],
         hours: 2,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Time Management.\n• Explain work schedule.\n• Interpret and apply time management chart.\n• Explain the functions and physiological role of managing time.\n• Explain aspects of time wasters.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the concept and importance of time management.\n• Design effective work schedules and prioritize academic and personal tasks.\n• Construct and interpret a personal time management chart.\n• Identify major time wasters and apply strategies to eliminate them.\n• Practice self-discipline and punctuality in daily routines.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -691,7 +778,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Fundamentals of Mathematics",
         subTopics: ["Operations carried out on positive and negative numbers", "The laws of operations on positive and negative numbers"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain operations carried out on positive and negative numbers.\n• State and apply the the laws of operations on positive and negative numbers.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain operations carried out on positive and negative numbers.\n• State and apply the laws of operations on positive and negative numbers.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -1509,7 +1596,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Introduction to Food Safety and Hygiene",
         subTopics: ["Meaning of terms", "Importance of food safety and hygiene", "Food safety and hygiene rules and regulations"],
         hours: 3,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Introduction to Food Safety and Hygiene.\n• Explain the functions and physiological role of food safety and hygiene.\n• State and apply the food safety and hygiene rules and regulations.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define food safety, sanitation, and hygiene concepts.\n• Explain the principles and public health importance of food safety and hygiene.\n• State and apply national food safety and hygiene rules and regulations.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -1519,7 +1606,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Food Contamination and Spoilage",
         subTopics: ["Meaning of terms", "Causes of food contamination", "Types of food contaminants", "Preventive measures of food contamination", "Safety regulations", "Food-borne illnesses (food poisoning and food infections)", "Prevention of food poisoning and infections"],
         hours: 3,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Food Contamination and Spoilage.\n• Analyze factors affecting food contamination.\n• Classify food contaminants and describe their categories.\n• Explain prevention, control and management measures for of food contamination.\n• Explain safety regulations.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms used in food contamination and spoilage.\n• Differentiate between physical, chemical, and biological contaminants.\n• Analyze causes and signs of food spoilage.\n• Explain prevention and control measures for food-borne illnesses and food poisoning.\n• Apply food safety regulations to prevent cross-contamination.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -1529,7 +1616,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Food Contact Surfaces",
         subTopics: ["Meaning of terms", "Types of food contact surfaces", "Materials for food contact surfaces", "Design requirements", "Hygienic standards"],
         hours: 3,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Food Contact Surfaces.\n• Classify food contact surfaces and describe their categories.\n• Explain materials for food contact surfaces.\n• Determine and calculate recommended dietary allowances and nutrient requirements.\n• Explain hygienic standards.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define food contact surfaces and classify their types.\n• Evaluate properties of materials suitable for food contact equipment.\n• Explain sanitary design requirements and hygienic standards for food surfaces.\n• Apply proper cleaning and sanitizing procedures to food contact equipment.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -1539,7 +1626,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Food Premises and Equipment",
         subTopics: ["Meaning of terms", "Types of food premises and equipment", "Hygiene requirements", "Design and layout", "Operational requirements", "Inspection of food premises and equipment"],
         hours: 3,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Food Premises and Equipment.\n• Classify food premises and equipment and describe their categories.\n• Determine and calculate recommended dietary allowances and nutrient requirements.\n• Explain design and layout.\n• Demonstrate safe handling and operation of inspection of food premises and equipment.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Describe types and hygienic standards of food production premises.\n• Explain design, ventilation, drainage and layout considerations for commercial kitchens.\n• Conduct routine sanitary inspections of food premises and processing equipment.\n• Apply statutory public health standards governing food establishment operations.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -1549,7 +1636,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Hazards Analysis and Critical Control Point (HACCP)",
         subTopics: ["Meaning of terms", "Principles of HACCP", "Importance of HACCP", "Developing a HACCP plan", "Implementation and management of HACCP system"],
         hours: 3,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Hazards Analysis and Critical Control Point (HACCP).\n• Describe the principles of HACCP.\n• Explain the functions and physiological role of HACCP.\n• Explain developing a HACCP plan.\n• Describe the structure, components and function of implementation and management of HACCP system.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define HACCP and explain its importance in preventing food-borne hazards.\n• Describe the seven core principles of the HACCP system.\n• Establish critical control points (CCPs), critical limits, and monitoring procedures.\n• Develop and implement a standard HACCP plan for a food service establishment.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -1735,7 +1822,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "[Savoury/Batter] Products",
         subTopics: ["Meaning of terms", "Role of ingredients", "Preparation methods", "Production methods", "Qualities"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in [Savoury/Batter] Products.\n• Explain the functions and physiological role of ingredients.\n• Explain preparation methods.\n• Explain production methods.\n• Explain qualities.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define savoury and batter products used in invalid nutrition.\n• Explain the culinary functions and nutritional role of ingredients in invalid cookery.\n• Demonstrate preparation and production methods for modified-texture savoury dishes.\n• Evaluate sensory and nutritional qualities of convalescent dishes.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -1755,7 +1842,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "[Confectionery] Products & Desserts",
         subTopics: ["Meaning of terms", "Types", "Role of ingredients", "Preparation methods", "Production", "Presentation", "Qualities", "Meaning of terms", "Classification", "Preparation methods", "Production", "Presentation", "Qualities"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in [Confectionery] Products & Desserts.\n• Explain types.\n• Explain the functions and physiological role of ingredients.\n• Explain preparation methods.\n• Explain production.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define confectionery and dessert concepts in clinical catering.\n• Classify desserts appropriate for convalescent and invalid diets.\n• Explain the functional properties and dietary role of ingredients in convalescent desserts.\n• Demonstrate modified dessert preparation, presentation and portioning techniques.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -2165,7 +2252,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Introduction to Diet Therapy",
         subTopics: ["Meaning of terms", "Relationship between nutrition and infection", "Nutrition care team", "Roles of a nutritionist and dietician", "Nutrition care process", "Importance of diet therapy", "Types of therapeutic diets"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Introduction to Diet Therapy.\n• Explain relationship between nutrition and infection.\n• Explain nutrition care team.\n• Explain the functions and physiological role of a nutritionist and dietician.\n• Describe the structure, components and function of nutrition care process.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define diet therapy concepts and therapeutic diet classifications.\n• Explain the bi-directional relationship between nutrition and infection.\n• Describe the composition and dynamics of the multidisciplinary nutrition care team.\n• Explain the clinical roles and professional responsibilities of a nutritionist and dietician.\n• Apply the four steps of the Nutrition Care Process (Assessment, Diagnosis, Intervention, Monitoring & Evaluation).",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -2175,7 +2262,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Diet Modification",
         subTopics: ["Meaning of terms", "Importance of diet modification", "Factors influencing diet modification", "Categories of diet modification", "Challenges of diet modification"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Diet Modification.\n• Explain the functions and physiological role of diet modification.\n• Analyze factors affecting diet modification.\n• Classify diet modification and describe their categories.\n• Discuss emerging issues, trends and coping strategies in diet Modification.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define diet modification and outline its therapeutic indications.\n• Explain the clinical rationale and importance of diet modification in patient care.\n• Analyze physiological, pathological, and psychological factors influencing diet modification.\n• Classify therapeutic diet modifications (consistency, energy, nutrient content).\n• Identify clinical challenges in patient dietary adherence and formulate coping strategies.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -2328,7 +2415,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Pre-Natal Care",
         subTopics: ["Meaning of terms", "Importance of pre-natal care", "Pre-conception care", "Nutrients that affect fertility"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Pre-Natal Care.\n• Explain the functions and physiological role of pre-natal care.\n• Explain pre-conception care.\n• Explain nutrients that affect fertility.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define pre-natal and pre-conception care concepts.\n• Explain the clinical objectives and components of pre-natal care.\n• Describe pre-conception dietary assessment and counseling.\n• Identify critical micro- and macronutrients that affect fertility and fetal development.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -2408,7 +2495,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Immunization",
         subTopics: ["Aspects of immunity", "Importance of immunization", "Immunization materials", "Immunization schedule", "WHO infant and child feeding guidelines", "Role of stakeholders in the community on maternal and child care"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain aspects of immunity.\n• Explain the functions and physiological role of immunization.\n• Explain immunization materials.\n• Explain immunization schedule.\n• Explain WHO infant and child feeding guidelines.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain principles of active and passive immunity.\n• Explain the public health role and importance of childhood immunization.\n• Outline the Kenya Expanded Programme on Immunization (KEPI) schedule and cold-chain materials.\n• Apply WHO infant and young child feeding (IYCF) guidelines in immunization clinics.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -2514,7 +2601,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Food Security in HIV-Affected Households",
         subTopics: ["Meaning of terms", "Importance of food security in HIV-affected households", "Nutrition interventions for affected households", "Socio-economic implications of HIV in relation to nutrition"],
         hours: 3,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Food Security in HIV-Affected Households.\n• Explain the functions and physiological role of food security in HIV-affected households.\n• Explain nutrition interventions for affected households.\n• Explain socio-economic implications of HIV in relation to nutrition.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define household food security concepts in the context of HIV and AIDS.\n• Explain the importance and strategies for enhancing food security in HIV-affected households.\n• Design appropriate community and clinical nutrition interventions for affected families.\n• Analyze socio-economic implications of HIV on household food production and livelihood sustainability.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -2658,7 +2745,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Sources of Kenyan Law",
         subTopics: ["Meaning of law", "The Constitution as the supreme law of Kenya", "Sources of law in Kenya", "Definition and organisation of the Judiciary (Magistrate’s court, Kadhi’s court, High Court, Court of Appeal, Supreme Court)"],
         hours: 3,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• State and apply the meaning of law.\n• State and apply the the Constitution as the supreme law of Kenya.\n• Identify dietary sources of law in Kenya.\n• Define terms and concepts used in Sources of Kenyan Law.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define law and explain its function in society.\n• Explain the Constitution as the supreme law of Kenya.\n• Identify statutory, customary, and common law sources of Kenyan law.\n• Describe the structure and organization of the Kenyan Judiciary.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -2902,7 +2989,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Vitamins",
         subTopics: ["Meaning of terms", "Classifications", "Sources", "Absorption, metabolism and assimilation", "Recommended daily allowances (RDA)", "Deficiency"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Vitamins.\n• Classify classifications.\n• Explain sources.\n• Explain the digestion, absorption and metabolism of assimilation.\n• Determine and calculate recommended dietary allowances and nutrient requirements.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts related to vitamins.\n• Classify vitamins into fat-soluble and water-soluble categories.\n• Identify dietary sources of essential vitamins.\n• Explain the digestion, absorption, metabolism and physiological assimilation of vitamins.\n• Determine recommended daily allowances (RDA) and identify vitamin deficiency disorders.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -2912,7 +2999,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
         topicTitle: "Minerals",
         subTopics: ["Meaning of terms", "Macro minerals", "Micro minerals", "Mineral sources", "Recommended daily allowances (RDA)", "Deficiency"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Minerals.\n• Explain macro minerals.\n• Explain micro minerals.\n• Explain mineral sources.\n• Determine and calculate recommended dietary allowances and nutrient requirements.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts related to minerals.\n• Explain the functions and requirements of macrominerals (calcium, phosphorus, magnesium, sodium, potassium).\n• Explain the functions and requirements of microminerals / trace elements (iron, iodine, zinc, selenium).\n• Identify dietary sources of essential minerals.\n• Determine recommended daily allowances (RDA) and describe mineral deficiency disorders.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."

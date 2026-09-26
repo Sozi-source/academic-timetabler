@@ -101,7 +101,7 @@ export function TimetableShell({ profile, children }: TimetableShellProps) {
           </div>
         </header>
 
-        <main className="admin-screen mx-auto min-w-0 w-full max-w-none overflow-x-clip px-[var(--content-gutter)] py-3.5 pb-20 sm:py-5 lg:py-6 lg:pb-6">
+        <main className="admin-screen mx-auto min-w-0 w-full max-w-none overflow-x-clip px-[var(--content-gutter)] py-3.5 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] sm:py-5 lg:py-6 lg:pb-6">
           {children}
         </main>
       </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { AlertCircle, CalendarCheck, FileDown, Pencil, Printer } from 'lucide-react';
+import { AlertCircle, CalendarCheck, FileDown, Pencil } from 'lucide-react';
 import Link from 'next/link';
 import {
   parseActivitiesList,
@@ -74,10 +74,6 @@ export function TVETDocumentViewer({
     }
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   return (
     <div className="min-w-0 space-y-4 sm:space-y-6">
       {/* Top Action Bar (Hidden during printing) */}
@@ -115,16 +111,6 @@ export function TVETDocumentViewer({
               <span className="hidden sm:inline">Edit Outline</span>
             </Link>
           )}
-
-          <button
-            type="button"
-            onClick={handlePrint}
-            className="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3.5 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
-          >
-            <Printer className="size-4 text-slate-600" aria-hidden="true" />
-            <span className="sm:hidden">Print</span>
-            <span className="hidden sm:inline">Print Preview</span>
-          </button>
 
           <button
             type="button"
@@ -266,9 +252,7 @@ export function TVETDocumentViewer({
                   </thead>
                   <tbody>
                     {courseOutline.weeklySchedule.map((sched, idx) => {
-                      const allSubtopics = sched.subTopics.flatMap((st) =>
-                        typeof st === 'string' ? st.split(/\s*[·;]\s*/).filter(Boolean) : []
-                      );
+                      const allSubtopics = parseSubTopics(sched.subTopics);
 
                       return (
                         <tr key={sched.weekNumber} className={idx % 2 === 0 ? 'bg-white align-top' : 'bg-slate-50 align-top'}>

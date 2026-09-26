@@ -7,6 +7,7 @@ import {
   normalizeUnitCodeKey,
   type UnitCurriculumDefinition,
 } from '@/features/teaching-documents/curriculum-registry';
+import { hasTopicCoverageContamination } from '@/features/teaching-documents/topic-coverage-validation';
 
 function isCorruptedText(text?: string | null): boolean {
   if (!text) return false;
@@ -99,6 +100,11 @@ function enrichWithCanonical(
   const isCompCorrupt = isCorruptedText(def.overallCompetency);
   const isScheduleCorrupt = def.weeklySchedule?.some(
     (w) => isCorruptedText(w.topicTitle) || isCorruptedText(w.specificLearningOutcomes)
+  ) || hasTopicCoverageContamination(
+    (def.weeklySchedule ?? []).map((week) => ({
+      topic: week.topicTitle,
+      coverage: week.subTopics.join('\n'),
+    })),
   );
 
   // Authoritative schedules (uploaded by user/HOD or trainer) MUST NOT be overwritten by canonical defaults
@@ -507,4 +513,3 @@ export const getApprovedCurriculumForUnitCode = cache(
     return getUnitCurriculum(resolvedCode || unitCode, resolvedName || unitName || '');
   }
 );
-

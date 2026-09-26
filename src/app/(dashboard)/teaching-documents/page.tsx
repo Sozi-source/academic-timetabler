@@ -1,4 +1,5 @@
 import {
+  Archive,
   BookOpenCheck,
   FileCheck2,
   FileOutput,
@@ -83,12 +84,20 @@ export default async function TeachingDocumentsPage() {
                 </span>
               ) : null}
             </Link>
+
+            <Link
+              href="/teaching-documents/qa-export"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
+            >
+              <Archive className="size-3.5" aria-hidden="true" />
+              QA ZIP Export
+            </Link>
           </div>
         }
       />
 
       {/* 4-Metric Telemetry Strip */}
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard
           label="Curriculum library"
           value={String(curriculumDocuments)}

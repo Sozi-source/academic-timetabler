@@ -125,12 +125,66 @@ export function parseDocxSyllabus(docxBuffer: Buffer, fileName?: string): Parsed
     }
 
     // 4. Extract Tables if present
+    //
+    // HARDENING (fixes the "week-range value mistaken for the topic title"
+    // bug): column roles are now determined primarily by matching each
+    // table's HEADER ROW text (e.g. "Week", "Topic", "Coverage") to known
+    // field names, instead of guessing from the CONTENT of column 0. The
+    // old approach broke whenever a week/sequence cell held anything other
+    // than a bare integer -- e.g. a range like "1-2" spanning two weeks in
+    // one row -- because it matched neither "digit" nor "Week N", so the
+    // range text itself got stored as the topic title while the real topic
+    // was demoted into subtopics.
+    //
+    // A universal plausibility check is applied as a last-resort safety
+    // net on TOP of the header-driven mapping, so a bare number, range, or
+    // "Week"/"Lesson" label can never end up stored as a topic title, even
+    // for tables with no recognizable header row at all. Do not remove
+    // this check when editing this function later -- it is the guard that
+    // stops this exact class of bug from recurring.
+    const HEADER_FIELD_PATTERNS: [string, RegExp[]][] = [
+      ['coverage', [/\bsub[\s-]?topic/i, /\bcoverage\b/i, /\bspecific\s+coverage\b/i, /\bcontent\b/i]],
+      ['learningOutcomes', [/\boutcome/i, /\bobjective/i]],
+      ['activities', [/\bactivit/i, /\bmethodolog/i, /\bteaching\s*\/?\s*learning\s+activ/i]],
+      ['assessment', [/\bassessment\b/i, /\bremark/i, /\blearning\s+check\b/i]],
+      ['resources', [/\bresource/i, /\breference/i, /\bmaterial/i, /\btextbook/i, /\bteaching\s+aid/i]],
+      ['hours', [/\bhour/i, /\bduration/i, /^time$/i]],
+      ['sequence', [/\bweek/i, /\bwk\b/i, /\bsequence\b/i, /^seq$/i]],
+      ['topic', [/\btopic\b/i, /\btheme\b/i, /^title$/i, /\bsession\s+title\b/i]],
+    ];
+
+    function classifyHeaderCell(text: string): string | null {
+      const t = text.trim();
+      if (!t) return null;
+      // Never treat a bare "Lesson"/"Lesson No." label as the topic column
+      // -- a lesson number is not a topic, and mistaking it for one is the
+      // same failure mode this hardening pass exists to prevent.
+      if (/^lesson(\s*(no\.?|number))?$/i.test(t)) return null;
+      for (const [field, patterns] of HEADER_FIELD_PATTERNS) {
+        if (patterns.some((re) => re.test(t))) return field;
+      }
+      return null;
+    }
+
+    function isPlausibleTopicTitle(text: string): boolean {
+      const t = text.trim();
+      if (!t) return false;
+      // Reject bare numbers or ranges like "1", "1-2", "1,2", "1 & 2" --
+      // these are week/sequence values, never real topic titles.
+      if (/^\d+\s*(?:[-–—&,]\s*\d+)?$/.test(t)) return false;
+      // Reject bare "Week 3", "Wk 4", "Lesson 2", "Session 1" style labels.
+      if (/^(?:week|wk|lesson|session)\s*\d*$/i.test(t)) return false;
+      // Require a minimum amount of actual alphabetic content.
+      return t.replace(/[^a-zA-Z]/g, '').length >= 3;
+    }
+
     const tableTopics: { topicTitle: string; subTopics: string }[] = [];
     const tableRegex = /<w:tbl\b[\s\S]*?<\/w:tbl>/g;
     let tblMatch: RegExpExecArray | null;
 
     while ((tblMatch = tableRegex.exec(xml)) !== null) {
       const tableContent = tblMatch[0];
+      const rows: string[][] = [];
       const rowRegex = /<w:tr\b[\s\S]*?<\/w:tr>/g;
       let trMatch: RegExpExecArray | null;
 
@@ -149,59 +203,108 @@ export function parseDocxSyllabus(docxBuffer: Buffer, fileName?: string): Parsed
               return textMatches.map((t) => t.replace(/<[^>]+>/g, '')).join('').trim();
             })
             .filter(Boolean);
-          const cellText = pTexts.join(' · ');
-          cells.push(cleanXmlString(cellText));
+          cells.push(cleanXmlString(pTexts.join(' · ')));
         }
 
-        if (cells.length >= 2) {
-          // Check if this is a header row (e.g. Week, Topic, Coverage)
-          const firstCell = cells[0].toLowerCase();
-          const secondCell = cells[1].toLowerCase();
+        if (cells.length >= 2) rows.push(cells);
+      }
+
+      if (rows.length === 0) continue;
+
+      // --- Try header-driven column mapping first (scan up to 5 rows) ---
+      const colMap: Record<string, number> = {};
+      let headerRowIndex = -1;
+      const scanLimit = Math.min(rows.length, 5);
+      for (let r = 0; r < scanLimit; r++) {
+        const candidateMap: Record<string, number> = {};
+        rows[r].forEach((cellText, idx) => {
+          const field = classifyHeaderCell(cellText);
+          if (field && !(field in candidateMap)) candidateMap[field] = idx;
+        });
+        if (Object.keys(candidateMap).length >= 2) {
+          Object.assign(colMap, candidateMap);
+          headerRowIndex = r;
+          break;
+        }
+      }
+
+      const startRow = headerRowIndex >= 0 ? headerRowIndex + 1 : 0;
+
+      for (let r = startRow; r < rows.length; r++) {
+        const cells = rows[r];
+        let topicTitle = '';
+        let candidateCells: string[] = [];
+
+        if (headerRowIndex >= 0 && (colMap.topic !== undefined || colMap.coverage !== undefined)) {
+          // Header-driven: trust the column the header actually labelled
+          // "Topic" (or, failing that, "Coverage"), regardless of what the
+          // Week/Sequence column contains.
+          const titleIdx = colMap.topic !== undefined ? colMap.topic : colMap.coverage;
+          topicTitle = cells[titleIdx] || '';
+          const excludedRoles = ['sequence', 'hours', 'learningOutcomes', 'activities', 'assessment', 'resources'];
+          const excludedIdxs = new Set<number>([titleIdx, ...excludedRoles.map((role) => colMap[role]).filter((v) => v !== undefined)]);
+          candidateCells = cells.filter((_, idx) => !excludedIdxs.has(idx));
+        } else {
+          // No usable header found -- fall back to the old position-based
+          // heuristic, but now RANGE-AWARE: a week/sequence cell can be
+          // "1", "1-2", "1,2" or "Week 3-4", not just a bare integer, so a
+          // range no longer gets mistaken for the topic itself.
+          const firstCellLower = (cells[0] || '').toLowerCase();
+          const secondCellLower = (cells[1] || '').toLowerCase();
           if (
-            firstCell.includes('week') ||
-            firstCell.includes('topic') ||
-            firstCell.includes('unit') ||
-            secondCell.includes('topic') ||
-            secondCell.includes('learning') ||
-            secondCell.includes('coverage')
+            firstCellLower.includes('week') ||
+            firstCellLower.includes('topic') ||
+            firstCellLower.includes('unit') ||
+            secondCellLower.includes('topic') ||
+            secondCellLower.includes('learning') ||
+            secondCellLower.includes('coverage')
           ) {
-            continue;
+            continue; // an actual header row that header-detection missed
           }
 
-          let topicTitle = '';
-          let candidateCells: string[] = [];
-
-          // If col 0 is week number and col 1 is topic
-          if (/^\d+$/.test(cells[0]) || /^(?:week\s*\d+|wk\s*\d+)$/i.test(cells[0])) {
+          const weekLike = /^(?:week|wk)?\s*\d+\s*(?:[-–—&,]\s*\d+)?$/i.test(cells[0]?.trim() || '');
+          if (weekLike) {
             topicTitle = cells[1] || '';
             candidateCells = cells.slice(2);
           } else {
-            // Col 0 is topic, Col 1+ is subtopics
             topicTitle = cells[0];
             candidateCells = cells.slice(1);
           }
+        }
 
-          if (topicTitle && topicTitle.length > 1) {
-            // Filter candidate cells to exclude methodology and reference citations
-            const validSubtopicParts: string[] = [];
-            for (const c of candidateCells) {
-              if (isMethodologyOrActivity(c) || isReferenceCitation(c)) {
-                continue;
-              }
-              // Split cell on dots or newlines or camelCase word boundaries
-              const parts = c.split(/\s*[·;\n\r]\s*/).filter(Boolean);
-              for (const part of parts) {
-                if (!isMethodologyOrActivity(part) && !isReferenceCitation(part)) {
-                  // Split on Title Case boundaries if subtopics were merged without delimiters
-                  const subPhrases = splitJoinedSubtopics(part);
-                  validSubtopicParts.push(...subPhrases);
-                }
+        // --- Universal hardening net: never store an implausible title ---
+        if (!isPlausibleTopicTitle(topicTitle)) {
+          const fallbackCandidate = candidateCells.find((c) => isPlausibleTopicTitle(c));
+          if (fallbackCandidate) {
+            candidateCells = candidateCells.filter((c) => c !== fallbackCandidate);
+            topicTitle = fallbackCandidate;
+          } else {
+            // Nothing plausible anywhere in this row -- skip it rather
+            // than publish a garbage title like "1-2" or "Week 3".
+            continue;
+          }
+        }
+
+        if (topicTitle && topicTitle.length > 1) {
+          // Filter candidate cells to exclude methodology and reference citations
+          const validSubtopicParts: string[] = [];
+          for (const c of candidateCells) {
+            if (isMethodologyOrActivity(c) || isReferenceCitation(c)) {
+              continue;
+            }
+            // Split cell on dots or newlines or camelCase word boundaries
+            const parts = c.split(/\s*[·;\n\r]\s*/).filter(Boolean);
+            for (const part of parts) {
+              if (!isMethodologyOrActivity(part) && !isReferenceCitation(part)) {
+                // Split on Title Case boundaries if subtopics were merged without delimiters
+                const subPhrases = splitJoinedSubtopics(part);
+                validSubtopicParts.push(...subPhrases);
               }
             }
-
-            const subTopics = validSubtopicParts.join(' · ');
-            tableTopics.push({ topicTitle: stripTopicFigures(cleanXmlString(topicTitle)), subTopics });
           }
+
+          const subTopics = validSubtopicParts.join(' · ');
+          tableTopics.push({ topicTitle: stripTopicFigures(cleanXmlString(topicTitle)), subTopics });
         }
       }
     }

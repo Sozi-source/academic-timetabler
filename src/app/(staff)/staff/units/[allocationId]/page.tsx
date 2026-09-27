@@ -5,7 +5,7 @@ import {
   Download,
   FileSpreadsheet,
   Keyboard,
-  Pencil,
+  UploadCloud,
   PlusCircle,
   UsersRound,
 } from 'lucide-react';
@@ -163,12 +163,12 @@ export default async function StaffUnitPage({
                 View Outline
               </Link>
               <Link
-                href={`/teaching-documents/curriculum/editor?unitId=${context.allocation.unitId}`}
+                href={`/teaching-documents/curriculum/individual-upload?unitId=${context.allocation.unitId}&documentType=course_outline`}
                 className="inline-flex h-8 items-center justify-center gap-1 rounded-lg border border-border bg-white px-2.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
-                title="Edit Course Outline online"
+                title="Upload or replace Course Outline"
               >
-                <Pencil className="size-3.5" />
-                Edit
+                <UploadCloud className="size-3.5" />
+                Upload
               </Link>
             </div>
           </Card>
@@ -196,12 +196,12 @@ export default async function StaffUnitPage({
                 View Scheme
               </Link>
               <Link
-                href={`/teaching-documents/curriculum/editor?unitId=${context.allocation.unitId}`}
+                href={`/teaching-documents/curriculum/individual-upload?unitId=${context.allocation.unitId}&documentType=scheme_of_work`}
                 className="inline-flex h-8 items-center justify-center gap-1 rounded-lg border border-border bg-white px-2.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
-                title="Edit Scheme online"
+                title="Upload or replace Scheme of Work"
               >
-                <Pencil className="size-3.5" />
-                Edit
+                <UploadCloud className="size-3.5" />
+                Upload
               </Link>
             </div>
           </Card>

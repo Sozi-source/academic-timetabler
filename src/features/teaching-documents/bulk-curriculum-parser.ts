@@ -118,7 +118,9 @@ export async function parseBulkCourseOutlineWorkbook(
   systemUnits: SystemUnitLookup[],
 ): Promise<BulkParseResult> {
   const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.load(buffer as any);
+  await workbook.xlsx.load(
+    buffer as unknown as Parameters<typeof workbook.xlsx.load>[0],
+  );
 
   const unitsMap = new Map<string, BulkCourseOutlineUnit>();
   const issues: Array<{ severity: 'warning' | 'info' | 'error'; message: string }> = [];

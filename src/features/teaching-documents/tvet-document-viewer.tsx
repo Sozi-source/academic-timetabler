@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { AlertCircle, CalendarCheck, FileDown, Pencil } from 'lucide-react';
+import { AlertCircle, CalendarCheck, FileDown, UploadCloud } from 'lucide-react';
 import Link from 'next/link';
 import {
   parseActivitiesList,
@@ -103,12 +103,12 @@ export function TVETDocumentViewer({
 
           {type !== 'record_of_work' && isDocumentReady && (
             <Link
-              href={`/teaching-documents/curriculum/editor?unitCode=${encodeURIComponent(header.unitCode)}`}
+              href={`/teaching-documents/curriculum/individual-upload?unitCode=${encodeURIComponent(header.unitCode)}`}
               className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
             >
-              <Pencil className="size-3.5 text-slate-600" aria-hidden="true" />
-              <span className="sm:hidden">Edit</span>
-              <span className="hidden sm:inline">Edit Outline</span>
+              <UploadCloud className="size-3.5 text-slate-600" aria-hidden="true" />
+              <span className="sm:hidden">Update</span>
+              <span className="hidden sm:inline">Update Document</span>
             </Link>
           )}
 

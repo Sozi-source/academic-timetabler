@@ -11,11 +11,11 @@ import {
   ClipboardList,
   Download,
   FileText,
+  FileUp,
   History,
   LayoutDashboard,
   LogOut,
   Menu,
-  PencilLine,
   X,
 } from 'lucide-react';
 import Link, { useLinkStatus } from 'next/link';
@@ -58,7 +58,7 @@ const NAV_SECTIONS: NavSection[] = [
     title: 'Curriculum & Documents',
     items: [
       { label: 'Teaching Documents', href: '/staff/documents', icon: FileText },
-      { label: 'Course Outline Editor', href: '/teaching-documents/curriculum/editor', icon: PencilLine },
+      { label: 'Upload Curriculum', href: '/teaching-documents/curriculum/individual-upload', icon: FileUp },
     ],
   },
   {

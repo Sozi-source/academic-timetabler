@@ -1,6 +1,7 @@
 import {
   BookOpenCheck,
-  Sparkles,
+  UploadCloud,
+  FileUp,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -130,14 +131,20 @@ export default async function CurriculumContentPage() {
               <ClearDocumentsButton />
             </span>
 
-            <BulkCourseOutlineUploadDialog />
-
             <Link
-              href="/teaching-documents/curriculum/editor"
+              href="/teaching-documents/curriculum/bulk-upload"
               className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-white px-3.5 text-xs font-semibold text-text-primary shadow-2xs hover:bg-surface-subtle transition"
             >
-              <Sparkles className="size-3.5 text-primary" />
-              Online Builder
+              <UploadCloud className="size-3.5 text-primary" />
+              Bulk Upload
+            </Link>
+
+            <Link
+              href="/teaching-documents/curriculum/individual-upload"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3.5 text-xs font-semibold text-white shadow-2xs hover:bg-primary-hover transition"
+            >
+              <FileUp className="size-3.5" />
+              Individual Upload
             </Link>
           </div>
         }
@@ -155,13 +162,19 @@ export default async function CurriculumContentPage() {
             Upload an Excel workbook or Word ZIP archive — topics distribute automatically across 14 weeks.
           </p>
           <div className="flex items-center justify-center gap-2">
-            <BulkCourseOutlineUploadDialog />
             <Link
-              href="/teaching-documents/curriculum/editor"
+              href="/teaching-documents/curriculum/bulk-upload"
               className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-white px-3 text-xs font-semibold text-text-primary shadow-2xs hover:bg-surface-subtle"
             >
-              <Sparkles className="size-3.5 text-primary" />
-              Online Builder
+              <UploadCloud className="size-3.5 text-primary" />
+              Bulk Upload
+            </Link>
+            <Link
+              href="/teaching-documents/curriculum/individual-upload"
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-white shadow-2xs hover:bg-primary-hover"
+            >
+              <FileUp className="size-3.5" />
+              Individual Upload
             </Link>
           </div>
         </section>
@@ -246,10 +259,10 @@ export default async function CurriculumContentPage() {
 
                                 <div className="flex flex-wrap gap-2 text-xs">
                                   <Link
-                                    href={`/teaching-documents/curriculum/editor?unitId=${row.unitId}&documentType=${document.documentType}`}
+                                    href={`/teaching-documents/curriculum/individual-upload?unitId=${row.unitId}&documentType=${document.documentType}`}
                                     className="font-semibold text-primary hover:underline"
                                   >
-                                    Edit {document.documentType === 'scheme_of_work' ? 'Scheme of Work' : 'Course Outline'}
+                                    Replace {document.documentType === 'scheme_of_work' ? 'Scheme of Work' : 'Course Outline'}
                                   </Link>
 
                                   <Link
@@ -292,10 +305,10 @@ export default async function CurriculumContentPage() {
                               <div className="flex flex-col items-start gap-2">
                                 <span className="text-xs text-text-muted">Missing</span>
                                 <Link
-                                  href={`/teaching-documents/curriculum/editor?unitId=${row.unitId}&documentType=${documentType}`}
+                                  href={`/teaching-documents/curriculum/individual-upload?unitId=${row.unitId}&documentType=${documentType}`}
                                   className="font-semibold text-primary hover:underline"
                                 >
-                                  Create {documentType === 'scheme_of_work' ? 'Scheme of Work' : 'Course Outline'}
+                                  Upload {documentType === 'scheme_of_work' ? 'Scheme of Work' : 'Course Outline'}
                                 </Link>
                               </div>
                             )}

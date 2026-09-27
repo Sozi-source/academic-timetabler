@@ -4,7 +4,7 @@ import {
   FileCheck2,
   FileOutput,
   FileText,
-  PencilLine,
+  FileUp,
   ShieldCheck,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -180,17 +180,17 @@ export default async function TeachingDocumentsPage() {
         </Link>
 
         <Link
-          href="/teaching-documents/curriculum/editor"
+          href="/teaching-documents/curriculum/individual-upload"
           className="group rounded-xl border border-border bg-white p-4 shadow-2xs transition hover:border-border-strong hover:bg-surface-subtle/40"
         >
           <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary transition group-hover:scale-105">
-            <PencilLine className="size-4.5" aria-hidden="true" />
+            <FileUp className="size-4.5" aria-hidden="true" />
           </div>
           <p className="mt-3 text-xs font-bold text-text-primary group-hover:text-primary transition-colors">
-            Outline Editor
+            Curriculum Upload
           </p>
           <p className="mt-1 text-[11px] text-text-muted leading-relaxed">
-            Draft and modify modular curriculum outlines.
+            Upload Word (.docx) or Excel (.xlsx) course outlines and schemes.
           </p>
         </Link>
       </section>

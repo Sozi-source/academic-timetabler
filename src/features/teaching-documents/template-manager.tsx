@@ -319,13 +319,13 @@ export function TeachingDocumentTemplateManager({
         {curriculumPresentationTemplate ? (
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-surface-subtle/60 px-3 py-2.5">
             <p className="text-[11px] leading-4 text-text-secondary">
-              Curriculum data is entered via the online editor.
+              Curriculum data is managed via individual or bulk document upload.
             </p>
             <a
-              href="/teaching-documents/curriculum/editor"
+              href="/teaching-documents/curriculum/individual-upload"
               className="text-[11px] font-semibold text-primary hover:underline"
             >
-              Open Syllabus Editor
+              Upload Curriculum
             </a>
           </div>
         ) : null}

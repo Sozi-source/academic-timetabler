@@ -68,8 +68,8 @@ function SearchableUnitSelect({
     if (!q) return units;
     return units.filter(
       (u) =>
-        u.code.toLowerCase().includes(q) ||
-        u.name.toLowerCase().includes(q)
+        (u.code || '').toLowerCase().includes(q) ||
+        (u.name || '').toLowerCase().includes(q)
     );
   }, [units, searchQuery]);
 

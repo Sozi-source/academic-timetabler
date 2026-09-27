@@ -173,13 +173,13 @@ export function IndividualUploadForm({
         });
 
         if (res.success) {
-          setSuccessMessage(res.message);
+          setSuccessMessage(res.message ?? 'Published successfully!');
           setTimeout(() => {
             router.push('/teaching-documents/curriculum');
             router.refresh();
           }, 1500);
         } else {
-          setErrorMessage('Failed to publish curriculum document.');
+          setErrorMessage(res.error || 'Failed to publish curriculum document.');
         }
       } catch (err: unknown) {
         setErrorMessage(err instanceof Error ? err.message : 'Publish failed');

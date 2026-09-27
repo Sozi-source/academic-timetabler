@@ -1,3 +1,22 @@
+### 2026-09-27: Removal of Online Builder and addition of dedicated Bulk & Individual Upload routes
+
+**Summary:** Completely removed the obsolete Online Curriculum Builder and replaced it with dedicated, first-class Bulk Upload (`/teaching-documents/curriculum/bulk-upload`) and Individual Upload (`/teaching-documents/curriculum/individual-upload`) routes. Individual upload accepts single `.docx` or `.xlsx` files with topic extraction, auto-detection of Course Outline vs Scheme of Work, and allows selecting from all 43 canonical department units or typing custom units. The Bulk Upload route provides department Excel template download and batch import with full validation preview. Added a backwards-compatible redirect from `/teaching-documents/curriculum/editor` to `/teaching-documents/curriculum/individual-upload`. Updated all navigation links across Curriculum Library, Staff Unit Workspaces, and Staff Shell.
+
+**Files changed:**
+- `src/features/teaching-documents/individual-curriculum-actions.ts` — Server action to parse single `.docx` and `.xlsx` curriculum documents and publish active versions with topic extraction.
+- `src/features/teaching-documents/individual-upload-form.tsx` — Client form for single document upload, unit selection, and real-time preview.
+- `src/app/(dashboard)/teaching-documents/curriculum/individual-upload/page.tsx` — Server page for individual upload route with database unit loading and canonical registry fallback.
+- `src/features/teaching-documents/bulk-upload-view.tsx` — Dedicated full-page view for batch curriculum upload (.xlsx and .zip).
+- `src/app/(dashboard)/teaching-documents/curriculum/bulk-upload/page.tsx` — Dedicated route for bulk curriculum upload.
+- `src/app/(dashboard)/teaching-documents/curriculum/editor/page.tsx` — Replaced builder with seamless redirect to individual upload route.
+- `src/features/teaching-documents/curriculum-editor/online-builder.tsx` — Deleted obsolete manual builder component.
+- `src/app/(dashboard)/teaching-documents/curriculum/page.tsx` — Replaced Online Builder actions and table links with Bulk and Individual upload links.
+- `src/app/(dashboard)/teaching-documents/page.tsx` — Updated quick action card to point to Curriculum Upload.
+- `src/app/(staff)/staff/units/[allocationId]/documents/page.tsx` — Updated staff action links to individual upload.
+- `src/app/(staff)/staff/units/[allocationId]/page.tsx` — Updated staff unit action links to individual upload.
+- `src/components/staff/staff-shell.tsx` — Replaced Outline Editor navigation link with Upload Curriculum.
+- `src/features/teaching-documents/template-manager.tsx` & `tvet-document-viewer.tsx` — Updated links to individual upload.
+
 ### 2026-09-27: Online Curriculum Builder unit selection & Word upload normalization
 
 **Summary:** Resolved an issue where uploading a Word syllabus in the Online Curriculum Builder appeared stuck on the default first unit (Communication Skills) and prevented selecting other units. Made the parent Card `overflow-visible relative z-20` so the SearchableUnitSelect dropdown popup is no longer clipped by the Card container. Enhanced `handleDocxUpload` to match by unit code or name and unselect default unit on unmatched upload so it no longer falsely displays Communication Skills. Passed `file.name` to `parseDocxSyllabusAction` so that filename fallback extracts unit code and title. Updated `handleUnitChange` to preserve uploaded/edited topics when switching to a unit that has no existing curriculum in the database.

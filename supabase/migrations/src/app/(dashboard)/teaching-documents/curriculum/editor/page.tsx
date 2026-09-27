@@ -89,6 +89,7 @@ export default async function OnlineCurriculumEditorPage({ searchParams }: PageP
     <OnlineCurriculumBuilder
       units={activeUnits}
       initialUnitId={resolvedUnitId}
+      initialDocumentType="course_outline"
       milestones={milestones}
       existingCurriculumMap={existingCurriculumMap}
     />

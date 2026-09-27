@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { requireTrainerAccess } from '@/features/auth/authorization';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { isCurriculumDocumentType, type CurriculumDocumentType } from '../curriculum-document-types';
 import { parseDocxSyllabus } from './docx-parser';
 
 export interface OnlineTopicItem {
@@ -15,6 +16,7 @@ export interface OnlineTopicItem {
 }
 
 export interface OnlineCurriculumPayload {
+  documentType?: CurriculumDocumentType;
   unitId?: string;
   unitCode: string;
   unitName: string;
@@ -33,7 +35,7 @@ export async function parseDocxSyllabusAction(formData: FormData) {
 
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
-  const parsed = parseDocxSyllabus(buffer);
+  const parsed = parseDocxSyllabus(buffer, file.name);
 
   if (parsed.topics.length === 0) {
     throw new Error('No syllabus topics or tables could be extracted from this Word document. Please ensure it contains a topic table or numbered topics.');
@@ -47,6 +49,15 @@ export async function parseDocxSyllabusAction(formData: FormData) {
 
 export async function saveOnlineCurriculumAction(payload: OnlineCurriculumPayload) {
   const profile = await requireTrainerAccess();
+  const documentType = payload.documentType ?? 'course_outline';
+
+  if (!profile.activeDepartmentId) {
+    throw new Error('Select an active department before publishing curriculum documents.');
+  }
+
+  if (!isCurriculumDocumentType(documentType)) {
+    throw new Error('Select whether this document is a course outline or scheme of work.');
+  }
 
   if (!payload.unitCode?.trim()) {
     throw new Error('Please specify a unit code (e.g. DHN 2304).');
@@ -60,11 +71,25 @@ export async function saveOnlineCurriculumAction(payload: OnlineCurriculumPayloa
   let targetUnitId = payload.unitId;
 
   // Resolve or create unit in units table
+  if (targetUnitId) {
+    const { data: selectedUnit } = await admin
+      .from('units')
+      .select('id')
+      .eq('id', targetUnitId)
+      .eq('department_id', profile.activeDepartmentId)
+      .maybeSingle();
+
+    if (!selectedUnit) {
+      throw new Error('The selected unit is not available in the active department.');
+    }
+  }
+
   if (!targetUnitId) {
     const { data: existingUnit } = await admin
       .from('units')
       .select('id')
       .ilike('code', payload.unitCode.trim())
+      .eq('department_id', profile.activeDepartmentId)
       .maybeSingle();
 
     if (existingUnit) {
@@ -75,6 +100,7 @@ export async function saveOnlineCurriculumAction(payload: OnlineCurriculumPayloa
         .insert({
           code: payload.unitCode.trim().toUpperCase(),
           name: payload.unitName.trim() || payload.unitCode.trim(),
+          department_id: profile.activeDepartmentId,
           is_active: true,
         })
         .select('id')
@@ -91,7 +117,9 @@ export async function saveOnlineCurriculumAction(payload: OnlineCurriculumPayloa
   const { data: existingVersions } = await admin
     .from('curriculum_document_versions')
     .select('version_number')
+    .eq('department_id', profile.activeDepartmentId)
     .eq('unit_id', targetUnitId)
+    .eq('document_type', documentType)
     .order('version_number', { ascending: false })
     .limit(1);
 
@@ -101,7 +129,9 @@ export async function saveOnlineCurriculumAction(payload: OnlineCurriculumPayloa
   await admin
     .from('curriculum_document_versions')
     .update({ status: 'superseded' })
+    .eq('department_id', profile.activeDepartmentId)
     .eq('unit_id', targetUnitId)
+    .eq('document_type', documentType)
     .eq('status', 'active');
 
   // 3. Construct structured payload
@@ -127,26 +157,12 @@ export async function saveOnlineCurriculumAction(payload: OnlineCurriculumPayloa
   };
 
   // 4. Insert active version
-  let targetDepartmentId = profile.activeDepartmentId;
-  if (!targetDepartmentId) {
-    const { data: uData } = await admin
-      .from('units')
-      .select('department_id')
-      .eq('id', targetUnitId)
-      .maybeSingle();
-    targetDepartmentId = uData?.department_id ?? (profile as any).departmentId;
-  }
-  if (!targetDepartmentId) {
-    const { data: dept } = await admin.from('departments').select('id').limit(1).maybeSingle();
-    targetDepartmentId = dept?.id;
-  }
-
   const { data: newDoc, error: insertError } = await admin
     .from('curriculum_document_versions')
     .insert({
-      department_id: targetDepartmentId,
+      department_id: profile.activeDepartmentId,
       unit_id: targetUnitId,
-      document_type: 'course_outline',
+      document_type: documentType,
       version_number: nextVersion,
       status: 'active',
       created_by: profile.id,
@@ -170,6 +186,6 @@ export async function saveOnlineCurriculumAction(payload: OnlineCurriculumPayloa
   return {
     success: true,
     documentId: newDoc?.id,
-    message: `Curriculum for ${payload.unitCode} saved and published successfully!`,
+    message: `${documentType === 'scheme_of_work' ? 'Scheme of Work' : 'Course Outline'} for ${payload.unitCode} saved and published successfully!`,
   };
 }

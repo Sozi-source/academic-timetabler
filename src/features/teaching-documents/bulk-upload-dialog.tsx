@@ -69,7 +69,7 @@ export function BulkCourseOutlineUploadDialog() {
         } else {
           setParseResult(result);
           if (result.units.length === 0) {
-            setErrorMessage('No course outlines or units could be extracted from this file.');
+            setErrorMessage('No course outlines or schemes of work could be extracted from this file.');
           }
         }
       } catch (err: unknown) {
@@ -114,7 +114,7 @@ export function BulkCourseOutlineUploadDialog() {
         onClick={handleOpen}
         leadingIcon={<UploadCloud className="size-3.5" />}
       >
-        Bulk Upload Outlines
+        Bulk Curriculum Upload
       </Button>
 
       {isOpen && (
@@ -128,10 +128,10 @@ export function BulkCourseOutlineUploadDialog() {
                 </div>
                 <div>
                   <h2 className="text-base font-bold text-text-primary">
-                    Authoritative Bulk Course Outline Upload
+                    Authoritative Bulk Curriculum Upload
                   </h2>
                   <p className="text-xs text-text-muted">
-                    Upload official syllabus content in bulk. The system retains 100% of the current TVET 14-week layout.
+                    Upload course outlines and schemes of work together. Each detected document type is published separately.
                   </p>
                 </div>
               </div>
@@ -156,7 +156,7 @@ export function BulkCourseOutlineUploadDialog() {
                     Download Pre-filled Department Excel Template
                   </div>
                   <p className="text-[11px] text-text-secondary leading-relaxed">
-                    Downloads an Excel workbook pre-populated with all active units in your department, ready for syllabus topic entry.
+                    Downloads the course outline template pre-populated with all active units. Mixed workbooks may include separate Scheme of Work Units and Topics sheets.
                   </p>
                 </div>
                 <a
@@ -235,7 +235,7 @@ export function BulkCourseOutlineUploadDialog() {
                 <div className="space-y-3 pt-2">
                   <div className="flex items-center justify-between">
                     <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted">
-                      Extracted Units Preview ({parseResult.totalUnits} Units Found)
+                      Extracted Curriculum Preview ({parseResult.totalUnits} Documents Found)
                     </h3>
                     <div className="flex items-center gap-2">
                       <Badge variant="success">
@@ -260,6 +260,9 @@ export function BulkCourseOutlineUploadDialog() {
                             <span className="font-black text-text-primary">
                               {unit.unitCode}
                             </span>
+                            <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
+                              {unit.documentType === 'scheme_of_work' ? 'Scheme of Work' : 'Course Outline'}
+                            </span>
                             <span className="text-text-muted truncate">
                               {unit.unitName}
                             </span>
@@ -267,7 +270,7 @@ export function BulkCourseOutlineUploadDialog() {
                           <div className="mt-1 flex items-center gap-3 text-[11px] text-text-muted">
                             <span className="inline-flex items-center gap-1">
                               <FileText className="size-3 text-text-tertiary" />
-                              {unit.topics.length} Syllabus Topic{unit.topics.length === 1 ? '' : 's'}
+                              {unit.topics.length} Topic{unit.topics.length === 1 ? '' : 's'}
                             </span>
                             {unit.unitDescription && (
                               <span className="truncate max-w-xs text-text-tertiary">
@@ -313,7 +316,7 @@ export function BulkCourseOutlineUploadDialog() {
                 {hasValidationErrors
                   ? 'Resolve the topic and coverage issues before publishing'
                   : parseResult
-                    ? `${parseResult.units.length} unit(s) ready to publish`
+                    ? `${parseResult.units.length} curriculum document(s) ready to publish`
                     : 'Select a file to begin'}
               </span>
 
@@ -340,7 +343,7 @@ export function BulkCourseOutlineUploadDialog() {
                     )
                   }
                 >
-                  {isCommitting ? 'Publishing Outlines...' : 'Commit Authoritative Outlines'}
+                  {isCommitting ? 'Publishing Curriculum...' : 'Publish Curriculum Documents'}
                 </Button>
               </div>
             </div>

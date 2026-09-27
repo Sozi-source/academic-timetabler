@@ -15,12 +15,27 @@ import {
   TVET_CURRICULUM_REGISTRY,
 } from './curriculum-registry';
 import { hasTopicCoverageContamination } from './topic-coverage-validation';
+import { isCurriculumDocumentType } from './curriculum-document-types';
 
 /**
  * Parses an uploaded file (either .xlsx or .zip) and returns the extracted units and matching status
  */
 export async function parseBulkCourseOutlinesAction(formData: FormData): Promise<BulkParseResult> {
-  await requireHodAccess();
+  const profile = await requireHodAccess();
+
+  if (!profile.activeDepartmentId) {
+    return {
+      ok: false,
+      error: 'Select an active department before importing curriculum documents.',
+      fileName: '',
+      fileType: 'xlsx',
+      totalUnits: 0,
+      matchedCount: 0,
+      unmatchedCount: 0,
+      units: [],
+      issues: [{ severity: 'error', message: 'No active department is selected.' }],
+    };
+  }
 
   const file = formData.get('file') as File | null;
   if (!file || file.size === 0) {
@@ -62,6 +77,7 @@ export async function parseBulkCourseOutlinesAction(formData: FormData): Promise
   const { data: unitsData } = await admin
     .from('units')
     .select('id, code, name')
+    .eq('department_id', profile.activeDepartmentId)
     .eq('is_active', true);
 
   const systemUnits: SystemUnitLookup[] = (unitsData ?? []).map((u) => ({
@@ -90,7 +106,20 @@ export async function commitBulkCourseOutlinesAction(
     return { success: false, count: 0, message: 'No units to commit.' };
   }
 
-  const malformedUnit = units.find((item) => hasTopicCoverageContamination(item.topics));
+  if (!profile.activeDepartmentId) {
+    return {
+      success: false,
+      count: 0,
+      message: 'Select an active department before publishing curriculum documents.',
+    };
+  }
+
+  const normalizedUnits = units.map((item) => ({
+    ...item,
+    documentType: item.documentType ?? 'course_outline',
+  }));
+
+  const malformedUnit = normalizedUnits.find((item) => hasTopicCoverageContamination(item.topics));
   if (malformedUnit) {
     return {
       success: false,
@@ -99,22 +128,37 @@ export async function commitBulkCourseOutlinesAction(
     };
   }
 
+  const invalidTypeUnit = normalizedUnits.find((item) => !isCurriculumDocumentType(item.documentType));
+  if (invalidTypeUnit) {
+    return {
+      success: false,
+      count: 0,
+      message: `Unit "${invalidTypeUnit.unitCode}" has an unsupported curriculum document type.`,
+    };
+  }
+
   const admin = createAdminClient();
   let committedCount = 0;
 
-  // Resolve target department
-  let targetDepartmentId = profile.activeDepartmentId;
-  if (!targetDepartmentId) {
-    const { data: dept } = await admin.from('departments').select('id').limit(1).maybeSingle();
-    targetDepartmentId = dept?.id;
-  }
-
-  for (const item of units) {
+  for (const item of normalizedUnits) {
     if (!item.unitCode?.trim() || item.topics.length === 0) {
       continue;
     }
 
+    const documentType = item.documentType;
+
     let targetUnitId = item.matchedUnitId;
+
+    if (targetUnitId) {
+      const { data: matchedUnit } = await admin
+        .from('units')
+        .select('id')
+        .eq('id', targetUnitId)
+        .eq('department_id', profile.activeDepartmentId)
+        .maybeSingle();
+
+      targetUnitId = matchedUnit?.id;
+    }
 
     // If unit wasn't pre-matched, check or create in units table
     if (!targetUnitId) {
@@ -122,6 +166,7 @@ export async function commitBulkCourseOutlinesAction(
         .from('units')
         .select('id')
         .ilike('code', item.unitCode.trim())
+        .eq('department_id', profile.activeDepartmentId)
         .maybeSingle();
 
       if (existingUnit) {
@@ -132,7 +177,7 @@ export async function commitBulkCourseOutlinesAction(
           .insert({
             code: item.unitCode.trim().toUpperCase(),
             name: item.unitName.trim() || item.unitCode.trim().toUpperCase(),
-            department_id: targetDepartmentId,
+            department_id: profile.activeDepartmentId,
             is_active: true,
           })
           .select('id')
@@ -150,8 +195,9 @@ export async function commitBulkCourseOutlinesAction(
     const { data: existingVersions } = await admin
       .from('curriculum_document_versions')
       .select('version_number')
+      .eq('department_id', profile.activeDepartmentId)
       .eq('unit_id', targetUnitId)
-      .eq('document_type', 'course_outline')
+      .eq('document_type', documentType)
       .order('version_number', { ascending: false })
       .limit(1);
 
@@ -161,8 +207,9 @@ export async function commitBulkCourseOutlinesAction(
     await admin
       .from('curriculum_document_versions')
       .update({ status: 'superseded', superseded_at: new Date().toISOString() })
+      .eq('department_id', profile.activeDepartmentId)
       .eq('unit_id', targetUnitId)
-      .eq('document_type', 'course_outline')
+      .eq('document_type', documentType)
       .eq('status', 'active');
 
     // 3. Format topics into authoritative content structure
@@ -205,9 +252,9 @@ export async function commitBulkCourseOutlinesAction(
     const { error: insertError } = await admin
       .from('curriculum_document_versions')
       .insert({
-        department_id: targetDepartmentId,
+        department_id: profile.activeDepartmentId,
         unit_id: targetUnitId,
-        document_type: 'course_outline',
+        document_type: documentType,
         version_number: nextVersion,
         status: 'active',
         source_type: 'admin_import',
@@ -223,7 +270,7 @@ export async function commitBulkCourseOutlinesAction(
 
     // 5. Update dynamic in-memory registry for instant response
     const codeKey = normalizeUnitCodeKey(item.unitCode);
-    TVET_CURRICULUM_REGISTRY[`${codeKey}:course_outline`] = {
+    TVET_CURRICULUM_REGISTRY[`${codeKey}:${documentType}`] = {
       unitCode: item.matchedUnitCode || item.unitCode.trim().toUpperCase(),
       unitName: item.matchedUnitName || item.unitName.trim(),
       unitDescription: item.unitDescription,
@@ -249,10 +296,11 @@ export async function commitBulkCourseOutlinesAction(
   revalidatePath('/staff/documents');
   revalidatePath('/staff/units/[allocationId]/documents', 'page');
   revalidatePath('/staff/units/[allocationId]/documents/course-outline', 'page');
+  revalidatePath('/staff/units/[allocationId]/documents/scheme-of-work', 'page');
 
   return {
     success: true,
     count: committedCount,
-    message: `Successfully uploaded and published ${committedCount} authoritative course outline${committedCount === 1 ? '' : 's'}!`,
+    message: `Successfully uploaded and published ${committedCount} curriculum document${committedCount === 1 ? '' : 's'}!`,
   };
 }

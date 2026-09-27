@@ -31,7 +31,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     weeklySchedule: [
       {
         weekNumber: 1,
-        topicTitle: "22.2.01 Introduction to Microbiology",
+        topicTitle: "Introduction to Microbiology",
         subTopics: ["Meaning of terms in microbiology", "Background of microbiology", "Importance of microbiology", "Application of microbiology in food industry and nutrition"],
         hours: 5,
         specificLearningOutcomes: "Define terms; outline background; explain importance; describe applications of microbiology.",
@@ -41,7 +41,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 2,
-        topicTitle: "22.2.02 General Classification of Microorganisms",
+        topicTitle: "General Classification of Microorganisms",
         subTopics: ["Bacteria: structure, classification", "Viruses: structure and types", "Protozoa: structure and examples", "Fungi: yeasts and moulds", "Algae: classification and characteristics", "Classification of microorganisms using practical specimens"],
         hours: 5,
         specificLearningOutcomes: "Describe and classify bacteria, viruses, protozoa, fungi, and algae; distinguish morphological features.",
@@ -51,7 +51,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 3,
-        topicTitle: "22.2.03 Microscopy",
+        topicTitle: "Microscopy",
         subTopics: ["Parts of a modern light microscope", "Use, care and maintenance of microscope", "Types of microscopes: bright field, dark field, phase contrast, fluorescence, electron", "Focusing using different objectives", "Preparing smears and microscope cleaning"],
         hours: 5,
         specificLearningOutcomes: "Identify parts of a modern microscope; describe types; demonstrate use, care and maintenance; prepare smears.",
@@ -61,7 +61,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 4,
-        topicTitle: "22.2.04 Cell Structure of Microorganisms",
+        topicTitle: "Cell Structure of Microorganisms",
         subTopics: ["Prokaryotic cells vs eukaryotic cells", "Structures of prokaryotic and eukaryotic cells", "Structures of fungi: yeast and mould", "Structures of viruses", "Drawing and labelling cross-sections of microbial cells"],
         hours: 5,
         specificLearningOutcomes: "Describe and differentiate prokaryotic and eukaryotic cells; draw and label cross-sections of microbial cells.",
@@ -71,7 +71,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 5,
-        topicTitle: "22.2.05 Laboratory Equipment and Sterilization",
+        topicTitle: "Laboratory Equipment and Sterilization",
         subTopics: ["Precautions in the microbiological laboratory", "Basic apparatus: petridishes, slides, inoculation loops, pipettes, autoclave, incubators, oven, glass rods, spreaders, flasks", "Sterilization methods: dry heat, moist heat (autoclaving, tyndallisation), disinfection, irradiation", "Practical sterilization: flaming wire loop, wet heat sterilization"],
         hours: 5,
         specificLearningOutcomes: "Identify apparatus; describe sterilization methods; carry out sterilization procedures.",
@@ -81,7 +81,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 6,
-        topicTitle: "22.2.06 Staining Techniques",
+        topicTitle: "Staining Techniques",
         subTopics: ["Meaning of staining terms", "Types of dyes: positive and negative staining", "Staining techniques: Gram stain, acid-fast staining, endospore, flagella, capsule staining", "Preparation of microscopic slide smears", "Carrying out staining procedures"],
         hours: 5,
         specificLearningOutcomes: "Describe types of dyes; carry out staining techniques; prepare slide smears.",
@@ -91,7 +91,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 7,
-        topicTitle: "22.2.07 Culturing Microorganisms",
+        topicTitle: "Culturing Microorganisms",
         subTopics: ["Meaning of terms: CFU, isolation, culture media", "Types of culture media: general purpose, selective, differential, enrichment", "Culturing and incubation methods: aerobic, anaerobic, microaerophilic", "Methods of isolation: streak plate, absolute dilution, pour plate", "Components of culture media: carbon, nitrogen, dyes, vitamins, agar, water", "Preparing culture media and isolating microorganisms to pure culture"],
         hours: 5,
         specificLearningOutcomes: "Describe types of culture media; explain culturing and isolation methods; prepare media and isolate microorganisms.",
@@ -111,7 +111,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 9,
-        topicTitle: "22.2.08 Growth of Microorganisms",
+        topicTitle: "Growth of Microorganisms",
         subTopics: ["Enumeration of microbes and control methods", "Biochemical tests", "Mechanism of microbial metabolism", "Factors affecting growth: intrinsic (pH, water activity) and extrinsic (temperature, humidity, O₂)", "Reproduction in microorganisms", "Microbial growth curves", "Cultivation methods"],
         hours: 5,
         specificLearningOutcomes: "Explain enumeration and control; describe biochemical tests and microbial growth curves; draw and interpret growth curves.",
@@ -151,7 +151,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 13,
-        topicTitle: "22.2.09 Emerging Issues and Trends in Microbiology",
+        topicTitle: "Emerging Issues and Trends in Microbiology",
         subTopics: ["Emerging issues and trends in food microbiology", "Challenges posed by emerging trends", "Antibiotic resistance and implications for food safety", "Ways of coping: biotechnology applications, biocontrol", "Strategies addressing emerging issues and trends"],
         hours: 5,
         specificLearningOutcomes: "Discuss emerging issues; describe antibiotic resistance; explain coping strategies and biotechnology applications.",
@@ -201,7 +201,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     weeklySchedule: [
       {
         weekNumber: 1,
-        topicTitle: "23.2.01 Introduction to Diet Therapy",
+        topicTitle: "Introduction to Diet Therapy",
         subTopics: ["Meaning of terms in diet therapy", "Importance of diet therapy in clinical practice", "Scope of diet therapy: preventive, curative, and palliative roles", "Overview of therapeutic diets and their indications"],
         hours: 5,
         specificLearningOutcomes: "Define terms; explain importance; discuss scope of diet therapy.",
@@ -211,7 +211,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 2,
-        topicTitle: "23.2.02 Diseases of the Liver and Gallbladder — Part I",
+        topicTitle: "Diseases of the Liver and Gallbladder — Part I",
         subTopics: ["Types of liver and gallbladder diseases: hepatitis, cirrhosis, fatty liver, cholecystitis, cholelithiasis", "Etiology of liver and gallbladder diseases", "Causes of liver and gallbladder diseases"],
         hours: 5,
         specificLearningOutcomes: "Identify types; describe etiology and causes of liver and gallbladder diseases.",
@@ -221,7 +221,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 3,
-        topicTitle: "23.2.02 Diseases of the Liver and Gallbladder — Part II",
+        topicTitle: "Diseases of the Liver and Gallbladder — Part II",
         subTopics: ["Signs and symptoms of liver and gallbladder diseases", "Management through dietary modification and nutritional support", "Gallbladder disease: dietary fat modification", "Planning diets for liver and gallbladder patients"],
         hours: 5,
         specificLearningOutcomes: "Describe signs and symptoms; discuss management; plan therapeutic diets for liver and gallbladder conditions.",
@@ -231,7 +231,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 4,
-        topicTitle: "23.2.03 Pancreatic Disorders",
+        topicTitle: "Pancreatic Disorders",
         subTopics: ["Meaning of terms", "Types of pancreatic disorders: pancreatitis, pancreatic cancer, diabetes mellitus", "Etiology and causes of pancreatic disorders", "Signs and symptoms", "Management through dietary modification", "Planning diets for pancreatic conditions"],
         hours: 5,
         specificLearningOutcomes: "Define terms; identify types; describe management; plan diets for pancreatic conditions.",
@@ -241,7 +241,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 5,
-        topicTitle: "23.2.04 Cardiovascular and Lung Diseases — Part I",
+        topicTitle: "Cardiovascular and Lung Diseases — Part I",
         subTopics: ["Meaning of terms", "Types of cardiovascular diseases: hypertension, coronary artery disease, heart failure, atherosclerosis, dyslipidaemia", "Types of lung diseases: COPD, asthma, tuberculosis", "Etiology and causes of cardiovascular and lung diseases"],
         hours: 5,
         specificLearningOutcomes: "Define terms; describe types; explain etiology and causes of cardiovascular and lung diseases.",
@@ -251,7 +251,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 6,
-        topicTitle: "23.2.04 Cardiovascular and Lung Diseases — Part II",
+        topicTitle: "Cardiovascular and Lung Diseases — Part II",
         subTopics: ["Signs and symptoms of cardiovascular and lung diseases", "Medical nutrition therapy: DASH diet, fat restriction, sodium restriction", "Dietary modifications for lung disease patients", "Planning diets for cardiovascular and lung disease patients"],
         hours: 5,
         specificLearningOutcomes: "Describe signs and symptoms; plan therapeutic diets for cardiovascular and lung conditions.",
@@ -261,7 +261,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 7,
-        topicTitle: "23.2.05 Renal Diseases — Part I",
+        topicTitle: "Renal Diseases — Part I",
         subTopics: ["Meaning of terms", "Types of renal diseases: acute kidney injury, chronic kidney disease, nephrotic syndrome, nephrolithiasis", "Etiology of renal diseases", "Causes and risk factors for renal diseases"],
         hours: 5,
         specificLearningOutcomes: "Define terms; identify types; describe etiology and causes of renal diseases.",
@@ -281,7 +281,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 9,
-        topicTitle: "23.2.05 Renal Diseases — Part II",
+        topicTitle: "Renal Diseases — Part II",
         subTopics: ["Signs and symptoms of renal diseases", "Management: protein restriction, potassium, phosphorus, and fluid management", "Haemodialysis and peritoneal dialysis nutritional considerations", "Planning diets for renal disease patients"],
         hours: 5,
         specificLearningOutcomes: "Describe signs and symptoms; plan therapeutic diets for renal conditions.",
@@ -321,7 +321,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 13,
-        topicTitle: "23.2.06 Emerging Issues and Trends in Diet Therapy",
+        topicTitle: "Emerging Issues and Trends in Diet Therapy",
         subTopics: ["Emerging issues and trends in clinical nutrition", "Challenges posed by emerging issues: NCD burden, food insecurity", "Coping strategies: community-based nutrition programmes, technology in dietetics", "Pharmaconutrition and functional foods in therapeutic settings"],
         hours: 5,
         specificLearningOutcomes: "Discuss emerging issues; identify challenges and coping strategies; describe functional foods in therapy.",
@@ -374,7 +374,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     weeklySchedule: [
       {
         weekNumber: 1,
-        topicTitle: "24.2.01 Introduction to Food Processing and Preservation",
+        topicTitle: "Introduction to Food Processing and Preservation",
         subTopics: ["Meaning of terms: food processing, food preservation, food deterioration", "Aims of food processing and preservation", "Overview of food processing and preservation methods", "Importance of food processing in nutritional security"],
         hours: 5,
         specificLearningOutcomes: "Define terms; explain aims of food processing and preservation; identify importance.",
@@ -384,7 +384,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 2,
-        topicTitle: "24.2.02 Factors Causing Food Deterioration",
+        topicTitle: "Factors Causing Food Deterioration",
         subTopics: ["Microbial spoilage: bacteria, yeasts, moulds", "Food enzymes: enzymatic browning, ripening", "Insects, parasites, and rodents", "Environmental factors: temperature, moisture, oxygen, light, duration", "Identification of signs of food deterioration"],
         hours: 5,
         specificLearningOutcomes: "Explain causes of food deterioration; identify signs of food deterioration.",
@@ -394,7 +394,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 3,
-        topicTitle: "24.2.03 Chemical Changes in Food During Storage and Processing",
+        topicTitle: "Chemical Changes in Food During Storage and Processing",
         subTopics: ["Browning: enzymatic vs. non-enzymatic (Maillard reaction)", "Ripening: changes in pigments, sugars, organic acids", "Sprouting and effects on nutritional quality", "Hydrolysis: fats, proteins, carbohydrates", "Oxidation: lipid peroxidation and rancidity", "Thermal degradation: effects on vitamins and proteins"],
         hours: 5,
         specificLearningOutcomes: "Explain chemical changes in food; describe browning, ripening, sprouting, hydrolysis, oxidation, thermal degradation.",
@@ -404,7 +404,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 4,
-        topicTitle: "24.2.04 Principles and Methods of Food Preservation",
+        topicTitle: "Principles and Methods of Food Preservation",
         subTopics: ["Preservation principles: destroying microorganisms, inhibiting growth, preventing contamination", "Classification: thermal processing, low temperature, dehydration, chemical, biological", "Selection criteria for appropriate preservation method", "Demonstration of preservation method principles"],
         hours: 5,
         specificLearningOutcomes: "Describe principles of food preservation methods; classify methods; demonstrate principles.",
@@ -414,7 +414,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 5,
-        topicTitle: "24.2.05 Thermal Processing",
+        topicTitle: "Thermal Processing",
         subTopics: ["Blanching: objectives, methods (water/steam), effects on food quality", "Pasteurization: objectives, methods (HTST, LTLT), effects on food", "Sterilization: commercial sterilization, stages in canning, spoilage of canned products", "Practical: blanching and pasteurization of food materials"],
         hours: 5,
         specificLearningOutcomes: "Describe blanching, pasteurization, sterilization; carry out blanching and pasteurization; achieve commercial sterilization.",
@@ -424,7 +424,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 6,
-        topicTitle: "24.2.06 Low Temperature Preservation",
+        topicTitle: "Low Temperature Preservation",
         subTopics: ["Terminologies: refrigeration, cold storage, chilling, freezing, thawing", "Methods and applications of low temperature preservation", "Effects of low temperatures on food quality", "Thawing process and effects on food safety", "Practical: operation of refrigeration and freezing equipment"],
         hours: 5,
         specificLearningOutcomes: "Define terminologies; describe methods and effects of low temperature preservation; apply thawing methods.",
@@ -454,7 +454,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 9,
-        topicTitle: "24.2.08 Fermentation and Pickling",
+        topicTitle: "Fermentation and Pickling",
         subTopics: ["Fermentation process: lactic acid and alcoholic fermentation", "Production of pickles: vegetables, fruits", "Preparation of pickles for use", "Traditional fermented foods in Kenya: uji, muratina, mursik", "Practical: fermentation and pickling of food products"],
         hours: 5,
         specificLearningOutcomes: "Describe fermentation process and types; produce pickles and fermented food products.",
@@ -464,7 +464,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 10,
-        topicTitle: "24.2.09 Salting and Smoking",
+        topicTitle: "Salting and Smoking",
         subTopics: ["Effects of salt: osmosis, water activity reduction, microbial inhibition", "Methods of salting: dry salting, wet salting, brine curing", "Effects of smoke on foods: phenols, formaldehyde, bactericidal effects", "Methods of smoking: hot smoking, cold smoking", "Practical: salting and smoking of fish and meat products"],
         hours: 5,
         specificLearningOutcomes: "Explain effects of salt and smoke; describe salting and smoking methods; carry out salting and smoking.",
@@ -474,7 +474,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 11,
-        topicTitle: "24.2.10 Controlled Atmosphere Storage and Food Additives",
+        topicTitle: "Controlled Atmosphere Storage and Food Additives",
         subTopics: ["Controlled atmosphere (CA) storage: principles and applications", "Modified atmosphere packaging (MAP) for fresh produce", "Food additives: aims, terminologies, classes (preservatives, antioxidants, emulsifiers, colouring)", "Safe use of additives: ADI, regulatory standards", "Irradiation: safety and applications"],
         hours: 5,
         specificLearningOutcomes: "Describe CA and MAP storage; explain food additives classes and safe use; describe irradiation.",
@@ -545,7 +545,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     weeklySchedule: [
       {
         weekNumber: 1,
-        topicTitle: "25.2.01 Introduction to Biostatistics",
+        topicTitle: "Introduction to Biostatistics",
         subTopics: ["Definition of biostatistics and related terms", "Importance and application of biostatistics in nutrition and health", "Types of data: quantitative (discrete, continuous) and qualitative (nominal, ordinal)", "Levels of measurement: nominal, ordinal, interval, ratio"],
         hours: 5,
         specificLearningOutcomes: "Define biostatistics; explain importance; differentiate types and levels of data.",
@@ -555,7 +555,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 2,
-        topicTitle: "25.2.02 Data Collection Methods",
+        topicTitle: "Data Collection Methods",
         subTopics: ["Types of data collection methods: interviews, questionnaires, observation, records review", "Designing data collection instruments", "Sampling methods: random, systematic, stratified, cluster, purposive", "Sample size determination principles"],
         hours: 5,
         specificLearningOutcomes: "Describe data collection methods; design simple instruments; differentiate sampling methods.",
@@ -565,7 +565,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 3,
-        topicTitle: "25.2.03 Data Presentation",
+        topicTitle: "Data Presentation",
         subTopics: ["Tabulation of data: frequency distribution tables", "Grouped frequency distributions", "Bar charts, histograms, pie charts", "Line graphs and scatter plots", "Interpretation of graphical data presentations"],
         hours: 5,
         specificLearningOutcomes: "Construct frequency tables; present data using charts and graphs; interpret data presentations.",
@@ -575,7 +575,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 4,
-        topicTitle: "25.2.04 Measures of Central Tendency",
+        topicTitle: "Measures of Central Tendency",
         subTopics: ["Mean: arithmetic, weighted", "Median: computation from raw data and frequency tables", "Mode: unimodal, bimodal, multimodal", "Properties and appropriate use of each measure", "Practical calculations and interpretation"],
         hours: 5,
         specificLearningOutcomes: "Define measures of central tendency; compute mean, median, mode from raw and grouped data; interpret.",
@@ -585,7 +585,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 5,
-        topicTitle: "25.2.04 Measures of Dispersion",
+        topicTitle: "Measures of Dispersion",
         subTopics: ["Range: simple and interquartile", "Variance and standard deviation", "Coefficient of variation", "Normal distribution curve and its properties", "Percentiles and z-scores"],
         hours: 5,
         specificLearningOutcomes: "Define measures of dispersion; compute range, variance, standard deviation; describe normal distribution and interpret z-scores.",
@@ -605,7 +605,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 7,
-        topicTitle: "25.2.07 Rates, Ratios, Proportions and Nutritional Indices",
+        topicTitle: "Rates, Ratios, Proportions and Nutritional Indices",
         subTopics: ["Definitions: rate, ratio, proportion", "Rates in public health: incidence rate, prevalence rate, crude rate, specific rate", "Nutritional indicators: stunting, wasting, GAM prevalence", "Disability-adjusted life years (DALYs) and nutritional significance"],
         hours: 5,
         specificLearningOutcomes: "Define rate, ratio, proportion; calculate incidence and prevalence rates; compute and interpret nutritional indicators.",
@@ -645,7 +645,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 11,
-        topicTitle: "25.2.10 Tests of Statistical Significance — Part I",
+        topicTitle: "Tests of Statistical Significance — Part I",
         subTopics: ["Concept of hypothesis testing: null and alternative hypothesis", "Type I and Type II errors", "Level of significance (p-value), confidence intervals", "z-test for large samples", "t-test: one-sample, independent samples, paired samples"],
         hours: 5,
         specificLearningOutcomes: "Explain hypothesis testing; define Type I and II errors; apply z-test and t-tests.",
@@ -655,7 +655,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 12,
-        topicTitle: "25.2.10 Tests of Statistical Significance — Part II",
+        topicTitle: "Tests of Statistical Significance — Part II",
         subTopics: ["Chi-square (χ²) test: goodness of fit and test of independence", "Analysis of variance (ANOVA): one-way and two-way", "Non-parametric tests: Mann-Whitney U, Wilcoxon signed-rank, Kruskal-Wallis", "Selecting appropriate statistical tests"],
         hours: 5,
         specificLearningOutcomes: "Apply chi-square test; apply one-way ANOVA; select appropriate tests for different data types.",
@@ -796,7 +796,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 9,
-        topicTitle: "26.2.02 Enzymes — Structure, Function, and Regulation",
+        topicTitle: "Enzymes — Structure, Function, and Regulation",
         subTopics: ["Enzyme structure: apoenzyme, coenzyme, cofactor, prosthetic group", "Enzyme nomenclature and classification: oxidoreductases, transferases, hydrolases, lyases, isomerases, ligases", "Enzyme kinetics: Michaelis-Menten equation, Km and Vmax", "Enzyme inhibition: competitive, non-competitive, uncompetitive", "Allosteric regulation and feedback inhibition"],
         hours: 5,
         specificLearningOutcomes: "Describe enzyme structure and nomenclature; explain Michaelis-Menten kinetics and inhibition types.",
@@ -836,7 +836,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 13,
-        topicTitle: "26.2.03 Biochemistry Laboratory: Qualitative Analysis",
+        topicTitle: "Biochemistry Laboratory: Qualitative Analysis",
         subTopics: ["Qualitative tests for carbohydrates: Benedict's test, iodine test, Barfoed's test", "Qualitative tests for proteins: Biuret test, ninhydrin test, Xanthoproteic test", "Qualitative tests for lipids: emulsification test, Sudan III staining", "Qualitative test for Vitamin C: DCPIP test", "Laboratory safety and recording results"],
         hours: 5,
         specificLearningOutcomes: "Carry out qualitative tests for carbohydrates, proteins, and lipids; interpret results; maintain laboratory safety.",
@@ -886,7 +886,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     weeklySchedule: [
       {
         weekNumber: 1,
-        topicTitle: "27.2.01 Introduction to Nutrition in the Lifespan",
+        topicTitle: "Introduction to Nutrition in the Lifespan",
         subTopics: ["Meaning of terms: lifespan, life stage, lifecycle", "Importance of lifecycle approach to nutrition", "Nutritionally vulnerable groups across the lifespan", "Concept of nutrition transition across life stages"],
         hours: 5,
         specificLearningOutcomes: "Define terms; explain lifecycle approach; identify nutritionally vulnerable groups.",
@@ -896,7 +896,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 2,
-        topicTitle: "27.2.02 Nutrition During the Pre-conception Period",
+        topicTitle: "Nutrition During the Pre-conception Period",
         subTopics: ["Meaning and importance of pre-conception nutrition", "Pre-conception nutrition for women: folate, iron, calcium, iodine", "Pre-conception nutrition for men: zinc, antioxidants, sperm quality", "Effects of pre-conception nutritional status on pregnancy outcomes"],
         hours: 5,
         specificLearningOutcomes: "Explain importance; describe nutrient requirements for pre-conception; explain effects on fertility and early pregnancy.",
@@ -906,7 +906,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 3,
-        topicTitle: "27.2.03 Nutrition During Pregnancy",
+        topicTitle: "Nutrition During Pregnancy",
         subTopics: ["Physiological changes during pregnancy", "Nutrient requirements: energy, protein, iron, folate, calcium, iodine, zinc, vitamins A, D, C", "Weight gain recommendations", "Common nutritional problems: anaemia, morning sickness, gestational diabetes", "Dietary assessment and counselling for pregnant women"],
         hours: 5,
         specificLearningOutcomes: "Describe physiological changes and nutrient requirements; identify nutritional problems; plan diets for pregnant women.",
@@ -1055,7 +1055,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     weeklySchedule: [
       {
         weekNumber: 1,
-        topicTitle: "28.2.01 Introduction to Nutrition and Behaviour",
+        topicTitle: "Introduction to Nutrition and Behaviour",
         subTopics: ["Meaning of terms: behaviour, nutrition behaviour, behaviour change", "Scope and importance of behavioural science in nutrition", "Determinants of food choice: biological, psychological, social, cultural, environmental", "The biopsychosocial model of health and nutrition"],
         hours: 5,
         specificLearningOutcomes: "Define terms; explain determinants of food choice; describe scope of behavioural science in nutrition.",
@@ -1065,7 +1065,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 2,
-        topicTitle: "28.2.02 Theories of Behaviour and Behaviour Change",
+        topicTitle: "Theories of Behaviour and Behaviour Change",
         subTopics: ["Health Belief Model: perceived susceptibility, severity, benefits, barriers, cues to action", "Stages of Change (Transtheoretical) Model: pre-contemplation, contemplation, preparation, action, maintenance", "Social Cognitive Theory: self-efficacy, observational learning", "Theory of Planned Behaviour: attitudes, subjective norms, perceived behavioural control"],
         hours: 5,
         specificLearningOutcomes: "Describe behaviour change theories; apply models to nutrition practice scenarios.",
@@ -1075,7 +1075,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 3,
-        topicTitle: "28.2.03 Research Methods in Nutrition and Behaviour",
+        topicTitle: "Research Methods in Nutrition and Behaviour",
         subTopics: ["Qualitative research: interviews, focus group discussions, ethnography", "Quantitative approaches: surveys, dietary assessment tools", "Experimental approaches in behaviour change research", "Ethical considerations in behavioural research"],
         hours: 5,
         specificLearningOutcomes: "Describe research methods; differentiate qualitative and quantitative approaches; explain ethical considerations.",
@@ -1085,7 +1085,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 4,
-        topicTitle: "28.2.04 Direct Effects of Diet on Brain Function and Behaviour",
+        topicTitle: "Direct Effects of Diet on Brain Function and Behaviour",
         subTopics: ["The central nervous system and nutrition: key neurotransmitters (serotonin, dopamine, norepinephrine)", "Role of glucose in brain function and cognitive performance", "Effects of nutritional deficiencies on mental function: iron, iodine, zinc, omega-3 fatty acids", "Diet and mental health: depression, anxiety, and cognitive decline"],
         hours: 5,
         specificLearningOutcomes: "Explain role of key nutrients in CNS function; describe effects of nutritional deficiencies on behaviour and cognition.",
@@ -1095,7 +1095,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 5,
-        topicTitle: "28.2.05 Nutrients and the Central Nervous System",
+        topicTitle: "Nutrients and the Central Nervous System",
         subTopics: ["B-vitamins and neurotransmitter synthesis: B1, B2, B3, B6, B9, B12", "Omega-3 fatty acids: DHA, EPA, and brain structure", "Alcohol and the brain: neurological effects of chronic alcohol consumption", "Depressants, stimulants, and substance abuse: nutritional consequences"],
         hours: 5,
         specificLearningOutcomes: "Describe roles of B-vitamins in neurotransmitter synthesis; explain role of omega-3 fatty acids; describe neurological effects of alcohol.",
@@ -1224,7 +1224,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     weeklySchedule: [
       {
         weekNumber: 1,
-        topicTitle: "29.2.01 Background of Primary Health Care",
+        topicTitle: "Background of Primary Health Care",
         subTopics: ["Definition of terms: primary health care, health, disease, illness, wellness", "Historical background: Alma-Ata Declaration (1978)", "Principles of PHC: accessibility, equity, community participation, intersectoral collaboration, appropriate technology", "Evolution of PHC globally and in Africa"],
         hours: 3,
         specificLearningOutcomes: "Define terms; describe history of PHC including Alma-Ata; explain PHC principles.",
@@ -1234,7 +1234,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 2,
-        topicTitle: "29.2.02 Components of Primary Health Care",
+        topicTitle: "Components of Primary Health Care",
         subTopics: ["Eight essential components of PHC (Alma-Ata): nutrition, safe water, sanitation, MCH, immunization, essential drugs, communicable disease control, health education", "Nutrition as a key component of PHC", "Kenya's PHC priorities", "Universal Health Coverage (UHC) and PHC"],
         hours: 3,
         specificLearningOutcomes: "Identify and describe PHC components; explain nutrition's role in PHC; describe Kenya's PHC priorities.",
@@ -1264,7 +1264,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 5,
-        topicTitle: "29.2.04 Maternal and Child Health Services in PHC",
+        topicTitle: "Maternal and Child Health Services in PHC",
         subTopics: ["Antenatal care: visits, assessments, supplementation, birth preparedness", "Delivery services and skilled birth attendance", "Postnatal care: maternal and newborn follow-up", "Child health services: immunization, IMCI, growth monitoring"],
         hours: 3,
         specificLearningOutcomes: "Describe MCH services within PHC; explain antenatal and postnatal care; describe child health services.",
@@ -1284,7 +1284,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 7,
-        topicTitle: "29.2.06 Nutrition in Primary Health Care",
+        topicTitle: "Nutrition in Primary Health Care",
         subTopics: ["Nutrition interventions in PHC: supplementation, growth monitoring, CMAM", "Integrated nutrition services in MCH clinics: IYCF, micronutrient supplementation, vitamin A", "Nutrition screening tools: MUAC, weight-for-height, MUST", "Nutrition referral pathways", "Community nutrition programmes: kitchen gardens, nutrition demonstrations"],
         hours: 3,
         specificLearningOutcomes: "Describe nutrition interventions in PHC; explain CMAM; apply nutrition screening tools.",
@@ -1304,7 +1304,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 9,
-        topicTitle: "29.2.05 Community-Based Health and Nutrition Programmes",
+        topicTitle: "Community-Based Health and Nutrition Programmes",
         subTopics: ["Community-based nutrition programmes: school nutrition, supplementary feeding", "Home-based care for chronic conditions: HIV, TB, cancer", "Community health education and promotion", "Community mobilization for health and nutrition", "Linkages between community structures and health facilities"],
         hours: 3,
         specificLearningOutcomes: "Describe community-based nutrition programmes; explain home-based care; apply community mobilization.",
@@ -1344,7 +1344,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 13,
-        topicTitle: "29.2.07 Emerging Issues and Trends in Primary Health Care",
+        topicTitle: "Emerging Issues and Trends in Primary Health Care",
         subTopics: ["Emerging issues: UHC, digital health, telemedicine in PHC", "Climate change and health: nutritional implications", "Challenges: task shifting, community empowerment", "Ways of coping with challenges"],
         hours: 3,
         specificLearningOutcomes: "Discuss emerging issues in PHC; describe digital health applications; explain coping strategies.",
@@ -1394,7 +1394,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     weeklySchedule: [
       {
         weekNumber: 1,
-        topicTitle: "30.2.01 Introduction to First Aid",
+        topicTitle: "Introduction to First Aid",
         subTopics: ["Meaning of terms: first aid, casualty, emergency", "Aims and importance of first aid", "Qualities and responsibilities of a first aider", "Legal considerations: consent, duty of care", "The first aid kit: contents and uses", "Scene safety and primary survey: DRABC (Danger, Response, Airway, Breathing, Circulation)"],
         hours: 4,
         specificLearningOutcomes: "Define terms; explain aims of first aid; describe first aid kit contents; apply DRABC.",
@@ -1424,7 +1424,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 4,
-        topicTitle: "30.2.02 Managing Wounds, Bleeding, and Shock",
+        topicTitle: "Managing Wounds, Bleeding, and Shock",
         subTopics: ["Types of wounds: cuts, lacerations, puncture wounds, abrasions, contusions, amputations", "Management of external bleeding: direct pressure, elevation, pressure points", "Internal bleeding: recognition and emergency management", "Wound dressing techniques: sterile technique", "Types of shock and management"],
         hours: 4,
         specificLearningOutcomes: "Classify wounds; manage external bleeding; apply wound dressings; recognize and manage shock.",
@@ -1514,7 +1514,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 13,
-        topicTitle: "30.2.07 Emerging Issues and Trends in First Aid",
+        topicTitle: "Emerging Issues and Trends in First Aid",
         subTopics: ["Emerging issues: digital health and first aid apps, community first responders", "Challenges: bystander hesitation, legal liability", "Stop the Bleed campaign and tourniquet application", "Future of first aid: technology integration"],
         hours: 4,
         specificLearningOutcomes: "Discuss emerging first aid trends; apply tourniquet technique; describe technology integration.",
@@ -1564,7 +1564,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     weeklySchedule: [
       {
         weekNumber: 1,
-        topicTitle: "31.2.01 Introduction to Business and Business Planning",
+        topicTitle: "Introduction to Business and Business Planning",
         subTopics: ["Meaning of terms: business, business plan, enterprise, entrepreneur", "Importance of a business plan in nutrition practice", "Characteristics of a good business plan", "Types of businesses in nutrition: catering, clinical nutrition, food production, consulting", "Identifying a business opportunity: market needs, gap analysis", "Guidelines for developing a business plan"],
         hours: 3,
         specificLearningOutcomes: "Define terms; explain importance; identify business opportunities in nutrition; describe guidelines for business plan.",
@@ -1584,7 +1584,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 3,
-        topicTitle: "31.2.02 Business Name, Legal Registration, and Organizational Structure",
+        topicTitle: "Business Name, Legal Registration, and Organizational Structure",
         subTopics: ["Business name selection and branding", "Legal forms of business: sole proprietorship, partnership, limited company, cooperative", "Business registration in Kenya: BRS, KRA, county requirements", "Organizational structure: hierarchical, flat, matrix", "Human resource planning: staffing needs, job descriptions, remuneration"],
         hours: 3,
         specificLearningOutcomes: "Select appropriate business name and legal form; describe registration process; design organizational structure.",
@@ -1684,7 +1684,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 13,
-        topicTitle: "31.2.07 Business Plan Presentation and Pitch",
+        topicTitle: "Business Plan Presentation and Pitch",
         subTopics: ["Preparing a business plan pitch: key highlights, investor perspective", "Presentation skills: body language, voice projection, visual aids", "Use of PowerPoint in business presentations", "Responding to investor and panel questions", "Practice presentations and peer feedback"],
         hours: 3,
         specificLearningOutcomes: "Prepare and deliver a persuasive business plan pitch; use visual aids; respond to panel questions.",
@@ -1734,7 +1734,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     weeklySchedule: [
       {
         weekNumber: 1,
-        topicTitle: "32.2.01 Introduction to Research Methods",
+        topicTitle: "Introduction to Research Methods",
         subTopics: ["Meaning of research and related terms", "Importance of research in nutrition and dietetics", "Types of research: basic, applied, action, experimental, descriptive", "Research process: overview from problem identification to dissemination", "Sources of research problems in nutrition", "Ethical principles in nutritional research"],
         hours: 3,
         specificLearningOutcomes: "Define research; explain importance; describe types; outline research process.",

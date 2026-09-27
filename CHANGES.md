@@ -1,3 +1,66 @@
+### 2026-09-27: Online Curriculum Builder unit selection & Word upload normalization
+
+**Summary:** Resolved an issue where uploading a Word syllabus in the Online Curriculum Builder appeared stuck on the default first unit (Communication Skills) and prevented selecting other units. Made the parent Card `overflow-visible relative z-20` so the SearchableUnitSelect dropdown popup is no longer clipped by the Card container. Enhanced `handleDocxUpload` to match by unit code or name and unselect default unit on unmatched upload so it no longer falsely displays Communication Skills. Passed `file.name` to `parseDocxSyllabusAction` so that filename fallback extracts unit code and title. Updated `handleUnitChange` to preserve uploaded/edited topics when switching to a unit that has no existing curriculum in the database.
+
+**Files changed:**
+- `src/features/teaching-documents/curriculum-editor/docx-parser.ts` — Added optional `fileName` fallback for extracting unit code and name.
+- `src/features/teaching-documents/curriculum-editor/actions.ts` — Passed `file.name` to `parseDocxSyllabus` in `parseDocxSyllabusAction`.
+- `src/features/teaching-documents/curriculum-editor/online-builder.tsx` — Added `overflow-visible relative z-20` to Card container, improved unit matching in `handleDocxUpload`, and preserved uploaded topics on unit selection.
+
+### 2026-09-27: Scheme of Work publishing and mixed curriculum imports
+
+**Summary:** Made online curriculum editing and bulk imports document-type-aware. Course Outline and Scheme of Work saves now read, supersede, and create versions only within the selected document type. The library links open the matching editor mode and offer creation actions for missing documents. The bulk workbook parser now keeps separately named sheet pairs distinct, reports unclassified non-empty sheets, and preserves legacy Course Outline workbooks. ZIP imports infer Scheme of Work from the document filename.
+
+**Files changed:**
+- `src/features/teaching-documents/curriculum-document-types.ts` — Added the shared curriculum document type and validation helpers.
+- `src/features/teaching-documents/curriculum-editor/actions.ts` — Scoped online version lookup, superseding, and inserts by document type, with a Course Outline default for unspecified calls.
+- `src/features/teaching-documents/curriculum-editor/online-builder.tsx` — Added a visible document type selector and type-specific editor and publish labels.
+- `src/app/(dashboard)/teaching-documents/curriculum/editor/page.tsx` — Loads both active document types and passes the requested type to the editor.
+- `src/app/(dashboard)/teaching-documents/curriculum/page.tsx` — Added type-specific edit and create links in each document column.
+- `src/features/teaching-documents/bulk-curriculum-parser.ts` — Parses multiple typed workbook sheet pairs and detects Scheme of Work DOCX files by filename.
+- `src/features/teaching-documents/bulk-curriculum-actions.ts` — Uses each parsed document type for versioning, inserts, superseding, and registry updates.
+- `src/features/teaching-documents/bulk-upload-dialog.tsx` — Renamed the workflow as Bulk Curriculum Upload and displays each row’s detected type.
+- `src/tests/bulk-course-outline-upload.test.ts` — Covered mixed workbooks, unclassified sheet warnings, legacy workbook behavior, and ZIP scheme detection.
+- `src/tests/curriculum-editor-document-type.test.ts` — Verified saves supersede only the selected document type and preserve the default Course Outline behavior.
+- `src/tests/bulk-curriculum-document-type.test.ts` — Verified mixed bulk commits keep version lookup, superseding, and inserts separate by document type.
+
+### 2026-09-27: Full-width ERP workspace launch cards
+
+**Summary:** Removed the dashboard’s right-side Manage & Approvals card so workspace destinations use the full content width. Replaced the large home-screen icon tiles with medium rectangular Business Central-style launch cards, using restrained Fluent colors and responsive columns that preserve card proportions across screen sizes. Existing workspace destinations remain available through the dashboard and the navigation menu.
+
+**Files changed:**
+- `src/features/dashboard/dashboard-view.tsx` — Expanded Workspaces to full width, changed its icon grid into responsive rectangular cards, and removed the right-side Manage & Approvals panel.
+
+### 2026-09-26: Dashboard typography and Fluent ERP text palette
+
+**Summary:** Aligned the admin dashboard and shell header typography with the existing Segoe UI system font and replaced mixed teal/gray text colors with the established Business Central text tokens. The session title now uses primary charcoal; labels and metadata use secondary Fluent gray; teal is reserved for primary actions and restrained status accents. Dashboard sizing and responsive layout are unchanged.
+
+**Files changed:**
+- `src/features/dashboard/dashboard-view.tsx` — Applied the shared Segoe UI font utility and semantic ERP text, surface, border, and action colors throughout the dashboard.
+- `src/components/layout/admin-header.tsx` — Aligned the page title and supporting metadata to ERP text tokens.
+
+### 2026-09-26: 1-Tap PDF Attendance Downloads & Institutional Slate Border Palette
+
+**Summary:**
+1. **1-Tap Direct PDF Downloads**: Streamlined unit workspace documents and attendance registers by removing redundant browser print actions, print preview buttons, and intermediate print navigation. Replaced attendance register dual-button sets ([Print] + [PDF]) with dedicated, full-width 1-tap "Download PDF" buttons triggering instantaneous binary PDF generation and file download. Updated Teaching Document actions to clean navigation (`View Outline`, `View Scheme`, `Log Progress`) and removed `window.print()` triggers from the TVET document viewer and record-of-work managers. Configured attendance preview subroutes to redirect straight to the authoritative PDF endpoint.
+2. **Neat Gray Border System**: Replaced heavy black borders (`#0f172a`, `border-slate-900`, `1F2937`) across Class, CAT, and Exam attendance sheets with an institutional slate palette (`#94a3b8` / `border-slate-400` outer borders and sign-offs, `#cbd5e1` / `border-slate-300` internal cell gridlines, and soft `slate-50` headers) across PDF generation (`@react-pdf/renderer`), Word export (`docx`), and responsive printable web views.
+
+**Files changed:**
+- `src/app/(staff)/staff/units/[allocationId]/page.tsx` — Replaced dual Print/PDF buttons with a single full-width 1-tap PDF download button for Class, CAT, and Exam registers. Updated Outline and Scheme actions to "View Outline" and "View Scheme", and simplified Record of Work to "Log Progress".
+- `src/app/(staff)/staff/units/[allocationId]/documents/page.tsx` — Updated unit documents overview with 1-tap "Download PDF" buttons across all attendance registers and removed obsolete print triggers.
+- `src/features/staff-downloads/staff-downloads-view.tsx` — Removed Print buttons and upgraded Attendance Registers to 1-tap "Download PDF" buttons.
+- `src/app/(staff)/staff/units/[allocationId]/documents/class-attendance/page.tsx` — Configured route to redirect directly to the Class Attendance PDF download endpoint.
+- `src/app/(staff)/staff/units/[allocationId]/documents/cat-attendance/page.tsx` — Configured route to redirect directly to the CAT Attendance PDF download endpoint.
+- `src/app/(staff)/staff/units/[allocationId]/documents/exam-attendance/page.tsx` — Configured route to redirect directly to the Exam Attendance PDF download endpoint.
+- `src/features/teaching-documents/tvet-document-viewer.tsx` — Removed `handlePrint` (`window.print()`) and the "Print Preview" button.
+- `src/features/teaching-documents/record-of-work-online/manager.tsx` — Removed the "Print Log" link and unused icon imports.
+- `src/features/teaching-documents/record-of-work-manager.tsx` — Removed the "Print Official Record" link and unused icon imports.
+- `src/features/assessment/attendance-sheet-docx.ts` — Updated border stroke color to neat Slate-400 (`94A3B8`).
+- `src/features/assessment/attendance-sheet-pdf.tsx` — Styled PDF table borders with `#94a3b8` perimeter/headers and `#cbd5e1` cell dividers.
+- `src/features/assessment/printable-signing-sheet.tsx` — Replaced black borders with `border-slate-400` and `border-slate-300`.
+- `src/features/class-attendance/printable-class-register.tsx` — Replaced harsh black borders with `border-slate-400` and `border-slate-300`.
+- `src/tests/attendance-sheet-docx.test.ts` & `supabase/migrations/src/tests/attendance-sheet-docx.test.ts` — Updated test assertions to match `94A3B8`.
+
 ### 2026-09-26: Trainer QA Examination ZIP Export
 
 **Summary:** Added a department-scoped QA export workspace. HODs can select an academic period and download a ZIP grouped by trainer, with separate Course Outlines and Schemes of Work folders. The pack includes the exact approved revision, an Excel QA index listing missing or unavailable documents, and a README. The export uses the private document store and checks the active department before including allocations.

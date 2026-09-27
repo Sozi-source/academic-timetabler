@@ -27,7 +27,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     weeklySchedule: [
       {
         weekNumber: 1,
-        topicTitle: "34.3.01 Introduction to Food Microbiology and Parasitology & 34.3.02 Role and Significance of Microorganisms",
+        topicTitle: "Introduction to Food Microbiology and Parasitology & Role and Significance of Microorganisms",
         subTopics: ["Meaning of terms", "Background of food microbiology and parasitology", "Importance of food microbiology and parasitology", "Significance of microorganisms", "Role of microorganisms in the environment and human activities", "Primary sources of microorganisms found in food: soil and water; plants and plant products; intestinal tract of animals; food utensils; animal feeds and hides; air and dust", "Introduction to sampling methods", "Surface sampling techniques"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define food microbiology and parasitology terms and concepts.\n• Explain the historical background and importance of food microbiology.\n• Explain the beneficial, spoilage and pathogenic roles of microorganisms in food systems.\n• Identify primary environmental sources of food contamination.\n• Demonstrate aseptic food and surface sampling techniques.",
@@ -37,27 +37,27 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 2,
-        topicTitle: "34.3.03 Spoilage Microorganisms in Food",
+        topicTitle: "Spoilage Microorganisms in Food",
         subTopics: ["Meaning of terms", "Spoilage microorganisms in various foods: meat and meat products; poultry and sea foods; fruits and vegetables; dairy and cereal products", "Storage of various food products", "Microbial action on various foods", "Specifics of microbial spoilage"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 34.3.03 Spoilage Microorganisms in Food.\n• Interpret and apply spoilage microorganisms in various foods: meat and meat products; poultry and sea foods; fruits and vegetables; dairy and cereal products.\n• Explain storage of various food products.\n• Explain microbial action on various foods.\n• Explain specifics of microbial spoilage.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Spoilage Microorganisms in Food.\n• Interpret and apply spoilage microorganisms in various foods: meat and meat products; poultry and sea foods; fruits and vegetables; dairy and cereal products.\n• Explain storage of various food products.\n• Explain microbial action on various foods.\n• Explain specifics of microbial spoilage.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 3,
-        topicTitle: "34.3.04 Food Borne Illnesses",
+        topicTitle: "Food Borne Illnesses",
         subTopics: ["Meaning of terms", "Specific food infections, symptoms, prevention and control of common food borne illnesses", "Typhoid", "Paratyphoid", "Salmonellosis", "Shigellosis", "Vibriosis", "Yersinia", "Cholera", "Listeriosis", "Campylobacteriosis"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 34.3.04 Food Borne Illnesses.\n• Explain specific food infections, symptoms, prevention and control of common food borne illnesses.\n• Explain typhoid.\n• Explain paratyphoid.\n• Explain salmonellosis.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Food Borne Illnesses.\n• Explain specific food infections, symptoms, prevention and control of common food borne illnesses.\n• Explain typhoid.\n• Explain paratyphoid.\n• Explain salmonellosis.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 4,
-        topicTitle: "34.3.06 Food Poisoning by Bacteria",
+        topicTitle: "Food Poisoning by Bacteria",
         subTopics: ["Factors that influence the number and type of microorganism in food", "Specific food intoxications", "Botulism", "Bacillus cereus", "Clostridium perfringens", "Staphylococcus food poisoning"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain factors that influence the number and type of microorganism in food.\n• Explain specific food intoxications.\n• Explain botulism.\n• Explain bacillus cereus.\n• Explain clostridium perfringens.",
@@ -67,17 +67,17 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 5,
-        topicTitle: "34.3.07 Food Poisoning by Fungi (Moulds)",
+        topicTitle: "Food Poisoning by Fungi (Moulds)",
         subTopics: ["Meaning of terms", "Specific aflatoxicosis", "Food borne intoxication by moulds", "Preventive measures against food borne intoxication by moulds"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 34.3.07 Food Poisoning by Fungi (Moulds).\n• Explain specific aflatoxicosis.\n• Explain food borne intoxication by moulds.\n• Explain prevention, control and management measures for against food borne intoxication by moulds.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Food Poisoning by Fungi (Moulds).\n• Explain specific aflatoxicosis.\n• Explain food borne intoxication by moulds.\n• Explain prevention, control and management measures for against food borne intoxication by moulds.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 6,
-        topicTitle: "34.3.08 Zoonotic Diseases",
+        topicTitle: "Zoonotic Diseases",
         subTopics: ["Anthrax", "Brucellosis"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain anthrax.\n• Explain brucellosis.",
@@ -87,7 +87,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 7,
-        topicTitle: "34.3.09 Intestinal Parasites",
+        topicTitle: "Intestinal Parasites",
         subTopics: ["Protozoa", "Helminths – tapeworms, pinworms, and roundworms"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain protozoa.\n• Explain helminths – tapeworms, pinworms, and roundworms.",
@@ -107,7 +107,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 9,
-        topicTitle: "34.3.10 Determination of Microorganisms in Food",
+        topicTitle: "Determination of Microorganisms in Food",
         subTopics: ["Examination of bacteria", "Methods of sampling bacteria", "Methods of isolation"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain examination of bacteria.\n• Describe methods and procedures for sampling bacteria.\n• Describe methods and procedures for isolation.",
@@ -117,7 +117,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 10,
-        topicTitle: "34.3.11 Concept of Indicator Organism",
+        topicTitle: "Concept of Indicator Organism",
         subTopics: ["Identification and enumeration of indicator microorganism", "Indicator of quality", "Indicator of safety", "Coliforms", "Faecal coliforms"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain identification and enumeration of indicator microorganism.\n• Explain indicator of quality.\n• Explain indicator of safety.\n• Explain coliforms.\n• Explain faecal coliforms.",
@@ -127,7 +127,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 11,
-        topicTitle: "34.3.12 Control of Microorganism in Food",
+        topicTitle: "Control of Microorganism in Food",
         subTopics: ["Heat treatment", "Low temperature treatment", "Effects of reduction of water activity", "Chemical agents and food preservatives", "Use of irradiation"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain heat treatment.\n• Explain low temperature treatment.\n• Explain effects of reduction of water activity.\n• Explain chemical agents and food preservatives.\n• Explain use of irradiation.",
@@ -137,20 +137,20 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 12,
-        topicTitle: "34.3.13 Emerging Issues and Trends",
+        topicTitle: "Emerging Issues and Trends",
         subTopics: ["Emerging issues and trends", "Challenges posed by the emerging trends", "Ways of coping with challenges posed by the emerging trends"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 34.3.13 Emerging Issues and Trends.\n• Explain ways of coping with challenges posed by the emerging trends.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends.\n• Explain ways of coping with challenges posed by the emerging trends.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 13,
-        topicTitle: "34.3.13 Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
         subTopics: ["Emerging issues and trends", "Challenges posed by the emerging trends", "Ways of coping with challenges posed by the emerging trends"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 34.3.13 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in 34.3.13 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain ways of coping with challenges posed by the emerging trends.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain ways of coping with challenges posed by the emerging trends.",
         learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
         resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
         assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
@@ -190,40 +190,40 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     weeklySchedule: [
       {
         weekNumber: 1,
-        topicTitle: "35.3.01 Aetiology and Principles of Communicable Diseases",
+        topicTitle: "Aetiology and Principles of Communicable Diseases",
         subTopics: ["Definition of communicable diseases", "Diarrhoea", "Pneumonia", "Bronchitis", "HIV", "Malaria", "Tuberculosis", "Measles", "Herpes Zoster", "Agent, host and environment", "Transmission cycle", "Zoonotic diseases", "Anthrax", "Brucellosis", "Principles for managing communicable diseases"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 35.3.01 Aetiology and Principles of Communicable Diseases.\n• Explain diarrhoea.\n• Explain pneumonia.\n• Explain bronchitis.\n• Explain HIV.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Aetiology and Principles of Communicable Diseases.\n• Explain diarrhoea.\n• Explain pneumonia.\n• Explain bronchitis.\n• Explain HIV.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 2,
-        topicTitle: "35.3.02 Non-Communicable Diseases",
+        topicTitle: "Non-Communicable Diseases",
         subTopics: ["Definition of terms", "Gout", "Obesity", "Osteoporosis", "Diabetes", "Inflammatory Bowel Disease", "Hypertension", "Asthma", "Cancer", "Causes, prevention and control", "Managing non-communicable diseases", "Palliative care"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 35.3.02 Non-Communicable Diseases.\n• Explain gout.\n• Explain obesity.\n• Explain osteoporosis.\n• Explain diabetes.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Non-Communicable Diseases.\n• Explain gout.\n• Explain obesity.\n• Explain osteoporosis.\n• Explain diabetes.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 3,
-        topicTitle: "35.3.03 Drug Abuse",
+        topicTitle: "Drug Abuse",
         subTopics: ["Definition of terms", "Classes of abused drugs", "Commonly used drugs in our communities", "Risk factors and effects of drug abuse", "Drug abuse and the youth", "Management of drug abuse"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 35.3.03 Drug Abuse.\n• Classify abused drugs and describe their categories.\n• Explain commonly used drugs in our communities.\n• Explain risk factors and effects of drug abuse.\n• Explain drug abuse and the youth.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Drug Abuse.\n• Classify abused drugs and describe their categories.\n• Explain commonly used drugs in our communities.\n• Explain risk factors and effects of drug abuse.\n• Explain drug abuse and the youth.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 4,
-        topicTitle: "35.3.04 Emerging Issues and Trends",
+        topicTitle: "Emerging Issues and Trends",
         subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Ways of managing challenges posed by emerging issues and trends"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 35.3.04 Emerging Issues and Trends.\n• Explain ways of managing challenges posed by emerging issues and trends.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends.\n• Explain ways of managing challenges posed by emerging issues and trends.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -310,10 +310,10 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 13,
-        topicTitle: "35.3.04 Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
         subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Ways of managing challenges posed by emerging issues and trends"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 35.3.04 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in 35.3.04 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain ways of managing challenges posed by emerging issues and trends.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain ways of managing challenges posed by emerging issues and trends.",
         learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
         resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
         assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
@@ -352,7 +352,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     weeklySchedule: [
       {
         weekNumber: 1,
-        topicTitle: "36.3.01 Introduction to Food Security",
+        topicTitle: "Introduction to Food Security",
         subTopics: ["Meaning of key terms used in food security", "Importance of food security", "Right to food and food sovereignty"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define food security, food sovereignty, and nutrition security concepts.\n• Explain the four pillars and national importance of food security.\n• Analyze the human right to adequate food under national and international law.",
@@ -362,17 +362,17 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 2,
-        topicTitle: "36.3.02 Components of Food Security",
+        topicTitle: "Components of Food Security",
         subTopics: ["Meaning of terms", "Food availability and food security", "Food accessibility and food security", "Food utilization and food security", "Food sustainability"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 36.3.02 Components of Food Security.\n• Explain food availability and food security.\n• Explain food accessibility and food security.\n• Explain food utilization and food security.\n• Explain food sustainability.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Components of Food Security.\n• Explain food availability and food security.\n• Explain food accessibility and food security.\n• Explain food utilization and food security.\n• Explain food sustainability.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 3,
-        topicTitle: "36.3.03 Measurement of Food Security",
+        topicTitle: "Measurement of Food Security",
         subTopics: ["Individual food security", "Household food security", "National food security"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain individual food security.\n• Explain household food security.\n• Explain national food security.",
@@ -382,7 +382,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 4,
-        topicTitle: "36.3.04 Cross-Cutting Issues in Food Security",
+        topicTitle: "Cross-Cutting Issues in Food Security",
         subTopics: ["Socio-economic factors influencing food security", "Cultural factors affecting food security", "Political factors influencing food security", "Environmental factors influencing food security"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain socio-economic factors influencing food security.\n• Explain cultural factors affecting food security.\n• Explain political factors influencing food security.\n• Explain environmental factors influencing food security.",
@@ -392,7 +392,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 5,
-        topicTitle: "36.3.05 Indicators of Food Security",
+        topicTitle: "Indicators of Food Security",
         subTopics: ["Indicators reflecting on food supply and availability", "Indicators reflecting on food accessibility", "Indicators reflecting on food utilization"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain indicators reflecting on food supply and availability.\n• Explain indicators reflecting on food accessibility.\n• Explain indicators reflecting on food utilization.",
@@ -402,20 +402,20 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 6,
-        topicTitle: "36.3.06 Food Insecurity",
+        topicTitle: "Food Insecurity",
         subTopics: ["Meaning of terms", "Types of food insecurity", "Causes of food insecurity", "Vulnerable groups to food insecurity", "Effects of food insecurity", "Coping strategies to food insecurity"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 36.3.06 Food Insecurity.\n• Classify food insecurity and describe their categories.\n• Analyze factors affecting food insecurity.\n• Explain vulnerable groups to food insecurity.\n• Explain effects of food insecurity.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Food Insecurity.\n• Classify food insecurity and describe their categories.\n• Analyze factors affecting food insecurity.\n• Explain vulnerable groups to food insecurity.\n• Explain effects of food insecurity.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 7,
-        topicTitle: "36.3.07 Food Security Interventions",
+        topicTitle: "Food Security Interventions",
         subTopics: ["Meaning of terms", "Nutrition intervention", "Process of nutrition intervention programme development", "Community participation in nutrition intervention", "Types of nutrition interventions"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 36.3.07 Food Security Interventions.\n• Explain nutrition intervention.\n• Describe the structure, components and function of process of nutrition intervention programme development.\n• Explain community participation in nutrition intervention.\n• Classify nutrition interventions and describe their categories.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Food Security Interventions.\n• Explain nutrition intervention.\n• Describe the structure, components and function of process of nutrition intervention programme development.\n• Explain community participation in nutrition intervention.\n• Classify nutrition interventions and describe their categories.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -432,7 +432,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 9,
-        topicTitle: "36.3.08 Gender and Food Security",
+        topicTitle: "Gender and Food Security",
         subTopics: ["Factors that determine the role of gender in food security in the society", "Role of gender in food security"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Analyze socio-cultural and economic factors determining gender roles in food production.\n• Explain the influence of women's empowerment, land rights, and resource access on household food security.",
@@ -442,7 +442,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 10,
-        topicTitle: "36.3.09 Stakeholders in Food Security",
+        topicTitle: "Stakeholders in Food Security",
         subTopics: ["Stakeholders in food security", "Role of the legislature in food security", "Role of the ministries", "Role played by NGOs, BOs, FBOs and other agencies in food security"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Identify key public, private, and civil society stakeholders in food security.\n• Explain the legislative and policy oversight role of parliament in food security.\n• Explain the mandates of relevant government ministries and line departments.\n• Analyze the collaborative role of NGOs, CBOs, FBOs, and international agencies in food security.",
@@ -452,7 +452,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 11,
-        topicTitle: "36.3.10 Actions to Improve Food Security",
+        topicTitle: "Actions to Improve Food Security",
         subTopics: ["Access", "Supplies", "Storage", "Production and distribution", "Marketing, import, export, prices", "Availability", "Processing", "Transport"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain access.\n• Explain supplies.\n• Explain storage.\n• Explain production and distribution.\n• Explain marketing, import, export, prices.",
@@ -462,7 +462,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 12,
-        topicTitle: "36.3.11 Emerging Issues and Trends",
+        topicTitle: "Emerging Issues and Trends",
         subTopics: ["Emerging trends", "Global trends in food production, trade and economic implications", "Coping with challenges"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain emerging trends.\n• Explain global trends in food production, trade and economic implications.\n• Explain coping with challenges.",
@@ -472,7 +472,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 13,
-        topicTitle: "36.3.11 Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
         subTopics: ["Emerging trends", "Global trends in food production, trade and economic implications", "Coping with challenges"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain emerging trends.\n• Explain global trends in food production, trade and economic implications.\n• Explain coping with challenges.",
@@ -516,27 +516,27 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     weeklySchedule: [
       {
         weekNumber: 1,
-        topicTitle: "37.3.01 Introduction to Nutrition Education and Counselling",
+        topicTitle: "Introduction to Nutrition Education and Counselling",
         subTopics: ["Meaning of terms used in nutrition education", "Origin of nutrition education", "Objectives of nutrition education", "Principles of nutrition education", "Principles of nutrition counselling"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 37.3.01 Introduction to Nutrition Education and Counselling.\n• Explain origin of nutrition education.\n• Explain objectives of nutrition education.\n• Describe the principles of nutrition education.\n• Describe the principles of nutrition counselling.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Introduction to Nutrition Education and Counselling.\n• Explain origin of nutrition education.\n• Explain objectives of nutrition education.\n• Describe the principles of nutrition education.\n• Describe the principles of nutrition counselling.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 2,
-        topicTitle: "37.3.02 Healthy Human Behaviour",
+        topicTitle: "Healthy Human Behaviour",
         subTopics: ["Meaning of terms", "Models and theories of behaviour", "Factors that influence behaviour"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 37.3.02 Healthy Human Behaviour.\n• Explain models and theories of behaviour.\n• Explain factors that influence behaviour.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Healthy Human Behaviour.\n• Explain models and theories of behaviour.\n• Explain factors that influence behaviour.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 3,
-        topicTitle: "37.3.03 Models and Theories of Nutrition Education and Counselling",
+        topicTitle: "Models and Theories of Nutrition Education and Counselling",
         subTopics: ["Health and nutrition education models and theories"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain health and nutrition education models and theories.",
@@ -546,7 +546,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 4,
-        topicTitle: "37.3.04 Communication in Nutrition Education and Counselling",
+        topicTitle: "Communication in Nutrition Education and Counselling",
         subTopics: ["Meaning of terms", "Importance of communication to nutrition education and counselling", "Components of communication", "Characteristics of a good health and nutrition educator and counsellor", "Methods of teaching and materials"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in communication for nutrition education.\n• Explain the importance and role of communication in nutrition education and counselling.\n• Describe the components of the communication process.\n• Explain characteristics of an effective health and nutrition educator and counsellor.\n• Select appropriate teaching methods and instructional materials.",
@@ -556,7 +556,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 5,
-        topicTitle: "37.3.05 Nutrition Counselling",
+        topicTitle: "Nutrition Counselling",
         subTopics: ["Meaning of terms", "Importance of nutrition counselling", "Steps in nutrition counselling", "Counselling in multicultural settings", "Techniques in counselling", "Roles and qualities of a nutrition counsellor"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in nutrition counselling.\n• Explain the importance and principles of nutrition counselling.\n• Outline the steps in the nutrition counselling process.\n• Apply counselling skills in multicultural settings.\n• Demonstrate effective counselling techniques and qualities of a nutrition counsellor.",
@@ -566,7 +566,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 6,
-        topicTitle: "37.3.06 Nutrition Counselling in Various Physiological Conditions",
+        topicTitle: "Nutrition Counselling in Various Physiological Conditions",
         subTopics: ["Vulnerable groups", "Pregnancy and lactation", "Paediatric", "Adolescence", "Geriatric", "Sports and athletics"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain vulnerable groups.\n• Explain pregnancy and lactation.\n• Explain paediatric.\n• Explain adolescence.\n• Explain geriatric.",
@@ -576,7 +576,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 7,
-        topicTitle: "37.3.07 Nutrition Counselling in Various Disease Conditions",
+        topicTitle: "Nutrition Counselling in Various Disease Conditions",
         subTopics: ["HIV/AIDS", "Diabetes", "Cancer", "Gastro-intestinal tract disorders", "Renal conditions", "Cardiovascular diseases"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain HIV/AIDS.\n• Explain diabetes.\n• Explain cancer.\n• Explain gastro-intestinal tract disorders.\n• Explain renal conditions.",
@@ -596,7 +596,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 9,
-        topicTitle: "37.3.08 Nutrition Counselling in Vegetarianism",
+        topicTitle: "Nutrition Counselling in Vegetarianism",
         subTopics: ["Nutrition counselling for vegans", "Lacto-ovo-vegetarians", "Lacto vegetarians"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain nutrition counselling for vegans.\n• Explain lacto-ovo-vegetarians.\n• Explain lacto vegetarians.",
@@ -606,10 +606,10 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 10,
-        topicTitle: "37.3.09 Emerging Issues and Trends",
+        topicTitle: "Emerging Issues and Trends",
         subTopics: ["Emerging issues", "Challenges", "Coping mechanisms"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 37.3.09 Emerging Issues and Trends.\n• Explain coping mechanisms.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends.\n• Explain coping mechanisms.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -636,10 +636,10 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 13,
-        topicTitle: "37.3.09 Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
         subTopics: ["Emerging issues", "Challenges", "Coping mechanisms"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 37.3.09 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in 37.3.09 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping mechanisms.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping mechanisms.",
         learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
         resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
         assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
@@ -679,70 +679,70 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     weeklySchedule: [
       {
         weekNumber: 1,
-        topicTitle: "38.3.01 Respiratory Diseases",
+        topicTitle: "Respiratory Diseases",
         subTopics: ["Meaning of terms", "Types of respiratory diseases and disorders", "Etiology", "Causes", "Signs and symptoms", "Management and diet modifications"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 38.3.01 Respiratory Diseases.\n• Classify respiratory diseases and disorders and describe their categories.\n• Explain etiology.\n• Explain causes.\n• Describe deficiency signs, symptoms and disorders related to 38.3.01 Respiratory Diseases.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Respiratory Diseases.\n• Classify respiratory diseases and disorders and describe their categories.\n• Explain etiology.\n• Explain causes.\n• Describe deficiency signs, symptoms and disorders related to Respiratory Diseases.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 2,
-        topicTitle: "38.3.02 Febrile Conditions",
+        topicTitle: "Febrile Conditions",
         subTopics: ["Meaning of terms", "Causes", "Classification", "Nutrition and metabolic implications of fevers", "Management"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 38.3.02 Febrile Conditions.\n• Explain causes.\n• Classify classification.\n• Explain nutrition and metabolic implications of fevers.\n• Explain management.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Febrile Conditions.\n• Explain causes.\n• Classify classification.\n• Explain nutrition and metabolic implications of fevers.\n• Explain management.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 3,
-        topicTitle: "38.3.03 Nutrition in Surgery",
+        topicTitle: "Nutrition in Surgery",
         subTopics: ["Meaning of terms", "Physiological changes during surgery", "Nutritional implication of surgery", "Nutrition support in various surgical conditions (head, gastro-intestinal tract)"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 38.3.03 Nutrition in Surgery.\n• Explain physiological changes during surgery.\n• Explain nutritional implication of surgery.\n• Explain nutrition support in various surgical conditions (head, gastro-intestinal tract).",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Nutrition in Surgery.\n• Explain physiological changes during surgery.\n• Explain nutritional implication of surgery.\n• Explain nutrition support in various surgical conditions (head, gastro-intestinal tract).",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 4,
-        topicTitle: "38.3.04 Nutrition in Cancer",
+        topicTitle: "Nutrition in Cancer",
         subTopics: ["Meaning of terms", "Classification of cancer diseases", "Nutrition implications of cancer", "Management of cancer"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 38.3.04 Nutrition in Cancer.\n• Classify cancer diseases and describe their categories.\n• Explain nutrition implications of cancer.\n• Explain prevention, control and management measures for cancer.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Nutrition in Cancer.\n• Classify cancer diseases and describe their categories.\n• Explain nutrition implications of cancer.\n• Explain prevention, control and management measures for cancer.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 5,
-        topicTitle: "38.3.05 Nutrition in Burns",
+        topicTitle: "Nutrition in Burns",
         subTopics: ["Meaning of terms", "Types of burns", "Causes", "Signs and symptoms", "Management", "Nutrition implications of burns"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 38.3.05 Nutrition in Burns.\n• Classify burns and describe their categories.\n• Explain causes.\n• Describe deficiency signs, symptoms and disorders related to 38.3.05 Nutrition in Burns.\n• Explain management.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Nutrition in Burns.\n• Classify burns and describe their categories.\n• Explain causes.\n• Describe deficiency signs, symptoms and disorders related to Nutrition in Burns.\n• Explain management.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 6,
-        topicTitle: "38.3.06 Musculo-skeletal Diseases",
+        topicTitle: "Musculo-skeletal Diseases",
         subTopics: ["Meaning of terms", "Types of musculoskeletal diseases", "Etiology", "Causes", "Signs and symptoms", "Management"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 38.3.06 Musculo-skeletal Diseases.\n• Classify musculoskeletal diseases and describe their categories.\n• Explain etiology.\n• Explain causes.\n• Describe deficiency signs, symptoms and disorders related to 38.3.06 Musculo-skeletal Diseases.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Musculo-skeletal Diseases.\n• Classify musculoskeletal diseases and describe their categories.\n• Explain etiology.\n• Explain causes.\n• Describe deficiency signs, symptoms and disorders related to Musculo-skeletal Diseases.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 7,
-        topicTitle: "38.3.07 Neuromuscular Diseases",
+        topicTitle: "Neuromuscular Diseases",
         subTopics: ["Meaning of terms", "Types", "Etiology", "Causes", "Signs and symptoms", "Management"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 38.3.07 Neuromuscular Diseases.\n• Explain types.\n• Explain etiology.\n• Explain causes.\n• Describe deficiency signs, symptoms and disorders related to 38.3.07 Neuromuscular Diseases.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Neuromuscular Diseases.\n• Explain types.\n• Explain etiology.\n• Explain causes.\n• Describe deficiency signs, symptoms and disorders related to Neuromuscular Diseases.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -759,10 +759,10 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 9,
-        topicTitle: "38.3.08 Emerging Issues and Trends",
+        topicTitle: "Emerging Issues and Trends",
         subTopics: ["Emerging trends", "Challenges", "Coping with challenges"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain emerging trends.\n• Discuss emerging issues, trends and coping strategies in 38.3.08 Emerging Issues and Trends.\n• Explain coping with challenges.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain emerging trends.\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends.\n• Explain coping with challenges.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -799,10 +799,10 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 13,
-        topicTitle: "38.3.08 Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
         subTopics: ["Emerging trends", "Challenges", "Coping with challenges"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain emerging trends.\n• Discuss emerging issues, trends and coping strategies in 38.3.08 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping with challenges.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain emerging trends.\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping with challenges.",
         learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
         resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
         assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
@@ -842,17 +842,17 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     weeklySchedule: [
       {
         weekNumber: 1,
-        topicTitle: "39.3.01 Introduction to Epidemiology & 39.3.02 Epidemiologic Approach to Disease Occurrence",
+        topicTitle: "Introduction to Epidemiology & Epidemiologic Approach to Disease Occurrence",
         subTopics: ["Meaning of terms", "Historical overview of epidemiology", "Goals of epidemiology", "Scope of epidemiology", "Advantages and disadvantages of nutritional epidemiology", "Meaning of terms", "Epidemiologic triad", "Interaction between agent, host and environment", "Clinical medicine vs epidemiology", "Steps in epidemiologic approach"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 39.3.01 Introduction to Epidemiology & 39.3.02 Epidemiologic Approach to Disease Occurrence.\n• Explain historical overview of epidemiology.\n• Explain goals of epidemiology.\n• Explain scope of epidemiology.\n• Explain advantages and disadvantages of nutritional epidemiology.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Introduction to Epidemiology & Epidemiologic Approach to Disease Occurrence.\n• Explain historical overview of epidemiology.\n• Explain goals of epidemiology.\n• Explain scope of epidemiology.\n• Explain advantages and disadvantages of nutritional epidemiology.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 2,
-        topicTitle: "39.3.03 Application of Epidemiology",
+        topicTitle: "Application of Epidemiology",
         subTopics: ["Communicable diseases", "Nutritional deficiency disorders", "Chronic diseases"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain communicable diseases.\n• Explain nutritional deficiency disorders.\n• Explain chronic diseases.",
@@ -862,17 +862,17 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 3,
-        topicTitle: "39.3.04 Measures of Morbidity",
+        topicTitle: "Measures of Morbidity",
         subTopics: ["Meaning of terms", "Types of morbidity measures", "Incidence rates", "Prevalence rates", "Prevalence pool"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 39.3.04 Measures of Morbidity.\n• Classify morbidity measures and describe their categories.\n• Explain incidence rates.\n• Explain prevalence rates.\n• Explain prevalence pool.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Measures of Morbidity.\n• Classify morbidity measures and describe their categories.\n• Explain incidence rates.\n• Explain prevalence rates.\n• Explain prevalence pool.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 4,
-        topicTitle: "39.3.05 Measures of Mortality",
+        topicTitle: "Measures of Mortality",
         subTopics: ["Meaning of terms", "Importance of mortality data", "Measures of mortality", "Sources of mortality data"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in measures of mortality.\n• Explain the importance and epidemiological applications of mortality data.\n• Calculate and interpret measures of mortality (crude death rate, cause-specific mortality, infant mortality).\n• Identify reliable sources of vital statistics and mortality data.",
@@ -882,27 +882,27 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 5,
-        topicTitle: "39.3.06 Measures of Natality",
+        topicTitle: "Measures of Natality",
         subTopics: ["Meaning of terms", "Natality", "Natality rates", "Crude birth rate", "General fertility rate", "Types of natality measures", "Importance of natality data", "Sources of natality data"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 39.3.06 Measures of Natality.\n• Explain natality.\n• Explain natality rates.\n• Explain crude birth rate.\n• Explain general fertility rate.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Measures of Natality.\n• Explain natality.\n• Explain natality rates.\n• Explain crude birth rate.\n• Explain general fertility rate.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 6,
-        topicTitle: "39.3.07 Natural History of Disease & 39.3.08 Disease Prevention",
+        topicTitle: "Natural History of Disease & Disease Prevention",
         subTopics: ["Meaning of terms", "Pathogenesis", "Pre-symptomatic", "Symptomatic", "Disability and rehabilitation", "Primary", "Secondary", "Tertiary"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 39.3.07 Natural History of Disease & 39.3.08 Disease Prevention.\n• Explain pathogenesis.\n• Explain pre-symptomatic.\n• Explain symptomatic.\n• Explain disability and rehabilitation.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Natural History of Disease & Disease Prevention.\n• Explain pathogenesis.\n• Explain pre-symptomatic.\n• Explain symptomatic.\n• Explain disability and rehabilitation.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 7,
-        topicTitle: "39.3.09 Population Screening",
+        topicTitle: "Population Screening",
         subTopics: ["Meaning of terms", "General aims of screening", "Population screening tools", "Characteristics of screening tools", "Considerations in establishing screening programmes"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in population screening.\n• Explain the general aims and principles of screening programmes.\n• Describe population screening tools and evaluate criteria for screening tools (sensitivity, specificity).\n• Explain epidemiological considerations in establishing screening programmes.",
@@ -922,7 +922,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 9,
-        topicTitle: "39.3.10 Outbreak Investigation",
+        topicTitle: "Outbreak Investigation",
         subTopics: ["Meaning of terms", "Importance of investigating an outbreak", "Steps of outbreak investigation"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in disease outbreak investigation.\n• Explain the importance and objectives of investigating disease outbreaks.\n• Describe the systematic steps involved in an epidemiological outbreak investigation.",
@@ -932,7 +932,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 10,
-        topicTitle: "39.3.11 Analytical Epidemiology",
+        topicTitle: "Analytical Epidemiology",
         subTopics: ["Observation study", "Experimental study", "Case control study", "Cross-sectional study", "Cohort study", "Randomized controlled trials", "Relative risk and odds ratio", "Ethics in epidemiology"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain observation study.\n• Explain experimental study.\n• Explain case control study.\n• Explain cross-sectional study.\n• Explain cohort study.",
@@ -942,7 +942,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 11,
-        topicTitle: "39.3.14 Community Health Record Keeping",
+        topicTitle: "Community Health Record Keeping",
         subTopics: ["Purpose of record keeping", "Patient care record", "Disease register", "Survey records"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain purpose of record keeping.\n• Explain patient care record.\n• Explain disease register.\n• Explain survey records.",
@@ -952,20 +952,20 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 12,
-        topicTitle: "39.3.15 Emerging Issues and Trends",
+        topicTitle: "Emerging Issues and Trends",
         subTopics: ["Emerging trends", "Challenges", "Coping with challenges"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain emerging trends.\n• Discuss emerging issues, trends and coping strategies in 39.3.15 Emerging Issues and Trends.\n• Explain coping with challenges.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain emerging trends.\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends.\n• Explain coping with challenges.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 13,
-        topicTitle: "39.3.15 Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
         subTopics: ["Emerging trends", "Challenges", "Coping with challenges"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain emerging trends.\n• Discuss emerging issues, trends and coping strategies in 39.3.15 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping with challenges.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain emerging trends.\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping with challenges.",
         learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
         resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
         assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
@@ -1004,17 +1004,17 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     weeklySchedule: [
       {
         weekNumber: 1,
-        topicTitle: "40.3.01 Introduction to Nutrition in Emergencies",
+        topicTitle: "Introduction to Nutrition in Emergencies",
         subTopics: ["Meaning of terms", "Types of emergencies", "Phases of emergencies", "Trends and consequences of disasters"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 40.3.01 Introduction to Nutrition in Emergencies.\n• Classify emergencies and describe their categories.\n• Explain phases of emergencies.\n• Discuss emerging issues, trends and coping strategies in 40.3.01 Introduction to Nutrition in Emergencies.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Introduction to Nutrition in Emergencies.\n• Classify emergencies and describe their categories.\n• Explain phases of emergencies.\n• Discuss emerging issues, trends and coping strategies in Introduction to Nutrition in Emergencies.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 2,
-        topicTitle: "40.3.02 Overview of Malnutrition in Emergencies",
+        topicTitle: "Overview of Malnutrition in Emergencies",
         subTopics: ["Types of malnutrition", "Strategies to address macro and micronutrient deficiencies"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Classify malnutrition and describe their categories.\n• Explain strategies to address macro and micronutrient deficiencies.",
@@ -1024,7 +1024,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 3,
-        topicTitle: "40.3.03 Roles and Responsibilities of Stakeholders in Humanitarian Activities",
+        topicTitle: "Roles and Responsibilities of Stakeholders in Humanitarian Activities",
         subTopics: ["Role of NGOs and FBOs", "Role of the military", "Socio-political factors surrounding emergencies"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the roles and humanitarian responsibilities of NGOs and FBOs.\n• Explain the civil-military coordination and role of the military in emergency logistics.\n• Analyze socio-political and security factors surrounding emergency operations.",
@@ -1034,17 +1034,17 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 4,
-        topicTitle: "40.3.04 Approaches to Nutrition Situation Analysis",
+        topicTitle: "Approaches to Nutrition Situation Analysis",
         subTopics: ["Meaning of terms", "Rapid assessment", "Nutrition surveys"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 40.3.04 Approaches to Nutrition Situation Analysis.\n• Explain rapid assessment.\n• Explain nutrition surveys.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Approaches to Nutrition Situation Analysis.\n• Explain rapid assessment.\n• Explain nutrition surveys.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 5,
-        topicTitle: "40.3.05 Food and Nutrition Emergency Responses",
+        topicTitle: "Food and Nutrition Emergency Responses",
         subTopics: ["Essential emergency responses", "Selective feeding programmes"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain essential emergency responses.\n• Explain selective feeding programmes.",
@@ -1054,7 +1054,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 6,
-        topicTitle: "40.3.06 Nutrition Intervention Programs",
+        topicTitle: "Nutrition Intervention Programs",
         subTopics: ["School feeding", "Emergency relief food", "Famine relief", "Food for work", "Supplementation", "Disaster preparedness and management"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain school feeding.\n• Explain emergency relief food.\n• Explain famine relief.\n• Explain food for work.\n• Explain supplementation.",
@@ -1064,7 +1064,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 7,
-        topicTitle: "40.3.07 Monitoring and Evaluation of Food and Nutrition Emergency Situations",
+        topicTitle: "Monitoring and Evaluation of Food and Nutrition Emergency Situations",
         subTopics: ["Meaning of terms", "Importance of monitoring and evaluation", "Challenges of monitoring and evaluation", "Sphere standards in monitoring and evaluation of food and nutrition responses in emergency responses"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in monitoring and evaluation of emergency nutrition programs.\n• Explain the importance and key objectives of monitoring and evaluation in emergencies.\n• Identify operational challenges encountered in emergency M&E.\n• Apply SPHERE minimum standards and indicators in emergency nutrition response evaluation.",
@@ -1084,10 +1084,10 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 9,
-        topicTitle: "40.3.08 Emerging Issues and Trends",
+        topicTitle: "Emerging Issues and Trends",
         subTopics: ["Emerging issues", "Challenges", "Coping strategies"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 40.3.08 Emerging Issues and Trends.\n• Explain coping strategies.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends.\n• Explain coping strategies.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -1124,10 +1124,10 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 13,
-        topicTitle: "40.3.08 Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
         subTopics: ["Emerging issues", "Challenges", "Coping strategies"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 40.3.08 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in 40.3.08 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping strategies.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping strategies.",
         learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
         resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
         assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
@@ -1167,17 +1167,17 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     weeklySchedule: [
       {
         weekNumber: 1,
-        topicTitle: "41.3.01 Introduction to Community Partnership Skills",
+        topicTitle: "Introduction to Community Partnership Skills",
         subTopics: ["Meaning of terms", "Overview of community partnership skills", "Characteristics of community entry programme"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 41.3.01 Introduction to Community Partnership Skills.\n• Explain overview of community partnership skills.\n• Explain characteristics of community entry programme.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Introduction to Community Partnership Skills.\n• Explain overview of community partnership skills.\n• Explain characteristics of community entry programme.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 2,
-        topicTitle: "41.3.02 Community Structure",
+        topicTitle: "Community Structure",
         subTopics: ["Introduction to community structure", "Community practitioner roles and responsibilities"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain introduction to community structure.\n• Explain community practitioner roles and responsibilities.",
@@ -1187,27 +1187,27 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 3,
-        topicTitle: "41.3.03 Partnership in Community Programmes",
+        topicTitle: "Partnership in Community Programmes",
         subTopics: ["Levels of partnership", "Ideal partnership relationship", "Benefits of a genuine relationship", "Challenges of developing a genuine relationship"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain levels of partnership.\n• Explain ideal partnership relationship.\n• Explain benefits of a genuine relationship.\n• Discuss emerging issues, trends and coping strategies in 41.3.03 Partnership in Community Programmes.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain levels of partnership.\n• Explain ideal partnership relationship.\n• Explain benefits of a genuine relationship.\n• Discuss emerging issues, trends and coping strategies in Partnership in Community Programmes.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 4,
-        topicTitle: "41.3.04 Community Entry Process",
+        topicTitle: "Community Entry Process",
         subTopics: ["Meaning of terms", "Community entry process", "Steps in community entry and partnership process", "Community practitioner roles and responsibilities"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 41.3.04 Community Entry Process.\n• Describe the structure, components and function of community entry process.\n• Describe the structure, components and function of steps in community entry and partnership process.\n• Explain community practitioner roles and responsibilities.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Community Entry Process.\n• Describe the structure, components and function of community entry process.\n• Describe the structure, components and function of steps in community entry and partnership process.\n• Explain community practitioner roles and responsibilities.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 5,
-        topicTitle: "41.3.05 Tools and Methods in Community Partnership Skills",
+        topicTitle: "Tools and Methods in Community Partnership Skills",
         subTopics: ["Tools used in community partnership", "Methods used in community partnership", "Conceptual framework and models"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Demonstrate safe handling and operation of tools used in community partnership.\n• Explain methods used in community partnership.\n• Explain conceptual framework and models.",
@@ -1217,17 +1217,17 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 6,
-        topicTitle: "41.3.06 Community Mobilisation",
+        topicTitle: "Community Mobilisation",
         subTopics: ["Meaning of terms", "Steps in community mobilisation", "Challenges in community mobilisation", "Community mobilisation in nutrition intervention"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 41.3.06 Community Mobilisation.\n• Explain steps in community mobilisation.\n• Discuss emerging issues, trends and coping strategies in 41.3.06 Community Mobilisation.\n• Explain community mobilisation in nutrition intervention.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Community Mobilisation.\n• Explain steps in community mobilisation.\n• Discuss emerging issues, trends and coping strategies in Community Mobilisation.\n• Explain community mobilisation in nutrition intervention.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 7,
-        topicTitle: "41.3.07 Community Acting",
+        topicTitle: "Community Acting",
         subTopics: ["Community acting groups", "Levels of participation: individual, family, groups", "Particular techniques"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain community acting groups.\n• Explain levels of participation: individual, family, groups.\n• Explain particular techniques.",
@@ -1247,10 +1247,10 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 9,
-        topicTitle: "41.3.08 Emerging Issues and Trends",
+        topicTitle: "Emerging Issues and Trends",
         subTopics: ["Emerging issues and trends", "Challenges of emerging issues", "Coping with challenges"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 41.3.08 Emerging Issues and Trends.\n• Explain coping with challenges.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends.\n• Explain coping with challenges.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -1287,10 +1287,10 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 13,
-        topicTitle: "41.3.08 Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
         subTopics: ["Emerging issues and trends", "Challenges of emerging issues", "Coping with challenges"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 41.3.08 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in 41.3.08 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping with challenges.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping with challenges.",
         learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
         resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
         assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
@@ -1332,7 +1332,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     weeklySchedule: [
       {
         weekNumber: 1,
-        topicTitle: "42.3.01 Introduction to Nutrition Assessment and Surveillance",
+        topicTitle: "Introduction to Nutrition Assessment and Surveillance",
         subTopics: ["Meaning of terms", "Importance of nutrition assessment", "Application of nutrition assessment"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in nutrition assessment and surveillance.\n• Explain the importance, objectives, and role of nutrition assessment in clinical and community settings.\n• Explain key applications of nutrition assessment in healthcare delivery.",
@@ -1342,7 +1342,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 2,
-        topicTitle: "42.3.02 Nutrition Assessment Techniques",
+        topicTitle: "Nutrition Assessment Techniques",
         subTopics: ["Concept of nutrition assessment techniques", "Pregnancy monitoring and operational assessment", "Assessment of lactation", "Complementary feeding", "Growth monitoring", "Nutrition assessment equipment", "Choice of nutrition assessment techniques"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the concept of nutrition assessment techniques.\n• Explain pregnancy monitoring and operational assessment.\n• Explain assessment of lactation.\n• Explain complementary feeding.\n• Explain growth monitoring.",
@@ -1352,7 +1352,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 3,
-        topicTitle: "42.3.03 Anthropometric Assessment",
+        topicTitle: "Anthropometric Assessment",
         subTopics: ["Importance of anthropometric assessment", "Types of anthropometric measurements", "Indices of anthropometric measurements"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain the importance and role of anthropometric assessment in evaluating nutritional status.\n• Classify anthropometric measurements (weight, height/length, MUAC, head circumference, skinfold).\n• Calculate and interpret anthropometric indices (WAZ, HAZ, WHZ, BMI-for-age).",
@@ -1362,17 +1362,17 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 4,
-        topicTitle: "42.3.04 Biochemical Assessment",
+        topicTitle: "Biochemical Assessment",
         subTopics: ["Meaning of terms", "Types of biochemical assessment", "Biochemical reference values", "Strengths and limitations of biochemical assessment"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 42.3.04 Biochemical Assessment.\n• Classify biochemical assessment and describe their categories.\n• Evaluate biochemical reference values.\n• Explain strengths and limitations of biochemical assessment.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Biochemical Assessment.\n• Classify biochemical assessment and describe their categories.\n• Evaluate biochemical reference values.\n• Explain strengths and limitations of biochemical assessment.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 5,
-        topicTitle: "42.3.05 Clinical Examination",
+        topicTitle: "Clinical Examination",
         subTopics: ["Clinical examinations", "Strength and limitation of clinical examination", "Indices of clinical examination", "Application of clinical examination"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain clinical examinations.\n• Explain strength and limitation of clinical examination.\n• Explain indices of clinical examination.\n• Explain application of clinical examination.",
@@ -1382,7 +1382,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 6,
-        topicTitle: "42.3.06 Dietary Surveys",
+        topicTitle: "Dietary Surveys",
         subTopics: ["Measurements used in dietary survey", "Factors that influence the choice of dietary methods", "Dietary recall questionnaires", "Food frequency questionnaires", "Diet history", "Advantages and disadvantages of dietary survey"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain measurements used in dietary survey.\n• Explain factors that influence the choice of dietary methods.\n• Explain dietary recall questionnaires.\n• Explain food frequency questionnaires.\n• Explain diet history.",
@@ -1392,7 +1392,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 7,
-        topicTitle: "42.3.07 Nutrition Surveillance",
+        topicTitle: "Nutrition Surveillance",
         subTopics: ["Meaning of terms", "Importance of nutrition surveillance", "Characteristics of surveillance", "Principles of nutrition surveillance"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in nutrition surveillance.\n• Explain the importance, purpose, and role of nutrition surveillance in public health.\n• Outline the core characteristics of an effective surveillance system.\n• Describe the guiding principles of community and facility-based nutrition surveillance.",
@@ -1412,7 +1412,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 9,
-        topicTitle: "42.3.08 Surveillance Information",
+        topicTitle: "Surveillance Information",
         subTopics: ["Nutrition surveillance information", "Importance of nutrition surveillance information", "Principal users of surveillance information"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Describe types and formats of nutrition surveillance information and reports.\n• Explain the importance and utilization of surveillance information in decision-making and early warning.\n• Identify principal users and stakeholders of nutrition surveillance information.",
@@ -1422,17 +1422,17 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 10,
-        topicTitle: "42.3.09 Types of Nutrition Survey",
+        topicTitle: "Types of Nutrition Survey",
         subTopics: ["Meaning of terms", "Rapid appraisal", "Rapid assessment", "Baseline survey", "Follow-up survey"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 42.3.09 Types of Nutrition Survey.\n• Explain rapid appraisal.\n• Explain rapid assessment.\n• Explain baseline survey.\n• Explain follow-up survey.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Types of Nutrition Survey.\n• Explain rapid appraisal.\n• Explain rapid assessment.\n• Explain baseline survey.\n• Explain follow-up survey.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 11,
-        topicTitle: "42.3.10 Programme Monitoring and Evaluation",
+        topicTitle: "Programme Monitoring and Evaluation",
         subTopics: ["Introduction to programme monitoring and evaluation", "Programme planning", "Programme implementation", "Programme monitoring", "Programme evaluation", "Theory and methodologies of programme and system planning", "Monitoring and evaluation"],
         hours: 5,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain introduction to programme monitoring and evaluation.\n• Explain programme planning.\n• Explain programme implementation.\n• Explain programme monitoring.\n• Explain programme evaluation.",
@@ -1442,20 +1442,20 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 12,
-        topicTitle: "42.3.12 Emerging Issues and Trends",
+        topicTitle: "Emerging Issues and Trends",
         subTopics: ["Identification of trends", "Challenges", "Coping mechanisms"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain identification of trends.\n• Discuss emerging issues, trends and coping strategies in 42.3.12 Emerging Issues and Trends.\n• Explain coping mechanisms.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain identification of trends.\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends.\n• Explain coping mechanisms.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 13,
-        topicTitle: "42.3.12 Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
         subTopics: ["Identification of trends", "Challenges", "Coping mechanisms"],
         hours: 5,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain identification of trends.\n• Discuss emerging issues, trends and coping strategies in 42.3.12 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping mechanisms.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain identification of trends.\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain coping mechanisms.",
         learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
         resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
         assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
@@ -1495,7 +1495,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     weeklySchedule: [
       {
         weekNumber: 1,
-        topicTitle: "43.3.01 Introduction to Product Development",
+        topicTitle: "Introduction to Product Development",
         subTopics: ["Meaning of terms", "Importance of product development", "Levels of product development", "Product life cycle"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in food product development.\n• Explain the importance and business rationale for new product development.\n• Describe the levels of product development.\n• Explain the stages of the product life cycle.",
@@ -1505,7 +1505,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 2,
-        topicTitle: "43.3.02 Idea Generation and Concept Development",
+        topicTitle: "Idea Generation and Concept Development",
         subTopics: ["Sources of ideas", "Processing of ideas", "Information gathering", "Information evaluation", "Feasibility analysis"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Identify internal and external sources of new product ideas.\n• Describe the screening and processing of product ideas.\n• Explain market information gathering methods.\n• Evaluate gathered market information.\n• Conduct preliminary technical and financial feasibility analysis.",
@@ -1515,7 +1515,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 3,
-        topicTitle: "43.3.03 Prototype Production and Testing",
+        topicTitle: "Prototype Production and Testing",
         subTopics: ["Production of prototypes", "Evaluation of prototype products", "Prototype modification"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain production of prototypes.\n• Explain evaluation of prototype products.\n• Explain prototype modification.",
@@ -1525,7 +1525,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 4,
-        topicTitle: "43.3.04 Initial Product Run",
+        topicTitle: "Initial Product Run",
         subTopics: ["Factors affecting new product development", "Causes of new product failure", "Output levels", "Quality control and quality checks", "Process efficacy analysis"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Analyze factors affecting new product development.\n• Analyze factors affecting new product failure.\n• Explain output levels.\n• Explain quality control and quality checks.\n• Describe the structure, components and function of process efficacy analysis.",
@@ -1535,7 +1535,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 5,
-        topicTitle: "43.3.05 Market Sampling",
+        topicTitle: "Market Sampling",
         subTopics: ["Market segmentation", "Product trials", "Customer reactions"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain market segmentation.\n• Explain product trials.\n• Explain customer reactions.",
@@ -1545,7 +1545,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 6,
-        topicTitle: "43.3.06 Product Launch",
+        topicTitle: "Product Launch",
         subTopics: ["Product launching methods", "Product launch timing", "Product launch evaluation"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain product launching methods.\n• Explain product launch timing.\n• Explain product launch evaluation.",
@@ -1555,7 +1555,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 7,
-        topicTitle: "43.3.07 Product Commercialization",
+        topicTitle: "Product Commercialization",
         subTopics: ["Product plan", "Financial plan", "Pre-launch trial", "Marketing plan", "Operations plan", "Financial analysis and projection"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain product plan.\n• Explain financial plan.\n• Explain pre-launch trial.\n• Explain marketing plan.\n• Explain operations plan.",
@@ -1575,7 +1575,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 9,
-        topicTitle: "43.3.08 Marketing Management",
+        topicTitle: "Marketing Management",
         subTopics: ["Marketing management principles", "Marketing mix: Product, Place, Price, Promotion", "Entry strategies"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain marketing management principles.\n• Explain marketing mix: Product, Place, Price, Promotion.\n• Explain entry strategies.",
@@ -1585,7 +1585,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 10,
-        topicTitle: "43.3.09 Product Sales",
+        topicTitle: "Product Sales",
         subTopics: ["Salesmanship", "Sales process", "Sales management", "Sales evaluation"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain salesmanship.\n• Describe the structure, components and function of sales process.\n• Explain sales management.\n• Explain sales evaluation.",
@@ -1595,10 +1595,10 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 11,
-        topicTitle: "43.3.10 Emerging Issues and Trends",
+        topicTitle: "Emerging Issues and Trends",
         subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Managing challenges posed by emerging issues and trends"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 43.3.10 Emerging Issues and Trends.\n• Explain managing challenges posed by emerging issues and trends.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends.\n• Explain managing challenges posed by emerging issues and trends.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -1615,10 +1615,10 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 13,
-        topicTitle: "43.3.10 Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
         subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Managing challenges posed by emerging issues and trends"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 43.3.10 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in 43.3.10 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain managing challenges posed by emerging issues and trends.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain managing challenges posed by emerging issues and trends.",
         learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
         resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
         assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
@@ -1658,7 +1658,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     weeklySchedule: [
       {
         weekNumber: 1,
-        topicTitle: "44.3.01 Introduction to Management & 44.3.02 Organization",
+        topicTitle: "Introduction to Management & Organization",
         subTopics: ["Meaning and purpose of management", "Management schools of thought", "Management theory", "Management functions", "Structure and design", "Principles of organization", "Relationship within an organization", "Delegation"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain meaning and purpose of management.\n• Explain management schools of thought.\n• Explain management theory.\n• Explain management functions.\n• Explain structure and design.",
@@ -1668,17 +1668,17 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 2,
-        topicTitle: "44.3.03 Management Styles",
+        topicTitle: "Management Styles",
         subTopics: ["Meaning of terms", "Management styles"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 44.3.03 Management Styles.\n• Explain management styles.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Management Styles.\n• Explain management styles.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 3,
-        topicTitle: "44.3.04 Production",
+        topicTitle: "Production",
         subTopics: ["Types of production", "Requirements", "Planning", "Control"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Classify production systems (job, batch, continuous/mass production).\n• Identify production requirements (raw materials, plant machinery, labour).\n• Explain production planning techniques.\n• Describe production control mechanisms.",
@@ -1688,7 +1688,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 4,
-        topicTitle: "44.3.05 Material Control",
+        topicTitle: "Material Control",
         subTopics: ["Sources of information", "Purchasing procedure", "Receiving procedure", "Types of stores", "Filing"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Identify sources of procurement and market information.\n• Explain purchasing and requisitioning procedures.\n• Describe receiving and inspection procedures.\n• Classify stores layout and inventory storage categories.\n• Explain filing and record management systems in stores.",
@@ -1698,7 +1698,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 5,
-        topicTitle: "44.3.06 Quality Control",
+        topicTitle: "Quality Control",
         subTopics: ["Meaning and importance of quality control", "Concept of quality", "Statistical quality control and sampling", "Quality control charts", "Standardization", "Process control and quality control", "Quality control cycles and their uses", "Quality cost effects and implementation"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain meaning and importance of quality control.\n• Explain the concept of quality.\n• Explain statistical quality control and sampling.\n• Interpret and apply quality control charts.\n• Explain standardization.",
@@ -1708,20 +1708,20 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 6,
-        topicTitle: "44.3.07 Economics",
+        topicTitle: "Economics",
         subTopics: ["Meaning of terms", "Factors of production", "Scarce resources and decision making", "Production possibility curve (frontier)", "Demand and supply curves"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 44.3.07 Economics.\n• Explain factors of production.\n• Explain scarce resources and decision making.\n• Explain production possibility curve (frontier).\n• Explain demand and supply curves.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Economics.\n• Explain factors of production.\n• Explain scarce resources and decision making.\n• Explain production possibility curve (frontier).\n• Explain demand and supply curves.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 7,
-        topicTitle: "44.3.08 Insurance",
+        topicTitle: "Insurance",
         subTopics: ["Meaning of terms", "Purpose of insurance", "Types of insurance", "Re-insurance", "Double insurance", "Subrogation"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in 44.3.08 Insurance.\n• Explain purpose of insurance.\n• Classify insurance and describe their categories.\n• Explain re-insurance.\n• Explain double insurance.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in Insurance.\n• Explain purpose of insurance.\n• Classify insurance and describe their categories.\n• Explain re-insurance.\n• Explain double insurance.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
@@ -1738,7 +1738,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 9,
-        topicTitle: "44.3.09 Human Resource Management",
+        topicTitle: "Human Resource Management",
         subTopics: ["Meaning of terms", "Functions of human resource manager", "Human resource process"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Define terms and concepts used in human resource management.\n• Explain the core functions and responsibilities of a human resource manager.\n• Describe the stages of the human resource process (recruitment, selection, induction, training, performance appraisal).",
@@ -1748,7 +1748,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 10,
-        topicTitle: "44.3.10 Labour Laws and Relations",
+        topicTitle: "Labour Laws and Relations",
         subTopics: ["Conditions of employment", "Collective bargaining", "Industrial disputes"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Explain conditions of employment.\n• Explain collective bargaining.\n• Explain industrial disputes.",
@@ -1758,7 +1758,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 11,
-        topicTitle: "44.3.11 Office Organization and Management",
+        topicTitle: "Office Organization and Management",
         subTopics: ["Filing systems", "Filing methods and equipment", "Indexing", "Computerized filing", "Reprography: typing, photocopying, duplicating", "Essentials of public relations: intrinsic, extrinsic", "Creation of conducive office environment"],
         hours: 4,
         specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Describe the structure, components and function of filing systems.\n• Demonstrate safe handling and operation of filing methods and equipment.\n• Explain indexing.\n• Explain computerized filing.\n• Explain reprography: typing, photocopying, duplicating.",
@@ -1768,20 +1768,20 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 12,
-        topicTitle: "44.3.12 Emerging Issues and Trends",
+        topicTitle: "Emerging Issues and Trends",
         subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Managing challenges posed by emerging issues and trends"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 44.3.12 Emerging Issues and Trends.\n• Explain managing challenges posed by emerging issues and trends.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends.\n• Explain managing challenges posed by emerging issues and trends.",
         learningActivities: "Interactive lecture presentations, group discussions, practical demonstrations, and laboratory exercises.",
         resourcesAndReferences: "Prescribed textbook references, lecture presentations, and practical equipment.",
         assessmentAndRemarks: "Class quiz, oral questions, practical observation, and assignment evaluation."
       },
       {
         weekNumber: 13,
-        topicTitle: "44.3.12 Emerging Issues and Trends & Comprehensive Syllabus Revision",
+        topicTitle: "Emerging Issues and Trends & Comprehensive Syllabus Revision",
         subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Managing challenges posed by emerging issues and trends"],
         hours: 4,
-        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in 44.3.12 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in 44.3.12 Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain managing challenges posed by emerging issues and trends.",
+        specificLearningOutcomes: "By the end of the lesson/topic, the trainee should be able to:\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Discuss emerging issues, trends and coping strategies in Emerging Issues and Trends & Comprehensive Syllabus Revision.\n• Explain managing challenges posed by emerging issues and trends.",
         learningActivities: "Group tutorials, past paper problem-solving clinics, student presentations, and plenary review.",
         resourcesAndReferences: "KNEC past examination question banks, model solutions, and prescribed textbooks.",
         assessmentAndRemarks: "Revision exercises, mock questions, and individual learner support (No CAT)."
@@ -1825,7 +1825,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     weeklySchedule: [
       {
         weekNumber: 1,
-        topicTitle: "45.3.01 Introduction to Research Project Work & Topic Formulation",
+        topicTitle: "Introduction to Research Project Work & Topic Formulation",
         subTopics: [
           "Meaning and purpose of TVET trade project work",
           "Role of empirical research in solving nutrition and public health challenges",
@@ -1841,7 +1841,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 2,
-        topicTitle: "45.3.02 Research Project Proposal: Problem Formulation & Objectives",
+        topicTitle: "Research Project Proposal: Problem Formulation & Objectives",
         subTopics: [
           "Components and standard structure of a TVET research proposal",
           "Background to the study: establishing nutritional context and rationale",
@@ -1858,7 +1858,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 3,
-        topicTitle: "45.3.02 Research Project Proposal: Literature Review & Conceptual Framework",
+        topicTitle: "Research Project Proposal: Literature Review & Conceptual Framework",
         subTopics: [
           "Literature searching techniques using academic databases and grey literature",
           "Critical synthesis of empirical studies on nutrition, dietary practices, and clinical outcomes",
@@ -1874,7 +1874,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 4,
-        topicTitle: "45.3.03 Research Methodologies & Study Design",
+        topicTitle: "Research Methodologies & Study Design",
         subTopics: [
           "Selection and justification of research design: cross-sectional, descriptive, analytical, intervention",
           "Study location description: geographical, demographic, and nutritional profile",
@@ -1891,7 +1891,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 5,
-        topicTitle: "45.3.03 Research Instruments Design, Pre-Testing & Ethical Protocols",
+        topicTitle: "Research Instruments Design, Pre-Testing & Ethical Protocols",
         subTopics: [
           "Design of primary data collection instruments: structured questionnaires, key informant guides, focus group discussion (FGD) guides",
           "Design of standardized anthropometric and dietary intake record forms (24-hour recalls, FFQs)",
@@ -1907,7 +1907,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 6,
-        topicTitle: "45.3.02 Proposal Defense, Departmental Vetting & Institutional Clearance",
+        topicTitle: "Proposal Defense, Departmental Vetting & Institutional Clearance",
         subTopics: [
           "Compilation and binding of complete Research Proposal (Chapters 1, 2, and 3 with tools and budget)",
           "Oral proposal presentation before the Departmental Academic Project Committee",
@@ -1923,7 +1923,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 7,
-        topicTitle: "45.3.04 Fieldwork & Primary Data Collection Phase I (Site Entry & Sampling)",
+        topicTitle: "Fieldwork & Primary Data Collection Phase I (Site Entry & Sampling)",
         subTopics: [
           "Protocol for entry into study sites: community leadership courtesy calls, health facility in-charges, institutional permissions",
           "Sensitization and recruitment of eligible participants according to sampling frame",
@@ -1939,7 +1939,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 8,
-        topicTitle: "45.3.04 Fieldwork & Primary Data Collection Phase II (Anthropometry & Deep Survey)",
+        topicTitle: "Fieldwork & Primary Data Collection Phase II (Anthropometry & Deep Survey)",
         subTopics: [
           "Intensive data collection in designated study clusters, households, or clinical wards",
           "Execution of standardized anthropometric measurements (weight, height/length, MUAC, edema verification)",
@@ -1955,7 +1955,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 9,
-        topicTitle: "45.3.04 Fieldwork Completion, Data Quality Audit & Supervisor Progress Review",
+        topicTitle: "Fieldwork Completion, Data Quality Audit & Supervisor Progress Review",
         subTopics: [
           "Finalization of remaining participant quotas and sampling follow-ups",
           "Formal study exit: debriefing community leaders and participating institutions",
@@ -1971,7 +1971,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 10,
-        topicTitle: "45.3.05 Data Processing, Cleaning & Electronic Database Entry",
+        topicTitle: "Data Processing, Cleaning & Electronic Database Entry",
         subTopics: [
           "Development of codebooks: defining variables, variable labels, value codes, and measurement scales",
           "Creation of electronic data entry template using statistical software (SPSS / Epi-Info / Excel)",
@@ -1987,7 +1987,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 11,
-        topicTitle: "45.3.05 Data Presentation, Statistical Analysis & Interpretation",
+        topicTitle: "Data Presentation, Statistical Analysis & Interpretation",
         subTopics: [
           "Descriptive statistical analysis: frequencies, percentages, cross-tabulations, measures of central tendency and dispersion",
           "Inferential statistical analysis where applicable: Chi-square tests of association, t-tests, ANOVA, correlation",
@@ -2003,7 +2003,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 12,
-        topicTitle: "45.3.06 Report Writing: Discussion, Conclusions, Recommendations & Draft Review",
+        topicTitle: "Report Writing: Discussion, Conclusions, Recommendations & Draft Review",
         subTopics: [
           "Drafting Chapter 5: Discussion of findings in the context of published local and international literature",
           "Drawing conclusions that directly address the stated study objectives",
@@ -2020,7 +2020,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 13,
-        topicTitle: "45.3.06 Draft Revisions, Document Formatting & Professional Binding",
+        topicTitle: "Draft Revisions, Document Formatting & Professional Binding",
         subTopics: [
           "Systematic integration of supervisor feedback, editorial corrections, and structural amendments",
           "Formatting adherence to TVET and KNEC specifications: margin dimensions, line spacing, font consistency, pagination",
@@ -2036,7 +2036,7 @@ export const MODULE_3_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       },
       {
         weekNumber: 14,
-        topicTitle: "45.3.06 Final Bound Project Submission & Oral Defense / Presentation",
+        topicTitle: "Final Bound Project Submission & Oral Defense / Presentation",
         subTopics: [
           "Formal submission of three bound copies of the Trade Project Report to the Head of Department",
           "Preparation of digital slide presentation (background, problem, objectives, methodology, key findings, conclusions, recommendations)",

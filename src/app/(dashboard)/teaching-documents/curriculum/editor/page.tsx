@@ -2,21 +2,50 @@ import { requireTrainerAccess } from '@/features/auth/authorization';
 import { getAssessmentMilestones } from '@/features/teaching-documents/assessment-milestones';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { OnlineCurriculumBuilder } from '@/features/teaching-documents/curriculum-editor/online-builder';
+import { isCurriculumDocumentType } from '@/features/teaching-documents/curriculum-document-types';
 
 interface PageProps {
-  searchParams: Promise<{ unitId?: string; unitCode?: string }>;
+  searchParams: Promise<{
+    unitId?: string;
+    unitCode?: string;
+    documentType?: string | string[];
+  }>;
 }
 
 export default async function OnlineCurriculumEditorPage({ searchParams }: PageProps) {
-  await requireTrainerAccess();
-  const { unitId, unitCode } = await searchParams;
+  const profile = await requireTrainerAccess();
+  const { unitId, unitCode, documentType: requestedDocumentType } = await searchParams;
+  const initialDocumentType = isCurriculumDocumentType(requestedDocumentType)
+    ? requestedDocumentType
+    : 'course_outline';
+
+  if (!profile.activeDepartmentId) {
+    return (
+      <OnlineCurriculumBuilder
+        units={[]}
+        initialUnitId={unitId}
+        initialDocumentType={initialDocumentType}
+        milestones={await getAssessmentMilestones()}
+        existingCurriculumMap={{}}
+      />
+    );
+  }
 
   const admin = createAdminClient();
 
   const [{ data: unitsData }, milestones, { data: existingVersions }] = await Promise.all([
-    admin.from('units').select('id,code,name,is_active').order('code', { ascending: true }),
+    admin
+      .from('units')
+      .select('id,code,name,is_active')
+      .eq('department_id', profile.activeDepartmentId)
+      .order('code', { ascending: true }),
     getAssessmentMilestones(),
-    admin.from('curriculum_document_versions').select('unit_id,payload').eq('status', 'active'),
+    admin
+      .from('curriculum_document_versions')
+      .select('unit_id,document_type,payload')
+      .eq('department_id', profile.activeDepartmentId)
+      .eq('status', 'active')
+      .in('document_type', ['course_outline', 'scheme_of_work']),
   ]);
 
   let activeUnits = (unitsData ?? [])
@@ -60,6 +89,7 @@ export default async function OnlineCurriculumEditorPage({ searchParams }: PageP
 
   if (existingVersions) {
     for (const v of existingVersions) {
+      if (!isCurriculumDocumentType(v.document_type)) continue;
       const p = (v as any).payload;
       if (p && v.unit_id) {
         const uCode = p.unit?.unitCode || '';
@@ -68,7 +98,7 @@ export default async function OnlineCurriculumEditorPage({ searchParams }: PageP
         const isBio = /biochem/i.test(uCode) || /biochem/i.test(uName);
         const cleanRef = !isBio && /lehninger|harper/i.test(rawRef) ? '' : rawRef;
 
-        existingCurriculumMap[v.unit_id] = {
+        existingCurriculumMap[`${v.document_type}:${v.unit_id}`] = {
           unitDescription: p.unit?.unitDescription,
           coreLearningOutcomes: p.unit?.coreLearningOutcomes,
           references: cleanRef,
@@ -89,6 +119,7 @@ export default async function OnlineCurriculumEditorPage({ searchParams }: PageP
     <OnlineCurriculumBuilder
       units={activeUnits}
       initialUnitId={resolvedUnitId}
+      initialDocumentType={initialDocumentType}
       milestones={milestones}
       existingCurriculumMap={existingCurriculumMap}
     />

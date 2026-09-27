@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import ExcelJS from 'exceljs';
+import { createZipArchive } from '@/features/teaching-documents/zip-archive';
 import {
   parseBulkCourseOutlineWorkbook,
   parseBulkCourseOutlineZip,
@@ -100,6 +101,7 @@ describe('Bulk Course Outline Upload & Ingestion', () => {
 
     const cndUnit = result.units.find((u) => u.unitCode === 'CND 1101');
     expect(cndUnit).toBeDefined();
+    expect(cndUnit?.documentType).toBe('course_outline');
     expect(cndUnit?.status).toBe('matched');
     expect(cndUnit?.matchedUnitId).toBe('unit-1');
     expect(cndUnit?.unitDescription).toBe('Official authoritative course description provided by HOD.');
@@ -113,6 +115,46 @@ describe('Bulk Course Outline Upload & Ingestion', () => {
     expect(dhnUnit?.matchedUnitId).toBe('unit-2');
     expect(dhnUnit?.topics).toHaveLength(1);
     expect(dhnUnit?.topics[0].topic).toBe('Enzymology Fundamentals');
+  });
+
+  it('keeps mixed Course Outline and Scheme of Work sheet pairs separate', async () => {
+    const workbook = new ExcelJS.Workbook();
+
+    for (const documentName of ['Course Outline', 'Scheme of Work']) {
+      const unitsSheet = workbook.addWorksheet(`${documentName} Units`);
+      unitsSheet.addRow(['Unit Code', 'Unit Name', 'Unit Description']);
+      unitsSheet.addRow([
+        'CND 1101',
+        'Human Anatomy and Physiology',
+        `${documentName} description`,
+      ]);
+
+      const topicsSheet = workbook.addWorksheet(`${documentName} Topics`);
+      topicsSheet.addRow(['Unit Code', 'Sequence', 'Topic Title', 'Sub-topics']);
+      topicsSheet.addRow([
+        'CND 1101',
+        1,
+        `${documentName} topic`,
+        `${documentName} coverage`,
+      ]);
+    }
+
+    workbook.addWorksheet('Review Notes').addRow(['Review notes are not curriculum data']);
+
+    const buffer = Buffer.from(await workbook.xlsx.writeBuffer());
+    const result = await parseBulkCourseOutlineWorkbook(buffer, 'mixed-curriculum.xlsx', mockSystemUnits);
+
+    expect(result.ok).toBe(true);
+    expect(result.totalUnits).toBe(2);
+    expect(result.units.map((unit) => unit.documentType).sort()).toEqual([
+      'course_outline',
+      'scheme_of_work',
+    ]);
+    expect(result.units.find((unit) => unit.documentType === 'course_outline')?.topics[0].topic)
+      .toBe('Course Outline topic');
+    expect(result.units.find((unit) => unit.documentType === 'scheme_of_work')?.topics[0].topic)
+      .toBe('Scheme of Work topic');
+    expect(result.issues.some((issue) => issue.message.includes('Review Notes'))).toBe(true);
   });
 
   it('handles unmatched units and adds appropriate warning issues', async () => {
@@ -141,6 +183,30 @@ describe('Bulk Course Outline Upload & Ingestion', () => {
     const result = await parseBulkCourseOutlineZip(emptyZip, 'empty.zip', mockSystemUnits);
     expect(result.ok).toBe(false);
     expect(result.error).toContain('No Word (.docx) documents found');
+  });
+
+  it('detects Scheme of Work Word documents from their filenames', async () => {
+    const xml = [
+      '<w:document><w:body><w:p><w:r><w:t>CND 1101</w:t></w:r></w:p><w:tbl>',
+      '<w:tr><w:tc><w:p><w:r><w:t>Week</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:t>Topic</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:t>Coverage</w:t></w:r></w:p></w:tc></w:tr>',
+      ...[1, 2, 3].map((week) =>
+        `<w:tr><w:tc><w:p><w:r><w:t>${week}</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:t>Topic ${week}</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:t>Coverage ${week}</w:t></w:r></w:p></w:tc></w:tr>`,
+      ),
+      '</w:tbl></w:body></w:document>',
+    ].join('');
+    const docx = createZipArchive([
+      { name: 'word/document.xml', data: Buffer.from(xml) },
+    ]);
+    const archive = createZipArchive([
+      { name: 'Scheme of Work CND 1101.docx', data: docx },
+    ]);
+
+    const result = await parseBulkCourseOutlineZip(archive, 'schemes.zip', mockSystemUnits);
+
+    expect(result.ok).toBe(true);
+    expect(result.units).toHaveLength(1);
+    expect(result.units[0].documentType).toBe('scheme_of_work');
+    expect(result.units[0].unitCode).toBe('CND 1101');
   });
 
   it('formats authoritative topics into standard 14-week TVET layout without synthetic leakage', async () => {

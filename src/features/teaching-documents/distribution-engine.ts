@@ -67,8 +67,20 @@ export function isPureAssessmentTopic(title: string): boolean {
   );
 }
 
-function cleanTopicTitle(title: string): string {
-  return title.replace(/\s*\((?:RAT\s*\d*|CAT)\)\s*$/i, '').trim();
+export function stripTopicFigures(text: string): string {
+  return text
+    .replace(/(?:^|\s*&\s*|\b)\d+(?:\.\d+)+(?:[a-zA-Z])?\s*/g, (match) => {
+      if (match.includes('&')) return ' & ';
+      return '';
+    })
+    .replace(/\s*&\s*$/, '')
+    .replace(/^\s*&\s*/, '')
+    .trim();
+}
+
+export function cleanTopicTitle(title: string): string {
+  const withoutAssessmentSuffix = title.replace(/\s*\((?:RAT\s*\d*|CAT)\)\s*$/i, '').trim();
+  return stripTopicFigures(withoutAssessmentSuffix);
 }
 
 /**
@@ -98,7 +110,7 @@ export function distributeTopicsAcrossWeeks(
         : [];
       const subTopics = rawSubs.filter((st: string) => !/continuous assessment|rat\s*\d/i.test(st));
       let slo = (t as any).specificLearningOutcomes || (t as any).learningOutcomes || '';
-      slo = slo.replace(/\s*\((?:RAT\s*\d*|CAT)\)/gi, '').trim();
+      slo = stripTopicFigures(slo.replace(/\s*\((?:RAT\s*\d*|CAT)\)/gi, '')).trim();
 
       return {
         topicTitle,

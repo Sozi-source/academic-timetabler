@@ -31,6 +31,7 @@ import { cn } from '@/lib/utils/cn';
 import { SLOBullets } from '../tvet-document-viewer';
 import {
   distributeTopicsAcrossWeeks,
+  stripTopicFigures,
 } from '../distribution-engine';
 import type { AssessmentMilestones } from '../assessment-milestones';
 import {
@@ -39,6 +40,10 @@ import {
   type OnlineTopicItem,
   type OnlineCurriculumPayload,
 } from './actions';
+import {
+  isCurriculumDocumentType,
+  type CurriculumDocumentType,
+} from '../curriculum-document-types';
 
 export interface SystemUnitOption {
   id: string;
@@ -49,6 +54,7 @@ export interface SystemUnitOption {
 interface OnlineCurriculumBuilderProps {
   units?: SystemUnitOption[];
   initialUnitId?: string;
+  initialDocumentType: CurriculumDocumentType;
   milestones: AssessmentMilestones;
   existingCurriculumMap?: Record<string, {
     unitDescription?: string;
@@ -253,11 +259,14 @@ const DEFAULT_SAMPLE_TOPICS: OnlineTopicItem[] = [
 export function OnlineCurriculumBuilder({
   units = [],
   initialUnitId,
+  initialDocumentType,
   milestones,
   existingCurriculumMap = {},
 }: OnlineCurriculumBuilderProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [documentType, setDocumentType] = useState<CurriculumDocumentType>(initialDocumentType);
 
   const [selectedUnitId, setSelectedUnitId] = useState<string>(
     initialUnitId || (units[0]?.id ?? '')
@@ -275,7 +284,9 @@ export function OnlineCurriculumBuilder({
     matchedUnit?.name || ''
   );
 
-  const existingData = selectedUnitId ? existingCurriculumMap[selectedUnitId] : null;
+  const existingData = selectedUnitId
+    ? existingCurriculumMap[`${documentType}:${selectedUnitId}`]
+    : null;
 
   const [unitDescription, setUnitDescription] = useState<string>(
     existingData?.unitDescription || ''
@@ -291,7 +302,7 @@ export function OnlineCurriculumBuilder({
     if (existingData?.topics && existingData.topics.length > 0) {
       return existingData.topics.map((t, idx) => ({
         id: String(idx + 1),
-        topicTitle: t.topicTitle,
+        topicTitle: stripTopicFigures(t.topicTitle),
         subTopics: t.subTopics.join(' · '),
       }));
     }
@@ -312,27 +323,46 @@ export function OnlineCurriculumBuilder({
       setUnitCode(target.code);
       setUnitName(target.name);
     }
-    const data = existingCurriculumMap[unitId];
-    if (data) {
+    const data = unitId ? existingCurriculumMap[`${documentType}:${unitId}`] : undefined;
+    if (data && data.topics && data.topics.length > 0) {
       setUnitDescription(data.unitDescription || '');
       setOverallCompetencies(data.coreLearningOutcomes || '');
       setReferences(data.references || '');
-      if (data.topics && data.topics.length > 0) {
-        setTopics(
-          data.topics.map((t, idx) => ({
-            id: String(idx + 1),
-            topicTitle: t.topicTitle,
-            subTopics: t.subTopics.join(' · '),
-          }))
-        );
-      }
+      setTopics(
+        data.topics.map((t, idx) => ({
+          id: String(idx + 1),
+          topicTitle: stripTopicFigures(t.topicTitle),
+          subTopics: t.subTopics.join(' · '),
+        }))
+      );
     } else {
-      // No saved curriculum for this unit — clear all fields
-      setUnitDescription('');
-      setOverallCompetencies('');
-      setReferences('');
-      setTopics([]);
+      // Only clear if the editor currently has no topics.
+      // If the user already uploaded or entered topics, preserve them for this newly selected unit.
+      if (topics.length === 0) {
+        setUnitDescription('');
+        setOverallCompetencies('');
+        setReferences('');
+        setTopics([]);
+      }
     }
+  };
+
+  const handleDocumentTypeChange = (nextDocumentType: CurriculumDocumentType) => {
+    setDocumentType(nextDocumentType);
+    const data = selectedUnitId
+      ? existingCurriculumMap[`${nextDocumentType}:${selectedUnitId}`]
+      : undefined;
+
+    setUnitDescription(data?.unitDescription || '');
+    setOverallCompetencies(data?.coreLearningOutcomes || '');
+    setReferences(data?.references || '');
+    setTopics(
+      (data?.topics ?? []).map((topic, index) => ({
+        id: String(index + 1),
+        topicTitle: stripTopicFigures(topic.topicTitle),
+        subTopics: topic.subTopics.join(' · '),
+      })),
+    );
   };
 
   // Word Document (.docx) Upload & Auto-Normalization
@@ -348,21 +378,47 @@ export function OnlineCurriculumBuilder({
 
       if (res.success && res.data) {
         let matchedUnitName = '';
+        let matchedUnitIdFound = '';
+
+        // 1. Try matching by unit code
         if (res.data.unitCode) {
-          setUnitCode(res.data.unitCode);
           const cleanUploaded = res.data.unitCode.toLowerCase().replace(/[^a-z0-9]/g, '');
           const matched = units.find(
             (u) => u.code.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanUploaded
           );
           if (matched) {
-            setSelectedUnitId(matched.id);
+            matchedUnitIdFound = matched.id;
             matchedUnitName = matched.name;
+            setUnitCode(matched.code);
+          } else {
+            setUnitCode(res.data.unitCode);
           }
         }
-        if (res.data.unitName) {
-          setUnitName(res.data.unitName);
-        } else if (matchedUnitName) {
+
+        // 2. If no code match, try matching by unit name
+        if (!matchedUnitIdFound && res.data.unitName) {
+          const cleanUploadedName = res.data.unitName.toLowerCase().replace(/[^a-z0-9]/g, '');
+          const matchedByName = units.find(
+            (u) => u.name.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanUploadedName
+          );
+          if (matchedByName) {
+            matchedUnitIdFound = matchedByName.id;
+            matchedUnitName = matchedByName.name;
+            setUnitCode(matchedByName.code);
+          }
+        }
+
+        // Update selectedUnitId to matched unit, or unselect so it doesn't stay on the default first unit (e.g. Communication Skills)
+        if (matchedUnitIdFound) {
+          setSelectedUnitId(matchedUnitIdFound);
+        } else {
+          setSelectedUnitId('');
+        }
+
+        if (matchedUnitName) {
           setUnitName(matchedUnitName);
+        } else if (res.data.unitName) {
+          setUnitName(res.data.unitName);
         }
 
         if (res.data.unitDescription) setUnitDescription(res.data.unitDescription);
@@ -457,13 +513,13 @@ export function OnlineCurriculumBuilder({
       if (parts.length > 1) {
         parsed.push({
           id: String(Date.now() + idx),
-          topicTitle: parts[0].trim(),
+          topicTitle: stripTopicFigures(parts[0].trim()),
           subTopics: parts.slice(1).join(' · ').trim(),
         });
       } else {
         parsed.push({
           id: String(Date.now() + idx),
-          topicTitle: cleanLine.trim(),
+          topicTitle: stripTopicFigures(cleanLine.trim()),
           subTopics: '',
         });
       }
@@ -605,6 +661,7 @@ export function OnlineCurriculumBuilder({
     setIsSaving(true);
     try {
       const payload: OnlineCurriculumPayload = {
+        documentType,
         unitId: selectedUnitId || undefined,
         unitCode: unitCode.trim().toUpperCase(),
         unitName: unitName.trim() || unitCode.trim().toUpperCase(),
@@ -637,11 +694,26 @@ export function OnlineCurriculumBuilder({
 
       <PageHeader
         eyebrow="Teaching documents"
-        title="Syllabus Editor"
-        description="Configure unit topics and preview 14-week schedules."
+        title={documentType === 'scheme_of_work' ? 'Edit Scheme of Work' : 'Edit Course Outline'}
+        description="Edit the selected unit’s curriculum document and preview its 14-week schedule."
         icon={Sparkles}
         actions={
           <div className="flex flex-wrap items-center gap-2">
+            <label className="sr-only" htmlFor="curriculum-document-type">Document type</label>
+            <select
+              id="curriculum-document-type"
+              value={documentType}
+              onChange={(event) => {
+                const nextDocumentType = event.currentTarget.value;
+                if (isCurriculumDocumentType(nextDocumentType)) {
+                  handleDocumentTypeChange(nextDocumentType);
+                }
+              }}
+              className="h-9 rounded-lg border border-border bg-white px-2.5 text-xs font-semibold text-text-primary focus:border-primary focus:outline-none"
+            >
+              <option value="course_outline">Course Outline</option>
+              <option value="scheme_of_work">Scheme of Work</option>
+            </select>
             <Link
               href="/teaching-documents/curriculum"
               className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle transition"
@@ -655,14 +727,16 @@ export function OnlineCurriculumBuilder({
               disabled={isSaving || !unitCode.trim()}
               leadingIcon={isSaving ? <LoaderCircle className="size-3.5 animate-spin" /> : <Save className="size-3.5" />}
             >
-              {isSaving ? 'Publishing...' : 'Save & Publish'}
+              {isSaving
+                ? 'Publishing...'
+                : `Publish ${documentType === 'scheme_of_work' ? 'Scheme of Work' : 'Course Outline'}`}
             </Button>
           </div>
         }
       />
 
       {/* Unit Selector & Top Controls */}
-      <Card className="p-3.5 bg-surface border-border">
+      <Card className="p-3.5 bg-surface border-border overflow-visible relative z-20">
         <div className="grid gap-3 sm:grid-cols-12 items-end">
           {units.length > 0 ? (
             <div className="sm:col-span-4">

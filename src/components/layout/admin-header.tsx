@@ -52,11 +52,11 @@ export function AdminHeader({
         ) : null}
 
         <div>
-          <h1 className="truncate text-sm font-bold tracking-tight text-teal-900 sm:text-base lg:text-lg">
+          <h1 className="truncate text-sm font-semibold tracking-tight text-text-primary sm:text-base lg:text-lg">
             {title}
           </h1>
           <p className="mt-0.5 hidden max-w-[38rem] truncate text-[0.68rem] font-medium leading-none text-text-muted sm:block">
-            {departmentLabel} <span className="mx-1 text-gray-300">•</span> {activePeriodName}
+            {departmentLabel} <span className="mx-1 text-text-subtle">•</span> {activePeriodName}
           </p>
         </div>
       </div>
@@ -120,7 +120,7 @@ export function AdminHeader({
                     onClick={() => setDropdownOpen(false)}
                     className="flex min-h-10 items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-text-secondary hover:bg-surface-subtle hover:text-text-primary"
                   >
-                    <User className="size-4 text-gray-400" />
+                    <User className="size-4 text-text-muted" />
                     <span>My Staff Workspace</span>
                   </Link>
                 </div>

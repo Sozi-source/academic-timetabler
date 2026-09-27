@@ -217,15 +217,6 @@ export default async function CurriculumContentPage() {
                             row.unitName
                           }
                         </div>
-                        <div className="mt-2">
-                          <Link
-                            href={`/teaching-documents/curriculum/editor?unitId=${row.unitId}`}
-                            className="inline-flex items-center gap-1 rounded bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary hover:bg-primary/20 transition"
-                          >
-                            <Sparkles className="size-3" />
-                            Edit Online
-                          </Link>
-                        </div>
                       </td>
 
                       {[
@@ -235,7 +226,10 @@ export default async function CurriculumContentPage() {
                         (
                           document,
                           index,
-                        ) => (
+                        ) => {
+                          const documentType = index === 0 ? 'course_outline' : 'scheme_of_work';
+
+                          return (
                           <td
                             key={
                               index
@@ -252,10 +246,10 @@ export default async function CurriculumContentPage() {
 
                                 <div className="flex flex-wrap gap-2 text-xs">
                                   <Link
-                                    href={`/teaching-documents/curriculum/editor?unitId=${row.unitId}`}
+                                    href={`/teaching-documents/curriculum/editor?unitId=${row.unitId}&documentType=${document.documentType}`}
                                     className="font-semibold text-primary hover:underline"
                                   >
-                                    Edit Online
+                                    Edit {document.documentType === 'scheme_of_work' ? 'Scheme of Work' : 'Course Outline'}
                                   </Link>
 
                                   <Link
@@ -295,12 +289,19 @@ export default async function CurriculumContentPage() {
                                 ) : null}
                               </div>
                             ) : (
-                              <span className="text-xs text-text-muted">
-                                Missing
-                              </span>
+                              <div className="flex flex-col items-start gap-2">
+                                <span className="text-xs text-text-muted">Missing</span>
+                                <Link
+                                  href={`/teaching-documents/curriculum/editor?unitId=${row.unitId}&documentType=${documentType}`}
+                                  className="font-semibold text-primary hover:underline"
+                                >
+                                  Create {documentType === 'scheme_of_work' ? 'Scheme of Work' : 'Course Outline'}
+                                </Link>
+                              </div>
                             )}
                           </td>
-                        ),
+                          );
+                        },
                       )}
                     </tr>
                   ),

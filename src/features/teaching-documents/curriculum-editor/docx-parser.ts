@@ -1,4 +1,5 @@
 import { unpackZipBuffer } from '../zip-ingestion';
+import { stripTopicFigures } from '../distribution-engine';
 
 export interface ParsedDocxSyllabus {
   unitCode?: string;
@@ -29,7 +30,7 @@ function cleanXmlString(xml: string): string {
 /**
  * Extracts structured text and tables from Word (.docx) document.xml
  */
-export function parseDocxSyllabus(docxBuffer: Buffer): ParsedDocxSyllabus {
+export function parseDocxSyllabus(docxBuffer: Buffer, fileName?: string): ParsedDocxSyllabus {
   try {
     const entries = unpackZipBuffer(docxBuffer);
     const documentXmlEntry = entries.find((e) => e.filename === 'word/document.xml');
@@ -42,7 +43,15 @@ export function parseDocxSyllabus(docxBuffer: Buffer): ParsedDocxSyllabus {
     // 1. Detect Unit Code: e.g. "DHN 2304", "NUT 101", "CLIN 201", "CND 1102"
     const codeRegex = /\b([A-Z]{2,6})\s*([0-9]{3,4}[A-Z]?)\b/i;
     const matchCode = xml.replace(/<[^>]+>/g, ' ').match(codeRegex);
-    const unitCode = matchCode ? `${matchCode[1].toUpperCase()} ${matchCode[2].toUpperCase()}` : '';
+    let unitCode = matchCode ? `${matchCode[1].toUpperCase()} ${matchCode[2].toUpperCase()}` : '';
+
+    if (!unitCode && fileName) {
+      const baseFilename = fileName.split('/').pop()?.split('\\').pop() ?? fileName;
+      const codeMatch = baseFilename.match(codeRegex);
+      if (codeMatch) {
+        unitCode = `${codeMatch[1].toUpperCase()} ${codeMatch[2].toUpperCase()}`;
+      }
+    }
 
     // 2. Detect Unit Name / Title
     let unitName = '';
@@ -50,6 +59,17 @@ export function parseDocxSyllabus(docxBuffer: Buffer): ParsedDocxSyllabus {
     const matchTitle = xml.match(titleRegex);
     if (matchTitle && matchTitle[1]) {
       unitName = cleanXmlString(matchTitle[1].replace(/<[^>]+>/g, ''));
+    } else if (fileName) {
+      const baseFilename = fileName.split('/').pop()?.split('\\').pop() ?? fileName;
+      const stripped = baseFilename
+        .replace(/\.docx$/i, '')
+        .replace(/^(?:course\s*outline|scheme\s*of\s*work|sow)\s*[-_:]?\s*/i, '')
+        .replace(/\b[A-Z]{2,6}\s*[0-9]{3,4}[A-Z]?\b/i, '')
+        .replace(/^[-_:\s]+|[-_:\s]+$/g, '')
+        .trim();
+      if (stripped.length > 2) {
+        unitName = stripped;
+      }
     }
 
     // 3. Extract plain-text paragraphs for metadata extraction
@@ -180,7 +200,7 @@ export function parseDocxSyllabus(docxBuffer: Buffer): ParsedDocxSyllabus {
             }
 
             const subTopics = validSubtopicParts.join(' · ');
-            tableTopics.push({ topicTitle: cleanXmlString(topicTitle), subTopics });
+            tableTopics.push({ topicTitle: stripTopicFigures(cleanXmlString(topicTitle)), subTopics });
           }
         }
       }
@@ -245,7 +265,7 @@ export function parseDocxSyllabus(docxBuffer: Buffer): ParsedDocxSyllabus {
 
     if (currentTopic) {
       listTopics.push({
-        topicTitle: currentTopic.topicTitle,
+        topicTitle: stripTopicFigures(currentTopic.topicTitle),
         subTopics: currentTopic.subTopicsList.join(' · '),
       });
     }

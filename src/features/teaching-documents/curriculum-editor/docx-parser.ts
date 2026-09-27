@@ -174,6 +174,13 @@ export function parseDocxSyllabus(docxBuffer: Buffer, fileName?: string): Parsed
       if (/^\d+\s*(?:[-–—&,]\s*\d+)?$/.test(t)) return false;
       // Reject bare "Week 3", "Wk 4", "Lesson 2", "Session 1" style labels.
       if (/^(?:week|wk|lesson|session)\s*\d*$/i.test(t)) return false;
+      // Reject document metadata and administrative header rows often found in Word tables
+      if (
+        /^(?:name\s+of\s+trainer|trainer(?:\s*name)?|instructor|institution|college|department|level|class|date\s+of\s+preparation|date\s+of\s+revision|revision\s+date|preparation\s+date|number\s+of\s+trainees|trainees\s+count|academic\s+year|term|intake|course\s+code|unit\s+code|unit\s+name|training\s+number)\s*[:=-]/i.test(t) ||
+        /^(?:name\s+of\s+trainer|date\s+of\s+preparation|number\s+of\s+trainees|institution\s*:|level\s*:\s*\d|training\s+number\s*:)/i.test(t)
+      ) {
+        return false;
+      }
       // Require a minimum amount of actual alphabetic content.
       return t.replace(/[^a-zA-Z]/g, '').length >= 3;
     }

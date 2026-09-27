@@ -12,6 +12,7 @@ import {
   Loader2,
   UploadCloud,
   FileSpreadsheet,
+  BookOpenCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -207,8 +208,8 @@ export function IndividualUploadForm({
     <div className="space-y-5">
       <PageHeader
         eyebrow="Teaching documents"
-        title="Individual Curriculum Upload"
-        description="Upload a single Word (.docx) or Excel (.xlsx) course outline or scheme of work."
+        title="Course Outline Upload"
+        description="Upload a Word (.docx) or Excel (.xlsx) course outline. The 14-week TVET Scheme of Work is automatically synthesized from this syllabus."
         icon={FileUp}
         backHref="/teaching-documents/curriculum"
         backLabel="Curriculum Content"
@@ -261,6 +262,15 @@ export function IndividualUploadForm({
         </div>
       )}
 
+      {/* Helper Banner */}
+      <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5 flex items-start gap-2.5 text-xs text-text-secondary">
+        <BookOpenCheck className="size-4 text-primary shrink-0 mt-0.5" />
+        <div>
+          <span className="font-semibold text-text-primary">Single Upload Workflow: </span>
+          Uploading a Course Outline establishes the official master syllabus. The 14-week Scheme of Work, session distributions, and CAT/exam milestones are automatically generated from it — zero separate scheme upload required.
+        </div>
+      </div>
+
       {/* Target Unit and Document Type Selection Card */}
       <Card className="p-4 bg-surface border-border overflow-visible relative z-20">
         <div className="grid gap-4 sm:grid-cols-12 items-end">
@@ -278,8 +288,8 @@ export function IndividualUploadForm({
               }}
               className="w-full h-10 rounded-xl border border-border bg-white px-3 text-xs font-semibold text-text-primary focus:border-primary focus:outline-none"
             >
-              <option value="course_outline">Course Outline</option>
-              <option value="scheme_of_work">Scheme of Work</option>
+              <option value="course_outline">Course Outline (Master Syllabus)</option>
+              <option value="scheme_of_work">Scheme of Work (Custom Override)</option>
             </select>
           </div>
 

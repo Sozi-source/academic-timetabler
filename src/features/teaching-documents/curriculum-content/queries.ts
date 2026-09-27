@@ -23,10 +23,25 @@ function isMismatchedPayload(targetName: string | undefined, payload: any): bool
   const desc = String(payload.unit?.unitDescription || payload.unitDescription || '').toLowerCase();
   const firstTopic = String(payload.content?.[0]?.topic || '').toLowerCase();
   const payloadName = String(payload.unit?.unitName || payload.unitName || '');
+  const familyKey = String(payload.unit?.contentFamilyKey || payload.contentFamilyKey || '');
+
+  // If payload defines a contentFamilyKey and it is incompatible with targetName, reject as mismatch
+  if (familyKey && !isCompatibleUnitTitle(targetName, familyKey)) {
+    return true;
+  }
 
   // If payload defines a unitName and it is incompatible with targetName, reject as mismatch
   if (payloadName && !isCompatibleUnitTitle(targetName, payloadName)) {
     return true;
+  }
+
+  // If first topic has an "Introduction to <Domain>" structure, verify that domain is compatible
+  const matchIntro = firstTopic.match(/(?:introduction\s+to|overview\s+of|fundamentals\s+of|concept\s+of)\s+([^,;.]+)/i);
+  if (matchIntro && matchIntro[1]) {
+    const introDomain = matchIntro[1].trim();
+    if (introDomain.length > 4 && !isCompatibleUnitTitle(targetName, introDomain)) {
+      return true;
+    }
   }
 
   // If target unit is Agricultural Production / Agriculture, but payload is about Food Security
@@ -50,6 +65,29 @@ function isMismatchedPayload(targetName: string | undefined, payload: any): bool
   if (!lowTarget.includes('biochem') && (desc.includes('intermediate metabolism') || firstTopic.includes('biochemistry'))) {
     return true;
   }
+
+  // If target unit is Biochemistry, but payload does not mention biochemistry and talks about unrelated domains
+  if (
+    lowTarget.includes('biochem') &&
+    !firstTopic.includes('biochem') &&
+    !firstTopic.includes('metabolism') &&
+    !firstTopic.includes('enzyme') &&
+    !firstTopic.includes('carbohydrate') &&
+    !firstTopic.includes('protein') &&
+    !firstTopic.includes('lipid') &&
+    !desc.includes('biochem') &&
+    !desc.includes('metabolism') &&
+    (firstTopic.includes('lifespan') ||
+      firstTopic.includes('security') ||
+      firstTopic.includes('anthropology') ||
+      firstTopic.includes('maternal') ||
+      firstTopic.includes('child') ||
+      firstTopic.includes('hygiene') ||
+      firstTopic.includes('primary health'))
+  ) {
+    return true;
+  }
+
   // If target unit is NOT communication, but payload is about communication skills
   if (!lowTarget.includes('communication') && !lowTarget.includes('ict') && firstTopic.includes('communication process')) {
     return true;
@@ -298,51 +336,60 @@ export const getApprovedCurriculumForUnitCode = cache(
       try {
         const { data: versions } = await supabase
           .from('curriculum_document_versions' as any)
-          .select('payload,document_type')
+          .select('payload,document_type,created_at')
           .eq('unit_id', unitId)
-          .eq('document_type', documentType)
           .eq('status', 'active')
           .order('created_at', { ascending: false });
 
         if (versions && versions.length > 0) {
-          const firstVer = versions[0];
-          const payload = firstVer.payload as any;
-          if (payload && Array.isArray(payload.content) && payload.content.length > 0) {
+          // Sort to prioritize exact documentType match, with course_outline as primary master syllabus
+          const sortedVersions = [...versions].sort((a, b) => {
+            if (a.document_type === documentType && b.document_type !== documentType) return -1;
+            if (b.document_type === documentType && a.document_type !== documentType) return 1;
+            if (a.document_type === 'course_outline' && b.document_type !== 'course_outline') return -1;
+            if (b.document_type === 'course_outline' && a.document_type !== 'course_outline') return 1;
+            return 0;
+          });
+
+          for (const ver of sortedVersions) {
+            const payload = ver.payload as any;
+            if (!payload || !Array.isArray(payload.content) || payload.content.length === 0) continue;
+            if (isMismatchedPayload(resolvedName || unitName, payload)) continue;
+
             const unitMeta = payload.unit || {};
             const docCodeKey = cleanKey(unitMeta.unitCode);
             const docNameKey = cleanKey(unitMeta.unitName);
 
-            // Strict validation: Must match target unit code or name and must NOT be mismatched payload
-            if (
-              (!docCodeKey ||
-                docCodeKey === targetKey ||
-                (targetNameKey && docNameKey === targetNameKey)) &&
-              !isMismatchedPayload(resolvedName || unitName, payload)
-            ) {
-              return enrichWithCanonical({
-                unitCode: unitMeta.unitCode || resolvedCode,
-                unitName: unitMeta.unitName || resolvedName,
-                unitDescription: unitMeta.unitDescription || undefined,
-                overallCompetency: unitMeta.coreLearningOutcomes || undefined,
-                learningOutcomes: unitMeta.coreLearningOutcomes
-                  ? [unitMeta.coreLearningOutcomes]
-                  : [],
-                teachingLearningApproaches: unitMeta.teachingLearningApproaches || undefined,
-                assessmentApproaches: unitMeta.assessmentApproaches || undefined,
-                references: cleanReferenceList(unitMeta.referencesResources, resolvedCode, resolvedName),
-                weeklySchedule: payload.content.map((row: any, idx: number) => ({
-                  weekNumber: row.sourceWeek || row.sequence || (idx + 1),
-                  topicTitle: row.topic || `Topic ${idx + 1}`,
-                  subTopics: row.coverage
-                    ? String(row.coverage).split(/\s*[·;]\s*/).filter(Boolean)
-                    : row.topic ? [row.topic] : [],
-                  specificLearningOutcomes: row.learningOutcomes || undefined,
-                  learningActivities: row.activities || undefined,
-                  resourcesAndReferences: cleanResourceField(row.resources),
-                  assessmentAndRemarks: row.assessment || undefined,
-                })),
-              }, resolvedCode || unitCode, resolvedName || unitName, true);
+            // Reject if unitCode explicitly contradicts
+            if (docCodeKey && targetKey && docCodeKey !== targetKey) {
+              if (!targetNameKey || !docNameKey || docNameKey !== targetNameKey) {
+                continue;
+              }
             }
+
+            return enrichWithCanonical({
+              unitCode: unitMeta.unitCode || resolvedCode,
+              unitName: unitMeta.unitName || resolvedName,
+              unitDescription: unitMeta.unitDescription || undefined,
+              overallCompetency: unitMeta.coreLearningOutcomes || undefined,
+              learningOutcomes: unitMeta.coreLearningOutcomes
+                ? [unitMeta.coreLearningOutcomes]
+                : [],
+              teachingLearningApproaches: unitMeta.teachingLearningApproaches || undefined,
+              assessmentApproaches: unitMeta.assessmentApproaches || undefined,
+              references: cleanReferenceList(unitMeta.referencesResources, resolvedCode, resolvedName),
+              weeklySchedule: payload.content.map((row: any, idx: number) => ({
+                weekNumber: row.sourceWeek || row.sequence || (idx + 1),
+                topicTitle: row.topic || `Topic ${idx + 1}`,
+                subTopics: row.coverage
+                  ? String(row.coverage).split(/\s*[·;]\s*/).filter(Boolean)
+                  : row.topic ? [row.topic] : [],
+                specificLearningOutcomes: row.learningOutcomes || undefined,
+                learningActivities: row.activities || undefined,
+                resourcesAndReferences: cleanResourceField(row.resources),
+                assessmentAndRemarks: row.assessment || undefined,
+              })),
+            }, resolvedCode || unitCode, resolvedName || unitName, true);
           }
         }
       } catch (err) {
@@ -376,6 +423,14 @@ export const getApprovedCurriculumForUnitCode = cache(
             });
 
             if (matchedUnitEntry && matchedUnitEntry.sourceUnitKey) {
+              // Ensure matched unit entry itself is not mismatched
+              if (
+                isMismatchedPayload(resolvedName || unitName, matchedUnitEntry) ||
+                (matchedUnitEntry.sourceUnitName && !isCompatibleUnitTitle(resolvedName || unitName, matchedUnitEntry.sourceUnitName))
+              ) {
+                continue;
+              }
+
               const unitContent = payload.content.filter(
                 (c: any) =>
                   c.sourceUnitKey === matchedUnitEntry.sourceUnitKey &&
@@ -383,6 +438,14 @@ export const getApprovedCurriculumForUnitCode = cache(
               );
 
               if (unitContent.length > 0) {
+                const samplePayload = {
+                  unit: matchedUnitEntry,
+                  content: unitContent,
+                };
+                if (isMismatchedPayload(resolvedName || unitName, samplePayload)) {
+                  continue;
+                }
+
                 return enrichWithCanonical({
                   unitCode: matchedUnitEntry.matchedUnitCode || matchedUnitEntry.sourceUnitCode || resolvedCode,
                   unitName: matchedUnitEntry.matchedUnitName || matchedUnitEntry.sourceUnitName || resolvedName,

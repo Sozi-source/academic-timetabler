@@ -2,6 +2,7 @@ import {
   BookOpenCheck,
   UploadCloud,
   FileUp,
+  CheckCircle2,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -232,90 +233,117 @@ export default async function CurriculumContentPage() {
                         </div>
                       </td>
 
-                      {[
-                        row.courseOutline,
-                        row.scheme,
-                      ].map(
-                        (
-                          document,
-                          index,
-                        ) => {
-                          const documentType = index === 0 ? 'course_outline' : 'scheme_of_work';
+                      {/* Course Outline Column (Master Syllabus) */}
+                      <td className="px-4 py-4">
+                        {row.courseOutline ? (
+                          <div className="space-y-2">
+                            <div className="text-xs font-semibold text-success">
+                              v{row.courseOutline.versionNumber} Active
+                            </div>
 
-                          return (
-                          <td
-                            key={
-                              index
-                            }
-                            className="px-4 py-4"
-                          >
-                            {document ? (
-                              <div className="space-y-2">
-                                <div className="text-xs font-semibold text-success">
-                                  v{
-                                    document.versionNumber
-                                  } Active
-                                </div>
+                            <div className="flex flex-wrap gap-2 text-xs">
+                              <Link
+                                href={`/teaching-documents/curriculum/individual-upload?unitId=${row.unitId}&documentType=course_outline`}
+                                className="font-semibold text-primary hover:underline"
+                              >
+                                Replace Course Outline
+                              </Link>
 
-                                <div className="flex flex-wrap gap-2 text-xs">
-                                  <Link
-                                    href={`/teaching-documents/curriculum/individual-upload?unitId=${row.unitId}&documentType=${document.documentType}`}
-                                    className="font-semibold text-primary hover:underline"
-                                  >
-                                    Replace {document.documentType === 'scheme_of_work' ? 'Scheme of Work' : 'Course Outline'}
-                                  </Link>
+                              <Link
+                                href={`/teaching-documents/curriculum/library/${row.unitId}/course_outline`}
+                                className="font-semibold text-text-secondary hover:underline"
+                              >
+                                History
+                              </Link>
 
-                                  <Link
-                                    href={`/teaching-documents/curriculum/library/${row.unitId}/${document.documentType}`}
-                                    className="font-semibold text-text-secondary hover:underline"
-                                  >
-                                    History
-                                  </Link>
-
-                                  <form
-                                    action={
-                                      retireCurriculumDocumentV54
-                                    }
-                                  >
-                                    <input
-                                      type="hidden"
-                                      name="documentId"
-                                      value={
-                                        document.id
-                                      }
-                                    />
-                                    <button
-                                      type="submit"
-                                      className="font-semibold text-text-muted hover:text-danger"
-                                    >
-                                      Retire
-                                    </button>
-                                  </form>
-                                </div>
-
-                                {document.sourceFileName ? (
-                                  <div className="max-w-[260px] truncate text-[10px] text-text-muted">
-                                    {
-                                      document.sourceFileName
-                                    }
-                                  </div>
-                                ) : null}
-                              </div>
-                            ) : (
-                              <div className="flex flex-col items-start gap-2">
-                                <span className="text-xs text-text-muted">Missing</span>
-                                <Link
-                                  href={`/teaching-documents/curriculum/individual-upload?unitId=${row.unitId}&documentType=${documentType}`}
-                                  className="font-semibold text-primary hover:underline"
+                              <form action={retireCurriculumDocumentV54}>
+                                <input
+                                  type="hidden"
+                                  name="documentId"
+                                  value={row.courseOutline.id}
+                                />
+                                <button
+                                  type="submit"
+                                  className="font-semibold text-text-muted hover:text-danger"
                                 >
-                                  Upload {documentType === 'scheme_of_work' ? 'Scheme of Work' : 'Course Outline'}
-                                </Link>
+                                  Retire
+                                </button>
+                              </form>
+                            </div>
+
+                            {row.courseOutline.sourceFileName ? (
+                              <div className="max-w-[260px] truncate text-[10px] text-text-muted">
+                                {row.courseOutline.sourceFileName}
                               </div>
-                            )}
-                          </td>
-                          );
-                        },
-                      )}
+                            ) : null}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-start gap-2">
+                            <span className="text-xs text-text-muted">Missing</span>
+                            <Link
+                              href={`/teaching-documents/curriculum/individual-upload?unitId=${row.unitId}&documentType=course_outline`}
+                              className="font-semibold text-primary hover:underline"
+                            >
+                              Upload Course Outline
+                            </Link>
+                          </div>
+                        )}
+                      </td>
+
+                      {/* 14-Week Scheme of Work Column (Auto-Generated from Course Outline) */}
+                      <td className="px-4 py-4">
+                        {row.scheme ? (
+                          <div className="space-y-2">
+                            <div className="text-xs font-semibold text-primary">
+                              v{row.scheme.versionNumber} Custom Scheme
+                            </div>
+
+                            <div className="flex flex-wrap gap-2 text-xs">
+                              <Link
+                                href={`/teaching-documents/curriculum/library/${row.unitId}/scheme_of_work`}
+                                className="font-semibold text-text-secondary hover:underline"
+                              >
+                                History
+                              </Link>
+
+                              <form action={retireCurriculumDocumentV54}>
+                                <input
+                                  type="hidden"
+                                  name="documentId"
+                                  value={row.scheme.id}
+                                />
+                                <button
+                                  type="submit"
+                                  className="font-semibold text-text-muted hover:text-danger"
+                                  title="Retire custom scheme to use auto-generated scheme from Course Outline"
+                                >
+                                  Retire Custom
+                                </button>
+                              </form>
+                            </div>
+
+                            {row.scheme.sourceFileName ? (
+                              <div className="max-w-[260px] truncate text-[10px] text-text-muted">
+                                {row.scheme.sourceFileName}
+                              </div>
+                            ) : null}
+                          </div>
+                        ) : row.courseOutline ? (
+                          <div className="space-y-1.5">
+                            <div className="inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700 border border-emerald-200">
+                              <CheckCircle2 className="size-3 text-emerald-600 shrink-0" />
+                              Auto-Generated (Ready)
+                            </div>
+                            <div className="text-[11px] text-text-muted">
+                              14-week schedule derived from v{row.courseOutline.versionNumber} Course Outline with CAT & exam milestones
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-xs text-text-muted">
+                            Requires Course Outline
+                          </div>
+                        )}
+                      </td>
                     </tr>
                   ),
                 )}

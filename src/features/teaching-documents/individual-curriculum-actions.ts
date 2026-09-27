@@ -437,4 +437,8 @@ export async function publishIndividualCurriculumAction(
 }
 
 // Backward-compatibility aliases
-export const saveOnlineCurriculumAction = publishIndividualCurriculumAction;
+export async function saveOnlineCurriculumAction(
+  payload: IndividualCurriculumPayload,
+) {
+  return publishIndividualCurriculumAction(payload);
+}

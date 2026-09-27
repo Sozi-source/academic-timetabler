@@ -10,7 +10,7 @@ import {
 } from '@/features/teaching-documents/curriculum-document-types';
 import {
   normalizeUnitCodeKey,
-  TVET_CURRICULUM_REGISTRY,
+  getAllCurriculumUnits,
 } from '@/features/teaching-documents/curriculum-registry';
 
 interface PageProps {
@@ -33,8 +33,8 @@ export default async function IndividualUploadPage({ searchParams }: PageProps) 
     ? docTypeStr
     : 'course_outline';
 
-  let activeUnits: SystemUnitOption[] = [];
-
+  // 1. Fetch DB units for active department
+  let dbUnits: SystemUnitOption[] = [];
   if (profile.activeDepartmentId) {
     try {
       const admin = createAdminClient();
@@ -44,42 +44,52 @@ export default async function IndividualUploadPage({ searchParams }: PageProps) 
         .eq('department_id', profile.activeDepartmentId)
         .order('code', { ascending: true });
 
-      activeUnits = (unitsData ?? [])
+      dbUnits = (unitsData ?? [])
         .filter((u) => u.is_active !== false && Boolean(u.code))
-        .sort((a, b) => (a.code || '').localeCompare(b.code || ''))
         .map((u) => ({
           id: u.id,
-          code: u.code || '',
-          name: u.name || u.code || '',
+          code: (u.code || '').trim().toUpperCase(),
+          name: (u.name || u.code || '').trim(),
         }));
     } catch {
-      activeUnits = [];
+      dbUnits = [];
     }
   }
 
-  // Fallback to curriculum registry entries if department has no loaded units yet
-  if (activeUnits.length === 0) {
-    const seenCodes = new Set<string>();
-    const regUnits: SystemUnitOption[] = [];
-    for (const [codeKey, meta] of Object.entries(TVET_CURRICULUM_REGISTRY)) {
-      const uCode = (meta?.unitCode || codeKey).trim().toUpperCase();
-      if (!seenCodes.has(uCode)) {
-        seenCodes.add(uCode);
-        regUnits.push({
-          id: `reg-${normalizeUnitCodeKey(uCode)}`,
-          code: uCode,
-          name: meta?.unitName || uCode,
-        });
-      }
+  // 2. Master curriculum registry units (guarantees all 43 TVET department units are always available)
+  const canonicalUnits: SystemUnitOption[] = getAllCurriculumUnits().map((u) => ({
+    id: `canonical-${u.canonicalKey}`,
+    code: u.unitCode.trim().toUpperCase(),
+    name: u.unitName.trim(),
+  }));
+
+  // 3. Merge: DB units take priority, add canonical units if not already in DB
+  const seenCodes = new Set<string>();
+  const activeUnits: SystemUnitOption[] = [];
+
+  for (const u of dbUnits) {
+    const key = normalizeUnitCodeKey(u.code);
+    if (!seenCodes.has(key)) {
+      seenCodes.add(key);
+      activeUnits.push(u);
     }
-    activeUnits = regUnits;
   }
 
-  // Match unitId from unitCode if unitId wasn't passed directly
+  for (const u of canonicalUnits) {
+    const key = normalizeUnitCodeKey(u.code);
+    if (!seenCodes.has(key)) {
+      seenCodes.add(key);
+      activeUnits.push(u);
+    }
+  }
+
+  activeUnits.sort((a, b) => a.code.localeCompare(b.code));
+
+  // 4. Resolve initial unit selection if unitId or unitCode was provided
   let resolvedUnitId = unitId;
   if (!resolvedUnitId && unitCode) {
     const matched = activeUnits.find(
-      (u) => (u.code || '').toLowerCase() === unitCode.toLowerCase()
+      (u) => normalizeUnitCodeKey(u.code) === normalizeUnitCodeKey(unitCode)
     );
     if (matched) {
       resolvedUnitId = matched.id;

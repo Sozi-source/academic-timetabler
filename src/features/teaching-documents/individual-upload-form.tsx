@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useRef, useMemo, useEffect } from 'react';
+import { useState, useTransition, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -10,17 +10,12 @@ import {
   FileUp,
   FileText,
   Loader2,
-  Search,
-  ChevronsUpDown,
-  Check,
-  X,
   UploadCloud,
   FileSpreadsheet,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
-import { cn } from '@/lib/utils/cn';
 import {
   parseIndividualCurriculumAction,
   publishIndividualCurriculumAction,
@@ -41,181 +36,6 @@ interface IndividualUploadFormProps {
   units: SystemUnitOption[];
   initialUnitId?: string;
   initialDocumentType: CurriculumDocumentType;
-}
-
-/** Searchable Unit Selector allowing users to filter and select units */
-function SearchableUnitSelect({
-  units,
-  selectedUnitId,
-  onSelectUnit,
-}: {
-  units: SystemUnitOption[];
-  selectedUnitId: string;
-  onSelectUnit: (unitId: string) => void;
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const containerRef = useRef<HTMLDivElement>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-
-  const selectedUnit = useMemo(
-    () => units.find((u) => u.id === selectedUnitId),
-    [units, selectedUnitId]
-  );
-
-  const filteredUnits = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return units;
-    return units.filter(
-      (u) =>
-        (u.code || '').toLowerCase().includes(q) ||
-        (u.name || '').toLowerCase().includes(q)
-    );
-  }, [units, searchQuery]);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleOpen = () => {
-    setIsOpen((prev) => {
-      const next = !prev;
-      if (next) {
-        setTimeout(() => searchInputRef.current?.focus(), 50);
-      }
-      return next;
-    });
-  };
-
-  return (
-    <div className="relative" ref={containerRef}>
-      <label className="block text-[10px] font-bold uppercase tracking-wider text-text-muted mb-1">
-        Target Department Unit
-      </label>
-
-      <button
-        type="button"
-        onClick={handleOpen}
-        className="flex h-10 w-full items-center justify-between gap-2 rounded-xl border border-border bg-white px-3 text-left text-xs font-semibold text-text-primary shadow-xs hover:border-border-strong focus:border-primary focus:outline-none transition"
-      >
-        <span className="truncate">
-          {selectedUnit ? (
-            <span className="flex items-center gap-2 truncate">
-              <span className="shrink-0 rounded bg-slate-100 px-2 py-0.5 text-[11px] font-black text-slate-800">
-                {selectedUnit.code}
-              </span>
-              <span className="truncate font-medium text-slate-700">{selectedUnit.name}</span>
-            </span>
-          ) : (
-            <span className="text-text-muted italic">+ Custom / Unlisted Unit</span>
-          )}
-        </span>
-        <ChevronsUpDown className="size-4 shrink-0 text-text-muted" />
-      </button>
-
-      {isOpen && (
-        <div className="absolute left-0 top-full z-50 mt-1 w-full min-w-[280px] sm:min-w-[360px] rounded-xl border border-slate-300 bg-white p-2 shadow-2xl animate-in fade-in-0 zoom-in-95">
-          <div className="relative mb-2">
-            <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-slate-400" />
-            <input
-              ref={searchInputRef}
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search code or title (e.g. DHN, Anatomy)..."
-              className="h-8 w-full rounded-lg border border-slate-200 bg-slate-50 pl-8 pr-7 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:border-slate-800 focus:bg-white focus:outline-none"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
-              >
-                <X className="size-3.5" />
-              </button>
-            )}
-          </div>
-
-          <div className="max-h-60 overflow-y-auto space-y-1 text-xs">
-            <button
-              type="button"
-              onClick={() => {
-                onSelectUnit('');
-                setIsOpen(false);
-                setSearchQuery('');
-              }}
-              className={cn(
-                'flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left transition',
-                !selectedUnitId ? 'bg-slate-100 text-slate-900 font-bold' : 'hover:bg-slate-50 text-slate-600'
-              )}
-            >
-              <span>+ Custom / Unlisted Unit</span>
-              {!selectedUnitId && <Check className="size-3.5 text-slate-900" />}
-            </button>
-
-            <div className="border-t border-slate-100 my-1" />
-
-            {filteredUnits.length === 0 ? (
-              <div className="p-3 text-center text-xs text-slate-500">
-                No units match &quot;{searchQuery}&quot;
-              </div>
-            ) : (
-              filteredUnits.map((u) => {
-                const isSelected = u.id === selectedUnitId;
-                return (
-                  <button
-                    key={u.id}
-                    type="button"
-                    onClick={() => {
-                      onSelectUnit(u.id);
-                      setIsOpen(false);
-                      setSearchQuery('');
-                    }}
-                    className={cn(
-                      'flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-left transition',
-                      isSelected ? 'bg-slate-900 text-white font-bold' : 'hover:bg-slate-100 text-slate-900'
-                    )}
-                  >
-                    <div className="flex items-center gap-2 truncate">
-                      <span
-                        className={cn(
-                          'shrink-0 rounded px-1.5 py-0.5 text-[10px] font-black',
-                          isSelected ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-800'
-                        )}
-                      >
-                        {u.code}
-                      </span>
-                      <span className="truncate text-xs">{u.name}</span>
-                    </div>
-                    {isSelected && <Check className="size-3.5 shrink-0 text-white" />}
-                  </button>
-                );
-              })
-            )}
-          </div>
-
-          <div className="mt-2 border-t border-slate-100 pt-1.5 px-1 text-[10px] text-slate-500 flex justify-between">
-            <span>{filteredUnits.length} units available</span>
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="text-slate-800 hover:underline font-semibold"
-              >
-                Clear search
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
 }
 
 export function IndividualUploadForm({
@@ -252,6 +72,7 @@ export function IndividualUploadForm({
 
   const handleUnitSelect = (unitId: string) => {
     setSelectedUnitId(unitId);
+    if (!unitId) return;
     const target = units.find((u) => u.id === unitId);
     if (target) {
       setUnitCode(target.code);
@@ -447,11 +268,21 @@ export function IndividualUploadForm({
           </div>
 
           <div className="sm:col-span-5">
-            <SearchableUnitSelect
-              units={units}
-              selectedUnitId={selectedUnitId}
-              onSelectUnit={handleUnitSelect}
-            />
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-text-muted mb-1">
+              Target Department Unit
+            </label>
+            <select
+              value={selectedUnitId}
+              onChange={(e) => handleUnitSelect(e.target.value)}
+              className="w-full h-10 rounded-xl border border-border bg-white px-3 text-xs font-semibold text-text-primary focus:border-primary focus:outline-none"
+            >
+              <option value="">+ Custom / Unlisted Unit</option>
+              {units.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.code} — {u.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="sm:col-span-2">

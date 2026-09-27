@@ -52,7 +52,7 @@ export default async function IndividualUploadPage({ searchParams }: PageProps) 
     activeUnits = Object.entries(TVET_CURRICULUM_REGISTRY).map(([code, meta]) => ({
       id: `reg-${code}`,
       code,
-      name: meta.title,
+      name: meta.unitName,
     }));
   }
 

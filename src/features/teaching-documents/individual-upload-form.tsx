@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Combobox, type ComboboxOption } from '@/components/ui/combobox';
 import { PageHeader } from '@/components/ui/page-header';
 import {
   parseIndividualCurriculumAction,
@@ -53,6 +54,21 @@ export function IndividualUploadForm({
     () => units.find((u) => u.id === initialUnitId),
     [units, initialUnitId]
   );
+
+  const unitComboboxOptions = useMemo<ComboboxOption[]>(() => {
+    return [
+      {
+        value: '',
+        label: '+ Custom / Unlisted Unit',
+        description: 'Manual unit code & title entry',
+      },
+      ...units.map((u) => ({
+        value: u.id,
+        label: `${u.code} — ${u.name}`,
+        description: u.code,
+      })),
+    ];
+  }, [units]);
 
   const [unitCode, setUnitCode] = useState<string>(matchedInitial?.code || '');
   const [unitName, setUnitName] = useState<string>(matchedInitial?.name || '');
@@ -271,18 +287,15 @@ export function IndividualUploadForm({
             <label className="block text-[10px] font-bold uppercase tracking-wider text-text-muted mb-1">
               Target Department Unit
             </label>
-            <select
+            <Combobox
+              options={unitComboboxOptions}
               value={selectedUnitId}
-              onChange={(e) => handleUnitSelect(e.target.value)}
-              className="w-full h-10 rounded-xl border border-border bg-white px-3 text-xs font-semibold text-text-primary focus:border-primary focus:outline-none"
-            >
-              <option value="">+ Custom / Unlisted Unit</option>
-              {units.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.code} — {u.name}
-                </option>
-              ))}
-            </select>
+              onValueChange={handleUnitSelect}
+              placeholder="Search or select department unit..."
+              searchPlaceholder="Type code or unit name to search..."
+              emptyMessage="No matching units found."
+              className="h-10 text-xs rounded-xl bg-white border-border shadow-none"
+            />
           </div>
 
           <div className="sm:col-span-2">

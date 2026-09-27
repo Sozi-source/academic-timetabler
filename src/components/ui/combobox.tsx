@@ -29,6 +29,7 @@ interface ComboboxProps {
   emptyMessage?: string;
   disabled?: boolean;
   name?: string;
+  className?: string;
 }
 
 export function Combobox({
@@ -40,6 +41,7 @@ export function Combobox({
   emptyMessage = 'No matching options.',
   disabled = false,
   name,
+  className,
 }: ComboboxProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -84,6 +86,7 @@ export function Combobox({
             'hover:border-focus-border',
             'focus-visible:border-focus-border focus-visible:ring-4 focus-visible:ring-focus-ring/25',
             'disabled:cursor-not-allowed disabled:bg-surface-muted disabled:text-text-muted',
+            className,
           )}
         >
           <span
@@ -107,22 +110,23 @@ export function Combobox({
           <PopoverPrimitive.Content
             align="start"
             sideOffset={6}
-            className="z-50 w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-xl border border-border bg-surface shadow-md"
+            className="z-50 w-[var(--radix-popover-trigger-width)] min-w-[280px] sm:min-w-[340px] overflow-hidden rounded-xl border border-border bg-white shadow-xl"
           >
-            <div className="flex items-center gap-2 border-b border-border px-3">
+            <div className="flex items-center gap-2 border-b border-border px-3 bg-surface-subtle/50">
               <Search
-                className="size-4 text-text-muted"
+                className="size-4 text-text-muted shrink-0"
                 aria-hidden="true"
               />
 
               <input
                 type="search"
+                autoFocus
                 value={query}
                 onChange={(event) => {
                   setQuery(event.target.value);
                 }}
                 placeholder={searchPlaceholder}
-                className="h-11 w-full bg-transparent text-sm text-text-primary outline-none placeholder:text-text-subtle"
+                className="h-10 w-full bg-transparent text-xs text-text-primary outline-none placeholder:text-text-subtle"
               />
             </div>
 

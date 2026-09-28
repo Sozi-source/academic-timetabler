@@ -1,3 +1,15 @@
+### 2026-09-28: Implemented Trainer Confirm & Submit UI and HOD Review Integration
+
+**Summary:** Implemented the end-to-end trainer confirmation, submission, and status-tracking workflow for TVET Course Outlines and Schemes of Work. Trainers viewing their allocated unit documents (`/staff/units/[allocationId]/documents/course-outline` and `.../scheme-of-work`) now have a prominent "Confirm & Submit for Review" action with a modal confirmation step. When submitted, the system compiles the official `.docx` via `buildTVETDocumentDocx`, securely stores the file in `teaching-documents-private` storage, logs an immutable revision in `teaching_document_revisions`, logs the submission in `teaching_document_submissions`, and creates/updates `teaching_documents` with `status: 'submitted'`. The document immediately enters the HOD review queue (`/teaching-documents/review`). Upon HOD approval, it becomes available in the QA export pack (`/teaching-documents/qa-export`) organized by trainer folders. Added real-time status banners and badges (Draft, Submitted/In Review, Approved by HOD, Returned with Correction Note) to both the document viewers and the unit documents hub (`/staff/units/[allocationId]/documents`).
+
+**Files changed:**
+- `src/features/teaching-documents/trainer-submission-actions.ts` — Created server actions `submitTrainerTeachingDocumentAction`, `getTeachingDocumentAllocationStatus`, and `getAllTeachingDocumentStatusesForAllocation`.
+- `src/features/teaching-documents/tvet-document-viewer.tsx` — Added Confirm & Submit button, resubmit handler, status notice banners (Approved, Submitted, Returned), and interactive confirmation modal dialog.
+- `src/app/(staff)/staff/units/[allocationId]/documents/course-outline/page.tsx` — Fetched live document status and passed `initialStatus` to viewer.
+- `src/app/(staff)/staff/units/[allocationId]/documents/scheme-of-work/page.tsx` — Fetched live document status and passed `initialStatus` to viewer.
+- `src/app/(staff)/staff/units/[allocationId]/documents/page.tsx` — Updated teaching documents card grid to display live status badges and direct Confirm & Submit / Resubmit action buttons.
+- `supabase/migrations/20260928050000_enable_tvet_document_confirm_and_submit.sql` — Migration ensuring default standard TVET template rows exist and relaxing template constraint.
+
 ### 2026-09-28: Fixed PageHeader Action Button Squishing and Layout Wrapping
 
 **Summary:** Resolved a flexbox layout bug where lengthy page titles and descriptions in `PageHeader` exerted compression on the right-hand actions container, causing the secondary navigation button ("Bulk Upload") to severely squish and wrap into multiline vertical text. Added `flex-1 min-w-0` to the header title container and `shrink-0` to the actions container, enforced `shrink-0 whitespace-nowrap` on action buttons and links in `individual-upload-form.tsx` and `bulk-upload-view.tsx`, and changed the verbose "Switch to Bulk Upload" label to "Bulk Upload".

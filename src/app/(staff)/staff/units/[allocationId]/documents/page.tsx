@@ -17,6 +17,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { requireTrainerAccess } from '@/features/auth/authorization';
 import { requireStaffAllocation } from '@/features/staff-assessment/queries';
 import { getRecordOfWorkContext } from '@/features/teaching-documents/record-of-work-online/queries';
+import { getAllTeachingDocumentStatusesForAllocation } from '@/features/teaching-documents/trainer-submission-actions';
 
 interface PageProps {
   params: Promise<{
@@ -37,7 +38,13 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
     notFound();
   }
 
-  const rowContext = await getRecordOfWorkContext(allocationId);
+  const [rowContext, docStatuses] = await Promise.all([
+    getRecordOfWorkContext(allocationId),
+    getAllTeachingDocumentStatusesForAllocation(allocationId),
+  ]);
+
+  const coStatus = docStatuses['course_outline'];
+  const sowStatus = docStatuses['scheme_of_work'];
 
   const entriesCount = rowContext?.entries.length ?? 0;
   const uniqueWeeksCount = new Set(rowContext?.entries.map((e) => e.weekNumber) ?? []).size;
@@ -58,7 +65,7 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
               Teaching Documents
             </h2>
             <p className="text-xs text-text-muted">
-              Official unit files.
+              Official unit files and submission statuses.
             </p>
           </div>
           <Badge variant="success">Official</Badge>
@@ -72,12 +79,31 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
                 <span className="rounded-lg bg-primary/10 p-2 text-primary">
                   <BookOpen className="size-4" />
                 </span>
-                <Badge variant="neutral">Master Outline</Badge>
+                {coStatus?.status === 'approved' ? (
+                  <Badge variant="success">Approved</Badge>
+                ) : coStatus?.status === 'submitted' ? (
+                  <Badge variant="info">Submitted (In Review)</Badge>
+                ) : coStatus?.status === 'returned' ? (
+                  <Badge variant="warning">Returned for Notes</Badge>
+                ) : (
+                  <Badge variant="neutral">Draft · Not Submitted</Badge>
+                )}
               </div>
               <h3 className="mt-3 text-sm font-bold text-text-primary">Course Outline</h3>
               <p className="mt-1 text-[11px] leading-relaxed text-text-muted">
                 Outcomes, schedule, grading, and references.
               </p>
+              {coStatus?.status === 'returned' && coStatus.reviewNote && (
+                <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 p-2 text-[11px] text-amber-800 leading-snug">
+                  <span className="font-semibold block text-[10px] uppercase tracking-wider text-amber-700">HOD Note:</span>
+                  {coStatus.reviewNote}
+                </p>
+              )}
+              {coStatus?.status === 'approved' && (
+                <p className="mt-2 text-[10px] font-semibold text-emerald-700">
+                  ✓ Verified by HOD · Ready for QA
+                </p>
+              )}
             </div>
             <div className="mt-4 flex gap-2 border-t border-border pt-3">
               <Link
@@ -85,7 +111,11 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
                 className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-white hover:bg-primary-hover"
               >
                 <BookOpen className="size-3.5" />
-                View Outline
+                {coStatus?.status === 'returned'
+                  ? 'Resubmit'
+                  : !coStatus || coStatus.status === 'draft'
+                    ? 'Confirm & Submit'
+                    : 'View Outline'}
               </Link>
               <Link
                 href={`/teaching-documents/curriculum/individual-upload?unitId=${context.allocation.unitId}&documentType=course_outline`}
@@ -105,12 +135,31 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
                 <span className="rounded-lg bg-primary/10 p-2 text-primary">
                   <FileSpreadsheet className="size-4" />
                 </span>
-                <Badge variant="neutral">14-Week Plan</Badge>
+                {sowStatus?.status === 'approved' ? (
+                  <Badge variant="success">Approved</Badge>
+                ) : sowStatus?.status === 'submitted' ? (
+                  <Badge variant="info">Submitted (In Review)</Badge>
+                ) : sowStatus?.status === 'returned' ? (
+                  <Badge variant="warning">Returned for Notes</Badge>
+                ) : (
+                  <Badge variant="neutral">Draft · Not Submitted</Badge>
+                )}
               </div>
               <h3 className="mt-3 text-sm font-bold text-text-primary">Scheme of Work</h3>
               <p className="mt-1 text-[11px] leading-relaxed text-text-muted">
                 Weekly lessons, activities, and resources.
               </p>
+              {sowStatus?.status === 'returned' && sowStatus.reviewNote && (
+                <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 p-2 text-[11px] text-amber-800 leading-snug">
+                  <span className="font-semibold block text-[10px] uppercase tracking-wider text-amber-700">HOD Note:</span>
+                  {sowStatus.reviewNote}
+                </p>
+              )}
+              {sowStatus?.status === 'approved' && (
+                <p className="mt-2 text-[10px] font-semibold text-emerald-700">
+                  ✓ Verified by HOD · Ready for QA
+                </p>
+              )}
             </div>
             <div className="mt-4 pt-3 border-t border-border flex gap-2">
               <Link
@@ -118,7 +167,11 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
                 className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-white hover:bg-primary-hover"
               >
                 <FileSpreadsheet className="size-3.5" />
-                View Scheme
+                {sowStatus?.status === 'returned'
+                  ? 'Resubmit'
+                  : !sowStatus || sowStatus.status === 'draft'
+                    ? 'Confirm & Submit'
+                    : 'View Scheme'}
               </Link>
               <Link
                 href={`/teaching-documents/curriculum/individual-upload?unitId=${context.allocation.unitId}&documentType=scheme_of_work`}

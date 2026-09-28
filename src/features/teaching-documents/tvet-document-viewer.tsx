@@ -1,8 +1,34 @@
 'use client';
 
 import Image from 'next/image';
-import { AlertCircle, CalendarCheck, FileDown, UploadCloud } from 'lucide-react';
+import {
+  AlertCircle,
+  AlertTriangle,
+  CalendarCheck,
+  Check,
+  CheckCircle2,
+  Clock,
+  FileDown,
+  LoaderCircle,
+  RotateCcw,
+  Send,
+  UploadCloud,
+} from 'lucide-react';
 import Link from 'next/link';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  submitTrainerTeachingDocumentAction,
+  type TeachingDocumentStatusInfo,
+} from './trainer-submission-actions';
 import {
   parseActivitiesList,
   parseResourcesList,
@@ -19,6 +45,22 @@ interface ViewerProps {
   courseOutline?: TVETCourseOutlineData;
   schemeOfWork?: TVETSchemeOfWorkData;
   recordOfWork?: TVETRecordOfWorkData;
+  initialStatus?: TeachingDocumentStatusInfo | null;
+}
+
+function formatStatusTimestamp(isoString: string | null | undefined): string {
+  if (!isoString) return '—';
+  try {
+    return new Date(isoString).toLocaleDateString('en-KE', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  } catch {
+    return isoString;
+  }
 }
 
 export function TVETDocumentViewer({
@@ -27,7 +69,16 @@ export function TVETDocumentViewer({
   courseOutline,
   schemeOfWork,
   recordOfWork,
+  initialStatus,
 }: ViewerProps) {
+  const [statusInfo, setStatusInfo] = useState<TeachingDocumentStatusInfo | null>(
+    initialStatus ?? null,
+  );
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
+
   const header =
     courseOutline?.header ??
     schemeOfWork?.header ??
@@ -74,6 +125,51 @@ export function TVETDocumentViewer({
     }
   };
 
+  const handleSubmitForReview = async () => {
+    if (type === 'record_of_work') return;
+    setIsSubmitting(true);
+    setSubmitError(null);
+    setSubmitSuccess(null);
+
+    try {
+      const res = await submitTrainerTeachingDocumentAction({
+        allocationId,
+        documentType: type,
+      });
+
+      if (res.statusInfo) {
+        setStatusInfo(res.statusInfo);
+      } else {
+        setStatusInfo((prev) => ({
+          id: prev?.id ?? '',
+          allocationId,
+          documentType: type,
+          status: 'submitted',
+          versionNumber: prev?.versionNumber ?? 1,
+          currentRevisionNumber: (prev?.currentRevisionNumber ?? 0) + 1,
+          submittedRevisionNumber: (prev?.currentRevisionNumber ?? 0) + 1,
+          approvedRevisionNumber: null,
+          reviewNote: null,
+          submittedAt: new Date().toISOString(),
+          approvedAt: null,
+          returnedAt: null,
+          updatedAt: new Date().toISOString(),
+        }));
+      }
+
+      setSubmitSuccess(res.message);
+      setIsConfirmOpen(false);
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error
+          ? err.message
+          : 'Submission failed. Please verify that curriculum syllabus is fully uploaded.',
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-w-0 space-y-4 sm:space-y-6">
       {/* Top Action Bar (Hidden during printing) */}
@@ -90,7 +186,7 @@ export function TVETDocumentViewer({
           )}
         </div>
 
-        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Link
             href="/teaching-documents/curriculum"
             className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-white px-3 text-xs font-semibold text-text-secondary shadow-2xs transition hover:bg-surface-subtle"
@@ -116,19 +212,228 @@ export function TVETDocumentViewer({
             type="button"
             onClick={handleExportWord}
             disabled={!isDocumentReady}
-            className={`inline-flex h-9 items-center gap-2 rounded-lg px-4 text-xs font-bold shadow-sm transition ${
+            className={`inline-flex h-9 items-center gap-2 rounded-lg px-3.5 text-xs font-bold shadow-sm transition ${
               isDocumentReady
-                ? 'bg-slate-900 text-white hover:bg-slate-800'
+                ? 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
                 : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
             }`}
             title={isDocumentReady ? 'Export Word (.docx)' : 'Curriculum content is not yet ready'}
           >
-            <FileDown className="size-4" aria-hidden="true" />
+            <FileDown className="size-3.5" aria-hidden="true" />
             <span className="sm:hidden">Word</span>
-            <span className="hidden sm:inline">Export Word (.docx)</span>
+            <span className="hidden sm:inline">Export Word</span>
           </button>
+
+          {/* Trainer Confirm & Submit Action */}
+          {type !== 'record_of_work' && (
+            <>
+              {statusInfo?.status === 'approved' ? (
+                <span className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-3.5 text-xs font-bold text-emerald-800 shadow-2xs">
+                  <Check className="size-3.5 text-emerald-600" />
+                  <span className="hidden sm:inline">Approved by HOD</span>
+                  <span className="sm:hidden">Approved</span>
+                </span>
+              ) : statusInfo?.status === 'submitted' ? (
+                <span className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-sky-300 bg-sky-50 px-3.5 text-xs font-bold text-sky-800 shadow-2xs">
+                  <Clock className="size-3.5 text-sky-600" />
+                  <span className="hidden sm:inline">Submitted · Awaiting HOD</span>
+                  <span className="sm:hidden">Submitted</span>
+                </span>
+              ) : statusInfo?.status === 'returned' ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSubmitError(null);
+                    setIsConfirmOpen(true);
+                  }}
+                  disabled={!isDocumentReady || isSubmitting}
+                  className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-amber-600 px-3.5 text-xs font-bold text-white shadow-sm hover:bg-amber-700 transition"
+                  title="Resubmit after addressing HOD feedback"
+                >
+                  <RotateCcw className="size-3.5" />
+                  <span className="hidden sm:inline">Resubmit for HOD Review</span>
+                  <span className="sm:hidden">Resubmit</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSubmitError(null);
+                    setIsConfirmOpen(true);
+                  }}
+                  disabled={!isDocumentReady || isSubmitting}
+                  className={`inline-flex h-9 items-center gap-1.5 rounded-lg px-4 text-xs font-bold text-white shadow-sm transition ${
+                    isDocumentReady
+                      ? 'bg-emerald-600 hover:bg-emerald-700'
+                      : 'bg-emerald-300 cursor-not-allowed opacity-60'
+                  }`}
+                  title={
+                    isDocumentReady
+                      ? 'Confirm and submit this official document to your HOD for review'
+                      : 'Curriculum syllabus must be ready before submission'
+                  }
+                >
+                  <Send className="size-3.5" />
+                  <span className="hidden sm:inline">Confirm & Submit for Review</span>
+                  <span className="sm:hidden">Submit to HOD</span>
+                </button>
+              )}
+            </>
+          )}
         </div>
       </div>
+
+      {/* Status Notice Banners (Hidden during printing) */}
+      {type !== 'record_of_work' && (
+        <div className="space-y-3 print:hidden">
+          {submitSuccess && (
+            <div className="flex items-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 p-3 text-xs font-medium text-emerald-900 shadow-2xs">
+              <CheckCircle2 className="size-4 shrink-0 text-emerald-600" />
+              <span>{submitSuccess}</span>
+            </div>
+          )}
+
+          {statusInfo?.status === 'approved' && (
+            <div className="flex items-start gap-3 rounded-xl border border-emerald-300 bg-emerald-50/90 p-4 text-xs text-emerald-950 shadow-2xs">
+              <CheckCircle2 className="size-5 shrink-0 text-emerald-600 mt-0.5" />
+              <div>
+                <p className="font-bold text-emerald-950 text-sm">
+                  Verified & Approved by Head of Department
+                </p>
+                <p className="mt-1 text-emerald-800 leading-relaxed">
+                  Approved on {formatStatusTimestamp(statusInfo.approvedAt)}. This official document is locked and will be bundled into the Quality Assurance (QA) examination export pack.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {statusInfo?.status === 'submitted' && (
+            <div className="flex items-start gap-3 rounded-xl border border-sky-300 bg-sky-50/90 p-4 text-xs text-sky-950 shadow-2xs">
+              <Clock className="size-5 shrink-0 text-sky-600 mt-0.5" />
+              <div>
+                <p className="font-bold text-sky-950 text-sm">
+                  Submitted for HOD Review & Verification
+                </p>
+                <p className="mt-1 text-sky-800 leading-relaxed">
+                  Submitted on {formatStatusTimestamp(statusInfo.submittedAt)} (Revision {statusInfo.submittedRevisionNumber ?? 1}). Your Head of Department has received this file in their review queue. You will see approval status updated here once reviewed.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {statusInfo?.status === 'returned' && (
+            <div className="flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50/90 p-4 text-xs text-amber-950 shadow-2xs">
+              <AlertTriangle className="size-5 shrink-0 text-amber-600 mt-0.5" />
+              <div className="flex-1">
+                <p className="font-bold text-amber-950 text-sm">
+                  Returned by Head of Department for Correction
+                </p>
+                {statusInfo.reviewNote && (
+                  <div className="mt-2 rounded-lg border border-amber-300 bg-white p-3 text-xs font-medium text-amber-900 shadow-2xs">
+                    <span className="font-bold uppercase tracking-wider text-[10px] text-amber-700 block mb-1">
+                      HOD Feedback Note:
+                    </span>
+                    {statusInfo.reviewNote}
+                  </div>
+                )}
+                <p className="mt-2 text-amber-800">
+                  Please update the curriculum as requested, then click <strong>Resubmit for HOD Review</strong> above.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Confirm & Submit Modal */}
+      {type !== 'record_of_work' && (
+        <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 mb-2">
+                <Send className="size-5" />
+              </div>
+              <DialogTitle className="text-base font-bold text-slate-900">
+                {statusInfo?.status === 'returned'
+                  ? 'Resubmit Document for HOD Review'
+                  : 'Confirm & Submit to HOD'}
+              </DialogTitle>
+              <DialogDescription className="text-xs text-slate-600">
+                Please confirm that the curriculum topics, schedule, and assessment milestones for this unit are accurate before submission.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs space-y-2">
+              <div className="flex justify-between gap-4">
+                <span className="text-slate-500 font-medium shrink-0">Unit:</span>
+                <span className="font-bold text-slate-800 text-right truncate">
+                  {header.unitCode} — {header.unitName}
+                </span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-slate-500 font-medium shrink-0">Cohort / Class:</span>
+                <span className="font-semibold text-slate-800 truncate">{header.cohortName}</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-slate-500 font-medium shrink-0">Document Type:</span>
+                <span className="font-semibold text-slate-800">{title}</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-slate-500 font-medium shrink-0">Contact Hours:</span>
+                <span className="text-slate-700">
+                  {header.weeklyHours} hrs/wk ({header.totalNominalHours} hrs total)
+                </span>
+              </div>
+            </div>
+
+            {statusInfo?.status === 'returned' && statusInfo.reviewNote && (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-2.5 text-xs text-amber-900">
+                <p className="font-bold text-[10px] uppercase tracking-wider text-amber-700">Addressed HOD Feedback:</p>
+                <p className="mt-0.5 italic">&quot;{statusInfo.reviewNote}&quot;</p>
+              </div>
+            )}
+
+            {submitError && (
+              <div className="rounded-lg border border-red-300 bg-red-50 p-2.5 text-xs text-red-900 font-medium">
+                {submitError}
+              </div>
+            )}
+
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              Upon submission, an official DOCX will be compiled, sealed, archived in private storage, and placed in the HOD review queue for verification.
+            </p>
+
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsConfirmOpen(false)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="primary"
+                onClick={handleSubmitForReview}
+                disabled={isSubmitting}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              >
+                {isSubmitting ? (
+                  <>
+                    <LoaderCircle className="size-3.5 animate-spin mr-1.5" />
+                    Submitting...
+                  </>
+                ) : statusInfo?.status === 'returned' ? (
+                  'Confirm & Resubmit Now'
+                ) : (
+                  'Confirm & Submit Now'
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Printable Document Container (Professional Academic Layout) */}
       <div className="mx-auto min-w-0 max-w-5xl overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-md print:m-0 print:max-w-none print:overflow-visible print:border-none print:shadow-none">

@@ -5,6 +5,7 @@ import { getApprovedCurriculumForUnitCode } from '@/features/teaching-documents/
 import { getAssessmentMilestones } from '@/features/teaching-documents/assessment-milestones';
 import { generateTVETSchemeOfWork } from '@/features/teaching-documents/tvet-standards';
 import { TVETDocumentViewer } from '@/features/teaching-documents/tvet-document-viewer';
+import { getTeachingDocumentAllocationStatus } from '@/features/teaching-documents/trainer-submission-actions';
 
 interface PageProps { params: Promise<{ allocationId: string }>; }
 
@@ -14,14 +15,23 @@ export default async function TVETSchemeOfWorkPage({ params }: PageProps) {
   const header = await getDocumentHeaderContext(allocationId);
   if (!header) notFound();
 
-  const [curriculum, milestones] = await Promise.all([
+  const [curriculum, milestones, initialStatus] = await Promise.all([
     getApprovedCurriculumForUnitCode(header.unitCode, header.unitName, 'scheme_of_work'),
     getAssessmentMilestones(header.academicPeriodId ?? undefined),
+    getTeachingDocumentAllocationStatus(allocationId, 'scheme_of_work'),
   ]);
 
   if (!curriculum) {
     return <div className="rounded-xl border border-border bg-surface p-6 text-sm text-text-muted">Curriculum content is not configured for this unit.</div>;
   }
   const schemeOfWork = generateTVETSchemeOfWork(header, curriculum, milestones);
-  return <TVETDocumentViewer type="scheme_of_work" allocationId={allocationId} schemeOfWork={schemeOfWork} />;
+  return (
+    <TVETDocumentViewer
+      type="scheme_of_work"
+      allocationId={allocationId}
+      schemeOfWork={schemeOfWork}
+      initialStatus={initialStatus}
+    />
+  );
 }
+

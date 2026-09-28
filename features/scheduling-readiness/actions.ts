@@ -1,0 +1,76 @@
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
+
+import { requireHodAccess } from '@/features/auth/authorization';
+import { createClient } from '@/lib/supabase/server';
+
+const assignmentSchema = z.object({
+  offeringId: z.string().uuid(),
+  academicPeriodId: z.string().uuid(),
+  trainerId: z.union([z.string().uuid(), z.literal('')]),
+  preferredRoomId: z.union([z.string().uuid(), z.literal('')]),
+  status: z.enum(['draft', 'active', 'suspended', 'completed', 'archived']),
+  isTimetableEnabled: z.enum(['true', 'false']),
+});
+
+export async function updateTeachingOfferingReadinessAction(formData: FormData): Promise<void> {
+  await requireHodAccess();
+
+  const parsed = assignmentSchema.safeParse({
+    offeringId: formData.get('offeringId'),
+    academicPeriodId: formData.get('academicPeriodId'),
+    trainerId: formData.get('trainerId'),
+    preferredRoomId: formData.get('preferredRoomId'),
+    status: formData.get('status'),
+    isTimetableEnabled: formData.get('isTimetableEnabled'),
+  });
+
+  if (!parsed.success) {
+    throw new Error('Invalid teaching offering allocation request.');
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc(
+    'update_teaching_allocation_readiness',
+    {
+      p_teaching_offering_id: parsed.data.offeringId,
+      p_academic_period_id: parsed.data.academicPeriodId,
+      p_trainer_id: parsed.data.trainerId || null,
+      p_preferred_room_id: parsed.data.preferredRoomId || null,
+      p_status: parsed.data.status,
+      p_is_timetable_enabled:
+        parsed.data.isTimetableEnabled === 'true',
+    },
+  );
+
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error('The teaching allocation was not updated.');
+
+  revalidatePath('/timetable/readiness');
+  revalidatePath('/timetable/generator');
+  revalidatePath('/timetable/teaching-allocations');
+}
+
+export async function includeAllUnassignedOfferingsAction(formData: FormData): Promise<void> {
+  await requireHodAccess();
+  const academicPeriodId = z.string().uuid().parse(formData.get('academicPeriodId'));
+  const supabase = await createClient();
+  const { error } = await supabase.rpc('include_all_unassigned_unit_offerings', {
+    p_academic_period_id: academicPeriodId,
+  });
+
+  if (error) throw new Error(error.message);
+
+  const { error: reconciliationError } = await supabase.rpc(
+    'reconcile_previous_trainer_assignments',
+    { p_academic_period_id: academicPeriodId },
+  );
+
+  if (reconciliationError) throw new Error(reconciliationError.message);
+
+  revalidatePath('/timetable/readiness');
+  revalidatePath('/timetable/teaching-allocations');
+  revalidatePath('/timetable/generator');
+}

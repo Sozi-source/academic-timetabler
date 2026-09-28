@@ -204,18 +204,18 @@ export function IndividualUploadForm({
       <PageHeader
         eyebrow="Teaching documents"
         title="Course Outline Upload"
-        description="Upload a Word (.docx) or Excel (.xlsx) course outline. The 14-week TVET Scheme of Work is automatically synthesized from this syllabus."
+        description="Upload a Word (.docx) or Excel (.xlsx) course outline."
         icon={FileUp}
         backHref="/teaching-documents/curriculum"
         backLabel="Curriculum Content"
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <Link
               href="/teaching-documents/curriculum/bulk-upload"
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle transition"
+              className="inline-flex h-9 shrink-0 whitespace-nowrap items-center gap-1.5 rounded-lg border border-border bg-white px-3.5 text-xs font-semibold text-text-secondary hover:bg-surface-subtle transition"
             >
               <UploadCloud className="size-3.5 text-primary" />
-              Switch to Bulk Upload
+              Bulk Upload
             </Link>
 
             <Button
@@ -223,6 +223,7 @@ export function IndividualUploadForm({
               size="sm"
               onClick={handlePublish}
               disabled={isParsing || isPublishing || !unitCode.trim() || topics.length === 0}
+              className="shrink-0 whitespace-nowrap"
               leadingIcon={
                 isPublishing ? (
                   <Loader2 className="size-3.5 animate-spin" />
@@ -262,7 +263,7 @@ export function IndividualUploadForm({
         <BookOpenCheck className="size-4 text-primary shrink-0 mt-0.5" />
         <div>
           <span className="font-semibold text-text-primary">Single Upload Workflow: </span>
-          Uploading a Course Outline establishes the official master syllabus. The 14-week Scheme of Work, session distributions, and CAT/exam milestones are automatically generated from it — zero separate scheme upload required.
+          Uploading a Course Outline establishes the official master syllabus.
         </div>
       </div>
 
@@ -276,7 +277,7 @@ export function IndividualUploadForm({
             <select
               value="course_outline"
               disabled
-              title="Course Outlines serve as the official master syllabus. 14-week Schemes of Work are automatically generated."
+              title="Course Outlines serve as the official master syllabus."
               className="w-full h-10 rounded-xl border border-border bg-surface-subtle px-3 text-xs font-semibold text-text-primary focus:outline-none cursor-default"
             >
               <option value="course_outline">Course Outline (Master Syllabus)</option>

@@ -114,10 +114,10 @@ export function BulkUploadView() {
         backHref="/teaching-documents/curriculum"
         backLabel="Back to Curriculum"
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <Link
               href="/teaching-documents/curriculum/individual-upload"
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-white px-3.5 text-xs font-semibold text-text-primary shadow-2xs hover:bg-surface-subtle transition"
+              className="inline-flex h-9 shrink-0 whitespace-nowrap items-center gap-1.5 rounded-lg border border-border bg-white px-3.5 text-xs font-semibold text-text-primary shadow-2xs hover:bg-surface-subtle transition"
             >
               <FileUp className="size-3.5 text-primary" />
               Individual Upload

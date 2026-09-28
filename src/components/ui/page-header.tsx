@@ -28,7 +28,7 @@ export function PageHeader({
       {context ? <div className="mb-3">{context}</div> : null}
 
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
+        <div className="flex min-w-0 flex-1 items-center gap-2.5 sm:gap-3">
           {backHref ? (
             <Link
               href={backHref}
@@ -43,7 +43,7 @@ export function PageHeader({
             </span>
           ) : null}
 
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             {eyebrow ? (
               <p className="hidden text-[10px] font-semibold uppercase tracking-wide text-text-muted sm:block">
                 {eyebrow}
@@ -59,7 +59,7 @@ export function PageHeader({
         </div>
 
         {actions ? (
-          <div className="flex w-full min-w-0 flex-wrap items-center gap-1.5 sm:gap-2 md:w-auto md:justify-end">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2 md:justify-end">
             {actions}
           </div>
         ) : null}

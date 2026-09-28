@@ -1,3 +1,12 @@
+### 2026-09-28: Fixed PageHeader Action Button Squishing and Layout Wrapping
+
+**Summary:** Resolved a flexbox layout bug where lengthy page titles and descriptions in `PageHeader` exerted compression on the right-hand actions container, causing the secondary navigation button ("Bulk Upload") to severely squish and wrap into multiline vertical text. Added `flex-1 min-w-0` to the header title container and `shrink-0` to the actions container, enforced `shrink-0 whitespace-nowrap` on action buttons and links in `individual-upload-form.tsx` and `bulk-upload-view.tsx`, and changed the verbose "Switch to Bulk Upload" label to "Bulk Upload".
+
+**Files changed:**
+- `src/components/ui/page-header.tsx` — Added `flex-1 min-w-0` to title text container and `shrink-0` to the actions container to prevent actions from being compressed.
+- `src/features/teaching-documents/individual-upload-form.tsx` — Applied `shrink-0 whitespace-nowrap` and cleaned button text to "Bulk Upload".
+- `src/features/teaching-documents/bulk-upload-view.tsx` — Applied `shrink-0 whitespace-nowrap` to header action link.
+
 ### 2026-09-28: Removed Scheme of Work from Upload Dropdown (Locked to Course Outline)
 
 **Summary:** Removed "Scheme of Work (Custom Override)" from the Document Type dropdown in the individual curriculum upload form (`/teaching-documents/curriculum/individual-upload`), locking the form strictly to "Course Outline (Master Syllabus)". Because Course Outlines serve as the single source of truth from which 14-week TVET Schemes of Work are automatically synthesized, allowing Schemes of Work in the upload dropdown caused confusion and potential topic mismatches. Also updated the file parsing action and form submission to consistently treat and publish all uploaded syllabi as Course Outlines, and updated the publish button to display "Publish Course Outline".

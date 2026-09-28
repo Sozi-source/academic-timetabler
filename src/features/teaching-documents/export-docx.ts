@@ -21,6 +21,8 @@ import {
 
 import {
   parseActivitiesList,
+  parseCourseOutlineApproaches,
+  parseCourseOutlineSubtopics,
   parseResourcesList,
   parseSLOOutcomes,
   parseSubTopics,
@@ -254,7 +256,10 @@ export async function buildTVETDocumentDocx(
                   spacing: { before: 0, after: 0 },
                   children: [
                     new TextRun({
-                      text: `${header.unitCode} — ${header.unitName.toUpperCase()}`,
+                      text:
+                        type === 'course_outline'
+                          ? header.unitName.toUpperCase()
+                          : `${header.unitCode} — ${header.unitName.toUpperCase()}`,
                       font: FONT,
                       bold: true,
                       size: 22,
@@ -272,6 +277,11 @@ export async function buildTVETDocumentDocx(
   );
 
   // 3. Metadata Context Matrix Table
+  const metadataFirstCell =
+    type === 'course_outline'
+      ? cell(`Unit: ${clean(header.unitName)}`, { bold: true, size: 15, widthPct: 25 })
+      : cell(`Cohort: ${clean(header.cohortName)}`, { bold: true, size: 15, widthPct: 25 });
+
   children.push(
     new Table({
       width: { size: 100, type: WidthType.PERCENTAGE },
@@ -279,7 +289,7 @@ export async function buildTVETDocumentDocx(
       rows: [
         new TableRow({
           children: [
-            cell(`Cohort: ${clean(header.cohortName)}`, { bold: true, size: 15, widthPct: 25 }),
+            metadataFirstCell,
             cell(`Trainer: ${clean(header.trainerName)}`, { bold: true, size: 15, widthPct: 25 }),
             cell(`Academic Period: ${clean(header.academicPeriodName)}`, { bold: true, size: 15, widthPct: 25 }),
             cell(`Status: APPROVED`, { bold: true, size: 15, color: '1A7F37', widthPct: 25 }),
@@ -353,18 +363,37 @@ export async function buildTVETDocumentDocx(
             }),
             ...co.weeklySchedule.map((sched, idx) => {
               const fill = idx % 2 === 1 ? ZEBRA_BG : 'FFFFFF';
-              const subList = sched.subTopics.flatMap((st) =>
-                typeof st === 'string' ? st.split(/\s*[·;]\s*/).filter(Boolean) : []
-              );
-              const subFormatted = subList.length > 0
-                ? subList.map((s) => `• ${s.trim()}`).join('\n')
-                : 'Core topic coverage';
+              const subList = parseCourseOutlineSubtopics(sched.subTopics);
+              const subParagraphs: Paragraph[] =
+                subList.length > 0
+                  ? subList.map(
+                      (s) =>
+                        new Paragraph({
+                          alignment: AlignmentType.LEFT,
+                          spacing: { before: 8, after: 8, line: 220 },
+                          indent: { left: 140 },
+                          children: [
+                            new TextRun({ text: '•  ', font: FONT, bold: true, size: 14, color: PRIMARY_DARK }),
+                            new TextRun({ text: clean(s), font: FONT, size: 14, color: '222222' }),
+                          ],
+                        }),
+                    )
+                  : [
+                      new Paragraph({
+                        alignment: AlignmentType.LEFT,
+                        spacing: { before: 8, after: 8, line: 220 },
+                        children: [
+                          new TextRun({ text: '•  ', font: FONT, bold: true, size: 14, color: PRIMARY_DARK }),
+                          new TextRun({ text: 'Core topic coverage and practical mastery', font: FONT, size: 14, color: '555555' }),
+                        ],
+                      }),
+                    ];
 
               return new TableRow({
                 children: [
                   cell(`W${sched.weekNumber}`, { align: AlignmentType.CENTER, bold: true, color: PRIMARY_DARK, fill, widthPct: 8 }),
                   cell(sched.topicTitle, { bold: true, fill, widthPct: 32 }),
-                  cell(subFormatted, { fill, widthPct: 52 }),
+                  cell(subParagraphs, { fill, widthPct: 52 }),
                   cell(`${sched.hours} hrs`, { align: AlignmentType.CENTER, fill, widthPct: 8 }),
                 ],
               });
@@ -375,34 +404,134 @@ export async function buildTVETDocumentDocx(
       );
     }
 
-    // Section 4: Approaches
-    if (co.teachingLearningApproaches || co.assessmentApproaches) {
-      const assessmentFormatted = (co.assessmentApproaches || '')
-        .split(/\n+/)
-        .map((l) => l.trim())
-        .filter(Boolean)
-        .map((l) => `• ${l}`)
-        .join('\n');
+    // Section 4: Approaches (Only bullets, each on a new line)
+    const rawTeaching =
+      co.teachingLearningApproaches?.trim() ||
+      'Interactive lectures and illustrated tutorials, Guided classroom discussions and seminar presentations, Practical laboratory demonstrations and hands-on exercises, Small-group problem-solving and case studies, Supervised assignments and self-directed study';
 
-      children.push(
-        sectionHeader('4', 'Teaching / Learning & Assessment Approaches'),
-        new Table({
-          width: { size: 100, type: WidthType.PERCENTAGE },
-          layout: TableLayoutType.FIXED,
-          rows: [
-            new TableRow({
-              children: [
-                cell(`Teaching Approaches:\n${clean(co.teachingLearningApproaches || 'Interactive lectures, guided discussions, and practical demonstrations.')}`, { fill: ZEBRA_BG, widthPct: 50 }),
-                cell(`Assessment Weighting:\n${assessmentFormatted || clean(co.assessmentApproaches)}`, { fill: ZEBRA_BG, widthPct: 50 }),
-              ],
-            }),
-          ],
-        }),
-        p('', { after: 100 }),
-      );
-    }
+    const teachingItems = parseCourseOutlineApproaches(rawTeaching);
+    const teachingParagraphs: Paragraph[] = [
+      new Paragraph({
+        alignment: AlignmentType.LEFT,
+        spacing: { before: 20, after: 40, line: 240 },
+        children: [
+          new TextRun({ text: 'Teaching / Learning Approaches:', font: FONT, bold: true, size: 15, color: PRIMARY_DARK }),
+        ],
+      }),
+      ...teachingItems.map(
+        (item) =>
+          new Paragraph({
+            alignment: AlignmentType.LEFT,
+            spacing: { before: 8, after: 8, line: 220 },
+            indent: { left: 140 },
+            children: [
+              new TextRun({ text: '•  ', font: FONT, bold: true, size: 14, color: PRIMARY_DARK }),
+              new TextRun({ text: clean(item), font: FONT, size: 14, color: '222222' }),
+            ],
+          }),
+      ),
+    ];
 
-    // Section 5: References
+    const rawAssessment =
+      co.assessmentApproaches?.trim() ||
+      'Continuous Assessment Tests (CATs) — 30%\nPractical Assignments, Laboratory Reports & Logbooks — 20%\nEnd-of-Term Summative Examination — 50%';
+
+    const assessmentItems = parseCourseOutlineApproaches(rawAssessment);
+    const assessmentParagraphs: Paragraph[] = [
+      new Paragraph({
+        alignment: AlignmentType.LEFT,
+        spacing: { before: 20, after: 40, line: 240 },
+        children: [
+          new TextRun({ text: 'Assessment Weighting & Evaluation:', font: FONT, bold: true, size: 15, color: PRIMARY_DARK }),
+        ],
+      }),
+      ...assessmentItems.map(
+        (item) =>
+          new Paragraph({
+            alignment: AlignmentType.LEFT,
+            spacing: { before: 8, after: 8, line: 220 },
+            indent: { left: 140 },
+            children: [
+              new TextRun({ text: '•  ', font: FONT, bold: true, size: 14, color: PRIMARY_DARK }),
+              new TextRun({ text: clean(item), font: FONT, size: 14, color: '222222' }),
+            ],
+          }),
+      ),
+    ];
+
+    children.push(
+      sectionHeader('4', 'Teaching / Learning & Assessment Approaches'),
+      new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        layout: TableLayoutType.FIXED,
+        rows: [
+          new TableRow({
+            children: [
+              cell(teachingParagraphs, { fill: ZEBRA_BG, widthPct: 50 }),
+              cell(assessmentParagraphs, { fill: ZEBRA_BG, widthPct: 50 }),
+            ],
+          }),
+        ],
+      }),
+      p('', { after: 100 }),
+    );
+
+    // Section 5: References & Equipment (Only bullets, each on a new line)
+    const refItems =
+      co.references && co.references.length > 0
+        ? co.references.map((r) => r.replace(/^[\s\d.)(\]\[•·▪●◦\-–—]+/, '').trim()).filter(Boolean)
+        : ['Prescribed curriculum textbooks, clinical manuals, and official departmental handouts.'];
+
+    const referenceParagraphs: Paragraph[] = [
+      new Paragraph({
+        alignment: AlignmentType.LEFT,
+        spacing: { before: 20, after: 40, line: 240 },
+        children: [
+          new TextRun({ text: 'Prescribed References & Textbooks:', font: FONT, bold: true, size: 15, color: PRIMARY_DARK }),
+        ],
+      }),
+      ...refItems.map(
+        (r) =>
+          new Paragraph({
+            alignment: AlignmentType.LEFT,
+            spacing: { before: 8, after: 8, line: 220 },
+            indent: { left: 140 },
+            children: [
+              new TextRun({ text: '•  ', font: FONT, bold: true, size: 14, color: PRIMARY_DARK }),
+              new TextRun({ text: clean(r), font: FONT, size: 14, color: '222222' }),
+            ],
+          }),
+      ),
+    ];
+
+    const rawEquip =
+      co.instructionalEquipment && co.instructionalEquipment.length > 0
+        ? co.instructionalEquipment.join(', ')
+        : 'Whiteboard & dry-erase markers, Multimedia LCD projector and computer aids, Personal protective equipment (PPE) and clinical laboratory gear, Standard TVET training manuals and reference charts';
+
+    const equipItems = parseCourseOutlineApproaches(rawEquip);
+    const equipParagraphs: Paragraph[] = [
+      new Paragraph({
+        alignment: AlignmentType.LEFT,
+        spacing: { before: 20, after: 40, line: 240 },
+        children: [
+          new TextRun({ text: 'Instructional Equipment & Safety Materials:', font: FONT, bold: true, size: 15, color: PRIMARY_DARK }),
+        ],
+      }),
+      ...equipItems.map(
+        (e) =>
+          new Paragraph({
+            alignment: AlignmentType.LEFT,
+            spacing: { before: 8, after: 8, line: 220 },
+            indent: { left: 140 },
+            children: [
+              new TextRun({ text: '•  ', font: FONT, bold: true, size: 14, color: PRIMARY_DARK }),
+              new TextRun({ text: clean(e), font: FONT, size: 14, color: '222222' }),
+            ],
+          }),
+      ),
+    ];
+
     children.push(
       sectionHeader('5', 'Instructional Resources & References'),
       new Table({
@@ -411,8 +540,8 @@ export async function buildTVETDocumentDocx(
         rows: [
           new TableRow({
             children: [
-              cell(`References:\n${co.references.map((r, i) => `${i + 1}. ${r}`).join('\n')}`, { fill: ZEBRA_BG, widthPct: 50 }),
-              cell(`Equipment & Safety:\n${co.instructionalEquipment.map((e, i) => `${i + 1}. ${e}`).join('\n')}`, { fill: ZEBRA_BG, widthPct: 50 }),
+              cell(referenceParagraphs, { fill: ZEBRA_BG, widthPct: 50 }),
+              cell(equipParagraphs, { fill: ZEBRA_BG, widthPct: 50 }),
             ],
           }),
         ],

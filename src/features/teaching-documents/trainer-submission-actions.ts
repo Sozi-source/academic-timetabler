@@ -275,7 +275,10 @@ export async function submitTrainerTeachingDocumentAction({
   const cleanUnitCode = header.unitCode
     .trim()
     .replace(/[^a-zA-Z0-9_-]/g, '_');
-  const filename = `${cleanUnitCode}_${documentType}.docx`;
+  const filename =
+    documentType === 'course_outline'
+      ? `${header.unitName.trim().replace(/[^a-zA-Z0-9_-]/g, '_')}_Course_Outline.docx`
+      : `${cleanUnitCode}_${documentType}.docx`;
   const mimeType =
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
   const sha256Hex = teachingFileSha256(docxBuffer);

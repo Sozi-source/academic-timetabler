@@ -1,3 +1,20 @@
+### 2026-09-28: Course Outline Bullet Formatting, HND Department Trainer Scoping, and Unit-Only Labeling
+
+**Summary:** 
+1. **Course Outline Discrete Bullet Formatting:** Fully updated Course Outline generation and rendering so that Section 3 (Content / Sub-topics Breakdown), Section 4 (Teaching/Learning & Assessment Approaches), and Section 5 (Prescribed References & Equipment/Safety Materials) strictly use individual bullet points with every point on its own new line. In Word (`.docx`) exports, each point is rendered as a standalone `Paragraph` element with authentic bullet styling (`•  `) and left indentation, eliminating Microsoft Word's issue where newline characters inside a single run glued multiple items onto the same line. Added `parseCourseOutlineSubtopics` and `parseCourseOutlineApproaches` in `tvet-standards.ts` to cleanly split commas, semicolons, inline numbering (`1.`, `2.`, `(a)`), and compound clauses.
+2. **Schemes of Work Preserved:** Schemes of work formatting and generation logic remain 100% unaltered.
+3. **Strict Department Scoping for QA Export:** In `qa-export.ts`, restricted trainer resolution strictly to trainers belonging to the active department (`Department of Human Nutrition and Dietetics`, `department_id: 5dad2236-def0-4270-96f8-2dfca48fed64`), completely filtering out cross-department external service trainers from other faculties (Applied Sciences, Health Records, Perioperative Theatre, Health & Social Sciences).
+4. **Unit-Only Content Labeling:** Removed unit codes and cohort prefixes from generated Course Outline titles, document headers, ZIP folder paths (`Course Outlines/<UnitName>.docx`), and QA Excel index rows. Course Outline banners and metadata matrices now cleanly feature only the Unit Name.
+
+**Files changed:**
+- `src/features/teaching-documents/tvet-standards.ts` — Added `parseCourseOutlineSubtopics` and `parseCourseOutlineApproaches` for bullet splitting.
+- `src/features/teaching-documents/export-docx.ts` — Updated Word generation for course outlines to format sections 3, 4, and 5 as discrete bulleted paragraphs, and cleaned banners/metadata to show only unit name.
+- `src/features/teaching-documents/tvet-document-viewer.tsx` — Updated interactive previewer to render sections 3, 4, and 5 with individual `<ul>`/`<li>` bullets, and removed unit code/cohort from title, banner, and exported file name.
+- `src/app/api/teaching-documents/export-word/route.ts` — Updated course outline download filename to `<CleanUnitName>_Course_Outline.docx`.
+- `src/features/teaching-documents/trainer-submission-actions.ts` — Updated submission action export filename to `<CleanUnitName>_Course_Outline.docx`.
+- `src/features/teaching-documents/qa-export.ts` — Filtered `trainers` and `teaching_allocations` strictly to the active HND department, sanitized course outline ZIP archive path to `Course Outlines/<UnitName>.docx`, and removed cohort/code for course outline rows in `QA_Index.xlsx`.
+- `CHANGES.md` — Documented changes and verification results.
+
 ### 2026-09-28: Auto-Approved Trainer Confirmed Documents and Fixed Allocation Department Access
 
 **Summary:** Relieved the HOD of manual review overhead by auto-approving all trainer-confirmed teaching documents (Course Outlines and Schemes of Work) immediately upon trainer confirmation. When a trainer confirms a document in `/staff/units/[allocationId]/documents/course-outline` or `.../scheme-of-work`, it is directly saved with `status: 'approved'` (and audited in `teaching_document_reviews`), making it instantly eligible for the QA Examination ZIP pack export without requiring manual clicks from the HOD. Applied database migration to transition all existing submitted documents to `approved`. Also resolved a SQL bug in `current_user_can_manage_teaching_allocation` where comparing cohort ID against allocation ID caused false-positive "This teaching document is outside your active department" errors on teaching document actions. Updated QA export logic to include both approved and submitted records with robust fallback revision numbers.

@@ -229,6 +229,118 @@ export function parseSubTopics(input?: string | string[] | null): string[] {
     .map((s) => s.replace(/^[\s\d.-]+/, '').trim())
     .filter((s) => s.length > 0);
 }
+
+/**
+ * Parses Course Outline subtopics into clean discrete points.
+ * Ensures each point is standalone (splitting by newlines, bullets, semicolons, inline numbering, and itemized clauses).
+ */
+export function parseCourseOutlineSubtopics(input?: string | string[] | null): string[] {
+  if (!input) return [];
+  const rawList: string[] = Array.isArray(input)
+    ? input.flatMap((item) => parseCourseOutlineSubtopics(item))
+    : [input];
+
+  const items: string[] = [];
+
+  for (const raw of rawList) {
+    if (!raw || typeof raw !== 'string') continue;
+
+    const lineSegments = raw.split(/[\r\n]+/);
+
+    for (const seg of lineSegments) {
+      const bulletSplit = seg
+        .split(/(?:[\u00b7\u2022\u25cf\u25aa\u25e6;|\t]+|(?<=\S)\s+(?:\d+[\.)]|\([a-zA-Z0-9]+\)|[a-zA-Z]\))\s+)/u)
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+      for (const piece of bulletSplit) {
+        if (piece.includes(':') && piece.includes(',')) {
+          const colonIdx = piece.indexOf(':');
+          const prefix = piece.slice(0, colonIdx).trim();
+          const rest = piece.slice(colonIdx + 1).trim();
+          const restParts = rest.split(/,\s*(?:and\s+)?|\s+and\s+/i).map((s) => s.trim()).filter(Boolean);
+          if (restParts.length > 1) {
+            items.push(`${prefix}: ${restParts[0]}`);
+            for (let i = 1; i < restParts.length; i++) {
+              items.push(restParts[i]);
+            }
+            continue;
+          }
+        } else if (piece.includes(',') && !piece.match(/\b(?:e\.g\.|i\.e\.|etc\.)/i)) {
+          const commaParts = piece.split(/,\s*(?:and\s+)?|\s+and\s+/i).map((s) => s.trim()).filter((s) => s.length > 2);
+          if (commaParts.length > 1 && !commaParts.some((cp) => cp.length > 80)) {
+            for (const cp of commaParts) {
+              items.push(cp);
+            }
+            continue;
+          }
+        }
+
+        items.push(piece);
+      }
+    }
+  }
+
+  return items
+    .map((item) =>
+      item
+        .replace(/^[\s\d.)(\]\[•·▪●◦\-–—]+/, '')
+        .replace(/[;,\s]+$/, '')
+        .trim(),
+    )
+    .filter((item) => item.length > 0)
+    .map((item) => item.charAt(0).toUpperCase() + item.slice(1));
+}
+
+/**
+ * Parses Section 4 & 5 approaches, equipment, and resources into discrete bullet points.
+ * Ensures compound comma/semicolon/numbered sentences are split so each item is on its own line.
+ */
+export function parseCourseOutlineApproaches(input?: string | string[] | null): string[] {
+  if (!input) return [];
+  const rawList: string[] = Array.isArray(input)
+    ? input.flatMap((item) => parseCourseOutlineApproaches(item))
+    : [input];
+
+  const items: string[] = [];
+
+  for (const raw of rawList) {
+    if (!raw || typeof raw !== 'string') continue;
+
+    const lines = raw.split(/[\r\n]+/);
+    for (const line of lines) {
+      const parts = line
+        .split(/(?:[\u00b7\u2022\u25cf\u25aa\u25e6;|\t]+|(?<=\S)\s+(?:\d+[\.)]|\([a-zA-Z0-9]+\)|[a-zA-Z]\))\s+)/u)
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+      for (const part of parts) {
+        const commaSeparated = part
+          .split(/,\s*(?:and\s+)?|\s+and\s+/i)
+          .map((s) => s.trim())
+          .filter((s) => s.length > 2);
+
+        if (commaSeparated.length > 1) {
+          for (const cs of commaSeparated) {
+            items.push(cs);
+          }
+        } else {
+          items.push(part);
+        }
+      }
+    }
+  }
+
+  return items
+    .map((item) =>
+      item
+        .replace(/^[\s\d.)(\]\[•·▪●◦\-–—]+/, '')
+        .replace(/[;,\s]+$/, '')
+        .trim(),
+    )
+    .filter((item) => item.length > 0)
+    .map((item) => item.charAt(0).toUpperCase() + item.slice(1));
+}
 /**
  * Parses learning activities into discrete lines
  */

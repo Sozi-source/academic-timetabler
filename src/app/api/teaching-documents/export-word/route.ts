@@ -57,7 +57,10 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unsupported document type' }, { status: 400 });
     }
 
-    const filename = `${header.unitCode.replace(/\s+/g, '_')}_${type}.docx`;
+    const filename =
+      type === 'course_outline'
+        ? `${header.unitName.replace(/[^a-zA-Z0-9_-]/g, '_')}_Course_Outline.docx`
+        : `${header.unitCode.replace(/\s+/g, '_')}_${type}.docx`;
 
     return new NextResponse(docxBuffer as unknown as BodyInit, {
       status: 200,
@@ -93,7 +96,10 @@ export async function POST(request: Request) {
     });
 
     const unitCode = header?.unitCode?.replace(/\s+/g, '_') || 'Curriculum';
-    const filename = `${unitCode}_${type}.docx`;
+    const filename =
+      type === 'course_outline' && header?.unitName
+        ? `${header.unitName.replace(/[^a-zA-Z0-9_-]/g, '_')}_Course_Outline.docx`
+        : `${unitCode}_${type}.docx`;
 
     return new NextResponse(docxBuffer as unknown as BodyInit, {
       status: 200,

@@ -31,6 +31,8 @@ import {
 } from './trainer-submission-actions';
 import {
   parseActivitiesList,
+  parseCourseOutlineApproaches,
+  parseCourseOutlineSubtopics,
   parseResourcesList,
   parseSLOOutcomes,
   parseSubTopics,
@@ -117,7 +119,10 @@ export function TVETDocumentViewer({
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${header.unitCode}_${type}.docx`;
+      a.download =
+        type === 'course_outline'
+          ? `${header.unitName.replace(/[^a-zA-Z0-9_-]/g, '_')}_Course_Outline.docx`
+          : `${header.unitCode}_${type}.docx`;
       a.click();
       URL.revokeObjectURL(url);
     } catch {
@@ -176,7 +181,7 @@ export function TVETDocumentViewer({
       <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-4 print:hidden">
         <div className="flex min-w-0 items-center gap-2">
           <span className="min-w-0 truncate text-xs font-bold text-slate-900">
-            {header.unitCode} · {header.unitName}
+            {type === 'course_outline' ? header.unitName : `${header.unitCode} · ${header.unitName}`}
           </span>
           {!isDocumentReady && (
             <span className="shrink-0 inline-flex items-center gap-1 rounded-md bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-900 border border-amber-300">
@@ -472,22 +477,34 @@ export function TVETDocumentViewer({
         <div className="border-b-2 border-slate-900 bg-slate-100 px-4 py-3 text-center sm:px-8 sm:py-3.5 print:bg-slate-50 print:border-black">
           <p className="text-[10px] font-bold tracking-widest text-slate-600 uppercase">Curriculum Unit</p>
           <h2 className="text-sm font-black tracking-wide text-slate-900 uppercase sm:text-xl print:text-black">
-            {header.unitCode} — {header.unitName}
+            {type === 'course_outline' ? header.unitName : `${header.unitCode} — ${header.unitName}`}
           </h2>
         </div>
 
         {/* ── CONTEXT MATRIX (HIGH-CONTRAST MONOCHROME-SAFE GRID) ── */}
         <div className="grid grid-cols-2 gap-0 border-b-2 border-slate-900 bg-slate-50 text-xs sm:grid-cols-4 print:border-black">
-          {[
-            { label: 'Cohort / Class', value: header.cohortName },
-            { label: 'Trainer', value: header.trainerName },
-            { label: 'Academic Period', value: header.academicPeriodName },
-            { label: 'Contact Hours', value: `${header.weeklyHours} hrs/wk · ${header.totalNominalHours} hrs total` },
-            { label: 'Standard Status', value: 'APPROVED', highlight: true },
-            { label: 'Delivery Duration', value: '14 Weeks' },
-            { label: 'Generated', value: new Date().toLocaleDateString('en-GB') },
-            { label: 'Document Type', value: title },
-          ].map(({ label, value, highlight }) => (
+          {(type === 'course_outline'
+            ? [
+                { label: 'Curriculum Unit', value: header.unitName },
+                { label: 'Trainer', value: header.trainerName },
+                { label: 'Academic Period', value: header.academicPeriodName },
+                { label: 'Contact Hours', value: `${header.weeklyHours} hrs/wk · ${header.totalNominalHours} hrs total` },
+                { label: 'Standard Status', value: 'APPROVED', highlight: true },
+                { label: 'Delivery Duration', value: '14 Weeks' },
+                { label: 'Generated', value: new Date().toLocaleDateString('en-GB') },
+                { label: 'Document Type', value: title },
+              ]
+            : [
+                { label: 'Cohort / Class', value: header.cohortName },
+                { label: 'Trainer', value: header.trainerName },
+                { label: 'Academic Period', value: header.academicPeriodName },
+                { label: 'Contact Hours', value: `${header.weeklyHours} hrs/wk · ${header.totalNominalHours} hrs total` },
+                { label: 'Standard Status', value: 'APPROVED', highlight: true },
+                { label: 'Delivery Duration', value: '14 Weeks' },
+                { label: 'Generated', value: new Date().toLocaleDateString('en-GB') },
+                { label: 'Document Type', value: title },
+              ]
+          ).map(({ label, value, highlight }) => (
             <div key={label} className="min-w-0 border-r border-b border-slate-300 px-3 py-2 sm:px-4 sm:py-2.5 last:border-r-0 print:border-slate-800">
               <span className="block text-[9px] font-bold uppercase tracking-wider text-slate-600">{label}</span>
               <span className={`mt-0.5 block font-bold ${highlight ? 'text-slate-900 font-black' : 'text-slate-900'}`}>{value}</span>
@@ -557,7 +574,7 @@ export function TVETDocumentViewer({
                   </thead>
                   <tbody>
                     {courseOutline.weeklySchedule.map((sched, idx) => {
-                      const allSubtopics = parseSubTopics(sched.subTopics);
+                      const allSubtopics = parseCourseOutlineSubtopics(sched.subTopics);
 
                       return (
                         <tr key={sched.weekNumber} className={idx % 2 === 0 ? 'bg-white align-top' : 'bg-slate-50 align-top'}>
@@ -578,7 +595,7 @@ export function TVETDocumentViewer({
                                 ))}
                               </ul>
                             ) : (
-                              <span className="text-slate-400 italic">Core topic mastery and practical coverage.</span>
+                              <span className="text-slate-400 italic">• Core topic mastery and practical coverage.</span>
                             )}
                           </td>
                           <td className="border border-slate-300 px-2 py-2 text-center font-semibold text-slate-800">
@@ -592,65 +609,72 @@ export function TVETDocumentViewer({
                 </div>
               </section>
 
-              {(courseOutline.teachingLearningApproaches || courseOutline.assessmentApproaches) && (
-                <section>
-                  <SectionHeading number="4" title="Teaching / Learning and Assessment Approaches" />
-                  <div className="mt-3 grid gap-4 sm:grid-cols-2">
-                    <div className="rounded-lg border border-slate-300 bg-slate-50 p-3">
-                      <p className="font-black text-slate-900 text-[11px] mb-1.5">Teaching / Learning Approaches</p>
-                      <p className="text-slate-800 leading-relaxed">{courseOutline.teachingLearningApproaches || 'Interactive lectures, guided class discussions, practical demonstrations, and small-group problem-solving.'}</p>
-                    </div>
-                    <div className="rounded-lg border border-slate-300 bg-slate-50 p-3">
-                      <p className="font-black text-slate-900 text-[11px] mb-1.5">Assessment Approaches & Weighting</p>
-                      <ul className="space-y-1 text-slate-800">
-                        {(courseOutline.assessmentApproaches || '')
-                          .split(/\n+/)
-                          .map((item) => item.trim())
-                          .filter(Boolean)
-                          .map((line, idx) => (
-                            <li key={idx} className="flex items-start gap-1.5">
-                              <span className="shrink-0 text-slate-900 font-bold">•</span>
-                              <span>{line}</span>
-                            </li>
-                          ))}
-                      </ul>
-                    </div>
+              <section>
+                <SectionHeading number="4" title="Teaching / Learning and Assessment Approaches" />
+                <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-lg border border-slate-300 bg-slate-50 p-3">
+                    <p className="font-black text-slate-900 text-[11px] mb-2">Teaching / Learning Approaches</p>
+                    <ul className="space-y-1.5 text-slate-800">
+                      {parseCourseOutlineApproaches(
+                        courseOutline.teachingLearningApproaches ||
+                          'Interactive lectures and illustrated tutorials, Guided classroom discussions and seminar presentations, Practical laboratory demonstrations and hands-on exercises, Small-group problem-solving and case studies, Supervised assignments and self-directed study',
+                      ).map((item, idx) => (
+                        <li key={idx} className="flex items-start gap-1.5">
+                          <span className="shrink-0 text-slate-900 font-bold">•</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                </section>
-              )}
+                  <div className="rounded-lg border border-slate-300 bg-slate-50 p-3">
+                    <p className="font-black text-slate-900 text-[11px] mb-2">Assessment Approaches & Weighting</p>
+                    <ul className="space-y-1.5 text-slate-800">
+                      {parseCourseOutlineApproaches(
+                        courseOutline.assessmentApproaches ||
+                          'Continuous Assessment Tests (CATs) — 30%\nPractical Assignments, Laboratory Reports & Logbooks — 20%\nEnd-of-Term Summative Examination — 50%',
+                      ).map((line, idx) => (
+                        <li key={idx} className="flex items-start gap-1.5">
+                          <span className="shrink-0 text-slate-900 font-bold">•</span>
+                          <span>{line}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </section>
 
               <section>
                 <SectionHeading number="5" title="Instructional Resources & References" />
                 <div className="mt-3 grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="font-black text-slate-900 text-[11px] mb-1">References</p>
+                  <div className="rounded-lg border border-slate-300 bg-slate-50 p-3">
+                    <p className="font-black text-slate-900 text-[11px] mb-2">Prescribed References & Textbooks</p>
                     {courseOutline.references.length === 0 ? (
-                      <p className="text-slate-600 italic leading-relaxed">Course Textbooks & Handouts as prescribed by the Department.</p>
+                      <p className="text-slate-600 italic leading-relaxed">• Prescribed curriculum textbooks, clinical manuals, and official departmental handouts.</p>
                     ) : (
-                      <ul className="space-y-1 text-slate-800">
+                      <ul className="space-y-1.5 text-slate-800">
                         {courseOutline.references.map((r, i) => (
-                          <li key={i} className="flex gap-1.5">
-                            <span className="shrink-0 text-slate-900 font-bold">{i + 1}.</span>
-                            <span>{r.replace(/^\d+\.\s*/, '')}</span>
+                          <li key={i} className="flex items-start gap-1.5">
+                            <span className="shrink-0 text-slate-900 font-bold">•</span>
+                            <span>{r.replace(/^[\s\d.)(\]\[•·▪●◦\-–—]+/, '').trim()}</span>
                           </li>
                         ))}
                       </ul>
                     )}
                   </div>
-                  <div>
-                    <p className="font-black text-slate-900 text-[11px] mb-1">Equipment & Safety Materials</p>
-                    {courseOutline.instructionalEquipment.length === 0 ? (
-                      <p className="text-slate-600 italic leading-relaxed">Whiteboard & Markers, Demonstration Aids & Standard Safety Gear.</p>
-                    ) : (
-                      <ul className="space-y-1 text-slate-800">
-                        {courseOutline.instructionalEquipment.map((e, i) => (
-                          <li key={i} className="flex gap-1.5">
-                            <span className="shrink-0 text-slate-900 font-bold">{i + 1}.</span>
-                            <span>{e.replace(/^\d+\.\s*/, '')}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                  <div className="rounded-lg border border-slate-300 bg-slate-50 p-3">
+                    <p className="font-black text-slate-900 text-[11px] mb-2">Instructional Equipment & Safety Materials</p>
+                    <ul className="space-y-1.5 text-slate-800">
+                      {parseCourseOutlineApproaches(
+                        courseOutline.instructionalEquipment.length > 0
+                          ? courseOutline.instructionalEquipment.join(', ')
+                          : 'Whiteboard & dry-erase markers, Multimedia LCD projector and computer aids, Personal protective equipment (PPE) and clinical laboratory gear, Standard TVET training manuals and reference charts',
+                      ).map((e, i) => (
+                        <li key={i} className="flex items-start gap-1.5">
+                          <span className="shrink-0 text-slate-900 font-bold">•</span>
+                          <span>{e}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
               </section>

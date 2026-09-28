@@ -121,12 +121,39 @@ export async function getQaExportPageData(): Promise<{
   }>;
 }> {
   const profile = await requireHodAccess();
-  const departmentId = profile.activeDepartmentId;
+  const admin = createAdminClient();
+
+  // Resolve Human Nutrition & Dietetics department ID
+  let departmentId = profile.activeDepartmentId;
   if (!departmentId) {
-    return { departmentName: profile.departmentName, departmentSelected: false, periods: [] };
+    const { data: hndDept } = await admin
+      .from('departments')
+      .select('id, name')
+      .or('code.eq.HND,name.ilike.%human nutrition%')
+      .limit(1)
+      .maybeSingle();
+    if (hndDept) {
+      departmentId = hndDept.id;
+    }
   }
 
-  const admin = createAdminClient();
+  if (!departmentId) {
+    return { departmentName: profile.departmentName || 'Human Nutrition and Dietetics', departmentSelected: false, periods: [] };
+  }
+
+  // Strictly filter trainers whose department is Human Nutrition and Dietetics
+  const { data: deptTrainers, error: trainerError } = await admin
+    .from('trainers')
+    .select('id')
+    .eq('department_id', departmentId)
+    .eq('is_active', true);
+
+  if (trainerError) throw new Error(`Unable to load trainers: ${trainerError.message}`);
+  const deptTrainerIds = cleanUuidList((deptTrainers ?? []).map((t) => t.id));
+  if (deptTrainerIds.length === 0) {
+    return { departmentName: profile.departmentName || 'Human Nutrition and Dietetics', departmentSelected: true, periods: [] };
+  }
+
   const units = await loadDepartmentUnits(departmentId);
   const unitIds = cleanUuidList(units.map((unit) => unit.id));
   if (unitIds.length === 0) {
@@ -137,6 +164,7 @@ export async function getQaExportPageData(): Promise<{
     .from('teaching_allocations')
     .select('id,academic_period_id,trainer_id,unit_id')
     .in('unit_id', unitIds)
+    .in('trainer_id', deptTrainerIds)
     .in('status', ['active', 'completed', 'archived']);
   const allocations = rows<AllocationRow>(allocationsResult.data, allocationsResult.error, 'teaching allocations');
   if (allocations.length === 0) {
@@ -213,8 +241,34 @@ export async function createQaExaminationPack(
   unavailableDocuments: number;
 }> {
   const admin = createAdminClient();
+
+  // Ensure department is Human Nutrition and Dietetics
+  let targetDeptId = departmentId;
+  if (!targetDeptId) {
+    const { data: hndDept } = await admin
+      .from('departments')
+      .select('id')
+      .or('code.eq.HND,name.ilike.%human nutrition%')
+      .limit(1)
+      .maybeSingle();
+    targetDeptId = hndDept?.id || '';
+  }
+
+  // Load ONLY trainers belonging to Human Nutrition and Dietetics
+  const { data: deptTrainers, error: trainerError } = await admin
+    .from('trainers')
+    .select('id, staff_number, full_name, department_id')
+    .eq('department_id', targetDeptId)
+    .eq('is_active', true);
+
+  if (trainerError) throw new Error(`Unable to load trainers: ${trainerError.message}`);
+  const deptTrainerIds = cleanUuidList((deptTrainers ?? []).map((t) => t.id));
+  if (deptTrainerIds.length === 0) {
+    throw new Error('No active trainers found in the Department of Human Nutrition and Dietetics.');
+  }
+
   const [units, periodResult] = await Promise.all([
-    loadDepartmentUnits(departmentId),
+    loadDepartmentUnits(targetDeptId),
     admin.from('academic_periods').select('id,name,starts_on,ends_on').eq('id', periodId).maybeSingle(),
   ]);
   const period = periodResult.data as PeriodRow | null;
@@ -230,6 +284,7 @@ export async function createQaExaminationPack(
     .select('id,academic_period_id,trainer_id,unit_id,cohort_id')
     .eq('academic_period_id', periodId)
     .in('unit_id', unitIds)
+    .in('trainer_id', deptTrainerIds)
     .in('status', ['active', 'completed', 'archived']);
   const allocations = rows<AllocationRow>(allocationsResult.data, allocationsResult.error, 'period allocations');
   if (allocations.length === 0) throw new Error('There are no active or completed trainer allocations for this period.');
@@ -314,7 +369,11 @@ export async function createQaExaminationPack(
         : undefined;
       const cohortName = cohortById.get(allocation.cohort_id)?.name ?? 'Cohort';
       const directory = documentType === 'course_outline' ? 'Course Outlines' : 'Schemes of Work';
-      const relativePath = `${folder}/${directory}/${safePathSegment(unit.code)}_${safePathSegment(unit.name)}_${safePathSegment(cohortName)}_${documentType}_allocation-${allocation.id.slice(0, 8)}_v${document ? Number(document.version_number) : 0}.${revision ? fileExtension(revision.original_filename) : 'pdf'}`;
+      const ext = revision ? fileExtension(revision.original_filename) : 'docx';
+      const relativePath =
+        documentType === 'course_outline'
+          ? `${folder}/${directory}/${safePathSegment(unit.name)}.${ext}`
+          : `${folder}/${directory}/${safePathSegment(unit.code)}_${safePathSegment(unit.name)}_${safePathSegment(cohortName)}_${documentType}_allocation-${allocation.id.slice(0, 8)}_v${document ? Number(document.version_number) : 0}.${ext}`;
       lines.push({
         allocationId: allocation.id,
         trainerId: trainer.id,
@@ -395,8 +454,8 @@ export async function createQaExaminationPack(
   index.addRows(lines.map((line) => ({
     staffNumber: line.staffNumber,
     trainerName: line.trainerName,
-    cohortName: line.cohortName,
-    unitCode: line.unitCode,
+    cohortName: line.documentType === 'course_outline' ? '—' : line.cohortName,
+    unitCode: line.documentType === 'course_outline' ? '—' : line.unitCode,
     unitName: line.unitName,
     document: documentLabel(line.documentType),
     status: line.status,
@@ -416,8 +475,13 @@ export async function createQaExaminationPack(
     entries.push({ name: `${folder}/Course Outlines/`, data: Buffer.alloc(0), isDirectory: true });
     entries.push({ name: `${folder}/Schemes of Work/`, data: Buffer.alloc(0), isDirectory: true });
   }
+  const addedZipPaths = new Set<string>();
   for (const line of lines) {
-    if (line.buffer && line.filePath) entries.push({ name: line.filePath, data: line.buffer });
+    if (line.buffer && line.filePath) {
+      if (addedZipPaths.has(line.filePath)) continue;
+      addedZipPaths.add(line.filePath);
+      entries.push({ name: line.filePath, data: line.buffer });
+    }
   }
 
   const indexBuffer = Buffer.from(await workbook.xlsx.writeBuffer());

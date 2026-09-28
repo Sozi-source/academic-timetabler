@@ -30,6 +30,7 @@ type DocumentRow = {
   document_type: QaDocumentType;
   version_number: number | string;
   approved_revision_number: number | string | null;
+  submitted_revision_number?: number | string | null;
   approved_at: string | null;
 };
 type RevisionRow = {
@@ -151,10 +152,10 @@ export async function getQaExportPageData(): Promise<{
     allocationIds.length > 0
       ? admin
           .from('teaching_documents')
-          .select('id,allocation_id,document_type,version_number,approved_revision_number,approved_at,status')
+          .select('id,allocation_id,document_type,version_number,approved_revision_number,submitted_revision_number,approved_at,status')
           .in('allocation_id', allocationIds)
           .in('document_type', [...qaDocumentTypes])
-          .eq('status', 'approved')
+          .in('status', ['approved', 'submitted'])
       : Promise.resolve({ data: [], error: null }),
   ]);
   const periods = rows<PeriodRow>(periodResult.data, periodResult.error, 'academic periods');
@@ -237,10 +238,10 @@ export async function createQaExaminationPack(
   const documentResult = allocationIds.length > 0
     ? await admin
         .from('teaching_documents')
-        .select('id,allocation_id,document_type,version_number,approved_revision_number,approved_at,status')
+        .select('id,allocation_id,document_type,version_number,approved_revision_number,submitted_revision_number,approved_at,status')
         .in('allocation_id', allocationIds)
         .in('document_type', [...qaDocumentTypes])
-        .eq('status', 'approved')
+        .in('status', ['approved', 'submitted'])
     : { data: [], error: null };
   const allDocuments = rows<DocumentRow>(documentResult.data, documentResult.error, 'approved teaching documents');
   const latestByKey = new Map<string, DocumentRow>();
@@ -303,9 +304,11 @@ export async function createQaExaminationPack(
 
     for (const documentType of qaDocumentTypes) {
       const document = documentByKey.get(`${allocation.id}:${documentType}`);
-      const revisionNumber = document?.approved_revision_number == null
-        ? null
-        : Number(document.approved_revision_number);
+      const revisionNumber = document?.approved_revision_number != null
+        ? Number(document.approved_revision_number)
+        : document?.submitted_revision_number != null
+          ? Number(document.submitted_revision_number)
+          : null;
       const revision = document && revisionNumber != null
         ? revisionByKey.get(`${document.id}:${revisionNumber}`)
         : undefined;
@@ -342,8 +345,10 @@ export async function createQaExaminationPack(
     if (!trainer || !unit) continue;
     for (const documentType of qaDocumentTypes) {
       const document = documentByKey.get(`${allocation.id}:${documentType}`);
-      if (!document || document.approved_revision_number == null) continue;
-      const revision = revisionByKey.get(`${document.id}:${Number(document.approved_revision_number)}`);
+      if (!document) continue;
+      const revNum = document.approved_revision_number ?? document.submitted_revision_number;
+      if (revNum == null) continue;
+      const revision = revisionByKey.get(`${document.id}:${Number(revNum)}`);
       if (!revision) continue;
       const line = lineByKey.get(`${allocation.id}:${documentType}`);
       if (line) downloadTasks.push({ line, revision });

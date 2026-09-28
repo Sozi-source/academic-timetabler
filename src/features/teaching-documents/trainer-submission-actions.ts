@@ -369,7 +369,7 @@ export async function submitTrainerTeachingDocumentAction({
     const { error: updateError } = await admin
       .from('teaching_documents')
       .update({
-        status: 'submitted',
+        status: 'approved',
         storage_bucket: teachingDocumentStorageBucket,
         storage_path: storagePath,
         original_filename: filename,
@@ -378,7 +378,10 @@ export async function submitTrainerTeachingDocumentAction({
         sha256: sha256Hex,
         current_revision_number: newRevisionNumber,
         submitted_revision_number: newRevisionNumber,
+        approved_revision_number: newRevisionNumber,
         submitted_at: nowIso,
+        approved_at: nowIso,
+        approved_by: profile.id,
         review_note: null,
         returned_at: null,
         returned_by: null,
@@ -392,6 +395,15 @@ export async function submitTrainerTeachingDocumentAction({
         `Failed to update document status: ${updateError.message}`,
       );
     }
+
+    // Record approval in reviews table for audit trail
+    await admin.from('teaching_document_reviews').insert({
+      document_id: documentId,
+      revision_number: newRevisionNumber,
+      decision: 'approved',
+      note: 'Confirmed by trainer and approved for QA download',
+      reviewed_by: profile.id,
+    });
   } else {
     documentId = randomUUID();
     newRevisionNumber = 1;
@@ -417,7 +429,7 @@ export async function submitTrainerTeachingDocumentAction({
 
     const nowIso = new Date().toISOString();
 
-    // Insert teaching_documents
+    // Insert teaching_documents as approved
     const { error: insertError } = await admin
       .from('teaching_documents')
       .insert({
@@ -430,7 +442,7 @@ export async function submitTrainerTeachingDocumentAction({
         document_type: documentType,
         template_id: templateId,
         version_number: 1,
-        status: 'submitted',
+        status: 'approved',
         storage_bucket: teachingDocumentStorageBucket,
         storage_path: storagePath,
         original_filename: filename,
@@ -439,7 +451,10 @@ export async function submitTrainerTeachingDocumentAction({
         sha256: sha256Hex,
         current_revision_number: 1,
         submitted_revision_number: 1,
+        approved_revision_number: 1,
         submitted_at: nowIso,
+        approved_at: nowIso,
+        approved_by: profile.id,
         created_by: profile.id,
         updated_by: profile.id,
       });
@@ -482,6 +497,15 @@ export async function submitTrainerTeachingDocumentAction({
     if (subError) {
       throw new Error(`Failed to record submission: ${subError.message}`);
     }
+
+    // Record approval in reviews table for audit trail
+    await admin.from('teaching_document_reviews').insert({
+      document_id: documentId,
+      revision_number: 1,
+      decision: 'approved',
+      note: 'Confirmed by trainer and approved for QA download',
+      reviewed_by: profile.id,
+    });
   }
 
   // 7. Revalidate Next.js cache paths
@@ -497,19 +521,19 @@ export async function submitTrainerTeachingDocumentAction({
 
   return {
     success: true,
-    message: `${docTitle} confirmed and submitted for HOD review.`,
+    message: `${docTitle} confirmed, approved, and ready for QA download.`,
     statusInfo: {
       id: documentId,
       allocationId,
       documentType,
-      status: 'submitted',
+      status: 'approved',
       versionNumber: existingDoc ? Number(existingDoc.version_number) : 1,
       currentRevisionNumber: newRevisionNumber,
       submittedRevisionNumber: newRevisionNumber,
-      approvedRevisionNumber: null,
+      approvedRevisionNumber: newRevisionNumber,
       reviewNote: null,
       submittedAt: nowIso,
-      approvedAt: null,
+      approvedAt: nowIso,
       returnedAt: null,
       updatedAt: nowIso,
     },

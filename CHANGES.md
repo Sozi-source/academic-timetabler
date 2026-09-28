@@ -1,3 +1,12 @@
+### 2026-09-28: Auto-Approved Trainer Confirmed Documents and Fixed Allocation Department Access
+
+**Summary:** Relieved the HOD of manual review overhead by auto-approving all trainer-confirmed teaching documents (Course Outlines and Schemes of Work) immediately upon trainer confirmation. When a trainer confirms a document in `/staff/units/[allocationId]/documents/course-outline` or `.../scheme-of-work`, it is directly saved with `status: 'approved'` (and audited in `teaching_document_reviews`), making it instantly eligible for the QA Examination ZIP pack export without requiring manual clicks from the HOD. Applied database migration to transition all existing submitted documents to `approved`. Also resolved a SQL bug in `current_user_can_manage_teaching_allocation` where comparing cohort ID against allocation ID caused false-positive "This teaching document is outside your active department" errors on teaching document actions. Updated QA export logic to include both approved and submitted records with robust fallback revision numbers.
+
+**Files changed:**
+- `supabase/migrations/20260928062500_auto_approve_trainer_confirmed_documents.sql` — Migration to auto-approve existing submitted documents, add review approval audit entries, and fix the `allocation.id` join in `current_user_can_manage_teaching_allocation`.
+- `src/features/teaching-documents/trainer-submission-actions.ts` — Updated `submitTrainerTeachingDocumentAction` to directly mark confirmed documents as `status: 'approved'` with `approved_at`, `approved_by`, and `approved_revision_number`.
+- `src/features/teaching-documents/qa-export.ts` — Updated `DocumentRow` type to support `submitted_revision_number`, query both `approved` and `submitted` documents, and resolve revision numbers with fallback hierarchy.
+
 ### 2026-09-28: Fixed Null UUID Error in QA Examination Pack Export
 
 **Summary:** Fixed a crash (`invalid input syntax for type uuid: "null"`) when downloading QA examination ZIP archives from `/api/teaching-documents/qa-export`. Teaching allocations in an academic period can have unassigned or null `trainer_id` (or `cohort_id`/`unit_id`), which caused raw `null` values to be passed into Supabase PostgREST `.in('id', ids.trainer)` filters. Added `cleanUuidList` helper to filter out nullish, blank, or `"null"` strings across all queries in `createQaExaminationPack` and `getQaExportPageData`, guarded `.in()` queries against empty array requests, and added graceful null checks in loop iterations.

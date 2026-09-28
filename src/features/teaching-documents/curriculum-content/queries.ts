@@ -1,5 +1,6 @@
 import { cache } from 'react';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import {
   findCanonicalCurriculum,
   getUnitCurriculum,
@@ -9,6 +10,7 @@ import {
 } from '@/features/teaching-documents/curriculum-registry';
 import { hasTopicCoverageContamination } from '@/features/teaching-documents/topic-coverage-validation';
 import {
+  normalizeCurriculumLearningOutcomes,
   normalizeCurriculumSubtopics,
   normalizeCurriculumTopicTitle,
   normalizeWeeklySchedule,
@@ -190,12 +192,13 @@ function enrichWithCanonical(
     notReadyMessage: canonical.notReadyMessage,
     unitDescription: !isDescCorrupt && def.unitDescription?.trim() ? def.unitDescription : canonical.unitDescription,
     overallCompetency: !isCompCorrupt && def.overallCompetency?.trim() ? def.overallCompetency : canonical.overallCompetency,
-    learningOutcomes:
+    learningOutcomes: normalizeCurriculumLearningOutcomes(
       def.learningOutcomes &&
       def.learningOutcomes.length > 0 &&
       !def.learningOutcomes.some(isCorruptedText)
         ? def.learningOutcomes
         : (canonical.learningOutcomes ?? []),
+    ),
     references:
       def.references && def.references.length > 0
         ? def.references
@@ -210,7 +213,12 @@ function enrichWithCanonical(
 
 
 export const getCurriculumContentImportBatch = cache(async (batchId: string) => {
-  const supabase = await createClient();
+  let supabase;
+  try {
+    supabase = await createClient();
+  } catch {
+    supabase = createAdminClient();
+  }
   const { data, error } = await supabase
     .from('curriculum_content_import_batches')
     .select('id,original_file_name,status,validation_summary,failure_message,created_at')
@@ -262,7 +270,12 @@ export const getApprovedCurriculumForUnitCode = cache(
     unitName?: string,
     documentType: 'course_outline' | 'scheme_of_work' = 'course_outline',
   ): Promise<UnitCurriculumDefinition> => {
-    const supabase = await createClient();
+    let supabase;
+    try {
+      supabase = await createClient();
+    } catch {
+      supabase = createAdminClient();
+    }
     const targetKey = cleanKey(unitCode);
     const targetNameKey = cleanKey(unitName);
 
@@ -384,9 +397,7 @@ export const getApprovedCurriculumForUnitCode = cache(
               unitName: unitMeta.unitName || resolvedName,
               unitDescription: unitMeta.unitDescription || undefined,
               overallCompetency: unitMeta.coreLearningOutcomes || undefined,
-              learningOutcomes: unitMeta.coreLearningOutcomes
-                ? [unitMeta.coreLearningOutcomes]
-                : [],
+              learningOutcomes: normalizeCurriculumLearningOutcomes(unitMeta.coreLearningOutcomes),
               teachingLearningApproaches: unitMeta.teachingLearningApproaches || undefined,
               assessmentApproaches: unitMeta.assessmentApproaches || undefined,
               references: cleanReferenceList(unitMeta.referencesResources, resolvedCode, resolvedName),

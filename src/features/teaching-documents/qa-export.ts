@@ -6,6 +6,10 @@ import { requireHodAccess } from '@/features/auth/authorization';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 import { createZipArchive } from './zip-archive';
+import { generateTVETCourseOutline, type TVETDocumentHeaderContext } from './tvet-standards';
+import { buildTVETDocumentDocx } from './export-docx';
+import { getApprovedCurriculumForUnitCode } from './curriculum-content/queries';
+import { getAssessmentMilestones } from './assessment-milestones';
 
 const qaDocumentTypes = ['course_outline', 'scheme_of_work'] as const;
 type QaDocumentType = (typeof qaDocumentTypes)[number];
@@ -23,6 +27,8 @@ type AllocationRow = {
   cohort_id: string;
   unit_id: string;
   trainer_id: string;
+  weekly_sessions?: number | null;
+  session_duration_minutes?: number | null;
 };
 type DocumentRow = {
   id: string;
@@ -281,7 +287,7 @@ export async function createQaExaminationPack(
 
   const allocationsResult = await admin
     .from('teaching_allocations')
-    .select('id,academic_period_id,trainer_id,unit_id,cohort_id')
+    .select('id,academic_period_id,trainer_id,unit_id,cohort_id,weekly_sessions,session_duration_minutes')
     .eq('academic_period_id', periodId)
     .in('unit_id', unitIds)
     .in('trainer_id', deptTrainerIds)
@@ -395,7 +401,14 @@ export async function createQaExaminationPack(
     `${line.allocationId}:${line.documentType}`,
     line,
   ]));
-  const downloadTasks: Array<{ line: QaLine; revision: RevisionRow }> = [];
+  const downloadTasks: Array<{
+    line: QaLine;
+    revision: RevisionRow;
+    allocation: AllocationRow;
+    trainer: TrainerRow;
+    unit: UnitRow;
+    cohortName: string;
+  }> = [];
   for (const allocation of allocations) {
     if (!allocation.trainer_id || !allocation.unit_id) continue;
     const trainer = trainerById.get(allocation.trainer_id);
@@ -410,7 +423,7 @@ export async function createQaExaminationPack(
       const revision = revisionByKey.get(`${document.id}:${Number(revNum)}`);
       if (!revision) continue;
       const line = lineByKey.get(`${allocation.id}:${documentType}`);
-      if (line) downloadTasks.push({ line, revision });
+      if (line) downloadTasks.push({ line, revision, allocation, trainer, unit, cohortName });
     }
   }
 
@@ -418,14 +431,59 @@ export async function createQaExaminationPack(
   let unavailableDocuments = 0;
   for (let start = 0; start < downloadTasks.length; start += 6) {
     const batch = downloadTasks.slice(start, start + 6);
-    await Promise.all(batch.map(async ({ line, revision }) => {
-      const result = await admin.storage.from(revision.storage_bucket).download(revision.storage_path);
-      if (result.error || !result.data) {
-        line.status = 'Approved record; file unavailable';
-        line.filePath = '';
-        return;
+    await Promise.all(batch.map(async ({ line, revision, allocation, trainer, unit, cohortName }) => {
+      let file: Buffer | null = null;
+
+      if (line.documentType === 'course_outline') {
+        try {
+          const weeklyHours = Math.max(
+            1,
+            Math.round(
+              ((allocation.weekly_sessions || 2) * (allocation.session_duration_minutes || 120)) / 60,
+            ),
+          );
+          const header: TVETDocumentHeaderContext = {
+            institutionName: 'Department Management System',
+            departmentName: departmentName || 'Department of Human Nutrition and Dietetics',
+            academicPeriodName: period.name,
+            academicPeriodId: period.id,
+            unitCode: unit.code,
+            unitName: unit.name,
+            cohortName,
+            trainerName: trainer.full_name || 'Trainer',
+            totalNominalHours: weeklyHours * 14,
+            weeklyHours,
+          };
+          const [curriculum, milestones] = await Promise.all([
+            getApprovedCurriculumForUnitCode(unit.code, unit.name, 'course_outline'),
+            getAssessmentMilestones(period.id),
+          ]);
+          if (curriculum && curriculum.isAvailable !== false && (curriculum.weeklySchedule?.length ?? 0) > 0) {
+            const courseOutline = generateTVETCourseOutline(header, curriculum, milestones);
+            file = await buildTVETDocumentDocx('course_outline', { courseOutline });
+            admin.storage
+              .from(revision.storage_bucket)
+              .upload(revision.storage_path, file, {
+                upsert: true,
+                contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+              })
+              .catch(() => {});
+          }
+        } catch (err) {
+          console.warn(`Dynamic QA course outline generation failed for ${unit.code}, falling back to storage:`, err);
+        }
       }
-      const file = Buffer.from(await result.data.arrayBuffer());
+
+      if (!file) {
+        const result = await admin.storage.from(revision.storage_bucket).download(revision.storage_path);
+        if (result.error || !result.data) {
+          line.status = 'Approved record; file unavailable';
+          line.filePath = '';
+          return;
+        }
+        file = Buffer.from(await result.data.arrayBuffer());
+      }
+
       totalSourceBytes += file.length;
       if (totalSourceBytes > MAX_ARCHIVE_INPUT_BYTES) {
         throw new Error('This QA pack exceeds the 200 MB export limit. Reduce the source document sizes before trying again.');

@@ -2,11 +2,17 @@ import { describe, expect, it } from 'vitest';
 import {
   getContiguousTopicSpan,
   isCurriculumArtifactToken,
+  normalizeCurriculumLearningOutcomes,
   normalizeCurriculumSubtopics,
   normalizeCurriculumTopicTitle,
   normalizeWeeklySchedule,
   serializeCurriculumSubtopics,
+  stripCurriculumListPrefix,
 } from '@/features/teaching-documents/curriculum-content-normalizer';
+import {
+  cleanTopicTitle,
+  isPureAssessmentTopic,
+} from '@/features/teaching-documents/distribution-engine';
 import { parseCourseOutlineApproaches } from '@/features/teaching-documents/tvet-standards';
 
 describe('curriculum content normalization', () => {
@@ -180,12 +186,80 @@ describe('curriculum content normalization', () => {
     });
   });
 
-  describe('Topic title normalization', () => {
+  describe('Topic title normalization and assessment cleaning', () => {
     it('normalizes numbered topic headings and strips outline prefixes', () => {
       expect(normalizeCurriculumTopicTitle('3.19 Lipids')).toBe('Lipids');
       expect(normalizeCurriculumTopicTitle('1-2 Carbohydrate Metabolism')).toBe('Carbohydrate Metabolism');
       expect(normalizeCurriculumTopicTitle('Topic 1: Introduction to Biochemistry')).toBe('Introduction to Biochemistry');
       expect(normalizeCurriculumTopicTitle('Week 3: Protein Synthesis (Part 1)')).toBe('Protein Synthesis');
+    });
+
+    it('identifies End Term Examination and variants as pure assessment topics', () => {
+      expect(isPureAssessmentTopic('End Term Examination')).toBe(true);
+      expect(isPureAssessmentTopic('End-Term Examination')).toBe(true);
+      expect(isPureAssessmentTopic('End Term Exam')).toBe(true);
+      expect(isPureAssessmentTopic('End of Term Examination')).toBe(true);
+      expect(isPureAssessmentTopic('Summative Examination')).toBe(true);
+      expect(isPureAssessmentTopic('Continuous Assessment Test (CAT)')).toBe(true);
+      expect(isPureAssessmentTopic('Enzymes')).toBe(false);
+      expect(isPureAssessmentTopic('Carbohydrate Metabolism')).toBe(false);
+    });
+
+    it('cleans compound assessment suffixes in cleanTopicTitle', () => {
+      expect(cleanTopicTitle('Enzymes & End Term Examination')).toBe('Enzymes');
+      expect(cleanTopicTitle('Enzymes and Final Examination')).toBe('Enzymes');
+      expect(cleanTopicTitle('Carbohydrate Metabolism (CAT)')).toBe('Carbohydrate Metabolism');
+      expect(cleanTopicTitle('Protein Metabolism (RAT 1)')).toBe('Protein Metabolism');
+    });
+  });
+
+  describe('Section 2: Learning outcomes discrete splitting and normalization', () => {
+    it('splits a single blob of numbered learning outcomes into discrete items', () => {
+      const blob =
+        '1. Explain the biochemical concepts and metabolism of biomolecules. 2. Describe carbohydrate and protein metabolic pathways. 3. Discuss clinical conditions associated with inborn errors of metabolism.';
+      const result = normalizeCurriculumLearningOutcomes(blob);
+      expect(result).toEqual([
+        'Explain the biochemical concepts and metabolism of biomolecules.',
+        'Describe carbohydrate and protein metabolic pathways.',
+        'Discuss clinical conditions associated with inborn errors of metabolism.',
+      ]);
+    });
+
+    it('strips introductory clauses before splitting outcomes', () => {
+      const blob =
+        'By the end of the unit, the trainee should be able to: 1. Apply nutritional principles in disease management. 2. Formulate therapeutic diets for metabolic conditions.';
+      const result = normalizeCurriculumLearningOutcomes(blob);
+      expect(result).toEqual([
+        'Apply nutritional principles in disease management.',
+        'Formulate therapeutic diets for metabolic conditions.',
+      ]);
+    });
+
+    it('handles arrays of outcomes and preserves discrete entries', () => {
+      const input = [
+        '1. Explain the role of enzymes in metabolic regulation',
+        '2. Analyze lipid profiles and cardiovascular risk',
+      ];
+      const result = normalizeCurriculumLearningOutcomes(input);
+      expect(result).toEqual([
+        'Explain the role of enzymes in metabolic regulation',
+        'Analyze lipid profiles and cardiovascular risk',
+      ]);
+    });
+  });
+
+  describe('Tightened list prefix rules', () => {
+    it('preserves uppercase domain acronyms like "ATP: production" without stripping "ATP"', () => {
+      expect(stripCurriculumListPrefix('ATP: production and regulation')).toBe('ATP: production and regulation');
+      expect(stripCurriculumListPrefix('DNA: structure and replication')).toBe('DNA: structure and replication');
+      expect(stripCurriculumListPrefix('BMI: classification and assessment')).toBe('BMI: classification and assessment');
+    });
+
+    it('strips "1-2 Meaning of terms" while preserving "1–2 μg/day recommended intake"', () => {
+      expect(stripCurriculumListPrefix('1-2 Meaning of terms')).toBe('Meaning of terms');
+      expect(stripCurriculumListPrefix('1–2 Overview of metabolism')).toBe('Overview of metabolism');
+      expect(stripCurriculumListPrefix('1–2 μg/day recommended intake')).toBe('1–2 μg/day recommended intake');
+      expect(stripCurriculumListPrefix('10-15 mg/100g')).toBe('10-15 mg/100g');
     });
   });
 });

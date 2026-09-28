@@ -45,6 +45,9 @@ export function isCurriculumArtifactToken(value: string): boolean {
   return false;
 }
 
+const MEASUREMENT_UNIT_REGEX =
+  /^(?:μg|ug|mg|g|kg|ml|l|dl|mmol|mol|kcal|cal|kj|cm|mm|m|hours?|hrs?|days?|weeks?|months?|years?|pts?|points?|%|percent)\b/i;
+
 /** Remove Word/list formatting from the beginning of one curriculum item. */
 export function stripCurriculumListPrefix(value: string): string {
   let text = value.replace(/^\uFEFF/, '').trim();
@@ -56,8 +59,9 @@ export function stripCurriculumListPrefix(value: string): string {
     text = text
       // Leading bullets
       .replace(new RegExp(`^${BULLET_CHARS}+\\s*`, 'u'), '')
-      // List markers with delimiter: 1., 1), (1), [1], 1 - , 1: , a., a), (a), i., etc.
-      .replace(/^\(?[A-Za-z0-9]{1,3}[.):\]\-–—]\s+/u, '')
+      // List markers with delimiter: 1., 1), (1), [1], 1: ; single letter a., a), (a); or roman numerals i., ii., (iii)
+      // Strictly excludes multi-letter uppercase tokens like "ATP:" or "DNA:".
+      .replace(/^(?:\(?\d{1,3}[.):\]\-–—]|\(?[a-zA-Z][.):\]\-–—]|\(?[ivxIVX]{1,4}[.):\]\-–—])\s+/u, '')
       // Multi-level list numbering: 1.2, 1.2.3, 1.2a followed by delimiter or space
       .replace(/^\d+(?:\.\d+)+(?:[A-Za-z])?[.):\-–—]?\s+/u, '')
       // Imported range followed by delimiter or bullet: 1-2:, 1-2., 1-2), 1-2 - , or 1-2 before bullet
@@ -65,6 +69,13 @@ export function stripCurriculumListPrefix(value: string): string {
       // Isolated range if the entire string is just the range (e.g. "1-2")
       .replace(/^\d+\s*[-–—]\s*\d+$/u, '')
       .trim();
+
+    // Range prefix followed by space and word (e.g. "1-2 Meaning of terms"):
+    // Strip ONLY if the word is NOT a recognized measurement unit (preserves "1–2 μg/day recommended intake")
+    const rangeMatch = text.match(/^(\d+\s*[-–—]\s*\d+)\s+([A-Za-zμ%]+)/u);
+    if (rangeMatch && !MEASUREMENT_UNIT_REGEX.test(rangeMatch[2])) {
+      text = text.slice(rangeMatch[1].length).trim();
+    }
 
     if (text === before) break;
   }
@@ -132,6 +143,73 @@ export function normalizeCurriculumSubtopics(input?: string | string[] | null): 
 /** Store canonical subtopics as one item per physical line. */
 export function serializeCurriculumSubtopics(input?: string | string[] | null): string {
   return normalizeCurriculumSubtopics(input).join('\n');
+}
+
+/**
+ * Splits and normalizes curriculum learning outcomes into discrete statements.
+ * Prevents multiple numbered outcomes from being concatenated into a single blob.
+ */
+export function normalizeCurriculumLearningOutcomes(
+  input?: string | string[] | null,
+): string[] {
+  if (input === null || input === undefined) return [];
+
+  const rawValues = Array.isArray(input) ? input : [input];
+  const outcomes: string[] = [];
+
+  for (const rawValue of rawValues) {
+    if (!rawValue) continue;
+    const text = String(rawValue).replace(/\r\n?/g, '\n').trim();
+    if (!text) continue;
+
+    const lines = text.split(/\n+/u);
+
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      if (!trimmedLine) continue;
+
+      // Split inline numbered list items: e.g. "1. Explain... 2. Describe..." or "(a) Explain... (b) Describe..."
+      const withSeparators = trimmedLine
+        .replace(/\s+(?=(?:\d{1,2}[.)]|\([0-9a-zA-Z]{1,2}\))\s+[A-Z])/gu, '\n')
+        .replace(new RegExp(`\\s*(?=${BULLET_CHARS})`, 'gu'), '\n');
+
+      const parts = withSeparators.split(/\n+/u);
+      for (const part of parts) {
+        const cleaned = stripCurriculumListPrefix(part);
+        if (!cleaned) continue;
+
+        // Skip pure introductory sentences that contain no actual outcome statement
+        if (
+          /^(?:by\s+the\s+end\s+of\s+.*?(?:able\s+to|will|competencies)|at\s+the\s+end\s+of\s+.*?(?:able\s+to|will|competencies)|the\s+(?:trainee|learner|student)\s+should\s+be\s+able\s+to|expected\s+learning\s+outcomes?|course\s+learning\s+outcomes?|specific\s+learning\s+outcomes?)\s*[:.]?$/i.test(
+            cleaned,
+          )
+        ) {
+          continue;
+        }
+
+        // If the item starts with an intro clause followed by colon, e.g.
+        // "By the end of the unit, the trainee should be able to: Explain...", strip the intro clause
+        const strippedIntro = cleaned.replace(
+          /^(?:by\s+the\s+end\s+of\s+[^:]+:\s*|at\s+the\s+end\s+of\s+[^:]+:\s*)/i,
+          '',
+        ).trim();
+
+        const finalItem = strippedIntro || cleaned;
+        if (finalItem && !isCurriculumArtifactToken(finalItem)) {
+          outcomes.push(finalItem.charAt(0).toUpperCase() + finalItem.slice(1));
+        }
+      }
+    }
+  }
+
+  // Preserve order while filtering duplicates
+  const seen = new Set<string>();
+  return outcomes.filter((item) => {
+    const key = item.replace(/\s+/g, ' ').trim().toLowerCase();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 /** Clean a topic heading without touching legitimate punctuation inside it. */

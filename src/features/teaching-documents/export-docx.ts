@@ -19,7 +19,11 @@ import {
   WidthType,
 } from 'docx';
 
-import { getContiguousTopicSpan, normalizeWeeklySchedule } from './curriculum-content-normalizer';
+import {
+  getContiguousTopicSpan,
+  normalizeCurriculumLearningOutcomes,
+  normalizeWeeklySchedule,
+} from './curriculum-content-normalizer';
 import {
   parseActivitiesList,
   parseCourseOutlineApproaches,
@@ -327,7 +331,8 @@ export async function buildTVETDocumentDocx(
 
     // Section 2: Summary of Learning Outcomes
     children.push(sectionHeader('2', 'Summary of Learning Outcomes (Core Competencies)'));
-    co.learningOutcomes.forEach((lo, i) => {
+    const learningOutcomes = normalizeCurriculumLearningOutcomes(co.learningOutcomes);
+    learningOutcomes.forEach((lo, i) => {
       children.push(
         new Paragraph({
           spacing: { before: 20, after: 40, line: 240 },

@@ -56,15 +56,33 @@ export function isPureAssessmentTopic(title: string): boolean {
   return (
     t.includes('continuous assessment test') ||
     t.includes('summative examination') ||
+    t.includes('summative exam') ||
     t.includes('mid-term examination') ||
+    t.includes('mid term examination') ||
     t.includes('mid-term review') ||
     t.includes('end of term examination') ||
+    t.includes('end-of-term examination') ||
+    t.includes('end term examination') ||
+    t.includes('end-term examination') ||
+    t.includes('end of term exam') ||
+    t.includes('end-of-term exam') ||
+    t.includes('end term exam') ||
+    t.includes('end-term exam') ||
+    t.includes('end of semester examination') ||
+    t.includes('end-of-semester examination') ||
+    t.includes('end semester examination') ||
+    t.includes('end-semester examination') ||
+    t.includes('end of semester exam') ||
+    t.includes('end-of-semester exam') ||
+    t.includes('end semester exam') ||
+    t.includes('end-semester exam') ||
     t.includes('supervised final') ||
     t.includes('course evaluation') ||
     /^cat\b/i.test(t) ||
     /^rat\b/i.test(t) ||
-    /^mid-term\s+/i.test(t) ||
-    /^(?:final|supervised\s+final|comprehensive\s+final)/i.test(t)
+    /^mid[\s-]+term\b/i.test(t) ||
+    /^end[\s-]+(?:of[\s-]+)?(?:term|semester)\b/i.test(t) ||
+    /^(?:final|supervised\s+final|comprehensive\s+final|summative)/i.test(t)
   );
 }
 
@@ -82,7 +100,13 @@ export function stripTopicFigures(text: string): string {
 }
 
 export function cleanTopicTitle(title: string): string {
-  const withoutAssessmentSuffix = title.replace(/\s*\((?:RAT\s*\d*|CAT)\)\s*$/i, '').trim();
+  const withoutAssessmentSuffix = title
+    .replace(
+      /\s*(?:&|\band\b)\s*(?:end[\s-]+(?:of[\s-]+)?(?:term|semester)[\s-]*(?:exam(?:ination)?)?|final[\s-]+exam(?:ination)?|continuous[\s-]+assessment[\s-]+test|summative[\s-]+exam(?:ination)?)\s*$/i,
+      '',
+    )
+    .replace(/\s*\((?:RAT\s*\d*|CAT|EXAM)\)\s*$/i, '')
+    .trim();
   return normalizeCurriculumTopicTitle(withoutAssessmentSuffix);
 }
 

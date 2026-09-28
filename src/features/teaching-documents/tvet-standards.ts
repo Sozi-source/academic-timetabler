@@ -1,7 +1,11 @@
 import { getUnitCurriculum, type UnitCurriculumDefinition } from './curriculum-registry';
 import { distributeTopicsAcrossWeeks } from './distribution-engine';
 import { DEFAULT_ASSESSMENT_MILESTONES, type AssessmentMilestones } from './assessment-milestones';
-import { isCurriculumArtifactToken, normalizeCurriculumSubtopics } from './curriculum-content-normalizer';
+import {
+  isCurriculumArtifactToken,
+  normalizeCurriculumLearningOutcomes,
+  normalizeCurriculumSubtopics,
+} from './curriculum-content-normalizer';
 
 export interface TVETDocumentHeaderContext {
   institutionName: string;
@@ -124,7 +128,7 @@ export function generateTVETCourseOutline(
     notReadyMessage,
     unitDescription: source.unitDescription ?? '',
     overallCompetency: source.overallCompetency ?? '',
-    learningOutcomes: source.learningOutcomes ?? [],
+    learningOutcomes: normalizeCurriculumLearningOutcomes(source.learningOutcomes),
     weeklySchedule: distributed.map((d) => {
       const isCat = d.weekNumber === effectiveMilestones.catWeek;
       const isExam = d.weekNumber === effectiveMilestones.examWeek;

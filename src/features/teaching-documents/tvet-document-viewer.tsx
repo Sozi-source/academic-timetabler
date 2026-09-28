@@ -29,7 +29,11 @@ import {
   submitTrainerTeachingDocumentAction,
   type TeachingDocumentStatusInfo,
 } from './trainer-submission-actions';
-import { getContiguousTopicSpan, normalizeWeeklySchedule } from './curriculum-content-normalizer';
+import {
+  getContiguousTopicSpan,
+  normalizeCurriculumLearningOutcomes,
+  normalizeWeeklySchedule,
+} from './curriculum-content-normalizer';
 import {
   parseActivitiesList,
   parseCourseOutlineApproaches,
@@ -554,7 +558,7 @@ export function TVETDocumentViewer({
               <section>
                 <SectionHeading number="2" title="Summary of Learning Outcomes (Core Competencies)" />
                 <ul className="mt-2.5 space-y-1.5 text-slate-800">
-                  {courseOutline.learningOutcomes.map((lo, i) => (
+                  {normalizeCurriculumLearningOutcomes(courseOutline.learningOutcomes).map((lo, i) => (
                     <li key={i} className="flex gap-2">
                       <span className="shrink-0 mt-0.5 flex size-4 items-center justify-center rounded border border-slate-900 bg-slate-100 text-[10px] font-black text-slate-900">{i + 1}</span>
                       <span className="leading-relaxed">{lo}</span>

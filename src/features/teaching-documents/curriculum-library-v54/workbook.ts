@@ -1,4 +1,9 @@
 import ExcelJS from 'exceljs';
+import {
+  normalizeCurriculumLearningOutcomes,
+  normalizeCurriculumSubtopics,
+  normalizeCurriculumTopicTitle,
+} from '@/features/teaching-documents/curriculum-content-normalizer';
 
 export interface CurriculumLibraryWorkbookRecordV54 {
   documentType:
@@ -77,9 +82,9 @@ export async function buildCurriculumLibraryWorkbookV54(
     text(
       unit.unitDescription,
     ),
-    text(
-      unit.coreLearningOutcomes,
-    ),
+    normalizeCurriculumLearningOutcomes(
+      text(unit.coreLearningOutcomes),
+    ).join('\n'),
     text(
       unit.teachingLearningApproaches,
     ),
@@ -131,8 +136,8 @@ export async function buildCurriculumLibraryWorkbookV54(
       Number(
         item.sequence ?? 0,
       ),
-      text(item.topic),
-      text(item.coverage),
+      normalizeCurriculumTopicTitle(text(item.topic)),
+      normalizeCurriculumSubtopics(text(item.coverage)).join(' · '),
     ];
 
     if (

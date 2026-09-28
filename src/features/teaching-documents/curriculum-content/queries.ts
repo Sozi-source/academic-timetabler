@@ -8,6 +8,7 @@ import {
   type UnitCurriculumDefinition,
 } from '@/features/teaching-documents/curriculum-registry';
 import { hasTopicCoverageContamination } from '@/features/teaching-documents/topic-coverage-validation';
+import { normalizeWeeklySchedule } from '@/features/teaching-documents/curriculum-content-normalizer';
 
 function isCorruptedText(text?: string | null): boolean {
   if (!text) return false;
@@ -134,19 +135,23 @@ function enrichWithCanonical(
     };
   }
 
+  // Normalize legacy/imported payloads at the read boundary too. This makes
+  // older active versions safe without requiring an immediate DB migration.
+  const normalizedDefSchedule = normalizeWeeklySchedule(def.weeklySchedule);
+
   const isDescCorrupt = isCorruptedText(def.unitDescription);
   const isCompCorrupt = isCorruptedText(def.overallCompetency);
-  const isScheduleCorrupt = def.weeklySchedule?.some(
+  const isScheduleCorrupt = normalizedDefSchedule?.some(
     (w) => isCorruptedText(w.topicTitle) || isCorruptedText(w.specificLearningOutcomes)
   ) || hasTopicCoverageContamination(
-    (def.weeklySchedule ?? []).map((week) => ({
+    (normalizedDefSchedule ?? []).map((week) => ({
       topic: week.topicTitle,
       coverage: week.subTopics.join('\n'),
     })),
   );
 
   // Authoritative schedules (uploaded by user/HOD or trainer) MUST NOT be overwritten by canonical defaults
-  let weeklySchedule = def.weeklySchedule;
+  let weeklySchedule = normalizedDefSchedule;
   const canonicalSchedule = canonical.weeklySchedule;
 
   if (isAuthoritative && weeklySchedule && weeklySchedule.length > 0 && !isScheduleCorrupt) {
@@ -190,7 +195,7 @@ function enrichWithCanonical(
       def.instructionalEquipment && def.instructionalEquipment.length > 0
         ? def.instructionalEquipment
         : (canonical.instructionalEquipment ?? []),
-    weeklySchedule: weeklySchedule || canonical.weeklySchedule,
+    weeklySchedule: normalizeWeeklySchedule(weeklySchedule || canonical.weeklySchedule),
   };
 }
 

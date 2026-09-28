@@ -19,6 +19,7 @@ import {
   WidthType,
 } from 'docx';
 
+import { getContiguousTopicSpan, normalizeWeeklySchedule } from './curriculum-content-normalizer';
 import {
   parseActivitiesList,
   parseCourseOutlineApproaches,
@@ -105,6 +106,7 @@ function cell(
     color?: string;
     widthPct?: number;
     isHeader?: boolean;
+    rowSpan?: number;
   } = {},
 ) {
   const paragraphs: Paragraph[] = Array.isArray(content)
@@ -130,6 +132,7 @@ function cell(
     shading: { fill: options.fill ?? (options.isHeader ? 'E2E8F0' : 'FFFFFF') },
     margins: { top: 60, bottom: 60, left: 80, right: 80 },
     width: options.widthPct ? { size: options.widthPct, type: WidthType.PERCENTAGE } : undefined,
+    rowSpan: options.rowSpan,
     children: paragraphs,
   });
 }
@@ -337,7 +340,9 @@ export async function buildTVETDocumentDocx(
     });
 
     // Section 3: 14-Week Topical Breakdown Table
-    if (co.weeklySchedule.length === 0) {
+    // Keep weekly records intact, but normalize legacy content before rendering.
+    const courseOutlineSchedule = normalizeWeeklySchedule(co.weeklySchedule);
+    if (courseOutlineSchedule.length === 0) {
       children.push(
         p('NOTICE: Curriculum content for this unit is currently pending official TVET syllabus ingestion. Course outline topics and weekly schedules have not yet been published by the department.', {
           bold: true,
@@ -361,9 +366,10 @@ export async function buildTVETDocumentDocx(
                 cell('Hours', { isHeader: true, align: AlignmentType.CENTER, widthPct: 8 }),
               ],
             }),
-            ...co.weeklySchedule.map((sched, idx) => {
+            ...courseOutlineSchedule.map((sched, idx) => {
               const fill = idx % 2 === 1 ? ZEBRA_BG : 'FFFFFF';
               const subList = parseCourseOutlineSubtopics(sched.subTopics);
+              const topicSpan = getContiguousTopicSpan(courseOutlineSchedule, idx);
               const subParagraphs: Paragraph[] =
                 subList.length > 0
                   ? subList.map(
@@ -389,14 +395,16 @@ export async function buildTVETDocumentDocx(
                       }),
                     ];
 
-              return new TableRow({
-                children: [
-                  cell(`W${sched.weekNumber}`, { align: AlignmentType.CENTER, bold: true, color: PRIMARY_DARK, fill, widthPct: 8 }),
-                  cell(sched.topicTitle, { bold: true, fill, widthPct: 32 }),
-                  cell(subParagraphs, { fill, widthPct: 52 }),
-                  cell(`${sched.hours} hrs`, { align: AlignmentType.CENTER, fill, widthPct: 8 }),
-                ],
-              });
+              const rowCells = [
+                cell(`W${sched.weekNumber}`, { align: AlignmentType.CENTER, bold: true, color: PRIMARY_DARK, fill, widthPct: 8 }),
+                ...(topicSpan.isStart
+                  ? [cell(sched.topicTitle, { bold: true, fill, widthPct: 32, rowSpan: topicSpan.rowSpan })]
+                  : []),
+                cell(subParagraphs, { fill, widthPct: 52 }),
+                cell(`${sched.hours} hrs`, { align: AlignmentType.CENTER, fill, widthPct: 8 }),
+              ];
+
+              return new TableRow({ children: rowCells });
             }),
           ],
         }),

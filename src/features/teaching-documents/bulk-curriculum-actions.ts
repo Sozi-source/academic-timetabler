@@ -15,6 +15,7 @@ import {
   TVET_CURRICULUM_REGISTRY,
 } from './curriculum-registry';
 import { hasTopicCoverageContamination } from './topic-coverage-validation';
+import { normalizeCurriculumSubtopics, normalizeCurriculumTopicTitle, serializeCurriculumSubtopics } from './curriculum-content-normalizer';
 import { isCurriculumDocumentType } from './curriculum-document-types';
 
 /**
@@ -215,8 +216,8 @@ export async function commitBulkCourseOutlinesAction(
     // 3. Format topics into authoritative content structure
     const formattedContent = item.topics.map((t, idx) => ({
       sequence: t.sequence || (idx + 1),
-      topic: t.topic.trim(),
-      coverage: t.coverage.trim(),
+      topic: normalizeCurriculumTopicTitle(t.topic),
+      coverage: serializeCurriculumSubtopics(t.coverage),
       hours: t.hours,
       learningOutcomes: t.learningOutcomes?.trim() || '',
       activities: t.activities?.trim() || '',
@@ -278,8 +279,8 @@ export async function commitBulkCourseOutlinesAction(
       learningOutcomes: item.coreLearningOutcomes ? [item.coreLearningOutcomes] : [],
       weeklySchedule: formattedContent.map((t) => ({
         weekNumber: t.sequence,
-        topicTitle: t.topic,
-        subTopics: t.coverage.split(/\s*[·;]\s*/).filter(Boolean),
+        topicTitle: normalizeCurriculumTopicTitle(t.topic),
+        subTopics: normalizeCurriculumSubtopics(t.coverage),
         hours: t.hours,
         resourcesAndReferences: t.resources,
       })),

@@ -29,6 +29,7 @@ import {
   submitTrainerTeachingDocumentAction,
   type TeachingDocumentStatusInfo,
 } from './trainer-submission-actions';
+import { getContiguousTopicSpan, normalizeWeeklySchedule } from './curriculum-content-normalizer';
 import {
   parseActivitiesList,
   parseCourseOutlineApproaches,
@@ -89,6 +90,8 @@ export function TVETDocumentViewer({
   if (!header) {
     return <div className="p-4 text-sm text-slate-600">Document details unavailable.</div>;
   }
+
+  const courseOutlineSchedule = normalizeWeeklySchedule(courseOutline?.weeklySchedule ?? []);
 
   const isDocumentReady =
     type === 'record_of_work'
@@ -573,23 +576,29 @@ export function TVETDocumentViewer({
                     </tr>
                   </thead>
                   <tbody>
-                    {courseOutline.weeklySchedule.map((sched, idx) => {
+                    {courseOutlineSchedule.map((sched, idx) => {
                       const allSubtopics = parseCourseOutlineSubtopics(sched.subTopics);
+                      const topicSpan = getContiguousTopicSpan(courseOutlineSchedule, idx);
 
                       return (
                         <tr key={sched.weekNumber} className={idx % 2 === 0 ? 'bg-white align-top' : 'bg-slate-50 align-top'}>
                           <td className="border border-slate-300 px-2 py-2 text-center font-black text-slate-900">
                             W{sched.weekNumber}
                           </td>
-                          <td className="border border-slate-300 px-3 py-2 font-bold text-slate-900 leading-snug">
-                            {sched.topicTitle}
-                          </td>
+                          {topicSpan.isStart && (
+                            <td
+                              rowSpan={topicSpan.rowSpan}
+                              className="border border-slate-300 px-3 py-2 align-middle font-bold text-slate-900 leading-snug"
+                            >
+                              {sched.topicTitle}
+                            </td>
+                          )}
                           <td className="border border-slate-300 px-3 py-2 text-slate-800 leading-relaxed">
                             {allSubtopics.length > 0 ? (
-                              <ul className="space-y-1">
+                              <ul className="m-0 space-y-1.5 p-0">
                                 {allSubtopics.map((sub, sIdx) => (
-                                  <li key={sIdx} className="flex items-start gap-1.5">
-                                    <span className="shrink-0 text-slate-900 font-bold">•</span>
+                                  <li key={sIdx} className="block leading-snug">
+                                    <span className="font-bold text-slate-900">• </span>
                                     <span>{sub.trim()}</span>
                                   </li>
                                 ))}

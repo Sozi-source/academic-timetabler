@@ -3,7 +3,7 @@ import { unpackZipBuffer } from './zip-ingestion';
 import { parseDocxSyllabus } from './curriculum-editor/docx-parser';
 import { normalizeUnitCodeKey } from './curriculum-registry';
 import { hasTopicCoverageContamination } from './topic-coverage-validation';
-import { stripTopicFigures } from './distribution-engine';
+import { normalizeCurriculumSubtopics, normalizeCurriculumTopicTitle, serializeCurriculumSubtopics } from './curriculum-content-normalizer';
 import {
   inferCurriculumDocumentType,
   type CurriculumDocumentType,
@@ -302,8 +302,10 @@ export async function parseBulkCourseOutlineWorkbook(
 
           unit.topics.push({
             sequence,
-            topic: stripTopicFigures(topicTitle) || `Topic ${sequence}`,
-            coverage: coverage ? stripTopicFigures(coverage) : (stripTopicFigures(topicTitle) || `Topic ${sequence}`),
+            topic: normalizeCurriculumTopicTitle(topicTitle) || `Topic ${sequence}`,
+            coverage: coverage
+              ? serializeCurriculumSubtopics(coverage)
+              : serializeCurriculumSubtopics(topicTitle) || `Topic ${sequence}`,
             hours: !isNaN(hoursVal as number) ? hoursVal : undefined,
             learningOutcomes: colMap.outcomes ? cleanCell(row.getCell(colMap.outcomes).value) : undefined,
             activities: colMap.activities ? cleanCell(row.getCell(colMap.activities).value) : undefined,
@@ -450,8 +452,8 @@ export async function parseBulkCourseOutlineZip(
         references: parsed.references,
         topics: parsed.topics.map((t, idx) => ({
           sequence: idx + 1,
-          topic: t.topicTitle,
-          coverage: t.subTopics,
+          topic: normalizeCurriculumTopicTitle(t.topicTitle),
+          coverage: serializeCurriculumSubtopics(t.subTopics),
         })),
       };
 

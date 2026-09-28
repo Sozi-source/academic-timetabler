@@ -1,4 +1,5 @@
 import { DEFAULT_ASSESSMENT_MILESTONES, type AssessmentMilestones } from './assessment-milestones';
+import { normalizeCurriculumSubtopics, normalizeCurriculumTopicTitle } from './curriculum-content-normalizer';
 import type { UnitCurriculumDefinition } from './curriculum-registry';
 
 type UnitWeeklyScheduleItem =
@@ -68,14 +69,16 @@ export function isPureAssessmentTopic(title: string): boolean {
 }
 
 export function stripTopicFigures(text: string): string {
-  return text
-    .replace(/(?:^|\s*&\s*|\b)\d+(?:\.\d+)+(?:[a-zA-Z])?\s*/g, (match) => {
-      if (match.includes('&')) return ' & ';
-      return '';
-    })
-    .replace(/\s*&\s*$/, '')
-    .replace(/^\s*&\s*/, '')
-    .trim();
+  return normalizeCurriculumTopicTitle(
+    text
+      .replace(/(?:^|\s*&\s*|\b)\d+(?:\.\d+)+(?:[a-zA-Z])?\s*/g, (match) => {
+        if (match.includes('&')) return ' & ';
+        return '';
+      })
+      .replace(/\s*&\s*$/, '')
+      .replace(/^\s*&\s*/, '')
+      .trim(),
+  );
 }
 
 export function cleanTopicTitle(title: string): string {
@@ -103,12 +106,12 @@ export function distributeTopicsAcrossWeeks(
     .map((t, idx) => {
       const rawTitle = (t as any).topicTitle || (t as any).topic || `Topic ${idx + 1}`;
       const topicTitle = cleanTopicTitle(rawTitle);
-      const rawSubs = Array.isArray((t as any).subTopics)
+      const rawSubs = Array.isArray((t as any).subTopics) || typeof (t as any).subTopics === 'string'
         ? (t as any).subTopics
         : typeof (t as any).coverage === 'string'
-        ? (t as any).coverage.split(/\s*[·;]\s*/).filter(Boolean)
+        ? (t as any).coverage
         : [];
-      const subTopics = rawSubs.filter((st: string) => !/continuous assessment|rat\s*\d/i.test(st));
+      const subTopics = normalizeCurriculumSubtopics(rawSubs).filter((st) => !/continuous assessment|rat\s*\d/i.test(st));
       let slo = (t as any).specificLearningOutcomes || (t as any).learningOutcomes || '';
       slo = stripTopicFigures(slo.replace(/\s*\((?:RAT\s*\d*|CAT)\)/gi, '')).trim();
 
@@ -195,9 +198,12 @@ export function distributeTopicsAcrossWeeks(
       for (let part = 0; part < allocatedWeeks; part++) {
         const weekNum = teachingWeeks[teachingWeekPtr++];
         const partSubtopics = subtopicChunks[part] || [];
-        const partSuffix = allocatedWeeks > 1 ? ` (Part ${part + 1})` : '';
-        const effectiveSubtopics = partSubtopics.length > 0 ? partSubtopics : (topic.subTopics ?? []);
-        const partTitle = `${topic.topicTitle}${partSuffix}`;
+        // Keep the real topic title identical across allocated weeks. The
+        // presentation layer merges contiguous identical topic cells; adding
+        // `(Part X)` here prevents that merge and makes the course outline
+        // look like the topic is changing when only its coverage is changing.
+        const effectiveSubtopics = partSubtopics;
+        const partTitle = topic.topicTitle;
 
         result.push({
           weekNumber: weekNum,

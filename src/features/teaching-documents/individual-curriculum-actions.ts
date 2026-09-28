@@ -9,8 +9,8 @@ import {
 } from './curriculum-document-types';
 import { parseDocxSyllabus } from './curriculum-editor/docx-parser';
 import { normalizeUnitCodeKey, TVET_CURRICULUM_REGISTRY } from './curriculum-registry';
-import { stripTopicFigures } from './distribution-engine';
 import { hasTopicCoverageContamination } from './topic-coverage-validation';
+import { normalizeCurriculumSubtopics, normalizeCurriculumTopicTitle, serializeCurriculumSubtopics } from './curriculum-content-normalizer';
 
 export interface IndividualTopicItem {
   sequence: number;
@@ -124,8 +124,8 @@ export async function parseIndividualCurriculumAction(
       const issues: string[] = [];
       const topics: IndividualTopicItem[] = parsed.topics.map((t, idx) => ({
         sequence: idx + 1,
-        topicTitle: stripTopicFigures(t.topicTitle),
-        subTopics: t.subTopics,
+        topicTitle: normalizeCurriculumTopicTitle(t.topicTitle),
+        subTopics: serializeCurriculumSubtopics(t.subTopics),
       }));
 
       if (
@@ -198,8 +198,8 @@ export async function parseIndividualCurriculumAction(
           if (!isNaN(seq) && col2) {
             topics.push({
               sequence: seq,
-              topicTitle: stripTopicFigures(col2),
-              subTopics: col3 || col2,
+              topicTitle: normalizeCurriculumTopicTitle(col2),
+              subTopics: serializeCurriculumSubtopics(col3 || col2),
             });
           }
 
@@ -364,8 +364,8 @@ export async function publishIndividualCurriculumAction(
     // 3. Construct structured payload
     const formattedContent = payload.topics.map((t, idx) => ({
       sequence: t.sequence || idx + 1,
-      topic: t.topicTitle.trim(),
-      coverage: t.subTopics.trim(),
+      topic: normalizeCurriculumTopicTitle(t.topicTitle),
+      coverage: serializeCurriculumSubtopics(t.subTopics),
       hours: t.hours,
       learningOutcomes: t.learningOutcomes?.trim() || '',
       activities: t.activities?.trim() || '',
@@ -437,8 +437,8 @@ export async function publishIndividualCurriculumAction(
         : [],
       weeklySchedule: formattedContent.map((t) => ({
         weekNumber: t.sequence,
-        topicTitle: t.topic,
-        subTopics: t.coverage.split(/\s*[·;]\s*/).filter(Boolean),
+        topicTitle: normalizeCurriculumTopicTitle(t.topic),
+        subTopics: normalizeCurriculumSubtopics(t.coverage),
         hours: t.hours,
         resourcesAndReferences: t.resources,
       })),

@@ -1,5 +1,6 @@
 import { unpackZipBuffer } from '../zip-ingestion';
 import { stripTopicFigures } from '../distribution-engine';
+import { normalizeCurriculumSubtopics, serializeCurriculumSubtopics } from '../curriculum-content-normalizer';
 
 export interface ParsedDocxSyllabus {
   unitCode?: string;
@@ -210,7 +211,10 @@ export function parseDocxSyllabus(docxBuffer: Buffer, fileName?: string): Parsed
               return textMatches.map((t) => t.replace(/<[^>]+>/g, '')).join('').trim();
             })
             .filter(Boolean);
-          cells.push(cleanXmlString(pTexts.join(' · ')));
+          // Preserve Word paragraph/list boundaries. Flattening these with a
+          // middle-dot loses the distinction between separate subtopics and
+          // allows Word's numbering/bullet formatting to leak into data.
+          cells.push(cleanXmlString(pTexts.join('\n')));
         }
 
         if (cells.length >= 2) rows.push(cells);
@@ -293,24 +297,22 @@ export function parseDocxSyllabus(docxBuffer: Buffer, fileName?: string): Parsed
         }
 
         if (topicTitle && topicTitle.length > 1) {
-          // Filter candidate cells to exclude methodology and reference citations
+          // Filter candidate cells to exclude methodology/reference content, then
+          // run every remaining value through the single canonical normalizer.
+          // This removes Word bullets and numbering such as `1-2` and keeps one
+          // curriculum point per physical line in storage.
           const validSubtopicParts: string[] = [];
           for (const c of candidateCells) {
-            if (isMethodologyOrActivity(c) || isReferenceCitation(c)) {
-              continue;
-            }
-            // Split cell on dots or newlines or camelCase word boundaries
-            const parts = c.split(/\s*[·;\n\r]\s*/).filter(Boolean);
-            for (const part of parts) {
+            if (isMethodologyOrActivity(c) || isReferenceCitation(c)) continue;
+
+            for (const part of normalizeCurriculumSubtopics(c)) {
               if (!isMethodologyOrActivity(part) && !isReferenceCitation(part)) {
-                // Split on Title Case boundaries if subtopics were merged without delimiters
-                const subPhrases = splitJoinedSubtopics(part);
-                validSubtopicParts.push(...subPhrases);
+                validSubtopicParts.push(part);
               }
             }
           }
 
-          const subTopics = validSubtopicParts.join(' · ');
+          const subTopics = serializeCurriculumSubtopics(validSubtopicParts);
           tableTopics.push({ topicTitle: stripTopicFigures(cleanXmlString(topicTitle)), subTopics });
         }
       }
@@ -354,7 +356,7 @@ export function parseDocxSyllabus(docxBuffer: Buffer, fileName?: string): Parsed
         if (currentTopic) {
           listTopics.push({
             topicTitle: currentTopic.topicTitle,
-            subTopics: currentTopic.subTopicsList.join(' · '),
+            subTopics: serializeCurriculumSubtopics(currentTopic.subTopicsList),
           });
         }
 
@@ -366,9 +368,10 @@ export function parseDocxSyllabus(docxBuffer: Buffer, fileName?: string): Parsed
         };
       } else if (currentTopic) {
         // Subtopics / bullets
-        const cleanSub = line.replace(/^[-*•·\d.)\s]+/, '').trim();
-        if (cleanSub && cleanSub.length > 2 && !cleanSub.toLowerCase().includes('learning outcome')) {
-          currentTopic.subTopicsList.push(cleanSub);
+        for (const cleanSub of normalizeCurriculumSubtopics(line)) {
+          if (cleanSub.length > 2 && !cleanSub.toLowerCase().includes('learning outcome')) {
+            currentTopic.subTopicsList.push(cleanSub);
+          }
         }
       }
     }
@@ -376,7 +379,7 @@ export function parseDocxSyllabus(docxBuffer: Buffer, fileName?: string): Parsed
     if (currentTopic) {
       listTopics.push({
         topicTitle: stripTopicFigures(currentTopic.topicTitle),
-        subTopics: currentTopic.subTopicsList.join(' · '),
+        subTopics: serializeCurriculumSubtopics(currentTopic.subTopicsList),
       });
     }
 

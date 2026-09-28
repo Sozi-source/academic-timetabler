@@ -97,8 +97,7 @@ export async function parseIndividualCurriculumAction(
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
-  const detectedDocumentType: CurriculumDocumentType =
-    /scheme|sow/i.test(fileName) ? 'scheme_of_work' : 'course_outline';
+  const detectedDocumentType: CurriculumDocumentType = 'course_outline';
 
   if (isDocx) {
     try {

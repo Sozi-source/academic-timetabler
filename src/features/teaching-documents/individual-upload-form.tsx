@@ -24,7 +24,6 @@ import {
   type IndividualTopicItem,
 } from './individual-curriculum-actions';
 import {
-  isCurriculumDocumentType,
   type CurriculumDocumentType,
 } from './curriculum-document-types';
 
@@ -37,18 +36,18 @@ export interface SystemUnitOption {
 interface IndividualUploadFormProps {
   units: SystemUnitOption[];
   initialUnitId?: string;
-  initialDocumentType: CurriculumDocumentType;
+  initialDocumentType?: CurriculumDocumentType;
 }
 
 export function IndividualUploadForm({
   units = [],
   initialUnitId,
-  initialDocumentType,
+  initialDocumentType = 'course_outline',
 }: IndividualUploadFormProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [documentType, setDocumentType] = useState<CurriculumDocumentType>(initialDocumentType);
+  const [documentType] = useState<CurriculumDocumentType>('course_outline');
   const [selectedUnitId, setSelectedUnitId] = useState<string>(initialUnitId || '');
 
   const matchedInitial = useMemo(
@@ -119,10 +118,6 @@ export function IndividualUploadForm({
         setUploadedFileName(result.fileName);
         setUploadedFileType(result.fileType);
         setIssues(result.issues || []);
-
-        if (result.detectedDocumentType) {
-          setDocumentType(result.detectedDocumentType);
-        }
 
         // Try matching unit if user hasn't explicitly locked a unit selection
         let matchedTarget: SystemUnitOption | undefined;
@@ -238,7 +233,7 @@ export function IndividualUploadForm({
             >
               {isPublishing
                 ? 'Publishing...'
-                : `Publish ${documentType === 'scheme_of_work' ? 'Scheme of Work' : 'Course Outline'}`}
+                : 'Publish Course Outline'}
             </Button>
           </div>
         }
@@ -279,17 +274,12 @@ export function IndividualUploadForm({
               Document Type
             </label>
             <select
-              value={documentType}
-              onChange={(e) => {
-                const val = e.target.value;
-                if (isCurriculumDocumentType(val)) {
-                  setDocumentType(val);
-                }
-              }}
-              className="w-full h-10 rounded-xl border border-border bg-white px-3 text-xs font-semibold text-text-primary focus:border-primary focus:outline-none"
+              value="course_outline"
+              disabled
+              title="Course Outlines serve as the official master syllabus. 14-week Schemes of Work are automatically generated."
+              className="w-full h-10 rounded-xl border border-border bg-surface-subtle px-3 text-xs font-semibold text-text-primary focus:outline-none cursor-default"
             >
               <option value="course_outline">Course Outline (Master Syllabus)</option>
-              <option value="scheme_of_work">Scheme of Work (Custom Override)</option>
             </select>
           </div>
 

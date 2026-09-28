@@ -83,7 +83,7 @@ export function stripTopicFigures(text: string): string {
 
 export function cleanTopicTitle(title: string): string {
   const withoutAssessmentSuffix = title.replace(/\s*\((?:RAT\s*\d*|CAT)\)\s*$/i, '').trim();
-  return stripTopicFigures(withoutAssessmentSuffix);
+  return normalizeCurriculumTopicTitle(withoutAssessmentSuffix);
 }
 
 /**

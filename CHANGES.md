@@ -1,3 +1,27 @@
+### 2026-09-28: Fixed Course Outline Multi-Week Topic Grouping, Artifact Stripping, and Discrete Bullet Formatting
+
+**Summary:**
+Resolved 5 interconnected Course Outline generation and formatting issues across the end-to-end pipeline (document ingestion, docx/excel parsing, database querying, distribution, interactive UI viewer, and DOCX generation):
+1. **Multi-Week Topic Row Grouping (Problem 1):** When a topic spans multiple contiguous weeks, the Course Outline schedule table now visually merges the Topic Title column using `rowSpan` in the web viewer (`tvet-document-viewer.tsx`) and vertical cell merges in DOCX export (`export-docx.ts`), while preserving distinct week numbers and distinct subtopics on separate rows. If a topic reappears non-contiguously later in the term, it correctly begins a new distinct group.
+2. **Curriculum Artifact Token Stripping (Problem 2):** Eliminated isolated outline markers, table cell numbers, and formatting artifacts (such as `1`, `1-2`, `1.`, `1)`, `(1)`, `• •`, `• 1-2`, `CAT`, `Week 1`) leaking into subtopic lists. Added `isCurriculumArtifactToken` in `curriculum-content-normalizer.ts` and enhanced `normalizeCurriculumSubtopics` to filter them out.
+3. **Discrete Bullet Paragraphs (Problem 3):** Ensured all subtopics and learning approaches are displayed as discrete bullet points on individual lines in both the web viewer and exported DOCX. In Word export, subtopics render as individual `Paragraph` elements with authentic bullet points and indentation, avoiding glued-together text.
+4. **Conservative Normalization for Domain Numbers (Problem 4):** Hardened `stripCurriculumListPrefix` to only strip numbers or ranges when followed by a delimiter (`:.)-–—`) or bullet symbol. Legitimate clinical, nutritional, and chemical terms containing numbers, units, ranges, and formulas (e.g., `1–2 μg/day recommended intake`, `Vitamin B12 deficiency`, `Type 1 and Type 2 diabetes`, `Stage 1 pressure ulcers`, `CO2 and H2O production`) are strictly preserved.
+5. **No Comma Splitting (Problem 5):** Prevented subtopics from splitting on commas, ensuring phrases such as `"Classification, structure and functions of carbohydrates"` remain intact as single subtopics.
+6. **Query & Serialization Alignment:** Guaranteed that `enrichWithCanonical` and `getApprovedCurriculumForUnitCode` in `queries.ts` always return weekly schedules passed through `normalizeWeeklySchedule`, preventing legacy unnormalized database rows from bypassing formatting rules.
+
+**Files changed:**
+- `src/features/teaching-documents/curriculum-content-normalizer.ts` — Added `isCurriculumArtifactToken`, hardened prefix removal, and enhanced topic/subtopic normalization.
+- `src/features/teaching-documents/curriculum-content/queries.ts` — Replaced raw string splits with canonical normalization across all priority queries (priorities 0, 1, 2, 3, 5) and ensured `weeklySchedule` normalization.
+- `src/features/teaching-documents/curriculum-editor/docx-parser.ts` — Normalized topic titles from DOCX syllabus tables and paragraphs.
+- `src/features/teaching-documents/distribution-engine.ts` — Used `normalizeCurriculumTopicTitle` in `cleanTopicTitle`.
+- `src/features/teaching-documents/bulk-curriculum-parser.ts` — Preserved raw coverage string during bulk parse previews.
+- `src/features/teaching-documents/tvet-standards.ts` — Refined `parseCourseOutlineApproaches` to preserve compound clauses joined by "and" and guarded assessment percentages.
+- `src/features/teaching-documents/tvet-document-viewer.tsx` — Styled merged `rowSpan` cells with clean background styling in Section 3 table.
+- `src/features/teaching-documents/export-docx.ts` — Ensured table rowSpan integrates cleanly with `docx`'s vertical merge.
+- `src/tests/curriculum-content-normalizer.test.ts` — Added 14 comprehensive unit tests verifying all 5 problem areas.
+- `src/tests/tvet-teaching-documents.test.ts` — Added verification test for DOCX buffer generation with multi-week topic spans.
+- `CHANGES.md` — Documented changes and verification evidence.
+
 ### 2026-09-28: Course Outline Bullet Formatting, HND Department Trainer Scoping, and Unit-Only Labeling
 
 **Summary:** 

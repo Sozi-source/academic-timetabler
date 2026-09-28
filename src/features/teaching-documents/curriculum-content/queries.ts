@@ -8,7 +8,11 @@ import {
   type UnitCurriculumDefinition,
 } from '@/features/teaching-documents/curriculum-registry';
 import { hasTopicCoverageContamination } from '@/features/teaching-documents/topic-coverage-validation';
-import { normalizeWeeklySchedule } from '@/features/teaching-documents/curriculum-content-normalizer';
+import {
+  normalizeCurriculumSubtopics,
+  normalizeCurriculumTopicTitle,
+  normalizeWeeklySchedule,
+} from '@/features/teaching-documents/curriculum-content-normalizer';
 
 function isCorruptedText(text?: string | null): boolean {
   if (!text) return false;
@@ -103,7 +107,12 @@ function enrichWithCanonical(
   isAuthoritative = false,
 ): UnitCurriculumDefinition {
   const canonical = findCanonicalCurriculum(lookupCode, lookupName);
-  if (!canonical) return def;
+  if (!canonical) {
+    return {
+      ...def,
+      weeklySchedule: normalizeWeeklySchedule(def.weeklySchedule),
+    };
+  }
 
   // Enforce semantic compatibility: never attach an unrelated canonical curriculum
   const targetTitle = def.unitName || lookupName;
@@ -170,7 +179,7 @@ function enrichWithCanonical(
         weeklySchedule.every((w) => !w.specificLearningOutcomes || !w.specificLearningOutcomes.includes('\n•')))
     ) {
       if (canonicalSchedule && canonicalSchedule.length > 0) {
-        weeklySchedule = canonicalSchedule;
+        weeklySchedule = normalizeWeeklySchedule(canonicalSchedule);
       }
     }
   }
@@ -318,10 +327,8 @@ export const getApprovedCurriculumForUnitCode = cache(
                 unitName: payload.unitName || resolvedName,
                 weeklySchedule: payload.content.map((row: any, idx: number) => ({
                   weekNumber: Number(row.sequence) || (idx + 1),
-                  topicTitle: row.topic || `Topic ${idx + 1}`,
-                  subTopics: row.coverage
-                    ? String(row.coverage).split(/\s*[·;]\s*/).filter(Boolean)
-                    : row.topic ? [row.topic] : [],
+                  topicTitle: normalizeCurriculumTopicTitle(row.topic || `Topic ${idx + 1}`),
+                  subTopics: normalizeCurriculumSubtopics(row.coverage || row.topic),
                   specificLearningOutcomes: row.learning_outcomes || undefined,
                   learningActivities: row.activities || undefined,
                   resourcesAndReferences: cleanResourceField(row.resources),
@@ -385,10 +392,8 @@ export const getApprovedCurriculumForUnitCode = cache(
               references: cleanReferenceList(unitMeta.referencesResources, resolvedCode, resolvedName),
               weeklySchedule: payload.content.map((row: any, idx: number) => ({
                 weekNumber: row.sourceWeek || row.sequence || (idx + 1),
-                topicTitle: row.topic || `Topic ${idx + 1}`,
-                subTopics: row.coverage
-                  ? String(row.coverage).split(/\s*[·;]\s*/).filter(Boolean)
-                  : row.topic ? [row.topic] : [],
+                topicTitle: normalizeCurriculumTopicTitle(row.topic || `Topic ${idx + 1}`),
+                subTopics: normalizeCurriculumSubtopics(row.coverage || row.topic),
                 specificLearningOutcomes: row.learningOutcomes || undefined,
                 learningActivities: row.activities || undefined,
                 resourcesAndReferences: cleanResourceField(row.resources),
@@ -462,10 +467,8 @@ export const getApprovedCurriculumForUnitCode = cache(
                   references: cleanReferenceList(matchedUnitEntry.referencesResources, resolvedCode, resolvedName),
                   weeklySchedule: unitContent.map((row: any, idx: number) => ({
                     weekNumber: row.week || row.sequence || (idx + 1),
-                    topicTitle: row.topic || `Topic ${idx + 1}`,
-                    subTopics: row.coverage
-                      ? String(row.coverage).split(/\s*[·;]\s*/).filter(Boolean)
-                      : row.subtopics ? String(row.subtopics).split(/\s*[·;]\s*/).filter(Boolean) : [row.topic],
+                    topicTitle: normalizeCurriculumTopicTitle(row.topic || `Topic ${idx + 1}`),
+                    subTopics: normalizeCurriculumSubtopics(row.coverage || row.subtopics || row.topic),
                     specificLearningOutcomes: row.learningOutcomes || undefined,
                     learningActivities: row.activities || undefined,
                     resourcesAndReferences: cleanResourceField(row.resources),
@@ -522,8 +525,8 @@ export const getApprovedCurriculumForUnitCode = cache(
                   learningOutcomes: (outcomes ?? []).map((row) => row.learning_outcome),
                   weeklySchedule: weeks.map((row) => ({
                     weekNumber: row.week_number,
-                    topicTitle: row.topic,
-                    subTopics: row.specific_coverage ? row.specific_coverage.split(/\s*[·;]\s*/).filter(Boolean) : [],
+                    topicTitle: normalizeCurriculumTopicTitle(row.topic),
+                    subTopics: normalizeCurriculumSubtopics(row.specific_coverage || row.topic),
                     learningActivities: row.teaching_learning_activities ?? undefined,
                     resourcesAndReferences: cleanResourceField(row.resources),
                     assessmentAndRemarks: row.assessment_learning_check ?? undefined,
@@ -578,6 +581,10 @@ export const getApprovedCurriculumForUnitCode = cache(
     }
 
     // 7. Priority 5: Fallback to unpopulated structure (never load wrong unit)
-    return getUnitCurriculum(resolvedCode || unitCode, resolvedName || unitName || '');
+    const fallback = getUnitCurriculum(resolvedCode || unitCode, resolvedName || unitName || '');
+    return {
+      ...fallback,
+      weeklySchedule: normalizeWeeklySchedule(fallback.weeklySchedule),
+    };
   }
 );

@@ -7,26 +7,63 @@
  * dependency-free so every import, query and renderer can use the same rules.
  */
 
-const BULLET_CHARS = '[\\u2022\\u00b7\\u25cf\\u25aa\\u25e6\\u25cb\\u25c9\\u2043\\u2023\\u204e*]';
+const RAW_BULLET_CHARS = '\\u2022\\u00b7\\u25cf\\u25aa\\u25e6\\u25cb\\u25c9\\u2043\\u2023\\u204e*';
+const BULLET_CHARS = `[${RAW_BULLET_CHARS}]`;
+
+/**
+ * Detects whether a string is a presentation/formatting artifact rather than
+ * real subtopic content (for example `1`, `1-2`, `(1)`, `•`, `• •`, `CAT`, `Week 1`).
+ */
+export function isCurriculumArtifactToken(value: string): boolean {
+  if (!value) return true;
+  const trimmed = value.trim();
+  if (!trimmed) return true;
+
+  // Bare bullets or punctuation only (e.g. "•", "·", "-", "• •", "--", ";", etc.)
+  const withoutBulletsAndPunct = trimmed.replace(
+    new RegExp(`^[${RAW_BULLET_CHARS}\\s.,;:|()\\[\\]{}–—\\-]+$`, 'u'),
+    '',
+  ).trim();
+  if (!withoutBulletsAndPunct) return true;
+
+  // Strip leading bullets/spaces to inspect the core content
+  const core = trimmed.replace(new RegExp(`^[${RAW_BULLET_CHARS}\\s]+`, 'u'), '').trim();
+  if (!core) return true;
+
+  // Isolated digits or single list markers: "1", "2", "12", "1.", "1)", "(1)", "[1]"
+  if (/^\(?\d{1,4}[.):\]\-–—]?$/.test(core)) return true;
+
+  // Isolated sequence ranges: "1-2", "1 - 2", "1–2", "3-4", "1-2.", "(1-2)", "1/2"
+  if (/^\(?\d{1,4}\s*[-–—/]\s*\d{1,4}[.):\]\-–—]?$/.test(core)) return true;
+
+  // Bare structural or timetable labels: "Week 1", "Wk 2", "Lesson 3", "Session 4", "Topic 1", "Part 1", "RAT 1", "CAT", "CAT 1", "Exam"
+  if (/^(?:week|wk|lesson|session|topic|part|module|unit|rat|cat|exam)\s*\d*(?:\s*[-–—]\s*\d*)?$/i.test(core)) return true;
+
+  // Bare column headings often captured from Word table headers:
+  if (/^(?:content|coverage|sub[\s-]?topics?|topics?|hours?|learning\s+outcomes?|activities|methodolog\w*|assessments?|remarks?|resources?|references?)$/i.test(core)) return true;
+
+  return false;
+}
 
 /** Remove Word/list formatting from the beginning of one curriculum item. */
 export function stripCurriculumListPrefix(value: string): string {
   let text = value.replace(/^\uFEFF/, '').trim();
 
   // Repeatedly remove formatting prefixes because Word conversions can produce
-  // combinations such as `• 1-2 • Meaning of terms`.
+  // combinations such as `• 1-2 • Meaning of terms` or `• • Meaning of terms`.
   for (let i = 0; i < 5; i++) {
     const before = text;
     text = text
-      .replace(new RegExp(`^${BULLET_CHARS}\\s*`, 'u'), '')
-      // 1-2, 1–2, 1—2 used as imported sequence/list labels.
-      .replace(/^\d+\s*[-–—]\s*\d+\s*[:.)-]?\s*/u, '')
-      // 1.2, 1.2.3 or 1.2a document/list numbering.
-      .replace(/^\d+(?:\.\d+)+(?:[A-Za-z])?\s*[:.)-]?\s*/u, '')
-      // 1., 1), (1), a., a), (a), i., etc.
-      .replace(/^\(?[A-Za-z0-9]{1,3}[.)]\s*/u, '')
-      // A plain numeric list marker such as `1 Meaning...`.
-      .replace(/^\d{1,3}\s+(?=[A-Za-z])/u, '')
+      // Leading bullets
+      .replace(new RegExp(`^${BULLET_CHARS}+\\s*`, 'u'), '')
+      // List markers with delimiter: 1., 1), (1), [1], 1 - , 1: , a., a), (a), i., etc.
+      .replace(/^\(?[A-Za-z0-9]{1,3}[.):\]\-–—]\s+/u, '')
+      // Multi-level list numbering: 1.2, 1.2.3, 1.2a followed by delimiter or space
+      .replace(/^\d+(?:\.\d+)+(?:[A-Za-z])?[.):\-–—]?\s+/u, '')
+      // Imported range followed by delimiter or bullet: 1-2:, 1-2., 1-2), 1-2 - , or 1-2 before bullet
+      .replace(new RegExp(`^\\d+\\s*[-–—]\\s*\\d+\\s*(?:[:.)\\-–—]|(?=${BULLET_CHARS}))\\s*`, 'u'), '')
+      // Isolated range if the entire string is just the range (e.g. "1-2")
+      .replace(/^\d+\s*[-–—]\s*\d+$/u, '')
       .trim();
 
     if (text === before) break;
@@ -67,14 +104,14 @@ export function normalizeCurriculumSubtopics(input?: string | string[] | null): 
         .replace(new RegExp(`\\s*(?=${BULLET_CHARS})`, 'gu'), '\n')
         // Inline numbered lists: `1. Foo 2. Bar` / `1) Foo 2) Bar`.
         .replace(/\s+(?=\d{1,3}\s*[.)]\s+)/gu, '\n')
-        // Imported ranges frequently act as list labels: `1-2 Foo 3-4 Bar`.
-        .replace(/\s+(?=\d+\s*[-–—]\s*\d+\s+[A-Za-z])/gu, '\n');
+        // Imported ranges acting as list labels before bullets: `1-2 • Foo 3-4 • Bar`.
+        .replace(new RegExp(`\\s+(?=\\d+\\s*[-–—]\\s*\\d+\\s*(?:[:.)\\-–—]|(?=${BULLET_CHARS})))`, 'gu'), '\n');
 
       const segments = withMarkersAsLines
         .split(new RegExp(`${BULLET_CHARS}+|[;|\\t]+|\\n+`, 'u'))
         .map(stripCurriculumListPrefix)
         .map((part) => part.replace(/^[,;|]+|[,;|]+$/g, '').trim())
-        .filter((part) => part.length > 0);
+        .filter((part) => part.length > 0 && !isCurriculumArtifactToken(part));
 
       items.push(...segments);
     }
@@ -84,6 +121,7 @@ export function normalizeCurriculumSubtopics(input?: string | string[] | null): 
   // Word bullets/paragraph runs. Do not collapse merely similar phrases.
   const seen = new Set<string>();
   return items.filter((item) => {
+    if (isCurriculumArtifactToken(item)) return false;
     const key = item.replace(/\s+/g, ' ').trim().toLocaleLowerCase();
     if (!key || seen.has(key)) return false;
     seen.add(key);
@@ -103,10 +141,11 @@ export function normalizeCurriculumTopicTitle(input?: string | null): string {
   let title = stripCurriculumListPrefix(String(input));
 
   // Topic/Week/Lesson labels are document structure, not part of the title.
-  title = title.replace(/^(?:topic|week|lesson|session|module)\s*\d+\s*[:.)-]\s*/i, '').trim();
+  title = title.replace(/^(?:topic|week|lesson|session|module)\s*\d+\s*[:.)-]?\s*/i, '').trim();
 
-  // Numeric curriculum prefixes such as `3.19` are source numbering.
+  // Numeric curriculum prefixes such as `3.19` or `1-2` are source numbering.
   title = title.replace(/^\d+(?:\.\d+)+(?:[A-Za-z])?\s*[:.)-]?\s*/u, '').trim();
+  title = title.replace(/^\d+\s*[-–—]\s*\d+\s*[:.)-]?\s*/u, '').trim();
 
   // Older distribution-engine versions appended `(Part X)` when one topic
   // occupied several weeks. That marker is implementation detail, not part

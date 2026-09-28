@@ -588,7 +588,7 @@ export function TVETDocumentViewer({
                           {topicSpan.isStart && (
                             <td
                               rowSpan={topicSpan.rowSpan}
-                              className="border border-slate-300 px-3 py-2 align-middle font-bold text-slate-900 leading-snug"
+                              className="border border-slate-300 px-3 py-2 align-middle font-bold text-slate-900 leading-snug bg-white"
                             >
                               {sched.topicTitle}
                             </td>

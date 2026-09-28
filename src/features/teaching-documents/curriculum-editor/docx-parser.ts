@@ -1,6 +1,10 @@
 import { unpackZipBuffer } from '../zip-ingestion';
 import { stripTopicFigures } from '../distribution-engine';
-import { normalizeCurriculumSubtopics, serializeCurriculumSubtopics } from '../curriculum-content-normalizer';
+import {
+  normalizeCurriculumSubtopics,
+  normalizeCurriculumTopicTitle,
+  serializeCurriculumSubtopics,
+} from '../curriculum-content-normalizer';
 
 export interface ParsedDocxSyllabus {
   unitCode?: string;
@@ -313,7 +317,7 @@ export function parseDocxSyllabus(docxBuffer: Buffer, fileName?: string): Parsed
           }
 
           const subTopics = serializeCurriculumSubtopics(validSubtopicParts);
-          tableTopics.push({ topicTitle: stripTopicFigures(cleanXmlString(topicTitle)), subTopics });
+          tableTopics.push({ topicTitle: normalizeCurriculumTopicTitle(cleanXmlString(topicTitle)), subTopics });
         }
       }
     }
@@ -378,7 +382,7 @@ export function parseDocxSyllabus(docxBuffer: Buffer, fileName?: string): Parsed
 
     if (currentTopic) {
       listTopics.push({
-        topicTitle: stripTopicFigures(currentTopic.topicTitle),
+        topicTitle: normalizeCurriculumTopicTitle(currentTopic.topicTitle),
         subTopics: serializeCurriculumSubtopics(currentTopic.subTopicsList),
       });
     }

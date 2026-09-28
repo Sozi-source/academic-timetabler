@@ -1,7 +1,7 @@
 import { getUnitCurriculum, type UnitCurriculumDefinition } from './curriculum-registry';
 import { distributeTopicsAcrossWeeks } from './distribution-engine';
 import { DEFAULT_ASSESSMENT_MILESTONES, type AssessmentMilestones } from './assessment-milestones';
-import { normalizeCurriculumSubtopics } from './curriculum-content-normalizer';
+import { isCurriculumArtifactToken, normalizeCurriculumSubtopics } from './curriculum-content-normalizer';
 
 export interface TVETDocumentHeaderContext {
   institutionName: string;
@@ -248,14 +248,27 @@ export function parseCourseOutlineApproaches(input?: string | string[] | null): 
 
     const lines = raw.split(/[\r\n]+/);
     for (const line of lines) {
+      // If the line contains an assessment weighting percentage (e.g. "— 30%"), keep as a single entry
+      if (/[-–—]\s*\d+%/.test(line)) {
+        const cleaned = line
+          .replace(/^[\s\d.)(\]\[•·▪●◦\-–—]+/, '')
+          .replace(/[;,\s]+$/, '')
+          .trim();
+        if (cleaned) {
+          items.push(cleaned.charAt(0).toUpperCase() + cleaned.slice(1));
+        }
+        continue;
+      }
+
       const parts = line
         .split(/(?:[\u00b7\u2022\u25cf\u25aa\u25e6;|\t]+|(?<=\S)\s+(?:\d+[\.)]|\([a-zA-Z0-9]+\)|[a-zA-Z]\))\s+)/u)
         .map((s) => s.trim())
         .filter(Boolean);
 
       for (const part of parts) {
+        // Split on comma only (with optional trailing "and"), never on bare "and" inside a phrase
         const commaSeparated = part
-          .split(/,\s*(?:and\s+)?|\s+and\s+/i)
+          .split(/,\s*(?:and\s+)?/i)
           .map((s) => s.trim())
           .filter((s) => s.length > 2);
 
@@ -277,7 +290,7 @@ export function parseCourseOutlineApproaches(input?: string | string[] | null): 
         .replace(/[;,\s]+$/, '')
         .trim(),
     )
-    .filter((item) => item.length > 0)
+    .filter((item) => item.length > 0 && !isCurriculumArtifactToken(item))
     .map((item) => item.charAt(0).toUpperCase() + item.slice(1));
 }
 /**

@@ -303,9 +303,7 @@ export async function parseBulkCourseOutlineWorkbook(
           unit.topics.push({
             sequence,
             topic: normalizeCurriculumTopicTitle(topicTitle) || `Topic ${sequence}`,
-            coverage: coverage
-              ? serializeCurriculumSubtopics(coverage)
-              : serializeCurriculumSubtopics(topicTitle) || `Topic ${sequence}`,
+            coverage: coverage || topicTitle || `Topic ${sequence}`,
             hours: !isNaN(hoursVal as number) ? hoursVal : undefined,
             learningOutcomes: colMap.outcomes ? cleanCell(row.getCell(colMap.outcomes).value) : undefined,
             activities: colMap.activities ? cleanCell(row.getCell(colMap.activities).value) : undefined,

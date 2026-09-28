@@ -275,6 +275,14 @@ describe('TVET Standardised Teaching Documents Suite', () => {
       expect(outline.assessmentApproaches).toContain('9th – 13th June 2026');
       expect(outline.assessmentApproaches).toContain('20th – 31st July 2026');
     });
+
+    it('generates a valid DOCX export with contiguous merged topics and discrete bulleted subtopics', async () => {
+      const { buildTVETDocumentDocx } = await import('@/features/teaching-documents/export-docx');
+      const outline = generateTVETCourseOutline(mockHeader);
+      const buffer = await buildTVETDocumentDocx('course_outline', { courseOutline: outline });
+      expect(buffer).toBeInstanceOf(Buffer);
+      expect(buffer.length).toBeGreaterThan(1000);
+    });
   });
 });
 

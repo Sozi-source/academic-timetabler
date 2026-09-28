@@ -398,7 +398,7 @@ export async function buildTVETDocumentDocx(
               const rowCells = [
                 cell(`W${sched.weekNumber}`, { align: AlignmentType.CENTER, bold: true, color: PRIMARY_DARK, fill, widthPct: 8 }),
                 ...(topicSpan.isStart
-                  ? [cell(sched.topicTitle, { bold: true, fill, widthPct: 32, rowSpan: topicSpan.rowSpan })]
+                  ? [cell(sched.topicTitle, { bold: true, fill: 'FFFFFF', widthPct: 32, rowSpan: topicSpan.rowSpan })]
                   : []),
                 cell(subParagraphs, { fill, widthPct: 52 }),
                 cell(`${sched.hours} hrs`, { align: AlignmentType.CENTER, fill, widthPct: 8 }),

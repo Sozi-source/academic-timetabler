@@ -85,6 +85,17 @@ function documentLabel(type: QaDocumentType): string {
   return type === 'course_outline' ? 'Course Outline' : 'Scheme of Work';
 }
 
+function cleanUuidList(ids: Array<string | null | undefined>): string[] {
+  return [
+    ...new Set(
+      ids.filter(
+        (id): id is string =>
+          Boolean(id && typeof id === 'string' && id.trim() !== '' && id !== 'null' && id !== 'undefined'),
+      ),
+    ),
+  ];
+}
+
 async function loadDepartmentUnits(departmentId: string): Promise<UnitRow[]> {
   const admin = createAdminClient();
   const result = await admin
@@ -116,30 +127,35 @@ export async function getQaExportPageData(): Promise<{
 
   const admin = createAdminClient();
   const units = await loadDepartmentUnits(departmentId);
-  if (units.length === 0) {
+  const unitIds = cleanUuidList(units.map((unit) => unit.id));
+  if (unitIds.length === 0) {
     return { departmentName: profile.departmentName, departmentSelected: true, periods: [] };
   }
 
   const allocationsResult = await admin
     .from('teaching_allocations')
     .select('id,academic_period_id,trainer_id,unit_id')
-    .in('unit_id', units.map((unit) => unit.id))
+    .in('unit_id', unitIds)
     .in('status', ['active', 'completed', 'archived']);
   const allocations = rows<AllocationRow>(allocationsResult.data, allocationsResult.error, 'teaching allocations');
   if (allocations.length === 0) {
     return { departmentName: profile.departmentName, departmentSelected: true, periods: [] };
   }
 
-  const allocationIds = allocations.map((allocation) => allocation.id);
-  const periodIds = [...new Set(allocations.map((allocation) => allocation.academic_period_id))];
+  const allocationIds = cleanUuidList(allocations.map((allocation) => allocation.id));
+  const periodIds = cleanUuidList(allocations.map((allocation) => allocation.academic_period_id));
   const [periodResult, documentsResult] = await Promise.all([
-    admin.from('academic_periods').select('id,name,starts_on,ends_on').in('id', periodIds),
-    admin
-      .from('teaching_documents')
-      .select('id,allocation_id,document_type,version_number,approved_revision_number,approved_at,status')
-      .in('allocation_id', allocationIds)
-      .in('document_type', [...qaDocumentTypes])
-      .eq('status', 'approved'),
+    periodIds.length > 0
+      ? admin.from('academic_periods').select('id,name,starts_on,ends_on').in('id', periodIds)
+      : Promise.resolve({ data: [], error: null }),
+    allocationIds.length > 0
+      ? admin
+          .from('teaching_documents')
+          .select('id,allocation_id,document_type,version_number,approved_revision_number,approved_at,status')
+          .in('allocation_id', allocationIds)
+          .in('document_type', [...qaDocumentTypes])
+          .eq('status', 'approved')
+      : Promise.resolve({ data: [], error: null }),
   ]);
   const periods = rows<PeriodRow>(periodResult.data, periodResult.error, 'academic periods');
   const approvedDocuments = rows<DocumentRow>(documentsResult.data, documentsResult.error, 'approved teaching documents');
@@ -160,7 +176,7 @@ export async function getQaExportPageData(): Promise<{
     periods: periods
       .map((period) => {
         const periodAllocations = allocations.filter((allocation) => allocation.academic_period_id === period.id);
-        const trainerIds = new Set(periodAllocations.map((allocation) => allocation.trainer_id));
+        const trainerIds = new Set(cleanUuidList(periodAllocations.map((allocation) => allocation.trainer_id)));
         const periodDocuments = documentsByPeriod.get(period.id) ?? [];
         const latestDocuments = new Map<string, DocumentRow>();
         for (const document of periodDocuments) {
@@ -205,22 +221,27 @@ export async function createQaExaminationPack(
   if (!period) throw new Error('The selected academic period was not found.');
   if (units.length === 0) throw new Error('No units are available for the active department.');
 
+  const unitIds = cleanUuidList(units.map((unit) => unit.id));
+  if (unitIds.length === 0) throw new Error('No units are available for the active department.');
+
   const allocationsResult = await admin
     .from('teaching_allocations')
     .select('id,academic_period_id,trainer_id,unit_id,cohort_id')
     .eq('academic_period_id', periodId)
-    .in('unit_id', units.map((unit) => unit.id))
+    .in('unit_id', unitIds)
     .in('status', ['active', 'completed', 'archived']);
   const allocations = rows<AllocationRow>(allocationsResult.data, allocationsResult.error, 'period allocations');
   if (allocations.length === 0) throw new Error('There are no active or completed trainer allocations for this period.');
 
-  const allocationIds = allocations.map((allocation) => allocation.id);
-  const documentResult = await admin
-    .from('teaching_documents')
-    .select('id,allocation_id,document_type,version_number,approved_revision_number,approved_at,status')
-    .in('allocation_id', allocationIds)
-    .in('document_type', [...qaDocumentTypes])
-    .eq('status', 'approved');
+  const allocationIds = cleanUuidList(allocations.map((allocation) => allocation.id));
+  const documentResult = allocationIds.length > 0
+    ? await admin
+        .from('teaching_documents')
+        .select('id,allocation_id,document_type,version_number,approved_revision_number,approved_at,status')
+        .in('allocation_id', allocationIds)
+        .in('document_type', [...qaDocumentTypes])
+        .eq('status', 'approved')
+    : { data: [], error: null };
   const allDocuments = rows<DocumentRow>(documentResult.data, documentResult.error, 'approved teaching documents');
   const latestByKey = new Map<string, DocumentRow>();
   for (const document of allDocuments) {
@@ -231,7 +252,7 @@ export async function createQaExaminationPack(
     }
   }
   const latestDocuments = [...latestByKey.values()];
-  const documentIds = latestDocuments.map((document) => document.id);
+  const documentIds = cleanUuidList(latestDocuments.map((document) => document.id));
   const revisionsResult = documentIds.length > 0
     ? await admin
         .from('teaching_document_revisions')
@@ -245,13 +266,17 @@ export async function createQaExaminationPack(
   ]));
 
   const ids = {
-    trainer: [...new Set(allocations.map((allocation) => allocation.trainer_id))],
-    unit: [...new Set(allocations.map((allocation) => allocation.unit_id))],
-    cohort: [...new Set(allocations.map((allocation) => allocation.cohort_id))],
+    trainer: cleanUuidList(allocations.map((allocation) => allocation.trainer_id)),
+    unit: cleanUuidList(allocations.map((allocation) => allocation.unit_id)),
+    cohort: cleanUuidList(allocations.map((allocation) => allocation.cohort_id)),
   };
   const [trainerResult, cohortResult] = await Promise.all([
-    admin.from('trainers').select('id,staff_number,full_name').in('id', ids.trainer),
-    admin.from('cohorts').select('id,name').in('id', ids.cohort),
+    ids.trainer.length > 0
+      ? admin.from('trainers').select('id,staff_number,full_name').in('id', ids.trainer)
+      : Promise.resolve({ data: [], error: null }),
+    ids.cohort.length > 0
+      ? admin.from('cohorts').select('id,name').in('id', ids.cohort)
+      : Promise.resolve({ data: [], error: null }),
   ]);
   const trainers = rows<TrainerRow>(trainerResult.data, trainerResult.error, 'trainers');
   const cohorts = rows<CohortRow>(cohortResult.data, cohortResult.error, 'cohorts');
@@ -266,6 +291,7 @@ export async function createQaExaminationPack(
   const lines: QaLine[] = [];
   const folderByTrainer = new Map<string, string>();
   for (const allocation of allocations) {
+    if (!allocation.trainer_id || !allocation.unit_id) continue;
     const trainer = trainerById.get(allocation.trainer_id);
     const unit = unitById.get(allocation.unit_id);
     if (!trainer || !unit) continue;
@@ -309,9 +335,10 @@ export async function createQaExaminationPack(
   ]));
   const downloadTasks: Array<{ line: QaLine; revision: RevisionRow }> = [];
   for (const allocation of allocations) {
+    if (!allocation.trainer_id || !allocation.unit_id) continue;
     const trainer = trainerById.get(allocation.trainer_id);
     const unit = unitById.get(allocation.unit_id);
-    const cohortName = cohortById.get(allocation.cohort_id)?.name ?? 'Cohort';
+    const cohortName = allocation.cohort_id ? cohortById.get(allocation.cohort_id)?.name ?? 'Cohort' : 'Cohort';
     if (!trainer || !unit) continue;
     for (const documentType of qaDocumentTypes) {
       const document = documentByKey.get(`${allocation.id}:${documentType}`);

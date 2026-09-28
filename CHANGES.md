@@ -1,3 +1,10 @@
+### 2026-09-28: Fixed Null UUID Error in QA Examination Pack Export
+
+**Summary:** Fixed a crash (`invalid input syntax for type uuid: "null"`) when downloading QA examination ZIP archives from `/api/teaching-documents/qa-export`. Teaching allocations in an academic period can have unassigned or null `trainer_id` (or `cohort_id`/`unit_id`), which caused raw `null` values to be passed into Supabase PostgREST `.in('id', ids.trainer)` filters. Added `cleanUuidList` helper to filter out nullish, blank, or `"null"` strings across all queries in `createQaExaminationPack` and `getQaExportPageData`, guarded `.in()` queries against empty array requests, and added graceful null checks in loop iterations.
+
+**Files changed:**
+- `src/features/teaching-documents/qa-export.ts` — Added `cleanUuidList`, sanitized UUID parameters for `trainers`, `cohorts`, `units`, `teaching_documents`, and `academic_periods`, and guarded against unassigned allocations.
+
 ### 2026-09-28: Implemented Trainer Confirm & Submit UI and HOD Review Integration
 
 **Summary:** Implemented the end-to-end trainer confirmation, submission, and status-tracking workflow for TVET Course Outlines and Schemes of Work. Trainers viewing their allocated unit documents (`/staff/units/[allocationId]/documents/course-outline` and `.../scheme-of-work`) now have a prominent "Confirm & Submit for Review" action with a modal confirmation step. When submitted, the system compiles the official `.docx` via `buildTVETDocumentDocx`, securely stores the file in `teaching-documents-private` storage, logs an immutable revision in `teaching_document_revisions`, logs the submission in `teaching_document_submissions`, and creates/updates `teaching_documents` with `status: 'submitted'`. The document immediately enters the HOD review queue (`/teaching-documents/review`). Upon HOD approval, it becomes available in the QA export pack (`/teaching-documents/qa-export`) organized by trainer folders. Added real-time status banners and badges (Draft, Submitted/In Review, Approved by HOD, Returned with Correction Note) to both the document viewers and the unit documents hub (`/staff/units/[allocationId]/documents`).

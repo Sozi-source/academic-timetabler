@@ -10,6 +10,7 @@ import {
 } from '@/features/teaching-documents/curriculum-registry';
 import { hasTopicCoverageContamination } from '@/features/teaching-documents/topic-coverage-validation';
 import {
+  isAssessmentOrEvaluationItem,
   normalizeCurriculumLearningOutcomes,
   normalizeCurriculumSubtopics,
   normalizeCurriculumTopicTitle,
@@ -186,19 +187,29 @@ function enrichWithCanonical(
     }
   }
 
+  const normalizedDefOutcomes = normalizeCurriculumLearningOutcomes(def.learningOutcomes);
+  const isOutcomesContaminated =
+    normalizedDefOutcomes.length === 0 ||
+    normalizedDefOutcomes.every(isAssessmentOrEvaluationItem) ||
+    Boolean(def.learningOutcomes?.some(isCorruptedText));
+
+  const learningOutcomes = !isOutcomesContaminated
+    ? normalizedDefOutcomes.filter((item) => !isAssessmentOrEvaluationItem(item))
+    : (canonical.learningOutcomes ?? []);
+
+  const isCompAssessment = isAssessmentOrEvaluationItem(def.overallCompetency);
+  const overallCompetency =
+    !isCompCorrupt && !isCompAssessment && def.overallCompetency?.trim()
+      ? def.overallCompetency
+      : (canonical.overallCompetency ?? '');
+
   return {
     ...def,
     isAvailable: true,
     notReadyMessage: canonical.notReadyMessage,
     unitDescription: !isDescCorrupt && def.unitDescription?.trim() ? def.unitDescription : canonical.unitDescription,
-    overallCompetency: !isCompCorrupt && def.overallCompetency?.trim() ? def.overallCompetency : canonical.overallCompetency,
-    learningOutcomes: normalizeCurriculumLearningOutcomes(
-      def.learningOutcomes &&
-      def.learningOutcomes.length > 0 &&
-      !def.learningOutcomes.some(isCorruptedText)
-        ? def.learningOutcomes
-        : (canonical.learningOutcomes ?? []),
-    ),
+    overallCompetency,
+    learningOutcomes,
     references:
       def.references && def.references.length > 0
         ? def.references

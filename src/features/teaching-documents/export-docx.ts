@@ -209,7 +209,9 @@ export async function buildTVETDocumentDocx(
       spacing: { before: 0, after: 60 },
       children: [
         new TextRun({
-          text: `DEPARTMENT OF ${header.departmentName.toUpperCase()}`,
+          text: header.departmentName.toUpperCase().trim().startsWith('DEPARTMENT OF')
+            ? header.departmentName.toUpperCase().trim()
+            : `DEPARTMENT OF ${header.departmentName.toUpperCase().trim()}`,
           font: FONT,
           bold: true,
           size: 18,

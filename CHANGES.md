@@ -1,3 +1,21 @@
+### 2026-09-29: Resolved Course Outline Section 2 Learning Outcomes Assessment Contamination
+
+**Summary:**
+Resolved an issue where Section 2 ("Summary of Learning Outcomes (Core Competencies)") of generated and exported TVET Course Outlines erroneously displayed synthesized examination and assessment deliverables (e.g. `1. Final Exam (theory & practical)`, `2. Portfolio submission Exam papers, Marking scheme`, `GRADING SYSTEM FOR THE COURSE...`) instead of authentic curriculum learning outcomes from the syllabus.
+1. **Assessment & Deliverable Detection (`isAssessmentOrEvaluationItem`):** Created a domain guard in `curriculum-content-normalizer.ts` identifying examination deliverables (`Final Exam...`, `Portfolio submission...`, `CAT`, `RAT`, `End Term Exam`, `Written/Oral/Practical Exam`), grading rubrics (`GRADING SYSTEM FOR THE COURSE...`, `This course will be graded as follows:`), and table artifacts (`Remarks`, leading table pipes).
+2. **Outcome Cleaning & Noise Stripping:** Enhanced `normalizeCurriculumLearningOutcomes` to filter out embedded grading headings, introductory exam boilerplate, and assessment deliverables, while preserving discrete TVET competency statements.
+3. **Canonical Enrichment Guard (`queries.ts`):** Hardened `enrichWithCanonical` in `queries.ts` so that when stored or uploaded learning outcomes or overall competency consist entirely of assessment methods/deliverables (or are empty/corrupted), the system immediately falls back to canonical TVET learning outcomes and competencies defined in `curriculum-data/` (e.g. `basic_biochemistry`).
+4. **DOCX Parser Heading & Table Guard (`docx-parser.ts`):** Prevented Word syllabus ingestion from matching assessment/grading headings as competencies (`!/assessment|evaluation|grading|marking\s+scheme/i`), added section boundary breaks so candidate lines do not bleed into assessment/references blocks, filtered candidate lines with `isAssessmentOrEvaluationItem`, and prevented table topics from extracting footer blocks (`TRAINER SIGN-OFF`, `HEAD OF DEPARTMENT`, etc.).
+5. **Database & Storage Clean Synchronization:** Cleaned legacy active versions in `curriculum_document_versions` in PostgreSQL and regenerated all stored Course Outline `.docx` revisions in Supabase Storage (`teaching-documents-private`) to guarantee that both web previews and exported Word documents render authentic TVET learning outcomes. Also fixed duplicate department prefix in DOCX headers.
+
+**Files changed:**
+- `src/features/teaching-documents/curriculum-content-normalizer.ts` — Added `isAssessmentOrEvaluationItem` and enhanced `normalizeCurriculumLearningOutcomes` to strip assessment noise and table artifacts.
+- `src/features/teaching-documents/curriculum-content/queries.ts` — Hardened `enrichWithCanonical` to fall back to canonical outcomes/competencies when stored data contains assessment deliverables.
+- `src/features/teaching-documents/curriculum-editor/docx-parser.ts` — Guarded learning outcome paragraph scanning against assessment headings, filtered candidate lines, and excluded footer tables from topic lists.
+- `src/features/teaching-documents/export-docx.ts` — Prevented duplicate `DEPARTMENT OF` prefix in exported Word document headers.
+- `src/tests/curriculum-content-normalizer.test.ts` — Added unit test coverage for `isAssessmentOrEvaluationItem` and assessment-contaminated outcome filtering.
+- `CHANGES.md` — Documented fixes and verification results.
+
 ### 2026-09-28: Fixed Course Outline Multi-Week Topic Grouping, Artifact Stripping, and Discrete Bullet Formatting
 
 **Summary:**

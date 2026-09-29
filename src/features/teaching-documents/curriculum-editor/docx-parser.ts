@@ -1,6 +1,7 @@
 import { unpackZipBuffer } from '../zip-ingestion';
 import { stripTopicFigures } from '../distribution-engine';
 import {
+  isAssessmentOrEvaluationItem,
   normalizeCurriculumSubtopics,
   normalizeCurriculumTopicTitle,
   serializeCurriculumSubtopics,
@@ -110,22 +111,31 @@ export function parseDocxSyllabus(docxBuffer: Buffer, fileName?: string): Parsed
         }
       }
       if (
-        /learning\s+outcome|core\s+competenc|expected\s+outcome|competencies/i.test(lower)
+        /learning\s+outcome|core\s+competenc|expected\s+outcome|competencies/i.test(lower) &&
+        !/assessment|evaluation|grading|marking\s+scheme|mode\s+of\s+evaluation/i.test(lower)
       ) {
         // Collect the next few lines as competencies
         const lines: string[] = [];
-        for (let j = i + 1; j < Math.min(i + 8, allParas.length); j++) {
+        for (let j = i + 1; j < Math.min(i + 12, allParas.length); j++) {
           const candidate = allParas[j];
           if (
-            candidate.length > 5 &&
-            !/weekly\s+delivery|topical\s+breakdown|week\s+\d|teaching|assessment/i.test(candidate)
+            /weekly\s+delivery|topical\s+breakdown|week\s+\d|teaching|assessment|evaluation|grading\s+system|marking\s+scheme|instructional\s+resources|references/i.test(
+              candidate,
+            )
           ) {
-            lines.push(candidate.replace(/^\d+[\.\)]\s*/, '').trim());
-          } else {
             break;
           }
+          if (candidate.length > 5 && !isAssessmentOrEvaluationItem(candidate)) {
+            // Also strip any trailing grading / assessment intros if present in candidate
+            const cleanLine = candidate.replace(/\b(?:GRADING\s+SYSTEMS?|ASSESSMENT\s+WEIGHTING).*$/i, '').trim();
+            if (cleanLine.length > 5 && !isAssessmentOrEvaluationItem(cleanLine)) {
+              lines.push(cleanLine.replace(/^\d+[\.\)]\s*/, '').trim());
+            }
+          }
         }
-        if (lines.length > 0) overallCompetencies = lines.join(' ');
+        if (lines.length > 0 && !overallCompetencies) {
+          overallCompetencies = lines.join('\n');
+        }
       }
     }
 
@@ -183,6 +193,12 @@ export function parseDocxSyllabus(docxBuffer: Buffer, fileName?: string): Parsed
       if (
         /^(?:name\s+of\s+trainer|trainer(?:\s*name)?|instructor|institution|college|department|level|class|date\s+of\s+preparation|date\s+of\s+revision|revision\s+date|preparation\s+date|number\s+of\s+trainees|trainees\s+count|academic\s+year|term|intake|course\s+code|unit\s+code|unit\s+name|training\s+number)\s*[:=-]/i.test(t) ||
         /^(?:name\s+of\s+trainer|date\s+of\s+preparation|number\s+of\s+trainees|institution\s*:|level\s*:\s*\d|training\s+number\s*:)/i.test(t)
+      ) {
+        return false;
+      }
+      // Reject footer blocks, sign-offs, assessment weightings, and references captured from tables
+      if (
+        /^(?:teaching\s*\/?\s*learning|assessment\s+weighting|prescribed\s+references|instructional\s+equipment|trainer\s+sign-off|head\s+of\s+department|quality\s+assurance)\b/i.test(t)
       ) {
         return false;
       }

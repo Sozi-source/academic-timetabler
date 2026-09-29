@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   getContiguousTopicSpan,
+  isAssessmentOrEvaluationItem,
   isCurriculumArtifactToken,
   normalizeCurriculumLearningOutcomes,
   normalizeCurriculumSubtopics,
@@ -245,6 +246,47 @@ describe('curriculum content normalization', () => {
         'Explain the role of enzymes in metabolic regulation',
         'Analyze lipid profiles and cardiovascular risk',
       ]);
+    });
+
+    it('filters out assessment items and examination deliverables from learning outcomes', () => {
+      const contaminated = [
+        'Final Exam (theory & practical)',
+        'Portfolio submission Exam papers, Marking scheme',
+      ];
+      const result = normalizeCurriculumLearningOutcomes(contaminated);
+      expect(result).toEqual([]);
+    });
+
+    it('strips grading headers and table artifacts while retaining authentic outcomes', () => {
+      const input = [
+        '| Apply diet therapy in management of diseases and disorders',
+        '| Use special diets in management of diseases and disorders',
+        'GRADING SYSTEM FOR THE COURSE This course will be graded as follows:',
+        'Remarks',
+      ];
+      const result = normalizeCurriculumLearningOutcomes(input);
+      expect(result).toEqual([
+        'Apply diet therapy in management of diseases and disorders',
+        'Use special diets in management of diseases and disorders',
+      ]);
+    });
+  });
+
+  describe('Assessment and evaluation item detection', () => {
+    it('accurately flags examination and assessment deliverables', () => {
+      expect(isAssessmentOrEvaluationItem('Final Exam (theory & practical)')).toBe(true);
+      expect(isAssessmentOrEvaluationItem('Portfolio submission Exam papers, Marking scheme')).toBe(true);
+      expect(isAssessmentOrEvaluationItem('Continuous Assessment Test (CAT)')).toBe(true);
+      expect(isAssessmentOrEvaluationItem('Remarks')).toBe(true);
+      expect(isAssessmentOrEvaluationItem('GRADING SYSTEM FOR THE COURSE')).toBe(true);
+      expect(isAssessmentOrEvaluationItem('This course will be graded as follows:')).toBe(true);
+    });
+
+    it('does NOT flag legitimate TVET learning outcomes', () => {
+      expect(isAssessmentOrEvaluationItem('Explain the chemical basis of nutrition and biochemistry')).toBe(false);
+      expect(isAssessmentOrEvaluationItem('Describe structure and functions of carbohydrates and their metabolism')).toBe(false);
+      expect(isAssessmentOrEvaluationItem('Carry out qualitative biochemical analysis tests')).toBe(false);
+      expect(isAssessmentOrEvaluationItem('Apply nutritional principles in clinical disease management')).toBe(false);
     });
   });
 

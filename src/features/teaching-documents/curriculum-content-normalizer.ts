@@ -146,6 +146,30 @@ export function serializeCurriculumSubtopics(input?: string | string[] | null): 
 }
 
 /**
+ * Detects if a text string is an assessment method, examination deliverable,
+ * grading rubric, or table artifact rather than an authentic TVET learning outcome.
+ */
+export function isAssessmentOrEvaluationItem(text?: string | null): boolean {
+  if (!text) return false;
+  const t = text.trim();
+  if (!t) return false;
+
+  // Single-word artifacts
+  if (/^(?:remarks?|evaluation|assessment|grading)$/i.test(t)) return true;
+
+  // Exam / Assessment deliverables and grading rubrics
+  if (
+    /^(?:final\s+(?:summative\s+)?exam(?:ination)?|portfolio\s+submission|exam\s+papers?|marking\s+schemes?|continuous\s+assessment(?:\s+test)?|cat\s*\d*|rat\s*\d*|end[\s-]term\s+exam(?:ination)?|mid[\s-]term\s+exam(?:ination)?|written\s+exam(?:ination)?|oral\s+exam(?:ination)?|practical\s+exam(?:ination)?)/i.test(t) ||
+    /^(?:grading\s+systems?|this\s+course\s+will\s+be\s+graded|grading\s+criteria|assessment\s+weighting|course\s+assessment|evaluation\s+criteria)/i.test(t) ||
+    /(?:portfolio\s+submission\s+exam\s+papers|exam\s+papers,\s*marking\s+scheme)/i.test(t)
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
  * Splits and normalizes curriculum learning outcomes into discrete statements.
  * Prevents multiple numbered outcomes from being concatenated into a single blob.
  */
@@ -165,37 +189,48 @@ export function normalizeCurriculumLearningOutcomes(
     const lines = text.split(/\n+/u);
 
     for (const line of lines) {
-      const trimmedLine = line.trim();
+      const trimmedLine = line.replace(/^[|\s]+/, '').trim();
       if (!trimmedLine) continue;
 
       // Split inline numbered list items: e.g. "1. Explain... 2. Describe..." or "(a) Explain... (b) Describe..."
       const withSeparators = trimmedLine
         .replace(/\s+(?=(?:\d{1,2}[.)]|\([0-9a-zA-Z]{1,2}\))\s+[A-Z])/gu, '\n')
-        .replace(new RegExp(`\\s*(?=${BULLET_CHARS})`, 'gu'), '\n');
+        .replace(new RegExp(`\\s*(?=${BULLET_CHARS})`, 'gu'), '\n')
+        .replace(/\s*(?=(?:UNIT\s+LEARNING\s+OUTCOMES|GRADING\s+SYSTEMS?\s+FOR\s+THE))/gi, '\n');
 
       const parts = withSeparators.split(/\n+/u);
       for (const part of parts) {
-        const cleaned = stripCurriculumListPrefix(part);
+        let cleaned = stripCurriculumListPrefix(part);
         if (!cleaned) continue;
 
-        // Skip pure introductory sentences that contain no actual outcome statement
+        // Strip leading table characters like '|'
+        cleaned = cleaned.replace(/^[|\s]+/, '').trim();
+
+        // Skip pure introductory sentences or headings that contain no actual outcome statement
         if (
-          /^(?:by\s+the\s+end\s+of\s+.*?(?:able\s+to|will|competencies)|at\s+the\s+end\s+of\s+.*?(?:able\s+to|will|competencies)|the\s+(?:trainee|learner|student)\s+should\s+be\s+able\s+to|expected\s+learning\s+outcomes?|course\s+learning\s+outcomes?|specific\s+learning\s+outcomes?)\s*[:.]?$/i.test(
+          /^(?:by\s+the\s+end\s+of\s+.*?(?:able\s+to|will|competencies)|at\s+the\s+end\s+of\s+.*?(?:able\s+to|will|competencies)|the\s+(?:trainee|learner|student)\s+should\s+be\s+able\s+to|upon\s+successful\s+completion\s+of\s+.*?(?:able\s+to|will|competencies)|expected\s+learning\s+outcomes?|course\s+learning\s+outcomes?|specific\s+learning\s+outcomes?|unit\s+learning\s+outcomes?\s*(?:\/\s*competencies)?|learning\s+outcomes?\s*\/\s*competencies|learning\s+activities(?:\s+remarks)?|grading\s+systems?\s+for\s+the\s+(?:course|unit)|this\s+course\s+will\s+be\s+graded\s+as\s+follows)\s*[:.]?$/i.test(
             cleaned,
           )
         ) {
           continue;
         }
 
-        // If the item starts with an intro clause followed by colon, e.g.
-        // "By the end of the unit, the trainee should be able to: Explain...", strip the intro clause
-        const strippedIntro = cleaned.replace(
-          /^(?:by\s+the\s+end\s+of\s+[^:]+:\s*|at\s+the\s+end\s+of\s+[^:]+:\s*)/i,
-          '',
-        ).trim();
+        // If the item starts with an intro clause, strip it cleanly
+        const strippedIntro = cleaned
+          .replace(/^(?:upon\s+successful\s+completion\s+of\s+[^:]+:\s*(?:\(knowledge[-\s]?based\))?\s*)/i, '')
+          .replace(/^(?:by\s+the\s+end\s+of\s+[^:]+:\s*|at\s+the\s+end\s+of\s+[^:]+:\s*)/i, '')
+          .replace(/^(?:the\s+(?:trainee|learner|student)\s+should\s+be\s+able\s+to:\s*)/i, '')
+          .replace(/^(?:student\s+should\s+be\s+able\s+to:\s*(?:learning\s+activities\s+remarks\s*)?(?:\d{1,2}\/\d{1,2}\/\d{4}\s*)?)/i, '')
+          .replace(/\b(?:GRADING\s+SYSTEMS?\s+FOR\s+THE\s+(?:COURSE|UNIT)|THIS\s+COURSE\s+WILL\s+BE\s+GRADED).*$/i, '')
+          .trim();
 
         const finalItem = strippedIntro || cleaned;
-        if (finalItem && !isCurriculumArtifactToken(finalItem)) {
+        if (
+          finalItem &&
+          finalItem.length > 3 &&
+          !isCurriculumArtifactToken(finalItem) &&
+          !isAssessmentOrEvaluationItem(finalItem)
+        ) {
           outcomes.push(finalItem.charAt(0).toUpperCase() + finalItem.slice(1));
         }
       }

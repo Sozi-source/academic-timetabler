@@ -326,7 +326,7 @@ export default async function DepartmentStudentUnitRegistrationPage({
                   </Link>
                   <Button type="submit">
                     <CheckCircle2 className="size-4" />
-                    Save & verify registration
+                    Register
                   </Button>
                 </div>
               </div>

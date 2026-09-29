@@ -1,3 +1,15 @@
+### 2026-09-29: Purged Unnecessary Description Sentences From Dashboard and Staff Page Headers
+
+**Summary:**
+Cleaned up page headers across the entire platform by purging redundant, static description sentences from 79 routes across dashboard and staff workspaces:
+1. **Purged Redundant Explanatory Subtext:** Removed boilerplate description sentences (e.g. `"Quickly update student lifecycle status and academic placement."`, `"Department student operations."`, `"Continuous assessment tests and final exam markbooks."`, `"Record class attendance."`) from all `<PageHeader>` tags.
+2. **Sleeker, Compact Layout:** Reduced header vertical footprint, allowing the page eyebrow, title, contextual badges, and action buttons to align neatly with maximum vertical screen space preserved for actual data tables and workflows.
+3. **Preserved Dynamic Runtime Metadata:** Maintained dynamic metadata subtitles in session-specific routes (e.g. student unit registration preview showing student name/admission number, session attendance headers showing cohort/date/time ranges).
+
+**Files changed:**
+- 79 route pages across `src/app/(dashboard)/` and `src/app/(staff)/` — Removed boilerplate `description` props from `<PageHeader>`.
+- `CHANGES.md` — Documented update.
+
 ### 2026-09-29: Cleaned Student Status Updater Layout & Removed Out-of-Scope Semester Reporting
 
 **Summary:**

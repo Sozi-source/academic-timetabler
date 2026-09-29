@@ -1,3 +1,19 @@
+### 2026-09-29: Cleaned Student Status Updater Layout & Removed Out-of-Scope Semester Reporting
+
+**Summary:**
+Refactored the quick student status updater screen (`/students/status`) to eliminate the out-of-scope `SEMESTER REPORTING` column and dedicate a dedicated, well-proportioned column for student admission numbers:
+1. **Removed `SEMESTER REPORTING` from Status Updater:** Eliminated the term-level reporting dropdown (`Reported` / `Not Reported`) from `InlineStatusUpdater`. Status management on this screen is strictly for overarching student lifecycle phases (`In Class`, `On Attachment`, `Deferred`, `Dropped Out`, `Suspended`, `Completed`, `Graduated`), while period reporting remains where it belongs (student portal check-ins, attendance registers, and unit registration eligibility).
+2. **Dedicated Admission Number Column:** Added a dedicated, monospace-formatted `Admission No.` column (`minmax(140px, 1.2fr)`) linked directly to the student registry profile (`/students/registry/${student.id}`).
+3. **Optimized Responsive Grid Spacing:** Restructured the table and header grid with balanced proportions (`minmax(0, 2.5fr)` for Student & Cohort, `minmax(140px, 1.2fr)` for Admission No., `minmax(180px, 1.4fr)` for Status dropdown, and `40px` for save indicator), ensuring clean breathing room across all screen widths. On mobile, the student identity and status dropdown stack cleanly without layout collisions.
+4. **Streamlined Server Action:** Simplified `quickUpdateStudentStatusAction` in `actions.ts` to update lifecycle status and academic placement without unnecessary calls or side-effects to `student_period_reporting`.
+5. **Updated Header Description:** Updated `/students/status` page description to *"Quickly update student lifecycle status and academic placement."*
+
+**Files changed:**
+- `src/features/students/inline-status-updater.tsx` — Removed semester reporting column/dropdown, added dedicated `Admission No.` column with registry profile link, and optimized grid layout.
+- `src/features/students/actions.ts` — Simplified `quickUpdateStudentStatusAction` signature and removed period reporting RPC update.
+- `src/app/(dashboard)/students/status/page.tsx` — Updated page description to reflect student lifecycle and placement focus.
+- `CHANGES.md` — Documented changes and verification results.
+
 ### 2026-09-29: Resolved Course Outline Section 2 Learning Outcomes Assessment Contamination
 
 **Summary:**

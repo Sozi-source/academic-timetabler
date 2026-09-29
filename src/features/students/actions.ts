@@ -447,7 +447,6 @@ export async function batchReassignStudentCohortAction(
 export async function quickUpdateStudentStatusAction(
   studentId: string,
   virtualStatus: string,
-  reportingStatus: 'reported' | 'not_reported',
 ): Promise<{ success: boolean; message: string }> {
   await requireHodAccess();
 
@@ -488,13 +487,6 @@ export async function quickUpdateStudentStatusAction(
     effective_date: today,
   });
   if (placementErr) return { success: false, message: progressionError(placementErr.message) };
-
-  const { error: reportingErr } = await supabase.rpc('set_student_status', {
-    target_student_id: studentId,
-    target_status: reportingStatus,
-    effective_date: today,
-  });
-  if (reportingErr) return { success: false, message: progressionError(reportingErr.message) };
 
   revalidatePath('/students');
   revalidatePath('/students/registry');

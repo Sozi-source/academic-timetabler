@@ -1,11 +1,11 @@
 'use client';
 
 import { CheckCircle2, LoaderCircle, Search, UserRound } from 'lucide-react';
+import Link from 'next/link';
 import { startTransition, useOptimistic, useState } from 'react';
 import { toast } from 'sonner';
 
 import { quickUpdateStudentStatusAction } from './actions';
-import { getStudentStatusLabel } from './student-status-stage';
 import type { StudentRow } from './types';
 
 // ─── Virtual status helpers (mirrors progression-form.tsx) ───────────────────
@@ -71,35 +71,28 @@ function matchesSearch(student: StudentRow, q: string): boolean {
 
 interface RowState {
   virtualStatus: VirtualStatus;
-  reporting: 'reported' | 'not_reported';
   saving: boolean;
   saved: boolean;
 }
 
 function InlineStatusRow({ student }: { student: StudentRow }) {
   const initialVirtual = toVirtualStatus(student.lifecycle_status, student.academic_phase);
-  const initialReporting = student.reporting_status === 'reported' ? 'reported' : 'not_reported';
 
   const [state, setOptimistic] = useOptimistic<RowState, Partial<RowState>>(
     {
       virtualStatus: initialVirtual,
-      reporting: initialReporting,
       saving: false,
       saved: false,
     },
     (prev, patch) => ({ ...prev, ...patch }),
   );
 
-  async function save(
-    nextVirtual: VirtualStatus,
-    nextReporting: 'reported' | 'not_reported',
-  ) {
+  async function save(nextVirtual: VirtualStatus) {
     const previousVirtual = state.virtualStatus;
-    const previousReporting = state.reporting;
 
     startTransition(async () => {
-      setOptimistic({ virtualStatus: nextVirtual, reporting: nextReporting, saving: true, saved: false });
-      const result = await quickUpdateStudentStatusAction(student.id, nextVirtual, nextReporting);
+      setOptimistic({ virtualStatus: nextVirtual, saving: true, saved: false });
+      const result = await quickUpdateStudentStatusAction(student.id, nextVirtual);
       if (result.success) {
         setOptimistic({ saving: false, saved: true });
         toast.success(`${student.full_name} — ${result.message}`);
@@ -107,7 +100,7 @@ function InlineStatusRow({ student }: { student: StudentRow }) {
         setTimeout(() => setOptimistic({ saved: false }), 2000);
       } else {
         // revert
-        setOptimistic({ virtualStatus: previousVirtual, reporting: previousReporting, saving: false, saved: false });
+        setOptimistic({ virtualStatus: previousVirtual, saving: false, saved: false });
         toast.error(`${student.full_name} — ${result.message}`);
       }
     });
@@ -117,71 +110,63 @@ function InlineStatusRow({ student }: { student: StudentRow }) {
   const cohort = student.current_cohort?.name ?? student.admission_cohort?.name ?? '—';
 
   return (
-    <div className="grid grid-cols-[1fr_auto] items-center gap-3 border-b border-border px-4 py-3 last:border-0 sm:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)_auto]">
+    <div className="grid grid-cols-[1fr_auto] items-center gap-3 border-b border-border px-4 py-3 last:border-0 sm:grid-cols-[minmax(0,2.5fr)_minmax(140px,1.2fr)_minmax(180px,1.4fr)_40px] sm:gap-4">
       {/* Student identity */}
       <div className="min-w-0">
-        <p className="truncate text-xs font-semibold text-text-primary">{student.full_name}</p>
+        <Link
+          href={`/students/registry/${student.id}`}
+          className="truncate text-xs font-semibold text-text-primary hover:text-primary transition-colors block"
+        >
+          {student.full_name}
+        </Link>
         <p className="mt-0.5 truncate text-[0.6875rem] text-text-muted">
-          {student.admission_number} · {programme} · {cohort}
+          <span className="sm:hidden font-mono text-[11px] text-text-secondary mr-1.5">{student.admission_number} ·</span>
+          {programme} · {cohort}
         </p>
+
+        {/* Mobile: status dropdown */}
+        <div className="mt-2.5 sm:hidden">
+          <select
+            value={state.virtualStatus}
+            disabled={state.saving}
+            onChange={(e) => save(e.target.value as VirtualStatus)}
+            aria-label={`Status for ${student.full_name}`}
+            className="h-8 w-full rounded-lg border border-border bg-surface px-2.5 text-xs font-medium text-text-primary outline-none ring-0 transition focus:border-primary focus:ring-1 focus:ring-primary/30 disabled:opacity-60"
+          >
+            {STATUS_OPTIONS.map(([value, label]) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      {/* Status dropdown */}
+      {/* Admission Number column (desktop) */}
+      <div className="hidden sm:block min-w-0">
+        <Link
+          href={`/students/registry/${student.id}`}
+          className="font-mono text-xs font-medium text-text-secondary hover:text-primary transition-colors inline-block"
+        >
+          {student.admission_number}
+        </Link>
+      </div>
+
+      {/* Status dropdown (desktop) */}
       <div className="hidden sm:block">
         <select
           value={state.virtualStatus}
           disabled={state.saving}
-          onChange={(e) => save(e.target.value as VirtualStatus, state.reporting)}
-          className="h-8 w-full rounded-lg border border-border bg-surface px-2 text-xs font-medium text-text-primary outline-none ring-0 transition focus:border-primary focus:ring-1 focus:ring-primary/30 disabled:opacity-60"
+          onChange={(e) => save(e.target.value as VirtualStatus)}
+          aria-label={`Status for ${student.full_name}`}
+          className="h-8 w-full rounded-lg border border-border bg-surface px-2.5 text-xs font-medium text-text-primary outline-none ring-0 transition focus:border-primary focus:ring-1 focus:ring-primary/30 disabled:opacity-60"
         >
           {STATUS_OPTIONS.map(([value, label]) => (
             <option key={value} value={value}>{label}</option>
           ))}
-        </select>
-      </div>
-
-      {/* Reporting dropdown */}
-      <div className="hidden sm:block">
-        <select
-          value={state.reporting}
-          disabled={state.saving}
-          onChange={(e) =>
-            save(state.virtualStatus, e.target.value as 'reported' | 'not_reported')
-          }
-          className="h-8 w-full rounded-lg border border-border bg-surface px-2 text-xs font-medium text-text-primary outline-none ring-0 transition focus:border-primary focus:ring-1 focus:ring-primary/30 disabled:opacity-60"
-        >
-          <option value="reported">Reported</option>
-          <option value="not_reported">Not Reported</option>
-        </select>
-      </div>
-
-      {/* Mobile: combined dropdowns stacked */}
-      <div className="col-span-2 flex gap-2 sm:hidden">
-        <select
-          value={state.virtualStatus}
-          disabled={state.saving}
-          onChange={(e) => save(e.target.value as VirtualStatus, state.reporting)}
-          className="h-8 flex-1 rounded-lg border border-border bg-surface px-2 text-xs font-medium text-text-primary outline-none ring-0 transition focus:border-primary focus:ring-1 focus:ring-primary/30 disabled:opacity-60"
-        >
-          {STATUS_OPTIONS.map(([value, label]) => (
-            <option key={value} value={value}>{label}</option>
-          ))}
-        </select>
-        <select
-          value={state.reporting}
-          disabled={state.saving}
-          onChange={(e) =>
-            save(state.virtualStatus, e.target.value as 'reported' | 'not_reported')
-          }
-          className="h-8 flex-1 rounded-lg border border-border bg-surface px-2 text-xs font-medium text-text-primary outline-none ring-0 transition focus:border-primary focus:ring-1 focus:ring-primary/30 disabled:opacity-60"
-        >
-          <option value="reported">Reported</option>
-          <option value="not_reported">Not Reported</option>
         </select>
       </div>
 
       {/* Save indicator */}
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center">
+      <div className="flex h-8 w-10 shrink-0 items-center justify-center">
         {state.saving ? (
           <LoaderCircle className="size-4 animate-spin text-primary" />
         ) : state.saved ? (
@@ -257,11 +242,11 @@ export function InlineStatusUpdater({ students }: InlineStatusUpdaterProps) {
       </div>
 
       {/* Column headers (desktop) */}
-      <div className="hidden rounded-lg border border-border bg-surface sm:grid sm:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-center sm:gap-3 sm:px-4 sm:py-2">
+      <div className="hidden rounded-lg border border-border bg-surface sm:grid sm:grid-cols-[minmax(0,2.5fr)_minmax(140px,1.2fr)_minmax(180px,1.4fr)_40px] sm:items-center sm:gap-4 sm:px-4 sm:py-2.5">
         <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted">Student</span>
+        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted">Admission No.</span>
         <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted">Status</span>
-        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted">Semester reporting</span>
-        <span className="w-8" />
+        <span className="w-10" />
       </div>
 
       {/* Student rows */}

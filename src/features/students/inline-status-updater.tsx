@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, ChevronDown, LoaderCircle, CheckCircle2, Search, UserRound } from 'lucide-react';
+import { Check, ChevronDown, FileDown, LoaderCircle, CheckCircle2, Search, UserRound } from 'lucide-react';
 import Link from 'next/link';
 import { startTransition, useOptimistic, useState } from 'react';
 import { toast } from 'sonner';
@@ -301,18 +301,38 @@ export function InlineStatusUpdater({ students }: InlineStatusUpdaterProps) {
     counts[v] = (counts[v] ?? 0) + 1;
   }
 
+  // ─── Export URL ────────────────────────────────────────────────────────────
+  function buildExportUrl() {
+    const params = new URLSearchParams();
+    if (statusFilter) params.set('status', statusFilter);
+    if (search) params.set('search', search);
+    const qs = params.toString();
+    return `/api/students/export${qs ? `?${qs}` : ''}`;
+  }
+
   return (
     <div className="space-y-3">
-      {/* Search */}
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-text-muted" />
-        <input
-          type="search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by name, admission number, programme…"
-          className="h-9 w-full rounded-lg border border-border bg-surface pl-8 pr-3 text-xs text-text-primary placeholder:text-text-muted outline-none ring-0 transition focus:border-primary focus:ring-1 focus:ring-primary/30"
-        />
+      {/* Search + Export row */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-text-muted" />
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by name, admission number, programme…"
+            className="h-9 w-full rounded-lg border border-border bg-surface pl-8 pr-3 text-xs text-text-primary placeholder:text-text-muted outline-none ring-0 transition focus:border-primary focus:ring-1 focus:ring-primary/30"
+          />
+        </div>
+        <a
+          href={buildExportUrl()}
+          download
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
+          title={statusFilter ? `Export ${STATUS_CONFIG[statusFilter as VirtualStatus]?.label} students to Excel` : 'Export all students to Excel'}
+        >
+          <FileDown className="size-3.5" />
+          <span className="hidden sm:inline">Export</span>
+        </a>
       </div>
 
       {/* Filter tabs */}

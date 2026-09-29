@@ -121,7 +121,6 @@ function InlineStatusRow({ student }: { student: StudentRow }) {
         </Link>
         <p className="mt-0.5 truncate text-[0.6875rem] text-text-muted">
           <span className="sm:hidden font-mono text-[11px] text-text-secondary mr-1.5">{student.admission_number} ·</span>
-          {programme} · {cohort}
         </p>
 
         {/* Mobile: status dropdown */}

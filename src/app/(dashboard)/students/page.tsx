@@ -18,7 +18,6 @@ export default async function StudentsModulePage() {
       <PageHeader
         eyebrow="Module 02"
         title="Student Lifecycle"
-        description="Department student operations."
         icon={GraduationCap}
         context={<Badge variant="success">Active</Badge>}
         actions={

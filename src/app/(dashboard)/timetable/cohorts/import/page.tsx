@@ -22,7 +22,6 @@ export default function ImportCohortsPage() {
       <PageHeader
         eyebrow="Bulk data import"
         title="Import cohorts"
-        description="Upload cohort workbook to import."
         context={
           <div className="inline-flex items-center gap-2 text-sm text-text-muted">
             <FileSpreadsheet className="size-4" aria-hidden="true" />

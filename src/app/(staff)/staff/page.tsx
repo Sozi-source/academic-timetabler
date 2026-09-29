@@ -42,7 +42,6 @@ export default async function StaffHomePage() {
       <PageHeader
         eyebrow="Trainer Workspace"
         title={portalGreeting(profile.fullName)}
-        description="Assigned units, classes, and assessment markbooks."
         icon={GraduationCap}
         actions={
           <div className="flex items-center gap-2">

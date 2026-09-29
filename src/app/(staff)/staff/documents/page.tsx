@@ -48,7 +48,6 @@ export default async function StaffDocumentsPage() {
       <PageHeader
         eyebrow="Staff"
         title="Teaching Documents"
-        description="Documents for your allocated units."
         icon={FileText}
       />
 

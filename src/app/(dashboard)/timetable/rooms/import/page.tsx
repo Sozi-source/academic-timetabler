@@ -26,7 +26,6 @@ export default function ImportRoomsPage() {
       <PageHeader
         eyebrow="Bulk data import"
         title="Import rooms"
-        description="Upload room workbook to import."
         context={
           <div className="inline-flex items-center gap-2 text-sm text-text-muted">
             <Building2

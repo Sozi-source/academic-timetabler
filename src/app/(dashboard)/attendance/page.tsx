@@ -56,7 +56,6 @@ export default async function DepartmentClassAttendancePage({ searchParams }: Pa
       <PageHeader
         eyebrow="Attendance"
         title="Department Class Attendance"
-        description="Monitor trainer compliance and student attendance records."
         icon={CalendarCheck2}
         backHref="/dashboard"
         backLabel="Dashboard"

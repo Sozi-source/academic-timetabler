@@ -77,7 +77,6 @@ export default async function StaffTimetablePage() {
       <PageHeader
         eyebrow="Staff"
         title="My Timetable"
-        description="Your published teaching schedule."
         icon={CalendarDays}
       />
 

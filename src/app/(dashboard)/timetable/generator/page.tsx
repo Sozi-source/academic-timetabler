@@ -69,7 +69,6 @@ export default async function TimetableGeneratorPage() {
       <PageHeader
         eyebrow="Step 2 of 4"
         title="Generate timetable"
-        description="Choose a period and generate a clash-free timetable automatically."
         context={
           <div className="inline-flex items-center gap-2 text-sm text-text-muted">
             <CalendarCheck2

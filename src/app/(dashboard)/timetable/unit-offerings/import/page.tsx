@@ -84,7 +84,6 @@ export default async function ImportUnitOfferingsPage() {
       <PageHeader
         eyebrow="Semester planning"
         title="Import Units on Offer"
-        description="Generate a prefilled workbook, or download a blank template."
         context={
           <div className="inline-flex items-center gap-2 text-sm text-text-muted">
             <CalendarRange

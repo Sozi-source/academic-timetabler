@@ -20,7 +20,6 @@ export default async function TeachingDocumentQaExportPage() {
       <PageHeader
         eyebrow="Curriculum & QA"
         title="QA Examination Export"
-        description="Package approved trainer outlines and schemes of work by academic period."
         icon={Archive}
         backHref="/teaching-documents"
         backLabel="Documents"

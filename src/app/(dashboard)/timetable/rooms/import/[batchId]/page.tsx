@@ -73,11 +73,6 @@ export default async function RoomImportPreviewPage({
             ? 'Rooms import results'
             : 'Review Rooms import'
         }
-        description={
-          isCompleted
-            ? 'Review the final Rooms import outcome and retained row-level audit results.'
-            : 'Review every workbook row before confirming the final Rooms database import.'
-        }
         context={
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="neutral">

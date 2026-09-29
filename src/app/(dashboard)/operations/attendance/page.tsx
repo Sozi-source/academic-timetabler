@@ -60,7 +60,6 @@ export default async function AttendanceOversightPage() {
       <PageHeader
         eyebrow="Operations & QA"
         title="Attendance oversight"
-        description="Department class-attendance records."
         icon={ClipboardCheck}
         actions={
           <Link

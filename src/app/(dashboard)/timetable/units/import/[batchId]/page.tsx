@@ -76,11 +76,6 @@ export default async function UnitImportReviewPage({
             ? 'Units import results'
             : 'Review Units import'
         }
-        description={
-          isCompleted
-            ? 'Review the final Units import outcome and retained row-level audit results.'
-            : 'Review resolved programmes, unit details and validation results before committing the Units workbook.'
-        }
         context={
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="neutral">

@@ -80,7 +80,6 @@ export default async function Page({searchParams}:{searchParams:Promise<{period?
   <PageHeader
     eyebrow="Timetable preparation"
     title="Simple teaching allocation"
-    description="Approve cohort offerings, confirm reviewed equivalent classes, then assign one trainer per delivery."
     actions={
       <div className="flex flex-wrap items-center gap-2">
         <Link

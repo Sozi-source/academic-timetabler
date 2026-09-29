@@ -76,7 +76,6 @@ export default async function CurriculumVersionHistoryPage({
       <PageHeader
         eyebrow={`${first.unitCode} — ${first.unitName}`}
         title={title}
-        description="Previous versions remain available until permanently deleted."
         icon={History}
         actions={
           <Link

@@ -25,7 +25,6 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
       <PageHeader
         eyebrow="Assessment"
         title="Unit markbooks"
-        description="One workbook per unit for CAT and final exam marks."
         icon={ListChecks}
         backHref="/assessment"
         backLabel="Assessments"

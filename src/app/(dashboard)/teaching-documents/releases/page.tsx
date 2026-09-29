@@ -78,7 +78,6 @@ export default async function TeachingDocumentReleasesPage() {
       <PageHeader
         eyebrow="Teaching Documents"
         title="Student releases"
-        description="Publish approved documents to students."
         icon={FileOutput}
         actions={
           <Link

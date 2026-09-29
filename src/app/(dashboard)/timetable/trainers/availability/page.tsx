@@ -123,7 +123,6 @@ export default async function Page({
       <PageHeader
         eyebrow="Trainers"
         title="Trainer availability"
-        description="Tick the sessions the trainer can teach."
         context={
           selectedPeriod ? (
             <span className="text-xs font-medium text-text-muted xl:text-sm">

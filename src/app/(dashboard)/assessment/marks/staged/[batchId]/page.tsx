@@ -128,7 +128,6 @@ export default async function StagedAssessmentMarkbookPage({
       <PageHeader
         eyebrow="Assessment"
         title="Staged marks"
-        description="Validated workbook preview before results are committed."
         icon={FileSpreadsheet}
       />
 

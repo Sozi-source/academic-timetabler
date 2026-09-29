@@ -35,7 +35,6 @@ export default async function TimetableEditorPage({
     <div className="space-y-4">
       <PageHeader
         title="Timetable Editor"
-        description="Interactive session placement and allocation management."
         actions={
           <form method="get" className="flex items-center gap-2">
             <Select

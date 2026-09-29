@@ -48,7 +48,6 @@ export default async function ConstraintsPage({
       <PageHeader
         eyebrow="Scheduling"
         title="Scheduling constraints"
-        description="Room, class, and institution restrictions."
         context={
           selectedPeriod ? (
             <span className="text-xs font-medium text-text-muted xl:text-sm">

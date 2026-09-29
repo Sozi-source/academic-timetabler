@@ -44,7 +44,6 @@ export default async function StudentDocumentPublicationPage() {
       <PageHeader
         eyebrow="Teaching Documents"
         title="Student Publication"
-        description="Control which approved documents students can download."
         icon={Eye}
         actions={
           <Link

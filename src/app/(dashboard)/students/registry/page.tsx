@@ -27,7 +27,6 @@ export default async function StudentRegistryPage({ searchParams }: { searchPara
         backLabel="Students"
         eyebrow="Student Lifecycle"
         title="Student registry"
-        description="Current and historical students."
         context={<Badge variant="neutral">{students.length} records</Badge>}
         actions={
           <div className="flex flex-wrap items-center gap-2">

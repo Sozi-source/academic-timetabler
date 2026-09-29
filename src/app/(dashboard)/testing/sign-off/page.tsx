@@ -47,7 +47,6 @@ export default async function ReleaseSignoffPage() {
       <PageHeader
         eyebrow="Release Candidate"
         title="Go-live sign-off"
-        description="Final controlled release approval."
         icon={ShieldCheck}
         context={
           <Badge variant={releaseGoLiveVariant(status)}>

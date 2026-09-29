@@ -60,7 +60,6 @@ export default async function DailyReportsPage({
       <PageHeader
         eyebrow="Academic operations"
         title="Trainer Daily Reports"
-        description="Daily teaching attendance, absences and concerns for HOD review."
         icon={ClipboardList}
         backHref="/dashboard"
         backLabel="Dashboard"

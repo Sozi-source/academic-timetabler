@@ -34,7 +34,6 @@ export default async function StudentPortalAccessPage() {
     <div className="space-y-5 pb-12">
       <PageHeader
         title="Student Portal Access & Accounts"
-        description="Real-time account activation and credential status."
         icon={KeyRound}
         actions={
           <Link

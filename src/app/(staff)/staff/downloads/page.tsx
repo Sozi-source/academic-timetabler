@@ -13,7 +13,6 @@ export default async function StaffDownloadsPage() {
     <div className="space-y-5">
       <PageHeader
         title="Downloads"
-        description="Printable registers and teaching files"
         icon={Download}
       />
 

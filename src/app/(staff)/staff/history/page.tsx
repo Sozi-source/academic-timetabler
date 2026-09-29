@@ -96,7 +96,6 @@ export default async function StaffHistoryPage() {
       <PageHeader
         eyebrow="Staff"
         title="History"
-        description="Your recent portal activity."
         icon={History}
       />
 

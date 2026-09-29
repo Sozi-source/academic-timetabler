@@ -37,7 +37,6 @@ export default async function TimetableReadinessPage({ searchParams }: { searchP
       <PageHeader
         eyebrow="Step 1 of 4"
         title="Check your setup"
-        description="Fix only the items marked as missing before generating the timetable."
         icon={ClipboardCheck}
         backHref="/dashboard"
         backLabel="Dashboard"

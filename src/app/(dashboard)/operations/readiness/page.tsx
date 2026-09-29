@@ -46,7 +46,6 @@ export default async function OperationsReadinessPage() {
       <PageHeader
         eyebrow="Operations & QA"
         title="Readiness checks"
-        description="Automated cross-module checks."
         icon={ShieldCheck}
         context={
           <Badge

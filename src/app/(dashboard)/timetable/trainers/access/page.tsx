@@ -49,7 +49,6 @@ export default async function TrainerAccessPage() {
       <PageHeader
         eyebrow="Trainers"
         title="Staff Access"
-        description="Link registered trainers to their secure staff workspace."
         icon={KeyRound}
         actions={
           <Link

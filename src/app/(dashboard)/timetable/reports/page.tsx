@@ -64,7 +64,6 @@ export default async function TimetableReportsPage({
       <PageHeader
         eyebrow="Enterprise reporting"
         title="Timetable reports"
-        description="Review the master timetable, cohort schedules, workloads and room usage."
         actions={(
           <div className="flex flex-wrap items-center gap-2">
             <Link

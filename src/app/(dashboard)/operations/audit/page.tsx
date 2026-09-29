@@ -57,7 +57,6 @@ export default async function OperationsAuditPage() {
       <PageHeader
         eyebrow="Operations & QA"
         title="Operational audit"
-        description="Recent controlled workflow activity."
         icon={History}
         backHref="/operations"
         backLabel="Operations"

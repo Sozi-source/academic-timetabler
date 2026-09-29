@@ -69,7 +69,6 @@ export default async function StaffAttendancePage() {
       <PageHeader
         eyebrow="Staff"
         title="Class Attendance"
-        description="Record class attendance."
         icon={CalendarCheck2}
       />
 

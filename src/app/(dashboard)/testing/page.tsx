@@ -45,7 +45,6 @@ export default async function SystemTestingPage() {
       <PageHeader
         eyebrow="Release Candidate"
         title="System Testing Center"
-        description="Automated readiness and controlled user-acceptance testing."
         icon={FlaskConical}
         context={
           <Badge variant={readiness.ready ? 'success' : 'danger'}>

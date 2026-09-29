@@ -61,7 +61,6 @@ export default async function ReleaseDefectsPage({
       <PageHeader
         eyebrow="Release Candidate"
         title="Defect register"
-        description="Track UAT issues to verified closure."
         icon={Bug}
         context={
           <Badge variant={blocking > 0 ? 'danger' : 'success'}>

@@ -48,7 +48,6 @@ export default async function ReleaseDeploymentsPage() {
       <PageHeader
         eyebrow="Release Candidate"
         title="Deployment register"
-        description="Controlled Pilot and Production release evidence."
         icon={Rocket}
         context={
           <Badge variant={canDeployProduction ? 'success' : 'warning'}>

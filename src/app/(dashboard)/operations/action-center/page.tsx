@@ -52,7 +52,6 @@ export default async function OperationsActionCenterPage() {
       <PageHeader
         eyebrow="Operations & QA"
         title="Action Center"
-        description="One queue for release and operational follow-up."
         icon={ListChecks}
         context={
           <Badge variant={counts.critical > 0 ? 'danger' : counts.warning > 0 ? 'warning' : 'success'}>

@@ -13,7 +13,6 @@ export default async function CurriculumImportPage() {
       <PageHeader
         eyebrow="Unit registration"
         title="Import curriculum"
-        description="Build the authoritative Programme → Stage → Unit structure."
         icon={BookOpenCheck}
         actions={
           <Link href="/students/unit-registration/stages" className="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-surface px-4 text-sm font-semibold text-text-secondary">

@@ -28,7 +28,6 @@ export default async function AssessmentMarksPage() {
       <PageHeader
         eyebrow="Assessment"
         title="Unit markbooks"
-        description="One progressive Excel workbook per unit for the whole academic period."
         icon={FileSpreadsheet}
         context={<Badge variant="neutral">{markbooks.length} units</Badge>}
       />

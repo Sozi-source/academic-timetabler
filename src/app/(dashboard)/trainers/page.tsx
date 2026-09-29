@@ -62,7 +62,6 @@ export default async function StaffManagementPage() {
       <PageHeader
         eyebrow="Institutional Personnel"
         title="Staff & Trainer Management"
-        description="Trainer directory, workload allocations, and workspace access."
         icon={Users}
         backHref="/dashboard"
         backLabel="Dashboard"

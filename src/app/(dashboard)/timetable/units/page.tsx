@@ -86,7 +86,6 @@ export default async function UnitsPage() {
       <PageHeader
         eyebrow="Academic structure"
         title="Units"
-        description="Manage units, contact hours, session needs and preferred teaching spaces."
         context={
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="neutral">

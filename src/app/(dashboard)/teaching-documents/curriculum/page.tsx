@@ -122,7 +122,6 @@ export default async function CurriculumContentPage() {
       <PageHeader
         eyebrow="Teaching documents"
         title="Curriculum Content"
-        description="Course Outlines and Schemes of Work."
         icon={BookOpenCheck}
         backHref="/teaching-documents"
         backLabel="Back"

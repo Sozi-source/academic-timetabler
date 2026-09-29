@@ -114,7 +114,6 @@ export default async function AssessmentPopulationPage({
       <PageHeader
         eyebrow="Assessment"
         title="Assessment population"
-        description="Confirm the registered roster, record assessment absences, then download the CAT or Exam markbook."
         icon={UsersRound}
       />
 

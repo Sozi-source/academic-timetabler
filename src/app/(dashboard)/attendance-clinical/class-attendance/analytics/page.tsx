@@ -93,7 +93,6 @@ export default async function AttendanceAnalyticsPage() {
       <PageHeader
         eyebrow="Attendance & Clinical"
         title="Attendance analytics"
-        description="Completed class attendance for the active academic period."
         icon={BarChart3}
         context={
           <Badge variant="institutional">

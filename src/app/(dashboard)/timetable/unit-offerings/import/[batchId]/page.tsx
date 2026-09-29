@@ -106,7 +106,6 @@ export default async function UnitOfferingImportBatchPage({
       <PageHeader
         eyebrow="Bulk data import"
         title="Units on Offer"
-        description="Review import rows."
         context={
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="neutral">

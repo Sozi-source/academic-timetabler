@@ -50,7 +50,6 @@ export default async function EditUnitPage({
       <PageHeader
         eyebrow="Academic structure"
         title={`Edit ${unit.code}`}
-        description="Update curriculum unit details, contact hours, weekly sessions, and stage."
         context={
           <div className="flex flex-wrap items-center gap-2">
             <Badge

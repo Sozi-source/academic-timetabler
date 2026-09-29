@@ -18,7 +18,6 @@ export default async function StudentStatusPage() {
       <PageHeader
         eyebrow="Student Lifecycle"
         title="Update student statuses"
-        description="Quickly update student lifecycle status and academic placement."
         icon={UsersRound}
         context={<Badge variant="neutral">{students.length} students</Badge>}
         actions={

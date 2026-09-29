@@ -75,11 +75,6 @@ export default async function TeachingAllocationImportPreviewPage({
             ? 'Allocation import results'
             : 'Review teaching allocations'
         }
-        description={
-          isCompleted
-            ? 'Review the completed import and retained row-level audit information.'
-            : 'Review relationship validation, duplicate detection and scheduling readiness before confirmation.'
-        }
         context={
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="neutral">

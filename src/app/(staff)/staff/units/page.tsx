@@ -25,7 +25,6 @@ export default async function StaffUnitsPage() {
       <PageHeader
         eyebrow="Staff"
         title="My Units"
-        description="Your teaching allocations."
         icon={BookOpenCheck}
       />
 

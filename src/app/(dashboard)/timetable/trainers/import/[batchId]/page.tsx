@@ -73,11 +73,6 @@ export default async function TrainerImportPreviewPage({
             ? 'Trainer import results'
             : 'Review Trainer import'
         }
-        description={
-          isCompleted
-            ? 'Review the final Trainer import outcome and retained row-level audit results.'
-            : 'Review every spreadsheet row before confirming the final Trainer database import.'
-        }
         context={
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="neutral">

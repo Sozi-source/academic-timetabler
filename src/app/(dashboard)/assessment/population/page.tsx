@@ -16,7 +16,6 @@ export default async function AssessmentPopulationPage() {
       <PageHeader
         eyebrow="Assessment"
         title="Assessment population"
-        description="Expected students for each unit markbook."
         icon={UsersRound}
         backHref="/assessment"
         backLabel="Assessments"

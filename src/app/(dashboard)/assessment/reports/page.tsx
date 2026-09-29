@@ -73,7 +73,6 @@ export default async function AssessmentReportsPage() {
       <div className="space-y-4">
         <PageHeader
           title="Examination Reports Centre"
-          description="No active academic period found"
           icon={FileText}
         />
       </div>

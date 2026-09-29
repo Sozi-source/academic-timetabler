@@ -112,7 +112,6 @@ export default async function AssessmentAnalysisPage() {
       <PageHeader
         eyebrow="Assessment"
         title="CAT & Exam analysis"
-        description="Participation and performance from committed assessment results."
         icon={BarChart3}
       />
 

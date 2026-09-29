@@ -59,7 +59,6 @@ export default async function StudentReportsPage() {
       <PageHeader
         eyebrow="Student Lifecycle"
         title="Student reports"
-        description="Department student census."
         icon={BarChart3}
         context={<Badge variant="neutral">{summary.total} students</Badge>}
         actions={

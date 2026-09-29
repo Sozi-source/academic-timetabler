@@ -107,7 +107,6 @@ export default async function OperationsPage() {
       <PageHeader
         eyebrow="Quality control"
         title="Operations & QA"
-        description="Release-candidate operational checks."
         icon={ShieldCheck}
         context={
           <Badge

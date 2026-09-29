@@ -47,7 +47,6 @@ export default async function EditTrainerPage({
       <PageHeader
         eyebrow="Staff Directory"
         title={`Edit Profile: ${trainer.fullName}`}
-        description="Update staff institutional credentials, contact parameters, and weekly workload targets."
         icon={User}
         backHref={`/trainers/${trainer.id}`}
         backLabel="Trainer Profile"

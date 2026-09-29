@@ -22,7 +22,6 @@ export default async function UnitRegistrationPage() {
         <PageHeader
           eyebrow="Registration"
           title="Unit Registration"
-          description="Register student unit selections for active academic periods."
           icon={BookOpenCheck}
           actions={
             <Link
@@ -45,7 +44,6 @@ export default async function UnitRegistrationPage() {
       <PageHeader
         eyebrow="Registration"
         title="Unit Registration"
-        description="Batch register cohorts and manage student unit selections."
         icon={BookOpenCheck}
         context={<Badge variant="institutional">{context.period.name}</Badge>}
         actions={(

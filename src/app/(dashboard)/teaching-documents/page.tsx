@@ -50,7 +50,6 @@ export default async function TeachingDocumentsPage() {
       <PageHeader
         eyebrow="Curriculum & QA"
         title="Teaching Documents"
-        description="Curriculum registry, trainer submissions and controlled student releases."
         icon={FileText}
         backHref="/dashboard"
         backLabel="Dashboard"

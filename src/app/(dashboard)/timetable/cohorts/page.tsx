@@ -93,7 +93,6 @@ export default async function CohortsPage() {
       <PageHeader
         eyebrow="Academic structure"
         title="Cohorts"
-        description="Manage cohorts."
         context={
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="neutral">

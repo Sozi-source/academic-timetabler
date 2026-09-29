@@ -120,7 +120,6 @@ export default async function TimetableHubPage() {
       <PageHeader
         eyebrow="Academic Operations"
         title="Academic Planning & Timetabling"
-        description="Schedule generation, live editing, and master institutional setup."
         icon={CalendarDays}
         backHref="/dashboard"
         backLabel="Dashboard"

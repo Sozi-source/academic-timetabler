@@ -67,11 +67,21 @@ export function DashboardView({
               </span>
             </div>
 
-            <p className="relative mt-3 text-[11px] font-semibold uppercase tracking-wider text-text-secondary lg:mt-4 lg:text-xs">
-              Academic session
-            </p>
-            <h1 className="relative text-xl font-semibold tracking-tight text-text-primary lg:text-3xl">
-              {activePeriodName}
+            <div className="relative mt-3 flex items-center gap-2 lg:mt-4">
+              <span className="h-3.5 w-[3px] rounded-full bg-primary/60" aria-hidden="true" />
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary/80">
+                Academic Session
+              </p>
+            </div>
+            <h1 className="relative mt-1.5 text-[1.35rem] font-light tracking-tight text-text-primary lg:text-[2rem]">
+              <span className="font-normal italic text-text-secondary">
+                {activePeriodName?.replace(/\s+\d{4}$/, '')}
+              </span>
+              {activePeriodName?.match(/\d{4}$/) ? (
+                <span className="ml-2 font-semibold not-italic text-text-primary">
+                  {activePeriodName.match(/\d{4}$/)?.[0]}
+                </span>
+              ) : null}
             </h1>
             <p className="relative mt-1 text-[12px] text-text-secondary lg:mt-2 lg:text-sm">
               {publishedSessions > 0 ? 'Timetable published and live' : 'Timetable in draft mode'}

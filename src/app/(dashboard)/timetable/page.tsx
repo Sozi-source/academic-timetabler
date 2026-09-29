@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
-  ArrowRight,
   BookOpen,
   Building2,
   CalendarDays,
@@ -14,7 +13,6 @@ import {
   Presentation,
   School,
   SlidersHorizontal,
-  Sparkles,
   UserRound,
 } from 'lucide-react';
 
@@ -32,91 +30,55 @@ export default async function TimetableHubPage() {
   const schedulingSteps = [
     {
       title: 'Check Readiness',
-      description: 'Offerings, allocations & room limits.',
       href: '/timetable/readiness',
       icon: ClipboardCheck,
-      badge: 'Step 1',
-      color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      badge: '01',
+      accent: 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20',
+      bar: 'bg-emerald-500',
+      badgeBg: 'bg-emerald-50 text-emerald-700 ring-emerald-200/60',
     },
     {
       title: 'Review & Edit',
-      description: 'Clash-detected schedule editor.',
       href: '/timetable/editor',
       icon: PencilRuler,
-      badge: 'Step 2',
-      color: 'bg-blue-50 text-blue-700 border-blue-200',
+      badge: '02',
+      accent: 'bg-blue-500/10 text-blue-700 border-blue-500/20',
+      bar: 'bg-blue-500',
+      badgeBg: 'bg-blue-50 text-blue-700 ring-blue-200/60',
     },
     {
-      title: 'Published Timetables',
-      description: 'Active snapshots on portals.',
+      title: 'Publish',
       href: '/timetable/published',
       icon: FileChartColumn,
-      badge: 'Step 3',
-      color: 'bg-purple-50 text-purple-700 border-purple-200',
+      badge: '03',
+      accent: 'bg-purple-500/10 text-purple-700 border-purple-500/20',
+      bar: 'bg-purple-500',
+      badgeBg: 'bg-purple-50 text-purple-700 ring-purple-200/60',
     },
     {
-      title: 'Timetable Reports',
-      description: 'PDF & Word export center.',
+      title: 'Reports',
       href: '/timetable/reports',
       icon: ListChecks,
-      badge: 'Export',
-      color: 'bg-amber-50 text-amber-700 border-amber-200',
+      badge: 'EX',
+      accent: 'bg-amber-500/10 text-amber-700 border-amber-500/20',
+      bar: 'bg-amber-500',
+      badgeBg: 'bg-amber-50 text-amber-700 ring-amber-200/60',
     },
-  ];
+  ] as const;
 
   const masterSetupItems = [
-    {
-      label: 'Academic Periods',
-      description: 'Term & semester dates',
-      href: '/timetable/academic-periods',
-      icon: CalendarRange,
-    },
-    {
-      label: 'Programmes & Cohorts',
-      description: 'Class groups & curriculum',
-      href: '/timetable/cohorts',
-      icon: School,
-    },
-    {
-      label: 'Unit Offerings',
-      description: 'Active term offerings',
-      href: '/timetable/unit-offerings',
-      icon: BookOpen,
-    },
-    {
-      label: 'Trainers & Staff',
-      description: 'Staff directory & loads',
-      href: '/timetable/trainers',
-      icon: UserRound,
-    },
-    {
-      label: 'Teaching Allocations',
-      description: 'Trainer assignments',
-      href: '/timetable/teaching-allocations',
-      icon: Presentation,
-    },
-    {
-      label: 'Lecture Rooms',
-      description: 'Venues & capacity',
-      href: '/timetable/rooms',
-      icon: Building2,
-    },
-    {
-      label: 'Scheduling Constraints',
-      description: 'Rules & forbidden slots',
-      href: '/timetable/constraints',
-      icon: SlidersHorizontal,
-    },
-    {
-      label: 'Excel Master Imports',
-      description: 'Bulk data upload',
-      href: '/timetable/imports',
-      icon: FileSpreadsheet,
-    },
-  ];
+    { label: 'Academic Periods', href: '/timetable/academic-periods', icon: CalendarRange },
+    { label: 'Programmes & Cohorts', href: '/timetable/cohorts', icon: School },
+    { label: 'Unit Offerings', href: '/timetable/unit-offerings', icon: BookOpen },
+    { label: 'Trainers & Staff', href: '/timetable/trainers', icon: UserRound },
+    { label: 'Teaching Allocations', href: '/timetable/teaching-allocations', icon: Presentation },
+    { label: 'Lecture Rooms', href: '/timetable/rooms', icon: Building2 },
+    { label: 'Scheduling Constraints', href: '/timetable/constraints', icon: SlidersHorizontal },
+    { label: 'Master Imports', href: '/timetable/imports', icon: FileSpreadsheet },
+  ] as const;
 
   return (
-    <div className="max-w-[var(--content-max-width)] mx-auto space-y-6">
+    <div className="max-w-[var(--content-max-width)] mx-auto space-y-8">
       <PageHeader
         eyebrow="Academic Operations"
         title="Academic Planning & Timetabling"
@@ -125,45 +87,65 @@ export default async function TimetableHubPage() {
         backLabel="Dashboard"
       />
 
-      {/* 1. Core Scheduling Workflow */}
-      <section aria-labelledby="scheduling-workflow-heading" className="space-y-4">
+      {/* ── 1. Scheduling Workflow ──────────────────────────────────────────── */}
+      <section aria-labelledby="scheduling-workflow-heading" className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 id="scheduling-workflow-heading" className="text-sm font-bold uppercase tracking-wider text-gray-700">
-            Timetable Engine & Workflow
-          </h2>
-          <span className="text-xs text-gray-500 font-medium">Core Scheduling Lifecycle</span>
+          <div className="flex items-center gap-2">
+            <span className="h-3.5 w-[3px] rounded-full bg-primary/60" aria-hidden="true" />
+            <h2
+              id="scheduling-workflow-heading"
+              className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary/80"
+            >
+              Scheduling Workflow
+            </h2>
+          </div>
+          <span className="text-[11px] font-medium text-text-muted">Core lifecycle · 3 steps</span>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
           {schedulingSteps.map((step) => {
             const Icon = step.icon;
             return (
               <Link
                 key={step.title}
                 href={step.href}
-                className="group flex flex-col justify-between rounded-2xl border border-gray-200 bg-white p-5 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-[#033B36]/30 hover:shadow-md"
+                className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-md"
               >
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className={`flex size-10 items-center justify-center rounded-xl border ${step.color} shadow-2xs`}>
-                      <Icon className="size-5" aria-hidden="true" />
+                {/* Colour bar top */}
+                <span className={`absolute inset-x-0 top-0 h-[3px] ${step.bar} opacity-80`} aria-hidden="true" />
+
+                <div className="flex flex-1 flex-col p-5 pt-6">
+                  {/* Icon + badge row */}
+                  <div className="flex items-start justify-between">
+                    <span
+                      className={`flex size-10 items-center justify-center rounded-xl border ${step.accent}`}
+                    >
+                      <Icon className="size-[18px]" aria-hidden="true" />
                     </span>
-                    <span className="rounded-md bg-gray-100 px-2 py-0.5 text-[10px] font-bold text-gray-600">
+                    <span
+                      className={`inline-flex h-5 items-center rounded-md px-2 text-[10px] font-bold ring-1 ${step.badgeBg}`}
+                    >
                       {step.badge}
                     </span>
                   </div>
 
-                  <h3 className="mt-4 text-sm font-bold text-gray-900 group-hover:text-[#033B36] transition-colors">
+                  {/* Title */}
+                  <p className="mt-4 text-[13px] font-semibold text-text-primary transition-colors group-hover:text-primary">
                     {step.title}
-                  </h3>
-                  <p className="mt-1.5 text-xs text-gray-500 leading-relaxed">
-                    {step.description}
                   </p>
-                </div>
 
-                <div className="mt-5 flex items-center gap-1.5 text-xs font-semibold text-[#033B36]">
-                  <span>Open workspace</span>
-                  <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                  {/* Spacer */}
+                  <div className="flex-1" />
+
+                  {/* CTA */}
+                  <div className="mt-5 border-t border-border/60 pt-3.5">
+                    <span className="text-[11px] font-semibold text-primary opacity-0 transition-opacity group-hover:opacity-100">
+                      Open →
+                    </span>
+                    <span className="text-[11px] font-medium text-text-muted transition-opacity group-hover:opacity-0 absolute">
+                      Open workspace
+                    </span>
+                  </div>
                 </div>
               </Link>
             );
@@ -171,35 +153,36 @@ export default async function TimetableHubPage() {
         </div>
       </section>
 
-      {/* 2. Master Data Setup */}
-      <section aria-labelledby="master-setup-heading" className="space-y-4">
+      {/* ── 2. Master Setup & Structure ─────────────────────────────────────── */}
+      <section aria-labelledby="master-setup-heading" className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 id="master-setup-heading" className="text-sm font-bold uppercase tracking-wider text-gray-700">
-            Master Setup & Structure
-          </h2>
-          <span className="text-xs text-gray-500 font-medium">Institutional Configuration</span>
+          <div className="flex items-center gap-2">
+            <span className="h-3.5 w-[3px] rounded-full bg-primary/60" aria-hidden="true" />
+            <h2
+              id="master-setup-heading"
+              className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary/80"
+            >
+              Master Setup & Structure
+            </h2>
+          </div>
+          <span className="text-[11px] font-medium text-text-muted">Institutional configuration</span>
         </div>
 
-        <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
           {masterSetupItems.map((item) => {
             const Icon = item.icon;
             return (
               <Link
                 key={item.label}
                 href={item.href}
-                className="group flex items-start gap-3.5 rounded-xl border border-gray-200 bg-white p-4 shadow-2xs transition-all hover:border-gray-300 hover:bg-gray-50/70"
+                className="group flex items-center gap-3.5 rounded-xl border border-border bg-surface px-4 py-3.5 shadow-2xs transition-all duration-150 hover:border-primary/30 hover:bg-primary/[0.03] hover:shadow-sm"
               >
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-700 group-hover:bg-[#033B36] group-hover:text-white transition-colors">
-                  <Icon className="size-4.5" aria-hidden="true" />
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-surface-subtle text-text-secondary transition-colors group-hover:bg-primary group-hover:text-white">
+                  <Icon className="size-[15px]" aria-hidden="true" />
                 </span>
-                <div className="min-w-0">
-                  <p className="text-xs font-bold text-gray-900 group-hover:text-[#033B36] transition-colors">
-                    {item.label}
-                  </p>
-                  <p className="mt-0.5 truncate text-[11px] text-gray-500">
-                    {item.description}
-                  </p>
-                </div>
+                <p className="text-[12.5px] font-medium text-text-secondary transition-colors group-hover:text-text-primary">
+                  {item.label}
+                </p>
               </Link>
             );
           })}

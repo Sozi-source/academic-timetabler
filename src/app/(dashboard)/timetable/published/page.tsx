@@ -38,20 +38,20 @@ export default async function PublishedTimetablesPage({
     <PageHeader
       eyebrow="Step 4 of 4"
       title="Timetable publication"
-      backHref="/dashboard"
-      backLabel="Dashboard"
+      backHref="/timetable"
+      backLabel="Timetabling"
       actions={<Badge variant="primary"><FileChartColumn className="size-3.5"/> Direct publishing</Badge>}
     />
 
     <Card className="p-4">
       <form method="get" className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <label className="flex-1 space-y-1.5">
-          <span className="text-sm font-medium text-text-primary">Academic Period</span>
+          <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">Academic Period</span>
           <Select id="academicPeriodId" name="academicPeriodId" defaultValue={selectedId ?? ''}>
-            {periods.map((period) => <option key={period.id} value={period.id}>{period.code} — {period.name}</option>)}
+            {periods.map((period) => <option key={period.id} value={period.id} title={period.name}>{period.code}{period.status === 'active' ? ' · Active' : ''}</option>)}
           </Select>
         </label>
-        <Button type="submit">Load versions</Button>
+        <Button type="submit">Load</Button>
       </form>
     </Card>
 

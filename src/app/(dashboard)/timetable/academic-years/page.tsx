@@ -42,6 +42,8 @@ export default async function AcademicYearsPage() {
       <PageHeader
         eyebrow="Academic calendar"
         title="Academic Years"
+        backHref="/timetable"
+        backLabel="Timetabling"
         context={
           activeYear ? (
             <div className="inline-flex items-center gap-2 rounded-full border border-success-border bg-success-surface px-3 py-1.5 text-xs font-semibold text-success">
@@ -98,12 +100,15 @@ export default async function AcademicYearsPage() {
         <section aria-labelledby="academic-year-records">
           <div className="mb-4 flex items-end justify-between gap-4">
             <div>
-              <h2
-                id="academic-year-records"
-                className="text-lg font-semibold text-text-primary"
-              >
-                Academic Year records
-              </h2>
+              <div className="flex items-center gap-2">
+                <span className="h-3.5 w-[3px] rounded-full bg-primary/60" aria-hidden="true" />
+                <h2
+                  id="academic-year-records"
+                  className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary/80"
+                >
+                  Academic Year records
+                </h2>
+              </div>
 
               <p className="mt-1 text-sm text-text-secondary">
                 {academicYears.length === 1

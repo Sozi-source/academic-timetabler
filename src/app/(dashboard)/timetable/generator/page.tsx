@@ -69,19 +69,12 @@ export default async function TimetableGeneratorPage() {
       <PageHeader
         eyebrow="Step 2 of 4"
         title="Generate timetable"
+        backHref="/timetable"
+        backLabel="Timetabling"
         context={
-          <div className="inline-flex items-center gap-2 text-sm text-text-muted">
-            <CalendarCheck2
-              className="size-4"
-              aria-hidden="true"
-            />
-
-            {selectablePeriods.length}{' '}
-            available Academic Period
-            {selectablePeriods.length === 1
-              ? ''
-              : 's'}
-          </div>
+          <span className="text-sm text-text-muted">
+            {selectablePeriods.length} period{selectablePeriods.length === 1 ? '' : 's'} available
+          </span>
         }
         actions={
           <div className="inline-flex items-center gap-2 rounded-xl bg-primary-soft px-3 py-2 text-sm font-semibold text-primary">
@@ -89,7 +82,7 @@ export default async function TimetableGeneratorPage() {
               className="size-4"
               aria-hidden="true"
             />
-            Automatic timetable
+            Automatic
           </div>
         }
       />

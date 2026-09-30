@@ -35,17 +35,19 @@ export default async function TimetableEditorPage({
     <div className="space-y-4">
       <PageHeader
         title="Timetable Editor"
+        backHref="/timetable"
+        backLabel="Timetabling"
         actions={
           <form method="get" className="flex items-center gap-2">
             <Select
               id="academicPeriodId"
               name="academicPeriodId"
               defaultValue={selectedId ?? ''}
-              className="h-9 min-w-[220px] max-w-[280px] text-xs font-semibold"
+              className="h-9 min-w-[160px] max-w-[220px] text-xs"
             >
               {periods.map((period) => (
-                <option key={period.id} value={period.id}>
-                  {period.code} — {period.name}
+                <option key={period.id} value={period.id} title={period.name}>
+                  {period.code}{period.status === 'active' ? ' · Active' : ''}
                 </option>
               ))}
             </Select>

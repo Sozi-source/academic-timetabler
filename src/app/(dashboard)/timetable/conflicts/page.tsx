@@ -45,6 +45,8 @@ export default async function TimetableConflictsPage({
       <PageHeader
         eyebrow="Enterprise scheduling"
         title="Conflict resolution centre"
+        backHref="/timetable"
+        backLabel="Timetabling"
         actions={<Badge variant="danger"><ShieldAlert className="size-3.5" /> Live validation</Badge>}
       />
 

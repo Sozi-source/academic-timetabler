@@ -48,10 +48,12 @@ export default async function ConstraintsPage({
       <PageHeader
         eyebrow="Scheduling"
         title="Scheduling constraints"
+        backHref="/timetable"
+        backLabel="Timetabling"
         context={
           selectedPeriod ? (
             <span className="text-xs font-medium text-text-muted xl:text-sm">
-              {selectedPeriod.name}
+              {selectedPeriod.code}
             </span>
           ) : undefined
         }
@@ -62,8 +64,8 @@ export default async function ConstraintsPage({
           method="get"
           className="flex flex-col gap-2 sm:flex-row sm:items-end"
         >
-          <label className="min-w-0 flex-1 text-xs font-semibold text-text-primary xl:text-sm">
-            Academic Period
+          <label className="min-w-0 flex-1">
+            <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">Academic Period</span>
             <Select
               id="academicPeriodId"
               name="academicPeriodId"
@@ -71,9 +73,8 @@ export default async function ConstraintsPage({
               className="mt-1.5"
             >
               {periods.map((period) => (
-                <option key={period.id} value={period.id}>
-                  {period.code} - {period.name}
-                  {period.status === 'active' ? ' (active)' : ''}
+                <option key={period.id} value={period.id} title={period.name}>
+                  {period.code}{period.status === 'active' ? ' · Active' : ''}
                 </option>
               ))}
             </Select>

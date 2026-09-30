@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import {
   AlertTriangle,
-  Building2,
   CheckCircle2,
   GraduationCap,
   UsersRound,
@@ -102,8 +101,11 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
       </section>
 
       {readiness.issues.length > 0 ? (
-        <section className="space-y-2" aria-labelledby="readiness-issues-title">
-          <h2 id="readiness-issues-title" className="text-lg font-semibold text-text-primary">Readiness issues</h2>
+        <section className="space-y-2.5" aria-labelledby="readiness-issues-title">
+          <div className="flex items-center gap-2">
+            <span className="h-3.5 w-[3px] rounded-full bg-primary/60" aria-hidden="true" />
+            <h2 id="readiness-issues-title" className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary/80">Readiness Issues</h2>
+          </div>
           <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
             {readiness.issues.map((entry) => (
               <article key={entry.id} className="rounded-xl border border-border bg-surface p-3 shadow-sm">
@@ -129,12 +131,12 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
       ) : null}
 
       <section className="space-y-2.5" aria-labelledby="offering-readiness-title">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 id="offering-readiness-title" className="text-lg font-semibold text-text-primary">Teaching allocations</h2>
-
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="h-3.5 w-[3px] rounded-full bg-primary/60" aria-hidden="true" />
+            <h2 id="offering-readiness-title" className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary/80">Teaching Allocations</h2>
           </div>
-          <span className="text-sm font-medium text-text-muted">{readiness.offerings.length} units</span>
+          <span className="text-[11px] font-medium text-text-muted">{readiness.offerings.length} units</span>
         </div>
 
         <div className="space-y-2">
@@ -308,11 +310,14 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
 
       <section className="grid gap-4 lg:grid-cols-3">
         <div className="rounded-xl border border-border bg-surface p-4 shadow-sm lg:col-span-2">
-          <div className="flex items-center gap-2">
-            <UsersRound className="size-5 text-primary" aria-hidden="true" />
-            <h2 className="font-semibold text-text-primary">Trainer workload</h2>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="h-3.5 w-[3px] rounded-full bg-primary/60" aria-hidden="true" />
+            <h2 className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary/80 flex items-center gap-2">
+              <UsersRound className="size-3.5" aria-hidden="true" />
+              Trainer Workload
+            </h2>
           </div>
-          <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
             {readiness.trainerWorkloads.map((workload) => (
               <div key={workload.trainerId} className="rounded-lg border border-border p-2.5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -332,11 +337,11 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
 
         <div className="rounded-xl border border-border bg-surface p-4 shadow-sm lg:col-span-1 flex flex-col justify-between">
           <div>
-            <div className="flex items-center gap-2">
-              <Building2 className="size-5 text-primary" aria-hidden="true" />
-              <h2 className="font-semibold text-text-primary">Next step</h2>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="h-3.5 w-[3px] rounded-full bg-primary/60" aria-hidden="true" />
+              <h2 className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary/80">Generate Timetable</h2>
             </div>
-            <p className="mt-2 text-xs text-text-secondary">Resolve blockers, then generate the timetable.</p>
+            <p className="mt-2 text-xs text-text-secondary">Resolve all blockers, then run the generator to produce the schedule.</p>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
             <Link href="/timetable/generator" className={`inline-flex h-9 items-center justify-center rounded-lg px-3.5 text-xs font-semibold ${readiness.isReady ? 'bg-primary text-primary-foreground' : 'pointer-events-none bg-surface-muted text-text-muted'}`}>Open generator</Link>

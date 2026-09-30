@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
-import { ArrowLeft, BarChart3 } from 'lucide-react';
-import Link from 'next/link';
+import { BarChart3 } from 'lucide-react';
 
 import { PageHeader } from '@/components/ui/page-header';
 import { getAcademicPeriods } from '@/features/academic-periods/queries';
@@ -64,44 +63,37 @@ export default async function TimetableReportsPage({
       <PageHeader
         eyebrow="Enterprise reporting"
         title="Timetable reports"
-        actions={(
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              href="/dashboard"
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
-            >
-              <ArrowLeft className="size-3.5" aria-hidden="true" />
-              Dashboard
-            </Link>
-            <div className="inline-flex h-9 items-center gap-2 rounded-lg bg-primary-soft px-3 text-xs font-semibold text-primary">
-              <BarChart3 className="size-3.5" aria-hidden="true" />
-              Operational intelligence
-            </div>
+        backHref="/timetable"
+        backLabel="Timetabling"
+        actions={
+          <div className="inline-flex h-9 items-center gap-2 rounded-lg bg-primary-soft px-3 text-xs font-semibold text-primary">
+            <BarChart3 className="size-3.5" aria-hidden="true" />
+            Operational intelligence
           </div>
-        )}
+        }
       />
 
       <form method="get" className="grid gap-4 rounded-2xl border border-border bg-surface p-4 shadow-sm md:grid-cols-[1fr_1fr_auto] md:items-end">
-        <label className="text-sm font-semibold text-text-primary" htmlFor="academicPeriodId">
+        <label className="text-xs font-semibold uppercase tracking-wide text-text-muted" htmlFor="academicPeriodId">
           Academic Period
-          <select id="academicPeriodId" name="academicPeriodId" defaultValue={selectedId ?? ''} className="mt-2 h-11 w-full rounded-xl border border-border-strong bg-surface px-3 text-sm font-normal">
+          <select id="academicPeriodId" name="academicPeriodId" defaultValue={selectedId ?? ''} className="mt-2 h-10 w-full rounded-xl border border-border-strong bg-surface px-3 text-sm font-normal">
             {periods.map((period) => (
-              <option key={period.id} value={period.id}>{period.code} — {period.name}</option>
+              <option key={period.id} value={period.id} title={period.name}>{period.code}{period.status === 'active' ? ' · Active' : ''}</option>
             ))}
           </select>
         </label>
 
-        <label className="text-sm font-semibold text-text-primary" htmlFor="report">
-          Report
-          <select id="report" name="report" defaultValue={report} className="mt-2 h-11 w-full rounded-xl border border-border-strong bg-surface px-3 text-sm font-normal">
+        <label className="text-xs font-semibold uppercase tracking-wide text-text-muted" htmlFor="report">
+          Report type
+          <select id="report" name="report" defaultValue={report} className="mt-2 h-10 w-full rounded-xl border border-border-strong bg-surface px-3 text-sm font-normal">
             {reportOptions.map((option) => (
               <option key={option.value} value={option.value}>{option.label}</option>
             ))}
           </select>
         </label>
 
-        <button className="h-11 rounded-xl bg-primary px-5 text-sm font-semibold text-white" type="submit">
-          Load report
+        <button className="h-10 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground" type="submit">
+          Load
         </button>
       </form>
 

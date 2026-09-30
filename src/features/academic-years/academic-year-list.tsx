@@ -112,23 +112,23 @@ export function AcademicYearList({
           <table className="w-full min-w-[780px] border-collapse text-left">
             <thead className="bg-surface-subtle">
               <tr className="border-b border-border">
-                <th className="px-3 py-2.5.5 text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">
+                <th className="px-3 py-2.5 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
                   Academic Year
                 </th>
 
-                <th className="px-3 py-2.5.5 text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">
+                <th className="px-3 py-2.5 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
                   Date range
                 </th>
 
-                <th className="px-3 py-2.5.5 text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">
+                <th className="px-3 py-2.5 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
                   Status
                 </th>
 
-                <th className="px-3 py-2.5.5 text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">
+                <th className="px-3 py-2.5 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
                   Notes
                 </th>
 
-                <th className="px-3 py-2.5.5 text-right text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">
+                <th className="px-3 py-2.5 text-right text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
                   Actions
                 </th>
               </tr>

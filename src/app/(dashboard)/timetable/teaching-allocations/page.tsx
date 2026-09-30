@@ -80,23 +80,16 @@ export default async function Page({searchParams}:{searchParams:Promise<{period?
   <PageHeader
     eyebrow="Timetable preparation"
     title="Simple teaching allocation"
+    backHref="/timetable"
+    backLabel="Timetabling"
     actions={
-      <div className="flex flex-wrap items-center gap-2">
-        <Link
-          href="/timetable/unit-equivalence"
-          className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
-        >
-          <GitMerge className="size-3.5 text-primary" aria-hidden="true" />
-          Unit equivalence
-        </Link>
-        <Link
-          href="/dashboard"
-          className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
-        >
-          <ArrowLeft className="size-3.5" aria-hidden="true" />
-          Dashboard
-        </Link>
-      </div>
+      <Link
+        href="/timetable/unit-equivalence"
+        className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
+      >
+        <GitMerge className="size-3.5 text-primary" aria-hidden="true" />
+        Unit equivalence
+      </Link>
     }
   />
   {params.generated==='1'?<Alert variant="success" icon={CheckCircle2} title="Cohort offering recommendations generated"><p>{params.created??'0'} new recommendation(s) were created. Review and approve them under Units on offer before allocation.</p></Alert>:null}

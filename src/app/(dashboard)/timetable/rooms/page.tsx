@@ -25,6 +25,8 @@ export default async function RoomsPage() {
     <div className="space-y-4">
       <PageHeader
         title="Rooms"
+        backHref="/timetable"
+        backLabel="Timetabling"
         context={
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="neutral">

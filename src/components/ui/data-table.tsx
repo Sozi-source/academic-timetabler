@@ -107,7 +107,7 @@ export function DataTable<TData, TValue>({
       ) : (
         <div className="w-full">
           <div className="w-full overflow-x-auto min-h-[140px]"><table className="w-full table-fixed border-collapse text-left">
-            <thead className="border-t-[3px] border-institutional-yellow bg-primary">
+            <thead className="bg-surface-subtle">
               {table
                 .getHeaderGroups()
                 .map((headerGroup) => (
@@ -127,7 +127,7 @@ export function DataTable<TData, TValue>({
                           <th
                             key={header.id}
                             colSpan={header.colSpan}
-                            className="min-w-0 break-words px-2.5 py-2 text-[10px] font-semibold uppercase xl:px-3 xl:py-2.5 xl:text-[11px] tracking-[0.06em] text-white/85"
+                            className="min-w-0 break-words px-2.5 py-2.5 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted xl:px-3"
                           >
                             {header.isPlaceholder ? null : (
                               <button
@@ -190,7 +190,7 @@ export function DataTable<TData, TValue>({
                     .map((cell) => (
                       <td
                         key={cell.id}
-                        className="min-w-0 break-words px-2.5 py-2 align-top text-[12px] leading-5 xl:px-3 xl:py-2.5 xl:text-[13px] text-text-secondary"
+                        className="min-w-0 break-words px-2.5 py-2.5 h-11 align-middle text-[12px] leading-5 xl:px-3 xl:text-[13px] text-text-secondary"
                       >
                         {flexRender(
                           cell.column.columnDef.cell,

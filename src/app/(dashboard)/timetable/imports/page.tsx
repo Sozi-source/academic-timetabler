@@ -65,11 +65,10 @@ export default function BulkImportsPage() {
     <div className="space-y-4">
       <PageHeader
         title="Bulk imports"
+        backHref="/timetable"
+        backLabel="Timetabling"
         context={
-          <div className="inline-flex items-center gap-2 text-xs text-text-muted xl:text-sm">
-            <FileSpreadsheet className="size-4" aria-hidden="true" />
-            Only listed fields are required.
-          </div>
+          <span className="text-xs text-text-muted">Required fields only — extras are ignored.</span>
         }
       />
 

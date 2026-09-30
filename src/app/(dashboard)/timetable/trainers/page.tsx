@@ -1,7 +1,7 @@
 import { CrudModal } from '@/components/ui/crud-modal';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowLeft, Upload } from 'lucide-react';
+import { Upload } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,8 @@ export default async function TrainersPage() {
     <div className="space-y-4">
       <PageHeader
         title="Trainers"
+        backHref="/timetable"
+        backLabel="Timetabling"
         context={
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="neutral">
@@ -42,12 +44,6 @@ export default async function TrainersPage() {
         }
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <Button asChild variant="outline" size="sm">
-              <Link href="/dashboard">
-                <ArrowLeft className="size-4" aria-hidden="true" />
-                Dashboard
-              </Link>
-            </Button>
             <Button asChild variant="outline" size="sm">
               <Link href="/timetable/trainers/availability">Availability</Link>
             </Button>

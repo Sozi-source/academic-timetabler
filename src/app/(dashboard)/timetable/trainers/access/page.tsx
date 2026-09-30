@@ -1,5 +1,4 @@
 import {
-  ArrowLeft,
   CheckCircle2,
   KeyRound,
   UserCheck,
@@ -50,18 +49,8 @@ export default async function TrainerAccessPage() {
         eyebrow="Trainers"
         title="Staff Access"
         icon={KeyRound}
-        actions={
-          <Link
-            href="/timetable/trainers"
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
-          >
-            <ArrowLeft
-              className="size-3.5"
-              aria-hidden="true"
-            />
-            Trainers
-          </Link>
-        }
+        backHref="/timetable/trainers"
+        backLabel="Trainers"
       />
 
       <section className="grid gap-3 sm:grid-cols-3">
@@ -96,7 +85,7 @@ export default async function TrainerAccessPage() {
         />
       </section>
 
-      <section className="overflow-hidden rounded-xl border border-border bg-white">
+      <section className="overflow-hidden rounded-xl border border-border bg-surface">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
           <div>
             <h2 className="text-sm font-semibold text-text-primary">

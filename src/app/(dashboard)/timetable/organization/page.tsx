@@ -1,5 +1,4 @@
 import {
-  ArrowLeft,
   Building2,
   Users,
 } from 'lucide-react';
@@ -39,6 +38,8 @@ export default async function OrganizationPage() {
     <div className="space-y-4">
       <PageHeader
         title="Schools / Departments"
+        backHref="/timetable"
+        backLabel="Timetabling"
         context={
           <div className="flex flex-wrap gap-2">
             <Badge variant="neutral">
@@ -60,21 +61,14 @@ export default async function OrganizationPage() {
           </div>
         }
         actions={
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              href="/dashboard"
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
-            >
-              <ArrowLeft className="size-3.5" aria-hidden="true" />
-              Dashboard
-            </Link>
-            {isSystemAdministrator ? (
+          isSystemAdministrator ? (
+            <div className="flex flex-wrap items-center gap-2">
               <OrganizationAdminActions
                 profiles={profiles}
                 workspaces={workspaces}
               />
-            ) : null}
-          </div>
+            </div>
+          ) : null
         }
       />
 

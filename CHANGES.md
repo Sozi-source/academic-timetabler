@@ -1,3 +1,25 @@
+### 2026-09-30: Timetable Setup Pages UI & Navigation Cleanup
+
+**Summary:**
+Applied consistent enterprise design standards, navigation links, and dropdown improvements across the remaining timetable sub-pages:
+1. **Unified Back Navigation (`backHref="/timetable"`):** Standardized back links across `programmes`, `time-slots`, `organization`, `unit-equivalence`, `trainers/access`, `trainers/availability`, `trainers/[id]`, and `units`. Removed misplaced Dashboard buttons from action toolbars.
+2. **Standard PageHeader Adoption:** Converted custom `<header>` in `time-slots/page.tsx` to standard `<PageHeader>`.
+3. **Migrated Actions Menus to Radix DropdownMenu:** Updated `programme-table.tsx` and `unit-table.tsx` from native `<details>` to Radix `DropdownMenu` with `align="end"` and `size: 48`, preventing clipping and width distortion across all screen sizes.
+4. **Clean Design Tokens & Eyebrows:** Replaced raw `bg-white` and hardcoded colors with `bg-surface` and `text-primary`. Restyled section headings in `unit-equivalence` with teal accent bars.
+
+**Files changed:**
+- `src/app/(dashboard)/timetable/organization/page.tsx` — Standardized back navigation and design tokens.
+- `src/app/(dashboard)/timetable/programmes/page.tsx` — Standardized back navigation and removed dashboard button.
+- `src/app/(dashboard)/timetable/time-slots/page.tsx` — Migrated to PageHeader with backHref and compact period badge.
+- `src/app/(dashboard)/timetable/trainers/access/page.tsx` — Standardized back navigation and design tokens.
+- `src/app/(dashboard)/timetable/trainers/availability/page.tsx` — Standardized back navigation and compact period badge.
+- `src/app/(dashboard)/timetable/unit-equivalence/page.tsx` — Standardized back navigation, table header, and eyebrow headings.
+- `src/app/(dashboard)/timetable/units/page.tsx` — Standardized back navigation and removed dashboard button.
+- `src/app/(dashboard)/trainers/[id]/page.tsx` — Updated back link to /timetable/trainers and design token colors.
+- `src/features/programmes/programme-table.tsx` — Migrated row actions to Radix DropdownMenu with size 48.
+- `src/features/units/unit-table.tsx` — Migrated row actions to Radix DropdownMenu with size 48.
+- `CHANGES.md` — Documented changes.
+
 ### 2026-09-30: Fixed DataTable Column Proportions & Actions Dropdown Layout
 
 **Summary:**

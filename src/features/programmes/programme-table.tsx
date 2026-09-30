@@ -24,6 +24,11 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Select } from '@/components/ui/select';
 
 import {
@@ -189,30 +194,35 @@ const columns: ColumnDef<Programme>[] = [
   {
     id: 'actions',
     enableSorting: false,
-    header: 'Actions',
+    header: '',
+    size: 48,
     cell: ({ row }) => (
-      <details className="relative">
-          <summary
-            className="inline-flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-lg border border-border-strong bg-surface text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
-            aria-label={`Actions for ${row.original.name}`}
-          >
-            <MoreVertical
-              className="size-4"
-              aria-hidden="true"
-            />
-          </summary>
+      <div className="flex items-center justify-end">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="inline-flex size-8 cursor-pointer items-center justify-center rounded-lg border border-border-strong bg-surface text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+              aria-label={`Actions for ${row.original.name}`}
+            >
+              <MoreVertical
+                className="size-4"
+                aria-hidden="true"
+              />
+            </button>
+          </DropdownMenuTrigger>
 
-          <div className="absolute right-0 z-40 mt-1 min-w-[210px] rounded-xl border border-border bg-surface p-2 shadow-xl [&_a]:w-full [&_a]:justify-start [&_button]:w-full [&_button]:justify-start [&_form]:w-full [&_select]:w-full">
-        <Link
-          href={`/timetable/programmes/${row.original.id}/edit`}
-          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
-        >
-          <Pencil
-            className="size-3.5"
-            aria-hidden="true"
-          />
-          Edit
-        </Link>
+          <DropdownMenuContent align="end" className="w-56 p-2 space-y-2">
+            <Link
+              href={`/timetable/programmes/${row.original.id}/edit`}
+              className="flex h-9 w-full items-center gap-2 rounded-lg px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+            >
+              <Pencil
+                className="size-3.5"
+                aria-hidden="true"
+              />
+              Edit Programme
+            </Link>
 
         {row.original.isActive ? (
           <form
@@ -305,10 +315,11 @@ const columns: ColumnDef<Programme>[] = [
               : 'Activate'}
           </Button>
         </form>
-                </div>
-        </details>
-    ),
-  },
+      </DropdownMenuContent>
+    </DropdownMenu>
+  </div>
+),
+},
 ];
 
 interface ProgrammeTableProps {

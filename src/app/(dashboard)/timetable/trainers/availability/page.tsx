@@ -1,5 +1,6 @@
 import { CheckCircle2 } from 'lucide-react';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
@@ -122,11 +123,15 @@ export default async function Page({
     <div className="space-y-4">
       <PageHeader
         eyebrow="Trainers"
-        title="Trainer availability"
+        title="Trainer Availability"
+        backHref="/timetable/trainers"
+        backLabel="Trainers"
         context={
           selectedPeriod ? (
-            <span className="text-xs font-medium text-text-muted xl:text-sm">
-              {selectedPeriod.name}
+            <span title={selectedPeriod.name}>
+              <Badge variant="neutral">
+                {selectedPeriod.code}
+              </Badge>
             </span>
           ) : undefined
         }

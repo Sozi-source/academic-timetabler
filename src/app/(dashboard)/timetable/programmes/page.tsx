@@ -1,7 +1,6 @@
 import { CrudModal } from '@/components/ui/crud-modal';
 import type { Metadata } from 'next';
 import {
-  ArrowLeft,
   BookOpenCheck,
   CalendarCheck2,
   GraduationCap,
@@ -80,6 +79,8 @@ export default async function ProgrammesPage() {
       <PageHeader
         eyebrow="Academic structure"
         title="Programmes"
+        backHref="/timetable"
+        backLabel="Timetabling"
         context={
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="neutral">
@@ -95,14 +96,6 @@ export default async function ProgrammesPage() {
         }
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <Link
-              href="/dashboard"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
-            >
-              <ArrowLeft className="size-4" aria-hidden="true" />
-              Dashboard
-            </Link>
-
             <Link
               href="/timetable/cohorts"
               className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"

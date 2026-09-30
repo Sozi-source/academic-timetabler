@@ -133,11 +133,11 @@ export default async function TrainerDetailsPage({
       {/* 1. Executive Top Navigation & Management Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Link
-          href="/trainers"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-900 transition"
+          href="/timetable/trainers"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-muted hover:text-text-primary transition"
         >
           <ArrowLeft className="size-3.5" />
-          Staff Directory
+          Trainers Directory
         </Link>
 
         <div className="flex flex-wrap items-center gap-1.5">
@@ -149,7 +149,7 @@ export default async function TrainerDetailsPage({
             asChild
             variant="primary"
             size="sm"
-            className="bg-[#033B36] text-white hover:bg-[#022A26] shadow-2xs h-8 text-xs font-semibold"
+            className="bg-primary text-white hover:bg-primary/90 shadow-2xs h-8 text-xs font-semibold"
           >
             <Link href={`/trainers/${trainer.id}/portal-view`}>
               <Eye className="size-3.5 mr-1.5" aria-hidden="true" />

@@ -20,6 +20,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer';
+import { PageHeader } from '@/components/ui/page-header';
 import { Select } from '@/components/ui/select';
 import {
   Tabs,
@@ -118,37 +119,31 @@ export default async function TimetableCalendarPage({
 
   return (
     <div className="admin-screen space-y-6">
-      <header className="flex flex-col gap-4 border-b border-border pb-5 lg:flex-row lg:items-end lg:justify-between">
-        <div className="min-w-0">
-          <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.17em] text-primary">
-            Timetable setup
-          </p>
+      <PageHeader
+        eyebrow="Timetable setup"
+        title="Working Days & Time Slots"
+        backHref="/timetable"
+        backLabel="Timetabling"
+        context={
+          <div className="flex flex-wrap items-center gap-2">
+            {selectedPeriod ? (
+              <span title={selectedPeriod.name}>
+                <Badge variant="primary">
+                  {selectedPeriod.code}
+                </Badge>
+              </span>
+            ) : null}
 
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-text-primary sm:text-[1.75rem]">
-            Working Days and Time Slots
-          </h1>
-
-          <p className="mt-1.5 max-w-2xl text-sm leading-6 text-text-secondary">
-            Teaching days and session time slots.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          {selectedPeriod ? (
-            <Badge variant="primary">
-              {selectedPeriod.name}
+            <Badge variant="neutral">
+              {enabledWorkingDays} enabled days
             </Badge>
-          ) : null}
 
-          <Badge variant="neutral">
-            {enabledWorkingDays} enabled days
-          </Badge>
-
-          <Badge variant="neutral">
-            {enabledTeachingSlots} teaching slots
-          </Badge>
-        </div>
-      </header>
+            <Badge variant="neutral">
+              {enabledTeachingSlots} teaching slots
+            </Badge>
+          </div>
+        }
+      />
 
       {configurablePeriods.length === 0 ? (
         <Card>

@@ -1,3 +1,16 @@
+### 2026-09-30: Column Width Distribution & Actions Sizing Fixes (Teaching Allocations, Rooms, Trainers)
+
+**Summary:**
+1. **Teaching Allocations Table Proportions:** Fixed equal column distribution in `teaching-allocations/page.tsx` where lack of explicit column widths caused `Action` (small unassign button) to consume 16.7% of the table while squishing the `Unit` content column. Configured explicit percentage widths (`w-[20%]`, `w-[32%]`, `w-[18%]`, `w-[12%]`, `w-[10%]`, `w-[8%]`) and added `overflow-x-auto min-w-[760px]` container.
+2. **Room Table Actions Sizing:** Set explicit `size: 110` on the `actions` column in `room-table.tsx` so TanStack `DataTable` prevents the action cell from expanding excessively.
+3. **Trainer Table Actions & Tokens:** Set explicit `size: 80` on the `actions` column in `trainer-table.tsx`, replaced raw hex color `#033B36` with theme token `text-primary`, and migrated button background from `bg-white` to `bg-surface`.
+
+**Files changed:**
+- `src/app/(dashboard)/timetable/teaching-allocations/page.tsx` — Applied explicit header column percentages and horizontal scroll wrapper.
+- `src/features/rooms/room-table.tsx` — Set explicit size for actions column.
+- `src/features/trainers/trainer-table.tsx` — Set explicit size for actions column and corrected color tokens.
+- `CHANGES.md` — Documented changes.
+
 ### 2026-09-30: Timetable Setup Pages UI & Navigation Cleanup
 
 **Summary:**

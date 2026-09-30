@@ -50,7 +50,7 @@ const columns: ColumnDef<Trainer>[] = [
       <div className="min-w-0">
         <Link
           href={`/trainers/${row.original.id}`}
-          className="break-words text-[12px] font-semibold text-text-primary transition hover:text-[#033B36] hover:underline xl:text-sm block"
+          className="break-words text-[12px] font-semibold text-text-primary transition hover:text-primary hover:underline xl:text-sm block"
         >
           {row.original.fullName}
         </Link>
@@ -126,13 +126,14 @@ const columns: ColumnDef<Trainer>[] = [
   },
   {
     id: 'actions',
+    size: 80,
     enableSorting: false,
     header: '',
     cell: ({ row }) => (
       <div className="flex items-center justify-end">
         <Link
           href={`/trainers/${row.original.id}`}
-          className="inline-flex h-8 items-center justify-center rounded-lg border border-border-strong bg-white px-2.5 text-xs font-medium text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary shadow-2xs"
+          className="inline-flex h-8 items-center justify-center rounded-lg border border-border-strong bg-surface px-2.5 text-xs font-medium text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary shadow-2xs"
         >
           Profile
         </Link>

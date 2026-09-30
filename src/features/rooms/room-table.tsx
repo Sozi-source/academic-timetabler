@@ -101,6 +101,7 @@ const columns: ColumnDef<Room>[] = [
   },
   {
     id: 'actions',
+    size: 110,
     enableSorting: false,
     header: '',
     cell: ({ row }) => (

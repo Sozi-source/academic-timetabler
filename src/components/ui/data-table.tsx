@@ -123,10 +123,16 @@ export function DataTable<TData, TValue>({
                         const sorted =
                           header.column.getIsSorted();
 
+                        const colSize = header.column.columnDef.size;
+                        const widthStyle = colSize
+                          ? { width: `${colSize}px`, minWidth: `${colSize}px`, maxWidth: header.column.columnDef.maxSize ? `${header.column.columnDef.maxSize}px` : `${colSize}px` }
+                          : undefined;
+
                         return (
                           <th
                             key={header.id}
                             colSpan={header.colSpan}
+                            style={widthStyle}
                             className="min-w-0 break-words px-2.5 py-2.5 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted xl:px-3"
                           >
                             {header.isPlaceholder ? null : (
@@ -187,17 +193,25 @@ export function DataTable<TData, TValue>({
                 >
                   {row
                     .getVisibleCells()
-                    .map((cell) => (
-                      <td
-                        key={cell.id}
-                        className="min-w-0 break-words px-2.5 py-2.5 h-11 align-middle text-[12px] leading-5 xl:px-3 xl:text-[13px] text-text-secondary"
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </td>
-                    ))}
+                    .map((cell) => {
+                      const colSize = cell.column.columnDef.size;
+                      const widthStyle = colSize
+                        ? { width: `${colSize}px`, minWidth: `${colSize}px`, maxWidth: cell.column.columnDef.maxSize ? `${cell.column.columnDef.maxSize}px` : `${colSize}px` }
+                        : undefined;
+
+                      return (
+                        <td
+                          key={cell.id}
+                          style={widthStyle}
+                          className="min-w-0 break-words px-2.5 py-2.5 h-11 align-middle text-[12px] leading-5 xl:px-3 xl:text-[13px] text-text-secondary"
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </td>
+                      );
+                    })}
                 </tr>
               ))}
             </tbody>

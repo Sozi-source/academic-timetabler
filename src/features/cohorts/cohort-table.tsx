@@ -23,6 +23,11 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Select } from '@/components/ui/select';
 
 import {
@@ -69,71 +74,28 @@ function getStatusVariant(
   }
 }
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat(
-    'en-KE',
-    {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    },
-  ).format(
-    new Date(`${value}T00:00:00`),
-  );
-}
-
 const columns: ColumnDef<Cohort>[] = [
-    {
+  {
     accessorKey: 'name',
     header: 'Cohort',
-    size: 190,
-    minSize: 160,
     cell: ({ row }) => (
-      <div className="w-max min-w-[10rem] sm:min-w-[10.5rem] lg:min-w-[11.5rem] xl:min-w-[12.5rem]">
-        <p
-          className="whitespace-nowrap text-[10.5px] font-semibold leading-4 text-text-primary sm:text-[11px] md:text-xs lg:text-[12.5px] xl:text-[13px]"
-          title={row.original.name}
-        >
-          {row.original.name}
-        </p>
-
-        <p
-          className="mt-0.5 whitespace-nowrap text-[9.5px] leading-4 text-text-muted sm:text-[10px] md:text-[11px] lg:text-xs"
-          title={row.original.code}
-        >
-          {row.original.code}
-        </p>
-      </div>
+      <span
+        className="font-semibold text-text-primary text-[12px] sm:text-[13px] xl:text-sm"
+        title={row.original.code}
+      >
+        {row.original.name}
+      </span>
     ),
-  },{
+  },
+  {
     id: 'programme',
     accessorFn: (row) =>
       row.programme?.code ?? '',
     header: 'Programme',
     cell: ({ row }) => (
       <span className="inline-flex min-w-0 break-words font-semibold text-text-primary">
-        {row.original.programme?.code ?? 'Ã¢â‚¬â€'}
+        {row.original.programme?.code ?? '—'}
       </span>
-    ),
-  },
-  {
-    id: 'dates',
-    accessorFn: (row) =>
-      row.intakeDate,
-    header: 'Dates',
-    cell: ({ row }) => (
-      <div className="min-w-0 max-w-full text-xs leading-5 text-text-primary">
-        <p>
-          Intake: {formatDate(row.original.intakeDate)}
-        </p>
-
-        <p className="mt-1 text-xs text-text-muted">
-          Completion:{' '}
-          {formatDate(
-            row.original.expectedCompletionDate,
-          )}
-        </p>
-      </div>
     ),
   },
   {
@@ -212,113 +174,122 @@ const columns: ColumnDef<Cohort>[] = [
   {
     id: 'actions',
     enableSorting: false,
-    header: 'Actions',
+    header: '',
+    size: 48,
     cell: ({ row }) => {
       const canToggleAvailability =
         row.original.status === 'planned' ||
         row.original.status === 'active';
 
       return (
-        <details className="relative">
-          <summary
-            className="inline-flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-lg border border-border-strong bg-surface text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
-            aria-label={`Actions for ${row.original.name}`}
-          >
-            <MoreVertical
-              className="size-4"
-              aria-hidden="true"
-            />
-          </summary>
-
-          <div className="absolute right-0 z-40 mt-1 min-w-[210px] rounded-xl border border-border bg-surface p-2 shadow-xl [&_a]:w-full [&_a]:justify-start [&_button]:w-full [&_button]:justify-start [&_form]:w-full [&_select]:w-full">
-          <Link
-            href={`/timetable/cohorts/${row.original.id}/edit`}
-            className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
-          >
-            <Pencil
-              className="size-3.5"
-              aria-hidden="true"
-            />
-            Edit
-          </Link>
-
-          {canToggleAvailability ? (
-            <form
-              action={
-                setCohortTimetableAvailabilityAction
-              }
-            >
-              <input
-                type="hidden"
-                name="id"
-                value={row.original.id}
-              />
-
-              <input
-                type="hidden"
-                name="isTimetableAvailable"
-                value={
-                  row.original.isTimetableAvailable
-                    ? 'false'
-                    : 'true'
-                }
-              />
-
-              <Button
-                type="submit"
-                variant="outline"
-                size="sm"
-                leadingIcon={
-                  row.original.isTimetableAvailable ? (
-                    <CalendarX2
-                      className="size-3.5"
-                      aria-hidden="true"
-                    />
-                  ) : (
-                    <CalendarCheck2
-                      className="size-3.5"
-                      aria-hidden="true"
-                    />
-                  )
-                }
+        <div className="flex items-center justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="inline-flex size-8 cursor-pointer items-center justify-center rounded-lg border border-border-strong bg-surface text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+                aria-label={`Actions for ${row.original.name}`}
               >
-                {row.original.isTimetableAvailable
-                  ? 'Remove availability'
-                  : 'Make available'}
-              </Button>
-            </form>
-          ) : null}
+                <MoreVertical
+                  className="size-4"
+                  aria-hidden="true"
+                />
+              </button>
+            </DropdownMenuTrigger>
 
-          <form action={setCohortStatusAction}>
-            <input
-              type="hidden"
-              name="id"
-              value={row.original.id}
-            />
+            <DropdownMenuContent align="end" className="w-56 p-2 space-y-2">
+              <Link
+                href={`/timetable/cohorts/${row.original.id}/edit`}
+                className="flex h-9 w-full items-center gap-2 rounded-lg px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+              >
+                <Pencil
+                  className="size-3.5"
+                  aria-hidden="true"
+                />
+                Edit Cohort
+              </Link>
 
-            <Select
-              name="status"
-              aria-label={`Change status for ${row.original.name}`}
-              defaultValue={row.original.status}
-              className="h-9 text-xs"
-              onChange={(event) => {
-                event.currentTarget.form?.requestSubmit();
-              }}
-            >
-              {cohortStatusOptions.map(
-                (option) => (
-                  <option
-                    key={option.value}
-                    value={option.value}
+              {canToggleAvailability ? (
+                <form
+                  action={
+                    setCohortTimetableAvailabilityAction
+                  }
+                >
+                  <input
+                    type="hidden"
+                    name="id"
+                    value={row.original.id}
+                  />
+
+                  <input
+                    type="hidden"
+                    name="isTimetableAvailable"
+                    value={
+                      row.original.isTimetableAvailable
+                        ? 'false'
+                        : 'true'
+                    }
+                  />
+
+                  <Button
+                    type="submit"
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start text-xs font-semibold"
+                    leadingIcon={
+                      row.original.isTimetableAvailable ? (
+                        <CalendarX2
+                          className="size-3.5"
+                          aria-hidden="true"
+                        />
+                      ) : (
+                        <CalendarCheck2
+                          className="size-3.5"
+                          aria-hidden="true"
+                        />
+                      )
+                    }
                   >
-                    {option.label}
-                  </option>
-                ),
-              )}
-            </Select>
-          </form>
-                  </div>
-        </details>
+                    {row.original.isTimetableAvailable
+                      ? 'Remove availability'
+                      : 'Make available'}
+                  </Button>
+                </form>
+              ) : null}
+
+              <div className="border-t border-border pt-2">
+                <form action={setCohortStatusAction}>
+                  <input
+                    type="hidden"
+                    name="id"
+                    value={row.original.id}
+                  />
+
+                  <Select
+                    name="status"
+                    aria-label={`Change status for ${row.original.name}`}
+                    defaultValue={row.original.status}
+                    className="h-8 w-full text-xs"
+                    onChange={(event) => {
+                      event.currentTarget.form?.requestSubmit();
+                    }}
+                  >
+                    {cohortStatusOptions.map(
+                      (option) => (
+                        <option
+                          key={option.value}
+                          value={option.value}
+                        >
+                          {option.label}
+                        </option>
+                      ),
+                    )}
+                  </Select>
+                </form>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       );
     },
   },

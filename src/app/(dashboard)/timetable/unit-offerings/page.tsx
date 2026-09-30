@@ -1,11 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
-  ArrowLeft,
   CalendarCheck2,
   GitMerge,
   Upload,
-  Plus,
 } from 'lucide-react';
 
 import { Alert } from '@/components/ui/alert';
@@ -45,10 +43,12 @@ export default async function UnitOfferingsPage({
       {/* Header */}
       <PageHeader
         title="Units on Offer"
+        backHref="/timetable"
+        backLabel="Timetabling"
         context={
           activePeriod ? (
             <div className="flex items-center gap-2">
-              <Badge variant="neutral">{activePeriod.name}</Badge>
+              <Badge variant="neutral">{activePeriod.code}</Badge>
               <span className="text-xs font-medium text-text-muted">
                 {activeUnits.length} units
               </span>
@@ -74,13 +74,6 @@ export default async function UnitOfferingsPage({
               <Link href="/timetable/unit-offerings/import">
                 <Upload className="size-4" />
                 Import
-              </Link>
-            </Button>
-
-            <Button asChild variant="outline" size="sm">
-              <Link href="/dashboard">
-                <ArrowLeft className="size-4" />
-                Dashboard
               </Link>
             </Button>
           </div>

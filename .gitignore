@@ -38,6 +38,7 @@ __pycache__/
 tsconfig.tsbuildinfo
 
 # Scratch / debug files at project root
+scratch/
 scratch_units.json
 mod2_summary.json
 extracted_curriculum_raw.txt

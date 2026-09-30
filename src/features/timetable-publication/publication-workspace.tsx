@@ -95,9 +95,9 @@ export function TimetablePublicationWorkspace({
   return <div className="space-y-6">
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <MetricCard label="Versions" value={String(versions.length)} description="Saved snapshots" icon={FileClock}/>
-      <MetricCard label="Next version" value={`v${nextVersionNumber}`} description={nextVersionTitle} icon={Clock3}/>
-      <MetricCard label="Published sessions" value={String(published?.sessionCount ?? 0)} description={published ? `Live as v${published.versionNumber}` : 'Draft only'} icon={CalendarCheck2}/>
-      <MetricCard label="Publishing" value="Direct" description={latest ? `Status: ${latest.status.replace('_', ' ')}` : 'Direct publish'} icon={CheckCircle2}/>
+      <MetricCard label="Next" value={`v${nextVersionNumber}`} description={nextVersionTitle} icon={Clock3}/>
+      <MetricCard label="Live sessions" value={String(published?.sessionCount ?? 0)} description={published ? `v${published.versionNumber} published` : 'No live version'} icon={CalendarCheck2}/>
+      <MetricCard label="Status" value={latest ? latest.status.replace('_', ' ') : '—'} description={published ? 'Published' : 'Draft only'} icon={CheckCircle2}/>
     </div>
 
     {canPublish ? (
@@ -106,21 +106,30 @@ export function TimetablePublicationWorkspace({
         nextVersionTitle={nextVersionTitle}
       />
     ) : (
-      <Card className="p-4 text-sm text-text-muted">
-        This Academic Period is archived. Its timetable history remains available, but it cannot receive a new published version.
+      <Card className="p-4 text-xs text-text-muted">
+        This period is archived — no new versions can be published.
       </Card>
     )}
 
     {published ? (
-      <section className="space-y-2">
-        <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-text-muted">Current published timetable</h2>
-        <Card className="border-success-border bg-success-surface p-5">
+      <section className="space-y-2.5">
+        <div className="flex items-center gap-2">
+          <span className="h-3.5 w-[3px] rounded-full bg-primary/60" aria-hidden="true" />
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary/80">Live Timetable</h2>
+        </div>
+        <Card className="border-success-border bg-success-surface p-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <div className="flex flex-wrap items-center gap-2">{statusBadge(published.status)}<span className="text-xs font-semibold text-text-muted">VERSION {published.versionNumber}</span></div>
-              <h3 className="mt-2 text-lg font-semibold text-text-primary">{published.title}</h3>
-              <p className="mt-1 text-sm text-text-secondary">{published.changeSummary ?? 'Published from the validated live timetable.'}</p>
-              <div className="mt-3 flex flex-wrap gap-4 text-xs text-text-muted"><span>{published.sessionCount} sessions</span><span>{published.conflictCount} blocking conflicts</span><span>Created {new Date(published.createdAt).toLocaleString()}</span></div>
+              <div className="flex flex-wrap items-center gap-2">{statusBadge(published.status)}<span className="text-[10px] font-bold uppercase tracking-wide text-text-muted">v{published.versionNumber}</span></div>
+              <h3 className="mt-1.5 text-sm font-semibold text-text-primary">{published.title}</h3>
+              {published.changeSummary ? (
+                <p className="mt-1 text-xs text-text-secondary">{published.changeSummary}</p>
+              ) : null}
+              <div className="mt-2 flex flex-wrap gap-3 text-[10px] text-text-muted">
+                <span>{published.sessionCount} sessions</span>
+                {published.conflictCount > 0 ? <span className="text-warning">{published.conflictCount} conflicts</span> : null}
+                <span>{new Date(published.createdAt).toLocaleDateString()}</span>
+              </div>
             </div>
           </div>
           <VersionSnapshot version={published} />
@@ -128,18 +137,21 @@ export function TimetablePublicationWorkspace({
       </section>
     ) : null}
 
-    <section className="space-y-2">
-      <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-text-muted">Version history</h2>
+    <section className="space-y-2.5">
+      <div className="flex items-center gap-2">
+        <span className="h-3.5 w-[3px] rounded-full bg-primary/60" aria-hidden="true" />
+        <h2 className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary/80">Version History</h2>
+      </div>
       {history.length === 0 ? (
         published ? null : (
-          <EmptyState icon={FileClock} title="No timetable version yet" description="No timetable version has been created for this Academic Period." />
+          <EmptyState icon={FileClock} title="No versions yet" description="No timetable version has been created for this period." />
         )
       ) : (
         <div className="divide-y divide-border-soft rounded-2xl border border-border bg-surface">
           {visibleHistory.map((version) => <HistoryRow key={version.id} version={version} />)}
           {overflowHistory.length > 0 ? (
             <details className="group">
-              <summary className="cursor-pointer list-none px-3 py-2.5 text-center text-sm font-semibold text-primary hover:bg-surface-subtle">
+              <summary className="cursor-pointer list-none px-3 py-2.5 text-center text-xs font-semibold text-primary hover:bg-surface-subtle">
                 Show {overflowHistory.length} more version{overflowHistory.length === 1 ? '' : 's'}
               </summary>
               <div className="divide-y divide-border-soft border-t border-border-soft">

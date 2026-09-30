@@ -97,10 +97,10 @@ export function AcademicPeriodLifecycleAction({
   );
 
   return (
-    <div className="min-w-0 max-w-full">
+    <div className="w-full">
       <form
         action={formAction}
-        className="flex min-w-0 flex-wrap items-center gap-2"
+        className="flex items-center gap-2"
       >
         <input
           type="hidden"
@@ -110,34 +110,29 @@ export function AcademicPeriodLifecycleAction({
 
         <Select
           name="status"
-          defaultValue={
-            academicPeriod.status
-          }
+          defaultValue={academicPeriod.status}
           disabled={pending}
           aria-label={`Status for ${academicPeriod.name}`}
-          className="min-h-9 max-w-full text-xs"
+          className="h-8 flex-1 text-xs"
         >
-          {statusOptions.map(
-            (option) => (
-              <option
-                key={option.value}
-                value={option.value}
-              >
-                {option.label}
-              </option>
-            ),
-          )}
+          {statusOptions.map((option) => (
+            <option
+              key={option.value}
+              value={option.value}
+            >
+              {option.label}
+            </option>
+          ))}
         </Select>
 
         <Button
           type="submit"
           variant="outline"
           size="sm"
+          className="h-8 shrink-0 px-2.5 text-xs font-semibold"
           disabled={pending}
         >
-          {pending
-            ? 'Saving...'
-            : 'Set'}
+          {pending ? '...' : 'Set'}
         </Button>
       </form>
 

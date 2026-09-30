@@ -172,59 +172,41 @@ export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadine
                           </div>
                         </div>
 
-                        <div className="mt-2.5 grid items-stretch gap-2 sm:grid-cols-3">
+                        <div className="mt-2.5 grid items-stretch gap-2 sm:grid-cols-2">
 
-                          <div className="flex min-w-0 flex-col rounded-lg bg-surface-subtle px-2.5 py-2">
-                            <p className="text-xs font-medium uppercase tracking-wide text-text-muted">
-                              Demand
-                            </p>
-
-                            <p className="mt-1 font-semibold text-text-primary">
-                              {offering.weeklySessions} × {offering.sessionDurationMinutes} min
-                            </p>
-
-                            <p className="mt-auto pt-1 text-xs text-text-muted">
-                              {(offering.weeklySessions * offering.sessionDurationMinutes) / 60} hrs/week
-                            </p>
-                          </div>
-
+                          {/* Participants */}
                           <div className="flex min-w-0 flex-col rounded-lg border border-border bg-surface-subtle px-2.5 py-2">
-                            <p className="text-xs font-medium uppercase tracking-wide text-text-muted">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted">
                               Participants
                             </p>
-
                             {offering.participants.length > 0 ? (
                               <div className="mt-1 space-y-1">
                                 {offering.participants.map((participant) => (
                                   <div key={participant.id} className="min-w-0">
-                                    <p className="break-words text-sm font-medium leading-5 text-text-primary">
+                                    <p className="break-words text-xs font-medium text-text-primary">
                                       {participant.cohortName}
                                     </p>
-
-                                    <p className="break-words text-xs text-text-muted">
-                                      {participant.unitCode} · {participant.cohortSize} learners
+                                    <p className="break-words text-[10px] text-text-muted">
+                                      {participant.unitCode}
                                     </p>
                                   </div>
                                 ))}
                               </div>
                             ) : (
-                              <p className="mt-1 text-sm font-medium text-danger">
-                                No participants
-                              </p>
+                              <p className="mt-1 text-xs font-medium text-danger">No participants</p>
                             )}
                           </div>
 
+                          {/* Capacity + Demand merged */}
                           <div className="flex min-w-0 flex-col rounded-lg bg-surface-subtle px-2.5 py-2">
-                            <p className="text-xs font-medium uppercase tracking-wide text-text-muted">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted">
                               Capacity
                             </p>
-
-                            <p className="mt-1 font-semibold text-text-primary">
-                              {requiredCapacity} learners
+                            <p className="mt-1 text-xs font-semibold text-text-primary">
+                              {requiredCapacity} learners · {offering.participants.length} cohort{offering.participants.length === 1 ? '' : 's'}
                             </p>
-
-                            <p className="mt-auto pt-1 text-xs text-text-muted">
-                              Across {offering.participants.length} cohort{offering.participants.length === 1 ? '' : 's'}
+                            <p className="mt-auto pt-1 text-[10px] text-text-muted">
+                              {offering.weeklySessions} × {offering.sessionDurationMinutes} min · {(offering.weeklySessions * offering.sessionDurationMinutes) / 60}h/wk
                             </p>
                           </div>
 

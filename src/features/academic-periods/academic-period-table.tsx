@@ -17,6 +17,11 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Select } from '@/components/ui/select';
 
 import {
@@ -50,6 +55,8 @@ const columns: ColumnDef<AcademicPeriod>[] = [
   {
     accessorKey: 'sequenceNumber',
     header: 'Order',
+    size: 56,
+    enableSorting: false,
     cell: ({ row }) => (
       <span className="inline-flex size-7 items-center justify-center rounded-full border border-border bg-surface-subtle text-xs font-semibold text-text-secondary">
         {row.original.sequenceNumber}
@@ -60,67 +67,35 @@ const columns: ColumnDef<AcademicPeriod>[] = [
     accessorKey: 'name',
     header: 'Academic Period',
     cell: ({ row }) => (
-      <div className="min-w-0 max-w-full">
-        <p className="font-semibold text-text-primary">
-          {row.original.name}
-        </p>
-
-        <p className="mt-1 text-xs text-text-muted">
-          {row.original.code}
-        </p>
-      </div>
-    ),
-  },
-  {
-    id: 'academicYear',
-    accessorFn: (row) =>
-      row.academicYear.name,
-    header: 'Academic Year',
-    cell: ({ row }) => (
-      <div className="min-w-0 max-w-full">
-        <p className="font-medium text-text-primary">
-          {row.original.academicYear.name}
-        </p>
-
-        <p className="mt-1 text-xs capitalize text-text-muted">
-          {row.original.academicYear.status}
-        </p>
-      </div>
+      <p className="font-medium text-text-primary" title={row.original.code}>
+        {row.original.name}
+      </p>
     ),
   },
   {
     id: 'periodDates',
-    accessorFn: (row) =>
-      `${row.startsOn} ${row.endsOn}`,
+    accessorFn: (row) => `${row.startsOn} ${row.endsOn}`,
     header: 'Period dates',
-    cell: ({ row }) => (
-      <span className="whitespace-normal break-words">
-        {formatDate(row.original.startsOn)}
-        {' to '}
-        {formatDate(row.original.endsOn)}
-      </span>
-    ),
-  },
-  {
-    id: 'teachingDates',
-    accessorFn: (row) =>
-      `${row.teachingStartsOn} ${row.teachingEndsOn}`,
-    header: 'Teaching window',
-    cell: ({ row }) => (
-      <span className="whitespace-normal break-words">
-        {formatDate(
-          row.original.teachingStartsOn,
-        )}
-        {' to '}
-        {formatDate(
-          row.original.teachingEndsOn,
-        )}
-      </span>
-    ),
+    cell: ({ row }) => {
+      const period = `${formatDate(row.original.startsOn)} – ${formatDate(row.original.endsOn)}`;
+      const teaching = `${formatDate(row.original.teachingStartsOn)} – ${formatDate(row.original.teachingEndsOn)}`;
+      const differs =
+        row.original.teachingStartsOn !== row.original.startsOn ||
+        row.original.teachingEndsOn !== row.original.endsOn;
+      return (
+        <div className="min-w-0">
+          <p className="text-sm text-text-primary">{period}</p>
+          {differs ? (
+            <p className="mt-0.5 text-[11px] text-text-muted">Teaching: {teaching}</p>
+          ) : null}
+        </div>
+      );
+    },
   },
   {
     accessorKey: 'status',
     header: 'Status',
+    size: 100,
     cell: ({ row }) => (
       <AcademicPeriodStatusBadge
         status={row.original.status}
@@ -131,41 +106,44 @@ const columns: ColumnDef<AcademicPeriod>[] = [
     id: 'actions',
     enableSorting: false,
     header: '',
-    size: 52,
-    minSize: 52,
-    maxSize: 52,
+    size: 48,
     cell: ({ row }) => (
-      <details className="relative">
-        <summary
-          className="inline-flex size-8 cursor-pointer list-none items-center justify-center rounded-lg border border-border-strong bg-surface text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
-          aria-label={`Actions for ${row.original.name}`}
-          title="Actions"
-        >
-          <MoreVertical
-            className="size-4"
-            aria-hidden="true"
-          />
-        </summary>
+      <div className="flex items-center justify-end">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="inline-flex size-8 cursor-pointer items-center justify-center rounded-lg border border-border-strong bg-surface text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+              aria-label={`Actions for ${row.original.name}`}
+              title="Actions"
+            >
+              <MoreVertical
+                className="size-4"
+                aria-hidden="true"
+              />
+            </button>
+          </DropdownMenuTrigger>
 
-        <div className="absolute right-0 z-50 mt-1 w-56 rounded-xl border border-border bg-surface p-2 shadow-xl">
-          <Link
-            href={`/timetable/academic-periods/${row.original.id}/edit`}
-            className="flex h-9 w-full items-center gap-2 rounded-lg px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
-          >
-            <Pencil
-              className="size-3.5"
-              aria-hidden="true"
-            />
-            Edit Academic Period
-          </Link>
+          <DropdownMenuContent align="end" className="w-56 p-2">
+            <Link
+              href={`/timetable/academic-periods/${row.original.id}/edit`}
+              className="flex h-9 w-full items-center gap-2 rounded-lg px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+            >
+              <Pencil
+                className="size-3.5"
+                aria-hidden="true"
+              />
+              Edit Academic Period
+            </Link>
 
-          <div className="mt-1 border-t border-border pt-2 [&_button]:w-full [&_button]:justify-start [&_form]:w-full [&_select]:w-full">
-            <AcademicPeriodLifecycleAction
-              academicPeriod={row.original}
-            />
-          </div>
-        </div>
-      </details>
+            <div className="mt-1 border-t border-border pt-2">
+              <AcademicPeriodLifecycleAction
+                academicPeriod={row.original}
+              />
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     ),
   },
 ];

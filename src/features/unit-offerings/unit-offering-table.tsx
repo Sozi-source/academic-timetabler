@@ -277,11 +277,11 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
             className="h-9 w-full text-[12px] xl:text-sm"
           >
             <option value="all">All states</option>
-            <option value="included">In Timetable (Included)</option>
-            <option value="excluded">Dropped (Excluded)</option>
-            <option value="draft">Pending Review / Draft</option>
-            <option value="active">Active (Allocated)</option>
-            <option value="disabled">Timetable Disabled</option>
+            <option value="included">In timetable</option>
+            <option value="excluded">Dropped</option>
+            <option value="draft">Pending review</option>
+            <option value="active">Active</option>
+            <option value="disabled">Disabled</option>
           </Select>
 
           {filtersActive ? (
@@ -317,19 +317,17 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
           name="reason"
           value="Dropped from cohort teaching plan for this academic period"
         />
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-surface px-4 py-3 shadow-xs">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-surface px-4 py-2.5 shadow-xs">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-bold text-text-primary">
-              Timetable Selection:
+            <span className="text-xs font-semibold text-text-muted">
+              Selection
             </span>
             {selectedIds.length > 0 ? (
               <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
-                {selectedIds.length} unit{selectedIds.length === 1 ? '' : 's'} selected
+                {selectedIds.length} unit{selectedIds.length === 1 ? '' : 's'}
               </span>
             ) : (
-              <span className="text-xs text-text-muted">
-                Use checkboxes to select units to include in or drop from the timetable.
-              </span>
+              <span className="text-xs text-text-muted">None selected</span>
             )}
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -375,7 +373,7 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
           ) : (
             <div className="w-full overflow-hidden">
               <table className="w-full table-fixed border-collapse text-left">
-                <thead className="border-t-[3px] border-institutional-yellow bg-primary text-[10px] uppercase tracking-wide text-white/85 xl:text-xs">
+                <thead className="border-b border-border bg-surface-subtle">
                   <tr>
                     <th className="w-[5%] px-3 py-2.5 text-center">
                       <input
@@ -386,13 +384,13 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
                         }}
                         onChange={toggleSelectAll}
                         aria-label="Select all visible units"
-                        className="size-3.5 cursor-pointer rounded border-white/40 bg-white/20 text-primary accent-institutional-yellow"
+                        className="size-3.5 cursor-pointer rounded border-border-strong text-primary accent-primary"
                       />
                     </th>
-                    <th className="w-[29%] px-3 py-2">Unit</th>
-                    <th className="w-[26%] px-3 py-2">Class</th>
-                    <th className="w-[18%] px-3 py-2">Sessions</th>
-                    <th className="w-[22%] px-3 py-2">Timetable Status</th>
+                    <th className="w-[29%] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">Unit</th>
+                    <th className="w-[26%] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">Class</th>
+                    <th className="w-[18%] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">Sessions</th>
+                    <th className="w-[22%] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border-soft">
@@ -402,8 +400,8 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
                     const isApproved = offering.approvalStatus === 'approved' && offering.selectionState === 'included';
 
                     return (
-                      <tr key={offering.id} className="align-top transition hover:bg-surface-subtle/60">
-                        <td className="px-3 py-3 text-center">
+                      <tr key={offering.id} className="align-middle transition hover:bg-surface-subtle/60">
+                        <td className="px-3 py-2.5 text-center">
                           <input
                             name="offeringId"
                             value={offering.id}
@@ -433,9 +431,6 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
                           <p className="break-words text-[12px] font-medium leading-5 text-text-primary xl:text-sm">
                             {offering.cohort?.name ?? '—'}
                           </p>
-                          <p className="mt-0.5 break-words text-[10px] text-text-muted xl:text-xs">
-                            {programme?.shortName ?? programme?.name ?? '—'}
-                          </p>
                         </td>
 
                         <td className="px-3 py-2.5 text-[12px] text-text-secondary xl:text-sm">
@@ -448,45 +443,43 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
                           <span className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold xl:text-xs ${stateClass(offering)}`}>
                             {stateLabel(offering)}
                           </span>
-                          {isApproved ? (
-                            <div className="mt-1.5">
+                          <div className="mt-1 flex items-center gap-2">
+                            {isApproved ? (
                               <button
                                 form={`withdraw-${offering.id}`}
                                 type="submit"
-                                className="text-[11px] font-semibold text-rose-600 hover:text-rose-800 hover:underline"
-                              >
-                                Drop from timetable
-                              </button>
-                            </div>
-                          ) : isDropped ? (
-                            <div className="mt-1.5">
-                              <button
-                                form={`approve-${offering.id}`}
-                                type="submit"
-                                className="text-[11px] font-semibold text-emerald-700 hover:text-emerald-900 hover:underline"
-                              >
-                                Include in timetable
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="mt-1.5 flex items-center gap-2">
-                              <button
-                                form={`approve-${offering.id}`}
-                                type="submit"
-                                className="text-[11px] font-semibold text-emerald-700 hover:text-emerald-900 hover:underline"
-                              >
-                                Approve
-                              </button>
-                              <span className="text-[10px] text-text-muted">·</span>
-                              <button
-                                form={`withdraw-${offering.id}`}
-                                type="submit"
-                                className="text-[11px] font-medium text-rose-600 hover:text-rose-800 hover:underline"
+                                className="text-[11px] font-medium text-rose-600 hover:underline"
                               >
                                 Drop
                               </button>
-                            </div>
-                          )}
+                            ) : isDropped ? (
+                              <button
+                                form={`approve-${offering.id}`}
+                                type="submit"
+                                className="text-[11px] font-medium text-emerald-700 hover:underline"
+                              >
+                                Include
+                              </button>
+                            ) : (
+                              <>
+                                <button
+                                  form={`approve-${offering.id}`}
+                                  type="submit"
+                                  className="text-[11px] font-semibold text-emerald-700 hover:underline"
+                                >
+                                  Approve
+                                </button>
+                                <span className="text-[10px] text-text-muted">·</span>
+                                <button
+                                  form={`withdraw-${offering.id}`}
+                                  type="submit"
+                                  className="text-[11px] font-medium text-rose-600 hover:underline"
+                                >
+                                  Drop
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );

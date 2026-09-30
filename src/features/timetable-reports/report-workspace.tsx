@@ -60,7 +60,7 @@ function SessionTable({
                 </div>
               </td>
               <td className="px-3 py-2.5">
-                <div className={master ? 'text-base font-bold leading-snug text-text-primary' : 'font-semibold text-text-primary'}>{row.unitName}</div>
+                <div className="text-sm font-medium text-text-primary leading-snug">{row.unitName}</div>
                 {!master ? <div className="text-xs text-text-muted">{row.unitCode}</div> : null}
                 {!master && row.departmentName && row.departmentCode?.toUpperCase() !== 'HND' && row.departmentName?.toUpperCase() !== 'HND' ? (
                   <div className="mt-1 text-xs font-medium text-primary">

@@ -114,28 +114,47 @@ export const getCohorts = cache(
   async (): Promise<Cohort[]> => {
     const supabase = await createClient();
 
-    const { data, error } = await supabase
-      .from('cohorts')
-      .select(cohortSelection)
-      .order('status', {
-        ascending: true,
-      })
-      .order('intake_date', {
-        ascending: false,
-      })
-      .order('name', {
-        ascending: true,
-      });
+    const [cohortsResult, studentsResult] = await Promise.all([
+      supabase
+        .from('cohorts')
+        .select(cohortSelection)
+        .order('status', {
+          ascending: true,
+        })
+        .order('intake_date', {
+          ascending: false,
+        })
+        .order('name', {
+          ascending: true,
+        }),
+      supabase
+        .from('students')
+        .select('current_cohort_id'),
+    ]);
 
-    if (error) {
+    if (cohortsResult.error) {
       throw new Error(
-        `Unable to load cohorts: ${error.message}`,
+        `Unable to load cohorts: ${cohortsResult.error.message}`,
       );
     }
 
+    const liveCounts = new Map<string, number>();
+    (studentsResult.data ?? []).forEach((st) => {
+      if (st.current_cohort_id) {
+        liveCounts.set(st.current_cohort_id, (liveCounts.get(st.current_cohort_id) ?? 0) + 1);
+      }
+    });
+
     return (
-      (data ?? []) as CohortRow[]
-    ).map(mapCohort);
+      (cohortsResult.data ?? []) as CohortRow[]
+    ).map((row) => {
+      const cohort = mapCohort(row);
+      const live = liveCounts.get(row.id);
+      if (live !== undefined) {
+        cohort.actualSize = live;
+      }
+      return cohort;
+    });
   },
 );
 

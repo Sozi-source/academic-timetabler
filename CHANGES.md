@@ -1,3 +1,18 @@
+### 2026-09-30: Fixed DataTable Column Proportions & Actions Dropdown Layout
+
+**Summary:**
+Resolved the column distribution bug causing wide start/end columns and squished middle columns, as well as fixing clipped/squished action menus:
+1. **Explicit Column Sizing in `DataTable`:** Updated `DataTable` to only apply widths when `columnDef.size` is explicitly specified by the column definition. Previously, TanStack's default fallback size of `150` was applied to all columns without explicit sizes, forcing `table-fixed` to scale all columns up and leaving huge empty spaces in the first (`Order`) and last (`Actions`) columns. Unconstrained content columns (`Academic Period`, `Period dates`) now dynamically absorb the remaining table width.
+2. **Compact Widths for Fixed Columns:** Locked `Order` to `56px`, `Status` to `100px`, and `Actions` to `48px`, allocating ~80% of horizontal space to content columns.
+3. **Radix DropdownMenu for Table Row Actions:** Replaced native `<details>` element in `academic-period-table.tsx` with Radix `DropdownMenu`, portaling dropdown contents outside the table structure to eliminate width clipping and distortion.
+4. **Clean Action Form Controls:** Formatted status selection into a clean horizontal row (`Select flex-1` + compact `Set` button).
+
+**Files changed:**
+- `src/components/ui/data-table.tsx` — Applied width styles only when `columnDef.size` is explicitly defined.
+- `src/features/academic-periods/academic-period-table.tsx` — Locked fixed column widths and migrated actions menu to Radix `DropdownMenu`.
+- `src/features/academic-periods/academic-period-lifecycle-action.tsx` — Streamlined inline status select form.
+- `CHANGES.md` — Documented changes.
+
 ### 2026-09-29: Purged Unnecessary Description Sentences From Dashboard and Staff Page Headers
 
 **Summary:**

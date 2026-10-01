@@ -1,3 +1,22 @@
+### 2026-10-01: Grounded Lecture Notes Generator (RAG Architecture)
+
+**Summary:**
+Implemented enterprise-grade, grounded (0% hallucination) lecture notes generator embedded into the academic planner:
+1. **Database Schema & Vector Search:** Created `supabase/migrations/20261001000000_lecture_notes.sql` with `lecture_materials`, `lecture_material_chunks` (`vector(768)` for Gemini `text-embedding-004`), `lecture_note_jobs`, RLS policies, IVFFlat index, and `match_lecture_chunks` cosine similarity RPC function.
+2. **Multi-Source Ingestion Pipeline:** Extracted text from PDF (`pdf-parse`), DOCX (`mammoth`), pasted text, and web URLs (`cheerio`), chunked into 400-token blocks with overlap (`chunker.ts`), and batch-embedded with Gemini Embedding API.
+3. **Strict Grounded Generation:** Built `prompt-builder.ts` with strict no-synthesis constraints, combining curriculum registry course outlines with top-k retrieved chunks, generating via Gemini 1.5 Pro (`temperature: 0.1`) and exporting to structured Word documents (`docx-builder.ts`).
+4. **UI Workspace & Navigation:** Added `/lecture-notes` dashboard and `/lecture-notes/[unitId]` workspace with live material library, scope controls (session vs unit), markdown preview, and signed DOCX download. Integrated into `admin-sidebar.tsx` and `teaching-documents/page.tsx`.
+
+**Files added/modified:**
+- `supabase/migrations/20261001000000_lecture_notes.sql`
+- `src/features/lecture-notes/` (types, queries, ingest, embeddings, generation, export, UI)
+- `src/app/(dashboard)/lecture-notes/page.tsx`
+- `src/app/(dashboard)/lecture-notes/[unitId]/page.tsx`
+- `src/app/api/lecture-notes/` (ingest, generate, materials, download)
+- `src/components/layout/admin-sidebar.tsx`
+- `src/app/(dashboard)/teaching-documents/page.tsx`
+- `CHANGES.md`
+
 ### 2026-09-30: Column Width Distribution & Actions Sizing Fixes (Teaching Allocations, Rooms, Trainers)
 
 **Summary:**

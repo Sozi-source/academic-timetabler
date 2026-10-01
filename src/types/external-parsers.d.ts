@@ -1,3 +1,6 @@
+// Type declarations for pdf-parse and mammoth
+// (neither ships @types/* packages)
+
 declare module 'pdf-parse' {
   interface PDFData {
     numpages: number;
@@ -30,5 +33,4 @@ declare module 'mammoth' {
 
   export function extractRawText(input: MammothOptions): Promise<ExtractResult>;
   export function convertToHtml(input: MammothOptions): Promise<ExtractResult>;
-  export default { extractRawText, convertToHtml };
 }

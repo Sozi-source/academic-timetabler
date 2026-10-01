@@ -6,6 +6,7 @@ import {
   FileText,
   FileUp,
   ShieldCheck,
+  Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -57,15 +58,23 @@ export default async function TeachingDocumentsPage() {
           <div className="flex flex-wrap gap-2">
             <Link
               href="/teaching-documents/curriculum"
-              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
             >
               <BookOpenCheck className="size-3.5" aria-hidden="true" />
               Curriculum
             </Link>
 
             <Link
+              href="/lecture-notes"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-primary/30 bg-primary-soft px-3 text-xs font-semibold text-primary transition hover:bg-primary/15"
+            >
+              <Sparkles className="size-3.5" aria-hidden="true" />
+              Lecture Notes
+            </Link>
+
+            <Link
               href="/teaching-documents/releases"
-              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
             >
               <FileOutput className="size-3.5" aria-hidden="true" />
               Releases
@@ -73,7 +82,7 @@ export default async function TeachingDocumentsPage() {
 
             <Link
               href="/teaching-documents/review"
-              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
             >
               <FileCheck2 className="size-3.5" aria-hidden="true" />
               Review
@@ -86,7 +95,7 @@ export default async function TeachingDocumentsPage() {
 
             <Link
               href="/teaching-documents/qa-export"
-              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle"
             >
               <Archive className="size-3.5" aria-hidden="true" />
               QA ZIP Export
@@ -131,11 +140,11 @@ export default async function TeachingDocumentsPage() {
       {/* College Assessment Milestones & Dates Setup */}
       <AssessmentMilestonesCard milestones={milestones} />
 
-      {/* 4 Core Operational Workspaces */}
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {/* 5 Core Operational Workspaces */}
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <Link
           href="/teaching-documents/curriculum"
-          className="group rounded-xl border border-border bg-white p-4 shadow-2xs transition hover:border-border-strong hover:bg-surface-subtle/40"
+          className="group rounded-xl border border-border bg-surface p-4 shadow-2xs transition hover:border-border-strong hover:bg-surface-subtle/40"
         >
           <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary transition group-hover:scale-105">
             <BookOpenCheck className="size-4.5" aria-hidden="true" />
@@ -149,8 +158,23 @@ export default async function TeachingDocumentsPage() {
         </Link>
 
         <Link
+          href="/lecture-notes"
+          className="group rounded-xl border border-primary/20 bg-surface p-4 shadow-2xs transition hover:border-primary hover:bg-primary-soft/30"
+        >
+          <div className="flex size-9 items-center justify-center rounded-lg bg-primary-soft text-primary transition group-hover:scale-105">
+            <Sparkles className="size-4.5" aria-hidden="true" />
+          </div>
+          <p className="mt-3 text-xs font-bold text-text-primary group-hover:text-primary transition-colors">
+            Lecture Notes Generator
+          </p>
+          <p className="mt-1 text-[11px] text-text-muted leading-relaxed">
+            Generate grounded lecture notes from outlines and uploaded materials.
+          </p>
+        </Link>
+
+        <Link
           href="/teaching-documents/releases"
-          className="group rounded-xl border border-border bg-white p-4 shadow-2xs transition hover:border-border-strong hover:bg-surface-subtle/40"
+          className="group rounded-xl border border-border bg-surface p-4 shadow-2xs transition hover:border-border-strong hover:bg-surface-subtle/40"
         >
           <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary transition group-hover:scale-105">
             <FileOutput className="size-4.5" aria-hidden="true" />
@@ -165,7 +189,7 @@ export default async function TeachingDocumentsPage() {
 
         <Link
           href="/teaching-documents/review"
-          className="group rounded-xl border border-border bg-white p-4 shadow-2xs transition hover:border-border-strong hover:bg-surface-subtle/40"
+          className="group rounded-xl border border-border bg-surface p-4 shadow-2xs transition hover:border-border-strong hover:bg-surface-subtle/40"
         >
           <div className="flex size-9 items-center justify-center rounded-lg bg-amber-50 text-amber-700 transition group-hover:scale-105">
             <FileCheck2 className="size-4.5" aria-hidden="true" />
@@ -180,7 +204,7 @@ export default async function TeachingDocumentsPage() {
 
         <Link
           href="/teaching-documents/curriculum/individual-upload"
-          className="group rounded-xl border border-border bg-white p-4 shadow-2xs transition hover:border-border-strong hover:bg-surface-subtle/40"
+          className="group rounded-xl border border-border bg-surface p-4 shadow-2xs transition hover:border-border-strong hover:bg-surface-subtle/40"
         >
           <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary transition group-hover:scale-105">
             <FileUp className="size-4.5" aria-hidden="true" />

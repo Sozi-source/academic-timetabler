@@ -12,6 +12,7 @@ import {
   LogOut,
   Settings,
   ShieldCheck,
+  Sparkles,
   User,
   UserCheck,
   Users,
@@ -88,6 +89,11 @@ export const adminNavSections: AdminNavSection[] = [
         label: 'Quality Assurance',
         href: '/teaching-documents',
         icon: ShieldCheck,
+      },
+      {
+        label: 'Lecture Notes',
+        href: '/lecture-notes',
+        icon: Sparkles,
       },
       {
         label: 'Grading & Results',

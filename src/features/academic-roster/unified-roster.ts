@@ -305,6 +305,48 @@ export async function getUnifiedUnitRoster({
     });
   }
 
+  // 4b. Hardened Fallback: If no registered candidates were found for any resolved cohort
+  // (e.g. before unit registrations are officially executed or finalized for that cohort),
+  // fall back to active enrolled students in those cohorts from public.students
+  // so trainers NEVER receive an empty/blank attendance signing sheet.
+  if (allCohortIds.length > 0) {
+    const cohortsWithRegistrations = new Set<string>();
+    for (const cand of candidateMap.values()) {
+      if (cand.cohortId) cohortsWithRegistrations.add(cand.cohortId);
+    }
+
+    const missingCohortIds = allCohortIds.filter((cid) => !cohortsWithRegistrations.has(cid));
+
+    if (missingCohortIds.length > 0 || candidateMap.size === 0) {
+      try {
+        const targetCohortIds = candidateMap.size === 0 ? allCohortIds : missingCohortIds;
+        const { data: cohortStudents } = await supabase
+          .from('students')
+          .select('id, admission_number, full_name, current_cohort_id, lifecycle_status')
+          .in('current_cohort_id', targetCohortIds)
+          .in('lifecycle_status', ['admitted', 'active']);
+
+        for (const st of cohortStudents ?? []) {
+          if (!st?.id || candidateMap.has(st.id)) continue;
+          const cohortId = st.current_cohort_id || '';
+          const cohortInfo = cohortMap.get(cohortId);
+
+          candidateMap.set(st.id, {
+            studentId: st.id,
+            admissionNumber: st.admission_number ?? '—',
+            fullName: st.full_name ?? 'Student',
+            cohortId,
+            cohortName: cohortInfo?.name ?? 'Cohort',
+            registrationStatus: 'enrolled',
+            attendanceStatus: 'expected',
+          });
+        }
+      } catch (fallbackErr) {
+        console.warn('Fallback to cohort students failed in unified roster:', fallbackErr);
+      }
+    }
+  }
+
   // 5. Attach student reporting status from student_period_reporting
   const allCandidateStudentIds = Array.from(candidateMap.keys());
   if (allCandidateStudentIds.length > 0 && academicPeriodId) {

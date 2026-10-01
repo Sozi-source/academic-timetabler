@@ -1,6 +1,7 @@
 import { cache } from 'react';
 
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { compareAdmissionNumbers } from '@/features/students/admission-number-sort';
 import { getUnifiedUnitRoster } from '@/features/academic-roster/unified-roster';
 
@@ -89,7 +90,7 @@ export interface AssessmentPopulationWorkspace {
 
 export const getAllocationPopulationWorkspace = cache(
   async (allocationId: string): Promise<AssessmentPopulationWorkspace> => {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     const { data: alloc, error: allocErr } = await supabase
       .from('teaching_allocations')

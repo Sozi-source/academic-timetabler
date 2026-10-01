@@ -433,6 +433,15 @@ export async function generateAttendanceSheetPdf(
               </View>
             ) : null}
 
+            {/* Notice if no pre-registered students found */}
+            {group.candidates.length === 0 ? (
+              <View style={[styles.cohortBanner, { backgroundColor: '#fef3c7', borderColor: '#fde68a' }]}>
+                <Text style={{ color: '#92400e' }}>
+                  CLASS REGISTER (MANUAL ENTRY): No pre-registered student records were found in the system for this cohort. Use the manual rows below to record attending students.
+                </Text>
+              </View>
+            ) : null}
+
             {/* Attendance Table */}
             <View style={styles.table}>
               {/* Header Row */}
@@ -583,11 +592,13 @@ export async function generateAttendanceSheetPdf(
                 );
               })}
 
-              {/* 4 Blank Candidate Entry Rows */}
-              {Array.from({ length: 4 }, (_, bIdx) => {
-                const rowNum = group.candidates.length + bIdx + 1;
-                const isLast = bIdx === 3;
-                const rowStyle = isLast ? styles.tableRowLast : styles.tableRow;
+              {/* Blank Candidate Entry Rows: 25 rows for manual entry if empty, else 4 buffer rows */}
+              {(() => {
+                const blankCount = group.candidates.length === 0 ? 25 : 4;
+                return Array.from({ length: blankCount }, (_, bIdx) => {
+                  const rowNum = group.candidates.length + bIdx + 1;
+                  const isLast = bIdx === blankCount - 1;
+                  const rowStyle = isLast ? styles.tableRowLast : styles.tableRow;
 
                 if (isClass) {
                   return (
@@ -664,7 +675,8 @@ export async function generateAttendanceSheetPdf(
                     </View>
                   </View>
                 );
-              })}
+              });
+            })()}
             </View>
 
             {/* Exam Script Count Summary Box */}

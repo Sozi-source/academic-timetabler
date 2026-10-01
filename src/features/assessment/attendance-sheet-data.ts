@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { getUnifiedUnitRoster } from '@/features/academic-roster/unified-roster';
 
 type RelationRow = Record<string, unknown>;
@@ -28,7 +28,7 @@ export interface AttendanceSheetMetadata {
 export async function getAttendanceSheetMetadata(
   allocationId: string,
 ): Promise<AttendanceSheetMetadata> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const [allocResult, slotResult, roster] = await Promise.all([
     supabase
       .from('teaching_allocations')

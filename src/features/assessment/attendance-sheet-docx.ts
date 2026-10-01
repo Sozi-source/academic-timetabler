@@ -299,8 +299,8 @@ export async function generateAttendanceSheetDocx(
             ],
           }),
         ),
-        // 4 blank rows
-        ...Array.from({ length: 4 }, (_, i) =>
+        // Blank rows: 25 for manual entry if empty, else 4 buffer rows
+        ...Array.from({ length: group.candidates.length === 0 ? 25 : 4 }, (_, i) =>
           new TableRow({
             cantSplit: true,
             height: { value: 360, rule: 'atLeast' },
@@ -342,8 +342,8 @@ export async function generateAttendanceSheetDocx(
             ],
           }),
         ),
-        // 4 blank rows
-        ...Array.from({ length: 4 }, (_, i) =>
+        // Blank rows: 25 for manual entry if empty, else 4 buffer rows
+        ...Array.from({ length: group.candidates.length === 0 ? 25 : 4 }, (_, i) =>
           new TableRow({
             cantSplit: true,
             height: { value: 380, rule: 'atLeast' },
@@ -385,8 +385,8 @@ export async function generateAttendanceSheetDocx(
             ],
           }),
         ),
-        // 4 blank rows
-        ...Array.from({ length: 4 }, (_, i) =>
+        // Blank rows: 25 for manual entry if empty, else 4 buffer rows
+        ...Array.from({ length: group.candidates.length === 0 ? 25 : 4 }, (_, i) =>
           new TableRow({
             cantSplit: true,
             height: { value: 380, rule: 'atLeast' },

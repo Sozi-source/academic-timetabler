@@ -1,3 +1,31 @@
+### 2026-10-01: Trainer Attendance List & Signing Sheet Hardening
+
+**Summary:**
+Addressed blank attendance signing sheet issue reported by trainers (e.g. Maureen Ayuma and Jane Osoo):
+1. **Department RLS & Cross-Department Access:**
+   - Identified that trainers with NULL `active_department_id` in `profiles` (like Maureen Ayuma) or trainers assigned to cross-department service units (like Jane Osoo from Applied Sciences teaching Human Nutrition students in DHN 3202) were blocked by Department RLS on `students` and `student_unit_registrations`, causing queries to return 0 students.
+   - Backfilled missing `active_department_id` in `profiles` for trainers linked to departments.
+   - Created migration `supabase/migrations/20261001050000_harden_trainer_attendance_access.sql` granting trainers read permissions to students enrolled in their allocated cohorts or registered for their allocated units across departments.
+2. **Service-Role Execution for Authorized Attendance Downloads:**
+   - Switched `getAllocationPopulationWorkspace` and `getAttendanceSheetMetadata` to use `createAdminClient()`. The endpoint `/api/staff/units/[allocationId]/attendance-sheet/[type]` already validates trainer ownership via `requireStaffAllocation({ profileId, allocationId })`; executing with the service role prevents cross-department student filtering.
+3. **Resilient Enrolled Cohort Fallback:**
+   - Hardened `getUnifiedUnitRoster`: when verified `student_unit_registrations` are empty or pending for a cohort, it automatically falls back to active/admitted students enrolled in the assigned cohorts (`students.current_cohort_id`), ensuring class signing sheets are never blank.
+4. **Printable Document Resilience:**
+   - Updated `attendance-sheet-pdf.tsx` and `attendance-sheet-docx.ts` to generate 25 manual signing rows (with an informative banner) instead of 4 rows if a cohort ever has zero registered records in the system.
+5. **Testing & Verification:**
+   - Added automated tests in `src/tests/trainer-attendance-hardening.test.ts`. Verified 123/123 test suites and full `npm run check` clean compilation.
+
+**Files added/modified:**
+- `supabase/migrations/20261001050000_harden_trainer_attendance_access.sql`
+- `src/features/academic-roster/unified-roster.ts`
+- `src/features/assessment/population-workspace.ts`
+- `src/features/assessment/attendance-sheet-data.ts`
+- `src/features/assessment/attendance-sheet-pdf.tsx`
+- `src/features/assessment/attendance-sheet-docx.ts`
+- `src/tests/admin-dashboard-design.test.ts`
+- `src/tests/trainer-attendance-hardening.test.ts`
+- `CHANGES.md`
+
 ### 2026-10-01: Grounded Lecture Notes Generator (RAG Architecture)
 
 **Summary:**

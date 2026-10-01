@@ -29,7 +29,7 @@ using public.students s
 where s.id = cae.student_id
   and (
     s.lifecycle_status in ('suspended', 'deferred', 'dropped_out', 'completed', 'graduated')
-    or s.academic_phase in ('attachment', 'internship', 'deferred', 'dropped_out')
+    or (s.academic_phase is not null and s.academic_phase != 'in_class')
   );
 
 -- 2. Purge class_attendance_entries for students who are not registered for the session's unit & period

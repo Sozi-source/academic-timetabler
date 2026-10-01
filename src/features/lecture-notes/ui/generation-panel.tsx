@@ -30,6 +30,7 @@ interface GenerationResult {
   promptTokens: number;
   outputTokens: number;
   docxStoragePath: string | null;
+  pdfStoragePath: string | null;
   generatedAt: string;
 }
 
@@ -58,7 +59,7 @@ export function GenerationPanel({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<GenerationResult | null>(null);
-  const [downloading, setDownloading] = useState(false);
+  const [downloadingFormat, setDownloadingFormat] = useState<'docx' | 'pdf' | null>(null);
 
   const effectiveTopic = useCustomTopic ? customTopic : selectedTopic;
 
@@ -103,9 +104,9 @@ export function GenerationPanel({
     }
   }
 
-  async function handleDownload(format: 'docx') {
+  async function handleDownload(format: 'docx' | 'pdf') {
     if (!result?.jobId) return;
-    setDownloading(true);
+    setDownloadingFormat(format);
     try {
       const response = await fetch(`/api/lecture-notes/download?jobId=${result.jobId}&format=${format}`);
       const json = await response.json() as { downloadUrl?: string; filename?: string; error?: string };
@@ -123,7 +124,7 @@ export function GenerationPanel({
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Download failed.');
     } finally {
-      setDownloading(false);
+      setDownloadingFormat(null);
     }
   }
 
@@ -241,10 +242,19 @@ export function GenerationPanel({
                 size="sm"
                 variant="outline"
                 onClick={() => handleDownload('docx')}
-                disabled={downloading || !result.docxStoragePath}
-                leadingIcon={downloading ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+                disabled={downloadingFormat === 'docx' || !result.docxStoragePath}
+                leadingIcon={downloadingFormat === 'docx' ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
               >
                 Download DOCX
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleDownload('pdf')}
+                disabled={downloadingFormat === 'pdf' || !result.pdfStoragePath}
+                leadingIcon={downloadingFormat === 'pdf' ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+              >
+                Download PDF
               </Button>
             </div>
           </div>

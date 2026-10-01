@@ -5,7 +5,7 @@ import { BookOpen, FileText, Layers, Upload } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/ui/page-header';
-import { requireHodAccess } from '@/features/auth/authorization';
+import { requireTrainerAccess } from '@/features/auth/authorization';
 import { getLectureNotesUnitList } from '@/features/lecture-notes/queries';
 
 export const dynamic = 'force-dynamic';
@@ -16,8 +16,8 @@ export const metadata: Metadata = {
 };
 
 export default async function LectureNotesPage() {
-  await requireHodAccess();
-  const units = await getLectureNotesUnitList();
+  const profile = await requireTrainerAccess();
+  const units = await getLectureNotesUnitList(profile);
 
   return (
     <div className="admin-screen space-y-6">

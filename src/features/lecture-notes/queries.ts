@@ -2,6 +2,9 @@
 // Lecture Notes — Supabase Queries
 // ============================================================
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { getApprovedCurriculumForUnitCode } from '@/features/teaching-documents/curriculum-content/queries';
+import type { AuthenticatedProfile } from '@/features/auth/types';
 import type {
   LectureMaterial,
   LectureNoteJob,
@@ -64,13 +67,15 @@ export async function getLectureNoteJob(id: string): Promise<LectureNoteJob | nu
 // ── Unit listing for the workspace landing page ───────────────
 
 /**
- * Returns all teaching allocations for the current HOD/trainer,
+ * Returns all teaching allocations for the current trainer or HOD,
  * enriched with material + job counts for the dashboard.
  */
-export async function getLectureNotesUnitList(): Promise<LectureNotesAllocationSummary[]> {
-  const db = await createClient();
+export async function getLectureNotesUnitList(
+  profile?: AuthenticatedProfile,
+): Promise<LectureNotesAllocationSummary[]> {
+  const adminDb = createAdminClient();
 
-  const { data: allocations, error } = await db
+  let query = adminDb
     .from('teaching_allocations')
     .select(
       `id,
@@ -82,19 +87,35 @@ export async function getLectureNotesUnitList(): Promise<LectureNotesAllocationS
     .in('status', ['draft', 'active'])
     .order('created_at', { ascending: false });
 
+  if (profile?.role === 'trainer') {
+    const { data: trainer } = await adminDb
+      .from('trainers')
+      .select('id')
+      .eq('profile_id', profile.id)
+      .eq('is_active', true)
+      .maybeSingle();
+
+    if (!trainer) return [];
+    query = query.eq('trainer_id', trainer.id);
+  } else if (profile?.role === 'hod' && profile.activeDepartmentId) {
+    query = query.eq('department_id', profile.activeDepartmentId);
+  }
+
+  const { data: allocations, error } = await query;
+
   if (error) throw new Error(`Failed to fetch allocations: ${error.message}`);
   if (!allocations || allocations.length === 0) return [];
 
   const unitIds = [...new Set(allocations.map((a) => a.unit_id))];
 
   // Fetch material counts per unit
-  const { data: materialCounts } = await db
+  const { data: materialCounts } = await adminDb
     .from('lecture_materials')
     .select('unit_id')
     .in('unit_id', unitIds);
 
   // Fetch job counts per unit
-  const { data: jobCounts } = await db
+  const { data: jobCounts } = await adminDb
     .from('lecture_note_jobs')
     .select('unit_id')
     .in('unit_id', unitIds);
@@ -160,56 +181,62 @@ export async function retrieveSimilarChunks({
 // ── Course outline context ────────────────────────────────────
 
 /**
- * Fetches course outline data for a unit from the curriculum registry.
- * Returns topics, learning outcomes, and weekly plan context as plain text.
+ * Fetches course outline data for a unit from the authoritative curriculum registry.
+ * Resolves uploaded course outlines, active versions, and canonical TVET syllabus fallbacks.
+ * Returns topics, learning outcomes, and weekly plan context.
  */
 export async function getCourseOutlineContext(unitId: string): Promise<{
   topics: string[];
   learningOutcomes: string[];
   weeklyPlanText: string;
 } | null> {
-  const db = await createClient();
+  const adminDb = createAdminClient();
 
-  // Pull from curriculum_templates — scheme_of_work or course_outline entries
-  const { data } = await db
-    .from('curriculum_templates')
-    .select('template_data')
-    .eq('unit_id', unitId)
-    .in('document_type', ['course_outline', 'scheme_of_work'])
-    .eq('status', 'active')
-    .order('created_at', { ascending: false })
-    .limit(2);
+  // 1. Fetch unit code & name
+  const { data: unit, error: unitError } = await adminDb
+    .from('units')
+    .select('code, name')
+    .eq('id', unitId)
+    .maybeSingle();
 
-  if (!data || data.length === 0) return null;
+  if (unitError || !unit) {
+    return null;
+  }
 
-  const combined = data.flatMap((row) => {
-    const d = row.template_data as Record<string, unknown> | null;
-    if (!d) return [];
-    return [d];
-  });
+  // 2. Fetch approved curriculum (handles trainer workbooks, curriculum_document_versions, and canonical syllabi)
+  const curriculum = await getApprovedCurriculumForUnitCode(
+    unit.code,
+    unit.name,
+    'course_outline',
+  );
 
   const topics: string[] = [];
-  const learningOutcomes: string[] = [];
+  const learningOutcomes: string[] = [...(curriculum.learningOutcomes ?? [])];
   const weeklyLines: string[] = [];
 
-  for (const d of combined) {
-    if (Array.isArray(d['topics'])) {
-      topics.push(...(d['topics'] as string[]));
+  for (const week of curriculum.weeklySchedule ?? []) {
+    if (week.topicTitle) {
+      topics.push(week.topicTitle);
     }
-    if (Array.isArray(d['learning_outcomes'])) {
-      learningOutcomes.push(...(d['learning_outcomes'] as string[]));
+    if (week.specificLearningOutcomes) {
+      learningOutcomes.push(week.specificLearningOutcomes);
     }
-    if (Array.isArray(d['weekly_plan'])) {
-      const plan = d['weekly_plan'] as Array<{ week?: number; topic?: string; activities?: string }>;
-      for (const w of plan) {
-        weeklyLines.push(`Week ${w.week ?? '?'}: ${w.topic ?? ''} — ${w.activities ?? ''}`);
-      }
+    const lineParts: string[] = [`Week ${week.weekNumber}: ${week.topicTitle}`];
+    if (week.subTopics && week.subTopics.length > 0) {
+      lineParts.push(`Coverage: ${week.subTopics.join(', ')}`);
     }
+    if (week.specificLearningOutcomes) {
+      lineParts.push(`Outcomes: ${week.specificLearningOutcomes}`);
+    }
+    if (week.learningActivities) {
+      lineParts.push(`Activities: ${week.learningActivities}`);
+    }
+    weeklyLines.push(lineParts.join('\n  '));
   }
 
   return {
-    topics: [...new Set(topics)],
-    learningOutcomes: [...new Set(learningOutcomes)],
-    weeklyPlanText: weeklyLines.join('\n'),
+    topics: [...new Set(topics.filter((t) => t.trim().length > 0))],
+    learningOutcomes: [...new Set(learningOutcomes.filter((o) => o.trim().length > 0))],
+    weeklyPlanText: weeklyLines.join('\n\n'),
   };
 }

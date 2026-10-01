@@ -9,15 +9,15 @@ export const runtime = 'nodejs';
 
 import { type NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { requireHodAccess } from '@/features/auth/authorization';
+import { requireTrainerAccess } from '@/features/auth/authorization';
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
-    await requireHodAccess();
+    await requireTrainerAccess();
     const db = await createClient();
 
     const jobId = req.nextUrl.searchParams.get('jobId');
-    const format = req.nextUrl.searchParams.get('format') ?? 'docx';
+    const format = (req.nextUrl.searchParams.get('format') ?? 'docx').toLowerCase();
 
     if (!jobId) {
       return NextResponse.json({ error: 'jobId is required.' }, { status: 400 });
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     const { data: job, error } = await db
       .from('lecture_note_jobs')
-      .select('id, status, docx_storage_bucket, docx_storage_path, topic, unit_id')
+      .select('id, status, docx_storage_bucket, docx_storage_path, pdf_storage_bucket, pdf_storage_path, topic, unit_id')
       .eq('id', jobId)
       .single();
 
@@ -37,12 +37,13 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: `Job is not complete (status: ${job.status})` }, { status: 400 });
     }
 
-    const bucket = job.docx_storage_bucket as string | null;
-    const path = job.docx_storage_path as string | null;
+    const isPdf = format === 'pdf';
+    const bucket = (isPdf ? job.pdf_storage_bucket : job.docx_storage_bucket) as string | null;
+    const path = (isPdf ? job.pdf_storage_path : job.docx_storage_path) as string | null;
 
     if (!bucket || !path) {
       return NextResponse.json(
-        { error: 'Output file not found for this job. The file may have been cleaned up.' },
+        { error: `${format.toUpperCase()} file not found for this job. The file may have been cleaned up.` },
         { status: 404 }
       );
     }

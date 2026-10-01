@@ -6,6 +6,7 @@ import {
   FileText,
   UploadCloud,
   PlusCircle,
+  Sparkles,
   UsersRound,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -210,6 +211,47 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
               >
                 <PlusCircle className="size-3.5" />
                 Log Progress
+              </Link>
+            </div>
+          </Card>
+        </div>
+      </section>
+
+      {/* LECTURE NOTES & TEACHING MATERIALS */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-bold text-text-primary">
+              Lecture Notes & Teaching Materials
+            </h2>
+            <p className="text-xs text-text-muted">
+              Grounded AI lecture note generator aligned with your syllabus and course outline.
+            </p>
+          </div>
+          <Badge variant="info">AI Tool</Badge>
+        </div>
+
+        <div className="portal-card-grid" data-columns="3">
+          <Card className="flex flex-col justify-between p-4 border-primary/40 bg-primary/5">
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="rounded-lg bg-primary/10 p-2 text-primary">
+                  <Sparkles className="size-4" />
+                </span>
+                <Badge variant="success">0% Synthetic AI</Badge>
+              </div>
+              <h3 className="mt-3 text-sm font-bold text-text-primary">Lecture Notes Generator</h3>
+              <p className="mt-1 text-[11px] leading-relaxed text-text-secondary">
+                Upload handouts, slides, and reference materials to generate fully grounded lecture notes, session breakdowns, and review questions.
+              </p>
+            </div>
+            <div className="mt-4 pt-3 border-t border-primary/20">
+              <Link
+                href={`/lecture-notes/${context.allocation.unitId}`}
+                className="inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-white shadow-xs transition hover:bg-primary-hover active:scale-[0.99]"
+              >
+                <Sparkles className="size-3.5" />
+                Open Lecture Notes
               </Link>
             </div>
           </Card>

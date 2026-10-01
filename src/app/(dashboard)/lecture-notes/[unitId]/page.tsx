@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/ui/page-header';
-import { requireHodAccess } from '@/features/auth/authorization';
+import { requireTrainerAccess } from '@/features/auth/authorization';
 import {
   getCourseOutlineContext,
   getLectureMaterialsForUnit,
@@ -32,7 +32,7 @@ export default async function UnitLectureNotesPage({
 }: {
   params: Promise<{ unitId: string }>;
 }) {
-  await requireHodAccess();
+  await requireTrainerAccess();
   const { unitId } = await params;
 
   const db = await createClient();

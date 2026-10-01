@@ -15,12 +15,13 @@ export const maxDuration = 120; // seconds — generation can take time
 
 import { type NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { requireHodAccess } from '@/features/auth/authorization';
+import { requireTrainerAccess } from '@/features/auth/authorization';
 import { embedText } from '@/features/lecture-notes/embeddings/gemini-embeddings';
 import { retrieveSimilarChunks, getCourseOutlineContext, getLectureMaterialsForUnit } from '@/features/lecture-notes/queries';
 import { buildGroundedPrompt } from '@/features/lecture-notes/generation/prompt-builder';
 import { generateLectureNotes } from '@/features/lecture-notes/generation/gemini-generator';
 import { buildLectureNotesDocx } from '@/features/lecture-notes/export/docx-builder';
+import { buildLectureNotesPdf } from '@/features/lecture-notes/export/pdf-builder';
 import type { GenerationGranularity } from '@/features/lecture-notes/types';
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
@@ -28,7 +29,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   let jobId: string | null = null;
 
   try {
-    const profile = await requireHodAccess();
+    const profile = await requireTrainerAccess();
     const body = await req.json() as {
       unitId: string;
       teachingAllocationId?: string | null;
@@ -121,24 +122,40 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       sourceMaterialTitles,
     });
 
-    // ── Build DOCX ─────────────────────────────────────────────
-    const docxBuffer = await buildLectureNotesDocx(notesDocument);
+    // ── Build DOCX & PDF in parallel ──────────────────────────
+    const [docxBuffer, pdfBuffer] = await Promise.all([
+      buildLectureNotesDocx(notesDocument),
+      buildLectureNotesPdf(notesDocument),
+    ]);
 
-    // ── Upload DOCX to Supabase Storage ────────────────────────
+    // ── Upload DOCX & PDF to Supabase Storage ──────────────────
     const timestamp = Date.now();
     const docxPath = `generated/${profile.id}/${unitId}/${jobId}/${timestamp}.docx`;
+    const pdfPath = `generated/${profile.id}/${unitId}/${jobId}/${timestamp}.pdf`;
 
-    const { error: uploadError } = await db.storage
-      .from('lecture-notes')
-      .upload(docxPath, docxBuffer, {
-        contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        upsert: true,
-      });
+    const [docxUploadResult, pdfUploadResult] = await Promise.all([
+      db.storage
+        .from('lecture-notes')
+        .upload(docxPath, docxBuffer, {
+          contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          upsert: true,
+        }),
+      db.storage
+        .from('lecture-notes')
+        .upload(pdfPath, pdfBuffer, {
+          contentType: 'application/pdf',
+          upsert: true,
+        }),
+    ]);
 
-    const docxStoragePath = uploadError ? null : docxPath;
+    const docxStoragePath = docxUploadResult.error ? null : docxPath;
+    const pdfStoragePath = pdfUploadResult.error ? null : pdfPath;
 
-    if (uploadError) {
-      console.warn('[lecture-notes/generate] DOCX upload failed:', uploadError.message);
+    if (docxUploadResult.error) {
+      console.warn('[lecture-notes/generate] DOCX upload failed:', docxUploadResult.error.message);
+    }
+    if (pdfUploadResult.error) {
+      console.warn('[lecture-notes/generate] PDF upload failed:', pdfUploadResult.error.message);
     }
 
     // ── Mark job as done ───────────────────────────────────────
@@ -148,6 +165,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       output_token_count: outputTokens,
       docx_storage_bucket: docxStoragePath ? 'lecture-notes' : null,
       docx_storage_path: docxStoragePath,
+      pdf_storage_bucket: pdfStoragePath ? 'lecture-notes' : null,
+      pdf_storage_path: pdfStoragePath,
       completed_at: new Date().toISOString(),
     }).eq('id', jobId);
 
@@ -165,6 +184,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       promptTokens,
       outputTokens,
       docxStoragePath,
+      pdfStoragePath,
       generatedAt: notesDocument.generatedAt,
     });
 

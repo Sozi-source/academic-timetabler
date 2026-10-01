@@ -16,6 +16,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  Sparkles,
   X,
 } from 'lucide-react';
 import Link, { useLinkStatus } from 'next/link';
@@ -59,6 +60,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: 'Teaching Documents', href: '/staff/documents', icon: FileText },
       { label: 'Upload Curriculum', href: '/teaching-documents/curriculum/individual-upload', icon: FileUp },
+      { label: 'Lecture Notes', href: '/lecture-notes', icon: Sparkles },
     ],
   },
   {

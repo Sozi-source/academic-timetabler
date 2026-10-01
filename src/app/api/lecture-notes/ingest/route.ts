@@ -9,7 +9,7 @@ export const runtime = 'nodejs'; // pdf-parse and mammoth require Node.js runtim
 
 import { type NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { requireHodAccess } from '@/features/auth/authorization';
+import { requireTrainerAccess } from '@/features/auth/authorization';
 import { chunkText } from '@/features/lecture-notes/ingest/chunker';
 import { extractTextFromPdf } from '@/features/lecture-notes/ingest/pdf-parser';
 import { extractTextFromDocx } from '@/features/lecture-notes/ingest/docx-parser';
@@ -18,7 +18,7 @@ import { embedTexts } from '@/features/lecture-notes/embeddings/gemini-embedding
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
-    const profile = await requireHodAccess();
+    const profile = await requireTrainerAccess();
     const db = await createClient();
 
     const formData = await req.formData();

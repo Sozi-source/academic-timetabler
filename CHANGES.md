@@ -1,3 +1,38 @@
+### 2026-10-01: Lecture Notes Generator Hardening, Course Outline Grounding & PDF Export
+
+**Summary:**
+Audited and resolved all critical flaws and accessibility gaps in the Lecture Notes Generator:
+1. **Course Outline Table Mismatch Fixed:**
+   - Corrected `getCourseOutlineContext` in `src/features/lecture-notes/queries.ts` which previously queried a non-existent table (`curriculum_templates`).
+   - Integrated `getApprovedCurriculumForUnitCode` which pulls from `curriculum_document_versions` and falls back gracefully to canonical TVET CDACC syllabi. Course outline topics, specific learning outcomes, and weekly delivery plans are now reliably supplied to the prompt builder and topic selector.
+2. **Access Control Loosened to Trainers:**
+   - Switched authorization checks in `/lecture-notes`, `/lecture-notes/[unitId]`, and all `/api/lecture-notes/*` routes from `requireHodAccess()` to `requireTrainerAccess()`. All teaching staff, HODs, and admins can now access and generate lecture notes for their assigned units.
+   - Updated `getLectureNotesUnitList` to scope unit offerings according to the authenticated user's role (trainer assignments vs department HOD).
+3. **Staff Portal & Navigation Integration:**
+   - Added direct "Lecture Notes" link in `staff-shell.tsx` under *Curriculum & Documents*.
+   - Added a dedicated "Lecture Notes & Teaching Materials" card in `/staff/units/[allocationId]/documents` linking straight to the unit generator.
+4. **Institutional PDF Export Added:**
+   - Implemented `pdf-builder.tsx` using `@react-pdf/renderer` with institutional branding and section layouts.
+   - Updated `/api/lecture-notes/generate` to build and upload both DOCX and PDF files to Supabase Storage.
+   - Updated `/api/lecture-notes/download` and `generation-panel.tsx` to support both DOCX and PDF downloads.
+5. **Verification Evidence:**
+   - `npm run check` (typecheck + ESLint + Turbopack build) passed with 0 errors.
+   - All 124 Vitest test suites (644 unit tests) passed.
+
+**Files added/modified:**
+- `src/features/lecture-notes/export/pdf-builder.tsx` (added)
+- `src/features/lecture-notes/queries.ts`
+- `src/features/lecture-notes/ui/generation-panel.tsx`
+- `src/app/(dashboard)/lecture-notes/page.tsx`
+- `src/app/(dashboard)/lecture-notes/[unitId]/page.tsx`
+- `src/app/(staff)/staff/units/[allocationId]/documents/page.tsx`
+- `src/components/staff/staff-shell.tsx`
+- `src/app/api/lecture-notes/generate/route.ts`
+- `src/app/api/lecture-notes/download/route.ts`
+- `src/app/api/lecture-notes/ingest/route.ts`
+- `src/app/api/lecture-notes/materials/route.ts`
+- `CHANGES.md`
+
 ### 2026-10-01: Trainer Attendance List & Signing Sheet Hardening
 
 **Summary:**

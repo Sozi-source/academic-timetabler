@@ -283,4 +283,244 @@ describe('unified unit roster domain logic', () => {
     expect(roster.students[0].cohortName).toBe('CND SEPT 26');
     expect(roster.students[1].cohortName).toBe('DND SEPT 26');
   });
+
+  it('strictly excludes suspended, deferred, and on-attachment students (e.g. Kingori, Ian Weru)', async () => {
+    const mockSupabase = {
+      from: (table: string) => {
+        const query: any = {
+          select: () => query,
+          eq: () => query,
+          in: () => query,
+          maybeSingle: async () => {
+            if (table === 'teaching_allocations') {
+              return {
+                data: {
+                  id: 'alloc-1',
+                  unit_id: 'unit-1',
+                  academic_period_id: 'period-1',
+                  cohort_id: 'cohort-a',
+                  participant_cohort_ids: [],
+                },
+                error: null,
+              };
+            }
+            return { data: null, error: null };
+          },
+          then: (resolve: any) => {
+            if (table === 'unit_offerings') {
+              return resolve({ data: [{ cohort_id: 'cohort-a' }], error: null });
+            }
+            if (table === 'teaching_allocations') {
+              return resolve({ data: [{ cohort_id: 'cohort-a', participant_cohort_ids: [] }], error: null });
+            }
+            if (table === 'student_unit_registrations') {
+              return resolve({
+                data: [
+                  {
+                    student_id: 'student-valid',
+                    cohort_id: 'cohort-a',
+                    registration_status: 'registered',
+                    student: {
+                      id: 'student-valid',
+                      admission_number: 'DHN/2026/001',
+                      full_name: 'Valid Active Student',
+                      current_cohort_id: 'cohort-a',
+                      lifecycle_status: 'active',
+                      academic_phase: 'in_class',
+                    },
+                  },
+                  {
+                    student_id: 'student-suspended',
+                    cohort_id: 'cohort-a',
+                    registration_status: 'registered',
+                    student: {
+                      id: 'student-suspended',
+                      admission_number: 'DHN/2026/002',
+                      full_name: 'Kingori, Ian Weru (Suspended)',
+                      current_cohort_id: 'cohort-a',
+                      lifecycle_status: 'suspended',
+                      academic_phase: 'in_class',
+                    },
+                  },
+                  {
+                    student_id: 'student-deferred',
+                    cohort_id: 'cohort-a',
+                    registration_status: 'registered',
+                    student: {
+                      id: 'student-deferred',
+                      admission_number: 'DHN/2026/003',
+                      full_name: 'Deferred Student',
+                      current_cohort_id: 'cohort-a',
+                      lifecycle_status: 'deferred',
+                      academic_phase: 'in_class',
+                    },
+                  },
+                  {
+                    student_id: 'student-attachment',
+                    cohort_id: 'cohort-a',
+                    registration_status: 'registered',
+                    student: {
+                      id: 'student-attachment',
+                      admission_number: 'DHN/2026/004',
+                      full_name: 'Attachment Student',
+                      current_cohort_id: 'cohort-a',
+                      lifecycle_status: 'active',
+                      academic_phase: 'attachment',
+                    },
+                  },
+                  {
+                    student_id: 'student-rep-deferred',
+                    cohort_id: 'cohort-a',
+                    registration_status: 'registered',
+                    student: {
+                      id: 'student-rep-deferred',
+                      admission_number: 'DHN/2026/005',
+                      full_name: 'Reported Deferred Student',
+                      current_cohort_id: 'cohort-a',
+                      lifecycle_status: 'active',
+                      academic_phase: 'in_class',
+                    },
+                  },
+                ],
+                error: null,
+              });
+            }
+            if (table === 'cohorts') {
+              return resolve({
+                data: [
+                  {
+                    id: 'cohort-a',
+                    name: 'DHN 2026',
+                    code: 'DHN-2026',
+                    programme: {
+                      id: 'prog-1',
+                      name: 'Diploma in Nutrition and Dietetics',
+                      code: 'DHN',
+                      department: { id: 'dept-1', name: 'Nutrition' },
+                    },
+                  },
+                ],
+                error: null,
+              });
+            }
+            if (table === 'student_period_reporting') {
+              return resolve({
+                data: [
+                  {
+                    student_id: 'student-rep-deferred',
+                    reporting_status: 'deferred',
+                  },
+                ],
+                error: null,
+              });
+            }
+            return resolve({ data: [], error: null });
+          },
+        };
+        return query;
+      },
+    };
+
+    const roster = await getUnifiedUnitRoster({
+      supabase: mockSupabase,
+      allocationId: 'alloc-1',
+    });
+
+    // Only the valid active, in-class student should appear
+    expect(roster.totalCount).toBe(1);
+    expect(roster.students).toHaveLength(1);
+    expect(roster.students[0].studentId).toBe('student-valid');
+    expect(roster.students[0].admissionNumber).toBe('DHN/2026/001');
+
+    // Suspended, deferred, attachment, and reported-deferred students MUST NEVER appear
+    const studentIds = roster.students.map((s) => s.studentId);
+    expect(studentIds).not.toContain('student-suspended');
+    expect(studentIds).not.toContain('student-deferred');
+    expect(studentIds).not.toContain('student-attachment');
+    expect(studentIds).not.toContain('student-rep-deferred');
+  });
+
+  it('never falls back to unregistered cohort students when a cohort has 0 registrations', async () => {
+    const mockSupabase = {
+      from: (table: string) => {
+        const query: any = {
+          select: () => query,
+          eq: () => query,
+          in: () => query,
+          maybeSingle: async () => {
+            if (table === 'teaching_allocations') {
+              return {
+                data: {
+                  id: 'alloc-empty',
+                  unit_id: 'unit-empty',
+                  academic_period_id: 'period-1',
+                  cohort_id: 'cohort-empty',
+                  participant_cohort_ids: [],
+                },
+                error: null,
+              };
+            }
+            return { data: null, error: null };
+          },
+          then: (resolve: any) => {
+            if (table === 'unit_offerings') {
+              return resolve({ data: [{ cohort_id: 'cohort-empty' }], error: null });
+            }
+            if (table === 'teaching_allocations') {
+              return resolve({ data: [{ cohort_id: 'cohort-empty', participant_cohort_ids: [] }], error: null });
+            }
+            if (table === 'student_unit_registrations') {
+              // 0 registered students
+              return resolve({ data: [], error: null });
+            }
+            if (table === 'cohorts') {
+              return resolve({
+                data: [
+                  {
+                    id: 'cohort-empty',
+                    name: 'DHN EMPTY',
+                    code: 'DHN-EMPTY',
+                    programme: {
+                      id: 'prog-1',
+                      name: 'Diploma in Nutrition and Dietetics',
+                      code: 'DHN',
+                      department: { id: 'dept-1', name: 'Nutrition' },
+                    },
+                  },
+                ],
+                error: null,
+              });
+            }
+            if (table === 'students') {
+              // Cohort has unregistered students
+              return resolve({
+                data: [
+                  {
+                    id: 'student-unregistered',
+                    admission_number: 'DHN/2026/999',
+                    full_name: 'Unregistered Student',
+                    current_cohort_id: 'cohort-empty',
+                    lifecycle_status: 'active',
+                  },
+                ],
+                error: null,
+              });
+            }
+            return resolve({ data: [], error: null });
+          },
+        };
+        return query;
+      },
+    };
+
+    const roster = await getUnifiedUnitRoster({
+      supabase: mockSupabase,
+      allocationId: 'alloc-empty',
+    });
+
+    // Unregistered students must NEVER be populated on attendance registers
+    expect(roster.totalCount).toBe(0);
+    expect(roster.students).toEqual([]);
+    expect(roster.cohortNames).toEqual(['DHN EMPTY']);
+  });
 });

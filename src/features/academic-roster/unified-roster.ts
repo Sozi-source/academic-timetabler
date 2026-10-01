@@ -178,7 +178,7 @@ export async function getUnifiedUnitRoster({
       student_id,
       cohort_id,
       registration_status,
-      student:students(id, admission_number, full_name, current_cohort_id, lifecycle_status)
+      student:students(id, admission_number, full_name, current_cohort_id, lifecycle_status, academic_phase)
     `)
     .eq('academic_period_id', academicPeriodId)
     .eq('registration_status', 'registered');
@@ -284,12 +284,30 @@ export async function getUnifiedUnitRoster({
   // 4. Populate candidates strictly from verified unit registrations
   // Students must be explicitly registered for this unit; merely belonging to a cohort
   // sharing the timetable slot does not place an unregistered student on the roster.
+  // In addition, students who are suspended, deferred, dropped out, or on attachment
+  // must NEVER appear on class attendance registers.
   const candidateMap = new Map<string, UnifiedRosterCandidate>();
 
   for (const reg of registrations ?? []) {
     const st = Array.isArray(reg.student) ? reg.student[0] : reg.student;
     if (!st?.id) continue;
-    if (st.lifecycle_status && !['admitted', 'active'].includes(st.lifecycle_status)) continue;
+
+    // Strict Domain Rule: Student must be actively admitted or active.
+    // Suspended, deferred, dropped_out, completed, or graduated students must NEVER appear on attendance registers.
+    const lifecycle = (st.lifecycle_status || '').toLowerCase();
+    if (lifecycle && !['admitted', 'active'].includes(lifecycle)) {
+      continue;
+    }
+    if (['suspended', 'deferred', 'dropped_out', 'completed', 'graduated'].includes(lifecycle)) {
+      continue;
+    }
+
+    // Strict Domain Rule: Students on attachment or internship are not attending classroom units
+    // and must NEVER appear on class attendance registers.
+    const phase = (st.academic_phase || '').toLowerCase();
+    if (phase && phase !== 'in_class') {
+      continue;
+    }
 
     const cohortId = reg.cohort_id || st.current_cohort_id || '';
     const cohortInfo = cohortMap.get(cohortId);
@@ -305,49 +323,9 @@ export async function getUnifiedUnitRoster({
     });
   }
 
-  // 4b. Hardened Fallback: If no registered candidates were found for any resolved cohort
-  // (e.g. before unit registrations are officially executed or finalized for that cohort),
-  // fall back to active enrolled students in those cohorts from public.students
-  // so trainers NEVER receive an empty/blank attendance signing sheet.
-  if (allCohortIds.length > 0) {
-    const cohortsWithRegistrations = new Set<string>();
-    for (const cand of candidateMap.values()) {
-      if (cand.cohortId) cohortsWithRegistrations.add(cand.cohortId);
-    }
-
-    const missingCohortIds = allCohortIds.filter((cid) => !cohortsWithRegistrations.has(cid));
-
-    if (missingCohortIds.length > 0 || candidateMap.size === 0) {
-      try {
-        const targetCohortIds = candidateMap.size === 0 ? allCohortIds : missingCohortIds;
-        const { data: cohortStudents } = await supabase
-          .from('students')
-          .select('id, admission_number, full_name, current_cohort_id, lifecycle_status')
-          .in('current_cohort_id', targetCohortIds)
-          .in('lifecycle_status', ['admitted', 'active']);
-
-        for (const st of cohortStudents ?? []) {
-          if (!st?.id || candidateMap.has(st.id)) continue;
-          const cohortId = st.current_cohort_id || '';
-          const cohortInfo = cohortMap.get(cohortId);
-
-          candidateMap.set(st.id, {
-            studentId: st.id,
-            admissionNumber: st.admission_number ?? '—',
-            fullName: st.full_name ?? 'Student',
-            cohortId,
-            cohortName: cohortInfo?.name ?? 'Cohort',
-            registrationStatus: 'enrolled',
-            attendanceStatus: 'expected',
-          });
-        }
-      } catch (fallbackErr) {
-        console.warn('Fallback to cohort students failed in unified roster:', fallbackErr);
-      }
-    }
-  }
-
   // 5. Attach student reporting status from student_period_reporting
+  // If a student reported as 'deferred' or 'dropped_out' for this academic period,
+  // they are deferred/dropped out and MUST be excluded from the attendance register.
   const allCandidateStudentIds = Array.from(candidateMap.keys());
   if (allCandidateStudentIds.length > 0 && academicPeriodId) {
     try {
@@ -365,7 +343,13 @@ export async function getUnifiedUnitRoster({
       }
 
       for (const [sId, cand] of candidateMap.entries()) {
-        cand.reportingStatus = reportingMap.get(sId) || 'unreported';
+        const repStatus = reportingMap.get(sId) || 'unreported';
+        if (repStatus === 'deferred' || repStatus === 'dropped_out') {
+          // Student deferred or dropped out of this academic period
+          candidateMap.delete(sId);
+        } else {
+          cand.reportingStatus = repStatus;
+        }
       }
     } catch (repErr) {
       console.warn('Could not load student_period_reporting for unified roster:', repErr);

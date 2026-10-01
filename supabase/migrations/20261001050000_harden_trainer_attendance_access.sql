@@ -52,18 +52,6 @@ using (
         or public.students.current_cohort_id = any(ta.participant_cohort_ids)
       )
   )
-  -- OR trainer teaching a unit this student is registered for
-  or exists (
-    select 1
-    from public.teaching_allocations ta
-    join public.trainers t on t.id = ta.trainer_id
-    join public.student_unit_registrations sur
-      on sur.unit_id = ta.unit_id
-      and sur.academic_period_id = ta.academic_period_id
-    where t.profile_id = auth.uid()
-      and sur.student_id = public.students.id
-      and ta.status in ('draft', 'active', 'completed')
-  )
 );
 
 -- 3. Policy: Trainers can read unit registrations for their allocated units

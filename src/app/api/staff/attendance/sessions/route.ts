@@ -384,25 +384,25 @@ export async function POST(
           allocationId: cs.teaching_allocation_id,
         });
 
-        if (roster.students.length > 0) {
-          const validStudentIdSet = new Set(roster.students.map((st) => st.studentId));
-          const { data: currentEntries } = await (adminDb as any)
+        const validStudentIdSet = new Set(roster.students.map((st) => st.studentId));
+        const { data: currentEntries } = await (adminDb as any)
+          .from('class_attendance_entries')
+          .select('student_id')
+          .eq('class_session_id', cs.id);
+
+        const orphanedIds = (currentEntries ?? [])
+          .map((e: any) => String(e.student_id))
+          .filter((sId: string) => !validStudentIdSet.has(sId));
+
+        if (orphanedIds.length > 0) {
+          await (adminDb as any)
             .from('class_attendance_entries')
-            .select('student_id')
-            .eq('class_session_id', cs.id);
+            .delete()
+            .eq('class_session_id', cs.id)
+            .in('student_id', orphanedIds);
+        }
 
-          const orphanedIds = (currentEntries ?? [])
-            .map((e: any) => String(e.student_id))
-            .filter((sId: string) => !validStudentIdSet.has(sId));
-
-          if (orphanedIds.length > 0) {
-            await (adminDb as any)
-              .from('class_attendance_entries')
-              .delete()
-              .eq('class_session_id', cs.id)
-              .in('student_id', orphanedIds);
-          }
-
+        if (roster.students.length > 0) {
           const records = roster.students.map((st) => ({
             class_session_id: cs.id,
             student_id: st.studentId,
@@ -413,18 +413,18 @@ export async function POST(
           await (adminDb as any)
             .from('class_attendance_entries')
             .upsert(records, { onConflict: 'class_session_id,student_id', ignoreDuplicates: true });
+        }
 
+        await (adminDb as any)
+          .from('class_sessions')
+          .update({ roster_count: roster.totalCount, updated_at: new Date().toISOString() })
+          .eq('id', cs.id);
+
+        if (roster.cohortIds.length > 0) {
           await (adminDb as any)
-            .from('class_sessions')
-            .update({ roster_count: roster.totalCount, updated_at: new Date().toISOString() })
-            .eq('id', cs.id);
-
-          if (roster.cohortIds.length > 0) {
-            await (adminDb as any)
-              .from('scheduled_sessions')
-              .update({ participant_cohort_ids: roster.cohortIds })
-              .eq('id', payload.scheduledSessionId);
-          }
+            .from('scheduled_sessions')
+            .update({ participant_cohort_ids: roster.cohortIds })
+            .eq('id', payload.scheduledSessionId);
         }
       }
     } catch (reconcileErr) {

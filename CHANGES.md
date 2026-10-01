@@ -1,3 +1,93 @@
+### 2026-10-01: Admin Student Attendance Scorecard, Subject % Matrix & Standing Analytics
+
+**Summary:**
+Implemented comprehensive multi-subject attendance scoring, subject percentage matrices, cohort filtering, and standing tracking on the Admin Class Attendance page (`/attendance`):
+1. **Multi-Subject Attendance Matrix & Standing Engine:**
+   - Created `src/features/class-attendance/scorecard-types.ts` and `src/features/class-attendance/scorecard-queries.ts` (`getDepartmentStudentAttendanceScorecard`).
+   - Computes individual attendance percentage for every registered unit per student (`present_count + late_count / marked_sessions`), overall departmental average scores, and standing statuses:
+     - `Good Standing`: $\ge 80\%$
+     - `Borderline`: $75\% - 79.9\%$
+     - `At Risk`: $< 75\%$
+     - `Unrecorded`: 0 marked sessions
+   - Units with 0 held/completed sessions render as `—` (no sessions held) so they do not artificially penalize students or skew averages.
+   - Strictly scopes to active in-class students (`lifecycle_status in ('admitted', 'active')` and `academic_phase = 'in_class'`). Suspended, deferred, dropped out, and attachment students are strictly excluded.
+2. **Interactive UI with Dynamic Matrix & Scorecard Views:**
+   - Created `src/features/class-attendance/student-attendance-scorecard.tsx` with:
+     - Overview KPI cards (Tracked Active Students, Department Avg Attendance, Good Standing, At Risk).
+     - Cohort filter dropdown (dynamically loads subject column headers specific to the selected cohort).
+     - Search input filtering instantly by student name, admission number, or unit code.
+     - Standing filter pills (`All`, `At Risk`, `Borderline`, `Good Standing`, `Unrecorded`).
+     - Dynamic Subject Matrix View mapping each registered unit to a column with Overall Score pinned at the end.
+     - Card / Scorecard List toggle view.
+     - Student drilldown dialog showing session-by-session breakdowns.
+     - Client-side CSV export and direct Excel spreadsheet export.
+3. **Excel Workbook Export:**
+   - Created `src/app/api/attendance/scorecard/export/route.ts` generating styled Excel `.xlsx` files with institutional headers, color-coded score columns, and summary metrics.
+4. **Admin Page Integration & Dual-Mode Tabs:**
+   - Updated `src/app/(dashboard)/attendance/page.tsx` with a dual-tab switcher:
+     - *Student Attendance & Scores* (`StudentAttendanceScorecard`).
+     - *Class Session Logs* (`AttendanceAdminTable`).
+5. **Testing & Verification:**
+   - Added unit tests in `src/tests/student-attendance-scorecard.test.ts` (4/4 passed).
+   - Clean verification across `typecheck`, `lint`, and `build` (127 routes generated cleanly).
+
+**Files added/modified:**
+- `src/features/class-attendance/scorecard-types.ts` (added)
+- `src/features/class-attendance/scorecard-queries.ts` (added)
+- `src/features/class-attendance/student-attendance-scorecard.tsx` (added)
+- `src/app/api/attendance/scorecard/export/route.ts` (added)
+- `src/app/(dashboard)/attendance/page.tsx`
+- `src/tests/student-attendance-scorecard.test.ts` (added)
+- `CHANGES.md`
+
+### 2026-10-01: Exclude Suspended, Deferred, On-Attachment, and Unregistered Students from Attendance Registers
+
+**Summary:**
+Strictly hardened attendance registers, printable signing sheets, and class attendance session workspaces so that students who are suspended, deferred, on attachment, or unregistered for a unit NEVER appear on attendance registers:
+1. **Unregistered Students Fallback Leak Eliminated:**
+   - Removed Step 4b in `src/features/academic-roster/unified-roster.ts` which previously fell back to querying all students in a cohort when registrations were not yet present.
+   - Enforced rule: As long as a student is not explicitly registered for a unit (`student_unit_registrations.registration_status = 'registered'`), they will never appear on attendance registers. When a cohort has no registrations, the roster count is 0 and printable sheets render blank rows for manual entry as designed.
+2. **Lifecycle & Academic Phase Filtering (`academic_phase` and `lifecycle_status`):**
+   - Updated `regQuery` in `src/features/academic-roster/unified-roster.ts` to select `academic_phase` alongside `lifecycle_status`.
+   - Excluded students whose `lifecycle_status` is in `['suspended', 'deferred', 'dropped_out', 'completed', 'graduated']`.
+   - Excluded students whose `academic_phase` is `'attachment'` (or `'internship'`, `'deferred'`, `'dropped_out'`). Students on attachment are not attending classroom sessions.
+   - Excluded students who have period reporting status of `'deferred'` or `'dropped_out'` in `student_period_reporting`.
+3. **Database Migration & Purging:**
+   - Created migration `supabase/migrations/20261001213000_exclude_suspended_deferred_attachment_from_attendance.sql`:
+     - Purged legacy `class_attendance_entries` for students who are suspended, deferred, on attachment, or without a verified unit registration for that session's unit & period.
+     - Recalculated `roster_count` on all affected `class_sessions`.
+     - Upgraded `open_class_attendance_session` to join `public.students` and `student_period_reporting`, strictly requiring active in-class students with verified registrations.
+     - Upgraded `refresh_assessment_population` to enforce the same filters.
+4. **Session Reconcile Hardening:**
+   - In `src/app/api/staff/attendance/sessions/route.ts`, ensured orphan student entry purge runs even when the valid roster is empty.
+5. **Verification Evidence:**
+   - Added unit tests in `src/tests/unified-unit-roster.test.ts` verifying exclusion of Kingori Ian Weru (suspended/deferred/attachment) and unregistered students. All tests passed.
+   - `npm run check` (typecheck + ESLint + Turbopack build) and `npm test` passed with 0 errors across 124 test suites (646 tests).
+
+**Files added/modified:**
+- `supabase/migrations/20261001213000_exclude_suspended_deferred_attachment_from_attendance.sql` (added)
+- `src/features/academic-roster/unified-roster.ts`
+- `src/app/api/staff/attendance/sessions/route.ts`
+- `src/tests/unified-unit-roster.test.ts`
+- `CHANGES.md`
+
+### 2026-10-01: Fix Infinite Recursion in "students" RLS Policy
+
+**Summary:**
+Resolved the database error `infinite recursion detected in policy for relation "students"` when querying `/students/registry`:
+1. **Root Cause:**
+   - In migration `20261001050000`, policy `students_trainer_read` on `students` contained a subquery to `student_unit_registrations`, while policy `student_unit_registrations_trainer_read` on `student_unit_registrations` contained a subquery to `students`.
+   - PostgreSQL RLS query planner detected this cyclic dependency and threw an infinite recursion error whenever `students` was selected by authenticated users.
+2. **Fix Implemented:**
+   - Created migration `supabase/migrations/20261001200000_fix_students_rls_infinite_recursion.sql` which drops and recreates `students_trainer_read` without referencing `student_unit_registrations`.
+   - Trainers read students either through department access or through direct cohort allocations (`students.current_cohort_id` joined to `teaching_allocations` and `trainers`), breaking the cyclic loop.
+   - Cleaned migration `20261001050000_harden_trainer_attendance_access.sql`.
+
+**Files added/modified:**
+- `supabase/migrations/20261001200000_fix_students_rls_infinite_recursion.sql` (added)
+- `supabase/migrations/20261001050000_harden_trainer_attendance_access.sql`
+- `CHANGES.md`
+
 ### 2026-10-01: Lecture Notes Generator Hardening, Course Outline Grounding & PDF Export
 
 **Summary:**

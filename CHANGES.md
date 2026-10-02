@@ -1,3 +1,23 @@
+### 2026-10-02: Fix Attendance Scorecard Discrepancy & 1,000-Row Pagination Truncation
+
+**Summary:**
+Resolved the root causes behind students seeing attendance percentages on their individual portals while appearing with missing/unrecorded (`—`) scores on the Admin Attendance Scorecard (`/attendance`):
+1. **Root Cause 1: PostgREST 1,000-Row Hard Ceiling on Registrations (`student_unit_registrations`):**
+   - The department has 1,305+ registered units for the current period.
+   - PostgREST enforces a hard default ceiling of 1,000 rows per query. Without pagination, rows 1,001 through 1,305 were silently truncated, causing students appearing later in alphabetical order to have 0 registered units loaded on the admin scorecard.
+2. **Root Cause 2: PostgREST 1,000-Row Hard Ceiling on Attendance Entries (`class_attendance_entries`):**
+   - The department has 2,725+ attendance entries in the current academic period.
+   - Querying `class_attendance_entries` across active session IDs without pagination returned only the first 1,000 records. The remaining 1,725 entries were silently omitted, leaving students with 0 recorded sessions and a null score on the admin side, even while their individual student portal queries (which only fetch single-student records) returned 100% of their attendance entries.
+3. **Root Cause 3: Strictly Registered-Unit Scoped Iteration:**
+   - The scorecard loop previously iterated strictly over `studentRegisteredUnits`. If a student was marked present/absent for a unit session before their unit registration was finalized in `student_unit_registrations`, or in shared deliveries, those sessions were excluded from the student's admin score.
+4. **Resolution Implemented in `src/features/class-attendance/scorecard-queries.ts`:**
+   - Implemented chunked `.range()` pagination loops for both `student_unit_registrations` and `class_attendance_entries`, retrieving all 1,305+ registrations and 2,725+ entries without truncation.
+   - Added `studentAttendedUnits` discovery: any unit where a student has marked attendance is dynamically mapped and merged with registered units (`combinedUnitsMap`), ensuring 100% of marked sessions are counted and scored.
+   - Verified that scored students increased from 171 to 202. The only 5 remaining students without scores have 0 attendance records anywhere in the database.
+5. **Verification & Testing:**
+   - `npm run check`: TypeScript typecheck, ESLint, and Next.js build passed with 0 errors across 127 routes.
+   - `npm test`: 126/126 test files passed, 651/651 tests green.
+
 ### 2026-10-02: Simplified Lecture Notes UI, Multi-File Ingestion & High-Demand Model Pool Hardening
 
 **Summary:**

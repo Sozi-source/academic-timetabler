@@ -139,26 +139,45 @@ export async function getDepartmentStudentAttendanceScorecard(
     };
   }
 
-  // 3. Query verified unit registrations for these students in this period
-  const { data: rawRegistrations } = await supabase
-    .from('student_unit_registrations')
-    .select(`
-      student_id,
-      unit_id,
-      unit:units!student_unit_registrations_unit_id_fkey (
-        id,
-        code,
-        name
-      )
-    `)
-    .eq('academic_period_id', period.id)
-    .eq('registration_status', 'registered')
-    .in('student_id', studentIds);
+  // 3. Query verified unit registrations for these students in this period (paginated to overcome PostgREST 1000-row ceiling)
+  const studentIdSet = new Set(studentIds);
+  const rawRegistrations: any[] = [];
+  let regFrom = 0;
+  const PAGE_SIZE = 1000;
+  while (true) {
+    const { data: page, error: regError } = await supabase
+      .from('student_unit_registrations')
+      .select(`
+        student_id,
+        unit_id,
+        unit:units!student_unit_registrations_unit_id_fkey (
+          id,
+          code,
+          name
+        )
+      `)
+      .eq('academic_period_id', period.id)
+      .eq('registration_status', 'registered')
+      .range(regFrom, regFrom + PAGE_SIZE - 1);
+
+    if (regError) {
+      console.warn('Error fetching student unit registrations:', regError.message);
+      break;
+    }
+    if (!page || page.length === 0) break;
+    for (const row of page) {
+      if (studentIdSet.has(row.student_id)) {
+        rawRegistrations.push(row);
+      }
+    }
+    if (page.length < PAGE_SIZE) break;
+    regFrom += PAGE_SIZE;
+  }
 
   const studentRegisteredUnits = new Map<string, Map<string, { unitId: string; unitCode: string; unitName: string }>>();
   const allUnitsMap = new Map<string, AttendanceScorecardUnitColumn>();
 
-  for (const reg of rawRegistrations ?? []) {
+  for (const reg of rawRegistrations) {
     const u = Array.isArray(reg.unit) ? reg.unit[0] : reg.unit;
     if (!u?.id) continue;
     allUnitsMap.set(u.id, { id: u.id, code: u.code || 'UNIT', name: u.name || 'Unit' });
@@ -220,34 +239,54 @@ export async function getDepartmentStudentAttendanceScorecard(
     activeSessionIds.push(sess.id);
   }
 
-  // 6. Query attendance entries (present / absent / late)
-  // Map of `${student_id}:${registered_unit_id}` -> { sessions: Set<string>; present: number; absent: number }
+  // 6. Query attendance entries (present / absent / late) with pagination
+  // Map of `${student_id}:${unit_id}` -> { sessions: Set<string>; present: number; absent: number }
   const studentUnitAttendanceStats = new Map<string, { sessions: Set<string>; present: number; absent: number }>();
+  // Also track units where student has marked attendance (even if not yet officially recorded in student_unit_registrations)
+  const studentAttendedUnits = new Map<string, Map<string, { unitId: string; unitCode: string; unitName: string }>>();
 
   if (activeSessionIds.length > 0) {
-    const CHUNK_SIZE = 1000;
-    for (let i = 0; i < studentIds.length; i += CHUNK_SIZE) {
-      const chunk = studentIds.slice(i, i + CHUNK_SIZE);
-      const { data: entries } = await supabase
+    const allEntries: any[] = [];
+    let entryFrom = 0;
+    while (true) {
+      const { data: page, error: entryError } = await supabase
         .from('class_attendance_entries')
         .select('class_session_id, student_id, attendance_status')
-        .in('student_id', chunk)
         .in('class_session_id', activeSessionIds)
-        .in('attendance_status', ['present', 'absent', 'late']);
+        .in('attendance_status', ['present', 'absent', 'late'])
+        .range(entryFrom, entryFrom + PAGE_SIZE - 1);
 
-      for (const entry of entries ?? []) {
-        const sess = sessionMap.get(entry.class_session_id);
-        if (!sess) continue;
+      if (entryError) {
+        console.warn('Error fetching class attendance entries:', entryError.message);
+        break;
+      }
+      if (!page || page.length === 0) break;
+      for (const row of page) {
+        if (studentIdSet.has(row.student_id)) {
+          allEntries.push(row);
+        }
+      }
+      if (page.length < PAGE_SIZE) break;
+      entryFrom += PAGE_SIZE;
+    }
 
-        const regMap = studentRegisteredUnits.get(entry.student_id);
-        if (!regMap) continue;
+    for (const entry of allEntries) {
+      const sess = sessionMap.get(entry.class_session_id);
+      if (!sess) continue;
 
-        // Resolve which registered unit of the student this session maps to:
-        let matchedUnitId: string | null = null;
+      const regMap = studentRegisteredUnits.get(entry.student_id);
 
+      // Resolve which registered unit of the student this session maps to:
+      let matchedUnitId: string | null = null;
+      let matchedUnitCode = sess.unitCode;
+      let matchedUnitName = sess.unitName;
+
+      if (regMap) {
         // a) Direct unit ID match
         if (regMap.has(sess.unitId)) {
           matchedUnitId = sess.unitId;
+          matchedUnitCode = regMap.get(sess.unitId)!.unitCode;
+          matchedUnitName = regMap.get(sess.unitId)!.unitName;
         }
 
         // b) Shared offering match across programmes
@@ -256,9 +295,11 @@ export async function getDepartmentStudentAttendanceScorecard(
           if (sharedId) {
             const equivalentUnitIds = sharedIdToUnitIds.get(sharedId);
             if (equivalentUnitIds) {
-              for (const regUnitId of regMap.keys()) {
+              for (const [regUnitId, regInfo] of regMap.entries()) {
                 if (equivalentUnitIds.has(regUnitId)) {
                   matchedUnitId = regUnitId;
+                  matchedUnitCode = regInfo.unitCode;
+                  matchedUnitName = regInfo.unitName;
                   break;
                 }
               }
@@ -272,32 +313,40 @@ export async function getDepartmentStudentAttendanceScorecard(
           for (const [regUnitId, regInfo] of regMap.entries()) {
             if (normalizeUnitTitle(regInfo.unitName) === normSessTitle) {
               matchedUnitId = regUnitId;
+              matchedUnitCode = regInfo.unitCode;
+              matchedUnitName = regInfo.unitName;
               break;
             }
           }
         }
+      }
 
-        // d) Single-unit fallback
-        if (!matchedUnitId && regMap.size === 1) {
-          matchedUnitId = Array.from(regMap.keys())[0];
-        }
+      if (!matchedUnitId) {
+        matchedUnitId = sess.unitId;
+      }
 
-        if (!matchedUnitId) {
-          matchedUnitId = sess.unitId;
-        }
+      // Track under attended units for this student so attended units are always visible
+      if (!studentAttendedUnits.has(entry.student_id)) {
+        studentAttendedUnits.set(entry.student_id, new Map());
+      }
+      studentAttendedUnits.get(entry.student_id)!.set(matchedUnitId, {
+        unitId: matchedUnitId,
+        unitCode: matchedUnitCode,
+        unitName: matchedUnitName,
+      });
+      allUnitsMap.set(matchedUnitId, { id: matchedUnitId, code: matchedUnitCode, name: matchedUnitName });
 
-        const key = `${entry.student_id}:${matchedUnitId}`;
-        if (!studentUnitAttendanceStats.has(key)) {
-          studentUnitAttendanceStats.set(key, { sessions: new Set(), present: 0, absent: 0 });
-        }
-        const stat = studentUnitAttendanceStats.get(key)!;
-        stat.sessions.add(entry.class_session_id);
+      const key = `${entry.student_id}:${matchedUnitId}`;
+      if (!studentUnitAttendanceStats.has(key)) {
+        studentUnitAttendanceStats.set(key, { sessions: new Set(), present: 0, absent: 0 });
+      }
+      const stat = studentUnitAttendanceStats.get(key)!;
+      stat.sessions.add(entry.class_session_id);
 
-        if (entry.attendance_status === 'present' || entry.attendance_status === 'late') {
-          stat.present++;
-        } else if (entry.attendance_status === 'absent') {
-          stat.absent++;
-        }
+      if (entry.attendance_status === 'present' || entry.attendance_status === 'late') {
+        stat.present++;
+      } else if (entry.attendance_status === 'absent') {
+        stat.absent++;
       }
     }
   }
@@ -326,19 +375,22 @@ export async function getDepartmentStudentAttendanceScorecard(
     cohortStudentCountMap.get(cohortId)!.studentCount++;
 
     const registeredUnitsMap = studentRegisteredUnits.get(st.id) ?? new Map();
+    const attendedUnitsMap = studentAttendedUnits.get(st.id) ?? new Map();
+    // Combine registered units with attended units so any unit where attendance was marked is included
+    const combinedUnitsMap = new Map([...registeredUnitsMap.entries(), ...attendedUnitsMap.entries()]);
+
     const unitScores: StudentUnitAttendanceScore[] = [];
 
     let totalStudentCompleted = 0;
     let totalStudentPresent = 0;
     let totalStudentAbsent = 0;
 
-    for (const [uId, uInfo] of registeredUnitsMap.entries()) {
+    for (const [uId, uInfo] of combinedUnitsMap.entries()) {
       const key = `${st.id}:${uId}`;
       const stat = studentUnitAttendanceStats.get(key);
       const completedSessions = stat ? stat.sessions.size : 0;
       const present = stat ? stat.present : 0;
       const absent = stat ? stat.absent : 0;
-      const marked = present + absent;
       const rate = attendanceRate({ present, absent });
 
       totalStudentCompleted += completedSessions;

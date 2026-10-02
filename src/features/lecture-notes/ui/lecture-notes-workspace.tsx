@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { LoaderCircle } from 'lucide-react';
 import type { LectureMaterial } from '../types';
 import { MaterialList, MaterialUploadForm } from './material-upload-form';
 import { GenerationPanel } from './generation-panel';
@@ -43,11 +44,41 @@ export function LectureNotesWorkspace({
       chunk_count: m.chunkCount,
       ingested_at: m.ingestedAt,
       created_at: m.createdAt,
-    }))
+    })),
   );
 
+  const hasProcessingMaterials = materials.some((m) => !m.ingested_at);
+
+  useEffect(() => {
+    if (!hasProcessingMaterials) return;
+
+    let cancelled = false;
+
+    const refreshMaterials = async () => {
+      try {
+        const response = await fetch(`/api/lecture-notes/materials?unitId=${encodeURIComponent(unitId)}`, {
+          cache: 'no-store',
+        });
+        if (!response.ok || cancelled) return;
+
+        const json = await response.json() as { materials?: Material[] };
+        if (json.materials) setMaterials(json.materials);
+      } catch {
+        // Background status polling is intentionally silent.
+      }
+    };
+
+    void refreshMaterials();
+    const timer = window.setInterval(() => void refreshMaterials(), 4000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [hasProcessingMaterials, unitId]);
+
   function handleMaterialAdded(material: Material) {
-    setMaterials((prev) => [material, ...prev]);
+    setMaterials((prev) => [material, ...prev.filter((item) => item.id !== material.id)]);
   }
 
   function handleMaterialDeleted(id: string) {
@@ -58,24 +89,29 @@ export function LectureNotesWorkspace({
 
   return (
     <div className="mx-auto max-w-2xl space-y-5">
-      {/* Upload zone */}
       <MaterialUploadForm
         unitId={unitId}
         teachingAllocationId={teachingAllocationId}
         onMaterialAdded={handleMaterialAdded}
       />
 
-      {/* Material library — only shown when there are materials */}
       {materials.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
-            Source Library ({materials.length})
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">
+              Source library
+            </p>
+            {hasProcessingMaterials ? (
+              <span className="inline-flex items-center gap-1.5 text-[10px] text-text-muted">
+                <LoaderCircle className="size-3 animate-spin" />
+                Indexing
+              </span>
+            ) : null}
+          </div>
           <MaterialList materials={materials} onDelete={handleMaterialDeleted} />
         </div>
       )}
 
-      {/* Generation */}
       <GenerationPanel
         unitId={unitId}
         unitCode={unitCode}
@@ -83,6 +119,7 @@ export function LectureNotesWorkspace({
         teachingAllocationId={teachingAllocationId}
         topics={topics}
         materialCount={ingestedCount}
+        processingCount={materials.length - ingestedCount}
       />
     </div>
   );

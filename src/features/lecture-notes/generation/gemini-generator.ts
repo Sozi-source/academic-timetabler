@@ -7,22 +7,16 @@
 // (503 / 429) apply exponential backoff before the next attempt.
 
 import type { GeneratedSection, LectureNotesDocument } from '../types';
+import { getGeminiApiKey } from '../lib/gemini-api-key';
 
 /** Ordered model list — first available & healthy wins. */
-const MODEL_POOL = ['gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-flash-latest'] as const;
+const MODEL_POOL = ['gemini-flash-latest', 'gemini-3.5-flash', 'gemini-3.8-flash'] as const;
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 /** Status codes that indicate a transient server-side issue and should trigger backoff. */
 const TRANSIENT_STATUS_CODES = new Set([429, 503, 500, 502, 504]);
 
-function getApiKey(): string {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error('GEMINI_API_KEY is not set. Please check your .env.local configuration.');
-  }
-  return apiKey;
-}
 
 export interface GeminiGenerationInput {
   prompt: string;
@@ -41,7 +35,7 @@ export interface GeminiGenerationInput {
 export async function generateLectureNotes(
   input: GeminiGenerationInput
 ): Promise<{ document: LectureNotesDocument; promptTokens: number; outputTokens: number }> {
-  const apiKey = getApiKey();
+  const apiKey = getGeminiApiKey();
 
   async function callGemini(modelName: string) {
     const url = `${GEMINI_API_URL}/${modelName}:generateContent?key=${apiKey}`;

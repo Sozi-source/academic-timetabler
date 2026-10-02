@@ -162,7 +162,7 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
         `"${s.cohortName}"`,
         `"${s.programmeCode}"`,
         ...unitValues.map((v) => `"${v}"`),
-        s.overallScore !== null ? `"${s.overallScore.toFixed(1)}%"` : '"Unrecorded"',
+        s.overallScore !== null ? `"${s.overallScore.toFixed(1)}%"` : '"No record"',
         `"${getAttendanceStandingLabel(s.standing)}"`,
         s.totalPresent,
         s.totalCompletedSessions,
@@ -188,53 +188,53 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
       {/* Metric Cards Banner */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard
-          label="Tracked Active Students"
+          label="Active Students"
           value={String(stats.totalStudents)}
           icon={Users}
-          description="Enrolled in active department cohorts"
+          description="Current department register"
         />
 
         <MetricCard
-          label="Department Avg Attendance"
+          label="Average attendance"
           value={attendanceRateLabel(stats.averageAttendanceRate)}
           icon={BookOpen}
-          description="Average across completed unit sessions"
+          description="Completed unit sessions"
         />
 
         <MetricCard
-          label="Good Standing (≥80%)"
+          label="Good standing"
           value={String(stats.goodStandingCount)}
           icon={CheckCircle2}
-          description="Cleared for examinations"
+          description="At or above threshold"
         />
 
         <MetricCard
-          label="At Risk (<80%)"
+          label="Below 80%"
           value={String(stats.atRiskCount)}
           icon={AlertTriangle}
-          description="Below mandatory college policy"
+          description="Needs attendance review"
         />
       </div>
 
       {/* Policy Alert Banner if students are at risk */}
       {stats.atRiskCount > 0 ? (
-        <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50/80 p-3.5 text-xs text-rose-950 shadow-2xs">
-          <AlertCircle className="mt-0.5 size-4 shrink-0 text-rose-600" />
+        <div className="flex items-start gap-3 rounded-xl border border-danger-border bg-danger-surface p-3.5 text-xs text-danger shadow-2xs">
+          <AlertCircle className="mt-0.5 size-4 shrink-0 text-danger" />
           <div className="flex-1 space-y-1">
             <p className="font-bold">
-              Mandatory Minimum Attendance Policy: {COLLEGE_MINIMUM_ATTENDANCE_PERCENT}%
+              Attendance threshold · {COLLEGE_MINIMUM_ATTENDANCE_PERCENT}%
             </p>
-            <p className="text-rose-900/90 text-[11px] leading-relaxed">
-              <strong>{stats.atRiskCount} active student{stats.atRiskCount === 1 ? '' : 's'}</strong> are currently below the required {COLLEGE_MINIMUM_ATTENDANCE_PERCENT}% attendance threshold across their registered units. Filter by &ldquo;At Risk&rdquo; below to review unit-by-unit attendance breakdowns or print warning registers.
+            <p className="text-danger text-[11px] leading-relaxed">
+              <strong>{stats.atRiskCount} active student{stats.atRiskCount === 1 ? '' : 's'}</strong> are below the {COLLEGE_MINIMUM_ATTENDANCE_PERCENT}% threshold.
             </p>
           </div>
           {standingFilter !== 'at_risk' && (
             <button
               type="button"
               onClick={() => setStandingFilter('at_risk')}
-              className="shrink-0 rounded-lg bg-rose-700 px-3 py-1.5 text-xs font-semibold text-white shadow-2xs hover:bg-rose-800 transition"
+              className="shrink-0 rounded-lg bg-danger px-3 py-1.5 text-xs font-semibold text-white shadow-2xs hover:bg-danger/90 transition"
             >
-              Filter At-Risk Students
+              View below 80%
             </button>
           )}
         </div>
@@ -249,7 +249,7 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
               <Search className="absolute left-2.5 top-2.5 size-3.5 text-text-muted" />
               <input
                 type="text"
-                placeholder="Search by student name or admission no..."
+                placeholder="Search student or admission no."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="h-8.5 w-full rounded-lg border border-border bg-surface-subtle pl-8 pr-7 text-xs text-text-primary placeholder:text-text-muted focus:border-primary focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary transition"
@@ -360,11 +360,11 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
             onClick={() => setStandingFilter('all')}
             className={`h-6.5 rounded-md px-2.5 text-[11px] font-semibold transition ${
               standingFilter === 'all'
-                ? 'bg-slate-900 text-white font-bold'
-                : 'bg-surface-subtle text-text-secondary hover:bg-slate-200'
+                ? 'bg-primary text-white font-bold'
+                : 'bg-surface-subtle text-text-secondary hover:bg-surface-subtle'
             }`}
           >
-            All Students ({stats.totalStudents})
+            All ({stats.totalStudents})
           </button>
 
           <button
@@ -372,11 +372,11 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
             onClick={() => setStandingFilter('at_risk')}
             className={`inline-flex h-6.5 items-center gap-1 rounded-md px-2.5 text-[11px] font-semibold transition ${
               standingFilter === 'at_risk'
-                ? 'bg-rose-700 text-white font-bold'
-                : 'bg-rose-50 text-rose-800 border border-rose-200 hover:bg-rose-100'
+                ? 'bg-danger text-white font-bold'
+                : 'bg-danger-surface text-danger border border-danger-border hover:bg-danger-surface'
             }`}
           >
-            At Risk &lt;80% ({stats.atRiskCount})
+            Below 80% ({stats.atRiskCount})
           </button>
 
           <button
@@ -384,11 +384,11 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
             onClick={() => setStandingFilter('borderline')}
             className={`inline-flex h-6.5 items-center gap-1 rounded-md px-2.5 text-[11px] font-semibold transition ${
               standingFilter === 'borderline'
-                ? 'bg-amber-600 text-white font-bold'
-                : 'bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100'
+                ? 'bg-warning text-white font-bold'
+                : 'bg-warning-surface text-warning border border-warning-border hover:bg-warning-surface'
             }`}
           >
-            Borderline 80–84% ({stats.borderlineCount})
+            80–84% ({stats.borderlineCount})
           </button>
 
           <button
@@ -396,11 +396,11 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
             onClick={() => setStandingFilter('good')}
             className={`inline-flex h-6.5 items-center gap-1 rounded-md px-2.5 text-[11px] font-semibold transition ${
               standingFilter === 'good'
-                ? 'bg-emerald-700 text-white font-bold'
-                : 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
+                ? 'bg-success text-white font-bold'
+                : 'bg-success-surface text-success border border-success-border hover:bg-success-surface'
             }`}
           >
-            Good Standing ≥85% ({stats.goodStandingCount})
+            ≥85% ({stats.goodStandingCount})
           </button>
 
           <button
@@ -408,16 +408,16 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
             onClick={() => setStandingFilter('unrecorded')}
             className={`inline-flex h-6.5 items-center gap-1 rounded-md px-2.5 text-[11px] font-semibold transition ${
               standingFilter === 'unrecorded'
-                ? 'bg-slate-700 text-white font-bold'
-                : 'bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200'
+                ? 'bg-primary text-white font-bold'
+                : 'bg-surface-subtle text-text-secondary border border-border hover:bg-surface-subtle'
             }`}
           >
-            Unrecorded ({stats.unrecordedCount})
+            No record ({stats.unrecordedCount})
           </button>
 
           {filteredStudents.length !== stats.totalStudents && (
             <span className="ml-auto text-[11px] text-text-muted italic">
-              Showing {filteredStudents.length} of {stats.totalStudents} students
+              {filteredStudents.length} of {stats.totalStudents}
             </span>
           )}
         </div>
@@ -460,7 +460,7 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
                   ))}
 
                   {/* Pinned Overall Score & Standing Column */}
-                  <th className="px-4 py-3 text-right whitespace-nowrap bg-emerald-50/50 text-emerald-950 font-extrabold sticky right-0 z-20 border-l border-border">
+                  <th className="px-4 py-3 text-right whitespace-nowrap bg-success-surface/50 text-success font-extrabold sticky right-0 z-20 border-l border-border">
                     Overall Score (%)
                   </th>
                 </tr>
@@ -478,8 +478,8 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
                     <tr
                       key={student.studentId}
                       onClick={() => setInspectedStudent(student)}
-                      className={`cursor-pointer transition-colors hover:bg-slate-50/80 ${
-                        isAtRisk ? 'bg-rose-50/25' : ''
+                      className={`cursor-pointer transition-colors hover:bg-surface-subtle ${
+                        isAtRisk ? 'bg-danger-surface/50' : ''
                       }`}
                     >
                       {/* Admission No (sticky left) */}
@@ -492,16 +492,16 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
                         <div className="flex items-center gap-1.5">
                           <span>{student.fullName}</span>
                           {isAtRisk ? (
-                            <span className="inline-block size-2 rounded-full bg-rose-500" title="At Risk (< 80%)" />
+                            <span className="inline-block size-2 rounded-full bg-danger" title="At Risk (< 80%)" />
                           ) : isGood ? (
-                            <span className="inline-block size-2 rounded-full bg-emerald-500" title="Good Standing" />
+                            <span className="inline-block size-2 rounded-full bg-success" title="Good Standing" />
                           ) : null}
                         </div>
                       </td>
 
                       {/* Cohort */}
                       <td className="px-3 py-2.5 text-text-secondary whitespace-nowrap text-[10.5px] border-r border-border">
-                        <span className="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 font-medium text-slate-700">
+                        <span className="inline-flex items-center gap-1 rounded bg-surface-subtle px-1.5 py-0.5 font-medium text-text-secondary">
                           {student.cohortName}
                         </span>
                       </td>
@@ -521,7 +521,7 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
                         if (unitScore.attendanceRate === null) {
                           return (
                             <td key={col.id} className="px-2 py-2 text-center border-r border-border" title="No completed sessions recorded">
-                              <span className="inline-block rounded bg-slate-100 px-1.5 py-0.5 text-[9.5px] font-medium text-slate-500">
+                              <span className="inline-block rounded bg-surface-subtle px-1.5 py-0.5 text-[9.5px] font-medium text-text-muted">
                                 0 ses
                               </span>
                             </td>
@@ -537,10 +537,10 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
                             key={col.id}
                             className={`px-2 py-2 text-center border-r border-border font-mono text-[10.5px] font-bold ${
                               isUnitAtRisk
-                                ? 'bg-rose-50/60 text-rose-700'
+                                ? 'bg-danger-surface/60 text-danger'
                                 : isUnitGood
-                                  ? 'bg-emerald-50/30 text-emerald-800'
-                                  : 'text-amber-800'
+                                  ? 'bg-success-surface/30 text-success'
+                                  : 'text-warning'
                             }`}
                             title={`${unitScore.unitCode}: ${unitScore.presentCount}/${unitScore.presentCount + unitScore.absentCount} sessions attended (${rate.toFixed(1)}%)`}
                           >
@@ -557,11 +557,11 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
                           <span
                             className={`font-mono text-xs font-black ${
                               isAtRisk
-                                ? 'text-rose-700'
+                                ? 'text-danger'
                                 : isGood
-                                  ? 'text-emerald-800'
+                                  ? 'text-success'
                                   : student.overallScore !== null
-                                    ? 'text-amber-700'
+                                    ? 'text-warning'
                                     : 'text-text-muted'
                             }`}
                           >
@@ -597,7 +597,7 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
                 key={student.studentId}
                 onClick={() => setInspectedStudent(student)}
                 className={`cursor-pointer rounded-2xl border bg-white p-4.5 shadow-2xs transition hover:shadow-xs hover:border-primary/40 ${
-                  isAtRisk ? 'border-rose-200 bg-rose-50/15' : 'border-border'
+                  isAtRisk ? 'border-danger-border bg-danger-surface/15' : 'border-border'
                 }`}
               >
                 <div className="flex items-start justify-between gap-3 border-b border-border pb-3">
@@ -615,7 +615,7 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
                       {student.programmeCode && (
                         <>
                           <span>•</span>
-                          <span className="rounded bg-slate-100 px-1 py-0.2 text-[10px] font-bold text-slate-700">
+                          <span className="rounded bg-surface-subtle px-1 py-0.2 text-[10px] font-bold text-text-secondary">
                             {student.programmeCode}
                           </span>
                         </>
@@ -627,7 +627,7 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
                     <div className="text-[10px] uppercase font-bold text-text-muted tracking-wider">Overall Attendance</div>
                     <div
                       className={`font-mono text-lg font-black ${
-                        isAtRisk ? 'text-rose-700' : 'text-emerald-800'
+                        isAtRisk ? 'text-danger' : 'text-success'
                       }`}
                     >
                       {student.overallScore !== null ? `${student.overallScore.toFixed(1)}%` : '—'}
@@ -656,7 +656,7 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
                             key={unit.unitId}
                             className={`flex items-center justify-between rounded-xl border p-2 text-xs transition ${
                               isUnitAtRisk
-                                ? 'border-rose-200 bg-rose-50/70 text-rose-950'
+                                ? 'border-danger-border bg-danger-surface/70 text-danger'
                                 : 'border-border bg-surface-subtle/60'
                             }`}
                           >
@@ -671,9 +671,9 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
                               <span
                                 className={`font-mono font-bold text-xs ${
                                   isUnitAtRisk
-                                    ? 'text-rose-700'
+                                    ? 'text-danger'
                                     : unit.attendanceRate !== null
-                                      ? 'text-emerald-800'
+                                      ? 'text-success'
                                       : 'text-text-muted'
                                 }`}
                               >
@@ -755,7 +755,7 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
                   <div
                     key={u.unitId}
                     className={`flex items-center justify-between rounded-xl border p-2.5 text-xs ${
-                      isUnitAtRisk ? 'border-rose-200 bg-rose-50/60' : 'border-border bg-white'
+                      isUnitAtRisk ? 'border-danger-border bg-danger-surface/60' : 'border-border bg-white'
                     }`}
                   >
                     <div>

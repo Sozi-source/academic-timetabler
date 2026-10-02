@@ -1,4 +1,56 @@
+### 2026-10-02: Fix GEMINI_API_KEY Dev Server Cache & Align Active Gemini Models
+
+**Summary:**
+Diagnosed and resolved the root cause of the `GEMINI_API_KEY is not set` banner when generating lecture notes on `/lecture-notes/[unitId]`:
+1. **Root Cause Analysis:**
+   - Next.js reads `.env.local` strictly when the server boots. If `npm run dev` was started in the terminal before `GEMINI_API_KEY` was added to `.env.local`, the running Node.js process did not have `process.env.GEMINI_API_KEY` populated, causing runtime errors when hitting `/api/lecture-notes/generate`.
+   - In addition, empirical testing revealed that `gemini-3.8-flash` frequently experiences transient 503 high demand spikes, while `gemini-flash-latest` and `gemini-3.5-flash` succeed immediately.
+   - For embeddings, `text-embedding-004` and `embedding-001` return 404 in this API version (`v1beta`); the supported active model is `gemini-embedding-001` with explicit 768-dimension alignment to match Supabase pgvector `vector(768)`.
+2. **Self-Healing Key Resolver Created:**
+   - Created `src/features/lecture-notes/lib/gemini-api-key.ts`:
+     - Checks `process.env.GEMINI_API_KEY`, `process.env.GOOGLE_API_KEY`, and `process.env.GOOGLE_AI_API_KEY`.
+     - If unpopulated in `process.env`, dynamically parses `.env.local` / `.env` from disk at runtime and caches it into `process.env.GEMINI_API_KEY`.
+     - Guarantees immediate zero-restart resolution even if the dev server was started before `.env.local` was updated.
+3. **Generation & Embedding Model Pool Updates:**
+   - Updated `src/features/lecture-notes/generation/gemini-generator.ts` to use `getGeminiApiKey()` and prioritized `['gemini-flash-latest', 'gemini-3.5-flash', 'gemini-3.8-flash']`.
+   - Updated `src/features/lecture-notes/embeddings/gemini-embeddings.ts` to use `getGeminiApiKey()` and set active embedding models to `['gemini-embedding-001', 'gemini-embedding-2']`.
+4. **Verification & Tests:**
+   - Added unit test suite `src/tests/lecture-notes-api-key.test.ts` (3/3 tests passed).
+
+### 2026-10-02: Fix Attendance Session Recurring Date Reuse Regression ("Auto-Submitted" Attendance)
+
+
+**Summary:**
+Diagnosed and resolved the root cause of trainers reporting that today's class attendance (Friday 2026-10-02) appeared as already submitted/completed:
+1. **Root Cause Diagnosis:**
+   - In migration `20261001213000_exclude_suspended_deferred_attachment_from_attendance.sql`, the PostgreSQL function `open_class_attendance_session` was rewritten.
+   - In step 6 of the function, the session lookup query contained:
+     ```sql
+     where (
+       session.scheduled_session_id = target_scheduled_session_id
+       or (
+         session.teaching_allocation_id = schedule_row.teaching_allocation_id
+         and session.session_date = target_session_date
+         and session.starts_at = schedule_row.starts_at
+       )
+     )
+     ```
+   - The first branch matching by `scheduled_session_id` omitted `and session.session_date = target_session_date` (a regression of `20260922173000_fix_attendance_session_date_reuse.sql`).
+   - Because `scheduled_session_id` identifies a recurring weekly timetable slot, when trainers opened attendance today (2026-10-02), the query matched and returned the completed class session from the previous week (2026-09-25) and touched its `updated_at` timestamp.
+   - When trainers clicked "Take attendance", the system redirected them to the historical session which was already marked `completed`, disabling attendance taking and making it appear as if the system auto-submitted on their behalf. No session for 2026-10-02 had been created.
+2. **Database Migration Applied:**
+   - Created `supabase/migrations/20261002170000_fix_open_class_attendance_session_date_matching.sql`.
+   - Strictly enforces `session.session_date = target_session_date` on both the `scheduled_session_id` and `teaching_allocation_id` branches.
+   - Uses `pg_advisory_xact_lock` to prevent race conditions during concurrent session creation.
+   - Preserves all filters excluding suspended, deferred, and on-attachment students.
+3. **Application-Level Defense-in-Depth Guardrail:**
+   - Updated `src/app/api/staff/attendance/sessions/route.ts`: Added validation verifying that the session returned by `open_class_attendance_session` matches `payload.sessionDate`. If a mismatched historical date is detected, the endpoint drops the returned session ID and falls back to atomic direct session creation for `payload.sessionDate` with `status: 'open'`, excluding cancelled sessions and seeding active enrolled students.
+4. **Verification & Testing:**
+   - Added unit test in `src/tests/attendance-session-date-regression.test.ts` verifying that historical sessions with identical `scheduled_session_id` on prior dates are never matched when opening a new date.
+   - Vitest: 126/126 test files passed, 652/652 tests green (`npm test`).
+
 ### 2026-10-02: Fix PDF Text Extraction Crash, Storage Bucket Auto-Creation & Embedding Hardening
+
 
 **Summary:**
 Resolved two runtime errors encountered when trainers upload lecture materials on `/lecture-notes/[unitId]`:

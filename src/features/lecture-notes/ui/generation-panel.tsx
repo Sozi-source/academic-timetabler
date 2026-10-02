@@ -35,6 +35,7 @@ interface GenerationPanelProps {
   teachingAllocationId?: string | null;
   topics: string[];
   materialCount: number;
+  processingCount?: number;
 }
 
 export function GenerationPanel({
@@ -44,6 +45,7 @@ export function GenerationPanel({
   teachingAllocationId,
   topics,
   materialCount,
+  processingCount = 0,
 }: GenerationPanelProps) {
   const [customTopic, setCustomTopic] = useState('');
   const [selectedTopic, setSelectedTopic] = useState(topics[0] ?? '');
@@ -150,18 +152,22 @@ export function GenerationPanel({
 
         <Button
           onClick={handleGenerate}
-          disabled={loading || !effectiveTopic.trim()}
+          disabled={loading || !effectiveTopic.trim() || processingCount > 0}
           leadingIcon={loading ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
           className="w-full"
         >
           {loading ? 'Generating notes…' : 'Generate notes'}
         </Button>
 
-        {loading && (
-          <p className="text-xs text-text-muted text-center">
-            Reading all materials and synthesizing comprehensive notes. This may take 20–40 seconds…
+        {processingCount > 0 ? (
+          <p className="text-[11px] text-text-muted text-center">
+            {processingCount} source {processingCount === 1 ? 'file is' : 'files are'} still being indexed.
           </p>
-        )}
+        ) : loading ? (
+          <p className="text-[11px] text-text-muted text-center">
+            Synthesizing notes from the indexed sources…
+          </p>
+        ) : null}
       </div>
 
       {/* Error */}

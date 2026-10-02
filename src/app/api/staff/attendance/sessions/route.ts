@@ -222,8 +222,24 @@ export async function POST(
 
   let classSessionId = data;
 
-  if (error) {
-    // If RPC fails (e.g. date outside period or day mismatch), use direct class_sessions insert / retrieval fallback with admin client
+  // Strict date verification: Ensure RPC returned a session matching payload.sessionDate
+  if (classSessionId && !error) {
+    const { data: verifiedCs } = await (adminDb as any)
+      .from('class_sessions')
+      .select('id, session_date')
+      .eq('id', classSessionId)
+      .maybeSingle();
+
+    if (verifiedCs && verifiedCs.session_date !== payload.sessionDate) {
+      console.warn(
+        `[attendance/sessions] RPC returned session ${classSessionId} with date ${verifiedCs.session_date}, but requested date is ${payload.sessionDate}. Forcing date-specific session creation.`
+      );
+      classSessionId = null;
+    }
+  }
+
+  if (error || !classSessionId) {
+    // If RPC fails (e.g. date outside period or day mismatch) or returned a mismatched date, use direct class_sessions insert / retrieval fallback with admin client
     try {
       let existingCs: any = null;
       const { data: csBySched } = await (adminDb as any)
@@ -231,6 +247,7 @@ export async function POST(
         .select('id, academic_period_id, unit_id, cohort_id, teaching_allocation_id')
         .eq('scheduled_session_id', payload.scheduledSessionId)
         .eq('session_date', payload.sessionDate)
+        .neq('status', 'cancelled')
         .maybeSingle();
 
       existingCs = csBySched;
@@ -244,6 +261,7 @@ export async function POST(
             .select('id, academic_period_id, unit_id, cohort_id, teaching_allocation_id')
             .eq('teaching_allocation_id', allocIdToCheck)
             .eq('session_date', payload.sessionDate)
+            .neq('status', 'cancelled')
             .maybeSingle();
           existingCs = csByAlloc;
         }

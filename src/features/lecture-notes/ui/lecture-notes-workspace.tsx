@@ -54,31 +54,35 @@ export function LectureNotesWorkspace({
     setMaterials((prev) => prev.filter((m) => m.id !== id));
   }
 
+  const ingestedCount = materials.filter((m) => m.ingested_at != null).length;
+
   return (
-    <div className="grid gap-6 lg:grid-cols-[400px_1fr]">
-      {/* Left: Materials panel */}
-      <div className="space-y-4">
-        <MaterialUploadForm
-          unitId={unitId}
-          teachingAllocationId={teachingAllocationId}
-          onMaterialAdded={handleMaterialAdded}
-        />
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">
+    <div className="mx-auto max-w-2xl space-y-5">
+      {/* Upload zone */}
+      <MaterialUploadForm
+        unitId={unitId}
+        teachingAllocationId={teachingAllocationId}
+        onMaterialAdded={handleMaterialAdded}
+      />
+
+      {/* Material library — only shown when there are materials */}
+      {materials.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
             Source Library ({materials.length})
           </p>
           <MaterialList materials={materials} onDelete={handleMaterialDeleted} />
         </div>
-      </div>
+      )}
 
-      {/* Right: Generation panel */}
+      {/* Generation */}
       <GenerationPanel
         unitId={unitId}
         unitCode={unitCode}
         unitName={unitName}
         teachingAllocationId={teachingAllocationId}
         topics={topics}
-        materialCount={materials.filter((m) => m.ingested_at != null).length}
+        materialCount={ingestedCount}
       />
     </div>
   );

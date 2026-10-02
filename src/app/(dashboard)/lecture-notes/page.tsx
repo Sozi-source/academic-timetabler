@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { BookOpen, FileText, Layers, Upload } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -45,44 +45,24 @@ export default async function LectureNotesPage() {
             <Link
               key={unit.allocationId}
               href={`/lecture-notes/${unit.unitId}`}
-              className="group flex flex-col gap-3 rounded-xl border border-border bg-surface p-4 shadow-xs transition hover:border-primary/40 hover:bg-surface-subtle hover:shadow-sm"
+              className="group flex items-center gap-4 rounded-xl border border-border bg-surface p-4 shadow-xs transition hover:border-primary/40 hover:bg-surface-subtle hover:shadow-sm"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
-                  <BookOpen className="size-5" aria-hidden="true" />
-                </div>
-                {unit.jobCount > 0 && (
-                  <Badge variant="success" dot>
-                    {unit.jobCount} generated
-                  </Badge>
-                )}
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+                <BookOpen className="size-5" aria-hidden="true" />
               </div>
 
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-text-primary group-hover:text-primary">
-                  {unit.unitCode} — {unit.unitName}
+                  {unit.unitCode}
                 </p>
-                <p className="mt-0.5 truncate text-xs text-text-muted">
-                  {unit.cohortName} · {unit.academicPeriodName}
-                </p>
+                <p className="truncate text-xs text-text-secondary">{unit.unitName}</p>
               </div>
 
-              <div className="flex items-center gap-3 border-t border-border-soft pt-3 text-xs text-text-muted">
-                <span className="flex items-center gap-1">
-                  <Upload className="size-3.5" aria-hidden="true" />
-                  {unit.materialCount} material{unit.materialCount === 1 ? '' : 's'}
-                </span>
-                <span className="flex items-center gap-1">
-                  <FileText className="size-3.5" aria-hidden="true" />
-                  {unit.jobCount} note{unit.jobCount === 1 ? '' : 's'}
-                </span>
-                {unit.materialCount === 0 && (
-                  <span className="ml-auto flex items-center gap-1 font-medium text-warning">
-                    <Layers className="size-3.5" aria-hidden="true" />
-                    Add materials
-                  </span>
-                )}
-              </div>
+              {unit.jobCount > 0 && (
+                <Badge variant="success" dot className="shrink-0">
+                  {unit.jobCount}
+                </Badge>
+              )}
             </Link>
           ))}
         </div>

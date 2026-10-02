@@ -3,12 +3,18 @@
 // ============================================================
 // Generates structured lecture notes using Google Gemini.
 // Parses markdown responses into standard sections.
+// Retry strategy: try each model in order; on transient errors
+// (503 / 429) apply exponential backoff before the next attempt.
 
 import type { GeneratedSection, LectureNotesDocument } from '../types';
 
-const PRIMARY_MODEL = 'gemini-3.8-flash';
-const FALLBACK_MODEL = 'gemini-flash-latest';
+/** Ordered model list — first available & healthy wins. */
+const MODEL_POOL = ['gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-flash-latest'] as const;
+
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
+
+/** Status codes that indicate a transient server-side issue and should trigger backoff. */
+const TRANSIENT_STATUS_CODES = new Set([429, 503, 500, 502, 504]);
 
 function getApiKey(): string {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -58,7 +64,9 @@ export async function generateLectureNotes(
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Gemini API error (${modelName} - ${response.status}): ${errorText}`);
+      const err = new Error(`Gemini API error (${modelName} - ${response.status}): ${errorText}`);
+      Object.assign(err, { isTransient: TRANSIENT_STATUS_CODES.has(response.status) });
+      throw err;
     }
 
     return (await response.json()) as {
@@ -74,12 +82,38 @@ export async function generateLectureNotes(
     };
   }
 
-  let resultData;
-  try {
-    resultData = await callGemini(PRIMARY_MODEL);
-  } catch (primaryErr) {
-    console.warn(`[gemini-generator] Primary model ${PRIMARY_MODEL} failed, trying fallback ${FALLBACK_MODEL}:`, primaryErr);
-    resultData = await callGemini(FALLBACK_MODEL);
+  let resultData: {
+    candidates?: Array<{
+      content?: {
+        parts?: Array<{ text?: string }>;
+      };
+    }>;
+    usageMetadata?: {
+      promptTokenCount?: number;
+      candidatesTokenCount?: number;
+    };
+  } | null = null;
+
+  let lastError: Error | null = null;
+
+  for (let i = 0; i < MODEL_POOL.length; i++) {
+    const model = MODEL_POOL[i];
+    try {
+      resultData = await callGemini(model);
+      break;
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      console.warn(`[gemini-generator] Model ${model} failed (attempt ${i + 1}/${MODEL_POOL.length}):`, lastError.message);
+      if (i < MODEL_POOL.length - 1) {
+        const isTransient = (err as { isTransient?: boolean })?.isTransient ?? true;
+        const delayMs = isTransient ? 1500 * (i + 1) : 400;
+        await new Promise((res) => setTimeout(res, delayMs));
+      }
+    }
+  }
+
+  if (!resultData) {
+    throw lastError ?? new Error('All Gemini models failed to generate content. Please try again.');
   }
 
   const candidate = resultData.candidates?.[0];

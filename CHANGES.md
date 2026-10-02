@@ -1,3 +1,31 @@
+### 2026-10-02: Simplified Lecture Notes UI, Multi-File Ingestion & High-Demand Model Pool Hardening
+
+**Summary:**
+Streamlined the Lecture Notes Generator UI and hardened generation resilience based on direct trainer feedback:
+1. **Multi-File Material Upload:**
+   - Updated `src/features/lecture-notes/ui/material-upload-form.tsx` with multi-file selection support (`multiple` file input).
+   - Trainers can select and queue multiple PDFs and DOCX files at once. All files are ingested, chunked, and embedded sequentially with dynamic progress feedback (`Uploading X of Y…`).
+   - Deduplicates picked files by filename and allows clearing individual files before starting upload.
+2. **Simplified, Distraction-Free Lecture Notes Workspace:**
+   - Overhauled `src/features/lecture-notes/ui/lecture-notes-workspace.tsx` into a centered, unified single-column flow:
+     - Multi-file source material upload at the top.
+     - Clean source library showing ingested files and indexed chunks.
+     - Direct topic selection and generation panel below.
+   - Refactored `src/features/lecture-notes/ui/generation-panel.tsx` to strip unnecessary configuration widgets:
+     - Removed "Scope" (session vs unit) and "Week number" selectors; defaults automatically to comprehensive session coverage.
+     - Simplified topic selection to just outline pick / custom topic input.
+     - Streamlined preview and download controls (quick Word / PDF action buttons).
+3. **Minimalist Lecture Notes Unit Cards:**
+   - Updated `src/app/(dashboard)/lecture-notes/page.tsx` to eliminate visual noise:
+     - Removed cohort names, academic periods, footer stats (`X materials`, `Y notes`), and the "Add materials" warning.
+     - Cards now feature a clean layout with unit icon, unit code, unit name, and a subtle generated notes count badge.
+4. **Resilient AI Model Pool & Exponential Backoff on 503 High Demand:**
+   - Upgraded `src/features/lecture-notes/generation/gemini-generator.ts` with a resilient multi-model pool (`gemini-3.8-flash` -> `gemini-3.5-flash` -> `gemini-flash-latest`).
+   - Added automatic exponential backoff on transient errors (`503 Service Unavailable / High Demand`, `429 Too Many Requests`, `500`, `502`, `504`) before falling back to the next model in the pool, ensuring seamless self-healing without user-facing failures.
+5. **Verification & Testing:**
+   - `npm run check`: TypeScript typecheck, ESLint, and Next.js production build passed with 0 errors across 127 routes.
+   - `npm test`: 126/126 test files passed, 651/651 tests green.
+
 ### 2026-10-02: Lecture Notes Generator Tactical Overhaul, Dual-Grounding & PDF Parser Hardening
 
 **Summary:**

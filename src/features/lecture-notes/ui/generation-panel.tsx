@@ -8,11 +8,9 @@ import {
   FileText,
   Loader2,
   Sparkles,
-  Zap,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
-import type { GenerationGranularity } from '../types';
 
 interface GeneratedSection {
   heading: string;
@@ -22,13 +20,9 @@ interface GeneratedSection {
 interface GenerationResult {
   jobId: string;
   topic: string;
-  granularity: GenerationGranularity;
-  sessionWeek: number | null;
   sections: GeneratedSection[];
   sourceMaterials: string[];
   chunkCount: number;
-  promptTokens: number;
-  outputTokens: number;
   docxStoragePath: string | null;
   pdfStoragePath: string | null;
   generatedAt: string;
@@ -51,8 +45,6 @@ export function GenerationPanel({
   topics,
   materialCount,
 }: GenerationPanelProps) {
-  const [granularity, setGranularity] = useState<GenerationGranularity>('session');
-  const [sessionWeek, setSessionWeek] = useState<number>(1);
   const [customTopic, setCustomTopic] = useState('');
   const [selectedTopic, setSelectedTopic] = useState(topics[0] ?? '');
   const [useCustomTopic, setUseCustomTopic] = useState(topics.length === 0);
@@ -65,10 +57,9 @@ export function GenerationPanel({
 
   async function handleGenerate() {
     if (!effectiveTopic.trim()) {
-      setError('Please specify a topic to generate notes for.');
+      setError('Please select or type a topic to generate notes for.');
       return;
     }
-
     setLoading(true);
     setError(null);
     setResult(null);
@@ -80,18 +71,14 @@ export function GenerationPanel({
         body: JSON.stringify({
           unitId,
           teachingAllocationId: teachingAllocationId ?? null,
-          granularity,
-          sessionWeek: granularity === 'session' ? sessionWeek : null,
+          granularity: 'session',
+          sessionWeek: null,
           topic: effectiveTopic.trim(),
         }),
       });
 
       const json = await response.json() as GenerationResult & { error?: string };
-
-      if (!response.ok || json.error) {
-        throw new Error(json.error ?? 'Generation failed.');
-      }
-
+      if (!response.ok || json.error) throw new Error(json.error ?? 'Generation failed.');
       setResult(json);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Generation failed. Please try again.');
@@ -106,12 +93,7 @@ export function GenerationPanel({
     try {
       const response = await fetch(`/api/lecture-notes/download?jobId=${result.jobId}&format=${format}`);
       const json = await response.json() as { downloadUrl?: string; filename?: string; error?: string };
-
-      if (!response.ok || !json.downloadUrl) {
-        throw new Error(json.error ?? 'Download failed.');
-      }
-
-      // Open signed URL in new tab to trigger browser download
+      if (!response.ok || !json.downloadUrl) throw new Error(json.error ?? 'Download failed.');
       const a = document.createElement('a');
       a.href = json.downloadUrl;
       a.download = json.filename ?? `lecture-notes.${format}`;
@@ -126,100 +108,58 @@ export function GenerationPanel({
 
   return (
     <div className="space-y-4">
-      {/* Configuration */}
-      <div className="rounded-xl border border-border bg-surface p-4 space-y-4">
-        <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">Generate Notes</p>
-
-        {/* Granularity */}
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary">Scope</label>
-            <Select
-              value={granularity}
-              onChange={(e) => setGranularity(e.target.value as GenerationGranularity)}
+      {/* Topic selection */}
+      <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+            Topic
+          </label>
+          {topics.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setUseCustomTopic(!useCustomTopic)}
+              className="text-xs font-medium text-primary hover:underline"
             >
-              <option value="session">Single session (by week)</option>
-              <option value="unit">Full unit / entire course</option>
-            </Select>
-          </div>
-
-          {granularity === 'session' && (
-            <div>
-              <label className="mb-1 block text-xs font-medium text-text-secondary">Week number</label>
-              <input
-                type="number"
-                min={1}
-                max={52}
-                value={sessionWeek}
-                onChange={(e) => setSessionWeek(Number(e.target.value))}
-                className="h-9 w-full rounded-lg border border-border-strong bg-surface px-3 text-sm text-text-primary outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
+              {useCustomTopic ? '← Pick from outline' : 'Type custom topic'}
+            </button>
           )}
         </div>
 
-        {/* Topic */}
-        <div>
-          <div className="mb-1 flex items-center justify-between">
-            <label className="text-xs font-medium text-text-secondary">
-              Topic <span className="text-danger">*</span>
-            </label>
-            {topics.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setUseCustomTopic(!useCustomTopic)}
-                className="text-xs font-medium text-primary hover:underline"
-              >
-                {useCustomTopic ? '← Pick from outline' : 'Type custom topic'}
-              </button>
-            )}
-          </div>
+        {useCustomTopic || topics.length === 0 ? (
+          <input
+            type="text"
+            value={customTopic}
+            onChange={(e) => setCustomTopic(e.target.value)}
+            placeholder="e.g. Macronutrient requirements in clinical nutrition"
+            className="h-9 w-full rounded-lg border border-border-strong bg-surface px-3 text-sm text-text-primary outline-none transition placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
+          />
+        ) : (
+          <Select value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)}>
+            {topics.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </Select>
+        )}
 
-          {useCustomTopic || topics.length === 0 ? (
-            <input
-              type="text"
-              value={customTopic}
-              onChange={(e) => setCustomTopic(e.target.value)}
-              placeholder="e.g. Macronutrient requirements in clinical nutrition"
-              className="h-9 w-full rounded-lg border border-border-strong bg-surface px-3 text-[12px] text-text-primary outline-none transition placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/20 xl:text-sm"
-            />
-          ) : (
-            <Select value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)}>
-              {topics.map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </Select>
-          )}
-        </div>
-
-        {/* Grounding mode indicator */}
-        <div className="flex items-start gap-2.5 rounded-lg border border-border bg-surface-subtle p-3 text-xs">
-          <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" />
-          <div className="space-y-0.5 text-text-secondary">
-            {materialCount > 0 ? (
-              <p>
-                <strong className="font-semibold text-text-primary">Dual-Grounding Active:</strong> Grounded in the approved TVET CDACC Course Outline and enriched with {materialCount} uploaded document{materialCount === 1 ? '' : 's'}.
-              </p>
-            ) : (
-              <p>
-                <strong className="font-semibold text-text-primary">Curriculum Grounded:</strong> Grounded directly in the approved TVET CDACC Course Outline and Specific Learning Outcomes. You can optionally upload textbooks or notes to enrich coverage.
-              </p>
-            )}
-          </div>
-        </div>
+        {/* Material context hint */}
+        {materialCount > 0 && (
+          <p className="text-[11px] text-text-muted">
+            <span className="font-medium text-primary">{materialCount}</span> source file{materialCount === 1 ? '' : 's'} will be read and unified into the notes.
+          </p>
+        )}
 
         <Button
           onClick={handleGenerate}
           disabled={loading || !effectiveTopic.trim()}
           leadingIcon={loading ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
-          className="w-full sm:w-auto"
+          className="w-full"
         >
-          {loading ? 'Generating…' : 'Generate lecture notes'}
+          {loading ? 'Generating notes…' : 'Generate notes'}
         </Button>
 
         {loading && (
-          <p className="text-xs text-text-muted">
-            Synthesizing approved curriculum outlines, learning outcomes, and source materials. This typically takes 15–35 seconds.
+          <p className="text-xs text-text-muted text-center">
+            Reading all materials and synthesizing comprehensive notes. This may take 20–40 seconds…
           </p>
         )}
       </div>
@@ -234,14 +174,14 @@ export function GenerationPanel({
 
       {/* Result */}
       {result && (
-        <div className="space-y-4">
-          {/* Success header */}
-          <div className="flex flex-wrap items-start justify-between gap-3 rounded-xl border border-success-border bg-success-surface px-4 py-3">
+        <div className="space-y-3">
+          {/* Download bar */}
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-success-border bg-success-surface px-4 py-3">
             <div className="flex items-center gap-2 text-sm font-semibold text-success">
               <CheckCircle2 className="size-4" />
-              Notes generated — {result.chunkCount} source chunk{result.chunkCount === 1 ? '' : 's'} used
+              Notes ready
             </div>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex gap-2">
               <Button
                 size="sm"
                 variant="outline"
@@ -249,7 +189,7 @@ export function GenerationPanel({
                 disabled={downloadingFormat === 'docx' || !result.docxStoragePath}
                 leadingIcon={downloadingFormat === 'docx' ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
               >
-                Download DOCX
+                Word
               </Button>
               <Button
                 size="sm"
@@ -258,55 +198,46 @@ export function GenerationPanel({
                 disabled={downloadingFormat === 'pdf' || !result.pdfStoragePath}
                 leadingIcon={downloadingFormat === 'pdf' ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
               >
-                Download PDF
+                PDF
               </Button>
             </div>
           </div>
 
           {/* Source materials used */}
           {result.sourceMaterials.length > 0 && (
-            <div className="rounded-xl border border-border bg-surface px-4 py-3">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">
-                Source materials used
-              </p>
-              <ul className="space-y-1">
-                {result.sourceMaterials.map((title) => (
-                  <li key={title} className="flex items-center gap-2 text-xs text-text-secondary">
-                    <FileText className="size-3.5 shrink-0 text-primary" />
-                    {title}
-                  </li>
-                ))}
-              </ul>
+            <div className="flex flex-wrap gap-1.5 rounded-lg border border-border bg-surface-subtle px-3 py-2">
+              {result.sourceMaterials.map((title) => (
+                <span
+                  key={title}
+                  className="flex items-center gap-1 rounded-md bg-surface px-2 py-1 text-[11px] text-text-secondary border border-border"
+                >
+                  <FileText className="size-3 shrink-0 text-primary" />
+                  {title}
+                </span>
+              ))}
             </div>
           )}
 
           {/* Notes preview */}
           <div className="rounded-xl border border-border bg-surface overflow-hidden">
-            <div className="border-b border-border bg-surface-subtle px-4 py-2.5 flex items-center gap-2">
-              <Zap className="size-4 text-primary" />
-              <span className="text-xs font-semibold text-text-primary">Preview</span>
-              <span className="ml-auto text-[10px] text-text-muted">
-                {result.promptTokens.toLocaleString()} prompt · {result.outputTokens.toLocaleString()} output tokens
-              </span>
+            <div className="border-b border-border bg-surface-subtle px-4 py-2 flex items-center gap-2">
+              <Sparkles className="size-3.5 text-primary" />
+              <span className="text-xs font-semibold text-text-primary">Preview — {result.topic}</span>
             </div>
-            <div className="divide-y divide-border-soft">
+            <div className="divide-y divide-border-soft max-h-[60vh] overflow-y-auto">
               {result.sections.map((section) => (
                 <div key={section.heading} className="px-4 py-4">
                   <h3 className="mb-2 text-sm font-bold text-text-primary">{section.heading}</h3>
-                  <div className="prose prose-sm max-w-none text-text-secondary">
+                  <div className="space-y-1">
                     {section.body.split('\n').map((line, i) => {
-                      if (!line.trim()) return <br key={i} />;
-                      if (line.startsWith('[No source material')) {
-                        return (
-                          <p key={i} className="rounded bg-warning-surface px-2 py-1 text-xs font-medium text-warning">
-                            {line}
-                          </p>
-                        );
-                      }
+                      if (!line.trim()) return null;
                       if (line.startsWith('- ') || line.startsWith('* ')) {
-                        return <p key={i} className="ml-4 text-xs before:mr-1 before:content-['•']">{line.slice(2)}</p>;
+                        return <p key={i} className="ml-3 text-xs text-text-secondary before:mr-1.5 before:content-['•']">{line.slice(2)}</p>;
                       }
-                      return <p key={i} className="text-xs">{line}</p>;
+                      if (line.startsWith('### ')) {
+                        return <p key={i} className="text-xs font-semibold text-text-primary mt-2">{line.slice(4)}</p>;
+                      }
+                      return <p key={i} className="text-xs text-text-secondary">{line}</p>;
                     })}
                   </div>
                 </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { FileText, Globe, Loader2, Paperclip, Plus, Trash2, Type } from 'lucide-react';
+import { FileText, Globe, Loader2, Paperclip, Trash2, Type, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
@@ -30,102 +30,142 @@ export function MaterialUploadForm({
   onMaterialAdded,
 }: MaterialUploadFormProps) {
   const [activeTab, setActiveTab] = useState<SourceTab>('file');
-  const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [textContent, setTextContent] = useState('');
-  const [file, setFile] = useState<File | null>(null);
+  const [textTitle, setTextTitle] = useState('');
+  const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const selected = Array.from(e.target.files ?? []);
+    setFiles((prev) => {
+      // Merge, deduplicate by name
+      const existing = new Set(prev.map((f) => f.name));
+      return [...prev, ...selected.filter((f) => !existing.has(f.name))];
+    });
+    // Reset input so same files can be re-added after removal
+    if (fileRef.current) fileRef.current.value = '';
+  }
+
+  function removeFile(name: string) {
+    setFiles((prev) => prev.filter((f) => f.name !== name));
+  }
+
+  async function uploadFile(file: File): Promise<void> {
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    const sourceType = ext === 'pdf' ? 'pdf' : 'docx';
+    const formData = new FormData();
+    formData.append('unitId', unitId);
+    if (teachingAllocationId) formData.append('teachingAllocationId', teachingAllocationId);
+    formData.append('title', file.name.replace(/\.[^.]+$/, ''));
+    formData.append('sourceType', sourceType);
+    formData.append('file', file);
+
+    const response = await fetch('/api/lecture-notes/ingest', {
+      method: 'POST',
+      body: formData,
+    });
+    const json = await response.json() as { materialId?: string; chunkCount?: number; error?: string };
+    if (!response.ok || !json.materialId) throw new Error(json.error ?? 'Upload failed.');
+
+    onMaterialAdded({
+      id: json.materialId,
+      title: file.name.replace(/\.[^.]+$/, ''),
+      source_type: sourceType,
+      source_url: null,
+      original_filename: file.name,
+      chunk_count: json.chunkCount ?? 0,
+      ingested_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+    });
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
 
-    if (!title.trim()) {
-      setError('Please enter a title for this material.');
+    if (activeTab === 'file') {
+      if (files.length === 0) { setError('Please select at least one file.'); return; }
+      setLoading(true);
+      const errors: string[] = [];
+      for (let i = 0; i < files.length; i++) {
+        setUploadingIndex(i);
+        try {
+          await uploadFile(files[i]);
+        } catch (err) {
+          errors.push(`${files[i].name}: ${err instanceof Error ? err.message : 'failed'}`);
+        }
+      }
+      setUploadingIndex(null);
+      setFiles([]);
+      if (errors.length > 0) setError(errors.join('\n'));
+      setLoading(false);
       return;
     }
 
-    if (activeTab === 'file' && !file) {
-      setError('Please select a file.');
-      return;
-    }
-    if (activeTab === 'url' && !url.trim()) {
-      setError('Please enter a URL.');
-      return;
-    }
-    if (activeTab === 'text' && !textContent.trim()) {
-      setError('Please paste some text content.');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append('unitId', unitId);
-      if (teachingAllocationId) formData.append('teachingAllocationId', teachingAllocationId);
-      formData.append('title', title.trim());
-
-      if (activeTab === 'file' && file) {
-        const ext = file.name.split('.').pop()?.toLowerCase();
-        formData.append('sourceType', ext === 'pdf' ? 'pdf' : 'docx');
-        formData.append('file', file);
-      } else if (activeTab === 'url') {
+    if (activeTab === 'url') {
+      if (!url.trim()) { setError('Please enter a URL.'); return; }
+      setLoading(true);
+      try {
+        const formData = new FormData();
+        formData.append('unitId', unitId);
+        if (teachingAllocationId) formData.append('teachingAllocationId', teachingAllocationId);
+        formData.append('title', url.trim());
         formData.append('sourceType', 'url');
         formData.append('sourceUrl', url.trim());
-      } else {
+        const response = await fetch('/api/lecture-notes/ingest', { method: 'POST', body: formData });
+        const json = await response.json() as { materialId?: string; chunkCount?: number; error?: string };
+        if (!response.ok || !json.materialId) throw new Error(json.error ?? 'Failed.');
+        onMaterialAdded({
+          id: json.materialId, title: url.trim(), source_type: 'url',
+          source_url: url.trim(), original_filename: null,
+          chunk_count: json.chunkCount ?? 0, ingested_at: new Date().toISOString(), created_at: new Date().toISOString(),
+        });
+        setUrl('');
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed.');
+      } finally { setLoading(false); }
+      return;
+    }
+
+    if (activeTab === 'text') {
+      if (!textContent.trim()) { setError('Please paste some text content.'); return; }
+      setLoading(true);
+      try {
+        const title = textTitle.trim() || 'Pasted notes';
+        const formData = new FormData();
+        formData.append('unitId', unitId);
+        if (teachingAllocationId) formData.append('teachingAllocationId', teachingAllocationId);
+        formData.append('title', title);
         formData.append('sourceType', 'text');
         formData.append('textContent', textContent.trim());
-      }
-
-      const response = await fetch('/api/lecture-notes/ingest', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const json = await response.json() as { materialId?: string; chunkCount?: number; error?: string };
-
-      if (!response.ok || !json.materialId) {
-        throw new Error(json.error ?? 'Ingestion failed.');
-      }
-
-      // Optimistic mock for the parent list
-      onMaterialAdded({
-        id: json.materialId,
-        title: title.trim(),
-        source_type: activeTab === 'file' ? (file?.name.endsWith('.pdf') ? 'pdf' : 'docx') : activeTab,
-        source_url: activeTab === 'url' ? url.trim() : null,
-        original_filename: file?.name ?? null,
-        chunk_count: json.chunkCount ?? 0,
-        ingested_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-      });
-
-      // Reset form
-      setTitle('');
-      setUrl('');
-      setTextContent('');
-      setFile(null);
-      if (fileRef.current) fileRef.current.value = '';
-
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed. Please try again.');
-    } finally {
-      setLoading(false);
+        const response = await fetch('/api/lecture-notes/ingest', { method: 'POST', body: formData });
+        const json = await response.json() as { materialId?: string; chunkCount?: number; error?: string };
+        if (!response.ok || !json.materialId) throw new Error(json.error ?? 'Failed.');
+        onMaterialAdded({
+          id: json.materialId, title, source_type: 'text',
+          source_url: null, original_filename: null,
+          chunk_count: json.chunkCount ?? 0, ingested_at: new Date().toISOString(), created_at: new Date().toISOString(),
+        });
+        setTextContent(''); setTextTitle('');
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed.');
+      } finally { setLoading(false); }
     }
   }
 
   const tabs: { id: SourceTab; label: string; icon: React.ReactNode }[] = [
-    { id: 'file', label: 'File', icon: <Paperclip className="size-3.5" /> },
+    { id: 'file', label: 'Files', icon: <Paperclip className="size-3.5" /> },
     { id: 'url', label: 'URL', icon: <Globe className="size-3.5" /> },
     { id: 'text', label: 'Paste text', icon: <Type className="size-3.5" /> },
   ];
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3 rounded-xl border border-border bg-surface-subtle p-4">
-      <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">Add Source Material</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">Add Source Materials</p>
 
       {/* Tab selector */}
       <div className="flex gap-1 rounded-lg border border-border bg-surface p-0.5">
@@ -146,82 +186,99 @@ export function MaterialUploadForm({
         ))}
       </div>
 
-      {/* Title */}
-      <div>
-        <label className="mb-1 block text-xs font-medium text-text-secondary">
-          Material title <span className="text-danger">*</span>
-        </label>
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="e.g. WHO Nutrition Guidelines Chapter 3"
-          className="h-9 w-full rounded-lg border border-border-strong bg-surface px-3 text-[12px] text-text-primary outline-none transition placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/20 xl:text-sm"
-          required
-        />
-      </div>
-
-      {/* Source-specific input */}
+      {/* File upload — multi-select */}
       {activeTab === 'file' && (
-        <div>
-          <label className="mb-1 block text-xs font-medium text-text-secondary">
-            PDF or DOCX file
-          </label>
+        <div className="space-y-2">
+          <div
+            className="flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-border-strong bg-surface px-3 py-5 text-center transition hover:border-primary/40 hover:bg-surface-subtle"
+            onClick={() => fileRef.current?.click()}
+          >
+            <Paperclip className="size-5 text-text-muted" />
+            <p className="text-xs font-medium text-text-secondary">Click to select PDFs or DOCX files</p>
+            <p className="text-[11px] text-text-muted">Multiple files supported — all will be read together</p>
+          </div>
           <input
             ref={fileRef}
             type="file"
             accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="block w-full text-xs text-text-secondary file:mr-3 file:rounded-md file:border-0 file:bg-primary-soft file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-primary hover:file:bg-primary/10"
+            onChange={handleFileChange}
+            multiple
+            className="hidden"
           />
+          {/* File queue */}
+          {files.length > 0 && (
+            <ul className="space-y-1">
+              {files.map((f, i) => (
+                <li key={f.name} className="flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 text-xs">
+                  <FileText className="size-3.5 shrink-0 text-primary" />
+                  <span className="min-w-0 flex-1 truncate text-text-primary">{f.name}</span>
+                  {loading && uploadingIndex === i && (
+                    <Loader2 className="size-3.5 shrink-0 animate-spin text-primary" />
+                  )}
+                  {!loading && (
+                    <button type="button" onClick={() => removeFile(f.name)} className="shrink-0 text-text-muted hover:text-danger">
+                      <X className="size-3.5" />
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 
+      {/* URL */}
       {activeTab === 'url' && (
-        <div>
-          <label className="mb-1 block text-xs font-medium text-text-secondary">
-            Web URL
-          </label>
-          <input
-            type="url"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://example.com/article"
-            className="h-9 w-full rounded-lg border border-border-strong bg-surface px-3 text-[12px] text-text-primary outline-none transition placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/20 xl:text-sm"
-          />
-        </div>
+        <input
+          type="url"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          placeholder="https://example.com/article"
+          className="h-9 w-full rounded-lg border border-border-strong bg-surface px-3 text-sm text-text-primary outline-none transition placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
+        />
       )}
 
+      {/* Paste text */}
       {activeTab === 'text' && (
-        <div>
-          <label className="mb-1 block text-xs font-medium text-text-secondary">
-            Paste content
-          </label>
+        <div className="space-y-2">
+          <input
+            type="text"
+            value={textTitle}
+            onChange={(e) => setTextTitle(e.target.value)}
+            placeholder="Title (optional)"
+            className="h-9 w-full rounded-lg border border-border-strong bg-surface px-3 text-sm text-text-primary outline-none transition placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
+          />
           <textarea
             value={textContent}
             onChange={(e) => setTextContent(e.target.value)}
             placeholder="Paste notes, transcripts, or any text content here…"
-            rows={6}
-            className="w-full rounded-lg border border-border-strong bg-surface px-3 py-2 text-[12px] text-text-primary outline-none transition placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/20 xl:text-sm"
+            rows={5}
+            className="w-full rounded-lg border border-border-strong bg-surface px-3 py-2 text-sm text-text-primary outline-none transition placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
         </div>
       )}
 
       {error && (
-        <p className="rounded-lg bg-danger-surface px-3 py-2 text-xs font-medium text-danger">
+        <p className="whitespace-pre-line rounded-lg bg-danger-surface px-3 py-2 text-xs font-medium text-danger">
           {error}
         </p>
       )}
 
-      <Button type="submit" size="sm" disabled={loading} leadingIcon={loading ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}>
-        {loading ? 'Processing…' : 'Add material'}
+      <Button
+        type="submit"
+        size="sm"
+        disabled={loading}
+        leadingIcon={loading ? <Loader2 className="size-4 animate-spin" /> : undefined}
+        className="w-full"
+      >
+        {loading
+          ? uploadingIndex !== null
+            ? `Uploading ${uploadingIndex + 1} of ${files.length}…`
+            : 'Processing…'
+          : activeTab === 'file' && files.length > 1
+            ? `Upload ${files.length} files`
+            : 'Add material'}
       </Button>
-
-      {loading && (
-        <p className="text-xs text-text-muted">
-          Extracting text and generating embeddings — this may take 10–30 seconds for large files.
-        </p>
-      )}
     </form>
   );
 }
@@ -260,13 +317,13 @@ export function MaterialList({ materials, onDelete }: MaterialListProps) {
       <div className="rounded-xl border border-dashed border-border-strong bg-surface px-4 py-8 text-center">
         <FileText className="mx-auto size-8 text-text-subtle" />
         <p className="mt-2 text-sm font-medium text-text-secondary">No materials yet</p>
-        <p className="mt-1 text-xs text-text-muted">Add PDFs, DOCX files, URLs or paste text to ground your lecture notes.</p>
+        <p className="mt-1 text-xs text-text-muted">Add PDFs, DOCX files, URLs or paste text to enrich your notes.</p>
       </div>
     );
   }
 
   return (
-    <ul className="space-y-2">
+    <ul className="space-y-1.5">
       {materials.map((m) => (
         <li
           key={m.id}
@@ -274,16 +331,15 @@ export function MaterialList({ materials, onDelete }: MaterialListProps) {
         >
           <div className="shrink-0">{sourceIcon(m.source_type)}</div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-text-primary">{m.title}</p>
-            <p className="mt-0.5 text-xs text-text-muted">
-              {m.original_filename ?? m.source_url ?? m.source_type}
-              {m.chunk_count > 0 && <span className="ml-2">· {m.chunk_count} chunks</span>}
-            </p>
+            <p className="truncate text-xs font-medium text-text-primary">{m.title}</p>
+            {m.chunk_count > 0 && (
+              <p className="text-[11px] text-text-muted">{m.chunk_count} chunks indexed</p>
+            )}
           </div>
           {m.ingested_at ? (
-            <Badge variant="success" dot className="shrink-0">Ready</Badge>
+            <Badge variant="success" dot className="shrink-0 text-[10px]">Ready</Badge>
           ) : (
-            <Badge variant="warning" className="shrink-0">Pending</Badge>
+            <Badge variant="warning" className="shrink-0 text-[10px]">Pending</Badge>
           )}
           <button
             type="button"

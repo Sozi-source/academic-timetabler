@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ['exceljs'],
+  serverExternalPackages: ['exceljs', 'pdf-parse', 'mammoth'],
   experimental: {
     serverActions: {
       bodySizeLimit: '50mb',

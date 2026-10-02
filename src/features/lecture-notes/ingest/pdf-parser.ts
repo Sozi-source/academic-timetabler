@@ -2,8 +2,25 @@
 // Lecture Notes — PDF Text Extractor
 // ============================================================
 // Uses pdf-parse (Node.js runtime only — NOT edge compatible).
-// Includes polyfills for DOMMatrix and DOMPoint required by pdfjs-dist
-// in Node.js server environments.
+// Loaded via createRequire so Next.js server runtime evaluates it
+// cleanly without Webpack module wrapping errors.
+
+import { createRequire } from 'node:module';
+
+interface PdfParseV2Result {
+  text?: string;
+  total?: number;
+  pages?: Array<{ text: string; num: number }>;
+}
+
+interface PdfParseV2Instance {
+  getText: () => Promise<PdfParseV2Result | string>;
+  destroy?: () => Promise<void>;
+}
+
+type PdfParseV2Constructor = new (options: { data: Buffer | Uint8Array; verbosity?: number }) => PdfParseV2Instance;
+
+type PdfParseV1Fn = (buffer: Buffer) => Promise<{ text?: string }>;
 
 function ensurePolyfills() {
   if (typeof (globalThis as unknown as { DOMMatrix?: unknown }).DOMMatrix === 'undefined') {
@@ -63,25 +80,42 @@ export async function extractTextFromPdf(buffer: Buffer): Promise<string> {
   ensurePolyfills();
 
   try {
-    const pdfMod = await import('pdf-parse');
+    let PDFParseClass: PdfParseV2Constructor | null = null;
+    let pdfParseFn: PdfParseV1Fn | null = null;
 
-    // Handle pdf-parse v2.x (class PDFParse with Uint8Array input)
-    if (typeof (pdfMod as unknown as { PDFParse?: unknown }).PDFParse === 'function') {
-      const PDFParseClass = (pdfMod as unknown as { PDFParse: new (data: Uint8Array) => { getText: () => Promise<string | { text?: string }> } }).PDFParse;
-      const parser = new PDFParseClass(new Uint8Array(buffer));
+    try {
+      const require = createRequire(import.meta.url);
+      const mod = require('pdf-parse');
+      if (typeof mod?.PDFParse === 'function') {
+        PDFParseClass = mod.PDFParse;
+      } else if (typeof mod === 'function') {
+        pdfParseFn = mod;
+      } else if (typeof mod?.default === 'function') {
+        pdfParseFn = mod.default;
+      }
+    } catch {
+      const pdfMod = await import('pdf-parse');
+      if (typeof (pdfMod as unknown as { PDFParse?: unknown }).PDFParse === 'function') {
+        PDFParseClass = (pdfMod as unknown as { PDFParse: PdfParseV2Constructor }).PDFParse;
+      } else if (typeof pdfMod.default === 'function') {
+        pdfParseFn = pdfMod.default as unknown as PdfParseV1Fn;
+      } else if (typeof pdfMod === 'function') {
+        pdfParseFn = pdfMod as unknown as PdfParseV1Fn;
+      }
+    }
+
+    if (PDFParseClass) {
+      const parser = new PDFParseClass({ data: buffer });
       const res = await parser.getText();
-      return typeof res === 'string' ? res : (res?.text ?? '');
+      const text = typeof res === 'string' ? res : (res?.text ?? '');
+      if (typeof parser.destroy === 'function') {
+        await parser.destroy().catch(() => {});
+      }
+      return text;
     }
 
-    // Handle pdf-parse v1.x (default function taking Buffer)
-    if (typeof pdfMod.default === 'function') {
-      const res = await (pdfMod.default as (b: Buffer) => Promise<{ text?: string }>)(buffer);
-      return res?.text ?? '';
-    }
-
-    // Handle generic function export
-    if (typeof pdfMod === 'function') {
-      const res = await (pdfMod as unknown as (b: Buffer) => Promise<{ text?: string }>)(buffer);
+    if (pdfParseFn) {
+      const res = await pdfParseFn(buffer);
       return res?.text ?? '';
     }
 

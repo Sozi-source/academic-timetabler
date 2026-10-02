@@ -99,11 +99,31 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       } catch (vectorErr) {
         console.warn('[lecture-notes/generate] Vector retrieval failed, proceeding with outline grounding:', vectorErr);
       }
+
+      // If vector search returned 0 matches or had an issue, fallback directly to stored material chunks
+      if (retrievedChunks.length === 0) {
+        const materialIds = materials.map((m) => m.id);
+        const { data: directChunks } = await db
+          .from('lecture_material_chunks')
+          .select('id, material_id, content')
+          .in('material_id', materialIds)
+          .order('chunk_index', { ascending: true })
+          .limit(10);
+
+        if (directChunks && directChunks.length > 0) {
+          retrievedChunks = directChunks.map((c) => ({
+            id: c.id,
+            materialId: c.material_id,
+            content: c.content,
+            similarity: 1.0,
+          }));
+        }
+      }
     }
 
     const usedMaterialIds = new Set(retrievedChunks.map((c) => c.materialId));
     const sourceMaterialTitles = materials
-      .filter((m) => usedMaterialIds.has(m.id))
+      .filter((m) => usedMaterialIds.size === 0 ? true : usedMaterialIds.has(m.id))
       .map((m) => m.title);
 
     // ── Build grounded prompt ──────────────────────────────────

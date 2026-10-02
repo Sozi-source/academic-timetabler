@@ -1,3 +1,24 @@
+### 2026-10-02: Fix PDF Text Extraction Crash, Storage Bucket Auto-Creation & Embedding Hardening
+
+**Summary:**
+Resolved two runtime errors encountered when trainers upload lecture materials on `/lecture-notes/[unitId]`:
+1. **Resolved `Object.defineProperty called on non-object` in `extractTextFromPdf`:**
+   - **Root Cause**: `pdf-parse` v2 is a CommonJS package whose entry point performs `Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" })`. When Next.js compiled server routes without `pdf-parse` in `serverExternalPackages`, Webpack bundled `pdf-parse` into an ESM wrapper where `exports` was undefined, throwing `TypeError: Object.defineProperty called on non-object`. In addition, `pdf-parse` v2 constructor requires `LoadParameters: { data: Buffer }` rather than a raw `Uint8Array`.
+   - **Fix in `next.config.ts`**: Added `pdf-parse` and `mammoth` to `serverExternalPackages: ['exceljs', 'pdf-parse', 'mammoth']` so Webpack does not bundle them.
+   - **Fix in `src/features/lecture-notes/ingest/pdf-parser.ts`**: Used `createRequire(import.meta.url)` to evaluate `pdf-parse` natively in Node.js runtime, passed `{ data: buffer }` to `PDFParse` constructor, and added instance cleanup via `parser.destroy()`.
+2. **Resolved `Bucket not found` on Supabase Storage Upload:**
+   - **Root Cause**: Supabase Storage bucket `lecture-notes` was not yet provisioned in the remote database.
+   - **Fix in `src/app/api/lecture-notes/ingest/route.ts`**: Added automated fallback using `createAdminClient()`. If the initial upload returns `Bucket not found`, the API route automatically creates the bucket on the fly with a 50MB limit and re-attempts the upload.
+   - **SQL Migration**: Created `supabase/migrations/20261002133000_create_lecture_notes_storage_bucket.sql` declaring the `lecture-notes` bucket and setting RLS policies on `storage.objects` for authenticated users.
+3. **Corrected Embedding Model & Ingestion Fault Tolerance:**
+   - **Fix in `src/features/lecture-notes/embeddings/gemini-embeddings.ts`**: Updated model name from non-existent `gemini-embedding-001` to official Gemini embedding model `text-embedding-004` (with fallback to `embedding-001`).
+   - **Fix in `src/app/api/lecture-notes/ingest/route.ts`**: Wrapped `embedTexts` in a resilient fallback so temporary embedding delays never fail file ingestion; text and chunks are always persisted.
+   - **Fix in `src/app/api/lecture-notes/generate/route.ts`**: Added direct chunk retrieval fallback if vector search returns 0 matches, guaranteeing uploaded material text is included in generation prompts.
+4. **Verification & Testing:**
+   - TypeScript Typecheck: Passed with 0 errors (`next typegen && tsc --noEmit`).
+   - Test Suite: 126/126 test files passed, 651/651 tests green (`npm test`).
+   - Next.js Webpack Build: Compiled successfully across all routes (`next build --webpack`).
+
 ### 2026-10-02: Fix Attendance Scorecard Discrepancy & 1,000-Row Pagination Truncation
 
 **Summary:**

@@ -7,7 +7,8 @@
  * Extracts plain text from a DOCX file buffer.
  */
 export async function extractTextFromDocx(buffer: Buffer): Promise<string> {
-  const mammoth = (await import('mammoth')).default;
+  const mammothMod = await import('mammoth');
+  const mammoth = (mammothMod as unknown as { default?: { extractRawText: (opts: { buffer: Buffer }) => Promise<{ value: string }> }; extractRawText?: (opts: { buffer: Buffer }) => Promise<{ value: string }> }).default ?? mammothMod;
   try {
     const result = await mammoth.extractRawText({ buffer });
     return result.value ?? '';

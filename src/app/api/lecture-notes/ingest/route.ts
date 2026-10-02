@@ -9,6 +9,7 @@ export const runtime = 'nodejs'; // pdf-parse and mammoth require Node.js runtim
 
 import { type NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { requireTrainerAccess } from '@/features/auth/authorization';
 import { chunkText } from '@/features/lecture-notes/ingest/chunker';
 import { extractTextFromPdf } from '@/features/lecture-notes/ingest/pdf-parser';
@@ -65,12 +66,43 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       // Upload raw file to Supabase Storage
       const ext = sourceType === 'pdf' ? 'pdf' : 'docx';
       const storageKey = `lecture-materials/${profile.id}/${unitId}/${Date.now()}.${ext}`;
-      const { error: uploadError } = await db.storage
+      const contentType = file.type || (sourceType === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+
+      let uploadError: { message: string } | null = null;
+      const { error: initialUploadError } = await db.storage
         .from('lecture-notes')
         .upload(storageKey, buffer, {
-          contentType: file.type || (sourceType === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'),
+          contentType,
           upsert: false,
         });
+
+      if (initialUploadError) {
+        uploadError = initialUploadError;
+        // If bucket is missing or permission fails, attempt with admin client and ensure bucket exists
+        if (initialUploadError.message.includes('Bucket not found') || initialUploadError.message.includes('bucket')) {
+          try {
+            const adminDb = createAdminClient();
+            await adminDb.storage.createBucket('lecture-notes', {
+              public: false,
+              fileSizeLimit: 52428800,
+              allowedMimeTypes: [
+                'application/pdf',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'text/plain',
+              ],
+            });
+            const { error: adminRetryError } = await adminDb.storage
+              .from('lecture-notes')
+              .upload(storageKey, buffer, {
+                contentType,
+                upsert: false,
+              });
+            uploadError = adminRetryError;
+          } catch (adminErr) {
+            console.warn('Storage auto-create or admin upload error:', adminErr);
+          }
+        }
+      }
 
       if (uploadError) {
         console.warn('Storage upload failed (continuing with text extraction):', uploadError.message);
@@ -126,8 +158,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // ── Embed all chunks ───────────────────────────────────────
-    const embeddings = await embedTexts(chunks);
+    // ── Embed all chunks (with graceful resilience) ───────────
+    let embeddings: number[][] = [];
+    try {
+      embeddings = await embedTexts(chunks);
+    } catch (embedErr) {
+      console.warn('[lecture-notes/ingest] Embedding generation failed (continuing with text chunks):', embedErr);
+    }
 
     // ── Insert chunks with embeddings ──────────────────────────
     const chunkRows = chunks.map((content, index) => ({

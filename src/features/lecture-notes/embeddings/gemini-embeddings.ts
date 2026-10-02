@@ -1,7 +1,7 @@
 // ============================================================
 // Lecture Notes — Gemini Embedding Client
 // ============================================================
-// Uses gemini-embedding-001 with outputDimensionality: 768
+// Uses text-embedding-004 (or legacy embedding-001) with outputDimensionality: 768
 // to align with Supabase pgvector column vector(768).
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
@@ -19,28 +19,38 @@ function getApiKey(): string {
 
 /**
  * Generates a 768-dimensional embedding for a single text string.
- * Used for both chunk ingestion and topic query lookups.
+ * Uses text-embedding-004 with fallback to embedding-001.
  */
 export async function embedText(text: string): Promise<number[]> {
   const apiKey = getApiKey();
-  const url = `${GEMINI_API_URL}/gemini-embedding-001:embedContent?key=${apiKey}`;
+  const models = ['text-embedding-004', 'embedding-001'];
+  let lastError: Error | null = null;
 
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      content: { parts: [{ text }] },
-      outputDimensionality: 768,
-    }),
-  });
+  for (const model of models) {
+    try {
+      const url = `${GEMINI_API_URL}/${model}:embedContent?key=${apiKey}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: { parts: [{ text }] },
+          outputDimensionality: 768,
+        }),
+      });
 
-  if (!res.ok) {
-    const errorBody = await res.text();
-    throw new Error(`Embedding API error (${res.status}): ${errorBody}`);
+      if (!res.ok) {
+        const errorBody = await res.text();
+        throw new Error(`Embedding API error (${res.status}): ${errorBody}`);
+      }
+
+      const data = (await res.json()) as { embedding: { values: number[] } };
+      return data.embedding.values;
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+    }
   }
 
-  const data = (await res.json()) as { embedding: { values: number[] } };
-  return data.embedding.values;
+  throw lastError ?? new Error('Failed to generate embedding');
 }
 
 /**
@@ -50,33 +60,42 @@ export async function embedText(text: string): Promise<number[]> {
 export async function embedTexts(texts: string[]): Promise<number[][]> {
   if (texts.length === 0) return [];
   const apiKey = getApiKey();
-  const url = `${GEMINI_API_URL}/gemini-embedding-001:batchEmbedContents?key=${apiKey}`;
-
+  const models = ['text-embedding-004', 'embedding-001'];
   const BATCH_SIZE = 50;
-  const results: number[][] = [];
 
-  for (let i = 0; i < texts.length; i += BATCH_SIZE) {
-    const batch = texts.slice(i, i + BATCH_SIZE);
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        requests: batch.map((text) => ({
-          model: 'models/gemini-embedding-001',
-          content: { parts: [{ text }] },
-          outputDimensionality: 768,
-        })),
-      }),
-    });
+  for (const model of models) {
+    try {
+      const url = `${GEMINI_API_URL}/${model}:batchEmbedContents?key=${apiKey}`;
+      const results: number[][] = [];
 
-    if (!res.ok) {
-      const errorBody = await res.text();
-      throw new Error(`Batch embedding API error (${res.status}): ${errorBody}`);
+      for (let i = 0; i < texts.length; i += BATCH_SIZE) {
+        const batch = texts.slice(i, i + BATCH_SIZE);
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            requests: batch.map((text) => ({
+              model: `models/${model}`,
+              content: { parts: [{ text }] },
+              outputDimensionality: 768,
+            })),
+          }),
+        });
+
+        if (!res.ok) {
+          const errorBody = await res.text();
+          throw new Error(`Batch embedding API error (${res.status}): ${errorBody}`);
+        }
+
+        const data = (await res.json()) as { embeddings: Array<{ values: number[] }> };
+        results.push(...data.embeddings.map((e) => e.values));
+      }
+
+      return results;
+    } catch (err) {
+      console.warn(`[lecture-notes/embedTexts] Failed with ${model}, trying fallback:`, err);
     }
-
-    const data = (await res.json()) as { embeddings: Array<{ values: number[] }> };
-    results.push(...data.embeddings.map((e) => e.values));
   }
 
-  return results;
+  throw new Error('All embedding models failed');
 }

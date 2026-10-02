@@ -68,10 +68,6 @@ export function GenerationPanel({
       setError('Please specify a topic to generate notes for.');
       return;
     }
-    if (materialCount === 0) {
-      setError('Please add at least one source material before generating. Notes must be grounded in your uploaded content.');
-      return;
-    }
 
     setLoading(true);
     setError(null);
@@ -196,13 +192,21 @@ export function GenerationPanel({
           )}
         </div>
 
-        {/* Warning if no materials */}
-        {materialCount === 0 && (
-          <div className="flex items-start gap-2 rounded-lg bg-warning-surface px-3 py-2.5 text-xs text-warning">
-            <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
-            <span>Add source materials first. Notes must be fully grounded — no materials means no output.</span>
+        {/* Grounding mode indicator */}
+        <div className="flex items-start gap-2.5 rounded-lg border border-border bg-surface-subtle p-3 text-xs">
+          <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" />
+          <div className="space-y-0.5 text-text-secondary">
+            {materialCount > 0 ? (
+              <p>
+                <strong className="font-semibold text-text-primary">Dual-Grounding Active:</strong> Grounded in the approved TVET CDACC Course Outline and enriched with {materialCount} uploaded document{materialCount === 1 ? '' : 's'}.
+              </p>
+            ) : (
+              <p>
+                <strong className="font-semibold text-text-primary">Curriculum Grounded:</strong> Grounded directly in the approved TVET CDACC Course Outline and Specific Learning Outcomes. You can optionally upload textbooks or notes to enrich coverage.
+              </p>
+            )}
           </div>
-        )}
+        </div>
 
         <Button
           onClick={handleGenerate}
@@ -215,7 +219,7 @@ export function GenerationPanel({
 
         {loading && (
           <p className="text-xs text-text-muted">
-            Retrieving relevant content from your materials and calling Gemini 1.5 Pro. This typically takes 20–60 seconds.
+            Synthesizing approved curriculum outlines, learning outcomes, and source materials. This typically takes 15–35 seconds.
           </p>
         )}
       </div>

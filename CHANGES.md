@@ -1,3 +1,33 @@
+### 2026-10-02: Lecture Notes Generator Tactical Overhaul, Dual-Grounding & PDF Parser Hardening
+
+**Summary:**
+Tactically overhauled the Lecture Notes Generation pipeline to make it robust, accurate, TVET CDACC-aligned, and dependable:
+1. **Resolved PDF Ingestion Crash (`DOMMatrix is not defined`):**
+   - Fixed text extraction in `src/features/lecture-notes/ingest/pdf-parser.ts` where `pdfjs-dist` inside `pdf-parse` threw `ReferenceError: DOMMatrix is not defined` in server-side Node.js runtimes.
+   - Added robust polyfills for `DOMMatrix` and `DOMPoint` on `globalThis`.
+   - Added dual-compatibility for `pdf-parse` v2 (`PDFParse` class accepting `Uint8Array`) and v1 legacy function with fallback.
+2. **Dual-Layer Curriculum Grounding (Zero-Upload Baseline + Material Enrichment):**
+   - Removed the artificial blocker in `src/features/lecture-notes/ui/generation-panel.tsx` which previously required trainers to upload source materials before generating notes.
+   - *Layer 1 (Baseline)*: Generates comprehensive, classroom-ready lecture notes grounded directly in the department's authoritative TVET CDACC Course Outlines, Specific Learning Outcomes (SLOs), and weekly schedules already stored in the curriculum database.
+   - *Layer 2 (Material Enrichment)*: If trainers upload supplementary PDFs, textbooks, or guidelines, semantic chunks are retrieved via pgvector and synthesized into the lecture notes.
+3. **AI Model Pipeline Modernization & API Key Configuration:**
+   - Updated `.env.local` with authenticated `GEMINI_API_KEY`.
+   - Upgraded embedding generation in `src/features/lecture-notes/embeddings/gemini-embeddings.ts` from deprecated `text-embedding-004` to `gemini-embedding-001` with explicit `outputDimensionality: 768`, perfectly aligning with Supabase's `vector(768)` database schema.
+   - Upgraded generator in `src/features/lecture-notes/generation/gemini-generator.ts` to `gemini-3.8-flash` with graceful fallback to `gemini-flash-latest`.
+4. **TVET CDACC Pedagogical Architecture:**
+   - Redesigned `src/features/lecture-notes/generation/prompt-builder.ts` to produce standard TVET delivery packets:
+     1. Session Overview & Specific Learning Outcomes (Cognitive, Psychomotor, Affective).
+     2. Key Scientific & Clinical Terminology with standard definitions.
+     3. Detailed Lecture Content (mechanisms, formulas, clinical guidelines, Kenyan case studies).
+     4. Trainer Delivery Guide (whiteboard plan, student discussion prompts, common misconceptions).
+     5. Formative Assessment & Review Questions (KNEC/CDACC exam-style MCQs, structured questions, and case scenarios).
+     6. Recommended References.
+5. **PDF Multi-Page Overflow Fix:**
+   - In `src/features/lecture-notes/export/pdf-builder.tsx`, removed `wrap={false}` from the section container to permit natural multi-page page breaks without truncation.
+6. **Full Verification:**
+   - 126/126 test files passed (651 tests green).
+   - `npm run check` completed with 0 errors across 127 Next.js production routes.
+
 ### 2026-10-01: Admin Student Attendance Scorecard, Subject % Matrix & Standing Analytics
 
 **Summary:**

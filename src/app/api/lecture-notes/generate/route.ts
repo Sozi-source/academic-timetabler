@@ -80,20 +80,27 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const learningOutcomes = outline?.learningOutcomes ?? [];
     const weeklyPlanContext = outline?.weeklyPlanText ?? '';
 
-    // ── Embed the topic query ──────────────────────────────────
-    const queryEmbedding = await embedText(topic);
-
-    // ── Retrieve relevant chunks ───────────────────────────────
-    const retrievedChunks = await retrieveSimilarChunks({
-      queryEmbedding,
-      unitId,
-      trainerId: profile.id,
-      matchCount: 10,
-      similarityThreshold: 0.4,
-    });
-
-    // ── Material titles for the document footer ────────────────
+    // ── Material titles & RAG retrieval ───────────────────────
     const materials = await getLectureMaterialsForUnit(unitId);
+    let retrievedChunks: Awaited<ReturnType<typeof retrieveSimilarChunks>> = [];
+
+    if (materials.length > 0) {
+      try {
+        // Expand query with outline outcomes for higher semantic precision
+        const expandedQuery = `${topic} ${learningOutcomes.slice(0, 3).join(' ')}`.trim();
+        const queryEmbedding = await embedText(expandedQuery);
+        retrievedChunks = await retrieveSimilarChunks({
+          queryEmbedding,
+          unitId,
+          trainerId: profile.id,
+          matchCount: 10,
+          similarityThreshold: 0.35,
+        });
+      } catch (vectorErr) {
+        console.warn('[lecture-notes/generate] Vector retrieval failed, proceeding with outline grounding:', vectorErr);
+      }
+    }
+
     const usedMaterialIds = new Set(retrievedChunks.map((c) => c.materialId));
     const sourceMaterialTitles = materials
       .filter((m) => usedMaterialIds.has(m.id))

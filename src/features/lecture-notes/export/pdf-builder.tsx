@@ -178,7 +178,7 @@ function SectionContent({ section }: { section: GeneratedSection }) {
   const lines = section.body.split('\n');
 
   return (
-    <View style={styles.section} wrap={false}>
+    <View style={styles.section}>
       <Text style={styles.sectionHeading}>{section.heading}</Text>
       {lines.map((line, idx) => {
         const trimmed = line.trim();

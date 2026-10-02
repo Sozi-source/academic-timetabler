@@ -1,8 +1,10 @@
 // ============================================================
 // Lecture Notes — Grounded Prompt Builder
 // ============================================================
-// Builds the strict, grounded system prompt for Gemini generation.
-// The prompt ONLY allows content from the provided source material.
+// Builds the pedagogical system prompt for Gemini generation.
+// Supports dual-grounding:
+// 1. Authoritative TVET CDACC syllabus & approved course outline (baseline)
+// 2. Trainer-uploaded source materials & documents (RAG enhancement when available)
 
 import type { RetrievedChunk } from '../types';
 
@@ -32,70 +34,96 @@ export function buildGroundedPrompt(input: PromptInput): string {
   const scopeLabel =
     granularity === 'session' && sessionWeek != null
       ? `Week ${sessionWeek} Session`
-      : 'Full Unit';
+      : 'Full Unit Notes';
 
   const outcomesText =
     learningOutcomes.length > 0
       ? learningOutcomes.map((o, i) => `${i + 1}. ${o}`).join('\n')
-      : '(No learning outcomes found in course outline)';
+      : '(Refer to canonical TVET CDACC competency outcomes for this unit)';
 
-  const chunksText =
-    retrievedChunks.length > 0
-      ? retrievedChunks
-          .map((c, i) => `[Source ${i + 1}]\n${c.content.trim()}`)
-          .join('\n\n---\n\n')
-      : '(No source material was uploaded for this topic)';
+  const hasSourceChunks = retrievedChunks.length > 0;
 
-  return `You are a lecture notes formatter for academic staff. Your ONLY job is to structure, organise, and rephrase content from the SOURCE MATERIAL below into clear, well-formatted lecture notes.
+  const chunksText = hasSourceChunks
+    ? retrievedChunks
+        .map((c, i) => `[Source Excerpt ${i + 1}]\n${c.content.trim()}`)
+        .join('\n\n---\n\n')
+    : '(No supplementary source files uploaded. Base content entirely on the approved TVET Course Outline and institutional syllabus requirements.)';
+
+  const groundingInstructions = hasSourceChunks
+    ? `GROUNDING MODE: DUAL GROUNDING (Curriculum Syllabus + Uploaded Source Material)
+- Synthesize the authoritative TVET CDACC course outline requirements with the provided SOURCE MATERIAL excerpts below.
+- Prioritize clinical definitions, diagnostic criteria, standard values, and specific protocols found in the uploaded sources.
+- Ensure the terminology aligns precisely with the provided source excerpts.`
+    : `GROUNDING MODE: CANONICAL TVET CURRICULUM GROUNDING
+- Ground the notes in the approved TVET CDACC Course Outline, Specific Learning Outcomes, and weekly plan provided below.
+- Provide comprehensive, technically accurate, academic and clinical explanations adhering strictly to Kenya TVET CDACC standards for Nutrition and Health Sciences.
+- Do not invent speculative claims; ensure all biological, physiological, and clinical principles are standard medical science.`;
+
+  return `You are an expert TVET Curriculum Specialist and Senior Medical & Nutrition Lecturer at Imperial College of Medical & Health Sciences.
+Your task is to generate comprehensive, highly structured, classroom-ready lecture notes for trainers and trainees.
 
 UNIT: ${unitCode} — ${unitName}
 SCOPE: ${scopeLabel}
 TOPIC: ${topic}
 
 ════════════════════════════════════════════════
-ABSOLUTE RULES — YOU MUST FOLLOW THESE EXACTLY:
+PEDAGOGICAL & GROUNDING RULES:
 ════════════════════════════════════════════════
-1. Use ONLY information present in the SOURCE MATERIAL below.
-2. Do NOT add any facts, examples, statistics, definitions, or explanations that are not explicitly in the sources.
-3. Do NOT draw on your training knowledge about this topic.
-4. If a section has no supporting source material, write exactly: [No source material provided for this section — add relevant materials in the material library]
-5. You MAY: rephrase for clarity, add headings, restructure into bullet points, add numbering, improve readability.
-6. You MAY NOT: invent, synthesise, extrapolate, or expand beyond what is in the sources.
+${groundingInstructions}
+- Use clear, academic, yet accessible language suitable for TVET Diploma and Certificate trainees.
+- Ensure all technical terms, clinical formulas (e.g. BMI, RDA, Fluid requirements), and assessment metrics are clearly explained.
+- Structure content with clear sub-headings (using ###), clean bullet points, and numbered steps.
 
 ════════════════════════════
-LEARNING OUTCOMES (from course outline):
+APPROVED COURSE OUTLINE & LEARNING OUTCOMES:
 ════════════════════════════
 ${outcomesText}
 
 ════════════════════════════
-WEEKLY PLAN CONTEXT (from course outline):
+WEEKLY PLAN & COVERAGE CONTEXT:
 ════════════════════════════
-${weeklyPlanContext || '(No weekly plan data available)'}
+${weeklyPlanContext || '(General unit syllabus coverage)'}
 
 ════════════════════════════
-SOURCE MATERIAL (trainer-uploaded documents):
+SUPPLEMENTARY SOURCE MATERIAL:
 ════════════════════════════
 ${chunksText}
 
 ════════════════════════════
-OUTPUT FORMAT:
+REQUIRED OUTPUT STRUCTURE:
 ════════════════════════════
-Generate lecture notes in this exact structure:
+Generate the lecture notes in this exact structure using markdown H2 headings (## Heading):
 
 # ${topic}
 **${unitCode}: ${unitName} | ${scopeLabel}**
 
-## Introduction
-(Brief overview of what will be covered — from sources only)
+## Session Overview & Objectives
+- Brief introductory overview of the session topic and its clinical/public health significance.
+- Specific Learning Outcomes (Cognitive, Psychomotor, Affective): By the end of this session, the trainee should be able to...
 
-## Key Concepts
-(Main sub-sections with headings, bullet points, and explanations — sources only)
+## Key Terminology & Definitions
+- Define 4–6 core scientific, medical, and clinical terms relevant to this topic with clear, standard definitions.
 
-## Summary
-(Concise recap of the main points covered — sources only)
+## Detailed Lecture Content
+Provide thorough, well-organized technical notes. Break into logical subtopics using ### subheadings:
+- Theoretical foundation & physiological/biochemical mechanisms.
+- Clinical guidelines, diagnostic criteria, or practical methodologies.
+- Bulleted key facts, classification tables or step-by-step procedures.
+- Real-world case study or practical scenario relevant to Kenyan/African public health settings.
 
-## Key Takeaways
-- (Bullet list of the most important points students should remember — sources only)
+## Trainer Delivery & Classroom Guide
+- Suggested blackboard/whiteboard structure or visual aid diagram layout.
+- Trainee engagement questions and classroom discussion prompts.
+- Common student misconceptions or diagnostic pitfalls to emphasize.
 
-Output clean markdown only. Do not include preamble or meta-commentary.`;
+## Formative Assessment & Review Questions
+- 3–4 KNEC/CDACC exam-style review questions:
+  1. Multiple Choice Question (with correct option and 1-line rationale).
+  2. Short Answer / Structured Question (with expected model answer points).
+  3. Practical Application or Scenario-based Question (with marking rubric guide).
+
+## Recommended References
+- List standard textbooks and guidelines (e.g., Kenya Ministry of Health Clinical Nutrition Guidelines, WHO, Kraus' Food & The Nutrition Care Process).
+
+Output clean, well-formatted markdown only. Do not include markdown code block backticks around the entire document.`;
 }

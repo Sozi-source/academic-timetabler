@@ -3,6 +3,7 @@ import 'server-only';
 import { attendanceRate, getAttendanceStanding } from '@/features/attendance-analytics/domain';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { createClient } from '@/lib/supabase/server';
 import type {
   AttendanceScorecardCohortOption,
   AttendanceScorecardUnitColumn,
@@ -11,14 +12,31 @@ import type {
   StudentUnitAttendanceScore,
 } from './scorecard-types';
 
+function normalizeUnitTitle(name: string): string {
+  return (name || '')
+    .toLowerCase()
+    .replace(/\b(introduction to|principles of|basics of|management of)\b/g, '')
+    .replace(/\b(lifecycle|lifespan)\b/g, 'lifespan')
+    .replace(/[^a-z0-9]/g, '')
+    .trim();
+}
+
 export async function getDepartmentStudentAttendanceScorecard(
   academicPeriodIdParam?: string,
 ): Promise<StudentAttendanceScorecardData> {
   const profile = await requireHodAccess();
-  const admin = createAdminClient();
+
+  // Prefer SSR authenticated client (RLS-backed by HOD session cookies),
+  // with fallback to admin client if running in background tasks or scripts.
+  let supabase: any;
+  try {
+    supabase = await createClient();
+  } catch {
+    supabase = createAdminClient();
+  }
 
   // 1. Resolve Academic Period
-  let periodQuery = admin
+  let periodQuery = supabase
     .from('academic_periods')
     .select('id, name, code, status');
 
@@ -32,7 +50,7 @@ export async function getDepartmentStudentAttendanceScorecard(
   let period = periodResult;
 
   if (!period) {
-    const { data: latestPeriod } = await admin
+    const { data: latestPeriod } = await supabase
       .from('academic_periods')
       .select('id, name, code, status')
       .order('starts_on', { ascending: false })
@@ -60,7 +78,7 @@ export async function getDepartmentStudentAttendanceScorecard(
   }
 
   // 2. Query all active in-class students for this department
-  let studentQuery = admin
+  let studentQuery = supabase
     .from('students')
     .select(`
       id,
@@ -92,8 +110,8 @@ export async function getDepartmentStudentAttendanceScorecard(
     throw new Error(`Unable to load student attendance scorecard: ${studentError.message}`);
   }
 
-  // Filter out any student on attachment or internship or suspended/deferred
-  const validStudents = (rawStudents ?? []).filter((s) => {
+  // Filter out any student on attachment or suspended/deferred
+  const validStudents = (rawStudents ?? []).filter((s: any) => {
     if (!s?.id) return false;
     const lifecycle = (s.lifecycle_status || '').toLowerCase();
     if (['suspended', 'deferred', 'dropped_out', 'completed', 'graduated'].includes(lifecycle)) return false;
@@ -102,7 +120,7 @@ export async function getDepartmentStudentAttendanceScorecard(
     return true;
   });
 
-  const studentIds = validStudents.map((s) => s.id);
+  const studentIds = validStudents.map((s: any) => s.id);
   if (studentIds.length === 0) {
     return {
       academicPeriodId: period.id,
@@ -122,7 +140,7 @@ export async function getDepartmentStudentAttendanceScorecard(
   }
 
   // 3. Query verified unit registrations for these students in this period
-  const { data: rawRegistrations } = await admin
+  const { data: rawRegistrations } = await supabase
     .from('student_unit_registrations')
     .select(`
       student_id,
@@ -155,28 +173,62 @@ export async function getDepartmentStudentAttendanceScorecard(
     });
   }
 
-  // 4. Query attendance aggregates for this period
-  const { data: sessionRows } = await admin
+  // 4. Query unit offerings for shared class discovery
+  const { data: rawOfferings } = await supabase
+    .from('unit_offerings')
+    .select('unit_id, confirmed_shared_offering_id')
+    .eq('academic_period_id', period.id)
+    .not('confirmed_shared_offering_id', 'is', null);
+
+  const unitIdToSharedId = new Map<string, string>();
+  const sharedIdToUnitIds = new Map<string, Set<string>>();
+
+  for (const off of rawOfferings ?? []) {
+    if (!off.unit_id || !off.confirmed_shared_offering_id) continue;
+    unitIdToSharedId.set(off.unit_id, off.confirmed_shared_offering_id);
+    if (!sharedIdToUnitIds.has(off.confirmed_shared_offering_id)) {
+      sharedIdToUnitIds.set(off.confirmed_shared_offering_id, new Set());
+    }
+    sharedIdToUnitIds.get(off.confirmed_shared_offering_id)!.add(off.unit_id);
+  }
+
+  // 5. Query attendance sessions for this period with unit details
+  const { data: sessionRows } = await supabase
     .from('class_sessions')
-    .select('id, unit_id, status')
+    .select(`
+      id,
+      unit_id,
+      status,
+      units!class_sessions_unit_id_fkey (
+        id,
+        code,
+        name
+      )
+    `)
     .eq('academic_period_id', period.id)
     .in('status', ['completed', 'open']);
 
-  const sessionUnitMap = new Map<string, string>();
+  const sessionMap = new Map<string, { unitId: string; unitCode: string; unitName: string }>();
   const activeSessionIds: string[] = [];
   for (const sess of sessionRows ?? []) {
-    sessionUnitMap.set(sess.id, sess.unit_id);
+    const u = Array.isArray(sess.units) ? sess.units[0] : sess.units;
+    sessionMap.set(sess.id, {
+      unitId: sess.unit_id,
+      unitCode: u?.code || '',
+      unitName: u?.name || '',
+    });
     activeSessionIds.push(sess.id);
   }
 
-  // Map of `${student_id}:${unit_id}` -> { sessions: Set<string>; present: number; absent: number }
+  // 6. Query attendance entries (present / absent / late)
+  // Map of `${student_id}:${registered_unit_id}` -> { sessions: Set<string>; present: number; absent: number }
   const studentUnitAttendanceStats = new Map<string, { sessions: Set<string>; present: number; absent: number }>();
 
   if (activeSessionIds.length > 0) {
     const CHUNK_SIZE = 1000;
     for (let i = 0; i < studentIds.length; i += CHUNK_SIZE) {
       const chunk = studentIds.slice(i, i + CHUNK_SIZE);
-      const { data: entries } = await admin
+      const { data: entries } = await supabase
         .from('class_attendance_entries')
         .select('class_session_id, student_id, attendance_status')
         .in('student_id', chunk)
@@ -184,14 +236,63 @@ export async function getDepartmentStudentAttendanceScorecard(
         .in('attendance_status', ['present', 'absent', 'late']);
 
       for (const entry of entries ?? []) {
-        const uId = sessionUnitMap.get(entry.class_session_id);
-        if (!uId) continue;
-        const key = `${entry.student_id}:${uId}`;
+        const sess = sessionMap.get(entry.class_session_id);
+        if (!sess) continue;
+
+        const regMap = studentRegisteredUnits.get(entry.student_id);
+        if (!regMap) continue;
+
+        // Resolve which registered unit of the student this session maps to:
+        let matchedUnitId: string | null = null;
+
+        // a) Direct unit ID match
+        if (regMap.has(sess.unitId)) {
+          matchedUnitId = sess.unitId;
+        }
+
+        // b) Shared offering match across programmes
+        if (!matchedUnitId) {
+          const sharedId = unitIdToSharedId.get(sess.unitId);
+          if (sharedId) {
+            const equivalentUnitIds = sharedIdToUnitIds.get(sharedId);
+            if (equivalentUnitIds) {
+              for (const regUnitId of regMap.keys()) {
+                if (equivalentUnitIds.has(regUnitId)) {
+                  matchedUnitId = regUnitId;
+                  break;
+                }
+              }
+            }
+          }
+        }
+
+        // c) Normalized subject name equivalence match (e.g. Lifespan vs Lifecycle)
+        if (!matchedUnitId) {
+          const normSessTitle = normalizeUnitTitle(sess.unitName);
+          for (const [regUnitId, regInfo] of regMap.entries()) {
+            if (normalizeUnitTitle(regInfo.unitName) === normSessTitle) {
+              matchedUnitId = regUnitId;
+              break;
+            }
+          }
+        }
+
+        // d) Single-unit fallback
+        if (!matchedUnitId && regMap.size === 1) {
+          matchedUnitId = Array.from(regMap.keys())[0];
+        }
+
+        if (!matchedUnitId) {
+          matchedUnitId = sess.unitId;
+        }
+
+        const key = `${entry.student_id}:${matchedUnitId}`;
         if (!studentUnitAttendanceStats.has(key)) {
           studentUnitAttendanceStats.set(key, { sessions: new Set(), present: 0, absent: 0 });
         }
         const stat = studentUnitAttendanceStats.get(key)!;
         stat.sessions.add(entry.class_session_id);
+
         if (entry.attendance_status === 'present' || entry.attendance_status === 'late') {
           stat.present++;
         } else if (entry.attendance_status === 'absent') {
@@ -201,7 +302,7 @@ export async function getDepartmentStudentAttendanceScorecard(
     }
   }
 
-  // 5. Build final student scorecard rows
+  // 7. Build final student scorecard rows
   const cohortStudentCountMap = new Map<string, AttendanceScorecardCohortOption>();
   let sumOfRates = 0;
   let countOfRatedStudents = 0;

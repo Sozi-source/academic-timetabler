@@ -1,18 +1,21 @@
 // ============================================================
 // Lecture Notes — Gemini Generation Client
 // ============================================================
-// Calls Gemini 1.5 Pro with the grounded prompt.
-// Parses the markdown response into structured sections.
+// Generates structured lecture notes using Google Gemini.
+// Parses markdown responses into standard sections.
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import type { GeneratedSection, LectureNotesDocument } from '../types';
 
-const GENERATION_MODEL = 'gemini-1.5-pro';
+const PRIMARY_MODEL = 'gemini-3.8-flash';
+const FALLBACK_MODEL = 'gemini-flash-latest';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
-function getClient() {
+function getApiKey(): string {
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error('GEMINI_API_KEY is not set.');
-  return new GoogleGenerativeAI(apiKey);
+  if (!apiKey) {
+    throw new Error('GEMINI_API_KEY is not set. Please check your .env.local configuration.');
+  }
+  return apiKey;
 }
 
 export interface GeminiGenerationInput {
@@ -26,29 +29,68 @@ export interface GeminiGenerationInput {
 }
 
 /**
- * Calls Gemini 1.5 Pro with the grounded prompt and returns a
+ * Calls Gemini with the grounded prompt and returns a
  * structured LectureNotesDocument parsed from the markdown response.
  */
 export async function generateLectureNotes(
   input: GeminiGenerationInput
 ): Promise<{ document: LectureNotesDocument; promptTokens: number; outputTokens: number }> {
-  const client = getClient();
-  const model = client.getGenerativeModel({
-    model: GENERATION_MODEL,
-    generationConfig: {
-      temperature: 0.1,  // Low temperature = minimal creative drift
-      topP: 0.8,
-      maxOutputTokens: 8192,
-    },
-  });
+  const apiKey = getApiKey();
 
-  const result = await model.generateContent(input.prompt);
-  const response = result.response;
-  const markdown = response.text();
+  async function callGemini(modelName: string) {
+    const url = `${GEMINI_API_URL}/${modelName}:generateContent?key=${apiKey}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [{ text: input.prompt }],
+          },
+        ],
+        generationConfig: {
+          temperature: 0.2,
+          topP: 0.85,
+          maxOutputTokens: 8192,
+        },
+      }),
+    });
 
-  const usage = response.usageMetadata;
-  const promptTokens = usage?.promptTokenCount ?? 0;
-  const outputTokens = usage?.candidatesTokenCount ?? 0;
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Gemini API error (${modelName} - ${response.status}): ${errorText}`);
+    }
+
+    return (await response.json()) as {
+      candidates?: Array<{
+        content?: {
+          parts?: Array<{ text?: string }>;
+        };
+      }>;
+      usageMetadata?: {
+        promptTokenCount?: number;
+        candidatesTokenCount?: number;
+      };
+    };
+  }
+
+  let resultData;
+  try {
+    resultData = await callGemini(PRIMARY_MODEL);
+  } catch (primaryErr) {
+    console.warn(`[gemini-generator] Primary model ${PRIMARY_MODEL} failed, trying fallback ${FALLBACK_MODEL}:`, primaryErr);
+    resultData = await callGemini(FALLBACK_MODEL);
+  }
+
+  const candidate = resultData.candidates?.[0];
+  const markdown = candidate?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
+
+  if (!markdown.trim()) {
+    throw new Error('Gemini returned an empty response. Please verify the topic and try again.');
+  }
+
+  const promptTokens = resultData.usageMetadata?.promptTokenCount ?? 0;
+  const outputTokens = resultData.usageMetadata?.candidatesTokenCount ?? 0;
 
   const sections = parseMarkdownIntoSections(markdown);
 
@@ -70,7 +112,7 @@ export async function generateLectureNotes(
 
 /**
  * Parses Gemini's markdown output into section objects.
- * Handles H2 headings as section boundaries.
+ * Handles H2 headings (## ...) as section boundaries.
  */
 function parseMarkdownIntoSections(markdown: string): GeneratedSection[] {
   const lines = markdown.split('\n');

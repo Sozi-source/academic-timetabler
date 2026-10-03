@@ -1,8 +1,6 @@
 // ============================================================
 // Lecture Notes — Direct Storage Upload
 // POST /api/lecture-notes/upload
-// Creates the material record and a Supabase signed upload target.
-// The browser sends the file directly to Storage, bypassing Vercel.
 // ============================================================
 
 export const runtime = 'nodejs';
@@ -14,11 +12,12 @@ import { requireTrainerAccess } from '@/features/auth/authorization';
 
 const BUCKET = 'lecture-notes';
 const MAX_FILE_BYTES = 25 * 1024 * 1024;
-const STORAGE_FILE_SIZE_LIMIT = '50MB';
+const MAX_ZIP_BYTES = 100 * 1024 * 1024;
 
 const MIME_BY_TYPE = {
-  pdf: 'application/pdf',
-  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  pdf: ['application/pdf'],
+  docx: ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+  zip: ['application/zip', 'application/x-zip-compressed', 'application/octet-stream'],
 } as const;
 
 type FileSourceType = keyof typeof MIME_BY_TYPE;
@@ -36,68 +35,40 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       mimeType?: string;
     };
 
-    const {
-      unitId,
-      teachingAllocationId = null,
-      title,
-      sourceType,
-      originalFilename,
-      fileSize,
-      mimeType,
-    } = body;
+    const { unitId, teachingAllocationId = null, title, sourceType, originalFilename, fileSize, mimeType } = body;
 
     if (!unitId || !title || !sourceType || !originalFilename || !fileSize) {
-      return NextResponse.json(
-        { error: 'unitId, title, sourceType, originalFilename and fileSize are required.' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'unitId, title, sourceType, originalFilename and fileSize are required.' }, { status: 400 });
     }
 
     if (!(sourceType in MIME_BY_TYPE)) {
-      return NextResponse.json({ error: 'Only PDF and DOCX files are supported.' }, { status: 400 });
+      return NextResponse.json({ error: 'Only PDF, DOCX and ZIP source files are supported.' }, { status: 400 });
     }
 
-    if (fileSize > MAX_FILE_BYTES) {
-      return NextResponse.json(
-        { error: 'File is too large. Please keep lecture materials below 25 MB.' },
-        { status: 413 },
-      );
+    const maxBytes = sourceType === 'zip' ? MAX_ZIP_BYTES : MAX_FILE_BYTES;
+    if (fileSize > maxBytes) {
+      return NextResponse.json({
+        error: `${sourceType.toUpperCase()} file is too large. Maximum size is ${Math.round(maxBytes / 1024 / 1024)} MB.`,
+      }, { status: 413 });
     }
 
-    const expectedMime = MIME_BY_TYPE[sourceType];
-    if (mimeType && mimeType !== expectedMime) {
-      return NextResponse.json({ error: 'The selected file type does not match its extension.' }, { status: 400 });
+    const expectedMimes = MIME_BY_TYPE[sourceType] as readonly string[];
+    if (mimeType && !expectedMimes.includes(mimeType)) {
+      // Browsers occasionally report application/octet-stream for ZIP files;
+      // extension validation below remains authoritative for that case.
+      if (!(sourceType === 'zip' && mimeType === 'application/octet-stream')) {
+        return NextResponse.json({ error: 'The selected file type does not match its extension.' }, { status: 400 });
+      }
     }
 
     const db = await createClient();
     const adminDb = createAdminClient();
-
-    // Provision the bucket when it is missing. This keeps the direct-upload
-    // path self-healing in environments where migrations have not yet created
-    // the Storage bucket. The browser still uploads the bytes directly to
-    // Supabase Storage; no file body passes through this route.
-    const { data: bucket, error: bucketError } = await adminDb.storage.getBucket(BUCKET);
+    const { data: bucket } = await adminDb.storage.getBucket(BUCKET);
     if (!bucket) {
-      const { error: createBucketError } = await adminDb.storage.createBucket(BUCKET, {
-        public: false,
-        fileSizeLimit: STORAGE_FILE_SIZE_LIMIT,
-        allowedMimeTypes: Object.values(MIME_BY_TYPE),
-      });
-
-      if (createBucketError) {
-        // A concurrent request may have created the bucket between getBucket
-        // and createBucket. Re-read before treating the error as fatal.
-        const { data: bucketAfterCreate } = await adminDb.storage.getBucket(BUCKET);
-        if (!bucketAfterCreate) {
-          return NextResponse.json(
-            { error: `Lecture-notes storage is not configured: ${createBucketError.message}${bucketError ? ` (${bucketError.message})` : ''}` },
-            { status: 503 },
-          );
-        }
-      }
+      return NextResponse.json({ error: 'Lecture-notes storage is not configured. Run the lecture-notes storage migration first.' }, { status: 503 });
     }
 
-    const ext = sourceType === 'pdf' ? 'pdf' : 'docx';
+    const ext = sourceType;
     const safeName = originalFilename.replace(/[^a-zA-Z0-9._-]+/g, '-').slice(-120);
     const storagePath = `materials/${profile.id}/${unitId}/${crypto.randomUUID()}-${safeName || `material.${ext}`}`;
 
@@ -106,10 +77,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       .createSignedUploadUrl(storagePath);
 
     if (signedUploadError || !signedUpload) {
-      return NextResponse.json(
-        { error: `Could not prepare file upload: ${signedUploadError?.message ?? 'Unknown storage error'}` },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: `Could not prepare file upload: ${signedUploadError?.message ?? 'Unknown storage error'}` }, { status: 500 });
     }
 
     const { data: material, error: materialError } = await db
@@ -133,10 +101,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       .single();
 
     if (materialError || !material) {
-      return NextResponse.json(
-        { error: `Failed to create material: ${materialError?.message ?? 'Unknown database error'}` },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: `Failed to create material: ${materialError?.message ?? 'Unknown database error'}` }, { status: 500 });
     }
 
     return NextResponse.json({
@@ -144,13 +109,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       path: signedUpload.path,
       token: signedUpload.token,
       material,
-      maxFileBytes: MAX_FILE_BYTES,
+      maxFileBytes: maxBytes,
     });
   } catch (err) {
     console.error('[lecture-notes/upload]', err);
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Could not prepare upload.' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Could not prepare upload.' }, { status: 500 });
   }
 }

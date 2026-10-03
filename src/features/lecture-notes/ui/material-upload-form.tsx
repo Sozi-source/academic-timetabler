@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { FileText, Globe, Loader2, Paperclip, Trash2, Type, X } from 'lucide-react';
+import { FileArchive, FileText, Globe, Loader2, Paperclip, Trash2, Type, X } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,7 @@ interface MaterialUploadFormProps {
 type SourceTab = 'file' | 'url' | 'text';
 
 const MAX_FILE_BYTES = 25 * 1024 * 1024;
+const MAX_ZIP_BYTES = 100 * 1024 * 1024;
 
 export function MaterialUploadForm({
   unitId,
@@ -57,14 +58,15 @@ export function MaterialUploadForm({
   }
 
   async function uploadFile(file: File): Promise<void> {
-    if (file.size > MAX_FILE_BYTES) {
-      throw new Error(`${file.name} is larger than 25 MB.`);
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    const sourceType = ext === 'pdf' ? 'pdf' : ext === 'docx' ? 'docx' : ext === 'zip' ? 'zip' : null;
+    if (!sourceType) {
+      throw new Error(`${file.name}: only PDF, DOCX and ZIP files are supported.`);
     }
 
-    const ext = file.name.split('.').pop()?.toLowerCase();
-    const sourceType = ext === 'pdf' ? 'pdf' : ext === 'docx' ? 'docx' : null;
-    if (!sourceType) {
-      throw new Error(`${file.name}: only PDF and DOCX files are supported.`);
+    const maxBytes = sourceType === 'zip' ? MAX_ZIP_BYTES : MAX_FILE_BYTES;
+    if (file.size > maxBytes) {
+      throw new Error(`${file.name} is larger than ${sourceType === 'zip' ? '100 MB' : '25 MB'}.`);
     }
 
     // 1. Ask the app for a signed Storage upload target.
@@ -229,7 +231,7 @@ export function MaterialUploadForm({
     <form onSubmit={handleSubmit} className="space-y-3 rounded-xl border border-border bg-surface p-4">
       <div className="flex items-center justify-between gap-3">
         <p className="text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">Source materials</p>
-        <span className="text-[10px] text-text-muted">PDF / DOCX · max 25 MB</span>
+        <span className="text-[10px] text-text-muted">PDF / DOCX · 25 MB · ZIP archive · 100 MB</span>
       </div>
 
       <div className="flex gap-1 rounded-lg border border-border bg-surface-subtle p-0.5">
@@ -257,15 +259,15 @@ export function MaterialUploadForm({
             onClick={() => fileRef.current?.click()}
             className="flex w-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed border-border-strong bg-surface-subtle px-3 py-5 text-center transition hover:border-primary/50 hover:bg-primary/[0.03]"
           >
-            <Paperclip className="size-5 text-text-muted" />
-            <span className="text-xs font-medium text-text-secondary">Select lecture files</span>
-            <span className="text-[11px] text-text-muted">Files upload directly to secure storage</span>
+            <FileArchive className="size-5 text-text-muted" />
+            <span className="text-xs font-medium text-text-secondary">Select lecture files or a ZIP archive</span>
+            <span className="text-[11px] text-text-muted">ZIP archives are read as one complete source collection</span>
           </button>
 
           <input
             ref={fileRef}
             type="file"
-            accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            accept=".pdf,.docx,.zip,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/zip,application/x-zip-compressed"
             onChange={handleFileChange}
             multiple
             className="hidden"
@@ -352,6 +354,8 @@ function sourceIcon(type: string) {
       return <FileText className="size-4 text-danger" />;
     case 'docx':
       return <FileText className="size-4 text-primary" />;
+    case 'zip':
+      return <FileArchive className="size-4 text-primary" />;
     case 'url':
       return <Globe className="size-4 text-text-muted" />;
     default:

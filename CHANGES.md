@@ -1,4 +1,22 @@
+### 2026-10-03: Zero-Deployment Hybrid In-Process Fallback for Unified Notes Generation
+
+**Summary:**
+Eliminated the mandatory requirement to deploy an external Python service for **Unified full unit** lecture notes generation:
+1. **Hybrid In-Process Architecture in `src/app/api/lecture-notes/generate/route.ts`:**
+   - Evaluates whether `LECTURE_NOTES_ENGINE_URL` and `LECTURE_NOTES_ENGINE_TOKEN` are configured.
+   - **If configured & reachable**: Delegates the job asynchronously to the dedicated Python queue worker (`claim_next_python_lecture_note_job`).
+   - **If NOT configured (or unreachable)**: Seamlessly falls back to the native in-process TypeScript consolidator (`buildUnifiedLectureNotesDocument` from `src/features/lecture-notes/generation/unified-consolidator.ts`).
+   - Generates both styled `.docx` and `.pdf` documents directly, uploads them to Supabase Storage `lecture-notes`, updates `lecture_note_jobs` to `status: 'done'`, and returns the completed notes with 200 OK immediately.
+2. **Client-Side Compatibility (`src/features/lecture-notes/ui/generation-panel.tsx`):**
+   - Immediate synchronous completion returns `status: 'done'`, which short-circuits the polling loop and presents the completed notes and download buttons instantly to the trainer.
+   - Cleaned up error messages to be engine-agnostic.
+3. **ZIP Ingestion Type Resolution (`src/features/lecture-notes/ingest/zip-parser.ts`):**
+   - Corrected TypeScript typing and dynamic constructor resolution for `jszip`.
+4. **Verification & Testing:**
+   - `npm run typecheck`: Passed with 0 errors.
+
 ### 2026-10-02: Fix GEMINI_API_KEY Dev Server Cache & Align Active Gemini Models
+
 
 **Summary:**
 Diagnosed and resolved the root cause of the `GEMINI_API_KEY is not set` banner when generating lecture notes on `/lecture-notes/[unitId]`:

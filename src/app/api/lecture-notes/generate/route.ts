@@ -1,28 +1,29 @@
 // ============================================================
 // Lecture Notes — Generate API Route
 // POST /api/lecture-notes/generate
+//
+// Generation modes:
+//   unified — deterministic full-source consolidation. Reads every
+//             ready material in full; no vector retrieval and no AI.
+//   ai      — topic/session synthesis using the existing Gemini RAG path.
 // ============================================================
-// 1. Creates a job record
-// 2. Embeds the topic query
-// 3. Retrieves relevant chunks via pgvector
-// 4. Builds grounded prompt
-// 5. Calls Gemini 1.5 Pro
-// 6. Exports DOCX + (optionally PDF via stream)
-// 7. Uploads outputs to Supabase Storage
 
 export const runtime = 'nodejs';
-export const maxDuration = 300; // full-unit synthesis may require a larger model context/output
+export const maxDuration = 120;
 
 import { type NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { requireTrainerAccess } from '@/features/auth/authorization';
 import { embedText } from '@/features/lecture-notes/embeddings/gemini-embeddings';
-import { retrieveSimilarChunks, getCourseOutlineContext, getLectureMaterialsForUnit, getUnifiedSourceMaterialsForUnit } from '@/features/lecture-notes/queries';
+import { retrieveSimilarChunks, getCourseOutlineContext, getLectureMaterialsForUnit } from '@/features/lecture-notes/queries';
 import { buildGroundedPrompt } from '@/features/lecture-notes/generation/prompt-builder';
 import { generateLectureNotes } from '@/features/lecture-notes/generation/gemini-generator';
 import { buildLectureNotesDocx } from '@/features/lecture-notes/export/docx-builder';
 import { buildLectureNotesPdf } from '@/features/lecture-notes/export/pdf-builder';
+import { buildUnifiedLectureNotesDocument } from '@/features/lecture-notes/generation/unified-consolidator';
 import type { GenerationGranularity } from '@/features/lecture-notes/types';
+
+type GenerationMode = 'unified' | 'ai';
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const db = await createClient();
@@ -33,18 +34,27 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const body = await req.json() as {
       unitId: string;
       teachingAllocationId?: string | null;
-      granularity: GenerationGranularity;
+      granularity?: GenerationGranularity;
+      generationMode?: GenerationMode;
       sessionWeek?: number | null;
       topic: string;
     };
 
-    const { unitId, teachingAllocationId, granularity, sessionWeek, topic } = body;
+    const generationMode = body.generationMode ?? 'unified';
+    const granularity: GenerationGranularity = generationMode === 'unified' ? 'unit' : (body.granularity ?? 'session');
+    const { unitId, teachingAllocationId, sessionWeek, topic } = body;
 
-    if (!unitId || !granularity || !topic) {
-      return NextResponse.json({ error: 'unitId, granularity, and topic are required.' }, { status: 400 });
+    if (!unitId || !topic) {
+      return NextResponse.json({ error: 'unitId and topic are required.' }, { status: 400 });
+    }
+    if (generationMode !== 'unified' && generationMode !== 'ai') {
+      return NextResponse.json({ error: 'Invalid generation mode.' }, { status: 400 });
     }
 
-    // ── Create a pending job record ─────────────────────────────
+    const engineUrl = process.env.LECTURE_NOTES_ENGINE_URL?.replace(/\/$/, '');
+    const engineToken = process.env.LECTURE_NOTES_ENGINE_TOKEN;
+    const hasPythonEngine = Boolean(engineUrl && engineToken);
+
     const { data: job, error: jobError } = await db
       .from('lecture_note_jobs')
       .insert({
@@ -53,9 +63,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         unit_id: unitId,
         department_id: profile.activeDepartmentId,
         granularity,
-        session_week: sessionWeek ?? null,
+        session_week: granularity === 'unit' ? null : (sessionWeek ?? null),
         topic,
-        status: 'processing',
+        status: (generationMode === 'unified' && hasPythonEngine) ? 'pending' : 'processing',
+        generation_engine: (generationMode === 'unified' && hasPythonEngine) ? 'python' : 'ai',
       })
       .select('id')
       .single();
@@ -65,45 +76,151 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
     jobId = job.id;
 
-    // ── Fetch unit info ────────────────────────────────────────
-    const { data: unit } = await db
-      .from('units')
-      .select('code, name')
-      .eq('id', unitId)
-      .single();
-
+    const { data: unit } = await db.from('units').select('code, name').eq('id', unitId).single();
     const unitCode = (unit as { code: string; name: string } | null)?.code ?? unitId;
     const unitName = (unit as { code: string; name: string } | null)?.name ?? 'Unknown Unit';
 
-    // ── Course outline context ─────────────────────────────────
+    const materials = await getLectureMaterialsForUnit(unitId);
+    const readyMaterials = materials.filter((m) => m.ingestedAt && m.contentText?.trim());
+
+    if (generationMode === 'unified') {
+      if (readyMaterials.length === 0) {
+        throw new Error('No ready source materials are available. Upload and wait for all source files to finish processing before generating unified notes.');
+      }
+
+      // If a dedicated Python engine is configured and reachable, delegate the job
+      if (hasPythonEngine && engineUrl && engineToken) {
+        try {
+          const engineResponse = await fetch(`${engineUrl}/v1/jobs/unified/enqueue`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Notes-Engine-Token': engineToken,
+            },
+            body: JSON.stringify({ job_id: jobId }),
+            cache: 'no-store',
+          });
+
+          if (engineResponse.ok) {
+            return NextResponse.json({
+              jobId,
+              unitCode,
+              unitName,
+              topic,
+              granularity: 'unit',
+              generationMode: 'unified',
+              status: 'pending',
+              sessionWeek: null,
+              sections: [],
+              sourceMaterials: readyMaterials.map((m) => m.title),
+              materialCount: readyMaterials.length,
+              sourceWordCount: 0,
+              retainedWordCount: 0,
+              duplicateParagraphCount: 0,
+              chunkCount: readyMaterials.reduce((sum, material) => sum + material.chunkCount, 0),
+              promptTokens: 0,
+              outputTokens: 0,
+              docxStoragePath: null,
+              pdfStoragePath: null,
+              generatedAt: new Date().toISOString(),
+            }, { status: 202 });
+          }
+          console.warn('[lecture-notes/generate] Python engine enqueue failed, falling back to native in-process consolidator');
+        } catch (engineErr) {
+          console.warn('[lecture-notes/generate] Python engine unreachable, falling back to native in-process consolidator:', engineErr);
+        }
+      }
+
+      // ── Native in-process TypeScript consolidator ────────────────
+      // Seamless zero-deployment fallback: consolidates all ready materials,
+      // builds DOCX & PDF, uploads to Supabase storage, and completes the job.
+      const { document: notesDocument, stats } = buildUnifiedLectureNotesDocument({
+        unitCode,
+        unitName,
+        topic,
+        materials: readyMaterials,
+      });
+
+      const [docxBuffer, pdfBuffer] = await Promise.all([
+        buildLectureNotesDocx(notesDocument),
+        buildLectureNotesPdf(notesDocument),
+      ]);
+
+      const timestamp = Date.now();
+      const docxPath = `generated/${profile.id}/${unitId}/${jobId}/${timestamp}.docx`;
+      const pdfPath = `generated/${profile.id}/${unitId}/${jobId}/${timestamp}.pdf`;
+
+      const [docxUploadResult, pdfUploadResult] = await Promise.all([
+        db.storage
+          .from('lecture-notes')
+          .upload(docxPath, docxBuffer, {
+            contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            upsert: true,
+          }),
+        db.storage
+          .from('lecture-notes')
+          .upload(pdfPath, pdfBuffer, {
+            contentType: 'application/pdf',
+            upsert: true,
+          }),
+      ]);
+
+      const docxStoragePath = docxUploadResult.error ? null : docxPath;
+      const pdfStoragePath = pdfUploadResult.error ? null : pdfPath;
+
+      const resultJson = {
+        sections: notesDocument.sections,
+        sourceMaterials: notesDocument.sourceMaterials,
+        materialCount: stats.materialCount,
+        sourceWordCount: stats.sourceWordCount,
+        retainedWordCount: stats.retainedWordCount,
+        duplicateParagraphCount: stats.duplicateParagraphCount,
+        generationMode: 'unified',
+      };
+
+      await db.from('lecture_note_jobs').update({
+        status: 'done',
+        prompt_token_count: 0,
+        output_token_count: 0,
+        docx_storage_bucket: docxStoragePath ? 'lecture-notes' : null,
+        docx_storage_path: docxStoragePath,
+        pdf_storage_bucket: pdfStoragePath ? 'lecture-notes' : null,
+        pdf_storage_path: pdfStoragePath,
+        result_json: resultJson,
+        completed_at: new Date().toISOString(),
+      }).eq('id', jobId);
+
+      return NextResponse.json({
+        jobId,
+        unitCode,
+        unitName,
+        topic,
+        granularity: 'unit',
+        generationMode: 'unified',
+        status: 'done',
+        sessionWeek: null,
+        sections: notesDocument.sections,
+        sourceMaterials: notesDocument.sourceMaterials,
+        materialCount: stats.materialCount,
+        sourceWordCount: stats.sourceWordCount,
+        retainedWordCount: stats.retainedWordCount,
+        duplicateParagraphCount: stats.duplicateParagraphCount,
+        chunkCount: readyMaterials.reduce((sum, material) => sum + material.chunkCount, 0),
+        promptTokens: 0,
+        outputTokens: 0,
+        docxStoragePath,
+        pdfStoragePath,
+        generatedAt: notesDocument.generatedAt,
+      }, { status: 200 });
+    }
+
+    // ── Existing AI-assisted topic/session path ─────────────────
     const outline = await getCourseOutlineContext(unitId);
     const learningOutcomes = outline?.learningOutcomes ?? [];
     const weeklyPlanContext = outline?.weeklyPlanText ?? '';
-
-    // ── Source materials ──────────────────────────────────────
-    // A full-unit generation must read the COMPLETE extracted text
-    // of every ready source file. The previous implementation sent
-    // only the top 10 vector chunks, which caused entire lessons and
-    // unique material from other versions to disappear from the
-    // generated document.
-    const materials = await getLectureMaterialsForUnit(unitId);
-    let sourceMaterialTitles = materials.map((m) => m.title);
-
     let retrievedChunks: Awaited<ReturnType<typeof retrieveSimilarChunks>> = [];
-    let unifiedSourceMaterials: Awaited<ReturnType<typeof getUnifiedSourceMaterialsForUnit>> = [];
 
-    if (granularity === 'unit') {
-      unifiedSourceMaterials = await getUnifiedSourceMaterialsForUnit(unitId);
-      sourceMaterialTitles = unifiedSourceMaterials.map((m) => m.title);
-
-      if (unifiedSourceMaterials.length === 0) {
-        return NextResponse.json(
-          { error: 'No fully processed lecture source files are available. Upload and finish processing the source materials before generating unified notes.' },
-          { status: 422 },
-        );
-      }
-    } else if (materials.length > 0) {
-      // Narrow topic/session generation continues to use semantic retrieval.
+    if (readyMaterials.length > 0) {
       try {
         const expandedQuery = `${topic} ${learningOutcomes.slice(0, 3).join(' ')}`.trim();
         const queryEmbedding = await embedText(expandedQuery);
@@ -111,39 +228,19 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           queryEmbedding,
           unitId,
           trainerId: profile.id,
-          matchCount: 24,
-          similarityThreshold: 0.30,
+          matchCount: 10,
+          similarityThreshold: 0.35,
         });
       } catch (vectorErr) {
         console.warn('[lecture-notes/generate] Vector retrieval failed:', vectorErr);
       }
-
-      if (retrievedChunks.length === 0) {
-        const materialIds = materials.map((m) => m.id);
-        const { data: directChunks } = await db
-          .from('lecture_material_chunks')
-          .select('id, material_id, content')
-          .in('material_id', materialIds)
-          .order('chunk_index', { ascending: true })
-          .limit(24);
-
-        if (directChunks && directChunks.length > 0) {
-          retrievedChunks = directChunks.map((c) => ({
-            id: c.id,
-            materialId: c.material_id,
-            content: c.content,
-            similarity: 1.0,
-          }));
-        }
-      }
     }
 
-    const sourceWordCount = unifiedSourceMaterials.reduce(
-      (total, material) => total + material.wordCount,
-      0,
-    );
+    const usedMaterialIds = new Set(retrievedChunks.map((c) => c.materialId));
+    const sourceMaterialTitles = readyMaterials
+      .filter((m) => usedMaterialIds.size === 0 ? true : usedMaterialIds.has(m.id))
+      .map((m) => m.title);
 
-    // ── Build grounded prompt ──────────────────────────────────
     const prompt = buildGroundedPrompt({
       unitCode,
       unitName,
@@ -153,10 +250,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       learningOutcomes,
       weeklyPlanContext,
       retrievedChunks,
-      sourceMaterials: unifiedSourceMaterials,
     });
 
-    // ── Call Gemini ────────────────────────────────────────────
     const { document: notesDocument, promptTokens, outputTokens } = await generateLectureNotes({
       prompt,
       unitCode,
@@ -167,43 +262,26 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       sourceMaterialTitles,
     });
 
-    // ── Build DOCX & PDF in parallel ──────────────────────────
     const [docxBuffer, pdfBuffer] = await Promise.all([
       buildLectureNotesDocx(notesDocument),
       buildLectureNotesPdf(notesDocument),
     ]);
 
-    // ── Upload DOCX & PDF to Supabase Storage ──────────────────
     const timestamp = Date.now();
     const docxPath = `generated/${profile.id}/${unitId}/${jobId}/${timestamp}.docx`;
     const pdfPath = `generated/${profile.id}/${unitId}/${jobId}/${timestamp}.pdf`;
-
     const [docxUploadResult, pdfUploadResult] = await Promise.all([
-      db.storage
-        .from('lecture-notes')
-        .upload(docxPath, docxBuffer, {
-          contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-          upsert: true,
-        }),
-      db.storage
-        .from('lecture-notes')
-        .upload(pdfPath, pdfBuffer, {
-          contentType: 'application/pdf',
-          upsert: true,
-        }),
+      db.storage.from('lecture-notes').upload(docxPath, docxBuffer, {
+        contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', upsert: true,
+      }),
+      db.storage.from('lecture-notes').upload(pdfPath, pdfBuffer, {
+        contentType: 'application/pdf', upsert: true,
+      }),
     ]);
 
     const docxStoragePath = docxUploadResult.error ? null : docxPath;
     const pdfStoragePath = pdfUploadResult.error ? null : pdfPath;
 
-    if (docxUploadResult.error) {
-      console.warn('[lecture-notes/generate] DOCX upload failed:', docxUploadResult.error.message);
-    }
-    if (pdfUploadResult.error) {
-      console.warn('[lecture-notes/generate] PDF upload failed:', pdfUploadResult.error.message);
-    }
-
-    // ── Mark job as done ───────────────────────────────────────
     await db.from('lecture_note_jobs').update({
       status: 'done',
       prompt_token_count: promptTokens,
@@ -215,31 +293,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       completed_at: new Date().toISOString(),
     }).eq('id', jobId);
 
-    // ── Return the document inline + metadata ──────────────────
     return NextResponse.json({
-      jobId,
-      unitCode,
-      unitName,
-      topic,
-      granularity,
-      sessionWeek: sessionWeek ?? null,
-      sections: notesDocument.sections,
-      sourceMaterials: sourceMaterialTitles,
-      chunkCount: retrievedChunks.length,
-      sourceMaterialCount: unifiedSourceMaterials.length,
-      sourceWordCount,
-      synthesisMode: granularity === 'unit' ? 'full-corpus' : 'topic-rag',
-      promptTokens,
-      outputTokens,
-      docxStoragePath,
-      pdfStoragePath,
-      generatedAt: notesDocument.generatedAt,
+      jobId, unitCode, unitName, topic, granularity, generationMode: 'ai', sessionWeek: sessionWeek ?? null,
+      sections: notesDocument.sections, sourceMaterials: sourceMaterialTitles, chunkCount: retrievedChunks.length,
+      promptTokens, outputTokens, docxStoragePath, pdfStoragePath, generatedAt: notesDocument.generatedAt,
     });
-
   } catch (err) {
     console.error('[lecture-notes/generate]', err);
-
-    // Mark job as errored
     if (jobId) {
       const db2 = await createClient();
       await db2.from('lecture_note_jobs').update({
@@ -248,10 +308,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         completed_at: new Date().toISOString(),
       }).eq('id', jobId);
     }
-
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Generation failed.' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Generation failed.' }, { status: 500 });
   }
 }

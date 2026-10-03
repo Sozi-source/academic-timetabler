@@ -98,9 +98,12 @@ export function MaterialUploadForm({
     }
 
     const supabase = createBrowserSupabaseClient();
+    const contentType = file.type || (sourceType === 'zip' ? 'application/zip' : undefined);
     const { error: uploadError } = await supabase.storage
       .from('lecture-notes')
-      .uploadToSignedUrl(prepared.path, prepared.token, file);
+      .uploadToSignedUrl(prepared.path, prepared.token, file, {
+        contentType,
+      });
 
     if (uploadError) {
       await fetch(`/api/lecture-notes/materials?materialId=${prepared.materialId}`, { method: 'DELETE' }).catch(() => undefined);

@@ -12,12 +12,18 @@ import { requireTrainerAccess } from '@/features/auth/authorization';
 
 const BUCKET = 'lecture-notes';
 const MAX_FILE_BYTES = 25 * 1024 * 1024;
-const MAX_ZIP_BYTES = 100 * 1024 * 1024;
+const MAX_ZIP_BYTES = 50 * 1024 * 1024;
 
 const MIME_BY_TYPE = {
   pdf: ['application/pdf'],
-  docx: ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
-  zip: ['application/zip', 'application/x-zip-compressed', 'application/octet-stream'],
+  docx: ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword'],
+  zip: [
+    'application/zip',
+    'application/x-zip-compressed',
+    'application/x-zip',
+    'application/octet-stream',
+    'multipart/x-zip',
+  ],
 } as const;
 
 type FileSourceType = keyof typeof MIME_BY_TYPE;
@@ -66,6 +72,23 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const { data: bucket } = await adminDb.storage.getBucket(BUCKET);
     if (!bucket) {
       return NextResponse.json({ error: 'Lecture-notes storage is not configured. Run the lecture-notes storage migration first.' }, { status: 503 });
+    }
+
+    // Auto-heal bucket allowed mime types if ZIP types are missing
+    if (bucket.allowed_mime_types && !bucket.allowed_mime_types.includes('application/x-zip-compressed')) {
+      const updatedMimes = Array.from(new Set([
+        ...bucket.allowed_mime_types,
+        'application/zip',
+        'application/x-zip-compressed',
+        'application/x-zip',
+        'application/octet-stream',
+        'multipart/x-zip',
+      ]));
+      await adminDb.storage.updateBucket(BUCKET, {
+        public: false,
+        fileSizeLimit: 52428800,
+        allowedMimeTypes: updatedMimes,
+      }).catch((e) => console.warn('[lecture-notes/upload] Failed to update bucket mime types:', e));
     }
 
     const ext = sourceType;

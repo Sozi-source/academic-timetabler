@@ -1,4 +1,27 @@
+### 2026-10-03: Fix ZIP Storage MIME Type Rejection (`application/x-zip-compressed`)
+
+**Summary:**
+Diagnosed and resolved the root cause of `Upload failed: mime type application/x-zip-compressed is not supported` when uploading ZIP lecture archives:
+1. **Root Cause Analysis:**
+   - In migration `20261002133000_create_lecture_notes_storage_bucket.sql`, the Supabase Storage bucket `lecture-notes` was created with `allowed_mime_types` restricted strictly to `application/pdf`, `docx`, and `text/plain`.
+   - Windows browsers (Edge, Chrome, Firefox) report the MIME type for `.zip` files as `application/x-zip-compressed` or `application/octet-stream`.
+   - When the client uploaded `Epidemiology.zip`, Supabase Storage rejected the file due to the bucket's strict MIME type whitelist.
+2. **Bucket Update & SQL Migration:**
+   - Live Supabase Storage bucket `lecture-notes` was immediately updated to allow:
+     `'application/pdf'`, `'application/vnd.openxmlformats-officedocument.wordprocessingml.document'`, `'application/msword'`, `'text/plain'`, `'text/markdown'`, `'application/zip'`, `'application/x-zip-compressed'`, `'application/x-zip'`, `'application/octet-stream'`, `'multipart/x-zip'`.
+   - Created database migration `supabase/migrations/20261003130000_allow_zip_mime_types_in_lecture_notes_storage.sql` to permanently persist these allowed MIME types.
+3. **Application Self-Healing & Client Upload Hardening:**
+   - Updated `src/app/api/lecture-notes/upload/route.ts`:
+     - Added auto-healing logic on upload preparation: if the bucket's allowed MIME types omit `application/x-zip-compressed`, the route automatically patches the bucket via `adminDb.storage.updateBucket`.
+     - Set `MAX_ZIP_BYTES = 50 * 1024 * 1024` (50MB) to align with Supabase Storage limit.
+   - Updated `src/features/lecture-notes/ui/material-upload-form.tsx`:
+     - Explicitly passes `contentType` in `uploadToSignedUrl` options with fallback to `application/zip`.
+4. **Verification:**
+   - Tested live bucket update via Supabase Storage API (`{ message: 'Successfully updated' }`).
+   - `npm run typecheck`: Passed with 0 errors.
+
 ### 2026-10-03: Zero-Deployment Hybrid In-Process Fallback for Unified Notes Generation
+
 
 **Summary:**
 Eliminated the mandatory requirement to deploy an external Python service for **Unified full unit** lecture notes generation:

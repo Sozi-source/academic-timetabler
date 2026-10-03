@@ -61,7 +61,12 @@ export function buildUnifiedLectureNotesDocument(input: {
   sessionWeek?: number | null;
   materials: LectureMaterial[];
 }): { document: LectureNotesDocument; stats: UnifiedSourceStats } {
-  const readyMaterials = input.materials.filter((material) => material.ingestedAt && material.contentText?.trim());
+  const readyMaterials = input.materials.filter((material) =>
+    Boolean(
+      (material.ingestedAt || (material as unknown as { ingested_at?: string }).ingested_at) &&
+      (material.contentText?.trim() || (material as unknown as { content_text?: string }).content_text?.trim())
+    )
+  );
   const sourceMaterials = readyMaterials.map((material) => material.title);
   const sectionsByKey = new Map<string, GeneratedSection>();
   const sectionOrder: string[] = [];
@@ -82,7 +87,8 @@ export function buildUnifiedLectureNotesDocument(input: {
   }
 
   for (const material of readyMaterials) {
-    const content = cleanText(material.contentText ?? '');
+    const rawContent = material.contentText || (material as unknown as { content_text?: string }).content_text || '';
+    const content = cleanText(rawContent);
     sourceWordCount += wordCount(content);
 
     let current = getSection('Unified Source Content');

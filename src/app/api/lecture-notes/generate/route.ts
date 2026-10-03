@@ -13,6 +13,7 @@ export const maxDuration = 120;
 
 import { type NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { requireTrainerAccess } from '@/features/auth/authorization';
 import { embedText } from '@/features/lecture-notes/embeddings/gemini-embeddings';
 import { retrieveSimilarChunks, getCourseOutlineContext, getLectureMaterialsForUnit } from '@/features/lecture-notes/queries';
@@ -81,7 +82,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const unitName = (unit as { code: string; name: string } | null)?.name ?? 'Unknown Unit';
 
     const materials = await getLectureMaterialsForUnit(unitId);
-    const readyMaterials = materials.filter((m) => m.ingestedAt && m.contentText?.trim());
+    const readyMaterials = materials.filter((m) =>
+      Boolean(
+        (m.ingestedAt || (m as unknown as { ingested_at?: string }).ingested_at) &&
+        (m.contentText?.trim() || (m as unknown as { content_text?: string }).content_text?.trim())
+      )
+    );
 
     if (generationMode === 'unified') {
       if (readyMaterials.length === 0) {
@@ -150,14 +156,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       const docxPath = `generated/${profile.id}/${unitId}/${jobId}/${timestamp}.docx`;
       const pdfPath = `generated/${profile.id}/${unitId}/${jobId}/${timestamp}.pdf`;
 
+      const adminDb = createAdminClient();
       const [docxUploadResult, pdfUploadResult] = await Promise.all([
-        db.storage
+        adminDb.storage
           .from('lecture-notes')
           .upload(docxPath, docxBuffer, {
             contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             upsert: true,
           }),
-        db.storage
+        adminDb.storage
           .from('lecture-notes')
           .upload(pdfPath, pdfBuffer, {
             contentType: 'application/pdf',

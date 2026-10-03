@@ -1,3 +1,24 @@
+### 2026-10-03: Fix "No ready source materials are available" False Negative in Unified Notes Generator
+
+**Summary:**
+Diagnosed and resolved the root cause of the error `No ready source materials are available. Upload and wait for all source files to finish processing before generating unified notes` when attempting to build unified notes for ready materials:
+1. **Root Cause Analysis:**
+   - In `src/features/lecture-notes/queries.ts`, `getLectureMaterialsForUnit(unitId)` performed `select('*')` and blindly cast the array to `LectureMaterial[]` (`as unknown as LectureMaterial[]`).
+   - PostgreSQL returns column names in snake_case (`ingested_at`, `content_text`, `chunk_count`), whereas `LectureMaterial` defines camelCase properties (`ingestedAt`, `contentText`, `chunkCount`).
+   - In `src/app/api/lecture-notes/generate/route.ts` line 84:
+     `const readyMaterials = materials.filter((m) => m.ingestedAt && m.contentText?.trim());`
+     evaluated `m.ingestedAt` as `undefined` and `m.contentText` as `undefined`, resulting in an empty array `readyMaterials = []` and throwing the error even though the material was fully ready and indexed with 471 chunks!
+2. **Schema-to-Domain Mapping (`src/features/lecture-notes/queries.ts`):**
+   - Implemented `mapMaterialRow(row)` and `mapJobRow(row)` to authoritatively map all snake_case database columns (`ingested_at`, `content_text`, `storage_path`, `processing_error`, `session_week`, etc.) to strict TypeScript domain models.
+   - Updated `getLectureMaterialsForUnit`, `getLectureMaterial`, `getLectureNoteJobsForUnit`, and `getLectureNoteJob` to run rows through these mappers.
+3. **Resilient Dual-Property Checks:**
+   - Updated `src/app/api/lecture-notes/generate/route.ts` and `src/features/lecture-notes/generation/unified-consolidator.ts` to check both camelCase (`ingestedAt`, `contentText`) and snake_case (`ingested_at`, `content_text`) properties as defense-in-depth.
+   - Ensured DOCX and PDF uploads to Supabase Storage use `adminDb.storage` to eliminate potential RLS hurdles during document storage.
+4. **Verification & Tests:**
+   - Remote database migrations verified up to date.
+   - Unit test suite: 129 test files, 658 tests passed (`npm test`).
+   - `npm run check` (typecheck + lint + next build): Passed with 0 errors across 127 routes.
+
 ### 2026-10-03: Fix Disappearing Materials on Processing Failure, Add PPTX Support & Actionable Error Badges
 
 **Summary:**

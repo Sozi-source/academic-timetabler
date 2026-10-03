@@ -6,11 +6,59 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { getApprovedCurriculumForUnitCode } from '@/features/teaching-documents/curriculum-content/queries';
 import type { AuthenticatedProfile } from '@/features/auth/types';
 import type {
+  GenerationGranularity,
+  JobStatus,
   LectureMaterial,
   LectureNoteJob,
   LectureNotesAllocationSummary,
+  MaterialSourceType,
   RetrievedChunk,
 } from './types';
+
+export function mapMaterialRow(row: Record<string, unknown>): LectureMaterial {
+  return {
+    id: String(row.id ?? ''),
+    trainerId: String(row.trainer_id ?? ''),
+    teachingAllocationId: row.teaching_allocation_id ? String(row.teaching_allocation_id) : null,
+    unitId: String(row.unit_id ?? ''),
+    departmentId: row.department_id ? String(row.department_id) : null,
+    title: String(row.title ?? ''),
+    sourceType: (row.source_type ?? 'docx') as MaterialSourceType,
+    sourceUrl: row.source_url ? String(row.source_url) : null,
+    originalFilename: row.original_filename ? String(row.original_filename) : null,
+    storageBucket: row.storage_bucket ? String(row.storage_bucket) : null,
+    storagePath: row.storage_path ? String(row.storage_path) : null,
+    contentText: row.content_text ? String(row.content_text) : (row.contentText ? String(row.contentText) : null),
+    chunkCount: typeof row.chunk_count === 'number' ? row.chunk_count : (typeof row.chunkCount === 'number' ? row.chunkCount : 0),
+    ingestedAt: row.ingested_at ? String(row.ingested_at) : (row.ingestedAt ? String(row.ingestedAt) : null),
+    processingError: row.processing_error ? String(row.processing_error) : (row.processingError ? String(row.processingError) : null),
+    createdAt: String(row.created_at ?? row.createdAt ?? ''),
+    updatedAt: String(row.updated_at ?? row.updatedAt ?? ''),
+  };
+}
+
+export function mapJobRow(row: Record<string, unknown>): LectureNoteJob {
+  return {
+    id: String(row.id ?? ''),
+    trainerId: String(row.trainer_id ?? ''),
+    teachingAllocationId: row.teaching_allocation_id ? String(row.teaching_allocation_id) : null,
+    unitId: String(row.unit_id ?? ''),
+    departmentId: row.department_id ? String(row.department_id) : null,
+    granularity: (row.granularity ?? 'unit') as GenerationGranularity,
+    sessionWeek: typeof row.session_week === 'number' ? row.session_week : null,
+    topic: row.topic ? String(row.topic) : null,
+    status: (row.status ?? 'pending') as JobStatus,
+    errorMessage: row.error_message ? String(row.error_message) : (row.errorMessage ? String(row.errorMessage) : null),
+    promptTokenCount: typeof row.prompt_token_count === 'number' ? row.prompt_token_count : null,
+    outputTokenCount: typeof row.output_token_count === 'number' ? row.output_token_count : null,
+    docxStorageBucket: row.docx_storage_bucket ? String(row.docx_storage_bucket) : null,
+    docxStoragePath: row.docx_storage_path ? String(row.docx_storage_path) : null,
+    pdfStorageBucket: row.pdf_storage_bucket ? String(row.pdf_storage_bucket) : null,
+    pdfStoragePath: row.pdf_storage_path ? String(row.pdf_storage_path) : null,
+    createdAt: String(row.created_at ?? row.createdAt ?? ''),
+    completedAt: row.completed_at ? String(row.completed_at) : null,
+  };
+}
 
 // ── Materials ─────────────────────────────────────────────────
 
@@ -23,7 +71,7 @@ export async function getLectureMaterialsForUnit(unitId: string): Promise<Lectur
     .order('created_at', { ascending: false });
 
   if (error) throw new Error(`Failed to fetch lecture materials: ${error.message}`);
-  return (data ?? []) as unknown as LectureMaterial[];
+  return (data ?? []).map((row) => mapMaterialRow(row as Record<string, unknown>));
 }
 
 export async function getLectureMaterial(id: string): Promise<LectureMaterial | null> {
@@ -35,7 +83,7 @@ export async function getLectureMaterial(id: string): Promise<LectureMaterial | 
     .maybeSingle();
 
   if (error) throw new Error(`Failed to fetch lecture material: ${error.message}`);
-  return data as unknown as LectureMaterial | null;
+  return data ? mapMaterialRow(data as Record<string, unknown>) : null;
 }
 
 // ── Generation Jobs ───────────────────────────────────────────
@@ -49,7 +97,7 @@ export async function getLectureNoteJobsForUnit(unitId: string): Promise<Lecture
     .order('created_at', { ascending: false });
 
   if (error) throw new Error(`Failed to fetch lecture note jobs: ${error.message}`);
-  return (data ?? []) as unknown as LectureNoteJob[];
+  return (data ?? []).map((row) => mapJobRow(row as Record<string, unknown>));
 }
 
 export async function getLectureNoteJob(id: string): Promise<LectureNoteJob | null> {
@@ -61,7 +109,7 @@ export async function getLectureNoteJob(id: string): Promise<LectureNoteJob | nu
     .maybeSingle();
 
   if (error) throw new Error(`Failed to fetch lecture note job: ${error.message}`);
-  return data as unknown as LectureNoteJob | null;
+  return data ? mapJobRow(data as Record<string, unknown>) : null;
 }
 
 // ── Unit listing for the workspace landing page ───────────────

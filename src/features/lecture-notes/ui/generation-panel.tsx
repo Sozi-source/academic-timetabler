@@ -3,8 +3,12 @@
 import { useState } from 'react';
 import {
   AlertTriangle,
+  BookOpen,
+  Check,
   CheckCircle2,
+  Copy,
   Download,
+  ExternalLink,
   FileText,
   Info,
   Loader2,
@@ -32,6 +36,8 @@ interface GenerationResult {
   sourceWordCount?: number;
   retainedWordCount?: number;
   duplicateParagraphCount?: number;
+  promptTokens?: number;
+  outputTokens?: number;
   status?: 'pending' | 'processing' | 'done' | 'error';
   error?: string | null;
 }
@@ -46,6 +52,8 @@ interface GenerationPanelProps {
   processingCount?: number;
 }
 
+type MethodMode = 'ai_full' | 'ai_topic' | 'unified';
+
 export function GenerationPanel({
   unitId,
   unitCode,
@@ -55,32 +63,40 @@ export function GenerationPanel({
   materialCount,
   processingCount = 0,
 }: GenerationPanelProps) {
-  const [generationMode, setGenerationMode] = useState<'unified' | 'ai'>('unified');
-  const [customTopic, setCustomTopic] = useState('Full Unit');
-  const [selectedTopic, setSelectedTopic] = useState(topics[0] ?? 'Full Unit');
+  const [methodMode, setMethodMode] = useState<MethodMode>('ai_full');
+  const [customTopic, setCustomTopic] = useState('Full Unit Notes');
+  const [selectedTopic, setSelectedTopic] = useState(topics[0] ?? 'Full Unit Notes');
   const [useCustomTopic, setUseCustomTopic] = useState(topics.length === 0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<GenerationResult | null>(null);
   const [downloadingFormat, setDownloadingFormat] = useState<'docx' | 'pdf' | null>(null);
 
-  const effectiveTopic = generationMode === 'unified'
-    ? (customTopic.trim() || 'Full Unit')
-    : (useCustomTopic ? customTopic : selectedTopic);
+  // NotebookLM companion state
+  const [exportingNotebookLM, setExportingNotebookLM] = useState(false);
+  const [copiedPrompt, setCopiedPrompt] = useState(false);
+  const [notebookLmNotice, setNotebookLmNotice] = useState<string | null>(null);
+
+  const effectiveTopic = methodMode === 'ai_topic'
+    ? (useCustomTopic ? customTopic : selectedTopic)
+    : (customTopic.trim() || 'Full Unit Notes');
 
   async function handleGenerate() {
     if (!effectiveTopic.trim()) {
       setError('Please select or type a topic to generate notes for.');
       return;
     }
-    if (generationMode === 'unified' && materialCount === 0) {
-      setError('Upload and wait for all source materials to become Ready before creating the unified unit notes.');
+    if ((methodMode === 'ai_full' || methodMode === 'unified') && materialCount === 0) {
+      setError('Upload and wait for all source materials to become Ready before generating full unit notes.');
       return;
     }
 
     setLoading(true);
     setError(null);
     setResult(null);
+
+    const generationMode = methodMode === 'unified' ? 'unified' : 'ai';
+    const granularity = methodMode === 'ai_topic' ? 'session' : 'unit';
 
     try {
       const response = await fetch('/api/lecture-notes/generate', {
@@ -90,7 +106,7 @@ export function GenerationPanel({
           unitId,
           teachingAllocationId: teachingAllocationId ?? null,
           generationMode,
-          granularity: generationMode === 'unified' ? 'unit' : 'session',
+          granularity,
           sessionWeek: null,
           topic: effectiveTopic.trim(),
         }),
@@ -99,9 +115,9 @@ export function GenerationPanel({
       const json = await response.json() as GenerationResult & { error?: string };
       if (!response.ok || json.error) throw new Error(json.error ?? 'Generation failed.');
 
-      if (generationMode === 'unified') {
+      if (generationMode === 'unified' && json.status !== 'done') {
         setResult(json);
-        let status = json.status ?? 'pending';
+        let status: GenerationResult['status'] = json.status ?? 'pending';
         for (let attempt = 0; attempt < 600 && status !== 'done' && status !== 'error'; attempt += 1) {
           await new Promise((resolve) => window.setTimeout(resolve, 3000));
           const statusResponse = await fetch(`/api/lecture-notes/jobs/${json.jobId}`, { cache: 'no-store' });
@@ -141,20 +157,71 @@ export function GenerationPanel({
     }
   }
 
+  async function handleLaunchNotebookLM() {
+    setExportingNotebookLM(true);
+    setNotebookLmNotice(null);
+    try {
+      const res = await fetch(`/api/lecture-notes/notebooklm?unitId=${encodeURIComponent(unitId)}`);
+      const data = await res.json() as { masterPrompt?: string; downloadUrl?: string; error?: string };
+      if (!res.ok || data.error) throw new Error(data.error ?? 'Failed to prepare NotebookLM bundle.');
+
+      if (data.masterPrompt && typeof navigator !== 'undefined' && navigator.clipboard) {
+        await navigator.clipboard.writeText(data.masterPrompt);
+        setCopiedPrompt(true);
+        window.setTimeout(() => setCopiedPrompt(false), 4000);
+      }
+
+      if (data.downloadUrl) {
+        const a = document.createElement('a');
+        a.href = data.downloadUrl;
+        a.target = '_blank';
+        a.click();
+      }
+
+      window.open('https://notebooklm.google.com', '_blank', 'noopener,noreferrer');
+      setNotebookLmNotice('Source bundle downloaded & master TVET prompt copied to clipboard! In NotebookLM, create a notebook, add the source file, and paste the prompt.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to export to NotebookLM.');
+    } finally {
+      setExportingNotebookLM(false);
+    }
+  }
+
+  async function handleCopyPrompt() {
+    setExportingNotebookLM(true);
+    try {
+      const res = await fetch(`/api/lecture-notes/notebooklm?unitId=${encodeURIComponent(unitId)}`);
+      const data = await res.json() as { masterPrompt?: string; error?: string };
+      if (!res.ok || !data.masterPrompt) throw new Error(data.error ?? 'Failed to fetch prompt.');
+      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        await navigator.clipboard.writeText(data.masterPrompt);
+        setCopiedPrompt(true);
+        window.setTimeout(() => setCopiedPrompt(false), 4000);
+      }
+      setNotebookLmNotice('TVET master prompt copied to clipboard!');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to copy prompt.');
+    } finally {
+      setExportingNotebookLM(false);
+    }
+  }
+
   return (
     <div className="space-y-4">
+      {/* Primary In-App Generator Card */}
       <div className="space-y-3 rounded-xl border border-border bg-surface p-4">
         <div className="flex items-center justify-between">
           <label className="text-xs font-semibold uppercase tracking-wide text-text-muted">Generation method</label>
-          <span className="text-[10px] text-text-muted">Complete source coverage first</span>
+          <span className="text-[10px] text-text-muted">Long-Context Grounded Engine</span>
         </div>
 
-        <Select value={generationMode} onChange={(e) => setGenerationMode(e.target.value as 'unified' | 'ai')}>
-          <option value="unified">Unified full unit — read every ready source</option>
-          <option value="ai">AI-assisted topic notes — semantic retrieval</option>
+        <Select value={methodMode} onChange={(e) => setMethodMode(e.target.value as MethodMode)}>
+          <option value="ai_full">AI Full Unit — Gemini Long-Context (NotebookLM Mode)</option>
+          <option value="ai_topic">AI Topic-Focused — Grounded on syllabus topic</option>
+          <option value="unified">Deterministic Full Unit — Merge text only (No AI)</option>
         </Select>
 
-        {generationMode === 'unified' ? (
+        {methodMode === 'ai_full' && (
           <>
             <input
               type="text"
@@ -163,11 +230,13 @@ export function GenerationPanel({
               placeholder="e.g. Full Unit Notes"
               className="h-9 w-full rounded-lg border border-border-strong bg-surface px-3 text-sm text-text-primary outline-none transition placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
-            <p className="text-[11px] text-text-muted">
-              The engine reads the <strong>complete extracted text</strong> from every Ready source, removes exact duplicate passages, and retains materially different content. No Gemini call is required.
+            <p className="text-[11px] text-text-muted leading-relaxed">
+              <strong>NotebookLM Paradigm:</strong> Gemini reads the <strong>complete extracted text</strong> from all Ready sources in a single long-context window (up to 1M tokens), removes duplicates, and generates structured, TVET-aligned lecture notes directly into Word and PDF.
             </p>
           </>
-        ) : (
+        )}
+
+        {methodMode === 'ai_topic' && (
           <>
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold uppercase tracking-wide text-text-muted">Topic</label>
@@ -194,6 +263,24 @@ export function GenerationPanel({
                 {topics.map((t) => <option key={t} value={t}>{t}</option>)}
               </Select>
             )}
+            <p className="text-[11px] text-text-muted">
+              Synthesizes deep lecture notes focused specifically on the selected syllabus topic, grounded in all uploaded reference materials.
+            </p>
+          </>
+        )}
+
+        {methodMode === 'unified' && (
+          <>
+            <input
+              type="text"
+              value={customTopic}
+              onChange={(e) => setCustomTopic(e.target.value)}
+              placeholder="e.g. Full Unit Notes"
+              className="h-9 w-full rounded-lg border border-border-strong bg-surface px-3 text-sm text-text-primary outline-none transition placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+            <p className="text-[11px] text-text-muted">
+              The engine reads the complete extracted text from every Ready source, removes exact duplicate paragraphs, and compiles the text deterministically without AI tokens.
+            </p>
           </>
         )}
 
@@ -203,13 +290,13 @@ export function GenerationPanel({
           </p>
         )}
 
-        {generationMode === 'unified' && materialCount === 0 && processingCount === 0 && (
+        {(methodMode === 'ai_full' || methodMode === 'unified') && materialCount === 0 && processingCount === 0 && (
           <div className="flex items-start gap-2.5 rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs text-text-secondary">
             <Info className="mt-0.5 size-4 shrink-0 text-primary" />
             <div className="space-y-1">
               <p className="font-medium text-text-primary">Source materials required</p>
               <p className="text-text-muted leading-relaxed">
-                Upload your lecture notes, slides, or a ZIP archive in the <strong>Source materials</strong> box above. Once indexed and marked <strong>Ready</strong>, the unified builder will activate to consolidate them.
+                Upload your lecture notes, slides, or a ZIP archive in the <strong>Source materials</strong> box above. Once indexed and marked <strong>Ready</strong>, the generation engine will activate to synthesize them.
               </p>
             </div>
           </div>
@@ -219,27 +306,71 @@ export function GenerationPanel({
           <div className="flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 p-2.5 text-xs text-text-secondary">
             <Loader2 className="size-3.5 shrink-0 animate-spin text-amber-500" />
             <span>
-              {processingCount} source {processingCount === 1 ? 'file is' : 'files are'} still indexing. Unified generation will enable as soon as processing finishes.
+              {processingCount} source {processingCount === 1 ? 'file is' : 'files are'} still indexing. Generation will enable as soon as processing finishes.
             </span>
           </div>
         )}
 
         <Button
           onClick={handleGenerate}
-          disabled={loading || processingCount > 0 || (generationMode === 'unified' && materialCount === 0) || !effectiveTopic.trim()}
+          disabled={loading || processingCount > 0 || ((methodMode === 'ai_full' || methodMode === 'unified') && materialCount === 0) || !effectiveTopic.trim()}
           leadingIcon={loading ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
           className="w-full"
         >
           {loading
-            ? (generationMode === 'unified' ? 'Building unified notes…' : 'Generating notes…')
-            : generationMode === 'unified'
+            ? (methodMode === 'unified' ? 'Building unified notes…' : 'Synthesizing lecture notes…')
+            : methodMode === 'ai_full'
               ? materialCount === 0
                 ? processingCount > 0
                   ? 'Indexing sources…'
-                  : 'Add sources above to build unified notes'
-                : `Build unified unit notes (${materialCount} source${materialCount === 1 ? '' : 's'})`
-              : 'Generate AI notes'}
+                  : 'Add sources above to generate notes'
+                : `Generate full unit notes (${materialCount} source${materialCount === 1 ? '' : 's'})`
+              : methodMode === 'ai_topic'
+                ? 'Generate AI topic notes'
+                : `Build unified unit notes (${materialCount} source${materialCount === 1 ? '' : 's'})`}
         </Button>
+      </div>
+
+      {/* Google NotebookLM Companion Card */}
+      <div className="space-y-3 rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <BookOpen className="size-4 text-indigo-500" />
+            <span className="text-xs font-semibold text-text-primary">Google NotebookLM Companion</span>
+          </div>
+          <span className="rounded-full bg-indigo-500/10 px-2 py-0.5 text-[10px] font-medium text-indigo-600 dark:text-indigo-400">
+            Interactive Cloud UI
+          </span>
+        </div>
+        <p className="text-xs leading-relaxed text-text-secondary">
+          Prefer Google&apos;s interactive NotebookLM workspace for Audio Overview podcasts, interactive Q&amp;A citations, or study guides? Export your curated source package and TVET master prompt in one click.
+        </p>
+        <div className="flex flex-wrap gap-2 pt-1">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleLaunchNotebookLM}
+            disabled={exportingNotebookLM || materialCount === 0}
+            leadingIcon={exportingNotebookLM ? <Loader2 className="size-3.5 animate-spin" /> : <ExternalLink className="size-3.5 text-indigo-500" />}
+            className="border-indigo-500/30 hover:bg-indigo-500/10"
+          >
+            Launch in NotebookLM
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleCopyPrompt}
+            disabled={exportingNotebookLM}
+            leadingIcon={copiedPrompt ? <Check className="size-3.5 text-success" /> : <Copy className="size-3.5" />}
+          >
+            {copiedPrompt ? 'Prompt copied!' : 'Copy TVET prompt'}
+          </Button>
+        </div>
+        {notebookLmNotice && (
+          <p className="text-[11px] font-medium text-indigo-600 dark:text-indigo-400">
+            {notebookLmNotice}
+          </p>
+        )}
       </div>
 
       {error && (
@@ -254,13 +385,42 @@ export function GenerationPanel({
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-success-border bg-success-surface px-4 py-3">
             <div className="flex items-center gap-2 text-sm font-semibold text-success">
               <CheckCircle2 className="size-4" />
-              {result.generationMode === 'unified' && result.status !== 'done' ? `Unified notes ${result.status ?? 'processing'}` : result.generationMode === 'unified' ? 'Unified notes ready' : 'AI notes ready'}
+              {result.generationMode === 'unified' && result.status !== 'done'
+                ? `Unified notes ${result.status ?? 'processing'}`
+                : result.generationMode === 'unified'
+                  ? 'Unified notes ready'
+                  : 'AI notes ready (Long-Context)'}
             </div>
             <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => handleDownload('docx')} disabled={downloadingFormat === 'docx' || !result.docxStoragePath} leadingIcon={downloadingFormat === 'docx' ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}>Word</Button>
-              <Button size="sm" variant="outline" onClick={() => handleDownload('pdf')} disabled={downloadingFormat === 'pdf' || !result.pdfStoragePath} leadingIcon={downloadingFormat === 'pdf' ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}>PDF</Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleDownload('docx')}
+                disabled={downloadingFormat === 'docx' || !result.docxStoragePath}
+                leadingIcon={downloadingFormat === 'docx' ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+              >
+                Word
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleDownload('pdf')}
+                disabled={downloadingFormat === 'pdf' || !result.pdfStoragePath}
+                leadingIcon={downloadingFormat === 'pdf' ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+              >
+                PDF
+              </Button>
             </div>
           </div>
+
+          {result.generationMode === 'ai' && ((result.promptTokens ?? 0) > 0 || (result.outputTokens ?? 0) > 0) && (
+            <div className="rounded-lg border border-border bg-surface-subtle px-3 py-2 text-[11px] text-text-secondary flex items-center justify-between">
+              <span>✨ Synthesized with Gemini Long-Context</span>
+              <span className="font-mono text-[10px] text-text-muted">
+                {result.promptTokens?.toLocaleString()} input tokens · {result.outputTokens?.toLocaleString()} output tokens
+              </span>
+            </div>
+          )}
 
           {result.generationMode === 'unified' && (
             <div className="rounded-lg border border-border bg-surface-subtle px-3 py-2 text-[11px] text-text-secondary">

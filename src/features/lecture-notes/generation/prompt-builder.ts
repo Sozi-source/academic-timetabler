@@ -102,7 +102,8 @@ export function buildGroundedPrompt(input: PromptInput): string {
       ? learningOutcomes.map((o, i) => `${i + 1}. ${o}`).join('\n')
       : '(Refer to the supplied source corpus and approved curriculum context.)';
 
-  const sourceCorpus = isFullUnit
+  const hasSourceMaterials = sourceMaterials.length > 0;
+  const sourceCorpus = hasSourceMaterials
     ? buildUnifiedSourceCorpus(sourceMaterials)
     : retrievedChunks.length > 0
       ? retrievedChunks
@@ -110,14 +111,14 @@ export function buildGroundedPrompt(input: PromptInput): string {
           .join('\n\n---\n\n')
       : '(No supplementary source excerpts were retrieved.)';
 
-  const sourceCoverage = isFullUnit
+  const sourceCoverage = hasSourceMaterials
     ? buildSourceCoverage(sourceMaterials)
     : retrievedChunks.length > 0
       ? `${retrievedChunks.length} semantically retrieved excerpts`
       : 'No supplementary source excerpts';
 
   const groundingInstructions = isFullUnit
-    ? `GROUNDING MODE: FULL-CORPUS UNIFIED SYNTHESIS
+    ? `GROUNDING MODE: FULL-CORPUS UNIFIED SYNTHESIS (NOTEBOOKLM LONG-CONTEXT)
 
 You have been given the COMPLETE extracted text of every successfully ingested source file for this unit. You MUST read and synthesize the entire corpus before drafting the notes.
 
@@ -140,7 +141,15 @@ SOURCE RECONCILIATION RULES:
 8. Build the final structure around the complete subject coverage discovered across the corpus, not around the order of a single source file.
 9. Preserve formulas, definitions, classifications, worked examples, tables, procedures, study designs, screening concepts, outbreak investigation, surveillance, ethics, and other substantive material present in the sources.
 10. Do not let the shortest or oldest source determine the scope of the final document.`
-    : `GROUNDING MODE: TOPIC-FOCUSED SOURCE SYNTHESIS
+    : hasSourceMaterials
+      ? `GROUNDING MODE: TOPIC-FOCUSED FULL-CORPUS SYNTHESIS
+- Topic of focus: "${topic}".
+- Thoroughly search the supplied source corpus for all content directly or tangentially related to "${topic}".
+- Synthesize all relevant explanations, definitions, classifications, formulas, procedures, and examples covering this topic from across the sources.
+- Ground all statements strictly in the supplied source materials.
+- Do not introduce unsupported claims.`
+      : `GROUNDING MODE: TOPIC-FOCUSED EXCERPT SYNTHESIS
+- Topic of focus: "${topic}".
 - Use the supplied retrieved excerpts as the primary source material.
 - Synthesize overlapping excerpts rather than repeating them.
 - Do not introduce unsupported claims merely to make the notes longer.`;

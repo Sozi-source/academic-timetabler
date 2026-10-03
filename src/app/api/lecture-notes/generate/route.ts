@@ -17,7 +17,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { requireTrainerAccess } from '@/features/auth/authorization';
 import { embedText } from '@/features/lecture-notes/embeddings/gemini-embeddings';
 import { retrieveSimilarChunks, getCourseOutlineContext, getLectureMaterialsForUnit } from '@/features/lecture-notes/queries';
-import { buildGroundedPrompt } from '@/features/lecture-notes/generation/prompt-builder';
+import { buildGroundedPrompt, type UnifiedSourceMaterial } from '@/features/lecture-notes/generation/prompt-builder';
 import { generateLectureNotes } from '@/features/lecture-notes/generation/gemini-generator';
 import { buildLectureNotesDocx } from '@/features/lecture-notes/export/docx-builder';
 import { buildLectureNotesPdf } from '@/features/lecture-notes/export/pdf-builder';
@@ -221,13 +221,24 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       }, { status: 200 });
     }
 
-    // ── Existing AI-assisted topic/session path ─────────────────
+    // ── AI Long-Context Synthesis (NotebookLM Engine) ───────────
     const outline = await getCourseOutlineContext(unitId);
     const learningOutcomes = outline?.learningOutcomes ?? [];
     const weeklyPlanContext = outline?.weeklyPlanText ?? '';
-    let retrievedChunks: Awaited<ReturnType<typeof retrieveSimilarChunks>> = [];
 
-    if (readyMaterials.length > 0) {
+    const sourceMaterials: UnifiedSourceMaterial[] = readyMaterials.map((m) => {
+      const content = m.contentText || (m as unknown as { content_text?: string }).content_text || '';
+      return {
+        id: m.id,
+        title: m.title,
+        originalFilename: m.originalFilename || (m as unknown as { original_filename?: string }).original_filename || null,
+        contentText: content,
+        wordCount: content.trim() ? content.trim().split(/\s+/).length : 0,
+      };
+    });
+
+    let retrievedChunks: Awaited<ReturnType<typeof retrieveSimilarChunks>> = [];
+    if (sourceMaterials.length === 0 && readyMaterials.length > 0) {
       try {
         const expandedQuery = `${topic} ${learningOutcomes.slice(0, 3).join(' ')}`.trim();
         const queryEmbedding = await embedText(expandedQuery);
@@ -243,10 +254,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       }
     }
 
-    const usedMaterialIds = new Set(retrievedChunks.map((c) => c.materialId));
-    const sourceMaterialTitles = readyMaterials
-      .filter((m) => usedMaterialIds.size === 0 ? true : usedMaterialIds.has(m.id))
-      .map((m) => m.title);
+    const sourceMaterialTitles = readyMaterials.map((m) => m.title);
 
     const prompt = buildGroundedPrompt({
       unitCode,
@@ -257,6 +265,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       learningOutcomes,
       weeklyPlanContext,
       retrievedChunks,
+      sourceMaterials,
     });
 
     const { document: notesDocument, promptTokens, outputTokens } = await generateLectureNotes({
@@ -277,17 +286,30 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const timestamp = Date.now();
     const docxPath = `generated/${profile.id}/${unitId}/${jobId}/${timestamp}.docx`;
     const pdfPath = `generated/${profile.id}/${unitId}/${jobId}/${timestamp}.pdf`;
+
+    const adminDb = createAdminClient();
     const [docxUploadResult, pdfUploadResult] = await Promise.all([
-      db.storage.from('lecture-notes').upload(docxPath, docxBuffer, {
-        contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', upsert: true,
+      adminDb.storage.from('lecture-notes').upload(docxPath, docxBuffer, {
+        contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        upsert: true,
       }),
-      db.storage.from('lecture-notes').upload(pdfPath, pdfBuffer, {
-        contentType: 'application/pdf', upsert: true,
+      adminDb.storage.from('lecture-notes').upload(pdfPath, pdfBuffer, {
+        contentType: 'application/pdf',
+        upsert: true,
       }),
     ]);
 
     const docxStoragePath = docxUploadResult.error ? null : docxPath;
     const pdfStoragePath = pdfUploadResult.error ? null : pdfPath;
+
+    const resultJson = {
+      sections: notesDocument.sections,
+      sourceMaterials: notesDocument.sourceMaterials,
+      materialCount: readyMaterials.length,
+      promptTokens,
+      outputTokens,
+      generationMode: 'ai',
+    };
 
     await db.from('lecture_note_jobs').update({
       status: 'done',
@@ -297,13 +319,27 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       docx_storage_path: docxStoragePath,
       pdf_storage_bucket: pdfStoragePath ? 'lecture-notes' : null,
       pdf_storage_path: pdfStoragePath,
+      result_json: resultJson,
       completed_at: new Date().toISOString(),
     }).eq('id', jobId);
 
     return NextResponse.json({
-      jobId, unitCode, unitName, topic, granularity, generationMode: 'ai', sessionWeek: sessionWeek ?? null,
-      sections: notesDocument.sections, sourceMaterials: sourceMaterialTitles, chunkCount: retrievedChunks.length,
-      promptTokens, outputTokens, docxStoragePath, pdfStoragePath, generatedAt: notesDocument.generatedAt,
+      jobId,
+      unitCode,
+      unitName,
+      topic,
+      granularity,
+      generationMode: 'ai',
+      sessionWeek: sessionWeek ?? null,
+      sections: notesDocument.sections,
+      sourceMaterials: sourceMaterialTitles,
+      materialCount: readyMaterials.length,
+      chunkCount: readyMaterials.reduce((sum, material) => sum + material.chunkCount, 0),
+      promptTokens,
+      outputTokens,
+      docxStoragePath,
+      pdfStoragePath,
+      generatedAt: notesDocument.generatedAt,
     });
   } catch (err) {
     console.error('[lecture-notes/generate]', err);

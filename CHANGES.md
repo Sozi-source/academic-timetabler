@@ -1,3 +1,24 @@
+### 2026-10-03: Implement Gemini Long-Context NotebookLM Engine & Google NotebookLM Companion Bridge
+
+**Summary:**
+Streamlined lecture notes generation by adopting the Google NotebookLM architecture (Gemini Long-Context full-corpus grounding) directly in-app and adding a 1-click companion export to Google NotebookLM:
+1. **Gemini Long-Context (In-App NotebookLM Engine):**
+   - Replaced fragile 10-chunk vector RAG in `src/app/api/lecture-notes/generate/route.ts` with direct full-corpus long-context synthesis using Gemini 2.5 Flash / 1.5 Pro.
+   - Maps 100% of all ready source materials into `UnifiedSourceMaterial[]` and passes the complete labelled source corpus to `buildGroundedPrompt`.
+   - Updated `src/features/lecture-notes/generation/prompt-builder.ts` to support full source corpus grounding in both full-unit and topic-focused modes.
+   - Admin storage client (`adminDb`) applied to both Word (`.docx`) and PDF (`.pdf`) output uploads to guarantee zero RLS failures.
+   - Saves `result_json` into `lecture_note_jobs` so generated sections, token counts, and file paths persist across page reloads.
+2. **Google NotebookLM Companion Bridge (`GET /api/lecture-notes/notebooklm`):**
+   - Built a dedicated companion endpoint that bundles the official TVET course outline, approved learning outcomes, weekly plan, and all ingested source texts into a single downloadable source file (`[UnitCode]_NotebookLM_Source_Bundle.txt`).
+   - Generates an expert TVET Curriculum Specialist master prompt tailored for Google NotebookLM.
+3. **UI Enhancements (`src/features/lecture-notes/ui/generation-panel.tsx`):**
+   - Default generation method set to **"AI Full Unit — Gemini Long-Context (NotebookLM Mode)"**.
+   - Added **Google NotebookLM Companion** card with "Launch in NotebookLM" (1-click source package download, TVET prompt copy to clipboard, and automated navigation to `https://notebooklm.google.com`) and "Copy TVET prompt".
+   - Added token consumption badge displaying prompt and candidate token counts.
+4. **Verification:**
+   - Vitest suite: 129 test files, 658 tests passed (`npm test`).
+   - `npm run check` (typecheck + lint + next build): Passed with 0 errors across all 127 routes.
+
 ### 2026-10-03: Fix "No ready source materials are available" False Negative in Unified Notes Generator
 
 **Summary:**

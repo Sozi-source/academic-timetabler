@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   Download,
   FileText,
+  Info,
   Loader2,
   Sparkles,
 } from 'lucide-react';
@@ -202,20 +203,43 @@ export function GenerationPanel({
           </p>
         )}
 
+        {generationMode === 'unified' && materialCount === 0 && processingCount === 0 && (
+          <div className="flex items-start gap-2.5 rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs text-text-secondary">
+            <Info className="mt-0.5 size-4 shrink-0 text-primary" />
+            <div className="space-y-1">
+              <p className="font-medium text-text-primary">Source materials required</p>
+              <p className="text-text-muted leading-relaxed">
+                Upload your lecture notes, slides, or a ZIP archive in the <strong>Source materials</strong> box above. Once indexed and marked <strong>Ready</strong>, the unified builder will activate to consolidate them.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {processingCount > 0 && (
+          <div className="flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 p-2.5 text-xs text-text-secondary">
+            <Loader2 className="size-3.5 shrink-0 animate-spin text-amber-500" />
+            <span>
+              {processingCount} source {processingCount === 1 ? 'file is' : 'files are'} still indexing. Unified generation will enable as soon as processing finishes.
+            </span>
+          </div>
+        )}
+
         <Button
           onClick={handleGenerate}
           disabled={loading || processingCount > 0 || (generationMode === 'unified' && materialCount === 0) || !effectiveTopic.trim()}
           leadingIcon={loading ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
           className="w-full"
         >
-          {loading ? (generationMode === 'unified' ? 'Building unified notes…' : 'Generating notes…') : generationMode === 'unified' ? 'Build unified unit notes' : 'Generate AI notes'}
+          {loading
+            ? (generationMode === 'unified' ? 'Building unified notes…' : 'Generating notes…')
+            : generationMode === 'unified'
+              ? materialCount === 0
+                ? processingCount > 0
+                  ? 'Indexing sources…'
+                  : 'Add sources above to build unified notes'
+                : `Build unified unit notes (${materialCount} source${materialCount === 1 ? '' : 's'})`
+              : 'Generate AI notes'}
         </Button>
-
-        {processingCount > 0 ? (
-          <p className="text-[11px] text-text-muted text-center">
-            {processingCount} source {processingCount === 1 ? 'file is' : 'files are'} still being processed. Wait until all are Ready.
-          </p>
-        ) : null}
       </div>
 
       {error && (

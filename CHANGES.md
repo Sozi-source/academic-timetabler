@@ -1,3 +1,22 @@
+### 2026-10-03: Unified Lecture Notes Builder Activation & Guidance
+
+**Summary:**
+Diagnosed and addressed the issue where the "Build unified unit notes" button remained inactive (`disabled`):
+1. **Root Cause Analysis:**
+   - In `src/features/lecture-notes/ui/generation-panel.tsx`, unified generation mode strictly requires at least one Ready source material (`materialCount > 0`).
+   - The user's earlier upload of `Epidemiology.zip` failed due to the storage bucket MIME restriction (`application/x-zip-compressed`), leaving 0 materials in the library for that unit.
+   - The UI previously lacked visual feedback explaining why the button was disabled when `materialCount === 0`.
+2. **UX Enhancements:**
+   - Added an informational callout above the generation button when `materialCount === 0 && processingCount === 0`, clearly explaining that source materials (PDF, Word, or ZIP) must be uploaded and ready first.
+   - Added an indexing alert with an animated spinner when source materials are still undergoing background extraction/chunking (`processingCount > 0`).
+   - Updated the button label to be context-aware:
+     - `materialCount === 0 && processingCount === 0`: `Add sources above to build unified notes`
+     - `processingCount > 0`: `Indexing sources…`
+     - `materialCount > 0`: `Build unified unit notes (N sources)`
+3. **Verification:**
+   - `npm run check` (typecheck + lint + next build): Passed with 0 errors across 127 routes.
+   - `npm test`: 128 test files passed (656 tests).
+
 ### 2026-10-03: Fix ZIP Storage MIME Type Rejection (`application/x-zip-compressed`)
 
 **Summary:**

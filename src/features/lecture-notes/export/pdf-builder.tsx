@@ -125,6 +125,34 @@ const styles = StyleSheet.create({
     marginTop: 5,
     marginBottom: 3,
   },
+  table: {
+    marginTop: 4,
+    marginBottom: 7,
+    borderWidth: 0.7,
+    borderColor: '#d1d5db',
+  },
+  tableRow: {
+    flexDirection: 'row',
+  },
+  tableCell: {
+    flex: 1,
+    borderRightWidth: 0.7,
+    borderBottomWidth: 0.7,
+    borderColor: '#d1d5db',
+    padding: 4,
+    fontSize: 7.8,
+    color: '#374151',
+  },
+  tableHeaderCell: {
+    flex: 1,
+    borderRightWidth: 0.7,
+    borderBottomWidth: 0.7,
+    borderColor: '#d1d5db',
+    padding: 4,
+    fontSize: 7.8,
+    fontFamily: 'Helvetica-Bold',
+    color: '#1f2937',
+  },
   warningBox: {
     backgroundColor: '#fffbeb',
     borderWidth: 1,
@@ -168,25 +196,115 @@ const styles = StyleSheet.create({
 });
 
 function cleanMarkdownInline(text: string): string {
-  return text
+  let value = text
     .replace(/\*\*([^*]+)\*\*/g, '$1')
     .replace(/\*([^*]+)\*/g, '$1')
-    .replace(/`([^`]+)`/g, '$1');
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/\\text\{([^{}]*)\}/g, '$1')
+    .replace(/\\mathrm\{([^{}]*)\}/g, '$1')
+    .replace(/\\mathbf\{([^{}]*)\}/g, '$1')
+    .replace(/\\times/g, '×')
+    .replace(/\\rightarrow/g, '→')
+    .replace(/\\leftrightarrow/g, '↔')
+    .replace(/\\geq/g, '≥')
+    .replace(/\\leq/g, '≤')
+    .replace(/\\ge/g, '≥')
+    .replace(/\\le/g, '≤')
+    .replace(/\\approx/g, '≈')
+    .replace(/\\pm/g, '±')
+    .replace(/\\%/g, '%')
+    .replace(/\\,/g, ' ')
+    .replace(/\\cdot/g, '·')
+    .replace(/\$\$/g, '')
+    .replace(/\$/g, '');
+
+  // Turn simple LaTeX fractions into readable inline fractions.
+  value = value.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, '$1 / $2');
+
+  return value
+    .replace(/\\\\/g, '')
+    .replace(/[ \t]{2,}/g, ' ')
+    .trim();
+}
+
+function isTableSeparator(line: string): boolean {
+  return /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)+\|?\s*$/.test(line);
+}
+
+function parseTableRow(line: string): string[] {
+  const trimmed = line.trim().replace(/^\|/, '').replace(/\|$/, '');
+  return trimmed.split('|').map((cell) => cleanMarkdownInline(cell.trim()));
+}
+
+function MarkdownTable({ lines }: { lines: string[] }) {
+  const rows = lines
+    .filter((line) => !isTableSeparator(line))
+    .map(parseTableRow)
+    .filter((row) => row.length > 0);
+
+  if (rows.length === 0) return null;
+
+  const columnCount = Math.max(...rows.map((row) => row.length));
+
+  return (
+    <View style={styles.table}>
+      {rows.map((row, rowIndex) => (
+        <View key={rowIndex} style={styles.tableRow}>
+          {Array.from({ length: columnCount }, (_, columnIndex) => (
+            <Text
+              key={columnIndex}
+              style={rowIndex === 0 ? styles.tableHeaderCell : styles.tableCell}
+            >
+              {row[columnIndex] ?? ''}
+            </Text>
+          ))}
+        </View>
+      ))}
+    </View>
+  );
 }
 
 function SectionContent({ section }: { section: GeneratedSection }) {
   const lines = section.body.split('\n');
+  const blocks: Array<{ type: 'line' | 'table'; lines: string[] }> = [];
+
+  for (let i = 0; i < lines.length; i += 1) {
+    const trimmed = lines[i].trim();
+    if (!trimmed) {
+      blocks.push({ type: 'line', lines: [''] });
+      continue;
+    }
+
+    if (trimmed.includes('|') && i + 1 < lines.length && isTableSeparator(lines[i + 1])) {
+      const tableLines = [trimmed, lines[i + 1]];
+      i += 2;
+      while (i < lines.length && lines[i].trim().includes('|')) {
+        tableLines.push(lines[i].trim());
+        i += 1;
+      }
+      i -= 1;
+      blocks.push({ type: 'table', lines: tableLines });
+      continue;
+    }
+
+    blocks.push({ type: 'line', lines: [lines[i]] });
+  }
 
   return (
     <View style={styles.section}>
       <Text style={styles.sectionHeading}>{section.heading}</Text>
-      {lines.map((line, idx) => {
+      {blocks.map((block, blockIndex) => {
+        if (block.type === 'table') {
+          return <MarkdownTable key={`table-${blockIndex}`} lines={block.lines} />;
+        }
+
+        const line = block.lines[0];
         const trimmed = line.trim();
         if (!trimmed) return null;
 
         if (trimmed.startsWith('[No source material')) {
           return (
-            <View key={idx} style={styles.warningBox}>
+            <View key={blockIndex} style={styles.warningBox}>
               <Text style={styles.warningText}>{trimmed}</Text>
             </View>
           );
@@ -195,7 +313,7 @@ function SectionContent({ section }: { section: GeneratedSection }) {
         if (/^[-*]\s+/.test(trimmed)) {
           const content = cleanMarkdownInline(trimmed.replace(/^[-*]\s+/, ''));
           return (
-            <View key={idx} style={styles.bulletRow}>
+            <View key={blockIndex} style={styles.bulletRow}>
               <Text style={styles.bulletDot}>•</Text>
               <Text style={styles.bulletText}>{content}</Text>
             </View>
@@ -207,23 +325,23 @@ function SectionContent({ section }: { section: GeneratedSection }) {
           const num = match ? match[1] : '';
           const content = cleanMarkdownInline(match ? match[2] : trimmed);
           return (
-            <View key={idx} style={styles.numberRow}>
+            <View key={blockIndex} style={styles.numberRow}>
               <Text style={styles.numberLabel}>{num}</Text>
               <Text style={styles.numberText}>{content}</Text>
             </View>
           );
         }
 
-        if (trimmed.startsWith('### ')) {
+        if (/^#{3,}\s+/.test(trimmed)) {
           return (
-            <Text key={idx} style={styles.subHeading}>
-              {cleanMarkdownInline(trimmed.slice(4))}
+            <Text key={blockIndex} style={styles.subHeading}>
+              {cleanMarkdownInline(trimmed.replace(/^#{3,}\s+/, ''))}
             </Text>
           );
         }
 
         return (
-          <Text key={idx} style={styles.paragraph}>
+          <Text key={blockIndex} style={styles.paragraph}>
             {cleanMarkdownInline(trimmed)}
           </Text>
         );

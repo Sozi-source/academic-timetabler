@@ -23,6 +23,9 @@ interface GenerationResult {
   sections: GeneratedSection[];
   sourceMaterials: string[];
   chunkCount: number;
+  sourceMaterialCount?: number;
+  sourceWordCount?: number;
+  synthesisMode?: 'full-corpus' | 'topic-rag';
   docxStoragePath: string | null;
   pdfStoragePath: string | null;
   generatedAt: string;
@@ -49,6 +52,7 @@ export function GenerationPanel({
 }: GenerationPanelProps) {
   const [customTopic, setCustomTopic] = useState('');
   const [selectedTopic, setSelectedTopic] = useState(topics[0] ?? '');
+  const [generationMode, setGenerationMode] = useState<'unit' | 'topic'>('unit');
   const [useCustomTopic, setUseCustomTopic] = useState(topics.length === 0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +77,7 @@ export function GenerationPanel({
         body: JSON.stringify({
           unitId,
           teachingAllocationId: teachingAllocationId ?? null,
-          granularity: 'session',
+          granularity: generationMode === 'unit' ? 'unit' : 'session',
           sessionWeek: null,
           topic: effectiveTopic.trim(),
         }),
@@ -110,6 +114,48 @@ export function GenerationPanel({
 
   return (
     <div className="space-y-4">
+      {/* Synthesis mode */}
+      <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+            Generation scope
+          </label>
+          <span className="text-[10px] text-text-muted">
+            {generationMode === 'unit' ? 'All processed source files' : 'Relevant source excerpts'}
+          </span>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => setGenerationMode('unit')}
+            className={`rounded-lg border px-3 py-2 text-left transition ${
+              generationMode === 'unit'
+                ? 'border-primary bg-primary/10 text-text-primary'
+                : 'border-border bg-surface text-text-secondary hover:border-border-strong'
+            }`}
+          >
+            <span className="block text-xs font-semibold">Unified full unit</span>
+            <span className="mt-0.5 block text-[10px] text-text-muted">
+              Reads every uploaded version and merges the coverage.
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setGenerationMode('topic')}
+            className={`rounded-lg border px-3 py-2 text-left transition ${
+              generationMode === 'topic'
+                ? 'border-primary bg-primary/10 text-text-primary'
+                : 'border-border bg-surface text-text-secondary hover:border-border-strong'
+            }`}
+          >
+            <span className="block text-xs font-semibold">Topic-focused</span>
+            <span className="mt-0.5 block text-[10px] text-text-muted">
+              Uses semantically relevant excerpts for a narrower topic.
+            </span>
+          </button>
+        </div>
+      </div>
+
       {/* Topic selection */}
       <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
         <div className="flex items-center justify-between">
@@ -146,7 +192,7 @@ export function GenerationPanel({
         {/* Material context hint */}
         {materialCount > 0 && (
           <p className="text-[11px] text-text-muted">
-            <span className="font-medium text-primary">{materialCount}</span> source file{materialCount === 1 ? '' : 's'} will be read and unified into the notes.
+            <span className="font-medium text-primary">{materialCount}</span> source file{materialCount === 1 ? '' : 's'} {generationMode === 'unit' ? 'will be read in full and unified into the notes.' : 'available for topic-focused retrieval.'}
           </p>
         )}
 
@@ -165,7 +211,9 @@ export function GenerationPanel({
           </p>
         ) : loading ? (
           <p className="text-[11px] text-text-muted text-center">
-            Synthesizing notes from the indexed sources…
+            {generationMode === 'unit'
+              ? 'Reading and synthesizing all processed source files…'
+              : 'Synthesizing notes from the indexed sources…'}
           </p>
         ) : null}
       </div>
@@ -221,6 +269,15 @@ export function GenerationPanel({
                   {title}
                 </span>
               ))}
+            </div>
+          )}
+
+          {result.synthesisMode === 'full-corpus' && (
+            <div className="rounded-lg border border-border bg-surface-subtle px-3 py-2 text-[11px] text-text-secondary">
+              Unified from <span className="font-semibold text-text-primary">{result.sourceMaterialCount ?? materialCount}</span> complete source file{(result.sourceMaterialCount ?? materialCount) === 1 ? '' : 's'}
+              {(result.sourceWordCount ?? 0) > 0 ? (
+                <> · approximately <span className="font-semibold text-text-primary">{(result.sourceWordCount ?? 0).toLocaleString()}</span> source words reviewed</>
+              ) : null}
             </div>
           )}
 

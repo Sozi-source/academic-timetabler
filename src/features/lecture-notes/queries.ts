@@ -146,6 +146,61 @@ export async function getLectureNotesUnitList(
   });
 }
 
+
+// ── Complete source corpus for unified full-unit generation ─────
+
+export interface UnifiedSourceMaterial {
+  id: string;
+  title: string;
+  originalFilename: string | null;
+  contentText: string;
+  wordCount: number;
+}
+
+/**
+ * Returns the complete extracted text of every ready source material
+ * visible to the current user for the unit.
+ *
+ * This is intentionally separate from vector retrieval. Vector search
+ * is useful for a narrow topic, but a full-unit synthesis must be able
+ * to read every uploaded version so that later lessons and unique
+ * details are not lost simply because they were not among the top-k
+ * semantic matches.
+ */
+export async function getUnifiedSourceMaterialsForUnit(
+  unitId: string,
+): Promise<UnifiedSourceMaterial[]> {
+  const db = await createClient();
+
+  const { data, error } = await db
+    .from('lecture_materials')
+    .select('id, title, original_filename, content_text, ingested_at, created_at')
+    .eq('unit_id', unitId)
+    .not('ingested_at', 'is', null)
+    .not('content_text', 'is', null)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    throw new Error(`Failed to fetch complete lecture source corpus: ${error.message}`);
+  }
+
+  return (data ?? [])
+    .map((material) => {
+      const contentText = typeof material.content_text === 'string'
+        ? material.content_text.trim()
+        : '';
+
+      return {
+        id: material.id as string,
+        title: (material.title as string) ?? 'Untitled source',
+        originalFilename: (material.original_filename as string | null) ?? null,
+        contentText,
+        wordCount: contentText ? contentText.split(/\s+/).length : 0,
+      };
+    })
+    .filter((material) => material.contentText.length > 0);
+}
+
 // ── Vector retrieval (called server-side) ─────────────────────
 
 /**

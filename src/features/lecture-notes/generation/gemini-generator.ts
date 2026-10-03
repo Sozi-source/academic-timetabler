@@ -10,7 +10,11 @@ import type { GeneratedSection, LectureNotesDocument } from '../types';
 import { getGeminiApiKey } from '../lib/gemini-api-key';
 
 /** Ordered model list — first available & healthy wins. */
-const MODEL_POOL = ['gemini-flash-latest', 'gemini-3.5-flash', 'gemini-3.8-flash'] as const;
+const MODEL_POOL = [
+  process.env.GEMINI_MODEL,
+  'gemini-2.5-flash',
+  'gemini-flash-latest',
+].filter((model): model is string => Boolean(model));
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
@@ -30,7 +34,9 @@ export interface GeminiGenerationInput {
 
 /**
  * Calls Gemini with the grounded prompt and returns a
- * structured LectureNotesDocument parsed from the markdown response.
+ * structured LectureNotesDocument parsed from the markdown response. Full-unit
+ * synthesis is intentionally allowed a much larger output budget than the
+ * previous 8,192-token cap so the complete source corpus can be consolidated.
  */
 export async function generateLectureNotes(
   input: GeminiGenerationInput
@@ -51,7 +57,7 @@ export async function generateLectureNotes(
         generationConfig: {
           temperature: 0.2,
           topP: 0.85,
-          maxOutputTokens: 8192,
+          maxOutputTokens: 24576,
         },
       }),
     });

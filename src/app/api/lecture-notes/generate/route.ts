@@ -11,13 +11,13 @@
 // 7. Uploads outputs to Supabase Storage
 
 export const runtime = 'nodejs';
-export const maxDuration = 120; // seconds — generation can take time
+export const maxDuration = 300; // full-unit synthesis may require a larger model context/output
 
 import { type NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { requireTrainerAccess } from '@/features/auth/authorization';
 import { embedText } from '@/features/lecture-notes/embeddings/gemini-embeddings';
-import { retrieveSimilarChunks, getCourseOutlineContext, getLectureMaterialsForUnit } from '@/features/lecture-notes/queries';
+import { retrieveSimilarChunks, getCourseOutlineContext, getLectureMaterialsForUnit, getUnifiedSourceMaterialsForUnit } from '@/features/lecture-notes/queries';
 import { buildGroundedPrompt } from '@/features/lecture-notes/generation/prompt-builder';
 import { generateLectureNotes } from '@/features/lecture-notes/generation/gemini-generator';
 import { buildLectureNotesDocx } from '@/features/lecture-notes/export/docx-builder';
@@ -80,27 +80,44 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const learningOutcomes = outline?.learningOutcomes ?? [];
     const weeklyPlanContext = outline?.weeklyPlanText ?? '';
 
-    // ── Material titles & RAG retrieval ───────────────────────
+    // ── Source materials ──────────────────────────────────────
+    // A full-unit generation must read the COMPLETE extracted text
+    // of every ready source file. The previous implementation sent
+    // only the top 10 vector chunks, which caused entire lessons and
+    // unique material from other versions to disappear from the
+    // generated document.
     const materials = await getLectureMaterialsForUnit(unitId);
-    let retrievedChunks: Awaited<ReturnType<typeof retrieveSimilarChunks>> = [];
+    let sourceMaterialTitles = materials.map((m) => m.title);
 
-    if (materials.length > 0) {
+    let retrievedChunks: Awaited<ReturnType<typeof retrieveSimilarChunks>> = [];
+    let unifiedSourceMaterials: Awaited<ReturnType<typeof getUnifiedSourceMaterialsForUnit>> = [];
+
+    if (granularity === 'unit') {
+      unifiedSourceMaterials = await getUnifiedSourceMaterialsForUnit(unitId);
+      sourceMaterialTitles = unifiedSourceMaterials.map((m) => m.title);
+
+      if (unifiedSourceMaterials.length === 0) {
+        return NextResponse.json(
+          { error: 'No fully processed lecture source files are available. Upload and finish processing the source materials before generating unified notes.' },
+          { status: 422 },
+        );
+      }
+    } else if (materials.length > 0) {
+      // Narrow topic/session generation continues to use semantic retrieval.
       try {
-        // Expand query with outline outcomes for higher semantic precision
         const expandedQuery = `${topic} ${learningOutcomes.slice(0, 3).join(' ')}`.trim();
         const queryEmbedding = await embedText(expandedQuery);
         retrievedChunks = await retrieveSimilarChunks({
           queryEmbedding,
           unitId,
           trainerId: profile.id,
-          matchCount: 10,
-          similarityThreshold: 0.35,
+          matchCount: 24,
+          similarityThreshold: 0.30,
         });
       } catch (vectorErr) {
-        console.warn('[lecture-notes/generate] Vector retrieval failed, proceeding with outline grounding:', vectorErr);
+        console.warn('[lecture-notes/generate] Vector retrieval failed:', vectorErr);
       }
 
-      // If vector search returned 0 matches or had an issue, fallback directly to stored material chunks
       if (retrievedChunks.length === 0) {
         const materialIds = materials.map((m) => m.id);
         const { data: directChunks } = await db
@@ -108,7 +125,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           .select('id, material_id, content')
           .in('material_id', materialIds)
           .order('chunk_index', { ascending: true })
-          .limit(10);
+          .limit(24);
 
         if (directChunks && directChunks.length > 0) {
           retrievedChunks = directChunks.map((c) => ({
@@ -121,10 +138,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       }
     }
 
-    const usedMaterialIds = new Set(retrievedChunks.map((c) => c.materialId));
-    const sourceMaterialTitles = materials
-      .filter((m) => usedMaterialIds.size === 0 ? true : usedMaterialIds.has(m.id))
-      .map((m) => m.title);
+    const sourceWordCount = unifiedSourceMaterials.reduce(
+      (total, material) => total + material.wordCount,
+      0,
+    );
 
     // ── Build grounded prompt ──────────────────────────────────
     const prompt = buildGroundedPrompt({
@@ -136,6 +153,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       learningOutcomes,
       weeklyPlanContext,
       retrievedChunks,
+      sourceMaterials: unifiedSourceMaterials,
     });
 
     // ── Call Gemini ────────────────────────────────────────────
@@ -208,6 +226,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       sections: notesDocument.sections,
       sourceMaterials: sourceMaterialTitles,
       chunkCount: retrievedChunks.length,
+      sourceMaterialCount: unifiedSourceMaterials.length,
+      sourceWordCount,
+      synthesisMode: granularity === 'unit' ? 'full-corpus' : 'topic-rag',
       promptTokens,
       outputTokens,
       docxStoragePath,

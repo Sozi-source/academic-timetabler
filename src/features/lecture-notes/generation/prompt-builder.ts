@@ -1,12 +1,30 @@
 // ============================================================
 // Lecture Notes — Grounded Prompt Builder
 // ============================================================
-// Builds the pedagogical system prompt for Gemini generation.
-// Supports dual-grounding:
-// 1. Authoritative TVET CDACC syllabus & approved course outline (baseline)
-// 2. Trainer-uploaded source materials & documents (RAG enhancement when available)
+// Two generation modes are supported:
+//
+// 1. FULL UNIT / UNIFIED SYNTHESIS
+//    Every successfully ingested source file for the unit is supplied
+//    to Gemini as a labelled source corpus. This is deliberately NOT
+//    a top-k RAG excerpt. It allows the model to compare different
+//    versions of the same lecture notes, remove repetition, reconcile
+//    overlap, and build one coherent set of notes.
+//
+// 2. TOPIC-FOCUSED
+//    Uses semantically retrieved excerpts for a narrower topic.
+//
+// The full-unit path exists specifically to avoid the previous failure
+// mode where only 10 vector chunks were sent to the model.
 
 import type { RetrievedChunk } from '../types';
+
+export interface UnifiedSourceMaterial {
+  id: string;
+  title: string;
+  originalFilename?: string | null;
+  contentText: string;
+  wordCount: number;
+}
 
 export interface PromptInput {
   unitCode: string;
@@ -17,6 +35,45 @@ export interface PromptInput {
   learningOutcomes: string[];
   weeklyPlanContext: string;
   retrievedChunks: RetrievedChunk[];
+  sourceMaterials?: UnifiedSourceMaterial[];
+}
+
+function cleanSourceText(text: string): string {
+  return text
+    .replace(/\u0000/g, ' ')
+    .replace(/\r\n/g, '\n')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{4,}/g, '\n\n')
+    .trim();
+}
+
+function buildUnifiedSourceCorpus(materials: UnifiedSourceMaterial[]): string {
+  if (materials.length === 0) {
+    return '(No successfully ingested source files are available.)';
+  }
+
+  return materials
+    .map((material, index) => {
+      const filename = material.originalFilename
+        ? ` | File: ${material.originalFilename}`
+        : '';
+
+      return [
+        `===== SOURCE ${index + 1}: ${material.title}${filename} =====`,
+        `SOURCE WORD COUNT: ${material.wordCount}`,
+        cleanSourceText(material.contentText),
+        `===== END SOURCE ${index + 1} =====`,
+      ].join('\n');
+    })
+    .join('\n\n');
+}
+
+function buildSourceCoverage(materials: UnifiedSourceMaterial[]): string {
+  if (materials.length === 0) return '(No source coverage available.)';
+
+  return materials
+    .map((m, i) => `${i + 1}. ${m.title} — approximately ${m.wordCount.toLocaleString()} words`)
+    .join('\n');
 }
 
 export function buildGroundedPrompt(input: PromptInput): string {
@@ -29,101 +86,167 @@ export function buildGroundedPrompt(input: PromptInput): string {
     learningOutcomes,
     weeklyPlanContext,
     retrievedChunks,
+    sourceMaterials = [],
   } = input;
 
+  const isFullUnit = granularity === 'unit';
   const scopeLabel =
-    granularity === 'session' && sessionWeek != null
-      ? `Week ${sessionWeek} Session`
-      : 'Full Unit Notes';
+    isFullUnit
+      ? 'Unified Full Unit Notes'
+      : sessionWeek != null
+        ? `Week ${sessionWeek} Topic/Session`
+        : 'Topic-Focused Notes';
 
   const outcomesText =
     learningOutcomes.length > 0
       ? learningOutcomes.map((o, i) => `${i + 1}. ${o}`).join('\n')
-      : '(Refer to canonical TVET CDACC competency outcomes for this unit)';
+      : '(Refer to the supplied source corpus and approved curriculum context.)';
 
-  const hasSourceChunks = retrievedChunks.length > 0;
+  const sourceCorpus = isFullUnit
+    ? buildUnifiedSourceCorpus(sourceMaterials)
+    : retrievedChunks.length > 0
+      ? retrievedChunks
+          .map((c, i) => `[Retrieved Source Excerpt ${i + 1}]\n${c.content.trim()}`)
+          .join('\n\n---\n\n')
+      : '(No supplementary source excerpts were retrieved.)';
 
-  const chunksText = hasSourceChunks
-    ? retrievedChunks
-        .map((c, i) => `[Source Excerpt ${i + 1}]\n${c.content.trim()}`)
-        .join('\n\n---\n\n')
-    : '(No supplementary source files uploaded. Base content entirely on the approved TVET Course Outline and institutional syllabus requirements.)';
+  const sourceCoverage = isFullUnit
+    ? buildSourceCoverage(sourceMaterials)
+    : retrievedChunks.length > 0
+      ? `${retrievedChunks.length} semantically retrieved excerpts`
+      : 'No supplementary source excerpts';
 
-  const groundingInstructions = hasSourceChunks
-    ? `GROUNDING MODE: DUAL GROUNDING (Curriculum Syllabus + Uploaded Source Material)
-- Synthesize the authoritative TVET CDACC course outline requirements with the provided SOURCE MATERIAL excerpts below.
-- Prioritize clinical definitions, diagnostic criteria, standard values, and specific protocols found in the uploaded sources.
-- Ensure the terminology aligns precisely with the provided source excerpts.`
-    : `GROUNDING MODE: CANONICAL TVET CURRICULUM GROUNDING
-- Ground the notes in the approved TVET CDACC Course Outline, Specific Learning Outcomes, and weekly plan provided below.
-- Provide comprehensive, technically accurate, academic and clinical explanations adhering strictly to Kenya TVET CDACC standards for Nutrition and Health Sciences.
-- Do not invent speculative claims; ensure all biological, physiological, and clinical principles are standard medical science.`;
+  const groundingInstructions = isFullUnit
+    ? `GROUNDING MODE: FULL-CORPUS UNIFIED SYNTHESIS
+
+You have been given the COMPLETE extracted text of every successfully ingested source file for this unit. You MUST read and synthesize the entire corpus before drafting the notes.
+
+The source files are different versions/editions of related lecture notes. They may:
+- repeat the same material;
+- use different wording or levels of detail;
+- cover different lessons;
+- contain overlapping or occasionally inconsistent statements.
+
+Your job is to produce ONE authoritative, coherent teaching document — NOT a summary of each file and NOT a copy-and-paste compilation.
+
+SOURCE RECONCILIATION RULES:
+1. Read across ALL labelled sources before drafting.
+2. Preserve useful detail that appears in only one source when it is relevant to the unit.
+3. Remove duplicated explanations while retaining the clearest and most pedagogically useful version.
+4. Where sources overlap, synthesize the common substance rather than repeating it.
+5. Where sources differ, prefer the clearer, more internally consistent and curriculum-aligned treatment. Do not silently invent a resolution for a material disagreement; state the distinction briefly when it matters.
+6. Do not attribute facts to a source unless the source actually supports them.
+7. Do not omit later lessons simply because an earlier source version stops earlier.
+8. Build the final structure around the complete subject coverage discovered across the corpus, not around the order of a single source file.
+9. Preserve formulas, definitions, classifications, worked examples, tables, procedures, study designs, screening concepts, outbreak investigation, surveillance, ethics, and other substantive material present in the sources.
+10. Do not let the shortest or oldest source determine the scope of the final document.`
+    : `GROUNDING MODE: TOPIC-FOCUSED SOURCE SYNTHESIS
+- Use the supplied retrieved excerpts as the primary source material.
+- Synthesize overlapping excerpts rather than repeating them.
+- Do not introduce unsupported claims merely to make the notes longer.`;
 
   return `You are an expert TVET Curriculum Specialist and Senior Medical & Nutrition Lecturer at Imperial College of Medical & Health Sciences.
-Your task is to generate comprehensive, highly structured, classroom-ready lecture notes for trainers and trainees.
+
+Your task is to generate high-quality, comprehensive, classroom-ready lecture notes from the supplied curriculum context and source material.
 
 UNIT: ${unitCode} — ${unitName}
 SCOPE: ${scopeLabel}
-TOPIC: ${topic}
+FOCUS/TITLE: ${topic}
 
-════════════════════════════════════════════════
-PEDAGOGICAL & GROUNDING RULES:
-════════════════════════════════════════════════
+============================================================
+CRITICAL SOURCE-USE REQUIREMENT
+============================================================
 ${groundingInstructions}
-- Use clear, academic, yet accessible language suitable for TVET Diploma and Certificate trainees.
-- Ensure all technical terms, clinical formulas (e.g. BMI, RDA, Fluid requirements), and assessment metrics are clearly explained.
-- Structure content with clear sub-headings (using ###), clean bullet points, and numbered steps.
 
-════════════════════════════
-APPROVED COURSE OUTLINE & LEARNING OUTCOMES:
-════════════════════════════
+SOURCE FILES AVAILABLE:
+${sourceCoverage}
+
+This is a source-grounded synthesis task. The uploaded source corpus is more important than generic model memory. Use general knowledge only to improve wording, structure, transitions, or explanations where it does not contradict the supplied material.
+
+============================================================
+CURRICULUM CONTEXT
+============================================================
+APPROVED LEARNING OUTCOMES:
 ${outcomesText}
 
-════════════════════════════
-WEEKLY PLAN & COVERAGE CONTEXT:
-════════════════════════════
-${weeklyPlanContext || '(General unit syllabus coverage)'}
+WEEKLY PLAN / COVERAGE CONTEXT:
+${weeklyPlanContext || '(No additional weekly plan was supplied.)'}
 
-════════════════════════════
-SUPPLEMENTARY SOURCE MATERIAL:
-════════════════════════════
-${chunksText}
+============================================================
+REQUIRED CONTENT QUALITY
+============================================================
+For a FULL UNIT:
+- Cover the complete epidemiology unit represented across the source corpus.
+- Do not stop after the introductory lessons.
+- Identify and include all substantive lesson areas found across the sources, including later lessons even if some older files omit them.
+- Produce a logically ordered teaching sequence and merge duplicate lessons/topics.
+- Retain useful Kenyan, African, public-health, nutrition and TVET examples from the sources.
+- Include important definitions, classifications, formulas, worked examples, tables, procedures, study designs, screening methods, outbreak investigation, surveillance, ethics, record keeping, programme planning/evaluation, and emerging issues when supported by the sources.
+- Use enough detail that the result can function as a standalone learner handout.
 
-════════════════════════════
-REQUIRED OUTPUT STRUCTURE:
-════════════════════════════
-Generate the lecture notes in this exact structure using markdown H2 headings (## Heading):
+For a TOPIC-FOCUSED document:
+- Stay tightly focused on the selected topic while using the strongest relevant source material.
+- Do not unnecessarily reproduce unrelated unit content.
+
+For all documents:
+- Explain concepts rather than merely listing them.
+- Preserve formulas accurately and explain every variable.
+- Use tables where a comparison is clearer than prose.
+- Use numbered procedures for sequential methods.
+- Include practical Kenyan examples where the sources provide them.
+- Avoid filler, generic motivational language, or invented references.
+- Do not mention that you are an AI.
+- Do not describe the source files in the body of the lecture notes.
+- Do not produce a source-by-source summary.
+
+============================================================
+OUTPUT STRUCTURE
+============================================================
+Return clean markdown only.
 
 # ${topic}
 **${unitCode}: ${unitName} | ${scopeLabel}**
 
-## Session Overview & Objectives
-- Brief introductory overview of the session topic and its clinical/public health significance.
-- Specific Learning Outcomes (Cognitive, Psychomotor, Affective): By the end of this session, the trainee should be able to...
+## Session Overview & Learning Outcomes
+Provide a concise overview followed by specific learning outcomes.
 
 ## Key Terminology & Definitions
-- Define 4–6 core scientific, medical, and clinical terms relevant to this topic with clear, standard definitions.
+Include the important terms required to understand the unit/scope.
 
 ## Detailed Lecture Content
-Provide thorough, well-organized technical notes. Break into logical subtopics using ### subheadings:
-- Theoretical foundation & physiological/biochemical mechanisms.
-- Clinical guidelines, diagnostic criteria, or practical methodologies.
-- Bulleted key facts, classification tables or step-by-step procedures.
-- Real-world case study or practical scenario relevant to Kenyan/African public health settings.
+Organize the entire substantive content into numbered major sections and ### subheadings. For a full unit, use a coherent sequence based on the complete source corpus rather than arbitrarily stopping at the first few lessons.
+
+For each major section, where supported:
+- explain the concept;
+- provide classifications/types;
+- provide formulas and define variables;
+- include tables/comparisons;
+- include practical or Kenyan examples;
+- include procedures/steps;
+- identify strengths, limitations, advantages, disadvantages and common errors where relevant.
+
+## Practical Applications & Kenyan Context
+Consolidate important Kenyan public-health and nutrition applications from the sources.
 
 ## Trainer Delivery & Classroom Guide
-- Suggested blackboard/whiteboard structure or visual aid diagram layout.
-- Trainee engagement questions and classroom discussion prompts.
-- Common student misconceptions or diagnostic pitfalls to emphasize.
+Provide suggested teaching emphasis, board/visual-aid ideas, discussion prompts and common misconceptions.
 
 ## Formative Assessment & Review Questions
-- 3–4 KNEC/CDACC exam-style review questions:
-  1. Multiple Choice Question (with correct option and 1-line rationale).
-  2. Short Answer / Structured Question (with expected model answer points).
-  3. Practical Application or Scenario-based Question (with marking rubric guide).
+Provide a meaningful set of KNEC/CDACC-style questions covering the breadth of the generated unit, including:
+- MCQs with answers and brief rationales;
+- short-answer/structured questions with expected points;
+- calculation/application questions where formulas are taught;
+- scenario/case questions with marking guidance.
+
+## Key Takeaways
+Summarize the major examinable and practical points.
 
 ## Recommended References
-- List standard textbooks and guidelines (e.g., Kenya Ministry of Health Clinical Nutrition Guidelines, WHO, Kraus' Food & The Nutrition Care Process).
+List references explicitly supported or named by the supplied material. Do not fabricate bibliographic details.
 
-Output clean, well-formatted markdown only. Do not include markdown code block backticks around the entire document.`;
+============================================================
+COMPLETE SOURCE CORPUS
+============================================================
+${sourceCorpus}
+`;
 }

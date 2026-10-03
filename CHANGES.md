@@ -1,3 +1,24 @@
+### 2026-10-03: Dashboard Narrow Banner, Core System Metrics & HOD Cross-Trainer Attendance Input
+
+**Summary:**
+1. **Narrow Hero Banner & Stat Cards Separation (`src/features/dashboard/dashboard-view.tsx`):**
+   - Streamlined the hero banner from a tall, multi-column card into a slim, single-row horizontal operational banner featuring the academic session, live timetable indicator, and quick actions (`Action Centre`, `Daily Reports`, `My Workspace`).
+   - Moved the stat cards OUT of the banner into a dedicated 4-column responsive grid directly below it.
+   - Replaced IT credential metrics ("active student portals") and static counts ("active units") with core operational system metrics:
+     - **Active Students**: Total enrolled students with term unit registration count.
+     - **Weekly Timetable**: Published live weekly session count.
+     - **Class Attendance**: Total completed sessions with real-time pending session review indicator.
+     - **Assessment Markbooks**: Markbooks total, finalised, and submitted for review.
+2. **Attendance Threshold Card Refactored to Compact Button:**
+   - Replaced full-width pink warning cards in `src/features/class-attendance/student-attendance-scorecard.tsx` and `src/features/attendance-analytics/hod-attendance-view.tsx` with compact, inline toggle buttons that filter and reset students below the 80% threshold without consuming full-width screen real estate.
+   - Made the "Below 80%" metric card interactive to toggle filtering.
+3. **HOD Cross-Trainer Attendance Input Flow:**
+   - In `src/features/class-attendance/admin-table.tsx`, added direct `Input Attendance` button for any open session on `/attendance?view=sessions`.
+   - In `src/app/(dashboard)/attendance/[sessionId]/page.tsx`, added `Input Attendance` action button navigating directly to the interactive `ClassAttendanceEditor` at `/staff/attendance/[sessionId]?returnTo=...`.
+   - Enables HODs to input or edit class attendance for sessions taught by external trainers or trainers from other departments.
+4. **Verification:**
+   - `npm run typecheck` & `npm run lint`: 0 errors.
+
 ### 2026-10-03: Implement Gemini Long-Context NotebookLM Engine & Google NotebookLM Companion Bridge
 
 **Summary:**

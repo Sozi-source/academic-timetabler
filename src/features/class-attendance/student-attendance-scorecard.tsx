@@ -208,35 +208,50 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
           description="At or above threshold"
         />
 
-        <MetricCard
-          label="Below 80%"
-          value={String(stats.atRiskCount)}
-          icon={AlertTriangle}
-          description="Needs attendance review"
-        />
+        {stats.atRiskCount > 0 ? (
+          <button
+            type="button"
+            onClick={() => setStandingFilter(standingFilter === 'at_risk' ? 'all' : 'at_risk')}
+            className="text-left w-full cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-danger rounded-2xl"
+            title="Click to toggle filter for students below 80%"
+          >
+            <MetricCard
+              label="Below 80%"
+              value={String(stats.atRiskCount)}
+              icon={AlertTriangle}
+              description="Needs attendance review"
+              className={standingFilter === 'at_risk' ? 'ring-2 ring-danger' : ''}
+            />
+          </button>
+        ) : (
+          <MetricCard
+            label="Below 80%"
+            value={String(stats.atRiskCount)}
+            icon={AlertTriangle}
+            description="Needs attendance review"
+          />
+        )}
       </div>
 
-      {/* Policy Alert Banner if students are at risk */}
+      {/* At-risk threshold quick filter button */}
       {stats.atRiskCount > 0 ? (
-        <div className="flex items-start gap-3 rounded-xl border border-danger-border bg-danger-surface p-3.5 text-xs text-danger shadow-2xs">
-          <AlertCircle className="mt-0.5 size-4 shrink-0 text-danger" />
-          <div className="flex-1 space-y-1">
-            <p className="font-bold">
-              Attendance threshold · {COLLEGE_MINIMUM_ATTENDANCE_PERCENT}%
-            </p>
-            <p className="text-danger text-[11px] leading-relaxed">
-              <strong>{stats.atRiskCount} active student{stats.atRiskCount === 1 ? '' : 's'}</strong> are below the {COLLEGE_MINIMUM_ATTENDANCE_PERCENT}% threshold.
-            </p>
-          </div>
-          {standingFilter !== 'at_risk' && (
-            <button
-              type="button"
-              onClick={() => setStandingFilter('at_risk')}
-              className="shrink-0 rounded-lg bg-danger px-3 py-1.5 text-xs font-semibold text-white shadow-2xs hover:bg-danger/90 transition"
-            >
-              View below 80%
-            </button>
-          )}
+        <div className="flex items-center">
+          <button
+            type="button"
+            onClick={() => setStandingFilter(standingFilter === 'at_risk' ? 'all' : 'at_risk')}
+            className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+              standingFilter === 'at_risk'
+                ? 'border-danger bg-danger text-white shadow-2xs'
+                : 'border-danger-border bg-danger-surface text-danger hover:bg-danger/10'
+            }`}
+          >
+            <AlertCircle className="size-3.5 shrink-0" />
+            <span>
+              {standingFilter === 'at_risk'
+                ? `Showing ${stats.atRiskCount} active student${stats.atRiskCount === 1 ? '' : 's'} below ${COLLEGE_MINIMUM_ATTENDANCE_PERCENT}% threshold (click to show all)`
+                : `View ${stats.atRiskCount} active student${stats.atRiskCount === 1 ? '' : 's'} below ${COLLEGE_MINIMUM_ATTENDANCE_PERCENT}% threshold`}
+            </span>
+          </button>
         </div>
       ) : null}
 

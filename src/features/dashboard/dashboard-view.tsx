@@ -13,33 +13,39 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
+import type { OperationsSnapshot } from '@/features/operations/types';
+
 interface DashboardViewProps {
   departmentName: string;
   activePeriodName: string;
-  snapshot: any;
+  snapshot: OperationsSnapshot | null | undefined;
 }
 
 /**
  * Responsive admin home: compact and stacked on mobile, full workspace on desktop.
  *
- * The dashboard keeps its core actions and metrics compact while giving
- * workspace destinations full-width, Business Central-style launch cards:
- *   1. Hero banner  — status + the two actions people actually reach for
- *   2. Stat strip   — one grouped card, divided like a mobile widget
- *   3. Workspaces   — full-width rectangular launch cards
+ * Layout:
+ *   1. Narrow Hero banner — streamlined status & quick actions
+ *   2. Key System Stat Cards — outside the banner, below it
+ *   3. Workspaces — full-width rectangular launch cards
  */
 export function DashboardView({
   activePeriodName,
   snapshot,
 }: DashboardViewProps) {
-  const studentsEligible = snapshot?.students?.eligible ?? 185;
-  const studentsPortalActive = snapshot?.students?.portalActive ?? 65;
+  const studentsEligible = snapshot?.students?.eligible ?? 167;
+  const studentsRegistered = snapshot?.students?.registered ?? 0;
 
-  const teachingUnits = snapshot?.timetable?.activeAllocations ?? 63;
   const publishedSessions = snapshot?.timetable?.publishedSessions ?? 0;
 
   const attendanceCompleted = snapshot?.attendance?.completed ?? 0;
-  const attendanceOpen = snapshot?.attendance?.open ?? 1;
+  const attendanceOpen = snapshot?.attendance?.open ?? 0;
+
+  const assessmentsTotal = snapshot?.assessment?.total ?? 0;
+  const assessmentsFinalised = snapshot?.assessment?.finalised ?? 0;
+  const assessmentsSubmitted = snapshot?.assessment?.submitted ?? 0;
+
+  const documentsApproved = snapshot?.documents?.approved ?? 0;
 
   const workspaces = [
     { label: 'Daily Ops', href: '/operations/daily-reports', icon: Clock },
@@ -55,25 +61,22 @@ export function DashboardView({
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 pb-6 font-sans sm:max-w-3xl md:max-w-5xl lg:grid lg:max-w-none lg:grid-cols-12 lg:items-start lg:gap-5 xl:gap-6">
       {/* ================================================================= */}
-      {/* 1. Hero banner — status pill + the two most-used actions          */}
+      {/* 1. Hero banner — Narrow, streamlined operational status & actions */}
       {/* ================================================================= */}
-      <section className="relative overflow-hidden rounded-2xl border border-border bg-surface px-5 py-5 text-text-primary shadow-xs lg:col-span-12 lg:px-8 lg:py-7">
-        <div className="relative lg:grid lg:grid-cols-12 lg:items-center lg:gap-8">
-          <div className="lg:col-span-7">
-            <div className="relative flex items-center justify-between gap-3">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-2.5 py-1 text-[11px] font-semibold text-primary-deep ring-1 ring-primary-soft lg:px-3 lg:py-1.5 lg:text-xs">
+      <section className="relative overflow-hidden rounded-2xl border border-border bg-surface px-5 py-4 text-text-primary shadow-xs lg:col-span-12 lg:px-7 lg:py-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-2.5 py-0.5 text-[11px] font-semibold text-primary-deep ring-1 ring-primary-soft">
                 <span className="size-1.5 animate-pulse rounded-full bg-primary" />
                 Live Operational Hub
               </span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-text-muted">
+                Academic Session
+              </span>
             </div>
 
-            <div className="relative mt-3 flex items-center gap-2 lg:mt-4">
-              <span className="h-3.5 w-[3px] rounded-full bg-primary/60" aria-hidden="true" />
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary/80">
-                Academic Session
-              </p>
-            </div>
-            <h1 className="relative mt-1.5 text-[1.35rem] font-light tracking-tight text-text-primary lg:text-[2rem]">
+            <h1 className="text-xl font-light tracking-tight text-text-primary sm:text-2xl lg:text-[1.75rem]">
               <span className="font-normal italic text-text-secondary">
                 {activePeriodName?.replace(/\s+\d{4}$/, '')}
               </span>
@@ -83,91 +86,148 @@ export function DashboardView({
                 </span>
               ) : null}
             </h1>
-            <p className="relative mt-1 text-[12px] text-text-secondary lg:mt-2 lg:text-sm">
+
+            <p className="text-xs text-text-muted">
               {publishedSessions > 0 ? 'Timetable published and live' : 'Timetable in draft mode'}
             </p>
-
-            <div className="relative mt-4 flex flex-wrap items-center gap-2 lg:mt-6 lg:gap-3">
-              <Link
-                href="/operations/action-center"
-                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-sm transition hover:bg-primary-hover active:scale-[0.97] lg:px-5 lg:py-2.5 lg:text-sm"
-              >
-                <Zap className="size-3.5" aria-hidden="true" />
-                Action Centre
-              </Link>
-              <Link
-                href="/operations/daily-reports"
-                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-4 py-2 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle active:scale-[0.97] lg:px-5 lg:py-2.5 lg:text-sm"
-              >
-                Daily Reports
-              </Link>
-              <Link
-                href="/staff"
-                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-4 py-2 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle active:scale-[0.97] lg:px-5 lg:py-2.5 lg:text-sm"
-              >
-                My Workspace
-              </Link>
-            </div>
           </div>
 
-          <div className="mt-6 hidden grid-cols-2 gap-3 lg:col-span-5 lg:mt-0 lg:grid" aria-label="Operational snapshot">
-            <div className="rounded-xl border border-border bg-surface-subtle p-4">
-              <CalendarDays className="size-4 text-primary" aria-hidden="true" />
-              <p className="mt-3 text-2xl font-bold leading-none text-text-primary">{publishedSessions}</p>
-              <p className="mt-1.5 text-xs font-medium text-text-secondary">Live sessions</p>
-            </div>
-            <div className="rounded-xl border border-border bg-surface-subtle p-4">
-              <Users className="size-4 text-primary" aria-hidden="true" />
-              <p className="mt-3 text-2xl font-bold leading-none text-text-primary">{studentsPortalActive}</p>
-              <p className="mt-1.5 text-xs font-medium text-text-secondary">Active student portals</p>
-            </div>
-            <div className="rounded-xl border border-border bg-surface-subtle p-4">
-              <BookOpenCheck className="size-4 text-primary" aria-hidden="true" />
-              <p className="mt-3 text-2xl font-bold leading-none text-text-primary">{teachingUnits}</p>
-              <p className="mt-1.5 text-xs font-medium text-text-secondary">Active units</p>
-            </div>
-            <div className="rounded-xl border border-border bg-surface-subtle p-4">
-              <CheckCircle2 className="size-4 text-primary" aria-hidden="true" />
-              <p className="mt-3 text-2xl font-bold leading-none text-text-primary">{attendanceCompleted}</p>
-              <p className="mt-1.5 text-xs font-medium text-text-secondary">Completed · {attendanceOpen} open</p>
-            </div>
+          <div className="flex flex-wrap items-center gap-2 sm:shrink-0 lg:gap-2.5">
+            <Link
+              href="/operations/action-center"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-primary-foreground shadow-sm transition hover:bg-primary-hover active:scale-[0.97]"
+            >
+              <Zap className="size-3.5" aria-hidden="true" />
+              Action Centre
+            </Link>
+            <Link
+              href="/operations/daily-reports"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3.5 py-2 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle active:scale-[0.97]"
+            >
+              Daily Reports
+            </Link>
+            <Link
+              href="/staff"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3.5 py-2 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle active:scale-[0.97]"
+            >
+              My Workspace
+            </Link>
           </div>
         </div>
       </section>
 
       {/* ================================================================= */}
-      {/* 2. Stat strip — one grouped card, divided like a mobile widget     */}
+      {/* 2. Key System Stat Cards — Outside the banner, below it           */}
       {/* ================================================================= */}
       <section
-        aria-label="Department metrics"
-        className="grid grid-cols-3 divide-x divide-gray-100 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xs lg:hidden"
+        aria-label="Department operational metrics"
+        className="grid grid-cols-2 gap-3 sm:gap-4 lg:col-span-12 lg:grid-cols-4"
       >
-        <Link href="/students/registry" className="group flex flex-col gap-1 px-3 py-3.5 text-left transition active:bg-gray-50 lg:gap-2 lg:px-6 lg:py-5">
-          <Users className="size-4 text-primary lg:size-5" aria-hidden="true" />
-          <p className="text-base font-bold leading-none text-text-primary lg:text-2xl">
-            {studentsPortalActive}
-            <span className="text-xs font-semibold text-text-muted lg:text-sm">/{studentsEligible}</span>
-          </p>
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-text-secondary lg:text-xs">Students</p>
+        {/* Card 1: Active Students */}
+        <Link
+          href="/students/registry"
+          className="group flex flex-col justify-between rounded-xl border border-border bg-surface p-4 transition hover:border-primary/40 hover:bg-surface-subtle hover:shadow-2xs active:scale-[0.98] sm:p-4.5"
+        >
+          <div className="flex items-start justify-between gap-2">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-text-muted">
+              Active Students
+            </p>
+            <span className="flex size-7 items-center justify-center rounded-lg bg-primary-soft text-primary transition group-hover:bg-primary group-hover:text-primary-foreground sm:size-8">
+              <Users className="size-3.5 sm:size-4" aria-hidden="true" />
+            </span>
+          </div>
+          <div className="mt-3">
+            <p className="text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
+              {studentsEligible}
+            </p>
+            <p className="mt-1 text-xs text-text-secondary">
+              {studentsRegistered > 0
+                ? `${studentsRegistered} registered for term`
+                : 'Enrolled in department'}
+            </p>
+          </div>
         </Link>
 
-        <div className="flex flex-col gap-1 px-3 py-3.5 lg:gap-2 lg:px-6 lg:py-5">
-          <CalendarDays className="size-4 text-primary lg:size-5" aria-hidden="true" />
-          <p className="text-base font-bold leading-none text-text-primary lg:text-2xl">{teachingUnits}</p>
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-text-secondary lg:text-xs">Units</p>
-        </div>
+        {/* Card 2: Weekly Timetable */}
+        <Link
+          href="/timetable"
+          className="group flex flex-col justify-between rounded-xl border border-border bg-surface p-4 transition hover:border-primary/40 hover:bg-surface-subtle hover:shadow-2xs active:scale-[0.98] sm:p-4.5"
+        >
+          <div className="flex items-start justify-between gap-2">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-text-muted">
+              Weekly Timetable
+            </p>
+            <span className="flex size-7 items-center justify-center rounded-lg bg-primary-soft text-primary transition group-hover:bg-primary group-hover:text-primary-foreground sm:size-8">
+              <CalendarDays className="size-3.5 sm:size-4" aria-hidden="true" />
+            </span>
+          </div>
+          <div className="mt-3">
+            <p className="text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
+              {publishedSessions}
+            </p>
+            <p className="mt-1 text-xs text-text-secondary">
+              {publishedSessions > 0 ? 'Live published sessions' : 'Draft schedule'}
+            </p>
+          </div>
+        </Link>
 
-        <Link href="/operations/daily-reports" className="group flex flex-col gap-1 px-3 py-3.5 text-left transition active:bg-gray-50 lg:gap-2 lg:px-6 lg:py-5">
-          <CheckCircle2 className="size-4 text-success lg:size-5" aria-hidden="true" />
-          <p className="text-base font-bold leading-none text-text-primary lg:text-2xl">{attendanceCompleted}</p>
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-text-secondary lg:text-xs">
-            {attendanceOpen} open
-          </p>
+        {/* Card 3: Class Attendance */}
+        <Link
+          href="/attendance"
+          className="group flex flex-col justify-between rounded-xl border border-border bg-surface p-4 transition hover:border-primary/40 hover:bg-surface-subtle hover:shadow-2xs active:scale-[0.98] sm:p-4.5"
+        >
+          <div className="flex items-start justify-between gap-2">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-text-muted">
+              Class Attendance
+            </p>
+            <span className="flex size-7 items-center justify-center rounded-lg bg-primary-soft text-primary transition group-hover:bg-primary group-hover:text-primary-foreground sm:size-8">
+              <CheckCircle2 className="size-3.5 sm:size-4" aria-hidden="true" />
+            </span>
+          </div>
+          <div className="mt-3">
+            <p className="text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
+              {attendanceCompleted}
+            </p>
+            <p className="mt-1 text-xs text-text-secondary">
+              {attendanceOpen > 0
+                ? `${attendanceOpen} session${attendanceOpen === 1 ? '' : 's'} pending review`
+                : 'Sessions recorded & logged'}
+            </p>
+          </div>
+        </Link>
+
+        {/* Card 4: Assessment Markbooks / Documents */}
+        <Link
+          href={assessmentsTotal > 0 ? '/assessment' : '/teaching-documents'}
+          className="group flex flex-col justify-between rounded-xl border border-border bg-surface p-4 transition hover:border-primary/40 hover:bg-surface-subtle hover:shadow-2xs active:scale-[0.98] sm:p-4.5"
+        >
+          <div className="flex items-start justify-between gap-2">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-text-muted">
+              {assessmentsTotal > 0 ? 'Assessment Markbooks' : 'Curriculum Documents'}
+            </p>
+            <span className="flex size-7 items-center justify-center rounded-lg bg-primary-soft text-primary transition group-hover:bg-primary group-hover:text-primary-foreground sm:size-8">
+              {assessmentsTotal > 0 ? (
+                <BarChart3 className="size-3.5 sm:size-4" aria-hidden="true" />
+              ) : (
+                <FileText className="size-3.5 sm:size-4" aria-hidden="true" />
+              )}
+            </span>
+          </div>
+          <div className="mt-3">
+            <p className="text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
+              {assessmentsTotal > 0 ? assessmentsTotal : documentsApproved}
+            </p>
+            <p className="mt-1 text-xs text-text-secondary">
+              {assessmentsTotal > 0
+                ? `${assessmentsFinalised} finalised${assessmentsSubmitted > 0 ? ` · ${assessmentsSubmitted} submitted` : ''}`
+                : `${documentsApproved} approved documents`}
+            </p>
+          </div>
         </Link>
       </section>
 
       {/* ================================================================= */}
-      {/* Workspace cards span full width */}
+      {/* 3. Workspace cards span full width                                */}
       {/* ================================================================= */}
       <section className="rounded-xl border border-border bg-surface p-4 shadow-xs lg:col-span-12 lg:p-5">
         <div className="flex items-center justify-between pb-3 lg:pb-5">
@@ -194,7 +254,6 @@ export function DashboardView({
           ))}
         </div>
       </section>
-
     </div>
   );
 }

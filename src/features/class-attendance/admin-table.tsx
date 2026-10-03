@@ -1,6 +1,6 @@
 'use client';
 
-import { LoaderCircle, RotateCcw } from 'lucide-react';
+import { CalendarCheck2, LoaderCircle, RotateCcw } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -117,12 +117,22 @@ export function AttendanceAdminTable({ items }: { items: DepartmentAttendanceSes
                 </span>
 
                 <div className="ml-auto flex items-center gap-1.5">
-                  <Link
-                    href={`/attendance/${item.classSessionId}`}
-                    className="inline-flex h-8 items-center justify-center rounded-lg border border-border-strong bg-surface px-2.5 text-[11px] font-semibold text-text-secondary transition hover:bg-surface-subtle"
-                  >
-                    View
-                  </Link>
+                  {item.sessionStatus === 'open' ? (
+                    <Link
+                      href={`/staff/attendance/${item.classSessionId}?returnTo=/attendance?view=sessions`}
+                      className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg bg-primary px-2.5 text-[11px] font-semibold text-primary-foreground transition hover:bg-primary-hover shadow-2xs"
+                    >
+                      <CalendarCheck2 className="size-3" aria-hidden="true" />
+                      <span>Input Attendance</span>
+                    </Link>
+                  ) : (
+                    <Link
+                      href={`/attendance/${item.classSessionId}`}
+                      className="inline-flex h-8 items-center justify-center rounded-lg border border-border-strong bg-surface px-2.5 text-[11px] font-semibold text-text-secondary transition hover:bg-surface-subtle"
+                    >
+                      View
+                    </Link>
+                  )}
 
                   {item.sessionStatus === 'completed' ? (
                     <Button

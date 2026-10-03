@@ -2,10 +2,8 @@
 
 import { useMemo, useState } from 'react';
 import {
-  AlertCircle,
   AlertTriangle,
   BookOpen,
-  CheckCircle2,
   GraduationCap,
   Search,
   Users,
@@ -142,41 +140,26 @@ export function HodAttendanceView({
           </button>
         </div>
 
-        {activeTab === 'students' && standingCounts.atRisk > 0 && standingFilter !== 'at_risk' ? (
+        {activeTab === 'students' && standingCounts.atRisk > 0 ? (
           <button
             type="button"
-            onClick={() => setStandingFilter('at_risk')}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-800 transition hover:bg-rose-100"
+            onClick={() => setStandingFilter(standingFilter === 'at_risk' ? 'all' : 'at_risk')}
+            className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+              standingFilter === 'at_risk'
+                ? 'border-rose-600 bg-rose-600 text-white shadow-2xs'
+                : 'border-rose-200 bg-rose-50 text-rose-800 hover:bg-rose-100'
+            }`}
           >
-            <AlertTriangle className="size-3.5 text-rose-600" />
-            View {standingCounts.atRisk} Student{standingCounts.atRisk === 1 ? '' : 's'} Below {COLLEGE_MINIMUM_ATTENDANCE_PERCENT}%
+            <AlertTriangle className={`size-3.5 ${standingFilter === 'at_risk' ? 'text-white' : 'text-rose-600'}`} />
+            {standingFilter === 'at_risk'
+              ? `Showing ${standingCounts.atRisk} Student${standingCounts.atRisk === 1 ? '' : 's'} Below ${COLLEGE_MINIMUM_ATTENDANCE_PERCENT}% (Click to show all)`
+              : `View ${standingCounts.atRisk} Student${standingCounts.atRisk === 1 ? '' : 's'} Below ${COLLEGE_MINIMUM_ATTENDANCE_PERCENT}%`}
           </button>
         ) : null}
       </div>
 
       {activeTab === 'students' ? (
         <div className="space-y-4">
-          {/* Policy Alert Banner */}
-          {standingCounts.atRisk > 0 ? (
-            <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50/70 p-3.5 text-xs text-rose-900">
-              <AlertCircle className="mt-0.5 size-4 shrink-0 text-rose-600" />
-              <div className="flex-1">
-                <p className="font-bold">
-                  College Minimum Attendance Requirement: {COLLEGE_MINIMUM_ATTENDANCE_PERCENT}%
-                </p>
-                <p className="mt-0.5 text-rose-800/90 text-[11px] leading-relaxed">
-                  <strong>{standingCounts.atRisk} student record{standingCounts.atRisk === 1 ? '' : 's'}</strong> fall below the mandatory {COLLEGE_MINIMUM_ATTENDANCE_PERCENT}% threshold required for CAT and examination clearance. Review below to issue warning letters or mentor intervention.
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50/70 p-3 text-xs text-emerald-900">
-              <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
-              <span>
-                All active student records meet or exceed the college minimum of {COLLEGE_MINIMUM_ATTENDANCE_PERCENT}% attendance.
-              </span>
-            </div>
-          )}
 
           {/* Filter Toolbar */}
           <div className="flex flex-col gap-3 rounded-xl border border-border bg-white p-3.5 shadow-2xs sm:flex-row sm:items-center sm:justify-between">

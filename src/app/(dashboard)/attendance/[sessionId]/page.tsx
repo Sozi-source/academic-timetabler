@@ -37,6 +37,16 @@ export default async function AttendanceReviewPage({
         icon={CalendarCheck2}
         actions={
           <div className="flex gap-2">
+            {workspace.sessionStatus === 'open' ? (
+              <Link
+                href={`/staff/attendance/${workspace.classSessionId}?returnTo=/attendance/${workspace.classSessionId}`}
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover"
+              >
+                <CalendarCheck2 className="size-3.5" aria-hidden="true" />
+                Input Attendance
+              </Link>
+            ) : null}
+
             {workspace.sessionStatus === 'completed' ? (
               <ReopenAttendanceButton sessionId={workspace.classSessionId} />
             ) : null}

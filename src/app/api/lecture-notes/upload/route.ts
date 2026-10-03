@@ -17,6 +17,11 @@ const MAX_ZIP_BYTES = 50 * 1024 * 1024;
 const MIME_BY_TYPE = {
   pdf: ['application/pdf'],
   docx: ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword'],
+  pptx: [
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'application/vnd.ms-powerpoint',
+    'application/octet-stream',
+  ],
   zip: [
     'application/zip',
     'application/x-zip-compressed',
@@ -48,7 +53,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     if (!(sourceType in MIME_BY_TYPE)) {
-      return NextResponse.json({ error: 'Only PDF, DOCX and ZIP source files are supported.' }, { status: 400 });
+      return NextResponse.json({ error: 'Only PDF, DOCX, PPTX and ZIP source files are supported.' }, { status: 400 });
     }
 
     const maxBytes = sourceType === 'zip' ? MAX_ZIP_BYTES : MAX_FILE_BYTES;
@@ -60,9 +65,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     const expectedMimes = MIME_BY_TYPE[sourceType] as readonly string[];
     if (mimeType && !expectedMimes.includes(mimeType)) {
-      // Browsers occasionally report application/octet-stream for ZIP files;
+      // Browsers occasionally report application/octet-stream for ZIP or PPTX files;
       // extension validation below remains authoritative for that case.
-      if (!(sourceType === 'zip' && mimeType === 'application/octet-stream')) {
+      if (!((sourceType === 'zip' || sourceType === 'pptx') && mimeType === 'application/octet-stream')) {
         return NextResponse.json({ error: 'The selected file type does not match its extension.' }, { status: 400 });
       }
     }
@@ -74,8 +79,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'Lecture-notes storage is not configured. Run the lecture-notes storage migration first.' }, { status: 503 });
     }
 
-    // Auto-heal bucket allowed mime types if ZIP types are missing
-    if (bucket.allowed_mime_types && !bucket.allowed_mime_types.includes('application/x-zip-compressed')) {
+    // Auto-heal bucket allowed mime types if ZIP or PPTX types are missing
+    if (bucket.allowed_mime_types && (!bucket.allowed_mime_types.includes('application/x-zip-compressed') || !bucket.allowed_mime_types.includes('application/vnd.openxmlformats-officedocument.presentationml.presentation'))) {
       const updatedMimes = Array.from(new Set([
         ...bucket.allowed_mime_types,
         'application/zip',
@@ -83,6 +88,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         'application/x-zip',
         'application/octet-stream',
         'multipart/x-zip',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'application/vnd.ms-powerpoint',
       ]));
       await adminDb.storage.updateBucket(BUCKET, {
         public: false,
@@ -120,7 +127,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         chunk_count: 0,
         ingested_at: null,
       })
-      .select('id, title, source_type, source_url, original_filename, chunk_count, ingested_at, created_at')
+      .select('id, title, source_type, source_url, original_filename, chunk_count, ingested_at, created_at, processing_error')
       .single();
 
     if (materialError || !material) {

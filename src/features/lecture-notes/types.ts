@@ -2,7 +2,7 @@
 // Lecture Notes — Domain Types
 // ============================================================
 
-export type MaterialSourceType = 'pdf' | 'docx' | 'zip' | 'text' | 'url';
+export type MaterialSourceType = 'pdf' | 'docx' | 'pptx' | 'zip' | 'text' | 'url';
 export type GenerationGranularity = 'session' | 'unit';
 export type JobStatus = 'pending' | 'processing' | 'done' | 'error';
 
@@ -21,6 +21,7 @@ export interface LectureMaterial {
   contentText: string | null;
   chunkCount: number;
   ingestedAt: string | null;
+  processingError?: string | null;
   createdAt: string;
   updatedAt: string;
 }

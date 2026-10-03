@@ -21,7 +21,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     const { data, error } = await db
       .from('lecture_materials')
-      .select('id, title, source_type, source_url, original_filename, chunk_count, ingested_at, created_at')
+      .select('id, title, source_type, source_url, original_filename, chunk_count, ingested_at, created_at, processing_error')
       .eq('unit_id', unitId)
       .order('created_at', { ascending: false });
 

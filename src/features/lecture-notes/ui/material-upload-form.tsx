@@ -15,6 +15,7 @@ interface Material {
   original_filename: string | null;
   chunk_count: number;
   ingested_at: string | null;
+  processing_error?: string | null;
   created_at: string;
 }
 
@@ -27,7 +28,7 @@ interface MaterialUploadFormProps {
 type SourceTab = 'file' | 'url' | 'text';
 
 const MAX_FILE_BYTES = 25 * 1024 * 1024;
-const MAX_ZIP_BYTES = 100 * 1024 * 1024;
+const MAX_ZIP_BYTES = 50 * 1024 * 1024;
 
 export function MaterialUploadForm({
   unitId,
@@ -59,14 +60,14 @@ export function MaterialUploadForm({
 
   async function uploadFile(file: File): Promise<void> {
     const ext = file.name.split('.').pop()?.toLowerCase();
-    const sourceType = ext === 'pdf' ? 'pdf' : ext === 'docx' ? 'docx' : ext === 'zip' ? 'zip' : null;
+    const sourceType = ext === 'pdf' ? 'pdf' : ext === 'docx' ? 'docx' : ext === 'pptx' ? 'pptx' : ext === 'zip' ? 'zip' : null;
     if (!sourceType) {
-      throw new Error(`${file.name}: only PDF, DOCX and ZIP files are supported.`);
+      throw new Error(`${file.name}: only PDF, DOCX, PPTX and ZIP files are supported.`);
     }
 
     const maxBytes = sourceType === 'zip' ? MAX_ZIP_BYTES : MAX_FILE_BYTES;
     if (file.size > maxBytes) {
-      throw new Error(`${file.name} is larger than ${sourceType === 'zip' ? '100 MB' : '25 MB'}.`);
+      throw new Error(`${file.name} is larger than ${sourceType === 'zip' ? '50 MB' : '25 MB'}.`);
     }
 
     // 1. Ask the app for a signed Storage upload target.
@@ -234,7 +235,7 @@ export function MaterialUploadForm({
     <form onSubmit={handleSubmit} className="space-y-3 rounded-xl border border-border bg-surface p-4">
       <div className="flex items-center justify-between gap-3">
         <p className="text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">Source materials</p>
-        <span className="text-[10px] text-text-muted">PDF / DOCX · 25 MB · ZIP archive · 100 MB</span>
+        <span className="text-[10px] text-text-muted">PDF / DOCX / PPTX · 25 MB · ZIP archive · 50 MB</span>
       </div>
 
       <div className="flex gap-1 rounded-lg border border-border bg-surface-subtle p-0.5">
@@ -264,13 +265,13 @@ export function MaterialUploadForm({
           >
             <FileArchive className="size-5 text-text-muted" />
             <span className="text-xs font-medium text-text-secondary">Select lecture files or a ZIP archive</span>
-            <span className="text-[11px] text-text-muted">ZIP archives are read as one complete source collection</span>
+            <span className="text-[11px] text-text-muted">PDF, DOCX, PPTX slides, or ZIP archives</span>
           </button>
 
           <input
             ref={fileRef}
             type="file"
-            accept=".pdf,.docx,.zip,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/zip,application/x-zip-compressed"
+            accept=".pdf,.docx,.pptx,.zip,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-zip-compressed"
             onChange={handleFileChange}
             multiple
             className="hidden"
@@ -357,6 +358,8 @@ function sourceIcon(type: string) {
       return <FileText className="size-4 text-danger" />;
     case 'docx':
       return <FileText className="size-4 text-primary" />;
+    case 'pptx':
+      return <FileText className="size-4 text-amber-500" />;
     case 'zip':
       return <FileArchive className="size-4 text-primary" />;
     case 'url':
@@ -400,14 +403,20 @@ export function MaterialList({ materials, onDelete }: MaterialListProps) {
           <div className="shrink-0">{sourceIcon(m.source_type)}</div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-xs font-medium text-text-primary">{m.title}</p>
-            {m.ingested_at ? (
+            {m.processing_error ? (
+              <p className="text-[11px] font-medium text-danger break-words" title={m.processing_error}>
+                {m.processing_error}
+              </p>
+            ) : m.ingested_at ? (
               <p className="text-[11px] text-text-muted">{m.chunk_count} indexed chunks</p>
             ) : (
-              <p className="text-[11px] text-text-muted">Processing in background</p>
+              <p className="text-[11px] text-text-muted">Processing in background…</p>
             )}
           </div>
 
-          {m.ingested_at ? (
+          {m.processing_error ? (
+            <Badge variant="danger" className="shrink-0 text-[10px]">Failed</Badge>
+          ) : m.ingested_at ? (
             <Badge variant="success" dot className="shrink-0 text-[10px]">Ready</Badge>
           ) : (
             <Badge variant="warning" className="shrink-0 text-[10px]">Processing</Badge>

@@ -18,6 +18,7 @@ import { requireTrainerAccess } from '@/features/auth/authorization';
 import { chunkText } from '@/features/lecture-notes/ingest/chunker';
 import { extractTextFromPdf } from '@/features/lecture-notes/ingest/pdf-parser';
 import { extractTextFromDocx } from '@/features/lecture-notes/ingest/docx-parser';
+import { extractTextFromPptx } from '@/features/lecture-notes/ingest/pptx-parser';
 import { unpackLectureSourceZip } from '@/features/lecture-notes/ingest/zip-parser';
 import { embedTexts } from '@/features/lecture-notes/embeddings/gemini-embeddings';
 
@@ -42,12 +43,18 @@ async function extractZipContents(buffer: Buffer): Promise<string> {
     const lower = entry.filename.toLowerCase();
     let text = '';
 
-    if (lower.endsWith('.pdf')) {
-      text = await extractTextFromPdf(entry.buffer);
-    } else if (lower.endsWith('.docx')) {
-      text = await extractTextFromDocx(entry.buffer);
-    } else if (lower.endsWith('.txt') || lower.endsWith('.md')) {
-      text = entry.buffer.toString('utf8');
+    try {
+      if (lower.endsWith('.pdf')) {
+        text = await extractTextFromPdf(entry.buffer);
+      } else if (lower.endsWith('.docx')) {
+        text = await extractTextFromDocx(entry.buffer);
+      } else if (lower.endsWith('.pptx')) {
+        text = await extractTextFromPptx(entry.buffer);
+      } else if (lower.endsWith('.txt') || lower.endsWith('.md')) {
+        text = entry.buffer.toString('utf8');
+      }
+    } catch (fileErr) {
+      console.warn(`[lecture-notes/process] Failed to extract text from ${entry.filename}:`, fileErr);
     }
 
     text = cleanExtractedText(text);
@@ -57,7 +64,7 @@ async function extractZipContents(buffer: Buffer): Promise<string> {
   }
 
   if (parts.length === 0) {
-    throw new Error('The ZIP contained supported files, but no readable text could be extracted from them.');
+    throw new Error('The ZIP contained supported files, but no readable text could be extracted from them (e.g. scanned image-only PDFs or empty files).');
   }
 
   return parts.join('\n\n==============================\n\n');
@@ -93,6 +100,8 @@ async function processMaterial(materialId: string, trainerId: string) {
       extractedText = await extractTextFromPdf(buffer);
     } else if (material.source_type === 'docx') {
       extractedText = await extractTextFromDocx(buffer);
+    } else if (material.source_type === 'pptx') {
+      extractedText = await extractTextFromPptx(buffer);
     } else if (material.source_type === 'zip') {
       extractedText = await extractZipContents(buffer);
     } else {
@@ -145,25 +154,21 @@ async function processMaterial(materialId: string, trainerId: string) {
       content_text: extractedText,
       chunk_count: chunks.length,
       ingested_at: new Date().toISOString(),
+      processing_error: null,
     }).eq('id', materialId);
 
     if (completeError) throw new Error(`Failed to mark material ready: ${completeError.message}`);
   } catch (error) {
-    console.error('[lecture-notes/process]', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('[lecture-notes/process] Failed to process material', materialId, errorMessage);
 
     try {
-      const { data: material } = await db
-        .from('lecture_materials')
-        .select('storage_bucket, storage_path')
-        .eq('id', materialId)
-        .maybeSingle();
-
-      if (material?.storage_path) {
-        await db.storage.from(material.storage_bucket || BUCKET).remove([material.storage_path]);
-      }
-      await db.from('lecture_materials').delete().eq('id', materialId);
-    } catch (cleanupError) {
-      console.error('[lecture-notes/process] cleanup failed', cleanupError);
+      await db.from('lecture_materials').update({
+        processing_error: errorMessage,
+        ingested_at: null,
+      }).eq('id', materialId);
+    } catch (recordError) {
+      console.error('[lecture-notes/process] failed to record error on material:', recordError);
     }
   }
 }
@@ -187,7 +192,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     if (material.trainer_id !== profile.id) return NextResponse.json({ error: 'You are not allowed to process this material.' }, { status: 403 });
     if (material.ingested_at) return NextResponse.json({ materialId, status: 'ready' });
 
-    after(() => processMaterial(materialId, profile.id));
+    after(async () => {
+      try {
+        await processMaterial(materialId, profile.id);
+      } catch (processErr) {
+        console.error('[lecture-notes/process/after]', processErr);
+      }
+    });
     return NextResponse.json({ materialId, status: 'processing' }, { status: 202 });
   } catch (err) {
     console.error('[lecture-notes/process/start]', err);

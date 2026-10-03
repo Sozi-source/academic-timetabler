@@ -1,3 +1,30 @@
+### 2026-10-03: Fix Disappearing Materials on Processing Failure, Add PPTX Support & Actionable Error Badges
+
+**Summary:**
+Diagnosed and resolved the root cause of uploaded lecture source files disappearing after brief processing:
+1. **Root Cause Analysis:**
+   - In `src/app/api/lecture-notes/process/route.ts`, when any parsing or text extraction error occurred inside `processMaterial()`, the `catch` block executed:
+     `await db.from('lecture_materials').delete().eq('id', materialId);`
+   - This silently wiped the material from the database and storage.
+   - When the client's polling loop (`GET /api/lecture-notes/materials`) queried the database 4 seconds later, the material was gone, causing it to disappear from the user's screen with zero diagnostic feedback.
+   - Additionally, TVET/academic lecture archives often contain PowerPoint slides (`.pptx`). Previously, `.pptx` was not in the supported extensions whitelist, causing ZIP unpacking to reject archives that contained slide decks.
+2. **Database Migration & Error Persistence:**
+   - Applied migration `supabase/migrations/20261003140000_add_processing_error_to_lecture_materials.sql` adding `processing_error text` to `lecture_materials`.
+   - Applied migration `supabase/migrations/20261003140500_add_pptx_source_type.sql` updating `source_type` check constraint to allow `'pdf', 'docx', 'pptx', 'zip', 'text', 'url'`.
+   - Replaced silent deletion on processing failure: `processMaterial()` now records `processing_error: errorMessage` in the database, retaining the material so trainers can see exactly what occurred.
+3. **PowerPoint Presentation (.pptx) Ingestion:**
+   - Created `src/features/lecture-notes/ingest/pptx-parser.ts` to parse Open Packaging Conventions PowerPoint slides using existing `jszip` dependency.
+   - Added slide-by-slide paragraph extraction with XML entity decoding.
+   - Hardened `extractZipContents()` with per-file `try...catch` so an unreadable file or image inside a ZIP archive does not abort the entire extraction.
+4. **UI Diagnostic Feedback (`MaterialList` & `LectureNotesWorkspace`):**
+   - Updated `MaterialList` to render a red **"Failed"** badge and the descriptive error message under the item, alongside a working delete button.
+   - Polling condition in `LectureNotesWorkspace` updated to ignore failed materials so the UI does not show infinite spinners.
+5. **Verification & Tests:**
+   - Added unit test suite `src/tests/lecture-notes-pptx.test.ts` (all passed).
+   - Remote database migrations applied via `supabase db push`.
+   - Full test suite passed: 129 test files, 658 tests.
+   - `npm run check` (typecheck + lint + next build): Passed with 0 errors across 127 routes.
+
 ### 2026-10-03: Unified Lecture Notes Builder Activation & Guidance
 
 **Summary:**

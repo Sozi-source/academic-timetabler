@@ -14,6 +14,7 @@ interface Material {
   original_filename: string | null;
   chunk_count: number;
   ingested_at: string | null;
+  processing_error?: string | null;
   created_at: string;
 }
 
@@ -43,11 +44,12 @@ export function LectureNotesWorkspace({
       original_filename: m.originalFilename,
       chunk_count: m.chunkCount,
       ingested_at: m.ingestedAt,
+      processing_error: (m as unknown as { processing_error?: string | null }).processing_error ?? m.processingError ?? null,
       created_at: m.createdAt,
     })),
   );
 
-  const hasProcessingMaterials = materials.some((m) => !m.ingested_at);
+  const hasProcessingMaterials = materials.some((m) => !m.ingested_at && !m.processing_error);
 
   useEffect(() => {
     if (!hasProcessingMaterials) return;
@@ -86,6 +88,7 @@ export function LectureNotesWorkspace({
   }
 
   const ingestedCount = materials.filter((m) => m.ingested_at != null).length;
+  const activeProcessingCount = materials.filter((m) => !m.ingested_at && !m.processing_error).length;
 
   return (
     <div className="mx-auto max-w-2xl space-y-5">
@@ -119,7 +122,7 @@ export function LectureNotesWorkspace({
         teachingAllocationId={teachingAllocationId}
         topics={topics}
         materialCount={ingestedCount}
-        processingCount={materials.length - ingestedCount}
+        processingCount={activeProcessingCount}
       />
     </div>
   );

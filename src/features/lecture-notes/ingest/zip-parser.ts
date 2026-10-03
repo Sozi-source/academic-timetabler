@@ -16,7 +16,7 @@ export interface ZipSourceEntry {
 const MAX_ENTRIES = 100;
 const MAX_TOTAL_UNCOMPRESSED_BYTES = 150 * 1024 * 1024;
 const MAX_ENTRY_UNCOMPRESSED_BYTES = 30 * 1024 * 1024;
-const SUPPORTED_EXTENSIONS = new Set(['pdf', 'docx', 'txt', 'md']);
+const SUPPORTED_EXTENSIONS = new Set(['pdf', 'docx', 'pptx', 'txt', 'md']);
 
 function safeFilename(filename: string): string | null {
   const normalized = filename.replace(/\\/g, '/').replace(/^\/+/, '');
@@ -82,7 +82,7 @@ export async function unpackLectureSourceZip(zipBuffer: Buffer): Promise<ZipSour
   }
 
   if (entries.length === 0) {
-    throw new Error('The ZIP contains no supported lecture-source files. Include PDF, DOCX, TXT or Markdown files.');
+    throw new Error('The ZIP contains no supported lecture-source files. Include PDF, DOCX, PPTX, TXT or Markdown files.');
   }
 
   return entries;

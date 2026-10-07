@@ -58,7 +58,7 @@ export const getTrainerAttendanceUnits = cache(
       `)
       .in('academic_period_id', periodIds)
       .in('unit_id', unitIds)
-      .eq('assessment_type', 'unit_markbook');
+      .eq('assessment_type', 'exam');
 
     if (eventError) {
       throw new Error(`Unable to load Unit Markbooks: ${eventError.message}`);
@@ -125,7 +125,7 @@ export async function getTrainerAttendanceWorkspace(
       unit:units(code,name)
     `)
     .eq('id', assessmentId)
-    .eq('assessment_type', 'unit_markbook')
+    .eq('assessment_type', 'exam')
     .maybeSingle();
 
   if (eventError) throw new Error(`Unable to load Unit Markbook: ${eventError.message}`);

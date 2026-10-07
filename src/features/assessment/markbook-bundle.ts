@@ -50,11 +50,22 @@ export async function loadAssessmentMarkbookBundle({
         .select('id')
         .eq('academic_period_id', alloc.academic_period_id)
         .eq('unit_id', alloc.unit_id)
-        .in('assessment_type', ['exam', 'unit_markbook'])
+        .eq('assessment_type', 'exam')
         .maybeSingle();
 
       if (eventData?.id) {
         resolvedAssessmentId = eventData.id;
+      } else {
+        const { data: provisionedId } = await supabase.rpc(
+          'ensure_unit_markbook_ready',
+          {
+            p_academic_period_id: alloc.academic_period_id,
+            p_unit_id: alloc.unit_id,
+          },
+        );
+        if (provisionedId) {
+          resolvedAssessmentId = provisionedId as string;
+        }
       }
     }
   }

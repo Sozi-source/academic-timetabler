@@ -134,10 +134,38 @@ export const getAllocationPopulationWorkspace = cache(
       cohortName: st.cohortName,
     }));
 
+    // Look up or provision the authoritative assessment event for this allocation
+    let resolvedAssessmentId = `alloc-${alloc.id}`;
+    let resolvedWorkflowStatus = 'open';
+
+    const { data: existingEvent } = await supabase
+      .from('assessment_events')
+      .select('id, operational_workflow_status')
+      .eq('academic_period_id', alloc.academic_period_id)
+      .eq('unit_id', alloc.unit_id)
+      .eq('assessment_type', 'exam')
+      .maybeSingle();
+
+    if (existingEvent?.id) {
+      resolvedAssessmentId = existingEvent.id;
+      resolvedWorkflowStatus = (existingEvent.operational_workflow_status as string) || 'open';
+    } else {
+      const { data: provisionedId } = await supabase.rpc(
+        'ensure_unit_markbook_ready',
+        {
+          p_academic_period_id: alloc.academic_period_id,
+          p_unit_id: alloc.unit_id,
+        },
+      );
+      if (provisionedId) {
+        resolvedAssessmentId = provisionedId as string;
+      }
+    }
+
     return {
-      assessmentId: `alloc-${alloc.id}`,
+      assessmentId: resolvedAssessmentId,
       assessmentType: 'exam',
-      workflowStatus: 'draft',
+      workflowStatus: resolvedWorkflowStatus,
       populationGeneratedAt: null,
       populationLockedAt: null,
       unit: {

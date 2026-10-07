@@ -282,7 +282,6 @@ export const getStaffWorkspace =
         [
           'cat',
           'exam',
-          'unit_markbook',
         ],
       );
 
@@ -851,7 +850,7 @@ export async function requireStaffAllocation({
     .select('id, workflow_status, population_locked_at, assessment_type, published_at')
     .eq('academic_period_id', rawAlloc.academic_period_id)
     .eq('unit_id', rawAlloc.unit_id)
-    .in('assessment_type', ['exam', 'unit_markbook'])
+    .eq('assessment_type', 'exam')
     .maybeSingle();
 
   let examSummary: StaffAssessmentSummary | null = null;

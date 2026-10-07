@@ -57,7 +57,7 @@ export async function initializeUnitAssessmentAction(formData: FormData) {
     .select('id')
     .eq('academic_period_id', academicPeriodId)
     .eq('unit_id', unitId)
-    .in('assessment_type', ['exam', 'unit_markbook'])
+    .eq('assessment_type', 'exam')
     .maybeSingle();
 
   let assessmentId = existingEvent?.id;

@@ -51,6 +51,53 @@ drop function if exists public.stage_assessment_marks_import(uuid, text, jsonb);
 -- 2. Normalize Assessment Events for Online Marks Workflow
 -- ----------------------------------------------------------------------------
 
+-- Upgrade validate_assessment_event so it does not block migrations or superuser updates (auth.uid() is null)
+create or replace function public.validate_assessment_event()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  selected_unit public.units%rowtype;
+  selected_programme public.programmes%rowtype;
+  selected_cohort public.cohorts%rowtype;
+begin
+  select * into selected_unit from public.units where id = new.unit_id;
+  if selected_unit.id is null then
+    raise exception using errcode = 'P0002', message = 'Assessment unit not found';
+  end if;
+
+  select * into selected_programme from public.programmes where id = selected_unit.programme_id;
+  if selected_programme.id is null or selected_programme.department_id <> new.department_id then
+    raise exception using errcode = '23514', message = 'Assessment unit must belong to the selected department';
+  end if;
+
+  if new.cohort_id is not null then
+    select * into selected_cohort from public.cohorts where id = new.cohort_id;
+    if selected_cohort.id is null or selected_cohort.programme_id <> selected_unit.programme_id then
+      raise exception using errcode = '23514', message = 'Assessment cohort must belong to the unit programme';
+    end if;
+  end if;
+
+  -- Enforce department authorization only when an interactive authenticated user is present
+  if auth.uid() is not null and not (
+    public.current_user_can_manage_department(new.department_id)
+    or public.assessment_actor_can_manage_assessment(new.id)
+  ) then
+    raise exception using errcode = '42501', message = 'Not permitted to manage this assessment';
+  end if;
+
+  new.title = trim(coalesce(new.title, 'Unit Markbook'));
+  new.notes = nullif(trim(coalesce(new.notes, '')), '');
+  new.updated_at = now();
+  new.updated_by = coalesce(auth.uid(), new.updated_by);
+  return new;
+end;
+$$;
+
+alter table public.assessment_events disable trigger assessment_events_validate;
+
 update public.assessment_events
 set
   operational_assessment_type = 'exam',
@@ -65,6 +112,8 @@ set
 where operational_assessment_type is null
    or operational_workflow_status is null
    or population_locked_at is null;
+
+alter table public.assessment_events enable trigger assessment_events_validate;
 
 -- ----------------------------------------------------------------------------
 -- 3. Ensure Assessment Rules exist for every Unit (Maximum 100, Pass 40)

@@ -204,7 +204,7 @@ export const getAssessmentPopulationWorkspace =
       throw new Error(`Invalid assessment identifier: "${assessmentId}"`);
     }
 
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     const {
       data: eventData,
@@ -307,135 +307,102 @@ export const getAssessmentPopulationWorkspace =
       (populationResult.data ??
         []) as UnknownRow[];
 
-    const studentIds = [
-      ...new Set(
-        populationRows
-          .map((row) =>
-            asString(row.student_id),
-          )
-          .filter(
-            (value): value is string =>
-              Boolean(value),
-          ),
-      ),
-    ];
-
-    let studentRows: UnknownRow[] = [];
-
-    let discoveredCohortName: string | null = null;
-
-    if (studentIds.length > 0) {
-      const {
-        data,
-        error: studentsError,
-      } = await supabase
-        .from('students')
-        .select(
-          'id, admission_number, full_name',
-        )
-        .in('id', studentIds);
-
-      if (studentsError) {
-        throw new Error(
-          `Unable to load assessment students: ${studentsError.message}`,
-        );
-      }
-
-      studentRows =
-        (data ?? []) as UnknownRow[];
-    } else {
-      // Auto-discovery fallback: fetch students across all registered cohorts
-      const roster = await getUnifiedUnitRoster({
-        supabase,
-        unitId,
-        academicPeriodId: periodId,
-      });
-      discoveredCohortName = roster.joinedCohortName;
-
-      for (const st of roster.students) {
-        studentRows.push({
-          id: st.studentId,
-          admission_number: st.admissionNumber,
-          full_name: st.fullName,
-        });
-        populationRows.push({
-          id: st.studentId,
-          student_id: st.studentId,
-          attendance_status: 'expected',
-          registration_status: st.registrationStatus,
-        });
-      }
-    }
-
-    const studentById = new Map(
-      studentRows.map((student) => [
-        asString(student.id) ?? '',
-        student,
+    const populationByStudentId = new Map(
+      populationRows.map((row) => [
+        asString(row.student_id) ?? '',
+        row,
       ]),
     );
 
-    const students =
-      populationRows
-        .map((population) => {
-          const studentId =
-            asString(
-              population.student_id,
-            );
+    // Discover authoritative roster across all cohorts taking this unit
+    const roster = await getUnifiedUnitRoster({
+      supabase,
+      unitId,
+      academicPeriodId: periodId,
+    });
 
-          if (!studentId) {
-            return null;
-          }
+    const discoveredCohortName =
+      roster.joinedCohortName ||
+      (cohortResult.data ? cohortResult.data.name : null);
 
-          const student =
-            studentById.get(studentId);
+    const candidateStudentIds = new Set(
+      roster.students.map((st) => st.studentId),
+    );
 
-          if (!student) {
-            return null;
-          }
+    // Identify any students in workspace rows that were not in unified roster
+    const extraStudentIds = populationRows
+      .map((row) => asString(row.student_id))
+      .filter((id): id is string => Boolean(id) && !candidateStudentIds.has(id));
 
-          const attendance =
-            asString(
-              population.attendance_status,
-            ) === 'absent'
-              ? 'absent'
-              : 'expected';
+    let extraStudentRows: UnknownRow[] = [];
+    if (extraStudentIds.length > 0) {
+      const { data: extraStudents } = await supabase
+        .from('students')
+        .select('id, admission_number, full_name, current_cohort_id, cohort:cohorts(id, name)')
+        .in('id', extraStudentIds);
+      extraStudentRows = (extraStudents ?? []) as UnknownRow[];
+    }
 
-          return {
-            populationId:
-              asString(population.id) ??
-              studentId,
-            studentId,
-            admissionNumber:
-              asString(
-                student.admission_number,
-              ) ?? 'â€”',
-            fullName:
-              asString(
-                student.full_name,
-              ) ?? 'Student',
-            attendanceStatus:
-              attendance,
-            registrationStatus:
-              asString(
-                population
-                  .snapshot_registration_status,
-              ),
-          } satisfies
-            AssessmentPopulationStudent;
-        })
-        .filter(
-          (
-            student,
-          ): student is
-            AssessmentPopulationStudent =>
-            student !== null,
-        )
-        .sort((first, second) =>
-          compareAdmissionNumbers(
-            first.admissionNumber,
-            second.admissionNumber,
-          ),
-        );
+    const extraStudentById = new Map(
+      extraStudentRows.map((st) => [asString(st.id) ?? '', st]),
+    );
+
+    const mergedStudents: AssessmentPopulationStudent[] = [];
+
+    // 1. Add all students discovered across all taking cohorts
+    for (const st of roster.students) {
+      const popRow = populationByStudentId.get(st.studentId);
+      const attendance =
+        popRow && asString(popRow.attendance_status) === 'absent'
+          ? 'absent'
+          : st.attendanceStatus === 'absent'
+            ? 'absent'
+            : 'expected';
+
+      mergedStudents.push({
+        populationId: (popRow ? asString(popRow.id) : null) ?? st.studentId,
+        studentId: st.studentId,
+        admissionNumber: st.admissionNumber,
+        fullName: st.fullName,
+        attendanceStatus: attendance,
+        registrationStatus:
+          (popRow ? asString(popRow.snapshot_registration_status) : null) ??
+          st.registrationStatus,
+        cohortId: st.cohortId,
+        cohortName: st.cohortName,
+      });
+    }
+
+    // 2. Add any extra students from population rows
+    for (const extraId of extraStudentIds) {
+      const extra = extraStudentById.get(extraId);
+      if (!extra) continue;
+      const popRow = populationByStudentId.get(extraId);
+      const cohortObj = relationRow(extra.cohort);
+
+      mergedStudents.push({
+        populationId: (popRow ? asString(popRow.id) : null) ?? extraId,
+        studentId: extraId,
+        admissionNumber: asString(extra.admission_number) ?? '—',
+        fullName: asString(extra.full_name) ?? 'Student',
+        attendanceStatus:
+          popRow && asString(popRow.attendance_status) === 'absent'
+            ? 'absent'
+            : 'expected',
+        registrationStatus: popRow
+          ? asString(popRow.snapshot_registration_status)
+          : 'registered',
+        cohortId: asString(extra.current_cohort_id) ?? undefined,
+        cohortName: cohortObj ? asString(cohortObj.name) ?? undefined : undefined,
+      });
+    }
+
+    // Sort by cohort name, then naturally by admission number
+    const students = mergedStudents.sort((first, second) => {
+      const cohortComparison = (first.cohortName || '').localeCompare(second.cohortName || '');
+      if (cohortComparison !== 0) return cohortComparison;
+      return compareAdmissionNumbers(first.admissionNumber, second.admissionNumber);
+    });
 
     const markedAbsent =
       students.filter(

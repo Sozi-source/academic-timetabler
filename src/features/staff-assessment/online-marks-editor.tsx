@@ -48,6 +48,7 @@ interface StudentRow {
   studentId: string;
   admissionNumber: string;
   fullName: string;
+  cohortName?: string;
   attendanceStatus: 'expected' | 'absent';
   initialMarks: OnlineMarkValues;
 }
@@ -192,7 +193,8 @@ export function OnlineMarksEditor({
     return parsedRows.filter(
       (row) =>
         row.student.fullName.toLowerCase().includes(q) ||
-        row.student.admissionNumber.toLowerCase().includes(q),
+        row.student.admissionNumber.toLowerCase().includes(q) ||
+        (row.student.cohortName && row.student.cohortName.toLowerCase().includes(q)),
     );
   }, [parsedRows, searchQuery]);
 
@@ -601,6 +603,11 @@ export function OnlineMarksEditor({
                       </p>
                       <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] font-medium text-slate-600">
                         <span>{row.student.admissionNumber}</span>
+                        {row.student.cohortName ? (
+                          <span className="rounded bg-slate-200/80 px-1 py-0.5 text-[9px] font-bold text-slate-700">
+                            {row.student.cohortName}
+                          </span>
+                        ) : null}
                         {row.total !== null ? (
                           <span className="font-bold text-[#0b4f4a]">
                             · {row.total.toFixed(1)}/100
@@ -705,9 +712,14 @@ export function OnlineMarksEditor({
                       <p className="text-xs font-bold text-slate-900 line-clamp-1">
                         {row.student.fullName}
                       </p>
-                      <p className="text-[10px] font-medium font-mono text-slate-600 whitespace-nowrap">
-                        {row.student.admissionNumber}
-                      </p>
+                      <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-medium text-slate-600">
+                        <span className="font-mono whitespace-nowrap">{row.student.admissionNumber}</span>
+                        {row.student.cohortName ? (
+                          <span className="rounded bg-slate-200/80 px-1 py-0.5 text-[9px] font-bold text-slate-700">
+                            {row.student.cohortName}
+                          </span>
+                        ) : null}
+                      </div>
                       {row.student.attendanceStatus === 'absent' ? (
                         <Badge variant="warning" className="mt-0.5 rounded-none text-[9px]">
                           Exam absent

@@ -113,7 +113,7 @@ export default async function StaffOnlineMarksPage({
     <div className="space-y-5">
       <PageHeader
         title="Enter marks"
-        description={`${access.allocation.unitName} · ${access.allocation.cohortName}`}
+        description={`${access.allocation.unitName} · ${population.cohort?.name || access.allocation.cohortName}`}
       />
 
 
@@ -156,6 +156,8 @@ export default async function StaffOnlineMarksPage({
                   student.admissionNumber,
                 fullName:
                   student.fullName,
+                cohortName:
+                  student.cohortName,
                 attendanceStatus:
                   student.attendanceStatus,
                 initialMarks: {

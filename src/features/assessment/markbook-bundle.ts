@@ -9,6 +9,9 @@ import type {
 import {
   getStaffOnlineMarkState,
 } from '@/features/staff-assessment/online-marks-query';
+import {
+  getUnifiedUnitRoster,
+} from '@/features/academic-roster/unified-roster';
 
 type UnknownRow =
   Record<string, unknown>;
@@ -129,6 +132,31 @@ export async function loadAssessmentMarkbookBundle({
     );
   }
 
+  const relatedUnitIds = [unitId];
+
+  // Discover sibling unit IDs in the same shared offering
+  const { data: directOfferings } = await supabase
+    .from('unit_offerings')
+    .select('confirmed_shared_offering_id')
+    .eq('academic_period_id', periodId)
+    .eq('unit_id', unitId)
+    .not('confirmed_shared_offering_id', 'is', null);
+
+  const sharedOfferingId = directOfferings?.[0]?.confirmed_shared_offering_id;
+  if (sharedOfferingId) {
+    const { data: siblingOfferings } = await supabase
+      .from('unit_offerings')
+      .select('unit_id')
+      .eq('academic_period_id', periodId)
+      .eq('confirmed_shared_offering_id', sharedOfferingId);
+
+    for (const off of siblingOfferings ?? []) {
+      if (off?.unit_id && !relatedUnitIds.includes(off.unit_id)) {
+        relatedUnitIds.push(off.unit_id);
+      }
+    }
+  }
+
   const {
     data: eventData,
     error: eventError,
@@ -141,9 +169,9 @@ export async function loadAssessmentMarkbookBundle({
       'academic_period_id',
       periodId,
     )
-    .eq(
+    .in(
       'unit_id',
-      unitId,
+      relatedUnitIds,
     )
     .eq(
       'assessment_type',
@@ -253,6 +281,35 @@ export async function loadAssessmentMarkbookBundle({
       rosterResult.data ??
       []
     ) as UnknownRow[];
+
+  // Augment with unified roster candidates across all taking cohorts
+  try {
+    const unifiedRoster = await getUnifiedUnitRoster({
+      supabase,
+      unitId,
+      academicPeriodId: periodId,
+    });
+
+    const existingStudentIds = new Set(
+      rosterRows.map((r) => asString(r.student_id)).filter(Boolean),
+    );
+
+    for (const st of unifiedRoster.students) {
+      if (!existingStudentIds.has(st.studentId)) {
+        rosterRows.push({
+          id: st.studentId,
+          assessment_id: resolvedAssessmentId,
+          student_id: st.studentId,
+          cohort_id: st.cohortId,
+          attendance_status: st.attendanceStatus,
+          snapshot_registration_status: st.registrationStatus,
+        });
+        existingStudentIds.add(st.studentId);
+      }
+    }
+  } catch (err) {
+    console.warn('Could not augment markbook bundle with unified roster:', err);
+  }
 
   if (
     rosterRows.length === 0

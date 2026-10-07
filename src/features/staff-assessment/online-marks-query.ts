@@ -129,6 +129,48 @@ export async function getStaffOnlineMarkState(
     return [];
   }
 
+  const targetEventIds = [targetId];
+
+  // Discover sibling assessment events in the same shared offering
+  const { data: targetEvent } = await supabase
+    .from('assessment_events')
+    .select('id, unit_id, academic_period_id')
+    .eq('id', targetId)
+    .maybeSingle();
+
+  if (targetEvent?.unit_id && targetEvent?.academic_period_id) {
+    const { data: directOfferings } = await supabase
+      .from('unit_offerings')
+      .select('confirmed_shared_offering_id')
+      .eq('academic_period_id', targetEvent.academic_period_id)
+      .eq('unit_id', targetEvent.unit_id)
+      .not('confirmed_shared_offering_id', 'is', null);
+
+    const sharedOfferingId = directOfferings?.[0]?.confirmed_shared_offering_id;
+    if (sharedOfferingId) {
+      const { data: siblingOfferings } = await supabase
+        .from('unit_offerings')
+        .select('unit_id')
+        .eq('academic_period_id', targetEvent.academic_period_id)
+        .eq('confirmed_shared_offering_id', sharedOfferingId);
+
+      const siblingUnitIds = (siblingOfferings ?? []).map((o) => o.unit_id).filter(Boolean);
+      if (siblingUnitIds.length > 0) {
+        const { data: siblingEvents } = await supabase
+          .from('assessment_events')
+          .select('id')
+          .eq('academic_period_id', targetEvent.academic_period_id)
+          .in('unit_id', siblingUnitIds);
+
+        for (const ev of siblingEvents ?? []) {
+          if (ev?.id && !targetEventIds.includes(ev.id)) {
+            targetEventIds.push(ev.id);
+          }
+        }
+      }
+    }
+  }
+
   const [
     draftResult,
     resultResult,
@@ -141,9 +183,9 @@ export async function getStaffOnlineMarkState(
         .select(
           'student_id, assignment_mark, presentation_mark, rat_mark, cat_mark, exam_mark, updated_at',
         )
-        .eq(
+        .in(
           'assessment_id',
-          targetId,
+          targetEventIds,
         ),
 
       supabase
@@ -153,9 +195,9 @@ export async function getStaffOnlineMarkState(
         .select(
           'student_id, component_marks, operational_result_status, imported_at',
         )
-        .eq(
+        .in(
           'assessment_event_id',
-          assessmentId,
+          targetEventIds,
         ),
     ]);
 

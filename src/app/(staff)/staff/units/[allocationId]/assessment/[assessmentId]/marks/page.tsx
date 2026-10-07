@@ -1,6 +1,7 @@
 import { Keyboard } from 'lucide-react';
 import {
   notFound,
+  redirect,
 } from 'next/navigation';
 
 import {
@@ -77,6 +78,18 @@ export default async function StaffOnlineMarksPage({
         targetAssessmentId,
       ),
     ]);
+
+  if (
+    !isUUID &&
+    population.assessmentId &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      population.assessmentId,
+    )
+  ) {
+    redirect(
+      `/staff/units/${allocationId}/assessment/${population.assessmentId}/marks`,
+    );
+  }
 
   if (
     !access ||

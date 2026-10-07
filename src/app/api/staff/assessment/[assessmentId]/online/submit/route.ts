@@ -57,14 +57,16 @@ export async function POST(
   let targetAssessmentId = assessmentId;
   if (targetAssessmentId.startsWith('alloc-')) {
     const allocId = targetAssessmentId.replace('alloc-', '');
-    const { data: alloc } = await supabase
+    const { createAdminClient } = await import('@/lib/supabase/admin');
+    const admin = createAdminClient();
+    const { data: alloc } = await admin
       .from('teaching_allocations')
       .select('academic_period_id, unit_id')
       .eq('id', allocId)
       .maybeSingle();
 
     if (alloc) {
-      const { data: eventData } = await supabase
+      const { data: eventData } = await admin
         .from('assessment_events')
         .select('id')
         .eq('academic_period_id', alloc.academic_period_id)
@@ -75,7 +77,7 @@ export async function POST(
       if (eventData?.id) {
         targetAssessmentId = eventData.id;
       } else {
-        const { data: provisionedId } = await supabase.rpc(
+        const { data: provisionedId } = await admin.rpc(
           'ensure_unit_markbook_ready',
           {
             p_academic_period_id: alloc.academic_period_id,

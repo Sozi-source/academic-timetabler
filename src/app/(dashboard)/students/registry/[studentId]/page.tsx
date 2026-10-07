@@ -1,4 +1,4 @@
-import { ArrowLeft, BookOpenCheck, CalendarDays, Eye, History, KeyRound, Pencil, UsersRound } from 'lucide-react';
+import { ArrowLeft, BookOpenCheck, CalendarDays, Eye, GraduationCap, History, KeyRound, Pencil, UsersRound } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -150,6 +150,13 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
                 </Button>
               }
             />
+            <Link
+              href={`/students/registry/${student.id}/results`}
+              className="inline-flex h-8 w-full sm:w-auto items-center justify-center gap-1 rounded-lg border border-border bg-surface px-2.5 text-xs font-semibold text-text-secondary shadow-2xs transition hover:bg-surface-subtle whitespace-nowrap active:scale-95"
+            >
+              <GraduationCap className="size-3.5 text-primary" />
+              <span>Results</span>
+            </Link>
             <Link
               href={`/students/registry/${student.id}/portal-view`}
               className="inline-flex h-8 w-full sm:w-auto items-center justify-center gap-1 rounded-lg bg-primary px-2.5 text-xs font-semibold text-white shadow-2xs transition hover:bg-primary-hover active:scale-95 whitespace-nowrap"

@@ -5,7 +5,6 @@ import {
   ChevronRight,
   ClipboardCheck,
   FileText,
-  GraduationCap,
   UserRound,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -27,7 +26,6 @@ import {
   getStudentPortalDocuments,
   getStudentPortalIdentity,
   getStudentPortalRegistrationContext,
-  getStudentPortalResults,
   getStudentPortalTimetable,
 } from '@/features/student-portal/queries';
 import { getStudentPortalSession } from '@/features/student-portal/session';
@@ -40,12 +38,11 @@ export default async function StudentPortalPage() {
     redirect('/student/login');
   }
 
-  const [student, period, registration, timetable, results, documents, attendance] = await Promise.all([
+  const [student, period, registration, timetable, documents, attendance] = await Promise.all([
     getStudentPortalIdentity(session.studentId).catch(() => null),
     getActiveStudentPortalPeriod().catch(() => null),
     getStudentPortalRegistrationContext(session.studentId).catch(() => null),
     getStudentPortalTimetable(session.studentId).catch(() => []),
-    getStudentPortalResults(session.studentId).catch(() => []),
     getStudentPortalDocuments(session.studentId).catch(() => []),
     getStudentPortalAttendance(session.studentId).catch(() => null),
   ]);

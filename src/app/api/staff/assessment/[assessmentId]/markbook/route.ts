@@ -100,24 +100,37 @@ export async function POST(
   const supabase =
     await createClient();
 
-  const {
-    error: lockError,
-  } = await supabase.rpc(
-    'lock_assessment_markbook_bundle',
-    {
-      target_assessment_id:
-        assessmentId,
-    },
-  );
+  let targetAssessmentId = assessmentId;
+  if (targetAssessmentId.startsWith('alloc-')) {
+    const allocId = targetAssessmentId.replace('alloc-', '');
+    const { data: alloc } = await supabase
+      .from('teaching_allocations')
+      .select('academic_period_id, unit_id')
+      .eq('id', allocId)
+      .maybeSingle();
 
-  if (lockError) {
-    return NextResponse.json(
+    if (alloc) {
+      const { data: eventData } = await supabase
+        .from('assessment_events')
+        .select('id')
+        .eq('academic_period_id', alloc.academic_period_id)
+        .eq('unit_id', alloc.unit_id)
+        .in('assessment_type', ['exam', 'unit_markbook'])
+        .maybeSingle();
+
+      if (eventData?.id) {
+        targetAssessmentId = eventData.id;
+      }
+    }
+  }
+
+  // Attempt to lock/ensure bundle without blocking download
+  if (!targetAssessmentId.startsWith('alloc-')) {
+    await supabase.rpc(
+      'lock_assessment_markbook_bundle',
       {
-        message:
-          lockError.message,
-      },
-      {
-        status: 409,
+        target_assessment_id:
+          targetAssessmentId,
       },
     );
   }
@@ -132,7 +145,7 @@ export async function POST(
     const bundle =
       await loadAssessmentMarkbookBundle({
         rootAssessmentId:
-          assessmentId,
+          targetAssessmentId,
         generationId,
         generatedAt,
       });

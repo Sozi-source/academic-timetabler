@@ -1327,127 +1327,196 @@ export const CERTIFICATE_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     practicalHours: 16,
     aliases: ["CHN 1202", "CND 2106", "Food Science"],
     isAvailable: true,
-    unitDescription: "This unit equips the trainee with knowledge of food science principles relevant to understanding food composition, properties, and processing in nutrition practice.",
-    overallCompetency: "By the end of the unit, the trainee should be able to: describe the chemical composition of foods; explain functional properties of food components; describe water activity and its effects on food quality; apply food science principles in food preparation and preservation; evaluate food quality and sensory characteristics.",
+    unitDescription: "This course is intended to impart the trainee with knowledge and skills food materials, food handling procedures, processing, preservation and technologies applied to specific food products.",
+    overallCompetency: "By the end of the unit, the trainee should be able to: describe food science concepts and principles; apply food processing and preservation methods; implement thermal, low-temperature, dehydration, and salting technologies; evaluate packaging and specific product technologies; analyze emerging issues and trends in food science.",
     learningOutcomes: [
-      "Describe the chemical composition and nutritional value of foods",
-      "Explain functional properties of carbohydrates, proteins, fats, and water",
-      "Describe water activity and its effects on food quality and safety",
-      "Apply food science principles in food preparation and processing",
-      "Evaluate food quality using sensory assessment",
-      "Describe food quality standards and labelling requirements"
+      "Explain the meaning, scope, and importance of food science in nutrition practice",
+      "Apply unit operations and principles of food processing and preservation",
+      "Describe thermal processing methods including blanching, pasteurization, and sterilization",
+      "Explain low-temperature preservation, refrigeration, and cold storage",
+      "Apply evaporation, dehydration, fermentation, pickling, salting, and smoking techniques",
+      "Describe controlled and modified atmosphere storage, food additives, and food packaging",
+      "Explain specific food product technologies for dairy, meat, cereal, roots, and tubers",
+      "Analyze emerging issues and trends in food science and technology"
     ],
-    teachingLearningApproaches: "Lectures, food science laboratory practicals, food preparation demonstrations, sensory evaluation sessions.",
-    assessmentApproaches: "Continuous Assessment Test (CAT); laboratory report; summative examination.",
+    teachingLearningApproaches: "Interactive lectures, guided class discussions, practical demonstrations, food processing laboratory sessions.",
+    assessmentApproaches: "Continuous Assessment Tests (CATs) · Final Summative Examination",
     weeklySchedule: [
       {
         weekNumber: 1,
         topicTitle: "Introduction to Food Science",
-        subTopics: ["Definition and scope of food science", "Branches of food science: food chemistry, food microbiology, food engineering, food safety, sensory evaluation", "Importance of food science in nutrition practice", "Food science laboratory: safety, equipment, and procedures", "Overview of food composition: macronutrients, micronutrients, water, phytochemicals"],
-        hours: 3, specificLearningOutcomes: "Define food science; describe branches; explain importance in nutrition; identify laboratory equipment.",
-        learningActivities: "Lecture, food science laboratory introduction.", resourcesAndReferences: "Food science textbooks; laboratory equipment.", assessmentAndRemarks: "Class quiz."
+        subTopics: ["Meaning of terms", "Importance of food science", "Scope of food science"],
+        hours: 3,
+        specificLearningOutcomes: "Define food science terms; explain the importance of food science in nutrition practice; describe the scope of food science.",
+        learningActivities: "Lecture, guided class discussion, introductory laboratory orientation.",
+        resourcesAndReferences: "Food science manuals and reference charts; whiteboard.",
+        assessmentAndRemarks: "Oral questions, diagnostic quiz."
       },
       {
         weekNumber: 2,
-        topicTitle: "Water in Food: Properties and Water Activity",
-        subTopics: ["Physical and chemical properties of water: polarity, hydrogen bonding", "Water activity (aw): definition, measurement, and significance", "Effect of water activity on food safety: microbial growth and spoilage", "Free vs. bound water in foods", "Methods of controlling water activity: drying, salting, sugaring, freezing"],
-        hours: 3, specificLearningOutcomes: "Describe water properties; define water activity; explain effect of aw on microbial growth; describe water activity control methods.",
-        learningActivities: "Lecture, practical determination of water content in foods.", resourcesAndReferences: "Food science textbooks; desiccating oven.", assessmentAndRemarks: "Practical exercise."
+        topicTitle: "Principles of Food Processing and Preservation",
+        subTopics: [
+          "Unit operation in food processing and preservation",
+          "Thermal processing",
+          "Low temperature preservation",
+          "Evaporation and dehydration",
+          "Fermentation and pickling",
+          "Salting and smoking",
+          "Controlled and modified atmosphere storage",
+          "Food additives",
+          "Irradiation"
+        ],
+        hours: 3,
+        specificLearningOutcomes: "Identify unit operations in food processing; describe principles of food preservation methods.",
+        learningActivities: "Lecture, comparative analysis of preservation techniques.",
+        resourcesAndReferences: "Preservation process flowcharts; reference textbooks.",
+        assessmentAndRemarks: "Class exercise, short quiz."
       },
       {
         weekNumber: 3,
-        topicTitle: "Carbohydrates in Food",
-        subTopics: ["Classification and structure of food carbohydrates: sugars, starch, dietary fibre", "Functional properties: sweetness, viscosity, gel formation, foam stability", "Starch gelatinization and retrogradation", "Dietary fibre: soluble and insoluble, health effects", "Sugar: crystallization, caramelization, Maillard browning"],
-        hours: 3, specificLearningOutcomes: "Describe food carbohydrate structures; explain functional properties; describe starch gelatinization and fibre health effects.",
-        learningActivities: "Lecture, practical: starch gelatinization experiment.", resourcesAndReferences: "Food chemistry textbooks; starch samples.", assessmentAndRemarks: "Practical exercise, report."
+        topicTitle: "Thermal Processing",
+        subTopics: ["Blanching", "Pasteurization", "Sterilization"],
+        hours: 3,
+        specificLearningOutcomes: "Describe blanching, pasteurization, and sterilization; explain thermal death time and commercial sterility.",
+        learningActivities: "Lecture, thermal processing demonstration.",
+        resourcesAndReferences: "Thermal processing charts; laboratory equipment.",
+        assessmentAndRemarks: "Practical report."
       },
       {
         weekNumber: 4,
-        topicTitle: "Proteins in Food",
-        subTopics: ["Structure and classification of food proteins: complete and incomplete proteins", "Functional properties of proteins: gelation, emulsification, foaming, water binding, coagulation", "Denaturation of proteins: heat, acid, mechanical stress — implications in cooking", "Protein-protein interactions: gluten formation in wheat", "Protein quality: biological value, amino acid score, PDCAAS"],
-        hours: 3, specificLearningOutcomes: "Describe protein structure and functional properties; explain denaturation; describe protein quality measures.",
-        learningActivities: "Lecture, practical: protein denaturation experiment (egg white).", resourcesAndReferences: "Food chemistry textbooks; food samples.", assessmentAndRemarks: "Practical exercise, report."
+        topicTitle: "Low Temperature Preservation",
+        subTopics: ["Terminologies", "Refrigeration", "Cold storage", "Chilling", "Freezing", "Thawing"],
+        hours: 3,
+        specificLearningOutcomes: "Define low-temperature terminologies; explain refrigeration and cold storage mechanisms; describe chilling, freezing, and safe thawing practices.",
+        learningActivities: "Lecture, cold storage temperature monitoring practical.",
+        resourcesAndReferences: "Refrigeration logs; reference texts.",
+        assessmentAndRemarks: "Assignment on freezing curves."
       },
       {
         weekNumber: 5,
-        topicTitle: "Lipids in Food",
-        subTopics: ["Classification and structure of food lipids: triglycerides, phospholipids, sterols", "Physical properties: melting point, plasticity, polymorphism in chocolate and fats", "Functional properties: emulsification, shortening, flavour, fat replacers", "Oxidative rancidity: causes, prevention, antioxidants", "Trans fats: formation by hydrogenation and health implications"],
-        hours: 3, specificLearningOutcomes: "Classify food lipids; describe functional properties; explain rancidity and antioxidants; describe trans fat formation.",
-        learningActivities: "Lecture, practical: rancidity testing of oils.", resourcesAndReferences: "Food chemistry textbooks; oil samples.", assessmentAndRemarks: "Practical exercise, report."
+        topicTitle: "Evaporation and Dehydration, Fermentation and Pickling",
+        subTopics: [
+          "Methods of evaporation and dehydration",
+          "Reconstitution",
+          "Fermentation process",
+          "Production of pickles",
+          "Preparation of pickles for use"
+        ],
+        hours: 3,
+        specificLearningOutcomes: "Explain evaporation and dehydration methods; describe reconstitution; describe the fermentation process and pickle production.",
+        learningActivities: "Lecture, fermentation and dehydration practical exercises.",
+        resourcesAndReferences: "Food samples; fermentation vessels; desiccators.",
+        assessmentAndRemarks: "Laboratory practical write-up."
       },
       {
         weekNumber: 6,
-        topicTitle: "Vitamins and Minerals in Food Processing",
-        subTopics: ["Stability of vitamins during processing: heat-labile (Vitamin C, B1) vs. heat-stable (B12)", "Effect of processing on mineral bioavailability: phytates, oxalates, iron absorption", "Vitamin C retention during cooking and storage", "Fortification vs. enrichment of foods", "Mineral-mineral interactions: iron and zinc competition"],
-        hours: 3, specificLearningOutcomes: "Describe vitamin stability during processing; explain mineral bioavailability; distinguish fortification and enrichment.",
-        learningActivities: "Lecture, vitamin C retention experiment.", resourcesAndReferences: "Food chemistry textbooks; DCPIP reagent.", assessmentAndRemarks: "Practical exercise, report."
+        topicTitle: "Salting and Smoking",
+        subTopics: ["Effects of salt", "Effect of smoke on foods", "Methods of salting", "Methods of smoking"],
+        hours: 3,
+        specificLearningOutcomes: "Describe the antimicrobial and preservation effects of salt and smoke; explain traditional and modern salting and smoking methods.",
+        learningActivities: "Lecture, practical observation of salted/smoked products.",
+        resourcesAndReferences: "Food samples; curing reference materials.",
+        assessmentAndRemarks: "Review questions."
       },
       {
         weekNumber: 7,
-        topicTitle: "Continuous Assessment Test (CAT) — Food Science",
-        subTopics: ["Written theory assessment covering topics from Weeks 1–6", "Post-CAT review and feedback session"],
-        hours: 3, specificLearningOutcomes: "Demonstrate mastery of food science topics from Weeks 1–6.",
-        learningActivities: "Supervised written CAT, plenary review.", resourcesAndReferences: "Examination scripts; marking keys.", assessmentAndRemarks: "CAT."
+        topicTitle: "Controlled and Modified Atmosphere Storage & Food Additives",
+        subTopics: ["Aims", "Terminologies", "Methods used", "Meaning of terms", "Classes of additives", "Safe use of additives"],
+        hours: 3,
+        specificLearningOutcomes: "Explain aims and methods of controlled and modified atmosphere storage; classify food additives and explain safe usage standards.",
+        learningActivities: "Lecture, analysis of packaged food additive declarations.",
+        resourcesAndReferences: "Food ingredient labels; KEBS/Codex additive standards.",
+        assessmentAndRemarks: "Label analysis report."
       },
       {
         weekNumber: 8,
-        topicTitle: "Food Colours, Flavours, and Additives",
-        subTopics: ["Natural pigments in foods: chlorophyll, carotenoids, anthocyanins, betalains", "Changes in pigment during processing: colour degradation", "Flavour compounds: volatile and non-volatile, Maillard reaction products", "Food additives: preservatives, antioxidants, emulsifiers, thickeners, colourings", "Regulations on food additives: KEBS standards, FAO/WHO Codex"],
-        hours: 3, specificLearningOutcomes: "Describe food pigments; explain flavour compounds; describe food additive types and regulations.",
-        learningActivities: "Lecture, food colour extraction practical.", resourcesAndReferences: "Food science textbooks; food samples.", assessmentAndRemarks: "Practical exercise."
+        topicTitle: "Continuous Assessment Test (CAT)",
+        subTopics: ["Supervised written evaluation covering Weeks 1–7", "CAT paper review and feedback"],
+        hours: 3,
+        specificLearningOutcomes: "Demonstrate mastery of food science concepts and preservation technologies.",
+        learningActivities: "Supervised written assessment.",
+        resourcesAndReferences: "CAT examination papers.",
+        assessmentAndRemarks: "Continuous Assessment Test (30%)."
       },
       {
         weekNumber: 9,
-        topicTitle: "Food Texture and Rheology",
-        subTopics: ["Definition of food texture: hardness, cohesiveness, springiness, gumminess, chewiness", "Rheological properties of foods: viscosity, elasticity, plasticity", "Texture measurement: texture profile analysis (TPA)", "Texture modification in therapeutic diets: texture-modified foods for dysphagia", "Gel formation in food: gelatin, pectin, agar, starch gels"],
-        hours: 3, specificLearningOutcomes: "Define food texture properties; describe rheological properties; describe gel formation and texture modification for therapeutic diets.",
-        learningActivities: "Lecture, practical: gel formation experiment.", resourcesAndReferences: "Food science textbooks; gelatin; pectin; agar.", assessmentAndRemarks: "Practical exercise."
+        topicTitle: "Packaging",
+        subTopics: ["Aims of packaging", "Properties required of packaging materials"],
+        hours: 3,
+        specificLearningOutcomes: "Explain aims of packaging; evaluate physical, chemical, and barrier properties required of food packaging materials.",
+        learningActivities: "Lecture, packaging material property evaluation.",
+        resourcesAndReferences: "Sample packaging materials (glass, metal, plastic, paperboard).",
+        assessmentAndRemarks: "Class quiz."
       },
       {
         weekNumber: 10,
-        topicTitle: "Heat Transfer and Food Preparation",
-        subTopics: ["Methods of heat transfer: conduction, convection, radiation", "Heat transfer in cooking: boiling, steaming, baking, frying, grilling, roasting", "Effect of cooking on nutritional content: advantages and losses", "Cooking and antinutritional factors: phytates, oxalates, lectins, tannins", "Optimal cooking methods for nutrient retention"],
-        hours: 3, specificLearningOutcomes: "Describe heat transfer methods in cooking; explain effects of cooking on nutritional content; describe antinutritional factor reduction.",
-        learningActivities: "Lecture, practical: comparative cooking nutrient retention.", resourcesAndReferences: "Food science textbooks; cooking equipment.", assessmentAndRemarks: "Practical exercise, report."
+        topicTitle: "Specific Products Technology",
+        subTopics: ["Dairy technology", "Meat technology", "Cereal technology"],
+        hours: 3,
+        specificLearningOutcomes: "Describe processing operations in dairy, meat, and cereal manufacturing.",
+        learningActivities: "Lecture, process flow diagrams analysis.",
+        resourcesAndReferences: "Industrial processing charts; reference manuals.",
+        assessmentAndRemarks: "Group presentation."
       },
       {
         weekNumber: 11,
-        topicTitle: "Sensory Evaluation of Food",
-        subTopics: ["Importance of sensory evaluation in food science and nutrition", "Human senses in food evaluation: taste, smell, appearance, texture, sound", "Types of sensory tests: discrimination tests, descriptive analysis, affective tests", "Sensory evaluation panel: recruitment, training, conditions", "Practical: sensory evaluation of food samples"],
-        hours: 3, specificLearningOutcomes: "Describe sensory evaluation methods; conduct sensory evaluation; interpret sensory data.",
-        learningActivities: "Lecture, practical sensory evaluation exercise.", resourcesAndReferences: "Sensory evaluation score sheets; food samples; textbooks.", assessmentAndRemarks: "Sensory evaluation practical report."
+        topicTitle: "Roots, Tubers, Starch, Sugar, Fruits, Vegetables & Beverage Technology",
+        subTopics: [
+          "Roots and tubers crops technology",
+          "Starch, sugar and confectionery technology",
+          "Fruits and vegetables technology",
+          "Beverage technology",
+          "Types of food products in each technology"
+        ],
+        hours: 3,
+        specificLearningOutcomes: "Describe technologies for roots, tubers, confectionery, horticultural products, and beverages; identify product types in each sector.",
+        learningActivities: "Lecture, product comparison clinic.",
+        resourcesAndReferences: "Product samples; TVET technology manuals.",
+        assessmentAndRemarks: "Assignment."
       },
       {
         weekNumber: 12,
-        topicTitle: "Food Quality, Standards, and Labelling",
-        subTopics: ["Food quality parameters: safety, nutritional quality, sensory quality, authenticity", "Food quality standards in Kenya: KEBS food standards", "Codex Alimentarius standards: purpose and application", "Food labelling requirements: ingredients, nutrition facts, claims", "Reading and interpreting food labels for nutrition counselling"],
-        hours: 3, specificLearningOutcomes: "Define food quality; describe KEBS and Codex standards; read and interpret food labels.",
-        learningActivities: "Lecture, food label analysis exercise.", resourcesAndReferences: "KEBS food standards; food label samples; textbooks.", assessmentAndRemarks: "Food label analysis exercise."
+        topicTitle: "Emerging Issues and Trends in Food Science",
+        subTopics: ["Emerging issues and trends", "Challenges posed by emerging issues and trends", "Coping mechanisms and innovations"],
+        hours: 3,
+        specificLearningOutcomes: "Discuss emerging trends, modern food technologies, and challenges in the food industry.",
+        learningActivities: "Seminar presentations, guided group debate.",
+        resourcesAndReferences: "Current research papers, industry publications.",
+        assessmentAndRemarks: "Seminar paper."
       },
       {
         weekNumber: 13,
-        topicTitle: "Emerging Issues and Trends in Food Science",
-        subTopics: ["Emerging issues: novel foods, food biofortification, nanotechnology in food", "Functional foods and nutraceuticals: definition, examples, health claims", "3D food printing: technology and nutritional applications", "Clean label movement: consumer demands for natural ingredients", "Challenges and coping strategies"],
-        hours: 3, specificLearningOutcomes: "Discuss emerging food science issues; describe functional foods; explain clean label movement.",
-        learningActivities: "Discussions, presentations.", resourcesAndReferences: "Journal articles; industry reports.", assessmentAndRemarks: "Oral presentation."
+        topicTitle: "Comprehensive Course Revision & Tutorial Clinic",
+        subTopics: ["Syllabus-wide review of food science principles, preservation methods, and product technologies", "Examination preparation"],
+        hours: 3,
+        specificLearningOutcomes: "Synthesize all course competences in preparation for summative examination.",
+        learningActivities: "Problem-solving clinic, past paper review.",
+        resourcesAndReferences: "Past KNEC/TVET papers; marking guides.",
+        assessmentAndRemarks: "Revision exercises."
       },
       {
         weekNumber: 14,
-        topicTitle: "Final Summative Examination — Food Science",
-        subTopics: ["Comprehensive written theory examination", "Practical: food science laboratory practical"],
-        hours: 3, specificLearningOutcomes: "Demonstrate comprehensive mastery of food science principles.",
-        learningActivities: "Supervised theory and practical examination.", resourcesAndReferences: "Official examination papers; marking rubrics.", assessmentAndRemarks: "Final summative examination."
+        topicTitle: "Final Summative Examination",
+        subTopics: ["Comprehensive institutional TVET final examination"],
+        hours: 3,
+        specificLearningOutcomes: "Demonstrate comprehensive competency in Food Science.",
+        learningActivities: "Supervised summative examination.",
+        resourcesAndReferences: "Official examination answer booklets.",
+        assessmentAndRemarks: "Final Summative Examination (70%)."
       }
     ],
     references: [
-      "Belitz, H. D., Grosch, W., & Schieberle, P. (2009). Food Chemistry (4th ed.). Springer.",
+      "Potter, N. N., & Hotchkiss, J. H. (2012). Food Science (5th ed.). Springer.",
       "Vaclavik, V. A., & Christian, E. W. (2014). Essentials of Food Science (4th ed.). Springer.",
-      "Kenya Bureau of Standards. Food Standards and Specifications."
+      "Fellows, P. J. (2016). Food Processing Technology: Principles and Practice (4th ed.). Woodhead Publishing.",
+      "Kenya Bureau of Standards (KEBS). Standards and Specifications for Food Products."
     ],
     instructionalEquipment: [
-      "Food science laboratory equipment (ovens, balances, pH meters)",
-      "Food samples for analysis", "Sensory evaluation score sheets",
-      "Reagents (Benedict's, Biuret, DCPIP)", "Whiteboard and LCD projector"
+      "Food science and technology laboratory facilities",
+      "Thermal processing equipment and thermometers",
+      "Hydrometers, refractometers, and moisture testing tools",
+      "Packaging material test samples",
+      "Whiteboard and multimedia projector"
     ]
   }
 };

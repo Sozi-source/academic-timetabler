@@ -45,13 +45,7 @@ export function canEditStaffAttendance(
 export function canDownloadStaffMarkbook(
   state: StaffAssessmentWorkflowState,
 ): boolean {
-  return (
-    state.populationCount >
-      0 &&
-    !terminal(
-      state.workflowStatus,
-    )
-  );
+  return state.populationCount > 0;
 }
 
 export function canDownloadStaffSigningSheet(
@@ -89,21 +83,16 @@ export function canUseStaffOnlineMarks({
   assessmentType:
     'cat' |
     'exam';
-  maximumMark:
+  maximumMark?:
     number |
     null;
 }): boolean {
   return (
     assessmentType ===
       'exam' &&
-    maximumMark ===
-      100 &&
+    (maximumMark === undefined || maximumMark === null || maximumMark === 100) &&
     state.populationCount >
-      0 &&
-    state.ruleConfigured &&
-    !terminal(
-      state.workflowStatus,
-    )
+      0
   );
 }
 

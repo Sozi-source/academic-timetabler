@@ -46,11 +46,35 @@ export function parseDocxSyllabus(docxBuffer: Buffer, fileName?: string): Parsed
 
     const xml = documentXmlEntry.buffer.toString('utf8');
 
-    // 1. Detect Unit Code: e.g. "DHN 2304", "NUT 101", "CLIN 201", "CND 1102"
-    const codeRegex = /\b([A-Z]{2,6})\s*([0-9]{3,4}[A-Z]?)\b/i;
-    const matchCode = xml.replace(/<[^>]+>/g, ' ').match(codeRegex);
-    let unitCode = matchCode ? `${matchCode[1].toUpperCase()} ${matchCode[2].toUpperCase()}` : '';
+    // 1. Extract plain-text paragraphs for metadata extraction
+    const allParas: string[] = [];
+    const allParaRegex = /(<w:p\b[\s\S]*?<\/w:p>)/g;
+    let apm: RegExpExecArray | null;
+    while ((apm = allParaRegex.exec(xml)) !== null) {
+      const texts = apm[1].match(/<w:t\b[^>]*>([\s\S]*?)<\/w:t>/g) || [];
+      const t = texts.map((x) => x.replace(/<[^>]+>/g, '')).join(' ').trim();
+      const c = cleanXmlString(t);
+      if (c) allParas.push(c);
+    }
 
+    // 2. Detect Unit Code: e.g. "DHN 2304", "NUT 101", "CLIN 201", "CND 1102"
+    const codeRegex = /\b([A-Z]{2,6})\s*([0-9]{3,4}[A-Z]?)\b/i;
+    const explicitCodeRegex = /(?:Unit|Course|Module)\s*(?:Code)?\s*[:=-]\s*([A-Z]{2,6}\s*[0-9]{3,4}[A-Z]?)/i;
+    let unitCode = '';
+
+    // Check first 10 paragraphs for explicit code label
+    for (let i = 0; i < Math.min(10, allParas.length); i++) {
+      const explicitMatch = allParas[i].match(explicitCodeRegex);
+      if (explicitMatch) {
+        const parts = explicitMatch[1].match(codeRegex);
+        if (parts) {
+          unitCode = `${parts[1].toUpperCase()} ${parts[2].toUpperCase()}`;
+          break;
+        }
+      }
+    }
+
+    // Check filename if no explicit label in header
     if (!unitCode && fileName) {
       const baseFilename = fileName.split('/').pop()?.split('\\').pop() ?? fileName;
       const codeMatch = baseFilename.match(codeRegex);
@@ -59,13 +83,29 @@ export function parseDocxSyllabus(docxBuffer: Buffer, fileName?: string): Parsed
       }
     }
 
-    // 2. Detect Unit Name / Title
+    // Fall back to first match in header paragraphs only (first 5 paragraphs)
+    if (!unitCode) {
+      for (let i = 0; i < Math.min(5, allParas.length); i++) {
+        const match = allParas[i].match(codeRegex);
+        if (match) {
+          unitCode = `${match[1].toUpperCase()} ${match[2].toUpperCase()}`;
+          break;
+        }
+      }
+    }
+
+    // 3. Detect Unit Name / Title
     let unitName = '';
     const titleRegex = /(?:Unit|Course|Module)\s*(?:Title|Name)?\s*[:=-]\s*([^\n\r<]+)/i;
-    const matchTitle = xml.match(titleRegex);
-    if (matchTitle && matchTitle[1]) {
-      unitName = cleanXmlString(matchTitle[1].replace(/<[^>]+>/g, ''));
-    } else if (fileName) {
+    for (let i = 0; i < Math.min(10, allParas.length); i++) {
+      const matchTitle = allParas[i].match(titleRegex);
+      if (matchTitle && matchTitle[1]) {
+        unitName = cleanXmlString(matchTitle[1]);
+        break;
+      }
+    }
+
+    if (!unitName && fileName) {
       const baseFilename = fileName.split('/').pop()?.split('\\').pop() ?? fileName;
       const stripped = baseFilename
         .replace(/\.docx$/i, '')
@@ -76,17 +116,6 @@ export function parseDocxSyllabus(docxBuffer: Buffer, fileName?: string): Parsed
       if (stripped.length > 2) {
         unitName = stripped;
       }
-    }
-
-    // 3. Extract plain-text paragraphs for metadata extraction
-    const allParas: string[] = [];
-    const allParaRegex = /(<w:p\b[\s\S]*?<\/w:p>)/g;
-    let apm: RegExpExecArray | null;
-    while ((apm = allParaRegex.exec(xml)) !== null) {
-      const texts = apm[1].match(/<w:t\b[^>]*>([\s\S]*?)<\/w:t>/g) || [];
-      const t = texts.map((x) => x.replace(/<[^>]+>/g, '')).join(' ').trim();
-      const c = cleanXmlString(t);
-      if (c) allParas.push(c);
     }
 
     // Extract unit description (paragraph after "description", "purpose", "overview" heading)

@@ -4,10 +4,12 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Download,
   LoaderCircle,
   Save,
   Search,
   Send,
+  Upload,
   X,
 } from 'lucide-react';
 import {
@@ -24,6 +26,12 @@ import {
 import {
   Button,
 } from '@/components/ui/button';
+import {
+  BulkUploadDialog,
+} from '@/features/assessment/marks/bulk-upload-dialog';
+import type {
+  MatchedBulkStudentResult,
+} from '@/features/assessment/marks/bulk-upload-parser';
 
 import {
   calculateOnlineFinalTotal,
@@ -86,17 +94,36 @@ export function OnlineMarksEditor({
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState<number | 'all'>(10);
 
-  const [busy, setBusy] = useState<'save' | 'submit' | null>(null);
+  const [busy, setBusy] = useState<'save' | 'submit' | 'download' | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [visibleComponent, setVisibleComponent] = useState<'all' | OnlineMarkComponentKey>('all');
+
+  // Callback invoked by BulkUploadDialog: merges spreadsheet data into editor state
+  const applyBulkMarks = (matched: MatchedBulkStudentResult[]) => {
+    setValues((prev) => {
+      const next = { ...prev };
+      for (const m of matched) {
+        if (!next[m.studentId]) continue;
+        next[m.studentId] = {
+          assignment: m.assignment !== null ? String(m.assignment) : '',
+          presentation: m.presentation !== null ? String(m.presentation) : '',
+          rat: m.rat !== null ? String(m.rat) : '',
+          cat: m.cat !== null ? String(m.cat) : '',
+          exam: m.attendanceStatus === 'absent' ? '' : m.exam !== null ? String(m.exam) : '',
+        };
+      }
+      return next;
+    });
+    setMessage(`Bulk upload applied for ${matched.length} student(s). Review and save when ready.`);
+  };
+
+  const editable = canEditOnlineMarks(workflowStatus);
 
   const isSingleMode = visibleComponent !== 'all';
   const singleComponent = isSingleMode
     ? onlineMarkComponents.find((c) => c.key === visibleComponent)
     : null;
-
-  const editable = canEditOnlineMarks(workflowStatus);
 
   const parsedRows = useMemo(
     () =>
@@ -358,6 +385,47 @@ export function OnlineMarksEditor({
     }
   }
 
+  async function downloadExcel() {
+    setBusy('download');
+    setError(null);
+    try {
+      if (editable && !invalid) {
+        await saveDraft({ silent: true });
+      }
+
+      const response = await fetch(
+        `/api/staff/assessment/${assessmentId}/markbook`,
+        { method: 'POST' },
+      );
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        setError(payload?.message ?? 'Excel marksheet could not be generated.');
+        return;
+      }
+
+      const blob = await response.blob();
+      const disposition = response.headers.get('content-disposition');
+      const filenameMatch = disposition?.match(/filename\*=UTF-8''([^;]+)|filename="?([^";]+)"?/i);
+      const filename = filenameMatch?.[1]
+        ? decodeURIComponent(filenameMatch[1])
+        : (filenameMatch?.[2] ?? 'Unit Marksheet.xlsx');
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      setError('Failed to download Excel marksheet.');
+    } finally {
+      setBusy(null);
+    }
+  }
+
   return (
     <div className="space-y-3.5 pb-24">
       {/* Sleek Compact Stats Strip */}
@@ -372,7 +440,42 @@ export function OnlineMarksEditor({
             </span>
           ) : null}
         </div>
-        <Badge variant="neutral" className="rounded-none border border-slate-300 bg-[#fffdf5] font-semibold text-slate-800">Scale /100</Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant="neutral" className="rounded-none border border-slate-300 bg-[#fffdf5] font-semibold text-slate-800">Scale /100</Badge>
+          {editable ? (
+            <BulkUploadDialog
+              assessmentId={assessmentId}
+              mode="staff"
+              onAppliedToEditor={applyBulkMarks}
+              onSaveSuccess={() => router.refresh()}
+              trigger={
+                <button
+                  type="button"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-none border border-slate-300 bg-[#fffdf5] px-2.5 text-xs font-bold text-slate-800 transition hover:bg-[#f2ece0]"
+                >
+                  <Upload className="size-3.5 text-slate-500" />
+                  <span>Bulk Upload</span>
+                </button>
+              }
+            />
+          ) : null}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={busy !== null}
+            onClick={() => void downloadExcel()}
+            leadingIcon={
+              busy === 'download' ? (
+                <LoaderCircle className="size-3.5 animate-spin" />
+              ) : (
+                <Download className="size-3.5" />
+              )
+            }
+          >
+            Export Excel
+          </Button>
+        </div>
       </section>
 
       {/* Mode Switcher & Search Filter */}
@@ -744,46 +847,77 @@ export function OnlineMarksEditor({
       ) : null}
 
       {/* Action Buttons */}
-      {editable ? (
-        <div className="flex items-center justify-end gap-2 pt-1">
+      <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-200">
+        <div>
+          {!editable ? (
+            <p className="text-xs font-medium text-slate-600">
+              Results are submitted and finalized. Download the completed spreadsheet below.
+            </p>
+          ) : (
+            <p className="text-[11px] text-text-muted">
+              {missing > 0
+                ? `${missing} mark(s) remaining before submission.`
+                : 'All marks complete and ready for submission.'}
+            </p>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
           <Button
             type="button"
             variant="outline"
             size="sm"
             disabled={busy !== null}
-            onClick={() => void saveDraft()}
+            onClick={() => void downloadExcel()}
             leadingIcon={
-              busy === 'save' ? (
+              busy === 'download' ? (
                 <LoaderCircle className="size-3.5 animate-spin" />
               ) : (
-                <Save className="size-3.5" />
+                <Download className="size-3.5" />
               )
             }
           >
-            Save draft
+            Download Excel (.xlsx)
           </Button>
 
-          <Button
-            type="button"
-            size="sm"
-            disabled={busy !== null || missing > 0 || Boolean(invalid)}
-            onClick={() => void submitMarks()}
-            leadingIcon={
-              busy === 'submit' ? (
-                <LoaderCircle className="size-3.5 animate-spin" />
-              ) : (
-                <Send className="size-3.5" />
-              )
-            }
-          >
-            Submit marks
-          </Button>
+          {editable ? (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={busy !== null}
+                onClick={() => void saveDraft()}
+                leadingIcon={
+                  busy === 'save' ? (
+                    <LoaderCircle className="size-3.5 animate-spin" />
+                  ) : (
+                    <Save className="size-3.5" />
+                  )
+                }
+              >
+                Save draft
+              </Button>
+
+              <Button
+                type="button"
+                size="sm"
+                disabled={busy !== null || missing > 0 || Boolean(invalid)}
+                onClick={() => void submitMarks()}
+                leadingIcon={
+                  busy === 'submit' ? (
+                    <LoaderCircle className="size-3.5 animate-spin" />
+                  ) : (
+                    <Send className="size-3.5" />
+                  )
+                }
+              >
+                Submit marks
+              </Button>
+            </>
+          ) : null}
         </div>
-      ) : (
-        <p className="text-right text-[10px] text-text-muted">
-          Results are read only after submission.
-        </p>
-      )}
+      </div>
     </div>
   );
 }

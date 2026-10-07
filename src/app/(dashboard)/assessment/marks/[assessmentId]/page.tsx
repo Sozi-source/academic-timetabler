@@ -4,6 +4,8 @@ import { notFound } from 'next/navigation';
 
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/ui/page-header';
+import { DownloadAssessmentMarkbookButton } from '@/features/assessment/markbook-controls';
+import { BulkUploadDialog } from '@/features/assessment/marks/bulk-upload-dialog';
 import { getAssessmentById, getAssessmentPopulation } from '@/features/assessment/queries';
 import { getAssessmentResultCount } from '@/features/assessment/marks/queries';
 import { requireHodAccess } from '@/features/auth/authorization';
@@ -69,6 +71,18 @@ export default async function AssessmentMarkWorkflowPage({
               <BarChart3 className="size-3.5 text-slate-500" />
               <span>Unit Analysis</span>
             </Link>
+            {!isComplete ? (
+              <BulkUploadDialog
+                assessmentId={assessment.id}
+                unitName={assessment.unit?.name ?? 'Unit Marksheet'}
+                mode="admin"
+              />
+            ) : null}
+            <DownloadAssessmentMarkbookButton
+              assessmentId={assessment.id}
+              unitName={assessment.unit?.name ?? 'Unit Marksheet'}
+              disabled={population.length === 0}
+            />
           </div>
         }
       />

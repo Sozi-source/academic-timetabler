@@ -119,28 +119,36 @@ export function IndividualUploadForm({
         setUploadedFileType(result.fileType);
         setIssues(result.issues || []);
 
-        // Try matching unit if user hasn't explicitly locked a unit selection
-        let matchedTarget: SystemUnitOption | undefined;
-        if (result.unitCode) {
-          const cleanCode = result.unitCode.toLowerCase().replace(/[^a-z0-9]/g, '');
-          matchedTarget = units.find(
-            (u) => u.code.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanCode
-          );
-        }
-        if (!matchedTarget && result.unitName) {
-          const cleanName = result.unitName.toLowerCase().replace(/[^a-z0-9]/g, '');
-          matchedTarget = units.find(
-            (u) => u.name.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanName
-          );
-        }
+        // Only auto-match unit if the user hasn't already selected or typed a unit
+        if (!selectedUnitId && !unitCode.trim()) {
+          let matchedTarget: SystemUnitOption | undefined;
+          // Priority A: Exact unit name match (e.g. "Food Science")
+          if (result.unitName) {
+            const cleanName = result.unitName.toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (cleanName) {
+              matchedTarget = units.find(
+                (u) => u.name.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanName
+              );
+            }
+          }
+          // Priority B: Unit code match
+          if (!matchedTarget && result.unitCode) {
+            const cleanCode = result.unitCode.toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (cleanCode) {
+              matchedTarget = units.find(
+                (u) => u.code.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanCode
+              );
+            }
+          }
 
-        if (matchedTarget) {
-          setSelectedUnitId(matchedTarget.id);
-          setUnitCode(matchedTarget.code);
-          setUnitName(matchedTarget.name);
-        } else {
-          if (result.unitCode) setUnitCode(result.unitCode);
-          if (result.unitName) setUnitName(result.unitName);
+          if (matchedTarget) {
+            setSelectedUnitId(matchedTarget.id);
+            setUnitCode(matchedTarget.code);
+            setUnitName(matchedTarget.name);
+          } else {
+            if (result.unitCode) setUnitCode(result.unitCode);
+            if (result.unitName) setUnitName(result.unitName);
+          }
         }
 
         if (result.unitDescription) setUnitDescription(result.unitDescription);

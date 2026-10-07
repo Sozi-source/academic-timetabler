@@ -79,27 +79,14 @@ export async function POST(
   const supabase =
     await createClient();
 
-  const {
-    error: lockError,
-  } = await supabase.rpc(
+  // Attempt to lock/ensure bundle without blocking download
+  await supabase.rpc(
     'lock_assessment_markbook_bundle',
     {
       target_assessment_id:
         assessmentId,
     },
   );
-
-  if (lockError) {
-    return NextResponse.json(
-      {
-        message:
-          lockError.message,
-      },
-      {
-        status: 409,
-      },
-    );
-  }
 
   const generationId =
     randomUUID();

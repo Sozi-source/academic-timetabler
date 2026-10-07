@@ -270,42 +270,19 @@ export function StaffAssessmentWorkflow({
   }
 
   async function openOnlineMarks() {
-    setBusy(
-      'online',
-    );
-
-    setMessage(
-      null,
-    );
-
+    setBusy('online');
+    setMessage(null);
     try {
-      const response =
-        await fetch(
-          `/api/staff/assessment/${assessmentId}/online/prepare`,
-          {
-            method:
-              'POST',
-          },
-        );
-
-      if (!response.ok) {
-        setMessage(
-          await messageFromResponse(
-            response,
-            'Online marks could not be opened.',
-          ),
-        );
-
-        return;
-      }
+      // Fire prepare optionally in the background
+      void fetch(`/api/staff/assessment/${assessmentId}/online/prepare`, {
+        method: 'POST',
+      }).catch(() => null);
 
       router.push(
         `/staff/units/${allocationId}/assessment/${assessmentId}/marks`,
       );
     } finally {
-      setBusy(
-        null,
-      );
+      setBusy(null);
     }
   }
 
@@ -463,7 +440,7 @@ export function StaffAssessmentWorkflow({
                 className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Download className="size-3.5" aria-hidden="true" />
-                Download Excel
+                Download marksheet (.xlsx)
               </button>
             ) : null}
 
@@ -514,7 +491,9 @@ export function StaffAssessmentWorkflow({
                     aria-hidden="true"
                   />
                 )}
-                Enter marks
+                {workflowStatus === 'submitted' || workflowStatus === 'finalised' || workflowStatus === 'archived'
+                  ? 'View marks'
+                  : 'Enter marks'}
               </button>
             ) : null}
 

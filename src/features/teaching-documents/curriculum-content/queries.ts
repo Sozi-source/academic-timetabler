@@ -132,19 +132,21 @@ function enrichWithCanonical(
   }
 
   if (canonical.isAvailable === false) {
-    return {
-      ...def,
-      unitDescription: canonical.unitDescription,
-      overallCompetency: canonical.overallCompetency,
-      learningOutcomes: [],
-      references: [],
-      instructionalEquipment: [],
-      weeklySchedule: [],
-      isAvailable: false,
-      notReadyMessage:
-        canonical.notReadyMessage ||
-        `Curriculum content for this unit is currently pending official TVET document ingestion.`,
-    };
+    if (!isAuthoritative || !def.weeklySchedule || def.weeklySchedule.length === 0) {
+      return {
+        ...def,
+        unitDescription: canonical.unitDescription,
+        overallCompetency: canonical.overallCompetency,
+        learningOutcomes: [],
+        references: [],
+        instructionalEquipment: [],
+        weeklySchedule: [],
+        isAvailable: false,
+        notReadyMessage:
+          canonical.notReadyMessage ||
+          `Curriculum content for this unit is currently pending official TVET document ingestion.`,
+      };
+    }
   }
 
   // Normalize legacy/imported payloads at the read boundary too. This makes
@@ -166,8 +168,8 @@ function enrichWithCanonical(
   let weeklySchedule = normalizedDefSchedule;
   const canonicalSchedule = canonical.weeklySchedule;
 
-  if (isAuthoritative && weeklySchedule && weeklySchedule.length > 0 && !isScheduleCorrupt) {
-    // Retain verbatim authoritative schedule
+  if (isAuthoritative && weeklySchedule && weeklySchedule.length > 0) {
+    // Retain verbatim authoritative schedule uploaded by user/trainer
   } else {
     const canonicalHasRichSLOs =
       canonicalSchedule &&

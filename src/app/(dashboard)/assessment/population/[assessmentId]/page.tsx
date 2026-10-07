@@ -22,12 +22,8 @@ import {
   DownloadAssessmentMarkbookButton,
 } from '@/features/assessment/markbook-controls';
 import {
-  AssessmentWorkbookValidationControl,
   DownloadAssessmentSigningSheetButton,
 } from '@/features/assessment/assessment-document-controls';
-import {
-  StageAssessmentMarkbookControl,
-} from '@/features/assessment/markbook-stage-control';
 import {
   AssessmentAbsenceButton,
   GenerateAssessmentPopulationButton,
@@ -232,24 +228,6 @@ export default async function AssessmentPopulationPage({
               }
               disabled={
                 !canDownload
-              }
-            />
-
-            <AssessmentWorkbookValidationControl
-              assessmentId={
-                workspace.assessmentId
-              }
-              disabled={
-                !locked
-              }
-            />
-
-            <StageAssessmentMarkbookControl
-              assessmentId={
-                workspace.assessmentId
-              }
-              disabled={
-                !locked
               }
             />
           </div>

@@ -34,6 +34,31 @@ export async function loadAssessmentMarkbookBundle({
   const supabase =
     await createClient();
 
+  let resolvedAssessmentId = rootAssessmentId;
+
+  if (resolvedAssessmentId.startsWith('alloc-')) {
+    const allocId = resolvedAssessmentId.replace('alloc-', '');
+    const { data: alloc } = await supabase
+      .from('teaching_allocations')
+      .select('academic_period_id, unit_id')
+      .eq('id', allocId)
+      .maybeSingle();
+
+    if (alloc) {
+      const { data: eventData } = await supabase
+        .from('assessment_events')
+        .select('id')
+        .eq('academic_period_id', alloc.academic_period_id)
+        .eq('unit_id', alloc.unit_id)
+        .in('assessment_type', ['exam', 'unit_markbook'])
+        .maybeSingle();
+
+      if (eventData?.id) {
+        resolvedAssessmentId = eventData.id;
+      }
+    }
+  }
+
   const {
     data: rootData,
     error: rootError,
@@ -44,7 +69,7 @@ export async function loadAssessmentMarkbookBundle({
     .select('*')
     .eq(
       'id',
-      rootAssessmentId,
+      resolvedAssessmentId,
     )
     .maybeSingle();
 

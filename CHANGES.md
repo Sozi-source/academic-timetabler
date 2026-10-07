@@ -1,3 +1,27 @@
+### 2026-10-05: Fix Food Science Course Outline AI Synthesis and Document Upload Hijacking
+
+**Summary:**
+1. **Root Cause Analysis (AI Synthesis & Failed Upload Replacement):**
+   - **Synthetic Syllabus Hardcoding**: In earlier harmonization commits, a 14-week synthetic syllabus ("Water in Food", "Carbohydrates in Food", etc.) was hardcoded in `src/features/teaching-documents/curriculum-data/certificate-units.ts` under `CHN 1202` instead of marking it unavailable or using the authentic TVET syllabus.
+   - **Document Hijacking via Heuristic Parser**: When uploading the genuine 11-topic Food Science course outline, `src/features/teaching-documents/curriculum-editor/docx-parser.ts` performed global regex matching across the document XML. It caught an incidental reference to `CHN 1301` inside the text and auto-detected `CHN 1301 - Diet Therapy Theory`.
+   - **Upload Form Unit Override**: `src/features/teaching-documents/individual-upload-form.tsx` unconditionally overwrote the user's manual selection (`selectedUnitId`) with the auto-detected unit from the parser, redirecting the Food Science document to Diet Therapy Theory (`e30a3c77-ebb6-47a2-ac67-fe06a92ed413`) and superseding Diet Therapy Theory's genuine course outline.
+   - **Query Schedule Corruption Fallback**: `src/features/teaching-documents/curriculum-content/queries.ts` contained a fallback that replaced custom/uploaded schedules with canonical fallback topics if bulleted SLOs (`\n•`) were missing, risking silent override of uploaded data.
+2. **Database Reassignment & Restoration Migration (`supabase/migrations/20261005100000_reassign_food_science_course_outline_and_restore_diet_therapy.sql`):**
+   - Reassigned active Food Science upload (`f21099c8-1c46-4b28-a6ab-82411d8fcf61`) from `CHN 1301` to `CHN 1202 - Food Science` (`4cd70f07-428c-4ee7-8e48-3fcb1494f1e4`).
+   - Created active version binding for equivalent Diploma unit `CND 2106 - Food Science` (`092bac80-c7ae-4765-b8ad-2eb8de5796a7`) pointing to the authentic Food Science course outline.
+   - Restored genuine Diet Therapy Theory outline (`1ad31166-bffe-49dc-a23a-364f5a5cf369`) as the active version for `CHN 1301`.
+   - Retired duplicate erroneous upload (`9f334f46-28f7-49c8-aebc-1f170ecee70f`).
+3. **Curriculum Registry Alignment (`src/features/teaching-documents/curriculum-data/certificate-units.ts`):**
+   - Replaced synthetic 14-week schedule with the official 11-topic syllabus matching the department curriculum ("Introduction to food science and nutrition", "Food nutrients and their sources", "Food commodities", "Food contamination and spoilage", "Methods of food preservation", "Food additives and adulteration", "Food packaging and labeling", "Sensory evaluation of food", "Food safety, hygiene and quality assurance", "Food security and post-harvest losses", "Emerging trends in food science").
+4. **Parser & Upload Guardrails:**
+   - In `src/features/teaching-documents/curriculum-editor/docx-parser.ts`, restricted course code extraction to explicit prefixes (`Unit Code: ...`) or initial header paragraphs, preventing incidental cross-references from reclassifying documents.
+   - In `src/features/teaching-documents/individual-upload-form.tsx`, locked unit selection once a user has chosen or specified a target unit, and prioritized unit title matching over isolated code matches.
+   - In `src/features/teaching-documents/curriculum-content/queries.ts`, ensured authoritative database records (`isAuthoritative: true`) are strictly preserved and never overwritten by canonical fallbacks.
+5. **Testing & Verification:**
+   - Added unit test `src/tests/food-science-resolution.test.ts` verifying `CHN 1202`, `CND 2106`, `CHN 1301`, and canonical resolution.
+   - All tests passed: `npm test` (127 test files, 656 passed).
+   - Full check passed: `npm run check` (typecheck, lint, Next.js production build with 0 errors).
+
 ### 2026-10-03: Dashboard Narrow Banner, Core System Metrics & HOD Cross-Trainer Attendance Input
 
 **Summary:**

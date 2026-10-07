@@ -583,7 +583,7 @@ function createOnlineMarksReportSheet(
   const sheet = workbook.addWorksheet(
     uniqueSheetName(workbook, safeSheetName(cohort.cohortName, 'Cohort')),
     {
-      views: [{ state: 'frozen', ySplit: 7, showGridLines: false }],
+      views: [{ state: 'frozen', ySplit: 7, showGridLines: true }],
       pageSetup: {
         orientation: 'landscape',
         fitToPage: true,
@@ -595,22 +595,22 @@ function createOnlineMarksReportSheet(
     },
   );
 
-  sheet.mergeCells('A1:K1');
-  sheet.getCell('A1').value = 'IMPERIAL COLLEGE TRAINER PORTAL';
+  sheet.mergeCells('A1:L1');
+  sheet.getCell('A1').value = 'ACADEMIC PLANNER';
   sheet.getCell('A1').font = { bold: true, size: 14, color: { argb: navy } };
   sheet.getCell('A1').alignment = { horizontal: 'center', vertical: 'middle' };
 
-  sheet.mergeCells('A2:K2');
-  sheet.getCell('A2').value = 'ONLINE MARKS REPORT';
+  sheet.mergeCells('A2:L2');
+  sheet.getCell('A2').value = 'UNIT MARKSHEET REPORT';
   sheet.getCell('A2').font = { bold: true, size: 12 };
   sheet.getCell('A2').alignment = { horizontal: 'center' };
 
-  sheet.mergeCells('A4:K4');
+  sheet.mergeCells('A4:L4');
   sheet.getCell('A4').value = `${bundle.unit.code ?? ''} ${bundle.unit.name} · ${cohort.cohortName}`.trim();
   sheet.getCell('A4').font = { bold: true, size: 10 };
   sheet.getCell('A4').alignment = { horizontal: 'center' };
 
-  sheet.mergeCells('A5:K5');
+  sheet.mergeCells('A5:L5');
   sheet.getCell('A5').value = `${bundle.academicPeriod.name} · Generated ${bundle.generatedAt.toLocaleString('en-GB')}`;
   sheet.getCell('A5').font = { size: 9, color: { argb: 'FF4B5563' } };
   sheet.getCell('A5').alignment = { horizontal: 'center' };
@@ -628,6 +628,7 @@ function createOnlineMarksReportSheet(
     'Exam /70',
     'RAT/CAT /15',
     'Final /100',
+    'Grade',
   ];
   headerRow.height = 28;
   headerRow.eachCell((cell) => {
@@ -665,6 +666,19 @@ function createOnlineMarksReportSheet(
         ? null
         : marks.assignment + marks.presentation + ratCatAverage + marks.exam;
 
+    const grade =
+      student.attendanceStatus === 'absent'
+        ? 'ABSENT'
+        : final === null
+          ? '—'
+          : final >= 75
+            ? 'DISTINCTION'
+            : final >= 65
+              ? 'CREDIT'
+              : final >= 40
+                ? 'PASS'
+                : 'REFER';
+
     const row = sheet.getRow(rowNumber);
     row.values = [
       index + 1,
@@ -676,8 +690,9 @@ function createOnlineMarksReportSheet(
       marks.rat,
       marks.cat,
       student.attendanceStatus === 'absent' ? 'AB' : marks.exam,
-      ratCatAverage,
-      student.attendanceStatus === 'absent' ? 'AB' : final,
+      ratCatAverage !== null ? Number(ratCatAverage.toFixed(2)) : null,
+      student.attendanceStatus === 'absent' ? 'AB' : final !== null ? Number(final.toFixed(2)) : null,
+      grade,
     ];
     row.height = 20;
     row.eachCell((cell, colNumber) => {
@@ -685,7 +700,7 @@ function createOnlineMarksReportSheet(
       cell.alignment = { vertical: 'middle', wrapText: colNumber !== 2 };
       applyThinBorder(cell);
     });
-    for (let column = 1; column <= 11; column += 1) {
+    for (let column = 1; column <= 12; column += 1) {
       if (column !== 2 && column !== 3) {
         sheet.getCell(rowNumber, column).alignment = {
           horizontal: 'center',
@@ -702,7 +717,7 @@ function createOnlineMarksReportSheet(
 
   sheet.columns = [
     { width: 6 },
-    { width: 28 },
+    { width: 26 },
     { width: 28 },
     { width: 12 },
     { width: 13 },
@@ -712,8 +727,9 @@ function createOnlineMarksReportSheet(
     { width: 11 },
     { width: 13 },
     { width: 12 },
+    { width: 14 },
   ];
-  sheet.autoFilter = { from: { row: 7, column: 1 }, to: { row: 7, column: 11 } };
+  sheet.autoFilter = { from: { row: 7, column: 1 }, to: { row: 7, column: 12 } };
   sheet.headerFooter.oddFooter = '&LGenerated from online marks&CPage &P of &N&RTrainer Portal';
 
   return { sheet, firstStudentRow: 8, students };
@@ -818,31 +834,33 @@ export async function generateAssessmentMarkbook(
       },
     );
 
-    await sheet.protect(
-      '',
-      {
-        selectLockedCells:
-          true,
-        selectUnlockedCells:
-          true,
-        formatCells:
-          false,
-        formatColumns:
-          false,
-        formatRows:
-          false,
-        insertColumns:
-          false,
-        insertRows:
-          false,
-        deleteColumns:
-          false,
-        deleteRows:
-          false,
-        sort: true,
-        autoFilter: true,
-      },
-    );
+    if (bundle.assessmentType !== 'exam') {
+      await sheet.protect(
+        '',
+        {
+          selectLockedCells:
+            true,
+          selectUnlockedCells:
+            true,
+          formatCells:
+            false,
+          formatColumns:
+            false,
+          formatRows:
+            false,
+          insertColumns:
+            false,
+          insertRows:
+            false,
+          deleteColumns:
+            false,
+          deleteRows:
+            false,
+          sort: true,
+          autoFilter: true,
+        },
+      );
+    }
   }
 
   const metadata =

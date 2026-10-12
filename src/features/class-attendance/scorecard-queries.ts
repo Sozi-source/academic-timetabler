@@ -69,6 +69,7 @@ export async function getDepartmentStudentAttendanceScorecard(
       stats: {
         totalStudents: 0,
         averageAttendanceRate: 0,
+        totalMissedLessons: 0,
         goodStandingCount: 0,
         borderlineCount: 0,
         atRiskCount: 0,
@@ -131,6 +132,7 @@ export async function getDepartmentStudentAttendanceScorecard(
       stats: {
         totalStudents: 0,
         averageAttendanceRate: 0,
+        totalMissedLessons: 0,
         goodStandingCount: 0,
         borderlineCount: 0,
         atRiskCount: 0,
@@ -448,6 +450,7 @@ export async function getDepartmentStudentAttendanceScorecard(
   });
 
   const averageAttendanceRate = countOfRatedStudents > 0 ? Math.round((sumOfRates / countOfRatedStudents) * 10) / 10 : 0;
+  const totalMissedLessons = scorecardStudents.reduce((acc, s) => acc + s.totalAbsent, 0);
   const sortedCohorts = Array.from(cohortStudentCountMap.values()).sort((a, b) => a.name.localeCompare(b.name));
   const sortedUnits = Array.from(allUnitsMap.values()).sort((a, b) => a.code.localeCompare(b.code));
 
@@ -460,6 +463,7 @@ export async function getDepartmentStudentAttendanceScorecard(
     stats: {
       totalStudents: scorecardStudents.length,
       averageAttendanceRate,
+      totalMissedLessons,
       goodStandingCount: goodCount,
       borderlineCount: borderlineCount,
       atRiskCount: atRiskCount,

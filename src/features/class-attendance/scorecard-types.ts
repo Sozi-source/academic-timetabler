@@ -46,6 +46,7 @@ export interface StudentAttendanceScorecardData {
   stats: {
     totalStudents: number;
     averageAttendanceRate: number;
+    totalMissedLessons: number;
     goodStandingCount: number;
     borderlineCount: number;
     atRiskCount: number;

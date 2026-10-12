@@ -112,11 +112,11 @@ export default async function DepartmentClassAttendancePage({ searchParams }: Pa
 
         <div className="flex items-center gap-3 text-[11px] text-text-muted">
           <span>
-            Avg <strong className="text-text-primary">{scorecardData.stats.averageAttendanceRate}%</strong>
+            <strong className="text-text-primary">{scorecardData.stats.totalMissedLessons}</strong> missed lessons
           </span>
           {scorecardData.stats.atRiskCount > 0 ? (
             <span className="font-semibold text-danger">
-              {scorecardData.stats.atRiskCount} below threshold
+              {scorecardData.stats.atRiskCount} at risk
             </span>
           ) : null}
         </div>

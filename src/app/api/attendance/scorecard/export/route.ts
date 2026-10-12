@@ -53,8 +53,8 @@ export async function GET(request: Request) {
     'Student Full Name',
     'Cohort',
     'Programme',
-    ...unitCols.map((u) => `${u.code} (%)`),
-    'Overall Attendance (%)',
+    ...unitCols.map((u) => `${u.code} (Missed)`),
+    'Total Missed Lessons',
     'Standing',
     'Sessions Present',
     'Total Sessions Held',
@@ -76,7 +76,7 @@ export async function GET(request: Request) {
     const unitValues = unitCols.map((col) => {
       const u = unitMap.get(col.id);
       if (!u) return '—';
-      return u.attendanceRate !== null ? `${u.attendanceRate.toFixed(1)}%` : 'No ses';
+      return `${u.absentCount} missed`;
     });
 
     const rowData = [
@@ -86,7 +86,7 @@ export async function GET(request: Request) {
       student.cohortName,
       student.programmeCode,
       ...unitValues,
-      student.overallScore !== null ? `${student.overallScore.toFixed(1)}%` : '—',
+      student.totalAbsent,
       getAttendanceStandingLabel(student.standing),
       student.totalPresent,
       student.totalCompletedSessions,
@@ -129,7 +129,7 @@ export async function GET(request: Request) {
     { width: 20 }, // Cohort
     { width: 14 }, // Programme
     ...unitCols.map(() => ({ width: 15 })), // Unit columns
-    { width: 22 }, // Overall Attendance
+    { width: 22 }, // Total Missed Lessons
     { width: 20 }, // Standing
     { width: 16 }, // Sessions Present
     { width: 18 }, // Total Sessions Held

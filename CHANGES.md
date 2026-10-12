@@ -1,3 +1,10 @@
+﻿### 2026-10-12: Instant status tab switching on Student Registry
+
+**Modified:** `src/features/students/student-registry-table.tsx`
+- Root cause: `handleTabChange` used `router.push` which re-rendered the server page and refetched the entire roster (`getStudents`, cohort options, auth) on every tab click, although filtering is already client-side.
+- Fix: active tab is now local state (seeded from the URL); the URL is mirrored with `window.history.replaceState` (no server round-trip). Deep links/refresh still work.
+- No breaking changes, no manual follow-up.
+
 ### 2026-10-05: Fix Food Science Course Outline AI Synthesis and Document Upload Hijacking
 
 **Summary:**
@@ -5,7 +12,7 @@
    - **Synthetic Syllabus Hardcoding**: In earlier harmonization commits, a 14-week synthetic syllabus ("Water in Food", "Carbohydrates in Food", etc.) was hardcoded in `src/features/teaching-documents/curriculum-data/certificate-units.ts` under `CHN 1202` instead of marking it unavailable or using the authentic TVET syllabus.
    - **Document Hijacking via Heuristic Parser**: When uploading the genuine 11-topic Food Science course outline, `src/features/teaching-documents/curriculum-editor/docx-parser.ts` performed global regex matching across the document XML. It caught an incidental reference to `CHN 1301` inside the text and auto-detected `CHN 1301 - Diet Therapy Theory`.
    - **Upload Form Unit Override**: `src/features/teaching-documents/individual-upload-form.tsx` unconditionally overwrote the user's manual selection (`selectedUnitId`) with the auto-detected unit from the parser, redirecting the Food Science document to Diet Therapy Theory (`e30a3c77-ebb6-47a2-ac67-fe06a92ed413`) and superseding Diet Therapy Theory's genuine course outline.
-   - **Query Schedule Corruption Fallback**: `src/features/teaching-documents/curriculum-content/queries.ts` contained a fallback that replaced custom/uploaded schedules with canonical fallback topics if bulleted SLOs (`\n•`) were missing, risking silent override of uploaded data.
+   - **Query Schedule Corruption Fallback**: `src/features/teaching-documents/curriculum-content/queries.ts` contained a fallback that replaced custom/uploaded schedules with canonical fallback topics if bulleted SLOs (`\nâ€¢`) were missing, risking silent override of uploaded data.
 2. **Database Reassignment & Restoration Migration (`supabase/migrations/20261005100000_reassign_food_science_course_outline_and_restore_diet_therapy.sql`):**
    - Reassigned active Food Science upload (`f21099c8-1c46-4b28-a6ab-82411d8fcf61`) from `CHN 1301` to `CHN 1202 - Food Science` (`4cd70f07-428c-4ee7-8e48-3fcb1494f1e4`).
    - Created active version binding for equivalent Diploma unit `CND 2106 - Food Science` (`092bac80-c7ae-4765-b8ad-2eb8de5796a7`) pointing to the authentic Food Science course outline.
@@ -57,7 +64,7 @@ Streamlined lecture notes generation by adopting the Google NotebookLM architect
    - Built a dedicated companion endpoint that bundles the official TVET course outline, approved learning outcomes, weekly plan, and all ingested source texts into a single downloadable source file (`[UnitCode]_NotebookLM_Source_Bundle.txt`).
    - Generates an expert TVET Curriculum Specialist master prompt tailored for Google NotebookLM.
 3. **UI Enhancements (`src/features/lecture-notes/ui/generation-panel.tsx`):**
-   - Default generation method set to **"AI Full Unit — Gemini Long-Context (NotebookLM Mode)"**.
+   - Default generation method set to **"AI Full Unit â€” Gemini Long-Context (NotebookLM Mode)"**.
    - Added **Google NotebookLM Companion** card with "Launch in NotebookLM" (1-click source package download, TVET prompt copy to clipboard, and automated navigation to `https://notebooklm.google.com`) and "Copy TVET prompt".
    - Added token consumption badge displaying prompt and candidate token counts.
 4. **Verification:**
@@ -125,7 +132,7 @@ Diagnosed and addressed the issue where the "Build unified unit notes" button re
    - Added an indexing alert with an animated spinner when source materials are still undergoing background extraction/chunking (`processingCount > 0`).
    - Updated the button label to be context-aware:
      - `materialCount === 0 && processingCount === 0`: `Add sources above to build unified notes`
-     - `processingCount > 0`: `Indexing sources…`
+     - `processingCount > 0`: `Indexing sourcesâ€¦`
      - `materialCount > 0`: `Build unified unit notes (N sources)`
 3. **Verification:**
    - `npm run check` (typecheck + lint + next build): Passed with 0 errors across 127 routes.
@@ -248,7 +255,7 @@ Resolved two runtime errors encountered when trainers upload lecture materials o
 ### 2026-10-02: Fix Attendance Scorecard Discrepancy & 1,000-Row Pagination Truncation
 
 **Summary:**
-Resolved the root causes behind students seeing attendance percentages on their individual portals while appearing with missing/unrecorded (`—`) scores on the Admin Attendance Scorecard (`/attendance`):
+Resolved the root causes behind students seeing attendance percentages on their individual portals while appearing with missing/unrecorded (`â€”`) scores on the Admin Attendance Scorecard (`/attendance`):
 1. **Root Cause 1: PostgREST 1,000-Row Hard Ceiling on Registrations (`student_unit_registrations`):**
    - The department has 1,305+ registered units for the current period.
    - PostgREST enforces a hard default ceiling of 1,000 rows per query. Without pagination, rows 1,001 through 1,305 were silently truncated, causing students appearing later in alphabetical order to have 0 registered units loaded on the admin scorecard.
@@ -271,7 +278,7 @@ Resolved the root causes behind students seeing attendance percentages on their 
 Streamlined the Lecture Notes Generator UI and hardened generation resilience based on direct trainer feedback:
 1. **Multi-File Material Upload:**
    - Updated `src/features/lecture-notes/ui/material-upload-form.tsx` with multi-file selection support (`multiple` file input).
-   - Trainers can select and queue multiple PDFs and DOCX files at once. All files are ingested, chunked, and embedded sequentially with dynamic progress feedback (`Uploading X of Y…`).
+   - Trainers can select and queue multiple PDFs and DOCX files at once. All files are ingested, chunked, and embedded sequentially with dynamic progress feedback (`Uploading X of Yâ€¦`).
    - Deduplicates picked files by filename and allows clearing individual files before starting upload.
 2. **Simplified, Distraction-Free Lecture Notes Workspace:**
    - Overhauled `src/features/lecture-notes/ui/lecture-notes-workspace.tsx` into a centered, unified single-column flow:
@@ -334,7 +341,7 @@ Implemented comprehensive multi-subject attendance scoring, subject percentage m
      - `Borderline`: $75\% - 79.9\%$
      - `At Risk`: $< 75\%$
      - `Unrecorded`: 0 marked sessions
-   - Units with 0 held/completed sessions render as `—` (no sessions held) so they do not artificially penalize students or skew averages.
+   - Units with 0 held/completed sessions render as `â€”` (no sessions held) so they do not artificially penalize students or skew averages.
    - Strictly scopes to active in-class students (`lifecycle_status in ('admitted', 'active')` and `academic_phase = 'in_class'`). Suspended, deferred, dropped out, and attachment students are strictly excluded.
 2. **Interactive UI with Dynamic Matrix & Scorecard Views:**
    - Created `src/features/class-attendance/student-attendance-scorecard.tsx` with:
@@ -503,10 +510,10 @@ Implemented enterprise-grade, grounded (0% hallucination) lecture notes generato
 3. **Trainer Table Actions & Tokens:** Set explicit `size: 80` on the `actions` column in `trainer-table.tsx`, replaced raw hex color `#033B36` with theme token `text-primary`, and migrated button background from `bg-white` to `bg-surface`.
 
 **Files changed:**
-- `src/app/(dashboard)/timetable/teaching-allocations/page.tsx` — Applied explicit header column percentages and horizontal scroll wrapper.
-- `src/features/rooms/room-table.tsx` — Set explicit size for actions column.
-- `src/features/trainers/trainer-table.tsx` — Set explicit size for actions column and corrected color tokens.
-- `CHANGES.md` — Documented changes.
+- `src/app/(dashboard)/timetable/teaching-allocations/page.tsx` â€” Applied explicit header column percentages and horizontal scroll wrapper.
+- `src/features/rooms/room-table.tsx` â€” Set explicit size for actions column.
+- `src/features/trainers/trainer-table.tsx` â€” Set explicit size for actions column and corrected color tokens.
+- `CHANGES.md` â€” Documented changes.
 
 ### 2026-09-30: Timetable Setup Pages UI & Navigation Cleanup
 
@@ -518,17 +525,17 @@ Applied consistent enterprise design standards, navigation links, and dropdown i
 4. **Clean Design Tokens & Eyebrows:** Replaced raw `bg-white` and hardcoded colors with `bg-surface` and `text-primary`. Restyled section headings in `unit-equivalence` with teal accent bars.
 
 **Files changed:**
-- `src/app/(dashboard)/timetable/organization/page.tsx` — Standardized back navigation and design tokens.
-- `src/app/(dashboard)/timetable/programmes/page.tsx` — Standardized back navigation and removed dashboard button.
-- `src/app/(dashboard)/timetable/time-slots/page.tsx` — Migrated to PageHeader with backHref and compact period badge.
-- `src/app/(dashboard)/timetable/trainers/access/page.tsx` — Standardized back navigation and design tokens.
-- `src/app/(dashboard)/timetable/trainers/availability/page.tsx` — Standardized back navigation and compact period badge.
-- `src/app/(dashboard)/timetable/unit-equivalence/page.tsx` — Standardized back navigation, table header, and eyebrow headings.
-- `src/app/(dashboard)/timetable/units/page.tsx` — Standardized back navigation and removed dashboard button.
-- `src/app/(dashboard)/trainers/[id]/page.tsx` — Updated back link to /timetable/trainers and design token colors.
-- `src/features/programmes/programme-table.tsx` — Migrated row actions to Radix DropdownMenu with size 48.
-- `src/features/units/unit-table.tsx` — Migrated row actions to Radix DropdownMenu with size 48.
-- `CHANGES.md` — Documented changes.
+- `src/app/(dashboard)/timetable/organization/page.tsx` â€” Standardized back navigation and design tokens.
+- `src/app/(dashboard)/timetable/programmes/page.tsx` â€” Standardized back navigation and removed dashboard button.
+- `src/app/(dashboard)/timetable/time-slots/page.tsx` â€” Migrated to PageHeader with backHref and compact period badge.
+- `src/app/(dashboard)/timetable/trainers/access/page.tsx` â€” Standardized back navigation and design tokens.
+- `src/app/(dashboard)/timetable/trainers/availability/page.tsx` â€” Standardized back navigation and compact period badge.
+- `src/app/(dashboard)/timetable/unit-equivalence/page.tsx` â€” Standardized back navigation, table header, and eyebrow headings.
+- `src/app/(dashboard)/timetable/units/page.tsx` â€” Standardized back navigation and removed dashboard button.
+- `src/app/(dashboard)/trainers/[id]/page.tsx` â€” Updated back link to /timetable/trainers and design token colors.
+- `src/features/programmes/programme-table.tsx` â€” Migrated row actions to Radix DropdownMenu with size 48.
+- `src/features/units/unit-table.tsx` â€” Migrated row actions to Radix DropdownMenu with size 48.
+- `CHANGES.md` â€” Documented changes.
 
 ### 2026-09-30: Fixed DataTable Column Proportions & Actions Dropdown Layout
 
@@ -540,10 +547,10 @@ Resolved the column distribution bug causing wide start/end columns and squished
 4. **Clean Action Form Controls:** Formatted status selection into a clean horizontal row (`Select flex-1` + compact `Set` button).
 
 **Files changed:**
-- `src/components/ui/data-table.tsx` — Applied width styles only when `columnDef.size` is explicitly defined.
-- `src/features/academic-periods/academic-period-table.tsx` — Locked fixed column widths and migrated actions menu to Radix `DropdownMenu`.
-- `src/features/academic-periods/academic-period-lifecycle-action.tsx` — Streamlined inline status select form.
-- `CHANGES.md` — Documented changes.
+- `src/components/ui/data-table.tsx` â€” Applied width styles only when `columnDef.size` is explicitly defined.
+- `src/features/academic-periods/academic-period-table.tsx` â€” Locked fixed column widths and migrated actions menu to Radix `DropdownMenu`.
+- `src/features/academic-periods/academic-period-lifecycle-action.tsx` â€” Streamlined inline status select form.
+- `CHANGES.md` â€” Documented changes.
 
 ### 2026-09-29: Purged Unnecessary Description Sentences From Dashboard and Staff Page Headers
 
@@ -554,8 +561,8 @@ Cleaned up page headers across the entire platform by purging redundant, static 
 3. **Preserved Dynamic Runtime Metadata:** Maintained dynamic metadata subtitles in session-specific routes (e.g. student unit registration preview showing student name/admission number, session attendance headers showing cohort/date/time ranges).
 
 **Files changed:**
-- 79 route pages across `src/app/(dashboard)/` and `src/app/(staff)/` — Removed boilerplate `description` props from `<PageHeader>`.
-- `CHANGES.md` — Documented update.
+- 79 route pages across `src/app/(dashboard)/` and `src/app/(staff)/` â€” Removed boilerplate `description` props from `<PageHeader>`.
+- `CHANGES.md` â€” Documented update.
 
 ### 2026-09-29: Cleaned Student Status Updater Layout & Removed Out-of-Scope Semester Reporting
 
@@ -568,10 +575,10 @@ Refactored the quick student status updater screen (`/students/status`) to elimi
 5. **Updated Header Description:** Updated `/students/status` page description to *"Quickly update student lifecycle status and academic placement."*
 
 **Files changed:**
-- `src/features/students/inline-status-updater.tsx` — Removed semester reporting column/dropdown, added dedicated `Admission No.` column with registry profile link, and optimized grid layout.
-- `src/features/students/actions.ts` — Simplified `quickUpdateStudentStatusAction` signature and removed period reporting RPC update.
-- `src/app/(dashboard)/students/status/page.tsx` — Updated page description to reflect student lifecycle and placement focus.
-- `CHANGES.md` — Documented changes and verification results.
+- `src/features/students/inline-status-updater.tsx` â€” Removed semester reporting column/dropdown, added dedicated `Admission No.` column with registry profile link, and optimized grid layout.
+- `src/features/students/actions.ts` â€” Simplified `quickUpdateStudentStatusAction` signature and removed period reporting RPC update.
+- `src/app/(dashboard)/students/status/page.tsx` â€” Updated page description to reflect student lifecycle and placement focus.
+- `CHANGES.md` â€” Documented changes and verification results.
 
 ### 2026-09-29: Resolved Course Outline Section 2 Learning Outcomes Assessment Contamination
 
@@ -584,169 +591,169 @@ Resolved an issue where Section 2 ("Summary of Learning Outcomes (Core Competenc
 5. **Database & Storage Clean Synchronization:** Cleaned legacy active versions in `curriculum_document_versions` in PostgreSQL and regenerated all stored Course Outline `.docx` revisions in Supabase Storage (`teaching-documents-private`) to guarantee that both web previews and exported Word documents render authentic TVET learning outcomes. Also fixed duplicate department prefix in DOCX headers.
 
 **Files changed:**
-- `src/features/teaching-documents/curriculum-content-normalizer.ts` — Added `isAssessmentOrEvaluationItem` and enhanced `normalizeCurriculumLearningOutcomes` to strip assessment noise and table artifacts.
-- `src/features/teaching-documents/curriculum-content/queries.ts` — Hardened `enrichWithCanonical` to fall back to canonical outcomes/competencies when stored data contains assessment deliverables.
-- `src/features/teaching-documents/curriculum-editor/docx-parser.ts` — Guarded learning outcome paragraph scanning against assessment headings, filtered candidate lines, and excluded footer tables from topic lists.
-- `src/features/teaching-documents/export-docx.ts` — Prevented duplicate `DEPARTMENT OF` prefix in exported Word document headers.
-- `src/tests/curriculum-content-normalizer.test.ts` — Added unit test coverage for `isAssessmentOrEvaluationItem` and assessment-contaminated outcome filtering.
-- `CHANGES.md` — Documented fixes and verification results.
+- `src/features/teaching-documents/curriculum-content-normalizer.ts` â€” Added `isAssessmentOrEvaluationItem` and enhanced `normalizeCurriculumLearningOutcomes` to strip assessment noise and table artifacts.
+- `src/features/teaching-documents/curriculum-content/queries.ts` â€” Hardened `enrichWithCanonical` to fall back to canonical outcomes/competencies when stored data contains assessment deliverables.
+- `src/features/teaching-documents/curriculum-editor/docx-parser.ts` â€” Guarded learning outcome paragraph scanning against assessment headings, filtered candidate lines, and excluded footer tables from topic lists.
+- `src/features/teaching-documents/export-docx.ts` â€” Prevented duplicate `DEPARTMENT OF` prefix in exported Word document headers.
+- `src/tests/curriculum-content-normalizer.test.ts` â€” Added unit test coverage for `isAssessmentOrEvaluationItem` and assessment-contaminated outcome filtering.
+- `CHANGES.md` â€” Documented fixes and verification results.
 
 ### 2026-09-28: Fixed Course Outline Multi-Week Topic Grouping, Artifact Stripping, and Discrete Bullet Formatting
 
 **Summary:**
 Resolved 5 interconnected Course Outline generation and formatting issues across the end-to-end pipeline (document ingestion, docx/excel parsing, database querying, distribution, interactive UI viewer, and DOCX generation):
 1. **Multi-Week Topic Row Grouping (Problem 1):** When a topic spans multiple contiguous weeks, the Course Outline schedule table now visually merges the Topic Title column using `rowSpan` in the web viewer (`tvet-document-viewer.tsx`) and vertical cell merges in DOCX export (`export-docx.ts`), while preserving distinct week numbers and distinct subtopics on separate rows. If a topic reappears non-contiguously later in the term, it correctly begins a new distinct group.
-2. **Curriculum Artifact Token Stripping (Problem 2):** Eliminated isolated outline markers, table cell numbers, and formatting artifacts (such as `1`, `1-2`, `1.`, `1)`, `(1)`, `• •`, `• 1-2`, `CAT`, `Week 1`) leaking into subtopic lists. Added `isCurriculumArtifactToken` in `curriculum-content-normalizer.ts` and enhanced `normalizeCurriculumSubtopics` to filter them out.
+2. **Curriculum Artifact Token Stripping (Problem 2):** Eliminated isolated outline markers, table cell numbers, and formatting artifacts (such as `1`, `1-2`, `1.`, `1)`, `(1)`, `â€¢ â€¢`, `â€¢ 1-2`, `CAT`, `Week 1`) leaking into subtopic lists. Added `isCurriculumArtifactToken` in `curriculum-content-normalizer.ts` and enhanced `normalizeCurriculumSubtopics` to filter them out.
 3. **Discrete Bullet Paragraphs (Problem 3):** Ensured all subtopics and learning approaches are displayed as discrete bullet points on individual lines in both the web viewer and exported DOCX. In Word export, subtopics render as individual `Paragraph` elements with authentic bullet points and indentation, avoiding glued-together text.
-4. **Conservative Normalization for Domain Numbers (Problem 4):** Hardened `stripCurriculumListPrefix` to only strip numbers or ranges when followed by a delimiter (`:.)-–—`) or bullet symbol. Legitimate clinical, nutritional, and chemical terms containing numbers, units, ranges, and formulas (e.g., `1–2 μg/day recommended intake`, `Vitamin B12 deficiency`, `Type 1 and Type 2 diabetes`, `Stage 1 pressure ulcers`, `CO2 and H2O production`) are strictly preserved.
+4. **Conservative Normalization for Domain Numbers (Problem 4):** Hardened `stripCurriculumListPrefix` to only strip numbers or ranges when followed by a delimiter (`:.)-â€“â€”`) or bullet symbol. Legitimate clinical, nutritional, and chemical terms containing numbers, units, ranges, and formulas (e.g., `1â€“2 Î¼g/day recommended intake`, `Vitamin B12 deficiency`, `Type 1 and Type 2 diabetes`, `Stage 1 pressure ulcers`, `CO2 and H2O production`) are strictly preserved.
 5. **No Comma Splitting (Problem 5):** Prevented subtopics from splitting on commas, ensuring phrases such as `"Classification, structure and functions of carbohydrates"` remain intact as single subtopics.
 6. **Query & Serialization Alignment:** Guaranteed that `enrichWithCanonical` and `getApprovedCurriculumForUnitCode` in `queries.ts` always return weekly schedules passed through `normalizeWeeklySchedule`, preventing legacy unnormalized database rows from bypassing formatting rules.
 
 **Files changed:**
-- `src/features/teaching-documents/curriculum-content-normalizer.ts` — Added `isCurriculumArtifactToken`, hardened prefix removal, and enhanced topic/subtopic normalization.
-- `src/features/teaching-documents/curriculum-content/queries.ts` — Replaced raw string splits with canonical normalization across all priority queries (priorities 0, 1, 2, 3, 5) and ensured `weeklySchedule` normalization.
-- `src/features/teaching-documents/curriculum-editor/docx-parser.ts` — Normalized topic titles from DOCX syllabus tables and paragraphs.
-- `src/features/teaching-documents/distribution-engine.ts` — Used `normalizeCurriculumTopicTitle` in `cleanTopicTitle`.
-- `src/features/teaching-documents/bulk-curriculum-parser.ts` — Preserved raw coverage string during bulk parse previews.
-- `src/features/teaching-documents/tvet-standards.ts` — Refined `parseCourseOutlineApproaches` to preserve compound clauses joined by "and" and guarded assessment percentages.
-- `src/features/teaching-documents/tvet-document-viewer.tsx` — Styled merged `rowSpan` cells with clean background styling in Section 3 table.
-- `src/features/teaching-documents/export-docx.ts` — Ensured table rowSpan integrates cleanly with `docx`'s vertical merge.
-- `src/tests/curriculum-content-normalizer.test.ts` — Added 14 comprehensive unit tests verifying all 5 problem areas.
-- `src/tests/tvet-teaching-documents.test.ts` — Added verification test for DOCX buffer generation with multi-week topic spans.
-- `CHANGES.md` — Documented changes and verification evidence.
+- `src/features/teaching-documents/curriculum-content-normalizer.ts` â€” Added `isCurriculumArtifactToken`, hardened prefix removal, and enhanced topic/subtopic normalization.
+- `src/features/teaching-documents/curriculum-content/queries.ts` â€” Replaced raw string splits with canonical normalization across all priority queries (priorities 0, 1, 2, 3, 5) and ensured `weeklySchedule` normalization.
+- `src/features/teaching-documents/curriculum-editor/docx-parser.ts` â€” Normalized topic titles from DOCX syllabus tables and paragraphs.
+- `src/features/teaching-documents/distribution-engine.ts` â€” Used `normalizeCurriculumTopicTitle` in `cleanTopicTitle`.
+- `src/features/teaching-documents/bulk-curriculum-parser.ts` â€” Preserved raw coverage string during bulk parse previews.
+- `src/features/teaching-documents/tvet-standards.ts` â€” Refined `parseCourseOutlineApproaches` to preserve compound clauses joined by "and" and guarded assessment percentages.
+- `src/features/teaching-documents/tvet-document-viewer.tsx` â€” Styled merged `rowSpan` cells with clean background styling in Section 3 table.
+- `src/features/teaching-documents/export-docx.ts` â€” Ensured table rowSpan integrates cleanly with `docx`'s vertical merge.
+- `src/tests/curriculum-content-normalizer.test.ts` â€” Added 14 comprehensive unit tests verifying all 5 problem areas.
+- `src/tests/tvet-teaching-documents.test.ts` â€” Added verification test for DOCX buffer generation with multi-week topic spans.
+- `CHANGES.md` â€” Documented changes and verification evidence.
 
 ### 2026-09-28: Course Outline Bullet Formatting, HND Department Trainer Scoping, and Unit-Only Labeling
 
 **Summary:** 
-1. **Course Outline Discrete Bullet Formatting:** Fully updated Course Outline generation and rendering so that Section 3 (Content / Sub-topics Breakdown), Section 4 (Teaching/Learning & Assessment Approaches), and Section 5 (Prescribed References & Equipment/Safety Materials) strictly use individual bullet points with every point on its own new line. In Word (`.docx`) exports, each point is rendered as a standalone `Paragraph` element with authentic bullet styling (`•  `) and left indentation, eliminating Microsoft Word's issue where newline characters inside a single run glued multiple items onto the same line. Added `parseCourseOutlineSubtopics` and `parseCourseOutlineApproaches` in `tvet-standards.ts` to cleanly split commas, semicolons, inline numbering (`1.`, `2.`, `(a)`), and compound clauses.
+1. **Course Outline Discrete Bullet Formatting:** Fully updated Course Outline generation and rendering so that Section 3 (Content / Sub-topics Breakdown), Section 4 (Teaching/Learning & Assessment Approaches), and Section 5 (Prescribed References & Equipment/Safety Materials) strictly use individual bullet points with every point on its own new line. In Word (`.docx`) exports, each point is rendered as a standalone `Paragraph` element with authentic bullet styling (`â€¢  `) and left indentation, eliminating Microsoft Word's issue where newline characters inside a single run glued multiple items onto the same line. Added `parseCourseOutlineSubtopics` and `parseCourseOutlineApproaches` in `tvet-standards.ts` to cleanly split commas, semicolons, inline numbering (`1.`, `2.`, `(a)`), and compound clauses.
 2. **Schemes of Work Preserved:** Schemes of work formatting and generation logic remain 100% unaltered.
 3. **Strict Department Scoping for QA Export:** In `qa-export.ts`, restricted trainer resolution strictly to trainers belonging to the active department (`Department of Human Nutrition and Dietetics`, `department_id: 5dad2236-def0-4270-96f8-2dfca48fed64`), completely filtering out cross-department external service trainers from other faculties (Applied Sciences, Health Records, Perioperative Theatre, Health & Social Sciences).
 4. **Unit-Only Content Labeling:** Removed unit codes and cohort prefixes from generated Course Outline titles, document headers, ZIP folder paths (`Course Outlines/<UnitName>.docx`), and QA Excel index rows. Course Outline banners and metadata matrices now cleanly feature only the Unit Name.
 
 **Files changed:**
-- `src/features/teaching-documents/tvet-standards.ts` — Added `parseCourseOutlineSubtopics` and `parseCourseOutlineApproaches` for bullet splitting.
-- `src/features/teaching-documents/export-docx.ts` — Updated Word generation for course outlines to format sections 3, 4, and 5 as discrete bulleted paragraphs, and cleaned banners/metadata to show only unit name.
-- `src/features/teaching-documents/tvet-document-viewer.tsx` — Updated interactive previewer to render sections 3, 4, and 5 with individual `<ul>`/`<li>` bullets, and removed unit code/cohort from title, banner, and exported file name.
-- `src/app/api/teaching-documents/export-word/route.ts` — Updated course outline download filename to `<CleanUnitName>_Course_Outline.docx`.
-- `src/features/teaching-documents/trainer-submission-actions.ts` — Updated submission action export filename to `<CleanUnitName>_Course_Outline.docx`.
-- `src/features/teaching-documents/qa-export.ts` — Filtered `trainers` and `teaching_allocations` strictly to the active HND department, sanitized course outline ZIP archive path to `Course Outlines/<UnitName>.docx`, and removed cohort/code for course outline rows in `QA_Index.xlsx`.
-- `CHANGES.md` — Documented changes and verification results.
+- `src/features/teaching-documents/tvet-standards.ts` â€” Added `parseCourseOutlineSubtopics` and `parseCourseOutlineApproaches` for bullet splitting.
+- `src/features/teaching-documents/export-docx.ts` â€” Updated Word generation for course outlines to format sections 3, 4, and 5 as discrete bulleted paragraphs, and cleaned banners/metadata to show only unit name.
+- `src/features/teaching-documents/tvet-document-viewer.tsx` â€” Updated interactive previewer to render sections 3, 4, and 5 with individual `<ul>`/`<li>` bullets, and removed unit code/cohort from title, banner, and exported file name.
+- `src/app/api/teaching-documents/export-word/route.ts` â€” Updated course outline download filename to `<CleanUnitName>_Course_Outline.docx`.
+- `src/features/teaching-documents/trainer-submission-actions.ts` â€” Updated submission action export filename to `<CleanUnitName>_Course_Outline.docx`.
+- `src/features/teaching-documents/qa-export.ts` â€” Filtered `trainers` and `teaching_allocations` strictly to the active HND department, sanitized course outline ZIP archive path to `Course Outlines/<UnitName>.docx`, and removed cohort/code for course outline rows in `QA_Index.xlsx`.
+- `CHANGES.md` â€” Documented changes and verification results.
 
 ### 2026-09-28: Auto-Approved Trainer Confirmed Documents and Fixed Allocation Department Access
 
 **Summary:** Relieved the HOD of manual review overhead by auto-approving all trainer-confirmed teaching documents (Course Outlines and Schemes of Work) immediately upon trainer confirmation. When a trainer confirms a document in `/staff/units/[allocationId]/documents/course-outline` or `.../scheme-of-work`, it is directly saved with `status: 'approved'` (and audited in `teaching_document_reviews`), making it instantly eligible for the QA Examination ZIP pack export without requiring manual clicks from the HOD. Applied database migration to transition all existing submitted documents to `approved`. Also resolved a SQL bug in `current_user_can_manage_teaching_allocation` where comparing cohort ID against allocation ID caused false-positive "This teaching document is outside your active department" errors on teaching document actions. Updated QA export logic to include both approved and submitted records with robust fallback revision numbers.
 
 **Files changed:**
-- `supabase/migrations/20260928062500_auto_approve_trainer_confirmed_documents.sql` — Migration to auto-approve existing submitted documents, add review approval audit entries, and fix the `allocation.id` join in `current_user_can_manage_teaching_allocation`.
-- `src/features/teaching-documents/trainer-submission-actions.ts` — Updated `submitTrainerTeachingDocumentAction` to directly mark confirmed documents as `status: 'approved'` with `approved_at`, `approved_by`, and `approved_revision_number`.
-- `src/features/teaching-documents/qa-export.ts` — Updated `DocumentRow` type to support `submitted_revision_number`, query both `approved` and `submitted` documents, and resolve revision numbers with fallback hierarchy.
+- `supabase/migrations/20260928062500_auto_approve_trainer_confirmed_documents.sql` â€” Migration to auto-approve existing submitted documents, add review approval audit entries, and fix the `allocation.id` join in `current_user_can_manage_teaching_allocation`.
+- `src/features/teaching-documents/trainer-submission-actions.ts` â€” Updated `submitTrainerTeachingDocumentAction` to directly mark confirmed documents as `status: 'approved'` with `approved_at`, `approved_by`, and `approved_revision_number`.
+- `src/features/teaching-documents/qa-export.ts` â€” Updated `DocumentRow` type to support `submitted_revision_number`, query both `approved` and `submitted` documents, and resolve revision numbers with fallback hierarchy.
 
 ### 2026-09-28: Fixed Null UUID Error in QA Examination Pack Export
 
 **Summary:** Fixed a crash (`invalid input syntax for type uuid: "null"`) when downloading QA examination ZIP archives from `/api/teaching-documents/qa-export`. Teaching allocations in an academic period can have unassigned or null `trainer_id` (or `cohort_id`/`unit_id`), which caused raw `null` values to be passed into Supabase PostgREST `.in('id', ids.trainer)` filters. Added `cleanUuidList` helper to filter out nullish, blank, or `"null"` strings across all queries in `createQaExaminationPack` and `getQaExportPageData`, guarded `.in()` queries against empty array requests, and added graceful null checks in loop iterations.
 
 **Files changed:**
-- `src/features/teaching-documents/qa-export.ts` — Added `cleanUuidList`, sanitized UUID parameters for `trainers`, `cohorts`, `units`, `teaching_documents`, and `academic_periods`, and guarded against unassigned allocations.
+- `src/features/teaching-documents/qa-export.ts` â€” Added `cleanUuidList`, sanitized UUID parameters for `trainers`, `cohorts`, `units`, `teaching_documents`, and `academic_periods`, and guarded against unassigned allocations.
 
 ### 2026-09-28: Implemented Trainer Confirm & Submit UI and HOD Review Integration
 
 **Summary:** Implemented the end-to-end trainer confirmation, submission, and status-tracking workflow for TVET Course Outlines and Schemes of Work. Trainers viewing their allocated unit documents (`/staff/units/[allocationId]/documents/course-outline` and `.../scheme-of-work`) now have a prominent "Confirm & Submit for Review" action with a modal confirmation step. When submitted, the system compiles the official `.docx` via `buildTVETDocumentDocx`, securely stores the file in `teaching-documents-private` storage, logs an immutable revision in `teaching_document_revisions`, logs the submission in `teaching_document_submissions`, and creates/updates `teaching_documents` with `status: 'submitted'`. The document immediately enters the HOD review queue (`/teaching-documents/review`). Upon HOD approval, it becomes available in the QA export pack (`/teaching-documents/qa-export`) organized by trainer folders. Added real-time status banners and badges (Draft, Submitted/In Review, Approved by HOD, Returned with Correction Note) to both the document viewers and the unit documents hub (`/staff/units/[allocationId]/documents`).
 
 **Files changed:**
-- `src/features/teaching-documents/trainer-submission-actions.ts` — Created server actions `submitTrainerTeachingDocumentAction`, `getTeachingDocumentAllocationStatus`, and `getAllTeachingDocumentStatusesForAllocation`.
-- `src/features/teaching-documents/tvet-document-viewer.tsx` — Added Confirm & Submit button, resubmit handler, status notice banners (Approved, Submitted, Returned), and interactive confirmation modal dialog.
-- `src/app/(staff)/staff/units/[allocationId]/documents/course-outline/page.tsx` — Fetched live document status and passed `initialStatus` to viewer.
-- `src/app/(staff)/staff/units/[allocationId]/documents/scheme-of-work/page.tsx` — Fetched live document status and passed `initialStatus` to viewer.
-- `src/app/(staff)/staff/units/[allocationId]/documents/page.tsx` — Updated teaching documents card grid to display live status badges and direct Confirm & Submit / Resubmit action buttons.
-- `supabase/migrations/20260928050000_enable_tvet_document_confirm_and_submit.sql` — Migration ensuring default standard TVET template rows exist and relaxing template constraint.
+- `src/features/teaching-documents/trainer-submission-actions.ts` â€” Created server actions `submitTrainerTeachingDocumentAction`, `getTeachingDocumentAllocationStatus`, and `getAllTeachingDocumentStatusesForAllocation`.
+- `src/features/teaching-documents/tvet-document-viewer.tsx` â€” Added Confirm & Submit button, resubmit handler, status notice banners (Approved, Submitted, Returned), and interactive confirmation modal dialog.
+- `src/app/(staff)/staff/units/[allocationId]/documents/course-outline/page.tsx` â€” Fetched live document status and passed `initialStatus` to viewer.
+- `src/app/(staff)/staff/units/[allocationId]/documents/scheme-of-work/page.tsx` â€” Fetched live document status and passed `initialStatus` to viewer.
+- `src/app/(staff)/staff/units/[allocationId]/documents/page.tsx` â€” Updated teaching documents card grid to display live status badges and direct Confirm & Submit / Resubmit action buttons.
+- `supabase/migrations/20260928050000_enable_tvet_document_confirm_and_submit.sql` â€” Migration ensuring default standard TVET template rows exist and relaxing template constraint.
 
 ### 2026-09-28: Fixed PageHeader Action Button Squishing and Layout Wrapping
 
 **Summary:** Resolved a flexbox layout bug where lengthy page titles and descriptions in `PageHeader` exerted compression on the right-hand actions container, causing the secondary navigation button ("Bulk Upload") to severely squish and wrap into multiline vertical text. Added `flex-1 min-w-0` to the header title container and `shrink-0` to the actions container, enforced `shrink-0 whitespace-nowrap` on action buttons and links in `individual-upload-form.tsx` and `bulk-upload-view.tsx`, and changed the verbose "Switch to Bulk Upload" label to "Bulk Upload".
 
 **Files changed:**
-- `src/components/ui/page-header.tsx` — Added `flex-1 min-w-0` to title text container and `shrink-0` to the actions container to prevent actions from being compressed.
-- `src/features/teaching-documents/individual-upload-form.tsx` — Applied `shrink-0 whitespace-nowrap` and cleaned button text to "Bulk Upload".
-- `src/features/teaching-documents/bulk-upload-view.tsx` — Applied `shrink-0 whitespace-nowrap` to header action link.
+- `src/components/ui/page-header.tsx` â€” Added `flex-1 min-w-0` to title text container and `shrink-0` to the actions container to prevent actions from being compressed.
+- `src/features/teaching-documents/individual-upload-form.tsx` â€” Applied `shrink-0 whitespace-nowrap` and cleaned button text to "Bulk Upload".
+- `src/features/teaching-documents/bulk-upload-view.tsx` â€” Applied `shrink-0 whitespace-nowrap` to header action link.
 
 ### 2026-09-28: Removed Scheme of Work from Upload Dropdown (Locked to Course Outline)
 
 **Summary:** Removed "Scheme of Work (Custom Override)" from the Document Type dropdown in the individual curriculum upload form (`/teaching-documents/curriculum/individual-upload`), locking the form strictly to "Course Outline (Master Syllabus)". Because Course Outlines serve as the single source of truth from which 14-week TVET Schemes of Work are automatically synthesized, allowing Schemes of Work in the upload dropdown caused confusion and potential topic mismatches. Also updated the file parsing action and form submission to consistently treat and publish all uploaded syllabi as Course Outlines, and updated the publish button to display "Publish Course Outline".
 
 **Files changed:**
-- `src/features/teaching-documents/individual-upload-form.tsx` — Removed Scheme of Work from the Document Type dropdown, locked the selector to Course Outline, removed the `setDocumentType` file-upload override, cleaned up unused imports, and updated the publish button.
-- `src/features/teaching-documents/individual-curriculum-actions.ts` — Hardened `parseIndividualCurriculumAction` to consistently detect `course_outline`.
+- `src/features/teaching-documents/individual-upload-form.tsx` â€” Removed Scheme of Work from the Document Type dropdown, locked the selector to Course Outline, removed the `setDocumentType` file-upload override, cleaned up unused imports, and updated the publish button.
+- `src/features/teaching-documents/individual-curriculum-actions.ts` â€” Hardened `parseIndividualCurriculumAction` to consistently detect `course_outline`.
 
 ### 2026-09-27: Streamlined Course Outline Single Upload & Biochemistry II Scheme Repair
 
-**Summary:** Re-established Course Outline upload as the single authoritative curriculum workflow across the department, eliminating the need and confusion of double-uploading Schemes of Work separately. In TVET standards, uploading a Course Outline acts as the master syllabus from which 14-week Schemes of Work are automatically synthesized (incorporating CAT 1/2 weeks, term dates, and exam milestones). Resolved the issue where `DHN 2304 — Biochemistry II` displayed "Nutrition in the lifespan" topics on its Scheme of Work viewer: retired the corrupted legacy batch `scheme_of_work` row, hardened `isMismatchedPayload` with `contentFamilyKey` semantic compatibility checks, updated curriculum queries to load the active Course Outline when generating Schemes of Work, and cleaned DHN 2304 v4 to 14 pure Biochemistry topics. Hardened the DOCX syllabus parser against administrative table headers (trainer name, institution, revision dates). Streamlined the Curriculum Library table to display "Auto-Generated (Ready)" for Schemes of Work when a Course Outline exists, removing misleading "Missing" prompts.
+**Summary:** Re-established Course Outline upload as the single authoritative curriculum workflow across the department, eliminating the need and confusion of double-uploading Schemes of Work separately. In TVET standards, uploading a Course Outline acts as the master syllabus from which 14-week Schemes of Work are automatically synthesized (incorporating CAT 1/2 weeks, term dates, and exam milestones). Resolved the issue where `DHN 2304 â€” Biochemistry II` displayed "Nutrition in the lifespan" topics on its Scheme of Work viewer: retired the corrupted legacy batch `scheme_of_work` row, hardened `isMismatchedPayload` with `contentFamilyKey` semantic compatibility checks, updated curriculum queries to load the active Course Outline when generating Schemes of Work, and cleaned DHN 2304 v4 to 14 pure Biochemistry topics. Hardened the DOCX syllabus parser against administrative table headers (trainer name, institution, revision dates). Streamlined the Curriculum Library table to display "Auto-Generated (Ready)" for Schemes of Work when a Course Outline exists, removing misleading "Missing" prompts.
 
 **Files changed:**
-- `supabase/migrations/20260927210000_retire_mismatched_scheme_versions_and_repair_biochemistry.sql` — PostgreSQL migration to retire cross-mapped legacy scheme versions from batch imports.
-- `src/features/teaching-documents/curriculum-content/queries.ts` — Enhanced `isMismatchedPayload` to validate `contentFamilyKey` and topic domains, and updated Priority 1 & 2 to prefer clean active Course Outlines and reject mismatched batch payloads.
-- `src/features/teaching-documents/curriculum-editor/docx-parser.ts` — Hardened `isPlausibleTopicTitle` to reject administrative metadata headers (`NAME OF TRAINER:`, `INSTITUTION:`, `DATE OF PREPARATION:`, etc.).
-- `src/app/(dashboard)/teaching-documents/curriculum/page.tsx` — Updated curriculum library view to show Schemes of Work as auto-generated from Course Outlines, removing confusing "Missing" prompts.
-- `src/features/teaching-documents/individual-upload-form.tsx` — Streamlined individual upload to focus on Course Outline master uploads, added explanatory single-upload banner, and updated document type options.
+- `supabase/migrations/20260927210000_retire_mismatched_scheme_versions_and_repair_biochemistry.sql` â€” PostgreSQL migration to retire cross-mapped legacy scheme versions from batch imports.
+- `src/features/teaching-documents/curriculum-content/queries.ts` â€” Enhanced `isMismatchedPayload` to validate `contentFamilyKey` and topic domains, and updated Priority 1 & 2 to prefer clean active Course Outlines and reject mismatched batch payloads.
+- `src/features/teaching-documents/curriculum-editor/docx-parser.ts` â€” Hardened `isPlausibleTopicTitle` to reject administrative metadata headers (`NAME OF TRAINER:`, `INSTITUTION:`, `DATE OF PREPARATION:`, etc.).
+- `src/app/(dashboard)/teaching-documents/curriculum/page.tsx` â€” Updated curriculum library view to show Schemes of Work as auto-generated from Course Outlines, removing confusing "Missing" prompts.
+- `src/features/teaching-documents/individual-upload-form.tsx` â€” Streamlined individual upload to focus on Course Outline master uploads, added explanatory single-upload banner, and updated document type options.
 
 ### 2026-09-27: Removal of Online Builder and addition of dedicated Bulk & Individual Upload routes
 
 **Summary:** Completely removed the obsolete Online Curriculum Builder and replaced it with dedicated, first-class Bulk Upload (`/teaching-documents/curriculum/bulk-upload`) and Individual Upload (`/teaching-documents/curriculum/individual-upload`) routes. Individual upload accepts single `.docx` or `.xlsx` files with topic extraction, auto-detection of Course Outline vs Scheme of Work, and allows selecting from all 43 canonical department units or typing custom units. The Bulk Upload route provides department Excel template download and batch import with full validation preview. Added a backwards-compatible redirect from `/teaching-documents/curriculum/editor` to `/teaching-documents/curriculum/individual-upload`. Updated all navigation links across Curriculum Library, Staff Unit Workspaces, and Staff Shell.
 
 **Files changed:**
-- `src/features/teaching-documents/individual-curriculum-actions.ts` — Server action to parse single `.docx` and `.xlsx` curriculum documents and publish active versions with topic extraction.
-- `src/features/teaching-documents/individual-upload-form.tsx` — Client form for single document upload, unit selection, and real-time preview.
-- `src/app/(dashboard)/teaching-documents/curriculum/individual-upload/page.tsx` — Server page for individual upload route with database unit loading and canonical registry fallback.
-- `src/features/teaching-documents/bulk-upload-view.tsx` — Dedicated full-page view for batch curriculum upload (.xlsx and .zip).
-- `src/app/(dashboard)/teaching-documents/curriculum/bulk-upload/page.tsx` — Dedicated route for bulk curriculum upload.
-- `src/app/(dashboard)/teaching-documents/curriculum/editor/page.tsx` — Replaced builder with seamless redirect to individual upload route.
-- `src/features/teaching-documents/curriculum-editor/online-builder.tsx` — Deleted obsolete manual builder component.
-- `src/app/(dashboard)/teaching-documents/curriculum/page.tsx` — Replaced Online Builder actions and table links with Bulk and Individual upload links.
-- `src/app/(dashboard)/teaching-documents/page.tsx` — Updated quick action card to point to Curriculum Upload.
-- `src/app/(staff)/staff/units/[allocationId]/documents/page.tsx` — Updated staff action links to individual upload.
-- `src/app/(staff)/staff/units/[allocationId]/page.tsx` — Updated staff unit action links to individual upload.
-- `src/components/staff/staff-shell.tsx` — Replaced Outline Editor navigation link with Upload Curriculum.
-- `src/features/teaching-documents/template-manager.tsx` & `tvet-document-viewer.tsx` — Updated links to individual upload.
+- `src/features/teaching-documents/individual-curriculum-actions.ts` â€” Server action to parse single `.docx` and `.xlsx` curriculum documents and publish active versions with topic extraction.
+- `src/features/teaching-documents/individual-upload-form.tsx` â€” Client form for single document upload, unit selection, and real-time preview.
+- `src/app/(dashboard)/teaching-documents/curriculum/individual-upload/page.tsx` â€” Server page for individual upload route with database unit loading and canonical registry fallback.
+- `src/features/teaching-documents/bulk-upload-view.tsx` â€” Dedicated full-page view for batch curriculum upload (.xlsx and .zip).
+- `src/app/(dashboard)/teaching-documents/curriculum/bulk-upload/page.tsx` â€” Dedicated route for bulk curriculum upload.
+- `src/app/(dashboard)/teaching-documents/curriculum/editor/page.tsx` â€” Replaced builder with seamless redirect to individual upload route.
+- `src/features/teaching-documents/curriculum-editor/online-builder.tsx` â€” Deleted obsolete manual builder component.
+- `src/app/(dashboard)/teaching-documents/curriculum/page.tsx` â€” Replaced Online Builder actions and table links with Bulk and Individual upload links.
+- `src/app/(dashboard)/teaching-documents/page.tsx` â€” Updated quick action card to point to Curriculum Upload.
+- `src/app/(staff)/staff/units/[allocationId]/documents/page.tsx` â€” Updated staff action links to individual upload.
+- `src/app/(staff)/staff/units/[allocationId]/page.tsx` â€” Updated staff unit action links to individual upload.
+- `src/components/staff/staff-shell.tsx` â€” Replaced Outline Editor navigation link with Upload Curriculum.
+- `src/features/teaching-documents/template-manager.tsx` & `tvet-document-viewer.tsx` â€” Updated links to individual upload.
 
 ### 2026-09-27: Online Curriculum Builder unit selection & Word upload normalization
 
 **Summary:** Resolved an issue where uploading a Word syllabus in the Online Curriculum Builder appeared stuck on the default first unit (Communication Skills) and prevented selecting other units. Made the parent Card `overflow-visible relative z-20` so the SearchableUnitSelect dropdown popup is no longer clipped by the Card container. Enhanced `handleDocxUpload` to match by unit code or name and unselect default unit on unmatched upload so it no longer falsely displays Communication Skills. Passed `file.name` to `parseDocxSyllabusAction` so that filename fallback extracts unit code and title. Updated `handleUnitChange` to preserve uploaded/edited topics when switching to a unit that has no existing curriculum in the database.
 
 **Files changed:**
-- `src/features/teaching-documents/curriculum-editor/docx-parser.ts` — Added optional `fileName` fallback for extracting unit code and name.
-- `src/features/teaching-documents/curriculum-editor/actions.ts` — Passed `file.name` to `parseDocxSyllabus` in `parseDocxSyllabusAction`.
-- `src/features/teaching-documents/curriculum-editor/online-builder.tsx` — Added `overflow-visible relative z-20` to Card container, improved unit matching in `handleDocxUpload`, and preserved uploaded topics on unit selection.
+- `src/features/teaching-documents/curriculum-editor/docx-parser.ts` â€” Added optional `fileName` fallback for extracting unit code and name.
+- `src/features/teaching-documents/curriculum-editor/actions.ts` â€” Passed `file.name` to `parseDocxSyllabus` in `parseDocxSyllabusAction`.
+- `src/features/teaching-documents/curriculum-editor/online-builder.tsx` â€” Added `overflow-visible relative z-20` to Card container, improved unit matching in `handleDocxUpload`, and preserved uploaded topics on unit selection.
 
 ### 2026-09-27: Scheme of Work publishing and mixed curriculum imports
 
 **Summary:** Made online curriculum editing and bulk imports document-type-aware. Course Outline and Scheme of Work saves now read, supersede, and create versions only within the selected document type. The library links open the matching editor mode and offer creation actions for missing documents. The bulk workbook parser now keeps separately named sheet pairs distinct, reports unclassified non-empty sheets, and preserves legacy Course Outline workbooks. ZIP imports infer Scheme of Work from the document filename.
 
 **Files changed:**
-- `src/features/teaching-documents/curriculum-document-types.ts` — Added the shared curriculum document type and validation helpers.
-- `src/features/teaching-documents/curriculum-editor/actions.ts` — Scoped online version lookup, superseding, and inserts by document type, with a Course Outline default for unspecified calls.
-- `src/features/teaching-documents/curriculum-editor/online-builder.tsx` — Added a visible document type selector and type-specific editor and publish labels.
-- `src/app/(dashboard)/teaching-documents/curriculum/editor/page.tsx` — Loads both active document types and passes the requested type to the editor.
-- `src/app/(dashboard)/teaching-documents/curriculum/page.tsx` — Added type-specific edit and create links in each document column.
-- `src/features/teaching-documents/bulk-curriculum-parser.ts` — Parses multiple typed workbook sheet pairs and detects Scheme of Work DOCX files by filename.
-- `src/features/teaching-documents/bulk-curriculum-actions.ts` — Uses each parsed document type for versioning, inserts, superseding, and registry updates.
-- `src/features/teaching-documents/bulk-upload-dialog.tsx` — Renamed the workflow as Bulk Curriculum Upload and displays each row’s detected type.
-- `src/tests/bulk-course-outline-upload.test.ts` — Covered mixed workbooks, unclassified sheet warnings, legacy workbook behavior, and ZIP scheme detection.
-- `src/tests/curriculum-editor-document-type.test.ts` — Verified saves supersede only the selected document type and preserve the default Course Outline behavior.
-- `src/tests/bulk-curriculum-document-type.test.ts` — Verified mixed bulk commits keep version lookup, superseding, and inserts separate by document type.
+- `src/features/teaching-documents/curriculum-document-types.ts` â€” Added the shared curriculum document type and validation helpers.
+- `src/features/teaching-documents/curriculum-editor/actions.ts` â€” Scoped online version lookup, superseding, and inserts by document type, with a Course Outline default for unspecified calls.
+- `src/features/teaching-documents/curriculum-editor/online-builder.tsx` â€” Added a visible document type selector and type-specific editor and publish labels.
+- `src/app/(dashboard)/teaching-documents/curriculum/editor/page.tsx` â€” Loads both active document types and passes the requested type to the editor.
+- `src/app/(dashboard)/teaching-documents/curriculum/page.tsx` â€” Added type-specific edit and create links in each document column.
+- `src/features/teaching-documents/bulk-curriculum-parser.ts` â€” Parses multiple typed workbook sheet pairs and detects Scheme of Work DOCX files by filename.
+- `src/features/teaching-documents/bulk-curriculum-actions.ts` â€” Uses each parsed document type for versioning, inserts, superseding, and registry updates.
+- `src/features/teaching-documents/bulk-upload-dialog.tsx` â€” Renamed the workflow as Bulk Curriculum Upload and displays each rowâ€™s detected type.
+- `src/tests/bulk-course-outline-upload.test.ts` â€” Covered mixed workbooks, unclassified sheet warnings, legacy workbook behavior, and ZIP scheme detection.
+- `src/tests/curriculum-editor-document-type.test.ts` â€” Verified saves supersede only the selected document type and preserve the default Course Outline behavior.
+- `src/tests/bulk-curriculum-document-type.test.ts` â€” Verified mixed bulk commits keep version lookup, superseding, and inserts separate by document type.
 
 ### 2026-09-27: Full-width ERP workspace launch cards
 
-**Summary:** Removed the dashboard’s right-side Manage & Approvals card so workspace destinations use the full content width. Replaced the large home-screen icon tiles with medium rectangular Business Central-style launch cards, using restrained Fluent colors and responsive columns that preserve card proportions across screen sizes. Existing workspace destinations remain available through the dashboard and the navigation menu.
+**Summary:** Removed the dashboardâ€™s right-side Manage & Approvals card so workspace destinations use the full content width. Replaced the large home-screen icon tiles with medium rectangular Business Central-style launch cards, using restrained Fluent colors and responsive columns that preserve card proportions across screen sizes. Existing workspace destinations remain available through the dashboard and the navigation menu.
 
 **Files changed:**
-- `src/features/dashboard/dashboard-view.tsx` — Expanded Workspaces to full width, changed its icon grid into responsive rectangular cards, and removed the right-side Manage & Approvals panel.
+- `src/features/dashboard/dashboard-view.tsx` â€” Expanded Workspaces to full width, changed its icon grid into responsive rectangular cards, and removed the right-side Manage & Approvals panel.
 
 ### 2026-09-26: Dashboard typography and Fluent ERP text palette
 
 **Summary:** Aligned the admin dashboard and shell header typography with the existing Segoe UI system font and replaced mixed teal/gray text colors with the established Business Central text tokens. The session title now uses primary charcoal; labels and metadata use secondary Fluent gray; teal is reserved for primary actions and restrained status accents. Dashboard sizing and responsive layout are unchanged.
 
 **Files changed:**
-- `src/features/dashboard/dashboard-view.tsx` — Applied the shared Segoe UI font utility and semantic ERP text, surface, border, and action colors throughout the dashboard.
-- `src/components/layout/admin-header.tsx` — Aligned the page title and supporting metadata to ERP text tokens.
+- `src/features/dashboard/dashboard-view.tsx` â€” Applied the shared Segoe UI font utility and semantic ERP text, surface, border, and action colors throughout the dashboard.
+- `src/components/layout/admin-header.tsx` â€” Aligned the page title and supporting metadata to ERP text tokens.
 
 ### 2026-09-26: 1-Tap PDF Attendance Downloads & Institutional Slate Border Palette
 
@@ -755,32 +762,32 @@ Resolved 5 interconnected Course Outline generation and formatting issues across
 2. **Neat Gray Border System**: Replaced heavy black borders (`#0f172a`, `border-slate-900`, `1F2937`) across Class, CAT, and Exam attendance sheets with an institutional slate palette (`#94a3b8` / `border-slate-400` outer borders and sign-offs, `#cbd5e1` / `border-slate-300` internal cell gridlines, and soft `slate-50` headers) across PDF generation (`@react-pdf/renderer`), Word export (`docx`), and responsive printable web views.
 
 **Files changed:**
-- `src/app/(staff)/staff/units/[allocationId]/page.tsx` — Replaced dual Print/PDF buttons with a single full-width 1-tap PDF download button for Class, CAT, and Exam registers. Updated Outline and Scheme actions to "View Outline" and "View Scheme", and simplified Record of Work to "Log Progress".
-- `src/app/(staff)/staff/units/[allocationId]/documents/page.tsx` — Updated unit documents overview with 1-tap "Download PDF" buttons across all attendance registers and removed obsolete print triggers.
-- `src/features/staff-downloads/staff-downloads-view.tsx` — Removed Print buttons and upgraded Attendance Registers to 1-tap "Download PDF" buttons.
-- `src/app/(staff)/staff/units/[allocationId]/documents/class-attendance/page.tsx` — Configured route to redirect directly to the Class Attendance PDF download endpoint.
-- `src/app/(staff)/staff/units/[allocationId]/documents/cat-attendance/page.tsx` — Configured route to redirect directly to the CAT Attendance PDF download endpoint.
-- `src/app/(staff)/staff/units/[allocationId]/documents/exam-attendance/page.tsx` — Configured route to redirect directly to the Exam Attendance PDF download endpoint.
-- `src/features/teaching-documents/tvet-document-viewer.tsx` — Removed `handlePrint` (`window.print()`) and the "Print Preview" button.
-- `src/features/teaching-documents/record-of-work-online/manager.tsx` — Removed the "Print Log" link and unused icon imports.
-- `src/features/teaching-documents/record-of-work-manager.tsx` — Removed the "Print Official Record" link and unused icon imports.
-- `src/features/assessment/attendance-sheet-docx.ts` — Updated border stroke color to neat Slate-400 (`94A3B8`).
-- `src/features/assessment/attendance-sheet-pdf.tsx` — Styled PDF table borders with `#94a3b8` perimeter/headers and `#cbd5e1` cell dividers.
-- `src/features/assessment/printable-signing-sheet.tsx` — Replaced black borders with `border-slate-400` and `border-slate-300`.
-- `src/features/class-attendance/printable-class-register.tsx` — Replaced harsh black borders with `border-slate-400` and `border-slate-300`.
-- `src/tests/attendance-sheet-docx.test.ts` & `supabase/migrations/src/tests/attendance-sheet-docx.test.ts` — Updated test assertions to match `94A3B8`.
+- `src/app/(staff)/staff/units/[allocationId]/page.tsx` â€” Replaced dual Print/PDF buttons with a single full-width 1-tap PDF download button for Class, CAT, and Exam registers. Updated Outline and Scheme actions to "View Outline" and "View Scheme", and simplified Record of Work to "Log Progress".
+- `src/app/(staff)/staff/units/[allocationId]/documents/page.tsx` â€” Updated unit documents overview with 1-tap "Download PDF" buttons across all attendance registers and removed obsolete print triggers.
+- `src/features/staff-downloads/staff-downloads-view.tsx` â€” Removed Print buttons and upgraded Attendance Registers to 1-tap "Download PDF" buttons.
+- `src/app/(staff)/staff/units/[allocationId]/documents/class-attendance/page.tsx` â€” Configured route to redirect directly to the Class Attendance PDF download endpoint.
+- `src/app/(staff)/staff/units/[allocationId]/documents/cat-attendance/page.tsx` â€” Configured route to redirect directly to the CAT Attendance PDF download endpoint.
+- `src/app/(staff)/staff/units/[allocationId]/documents/exam-attendance/page.tsx` â€” Configured route to redirect directly to the Exam Attendance PDF download endpoint.
+- `src/features/teaching-documents/tvet-document-viewer.tsx` â€” Removed `handlePrint` (`window.print()`) and the "Print Preview" button.
+- `src/features/teaching-documents/record-of-work-online/manager.tsx` â€” Removed the "Print Log" link and unused icon imports.
+- `src/features/teaching-documents/record-of-work-manager.tsx` â€” Removed the "Print Official Record" link and unused icon imports.
+- `src/features/assessment/attendance-sheet-docx.ts` â€” Updated border stroke color to neat Slate-400 (`94A3B8`).
+- `src/features/assessment/attendance-sheet-pdf.tsx` â€” Styled PDF table borders with `#94a3b8` perimeter/headers and `#cbd5e1` cell dividers.
+- `src/features/assessment/printable-signing-sheet.tsx` â€” Replaced black borders with `border-slate-400` and `border-slate-300`.
+- `src/features/class-attendance/printable-class-register.tsx` â€” Replaced harsh black borders with `border-slate-400` and `border-slate-300`.
+- `src/tests/attendance-sheet-docx.test.ts` & `supabase/migrations/src/tests/attendance-sheet-docx.test.ts` â€” Updated test assertions to match `94A3B8`.
 
 ### 2026-09-26: Trainer QA Examination ZIP Export
 
 **Summary:** Added a department-scoped QA export workspace. HODs can select an academic period and download a ZIP grouped by trainer, with separate Course Outlines and Schemes of Work folders. The pack includes the exact approved revision, an Excel QA index listing missing or unavailable documents, and a README. The export uses the private document store and checks the active department before including allocations.
 
 **Files changed:**
-- `src/features/teaching-documents/qa-export.ts` — Loads period allocations, approved document revisions, creates the QA index, and assembles trainer folders.
-- `src/features/teaching-documents/zip-archive.ts` — Adds UTF-8 ZIP archive generation without a new runtime dependency.
-- `src/app/api/teaching-documents/qa-export/route.ts` — Adds the HOD-authorized ZIP download endpoint.
-- `src/app/(dashboard)/teaching-documents/qa-export/page.tsx` — Adds the academic-period selection, approval coverage summary, and download action.
-- `src/app/(dashboard)/teaching-documents/page.tsx` — Adds a direct link to the QA ZIP export workspace.
-- `src/features/staff-downloads/staff-downloads-view.tsx` — Restores the `Link` import required by existing links after the full check surfaced the missing import in this already-edited workspace file.
+- `src/features/teaching-documents/qa-export.ts` â€” Loads period allocations, approved document revisions, creates the QA index, and assembles trainer folders.
+- `src/features/teaching-documents/zip-archive.ts` â€” Adds UTF-8 ZIP archive generation without a new runtime dependency.
+- `src/app/api/teaching-documents/qa-export/route.ts` â€” Adds the HOD-authorized ZIP download endpoint.
+- `src/app/(dashboard)/teaching-documents/qa-export/page.tsx` â€” Adds the academic-period selection, approval coverage summary, and download action.
+- `src/app/(dashboard)/teaching-documents/page.tsx` â€” Adds a direct link to the QA ZIP export workspace.
+- `src/features/staff-downloads/staff-downloads-view.tsx` â€” Restores the `Link` import required by existing links after the full check surfaced the missing import in this already-edited workspace file.
 
 **Limitations:** The export is limited to 200 MB of source documents per pack. It records missing approvals or unavailable stored revisions in the index rather than silently presenting the pack as complete. This export does not mark the external QA submission as completed.
 
@@ -789,18 +796,18 @@ Resolved 5 interconnected Course Outline generation and formatting issues across
 **Summary:** Fixed the course outline rendering and import paths so topic headings remain separate from subtopic coverage. A repeated-content validator now rejects uploads where multiple long topic titles substantially repeat their coverage text, and the server rechecks before publishing. Existing authoritative schedules with the same strong corruption pattern fall back to their canonical curriculum. The known malformed DCU 1102 Entrepreneurship upload is retired through a unit- and source-file-scoped migration; no other unit records are changed.
 
 **Files changed:**
-- `src/features/teaching-documents/topic-coverage-validation.ts` — Added a conservative multi-row contamination detector.
-- `src/features/teaching-documents/bulk-curriculum-parser.ts` — Validate XLSX and ZIP imports and surface blocking errors.
-- `src/features/teaching-documents/bulk-curriculum-actions.ts` — Repeat validation on the server before committing imported outlines.
-- `src/features/teaching-documents/bulk-upload-dialog.tsx` — Disable publishing when validation finds a topic/coverage mix-up.
-- `src/features/teaching-documents/curriculum-content/queries.ts` — Use canonical schedule data when an active authoritative schedule has the confirmed corruption pattern.
-- `src/features/teaching-documents/tvet-standards.ts` — Split newline, bullet, middle-dot, semicolon, and pipe-delimited subtopics consistently.
-- `src/features/teaching-documents/tvet-document-viewer.tsx` — Render each parsed subtopic as its own bullet.
-- `supabase/migrations/20260926160000_retire_malformed_dcu_entrepreneurship_outline.sql` — Retire only the identified malformed active DCU 1102 import.
+- `src/features/teaching-documents/topic-coverage-validation.ts` â€” Added a conservative multi-row contamination detector.
+- `src/features/teaching-documents/bulk-curriculum-parser.ts` â€” Validate XLSX and ZIP imports and surface blocking errors.
+- `src/features/teaching-documents/bulk-curriculum-actions.ts` â€” Repeat validation on the server before committing imported outlines.
+- `src/features/teaching-documents/bulk-upload-dialog.tsx` â€” Disable publishing when validation finds a topic/coverage mix-up.
+- `src/features/teaching-documents/curriculum-content/queries.ts` â€” Use canonical schedule data when an active authoritative schedule has the confirmed corruption pattern.
+- `src/features/teaching-documents/tvet-standards.ts` â€” Split newline, bullet, middle-dot, semicolon, and pipe-delimited subtopics consistently.
+- `src/features/teaching-documents/tvet-document-viewer.tsx` â€” Render each parsed subtopic as its own bullet.
+- `supabase/migrations/20260926160000_retire_malformed_dcu_entrepreneurship_outline.sql` â€” Retire only the identified malformed active DCU 1102 import.
 
 **Manual follow-up:** Apply the new Supabase migration in the target environment. No other database data is updated.
 
-### 2026-09-26: Curriculum & Teaching Documents — Universal Course Outline Data & Topic Distribution Engine Fix
+### 2026-09-26: Curriculum & Teaching Documents â€” Universal Course Outline Data & Topic Distribution Engine Fix
 
 **Summary:** Resolved formatting flaws, topic concatenation, artificial compression, and template hallucinations across course outlines for all 51 TVET units:
 1. **Distribution Engine (`distribution-engine.ts`)**: Upgraded `isPureAssessmentTopic()` to systematically match and isolate all variations of Continuous Assessment Tests (CAT), Mid-Term Reviews, End of Term Examinations, and Supervised Summative Examinations from regular syllabus topics across all units. This eliminates unwanted concatenation of topics with assessment labels (e.g. `& Final Summative...`) and prevents artificial week compression. Exported `isPureAssessmentTopic` for direct consumption.
@@ -813,196 +820,196 @@ Resolved 5 interconnected Course Outline generation and formatting issues across
 4. **Verification**: Comprehensive audit verified 0 remaining anomalies across all 4 registries (Module 1, Module 2, Module 3, Certificate). 100% of the 1,219 Vitest unit tests passed (239/239 test files) and `npm run check` (`typecheck && lint && build`) passed cleanly with zero errors.
 
 **Files changed:**
-- `src/features/teaching-documents/distribution-engine.ts` — Enhanced `isPureAssessmentTopic()` regex matcher and exported function.
-- `src/features/teaching-documents/curriculum-data/module-1.ts` — Comprehensive content fix and verbatim KNEC restructuring for Entrepreneurship, ICT, Communication Skills, Life Skills, Food Safety, and others.
-- `src/features/teaching-documents/curriculum-data/module-3.ts` — Fixed all outcome hallucinations in Food Security, Epidemiology, Emergencies, Assessment/Surveillance, Product Development, and Industrial Management.
+- `src/features/teaching-documents/distribution-engine.ts` â€” Enhanced `isPureAssessmentTopic()` regex matcher and exported function.
+- `src/features/teaching-documents/curriculum-data/module-1.ts` â€” Comprehensive content fix and verbatim KNEC restructuring for Entrepreneurship, ICT, Communication Skills, Life Skills, Food Safety, and others.
+- `src/features/teaching-documents/curriculum-data/module-3.ts` â€” Fixed all outcome hallucinations in Food Security, Epidemiology, Emergencies, Assessment/Surveillance, Product Development, and Industrial Management.
 
-### 2026-09-26: UI — Microsoft Dynamics 365 Business Central ERP Design System & 2-Column Mobile Metric Grids
+### 2026-09-26: UI â€” Microsoft Dynamics 365 Business Central ERP Design System & 2-Column Mobile Metric Grids
 
 **Summary:** Transitioned the administrative interface across all screens to the Microsoft Dynamics 365 Business Central ERP design language (Segoe UI typography, tabular figure alignment, neutral text and border palette, Business Central FastTab cards/tables, and Activity Cue tiles), and enforced a 2-column grid layout (`grid-cols-2 gap-2`) for metric cards on mobile viewports to prevent vertical card stacking.
 
 **Files changed:**
-- `src/app/globals.css` — Configured `--font-ui` to `"Segoe UI"`, `--font-code` to `"Segoe UI Mono"`, aligned design tokens to Microsoft Fluent ERP standards (`--background: #f3f2f1`, `--text-primary: #201f1e`, `--text-secondary: #605e5c`, `--border: #e1dfdd`, `--border-soft: #edebe9`), updated corner radius tokens to Business Central FastTab standards (`--radius-sm: 0.25rem`, `--radius-md: 0.375rem`, `--radius-lg: 0.5rem`), refined `.admin-metric-card` to Business Central Activity Cues with a 3px top accent bar, and styled tables to Business Central list layouts with tabular figures.
-- `src/components/ui/card.tsx` — Updated `Card`, `CardHeader`, and `CardTitle` to FastTab styling (`rounded-lg border-border shadow-[0_1px_2px_rgba(0,0,0,0.04)]`).
-- `src/components/ui/metric-card.tsx` — Styled Activity Cues with `tabular-nums`, clean Segoe UI weights, uppercase tracked labels, and restrained padding.
-- `src/components/ui/badge.tsx` — Aligned status badges to Fluent rounded tags (`rounded-md`, 4px radius) with tabular numerals.
-- `src/components/ui/button.tsx` — Updated button sizing classes to Business Central command buttons with clean `rounded-md` / `rounded-lg` borders.
-- `src/features/student-unit-registration/student-unit-registration-table.tsx` — Refined toolbar, search bar, dropdowns, and table borders to Business Central ERP styling.
-- `src/app/(dashboard)/students/unit-registration/page.tsx` — Replaced single-column vertical stack with `grid grid-cols-2 gap-2 sm:grid-cols-2 md:grid-cols-4`.
-- `src/app/(dashboard)/teaching-documents/page.tsx` — Updated telemetry strip to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
-- `src/app/(dashboard)/timetable/units/page.tsx` — Updated unit metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
-- `src/app/(dashboard)/timetable/teaching-allocations/page.tsx` — Updated allocation metrics to `grid gap-2 grid-cols-2 sm:grid-cols-3`.
-- `src/app/(dashboard)/timetable/cohorts/page.tsx` — Updated cohort metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
-- `src/app/(dashboard)/timetable/programmes/page.tsx` — Updated programme metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
-- `src/app/(dashboard)/students/reports/page.tsx` — Updated student reports metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6`.
-- `src/app/(dashboard)/assessment/analysis/page.tsx` — Updated assessment metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
-- `src/app/(dashboard)/attendance-clinical/class-attendance/analytics/page.tsx` — Updated attendance metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
-- `src/app/(dashboard)/operations/attendance/page.tsx` — Updated operations attendance metrics to `grid grid-cols-2 gap-2 sm:grid-cols-3`.
-- `src/app/(dashboard)/operations/action-center/page.tsx` — Updated action center metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
-- `src/app/(dashboard)/operations/incidents/page.tsx` — Updated incidents metrics to `grid grid-cols-2 gap-2 sm:grid-cols-3`.
-- `src/app/(dashboard)/testing/page.tsx` — Updated testing metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6`.
-- `src/app/(dashboard)/testing/sign-off/page.tsx` — Updated sign-off metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
-- `src/app/(dashboard)/testing/deployments/page.tsx` — Updated deployment metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
-- `src/app/(dashboard)/testing/defects/page.tsx` — Updated defects metrics to `grid grid-cols-2 gap-2 sm:grid-cols-3`.
+- `src/app/globals.css` â€” Configured `--font-ui` to `"Segoe UI"`, `--font-code` to `"Segoe UI Mono"`, aligned design tokens to Microsoft Fluent ERP standards (`--background: #f3f2f1`, `--text-primary: #201f1e`, `--text-secondary: #605e5c`, `--border: #e1dfdd`, `--border-soft: #edebe9`), updated corner radius tokens to Business Central FastTab standards (`--radius-sm: 0.25rem`, `--radius-md: 0.375rem`, `--radius-lg: 0.5rem`), refined `.admin-metric-card` to Business Central Activity Cues with a 3px top accent bar, and styled tables to Business Central list layouts with tabular figures.
+- `src/components/ui/card.tsx` â€” Updated `Card`, `CardHeader`, and `CardTitle` to FastTab styling (`rounded-lg border-border shadow-[0_1px_2px_rgba(0,0,0,0.04)]`).
+- `src/components/ui/metric-card.tsx` â€” Styled Activity Cues with `tabular-nums`, clean Segoe UI weights, uppercase tracked labels, and restrained padding.
+- `src/components/ui/badge.tsx` â€” Aligned status badges to Fluent rounded tags (`rounded-md`, 4px radius) with tabular numerals.
+- `src/components/ui/button.tsx` â€” Updated button sizing classes to Business Central command buttons with clean `rounded-md` / `rounded-lg` borders.
+- `src/features/student-unit-registration/student-unit-registration-table.tsx` â€” Refined toolbar, search bar, dropdowns, and table borders to Business Central ERP styling.
+- `src/app/(dashboard)/students/unit-registration/page.tsx` â€” Replaced single-column vertical stack with `grid grid-cols-2 gap-2 sm:grid-cols-2 md:grid-cols-4`.
+- `src/app/(dashboard)/teaching-documents/page.tsx` â€” Updated telemetry strip to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
+- `src/app/(dashboard)/timetable/units/page.tsx` â€” Updated unit metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
+- `src/app/(dashboard)/timetable/teaching-allocations/page.tsx` â€” Updated allocation metrics to `grid gap-2 grid-cols-2 sm:grid-cols-3`.
+- `src/app/(dashboard)/timetable/cohorts/page.tsx` â€” Updated cohort metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
+- `src/app/(dashboard)/timetable/programmes/page.tsx` â€” Updated programme metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
+- `src/app/(dashboard)/students/reports/page.tsx` â€” Updated student reports metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6`.
+- `src/app/(dashboard)/assessment/analysis/page.tsx` â€” Updated assessment metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
+- `src/app/(dashboard)/attendance-clinical/class-attendance/analytics/page.tsx` â€” Updated attendance metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
+- `src/app/(dashboard)/operations/attendance/page.tsx` â€” Updated operations attendance metrics to `grid grid-cols-2 gap-2 sm:grid-cols-3`.
+- `src/app/(dashboard)/operations/action-center/page.tsx` â€” Updated action center metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
+- `src/app/(dashboard)/operations/incidents/page.tsx` â€” Updated incidents metrics to `grid grid-cols-2 gap-2 sm:grid-cols-3`.
+- `src/app/(dashboard)/testing/page.tsx` â€” Updated testing metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6`.
+- `src/app/(dashboard)/testing/sign-off/page.tsx` â€” Updated sign-off metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
+- `src/app/(dashboard)/testing/deployments/page.tsx` â€” Updated deployment metrics to `grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-4`.
+- `src/app/(dashboard)/testing/defects/page.tsx` â€” Updated defects metrics to `grid grid-cols-2 gap-2 sm:grid-cols-3`.
 
 **Breaking changes / manual follow-up:** None.
 
-### 2026-09-26: UI — Move Status Column on Mobile to Student Details Page & Expand Name Column
+### 2026-09-26: UI â€” Move Status Column on Mobile to Student Details Page & Expand Name Column
 
 **Summary:** In the Unit Registration table (`/students/unit-registration`), the dedicated Status column is hidden on small screens (`<sm`) to relieve mobile crowding, allocating full horizontal space to student names and admission numbers so names are no longer truncated. Student names now link directly to their student details/profile page (`/students/registry/[studentId]`), and unavailable (attachment) students can tap the action label or name to view their profile. On the Student Details page, the status badge now displays the canonical lifecycle status and academic phase (e.g. "On attachment", "In class") via `getStudentStatusLabel` and `getStatusBadgeVariant`, with a direct `Unit Reg` action button. The Unit Registration Editor page also now displays the registration status badge directly in the page header with a shortcut to the student profile.
 
 **Files changed:**
-- `src/features/student-unit-registration/student-unit-registration-table.tsx` — Reconfigured mobile table layout to `grid-cols-[1fr_auto_auto]`, hid `Status` header and badge cells on mobile viewports (`hidden sm:inline` / `hidden sm:block`), linked student names to `/students/registry/[studentId]`, and linked "Unavailable" to student details.
-- `src/app/(dashboard)/students/registry/[studentId]/page.tsx` — Updated status badge to use canonical `getStudentStatusLabel(student.lifecycle_status, student.academic_phase)` and `getStatusBadgeVariant(...)`, and added a direct `Unit Reg` button for eligible students.
-- `src/app/(dashboard)/students/unit-registration/register/[studentId]/page.tsx` — Prominently placed registration verification status badge in `PageHeader` context and added `Student Profile` link.
+- `src/features/student-unit-registration/student-unit-registration-table.tsx` â€” Reconfigured mobile table layout to `grid-cols-[1fr_auto_auto]`, hid `Status` header and badge cells on mobile viewports (`hidden sm:inline` / `hidden sm:block`), linked student names to `/students/registry/[studentId]`, and linked "Unavailable" to student details.
+- `src/app/(dashboard)/students/registry/[studentId]/page.tsx` â€” Updated status badge to use canonical `getStudentStatusLabel(student.lifecycle_status, student.academic_phase)` and `getStatusBadgeVariant(...)`, and added a direct `Unit Reg` button for eligible students.
+- `src/app/(dashboard)/students/unit-registration/register/[studentId]/page.tsx` â€” Prominently placed registration verification status badge in `PageHeader` context and added `Student Profile` link.
 
-### 2026-09-26: UI — Student Overview Metric Cards 2-Column Mobile Grid & Compact Density
+### 2026-09-26: UI â€” Student Overview Metric Cards 2-Column Mobile Grid & Compact Density
 
 **Summary:** Reconfigured the 6 metric cards on the Students dashboard (`/students`) from a tall single-column stack into a responsive 2-column grid (`grid-cols-2 gap-2`) on mobile viewports. Reduced minimum height to `5.25rem` and optimized padding and typography for higher mobile information density.
 
 **Files changed:**
-- `src/app/(dashboard)/students/page.tsx` — Added `grid-cols-2 gap-2` to mobile metric cards grid container, and compacted navigation cards.
-- `src/components/ui/metric-card.tsx` — Reduced mobile min-height from `6.9rem` to `5.25rem`, icon size to `size-6`, and font size.
-- `src/app/globals.css` — Updated `.admin-screen .admin-metric-card` mobile CSS rules to match compact density.
+- `src/app/(dashboard)/students/page.tsx` â€” Added `grid-cols-2 gap-2` to mobile metric cards grid container, and compacted navigation cards.
+- `src/components/ui/metric-card.tsx` â€” Reduced mobile min-height from `6.9rem` to `5.25rem`, icon size to `size-6`, and font size.
+- `src/app/globals.css` â€” Updated `.admin-screen .admin-metric-card` mobile CSS rules to match compact density.
 
-### 2026-09-26: Fix — Prevent Bottom Navigation Bar from Obscuring the Last Card on Mobile
+### 2026-09-26: Fix â€” Prevent Bottom Navigation Bar from Obscuring the Last Card on Mobile
 
 **Summary:** Increased mobile bottom padding on `.admin-screen` and across all platform/module shell layouts (`StudentShell`, `PlatformShell`, `TimetableShell`, `AssessmentShell`, `StaffShell`, `StudentPortalShell`) to `calc(5.5rem + env(safe-area-inset-bottom, 0px))`. This guarantees the last card, button, or list row on any page scrolls fully into view above the fixed bottom navigation tab bar with comfortable breathing room.
 
 **Files changed:**
-- `src/app/globals.css` — Configured `.admin-screen` bottom padding to `calc(5.5rem + env(safe-area-inset-bottom, 0px))` on viewports `< 1024px`, reset nested `.admin-screen` padding to `0`, and kept `2rem` on desktop.
-- `src/components/layout/student-shell.tsx` — Updated `<main>` bottom padding to `pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]`.
-- `src/components/layout/platform-shell.tsx` — Updated `<main>` bottom padding to `pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]`.
-- `src/components/layout/timetable-shell.tsx` — Updated `<main>` bottom padding to `pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]`.
-- `src/components/layout/assessment-shell.tsx` — Updated `<main>` bottom padding to `pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]`.
-- `src/components/staff/staff-shell.tsx` — Updated `<main>` bottom padding to `pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]`.
-- `src/components/student/student-portal-shell.tsx` — Updated `<main>` bottom padding to `pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]`.
+- `src/app/globals.css` â€” Configured `.admin-screen` bottom padding to `calc(5.5rem + env(safe-area-inset-bottom, 0px))` on viewports `< 1024px`, reset nested `.admin-screen` padding to `0`, and kept `2rem` on desktop.
+- `src/components/layout/student-shell.tsx` â€” Updated `<main>` bottom padding to `pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]`.
+- `src/components/layout/platform-shell.tsx` â€” Updated `<main>` bottom padding to `pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]`.
+- `src/components/layout/timetable-shell.tsx` â€” Updated `<main>` bottom padding to `pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]`.
+- `src/components/layout/assessment-shell.tsx` â€” Updated `<main>` bottom padding to `pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]`.
+- `src/components/staff/staff-shell.tsx` â€” Updated `<main>` bottom padding to `pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]`.
+- `src/components/student/student-portal-shell.tsx` â€” Updated `<main>` bottom padding to `pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]`.
 
 **Breaking changes / manual follow-up:** None.
 
-### 2026-09-26: UI — Mobile Screen Density & Native Alignment Across Core Workspaces
+### 2026-09-26: UI â€” Mobile Screen Density & Native Alignment Across Core Workspaces
 
 **Summary:** Optimised mobile layouts across Unit Registration, Department Attendance, Curriculum Content, and Trainer Management. Merged admission numbers directly beneath student names to free up horizontal width, eliminated action button collisions by hiding secondary desktop actions on small viewports, removed raw developer parameter prompt text, and introduced structured native mobile cards and compact telemetry grids.
 
 **Files changed:**
-- `src/features/student-unit-registration/student-unit-registration-table.tsx` — Placed admission numbers directly beneath student names, updated grid to 4 responsive columns, hid `Portal` preview button on mobile, and shortened action button label.
-- `src/app/(dashboard)/attendance/page.tsx` — Hoisted back link into `PageHeader` and removed raw URL query parameters instruction card.
-- `src/features/class-attendance/admin-table.tsx` — Transformed mobile vertical session list into native structured cards with labelled attendance statistics and right-aligned action buttons.
-- `src/app/(dashboard)/teaching-documents/curriculum/page.tsx` — Hoisted back navigation to `PageHeader` and hid destructive `Clear Documents` button on mobile.
-- `src/app/(dashboard)/trainers/page.tsx` — Converted 4 stacked full-height metric cards on mobile to a compact 2×2 grid and hid secondary desktop actions.
+- `src/features/student-unit-registration/student-unit-registration-table.tsx` â€” Placed admission numbers directly beneath student names, updated grid to 4 responsive columns, hid `Portal` preview button on mobile, and shortened action button label.
+- `src/app/(dashboard)/attendance/page.tsx` â€” Hoisted back link into `PageHeader` and removed raw URL query parameters instruction card.
+- `src/features/class-attendance/admin-table.tsx` â€” Transformed mobile vertical session list into native structured cards with labelled attendance statistics and right-aligned action buttons.
+- `src/app/(dashboard)/teaching-documents/curriculum/page.tsx` â€” Hoisted back navigation to `PageHeader` and hid destructive `Clear Documents` button on mobile.
+- `src/app/(dashboard)/trainers/page.tsx` â€” Converted 4 stacked full-height metric cards on mobile to a compact 2Ã—2 grid and hid secondary desktop actions.
 
 **Breaking changes / manual follow-up:** None.
 
-### 2026-09-26: UI — Balanced Admin Dashboard Workspaces with Attendance Icon & Route Highlighting
+### 2026-09-26: UI â€” Balanced Admin Dashboard Workspaces with Attendance Icon & Route Highlighting
 
-**Summary:** Added the **Attendance** icon to the Admin Dashboard Workspaces card to complete a balanced 8-icon, 4×2 grid. Enhanced `isNavItemActive` to recognize `/attendance` so navigating from the workspace tile or sidebar correctly highlights the "Class Attendance" item. Also expanded academic session formatting to full month names (e.g. `September-December 2026`) and updated heading text colors from stark black to institutional teal and refined gray.
+**Summary:** Added the **Attendance** icon to the Admin Dashboard Workspaces card to complete a balanced 8-icon, 4Ã—2 grid. Enhanced `isNavItemActive` to recognize `/attendance` so navigating from the workspace tile or sidebar correctly highlights the "Class Attendance" item. Also expanded academic session formatting to full month names (e.g. `September-December 2026`) and updated heading text colors from stark black to institutional teal and refined gray.
 
 **Files changed:**
-- `src/features/dashboard/dashboard-view.tsx` — Added Attendance workspace icon (`CheckCircle2`, teal tint `#033B36`, linking to `/attendance-clinical/class-attendance`).
-- `src/components/layout/admin-sidebar.tsx` — Added `/attendance` route matching to `isNavItemActive` for Class Attendance navigation.
-- `src/tests/admin-dashboard-design.test.ts` — Added test assertions verifying active route detection for `/attendance` and subpaths.
-- `src/app/(dashboard)/dashboard/page.tsx` — Expanded semester abbreviation format to full month names (`September-December 2026`).
-- `src/components/layout/platform-shell.tsx` & `src/components/layout/admin-header.tsx` — Updated default period name fallback to `September-December 2026`.
+- `src/features/dashboard/dashboard-view.tsx` â€” Added Attendance workspace icon (`CheckCircle2`, teal tint `#033B36`, linking to `/attendance-clinical/class-attendance`).
+- `src/components/layout/admin-sidebar.tsx` â€” Added `/attendance` route matching to `isNavItemActive` for Class Attendance navigation.
+- `src/tests/admin-dashboard-design.test.ts` â€” Added test assertions verifying active route detection for `/attendance` and subpaths.
+- `src/app/(dashboard)/dashboard/page.tsx` â€” Expanded semester abbreviation format to full month names (`September-December 2026`).
+- `src/components/layout/platform-shell.tsx` & `src/components/layout/admin-header.tsx` â€” Updated default period name fallback to `September-December 2026`.
 
 **Breaking changes / manual follow-up:** None.
 
-### 2026-09-26: Fix — Keep admin interface density steady on wide screens
+### 2026-09-26: Fix â€” Keep admin interface density steady on wide screens
 
 **Summary:** Removed extra-large viewport scaling from shared controls and common admin layouts so text, buttons, fields, cards, and table rows retain their laptop-sized proportions. Standardized the admin content width at 90rem and capped the page gutters.
 
 **Files changed:**
-- `src/app/globals.css` — Sets the shared admin width cap and removes additional wide-screen gutter growth.
-- `src/components/ui/` — Caps shared button, field, badge, table, card, filter, toolbar, and pagination sizing at the laptop breakpoint.
-- `src/app/(dashboard)/timetable/` — Keeps timetable import and trainer workload text at the shared maximum size.
-- `src/features/cohorts/cohort-table.tsx` — Caps cohort name sizing and width at the laptop breakpoint.
+- `src/app/globals.css` â€” Sets the shared admin width cap and removes additional wide-screen gutter growth.
+- `src/components/ui/` â€” Caps shared button, field, badge, table, card, filter, toolbar, and pagination sizing at the laptop breakpoint.
+- `src/app/(dashboard)/timetable/` â€” Keeps timetable import and trainer workload text at the shared maximum size.
+- `src/features/cohorts/cohort-table.tsx` â€” Caps cohort name sizing and width at the laptop breakpoint.
 
 **Breaking changes / manual follow-up:** None.
 
-### 2026-09-26: Fix — Load saved semester reporting and unify page headings
+### 2026-09-26: Fix â€” Load saved semester reporting and unify page headings
 
 **Summary:** The student status editor now loads the active period's saved reporting state instead of displaying every student as reported by default. Shortened its helper text and applied a consistent teal, semibold title style through the shared page header.
 
 **Files changed:**
-- `src/features/students/queries.ts` — Loads active-period reporting values with student rows.
-- `src/features/students/inline-status-updater.tsx` — Initializes each reporting control from its saved value.
-- `src/app/(dashboard)/students/status/page.tsx` — Replaced the long page description with concise copy.
-- `src/components/ui/page-header.tsx` — Uses the teal primary color and semibold title style for shared page headings.
+- `src/features/students/queries.ts` â€” Loads active-period reporting values with student rows.
+- `src/features/students/inline-status-updater.tsx` â€” Initializes each reporting control from its saved value.
+- `src/app/(dashboard)/students/status/page.tsx` â€” Replaced the long page description with concise copy.
+- `src/components/ui/page-header.tsx` â€” Uses the teal primary color and semibold title style for shared page headings.
 
 **Breaking changes / manual follow-up:** None.
 
-### 2026-09-26: Change — Auto-verify registered unit rosters
+### 2026-09-26: Change â€” Auto-verify registered unit rosters
 
 **Summary:** Existing unit registrations are backfilled as verified submissions, and each new registered unit row now creates or advances its student's period submission to verified and links the row to that submission. This applies across HOD, batch, and student self-service registration writes, so the unit registration export reports registered students as verified without manual cleanup.
 
 **Files changed:**
-- `supabase/migrations/20260926130000_auto_verify_registered_students.sql` — Backfills eligible existing rosters and adds a trigger that automatically verifies and links future registered-unit rows.
+- `supabase/migrations/20260926130000_auto_verify_registered_students.sql` â€” Backfills eligible existing rosters and adds a trigger that automatically verifies and links future registered-unit rows.
 
 **Breaking changes / manual follow-up:** Apply the new Supabase migration with `supabase db push`. Unit roster writes are now considered verified automatically.
 
-### 2026-09-26: Fix — Exclude attachment students from unit registration
+### 2026-09-26: Fix â€” Exclude attachment students from unit registration
 
-**Summary:** Students whose academic phase is attachment remain visible in the unit registration list, with a clear “Not eligible” status and no registration action. They are excluded from pending, eligible, submitted, verified, and exception counts; can be found with the “Not eligible (attachment)” filter; and are identified clearly in Excel exports. Registration and stage update server actions reject attachment students, the direct registration editor route no longer opens for them, and a database trigger blocks registration writes through direct RPC or table calls while preserving existing records.
+**Summary:** Students whose academic phase is attachment remain visible in the unit registration list, with a clear â€œNot eligibleâ€ status and no registration action. They are excluded from pending, eligible, submitted, verified, and exception counts; can be found with the â€œNot eligible (attachment)â€ filter; and are identified clearly in Excel exports. Registration and stage update server actions reject attachment students, the direct registration editor route no longer opens for them, and a database trigger blocks registration writes through direct RPC or table calls while preserving existing records.
 
 **Files changed:**
-- `src/features/student-unit-registration/types.ts` — Added the student's academic phase to registration records.
-- `src/features/student-unit-registration/queries.ts` — Loads phase data and excludes attachment students from registration metrics and editor access.
-- `src/features/student-unit-registration/student-unit-registration-table.tsx` — Shows an ineligible state, hides registration and portal actions, and adds a dedicated filter.
-- `src/features/student-unit-registration/actions.ts` — Blocks registration and stage changes for attachment students.
-- `src/app/(dashboard)/students/unit-registration/page.tsx` — Counts eligible students in the summary card.
-- `src/app/api/students/unit-registration/export/route.ts` — Adds attachment eligibility to export labels and filters.
-- `supabase/migrations/20260926120000_block_attachment_unit_registrations.sql` — Blocks new registered-unit rows for students on attachment.
+- `src/features/student-unit-registration/types.ts` â€” Added the student's academic phase to registration records.
+- `src/features/student-unit-registration/queries.ts` â€” Loads phase data and excludes attachment students from registration metrics and editor access.
+- `src/features/student-unit-registration/student-unit-registration-table.tsx` â€” Shows an ineligible state, hides registration and portal actions, and adds a dedicated filter.
+- `src/features/student-unit-registration/actions.ts` â€” Blocks registration and stage changes for attachment students.
+- `src/app/(dashboard)/students/unit-registration/page.tsx` â€” Counts eligible students in the summary card.
+- `src/app/api/students/unit-registration/export/route.ts` â€” Adds attachment eligibility to export labels and filters.
+- `supabase/migrations/20260926120000_block_attachment_unit_registrations.sql` â€” Blocks new registered-unit rows for students on attachment.
 
 **Breaking changes / manual follow-up:** Apply the new Supabase migration with `supabase db push`.
 
-### 2026-09-26: Add — Unit Registration Excel Export
+### 2026-09-26: Add â€” Unit Registration Excel Export
 
 **Summary:** Added an Excel export for all active-period unit registration records or the records matching the current search, status, and cohort filters. The export includes selected and expected unit counts, registration and submission statuses, cohort and programme details, and exception or verification notes. It exports the full filtered result, independent of the table's current page. The visible table now gives admission numbers their own column in place of Cohort / Programme, keeps each student on one line, and leaves unregistration in the per-student registration screen.
 
 **Files changed:**
-- `src/features/student-unit-registration/student-unit-registration-table.tsx` — Added an Export Excel control that carries active filters, replaced the Cohort / Programme table column with a dedicated Admission Number column, and simplified row actions to fit on one line.
-- `src/app/(dashboard)/students/unit-registration/register/[studentId]/page.tsx` — Kept one clearly labeled destructive unregister action inside the student's registration details.
-- `src/app/api/students/unit-registration/export/route.ts` — Added an HOD-authorized Excel export endpoint.
+- `src/features/student-unit-registration/student-unit-registration-table.tsx` â€” Added an Export Excel control that carries active filters, replaced the Cohort / Programme table column with a dedicated Admission Number column, and simplified row actions to fit on one line.
+- `src/app/(dashboard)/students/unit-registration/register/[studentId]/page.tsx` â€” Kept one clearly labeled destructive unregister action inside the student's registration details.
+- `src/app/api/students/unit-registration/export/route.ts` â€” Added an HOD-authorized Excel export endpoint.
 
 **Breaking changes / manual follow-up:** None.
 
-### 2026-09-25: Simplify — Student Lifecycle Navigation
+### 2026-09-25: Simplify â€” Student Lifecycle Navigation
 
 **Summary:** Removed the duplicate Portal Access destination from the Student Lifecycle sidebar and mobile tabs. Portal access tools remain available from relevant operations actions.
 
 **Files changed:**
-- `src/components/layout/student-shell.tsx` — Removed the redundant `/students/access` navigation entry and mobile tab.
+- `src/components/layout/student-shell.tsx` â€” Removed the redundant `/students/access` navigation entry and mobile tab.
 
 **Breaking changes / manual follow-up:** None. The portal-access route and action links remain available.
 
-### 2026-09-25: Polish — Student Registry Filters and Name Hierarchy
+### 2026-09-25: Polish â€” Student Registry Filters and Name Hierarchy
 
 **Summary:** Grouped registry status filters and search/export controls into a single panel with a dedicated filter row. Reduced the visual weight of student names with a softer teal-gray treatment.
 
 **Files changed:**
-- `src/features/students/student-registry-table.tsx` — Reorganized the status and search toolbar and softened student-name typography on mobile and desktop.
+- `src/features/students/student-registry-table.tsx` â€” Reorganized the status and search toolbar and softened student-name typography on mobile and desktop.
 
 **Breaking changes / manual follow-up:** None.
 
-### 2026-09-25: Improve — Student Registry Desktop Table Readability
+### 2026-09-25: Improve â€” Student Registry Desktop Table Readability
 
 **Summary:** Desktop and tablet student registry rows now show Admission Number in its own column instead of beneath the student name. Added visible separators and more vertical spacing between student rows. The compact stacked layout on phones is unchanged.
 
 **Files changed:**
-- `src/features/students/student-registry-table.tsx` — Added the admission number header and column, and row separators and spacing for the wide table view.
+- `src/features/students/student-registry-table.tsx` â€” Added the admission number header and column, and row separators and spacing for the wide table view.
 
 **Breaking changes / manual follow-up:** None.
 
-### 2026-09-25: Fix — Restore responsive admin dashboard layouts
+### 2026-09-25: Fix â€” Restore responsive admin dashboard layouts
 
 **Summary:** Removed global CSS rules that forced unrelated sections and divs into metric-grid column counts, forced all tables wider than phone screens, and overrode page heading sizes. Metric grid columns now come from each page's responsive layout. The admin home keeps its compact mobile design, expands comfortably on tablet, and uses a full-width desktop layout with a white hero, a 3:1 Workspaces to Manage & Approvals split, and larger workspace icons.
 
 **Files changed:**
-- `src/app/globals.css` — Removed broad `:has()` grid overrides, global table minimum width and heading overrides, and a generic metric-grid override.
-- `src/features/dashboard/dashboard-view.tsx` — Expanded the dashboard's max width at tablet sizes, arranged its major panels for desktop, replaced the dark hero with a white card, and increased desktop icon, text, and row sizing. Workspaces uses 9 of 12 desktop columns; Manage & Approvals uses 3. The hero's right side now shows four live operational summary tiles on desktop, while the existing metric strip remains on smaller screens.
+- `src/app/globals.css` â€” Removed broad `:has()` grid overrides, global table minimum width and heading overrides, and a generic metric-grid override.
+- `src/features/dashboard/dashboard-view.tsx` â€” Expanded the dashboard's max width at tablet sizes, arranged its major panels for desktop, replaced the dark hero with a white card, and increased desktop icon, text, and row sizing. Workspaces uses 9 of 12 desktop columns; Manage & Approvals uses 3. The hero's right side now shows four live operational summary tiles on desktop, while the existing metric strip remains on smaller screens.
 
 **Breaking changes / manual follow-up:** None. No data, route, or database changes.
 
-### 2026-09-25: Refactor — Student Registry Table & Profile Mobile UX Optimization
+### 2026-09-25: Refactor â€” Student Registry Table & Profile Mobile UX Optimization
 
 **Summary of improvements:**
 1. **Student Registry Table (`student-registry-table.tsx`)**:
@@ -1024,17 +1031,17 @@ Resolved 5 interconnected Course Outline generation and formatting issues across
    - Redesigned profile action buttons on mobile into a clean, compact 2x2 grid with `whitespace-nowrap` labels (`Reassign`, `Edit Adm. No.`, `Reset Pwd`, `Student View`), eliminating awkward multi-line text wrapping.
 
 **Files changed:**
-- `src/features/students/student-registry-table.tsx` — Checkbox and bulk bar removed, columns simplified (Name, Adm No, Status, Stage), compact slim styling, dynamic Excel export.
-- `src/features/students/student-status-stage.tsx` — Fixed em-dash encoding, added `getStatusBadgeVariant`.
-- `src/app/api/students/export/route.ts` — Handled query filters (`status`, `cohortId`, `search`), added Status & Stage columns.
-- `src/app/(dashboard)/students/registry/page.tsx` — Removed unneeded "Student access" link, moved back button to left side, removed redundant duplicate export.
-- `src/app/(dashboard)/students/registry/[studentId]/page.tsx` — Back button placed at top left, slim header card, non-wrapping compact action buttons, cohort change trigger.
-- `src/features/students/reassign-cohort-dialog.tsx` — New component for single-student cohort reassignment.
-- `src/features/students/reset-student-password-dialog.tsx` — Added custom `trigger` prop support.
+- `src/features/students/student-registry-table.tsx` â€” Checkbox and bulk bar removed, columns simplified (Name, Adm No, Status, Stage), compact slim styling, dynamic Excel export.
+- `src/features/students/student-status-stage.tsx` â€” Fixed em-dash encoding, added `getStatusBadgeVariant`.
+- `src/app/api/students/export/route.ts` â€” Handled query filters (`status`, `cohortId`, `search`), added Status & Stage columns.
+- `src/app/(dashboard)/students/registry/page.tsx` â€” Removed unneeded "Student access" link, moved back button to left side, removed redundant duplicate export.
+- `src/app/(dashboard)/students/registry/[studentId]/page.tsx` â€” Back button placed at top left, slim header card, non-wrapping compact action buttons, cohort change trigger.
+- `src/features/students/reassign-cohort-dialog.tsx` â€” New component for single-student cohort reassignment.
+- `src/features/students/reset-student-password-dialog.tsx` â€” Added custom `trigger` prop support.
 
 **Verification**: `npm run check` passed (`next typegen && tsc --noEmit && npm run lint && next build`, code 0). Unit tests passed.
 
-### 2026-09-24: Fix — Attendance Register 100% Personal Timetable Parity (e.g. Wednesday Trade Project)
+### 2026-09-24: Fix â€” Attendance Register 100% Personal Timetable Parity (e.g. Wednesday Trade Project)
 
 **Root cause**:
 1. **Source-of-truth discrepancy**: `/staff/timetable` (and the trainer portal) reads from published `timetable_versions.snapshot`, whereas `/staff/attendance` only queried the `scheduled_sessions` table with `.eq('status', 'locked')`. Sessions in the published timetable snapshot (like Wednesday Trade Project) whose rows in `scheduled_sessions` were in `draft` or `confirmed` status, or were not yet materialized as locked scheduled sessions, were completely invisible in the trainer's class attendance register list.
@@ -1048,96 +1055,96 @@ Resolved 5 interconnected Course Outline generation and formatting issues across
 4. **HOD Impersonation Parity**: `getTrainerAttendanceScheduleForAdmin(profileId)` now delegates directly to `resolveTrainerAttendanceSchedule(profileId)`, ensuring HODs in `/trainers/[id]/portal-view` see the exact same 100% accurate register.
 
 **Files changed:**
-- `src/features/class-attendance/domain.ts` — Added `normalizeDayOfWeek` helper and updated `weekdayLabel`.
-- `src/features/class-attendance/attendance-schedule-list.tsx` — Normalized weekday comparisons in `displayedItems`.
-- `src/features/class-attendance/queries.ts` — Implemented `resolveTrainerAttendanceSchedule` unifying published snapshots and live sessions; unified `getStaffClassAttendanceSchedule` and `getTrainerAttendanceScheduleForAdmin`.
-- `src/app/api/staff/attendance/sessions/route.ts` — Day normalization, room resolution without limit, allocation recovery, and snapshot fallback for `sessionData`.
+- `src/features/class-attendance/domain.ts` â€” Added `normalizeDayOfWeek` helper and updated `weekdayLabel`.
+- `src/features/class-attendance/attendance-schedule-list.tsx` â€” Normalized weekday comparisons in `displayedItems`.
+- `src/features/class-attendance/queries.ts` â€” Implemented `resolveTrainerAttendanceSchedule` unifying published snapshots and live sessions; unified `getStaffClassAttendanceSchedule` and `getTrainerAttendanceScheduleForAdmin`.
+- `src/app/api/staff/attendance/sessions/route.ts` â€” Day normalization, room resolution without limit, allocation recovery, and snapshot fallback for `sessionData`.
 
 **Verification**: `npm run check` passed (`next typegen && tsc --noEmit` + `eslint` + `next build`, Turbopack).
 
-### 2026-09-24: Fix — Trainer attendance register missing sessions (e.g. Agricultural Production on Tuesday)
+### 2026-09-24: Fix â€” Trainer attendance register missing sessions (e.g. Agricultural Production on Tuesday)
 
 **Root causes (three compounding bugs in `getStaffClassAttendanceSchedule`):**
 
-1. **RLS silently dropped cross-department service units** — `units` and `cohorts` lookups used `createClient()` (the trainer's session-scoped client). Any unit managed by a different department (e.g. "Agricultural Production" owned by Dept B but taught by a trainer in Dept A) returned `null` from the RLS-filtered query. The guard `if (!unit || !cohort || ...) continue` then silently excluded the entire session with no error or log. Fixed by switching **all** DB reads in this function to `createAdminClient()`.
+1. **RLS silently dropped cross-department service units** â€” `units` and `cohorts` lookups used `createClient()` (the trainer's session-scoped client). Any unit managed by a different department (e.g. "Agricultural Production" owned by Dept B but taught by a trainer in Dept A) returned `null` from the RLS-filtered query. The guard `if (!unit || !cohort || ...) continue` then silently excluded the entire session with no error or log. Fixed by switching **all** DB reads in this function to `createAdminClient()`.
 
-2. **Trainer_id-only query missed allocation-linked sessions** — The scheduled sessions query was `WHERE trainer_id = workspace.trainerId`. If a session's `trainer_id` was `NULL` or had become stale (e.g. after a trainer reassignment), the session was completely invisible even though the allocation link was correct. Fixed by adding a **second query by `teaching_allocation_id IN (allocationIds)`** and merging+deduplicating by session ID.
+2. **Trainer_id-only query missed allocation-linked sessions** â€” The scheduled sessions query was `WHERE trainer_id = workspace.trainerId`. If a session's `trainer_id` was `NULL` or had become stale (e.g. after a trainer reassignment), the session was completely invisible even though the allocation link was correct. Fixed by adding a **second query by `teaching_allocation_id IN (allocationIds)`** and merging+deduplicating by session ID.
 
-3. **`getUnifiedUnitRoster` also received the RLS-scoped client** — Multi-cohort name resolution for cross-department units also failed silently. Fixed by passing the `admin` client.
+3. **`getUnifiedUnitRoster` also received the RLS-scoped client** â€” Multi-cohort name resolution for cross-department units also failed silently. Fixed by passing the `admin` client.
 
-**Bonus improvement**: The silent `continue` on missing lookups is now replaced with `console.warn` that logs the session ID and which specific lookup (unit/cohort/day/slot) failed — so future issues are immediately visible in server logs.
+**Bonus improvement**: The silent `continue` on missing lookups is now replaced with `console.warn` that logs the session ID and which specific lookup (unit/cohort/day/slot) failed â€” so future issues are immediately visible in server logs.
 
 **Files changed:**
-- `src/features/class-attendance/queries.ts` — `getStaffClassAttendanceSchedule()` rewritten: admin client throughout, dual-query strategy, diagnostic logging.
+- `src/features/class-attendance/queries.ts` â€” `getStaffClassAttendanceSchedule()` rewritten: admin client throughout, dual-query strategy, diagnostic logging.
 
 **Verification**: `npm run check` passed (exit code 0). No schema changes required.
 
-### 2026-09-23: Fix — Student portal attendance percentage & missed lessons not showing
+### 2026-09-23: Fix â€” Student portal attendance percentage & missed lessons not showing
 
-**Root cause**: `getStudentPortalAttendance` in `src/features/attendance-analytics/queries.ts` fetched `class_sessions` with a hard filter `.eq('status', 'completed')`. Any session where the trainer opened the register and marked students but did not click **"Complete"** remained at `status = 'open'`. Those sessions were silently excluded, so affected students saw zero recorded sessions, no attendance percentage, and no missed lessons — even though their `present`/`absent` entries existed in `class_attendance_entries`.
+**Root cause**: `getStudentPortalAttendance` in `src/features/attendance-analytics/queries.ts` fetched `class_sessions` with a hard filter `.eq('status', 'completed')`. Any session where the trainer opened the register and marked students but did not click **"Complete"** remained at `status = 'open'`. Those sessions were silently excluded, so affected students saw zero recorded sessions, no attendance percentage, and no missed lessons â€” even though their `present`/`absent` entries existed in `class_attendance_entries`.
 
-**Fix**: Changed `.eq('status', 'completed')` → `.in('status', ['completed', 'open'])` at line ~438 of `src/features/attendance-analytics/queries.ts`. Students now see their attendance data as soon as a trainer marks them (present or absent), regardless of whether the trainer has formally submitted the register.
+**Fix**: Changed `.eq('status', 'completed')` â†’ `.in('status', ['completed', 'open'])` at line ~438 of `src/features/attendance-analytics/queries.ts`. Students now see their attendance data as soon as a trainer marks them (present or absent), regardless of whether the trainer has formally submitted the register.
 
 **Files changed:**
-- `src/features/attendance-analytics/queries.ts` — one-line status filter change (line ~438).
+- `src/features/attendance-analytics/queries.ts` â€” one-line status filter change (line ~438).
 
 **Verification**: `npm run check` passed (exit code 0). No schema changes required.
 
-### 2026-09-23: Trainers — Full-Fidelity Portal View (`/trainers/[id]/portal-view`)
+### 2026-09-23: Trainers â€” Full-Fidelity Portal View (`/trainers/[id]/portal-view`)
 
-**Scope**: Admin impersonation — HODs can now view a trainer's portal exactly as the trainer sees it. No database schema changes.
+**Scope**: Admin impersonation â€” HODs can now view a trainer's portal exactly as the trainer sees it. No database schema changes.
 
 **What changed:**
-- `src/features/class-attendance/queries.ts` — Added two new admin-safe query functions:
-  - `getTrainerAttendanceScheduleForAdmin(profileId)` — mirrors `getStaffClassAttendanceSchedule` but accepts an explicit `profileId` instead of reading from the session JWT.
-  - `getTrainerAttendanceHistoryForAdmin(trainerId, limit)` — queries `class_sessions` directly via admin client (bypassing RLS) by `trainer_id`, then joins with units/cohorts and computes present/absent/unmarked counts from `class_attendance_entries`.
+- `src/features/class-attendance/queries.ts` â€” Added two new admin-safe query functions:
+  - `getTrainerAttendanceScheduleForAdmin(profileId)` â€” mirrors `getStaffClassAttendanceSchedule` but accepts an explicit `profileId` instead of reading from the session JWT.
+  - `getTrainerAttendanceHistoryForAdmin(trainerId, limit)` â€” queries `class_sessions` directly via admin client (bypassing RLS) by `trainer_id`, then joins with units/cohorts and computes present/absent/unmarked counts from `class_attendance_entries`.
   - Added `createAdminClient` import.
-- `src/app/(dashboard)/trainers/[id]/portal-view/page.tsx` — **[FULL REWRITE]** Now renders 5 real-data tabs:
-  1. **Timetable** — Full weekly grid (desktop table + mobile day-by-day) using `getStaffPublishedTimetable(trainer.profileId)` + `mergeStaffTimetableSessions`. Identical layout to `/staff/timetable`.
-  2. **Teaching Units** — All allocated units via `getStaffWorkspace(trainer.profileId)`, with "Open Workspace" links to `/staff/units/[allocationId]` (accessible to HODs via `requireTrainerAccess` + allocation fallback path).
-  3. **Attendance** — Metrics (weekly classes, completed, cancelled, open) + scheduled sessions with "View Register" links to `/staff/attendance/[sessionId]` + full history list, all via the two new admin query functions.
-  4. **Documents** — Links to `/staff/units/[allocationId]/documents` for each allocated unit.
-  5. **Profile** — Full trainer parameters (name, staff number, email, employment type, hours, department, specialization, workspace link status).
+- `src/app/(dashboard)/trainers/[id]/portal-view/page.tsx` â€” **[FULL REWRITE]** Now renders 5 real-data tabs:
+  1. **Timetable** â€” Full weekly grid (desktop table + mobile day-by-day) using `getStaffPublishedTimetable(trainer.profileId)` + `mergeStaffTimetableSessions`. Identical layout to `/staff/timetable`.
+  2. **Teaching Units** â€” All allocated units via `getStaffWorkspace(trainer.profileId)`, with "Open Workspace" links to `/staff/units/[allocationId]` (accessible to HODs via `requireTrainerAccess` + allocation fallback path).
+  3. **Attendance** â€” Metrics (weekly classes, completed, cancelled, open) + scheduled sessions with "View Register" links to `/staff/attendance/[sessionId]` + full history list, all via the two new admin query functions.
+  4. **Documents** â€” Links to `/staff/units/[allocationId]/documents` for each allocated unit.
+  5. **Profile** â€” Full trainer parameters (name, staff number, email, employment type, hours, department, specialization, workspace link status).
 
-**Verification**: `npm run check` passed (exit code 0). `/trainers/[id]/portal-view` appears as `ƒ` (dynamic) in build manifest.
+**Verification**: `npm run check` passed (exit code 0). `/trainers/[id]/portal-view` appears as `Æ’` (dynamic) in build manifest.
 
-### 2026-09-23: Students — Remove `/students/progression`; replace sidebar nav item
+### 2026-09-23: Students â€” Remove `/students/progression`; replace sidebar nav item
 
-- `src/components/layout/student-shell.tsx` — Replaced "Status & progression" nav item (`/students/progression`, `History` icon) with **"Update statuses"** (`/students/status`, `RefreshCw` icon). Swapped `History` import for `RefreshCw`.
-- `src/app/(dashboard)/students/progression/page.tsx` — **[DELETED]**. The old read-only exception list is superseded by the inline status updater at `/students/status`.
+- `src/components/layout/student-shell.tsx` â€” Replaced "Status & progression" nav item (`/students/progression`, `History` icon) with **"Update statuses"** (`/students/status`, `RefreshCw` icon). Swapped `History` import for `RefreshCw`.
+- `src/app/(dashboard)/students/progression/page.tsx` â€” **[DELETED]**. The old read-only exception list is superseded by the inline status updater at `/students/status`.
 - `.next` cache cleared to purge stale generated type references to the deleted page.
 
 **Verification**: `npm run check` passed (exit code 0). `/students/progression` no longer appears in the build manifest.
 
-### 2026-09-22: Students — Inline Bulk Status Updater (`/students/status`)
+### 2026-09-22: Students â€” Inline Bulk Status Updater (`/students/status`)
 
 **Scope**: New page, new server action, new client component. No database schema changes.
 
 **What changed:**
-- `src/features/students/actions.ts` — Added `quickUpdateStudentStatusAction(studentId, virtualStatus, reportingStatus)`: a direct async server action (not a form-action) that maps the virtual `'in_class'` / `'on_attachment'` values to the correct `targetStatus` + `academicPlacement` RPC calls and revalidates relevant paths.
-- `src/features/students/inline-status-updater.tsx` — **[NEW]** `'use client'` component. Renders a searchable, filterable list of all students. Each row has a **Status** dropdown and a **Semester reporting** dropdown that auto-save on `onChange` via `startTransition` + `quickUpdateStudentStatusAction`. Uses `useOptimistic` for instant UI feedback, reverts on error, and fires a `sonner` toast on success or failure.
-- `src/app/(dashboard)/students/status/page.tsx` — **[NEW]** Server route page at `/students/status`. Fetches all students and passes them to `InlineStatusUpdater`. Marked `force-dynamic`.
-- `src/app/(dashboard)/students/page.tsx` — Added **"Update statuses"** card linking to `/students/status` in the module hub grid. Grid widened from `lg:grid-cols-4` to `lg:grid-cols-5`.
+- `src/features/students/actions.ts` â€” Added `quickUpdateStudentStatusAction(studentId, virtualStatus, reportingStatus)`: a direct async server action (not a form-action) that maps the virtual `'in_class'` / `'on_attachment'` values to the correct `targetStatus` + `academicPlacement` RPC calls and revalidates relevant paths.
+- `src/features/students/inline-status-updater.tsx` â€” **[NEW]** `'use client'` component. Renders a searchable, filterable list of all students. Each row has a **Status** dropdown and a **Semester reporting** dropdown that auto-save on `onChange` via `startTransition` + `quickUpdateStudentStatusAction`. Uses `useOptimistic` for instant UI feedback, reverts on error, and fires a `sonner` toast on success or failure.
+- `src/app/(dashboard)/students/status/page.tsx` â€” **[NEW]** Server route page at `/students/status`. Fetches all students and passes them to `InlineStatusUpdater`. Marked `force-dynamic`.
+- `src/app/(dashboard)/students/page.tsx` â€” Added **"Update statuses"** card linking to `/students/status` in the module hub grid. Grid widened from `lg:grid-cols-4` to `lg:grid-cols-5`.
 
-**Verification**: `npm run check` passed (exit code 0) — typecheck, lint, and production build clean. `/students/status` appears as `ƒ` (dynamic) in the build manifest.
+**Verification**: `npm run check` passed (exit code 0) â€” typecheck, lint, and production build clean. `/students/status` appears as `Æ’` (dynamic) in the build manifest.
 
-### 2026-09-22: Students — Split "Active" status into "In Class" and "On Attachment"
+### 2026-09-22: Students â€” Split "Active" status into "In Class" and "On Attachment"
 
 **Scope**: UI/display-layer change only. No database schema or migration required.
 
 **What changed:**
-- `src/features/students/types.ts` — `StudentSummary` interface: replaced `active` and `attachment` fields with `inClass` and `onAttachment`.
-- `src/features/students/queries.ts` — `getStudentSummary`: counts now split by `academic_phase === 'attachment'` for active/admitted students.
-- `src/features/students/student-registry-table.tsx` — `statusCounts`, `statusFiltered`, and `statusTabs`: the single "Active" tab is replaced by two tabs — **"In Class"** (active/admitted + phase ≠ attachment) and **"On Attachment"** (active/admitted + phase = attachment). Filter branches handle `in_class` and `on_attachment` as virtual query-param values.
-- `src/features/students/progression-form.tsx` — "Update student status" form: replaced the single "Active" dropdown option with "In Class" and "On Attachment". The form derives `targetStatus='active'` and the correct `academicPlacement` as hidden fields from the user's virtual selection. The separate "Academic placement" dropdown is removed (now implicit). Added helper functions `deriveTargetStatus`, `deriveAcademicPlacement`, `toVirtualStatus`.
-- `src/app/(dashboard)/students/page.tsx` — metric cards updated: "Active" → "In Class", "Attachment" → "On Attachment".
-- `src/app/(dashboard)/students/reports/page.tsx` — metric cards updated: same rename.
-- `supabase/migrations/src/app/(dashboard)/students/page.tsx` — same metric card rename (mirror copy).
-- `supabase/migrations/src/app/(dashboard)/students/reports/page.tsx` — same metric card rename (mirror copy).
+- `src/features/students/types.ts` â€” `StudentSummary` interface: replaced `active` and `attachment` fields with `inClass` and `onAttachment`.
+- `src/features/students/queries.ts` â€” `getStudentSummary`: counts now split by `academic_phase === 'attachment'` for active/admitted students.
+- `src/features/students/student-registry-table.tsx` â€” `statusCounts`, `statusFiltered`, and `statusTabs`: the single "Active" tab is replaced by two tabs â€” **"In Class"** (active/admitted + phase â‰  attachment) and **"On Attachment"** (active/admitted + phase = attachment). Filter branches handle `in_class` and `on_attachment` as virtual query-param values.
+- `src/features/students/progression-form.tsx` â€” "Update student status" form: replaced the single "Active" dropdown option with "In Class" and "On Attachment". The form derives `targetStatus='active'` and the correct `academicPlacement` as hidden fields from the user's virtual selection. The separate "Academic placement" dropdown is removed (now implicit). Added helper functions `deriveTargetStatus`, `deriveAcademicPlacement`, `toVirtualStatus`.
+- `src/app/(dashboard)/students/page.tsx` â€” metric cards updated: "Active" â†’ "In Class", "Attachment" â†’ "On Attachment".
+- `src/app/(dashboard)/students/reports/page.tsx` â€” metric cards updated: same rename.
+- `supabase/migrations/src/app/(dashboard)/students/page.tsx` â€” same metric card rename (mirror copy).
+- `supabase/migrations/src/app/(dashboard)/students/reports/page.tsx` â€” same metric card rename (mirror copy).
 
-**Verification**: `npm run check` passed (exit code 0) — typecheck, lint, and production build all clean.
+**Verification**: `npm run check` passed (exit code 0) â€” typecheck, lint, and production build all clean.
 
-### 2026-09-22: Trainer Daily Report — Single Compact Context Card
+### 2026-09-22: Trainer Daily Report â€” Single Compact Context Card
 
 
 - Consolidated the Daily Report header, date/trainer context, navigation controls, and submitted-record summary into one compact context card.
@@ -1145,58 +1152,58 @@ Resolved 5 interconnected Course Outline generation and formatting issues across
 - Preserved the essential submitted metrics (lesson count, present, absent) as a compact inline status strip inside the same card.
 - Removed the duplicate submitted-status rendering from `src/features/trainer-daily-report/trainer-form.tsx`.
 
-# CHANGES.md — Architectural Delta Registry & Project Changelog
+# CHANGES.md â€” Architectural Delta Registry & Project Changelog
 
 This document tracks all architectural modifications, schema updates, bugfixes, breaking changes, and pending manual follow-up tasks across the codebase. 
 
 > **Instruction for AI Agents & Developers**: Any time you update, refactor, or migrate code in this project, append a summary of your changes under [Recent Architectural Updates](#recent-architectural-updates) following the standard format below.
 
 > [!CAUTION]
-> **NON-NEGOTIABLE CORE POLICY — ZERO REGRESSION & WORKING CODE PROTECTION**:
+> **NON-NEGOTIABLE CORE POLICY â€” ZERO REGRESSION & WORKING CODE PROTECTION**:
 > **Never alter, break, or degrade working code when fixing a different issue.**
 > Targeted bugfixes and feature updates must strictly limit modifications to the designated scope. Before modifying shared components, data contracts, or layout structures, agents and developers must audit all consumer sites, verify that existing features remain untouched, and prevent unintended regressions or collateral damage.
 
 ---
 
-### 2026-09-25: Mobile-Native UI Pass — Batch 1 (Shared PageHeader + Operations Hub)
+### 2026-09-25: Mobile-Native UI Pass â€” Batch 1 (Shared PageHeader + Operations Hub)
 
 **Scope**: First batch of the app-wide mobile-native UI pass. Establishes the shared-component fix first (per the working plan: fix shared components before sweeping individual pages), then applies the full pattern to the Operations hub page as the first section page.
 
 **What changed:**
-- `src/components/ui/page-header.tsx` — Typography hierarchy pass used by nearly every page in the app:
+- `src/components/ui/page-header.tsx` â€” Typography hierarchy pass used by nearly every page in the app:
   - Eyebrow label now hidden below `sm:` (was a 3-line stack of eyebrow + title + description at micro sizes on phones).
   - Title bumped from `text-[1.05rem]` to `text-lg` on mobile with `leading-snug` for better legibility.
   - Description clamped to a single line on mobile (`line-clamp-1`) at a slightly larger `13px`, expanding to the original 2-line clamp at `sm:` and up. Rationale: a short single subtitle reads cleaner on a phone than a cramped 2-line stack; full description remains visible at desktop widths.
-- `src/app/(dashboard)/operations/page.tsx` — Applied the dashboard/daily-reports pattern:
+- `src/app/(dashboard)/operations/page.tsx` â€” Applied the dashboard/daily-reports pattern:
   - The 4 separately-bordered metric cards are now a single divided 2x2 card (native widget style) below `sm:`, with the original 4-card grid preserved unchanged from `sm:` up.
-  - The 5-tile "Operations Workspaces" icon grid is now a single grouped list card (icon + label + sub-label, divided rows, ≥44px touch targets) below `sm:`, with the original icon-card grid preserved unchanged from `sm:` up.
-  - No data-fetching, query, or prop changes — visual only. Desktop (`sm:`/`lg:`/`xl:`) presentation is byte-for-byte the same JSX as before, just gated behind a `hidden sm:grid` / `hidden sm:block` instead of being the only version.
+  - The 5-tile "Operations Workspaces" icon grid is now a single grouped list card (icon + label + sub-label, divided rows, â‰¥44px touch targets) below `sm:`, with the original icon-card grid preserved unchanged from `sm:` up.
+  - No data-fetching, query, or prop changes â€” visual only. Desktop (`sm:`/`lg:`/`xl:`) presentation is byte-for-byte the same JSX as before, just gated behind a `hidden sm:grid` / `hidden sm:block` instead of being the only version.
 
-**Not yet touched (flagged, not guessed at)**: this is a large, multi-page task (100+ routes under `src/app/(dashboard)/**` plus `trainer`, `student`, `(staff)`, `(auth)` areas). Remaining work, to be picked up section-by-section per the original plan (Operations → Timetable → Assessment → Students → Trainers → Teaching Documents; Staff/Student portals already largely done):
-- Operations: `action-center`, `attendance`, `audit`, `incidents`, `readiness`, `history`, `daily-reports/print` pages/components still need the table→card and badge→list-row passes.
+**Not yet touched (flagged, not guessed at)**: this is a large, multi-page task (100+ routes under `src/app/(dashboard)/**` plus `trainer`, `student`, `(staff)`, `(auth)` areas). Remaining work, to be picked up section-by-section per the original plan (Operations â†’ Timetable â†’ Assessment â†’ Students â†’ Trainers â†’ Teaching Documents; Staff/Student portals already largely done):
+- Operations: `action-center`, `attendance`, `audit`, `incidents`, `readiness`, `history`, `daily-reports/print` pages/components still need the tableâ†’card and badgeâ†’list-row passes.
 - Timetable, Assessment, Students, Teaching Documents, Testing, Trainers sections: not yet started in this pass.
 - Any `<table min-w-[...]>` components across `src/features/**` still need a `sm:hidden` stacked-card alternative per the `hod-report-list.tsx` reference pattern.
 
 **Verification**: Not build-verified in this environment (no installed `node_modules`/`package.json` present in this upload). Changes are additive/mobile-only (new `sm:hidden` / `hidden sm:...` blocks) and do not alter existing `lg:`/`xl:` markup, so desktop rendering is unchanged. Run `npm run check` before merging.
 
-### 2026-09-25: Mobile-Native UI Pass — Batch 2 (Students Registry)
+### 2026-09-25: Mobile-Native UI Pass â€” Batch 2 (Students Registry)
 
 **Scope**: Follow-up batch covering `/students/registry`, called out by the HOD as not yet fixed.
 
 **What changed:**
 - `src/features/students/student-registry-table.tsx`:
   - **Status filter pills**: were `flex flex-wrap`, wrapping unpredictably across lines on phones (the same anti-pattern flagged for badge clusters elsewhere). Now scroll horizontally in a single row below `sm:` (hidden scrollbar, `shrink-0` pills), reverting to the original wrapping layout unchanged from `sm:` up.
-  - **Student rows**: previously a bare CSS grid with no explicit mobile column template, so every field (checkbox, name, programme, cohort, status, chevron) stacked on its own line per student — a dense, unlabeled vertical dump on phones. Added a dedicated `md:hidden` native card list: checkbox + name/admission number on top, chevron top-right, programme code and cohort as one secondary line, and the existing `StudentStatusStage` badge on its own line below. The original dense grid-row markup is preserved byte-for-byte, now gated behind `hidden md:block` so tablet/desktop is unchanged.
-  - No changes to filtering, sorting, pagination, selection, or batch-action logic/props — visual only.
+  - **Student rows**: previously a bare CSS grid with no explicit mobile column template, so every field (checkbox, name, programme, cohort, status, chevron) stacked on its own line per student â€” a dense, unlabeled vertical dump on phones. Added a dedicated `md:hidden` native card list: checkbox + name/admission number on top, chevron top-right, programme code and cohort as one secondary line, and the existing `StudentStatusStage` badge on its own line below. The original dense grid-row markup is preserved byte-for-byte, now gated behind `hidden md:block` so tablet/desktop is unchanged.
+  - No changes to filtering, sorting, pagination, selection, or batch-action logic/props â€” visual only.
 - `src/app/(dashboard)/students/registry/page.tsx`: no changes needed beyond the shared `PageHeader` fix already shipped in Batch 1 (this page uses `PageHeader` directly).
 
 **Verification**: Not build-verified in this environment. Edits are additive (`md:hidden` / `hidden md:block` blocks) and do not touch the existing `md:`+ markup or any data/logic. Run `npm run check` before merging.
 
-### 2026-09-25: Mobile-Native UI Pass — Batch 2 fix (Students Registry status text size)
+### 2026-09-25: Mobile-Native UI Pass â€” Batch 2 fix (Students Registry status text size)
 
-**Context**: HOD-reported screenshot showed `Current & Historical Student Records` on `/students/registry` rendering the status label ("On attachment", "In class") as large, bold, heading-sized text on the new mobile cards from Batch 2 — clearly out of place next to the compact name/admission/programme lines above it.
+**Context**: HOD-reported screenshot showed `Current & Historical Student Records` on `/students/registry` rendering the status label ("On attachment", "In class") as large, bold, heading-sized text on the new mobile cards from Batch 2 â€” clearly out of place next to the compact name/admission/programme lines above it.
 
-**Root cause**: `StudentStatusStage` (`src/features/students/student-status-stage.tsx`) sets no font-size class of its own on its status line (`font-medium text-text-primary`, no explicit size) — it relies on inheriting the ambient font size from whatever container it's dropped into. In the original desktop grid row it inherited `text-xs` from the row wrapper. The new Batch 2 mobile card wrapper (`src/features/students/student-registry-table.tsx`) had no base text size on its row container, so the status line rendered at the browser's default paragraph size instead.
+**Root cause**: `StudentStatusStage` (`src/features/students/student-status-stage.tsx`) sets no font-size class of its own on its status line (`font-medium text-text-primary`, no explicit size) â€” it relies on inheriting the ambient font size from whatever container it's dropped into. In the original desktop grid row it inherited `text-xs` from the row wrapper. The new Batch 2 mobile card wrapper (`src/features/students/student-registry-table.tsx`) had no base text size on its row container, so the status line rendered at the browser's default paragraph size instead.
 
 **Fix**: Added `text-xs` to the mobile card row container (matching the desktop row it was adapted from), and wrapped `<StudentStatusStage />` in a compact `inline-flex` pill (`rounded-md bg-surface-subtle px-2 py-1 text-[11px]`) instead of a bare block, so status/stage now reads as a small inline badge consistent with the rest of the card instead of a large stray heading.
 
@@ -1204,27 +1211,27 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 
 **Verification**: Not build-verified in this environment; visual-only change to className strings on the Batch 2 mobile card block, no logic touched.
 
-### 2026-09-25: Mobile-Native UI Pass — Batch 2 refinement (Students Registry — narrower, less crowded rows)
+### 2026-09-25: Mobile-Native UI Pass â€” Batch 2 refinement (Students Registry â€” narrower, less crowded rows)
 
-**Context**: HOD asked for the `/students/registry` mobile rows to be narrower and clearer — the Batch 2 card had 4 separately-stacked blocks per student (name+admission, chevron, programme+cohort line, status pill), which still read as busy.
+**Context**: HOD asked for the `/students/registry` mobile rows to be narrower and clearer â€” the Batch 2 card had 4 separately-stacked blocks per student (name+admission, chevron, programme+cohort line, status pill), which still read as busy.
 
 **What changed** (`src/features/students/student-registry-table.tsx`, mobile card block only, `md:hidden`):
-- Reduced row padding/gaps (`py-3.5`→`py-3`, `gap-3`→`gap-2.5`) for a tighter, narrower row.
-- Every text field now `truncate`s on a single line instead of wrapping (name, admission/programme line, cohort name) — a long name or cohort no longer pushes the row taller or forces a second line.
-- Combined admission number + programme code onto one muted line (`ADM · CODE`) instead of two separate blocks.
+- Reduced row padding/gaps (`py-3.5`â†’`py-3`, `gap-3`â†’`gap-2.5`) for a tighter, narrower row.
+- Every text field now `truncate`s on a single line instead of wrapping (name, admission/programme line, cohort name) â€” a long name or cohort no longer pushes the row taller or forces a second line.
+- Combined admission number + programme code onto one muted line (`ADM Â· CODE`) instead of two separate blocks.
 - Combined cohort name and the status/stage indicator onto one row, cohort left (truncating, flexible width) and status right (fixed pill, never wraps).
-- Replaced the stacked `<StudentStatusStage />` component (which renders two `block` spans — status label then stage code — and doesn't fit a single-line pill) with its own already-imported helper functions (`getStudentStatusLabel`, `getStudentStageLabel`) rendered inline in one compact pill: `In class · Y2S3`. The shared `StudentStatusStage` component itself is untouched and still used as-is in the unchanged desktop grid row (`hidden md:block`).
+- Replaced the stacked `<StudentStatusStage />` component (which renders two `block` spans â€” status label then stage code â€” and doesn't fit a single-line pill) with its own already-imported helper functions (`getStudentStatusLabel`, `getStudentStageLabel`) rendered inline in one compact pill: `In class Â· Y2S3`. The shared `StudentStatusStage` component itself is untouched and still used as-is in the unchanged desktop grid row (`hidden md:block`).
 - Net effect: 3 stacked lines instead of 4, nothing wraps to a second line under normal data, and the card reads as one coherent narrow row rather than a small stack of separate blocks.
 
 **Verification**: Not build-verified in this environment; visual-only change to the Batch 2 mobile card markup, no logic/data changes. Run `npm run check` before merging.
 
-### 2026-09-25: Mobile-Native UI Pass — Batch 2 fix (Students Registry — missing row dividers)
+### 2026-09-25: Mobile-Native UI Pass â€” Batch 2 fix (Students Registry â€” missing row dividers)
 
 **Context**: HOD asked for a faint gray separator between student rows on the mobile card list at `/students/registry`.
 
-**Root cause**: the outer table wrapper (`src/features/students/student-registry-table.tsx`) has `divide-y divide-border` on the container that holds the desktop column-title bar, the mobile card list, and the desktop grid list as its three direct children — so that divider only ever drew a line *between those three sections*, never between individual student cards inside the mobile list. The mobile `md:hidden` list itself had no `divide-y` of its own, so consecutive student cards had no visual separation beyond the (rare) selected-row background tint.
+**Root cause**: the outer table wrapper (`src/features/students/student-registry-table.tsx`) has `divide-y divide-border` on the container that holds the desktop column-title bar, the mobile card list, and the desktop grid list as its three direct children â€” so that divider only ever drew a line *between those three sections*, never between individual student cards inside the mobile list. The mobile `md:hidden` list itself had no `divide-y` of its own, so consecutive student cards had no visual separation beyond the (rare) selected-row background tint.
 
-**Fix**: added `divide-y divide-border/70` directly to the mobile card list container (`<div className="md:hidden">` → `<div className="divide-y divide-border/70 md:hidden">`), giving every student card a faint gray bottom border matching the app's existing `border` design token at 70% opacity. The desktop grid rows (`hidden md:block`) already had correct dividers via the outer wrapper and are untouched.
+**Fix**: added `divide-y divide-border/70` directly to the mobile card list container (`<div className="md:hidden">` â†’ `<div className="divide-y divide-border/70 md:hidden">`), giving every student card a faint gray bottom border matching the app's existing `border` design token at 70% opacity. The desktop grid rows (`hidden md:block`) already had correct dividers via the outer wrapper and are untouched.
 
 **Files changed**: `src/features/students/student-registry-table.tsx`.
 
@@ -1232,20 +1239,20 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 
 ## Active Pending Actions & Technical Debt
 
-1. **Teaching Documents — Legacy Template ID Migration**:
+1. **Teaching Documents â€” Legacy Template ID Migration**:
    - Legacy DB rows stored curriculum templates under `tpl-tvet-<code>` (without document type suffix). A migration is needed to reclassify each row as either `scheme_of_work` or `course_outline` and re-save under `tpl-tvet-<code>-<type>`.
 2. **Curriculum Upload UI Update (`curriculum-zip-upload-dialog.tsx`)**:
    - Update `curriculum-zip-upload-dialog.tsx` to display `unresolvedFiles` from the ingestion preview response, allowing HODs to select document types manually prior to commit.
 3. **Units Without Source Materials** (reported to HOD, no curriculum content to add):
-   - Clinical Rotation (`CHN 1308`, `CND 2103`, `DHN 1306`, `DND 2103`) — clinical placement; no KNEC lecture syllabus.
-   - Medical Terminologies (`CCU 1113`, `DHN 1301`) — no standalone outline or scheme found in provided materials.
-4. **Timetabling Pipeline Audit — Resolved 2026-09-19** (see the two dated entries below for full detail): `workload.ts`'s full-day discount confirmed deliberate (left as-is); `createCandidateSessions`/`sessionSatisfiesRequest` now honor a day-only `fixedWorkingDayId` pin; `suggestions.ts`/`candidate-factory.ts` wired into the generator's own unscheduled-session recovery suggestions. Still open:
-   - `timetable-quick-edit/`: still uses its own lightweight generic-text suggestion (`diagnostics.ts`), not `suggestAlternativePlacements`. Wiring it in requires the module to load period-wide room/trainer/day/slot data, which contradicts its documented "load only the one field being edited" design (see `query-types.ts`) — needs a scoped design decision before building, not a drop-in swap.
-   - `exchange-repair.ts`'s `warningCount` (scoring tiebreaker only, not a suggestion gate) still compares against the simulation's absolute count rather than baseline-relative — low severity, flagged for confirmation.
+   - Clinical Rotation (`CHN 1308`, `CND 2103`, `DHN 1306`, `DND 2103`) â€” clinical placement; no KNEC lecture syllabus.
+   - Medical Terminologies (`CCU 1113`, `DHN 1301`) â€” no standalone outline or scheme found in provided materials.
+4. **Timetabling Pipeline Audit â€” Resolved 2026-09-19** (see the two dated entries below for full detail): `workload.ts`'s full-day discount confirmed deliberate (left as-is); `createCandidateSessions`/`sessionSatisfiesRequest` now honor a day-only `fixedWorkingDayId` pin; `suggestions.ts`/`candidate-factory.ts` wired into the generator's own unscheduled-session recovery suggestions. Still open:
+   - `timetable-quick-edit/`: still uses its own lightweight generic-text suggestion (`diagnostics.ts`), not `suggestAlternativePlacements`. Wiring it in requires the module to load period-wide room/trainer/day/slot data, which contradicts its documented "load only the one field being edited" design (see `query-types.ts`) â€” needs a scoped design decision before building, not a drop-in swap.
+   - `exchange-repair.ts`'s `warningCount` (scoring tiebreaker only, not a suggestion gate) still compares against the simulation's absolute count rather than baseline-relative â€” low severity, flagged for confirmation.
    - The relaxed recovery search added below only runs for the primary `no_valid_placement` path; the `no_rooms` case and the "linked fixed session" sub-case don't yet get suggestions.
    - Not build-verified: this environment's upload has no `package.json`/`tsconfig`, so changes were reviewed manually (plus a brace/paren balance check) rather than compiled. Run `tsc --noEmit` before merging.
 5. **Lock Future Academic Periods from Placement/Editing** (requested 2026-09-19, awaiting scope confirmation):
-   - HOD asked that future semesters be locked, after the orphaned-allocation fix above surfaced a `September-December 2029` offering sitting alongside the `2026` one for the same cohort/unit. This is a deliberate access-control change, not a bug fix — not started pending one decision:
+   - HOD asked that future semesters be locked, after the orphaned-allocation fix above surfaced a `September-December 2029` offering sitting alongside the `2026` one for the same cohort/unit. This is a deliberate access-control change, not a bug fix â€” not started pending one decision:
      - Option A: only the single currently-`active` academic period is editable/placeable; every other period (`planned` or otherwise) is locked until explicitly activated.
      - Option B: a near-term planning window (current period + the next one) stays editable; only periods further out are locked.
    - Likely implementation shape once decided: tighten the period-status check already present in `validate_scheduled_session_relationships()` / `validate_pending_scheduled_session()` (currently `not in ('planned','active')`, fixed by `20260919160000`) and the equivalent app-layer guards in `unit_offerings` approval/placement actions, rather than a new mechanism from scratch.
@@ -1435,7 +1442,7 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 
 - **Context & Problem**:
   - The top of `/timetable/editor` was cluttered with 3 stacked cards consuming vertical space before the timetable grid.
-  - Tutorial-like and wordy phrasing ("STEP 3 OF 4", "Review and edit", "Move a lesson or room only when needed — clashes are flagged automatically", "Safe editing", "Locked sessions cannot be moved or altered by the auto-generator...") created visual noise and looked unpolished.
+  - Tutorial-like and wordy phrasing ("STEP 3 OF 4", "Review and edit", "Move a lesson or room only when needed â€” clashes are flagged automatically", "Safe editing", "Locked sessions cannot be moved or altered by the auto-generator...") created visual noise and looked unpolished.
 - **Architectural Solutions & Changes**:
   - **Unified Executive PageHeader (`src/app/(dashboard)/timetable/editor/page.tsx`)**:
     - Renamed page to **`Timetable Editor`** with a concise, professional description ("Interactive session placement and allocation management.").
@@ -1443,7 +1450,7 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
     - Integrated the **Academic Period** selector dropdown directly into the `PageHeader.actions` slot, completely eliminating the bulky standalone second card.
   - **Sleek Workspace Command Toolbar (`src/features/timetable-editor/editor-workspace.tsx`)**:
     - Removed the verbose 2-sentence explanatory paragraph.
-    - Rendered a compact, single-row metrics bar: `{totalCount} Sessions · {lockedCount} Hard-Fixed` in clean typography and pill badges.
+    - Rendered a compact, single-row metrics bar: `{totalCount} Sessions Â· {lockedCount} Hard-Fixed` in clean typography and pill badges.
     - Streamlined action button labels to punchy, executive commands: `Lock All` / `Unlock All`, `Undo`, and `Generator` (with preserved query params `?academicPeriodId=...`).
 - **Files Modified**:
   - `src/app/(dashboard)/timetable/editor/page.tsx`
@@ -1476,7 +1483,7 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 ### 2026-09-19: Timetable Editor Session Card Sizing & Period Separation (Small Screen Optimization)
 
 - **Context & Problem**:
-  - On standard and smaller laptop screens (~200px day-column card width), the card footer buttons ("Move / Edit" and "Quick Edit") fought for limited horizontal space (~70–75px each), causing label truncation and clipping.
+  - On standard and smaller laptop screens (~200px day-column card width), the card footer buttons ("Move / Edit" and "Quick Edit") fought for limited horizontal space (~70â€“75px each), causing label truncation and clipping.
   - In the card header, the "Hard-Fixed" status badge competed for space with the unit code and the lock action icon, leading to awkward truncation.
   - Additionally, sessions within a day column lacked clear visual demarcations across academic periods (Morning, Mid-morning, Afternoon).
 - **Architectural Solutions & Changes**:
@@ -1487,7 +1494,7 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
     - Constrained `QuickEditPanel`'s button with dense sizing (`h-8 w-full min-w-0 max-w-full truncate text-[11px] leading-none whitespace-nowrap overflow-hidden`) so both buttons cleanly fit narrow card widths without truncation or fighting for space.
     - Cleaned up duplicate/corrupted nested markup fragments at the bottom of `session-editor-card.tsx`.
   - **Academic Period Demarcation (`editor-workspace.tsx`)**:
-    - Grouped sessions into periods: Morning (before 10:30), Mid-morning (10:30–13:59), and Afternoon (14:00 onwards).
+    - Grouped sessions into periods: Morning (before 10:30), Mid-morning (10:30â€“13:59), and Afternoon (14:00 onwards).
     - Rendered `SessionPeriodSection` with compact uppercase dividers and count badges, suppressing empty periods to keep days compact.
 - **Files Modified**:
   - `src/features/timetable-editor/session-editor-card.tsx`
@@ -1502,44 +1509,44 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 
 - **Context & Problem**:
   - HOD reported: 6 sessions hard-fixed via "Place Unit on Timetable" (confirmed no conflict, timetable published) reappeared as "unresolved" on the very next regeneration, as if never placed.
-  - **Root cause**: `src/features/timetable-generator/planner.ts`, `sessionSatisfiesRequest()` requires an existing session's room to exactly match `allocation.preferredRoomId` before treating that slot as already satisfied. A hard-fixed session commonly uses a *different* room than the allocation's stored preference (the normal reason to hard-fix by hand: the preferred room didn't work). None of `schedule_allocation_session_safely()` ("Place Unit on Timetable"), `move_scheduled_session_safely()` ("Move/Edit", Quick Edit), or `assign_scheduled_session_room_safely()` (Quick Edit room-only swap) ever wrote a manually-chosen room back onto `teaching_allocations.preferred_room_id` — unlike a manually-chosen **trainer**, which all already sync correctly. Every regeneration therefore re-requested a duplicate session for an already-fulfilled slot, collided with the real one, and reported it unresolved — permanently, regardless of how many times it was re-fixed.
+  - **Root cause**: `src/features/timetable-generator/planner.ts`, `sessionSatisfiesRequest()` requires an existing session's room to exactly match `allocation.preferredRoomId` before treating that slot as already satisfied. A hard-fixed session commonly uses a *different* room than the allocation's stored preference (the normal reason to hard-fix by hand: the preferred room didn't work). None of `schedule_allocation_session_safely()` ("Place Unit on Timetable"), `move_scheduled_session_safely()` ("Move/Edit", Quick Edit), or `assign_scheduled_session_room_safely()` (Quick Edit room-only swap) ever wrote a manually-chosen room back onto `teaching_allocations.preferred_room_id` â€” unlike a manually-chosen **trainer**, which all already sync correctly. Every regeneration therefore re-requested a duplicate session for an already-fulfilled slot, collided with the real one, and reported it unresolved â€” permanently, regardless of how many times it was re-fixed.
 - **Architectural Solutions & Changes**:
   - New migration `20260919200000_persist_hard_fixed_room_choice.sql`:
-    1. All three RPCs above now sync a manually-chosen room onto `teaching_allocations.preferred_room_id` when it differs, mirroring the existing trainer-sync pattern exactly. Rebuilt by programmatically patching the exact currently-applied function bodies (not retyped from memory) to guarantee the `20260919160000` shared-class clash-message wording ("That session is a shared class led by X") was not regressed — verified present in the final file.
+    1. All three RPCs above now sync a manually-chosen room onto `teaching_allocations.preferred_room_id` when it differs, mirroring the existing trainer-sync pattern exactly. Rebuilt by programmatically patching the exact currently-applied function bodies (not retyped from memory) to guarantee the `20260919160000` shared-class clash-message wording ("That session is a shared class led by X") was not regressed â€” verified present in the final file.
     2. One-off repair: every currently-placed, non-cancelled session's allocation is realigned to the room it is actually sitting in.
-  - No `planner.ts` change was needed — `sessionSatisfiesRequest()`'s exact-match check is correct as written; it only needed the underlying data kept in sync, which the RPCs now do.
+  - No `planner.ts` change was needed â€” `sessionSatisfiesRequest()`'s exact-match check is correct as written; it only needed the underlying data kept in sync, which the RPCs now do.
 - **Files Modified**:
   - `supabase/migrations/20260919200000_persist_hard_fixed_room_choice.sql` (new)
   - `CHANGES.md`
-- **Verification Evidence**: Not build/DB-verified in this environment. Dollar-quote balance (6 = 3 functions) and transaction (`begin`/`commit`) balance checked programmatically. Run `supabase db push`, then reopen the timetable generator and regenerate — the previously hard-fixed sessions should no longer appear under "Units missing from timetable."
+- **Verification Evidence**: Not build/DB-verified in this environment. Dollar-quote balance (6 = 3 functions) and transaction (`begin`/`commit`) balance checked programmatically. Run `supabase db push`, then reopen the timetable generator and regenerate â€” the previously hard-fixed sessions should no longer appear under "Units missing from timetable."
 - **Still open from the same conversation, not yet built**: clinical-rotation display cap (max 2 sessions per allocation card), general "unit merging efficiency" hardening (needs more specific repro from HOD), and the future-semester locking decision (Option A vs B, still awaiting HOD's answer).
 
 ### 2026-09-19: Orphaned Allocations Left Behind by Shared-Class Merges
 
 - **Context & Problem**:
-  - HOD reported placing `CHN 2202 Management of Malnutrition` for `CHN-MAY-2025` (Sept–Dec 2026) blocked by "Cohort Conflict: CHN-MAY-2025 already has DND 2101 Management of Malnutrition with Fiona Kwamboka in PHYSIOGYM at this time" — naming the **same** cohort, not a partner. Diagnosed interactively via direct SQL against the live data (not from a build/test run), ruling out both the phantom-participant-array defect (20260919160000) and a cross-period leak before finding the actual cause.
-  - **Root cause**: `unit_offerings` row `6d6ac895` (this cohort/unit/period) already had `allocation_status = 'allocated'`, `confirmed_shared_offering_id = e63c1b7d` — the same shared `teaching_offering` `DND 2101`/`CND 2101` were merged into. But `teaching_allocations` row `e87b70b0` for the identical cohort/unit/period was never updated to match: `teaching_offering_id` still `null`, `status` still `draft`, `is_timetable_enabled` still `true`, zero `scheduled_sessions` of its own. `public.confirm_shared_unit_offerings()` (`20260816005000`) only ever writes to `unit_offerings` and `teaching_offering_participants`; it assumes no `teaching_allocation` exists yet for a unit being merged. When the ordinary single-cohort approval path had already created one independently, the merge left it behind — still listed as "missing from timetable," still independently placeable, and correctly rejected on placement because the cohort was already inside the class it should have joined.
+  - HOD reported placing `CHN 2202 Management of Malnutrition` for `CHN-MAY-2025` (Septâ€“Dec 2026) blocked by "Cohort Conflict: CHN-MAY-2025 already has DND 2101 Management of Malnutrition with Fiona Kwamboka in PHYSIOGYM at this time" â€” naming the **same** cohort, not a partner. Diagnosed interactively via direct SQL against the live data (not from a build/test run), ruling out both the phantom-participant-array defect (20260919160000) and a cross-period leak before finding the actual cause.
+  - **Root cause**: `unit_offerings` row `6d6ac895` (this cohort/unit/period) already had `allocation_status = 'allocated'`, `confirmed_shared_offering_id = e63c1b7d` â€” the same shared `teaching_offering` `DND 2101`/`CND 2101` were merged into. But `teaching_allocations` row `e87b70b0` for the identical cohort/unit/period was never updated to match: `teaching_offering_id` still `null`, `status` still `draft`, `is_timetable_enabled` still `true`, zero `scheduled_sessions` of its own. `public.confirm_shared_unit_offerings()` (`20260816005000`) only ever writes to `unit_offerings` and `teaching_offering_participants`; it assumes no `teaching_allocation` exists yet for a unit being merged. When the ordinary single-cohort approval path had already created one independently, the merge left it behind â€” still listed as "missing from timetable," still independently placeable, and correctly rejected on placement because the cohort was already inside the class it should have joined.
 - **Architectural Solutions & Changes**:
   - New migration `20260919190000_retire_orphaned_allocations_after_merge.sql`:
     1. One-off repair: retires (`status = suspended`, `is_timetable_enabled = false`, `teaching_offering_id` linked, note appended) every `teaching_allocations` row currently in this orphaned state.
-    2. `public.retire_orphaned_allocation_after_merge()` — `AFTER UPDATE` trigger on `unit_offerings`: whenever an offering's merge state changes (`confirmed_shared_offering_id` newly set or `allocation_status` becomes `allocated`), retires any pre-existing standalone allocation for the same cohort/unit/period that has no sessions of its own, in the same transaction as the merge. Wrapped so a retirement failure can never block the merge/approval that triggered it (same defensive pattern as the `20260919160000` propagation triggers).
+    2. `public.retire_orphaned_allocation_after_merge()` â€” `AFTER UPDATE` trigger on `unit_offerings`: whenever an offering's merge state changes (`confirmed_shared_offering_id` newly set or `allocation_status` becomes `allocated`), retires any pre-existing standalone allocation for the same cohort/unit/period that has no sessions of its own, in the same transaction as the merge. Wrapped so a retirement failure can never block the merge/approval that triggered it (same defensive pattern as the `20260919160000` propagation triggers).
     3. `public.audit_orphaned_merged_allocations(academic_period_id)` for verification and ongoing monitoring, mirroring `public.audit_phantom_session_participants()`.
 - **Files Modified**:
   - `supabase/migrations/20260919190000_retire_orphaned_allocations_after_merge.sql` (new)
   - `CHANGES.md`
-- **Verification Evidence**: Not build-verified in this environment (no installed `node_modules`, no live DB access); the migration's dollar-quote/`begin`-`commit` balance was checked (4 `$$` = 2 balanced functions, one `begin`/`commit` pair). Run `supabase db push`, then `select * from public.audit_orphaned_merged_allocations();` — expect zero rows — then retry the originally reported placement.
-- **Raised separately, not yet built**: HOD asked that future academic periods be locked from placement/editing entirely (a distinct access-control decision, not a bug fix) — open question on exact scope (only the single active period editable vs. a near-term planning window) before implementing.
+- **Verification Evidence**: Not build-verified in this environment (no installed `node_modules`, no live DB access); the migration's dollar-quote/`begin`-`commit` balance was checked (4 `$$` = 2 balanced functions, one `begin`/`commit` pair). Run `supabase db push`, then `select * from public.audit_orphaned_merged_allocations();` â€” expect zero rows â€” then retry the originally reported placement.
+- **Raised separately, not yet built**: HOD asked that future academic periods be locked from placement/editing entirely (a distinct access-control decision, not a bug fix) â€” open question on exact scope (only the single active period editable vs. a near-term planning window) before implementing.
 
-### 2026-09-19: Phantom Cohort Conflicts — Authoritative Shared-Class Membership
+### 2026-09-19: Phantom Cohort Conflicts â€” Authoritative Shared-Class Membership
 
 - **Context & Problem**:
-  - HOD reported the master-timetable placement dialog refusing valid slots: placing Agriculture for `CHN-JAN-MAR-2025` was blocked by "Cohort Conflict: CHN-JAN-MAR-2025 already has CHN 2207 Introduction to Nutrition Assessment and Surveillance", and placing Industrial Organization for `DHN-MAY-2024` on Tuesday 10:30 was blocked by "DHN 3104 Diet Therapy III" — neither cohort takes the blocking unit.
+  - HOD reported the master-timetable placement dialog refusing valid slots: placing Agriculture for `CHN-JAN-MAR-2025` was blocked by "Cohort Conflict: CHN-JAN-MAR-2025 already has CHN 2207 Introduction to Nutrition Assessment and Surveillance", and placing Industrial Organization for `DHN-MAY-2024` on Tuesday 10:30 was blocked by "DHN 3104 Diet Therapy III" â€” neither cohort takes the blocking unit.
   - **Root cause**: shared-class membership is denormalised into `teaching_allocations.participant_cohort_ids` and `scheduled_sessions.participant_cohort_ids`. Nothing propagated membership changes (unit-offering drops/withdrawals/exclusions, cohort merges, re-imports, cross-stage registration repairs) back into those arrays: `refresh_shared_class_participant_context()` was only ever invoked by hand inside one-off migrations, and there was no trigger on `teaching_offering_participants` or on `unit_offerings` status changes. Worse, `resolve_participant_cohort_ids()` accepted **every** `teaching_offering_participants` row for an offering with no check that the cohort still held a live unit offering. A cohort that had dropped a unit therefore stayed inside every session's participant array and collided with every future placement. The prior DNDT / CHN-MAY-2025 / DND-SEP-2025 "correct participants" migrations were per-cohort symptom repairs of this same defect.
   - Secondary defects found in the same path: (a) the cohort-clash message reported the *owning* cohort of the clashing session rather than the cohort that actually overlapped, so the text named a cohort/unit pairing that does not exist; (b) inflated `combined_cohort_size` from phantom participants could trip the room-capacity guard; (c) in `schedule-allocation-dialog.tsx`, unchecking "Hard-fix / Lock this session immediately" submitted nothing, and `formData.get('isLocked') ?? 'true'` re-defaulted it to locked.
 - **Architectural Solutions & Changes**:
   - New migration `20260919160000_authoritative_participant_cohort_conflicts.sql`:
-    - `public.cohort_has_live_unit_offering()` / `public.cohort_offerings_are_managed()` — authoritative membership predicates (offering `status in (draft,active)`, `is_timetable_enabled`, `approval_status = approved`, `selection_state = included`), matching the gate already used by `getTimetableEnabledAllocations`.
-    - `public.resolve_participant_cohort_ids()` now filters participants through those predicates. Cohorts with no unit offerings at all in the period are treated as unmanaged (legacy/manual shared classes) and keep their historical membership — deliberately conservative, so no working shared class is silently dissolved.
+    - `public.cohort_has_live_unit_offering()` / `public.cohort_offerings_are_managed()` â€” authoritative membership predicates (offering `status in (draft,active)`, `is_timetable_enabled`, `approval_status = approved`, `selection_state = included`), matching the gate already used by `getTimetableEnabledAllocations`.
+    - `public.resolve_participant_cohort_ids()` now filters participants through those predicates. Cohorts with no unit offerings at all in the period are treated as unmanaged (legacy/manual shared classes) and keep their historical membership â€” deliberately conservative, so no working shared class is silently dissolved.
     - Triggers `teaching_offering_participants_propagate_membership` and `unit_offerings_propagate_membership` refresh participant context automatically; both swallow refresh failures as warnings so membership sync can never block the drop/approval operation that triggered it.
     - One-off repair of drifted data. **Shrink-only by construction**: allocations are only rewritten when the new set is a subset of the stored set, and sessions are intersected with live membership, so deliberate standalone/subset placements made through `target_participant_cohort_ids` survive and no new conflict can be introduced by the repair itself.
     - `schedule_allocation_session_safely()` and `validate_scheduled_session_conflicts()` now resolve the clash via a `lateral` intersection and name the cohort that genuinely overlaps, adding "That session is a shared class led by X" when the owner differs.
@@ -1558,18 +1565,18 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 - **Verification Evidence**:
   - Not build-verified in this environment (no installed `node_modules`): the four TypeScript/TSX files were parse-checked with esbuild and reviewed manually; the SQL was reviewed and dollar-quote/`begin`-`commit` balanced. Run `npm run check` and `npm test`, then `supabase db push`, before merging.
   - Post-deploy verification: `select * from public.audit_phantom_session_participants('<academic_period_id>');` should return zero rows, and the two reported placements should show "Slot is completely available".
-- **Amended same-day**: `supabase db push` on this migration failed at statement 11 (the section-3 repair `UPDATE` on `teaching_allocations`) with `invalid input value for enum public.academic_period_status: "open"`. Root cause is unrelated to this migration: `public.validate_scheduled_session_relationships()`, most recently redefined in `20260919090000_fix_live_unit_offering_drop_rpc.sql`, checks `selected_period.status not in ('open', 'planned', 'active')`, but `public.academic_period_status` has no `'open'` member (only `planned`/`active`/`closed`/`archived`). The repair's `UPDATE` on `teaching_allocations` fires the existing `sync_allocation_participants_to_sessions` `AFTER` trigger, which updates `scheduled_sessions`, which fires that `BEFORE` trigger — so any write cascading this far hits the bug, not only this migration. Added a section 0 to this same migration file that redefines `validate_scheduled_session_relationships()` with the enum literal corrected to `not in ('planned', 'active')`, ahead of the section-3 repair, so the migration is self-contained and re-runnable as-is. This also fixes the same latent crash on the manual placement RPC, the timetable generator, and quick-edit going forward.
-- **Amended again, same day**: the retried push hit the *identical* error at the *identical* statement. `scheduled_sessions` carries a second, conditional trigger — `scheduled_sessions_validate_pending_relationships` (added in `20260816011000_provisional_timetable_reservations.sql`, `when (new.trainer_id is null)`) — executing `public.validate_pending_scheduled_session()`, which independently contains the exact same `not in ('open', 'planned', 'active')` defect. Any cascaded session row with no trainer yet assigned fires this trigger instead of (or in addition to) `validate_scheduled_session_relationships()`, so fixing only the first function was insufficient. Added the same corrected literal to `validate_pending_scheduled_session()` in section 0 of this migration. Verified, before this second amendment, that no third live function/trigger in the `scheduled_sessions` / `teaching_allocations` graph contains the `'open'` literal (`grep` across every migration for `academic_period_status`-adjacent `'open'` comparisons returns only these two, both now fixed).
+- **Amended same-day**: `supabase db push` on this migration failed at statement 11 (the section-3 repair `UPDATE` on `teaching_allocations`) with `invalid input value for enum public.academic_period_status: "open"`. Root cause is unrelated to this migration: `public.validate_scheduled_session_relationships()`, most recently redefined in `20260919090000_fix_live_unit_offering_drop_rpc.sql`, checks `selected_period.status not in ('open', 'planned', 'active')`, but `public.academic_period_status` has no `'open'` member (only `planned`/`active`/`closed`/`archived`). The repair's `UPDATE` on `teaching_allocations` fires the existing `sync_allocation_participants_to_sessions` `AFTER` trigger, which updates `scheduled_sessions`, which fires that `BEFORE` trigger â€” so any write cascading this far hits the bug, not only this migration. Added a section 0 to this same migration file that redefines `validate_scheduled_session_relationships()` with the enum literal corrected to `not in ('planned', 'active')`, ahead of the section-3 repair, so the migration is self-contained and re-runnable as-is. This also fixes the same latent crash on the manual placement RPC, the timetable generator, and quick-edit going forward.
+- **Amended again, same day**: the retried push hit the *identical* error at the *identical* statement. `scheduled_sessions` carries a second, conditional trigger â€” `scheduled_sessions_validate_pending_relationships` (added in `20260816011000_provisional_timetable_reservations.sql`, `when (new.trainer_id is null)`) â€” executing `public.validate_pending_scheduled_session()`, which independently contains the exact same `not in ('open', 'planned', 'active')` defect. Any cascaded session row with no trainer yet assigned fires this trigger instead of (or in addition to) `validate_scheduled_session_relationships()`, so fixing only the first function was insufficient. Added the same corrected literal to `validate_pending_scheduled_session()` in section 0 of this migration. Verified, before this second amendment, that no third live function/trigger in the `scheduled_sessions` / `teaching_allocations` graph contains the `'open'` literal (`grep` across every migration for `academic_period_status`-adjacent `'open'` comparisons returns only these two, both now fixed).
 
 ### 2026-09-19: Unit Equivalence Wired Into Shared-Class Merge; Automatic Merge Exposed in UI
 
 - **Context & Problem**:
   - HOD reported `CHN 2202 Management of Malnutrition` (CHN-MAY-2025) and `DND 1304 Food Production for Invalids and Convalescents` (DND-JAN-MAR-2026, already `Shared` with some but apparently not all cohorts that take it) sitting as separate unplaced allocations instead of combining with the other cohorts taking the same subject, and asked that "all similar unit names should allow cohort sharing with same trainer at the same time and venue."
-  - **Root cause, two disconnected systems**: (1) `public.unit_equivalence_groups` / `unit_equivalence_members`, the HOD-approved academic equivalence record reviewed at `/timetable/unit-equivalence` — that page's own copy says "Approve academic equivalence once; sharing remains a separate period-specific decision" and "Similarity never renames, approves, allocates, or merges a unit," by design. (2) `public.merge_matching_unit_offerings()` (`20260816050000_automatic_same_name_shared_classes.sql`), the function that actually combines unallocated offerings into a shared class via `confirm_shared_unit_offerings()`. It groups purely by `canonical_shared_unit_title(unit.name)` — text normalization plus a handful of one-off migrations hardcoding specific title-variant pairs (diet therapy, non-communicable diseases, etc.). An HOD-approved equivalence between two differently-worded units was invisible to it.
-  - **Independent bug**: `merge_matching_unit_offerings()` was never called from anywhere in the application — no server action, no UI control referenced it — so even units sharing the exact same canonical title never merged automatically, contrary to its name and its own comment.
+  - **Root cause, two disconnected systems**: (1) `public.unit_equivalence_groups` / `unit_equivalence_members`, the HOD-approved academic equivalence record reviewed at `/timetable/unit-equivalence` â€” that page's own copy says "Approve academic equivalence once; sharing remains a separate period-specific decision" and "Similarity never renames, approves, allocates, or merges a unit," by design. (2) `public.merge_matching_unit_offerings()` (`20260816050000_automatic_same_name_shared_classes.sql`), the function that actually combines unallocated offerings into a shared class via `confirm_shared_unit_offerings()`. It groups purely by `canonical_shared_unit_title(unit.name)` â€” text normalization plus a handful of one-off migrations hardcoding specific title-variant pairs (diet therapy, non-communicable diseases, etc.). An HOD-approved equivalence between two differently-worded units was invisible to it.
+  - **Independent bug**: `merge_matching_unit_offerings()` was never called from anywhere in the application â€” no server action, no UI control referenced it â€” so even units sharing the exact same canonical title never merged automatically, contrary to its name and its own comment.
 - **Architectural Solutions & Changes**:
   - New migration `20260919170000_wire_unit_equivalence_into_shared_class_merge.sql`:
-    - `public.canonical_shared_unit_title_for_unit(unit_id, fallback_title)` — resolves an approved, active equivalence group's canonical name for the unit first, falling back to the existing `canonical_shared_unit_title(text)` normalization. Additive: the plain text function and every other historical caller of it are untouched.
+    - `public.canonical_shared_unit_title_for_unit(unit_id, fallback_title)` â€” resolves an approved, active equivalence group's canonical name for the unit first, falling back to the existing `canonical_shared_unit_title(text)` normalization. Additive: the plain text function and every other historical caller of it are untouched.
     - `public.merge_matching_unit_offerings()` redefined to resolve each candidate's canonical title through the new unit-aware resolver. Every existing safety guard (equal session duration, one cohort per offering, excluded offering types, unallocated-only, department-scoped, per-candidate exception handling so one domain-validation failure doesn't abort the batch) is unchanged.
   - `src/features/timetable-editor/actions.ts`: new `combineMatchingUnitsAction` calling the previously-orphaned RPC for the active Academic Period.
   - `src/features/timetable-editor/editor-workspace.tsx`: "Combine matching units" button added beside "Review generator diagnosis" in the "Units missing from timetable" panel.
@@ -1578,7 +1585,7 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
   - `src/features/timetable-editor/actions.ts`
   - `src/features/timetable-editor/editor-workspace.tsx`
   - `CHANGES.md`
-- **Does not by itself combine the two reported units**: doing so unattended would mean the system silently decides two differently-worded units are "the same," which is exactly the risk the equivalence-approval workflow exists to prevent. The HOD must first approve `Management of Malnutrition` and `Food Production for Invalids and Convalescents` as equivalent to their partner cohorts' units (or their titles must already normalize identically) at `/timetable/unit-equivalence`, then use the new "Combine matching units" button. If the partner unit belongs to a different department than the HOD's active one, neither the equivalence-candidate list nor the merge itself will surface it — both are department-scoped by design; that is a separate, larger cross-department question, not addressed here.
+- **Does not by itself combine the two reported units**: doing so unattended would mean the system silently decides two differently-worded units are "the same," which is exactly the risk the equivalence-approval workflow exists to prevent. The HOD must first approve `Management of Malnutrition` and `Food Production for Invalids and Convalescents` as equivalent to their partner cohorts' units (or their titles must already normalize identically) at `/timetable/unit-equivalence`, then use the new "Combine matching units" button. If the partner unit belongs to a different department than the HOD's active one, neither the equivalence-candidate list nor the merge itself will surface it â€” both are department-scoped by design; that is a separate, larger cross-department question, not addressed here.
 - **Verification Evidence**: Not build-verified in this environment (no installed `node_modules`); the two TypeScript/TSX files were parse-checked with esbuild and reviewed manually, and the migration's dollar-quote/`begin`-`commit` balance was checked (4 `$$` markers = 2 balanced functions, one `begin`/`commit` pair). Run `npm run check` and `npm test`, then `supabase db push`, before merging.
 
 , Fixed-Day Scoping & Contract Reconciliation
@@ -1601,21 +1608,21 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
   - `npm test`: 117 test files passed, 598 tests passed (100% passing).
   - `npm run check` (`typecheck && lint && build`): All TypeScript contracts, ESLint rules, and Turbopack Next.js production build succeeded with zero errors.
 
-### 2026-09-19: Timetable Generator Pipeline Audit — Recovery Suggestions Wired In & Day-Only Fixed-Day Pin Honored
+### 2026-09-19: Timetable Generator Pipeline Audit â€” Recovery Suggestions Wired In & Day-Only Fixed-Day Pin Honored
 
 - **Context & Problem**:
-  - Resolution of the three items logged under "Timetabling Pipeline Audit — Awaiting Confirmation" (workload.ts full-day discount, orphaned suggestions.ts/candidate-factory.ts, fixedWorkingDayId gating), following domain confirmation.
+  - Resolution of the three items logged under "Timetabling Pipeline Audit â€” Awaiting Confirmation" (workload.ts full-day discount, orphaned suggestions.ts/candidate-factory.ts, fixedWorkingDayId gating), following domain confirmation.
   - **Confirmed deliberate, no change**: `workload.ts`'s `analyzeTrainerWorkloads` full-day-session recalculation (`rawTeachingMinutes - 480 + 120`, exempting full-day sessions from `exceedsDailyLimit`) is intentional clinical-placement handling. Left untouched.
-  - **Bug (`planner.ts`)**: a standalone `allocation.fixedWorkingDayId` (day pinned, no specific time slot pinned) was silently ignored. `sessionSatisfiesRequest` returned `true` unconditionally whenever `fixedTimeSlotId` was absent, without checking the day pin at all. `createCandidateSessions` computed its own `fixedWorkingDayId` gated behind `fixedTimeSlotId` being truthy (`fixedTimeSlotId ? fixedWorkingDayIds[...] ?? ... : null`), forcing it to `null` for a day-only pin — so the existing, otherwise-correct working-day filter loop a few lines below it never had anything to filter on.
-  - **Dead code (`suggestions.ts` / `candidate-factory.ts`)**: `suggestAlternativePlacements` and `createPlacementCandidates` were fully implemented and unit-tested but called from nowhere in production code — `generateTimetablePlan()`'s own `suggestions` field was hardcoded to `[]` and never populated, and no UI consumed it. Decision: wire into the generator (quick-edit is a separate, larger follow-up — see pending item above).
+  - **Bug (`planner.ts`)**: a standalone `allocation.fixedWorkingDayId` (day pinned, no specific time slot pinned) was silently ignored. `sessionSatisfiesRequest` returned `true` unconditionally whenever `fixedTimeSlotId` was absent, without checking the day pin at all. `createCandidateSessions` computed its own `fixedWorkingDayId` gated behind `fixedTimeSlotId` being truthy (`fixedTimeSlotId ? fixedWorkingDayIds[...] ?? ... : null`), forcing it to `null` for a day-only pin â€” so the existing, otherwise-correct working-day filter loop a few lines below it never had anything to filter on.
+  - **Dead code (`suggestions.ts` / `candidate-factory.ts`)**: `suggestAlternativePlacements` and `createPlacementCandidates` were fully implemented and unit-tested but called from nowhere in production code â€” `generateTimetablePlan()`'s own `suggestions` field was hardcoded to `[]` and never populated, and no UI consumed it. Decision: wire into the generator (quick-edit is a separate, larger follow-up â€” see pending item above).
 - **Architectural Solutions & Changes**:
   - `planner.ts` (`sessionSatisfiesRequest`): now computes `fixedWorkingDayId` unconditionally, and when there's a day pin but no time-slot pin, requires `session.workingDayId === fixedWorkingDayId` instead of returning `true` outright.
   - `planner.ts` (`createCandidateSessions`): removed the `fixedTimeSlotId ? ... : null` gate around `fixedWorkingDayId`, so a day-only pin now reaches the existing working-day filter.
-  - `planner.ts` (`generateTimetablePlan`): hoisted the `suggestions` array to the top of the function (alongside `selectedSessions`/`unscheduled`) instead of a late hardcoded `[]`. At the point a session request exhausts the strict candidate search and `tryRelocationRepair`, it now builds a synthetic "recovery session" for that allocation/session-number and runs a relaxed search — every enabled working day (ignoring any fixed-day/time pin that may have caused the failure), every active/timetable-available room in the department (not just the allocation's single preferred room — see below), same trainer — through `createPlacementCandidates` and `suggestAlternativePlacements`, pushing up to 3 ranked suggestions per unscheduled session into the result.
-  - **Caught before shipping**: `getEligibleRooms` (used by the strict scheduling path) does not return a genuine "candidate rooms" set — it returns `[null]` (roomless) when the allocation has no `preferredRoomId`, or the one specific preferred room otherwise. It is never a multi-room search space. `createPlacementCandidates` expects a real `PlanningRoom[]`; passing `eligibleRooms` would have been both a type mismatch and a runtime crash (`null.isActive`) for the common no-preferred-room case. Used `input.rooms` (all department rooms) instead, letting `createPlacementCandidates`'s own `isActive && isTimetableAvailable` filter and the existing conflict-detector's capacity/type checks do the validation — this also means recovery suggestions may now recommend a different room than the allocation's stated preference, which is intentional for a "relaxed recovery" search.
+  - `planner.ts` (`generateTimetablePlan`): hoisted the `suggestions` array to the top of the function (alongside `selectedSessions`/`unscheduled`) instead of a late hardcoded `[]`. At the point a session request exhausts the strict candidate search and `tryRelocationRepair`, it now builds a synthetic "recovery session" for that allocation/session-number and runs a relaxed search â€” every enabled working day (ignoring any fixed-day/time pin that may have caused the failure), every active/timetable-available room in the department (not just the allocation's single preferred room â€” see below), same trainer â€” through `createPlacementCandidates` and `suggestAlternativePlacements`, pushing up to 3 ranked suggestions per unscheduled session into the result.
+  - **Caught before shipping**: `getEligibleRooms` (used by the strict scheduling path) does not return a genuine "candidate rooms" set â€” it returns `[null]` (roomless) when the allocation has no `preferredRoomId`, or the one specific preferred room otherwise. It is never a multi-room search space. `createPlacementCandidates` expects a real `PlanningRoom[]`; passing `eligibleRooms` would have been both a type mismatch and a runtime crash (`null.isActive`) for the common no-preferred-room case. Used `input.rooms` (all department rooms) instead, letting `createPlacementCandidates`'s own `isActive && isTimetableAvailable` filter and the existing conflict-detector's capacity/type checks do the validation â€” this also means recovery suggestions may now recommend a different room than the allocation's stated preference, which is intentional for a "relaxed recovery" search.
   - `server-types.ts`: added `GeneratorPlacementSuggestion` (`id`, `message`, `score`, resolved `proposedWorkingDayName`/`proposedTimeLabel`/`proposedRoomName`) and a `placementSuggestions: GeneratorPlacementSuggestion[]` field on `GeneratorUnscheduledSession`.
   - `data-adapter.ts` (`mapUnscheduledSessions`): builds lookups for working days/time slots/rooms and filters `plannerResult.suggestions` by a `conflictId` of `${teachingAllocationId}:${sessionNumber}` (mirrors the existing `exchangeSuggestions` filtering pattern), resolving each suggestion's proposed day/time/room to display labels.
-  - `generator-issues.tsx`: added an "Alternative placements" panel per unscheduled session, styled like the existing "Smart exchange repairs" panel, shown above it. Read-only for now — no "apply" action, to keep this pass additive and avoid introducing a new database-mutating pathway without dedicated testing.
+  - `generator-issues.tsx`: added an "Alternative placements" panel per unscheduled session, styled like the existing "Smart exchange repairs" panel, shown above it. Read-only for now â€” no "apply" action, to keep this pass additive and avoid introducing a new database-mutating pathway without dedicated testing.
 - **Files Modified**:
   - `src/features/timetable-generator/planner.ts`
   - `src/features/timetable-generator/server-types.ts`
@@ -1623,21 +1630,21 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
   - `src/features/timetable-generator/generator-issues.tsx`
   - `CHANGES.md`
 - **Manual Follow-ups**:
-  - **Not build-verified** — this upload has no `package.json`/`tsconfig`, so this was reviewed by hand plus a brace/paren balance check, not compiled. Run `tsc --noEmit` and the existing test suite (`src/tests/timetable-generator/suggestions.test.ts` covers the two previously-orphaned functions directly) before merging.
+  - **Not build-verified** â€” this upload has no `package.json`/`tsconfig`, so this was reviewed by hand plus a brace/paren balance check, not compiled. Run `tsc --noEmit` and the existing test suite (`src/tests/timetable-generator/suggestions.test.ts` covers the two previously-orphaned functions directly) before merging.
   - Test the day-only pin fix directly: set `fixedWorkingDayId` on an allocation with no `fixedTimeSlotIds` entry for that session, regenerate, and confirm it only ever lands on that day.
   - Test the recovery suggestions: force an allocation into `no_valid_placement` (e.g. a trainer double-booked every remaining slot) and confirm the "Alternative placements" panel shows real, distinct day/time/room options.
-  - Watch generation performance if a run produces many unscheduled sessions — the recovery search re-runs a full `scorePlacements` pass per unscheduled session, on top of the strict pass and `tryRelocationRepair` that already ran for it.
+  - Watch generation performance if a run produces many unscheduled sessions â€” the recovery search re-runs a full `scorePlacements` pass per unscheduled session, on top of the strict pass and `tryRelocationRepair` that already ran for it.
   - Quick-edit wiring, `warningCount` baseline-relative tightening in `exchange-repair.ts`, the `no_rooms`/linked-fixed-session suggestion gap, and an "apply this placement" action are all listed under the pending item above.
 
-### 2026-09-19: Timetable Generator Pipeline Audit — Trainer Exchange Suggestions Silently Suppressed by Unrelated Conflicts
+### 2026-09-19: Timetable Generator Pipeline Audit â€” Trainer Exchange Suggestions Silently Suppressed by Unrelated Conflicts
 
 - **Context & Problem**:
-  - Continuation of the chunked `src/features/timetable-generator/` audit into `actions.ts` (675 lines, reviewed clean — see Manual Follow-ups) and `exchange-repair.ts` (355 lines).
-  - `actions.ts`: the save action hardcodes `overwriteExisting: true` regardless of the preview's setting. Traced into `generator-workspace.tsx` and confirmed the Save button submits a hidden `overwriteExisting="true"` field independent of the preview checkbox — this is deliberate design (Save always commits a full regeneration; the preview toggle only controls what's reviewed beforehand), not a bug. No fix needed.
-  - **Bug (`exchange-repair.ts`)**: `evaluateTrainerExchangeSuggestion()` simulates a proposed trainer swap via `generateTimetablePlan()`, then rejects the suggestion whenever `simulation.conflicts` contains any `blocked`-severity conflict — but that count reflects every blocked conflict across the *entire* regenerated timetable, not just ones caused by the swap itself. Any pre-existing unrelated blocked conflict elsewhere in the period (plausible given the conflict-handling history already in this changelog) trips the check and rejects an otherwise-clean swap. Since `findTrainerExchangeSuggestions()` calls this function for every candidate partner, the practical effect was the entire "suggest a trainer exchange" feature silently returning zero suggestions whenever anything else in the timetable had a blocked conflict, with no error or indication why.
+  - Continuation of the chunked `src/features/timetable-generator/` audit into `actions.ts` (675 lines, reviewed clean â€” see Manual Follow-ups) and `exchange-repair.ts` (355 lines).
+  - `actions.ts`: the save action hardcodes `overwriteExisting: true` regardless of the preview's setting. Traced into `generator-workspace.tsx` and confirmed the Save button submits a hidden `overwriteExisting="true"` field independent of the preview checkbox â€” this is deliberate design (Save always commits a full regeneration; the preview toggle only controls what's reviewed beforehand), not a bug. No fix needed.
+  - **Bug (`exchange-repair.ts`)**: `evaluateTrainerExchangeSuggestion()` simulates a proposed trainer swap via `generateTimetablePlan()`, then rejects the suggestion whenever `simulation.conflicts` contains any `blocked`-severity conflict â€” but that count reflects every blocked conflict across the *entire* regenerated timetable, not just ones caused by the swap itself. Any pre-existing unrelated blocked conflict elsewhere in the period (plausible given the conflict-handling history already in this changelog) trips the check and rejects an otherwise-clean swap. Since `findTrainerExchangeSuggestions()` calls this function for every candidate partner, the practical effect was the entire "suggest a trainer exchange" feature silently returning zero suggestions whenever anything else in the timetable had a blocked conflict, with no error or indication why.
 - **Architectural Solutions & Changes**:
-  - `exchange-repair.ts`: `evaluateTrainerExchangeSuggestion()` now computes the blocked-conflict count on `baseline.conflicts` (the pre-swap timetable, already available on the passed-in `AutomaticPlannerResult`) the same way it already computed it on `simulation.conflicts`, and rejects the suggestion only when the post-swap count exceeds the baseline count (`newBlockedConflictCount > 0`) — i.e. only conflicts newly introduced by this specific swap. Confirmed `baseline.conflicts` is unaffected by the same-day `planner.ts` sessions-truncation fix, since conflicts are detected against the full session set before that truncation ever happened.
-  - Noted but left unchanged: `warningCount` on the same function still uses `simulation.conflicts`'s absolute count. It only feeds the suggestion's tiebreaker `score`, not the accept/reject gate, so a pre-existing unrelated warning would slightly deflate a score rather than suppress a suggestion — much lower severity, left as-is pending confirmation it's worth tightening too.
+  - `exchange-repair.ts`: `evaluateTrainerExchangeSuggestion()` now computes the blocked-conflict count on `baseline.conflicts` (the pre-swap timetable, already available on the passed-in `AutomaticPlannerResult`) the same way it already computed it on `simulation.conflicts`, and rejects the suggestion only when the post-swap count exceeds the baseline count (`newBlockedConflictCount > 0`) â€” i.e. only conflicts newly introduced by this specific swap. Confirmed `baseline.conflicts` is unaffected by the same-day `planner.ts` sessions-truncation fix, since conflicts are detected against the full session set before that truncation ever happened.
+  - Noted but left unchanged: `warningCount` on the same function still uses `simulation.conflicts`'s absolute count. It only feeds the suggestion's tiebreaker `score`, not the accept/reject gate, so a pre-existing unrelated warning would slightly deflate a score rather than suppress a suggestion â€” much lower severity, left as-is pending confirmation it's worth tightening too.
 - **Files Modified**:
   - `src/features/timetable-generator/exchange-repair.ts`
   - `CHANGES.md`
@@ -1647,15 +1654,15 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
   - Confirm whether `warningCount`'s use of the absolute (non-baseline-relative) simulation count is acceptable, or should be tightened the same way.
   - The three items below (full-day workload rule, orphaned `suggestions.ts`, `fixedWorkingDayId` gating) are still awaiting domain confirmation.
 
-### 2026-09-19: Timetable Generator Pipeline Audit — Room-Capacity Scoring & Dropped Existing Sessions
+### 2026-09-19: Timetable Generator Pipeline Audit â€” Room-Capacity Scoring & Dropped Existing Sessions
 
 - **Context & Problem**:
   - Ongoing chunked audit of `src/features/timetable-generator/` (the automatic timetable generation pipeline) requested to identify and fix bugs incrementally.
-  - **Bug 1 (`scorer.ts`)**: `getRoomCapacityAdjustment()` had no upper bound on its `utilization >= 0.7` branch, so a candidate placement where the cohort *overflows* the room (`utilization > 1`) was scored `+8` with the message "The room is efficiently sized for the cohort" — the opposite of what's true. `conflict-detector.ts` independently and correctly flags overflow as a `blocked` conflict (`insufficient_room_capacity`), so the mis-scored candidate was always excluded from the final selection either way — but the score breakdown shown to a HOD reviewing a conflict would have been actively misleading.
-  - **Bug 2 (`planner.ts`, higher severity)**: `generateTimetablePlan()` computed conflicts and statistics against the full session set (`existingSessions + selectedSessions`) but its return statement only returned `sessions: selectedSessions` — the newly-generated delta, silently dropping every pre-existing session that already satisfied its request and didn't need regenerating. This propagated through three consumers:
-    1. `mapPreviewSessions()` in `data-adapter.ts` — the generator preview UI would show only newly-placed sessions, hiding everything already correctly scheduled, whenever "Replace existing editable sessions" was left unchecked (the normal incremental-generation path).
-    2. `calculateStatistics()` — `scheduledSessionCount` and utilization percentages undercounted to match.
-    3. `actions.ts` (`payload = preview.sessions.map(...)` → `save_generated_timetable_draft` RPC) — since that RPC clears and replaces the period's draft sessions before writing (per the 2026-09-18 enterprise lifecycle-sync entry below), saving a non-overwrite generation run would have **deleted every previously-scheduled session not touched by that run** from the database, not merely hidden it from view.
+  - **Bug 1 (`scorer.ts`)**: `getRoomCapacityAdjustment()` had no upper bound on its `utilization >= 0.7` branch, so a candidate placement where the cohort *overflows* the room (`utilization > 1`) was scored `+8` with the message "The room is efficiently sized for the cohort" â€” the opposite of what's true. `conflict-detector.ts` independently and correctly flags overflow as a `blocked` conflict (`insufficient_room_capacity`), so the mis-scored candidate was always excluded from the final selection either way â€” but the score breakdown shown to a HOD reviewing a conflict would have been actively misleading.
+  - **Bug 2 (`planner.ts`, higher severity)**: `generateTimetablePlan()` computed conflicts and statistics against the full session set (`existingSessions + selectedSessions`) but its return statement only returned `sessions: selectedSessions` â€” the newly-generated delta, silently dropping every pre-existing session that already satisfied its request and didn't need regenerating. This propagated through three consumers:
+    1. `mapPreviewSessions()` in `data-adapter.ts` â€” the generator preview UI would show only newly-placed sessions, hiding everything already correctly scheduled, whenever "Replace existing editable sessions" was left unchecked (the normal incremental-generation path).
+    2. `calculateStatistics()` â€” `scheduledSessionCount` and utilization percentages undercounted to match.
+    3. `actions.ts` (`payload = preview.sessions.map(...)` â†’ `save_generated_timetable_draft` RPC) â€” since that RPC clears and replaces the period's draft sessions before writing (per the 2026-09-18 enterprise lifecycle-sync entry below), saving a non-overwrite generation run would have **deleted every previously-scheduled session not touched by that run** from the database, not merely hidden it from view.
 - **Architectural Solutions & Changes**:
   - `scorer.ts`: Added an explicit `utilization > 1` branch to `getRoomCapacityAdjustment()` returning `points: -20` with an accurate "too small for the cohort" message, ahead of the existing `>= 0.7` branch.
   - `planner.ts`: `generateTimetablePlan()` now returns the full merged `sessions` (`[...existingSessions, ...selectedSessions]`, already computed locally for conflict detection) instead of `selectedSessions` alone, both in the function's return value and as the input to `calculateStatistics()`. Verified no other consumer (`exchange-repair.ts`, the rest of `actions.ts`) relied on the previous delta-only shape before making the change.
@@ -1709,14 +1716,14 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
     3. Existing partner allocations could still reference the withdrawn offering; re-enabling them then failed the authoritative approved-offering trigger.
 - **Architectural Solutions & Changes**:
   - **`supabase/migrations/20260918183000_enterprise_unit_offering_lifecycle_sync.sql`**:
-    - **Step 0 — Deduplication & Partial Unique Index Guard**:
+    - **Step 0 â€” Deduplication & Partial Unique Index Guard**:
       - Deduplicates any duplicate allocations in `public.teaching_allocations` by archiving older duplicates.
       - Standardizes the partial unique index:
         `CREATE UNIQUE INDEX teaching_allocations_period_cohort_unit_unique_idx ON public.teaching_allocations (academic_period_id, cohort_id, unit_id) WHERE status IN ('draft', 'active', 'suspended')`.
-    - **Step 1 — Resilient Allocation Validation (`validate_teaching_allocation`)**:
+    - **Step 1 â€” Resilient Allocation Validation (`validate_teaching_allocation`)**:
       - Gracefully bypasses validation checks for suspended, archived, or disabled allocations (`new.is_timetable_enabled = false`).
       - Permits cross-stage units when an approved offering or audited legacy/special exception exists.
-    - **Step 2 — Zero-Mutation Offering Drop & Re-enable Lifecycle (`set_unit_offering_approval`)**:
+    - **Step 2 â€” Zero-Mutation Offering Drop & Re-enable Lifecycle (`set_unit_offering_approval`)**:
       - **Drop Branch (`p_approve = false`)**:
         - Completely eliminated the `update ... set cohort_id = rem_cohort` reassignment mutation.
         - The dropping cohort's allocation is cleanly suspended (`status = 'suspended'`, `is_timetable_enabled = false`).
@@ -1727,11 +1734,11 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
       - **Approve Branch (`p_approve = true`)**:
         - Targets and reactivates any existing allocation record (`status = 'draft'`, `is_timetable_enabled = true`).
         - Inserts an unassigned draft allocation only if no allocation exists at all for `(academic_period_id, cohort_id, unit_id)`.
-    - **Step 3 — Special Unit Offering Protection (`add_special_unit_offering`)**:
+    - **Step 3 â€” Special Unit Offering Protection (`add_special_unit_offering`)**:
       - Re-activates existing allocations safely or inserts with conflict fallback.
-    - **Step 4 — Clean Timetable Draft Generation (`save_generated_timetable_draft`)**:
+    - **Step 4 â€” Clean Timetable Draft Generation (`save_generated_timetable_draft`)**:
       - Clears orphaned and suspended sessions before persisting new generation runs.
-    - **Step 5 — Targeted Data Cleanup**:
+    - **Step 5 â€” Targeted Data Cleanup**:
       - Reconciles `Research` (clearing `DNDT-SEP-2026` ghost sessions) and `Agricultural Production` (cleaning `CHN MAY 25` and `CND MAY 25` shared allocations).
 - **Verification**:
   - `npm test`: 117/117 test files passed, 598/598 tests passed.
@@ -1765,17 +1772,17 @@ This document tracks all architectural modifications, schema updates, bugfixes, 
 
 **Summary**: All TVET Module 2 units populated from the official KNEC curriculum. 8 CHN/CND certificate programme units added as a new canonical registry. Trade Project fully restructured to authentic fieldwork-based schedule with no synthetic assessments.
 
-#### A. module-3.ts — Trade Project Restructured
+#### A. module-3.ts â€” Trade Project Restructured
 - Replaced synthetic CAT/revision/exam weeks with an authentic 14-week TVET fieldwork schedule.
-- Weeks 1–6: Topic formulation, proposal writing (Chapters 1–3), literature review, methodology, instruments, proposal defense.
-- Weeks 7–9: Dedicated primary data collection / fieldwork.
-- Weeks 10–12: Data processing, statistical analysis, discussion, draft compilation.
-- Weeks 13–14: Draft revisions, binding, final submission, oral viva voce defense.
+- Weeks 1â€“6: Topic formulation, proposal writing (Chapters 1â€“3), literature review, methodology, instruments, proposal defense.
+- Weeks 7â€“9: Dedicated primary data collection / fieldwork.
+- Weeks 10â€“12: Data processing, statistical analysis, discussion, draft compilation.
+- Weeks 13â€“14: Draft revisions, binding, final submission, oral viva voce defense.
 - `assessmentApproaches` explicitly states: **"NO CAT, NO RAT, NO written summative examination"**.
 - Aliases expanded: `CND 2307`, `DHN 3205`, `CHN 2206`, `DND 3206`, `DNDT 1305`, `Trade project & Business Plan`.
 
-#### B. module-2.ts — All 12 Units Fully Populated
-All 12 Module 2 units changed from `isAvailable: false` (empty) to `isAvailable: true` with complete 14-week TVET schedules. Sources: Official KNEC Diploma in Nutrition and Dietetics Curriculum Specification (syllabus codes 22.2.0 – 33.2.0).
+#### B. module-2.ts â€” All 12 Units Fully Populated
+All 12 Module 2 units changed from `isAvailable: false` (empty) to `isAvailable: true` with complete 14-week TVET schedules. Sources: Official KNEC Diploma in Nutrition and Dietetics Curriculum Specification (syllabus codes 22.2.0 â€“ 33.2.0).
 
 | Key | Syllabus Code | Unit Name | Hours |
 |-----|--------------|-----------|-------|
@@ -1808,26 +1815,26 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
 | `applied_biological_sciences` | CHN 1303 / CND 2107 | Applied Biological Sciences | 40 hrs |
 | `food_science` | CHN 1202 / CND 2106 | Food Science | 40 hrs |
 
-#### D. shared-map.ts — Certificate Unit Aliases Added; Guard Fixed
+#### D. shared-map.ts â€” Certificate Unit Aliases Added; Guard Fixed
 - Added 40+ alias entries for the 8 new certificate units (normalised unit codes and full title strings).
 - **Fixed**: Removed blanket `isVulnerable` guard that blocked `nutrition_for_vulnerable_groups` from ever resolving. Guard now correctly allows matches to canonical nutrition/vulnerable group keys.
 
-#### E. index.ts — CERTIFICATE_CURRICULUM Integrated
+#### E. index.ts â€” CERTIFICATE_CURRICULUM Integrated
 - Added import: `import { CERTIFICATE_CURRICULUM } from './certificate-units'`
 - Spread into `MASTER_CURRICULUM_REGISTRY`: `...CERTIFICATE_CURRICULUM`
 - Added re-export for consumers.
 
 #### Files Modified
-- `src/features/teaching-documents/curriculum-data/module-2.ts` — full 12-unit population (151 KB, 2053 lines)
-- `src/features/teaching-documents/curriculum-data/module-3.ts` — Trade Project restructured (lines 1803–end)
-- `src/features/teaching-documents/curriculum-data/certificate-units.ts` — **NEW** (108 KB, 1453 lines)
-- `src/features/teaching-documents/curriculum-data/shared-map.ts` — aliases added, isVulnerable guard fixed
-- `src/features/teaching-documents/curriculum-data/index.ts` — CERTIFICATE_CURRICULUM import and spread
-- `CHANGES.md` — this entry
+- `src/features/teaching-documents/curriculum-data/module-2.ts` â€” full 12-unit population (151 KB, 2053 lines)
+- `src/features/teaching-documents/curriculum-data/module-3.ts` â€” Trade Project restructured (lines 1803â€“end)
+- `src/features/teaching-documents/curriculum-data/certificate-units.ts` â€” **NEW** (108 KB, 1453 lines)
+- `src/features/teaching-documents/curriculum-data/shared-map.ts` â€” aliases added, isVulnerable guard fixed
+- `src/features/teaching-documents/curriculum-data/index.ts` â€” CERTIFICATE_CURRICULUM import and spread
+- `CHANGES.md` â€” this entry
 
 #### No Breaking Changes
 - All existing Module 1 and Module 3 units are untouched (zero-regression policy).
-- MASTER_CURRICULUM_REGISTRY is additive — all existing canonical keys preserved.
+- MASTER_CURRICULUM_REGISTRY is additive â€” all existing canonical keys preserved.
 
 
 
@@ -1902,14 +1909,14 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
   - Placing unit `DCU 1104 First Aid` for cohort `DHN-JAN-MAR-2025` threw an uninformative error: `Cohort clash: a participating cohort already has another session during the selected time`.
   - The HOD noted that `DHN-JAN-MAR-2025` had no class on Friday at 10:30.
   - The root cause was that `DCU 1104` is a **Shared Class** (`teaching_offerings`) taken jointly by multiple cohorts (e.g. `DHN` + `DND`). The DB trigger rejected placement because a partner cohort (or clinical rotation) was already occupied at that time, but the error message failed to identify which cohort was clashing.
-  - Additionally, uncontrolled `<Select defaultValue=...>` inputs in `ScheduleAllocationDialog` reset back to `Monday` and `Morning Session · 08:00` upon error re-render.
+  - Additionally, uncontrolled `<Select defaultValue=...>` inputs in `ScheduleAllocationDialog` reset back to `Monday` and `Morning Session Â· 08:00` upon error re-render.
 - **Key Changes**:
   - `src/features/timetable-editor/schedule-allocation-dialog.tsx`:
     - Converted all inputs (`workingDayId`, `timeSlotId`, `trainerId`, `roomId`, `notes`, `isLocked`) to controlled React state so selections persist across errors.
     - Implemented instant client-side collision detection against all timetable sessions (`data.sessions`).
     - Explicitly detects and highlights whether the clash is with the primary cohort or a shared partner cohort (naming cohort code, unit code, trainer, and room).
     - Displays a "Shared Class" badge listing all participating cohorts when a unit is shared across multiple cohorts.
-    - Added live availability indicator (`✓ Slot is completely available`) and blocked submission when a clash is present.
+    - Added live availability indicator (`âœ“ Slot is completely available`) and blocked submission when a clash is present.
     - Resolved modal viewport overflow: Configured `DialogContent` with `max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden`, pinned `DialogHeader` and `DialogFooter` (`shrink-0`), and enabled smooth internal scrolling on `DialogBody` (`overflow-y-auto flex-1 min-h-0`). Dialog title, close button, and footer action buttons ("Cancel", "Schedule & Lock") remain 100% visible on all laptop resolutions.
   - `src/components/ui/dialog.tsx`:
     - Updated core `DialogContent` with `max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden`, pinned header/footer with `shrink-0`, and made `DialogBody` scrollable by default with `overflow-y-auto flex-1 min-h-0`.
@@ -2297,7 +2304,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
   - `npm run check`: Typecheck, ESLint, and Next.js 16 production build passed with 0 errors across all routes.
   - Supabase database audit confirmed 16 past dates with cancelled sessions are no longer flagged as phantom unsubmitted reports.
 
-### 2026-09-15: Admin Sidebar Upgrade — Grouped Sections, Core Modules & Collision-Proof Matching
+### 2026-09-15: Admin Sidebar Upgrade â€” Grouped Sections, Core Modules & Collision-Proof Matching
 - **Files Modified**:
   - `src/components/layout/admin-sidebar.tsx`:
     - **Structured Grouping**: Organized navigation into 4 logical, clean enterprise sections: *Operations* (Dashboard, Daily Operations, Class Attendance, Action Centre), *Academics & Quality* (Academic Planning, Unit Registration, Quality Assurance, Grading & Results, Reports), *Faculty & Students* (Staff & Trainers, Student Registry), and *System* (Settings).
@@ -2310,9 +2317,9 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
 
 ### 2026-09-15: 80% College Minimum Attendance Policy & Student Portal Missed Lessons View
 - **Files Modified/Added**:
-  - `src/features/attendance-analytics/domain.ts`: Added `COLLEGE_MINIMUM_ATTENDANCE_PERCENT = 80.0` constant. Added `AttendanceStanding` type (`good` $\ge 85\%$, `borderline` $80\text{–}84.9\%$, `at_risk` $< 80\%$, `unrecorded`) and helper functions `getAttendanceStanding`, `getAttendanceStandingLabel`, and `getAttendanceBadgeVariant` enforcing the official college 80% minimum attendance policy for examination/CAT clearance.
+  - `src/features/attendance-analytics/domain.ts`: Added `COLLEGE_MINIMUM_ATTENDANCE_PERCENT = 80.0` constant. Added `AttendanceStanding` type (`good` $\ge 85\%$, `borderline` $80\text{â€“}84.9\%$, `at_risk` $< 80\%$, `unrecorded`) and helper functions `getAttendanceStanding`, `getAttendanceStandingLabel`, and `getAttendanceBadgeVariant` enforcing the official college 80% minimum attendance policy for examination/CAT clearance.
   - `src/tests/attendance-analytics-domain.test.ts`: Added unit tests verifying boundary classifications for the 80% college requirement (`79.9%` $\rightarrow$ `at_risk`, `80.0%` & `84.9%` $\rightarrow$ `borderline`, `85.0%` & `100%` $\rightarrow$ `good`).
-  - `src/features/attendance-analytics/hod-attendance-view.tsx` [NEW]: Created interactive dual-view client component for HOD analytics (`/attendance-clinical/class-attendance/analytics`), enabling switching between Student Attendance and Unit Overview. Includes student name/admission search, cohort filter, status filter chips (`All`, `At Risk < 80%` with direct warning count button, `Borderline 80–84%`, `Good Standing ≥ 85%`), attendance rate progress bars, and official college policy callout.
+  - `src/features/attendance-analytics/hod-attendance-view.tsx` [NEW]: Created interactive dual-view client component for HOD analytics (`/attendance-clinical/class-attendance/analytics`), enabling switching between Student Attendance and Unit Overview. Includes student name/admission search, cohort filter, status filter chips (`All`, `At Risk < 80%` with direct warning count button, `Borderline 80â€“84%`, `Good Standing â‰¥ 85%`), attendance rate progress bars, and official college policy callout.
   - `src/app/(dashboard)/attendance-clinical/class-attendance/analytics/page.tsx`: Embedded `HodAttendanceView` passing aggregated unit data and detailed student rosters, along with college attendance policy footnote.
   - `src/components/student/student-portal-shell.tsx`: Temporarily hid the direct `Attendance` link from the student portal sidebar and mobile navigation drawer as instructed ("implement student view fully but first hide it"), keeping the portal uncluttered while retaining the route.
   - `src/features/student-portal/student-attendance-view.tsx` [NEW]: Created comprehensive student attendance view showing overall attendance rate, 80% college exam clearance threshold indicator, unit-by-unit breakdown, and filterable session history (All Classes vs Missed Lessons).
@@ -2332,7 +2339,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
 - **Files Modified**:
   - `src/features/trainer-daily-report/domain.ts`: Updated `getAbsenteeColumnClass` to dynamically scale up to 4 columns (`grid-cols-1`, `sm:grid-cols-2`, `md:grid-cols-3`, `xl:grid-cols-4`) for large absentee populations ($\ge 17$ students), and updated `formatAbsenteeLine` for clean 1-line display.
   - `src/features/trainer-daily-report/hod-report-list.tsx`: Streamlined table to 4 balanced columns (`Unit & Time` `w-[230px]`, `Present` `w-[60px]`, `Absent` `w-[60px]`, and `Absentees` remaining $\sim 70\%$ width). Removed the standalone `Class` column that previously ballooned row height across multi-cohort badges. Combined unit details and session time into a single structured cell. Removed truncation from student names so full names and admission numbers are visible in full.
-  - `src/app/(dashboard)/operations/daily-reports/print/page.tsx`: Updated print view table to 4 columns (`w-[26%]`, `w-[6%]`, `w-[6%]`, `w-[62%]`). Removed `Class` column. Formatted absentee students into 1–4 straight print columns with full names and admission numbers without truncation.
+  - `src/app/(dashboard)/operations/daily-reports/print/page.tsx`: Updated print view table to 4 columns (`w-[26%]`, `w-[6%]`, `w-[6%]`, `w-[62%]`). Removed `Class` column. Formatted absentee students into 1â€“4 straight print columns with full names and admission numbers without truncation.
   - `src/features/trainer-daily-report/export-docx.ts`: Updated Word export table headers and column widths (Unit & Time at 26%, Absentees at 60%). Combined unit and session time into a clean paragraph stack.
   - `src/tests/trainer-daily-report-domain.test.ts`: Added unit tests verifying responsive column scaling for 0, 3, 5, 8, 12, 16, 17, and 32 absentees, and formatting of student details with circumstance notes.
 - **Verification Evidence**:
@@ -2408,7 +2415,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
   - `src/tests/trainer-daily-report-domain.test.ts`
 - **What Changed**:
   - **Frictionless Class Attendance Workflow**:
-    - Purged the need for trainers to manually click "Present" 30–50 times per class session.
+    - Purged the need for trainers to manually click "Present" 30â€“50 times per class session.
     - Defaulted active enrolled students to **Present** upon session opening (unless flagged as not reported for the semester).
     - Introduced high-density, single-click toggle between **Present** (emerald) and **Absent** (rose).
     - Added instant **Unavoidable Circumstance Chips** (`Leave of absence`, `Pending unit registration`, `Medical / Sickness`, `Official college duty`, `Fee clearance / Admin`) visible only when a student is marked Absent, pre-populating circumstances into notes with 1 click.
@@ -2420,7 +2427,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
     - Elevated scheduled lessons section with refined card layout, clean status badges (`Completed`, `In Progress`, `Not Recorded`, `Cancelled`), and metric pills with colored indicators.
     - Replaced wordy absentee descriptions with a streamlined **Absentee Register** displaying recognized circumstance tags.
     - Streamlined non-teaching day guidance and form inputs with character counters and concise microcopy.
-    - Upgraded Daily Report page header with an executive date navigation stepper (`‹ Prev Day`, native date picker, `Next Day ›`, and `Today` quick jump shortcut).
+    - Upgraded Daily Report page header with an executive date navigation stepper (`â€¹ Prev Day`, native date picker, `Next Day â€º`, and `Today` quick jump shortcut).
 - **Verification Evidence**:
   - `npx vitest run src/tests/class-attendance-domain.test.ts src/tests/trainer-daily-report-domain.test.ts`: 9/9 passed.
   - `npm test`: 117/117 test files passed, 585/585 tests passed.
@@ -2494,7 +2501,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
     - Enforced zero information alteration: no synthetic topics, no paraphrased learning objectives, and no omitted topics.
   - **Authentic Principles of Human Nutrition (20.1.0)**:
     - Replaced synthetic content with the authentic KNEC/KNDI syllabus:
-      - Description and general objectives (a–e) preserved verbatim.
+      - Description and general objectives (aâ€“e) preserved verbatim.
       - 11 official topics (*Introduction to Nutrition, Carbohydrates, Proteins, Lipids, Digestion, Absorption, Metabolism and Excretion of Nutrients, Energy, Water, Vitamins, Minerals, Malnutrition, Emerging Issues and Trends in Human Nutrition*).
       - Structured across the 14-week term with exactly 1 Mid-Term Continuous Assessment Test (CAT) at Week 8 (covering Weeks 1 to 7), strictly no CAT in Week 13 (dedicated to Comprehensive Syllabus Revision & Tutorial Clinic), and Final Summative Examination in Week 14.
   - **Pedagogical Bloom's Behavioral Learning Outcomes**:
@@ -2518,7 +2525,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
   - **Overhauled Canonical Module 1 Units (`module-1.ts`)**:
     - Cleansed and structured all 19 canonical curriculum units across Nutrition, Dietetics, and Core Common Units.
     - Completely purged OCR corruption artifacts (e.g. `crnail`, `(Fating system`, `O'cd) (15vd)`), misallocated outlines (e.g. Biochemistry content under Nutrition Epidemiology), and Table of Contents bleed.
-    - Each unit now includes authoritative TVET unit descriptions, Bloom's revised taxonomy competencies, 4–6 discrete learning outcomes, 14-week structured syllabi (`• ...` specific learning outcomes, student-centered learning activities, instructional resources, and TVET assessment milestones: CAT 1 in Week 6/7, Mid-Term CAT 2 in Week 9, Revision in Week 13, and Final Examination in Week 14), standard textbooks, and lab/instructional equipment.
+    - Each unit now includes authoritative TVET unit descriptions, Bloom's revised taxonomy competencies, 4â€“6 discrete learning outcomes, 14-week structured syllabi (`â€¢ ...` specific learning outcomes, student-centered learning activities, instructional resources, and TVET assessment milestones: CAT 1 in Week 6/7, Mid-Term CAT 2 in Week 9, Revision in Week 13, and Final Examination in Week 14), standard textbooks, and lab/instructional equipment.
   - **Disambiguated Unit Mappings & Title-First Resolution (`shared-map.ts`)**:
     - Expanded registry with 306 mappings across all institutional acronyms, codes, and title variants.
     - Updated `resolveCanonicalKey` to prioritize exact normalized unit title matching before course code matching. This resolves inter-departmental code collisions where different courses share identical numbers (e.g. CCU 1106 ICT no longer collides with Life Skills; CCU 1103 HIV no longer collides with Nutrition).
@@ -2909,8 +2916,8 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
   - **Statutory Theory Specific Objectives Extraction**: Extracted the exact lettered clauses (`a)`, `b)`, `c)`, `d)`...) from the "Theory - Specific Objectives" sections of `Diploma Curriculum.pdf` across all sub-modules for all 43 units in Modules I, II, and III.
   - **Statutory Lead-in Formatting**: Every weekly topic strictly begins with the statutory TVET lead-in:
     `By the end of the lesson/topic, the trainee should be able to:`
-    followed by each authentic objective on its own bulleted line (e.g., `• Define terms used in entrepreneurship.`, `• Explain the differences between self employment and formal employment.`, etc.).
-  - **High-Precision Cleansing**: Purged all OCR scanning typos (e.g. `fonnal` -> `formal`, `ot'` -> `of`, `titetors` -> `factors`, `atreet` -> `affect`, `enttvpt•eneurial` -> `entrepreneurial`, `traincc` -> `trainee`) and removed stray OCR line numbers/code annotations.
+    followed by each authentic objective on its own bulleted line (e.g., `â€¢ Define terms used in entrepreneurship.`, `â€¢ Explain the differences between self employment and formal employment.`, etc.).
+  - **High-Precision Cleansing**: Purged all OCR scanning typos (e.g. `fonnal` -> `formal`, `ot'` -> `of`, `titetors` -> `factors`, `atreet` -> `affect`, `enttvptâ€¢eneurial` -> `entrepreneurial`, `traincc` -> `trainee`) and removed stray OCR line numbers/code annotations.
   - **Derived Subtopics**: Populated `subTopics` arrays with discrete, non-empty curriculum topics corresponding directly to the statutory objectives.
 - **Verification Evidence**:
   - `npm test`: 115 test files passed, 567 tests passed.
@@ -2965,7 +2972,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
   - **Eliminated RAT (Continuous Assessment Test & Final Exam Only)**: Removed Continuous Assessment 1 (RAT) from all interfaces, drawer controls, and calculations. Standardized on a 2-tier college grading structure: Continuous Assessment Test (CAT, 30% coursework) and End-Term Examination (70% summative).
   - **Dynamic Assessment Milestone Injection**: Week placement for CAT and Final Exam is determined strictly by college-wide institutional setup (`AssessmentMilestones` / `semester_program_activities`), not hardcoded weeks. Non-milestone teaching weeks distribute syllabus topics dynamically across the remaining term weeks.
   - **Empty Assessment Rows Without Synthetic Content**: On configured CAT and Exam weeks, Sub-topics, Specific Learning Outcomes, Learning Activities, and Instructional Resources are generated completely empty (`[]` or `''`). Prohibited synthetic text (e.g. fake behavioral objectives like "Explain principles of Mid-Term theory...", fake culinary assessments, fake question paper resources).
-  - **Viewer & Word DOCX Empty State Formatting**: Both `tvet-document-viewer.tsx` and `export-docx.ts` render clean dashes (`—`) without printing bold TVET lead-ins or empty bullet points when assessment rows have no syllabus content.
+  - **Viewer & Word DOCX Empty State Formatting**: Both `tvet-document-viewer.tsx` and `export-docx.ts` render clean dashes (`â€”`) without printing bold TVET lead-ins or empty bullet points when assessment rows have no syllabus content.
 - **Verification Evidence**:
   - Full test suite passed 100% (`npm test`: 115 test files passed, 567 tests passed).
   - Production check passed code 0 (`npm run check`: TypeScript 0 errors, ESLint 0 errors, Next.js 16 build succeeded).
@@ -2987,7 +2994,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
   - `src/tests/timetable-generator/planner.test.ts`
   - `src/features/timetable-editor/validation.ts`
 - **What Changed**:
-  - **Scheme of Work Polish (Sub-topics)**: Sub-topics in each weekly block now occupy discrete individual lines with bold bullet points (`•`) across both web preview (`tvet-document-viewer.tsx`) and Word `.docx` exports (`export-docx.ts`).
+  - **Scheme of Work Polish (Sub-topics)**: Sub-topics in each weekly block now occupy discrete individual lines with bold bullet points (`â€¢`) across both web preview (`tvet-document-viewer.tsx`) and Word `.docx` exports (`export-docx.ts`).
   - **Scheme of Work Polish (Specific Learning Outcomes)**: Standardized all specific learning outcomes to begin with the TVET statutory bold lead-in **By the end of the lesson/topic, the trainee should be able to:** followed by individual behavioral outcomes on separate lines with clean bullet formatting.
   - **Scheme of Work Polish (Activities & Resources)**: Pedagogical activities and instructional resources each render on separate lines. Widened the Resources column in both HTML and DOCX tables from 11% to 18% with word wrapping enabled to gracefully accommodate textbook citations, manuals, and laboratory equipment as content expands.
   - **College-Wide Assessment Schedule Setup**:
@@ -3030,7 +3037,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
   - None required. All 43 units are instantly active and accessible for all HODs and trainers when generating Course Outlines and Schemes of Work.
 
 
-### 2026-09-11: Quality Assurance Teaching Documents — Semester Program of Activities & Standardized SOW/Outline/ROW Engine
+### 2026-09-11: Quality Assurance Teaching Documents â€” Semester Program of Activities & Standardized SOW/Outline/ROW Engine
 - **Files Modified / Added**:
   - `supabase/migrations/20260911070000_semester_program_of_activities.sql` [NEW]
   - `src/features/teaching-documents/program-of-activities/types.ts` [NEW]
@@ -3082,7 +3089,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
   - **Excel Import Upload Instructions Pruning**: Pruned long-winded paragraphs across all 5 master data and timetable import upload forms (`master-data`, `units`, `trainers`, `teaching-allocations`, `rooms`) to concise, professional 1-line guidance.
 - **Verification**: `npm run check` (`tsc --noEmit`, ESLint, Next.js build) passed with 0 errors across all 152 routes.
 
-### 2026-09-09: Phase 2 — System-Wide Layout Density, Multi-Column Scaling & Microcopy Pruning
+### 2026-09-09: Phase 2 â€” System-Wide Layout Density, Multi-Column Scaling & Microcopy Pruning
 - **Files Modified**:
   - `src/app/(dashboard)/students/unit-registration/register/[studentId]/page.tsx`
   - `src/features/student-unit-registration/batch-unit-registration.tsx`
@@ -3139,9 +3146,9 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
   - `src/app/(dashboard)/students/unit-registration/page.tsx`
   - `src/app/portal-theme.css`
 - **What Changed**:
-  - **Eliminated 2-Card Layout Bloat**: Replaced remaining `sm:grid-cols-2 xl:grid-cols-4` patterns with `sm:grid-cols-2 lg:grid-cols-4`, ensuring intermediate desktop and iPad landscape viewports (1024px–1279px) render 4 columns instead of 2 giant stretching cards. Upgraded 5-metric layouts to include intermediate `md:grid-cols-3` breakpoints.
+  - **Eliminated 2-Card Layout Bloat**: Replaced remaining `sm:grid-cols-2 xl:grid-cols-4` patterns with `sm:grid-cols-2 lg:grid-cols-4`, ensuring intermediate desktop and iPad landscape viewports (1024pxâ€“1279px) render 4 columns instead of 2 giant stretching cards. Upgraded 5-metric layouts to include intermediate `md:grid-cols-3` breakpoints.
   - **Container Width Standardization**: Replaced legacy `max-w-[1500px]` and `max-w-[1600px]` wrappers with unified `max-w-[var(--content-max-width)]` (90rem/1440px) across stage setup, batch unit registration, and student lifecycle progression.
-  - **Multi-Column Checklist & Selection Grids**: Upgraded student unit registration checklists (`expectedUnits`, `otherOfferedUnits`, `curriculumUnits`), stage unit binding checkboxes, and timetable editor missing allocations from 2 columns to responsive 3–4 columns (`sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4`).
+  - **Multi-Column Checklist & Selection Grids**: Upgraded student unit registration checklists (`expectedUnits`, `otherOfferedUnits`, `curriculumUnits`), stage unit binding checkboxes, and timetable editor missing allocations from 2 columns to responsive 3â€“4 columns (`sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4`).
   - **Portal Theme Grid Alignment**: Activated 4-column metric grids in `portal-theme.css` at `@media (min-width: 1024px)` instead of waiting for `1280px`.
   - **Loading Skeleton Harmony**: Synchronized all timetable entity loading skeletons with the new `grid gap-3 sm:grid-cols-2 lg:grid-cols-4` layouts to eliminate layout shifting during navigation.
   - **Microcopy Pruning**: Pruned long-winded page header descriptions across 14 dashboard and import views into concise microcopy.
@@ -3223,7 +3230,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
 - **Manual Follow-up**:
   - Run `supabase db push` to apply `20260908221000_repair_class_attendance_roster.sql` to production database.
 
-### 2026-09-08: Class Attendance — Late Registration Logic Fix
+### 2026-09-08: Class Attendance â€” Late Registration Logic Fix
 - **Files Added**:
   - `supabase/migrations/20260908173000_fix_late_student_attendance.sql`
 - **What Changed**:
@@ -3241,7 +3248,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
 - **Manual Follow-ups**:
   - Run `supabase db push` to push migration `20260908123000_fix_chn_stages_and_offerings.sql` to your Supabase PostgreSQL database.
 
-### 2026-09-08: Student Unit Registration — Missing Cohort Fix
+### 2026-09-08: Student Unit Registration â€” Missing Cohort Fix
 - **Files Added**:
   - `supabase/migrations/20260908113000_fix_department_register_student_units_cohort.sql`
 - **What Changed**:
@@ -3276,7 +3283,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
   - **Surface Placement**: Embedded the "Sync Reporting" dialog directly in both the **Student Registry** (`/students/registry`) and **Unit Registration** (`/students/unit-registration`) action toolbars.
   - **Unit Tests**: Added 10 Vitest assertions in `src/tests/students/reporting-sync.test.ts` verifying URL normalization, CSV/paste parsing, and key normalization. All 34/34 student test assertions passing.
 
-### 2026-09-07: Student Lifecycle — Reactivation & Resumption from Completed Status
+### 2026-09-07: Student Lifecycle â€” Reactivation & Resumption from Completed Status
 - **Files Added**:
   - `supabase/migrations/20260907230000_allow_completed_student_resumption.sql`
 - **Files Modified**:
@@ -3291,7 +3298,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
 - **Manual Follow-up**:
   - Run `supabase db push` to deploy `20260907230000_allow_completed_student_resumption.sql`.
 
-### 2026-09-07: Student Registry — Batch Actions, Reporting Confirmation & Lifecycle Management (Phase 1)
+### 2026-09-07: Student Registry â€” Batch Actions, Reporting Confirmation & Lifecycle Management (Phase 1)
 - **Files Added**:
   - `supabase/migrations/20260907221500_batch_student_lifecycle_management.sql`
   - `src/features/students/batch-action-dialogs.tsx`
@@ -3316,7 +3323,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
 - **Manual Follow-up**:
   - Run `supabase db push` to push migration `20260907221500_batch_student_lifecycle_management.sql` to your Supabase PostgreSQL database.
 
-### 2026-09-07: Student Unit Registration — View Persistence on Save
+### 2026-09-07: Student Unit Registration â€” View Persistence on Save
 - **Files Modified**:
   - `src/features/student-unit-registration/actions.ts`
   - `src/app/(dashboard)/students/unit-registration/register/[studentId]/page.tsx`
@@ -3326,7 +3333,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
   - **Academic Stage Update Feedback**: Added a confirmation badge (`stage_updated=1`) when changing student academic stages.
   - **Explicit Return Navigation**: Added "Return to Student List" navigation buttons in both the header and footer actions, allowing the user to return to the student table whenever they choose rather than being automatically booted out upon saving.
 
-### 2026-09-07: Student Unit Registration — Flexible Unit Selection & DNDT Y1S2 Stage Alignment
+### 2026-09-07: Student Unit Registration â€” Flexible Unit Selection & DNDT Y1S2 Stage Alignment
 - **Files Added**:
   - `supabase/migrations/20260907091000_fix_dndt_stages_and_registration_flexibility.sql`
 - **Files Modified**:
@@ -3345,7 +3352,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
   - **Auto-Provisioning in Server Action**: In `registerStudentUnitsByDepartment`, if an HOD selects a valid programme curriculum unit that does not yet have an offering row for the student's cohort in the active period, it is automatically provisioned (`origin: 'special', exception_reason: 'Department unit offering'`) so registration saves seamlessly.
   - **Optional Note Fallback**: Provided default note `'Department authorized registration'` when custom unit selections differ from expected units, preventing form rejections when HODs leave the note blank.
 
-### 2026-09-07: Student Registry — Admission Number Correction with Programme & Cohort Auto-Sync
+### 2026-09-07: Student Registry â€” Admission Number Correction with Programme & Cohort Auto-Sync
 - **Files Added**:
   - `supabase/migrations/20260907052500_update_student_admission_number.sql`
   - `src/features/students/edit-admission-number-dialog.tsx`
@@ -3366,7 +3373,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
 - **Manual Follow-up**:
   - Run `supabase db push` or execute `20260907052500_update_student_admission_number.sql` in Supabase SQL editor to install/update the RPC.
 
-### 2026-09-06: Student Unit Registration — 1-Click Unregister Action Button
+### 2026-09-06: Student Unit Registration â€” 1-Click Unregister Action Button
 
 - **Files Modified**:
   - `src/features/student-unit-registration/undo-registration-button.tsx`
@@ -3379,7 +3386,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
   - **Individual Registration Page Integration**: Placed prominent unregister action buttons on `/students/unit-registration/register/[studentId]` (in both the top stage/status header and the bottom form action bar alongside "Save & verify registration").
   - **Administrative Undo**: Calls `DELETE /api/students/unit-registration/[studentId]/undo`, executing the database RPC `undo_student_unit_registration` to clear registrations and submissions for the target academic period without resetting student stage or cohort.
 
-### 2026-09-06: Database Migration — Fix Unit Offering Withdrawal Exception Reason Check Constraint
+### 2026-09-06: Database Migration â€” Fix Unit Offering Withdrawal Exception Reason Check Constraint
 - **Files Added**:
   - `supabase/migrations/20260906213500_fix_unit_offering_withdrawal_exception_reason_constraint.sql`
 - **What Changed**:
@@ -3390,7 +3397,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
   - **Updated `set_unit_offering_approval` RPC**: Explicitly populates both `withdrawal_reason` and `exception_reason` when withdrawing offerings so authorization updates never violate table constraints.
 - **Manual Follow-up**: Run `supabase db push` or run the SQL in Supabase SQL editor to apply `20260906213500_fix_unit_offering_withdrawal_exception_reason_constraint.sql` on the live database.
 
-### 2026-09-06: Student Unit Registration Form & PDF — Vertical Stretch & Dead-Space Elimination below MD Approval
+### 2026-09-06: Student Unit Registration Form & PDF â€” Vertical Stretch & Dead-Space Elimination below MD Approval
 - **Files Modified**:
   - `src/features/student-portal/registration-pdf.tsx`
   - `src/features/student-unit-registration/unit-registration-form-preview.tsx`
@@ -3402,7 +3409,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
   - **Screen & Print Web Preview Sync**: Maintained unified responsive styling in `UnitRegistrationFormPreview` using flex `justify-between` and `min-h-[290mm] print:min-h-[282mm] print:h-[282mm]` so neither on-screen preview nor browser printing leaves dead white space below Card 6.
   - **Comprehensive Page Count Test Suite**: Added vitest unit tests across 1, 2, 4, 6, 7, 8, 10, and 12 unit permutations confirming all generated PDFs strictly adhere to 1 single page without overflow.
 
-### 2026-09-06: Units on Offer — Bulk & Row-Level Offering Withdrawal Actions
+### 2026-09-06: Units on Offer â€” Bulk & Row-Level Offering Withdrawal Actions
 - **Files Modified**:
   - `src/features/unit-offerings/unit-offering-table.tsx`
   - `src/features/unit-offerings/approval-actions.ts`
@@ -3411,7 +3418,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
   - **Row-Level Drop Action**: Added a 1-click `Drop from cohort` link button for any unit in `Review required` or `Active` state directly in the Authorization column.
   - **Action Resiliency**: Updated `withdrawUnitOfferingAction` to handle multiple offering IDs and provide an automatic default reason (`"Dropped from cohort teaching plan for this academic period"`).
 
-### 2026-09-06: Student Portal Activation & Sign-In Form Cleanup — Password Terminology
+### 2026-09-06: Student Portal Activation & Sign-In Form Cleanup â€” Password Terminology
 - **Files Modified**:
   - `src/features/student-portal/student-activation-form.tsx`
   - `src/features/student-portal/student-login-form.tsx`
@@ -3424,7 +3431,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
   - **Iconography**: Swapped generic key icons for standard `Lock` icons on password fields.
   - **Action Compatibility**: Updated `activateStudentAccount` and `studentPortalLogin` server actions to support `password` / `confirmPassword` while maintaining backward compatibility with existing callers.
 
-### 2026-09-06: Database Migration — Repair `student_portal_credentials` Column & Self-Service Activation RPC
+### 2026-09-06: Database Migration â€” Repair `student_portal_credentials` Column & Self-Service Activation RPC
 - **Files Added/Modified**:
   - `supabase/migrations/20260906193500_repair_student_portal_credentials_created_at.sql` (NEW)
   - `supabase/migrations/20260905211500_student_self_service_activation.sql`
@@ -3433,7 +3440,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
   - **Repaired Activation RPC (`activate_student_portal_account`)**: Updated the self-service student activation procedure to populate both `issued_at` and `created_at`, safely record audit events to `student_portal_access_events`, and handle missing event tables gracefully without interrupting account activation.
 - **Manual Follow-up**: Run `supabase db push` or run the SQL in Supabase SQL editor to apply `20260906193500_repair_student_portal_credentials_created_at.sql` on the live database.
 
-### 2026-09-06: Fix Next.js & TypeScript Build Errors — Docx TableVerticalAlign & WeekdayCode Test
+### 2026-09-06: Fix Next.js & TypeScript Build Errors â€” Docx TableVerticalAlign & WeekdayCode Test
 - **Files Modified**:
   - `src/features/student-portal/registration-docx.ts`
   - `src/tests/timetable-generator/planner.test.ts`
@@ -3441,7 +3448,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
   - **Fixed `TableVerticalAlign` Type Error in Docx Generator**: Replaced generic `VerticalAlign` (`'both' | 'center' | 'top' | 'bottom'`) with the docx table-specific `VerticalAlignTable` enum (`'center' | 'top' | 'bottom'`), eliminating the TS2322 assignment error in `buildStudentUnitRegistrationDocx`.
   - **Fixed `WeekdayCode` Casing Error in Planner Test**: Corrected capitalized `'Wednesday'` to canonical lowercase `'wednesday'` on `PlanningWorkingDay.dayOfWeek` in `src/tests/timetable-generator/planner.test.ts`.
 
-### 2026-09-06: Fix Next.js Build Type Errors — Button Variant, Badge Variant & StudentPortalUnit Property
+### 2026-09-06: Fix Next.js Build Type Errors â€” Button Variant, Badge Variant & StudentPortalUnit Property
 - **Files Modified**:
   - `src/app/(dashboard)/trainers/[id]/page.tsx`
   - `src/app/(dashboard)/students/registry/[studentId]/portal-view/page.tsx`
@@ -3458,7 +3465,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
 - **What Changed**:
   - **Increased Vertical Spacing**: Increased item list spacing from `space-y-0.5` to `space-y-2` and link padding from `py-2` to `py-2.5`, giving navigation items room to breathe and improving target area ergonomics.
 
-### 2026-09-06: Enterprise Admin Route — Staff / Trainer Portal Workspace Preview & Access Buttons
+### 2026-09-06: Enterprise Admin Route â€” Staff / Trainer Portal Workspace Preview & Access Buttons
 - **Files Added/Modified**:
   - `src/app/(dashboard)/trainers/[id]/portal-view/page.tsx` (NEW)
   - `src/app/(dashboard)/timetable/trainers/[id]/portal-view/page.tsx` (NEW)
@@ -3479,7 +3486,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
   - **Purged Legacy "PINs Active" Terminology**: Replaced outdated legacy `185 PINs active` subtext on the main HOD dashboard **Students Portal** telemetry card with `{studentsPortalActive} Accounts active`.
   - **Updated Telemetry Ratios**: Aligned metric main display to show `{studentsPortalActive} / {studentsEligible}` (e.g., `65 / 185` active accounts vs total student population), accurately reflecting self-service account activations.
 
-### 2026-09-06: Marks Entry Editor UI — Cream Background & Square Input Fields
+### 2026-09-06: Marks Entry Editor UI â€” Cream Background & Square Input Fields
 - **Files Modified**:
   - `src/features/staff-assessment/online-marks-editor.tsx`
 - **What Changed**:
@@ -3622,7 +3629,7 @@ Created `src/features/teaching-documents/curriculum-data/certificate-units.ts` w
   - Updated `CLAUDE.md` with Claude Code CLI terminal shortcuts, project directory maps, and rapid inspection paths.
   - Formatted `CHANGES.md` as the authoritative Architectural Delta Registry for tracking project updates and technical debt across all AI models.
 
-### 2026-08-22: Teaching-Documents Fix — Per-Type Curriculum Registry & Ingestion
+### 2026-08-22: Teaching-Documents Fix â€” Per-Type Curriculum Registry & Ingestion
 - **Files Replaced**:
   - `src/features/teaching-documents/zip-ingestion.ts`
   - `src/features/teaching-documents/curriculum-registry.ts`
@@ -3655,7 +3662,7 @@ When logging changes, copy and fill out the template below:
   - Steps required by developers or admins (e.g. running `npx supabase db push`).
 ```
 
-## 2026-09-22 — Trainer attendance hardening
+## 2026-09-22 â€” Trainer attendance hardening
 
 - Added database concurrency locking to `open_class_attendance_session` so simultaneous opens for the same scheduled lesson/date cannot race into duplicate sessions.
 - Reasserted unique attendance-session backstops for scheduled-session/date and allocation/date/start-time combinations.
@@ -3668,13 +3675,13 @@ No database or application runtime changes were executed while preparing this pa
 
 ### 2026-09-22: Simplified Student Status Management
 
-- Added a simple Student Profile → Update progression control for the six operational statuses: Active, Deferred, Dropped Out, Suspended, Completed, and Graduated.
+- Added a simple Student Profile â†’ Update progression control for the six operational statuses: Active, Deferred, Dropped Out, Suspended, Completed, and Graduated.
 - Status changes now require only selecting a status and saving; the system records the effective date automatically and writes a lifecycle audit event without asking the user for a reason or note.
 - New students default to Active; existing `admitted` records are normalized to Active.
 - Non-active lifecycle statuses are excluded from active-semester student reporting/registration through the existing authoritative lifecycle filters, while historical records remain stored.
 - Removed Withdrawn from the student status UI and added Suspended to registry filters and batch status actions.
 
-## 2026-09-22 — Attachment and Not Reported student status controls
+## 2026-09-22 â€” Attachment and Not Reported student status controls
 
 - Added independent **Academic placement** control on the Student Profile: `In Class` / `Attachment`.
 - Added independent **Semester reporting** control: `Reported` / `Not Reported`.

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import {
   ChevronDown,
   ChevronRight,
@@ -41,11 +41,13 @@ export function StudentRegistryTable({
   cohorts = [],
   initialStatus,
 }: StudentRegistryTableProps) {
-  const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Active status tab state
-  const activeStatus = searchParams.get('status') || initialStatus || '';
+  // Active status tab state (seeded once from the URL; kept locally afterwards
+  // so switching tabs never waits on a server round-trip)
+  const [activeStatus, setActiveStatus] = useState(
+    () => searchParams.get('status') || initialStatus || '',
+  );
 
   // Filter & Search states
   const [cohortFilter, setCohortFilter] = useState('');
@@ -167,17 +169,23 @@ export function StudentRegistryTable({
     return sortedStudents.slice(start, start + pageSize);
   }, [sortedStudents, currentPageIndex, pageSize]);
 
-  // Handle Tab Switch
+  // Handle Tab Switch — filtering is done client-side on the already-loaded
+  // roster, so update local state instantly and only mirror the choice into the
+  // URL (shareable/refresh-safe) without triggering a server re-render.
   const handleTabChange = (value: string) => {
     setPageIndex(0);
-    const params = new URLSearchParams(searchParams.toString());
+    setActiveStatus(value);
+    const params = new URLSearchParams(window.location.search);
     if (value) {
       params.set('status', value);
     } else {
       params.delete('status');
     }
-    router.push(
-      `/students/registry${params.toString() ? `?${params.toString()}` : ''}`,
+    const qs = params.toString();
+    window.history.replaceState(
+      null,
+      '',
+      `/students/registry${qs ? `?${qs}` : ''}`,
     );
   };
 

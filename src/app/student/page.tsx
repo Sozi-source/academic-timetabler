@@ -13,7 +13,6 @@ import { redirect } from 'next/navigation';
 import { StudentPortalShell } from '@/components/student/student-portal-shell';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { COLLEGE_MINIMUM_ATTENDANCE_PERCENT } from '@/features/attendance-analytics/domain';
 import { getStudentPortalAttendance } from '@/features/attendance-analytics/queries';
 import {
   activeStudentUnits,
@@ -128,17 +127,12 @@ export default async function StudentPortalPage() {
                       Missed Lessons ({missedLessons.length})
                     </h2>
                     <span className="rounded bg-rose-200/80 px-1.5 py-0.2 text-[10px] font-bold text-rose-900">
-                      College Minimum: {COLLEGE_MINIMUM_ATTENDANCE_PERCENT}% Required
+                      Regular Attendance Required
                     </span>
                   </div>
-                  {attendance?.attendanceRate !== null && attendance?.attendanceRate !== undefined && (
-                    <span className="font-mono text-xs font-bold text-rose-800">
-                      Attendance: {attendance.attendanceRate.toFixed(1)}%
-                    </span>
-                  )}
                 </div>
                 <p className="mt-1 text-[11px] text-rose-800/90 leading-relaxed">
-                  You were marked absent in {missedLessons.length} scheduled class session{missedLessons.length === 1 ? '' : 's'}. TVET and college academic policy requires at least {COLLEGE_MINIMUM_ATTENDANCE_PERCENT}% attendance to sit for Continuous Assessment Tests (CATs) and final examinations.
+                  You were marked absent in {missedLessons.length} scheduled class session{missedLessons.length === 1 ? '' : 's'}. TVET and college academic policy requires regular class attendance to sit for Continuous Assessment Tests (CATs) and final examinations.
                 </p>
 
                 <div className="mt-2.5 divide-y divide-rose-200/60 rounded-lg border border-rose-200 bg-white overflow-hidden">

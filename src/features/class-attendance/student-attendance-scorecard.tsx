@@ -12,6 +12,7 @@ import {
   GraduationCap,
   LayoutGrid,
   List,
+  Percent,
   Search,
   SlidersHorizontal,
   User,
@@ -23,6 +24,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { MetricCard } from '@/components/ui/metric-card';
+import { Switch } from '@/components/ui/switch';
 import {
   COLLEGE_MINIMUM_ATTENDANCE_PERCENT,
   attendanceRateLabel,
@@ -44,7 +46,7 @@ interface StudentAttendanceScorecardProps {
 }
 
 type StandingFilter = 'all' | 'at_risk' | 'borderline' | 'good' | 'unrecorded';
-type SortField = 'overall_asc' | 'overall_desc' | 'name_asc' | 'admission_asc';
+type SortField = 'missed_desc' | 'missed_asc' | 'overall_asc' | 'overall_desc' | 'name_asc' | 'admission_asc';
 type ViewMode = 'matrix' | 'cards';
 
 export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceScorecardProps) {
@@ -53,9 +55,35 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCohortId, setSelectedCohortId] = useState<string>('all');
   const [standingFilter, setStandingFilter] = useState<StandingFilter>('all');
-  const [sortField, setSortField] = useState<SortField>('overall_asc');
+  const [sortField, setSortField] = useState<SortField>('missed_desc');
   const [viewMode, setViewMode] = useState<ViewMode>('matrix');
   const [inspectedStudent, setInspectedStudent] = useState<StudentAttendanceScorecardItem | null>(null);
+  const [showPercentage, setShowPercentage] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('attendance_show_percentage');
+        if (saved !== null) return saved === 'true';
+      } catch {
+        // ignore
+      }
+    }
+    return false;
+  });
+
+  const handleTogglePercentage = (checked: boolean) => {
+    setShowPercentage(checked);
+    try {
+      localStorage.setItem('attendance_show_percentage', String(checked));
+    } catch {
+      // ignore
+    }
+    // Automatically switch default sort field to match the selected mode
+    if (checked && (sortField === 'missed_desc' || sortField === 'missed_asc')) {
+      setSortField('overall_asc');
+    } else if (!checked && (sortField === 'overall_asc' || sortField === 'overall_desc')) {
+      setSortField('missed_desc');
+    }
+  };
 
   // Dynamic unit columns for the selected scope
   const activeUnitColumns = useMemo(() => {
@@ -110,6 +138,10 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
     // Sort students
     return filtered.sort((a, b) => {
       switch (sortField) {
+        case 'missed_desc':
+          return b.totalAbsent - a.totalAbsent;
+        case 'missed_asc':
+          return a.totalAbsent - b.totalAbsent;
         case 'overall_asc': {
           if (a.overallScore === null && b.overallScore === null) return 0;
           if (a.overallScore === null) return 1;
@@ -136,24 +168,39 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
   const handleExportCsv = () => {
     if (filteredStudents.length === 0) return;
 
-    const headers = [
-      'Admission No',
-      'Student Name',
-      'Cohort',
-      'Programme',
-      ...activeUnitColumns.map((u) => `${u.code} (%)`),
-      'Overall Attendance (%)',
-      'Standing',
-      'Total Sessions Attended',
-      'Total Sessions Held',
-    ];
+    const headers = showPercentage
+      ? [
+          'Admission No',
+          'Student Name',
+          'Cohort',
+          'Programme',
+          ...activeUnitColumns.map((u) => `${u.code} (%)`),
+          'Overall Attendance (%)',
+          'Standing',
+          'Total Sessions Attended',
+          'Total Sessions Held',
+        ]
+      : [
+          'Admission No',
+          'Student Name',
+          'Cohort',
+          'Programme',
+          ...activeUnitColumns.map((u) => `${u.code} (Missed)`),
+          'Total Missed Lessons',
+          'Standing',
+          'Total Sessions Attended',
+          'Total Sessions Held',
+        ];
 
     const rows = filteredStudents.map((s) => {
       const unitMap = new Map(s.units.map((u) => [u.unitId, u]));
       const unitValues = activeUnitColumns.map((col) => {
         const u = unitMap.get(col.id);
         if (!u) return 'N/A';
-        return u.attendanceRate !== null ? `${u.attendanceRate.toFixed(1)}%` : 'No sessions';
+        if (showPercentage) {
+          return u.attendanceRate !== null ? `${u.attendanceRate.toFixed(1)}%` : 'No sessions';
+        }
+        return `${u.absentCount} missed`;
       });
 
       return [
@@ -162,7 +209,9 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
         `"${s.cohortName}"`,
         `"${s.programmeCode}"`,
         ...unitValues.map((v) => `"${v}"`),
-        s.overallScore !== null ? `"${s.overallScore.toFixed(1)}%"` : '"No record"',
+        showPercentage
+          ? (s.overallScore !== null ? `"${s.overallScore.toFixed(1)}%"` : '"No record"')
+          : s.totalAbsent,
         `"${getAttendanceStandingLabel(s.standing)}"`,
         s.totalPresent,
         s.totalCompletedSessions,
@@ -194,18 +243,27 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
           description="Current department register"
         />
 
-        <MetricCard
-          label="Average attendance"
-          value={attendanceRateLabel(stats.averageAttendanceRate)}
-          icon={BookOpen}
-          description="Completed unit sessions"
-        />
+        {showPercentage ? (
+          <MetricCard
+            label="Average attendance"
+            value={attendanceRateLabel(stats.averageAttendanceRate)}
+            icon={BookOpen}
+            description="Completed unit sessions"
+          />
+        ) : (
+          <MetricCard
+            label="Missed lessons"
+            value={String(stats.totalMissedLessons)}
+            icon={AlertTriangle}
+            description="Total absences recorded"
+          />
+        )}
 
         <MetricCard
           label="Good standing"
           value={String(stats.goodStandingCount)}
           icon={CheckCircle2}
-          description="At or above threshold"
+          description={showPercentage ? "At or above threshold" : "Regular class attendance"}
         />
 
         {stats.atRiskCount > 0 ? (
@@ -213,21 +271,21 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
             type="button"
             onClick={() => setStandingFilter(standingFilter === 'at_risk' ? 'all' : 'at_risk')}
             className="text-left w-full cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-danger rounded-2xl"
-            title="Click to toggle filter for students below 80%"
+            title={showPercentage ? "Click to toggle filter for students below 80%" : "Click to toggle filter for students at risk"}
           >
             <MetricCard
-              label="Below 80%"
+              label={showPercentage ? "Below 80%" : "At risk"}
               value={String(stats.atRiskCount)}
-              icon={AlertTriangle}
+              icon={AlertCircle}
               description="Needs attendance review"
               className={standingFilter === 'at_risk' ? 'ring-2 ring-danger' : ''}
             />
           </button>
         ) : (
           <MetricCard
-            label="Below 80%"
+            label={showPercentage ? "Below 80%" : "At risk"}
             value={String(stats.atRiskCount)}
-            icon={AlertTriangle}
+            icon={AlertCircle}
             description="Needs attendance review"
           />
         )}
@@ -248,8 +306,8 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
             <AlertCircle className="size-3.5 shrink-0" />
             <span>
               {standingFilter === 'at_risk'
-                ? `Showing ${stats.atRiskCount} active student${stats.atRiskCount === 1 ? '' : 's'} below ${COLLEGE_MINIMUM_ATTENDANCE_PERCENT}% threshold (click to show all)`
-                : `View ${stats.atRiskCount} active student${stats.atRiskCount === 1 ? '' : 's'} below ${COLLEGE_MINIMUM_ATTENDANCE_PERCENT}% threshold`}
+                ? `Showing ${stats.atRiskCount} active student${stats.atRiskCount === 1 ? '' : 's'} ${showPercentage ? `below ${COLLEGE_MINIMUM_ATTENDANCE_PERCENT}% threshold` : 'at risk'} (click to show all)`
+                : `View ${stats.atRiskCount} active student${stats.atRiskCount === 1 ? '' : 's'} ${showPercentage ? `below ${COLLEGE_MINIMUM_ATTENDANCE_PERCENT}% threshold` : 'at risk'}`}
             </span>
           </button>
         </div>
@@ -312,8 +370,8 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
                 onChange={(e) => setSortField(e.target.value as SortField)}
                 className="h-8.5 rounded-lg border border-border bg-surface-subtle px-2.5 text-xs font-medium text-text-primary focus:border-primary focus:bg-white focus:outline-none transition"
               >
-                <option value="overall_asc">Attendance % (Lowest first)</option>
-                <option value="overall_desc">Attendance % (Highest first)</option>
+                <option value="missed_desc">Missed Lessons (Most first)</option>
+                <option value="missed_asc">Missed Lessons (Least first)</option>
                 <option value="name_asc">Student Name (A–Z)</option>
                 <option value="admission_asc">Admission No</option>
               </select>
@@ -391,7 +449,7 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
                 : 'bg-danger-surface text-danger border border-danger-border hover:bg-danger-surface'
             }`}
           >
-            Below 80% ({stats.atRiskCount})
+            At risk ({stats.atRiskCount})
           </button>
 
           <button
@@ -403,7 +461,7 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
                 : 'bg-warning-surface text-warning border border-warning-border hover:bg-warning-surface'
             }`}
           >
-            80–84% ({stats.borderlineCount})
+            Watch closely ({stats.borderlineCount})
           </button>
 
           <button
@@ -415,7 +473,7 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
                 : 'bg-success-surface text-success border border-success-border hover:bg-success-surface'
             }`}
           >
-            ≥85% ({stats.goodStandingCount})
+            Good standing ({stats.goodStandingCount})
           </button>
 
           <button
@@ -475,8 +533,8 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
                   ))}
 
                   {/* Pinned Overall Score & Standing Column */}
-                  <th className="px-4 py-3 text-right whitespace-nowrap bg-success-surface/50 text-success font-extrabold sticky right-0 z-20 border-l border-border">
-                    Overall Score (%)
+                  <th className="px-4 py-3 text-right whitespace-nowrap bg-surface-subtle font-extrabold sticky right-0 z-20 border-l border-border">
+                    Missed Lessons
                   </th>
                 </tr>
               </thead>
@@ -507,7 +565,7 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
                         <div className="flex items-center gap-1.5">
                           <span>{student.fullName}</span>
                           {isAtRisk ? (
-                            <span className="inline-block size-2 rounded-full bg-danger" title="At Risk (< 80%)" />
+                            <span className="inline-block size-2 rounded-full bg-danger" title="At Risk" />
                           ) : isGood ? (
                             <span className="inline-block size-2 rounded-full bg-success" title="Good Standing" />
                           ) : null}
@@ -533,7 +591,7 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
                           );
                         }
 
-                        if (unitScore.attendanceRate === null) {
+                        if (unitScore.completedSessions === 0) {
                           return (
                             <td key={col.id} className="px-2 py-2 text-center border-r border-border" title="No completed sessions recorded">
                               <span className="inline-block rounded bg-surface-subtle px-1.5 py-0.5 text-[9.5px] font-medium text-text-muted">
@@ -543,24 +601,23 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
                           );
                         }
 
-                        const rate = unitScore.attendanceRate;
-                        const isUnitAtRisk = rate < COLLEGE_MINIMUM_ATTENDANCE_PERCENT;
-                        const isUnitGood = rate >= 85.0;
+                        const hasAbsence = unitScore.absentCount > 0;
+                        const isUnitAtRisk = unitScore.attendanceRate !== null && unitScore.attendanceRate < COLLEGE_MINIMUM_ATTENDANCE_PERCENT;
 
                         return (
                           <td
                             key={col.id}
-                            className={`px-2 py-2 text-center border-r border-border font-mono text-[10.5px] font-bold ${
-                              isUnitAtRisk
-                                ? 'bg-danger-surface/60 text-danger'
-                                : isUnitGood
-                                  ? 'bg-success-surface/30 text-success'
-                                  : 'text-warning'
+                            className={`px-2 py-2 text-center border-r border-border font-mono text-[10.5px] ${
+                              hasAbsence
+                                ? isUnitAtRisk
+                                  ? 'bg-danger-surface/60 text-danger font-bold'
+                                  : 'bg-amber-50/50 text-amber-800 font-semibold'
+                                : 'text-emerald-700 font-medium'
                             }`}
-                            title={`${unitScore.unitCode}: ${unitScore.presentCount}/${unitScore.presentCount + unitScore.absentCount} sessions attended (${rate.toFixed(1)}%)`}
+                            title={`${unitScore.unitCode}: ${unitScore.absentCount} missed, ${unitScore.presentCount} attended (${unitScore.completedSessions} total sessions)`}
                           >
                             <span className="inline-block min-w-[36px] rounded px-1 py-0.5">
-                              {rate.toFixed(1)}%
+                              {unitScore.absentCount === 0 ? '0 missed' : `${unitScore.absentCount} missed`}
                             </span>
                           </td>
                         );
@@ -571,16 +628,14 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
                         <div className="flex items-center justify-end gap-2">
                           <span
                             className={`font-mono text-xs font-black ${
-                              isAtRisk
-                                ? 'text-danger'
-                                : isGood
-                                  ? 'text-success'
-                                  : student.overallScore !== null
-                                    ? 'text-warning'
-                                    : 'text-text-muted'
+                              student.totalAbsent > 0
+                                ? isAtRisk
+                                  ? 'text-danger'
+                                  : 'text-amber-700'
+                                : 'text-success'
                             }`}
                           >
-                            {student.overallScore !== null ? `${student.overallScore.toFixed(1)}%` : '—'}
+                            {student.totalAbsent} missed
                           </span>
 
                           <Badge variant={getAttendanceBadgeVariant(student.overallScore)} className="text-[10px] py-0 px-1.5">
@@ -639,16 +694,16 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
                   </div>
 
                   <div className="text-right">
-                    <div className="text-[10px] uppercase font-bold text-text-muted tracking-wider">Overall Attendance</div>
+                    <div className="text-[10px] uppercase font-bold text-text-muted tracking-wider">Missed Lessons</div>
                     <div
                       className={`font-mono text-lg font-black ${
-                        isAtRisk ? 'text-danger' : 'text-success'
+                        student.totalAbsent > 0 ? (isAtRisk ? 'text-danger' : 'text-amber-700') : 'text-success'
                       }`}
                     >
-                      {student.overallScore !== null ? `${student.overallScore.toFixed(1)}%` : '—'}
+                      {student.totalAbsent} {student.totalAbsent === 1 ? 'lesson' : 'lessons'}
                     </div>
                     <div className="text-[10.5px] text-text-muted">
-                      {student.totalPresent}/{student.totalCompletedSessions} sessions
+                      {student.totalPresent}/{student.totalCompletedSessions} attended
                     </div>
                   </div>
                 </div>
@@ -685,17 +740,17 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
                             <div className="text-right shrink-0">
                               <span
                                 className={`font-mono font-bold text-xs ${
-                                  isUnitAtRisk
-                                    ? 'text-danger'
-                                    : unit.attendanceRate !== null
-                                      ? 'text-success'
-                                      : 'text-text-muted'
+                                  unit.absentCount > 0
+                                    ? isUnitAtRisk
+                                      ? 'text-danger'
+                                      : 'text-amber-700'
+                                    : 'text-success'
                                 }`}
                               >
-                                {unit.attendanceRate !== null ? `${unit.attendanceRate.toFixed(1)}%` : '—'}
+                                {unit.absentCount} missed
                               </span>
                               <div className="text-[9.5px] text-text-muted">
-                                {unit.presentCount}/{unit.completedSessions} ses
+                                {unit.presentCount}/{unit.completedSessions} attended
                               </div>
                             </div>
                           </div>
@@ -739,9 +794,9 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
             {/* Scorecard Overview */}
             <div className="mt-4 grid grid-cols-3 gap-3 rounded-xl bg-surface-subtle p-3.5 text-center">
               <div>
-                <div className="text-[10px] font-bold uppercase text-text-muted">Overall Rate</div>
-                <div className="font-mono text-lg font-black text-primary">
-                  {inspectedStudent.overallScore !== null ? `${inspectedStudent.overallScore.toFixed(1)}%` : '—'}
+                <div className="text-[10px] font-bold uppercase text-text-muted">Missed Lessons</div>
+                <div className={`font-mono text-lg font-black ${inspectedStudent.totalAbsent > 0 ? 'text-danger' : 'text-success'}`}>
+                  {inspectedStudent.totalAbsent}
                 </div>
               </div>
               <div>
@@ -778,11 +833,11 @@ export function StudentAttendanceScorecard({ scorecardData }: StudentAttendanceS
                       <div className="text-[11px] text-text-secondary">{u.unitName}</div>
                     </div>
                     <div className="text-right">
-                      <div className="font-mono font-bold text-sm text-text-primary">
-                        {u.attendanceRate !== null ? `${u.attendanceRate.toFixed(1)}%` : 'No sessions'}
+                      <div className={`font-mono font-bold text-sm ${u.absentCount > 0 ? 'text-danger' : 'text-success'}`}>
+                        {u.absentCount} missed
                       </div>
                       <div className="text-[10.5px] text-text-muted">
-                        {u.presentCount} present · {u.absentCount} absent
+                        {u.presentCount} attended · {u.completedSessions} total sessions
                       </div>
                     </div>
                   </div>

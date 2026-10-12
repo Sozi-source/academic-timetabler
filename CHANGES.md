@@ -1,4 +1,12 @@
-﻿### 2026-10-12: Instant status tab switching on Student Registry
+﻿### 2026-10-12: Responsive admin sidebar navigation
+
+**Added:** `src/app/(dashboard)/loading.tsx` **Modified:** `src/components/layout/admin-sidebar.tsx`
+- Root cause: most sidebar destinations had no `loading.tsx`, so the old page stayed visible until the server finished rendering (auth + data queries); the active highlight also waited for `pathname` to change.
+- Fix: shared dashboard skeleton fallback (segment-level loading.tsx files still take precedence) and an optimistic active highlight set on click, self-clearing once the pathname changes.
+- Not changed: pathname-based shell swapping in `dashboard-shell.tsx` (remount on section change).
+- No breaking changes, no manual follow-up.
+
+### 2026-10-12: Instant status tab switching on Student Registry
 
 **Modified:** `src/features/students/student-registry-table.tsx`
 - Root cause: `handleTabChange` used `router.push` which re-rendered the server page and refetched the entire roster (`getStudents`, cohort options, auth) on every tab click, although filtering is already client-side.

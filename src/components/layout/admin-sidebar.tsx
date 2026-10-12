@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 import { logoutAction } from '@/features/auth/actions';
 import { cn } from '@/lib/utils/cn';
@@ -173,6 +173,12 @@ export function AdminSidebar({
 }: AdminSidebarProps) {
   const pathname = usePathname();
 
+  // Optimistic navigation: highlight the clicked item immediately instead of
+  // waiting for the server render. It is only honoured while the pathname is
+  // still the one the click started from, so it clears itself on arrival.
+  const [pendingNav, setPendingNav] = useState<{ href: string; from: string } | null>(null);
+  const pendingHref = pendingNav && pendingNav.from === pathname ? pendingNav.href : null;
+
   const allHrefs = useMemo(() => adminNavItems.map((item) => item.href), []);
 
   const sidebarContent = (
@@ -223,13 +229,18 @@ export function AdminSidebar({
 
             {section.items.map((item) => {
               const Icon = item.icon;
-              const isActive = isNavItemActive(pathname, item.href, allHrefs, item.exact);
+              const isActive = pendingHref
+                ? pendingHref === item.href
+                : isNavItemActive(pathname, item.href, allHrefs, item.exact);
 
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  onClick={onMobileClose}
+                  onClick={() => {
+                    setPendingNav({ href: item.href, from: pathname });
+                    onMobileClose?.();
+                  }}
                   aria-current={isActive ? 'page' : undefined}
                   className={cn(
                     'group relative flex min-h-10 items-center gap-2.5 rounded-xl px-3 py-2 text-[0.72rem] font-semibold transition-all duration-150',

@@ -1,4 +1,11 @@
-﻿### 2026-10-12: Responsive admin sidebar navigation
+﻿### 2026-10-12: Restore admin attendance percentages (student portal stays hidden)
+
+**Modified (restored to pre-4cac023 versions):** `src/features/class-attendance/student-attendance-scorecard.tsx`, `src/features/attendance-analytics/hod-attendance-view.tsx`, `src/app/(dashboard)/attendance/page.tsx`, `src/app/(dashboard)/attendance-clinical/class-attendance/analytics/page.tsx`, `src/app/api/attendance/scorecard/export/route.ts`
+- The change that hid attendance % from students also replaced percentages with 'missed lessons' in the HOD views and Excel export. Admin views again show overall/per-unit attendance %, thresholds, sorting and cohort/student filters; the export has % columns again.
+- Unchanged: `src/app/student/page.tsx` (student portal still hides the %). The `totalMissedLessons` stat remains in scorecard queries/types.
+- No migrations or manual follow-up.
+
+### 2026-10-12: Responsive admin sidebar navigation
 
 **Added:** `src/app/(dashboard)/loading.tsx` **Modified:** `src/components/layout/admin-sidebar.tsx`
 - Root cause: most sidebar destinations had no `loading.tsx`, so the old page stayed visible until the server finished rendering (auth + data queries); the active highlight also waited for `pathname` to change.

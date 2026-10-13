@@ -152,8 +152,8 @@ export function HodAttendanceView({
           >
             <AlertTriangle className={`size-3.5 ${standingFilter === 'at_risk' ? 'text-white' : 'text-rose-600'}`} />
             {standingFilter === 'at_risk'
-              ? `Showing ${standingCounts.atRisk} Student${standingCounts.atRisk === 1 ? '' : 's'} at Risk (Click to show all)`
-              : `View ${standingCounts.atRisk} Student${standingCounts.atRisk === 1 ? '' : 's'} at Risk`}
+              ? `Showing ${standingCounts.atRisk} Student${standingCounts.atRisk === 1 ? '' : 's'} Below ${COLLEGE_MINIMUM_ATTENDANCE_PERCENT}% (Click to show all)`
+              : `View ${standingCounts.atRisk} Student${standingCounts.atRisk === 1 ? '' : 's'} Below ${COLLEGE_MINIMUM_ATTENDANCE_PERCENT}%`}
           </button>
         ) : null}
       </div>
@@ -225,7 +225,7 @@ export function HodAttendanceView({
                     : 'bg-rose-50 text-rose-800 border border-rose-200 hover:bg-rose-100'
                 }`}
               >
-                At Risk ({standingCounts.atRisk})
+                At Risk &lt;80% ({standingCounts.atRisk})
               </button>
 
               <button
@@ -237,7 +237,7 @@ export function HodAttendanceView({
                     : 'bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100'
                 }`}
               >
-                Watch Closely ({standingCounts.borderline})
+                Borderline 80–84% ({standingCounts.borderline})
               </button>
 
               <button
@@ -249,7 +249,7 @@ export function HodAttendanceView({
                     : 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
                 }`}
               >
-                Good Standing ({standingCounts.good})
+                Good ≥85% ({standingCounts.good})
               </button>
             </div>
           </div>
@@ -274,7 +274,7 @@ export function HodAttendanceView({
                       <th className="px-2.5 py-2.5 text-center">Completed</th>
                       <th className="px-2.5 py-2.5 text-center">Present</th>
                       <th className="px-2.5 py-2.5 text-center">Absent</th>
-                      <th className="px-3.5 py-2.5 text-right">Standing</th>
+                      <th className="px-3.5 py-2.5 text-right">Attendance Rate</th>
                     </tr>
                   </thead>
 
@@ -333,11 +333,11 @@ export function HodAttendanceView({
                               {isAtRisk ? (
                                 <span className="inline-flex items-center gap-1 rounded-md border border-rose-200 bg-rose-100 px-2 py-0.5 font-mono text-[10.5px] font-bold text-rose-800">
                                   <AlertTriangle className="size-3 text-rose-600" />
-                                  {s.absentCount} missed · At Risk
+                                  {attendanceRateLabel(s.attendanceRate)} · At Risk
                                 </span>
                               ) : (
                                 <Badge variant={getAttendanceBadgeVariant(s.attendanceRate)}>
-                                  {s.absentCount > 0 ? `${s.absentCount} missed` : 'Good Standing'}
+                                  {attendanceRateLabel(s.attendanceRate)}
                                   {standing === 'borderline' ? ' · Borderline' : ''}
                                 </Badge>
                               )}
@@ -355,7 +355,7 @@ export function HodAttendanceView({
                   Showing {filteredStudents.length} of {students.length} student record{students.length === 1 ? '' : 's'}
                 </span>
                 <span>
-                  Regular attendance required for examination clearance.
+                  College Minimum Requirement: <strong>{COLLEGE_MINIMUM_ATTENDANCE_PERCENT}%</strong>
                 </span>
               </div>
             </div>

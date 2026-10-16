@@ -13,7 +13,7 @@ const navy =
   'FF102B54';
 
 const border =
-  'FFD9E1EA';
+  'FF64748B';
 
 function applyBorder(
   cell: ExcelJS.Cell,
@@ -474,19 +474,22 @@ export async function generateAssessmentSigningSheet(
         ];
 
         row.height =
-          25;
+          28;
 
         row.eachCell(
           (cell, colNumber) => {
             cell.font = {
-              size: 9,
+              size: 11,
+              color: {
+                argb: 'FF1E293B',
+              },
             };
 
             cell.alignment = {
               vertical:
                 'middle',
               wrapText:
-                colNumber !== 2,
+                colNumber > 3,
             };
 
             applyBorder(
@@ -534,7 +537,7 @@ export async function generateAssessmentSigningSheet(
             4,
           ).font = {
             bold: true,
-            size: 9,
+            size: 11,
             color: {
               argb:
                 'FF7F1D1D',
@@ -562,19 +565,19 @@ export async function generateAssessmentSigningSheet(
 
     sheet.columns = [
       {
-        width: 7,
+        width: 8,
       },
       {
-        width: 28,
+        width: 30,
       },
       {
-        width: 32,
+        width: 38,
       },
       {
         width: 24,
       },
       {
-        width: 14,
+        width: 16,
       },
       {
         width: 22,

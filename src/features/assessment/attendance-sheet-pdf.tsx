@@ -21,20 +21,20 @@ Font.registerHyphenationCallback((word) => [word]);
 
 const styles = StyleSheet.create({
   pageLandscape: {
-    paddingTop: 18,
-    paddingBottom: 22,
-    paddingHorizontal: 24,
-    fontSize: 7.5,
+    paddingTop: 16,
+    paddingBottom: 20,
+    paddingHorizontal: 16,
+    fontSize: 8,
     fontFamily: 'Helvetica',
-    color: '#0f172a',
+    color: '#1e293b',
   },
   pagePortrait: {
-    paddingTop: 20,
-    paddingBottom: 22,
-    paddingHorizontal: 26,
-    fontSize: 7.5,
+    paddingTop: 18,
+    paddingBottom: 20,
+    paddingHorizontal: 16,
+    fontSize: 8,
     fontFamily: 'Helvetica',
-    color: '#0f172a',
+    color: '#1e293b',
   },
   headerContainer: {
     marginBottom: 6,
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 9,
     fontFamily: 'Helvetica-Bold',
-    color: '#0f172a',
+    color: '#1e293b',
     textAlign: 'center',
     marginBottom: 1.5,
     textTransform: 'uppercase',
@@ -73,8 +73,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     backgroundColor: '#f8fafc',
-    borderWidth: 0.5,
-    borderColor: '#cbd5e1',
+    borderWidth: 0.75,
+    borderColor: '#64748b',
     borderRadius: 3,
     paddingVertical: 3,
     paddingHorizontal: 6,
@@ -89,13 +89,13 @@ const styles = StyleSheet.create({
   },
   metaLabel: {
     fontFamily: 'Helvetica-Bold',
-    fontSize: 7,
+    fontSize: 8,
     color: '#334155',
     width: 68,
   },
   metaValue: {
-    fontSize: 7,
-    color: '#0f172a',
+    fontSize: 8,
+    color: '#1e293b',
     flex: 1,
   },
   cohortBanner: {
@@ -103,81 +103,84 @@ const styles = StyleSheet.create({
     fontFamily: 'Helvetica-Bold',
     color: '#033B36',
     backgroundColor: '#ecfdf5',
-    borderWidth: 0.5,
-    borderColor: '#a7f3d0',
+    borderWidth: 0.75,
+    borderColor: '#6ee7b7',
     borderRadius: 2,
     paddingVertical: 2,
     paddingHorizontal: 6,
     marginBottom: 6,
   },
   table: {
-    borderWidth: 0.75,
-    borderColor: '#94a3b8',
+    borderWidth: 1,
+    borderColor: '#475569',
     marginBottom: 8,
   },
   tableHeaderRow: {
     flexDirection: 'row',
-    backgroundColor: '#f8fafc',
-    borderBottomWidth: 0.75,
-    borderBottomColor: '#94a3b8',
+    backgroundColor: '#f1f5f9',
+    borderBottomWidth: 1,
+    borderBottomColor: '#475569',
   },
   tableRow: {
     flexDirection: 'row',
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#cbd5e1',
-    minHeight: 14,
+    borderBottomWidth: 0.75,
+    borderBottomColor: '#64748b',
+    minHeight: 22,
     alignItems: 'center',
   },
   tableRowLast: {
     flexDirection: 'row',
-    minHeight: 14,
+    minHeight: 22,
     alignItems: 'center',
   },
   thCell: {
     fontFamily: 'Helvetica-Bold',
-    fontSize: 7,
+    fontSize: 9.5,
     color: '#1e293b',
-    paddingVertical: 3,
-    paddingHorizontal: 2,
+    paddingVertical: 4,
+    paddingHorizontal: 3,
     textAlign: 'center',
-    borderRightWidth: 0.5,
-    borderRightColor: '#94a3b8',
+    borderRightWidth: 0.75,
+    borderRightColor: '#64748b',
     justifyContent: 'center',
   },
   tdCell: {
-    fontSize: 6.8,
-    color: '#0f172a',
-    paddingVertical: 2,
-    paddingHorizontal: 3,
-    borderRightWidth: 0.5,
-    borderRightColor: '#cbd5e1',
+    fontSize: 11,
+    color: '#1e293b',
+    paddingVertical: 3.5,
+    paddingHorizontal: 4,
+    borderRightWidth: 0.75,
+    borderRightColor: '#64748b',
     justifyContent: 'center',
   },
   cellNoBorderRight: {
     borderRightWidth: 0,
   },
   classDateHeader: {
-    fontSize: 6,
+    fontSize: 7,
     textAlign: 'left',
     paddingLeft: 2,
+    color: '#334155',
   },
   centerText: {
     textAlign: 'center',
   },
   boldText: {
     fontFamily: 'Helvetica-Bold',
+    color: '#1e293b',
   },
   examSummaryBox: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     backgroundColor: '#f8fafc',
-    borderWidth: 0.75,
-    borderColor: '#94a3b8',
+    borderWidth: 1,
+    borderColor: '#64748b',
     paddingVertical: 4,
     paddingHorizontal: 8,
     marginBottom: 10,
-    fontSize: 7.2,
+    fontSize: 9,
     fontFamily: 'Helvetica-Bold',
+    color: '#1e293b',
   },
   signoffContainerLandscape: {
     marginTop: 8,
@@ -186,50 +189,50 @@ const styles = StyleSheet.create({
   signoffRowLandscape: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    height: 16,
+    height: 18,
   },
   signoffLabelLandscape: {
     fontFamily: 'Helvetica-Bold',
-    fontSize: 7.5,
-    color: '#0f172a',
-    width: 108,
+    fontSize: 8.5,
+    color: '#1e293b',
+    width: 112,
   },
   signoffLineLandscapeName: {
-    borderBottomWidth: 0.75,
-    borderBottomColor: '#94a3b8',
+    borderBottomWidth: 1,
+    borderBottomColor: '#64748b',
     width: 140,
-    height: 14,
+    height: 16,
     paddingHorizontal: 2,
     justifyContent: 'flex-end',
   },
   signoffLabelComment: {
     fontFamily: 'Helvetica-Bold',
-    fontSize: 7.5,
-    color: '#0f172a',
+    fontSize: 8.5,
+    color: '#1e293b',
     width: 52,
     textAlign: 'right',
     paddingRight: 4,
   },
   signoffLineComment: {
-    borderBottomWidth: 0.75,
-    borderBottomColor: '#94a3b8',
+    borderBottomWidth: 1,
+    borderBottomColor: '#64748b',
     flex: 1,
-    height: 14,
+    height: 16,
     marginRight: 6,
   },
   signoffLabelSign: {
     fontFamily: 'Helvetica-Bold',
-    fontSize: 7.5,
-    color: '#0f172a',
+    fontSize: 8.5,
+    color: '#1e293b',
     width: 32,
     textAlign: 'right',
     paddingRight: 4,
   },
   signoffLineSign: {
-    borderBottomWidth: 0.75,
-    borderBottomColor: '#94a3b8',
+    borderBottomWidth: 1,
+    borderBottomColor: '#64748b',
     width: 90,
-    height: 14,
+    height: 16,
   },
   signoffContainerPortrait: {
     marginTop: 12,
@@ -238,49 +241,49 @@ const styles = StyleSheet.create({
   signoffRowPortrait: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    height: 16,
+    height: 18,
   },
   signoffLabelPortrait: {
     fontFamily: 'Helvetica-Bold',
-    fontSize: 7.5,
-    color: '#0f172a',
-    width: 78,
+    fontSize: 8.5,
+    color: '#1e293b',
+    width: 82,
   },
   signoffLinePortraitName: {
-    borderBottomWidth: 0.75,
-    borderBottomColor: '#94a3b8',
+    borderBottomWidth: 1,
+    borderBottomColor: '#64748b',
     width: 160,
-    height: 14,
+    height: 16,
     paddingHorizontal: 2,
     justifyContent: 'flex-end',
   },
   signoffLabelPortraitSign: {
     fontFamily: 'Helvetica-Bold',
-    fontSize: 7.5,
-    color: '#0f172a',
+    fontSize: 8.5,
+    color: '#1e293b',
     width: 34,
     textAlign: 'right',
     paddingRight: 4,
   },
   signoffLinePortraitSign: {
-    borderBottomWidth: 0.75,
-    borderBottomColor: '#94a3b8',
+    borderBottomWidth: 1,
+    borderBottomColor: '#64748b',
     width: 100,
-    height: 14,
+    height: 16,
   },
   signoffLabelPortraitDate: {
     fontFamily: 'Helvetica-Bold',
-    fontSize: 7.5,
-    color: '#0f172a',
+    fontSize: 8.5,
+    color: '#1e293b',
     width: 34,
     textAlign: 'right',
     paddingRight: 4,
   },
   signoffLinePortraitDate: {
-    borderBottomWidth: 0.75,
-    borderBottomColor: '#94a3b8',
+    borderBottomWidth: 1,
+    borderBottomColor: '#64748b',
     width: 80,
-    height: 14,
+    height: 16,
   },
   footer: {
     position: 'absolute',
@@ -288,7 +291,7 @@ const styles = StyleSheet.create({
     left: 24,
     right: 24,
     textAlign: 'center',
-    fontSize: 6.8,
+    fontSize: 7.5,
     color: '#64748b',
   },
 });
@@ -339,26 +342,26 @@ export async function generateAttendanceSheetPdf(
     });
   }
 
-  // Column width constants for Landscape Class Attendance
-  const COL_CLASS_NO = 22;
-  const COL_CLASS_ADM = 126;
-  const COL_CLASS_NAME = 166;
-  const COL_CLASS_SESSION = 59.25; // 8 sessions * 59.25 = 474. Total = 788pt
+  // Column width constants for Landscape Class Attendance (Total: 808pt)
+  const COL_CLASS_NO = 24;
+  const COL_CLASS_ADM = 144;
+  const COL_CLASS_NAME = 208;
+  const COL_CLASS_SESSION = 54; // 8 sessions * 54 = 432. Total = 808pt
 
-  // Column width constants for Portrait CAT / Exam Attendance
-  const COL_EXAM_NO = 22;
-  const COL_EXAM_ADM = 126;
-  const COL_EXAM_NAME = 192;
-  const COL_EXAM_BOOKLET = 86;
-  const COL_EXAM_SIGN = 58;
-  const COL_EXAM_DATE = 58; // Total = 542pt
+  // Column width constants for Portrait CAT / Exam Attendance (Total: 562pt)
+  const COL_EXAM_NO = 24;
+  const COL_EXAM_ADM = 140;
+  const COL_EXAM_NAME = 196;
+  const COL_EXAM_BOOKLET = 68;
+  const COL_EXAM_SIGN = 67;
+  const COL_EXAM_DATE = 67; // Total = 562pt
 
-  const COL_CAT_NO = 22;
-  const COL_CAT_ADM = 126;
-  const COL_CAT_NAME = 202;
-  const COL_CAT_SIGN = 90;
-  const COL_CAT_SCORE = 51;
-  const COL_CAT_DATE = 51; // Total = 542pt
+  const COL_CAT_NO = 24;
+  const COL_CAT_ADM = 140;
+  const COL_CAT_NAME = 210;
+  const COL_CAT_SIGN = 76;
+  const COL_CAT_SCORE = 56;
+  const COL_CAT_DATE = 56; // Total = 562pt
 
   const doc = (
     <Document
@@ -465,7 +468,7 @@ export async function generateAttendanceSheetPdf(
                         s === 7 ? styles.cellNoBorderRight : {},
                       ]}
                     >
-                      <Text style={styles.classDateHeader}>Date: __________</Text>
+                      <Text style={styles.classDateHeader}>Date: ____</Text>
                     </View>
                   ))}
                 </View>
@@ -517,15 +520,15 @@ export async function generateAttendanceSheetPdf(
               {group.candidates.map((cand, idx) => {
                 if (isClass) {
                   return (
-                    <View key={cand.studentId} style={styles.tableRow}>
+                    <View key={cand.studentId} wrap={false} style={styles.tableRow}>
                       <View style={[styles.tdCell, { width: COL_CLASS_NO }]}>
                         <Text style={styles.centerText}>{idx + 1}.</Text>
                       </View>
                       <View style={[styles.tdCell, { width: COL_CLASS_ADM }]}>
-                        <Text style={styles.boldText}>{cand.admissionNumber}</Text>
+                        <Text wrap={false} style={styles.boldText}>{cand.admissionNumber}</Text>
                       </View>
                       <View style={[styles.tdCell, { width: COL_CLASS_NAME }]}>
-                        <Text>{cand.fullName}</Text>
+                        <Text wrap={false}>{cand.fullName}</Text>
                       </View>
                       {Array.from({ length: 8 }, (_, s) => (
                         <View
@@ -545,15 +548,15 @@ export async function generateAttendanceSheetPdf(
 
                 if (isExam) {
                   return (
-                    <View key={cand.studentId} style={styles.tableRow}>
+                    <View key={cand.studentId} wrap={false} style={styles.tableRow}>
                       <View style={[styles.tdCell, { width: COL_EXAM_NO }]}>
                         <Text style={styles.centerText}>{idx + 1}.</Text>
                       </View>
                       <View style={[styles.tdCell, { width: COL_EXAM_ADM }]}>
-                        <Text style={styles.boldText}>{cand.admissionNumber}</Text>
+                        <Text wrap={false} style={styles.boldText}>{cand.admissionNumber}</Text>
                       </View>
                       <View style={[styles.tdCell, { width: COL_EXAM_NAME }]}>
-                        <Text>{cand.fullName}</Text>
+                        <Text wrap={false}>{cand.fullName}</Text>
                       </View>
                       <View style={[styles.tdCell, { width: COL_EXAM_BOOKLET }]}>
                         <Text>&nbsp;</Text>
@@ -569,15 +572,15 @@ export async function generateAttendanceSheetPdf(
                 }
 
                 return (
-                  <View key={cand.studentId} style={styles.tableRow}>
+                  <View key={cand.studentId} wrap={false} style={styles.tableRow}>
                     <View style={[styles.tdCell, { width: COL_CAT_NO }]}>
                       <Text style={styles.centerText}>{idx + 1}.</Text>
                     </View>
                     <View style={[styles.tdCell, { width: COL_CAT_ADM }]}>
-                      <Text style={styles.boldText}>{cand.admissionNumber}</Text>
+                      <Text wrap={false} style={styles.boldText}>{cand.admissionNumber}</Text>
                     </View>
                     <View style={[styles.tdCell, { width: COL_CAT_NAME }]}>
-                      <Text>{cand.fullName}</Text>
+                      <Text wrap={false}>{cand.fullName}</Text>
                     </View>
                     <View style={[styles.tdCell, { width: COL_CAT_SIGN }]}>
                       <Text>&nbsp;</Text>
@@ -602,7 +605,7 @@ export async function generateAttendanceSheetPdf(
 
                 if (isClass) {
                   return (
-                    <View key={`blank-${bIdx}`} style={rowStyle}>
+                    <View key={`blank-${bIdx}`} wrap={false} style={rowStyle}>
                       <View style={[styles.tdCell, { width: COL_CLASS_NO }]}>
                         <Text style={styles.centerText}>{rowNum}.</Text>
                       </View>
@@ -630,7 +633,7 @@ export async function generateAttendanceSheetPdf(
 
                 if (isExam) {
                   return (
-                    <View key={`blank-${bIdx}`} style={rowStyle}>
+                    <View key={`blank-${bIdx}`} wrap={false} style={rowStyle}>
                       <View style={[styles.tdCell, { width: COL_EXAM_NO }]}>
                         <Text style={styles.centerText}>{rowNum}.</Text>
                       </View>
@@ -654,7 +657,7 @@ export async function generateAttendanceSheetPdf(
                 }
 
                 return (
-                  <View key={`blank-${bIdx}`} style={rowStyle}>
+                  <View key={`blank-${bIdx}`} wrap={false} style={rowStyle}>
                     <View style={[styles.tdCell, { width: COL_CAT_NO }]}>
                       <Text style={styles.centerText}>{rowNum}.</Text>
                     </View>

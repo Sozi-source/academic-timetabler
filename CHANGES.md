@@ -1,4 +1,22 @@
-﻿### 2026-10-12: Restore admin attendance percentages (student portal stays hidden)
+### 2026-10-16: Enhance Class Attendance, CAT & Exam Signing Sheet Print Clarity & Typography
+
+**Modified:**
+- `src/features/assessment/attendance-sheet-pdf.tsx`
+- `src/features/assessment/printable-signing-sheet.tsx`
+- `src/features/class-attendance/printable-class-register.tsx`
+- `src/features/assessment/attendance-sheet-docx.ts`
+- `src/features/assessment/signing-sheet-generator.ts`
+- `src/app/api/assessment/[assessmentId]/attendance-sheet/route.ts`
+
+**Details:**
+- **Crisp Deeper Gray Borders**: Replaced faint/washed-out 0.5pt `#cbd5e1` and `#94a3b8` borders with crisp, deep slate gray borders (`#64748b` internal cell/row borders, `#475569` outer table borders and header dividers). This ensures sharp, visible printed borders on physical laser and inkjet printers without resorting to harsh black `#000000`.
+- **Clearer Gray Font Typography**: Upgraded font colors across headers and data cells from pure/near-black (`#000000`/`#0f172a`) to executive slate gray (`#1e293b` / `#334155`), maintaining the premium design while improving contrast and aesthetic clarity.
+- **Font Size Increased to 11**: Increased text font size across table data cells from 6.8pt/10.5px to 11pt, ensuring student details and attendance rolls are clearly legible when printed.
+- **Non-Wrapping Student Name & Admission Number**: Expanded column widths for admission numbers and candidate names across Landscape Class Attendance (144pt Adm / 208pt Name), Portrait Exam Register (140pt Adm / 196pt Name), and Portrait CAT Register (140pt Adm / 210pt Name). Added `wrap={false}` and `whitespace-nowrap` guarantees to prevent names or admission numbers from wrapping to subsequent lines or truncating.
+- **Print Stylesheets**: Added `@media print` rules to ensure that browser prints use the same clear slate gray palette (`color: #1e293b !important; border-color: #64748b !important;`).
+- No database migrations or manual follow-up required.
+
+### 2026-10-12: Restore admin attendance percentages (student portal stays hidden)
 
 **Modified (restored to pre-4cac023 versions):** `src/features/class-attendance/student-attendance-scorecard.tsx`, `src/features/attendance-analytics/hod-attendance-view.tsx`, `src/app/(dashboard)/attendance/page.tsx`, `src/app/(dashboard)/attendance-clinical/class-attendance/analytics/page.tsx`, `src/app/api/attendance/scorecard/export/route.ts`
 - The change that hid attendance % from students also replaced percentages with 'missed lessons' in the HOD views and Excel export. Admin views again show overall/per-unit attendance %, thresholds, sorting and cohort/student filters; the export has % columns again.

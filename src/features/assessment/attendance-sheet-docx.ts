@@ -52,11 +52,17 @@ const thinBorder = {
   color: '94A3B8',
 } as const;
 
+const cellBorder = {
+  style: BorderStyle.SINGLE,
+  size: 6,
+  color: '64748B',
+} as const;
+
 const borders = {
-  top: thinBorder,
-  bottom: thinBorder,
-  left: thinBorder,
-  right: thinBorder,
+  top: cellBorder,
+  bottom: cellBorder,
+  left: cellBorder,
+  right: cellBorder,
 } as const;
 
 const noBorder = {
@@ -110,8 +116,8 @@ function labelLine(label: string, value: string) {
   return new Paragraph({
     spacing: { after: 30, line: 240 },
     children: [
-      new TextRun({ text: `${label}: `, bold: true, size: 18, font: FONT }),
-      new TextRun({ text: value, size: 18, font: FONT }),
+      new TextRun({ text: `${label}: `, bold: true, size: 18, font: FONT, color: '334155' }),
+      new TextRun({ text: value, size: 18, font: FONT, color: '1E293B' }),
     ],
   });
 }
@@ -122,6 +128,8 @@ function cell(
     bold?: boolean;
     align?: (typeof AlignmentType)[keyof typeof AlignmentType];
     shading?: string;
+    size?: number;
+    color?: string;
   } = {},
 ) {
   return new TableCell({
@@ -132,8 +140,10 @@ function cell(
     children: [
       paragraph(value, {
         bold: options.bold,
-        size: 16,
+        size: options.size ?? 22,
+        color: options.color ?? '1E293B',
         alignment: options.align,
+        keepLines: true,
       }),
     ],
   });
@@ -315,7 +325,7 @@ export async function generateAttendanceSheetDocx(
       ];
     } else if (isExam) {
       // Exam Attendance & Script Register
-      columnWidths = [550, 2200, 2800, 1400, 1550, 750];
+      columnWidths = [550, 2400, 3400, 1300, 1300, 750];
       rows = [
         new TableRow({
           tableHeader: true,
@@ -360,7 +370,7 @@ export async function generateAttendanceSheetDocx(
       ];
     } else {
       // CAT Attendance List (No booklet number)
-      columnWidths = [600, 2300, 3500, 1900, 900];
+      columnWidths = [550, 2400, 3800, 1900, 950];
       rows = [
         new TableRow({
           tableHeader: true,

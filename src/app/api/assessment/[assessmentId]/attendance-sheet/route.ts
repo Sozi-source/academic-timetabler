@@ -69,13 +69,19 @@ export async function GET(_request: Request, { params }: { params: Promise<{ ass
     header.alignment = { horizontal: 'center', vertical: 'middle' };
     students.forEach((student, index) => {
       const row = sheet.addRow([index + 1, student.admissionNumber, student.fullName, '']);
-      row.height = 25;
+      row.height = 28;
       row.eachCell((cell, colNumber) => {
-        cell.alignment = { vertical: 'middle', wrapText: colNumber !== 2 };
-        cell.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } };
+        cell.font = { size: 11, color: { argb: 'FF1E293B' } };
+        cell.alignment = { vertical: 'middle', wrapText: colNumber > 3 };
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FF64748B' } },
+          bottom: { style: 'thin', color: { argb: 'FF64748B' } },
+          left: { style: 'thin', color: { argb: 'FF64748B' } },
+          right: { style: 'thin', color: { argb: 'FF64748B' } },
+        };
       });
     });
-    sheet.columns = [{ width: 8 }, { width: 28 }, { width: 38 }, { width: 28 }];
+    sheet.columns = [{ width: 8 }, { width: 30 }, { width: 40 }, { width: 28 }];
   }
 
   const buffer = await workbook.xlsx.writeBuffer();

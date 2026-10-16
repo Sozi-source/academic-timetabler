@@ -136,12 +136,32 @@ export function PrintableSigningSheet({
         </div>
       </div>
 
+      {/* Print Styles */}
+      <style>{`
+        @page {
+          size: A4 portrait;
+          margin: 10mm 12mm;
+        }
+        @media print {
+          body {
+            background: white !important;
+            color: #1e293b !important;
+          }
+          table {
+            border-color: #475569 !important;
+          }
+          th, td {
+            border-color: #64748b !important;
+          }
+        }
+      `}</style>
+
       {/* Official Printable Sheet(s) - One per cohort with clean page breaks */}
       <div className="space-y-8 print:space-y-0">
         {displayedGroups.map((group, groupIdx) => (
           <article
             key={group.cohortName}
-            className={`rounded-xl border border-border bg-white p-6 shadow-xs print:border-0 print:p-0 print:shadow-none font-sans text-slate-900 ${
+            className={`rounded-xl border border-border bg-white p-6 shadow-xs print:border-0 print:p-0 print:shadow-none font-sans text-slate-800 ${
               groupIdx > 0 ? 'print:break-before-page' : ''
             }`}
             style={{ breakAfter: groupIdx < displayedGroups.length - 1 ? 'page' : 'auto' }}
@@ -158,19 +178,19 @@ export function PrintableSigningSheet({
                   priority
                 />
               </div>
-              <h1 className="text-sm font-bold uppercase tracking-wide text-slate-900 sm:text-base">
+              <h1 className="text-sm font-bold uppercase tracking-wide text-slate-800 sm:text-base">
                 {institutionName}
               </h1>
-              <h2 className="mt-0.5 text-sm font-black uppercase tracking-wider text-slate-900">
+              <h2 className="mt-0.5 text-sm font-black uppercase tracking-wider text-slate-800">
                 {title}
               </h2>
-              <p className="text-xs font-bold text-slate-800">
+              <p className="text-xs font-bold text-slate-700">
                 {periodName}
               </p>
             </div>
 
             {/* Academic Details Block */}
-            <div className="mt-3 space-y-1 text-xs border-b border-slate-300 pb-2">
+            <div className="mt-3 space-y-1 text-xs border-b border-slate-400 pb-2 text-slate-800">
               <p>
                 <span className="font-bold">School:</span> {schoolName}
               </p>
@@ -193,78 +213,78 @@ export function PrintableSigningSheet({
 
             {/* Attendance Register Table */}
             <div className="mt-3 overflow-x-auto">
-              <table className="w-full table-fixed border-collapse border border-slate-400 text-left text-[11px]">
+              <table className="w-full table-fixed border-collapse border border-slate-600 text-left text-sm print:text-[11pt] text-slate-800">
                 <colgroup>
-                  <col className="w-10" />
-                  <col className="w-44" />
-                  <col />
-                  {isExam ? <col className="w-32" /> : null}
-                  <col className="w-32" />
+                  <col className="w-12" />
+                  <col className="w-48" />
+                  <col className="w-72" />
+                  {isExam ? <col className="w-28" /> : null}
+                  <col className="w-28" />
                   <col className="w-20" />
                 </colgroup>
 
                 <thead>
-                  <tr className="bg-slate-100 font-bold text-slate-900">
-                    <th className="border border-slate-300 px-1.5 py-1 text-center">No.</th>
-                    <th className="border border-slate-300 px-2 py-1">Adm No.</th>
-                    <th className="border border-slate-300 px-2 py-1">Candidate Name</th>
+                  <tr className="bg-slate-100 font-bold text-slate-800">
+                    <th className="border border-slate-500 px-1.5 py-1.5 text-center">No.</th>
+                    <th className="border border-slate-500 px-2.5 py-1.5 whitespace-nowrap">Adm No.</th>
+                    <th className="border border-slate-500 px-2.5 py-1.5 whitespace-nowrap">Candidate Name</th>
                     {isExam ? (
-                      <th className="border border-slate-300 px-2 py-1 text-center">Booklet No.</th>
+                      <th className="border border-slate-500 px-2 py-1.5 text-center whitespace-nowrap">Booklet No.</th>
                     ) : null}
-                    <th className="border border-slate-300 px-2 py-1 text-center">Signature</th>
-                    <th className="border border-slate-300 px-2 py-1 text-center">Marks</th>
+                    <th className="border border-slate-500 px-2 py-1.5 text-center whitespace-nowrap">Signature</th>
+                    <th className="border border-slate-500 px-2 py-1.5 text-center whitespace-nowrap">Marks</th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {/* Candidate Rows for this Cohort */}
                   {group.candidates.map((cand, idx) => (
-                    <tr key={cand.studentId} className="h-7">
-                      <td className="border border-slate-300 px-1.5 py-0.5 text-center font-medium">
+                    <tr key={cand.studentId} className="h-8">
+                      <td className="border border-slate-500 px-1.5 py-1 text-center font-medium">
                         {idx + 1}.
                       </td>
-                      <td className="border border-slate-300 px-2 py-0.5 font-semibold whitespace-nowrap">
+                      <td className="border border-slate-500 px-2.5 py-1 font-semibold whitespace-nowrap">
                         {cand.admissionNumber}
                       </td>
-                      <td className="border border-slate-300 px-2 py-0.5 font-bold uppercase truncate">
+                      <td className="border border-slate-500 px-2.5 py-1 font-bold uppercase whitespace-nowrap">
                         {cand.fullName}
                       </td>
                       {isExam ? (
-                        <td className="border border-slate-300 p-0 text-center">
-                          <div className="h-6 w-full" />
+                        <td className="border border-slate-500 p-0 text-center">
+                          <div className="h-7 w-full" />
                         </td>
                       ) : null}
-                      <td className="border border-slate-300 p-0 text-center">
-                        <div className="h-6 w-full" />
+                      <td className="border border-slate-500 p-0 text-center">
+                        <div className="h-7 w-full" />
                       </td>
-                      <td className="border border-slate-300 p-0 text-center">
-                        <div className="h-6 w-full" />
+                      <td className="border border-slate-500 p-0 text-center">
+                        <div className="h-7 w-full" />
                       </td>
                     </tr>
                   ))}
 
                   {/* Blank Extra Rows for late adds */}
                   {Array.from({ length: blankRowsCount }, (_, i) => (
-                    <tr key={`blank-${i}`} className="h-7">
-                      <td className="border border-slate-300 px-1.5 py-0.5 text-center font-medium">
+                    <tr key={`blank-${i}`} className="h-8">
+                      <td className="border border-slate-500 px-1.5 py-1 text-center font-medium">
                         {group.candidates.length + i + 1}.
                       </td>
-                      <td className="border border-slate-300 px-2 py-0.5 font-semibold">
+                      <td className="border border-slate-500 px-2.5 py-1 font-semibold whitespace-nowrap">
                         &nbsp;
                       </td>
-                      <td className="border border-slate-300 px-2 py-0.5">
+                      <td className="border border-slate-500 px-2.5 py-1 whitespace-nowrap">
                         &nbsp;
                       </td>
                       {isExam ? (
-                        <td className="border border-slate-300 p-0 text-center">
-                          <div className="h-6 w-full" />
+                        <td className="border border-slate-500 p-0 text-center">
+                          <div className="h-7 w-full" />
                         </td>
                       ) : null}
-                      <td className="border border-slate-300 p-0 text-center">
-                        <div className="h-6 w-full" />
+                      <td className="border border-slate-500 p-0 text-center">
+                        <div className="h-7 w-full" />
                       </td>
-                      <td className="border border-slate-300 p-0 text-center">
-                        <div className="h-6 w-full" />
+                      <td className="border border-slate-500 p-0 text-center">
+                        <div className="h-7 w-full" />
                       </td>
                     </tr>
                   ))}
@@ -274,7 +294,7 @@ export function PrintableSigningSheet({
 
             {/* Script Count Summary (Exam) */}
             {isExam ? (
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-4 border border-slate-300 bg-slate-50/80 px-3 py-2 text-xs font-bold text-slate-800">
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-4 border border-slate-500 bg-slate-50/80 px-3 py-2 text-xs font-bold text-slate-800">
                 <span>Total Registered Candidates: {group.candidates.length}</span>
                 <span>Total Scripts Collected: ___________</span>
                 <span>Total Absent Candidates: ___________</span>
@@ -282,31 +302,31 @@ export function PrintableSigningSheet({
             ) : null}
 
             {/* Official Sign-off Footer - Full Width & Well-Spaced Layout */}
-            <div className="mt-8 text-xs font-semibold text-slate-900 w-full">
+            <div className="mt-8 text-xs font-semibold text-slate-800 w-full">
               <div className="grid grid-cols-[110px_2fr_45px_1.2fr_45px_1fr] items-center gap-x-3 gap-y-5 w-full">
                 {/* Row 1: Invigilator */}
                 <span className="font-bold whitespace-nowrap">Invigilator:</span>
-                <span className="border-b border-slate-400 h-5 w-full" />
+                <span className="border-b-2 border-slate-500 h-5 w-full" />
                 <span className="font-bold text-right whitespace-nowrap">Sign:</span>
-                <span className="border-b border-slate-400 h-5 w-full" />
+                <span className="border-b-2 border-slate-500 h-5 w-full" />
                 <span className="font-bold text-right whitespace-nowrap">Date:</span>
-                <span className="border-b border-slate-400 h-5 w-full" />
+                <span className="border-b-2 border-slate-500 h-5 w-full" />
 
                 {/* Row 2: Examiner */}
                 <span className="font-bold whitespace-nowrap">Examiner:</span>
-                <span className="border-b border-slate-400 h-5 w-full" />
+                <span className="border-b-2 border-slate-500 h-5 w-full" />
                 <span className="font-bold text-right whitespace-nowrap">Sign:</span>
-                <span className="border-b border-slate-400 h-5 w-full" />
+                <span className="border-b-2 border-slate-500 h-5 w-full" />
                 <span className="font-bold text-right whitespace-nowrap">Date:</span>
-                <span className="border-b border-slate-400 h-5 w-full" />
+                <span className="border-b-2 border-slate-500 h-5 w-full" />
 
                 {/* Row 3: Exam Officer */}
                 <span className="font-bold whitespace-nowrap">Exam Officer:</span>
-                <span className="border-b border-slate-400 h-5 w-full" />
+                <span className="border-b-2 border-slate-500 h-5 w-full" />
                 <span className="font-bold text-right whitespace-nowrap">Sign:</span>
-                <span className="border-b border-slate-400 h-5 w-full" />
+                <span className="border-b-2 border-slate-500 h-5 w-full" />
                 <span className="font-bold text-right whitespace-nowrap">Date:</span>
-                <span className="border-b border-slate-400 h-5 w-full" />
+                <span className="border-b-2 border-slate-500 h-5 w-full" />
               </div>
             </div>
           </article>

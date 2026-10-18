@@ -3788,3 +3788,17 @@ No database or application runtime changes were executed while preparing this pa
 - The review queue now lists only papers awaiting review. Ready, rejected, and imported records no longer remain mixed into the confirmation list; the ready count is batch-wide and remains available to the import action.
 - Marking a paper ready now commits ready papers immediately, so confirmation does not require a second separate import click. Existing ready papers can still be committed with the batch action.
 - No schema change. Apply the existing partial-import migration before using immediate commit.
+### 2026-10-18: Add single-click import feedback for confirmed papers
+
+**Added:** `src/features/exam-setting/import-action-button.tsx`
+**Modified:** `src/app/(dashboard)/assessment/exam-setting/past-papers/page.tsx`, `CHANGES.md`
+- The batch action now clearly imports every confirmed paper in one click. Submission buttons disable and show progress feedback while the server action runs, preventing repeat clicks and making the operation visibly active.
+- No schema changes or manual follow-up required.
+
+### 2026-10-18: Restore missing past-paper source metadata columns
+
+**Added:** `supabase/migrations/20261018133000_exam_source_file_metadata_compat.sql`
+**Modified:** `CHANGES.md`
+- Added the missing `series`, `trainer_name`, `unit_code`, and `parse_notes` columns to pre-existing `exam_source_files` installations, with constraints matching the exam setting foundation schema. This fixes the commit RPC failure caused by the older live table shape while preserving existing rows.
+- Applied the migration to the linked Supabase database. The previously failed commit then registered all 15 ready papers; 3 rejected records remain in the batch (2 have `unread_parts` parser status, and 1 usable-with-notes record was already rejected).
+- No breaking changes. The change is additive and idempotent.

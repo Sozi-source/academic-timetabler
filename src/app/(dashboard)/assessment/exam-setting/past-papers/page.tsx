@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
 import { requireHodAccess } from '@/features/auth/authorization';
+import { ExamImportActionButton } from '@/features/exam-setting/import-action-button';
 import {
   autoImportConfidentPapersAction,
   commitExamImportBatchAction,
@@ -193,19 +194,21 @@ export default async function PastPaperImportPage({
                 <div className="ml-auto flex flex-wrap gap-2">
                   <form action={autoImportConfidentPapersAction}>
                     <input type="hidden" name="batchId" value={workspace.selectedBatch.id} />
-                    <button type="submit" disabled={workspace.autoImportMigrationRequired} className="inline-flex h-9 items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 text-xs font-semibold text-primary hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-50">
-                      <RefreshCw className="size-3.5" aria-hidden="true" /> Auto-import safe matches
-                    </button>
+                    <ExamImportActionButton
+                      kind="auto"
+                      label="Auto-import safe matches"
+                      pendingLabel="Matching and importing…"
+                      disabled={workspace.autoImportMigrationRequired}
+                    />
                   </form>
                   <form action={commitExamImportBatchAction}>
                     <input type="hidden" name="batchId" value={workspace.selectedBatch.id} />
-                    <button
-                      type="submit"
+                    <ExamImportActionButton
+                      kind="commit"
+                      label={`Import all ${workspace.readyCount} confirmed`}
+                      pendingLabel="Importing confirmed papers…"
                       disabled={workspace.readyCount === 0 || workspace.autoImportMigrationRequired}
-                      className="inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-3 text-xs font-semibold text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <Archive className="size-3.5" aria-hidden="true" /> Import {workspace.readyCount} ready
-                    </button>
+                    />
                   </form>
                 </div>
               ) : null}

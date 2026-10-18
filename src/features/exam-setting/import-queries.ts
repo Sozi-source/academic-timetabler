@@ -36,12 +36,18 @@ export interface ExamImportWorkspace {
   batches: ExamImportBatch[];
   selectedBatch: ExamImportBatch | null;
   items: ExamImportItem[];
+  itemPage: number;
+  itemPageCount: number;
+  itemCount: number;
   readyCount: number;
   migrationRequired: boolean;
+  autoImportMigrationRequired: boolean;
 }
 
+const ITEMS_PER_PAGE = 30;
+
 export const getExamImportWorkspace = cache(
-  async (requestedBatchId?: string): Promise<ExamImportWorkspace> => {
+  async (requestedBatchId?: string, requestedItemPage = 1): Promise<ExamImportWorkspace> => {
     const profile = await requireHodAccess();
     const empty: ExamImportWorkspace = {
       departmentName: profile.departmentName,
@@ -49,13 +55,17 @@ export const getExamImportWorkspace = cache(
       batches: [],
       selectedBatch: null,
       items: [],
+      itemPage: 1,
+      itemPageCount: 0,
+      itemCount: 0,
       readyCount: 0,
       migrationRequired: false,
+      autoImportMigrationRequired: false,
     };
     if (!profile.activeDepartmentId) return empty;
 
     const supabase = await createClient();
-    const [unitResult, batchResult] = await Promise.all([
+    const [unitResult, batchResult, autoImportCapability] = await Promise.all([
       supabase
         .from('units')
         .select('id,code,name')
@@ -68,6 +78,7 @@ export const getExamImportWorkspace = cache(
         .eq('department_id', profile.activeDepartmentId)
         .order('created_at', { ascending: false })
         .limit(20),
+      supabase.rpc('exam_import_partial_commit_enabled'),
     ]);
 
     if (unitResult.error) throw new Error(`Unable to load units: ${unitResult.error.message}`);
@@ -78,6 +89,8 @@ export const getExamImportWorkspace = cache(
       throw new Error(`Unable to load exam import batches: ${batchResult.error.message}`);
     }
 
+    const autoImportMigrationRequired = Boolean(autoImportCapability.error);
+
     const batches: ExamImportBatch[] = (batchResult.data ?? []).map((row) => ({
       id: row.id,
       sourceFilename: row.source_filename,
@@ -87,17 +100,27 @@ export const getExamImportWorkspace = cache(
     }));
     const selectedBatch = batches.find((batch) => batch.id === requestedBatchId) ?? null;
     if (!selectedBatch) {
-      return { ...empty, units: unitResult.data ?? [], batches };
+      return { ...empty, units: unitResult.data ?? [], batches, autoImportMigrationRequired };
     }
 
-    const { data: rows, error: itemsError } = await supabase
+    const [{ data: rows, error: itemsError, count: itemCount }, { count: readyCount, error: readyCountError }] = await Promise.all([
+      supabase
       .from('exam_import_items')
-      .select('id,source_path,exam_year,series,trainer_name,paper_kind,unit_code,import_status,parse_error,parse_notes,paper_preview,unit_id,review_status,source_file_id')
+      .select('id,source_path,exam_year,series,trainer_name,paper_kind,unit_code,import_status,parse_error,parse_notes,paper_preview,unit_id,review_status,source_file_id', { count: 'exact' })
       .eq('batch_id', selectedBatch.id)
       .eq('department_id', profile.activeDepartmentId)
-      .order('source_path', { ascending: true });
+      .eq('review_status', 'pending')
+      .order('source_path', { ascending: true })
+      .range((Math.max(1, requestedItemPage) - 1) * ITEMS_PER_PAGE, Math.max(1, requestedItemPage) * ITEMS_PER_PAGE - 1),
+      supabase.from('exam_import_items')
+        .select('id', { count: 'exact', head: true })
+        .eq('batch_id', selectedBatch.id)
+        .eq('department_id', profile.activeDepartmentId)
+        .eq('review_status', 'ready'),
+    ]);
 
     if (itemsError) throw new Error(`Unable to load imported papers: ${itemsError.message}`);
+    if (readyCountError) throw new Error(`Unable to count confirmed papers: ${readyCountError.message}`);
     const items: ExamImportItem[] = (rows ?? []).map((row) => ({
       id: row.id,
       sourcePath: row.source_path,
@@ -135,8 +158,12 @@ export const getExamImportWorkspace = cache(
       batches,
       selectedBatch,
       items,
-      readyCount: items.filter((item) => item.reviewStatus === 'ready').length,
+      itemPage: Math.max(1, requestedItemPage),
+      itemPageCount: Math.ceil((itemCount ?? 0) / ITEMS_PER_PAGE),
+      itemCount: itemCount ?? 0,
+      readyCount: readyCount ?? 0,
       migrationRequired: false,
+      autoImportMigrationRequired,
     };
   },
 );

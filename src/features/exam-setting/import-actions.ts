@@ -10,6 +10,8 @@ import { requireHodAccess } from '@/features/auth/authorization';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 
+import { findConfidentImportUnit, type ImportMatchUnit } from './import-matching';
+
 const importStatusSchema = z.enum([
   'usable',
   'usable_with_notes',
@@ -63,8 +65,7 @@ function importPath(batchId?: string, query?: string): never {
   const params = new URLSearchParams();
   if (batchId) params.set('batchId', batchId);
   if (query) {
-    const [key, value] = query.split('=', 2);
-    if (key && value) params.set(key, value);
+    new URLSearchParams(query).forEach((value, key) => params.set(key, value));
   }
   redirect(`/assessment/exam-setting/past-papers?${params.toString()}`);
 }
@@ -104,29 +105,52 @@ function parseJsonLines(contents: string): ImportRecord[] | null {
   return records;
 }
 
+async function partialImportIsEnabled(supabase: Awaited<ReturnType<typeof createClient>>) {
+  const { data, error } = await supabase.rpc('exam_import_partial_commit_enabled');
+  return !error && data === true;
+}
+
 function databaseRows(
   records: ImportRecord[],
   batchId: string,
   departmentId: string,
+  units: ImportMatchUnit[],
 ) {
-  return records.map((record) => ({
-    batch_id: batchId,
-    department_id: departmentId,
-    source_path: record.meta.path,
-    exam_year: record.meta.year,
-    series: record.meta.series,
-    trainer_name: record.meta.trainer,
-    paper_kind: record.meta.paper_kind,
-    unit_code: record.paper && 'unit_code' in record.paper
+  return records.map((record) => {
+    const paperCode = record.paper && 'unit_code' in record.paper
       && typeof record.paper.unit_code === 'string'
       ? record.paper.unit_code.slice(0, 80)
-      : null,
-    import_status: record.status,
-    parse_error: record.error ?? record.paper?.issues.join(' | ') ?? null,
-    parse_notes: record.paper?.notes ?? [],
-    paper_data: record.paper,
-    paper_preview: previewForPaper(record.paper),
-  }));
+      : null;
+    const paperTitle = record.paper && 'unit_title' in record.paper
+      && typeof record.paper.unit_title === 'string'
+      ? record.paper.unit_title
+      : null;
+    const matchedUnit = record.status === 'usable' || record.status === 'usable_with_notes'
+      ? findConfidentImportUnit(paperTitle, units)
+      : null;
+
+    return {
+      batch_id: batchId,
+      department_id: departmentId,
+      source_path: record.meta.path,
+      exam_year: record.meta.year,
+      series: record.meta.series,
+      trainer_name: record.meta.trainer,
+      paper_kind: record.meta.paper_kind,
+      unit_code: paperCode,
+      import_status: record.status,
+      parse_error: record.error ?? record.paper?.issues.join(' | ') ?? null,
+      parse_notes: record.paper?.notes ?? [],
+      paper_data: record.paper,
+      paper_preview: previewForPaper(record.paper),
+      unit_id: matchedUnit?.id ?? null,
+      review_status: matchedUnit
+        ? 'ready'
+        : record.status === 'usable' || record.status === 'usable_with_notes'
+          ? 'pending'
+          : 'rejected',
+    };
+  });
 }
 
 export async function importParsedPapersAction(formData: FormData) {
@@ -148,6 +172,16 @@ export async function importParsedPapersAction(formData: FormData) {
   const records = parseJsonLines(contents);
   if (!records) importPath(undefined, 'error=format');
 
+  const supabase = await createClient();
+  if (!(await partialImportIsEnabled(supabase))) importPath(undefined, 'error=automigration');
+  const { data: departmentUnits, error: unitsError } = await supabase
+    .from('units')
+    .select('id,code,name')
+    .eq('department_id', profile.activeDepartmentId)
+    .eq('is_active', true);
+  if (unitsError) importPath(undefined, 'error=units');
+  const units: ImportMatchUnit[] = departmentUnits ?? [];
+
   const batchId = randomUUID();
   const storagePath = `${profile.activeDepartmentId}/${batchId}/papers.jsonl`;
   const admin = createAdminClient();
@@ -160,7 +194,6 @@ export async function importParsedPapersAction(formData: FormData) {
     });
   if (uploadError) importPath(undefined, 'error=storage');
 
-  const supabase = await createClient();
   const { error: batchError } = await supabase.from('exam_import_batches').insert({
     id: batchId,
     department_id: profile.activeDepartmentId,
@@ -176,7 +209,7 @@ export async function importParsedPapersAction(formData: FormData) {
     importPath(undefined, 'error=save');
   }
 
-  const rows = databaseRows(records, batchId, profile.activeDepartmentId);
+  const rows = databaseRows(records, batchId, profile.activeDepartmentId, units);
   for (let index = 0; index < rows.length; index += 50) {
     const { error: itemsError } = await supabase
       .from('exam_import_items')
@@ -192,8 +225,125 @@ export async function importParsedPapersAction(formData: FormData) {
     }
   }
 
+  const automaticallyReadyCount = rows.filter((row) => row.review_status === 'ready').length;
+  const needsReviewCount = rows.filter((row) => row.review_status === 'pending').length;
+  let autoImportedCount = 0;
+  if (automaticallyReadyCount > 0 || needsReviewCount === 0) {
+    const { data, error } = await supabase.rpc('exam_commit_import_batch', {
+      requested_batch: batchId,
+    });
+    if (error) importPath(batchId, `error=autoimport`);
+    autoImportedCount = data ?? 0;
+  }
+
   revalidatePath('/assessment/exam-setting/past-papers');
-  importPath(batchId, `imported=${records.length}`);
+  revalidatePath('/assessment/exam-setting/question-bank');
+  importPath(batchId, `autoImported=${autoImportedCount}&needsReview=${needsReviewCount}&records=${records.length}`);
+}
+
+export async function autoImportConfidentPapersAction(formData: FormData) {
+  const profile = await requireHodAccess();
+  if (!profile.activeDepartmentId) importPath(undefined, 'error=department');
+  const batchId = formData.get('batchId');
+  if (typeof batchId !== 'string' || !z.uuid().safeParse(batchId).success) {
+    importPath(undefined, 'error=invalid');
+  }
+
+  const supabase = await createClient();
+  if (!(await partialImportIsEnabled(supabase))) importPath(batchId, 'error=automigration');
+  const { data: batch } = await supabase
+    .from('exam_import_batches')
+    .select('id,status')
+    .eq('id', batchId)
+    .eq('department_id', profile.activeDepartmentId)
+    .maybeSingle();
+  if (!batch || batch.status !== 'reviewing') importPath(batchId, 'error=closed');
+
+  const [{ data: units, error: unitsError }, { data: items, error: itemsError }] = await Promise.all([
+    supabase.from('units').select('id,code,name')
+      .eq('department_id', profile.activeDepartmentId).eq('is_active', true),
+    supabase.from('exam_import_items')
+      .select('id,unit_code,import_status,review_status,paper_data')
+      .eq('batch_id', batchId)
+      .eq('department_id', profile.activeDepartmentId)
+      .eq('review_status', 'pending'),
+  ]);
+  if (unitsError || itemsError) importPath(batchId, 'error=autoprepare');
+
+  const unitList: ImportMatchUnit[] = units ?? [];
+  const itemsToSkip: string[] = [];
+  const matched = new Map<string, string[]>();
+  for (const item of items ?? []) {
+    if (item.import_status !== 'usable' && item.import_status !== 'usable_with_notes') {
+      itemsToSkip.push(item.id);
+      continue;
+    }
+    const identity = z.object({
+      unit_title: z.string().nullable().optional(),
+    }).passthrough().safeParse(item.paper_data);
+    if (!identity.success) continue;
+    const unit = findConfidentImportUnit(
+      identity.data.unit_title ?? null,
+      unitList,
+    );
+    if (!unit) continue;
+    const ids = matched.get(unit.id) ?? [];
+    ids.push(item.id);
+    matched.set(unit.id, ids);
+  }
+
+  if (itemsToSkip.length > 0) {
+    const { error } = await supabase.from('exam_import_items')
+      .update({ review_status: 'rejected' })
+      .eq('batch_id', batchId)
+      .eq('department_id', profile.activeDepartmentId)
+      .in('id', itemsToSkip);
+    if (error) importPath(batchId, 'error=autoprepare');
+  }
+
+  let autoReadyCount = 0;
+  for (const [unitId, itemIds] of matched) {
+    const { error } = await supabase.from('exam_import_items')
+      .update({ review_status: 'ready', unit_id: unitId })
+      .eq('batch_id', batchId)
+      .eq('department_id', profile.activeDepartmentId)
+      .eq('review_status', 'pending')
+      .in('id', itemIds);
+    if (error) importPath(batchId, 'error=autoprepare');
+    autoReadyCount += itemIds.length;
+  }
+
+  let autoImportedCount = 0;
+  const { count: readyCount, error: readyCountError } = await supabase.from('exam_import_items')
+    .select('id', { count: 'exact', head: true })
+    .eq('batch_id', batchId)
+    .eq('department_id', profile.activeDepartmentId)
+    .eq('review_status', 'ready');
+  if (readyCountError) importPath(batchId, 'error=autoprepare');
+  const { count: pendingCount, error: pendingCountError } = await supabase.from('exam_import_items')
+    .select('id', { count: 'exact', head: true })
+    .eq('batch_id', batchId)
+    .eq('department_id', profile.activeDepartmentId)
+    .eq('review_status', 'pending')
+    .in('import_status', ['usable', 'usable_with_notes']);
+  if (pendingCountError) importPath(batchId, 'error=autoprepare');
+  if ((readyCount ?? 0) > 0 || (pendingCount ?? 0) === 0) {
+    const { data, error } = await supabase.rpc('exam_commit_import_batch', {
+      requested_batch: batchId,
+    });
+    if (error) importPath(batchId, 'error=autoimport');
+    autoImportedCount = data ?? 0;
+  }
+
+  const { count: needsReviewCount } = await supabase.from('exam_import_items')
+    .select('id', { count: 'exact', head: true })
+    .eq('batch_id', batchId)
+    .eq('department_id', profile.activeDepartmentId)
+    .eq('review_status', 'pending')
+    .in('import_status', ['usable', 'usable_with_notes']);
+  revalidatePath('/assessment/exam-setting/past-papers');
+  revalidatePath('/assessment/exam-setting/question-bank');
+  importPath(batchId, `autoImported=${autoImportedCount}&autoMatched=${autoReadyCount}&needsReview=${needsReviewCount ?? 0}`);
 }
 
 export async function reviewExamImportItemAction(formData: FormData) {
@@ -235,6 +385,9 @@ export async function reviewExamImportItemAction(formData: FormData) {
 
   let unitId: string | null = null;
   if (parsed.data.reviewStatus === 'ready') {
+    if (!(await partialImportIsEnabled(supabase))) {
+      importPath(parsed.data.batchId, 'error=automigration');
+    }
     if (!['usable', 'usable_with_notes'].includes(item.import_status)) {
       importPath(parsed.data.batchId, 'error=unusable');
     }
@@ -259,6 +412,16 @@ export async function reviewExamImportItemAction(formData: FormData) {
     .eq('department_id', profile.activeDepartmentId);
   if (error) importPath(parsed.data.batchId, 'error=save');
 
+  if (parsed.data.reviewStatus === 'ready') {
+    const { data: importedCount, error: commitError } = await supabase.rpc('exam_commit_import_batch', {
+      requested_batch: parsed.data.batchId,
+    });
+    if (commitError) importPath(parsed.data.batchId, 'error=commit');
+    revalidatePath('/assessment/exam-setting/question-bank');
+    revalidatePath('/assessment/exam-setting/past-papers');
+    importPath(parsed.data.batchId, `committed=${importedCount}`);
+  }
+
   revalidatePath('/assessment/exam-setting/past-papers');
   importPath(parsed.data.batchId, `item=${parsed.data.reviewStatus}`);
 }
@@ -273,6 +436,7 @@ export async function commitExamImportBatchAction(formData: FormData) {
   }
 
   const supabase = await createClient();
+  if (!(await partialImportIsEnabled(supabase))) importPath(batchId, 'error=automigration');
   const { data, error } = await supabase.rpc('exam_commit_import_batch', {
     requested_batch: batchId,
   });

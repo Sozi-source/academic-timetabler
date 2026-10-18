@@ -1,3 +1,10 @@
+### 2026-10-18: Handle Windows subprocess text encoding in exam importer
+
+**Modified:** `scripts/exam-engine/exam_engine/textextract.py`, `CHANGES.md`
+- Decode Pandoc and pdftotext output as UTF-8 with replacement for invalid bytes. This prevents Windows' active code page from crashing a subprocess reader thread and aborting the entire paper batch.
+- Report a clear extraction error if a converter returns no stdout, so an individual file can be retained as unreadable in the import report.
+- No schema or workflow changes. Re-run the same importer command to regenerate `papers.jsonl` and `report.csv`.
+
 ### 2026-10-17: Add exam-setting foundation and past-paper review importer
 
 **Added:** `supabase/migrations/20261017120000_exam_setting_foundation.sql`, `scripts/exam-engine/`, `data/exam-setting/reference_questions.jsonl`, `data/exam-setting/import_report.csv`
@@ -3761,3 +3768,23 @@ No database or application runtime changes were executed while preparing this pa
 - `Attachment` is stored as the student's academic phase while retaining an Active lifecycle.
 - `Not Reported` applies to the current active academic period's reporting record; attendance continues to treat non-reported students as `not_reported`.
 - No reason or remarks are required; the existing save action records the change.
+### 2026-10-18: Auto-register confidently matched past papers
+
+**Added:** `src/features/exam-setting/import-matching.ts`, `supabase/migrations/20261018110000_exam_partial_import_and_auto_ready.sql`
+**Modified:** `src/features/exam-setting/import-actions.ts`, `src/features/exam-setting/import-queries.ts`, `src/app/(dashboard)/assessment/exam-setting/past-papers/page.tsx`, `scripts/exam-engine/README.md`, `CHANGES.md`
+- Parser records with usable status now auto-match only when the parsed unit title uniquely identifies one active department unit. Printed codes are retained as source metadata but are ignored for matching. Matched papers are registered immediately after upload; unresolved titles remain pending without a preselected unit.
+- Added a one-click action for existing batches to import safe matches, while the normal review flow remains available for uncertain matches. The commit RPC now supports partial imports and leaves the batch open while usable papers still need unit review.
+- Parser records that are unreadable, structurally incomplete, schemes, or outlines are excluded from source registration. Parser notes remain preserved on accepted records.
+- No breaking changes. Apply `20261018110000_exam_partial_import_and_auto_ready.sql` with `npx supabase db push` before using the automatic import flow. Existing staged batches can then use **Auto-import safe matches**.
+### 2026-10-18: Paginate past-paper review to keep large batches responsive
+
+**Modified:** `src/features/exam-setting/import-queries.ts`, `src/app/(dashboard)/assessment/exam-setting/past-papers/page.tsx`, `CHANGES.md`
+- The review screen now fetches and renders at most 30 paper records at once, rather than loading every record and question preview in a large batch. Added a total count and previous/next page controls.
+- Bulk auto-import of safe unit-name matches remains available for the entire batch, so pagination does not add manual confirmation work.
+- No database migration or breaking change. Refresh the page to use the paginated queue.
+### 2026-10-18: Clear confirmed papers from the review queue
+
+**Modified:** `src/features/exam-setting/import-queries.ts`, `src/features/exam-setting/import-actions.ts`, `src/app/(dashboard)/assessment/exam-setting/past-papers/page.tsx`, `CHANGES.md`
+- The review queue now lists only papers awaiting review. Ready, rejected, and imported records no longer remain mixed into the confirmation list; the ready count is batch-wide and remains available to the import action.
+- Marking a paper ready now commits ready papers immediately, so confirmation does not require a second separate import click. Existing ready papers can still be committed with the batch action.
+- No schema change. Apply the existing partial-import migration before using immediate commit.

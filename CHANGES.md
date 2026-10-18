@@ -3,12 +3,23 @@
 **Added:** `src/features/exam-setting/generation-actions.ts`, `src/features/exam-setting/generation-queries.ts`, `src/features/exam-setting/generate-submit-button.tsx`, `src/app/(dashboard)/assessment/exam-setting/generate/page.tsx`, `supabase/migrations/20261018141000_exam_generated_paper_commit.sql`
 **Modified:** `src/features/exam-setting/question-bank.ts`, `src/features/exam-setting/workflow-steps.tsx`, `.env.example`, `scripts/exam-engine/README.md`, `CHANGES.md`
 - Added the Step 4 one-click paper generator. It gathers all parsed, marked historical questions for the selected unit, favors less-used seeds, and does not reuse a seed within the same paper. Only source questions used in that paper are added to the question bank when needed; Step 3 tagging remains optional.
+- Historical source type is not required to match the blueprint slot: Gemini can rework source questions into the written blueprint format. A paper still requires enough distinct marked source questions for all blueprint slots.
 - Uses Google Gemini on the server to create fresh wording and scenarios matching the active blueprint's sections, item counts, and marks. Generation runs in small parallel batches and rejects malformed output before saving.
 - Added local 4-word-shingle similarity checks against the selected unit's entire imported question archive. Generated questions keep their seed question/source/year, derivation mode, and similarity score. Overlap above 25% marks the item for further review.
 - Added an atomic department-scoped database function to commit the draft paper, generated questions, paper items, and audit event together. Historical questions remain reference-only; no paper or question is approved/exported automatically.
 - Privacy: question text for the selected unit is sent to Google Gemini for rewriting. Configure `GEMINI_API_KEY` and optionally `EXAM_GENERATION_MODEL` on the server.
 - Applied `20261018141000_exam_generated_paper_commit.sql` to the linked Supabase project. Other environments should apply it with `npx supabase db push`. To use the screen, activate a blueprint and select an active or planned academic period.
 - No destructive schema changes. Papers remain unique by unit, academic period, and paper type; generating that same combination again is blocked.
+
+### 2026-10-18: Enforce the college written-question exam format
+
+**Added:** `supabase/migrations/20261018152000_exam_setting_written_only.sql`
+**Modified:** `src/features/exam-setting/actions.ts`, `src/features/exam-setting/generation-actions.ts`, `src/app/(dashboard)/assessment/exam-setting/page.tsx`, `src/app/(dashboard)/assessment/exam-setting/generate/page.tsx`, `CHANGES.md`
+- Replaced Section A MCQs with ten written short-answer questions worth 4 marks each. Section B remains four 20-mark structured questions, answer any three, matching the supplied college sample's written format and 100-mark total.
+- Updated existing blueprint versions that used MCQs, so current active formats can still generate new drafts without a manual blueprint rebuild.
+- Generation prompts and validation reject answer options and MCQ blueprint slots. The database migration updates old blueprint layouts, adds a generated-question constraint, and protects the atomic paper commit RPC from MCQs.
+- Existing historical MCQs remain available as source records, but generated exam questions must be written questions.
+- Manual follow-up: apply `20261018152000_exam_setting_written_only.sql` with `npx supabase db push` in each database environment.
 
 ### 2026-10-18: Handle Windows subprocess text encoding in exam importer
 

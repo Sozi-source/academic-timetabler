@@ -147,7 +147,7 @@ export default async function ExamSettingPage({
               <div className="rounded-lg border border-border bg-surface-subtle p-3 text-xs text-text-secondary">
                 <p className="font-semibold text-text-primary">College paper structure · 100 marks</p>
                 <ul className="mt-2 space-y-1">
-                  <li>Section A: 40 multiple-choice items · answer all</li>
+                  <li>Section A: 10 written short-answer questions · 4 marks each · answer all</li>
                   <li>Section B: 4 structured questions · answer any 3 at 20 marks each</li>
                   <li className="flex items-center gap-1.5"><Clock3 className="size-3.5" /> Duration is set above</li>
                 </ul>

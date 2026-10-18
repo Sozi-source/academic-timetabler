@@ -45,17 +45,16 @@ export async function createExamBlueprintAction(formData: FormData) {
 
   const layout = {
     instructions: [
-      'Answer all questions in Section A.',
+      'Answer all questions in Section A. Each question carries 4 marks.',
       'Answer any three questions in Section B.',
     ],
     sections: [
       {
         label: 'A',
-        title: 'Multiple Choice Questions',
-        question_type: 'mcq',
-        question_count: 40,
-        marks_each: 1,
-        choice: { answer: 40, of: 40 },
+        title: 'Short Answer Questions',
+        question_type: 'short_answer',
+        question_count: 10,
+        marks_each: 4,
       },
       {
         label: 'B',

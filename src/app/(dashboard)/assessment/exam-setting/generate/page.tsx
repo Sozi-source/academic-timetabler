@@ -24,12 +24,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   'no-sources': 'There are no parsed past papers for this unit. Import and review past papers first.',
   'no-questions': 'No parsed historical questions with usable marks were found for this unit.',
   'blueprint-layout': 'The active blueprint does not contain a supported paper layout.',
-  'not-enough-mcq': 'The archive does not contain enough distinct multiple-choice questions to fill this blueprint section.',
-  'not-enough-structured': 'The archive does not contain enough distinct written questions to fill this blueprint section.',
-  'not-enough-short_answer': 'The archive does not contain enough distinct written questions to fill this blueprint section.',
-  'not-enough-case_study': 'The archive does not contain enough distinct written questions to fill this blueprint section.',
-  'not-enough-essay': 'The archive does not contain enough distinct written questions to fill this blueprint section.',
-  'not-enough-practical': 'The archive does not contain enough distinct written questions to fill this blueprint section.',
+  'not-enough-questions': 'The archive has fewer distinct marked questions than this blueprint needs. Import more past papers for this unit, then try again.',
   'generation-format': 'Gemini returned a question that did not meet the blueprint format. No paper draft was created; try again.',
   generation: 'Gemini could not generate this paper. No paper draft was created; try again.',
   commit: 'The generated paper could not be saved. No paper draft was created; refresh and try again.',
@@ -64,7 +59,7 @@ export default async function ExamGeneratePage({ searchParams }: { searchParams:
 
       {workspace.migrationRequired ? (
         <p role="status" className="rounded-lg border border-warning-border bg-warning-surface px-4 py-3 text-xs text-warning">
-          Apply <code>20261018141000_exam_generated_paper_commit.sql</code> with <code>npx supabase db push</code> to enable generation.
+          Apply the exam-setting migrations with <code>npx supabase db push</code> to enable generation.
         </p>
       ) : null}
       {errorCode && ERROR_MESSAGES[errorCode] ? (
@@ -120,7 +115,7 @@ export default async function ExamGeneratePage({ searchParams }: { searchParams:
           <CardHeader><CardTitle>How this draft is built</CardTitle></CardHeader>
           <CardContent className="space-y-3 text-xs leading-5 text-text-secondary">
             <p>All readable historical questions for the selected unit are eligible as source material. The system favors questions used less often and does not repeat a source question within one paper.</p>
-            <p>Gemini rewrites the wording and scenarios, while preserving the topic and learning intent. Scientific facts, answer validity, and mark allocation still need academic moderation.</p>
+            <p>Gemini reworks each selected question into written short-answer or structured form, preserving its topic and learning intent. This college format does not allow multiple-choice questions. Scientific facts and mark allocation still need academic moderation.</p>
             <p>Generated questions remain drafts. Each one links to its source question; high wording overlap is flagged for review. No paper is approved or exported automatically.</p>
           </CardContent>
         </Card>

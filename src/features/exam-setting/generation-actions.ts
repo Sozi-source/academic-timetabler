@@ -19,7 +19,7 @@ const generationInput = z.object({
 
 const generatedQuestionSchema = z.object({
   stem: z.string().trim().min(20).max(5000),
-  options: z.array(z.string().trim().min(1).max(500)).max(6),
+  options: z.array(z.string().trim().min(1).max(500)).length(0),
   parts: z.array(z.object({
     label: z.string().trim().min(1).max(12),
     text: z.string().trim().min(5).max(2000),
@@ -29,14 +29,14 @@ const generatedQuestionSchema = z.object({
   cognitiveLevel: z.enum(['recall', 'comprehension', 'application', 'analysis']),
   topic: z.string().trim().min(2).max(240),
   learningOutcome: z.string().trim().max(1000),
-  derivationMode: z.enum(['reword', 'rescenario']),
+  derivationMode: z.enum(['reword', 'rescenario', 'new_from_notes']),
 });
 
 type GenerationSlot = {
   sectionLabel: string;
   itemNumber: number;
   marks: number;
-  questionType: 'mcq' | 'short_answer' | 'structured' | 'essay' | 'case_study' | 'practical';
+  questionType: 'short_answer' | 'structured' | 'essay' | 'case_study' | 'practical';
   seed: {
     id: string | null;
     sourceFileId: string;
@@ -112,8 +112,8 @@ async function generateBatch(
     'You write draft college-level examination questions for a Human Nutrition and Dietetics programme.',
     'Return only a valid JSON array, with exactly one object for each input item and the same index order.',
     'Use each historical item only as a guide to its topic and learning intent. Create a genuinely new question: change the scenario, data, framing, and sentence structure; never copy a sentence or merely swap synonyms. Preserve scientific meaning and the requested difficulty and cognitive level. Keep standard clinical and scientific terminology accurate.',
-    'For mcq items, provide exactly four concise options, each as a string; do not mark or explain the correct option. The stem must make one best answer possible.',
-    'For structured, case_study, essay, short_answer, or practical items, options must be an empty array. Provide a clear stem and numbered/lettered parts whose marks add up exactly to the requested marks. For a non-structured item without parts, use an empty parts array.',
+    'This college paper format does not allow multiple-choice questions. Never produce options or answer choices. Every item is a written short-answer or structured question.',
+    'Options must always be an empty array. Provide a clear stem and numbered/lettered parts whose marks add up exactly to the requested marks when parts are used. For a short-answer item without parts, use an empty parts array.',
     'Include topic, learningOutcome, difficulty (easy|medium|hard), cognitiveLevel (recall|comprehension|application|analysis), and derivationMode (reword|rescenario|new_from_notes). Use rescenario when introducing a new clinical, community, laboratory, or food-service scenario; otherwise use reword.',
     'Each object must contain: index, stem, options, parts (objects with label,text,marks), topic, learningOutcome, difficulty, cognitiveLevel, derivationMode.',
     JSON.stringify(input),
@@ -131,13 +131,7 @@ async function generateBatch(
     const parsed = generatedQuestionSchema.safeParse(candidate);
     if (!parsed.success) throw new Error(`A generated question did not meet the paper format (item ${slots[index].sectionLabel}${slots[index].itemNumber}). Try again.`);
     const slot = slots[index];
-    if (slot.questionType === 'mcq' && parsed.data.options.length !== 4) {
-      throw new Error(`Generated MCQ ${slot.sectionLabel}${slot.itemNumber} must have four options. Try again.`);
-    }
-    if (slot.questionType !== 'mcq' && parsed.data.options.length > 0) {
-      throw new Error(`Generated question ${slot.sectionLabel}${slot.itemNumber} has unexpected options. Try again.`);
-    }
-    if (slot.questionType !== 'mcq' && parsed.data.parts.length > 0
+    if (parsed.data.parts.length > 0
       && parsed.data.parts.reduce((sum, part) => sum + part.marks, 0) !== slot.marks) {
       throw new Error(`Generated question ${slot.sectionLabel}${slot.itemNumber} does not add to ${slot.marks} marks. Try again.`);
     }
@@ -224,22 +218,17 @@ export async function generateExamPaperAction(formData: FormData) {
     const questionType = section.question_type;
     if (!/^[A-E]$/.test(label) || !Number.isInteger(questionCount) || questionCount < 1 || questionCount > 100
       || !Number.isInteger(marksEach) || marksEach < 1 || marksEach > 100
-      || !['mcq', 'short_answer', 'structured', 'essay', 'case_study', 'practical'].includes(String(questionType))) {
+      || !['short_answer', 'structured', 'essay', 'case_study', 'practical'].includes(String(questionType))) {
       fail('blueprint-layout');
     }
-    const eligible = seeds.filter((seed) => questionType === 'mcq'
-      ? seed.questionType === 'mcq'
-      : seed.questionType !== 'mcq');
-    if (eligible.length < questionCount) fail(`not-enough-${String(questionType)}`);
     const choice = typeof section.choice === 'object' && section.choice !== null ? section.choice as Record<string, unknown> : null;
     for (let index = 0; index < questionCount; index += 1) {
-      const seed = eligible[index % eligible.length];
       slots.push({
         sectionLabel: label,
         itemNumber: index + 1,
         marks: marksEach,
         questionType: questionType as GenerationSlot['questionType'],
-        seed,
+        seed: seeds[0],
         slotSpec: {
           title: typeof section.title === 'string' ? section.title : `Section ${label}`,
           questionType,
@@ -250,6 +239,7 @@ export async function generateExamPaperAction(formData: FormData) {
     }
   }
   if (slots.length === 0) fail('blueprint-layout');
+  if (seeds.length < slots.length) fail('not-enough-questions');
 
   const { data: generatedSeedUses, error: usageError } = await supabase.from('exam_questions')
     .select('seed_question_id').eq('department_id', profile.activeDepartmentId).eq('unit_id', unitId).eq('origin', 'generated');
@@ -258,13 +248,11 @@ export async function generateExamPaperAction(formData: FormData) {
   for (const use of generatedSeedUses ?? []) if (use.seed_question_id) useCounts.set(use.seed_question_id, (useCounts.get(use.seed_question_id) ?? 0) + 1);
   const usedThisPaper = new Set<string>();
   for (let start = 0; start < slots.length; start += 1) {
-    const type = slots[start].questionType;
-    const candidatePool = seeds.filter((seed) => type === 'mcq' ? seed.questionType === 'mcq' : seed.questionType !== 'mcq')
-      .sort((left, right) => (left.id ? useCounts.get(left.id) ?? 0 : 0) - (right.id ? useCounts.get(right.id) ?? 0 : 0)
-        || (left.sourceYear ?? 0) - (right.sourceYear ?? 0)
-        || left.sourceQuestionKey.localeCompare(right.sourceQuestionKey));
+    const candidatePool = [...seeds].sort((left, right) => (left.id ? useCounts.get(left.id) ?? 0 : 0) - (right.id ? useCounts.get(right.id) ?? 0 : 0)
+      || (left.sourceYear ?? 0) - (right.sourceYear ?? 0)
+      || left.sourceQuestionKey.localeCompare(right.sourceQuestionKey));
     const seed = candidatePool.find((candidate) => !usedThisPaper.has(`${candidate.sourceFileId}:${candidate.sourceQuestionKey}`));
-    if (!seed) fail(`not-enough-${type}`);
+    if (!seed) fail('not-enough-questions');
     usedThisPaper.add(`${seed.sourceFileId}:${seed.sourceQuestionKey}`);
     slots[start].seed = seed;
   }
@@ -317,10 +305,8 @@ export async function generateExamPaperAction(formData: FormData) {
 
   const items = slots.map((slot, index) => {
     const candidate = generated[index];
-    const body = slot.questionType === 'mcq'
-      ? { stem: candidate.stem, options: candidate.options.map((text, optionIndex) => ({ label: String.fromCharCode(65 + optionIndex), text })) }
-      : { stem: candidate.stem, parts: candidate.parts.map((part) => ({ label: part.label, text: part.text, own_marks: part.marks })) };
-    const bodyText = [candidate.stem, ...candidate.options, ...candidate.parts.map((part) => part.text)].join('\n');
+    const body = { stem: candidate.stem, parts: candidate.parts.map((part) => ({ label: part.label, text: part.text, own_marks: part.marks })) };
+    const bodyText = [candidate.stem, ...candidate.parts.map((part) => part.text)].join('\n');
     const maxSimilarity = Math.max(0, ...seeds.map((seed) => similarity(bodyText, seed.bodyText)));
     return {
       section_label: slot.sectionLabel,

@@ -28,6 +28,13 @@
 - Replace message-length error classification with safe provider categories for authentication, model configuration, quota, provider availability, and invalid question output. Error details and question text are not sent to the browser.
 - No schema or workflow changes.
 
+### 2026-10-19: Use a currently available Gemini model by default
+
+**Modified:** `.env.example`, `src/features/exam-setting/generation-actions.ts`, `src/app/(dashboard)/assessment/exam-setting/generate/page.tsx`, `CHANGES.md`
+- Set the default exam generation model to `gemini-3.8-flash`. Google currently lists this as a stable Flash model and limits access to Gemini 2.5 models for new projects.
+- Update the model error guidance to point to the deployed environment settings. A host-level `EXAM_GENERATION_MODEL` continues to override the application default.
+- No schema changes. If the host has an explicit older model value, update it to `gemini-3.8-flash` and redeploy.
+
 ### 2026-10-18: Handle Windows subprocess text encoding in exam importer
 
 **Modified:** `scripts/exam-engine/exam_engine/textextract.py`, `CHANGES.md`

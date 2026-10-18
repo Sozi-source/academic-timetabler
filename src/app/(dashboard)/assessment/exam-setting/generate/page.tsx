@@ -16,7 +16,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   invalid: 'Choose a unit, active blueprint, academic period, and paper type.',
   provider: 'Gemini is not configured. Set GEMINI_API_KEY on the server and restart the app.',
   'provider-auth': 'Gemini rejected the API credentials or the key lacks permission. Replace GEMINI_API_KEY with a valid key and restart the app.',
-  'provider-model': 'The configured Gemini model is unavailable for this API key. Check EXAM_GENERATION_MODEL in .env.local and restart the app.',
+  'provider-model': 'The configured Gemini model is unavailable for this API key. Set EXAM_GENERATION_MODEL to gemini-3.8-flash in the deployed app settings, then redeploy.',
   'provider-quota': 'Gemini rate or usage limits were reached after automatic retries. Wait before trying again, or check the project quota in Google AI Studio.',
   'provider-unavailable': 'Gemini is temporarily unavailable. Wait a few minutes and try again.',
   'provider-error': 'Gemini rejected the generation request. Check the key permissions, model setting, and Google AI Studio project status.',

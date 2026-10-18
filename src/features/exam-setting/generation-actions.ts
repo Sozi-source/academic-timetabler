@@ -272,7 +272,7 @@ export async function generateExamPaperAction(formData: FormData) {
   let model: ReturnType<GoogleGenerativeAI['getGenerativeModel']>;
   try {
     const client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    model = client.getGenerativeModel({ model: process.env.EXAM_GENERATION_MODEL || 'gemini-2.5-flash' });
+    model = client.getGenerativeModel({ model: process.env.EXAM_GENERATION_MODEL || 'gemini-3.8-flash' });
   } catch {
     fail('provider');
   }

@@ -4,11 +4,11 @@ const STEPS = [
   { number: 1, label: 'Blueprints', href: '/assessment/exam-setting' },
   { number: 2, label: 'Past papers', href: '/assessment/exam-setting/past-papers' },
   { number: 3, label: 'Question bank', href: '/assessment/exam-setting/question-bank' },
-  { number: 4, label: 'Generate' },
+  { number: 4, label: 'Generate', href: '/assessment/exam-setting/generate' },
   { number: 5, label: 'Moderate & export' },
 ] as const;
 
-export function ExamSettingSteps({ currentStep }: { currentStep: 1 | 2 | 3 }) {
+export function ExamSettingSteps({ currentStep }: { currentStep: 1 | 2 | 3 | 4 | 5 }) {
   return (
     <nav className="grid gap-2 sm:grid-cols-5" aria-label="Exam-setting workflow">
       {STEPS.map((step) => {

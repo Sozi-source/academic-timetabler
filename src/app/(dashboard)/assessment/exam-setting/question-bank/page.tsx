@@ -5,7 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
 import { requireHodAccess } from '@/features/auth/authorization';
-import { saveHistoricalQuestionTagAction } from '@/features/exam-setting/question-bank-actions';
+import {
+  bulkSaveHistoricalQuestionTagsAction,
+  saveHistoricalQuestionTagAction,
+} from '@/features/exam-setting/question-bank-actions';
 import { getQuestionBankWorkspace } from '@/features/exam-setting/question-bank';
 import { ExamSettingSteps } from '@/features/exam-setting/workflow-steps';
 
@@ -17,6 +20,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   question: 'That parsed question has no usable mark total. Review the original parser output before tagging it.',
   save: 'The question tags could not be saved. Apply the question bank migration and refresh.',
   source: 'That historical paper is unavailable in the active department.',
+  bulk: 'The bulk tags could not be saved. Refresh and try again.',
 };
 
 export default async function ExamQuestionBankPage({ searchParams }: { searchParams: SearchParams }) {
@@ -55,6 +59,9 @@ export default async function ExamQuestionBankPage({ searchParams }: { searchPar
       {typeof params.saved === 'string' ? (
         <p role="status" className="rounded-lg border border-success-border bg-success-surface px-4 py-3 text-xs font-medium text-success">Question tags saved. The historical question remains a draft reference and cannot be approved for reuse.</p>
       ) : null}
+      {typeof params.bulkSaved === 'string' ? (
+        <p role="status" className="rounded-lg border border-success-border bg-success-surface px-4 py-3 text-xs font-medium text-success">Saved tags for {params.bulkSaved} question(s). Historical questions remain draft references and cannot be approved for reuse.</p>
+      ) : null}
 
       <div className="grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)]">
         <Card>
@@ -90,6 +97,49 @@ export default async function ExamQuestionBankPage({ searchParams }: { searchPar
                   No published curriculum topics are mapped to {selectedPaper.unitCode}. Enter a topic manually; it will be retained as text for later curriculum alignment.
                 </p>
               ) : null}
+              <form action={bulkSaveHistoricalQuestionTagsAction} className="space-y-3 rounded-lg border border-primary/20 bg-primary/5 p-3">
+                <input type="hidden" name="paperId" value={selectedPaper.id} />
+                <div>
+                  <p className="text-xs font-bold text-text-primary">Bulk tag questions</p>
+                  <p className="mt-1 text-[11px] leading-4 text-text-secondary">Choose the questions that share one topic, enter the topic once, then save them together. Uncheck questions from other topics. Existing tags on selected questions will be replaced.</p>
+                </div>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <label className="space-y-1 text-[11px] font-semibold text-text-secondary">
+                    Shared curriculum topic
+                    <input name="topic" list={`bulk-topics-${selectedPaper.id}`} required minLength={2} maxLength={240} placeholder="Choose or enter topic" className="h-9 w-full rounded-md border border-border bg-surface px-2 text-xs text-text-primary" />
+                    <datalist id={`bulk-topics-${selectedPaper.id}`}>{workspace.topics.map((topic) => <option key={topic} value={topic} />)}</datalist>
+                  </label>
+                  <label className="space-y-1 text-[11px] font-semibold text-text-secondary">
+                    Shared learning outcome (optional)
+                    <input name="learningOutcome" list={`bulk-outcomes-${selectedPaper.id}`} maxLength={1000} placeholder="Choose or enter learning outcome" className="h-9 w-full rounded-md border border-border bg-surface px-2 text-xs text-text-primary" />
+                    <datalist id={`bulk-outcomes-${selectedPaper.id}`}>{workspace.learningOutcomes.map((outcome, index) => <option key={`${index}-${outcome}`} value={outcome} />)}</datalist>
+                  </label>
+                  <label className="space-y-1 text-[11px] font-semibold text-text-secondary">Difficulty
+                    <select name="difficulty" defaultValue="medium" className="h-9 w-full rounded-md border border-border bg-surface px-2 text-xs text-text-primary"><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select>
+                  </label>
+                  <label className="space-y-1 text-[11px] font-semibold text-text-secondary">Cognitive level
+                    <select name="cognitiveLevel" defaultValue="" className="h-9 w-full rounded-md border border-border bg-surface px-2 text-xs text-text-primary"><option value="">Not set</option><option value="recall">Recall</option><option value="comprehension">Comprehension</option><option value="application">Application</option><option value="analysis">Analysis</option></select>
+                  </label>
+                </div>
+                <fieldset className="space-y-2">
+                  <legend className="text-[11px] font-semibold text-text-secondary">Questions to tag together</legend>
+                  <div className="grid max-h-72 gap-1 overflow-y-auto rounded-md border border-border bg-surface p-2 sm:grid-cols-2">
+                    {selectedPaper.questions.map((question) => (
+                      <label key={question.key} className="flex items-start gap-2 rounded px-2 py-1.5 text-[11px] hover:bg-surface-subtle">
+                        <input type="checkbox" name="questionKeys" value={question.key} defaultChecked={Boolean(question.marks)} disabled={!question.marks || workspace.migrationRequired} className="mt-0.5 accent-primary" />
+                        <span className="min-w-0">
+                          <span className="font-semibold">Section {question.section} · Q{question.number}</span>
+                          <span className="ml-1 text-text-muted">{question.marks ? `${question.marks} marks` : 'marks unresolved'}</span>
+                          <span className="mt-0.5 block line-clamp-2 text-text-secondary">{question.stem || question.bodyText}</span>
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+                <button type="submit" disabled={workspace.migrationRequired || !selectedPaper.questions.some((question) => question.marks)} className="h-9 rounded-md bg-primary px-3 text-xs font-semibold text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50">
+                  Save tags for selected questions
+                </button>
+              </form>
               {selectedPaper.questions.map((question) => (
                 <form key={question.key} action={saveHistoricalQuestionTagAction} className="rounded-lg border border-border p-3">
                   <input type="hidden" name="paperId" value={selectedPaper.id} />

@@ -17,6 +17,7 @@ export interface HistoricalQuestion {
   learningOutcome: string;
   difficulty: 'easy' | 'medium' | 'hard';
   cognitiveLevel: string;
+  sourceBody: Record<string, unknown>;
 }
 
 export interface HistoricalPaper {
@@ -118,10 +119,24 @@ function parsedQuestions(value: unknown, tags: Map<string, JsonObject>): Histori
         learningOutcome: text(saved?.learning_outcome),
         difficulty,
         cognitiveLevel: text(saved?.cognitive_level),
+        sourceBody: {
+          section: sectionLabel,
+          number,
+          stem,
+          parts: Array.isArray(question.parts) ? question.parts : [],
+        },
       });
     }
   }
   return result;
+}
+
+export function getParsedHistoricalQuestions(extractedText: string): HistoricalQuestion[] {
+  try {
+    return parsedQuestions(JSON.parse(extractedText), new Map());
+  } catch {
+    return [];
+  }
 }
 
 export function getHistoricalQuestionDetails(extractedText: string, key: string) {

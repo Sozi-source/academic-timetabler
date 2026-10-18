@@ -1,3 +1,15 @@
+### 2026-10-18: Generate new exam drafts from historical question archives
+
+**Added:** `src/features/exam-setting/generation-actions.ts`, `src/features/exam-setting/generation-queries.ts`, `src/features/exam-setting/generate-submit-button.tsx`, `src/app/(dashboard)/assessment/exam-setting/generate/page.tsx`, `supabase/migrations/20261018141000_exam_generated_paper_commit.sql`
+**Modified:** `src/features/exam-setting/question-bank.ts`, `src/features/exam-setting/workflow-steps.tsx`, `.env.example`, `scripts/exam-engine/README.md`, `CHANGES.md`
+- Added the Step 4 one-click paper generator. It gathers all parsed, marked historical questions for the selected unit, favors less-used seeds, and does not reuse a seed within the same paper. Only source questions used in that paper are added to the question bank when needed; Step 3 tagging remains optional.
+- Uses Google Gemini on the server to create fresh wording and scenarios matching the active blueprint's sections, item counts, and marks. Generation runs in small parallel batches and rejects malformed output before saving.
+- Added local 4-word-shingle similarity checks against the selected unit's entire imported question archive. Generated questions keep their seed question/source/year, derivation mode, and similarity score. Overlap above 25% marks the item for further review.
+- Added an atomic department-scoped database function to commit the draft paper, generated questions, paper items, and audit event together. Historical questions remain reference-only; no paper or question is approved/exported automatically.
+- Privacy: question text for the selected unit is sent to Google Gemini for rewriting. Configure `GEMINI_API_KEY` and optionally `EXAM_GENERATION_MODEL` on the server.
+- Applied `20261018141000_exam_generated_paper_commit.sql` to the linked Supabase project. Other environments should apply it with `npx supabase db push`. To use the screen, activate a blueprint and select an active or planned academic period.
+- No destructive schema changes. Papers remain unique by unit, academic period, and paper type; generating that same combination again is blocked.
+
 ### 2026-10-18: Handle Windows subprocess text encoding in exam importer
 
 **Modified:** `scripts/exam-engine/exam_engine/textextract.py`, `CHANGES.md`
@@ -3802,3 +3814,9 @@ No database or application runtime changes were executed while preparing this pa
 - Added the missing `series`, `trainer_name`, `unit_code`, and `parse_notes` columns to pre-existing `exam_source_files` installations, with constraints matching the exam setting foundation schema. This fixes the commit RPC failure caused by the older live table shape while preserving existing rows.
 - Applied the migration to the linked Supabase database. The previously failed commit then registered all 15 ready papers; 3 rejected records remain in the batch (2 have `unread_parts` parser status, and 1 usable-with-notes record was already rejected).
 - No breaking changes. The change is additive and idempotent.
+### 2026-10-18: Add bulk tagging for historical paper questions
+
+**Modified:** `src/features/exam-setting/question-bank-actions.ts`, `src/app/(dashboard)/assessment/exam-setting/question-bank/page.tsx`, `CHANGES.md`
+- Added a single-submit bulk tag form for each selected paper. HODs can select questions sharing a topic, enter topic/outcome/difficulty/cognitive level once, and save the group together. Questions with unresolved marks cannot be selected.
+- Existing tags on selected questions are replaced, and historical questions remain draft-only references. The per-question editor remains available for precise corrections.
+- No schema change or manual migration required.

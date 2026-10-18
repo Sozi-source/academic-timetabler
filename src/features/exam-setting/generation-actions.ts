@@ -421,7 +421,10 @@ export async function generateExamPaperAction(formData: FormData) {
     requested_kind: paperKind,
     requested_items: items,
   });
-  if (commitError || !paperId) fail(commitError?.code === '23505' ? 'duplicate' : 'commit');
+  if (commitError || !paperId) {
+    console.error('[exam-generation] Commit failed:', commitError?.message ?? 'no paperId returned', commitError?.code);
+    fail(commitError?.code === '23505' ? 'duplicate' : 'commit');
+  }
 
   revalidatePath('/assessment/exam-setting/generate');
   revalidatePath('/assessment/exam-setting/moderate');

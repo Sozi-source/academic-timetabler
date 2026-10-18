@@ -1,3 +1,12 @@
+### 2026-10-19: Fix Gemini exam generation failing with "did not meet the blueprint format"
+
+**Modified:** `src/features/exam-setting/generation-actions.ts`, `CHANGES.md`
+- Root cause: seeds were assigned to blueprint slots without considering marks (e.g. a 4-mark Section A slot received a 20- or 6-mark seed). Gemini copied the seed's half marks (e.g. `1.5`), which failed the integer `marks` validation. Because one bad item aborted the whole paper, generation failed with `generation-format`. This was reproduced against the DHN 2304 Biochemistry II archive.
+- Gemini is now called with a structured `responseSchema` that mirrors the Zod contract: integer marks, enum difficulty/cognitive level/derivation mode, and required fields. The prompt also requires whole-number marks scaled to the target slot.
+- Seed selection now prefers the seed with the closest marks after use-count rotation. Year and key remain tie-breakers.
+- A batch that fails format validation (malformed JSON, wrong order, schema failure, or wrong mark total) is retried once before the paper fails. The underlying generation error is now logged server-side with `[exam-generation]`.
+- No schema, API, or UI changes. No manual follow-up is required.
+
 ### 2026-10-18: Generate new exam drafts from historical question archives
 
 **Added:** `src/features/exam-setting/generation-actions.ts`, `src/features/exam-setting/generation-queries.ts`, `src/features/exam-setting/generate-submit-button.tsx`, `src/app/(dashboard)/assessment/exam-setting/generate/page.tsx`, `supabase/migrations/20261018141000_exam_generated_paper_commit.sql`

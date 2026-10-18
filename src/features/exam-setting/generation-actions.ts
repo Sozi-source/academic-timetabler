@@ -1,6 +1,6 @@
 'use server';
 
-import { GoogleGenerativeAI, GoogleGenerativeAIFetchError } from '@google/generative-ai';
+import { GoogleGenerativeAI, GoogleGenerativeAIFetchError, SchemaType, type ResponseSchema } from '@google/generative-ai';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
@@ -31,6 +31,46 @@ const generatedQuestionSchema = z.object({
   learningOutcome: z.string().trim().max(1000),
   derivationMode: z.enum(['reword', 'rescenario', 'new_from_notes']),
 });
+
+/**
+ * Structured-output schema sent to Gemini. It mirrors generatedQuestionSchema so the
+ * decoder itself guarantees whole-number marks and valid enum values (past papers often
+ * contain half marks such as 1.5, which the model would otherwise copy).
+ */
+const enumString = (values: string[]): ResponseSchema => ({ type: SchemaType.STRING, format: 'enum', enum: values });
+const generatedBatchResponseSchema: ResponseSchema = {
+  type: SchemaType.ARRAY,
+  items: {
+    type: SchemaType.OBJECT,
+    properties: {
+      index: { type: SchemaType.INTEGER },
+      stem: { type: SchemaType.STRING },
+      options: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING }, maxItems: 0 },
+      parts: {
+        type: SchemaType.ARRAY,
+        maxItems: 20,
+        items: {
+          type: SchemaType.OBJECT,
+          properties: {
+            label: { type: SchemaType.STRING },
+            text: { type: SchemaType.STRING },
+            marks: { type: SchemaType.INTEGER },
+          },
+          required: ['label', 'text', 'marks'],
+        },
+      },
+      difficulty: enumString(['easy', 'medium', 'hard']),
+      cognitiveLevel: enumString(['recall', 'comprehension', 'application', 'analysis']),
+      topic: { type: SchemaType.STRING },
+      learningOutcome: { type: SchemaType.STRING },
+      derivationMode: enumString(['reword', 'rescenario', 'new_from_notes']),
+    },
+    required: ['index', 'stem', 'options', 'parts', 'difficulty', 'cognitiveLevel', 'topic', 'learningOutcome', 'derivationMode'],
+  },
+};
+
+/** Thrown when Gemini answers but the content fails paper-format validation (retryable). */
+class GenerationFormatError extends Error {}
 
 type GenerationSlot = {
   sectionLabel: string;
@@ -114,41 +154,65 @@ async function generateBatch(
     'Use each historical item only as a guide to its topic and learning intent. Create a genuinely new question: change the scenario, data, framing, and sentence structure; never copy a sentence or merely swap synonyms. Preserve scientific meaning and the requested difficulty and cognitive level. Keep standard clinical and scientific terminology accurate.',
     'This college paper format does not allow multiple-choice questions. Never produce options or answer choices. Every item is a written short-answer or structured question.',
     'Options must always be an empty array. Provide a clear stem and numbered/lettered parts whose marks add up exactly to the requested marks when parts are used. For a short-answer item without parts, use an empty parts array.',
+    'Every part mark must be a whole number (1, 2, 3, ...). Never use half or decimal marks, even if the historical item did. The historical item may carry a different mark value from the target; always scale the question to the requested marks.',
     'Include topic, learningOutcome, difficulty (easy|medium|hard), cognitiveLevel (recall|comprehension|application|analysis), and derivationMode (reword|rescenario|new_from_notes). Use rescenario when introducing a new clinical, community, laboratory, or food-service scenario; otherwise use reword.',
     'Each object must contain: index, stem, options, parts (objects with label,text,marks), topic, learningOutcome, difficulty, cognitiveLevel, derivationMode.',
     JSON.stringify(input),
   ].join('\n\n');
-  let result: Awaited<ReturnType<typeof model.generateContent>> | undefined;
-  for (let attempt = 0; attempt < 3; attempt += 1) {
+
+  const validate = (text: string): Array<z.infer<typeof generatedQuestionSchema>> => {
+    let raw: unknown;
     try {
-      result = await model.generateContent({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: 'application/json', temperature: 0.75 },
-      });
-      break;
+      raw = parseModelJson(text);
+    } catch {
+      throw new GenerationFormatError('Gemini returned malformed JSON. Try generating again.');
+    }
+    if (!Array.isArray(raw) || raw.length !== slots.length) throw new GenerationFormatError('Gemini returned an incomplete set of questions. Try generating again.');
+    return raw.map((candidate, index) => {
+      if (typeof candidate !== 'object' || candidate === null || !('index' in candidate) || candidate.index !== index) {
+        throw new GenerationFormatError('Gemini returned questions in an invalid order. Try generating again.');
+      }
+      const parsed = generatedQuestionSchema.safeParse(candidate);
+      if (!parsed.success) throw new GenerationFormatError(`A generated question did not meet the paper format (item ${slots[index].sectionLabel}${slots[index].itemNumber}). Try again.`);
+      const slot = slots[index];
+      if (parsed.data.parts.length > 0
+        && parsed.data.parts.reduce((sum, part) => sum + part.marks, 0) !== slot.marks) {
+        throw new GenerationFormatError(`Generated question ${slot.sectionLabel}${slot.itemNumber} does not add to ${slot.marks} marks. Try again.`);
+      }
+      return parsed.data;
+    });
+  };
+
+  // Format failures are usually one-off model slips; retry the batch once before failing the paper.
+  const formatAttempts = 2;
+  for (let formatAttempt = 0; ; formatAttempt += 1) {
+    let result: Awaited<ReturnType<typeof model.generateContent>> | undefined;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        result = await model.generateContent({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: {
+            responseMimeType: 'application/json',
+            responseSchema: generatedBatchResponseSchema,
+            temperature: 0.75,
+          },
+        });
+        break;
+      } catch (error) {
+        const canRetry = error instanceof GoogleGenerativeAIFetchError
+          && (error.status === 429 || error.status === 503);
+        if (!canRetry || attempt === 2) throw error;
+        await new Promise((resolve) => setTimeout(resolve, 1500 * (attempt + 1)));
+      }
+    }
+    if (!result) throw new Error('Gemini returned no response.');
+    try {
+      return validate(result.response.text());
     } catch (error) {
-      const canRetry = error instanceof GoogleGenerativeAIFetchError
-        && (error.status === 429 || error.status === 503);
-      if (!canRetry || attempt === 2) throw error;
-      await new Promise((resolve) => setTimeout(resolve, 1500 * (attempt + 1)));
+      if (!(error instanceof GenerationFormatError) || formatAttempt >= formatAttempts - 1) throw error;
+      console.warn(`[exam-generation] ${error.message} Retrying batch (attempt ${formatAttempt + 2}/${formatAttempts}).`);
     }
   }
-  if (!result) throw new Error('Gemini returned no response.');
-  const raw = parseModelJson(result.response.text());
-  if (!Array.isArray(raw) || raw.length !== slots.length) throw new Error('Gemini returned an incomplete set of questions. Try generating again.');
-  return raw.map((candidate, index) => {
-    if (typeof candidate !== 'object' || candidate === null || !('index' in candidate) || candidate.index !== index) {
-      throw new Error('Gemini returned questions in an invalid order. Try generating again.');
-    }
-    const parsed = generatedQuestionSchema.safeParse(candidate);
-    if (!parsed.success) throw new Error(`A generated question did not meet the paper format (item ${slots[index].sectionLabel}${slots[index].itemNumber}). Try again.`);
-    const slot = slots[index];
-    if (parsed.data.parts.length > 0
-      && parsed.data.parts.reduce((sum, part) => sum + part.marks, 0) !== slot.marks) {
-      throw new Error(`Generated question ${slot.sectionLabel}${slot.itemNumber} does not add to ${slot.marks} marks. Try again.`);
-    }
-    return parsed.data;
-  });
 }
 
 export async function generateExamPaperAction(formData: FormData) {
@@ -260,7 +324,10 @@ export async function generateExamPaperAction(formData: FormData) {
   for (const use of generatedSeedUses ?? []) if (use.seed_question_id) useCounts.set(use.seed_question_id, (useCounts.get(use.seed_question_id) ?? 0) + 1);
   const usedThisPaper = new Set<string>();
   for (let start = 0; start < slots.length; start += 1) {
+    const slotMarks = slots[start].marks;
     const candidatePool = [...seeds].sort((left, right) => (left.id ? useCounts.get(left.id) ?? 0 : 0) - (right.id ? useCounts.get(right.id) ?? 0 : 0)
+      // Prefer seeds sized like the slot so Gemini rewrites a comparable question instead of rescaling a mismatched one.
+      || Math.abs(left.marks - slotMarks) - Math.abs(right.marks - slotMarks)
       || (left.sourceYear ?? 0) - (right.sourceYear ?? 0)
       || left.sourceQuestionKey.localeCompare(right.sourceQuestionKey));
     const seed = candidatePool.find((candidate) => !usedThisPaper.has(`${candidate.sourceFileId}:${candidate.sourceQuestionKey}`));
@@ -283,6 +350,7 @@ export async function generateExamPaperAction(formData: FormData) {
     generated = [];
     for (const batch of batches) generated.push(...await generateBatch(model, batch));
   } catch (error) {
+    console.error('[exam-generation] Generation failed:', error instanceof Error ? error.message : error);
     if (error instanceof GoogleGenerativeAIFetchError) {
       if (error.status === 401 || error.status === 403) fail('provider-auth');
       if (error.status === 404) fail('provider-model');

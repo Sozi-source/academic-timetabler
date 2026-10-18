@@ -1,3 +1,42 @@
+### 2026-10-17: Add exam-setting foundation and past-paper review importer
+
+**Added:** `supabase/migrations/20261017120000_exam_setting_foundation.sql`, `scripts/exam-engine/`, `data/exam-setting/reference_questions.jsonl`, `data/exam-setting/import_report.csv`
+**Modified:** `CHANGES.md`
+- Added the supplied exam-bank schema as a timestamped migration. Exam records now carry an owning `department_id`, derive it from existing unit/paper/source ownership when possible, and use department-management policies. Trainer source/question policies also require the active department and allocated unit.
+- Added the Python parser/importer and supplied parser cases under `scripts/exam-engine/`. It reports unreadable and structurally incomplete papers rather than silently dropping them, and excludes marking schemes/outlines from question flattening.
+- Added the supplied reference-question export and import report as review artifacts. They are not seeded into `exam_questions`: the export lacks verified topics/learning outcomes and unit UUIDs, so mapping them automatically would be unsafe.
+- Manual follow-up: apply the migration through the normal Supabase migration process; install Python 3.10+, Pandoc, and the relevant PDF/legacy Word converters to run imports. This package does not include a paper-generation worker, originality scoring, blueprint/moderation UI, or export workflow; those are not present in the supplied engine/schema packet.
+- Breaking changes: none to existing application routes or tables. No automatic backfill of the supplied reference corpus occurs.
+
+### 2026-10-17: Build exam-setting workflow step 1, blueprints
+
+**Added:** `src/features/exam-setting/types.ts`, `src/features/exam-setting/queries.ts`, `src/features/exam-setting/actions.ts`, `src/app/(dashboard)/assessment/exam-setting/page.tsx`
+**Added:** `supabase/migrations/20261017211000_exam_blueprint_lifecycle.sql`
+**Modified:** `src/components/layout/assessment-shell.tsx`, `scripts/exam-engine/README.md`, `CHANGES.md`
+- Added a department-scoped HOD screen to create draft blueprint versions, review current versions, and activate or retire them. New blueprints encode the 100-mark college format and configurable duration, with optional programme scope.
+- Added a follow-up migration with an atomic status function so activating a version retires the prior active version for the same blueprint name/programme. It adds department-aware version uniqueness and one-active-version protection without rewriting the already-applied foundation migration.
+- The page detects an unapplied exam-setting migration and explains the required setup instead of failing with a blank screen.
+- No breaking changes. The foundation migration is applied; apply the lifecycle migration before using activation/retirement controls. Next step: build past-paper upload/import review against this blueprint foundation.
+
+### 2026-10-17: Build exam-setting workflow step 2, past-paper review
+
+**Added:** `supabase/migrations/20261017220000_exam_paper_import_review.sql`, `src/features/exam-setting/import-actions.ts`, `src/features/exam-setting/import-queries.ts`, `src/features/exam-setting/workflow-steps.tsx`, `src/app/(dashboard)/assessment/exam-setting/past-papers/page.tsx`
+**Modified:** `src/app/(dashboard)/assessment/exam-setting/page.tsx`, `scripts/exam-engine/README.md`, `CHANGES.md`
+- Added a department-scoped upload and review queue for the offline parser's `papers.jsonl` output. Uploads are schema-checked, limited to 45 MB/1,000 records, stored in a private bucket, and staged for HOD review.
+- Reviewers can match recognized unit codes to active units, mark clean or noted papers ready, and reject malformed/unreadable records. Ready papers are committed atomically into `exam_source_files`; parsed structures and trainer notes are preserved for the question-bank step.
+- Hardened source-file visibility so trainers cannot read historical exam papers; trainer reads remain limited to notes and format guides for their allocated units.
+- Added tenant-isolated import batch/item tables and an atomic commit function. Workflow navigation now links blueprint setup and paper review.
+- No breaking changes. Apply the lifecycle and import-review migrations with `npx supabase db push` before using activation or import controls. Next step: curate imported question structures into the historical question bank with topic/outcome tagging.
+
+### 2026-10-18: Build exam-setting workflow step 3, historical question bank
+
+**Added:** `supabase/migrations/20261018064000_exam_question_source_keys.sql`, `src/features/exam-setting/question-bank.ts`, `src/features/exam-setting/question-bank-actions.ts`, `src/app/(dashboard)/assessment/exam-setting/question-bank/page.tsx`
+**Modified:** `src/features/exam-setting/workflow-steps.tsx`, `scripts/exam-engine/README.md`, `CHANGES.md`
+- Added a HOD-only question-bank screen for parsed, department-scoped past papers. It reads topics and outcomes from the mapped curriculum registry, with text entry where no published curriculum mapping exists.
+- Question tags are saved as historical draft references with source lineage, year, paper type, mark totals, difficulty, and cognitive level. Stable source keys make repeat saves update the same question; historical questions remain prohibited from approval.
+- Parser questions without usable marks remain visible but cannot be saved into the mark-constrained question table.
+- No breaking changes. Apply `20261018064000_exam_question_source_keys.sql` with `npx supabase db push` before tagging questions. Next step: blueprint coverage and question generation.
+
 ### 2026-10-16: Enhance Class Attendance, CAT & Exam Signing Sheet Print Clarity & Typography
 
 **Modified:**

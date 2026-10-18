@@ -3,6 +3,7 @@
 import {
   ArrowLeft,
   BarChart3,
+  BookOpenCheck,
   FileText,
   GraduationCap,
   LayoutDashboard,
@@ -27,6 +28,7 @@ interface AssessmentShellProps {
 
 const NAVIGATION_ITEMS = [
   { label: 'Overview', href: '/assessment', icon: LayoutDashboard },
+  { label: 'Exam Setting', href: '/assessment/exam-setting', icon: BookOpenCheck },
   { label: 'CAT & Exam Analysis', href: '/assessment/analysis', icon: BarChart3 },
   { label: 'Reports', href: '/assessment/reports', icon: FileText },
 ] as const;

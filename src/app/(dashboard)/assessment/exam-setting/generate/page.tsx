@@ -15,6 +15,11 @@ const ERROR_MESSAGES: Record<string, string> = {
   department: 'Select an active department before generating a paper.',
   invalid: 'Choose a unit, active blueprint, academic period, and paper type.',
   provider: 'Gemini is not configured. Set GEMINI_API_KEY on the server and restart the app.',
+  'provider-auth': 'Gemini rejected the API credentials or the key lacks permission. Replace GEMINI_API_KEY with a valid key and restart the app.',
+  'provider-model': 'The configured Gemini model is unavailable for this API key. Check EXAM_GENERATION_MODEL in .env.local and restart the app.',
+  'provider-quota': 'Gemini rate or usage limits were reached after automatic retries. Wait before trying again, or check the project quota in Google AI Studio.',
+  'provider-unavailable': 'Gemini is temporarily unavailable. Wait a few minutes and try again.',
+  'provider-error': 'Gemini rejected the generation request. Check the key permissions, model setting, and Google AI Studio project status.',
   unit: 'The selected unit is unavailable in this department.',
   blueprint: 'Activate a department blueprint before generating papers.',
   period: 'Choose an active or planned academic period.',
@@ -26,7 +31,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   'blueprint-layout': 'The active blueprint does not contain a supported paper layout.',
   'not-enough-questions': 'The archive has fewer distinct marked questions than this blueprint needs. Import more past papers for this unit, then try again.',
   'generation-format': 'Gemini returned a question that did not meet the blueprint format. No paper draft was created; try again.',
-  generation: 'Gemini could not generate this paper. No paper draft was created; try again.',
+  generation: 'Gemini could not generate this paper. No paper draft was created; check the provider status and try again.',
   commit: 'The generated paper could not be saved. No paper draft was created; refresh and try again.',
 };
 

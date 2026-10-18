@@ -21,6 +21,13 @@
 - Existing historical MCQs remain available as source records, but generated exam questions must be written questions.
 - Manual follow-up: apply `20261018152000_exam_setting_written_only.sql` with `npx supabase db push` in each database environment.
 
+### 2026-10-18: Make Gemini exam generation resilient and diagnosable
+
+**Modified:** `src/features/exam-setting/generation-actions.ts`, `src/app/(dashboard)/assessment/exam-setting/generate/page.tsx`, `CHANGES.md`
+- Run Gemini batches sequentially to avoid burst rate limits and retry temporary 429/503 responses up to two times with a short backoff.
+- Replace message-length error classification with safe provider categories for authentication, model configuration, quota, provider availability, and invalid question output. Error details and question text are not sent to the browser.
+- No schema or workflow changes.
+
 ### 2026-10-18: Handle Windows subprocess text encoding in exam importer
 
 **Modified:** `scripts/exam-engine/exam_engine/textextract.py`, `CHANGES.md`

@@ -1,6 +1,6 @@
 'use server';
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, GoogleGenerativeAIFetchError } from '@google/generative-ai';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
@@ -118,10 +118,22 @@ async function generateBatch(
     'Each object must contain: index, stem, options, parts (objects with label,text,marks), topic, learningOutcome, difficulty, cognitiveLevel, derivationMode.',
     JSON.stringify(input),
   ].join('\n\n');
-  const result = await model.generateContent({
-    contents: [{ role: 'user', parts: [{ text: prompt }] }],
-    generationConfig: { responseMimeType: 'application/json', temperature: 0.75 },
-  });
+  let result: Awaited<ReturnType<typeof model.generateContent>> | undefined;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      result = await model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: { responseMimeType: 'application/json', temperature: 0.75 },
+      });
+      break;
+    } catch (error) {
+      const canRetry = error instanceof GoogleGenerativeAIFetchError
+        && (error.status === 429 || error.status === 503);
+      if (!canRetry || attempt === 2) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 1500 * (attempt + 1)));
+    }
+  }
+  if (!result) throw new Error('Gemini returned no response.');
   const raw = parseModelJson(result.response.text());
   if (!Array.isArray(raw) || raw.length !== slots.length) throw new Error('Gemini returned an incomplete set of questions. Try generating again.');
   return raw.map((candidate, index) => {
@@ -268,11 +280,17 @@ export async function generateExamPaperAction(formData: FormData) {
   const batches = chunk(slots, 8);
   let generated: Array<z.infer<typeof generatedQuestionSchema>>;
   try {
-    const results = await Promise.all(batches.map((batch) => generateBatch(model, batch)));
-    generated = results.flat();
+    generated = [];
+    for (const batch of batches) generated.push(...await generateBatch(model, batch));
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Gemini could not generate this paper. Try again.';
-    fail(message.length < 180 ? 'generation-format' : 'generation');
+    if (error instanceof GoogleGenerativeAIFetchError) {
+      if (error.status === 401 || error.status === 403) fail('provider-auth');
+      if (error.status === 404) fail('provider-model');
+      if (error.status === 429) fail('provider-quota');
+      if (error.status !== undefined && error.status >= 500) fail('provider-unavailable');
+      fail('provider-error');
+    }
+    fail('generation-format');
   }
 
   const selectedSeedKeys = new Set(slots.map((slot) => `${slot.seed.sourceFileId}:${slot.seed.sourceQuestionKey}`));

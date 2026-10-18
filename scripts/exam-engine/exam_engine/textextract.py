@@ -37,11 +37,24 @@ def extract_text(path: str | Path, timeout: int = 90) -> str:
 
 def _run(cmd: list[str], timeout: int) -> str:
     try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        # Pandoc and pdftotext emit UTF-8, while Windows may otherwise decode
+        # subprocess pipes using the active legacy code page (often cp1252).
+        # Invalid bytes in a document/tool diagnostic must not kill the reader
+        # thread and leave subprocess.run with stdout=None.
+        proc = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=timeout,
+        )
     except FileNotFoundError as exc:
         raise ExtractionError(f"{cmd[0]} is not installed") from exc
     except subprocess.TimeoutExpired as exc:
         raise ExtractionError(f"{cmd[0]} timed out") from exc
     if proc.returncode != 0:
         raise ExtractionError(proc.stderr.strip()[:300] or f"{cmd[0]} failed")
+    if proc.stdout is None:
+        raise ExtractionError(f"{cmd[0]} returned no text output")
     return proc.stdout

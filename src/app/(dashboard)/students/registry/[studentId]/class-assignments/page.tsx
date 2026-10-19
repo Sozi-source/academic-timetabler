@@ -4,7 +4,8 @@ import { ArrowLeft, UsersRound } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { requireHodAccess } from '@/features/auth/authorization';
-import { addStudentClassAssignment, deactivateStudentClassAssignment } from '@/features/students/class-assignment-actions';
+import { deactivateStudentClassAssignment } from '@/features/students/class-assignment-actions';
+import { StudentClassAssignmentForm, type StudentClassAssignmentOption } from '@/features/students/student-class-assignment-form';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 
@@ -48,7 +49,7 @@ export default async function StudentClassAssignmentsPage({
     supabase.from('academic_periods').select('id, name, code').eq('status', 'active'),
     supabase
       .from('student_unit_registrations')
-      .select('id, academic_period_id, unit:units(code, name), period:academic_periods(name, code)')
+      .select('id, academic_period_id, unit:units(id, code, name), period:academic_periods(name, code)')
       .eq('student_id', studentId)
       .eq('registration_status', 'registered'),
   ]);
@@ -56,13 +57,15 @@ export default async function StudentClassAssignmentsPage({
   if (!student) return <p className="p-6 text-sm text-text-secondary">Student not found.</p>;
   const activePeriodIds = (periods ?? []).map((period) => period.id);
   const eligibleRegistrations = (registrations ?? []).filter((registration) => activePeriodIds.includes(registration.academic_period_id));
-  const [{ data: allocations }, { data: assignments }] = activePeriodIds.length
+  const registrationUnits = eligibleRegistrations
+    .map((registration) => relation(registration.unit))
+    .filter((unit): unit is NonNullable<typeof unit> & { id: string } => Boolean(unit?.id));
+  const registrationUnitIds = [...new Set(registrationUnits.map((unit) => unit.id))];
+  const [{ data: sourceMembers }, { data: assignments }] = activePeriodIds.length
     ? await Promise.all([
-        supabase
-          .from('teaching_allocations')
-          .select('id, academic_period_id, unit:units(code, name), cohort:cohorts(name)')
-          .in('academic_period_id', activePeriodIds)
-          .eq('status', 'active'),
+        registrationUnitIds.length
+          ? supabase.from('unit_equivalence_members').select('unit_id, equivalence_group_id').in('unit_id', registrationUnitIds).eq('status', 'approved')
+          : Promise.resolve({ data: [] }),
         supabase
           .from('student_class_assignments')
           .select('id, source_registration_id, teaching_allocation_id, reason, created_at, registration:student_unit_registrations!inner(unit:units(code, name), period:academic_periods(name, code)), allocation:teaching_allocations!inner(unit:units(code, name), cohort:cohorts(name))')
@@ -70,6 +73,49 @@ export default async function StudentClassAssignmentsPage({
           .eq('is_active', true),
       ])
     : [{ data: [] }, { data: [] }];
+
+  const equivalenceGroupIds = [...new Set((sourceMembers ?? []).map((member) => member.equivalence_group_id))];
+  const { data: equivalentMembers } = equivalenceGroupIds.length
+    ? await supabase.from('unit_equivalence_members').select('unit_id, equivalence_group_id').in('equivalence_group_id', equivalenceGroupIds).eq('status', 'approved')
+    : { data: [] };
+  const equivalentUnitIdsBySource = new Map<string, Set<string>>();
+  for (const unitId of registrationUnitIds) equivalentUnitIdsBySource.set(unitId, new Set([unitId]));
+  for (const member of sourceMembers ?? []) {
+    const targetIds = equivalentUnitIdsBySource.get(member.unit_id);
+    if (targetIds) {
+      for (const equivalent of equivalentMembers ?? []) {
+        if (equivalent.equivalence_group_id === member.equivalence_group_id) targetIds.add(equivalent.unit_id);
+      }
+    }
+  }
+
+  const allEquivalentUnitIds = [...new Set([...equivalentUnitIdsBySource.values()].flatMap((unitIds) => [...unitIds]))];
+  const { data: allocations } = activePeriodIds.length && allEquivalentUnitIds.length
+    ? await supabase
+        .from('teaching_allocations')
+        .select('id, academic_period_id, unit_id, unit:units(code, name), cohort:cohorts(name)')
+        .in('academic_period_id', activePeriodIds)
+        .in('unit_id', allEquivalentUnitIds)
+        .eq('status', 'active')
+    : { data: [] };
+
+  const registrationOptions: StudentClassAssignmentOption[] = eligibleRegistrations.map((registration) => {
+    const unit = relation(registration.unit);
+    const period = relation(registration.period);
+    return { id: registration.id, label: `${unit?.code ?? 'Unit'} · ${unit?.name ?? 'Unit'} — ${period?.name ?? period?.code ?? 'Period'}` };
+  });
+  const allocationsByRegistration: Record<string, StudentClassAssignmentOption[]> = {};
+  for (const registration of eligibleRegistrations) {
+    const unit = relation(registration.unit);
+    const matchingUnitIds = equivalentUnitIdsBySource.get(unit?.id ?? '') ?? new Set<string>();
+    allocationsByRegistration[registration.id] = (allocations ?? [])
+      .filter((allocation) => allocation.academic_period_id === registration.academic_period_id && matchingUnitIds.has(allocation.unit_id))
+      .map((allocation) => {
+        const targetUnit = relation(allocation.unit);
+        const targetCohort = relation(allocation.cohort);
+        return { id: allocation.id, label: `${targetUnit?.code ?? 'Unit'} · ${targetUnit?.name ?? 'Unit'} — ${targetCohort?.name ?? 'Cohort'}` };
+      });
+  }
 
   const cohort = relation(student.current_cohort);
   return (
@@ -95,33 +141,13 @@ export default async function StudentClassAssignmentsPage({
 
       <Card className="p-5">
         <h2 className="font-semibold text-text-primary">Add a class assignment</h2>
-        {eligibleRegistrations.length && allocations?.length ? (
-          <form action={addStudentClassAssignment} className="mt-4 grid gap-3 md:grid-cols-2">
-            <input type="hidden" name="studentId" value={studentId} />
-            <label className="grid gap-1 text-sm font-medium text-text-secondary">Student&apos;s registered unit
-              <select required name="registrationId" className="h-10 rounded-lg border border-border bg-surface px-3 text-text-primary">
-                {eligibleRegistrations.map((registration) => {
-                  const unit = relation(registration.unit);
-                  const period = relation(registration.period);
-                  return <option key={registration.id} value={registration.id}>{unit?.code} · {unit?.name} — {period?.name ?? period?.code}</option>;
-                })}
-              </select>
-            </label>
-            <label className="grid gap-1 text-sm font-medium text-text-secondary">Existing target class
-              <select required name="allocationId" className="h-10 rounded-lg border border-border bg-surface px-3 text-text-primary">
-                {allocations.map((allocation) => {
-                  const unit = relation(allocation.unit);
-                  const targetCohort = relation(allocation.cohort);
-                  return <option key={allocation.id} value={allocation.id}>{unit?.code} · {unit?.name} — {targetCohort?.name}</option>;
-                })}
-              </select>
-            </label>
-            <label className="grid gap-1 text-sm font-medium text-text-secondary md:col-span-2">Reason
-              <input required minLength={3} maxLength={500} name="reason" placeholder="For example: resuming deferred units with the current delivery cohort" className="h-10 rounded-lg border border-border bg-surface px-3 text-text-primary" />
-            </label>
-            <button className="h-10 w-fit rounded-lg bg-primary px-4 text-sm font-semibold text-white hover:bg-primary-hover">Add student to class</button>
-          </form>
-        ) : <p className="mt-3 text-sm text-text-secondary">This student needs active unit registrations and the department needs an active period with existing class allocations.</p>}
+        {eligibleRegistrations.length ? (
+          <StudentClassAssignmentForm
+            studentId={studentId}
+            registrations={registrationOptions}
+            allocationsByRegistration={allocationsByRegistration}
+          />
+        ) : <p className="mt-3 text-sm text-text-secondary">This student has no registered units in an active academic period.</p>}
       </Card>
 
       <Card className="overflow-hidden">

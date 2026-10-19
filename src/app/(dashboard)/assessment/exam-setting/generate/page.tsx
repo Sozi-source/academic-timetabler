@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { WandSparkles } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -39,11 +40,14 @@ export default async function ExamGeneratePage({ searchParams }: { searchParams:
   await requireHodAccess();
   const params = await searchParams;
   const errorCode = typeof params.error === 'string' ? params.error : '';
-  const createdPaperId = typeof params.created === 'string' ? params.created : '';
-  const [workspace, preview] = await Promise.all([
-    getExamGenerationWorkspace(),
-    createdPaperId ? getGeneratedPaperPreview(createdPaperId) : Promise.resolve(null),
-  ]);
+  const requestedPaperId = typeof params.created === 'string'
+    ? params.created
+    : typeof params.paper === 'string'
+      ? params.paper
+      : '';
+  const workspace = await getExamGenerationWorkspace();
+  const activePaperId = requestedPaperId || workspace.recentPapers[0]?.id || '';
+  const preview = activePaperId ? await getGeneratedPaperPreview(activePaperId) : null;
   const canGenerate = !workspace.migrationRequired && workspace.units.length > 0
     && workspace.blueprints.length > 0 && workspace.periods.length > 0
     && workspace.units.some((unit) => unit.sourcePaperCount > 0);
@@ -127,10 +131,10 @@ export default async function ExamGeneratePage({ searchParams }: { searchParams:
       </div>
 
       {preview ? (
-        <Card>
+        <Card id="draft-preview">
           <CardHeader>
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <CardTitle>Generated draft · {preview.unitName} · {preview.periodName}</CardTitle>
+              <CardTitle>Generated draft · {preview.unitName} · {preview.periodName} ({preview.paperKind})</CardTitle>
               <Badge variant="warning">{preview.status} · {preview.totalMarks} marks</Badge>
             </div>
           </CardHeader>
@@ -141,8 +145,18 @@ export default async function ExamGeneratePage({ searchParams }: { searchParams:
                   <p className="text-xs font-bold text-text-primary">Section {question.section} · Question {question.number} · {question.marks} marks</p>
                   <Badge variant={question.status === 'needs_review' ? 'warning' : 'neutral'}>{question.status} · {Math.round(question.similarity * 100)}% wording overlap</Badge>
                 </div>
-                <p className="mt-2 whitespace-pre-line text-xs leading-5 text-text-secondary">{question.bodyText}</p>
-                <p className="mt-1 text-[11px] text-text-muted">Topic: {question.topic}</p>
+                <p className="mt-2 whitespace-pre-line text-xs leading-5 text-text-primary">{question.stem}</p>
+                {question.parts.length > 0 ? (
+                  <ol className="mt-2 space-y-1.5 pl-4 text-xs leading-5 text-text-secondary">
+                    {question.parts.map((part, partIndex) => (
+                      <li key={`${question.section}-${question.number}-${part.label || partIndex}`} className="flex items-baseline justify-between gap-3">
+                        <span><strong className="font-semibold text-text-primary">({part.label || String.fromCharCode(97 + partIndex)})</strong> {part.text}</span>
+                        {part.marks > 0 ? <span className="shrink-0 text-[11px] font-medium text-text-muted">({part.marks} {part.marks === 1 ? 'mark' : 'marks'})</span> : null}
+                      </li>
+                    ))}
+                  </ol>
+                ) : null}
+                <p className="mt-1.5 text-[11px] text-text-muted">Topic: {question.topic}</p>
               </div>
             ))}
           </div>
@@ -152,12 +166,22 @@ export default async function ExamGeneratePage({ searchParams }: { searchParams:
       <Card>
         <CardHeader><CardTitle>Recent drafts</CardTitle></CardHeader>
         <div className="divide-y divide-border">
-          {workspace.recentPapers.map((paper) => (
-            <div key={paper.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-xs">
-              <p className="font-semibold text-text-primary">{paper.unitName} · {paper.periodName} · {paper.paperKind}</p>
-              <Badge variant="warning">{paper.status}</Badge>
-            </div>
-          ))}
+          {workspace.recentPapers.map((paper) => {
+            const isSelected = preview?.id === paper.id;
+            return (
+              <Link
+                key={paper.id}
+                href={`/assessment/exam-setting/generate?created=${encodeURIComponent(paper.id)}#draft-preview`}
+                className={`flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-xs transition-colors hover:bg-surface-muted/60 ${isSelected ? 'bg-primary/5' : ''}`}
+              >
+                <p className="font-semibold text-text-primary">{paper.unitName} · {paper.periodName} · {paper.paperKind}</p>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-primary">{isSelected ? 'Viewing draft' : 'Open draft'}</span>
+                  <Badge variant="warning">{paper.status}</Badge>
+                </div>
+              </Link>
+            );
+          })}
           {workspace.recentPapers.length === 0 ? <p className="px-4 py-6 text-center text-xs text-text-muted">No generated drafts yet.</p> : null}
         </div>
       </Card>

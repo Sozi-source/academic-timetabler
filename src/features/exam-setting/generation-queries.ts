@@ -15,11 +15,23 @@ export interface ExamGenerationWorkspace {
 }
 
 export interface GeneratedPaperPreview {
+  id: string;
   status: string;
   totalMarks: number;
   unitName: string;
   periodName: string;
-  questions: Array<{ section: string; number: number; marks: number; status: string; bodyText: string; topic: string; similarity: number }>;
+  paperKind: string;
+  questions: Array<{
+    section: string;
+    number: number;
+    marks: number;
+    status: string;
+    stem: string;
+    parts: Array<{ label: string; text: string; marks: number }>;
+    bodyText: string;
+    topic: string;
+    similarity: number;
+  }>;
 }
 
 export async function getGeneratedPaperPreview(paperId: string): Promise<GeneratedPaperPreview | null> {
@@ -27,7 +39,7 @@ export async function getGeneratedPaperPreview(paperId: string): Promise<Generat
   if (!profile.activeDepartmentId) return null;
   const supabase = await createClient();
   const { data, error } = await supabase.from('exam_paper_items')
-    .select('section_label,item_number,marks,slot_status,exam_questions!inner(body_text,topic,max_similarity),exam_papers!inner(status,total_marks,department_id,units!inner(name),academic_periods!inner(name))')
+    .select('section_label,item_number,marks,slot_status,exam_questions!inner(body,body_text,topic,max_similarity),exam_papers!inner(id,paper_kind,status,total_marks,department_id,units!inner(name),academic_periods!inner(name))')
     .eq('department_id', profile.activeDepartmentId)
     .eq('paper_id', paperId)
     .order('section_label')
@@ -42,21 +54,45 @@ export async function getGeneratedPaperPreview(paperId: string): Promise<Generat
   const unit = paper && (Array.isArray(paper.units) ? paper.units[0] : paper.units);
   const period = paper && (Array.isArray(paper.academic_periods) ? paper.academic_periods[0] : paper.academic_periods);
   return {
+    id: paper?.id ?? paperId,
     status: paper?.status ?? 'draft',
     totalMarks: paper?.total_marks ?? 0,
     unitName: unit?.name ?? 'Unit',
     periodName: period?.name ?? 'Academic period',
+    paperKind: paper?.paper_kind ?? 'main',
     questions: data.flatMap((item) => {
       const question = Array.isArray(item.exam_questions) ? item.exam_questions[0] : item.exam_questions;
-      return question ? [{
+      if (!question) return [];
+      const rawBody = typeof question.body === 'object' && question.body !== null && !Array.isArray(question.body)
+        ? question.body as Record<string, unknown>
+        : null;
+      const stem = typeof rawBody?.stem === 'string' && rawBody.stem.trim().length > 0
+        ? rawBody.stem.trim()
+        : question.body_text;
+      const rawParts = Array.isArray(rawBody?.parts) ? rawBody.parts : [];
+      const parts = rawParts.flatMap((part) => {
+        if (typeof part !== 'object' || part === null || Array.isArray(part)) return [];
+        const record = part as Record<string, unknown>;
+        const label = typeof record.label === 'string' ? record.label.trim() : '';
+        const text = typeof record.text === 'string' ? record.text.trim() : '';
+        const marks = typeof record.own_marks === 'number'
+          ? record.own_marks
+          : typeof record.marks === 'number'
+            ? record.marks
+            : 0;
+        return text ? [{ label, text, marks }] : [];
+      });
+      return [{
         section: item.section_label,
         number: item.item_number,
         marks: item.marks ?? 0,
         status: item.slot_status,
+        stem,
+        parts,
         bodyText: question.body_text,
         topic: question.topic,
         similarity: question.max_similarity ?? 0,
-      }] : [];
+      }];
     }),
   };
 }

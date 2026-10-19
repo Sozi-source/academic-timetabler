@@ -1,13 +1,14 @@
 ### 2026-10-19: Fix Gemini exam generation and draft paper commit (`exam_commit_generated_paper`)
 
 **Added:** `supabase/migrations/20261019005500_fix_exam_commit_generated_paper_item_ambiguity.sql`
-**Modified:** `src/features/exam-setting/generation-actions.ts`, `CHANGES.md`
+**Modified:** `src/features/exam-setting/generation-actions.ts`, `src/features/exam-setting/generation-queries.ts`, `src/app/(dashboard)/assessment/exam-setting/generate/page.tsx`, `CHANGES.md`
 - Root cause 1 (generation format failure): seeds were assigned to blueprint slots without considering marks (e.g. a 4-mark Section A slot received a 20- or 6-mark seed). Gemini copied the seed's half marks (e.g. `1.5`), which failed the integer `marks` validation. Because one bad item aborted the whole paper, generation failed with `generation-format`. This was reproduced against the DHN 2304 Biochemistry II archive.
 - Root cause 2 (commit failure: *"The generated paper could not be saved"*): `public.exam_commit_generated_paper` declared a PL/pgSQL variable `item jsonb;` and also queried `from jsonb_array_elements(requested_items) item`, causing PostgreSQL error `42702: column reference "item" is ambiguous` whenever a generated paper was committed.
 - Gemini is now called with a structured `responseSchema` that mirrors the Zod contract: integer marks, enum difficulty/cognitive level/derivation mode, and required fields. The prompt also requires whole-number marks scaled to the target slot.
 - Seed selection now prefers the seed with the closest marks after use-count rotation. Year and key remain tie-breakers.
 - A batch that fails format validation (malformed JSON, wrong order, schema failure, or wrong mark total) is retried once before the paper fails. Both generation and commit errors are now logged server-side with `[exam-generation]`.
 - Replaced the ambiguous `item`/`question`/`section` identifiers in `public.exam_commit_generated_paper` with `v_item`/`v_question` and explicit table-column aliases (`as slot(item)`, `as sec(section)`), and pushed `20261019005500_fix_exam_commit_generated_paper_item_ambiguity.sql` to the linked Supabase database.
+- Made every row in **Recent drafts** on `/assessment/exam-setting/generate` a clickable link that opens the draft preview (with structured question parts and sub-marks), and defaulted the page to displaying the latest generated draft automatically when no `?created=` parameter is present.
 
 ### 2026-10-18: Generate new exam drafts from historical question archives
 

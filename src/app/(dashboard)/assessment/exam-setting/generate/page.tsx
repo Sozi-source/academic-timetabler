@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { WandSparkles } from 'lucide-react';
+import { Download, WandSparkles } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -135,7 +135,16 @@ export default async function ExamGeneratePage({ searchParams }: { searchParams:
           <CardHeader>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <CardTitle>Generated draft · {preview.unitName} · {preview.periodName} ({preview.paperKind})</CardTitle>
-              <Badge variant="warning">{preview.status} · {preview.totalMarks} marks</Badge>
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="warning">{preview.status} · {preview.totalMarks} marks</Badge>
+                <a
+                  href={`/api/exam-setting/papers/${encodeURIComponent(preview.id)}/download`}
+                  className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold text-white transition-colors hover:bg-primary/90"
+                >
+                  <Download className="size-3.5" aria-hidden="true" />
+                  Download Word (.docx)
+                </a>
+              </div>
             </div>
           </CardHeader>
           <div className="divide-y divide-border">
@@ -169,17 +178,33 @@ export default async function ExamGeneratePage({ searchParams }: { searchParams:
           {workspace.recentPapers.map((paper) => {
             const isSelected = preview?.id === paper.id;
             return (
-              <Link
+              <div
                 key={paper.id}
-                href={`/assessment/exam-setting/generate?created=${encodeURIComponent(paper.id)}#draft-preview`}
-                className={`flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-xs transition-colors hover:bg-surface-muted/60 ${isSelected ? 'bg-primary/5' : ''}`}
+                className={`flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-xs ${isSelected ? 'bg-primary/5' : ''}`}
               >
-                <p className="font-semibold text-text-primary">{paper.unitName} · {paper.periodName} · {paper.paperKind}</p>
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-primary">{isSelected ? 'Viewing draft' : 'Open draft'}</span>
+                <Link
+                  href={`/assessment/exam-setting/generate?created=${encodeURIComponent(paper.id)}#draft-preview`}
+                  className="font-semibold text-text-primary hover:text-primary"
+                >
+                  {paper.unitName} · {paper.periodName} · {paper.paperKind}
+                </Link>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Link
+                    href={`/assessment/exam-setting/generate?created=${encodeURIComponent(paper.id)}#draft-preview`}
+                    className="font-medium text-primary hover:underline"
+                  >
+                    {isSelected ? 'Viewing draft' : 'Open draft'}
+                  </Link>
+                  <a
+                    href={`/api/exam-setting/papers/${encodeURIComponent(paper.id)}/download`}
+                    className="inline-flex items-center gap-1 rounded-md border border-border bg-surface px-2.5 py-1 font-medium text-text-primary transition-colors hover:border-primary/40 hover:text-primary"
+                  >
+                    <Download className="size-3" aria-hidden="true" />
+                    Download .docx
+                  </a>
                   <Badge variant="warning">{paper.status}</Badge>
                 </div>
-              </Link>
+              </div>
             );
           })}
           {workspace.recentPapers.length === 0 ? <p className="px-4 py-6 text-center text-xs text-text-muted">No generated drafts yet.</p> : null}

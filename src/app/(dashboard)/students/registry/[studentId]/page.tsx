@@ -94,6 +94,13 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
 
           {/* Slim, neatly aligned action buttons */}
           <div className="grid grid-cols-2 gap-1.5 sm:flex sm:w-auto sm:items-center sm:gap-2 shrink-0">
+            <Link
+              href={`/students/registry/${student.id}/class-assignments`}
+              className="inline-flex h-8 w-full sm:w-auto items-center justify-center gap-1 rounded-lg border border-border bg-surface px-2.5 text-xs font-semibold text-text-secondary shadow-2xs transition hover:bg-surface-subtle whitespace-nowrap"
+            >
+              <UsersRound className="size-3.5 text-primary" />
+              <span>Class Assignments</span>
+            </Link>
             {student.academic_phase !== 'attachment' ? (
               <Link
                 href={`/students/unit-registration/register/${student.id}`}

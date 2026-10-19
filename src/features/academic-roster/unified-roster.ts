@@ -193,6 +193,42 @@ export async function getUnifiedUnitRoster({
     allUnitIds.length === 1 ? regQuery.eq('unit_id', allUnitIds[0]) : regQuery.in('unit_id', allUnitIds),
   ]);
 
+  // Explicit HOD assignments add only the selected student to this allocation.
+  // The source registration remains in the student's home cohort and unit.
+  const rosterRegistrations = [...(registrations ?? [])];
+  if (allocationId) {
+    try {
+      const { data: individualAssignments } = await supabase
+        .from('student_class_assignments')
+        .select(`
+          student_id,
+          students!inner(id, admission_number, full_name, current_cohort_id, lifecycle_status, academic_phase),
+          student_unit_registrations!inner(cohort_id, registration_status)
+        `)
+        .eq('teaching_allocation_id', allocationId)
+        .eq('academic_period_id', academicPeriodId)
+        .eq('is_active', true);
+
+      for (const assignment of individualAssignments ?? []) {
+        const student = Array.isArray(assignment.students) ? assignment.students[0] : assignment.students;
+        const registration = Array.isArray(assignment.student_unit_registrations)
+          ? assignment.student_unit_registrations[0]
+          : assignment.student_unit_registrations;
+        if (student?.id && registration?.registration_status === 'registered') {
+          rosterRegistrations.push({
+            student_id: student.id,
+            cohort_id: registration.cohort_id,
+            registration_status: 'registered',
+            student,
+          });
+        }
+      }
+    } catch (assignmentError) {
+      // Keep existing attendance rosters working before the assignment migration is applied.
+      console.warn('Could not load individual class assignments:', assignmentError);
+    }
+  }
+
   for (const off of offerings ?? []) {
     if (off.cohort_id) cohortIdSet.add(off.cohort_id);
   }
@@ -206,7 +242,7 @@ export async function getUnifiedUnitRoster({
     }
   }
 
-  for (const reg of registrations ?? []) {
+  for (const reg of rosterRegistrations) {
     if (reg.cohort_id) cohortIdSet.add(reg.cohort_id);
     const st = Array.isArray(reg.student) ? reg.student[0] : reg.student;
     if (st?.current_cohort_id) cohortIdSet.add(st.current_cohort_id);
@@ -288,7 +324,7 @@ export async function getUnifiedUnitRoster({
   // must NEVER appear on class attendance registers.
   const candidateMap = new Map<string, UnifiedRosterCandidate>();
 
-  for (const reg of registrations ?? []) {
+  for (const reg of rosterRegistrations) {
     const st = Array.isArray(reg.student) ? reg.student[0] : reg.student;
     if (!st?.id) continue;
 

@@ -1,6 +1,6 @@
-### 2026-10-19: Fix Gemini exam generation and draft paper commit (`exam_commit_generated_paper`)
+### 2026-10-19: Fix Gemini exam generation, draft paper commit (`exam_commit_generated_paper`), and add Word (`.docx`) paper download
 
-**Added:** `supabase/migrations/20261019005500_fix_exam_commit_generated_paper_item_ambiguity.sql`
+**Added:** `supabase/migrations/20261019005500_fix_exam_commit_generated_paper_item_ambiguity.sql`, `src/features/exam-setting/export-docx.ts`, `src/app/api/exam-setting/papers/[paperId]/download/route.ts`
 **Modified:** `src/features/exam-setting/generation-actions.ts`, `src/features/exam-setting/generation-queries.ts`, `src/app/(dashboard)/assessment/exam-setting/generate/page.tsx`, `CHANGES.md`
 - Root cause 1 (generation format failure): seeds were assigned to blueprint slots without considering marks (e.g. a 4-mark Section A slot received a 20- or 6-mark seed). Gemini copied the seed's half marks (e.g. `1.5`), which failed the integer `marks` validation. Because one bad item aborted the whole paper, generation failed with `generation-format`. This was reproduced against the DHN 2304 Biochemistry II archive.
 - Root cause 2 (commit failure: *"The generated paper could not be saved"*): `public.exam_commit_generated_paper` declared a PL/pgSQL variable `item jsonb;` and also queried `from jsonb_array_elements(requested_items) item`, causing PostgreSQL error `42702: column reference "item" is ambiguous` whenever a generated paper was committed.
@@ -9,6 +9,7 @@
 - A batch that fails format validation (malformed JSON, wrong order, schema failure, or wrong mark total) is retried once before the paper fails. Both generation and commit errors are now logged server-side with `[exam-generation]`.
 - Replaced the ambiguous `item`/`question`/`section` identifiers in `public.exam_commit_generated_paper` with `v_item`/`v_question` and explicit table-column aliases (`as slot(item)`, `as sec(section)`), and pushed `20261019005500_fix_exam_commit_generated_paper_item_ambiguity.sql` to the linked Supabase database.
 - Made every row in **Recent drafts** on `/assessment/exam-setting/generate` a clickable link that opens the draft preview (with structured question parts and sub-marks), and defaulted the page to displaying the latest generated draft automatically when no `?created=` parameter is present.
+- Added Word (`.docx`) export for generated examination papers (`/api/exam-setting/papers/[paperId]/download`) formatted to the ICMHS examination cover/header standard, with **Download Word (.docx)** buttons in both the preview card header and every row in **Recent drafts**, and audit logging (`paper_exported`).
 
 ### 2026-10-18: Generate new exam drafts from historical question archives
 
@@ -3857,3 +3858,13 @@ No database or application runtime changes were executed while preparing this pa
 - Added a single-submit bulk tag form for each selected paper. HODs can select questions sharing a topic, enter topic/outcome/difficulty/cognitive level once, and save the group together. Questions with unresolved marks cannot be selected.
 - Existing tags on selected questions are replaced, and historical questions remain draft-only references. The per-question editor remains available for precise corrections.
 - No schema change or manual migration required.
+### 2026-10-19: Support individual student class assignments
+
+**Added:** `supabase/migrations/20261019103000_student_individual_class_assignments.sql`, `src/features/students/class-assignment-actions.ts`, `src/app/(dashboard)/students/registry/[studentId]/class-assignments/page.tsx`
+**Modified:** `src/features/academic-roster/unified-roster.ts`, `src/app/(dashboard)/students/registry/[studentId]/page.tsx`, `CHANGES.md`
+- Added an HOD-controlled assignment from a student's registered unit to an existing teaching allocation for the same or an approved equivalent unit. The saved reason and assignment are period scoped; HODs can remove an assignment without editing the original registration.
+- Class, CAT, and exam attendance rosters now include only the individually assigned student on that target allocation. Home cohort, unit registration, scheduled sessions, trainer, room, and time remain unchanged.
+- The database trigger enforces active in-class student status, matching period and registration, unit equivalence, and department-management permission. RLS keeps access department scoped.
+- Manual follow-up: apply the migration with `npx supabase db push`, then open a student's registry profile and use **Class Assignments** to attach their registered units to existing classes. This migration does not assign any student automatically.
+- No existing records are rewritten. Assignments do not make a student part of the target cohort for timetable or cohort reports.
+

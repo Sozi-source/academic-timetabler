@@ -22,8 +22,8 @@ export default async function StudentClassAssignmentsPage({
 }) {
   await requireHodAccess();
   const [{ studentId }, query, supabase] = await Promise.all([params, searchParams, createClient()]);
-  const [{ data: student }, { data: periods }, { data: registrations }] = await Promise.all([
-    supabase.from('students').select('id, full_name, admission_number, current_cohort:cohorts(name)').eq('id', studentId).maybeSingle(),
+  const [{ data: student, error: studentError }, { data: periods }, { data: registrations }] = await Promise.all([
+    supabase.from('students').select('id, full_name, admission_number, current_cohort:cohorts!students_current_cohort_id_fkey(name)').eq('id', studentId).maybeSingle(),
     supabase.from('academic_periods').select('id, name, code').eq('status', 'active'),
     supabase
       .from('student_unit_registrations')
@@ -31,6 +31,7 @@ export default async function StudentClassAssignmentsPage({
       .eq('student_id', studentId)
       .eq('registration_status', 'registered'),
   ]);
+  if (studentError) throw new Error(`Unable to load student: ${studentError.message}`);
   if (!student) return <p className="p-6 text-sm text-text-secondary">Student not found.</p>;
   const activePeriodIds = (periods ?? []).map((period) => period.id);
   const eligibleRegistrations = (registrations ?? []).filter((registration) => activePeriodIds.includes(registration.academic_period_id));

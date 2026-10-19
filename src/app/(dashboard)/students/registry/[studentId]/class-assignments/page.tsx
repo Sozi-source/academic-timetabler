@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { addStudentClassAssignment, deactivateStudentClassAssignment } from '@/features/students/class-assignment-actions';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 
 type SearchParams = Promise<{ error?: string; saved?: string; removed?: string }>;
@@ -20,10 +21,30 @@ export default async function StudentClassAssignmentsPage({
   params: Promise<{ studentId: string }>;
   searchParams: SearchParams;
 }) {
-  await requireHodAccess();
+  const profile = await requireHodAccess();
   const [{ studentId }, query, supabase] = await Promise.all([params, searchParams, createClient()]);
+  let studentQuery = createAdminClient()
+    .from('students')
+    .select('id, department_id, full_name, admission_number, current_cohort:cohorts!students_current_cohort_id_fkey(name)')
+    .eq('id', studentId);
+
+  if (profile.role !== 'system_admin') {
+    if (!profile.activeDepartmentId) {
+      return <p className="p-6 text-sm text-text-secondary">Select the department you manage, then reload this page.</p>;
+    }
+    const { data: canManageDepartment, error: accessError } = await supabase.rpc(
+      'current_user_can_manage_department',
+      { requested_department: profile.activeDepartmentId },
+    );
+    if (accessError) throw new Error(`Unable to verify department access: ${accessError.message}`);
+    if (!canManageDepartment) {
+      return <p className="p-6 text-sm text-text-secondary">You do not have management access to the active department.</p>;
+    }
+    studentQuery = studentQuery.eq('department_id', profile.activeDepartmentId);
+  }
+
   const [{ data: student, error: studentError }, { data: periods }, { data: registrations }] = await Promise.all([
-    supabase.from('students').select('id, full_name, admission_number, current_cohort:cohorts!students_current_cohort_id_fkey(name)').eq('id', studentId).maybeSingle(),
+    studentQuery.maybeSingle(),
     supabase.from('academic_periods').select('id, name, code').eq('status', 'active'),
     supabase
       .from('student_unit_registrations')

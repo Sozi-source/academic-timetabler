@@ -3865,6 +3865,7 @@ No database or application runtime changes were executed while preparing this pa
 - Added an HOD-controlled assignment from a student's registered unit to an existing teaching allocation for the same or an approved equivalent unit. The saved reason and assignment are period scoped; HODs can remove an assignment without editing the original registration.
 - Class, CAT, and exam attendance rosters now include only the individually assigned student on that target allocation. Home cohort, unit registration, scheduled sessions, trainer, room, and time remain unchanged.
 - The database trigger enforces active in-class student status, matching period and registration, unit equivalence, and department-management permission. RLS keeps access department scoped.
+- Fixed the student lookup to name the current-cohort foreign key explicitly. The page now verifies the HOD's active department and performs an ID-scoped read for that department, so RLS no longer turns an authorized Esther record into a misleading “Student not found” result. Database lookup errors are shown as errors.
 - Manual follow-up: apply the migration with `npx supabase db push`, then open a student's registry profile and use **Class Assignments** to attach their registered units to existing classes. This migration does not assign any student automatically.
 - No existing records are rewritten. Assignments do not make a student part of the target cohort for timetable or cohort reports.
 

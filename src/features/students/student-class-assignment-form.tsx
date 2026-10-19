@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 
 import { addStudentClassAssignment } from './class-assignment-actions';
@@ -53,7 +54,7 @@ export function StudentClassAssignmentForm({
         </select>
       </label>
       {allocations.length === 0 ? (
-        <p className="text-xs text-text-muted md:col-span-2">There is no active class for this unit or an approved equivalent in the current academic period.</p>
+        <p className="text-xs text-text-muted md:col-span-2">There is no active class for this unit or an approved equivalent in the current academic period. <Link href="/timetable/unit-equivalence" className="font-medium text-primary underline underline-offset-2">Review unit equivalence</Link>.</p>
       ) : availableAllocations.length === 0 ? (
         <p className="text-xs text-text-muted md:col-span-2">All matching classes already have active assignments. Remove an assignment below before adding it again.</p>
       ) : null}

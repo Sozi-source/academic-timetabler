@@ -12,7 +12,7 @@ export async function approveEquivalenceGroupAction(formData: FormData) {
   const unitIds = formData.getAll('unitId').map(String).filter(Boolean);
   const canonicalName = String(formData.get('canonicalName') ?? '').trim();
   const notes = String(formData.get('notes') ?? '').trim();
-  if (unitIds.length < 2 || !canonicalName) redirect(`${path}?error=${encodeURIComponent('Select at least two units and provide a canonical name')}`);
+  if (unitIds.length === 0 || !canonicalName) redirect(`${path}?error=${encodeURIComponent('Select at least one unit and provide a canonical name')}`);
   const db = await createClient();
   const { error } = await db.rpc('approve_unit_equivalence_group', {
     p_unit_ids: unitIds, p_canonical_name: canonicalName, p_notes: notes || null,

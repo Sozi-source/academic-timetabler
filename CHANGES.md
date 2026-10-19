@@ -3861,10 +3861,11 @@ No database or application runtime changes were executed while preparing this pa
 ### 2026-10-19: Support individual student class assignments
 
 **Added:** `supabase/migrations/20261019103000_student_individual_class_assignments.sql`, `src/features/students/class-assignment-actions.ts`, `src/features/students/student-class-assignment-form.tsx`, `src/app/(dashboard)/students/registry/[studentId]/class-assignments/page.tsx`
-**Modified:** `src/features/academic-roster/unified-roster.ts`, `src/app/(dashboard)/students/registry/[studentId]/page.tsx`, `src/app/(dashboard)/students/registry/[studentId]/class-assignments/page.tsx`, `CHANGES.md`
+**Modified:** `src/features/academic-roster/unified-roster.ts`, `src/app/(dashboard)/students/registry/[studentId]/page.tsx`, `src/app/(dashboard)/students/registry/[studentId]/class-assignments/page.tsx`, `src/features/unit-equivalence/actions.ts`, `CHANGES.md`
 - Added an HOD-controlled assignment from a student's registered unit to an existing teaching allocation for the same or an approved equivalent unit. The saved reason and assignment are period scoped; HODs can remove an assignment without editing the original registration.
 - The assignment form now filters available target classes by the selected registration's unit or approved equivalent, in the same academic period. Changing the registered unit updates the target class choices.
 - Classes with an existing active assignment are marked and disabled in the form; duplicate submissions receive a clear message, with removal available from the current assignments list.
+- When a registered unit has no active matching class, the form links to unit equivalence review. HODs can add one unit to an existing canonical group; the database still requires two units when creating a new group.
 - Class, CAT, and exam attendance rosters now include only the individually assigned student on that target allocation. Home cohort, unit registration, scheduled sessions, trainer, room, and time remain unchanged.
 - The database trigger enforces active in-class student status, matching period and registration, unit equivalence, and department-management permission. RLS keeps access department scoped.
 - Fixed the student lookup to name the current-cohort foreign key explicitly. The page now verifies the HOD's active department and performs an ID-scoped read for that department, so RLS no longer turns an authorized Esther record into a misleading “Student not found” result. Database lookup errors are shown as errors.

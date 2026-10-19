@@ -51,8 +51,34 @@ export default async function UnitEquivalencePage({ searchParams }: PageProps<'/
         <span className="h-3.5 w-[3px] rounded-full bg-primary/60" aria-hidden="true" />
         <h2 className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary/80">Similarity Review Queue</h2>
       </div>
-      <p className="text-xs text-text-muted">These are suggestions only. Similarity never renames, approves, allocates, or merges a unit.</p>
-      {fuzzy.length === 0 ? <Alert>No fuzzy candidates require review.</Alert> : <div className="overflow-hidden rounded-xl border border-border bg-surface"><table className="w-full text-left text-sm"><thead className="border-b border-border bg-surface-subtle text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted"><tr><th className="p-3">Unit</th><th className="p-3">Nearest title</th><th className="p-3">Similarity</th></tr></thead><tbody className="divide-y divide-border-soft">{fuzzy.map((row) => <tr key={row.unit_id}><td className="p-3"><strong>{row.unit_code}</strong> — {row.unit_name}<div className="text-xs text-text-muted">{row.programme_code}</div></td><td className="p-3">{row.nearest_unit_name ?? '—'}</td><td className="p-3">{Math.round(row.similarity_score * 100)}%</td></tr>)}</tbody></table></div>}
+      <p className="text-xs text-text-muted">Suggestions require explicit HOD review. Approving a match adds the selected units to an equivalence group; similarity alone never changes academic records.</p>
+      {fuzzy.length === 0 ? <Alert>No fuzzy candidates require review.</Alert> : <div className="overflow-x-auto rounded-xl border border-border bg-surface"><table className="w-full min-w-[900px] text-left text-sm"><thead className="border-b border-border bg-surface-subtle text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted"><tr><th className="p-3">Unit</th><th className="p-3">Nearest title</th><th className="p-3">Similarity</th><th className="p-3">HOD review</th></tr></thead><tbody className="divide-y divide-border-soft">{fuzzy.map((row) => {
+        const existingGroup = groups.find((group) => group.members.some((member) => member.unit_id === row.nearest_unit_id));
+        return <tr key={row.unit_id}>
+          <td className="p-3"><strong>{row.unit_code}</strong> — {row.unit_name}<div className="text-xs text-text-muted">{row.programme_code}</div></td>
+          <td className="p-3">{row.nearest_unit_name ?? '—'}</td>
+          <td className="p-3">{Math.round(row.similarity_score * 100)}%</td>
+          <td className="p-3">
+            {row.nearest_unit_id && existingGroup ? (
+              <form action={approveEquivalenceGroupAction} className="grid gap-2">
+                <input type="hidden" name="unitId" value={row.unit_id} />
+                <input type="hidden" name="canonicalName" value={existingGroup.canonical_name} />
+                <input type="hidden" name="notes" value={`HOD-reviewed match with ${row.nearest_unit_name ?? 'the existing canonical subject'}.`} />
+                <span className="text-xs text-text-muted">Add this unit to “{existingGroup.canonical_name}”</span>
+                <Button type="submit">Approve and add unit</Button>
+              </form>
+            ) : row.nearest_unit_id ? (
+              <form action={approveEquivalenceGroupAction} className="grid gap-2">
+                <label className="flex items-start gap-2 text-xs"><input type="checkbox" name="unitId" value={row.unit_id} defaultChecked /><span><strong>{row.unit_code}</strong> — {row.unit_name}</span></label>
+                <label className="flex items-start gap-2 text-xs"><input type="checkbox" name="unitId" value={row.nearest_unit_id} defaultChecked /><span><strong>Nearest match</strong> — {row.nearest_unit_name}</span></label>
+                <Input name="canonicalName" defaultValue={row.nearest_unit_name ?? row.unit_name} aria-label="Canonical unit name" required />
+                <Input name="notes" placeholder="Academic review note (optional)" aria-label="Review note" />
+                <Button type="submit">Approve selected units</Button>
+              </form>
+            ) : <span className="text-xs text-text-muted">No unit to compare</span>}
+          </td>
+        </tr>;
+      })}</tbody></table></div>}
     </section>
 
     <section className="space-y-3">

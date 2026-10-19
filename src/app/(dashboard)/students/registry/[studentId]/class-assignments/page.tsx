@@ -105,6 +105,9 @@ export default async function StudentClassAssignmentsPage({
     return { id: registration.id, label: `${unit?.code ?? 'Unit'} · ${unit?.name ?? 'Unit'} — ${period?.name ?? period?.code ?? 'Period'}` };
   });
   const allocationsByRegistration: Record<string, StudentClassAssignmentOption[]> = {};
+  const activeAssignmentKeys = new Set((assignments ?? []).map(
+    (assignment) => `${assignment.source_registration_id}:${assignment.teaching_allocation_id}`,
+  ));
   for (const registration of eligibleRegistrations) {
     const unit = relation(registration.unit);
     const matchingUnitIds = equivalentUnitIdsBySource.get(unit?.id ?? '') ?? new Set<string>();
@@ -113,7 +116,12 @@ export default async function StudentClassAssignmentsPage({
       .map((allocation) => {
         const targetUnit = relation(allocation.unit);
         const targetCohort = relation(allocation.cohort);
-        return { id: allocation.id, label: `${targetUnit?.code ?? 'Unit'} · ${targetUnit?.name ?? 'Unit'} — ${targetCohort?.name ?? 'Cohort'}` };
+        const alreadyAssigned = activeAssignmentKeys.has(`${registration.id}:${allocation.id}`);
+        return {
+          id: allocation.id,
+          label: `${targetUnit?.code ?? 'Unit'} · ${targetUnit?.name ?? 'Unit'} — ${targetCohort?.name ?? 'Cohort'}${alreadyAssigned ? ' (already assigned)' : ''}`,
+          disabled: alreadyAssigned,
+        };
       });
   }
 
@@ -135,7 +143,7 @@ export default async function StudentClassAssignmentsPage({
         <p className="mt-4 max-w-3xl text-sm leading-6 text-text-secondary">Assign this student to an existing class for an approved equivalent unit. Only this student is added to the class and its attendance, CAT, and exam rosters.</p>
       </Card>
 
-      {query.error ? <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">Assignment could not be saved: {query.error}</p> : null}
+      {query.error ? <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">Assignment could not be saved: {query.error === 'duplicate' ? 'This student is already assigned to that class for the selected registered unit.' : query.error}</p> : null}
       {query.saved ? <p role="status" className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">Class assignment saved.</p> : null}
       {query.removed ? <p role="status" className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">Class assignment removed.</p> : null}
 

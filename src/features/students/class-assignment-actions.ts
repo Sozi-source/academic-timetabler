@@ -37,6 +37,9 @@ export async function addStudentClassAssignment(formData: FormData) {
     teaching_allocation_id: allocationId as string,
     reason,
   });
+  if (error?.code === '23505') {
+    redirect(`/students/registry/${student.id}/class-assignments?error=duplicate`);
+  }
   if (error) redirect(`/students/registry/${student.id}/class-assignments?error=${encodeURIComponent(error.message)}`);
 
   revalidatePath(`/students/registry/${student.id}`);

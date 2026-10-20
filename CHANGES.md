@@ -1,3 +1,10 @@
+### 2026-10-20: Reconcile assessment overview with live unit registrations and simplify layout
+
+**Modified:** `src/features/assessment/control-center-queries.ts`, `src/features/assessment/assessment-control-center.tsx`, `CHANGES.md`
+- Calculate per-unit candidate totals from all current-period `student_unit_registrations` with `registration_status = 'registered'`. Fetch registrations in pages to avoid Supabase's response row cap. Match assessment results, saved drafts, and attendance records against that current registered roster.
+- Remove the cohort and status table columns, analysis action, conditional CAT/Exam columns, and redundant summary cards. Keep the markbook action and show current registration totals, mark progress, and submitted markbooks.
+- Restyle the page with muted text and medium font weights, align the table using fixed column widths, and keep unit codes on a single line.
+
 ### 2026-10-20: Add assessment-scoped trainer mark entry links
 
 **Added:** `src/features/assessment/trainer-mark-entry.ts`, `src/features/assessment/trainer-mark-entry-types.ts`, `src/features/assessment/trainer-mark-entry-portal.tsx`, `src/features/assessment/trainer-mark-invites.tsx`, `src/app/trainer-mark-entry/page.tsx`, trainer invite and public portal API routes, `supabase/migrations/20261020150000_external_trainer_mark_entry.sql`

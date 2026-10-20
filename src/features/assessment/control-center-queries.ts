@@ -16,7 +16,6 @@ export interface AssessmentControlCenterItem {
   unitName: string;
   academicPeriodId: string;
   academicPeriodName: string;
-  cohortNames: string[];
   trainerNames: string[];
   populationCount: number;
   populationLocked: boolean;
@@ -33,7 +32,6 @@ export interface AssessmentControlCenterItem {
   finalisedAt: string | null;
   isPublished: boolean;
   publishedAt: string | null;
-  analysisId: string;
 }
 
 export interface AssessmentControlCenterSummary {
@@ -138,7 +136,6 @@ export const getAssessmentControlCenterData = cache(
         title,
         unit_id,
         academic_period_id,
-        cohort_id,
         status,
         operational_assessment_type,
         operational_workflow_status,
@@ -150,7 +147,6 @@ export const getAssessmentControlCenterData = cache(
         cat_marks_finalized_at,
         exam_marks_finalized_at,
         unit:units(id, code, name),
-        cohort:cohorts(id, code, name),
         academic_period:academic_periods(id, code, name)
       `)
       .eq('department_id', profile.activeDepartmentId)
@@ -188,18 +184,46 @@ export const getAssessmentControlCenterData = cache(
     const eventIds = eventRows.map((e) => e.id);
     const unitIds = [...new Set(eventRows.map((e) => e.unit_id).filter(Boolean))];
 
-    // 3. Concurrently fetch populations, results, online drafts, and teaching allocations
+    // 3. Use current unit registrations as the candidate source; assessment populations are snapshots
+    // and can drift after a student's unit registration is corrected.
+    const fetchCurrentRegistrations = async () => {
+      const pageSize = 1000;
+      const rows: Array<{ unit_id: string; student_id: string }> = [];
+      let offset = 0;
+
+      while (true) {
+        const { data, error } = await admin
+          .from('student_unit_registrations')
+          .select('unit_id,student_id')
+          .eq('academic_period_id', activePeriod.id)
+          .eq('registration_status', 'registered')
+          .in('unit_id', unitIds)
+          .order('unit_id', { ascending: true })
+          .order('student_id', { ascending: true })
+          .range(offset, offset + pageSize - 1);
+
+        if (error) throw new Error(`Unable to load current unit registrations: ${error.message}`);
+        if (!data?.length) break;
+        rows.push(...data);
+        if (data.length < pageSize) break;
+        offset += pageSize;
+      }
+
+      return rows;
+    };
+
     const [
       { data: populations, error: popError },
+      registrations,
       { data: results, error: resError },
       { data: onlineDrafts, error: draftsError },
       { data: allocations, error: allocError },
     ] = await Promise.all([
       admin
         .from('assessment_population')
-        .select('assessment_event_id, student_id, cohort_id, population_status, attendance_status, cohort:cohorts(name)')
-        .in('assessment_event_id', eventIds)
-        .eq('population_status', 'expected'),
+        .select('assessment_event_id, student_id, attendance_status')
+        .in('assessment_event_id', eventIds),
+      fetchCurrentRegistrations(),
       admin
         .from('assessment_results')
         .select('assessment_event_id, student_id, import_source, operational_result_status, component_marks, total_mark')
@@ -242,6 +266,14 @@ export const getAssessmentControlCenterData = cache(
       eventPopulationsMap.get(pop.assessment_event_id)!.push(pop);
     }
 
+    const registrationsByUnitMap = new Map<string, typeof registrations>();
+    for (const registration of registrations ?? []) {
+      if (!registrationsByUnitMap.has(registration.unit_id)) {
+        registrationsByUnitMap.set(registration.unit_id, []);
+      }
+      registrationsByUnitMap.get(registration.unit_id)!.push(registration);
+    }
+
     // Map results per event
     const eventResultsMap = new Map<string, typeof results>();
     for (const res of results ?? []) {
@@ -267,19 +299,12 @@ export const getAssessmentControlCenterData = cache(
       const unit = one(event.unit as Relation<{ id: string; code: string; name: string }>);
       const period = one(event.academic_period as Relation<{ id: string; code: string; name: string }>);
       const evPops = eventPopulationsMap.get(event.id) ?? [];
+      const currentRegistrations = registrationsByUnitMap.get(event.unit_id) ?? [];
       const evResults = eventResultsMap.get(event.id) ?? [];
       const evDrafts = eventDraftsMap.get(event.id) ?? [];
 
-      const totalExpected = evPops.length;
+      const totalExpected = currentRegistrations.length;
       const trainerNames = Array.from(unitTrainersMap.get(event.unit_id) ?? []);
-
-      // Collect cohort names
-      const cohortNamesSet = new Set<string>();
-      for (const p of evPops) {
-        const cohort = one(p.cohort as Relation<{ name: string }>);
-        if (cohort?.name) cohortNamesSet.add(cohort.name);
-      }
-      const cohortNames = Array.from(cohortNamesSet);
 
       // Determine marks source
       const sources = new Set(evResults.map((r) => r.import_source).filter(Boolean));
@@ -296,18 +321,25 @@ export const getAssessmentControlCenterData = cache(
 
       // Count sat, absent, and missing marks
       const resultMapByStudent = new Map(evResults.map((r) => [r.student_id, r]));
+      const draftMapByStudent = new Map(evDrafts.map((draft) => [draft.student_id, draft]));
       let satCount = 0;
       let absentCount = 0;
       let missingCount = 0;
 
-      for (const pop of evPops) {
-        const res = resultMapByStudent.get(pop.student_id);
-        if (pop.attendance_status === 'absent' || res?.operational_result_status === 'absent') {
+      const attendanceByStudent = new Map(evPops.map((population) => [population.student_id, population.attendance_status]));
+      for (const registration of currentRegistrations) {
+        const res = resultMapByStudent.get(registration.student_id);
+        const draft = draftMapByStudent.get(registration.student_id);
+        if (attendanceByStudent.get(registration.student_id) === 'absent' || res?.operational_result_status === 'absent') {
           absentCount += 1;
         } else if (
           res &&
           (res.operational_result_status === 'sat' ||
             (res.total_mark !== null && res.total_mark !== undefined))
+        ) {
+          satCount += 1;
+        } else if (
+          draft && [draft.assignment_mark, draft.presentation_mark, draft.rat_mark, draft.cat_mark, draft.exam_mark].some((mark) => mark !== null)
         ) {
           satCount += 1;
         } else {
@@ -348,7 +380,6 @@ export const getAssessmentControlCenterData = cache(
         unitName: unit?.name ?? 'Unit markbook',
         academicPeriodId: activePeriod.id,
         academicPeriodName: period?.name ?? activePeriod.name,
-        cohortNames,
         trainerNames,
         populationCount: totalExpected,
         populationLocked: isLocked,
@@ -365,7 +396,6 @@ export const getAssessmentControlCenterData = cache(
         finalisedAt: event.finalised_at ?? event.exam_marks_finalized_at,
         isPublished,
         publishedAt: event.published_at,
-        analysisId: event.id,
       });
     }
 

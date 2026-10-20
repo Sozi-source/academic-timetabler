@@ -15,6 +15,7 @@ async function accessToken(): Promise<string> {
     ? configuredAudience.replace(/^https:\/\/iam\.googleapis\.com\//, '//iam.googleapis.com/')
     :
     `//iam.googleapis.com/projects/${projectNumber}/locations/global/workloadIdentityPools/${poolId}/providers/${providerId}`;
+  const subjectTokenAudience = `https:${audience}`;
   const authClient = ExternalAccountClient.fromJSON({
     type: 'external_account',
     audience,
@@ -26,7 +27,7 @@ async function accessToken(): Promise<string> {
       'https://www.googleapis.com/auth/drive.file',
     ],
     subject_token_supplier: {
-      getSubjectToken: () => getVercelOidcToken(),
+      getSubjectToken: () => getVercelOidcToken({ audience: subjectTokenAudience }),
     },
   });
   if (!authClient) throw new Error('Could not initialize Google workload identity federation.');

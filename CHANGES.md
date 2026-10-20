@@ -3,6 +3,7 @@
 **Modified:** `.env.example`, `src/features/assessment/google-sheets.ts`, `CHANGES.md`
 - Use Google's canonical `//iam.googleapis.com/...` resource name for the STS exchange audience, and let Vercel issue its token with the configured team audience.
 - Normalize an existing `GCP_AUDIENCE` value with the previous `https://iam.googleapis.com/...` format so the deployment can continue using that setting safely.
+- Request the OIDC subject token with the provider's canonical HTTPS audience; keep the protocol relative form for Google's STS request.
 
 ### 2026-10-20: Add Google Sheets mark entry for external trainers
 

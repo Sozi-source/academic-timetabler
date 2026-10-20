@@ -23,7 +23,7 @@ function one<T>(value: T | T[] | null): T | null {
 
 async function getUnitScope(admin: ReturnType<typeof createAdminClient>, unitId: string, departmentId: string) {
   const { data: baseUnit, error: unitError } = await admin.from('units')
-    .select('id,programme:programmes!inner(department_id)')
+    .select('id,code,name,programme:programmes!inner(department_id)')
     .eq('id', unitId)
     .eq('programme.department_id', departmentId)
     .maybeSingle();
@@ -49,7 +49,7 @@ async function getUnitScope(admin: ReturnType<typeof createAdminClient>, unitId:
     if (membersError) throw new Error('Could not load equivalent units.');
     unitIds = [...new Set((members ?? []).map((member) => member.unit_id))];
   }
-  return { unitIds, scopeUnitId: [...unitIds].sort()[0] ?? unitId };
+  return { unitIds, scopeUnitId: [...unitIds].sort()[0] ?? unitId, unitCode: baseUnit.code, unitName: baseUnit.name };
 }
 
 async function loadReadyScopes(admin: ReturnType<typeof createAdminClient>, unitIds: string[], departmentId: string, periodId: string) {
@@ -185,6 +185,13 @@ export async function POST(request: Request, { params }: RouteContext) {
       return NextResponse.json({ message: 'Could not create cohort access for this trainer link.' }, { status: 500 });
     }
     const inviteUrl = new URL('/trainer-mark-entry', request.url);
+    const unitSlug = `${scope.unitCode}-${scope.unitName}`
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+    inviteUrl.searchParams.set('unit', unitSlug);
     inviteUrl.hash = token;
     return NextResponse.json({ invite: { id: root.id, expiresAt: root.expires_at, cohortCount: readyScopes.length }, inviteUrl: inviteUrl.toString() }, { status: 201 });
   } catch (error) {

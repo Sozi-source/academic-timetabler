@@ -117,7 +117,7 @@ export function AssessmentUnitCohorts({ unit, periodName, periodId, cohorts }: A
         </section>
       ) : null}
 
-      <TrainerUnitMarkInvites unitId={unit.id} periodId={periodId} />
+      <TrainerUnitMarkInvites unitId={unit.id} unitName={unit.name} periodId={periodId} />
     </div>
   );
 }

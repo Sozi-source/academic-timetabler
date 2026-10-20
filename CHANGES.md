@@ -11,6 +11,11 @@
 - Remove current registered unit rows from the add-units table so each registration appears only once on the page.
 - No database migration required; existing registration status and department update RLS policy are used.
 
+### 2026-10-20: Show the unit name as the trainer link
+
+**Modified:** `src/features/assessment/trainer-unit-mark-invites.tsx`, `src/features/assessment/assessment-unit-cohorts.tsx`, `CHANGES.md`
+- Display the newly created trainer URL as a clickable unit name and keep the copy-link button. Show the raw URL only if clipboard access fails.
+
 ### 2026-10-21: Improve individual and batch unit registration
 
 **Added:** `src/features/student-unit-registration/student-unit-registration-lines.tsx`, `supabase/migrations/20261021100000_exclude_attachment_from_batch_registration.sql`

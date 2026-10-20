@@ -19,7 +19,7 @@ interface UnitTrainerInvite {
   submittedCohortCount: number;
 }
 
-export function TrainerUnitMarkInvites({ unitId, periodId }: { unitId: string; periodId: string }) {
+export function TrainerUnitMarkInvites({ unitId, unitName, periodId }: { unitId: string; unitName: string; periodId: string }) {
   const endpoint = `/api/assessment/units/${unitId}/trainer-invites?periodId=${encodeURIComponent(periodId)}`;
   const [invites, setInvites] = useState<UnitTrainerInvite[]>([]);
   const [trainerName, setTrainerName] = useState('');
@@ -27,6 +27,7 @@ export function TrainerUnitMarkInvites({ unitId, periodId }: { unitId: string; p
   const [expiryDays, setExpiryDays] = useState('7');
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [showFallback, setShowFallback] = useState(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -52,6 +53,7 @@ export function TrainerUnitMarkInvites({ unitId, periodId }: { unitId: string; p
     setMessage('');
     setInviteUrl(null);
     setCopied(false);
+    setShowFallback(false);
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -78,6 +80,7 @@ export function TrainerUnitMarkInvites({ unitId, periodId }: { unitId: string; p
       await navigator.clipboard.writeText(inviteUrl);
       setCopied(true);
     } catch {
+      setShowFallback(true);
       setError('Could not copy automatically. Select and copy the link shown below.');
     }
   }
@@ -120,10 +123,10 @@ export function TrainerUnitMarkInvites({ unitId, periodId }: { unitId: string; p
       {inviteUrl ? (
         <div className="space-y-2 rounded-lg border border-emerald-200 bg-white p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs font-semibold text-emerald-900">Copy this link now. It is shown only once.</p>
+            <a href={inviteUrl} target="_blank" rel="noreferrer" className="text-xs font-semibold text-emerald-900 underline decoration-emerald-300 underline-offset-2 hover:text-emerald-700">{unitName}</a>
             <Button type="button" size="sm" variant="outline" onClick={copyInvite}>{copied ? <Check className="size-3.5" /> : <Clipboard className="size-3.5" />}{copied ? 'Copied' : 'Copy link'}</Button>
           </div>
-          <input readOnly value={inviteUrl} onFocus={(event) => event.currentTarget.select()} className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs text-slate-700" aria-label="Unit trainer invitation link" />
+          {showFallback ? <input readOnly value={inviteUrl} onFocus={(event) => event.currentTarget.select()} className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs text-slate-700" aria-label="Unit trainer invitation link" /> : null}
         </div>
       ) : null}
       {message ? <p role="status" className="text-xs font-medium text-emerald-800">{message}</p> : null}

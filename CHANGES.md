@@ -8,6 +8,7 @@
 
 **Modified:** `src/features/student-unit-registration/student-unit-registration-lines.tsx`, `src/features/student-unit-registration/actions.ts`, `src/features/student-unit-registration/queries.ts`, `src/features/student-unit-registration/types.ts`, `src/app/(dashboard)/students/unit-registration/register/[studentId]/page.tsx`, `CHANGES.md`
 - Add a three-dot menu to active-period registered unit rows. HODs can activate an inline stage/unit edit and save it with the existing registration form, or mark the registration dropped immediately while retaining its history row.
+- Remove current registered unit rows from the add-units table so each registration appears only once on the page.
 - No database migration required; existing registration status and department update RLS policy are used.
 
 ### 2026-10-21: Improve individual and batch unit registration

@@ -130,10 +130,7 @@ export function StudentUnitRegistrationLines({
 
       <section className="overflow-hidden rounded-xl border border-border bg-surface">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
-          <div>
-            <h2 className="text-sm font-medium text-text-primary">Add units for {context.period.name}</h2>
-            <p className="mt-0.5 text-xs text-text-muted">Choose a stage, then choose an available unit. Existing registrations stay selected.</p>
-          </div>
+          <h2 className="text-sm font-medium text-text-primary">Add units for {context.period.name}</h2>
           <button type="button" onClick={addLine} className="inline-flex h-8 items-center rounded-md border border-border px-3 text-xs font-medium text-primary hover:bg-surface-subtle">
             Add a unit line
           </button>
@@ -159,17 +156,6 @@ export function StudentUnitRegistrationLines({
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {context.registrationHistory
-                .filter((registration) => registration.academicPeriodId === context.period.id && registration.registrationStatus === 'registered')
-                .map((registration) => (
-                  <tr key={`current:${registration.unitId}`}>
-                    <td className="px-3 py-2.5 text-text-secondary">{registration.academicPeriodName}</td>
-                    <td className="px-3 py-2.5 text-text-secondary">{registration.stageName}</td>
-                    <td className="px-3 py-2.5 font-mono text-text-secondary">{registration.unitCode}</td>
-                    <td className="px-3 py-2.5 text-text-primary">{registration.unitName}</td>
-                    <td className="px-3 py-2.5 text-emerald-700">✓ Registered</td>
-                  </tr>
-                ))}
               {lines.map((line) => {
                 const stageUnits = context.units.filter((unit) => unit.stageId === line.stageId && !currentIds.has(unit.id));
                 const unit = context.units.find((candidate) => candidate.id === line.unitId);

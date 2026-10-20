@@ -138,14 +138,14 @@ export default async function StudentClassAssignmentsPage({
             <h1 className="mt-1 text-xl font-bold text-text-primary">{student.full_name}</h1>
             <p className="mt-1 text-sm text-text-secondary">{student.admission_number} · Home cohort: {cohort?.name ?? 'Not assigned'}</p>
           </div>
-          <Badge variant="neutral">Does not change cohort or timetable</Badge>
+          <Badge variant="neutral">Cohort and timetable stay unchanged</Badge>
         </div>
-        <p className="mt-4 max-w-3xl text-sm leading-6 text-text-secondary">Assign this student to an existing class for an approved equivalent unit. Only this student is added to the class and its attendance, CAT, and exam rosters.</p>
+        <p className="mt-4 max-w-3xl text-sm leading-6 text-text-secondary">Assign the student to an existing class for an approved equivalent unit. This affects attendance, CAT, and exam rosters only.</p>
       </Card>
 
-      {query.error ? <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">Assignment could not be saved: {query.error === 'duplicate' ? 'This student is already assigned to that class for the selected registered unit.' : query.error}</p> : null}
-      {query.saved ? <p role="status" className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">Class assignment saved.</p> : null}
-      {query.removed ? <p role="status" className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">Class assignment removed.</p> : null}
+      {query.error ? <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">Assignment failed: {query.error === 'duplicate' ? 'This student is already assigned to this class for this unit.' : query.error}</p> : null}
+      {query.saved ? <p role="status" className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">Assignment saved.</p> : null}
+      {query.removed ? <p role="status" className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">Assignment removed.</p> : null}
 
       <Card className="p-5">
         <h2 className="font-semibold text-text-primary">Add a class assignment</h2>
@@ -155,12 +155,12 @@ export default async function StudentClassAssignmentsPage({
             registrations={registrationOptions}
             allocationsByRegistration={allocationsByRegistration}
           />
-        ) : <p className="mt-3 text-sm text-text-secondary">This student has no registered units in an active academic period.</p>}
+        ) : <p className="mt-3 text-sm text-text-secondary">No registered units in an active period.</p>}
       </Card>
 
       <Card className="overflow-hidden">
         <div className="flex items-center gap-2 border-b border-border p-4"><UsersRound className="size-4 text-primary" /><h2 className="font-semibold text-text-primary">Current assignments</h2></div>
-        {!assignments?.length ? <p className="p-5 text-sm text-text-secondary">No individual class assignments yet.</p> : (
+        {!assignments?.length ? <p className="p-5 text-sm text-text-secondary">No assignments yet.</p> : (
           <ul className="divide-y divide-border">
             {assignments.map((assignment) => {
               const source = relation(assignment.registration);

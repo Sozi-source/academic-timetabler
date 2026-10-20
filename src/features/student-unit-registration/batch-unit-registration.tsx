@@ -444,12 +444,6 @@ export function BatchUnitRegistration({
               </div>
             </fieldset>
           </div>
-          <p className="text-xs text-text-muted">
-            {registrationPath === 'expected'
-              ? 'Register curriculum units for the students’ current stage.'
-              : 'After stage registration, add missed or cross-stage units with an HOD reason.'}
-          </p>
-
           {mode === 'cohort' ? (
             <div className="mt-4">
               <label

@@ -83,10 +83,6 @@ export function CohortStageAssignment({
           defaultChecked
           className="mt-0.5 h-3.5 w-3.5 rounded border-border"
         />
-        <span>
-          Apply to active students in this cohort who currently have no stage.
-          Existing individual stages are preserved.
-        </span>
       </label>
     </div>
   );

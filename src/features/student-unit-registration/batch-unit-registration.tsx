@@ -305,9 +305,6 @@ export function BatchUnitRegistration({
                 Batch unit registration
               </h1>
 
-              <p className="mt-0.5 text-sm text-slate-600">
-                Register stage curriculum or HOD-approved additional units by cohort or selected students.
-              </p>
             </div>
           </div>
         </div>
@@ -485,20 +482,10 @@ export function BatchUnitRegistration({
                 ))}
               </select>
               {cohortId ? (
-                <>
-                  <CohortStageAssignment
-                    cohortId={cohortId}
-                    setups={cohortStageSetups}
-                  />
-                  {registrationPath === 'expected' && cohortStageSetups.find((s) => s.cohortId === cohortId && !s.currentStageId) ? (
-                    <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50/80 p-2.5 text-xs text-amber-900 flex items-start gap-2">
-                      <span className="mt-0.5 size-1.5 rounded-full bg-amber-500 shrink-0" />
-                      <div>
-                        <strong className="font-semibold">Stage Assignment Required:</strong> This cohort has not yet been assigned to an academic stage. Please select and assign a stage above to enable automatic unit registration for these students.
-                      </div>
-                    </div>
-                  ) : null}
-                </>
+                <CohortStageAssignment
+                  cohortId={cohortId}
+                  setups={cohortStageSetups}
+                />
               ) : null}
             </div>
           ) : (
@@ -540,7 +527,6 @@ export function BatchUnitRegistration({
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h2 className="text-sm font-semibold text-text-primary">Units to add</h2>
-                <p className="mt-0.5 text-xs text-text-secondary">Only units in each selected student&apos;s programme are registered. Off-stage units are recorded as HOD-approved overrides.</p>
               </div>
               <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-primary ring-1 ring-primary/20">{selectedUnitIds.size} selected</span>
             </div>
@@ -563,7 +549,7 @@ export function BatchUnitRegistration({
             </div>
             <label className="mt-4 block text-xs font-semibold text-text-secondary">
               HOD override reason
-              <textarea name="overrideReason" required rows={2} maxLength={1000} placeholder="E.g. missed in an earlier term, approved repeat, or approved accelerated study." className="mt-1.5 w-full resize-none rounded-lg border border-border bg-white px-3 py-2 text-xs outline-none focus:border-primary" />
+              <textarea name="overrideReason" required rows={2} maxLength={1000} className="mt-1.5 w-full resize-none rounded-lg border border-border bg-white px-3 py-2 text-xs outline-none focus:border-primary" />
             </label>
           </section>
         ) : null}

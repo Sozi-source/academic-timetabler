@@ -1,9 +1,12 @@
 ### 2026-10-20: Reconcile assessment overview with live unit registrations and simplify layout
 
+**Added:** `src/app/(dashboard)/assessment/unit/[unitId]/page.tsx`, `src/features/assessment/assessment-unit-cohorts.tsx`
 **Modified:** `src/features/assessment/control-center-queries.ts`, `src/features/assessment/assessment-control-center.tsx`, `CHANGES.md`
 - Calculate per-unit candidate totals from all current-period `student_unit_registrations` with `registration_status = 'registered'`. Fetch registrations in pages to avoid Supabase's response row cap. Match assessment results, saved drafts, and attendance records against that current registered roster.
 - Remove the cohort and status table columns, analysis action, conditional CAT/Exam columns, and redundant summary cards. Keep the markbook action and show current registration totals, mark progress, and submitted markbooks.
 - Restyle the page with muted text and medium font weights, align the table using fixed column widths, and keep unit codes on a single line.
+- Group cohort-specific assessment events into one unit row. Its single unit link opens a workspace with cohort toggle buttons and the current registered student roster for the selected cohort, plus links to that cohort's existing markbooks.
+- Combine programme-specific unit records only when they belong to an active, HOD-approved unit-equivalence group. Show the member unit codes together, count registrations across the group, and load the combined current roster and markbooks from its unit link. Similar unit names alone do not trigger a merge; approve the intended equivalence group in Unit Equivalence before expecting Human Anatomy and Physiology to appear as one row.
 
 ### 2026-10-20: Add assessment-scoped trainer mark entry links
 

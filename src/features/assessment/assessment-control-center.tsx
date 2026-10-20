@@ -13,23 +13,79 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
   const router = useRouter();
   const [search, setSearch] = useState('');
 
-  const filteredItems = useMemo(() => {
+  const unitGroups = useMemo(() => {
+    const byUnit = new Map<string, {
+      unitId: string;
+      unitIds: Set<string>;
+      unitCode: string;
+      unitCodes: Set<string>;
+      unitName: string;
+      trainerNames: Set<string>;
+      registeredByCohort: Map<string, number>;
+      allCohortsRegistrationCount: number | null;
+    }>();
+    for (const item of data.items) {
+      const groupKey = item.equivalenceGroupId ? `equivalence:${item.equivalenceGroupId}` : `unit:${item.unitId}`;
+      let group = byUnit.get(groupKey);
+      if (!group) {
+        group = {
+          unitId: item.unitId,
+          unitIds: new Set(item.equivalentUnitIds),
+          unitCode: item.equivalentUnitCodes[0] ?? item.unitCode,
+          unitCodes: new Set(item.equivalentUnitCodes.length ? item.equivalentUnitCodes : [item.unitCode]),
+          unitName: item.canonicalUnitName ?? item.unitName,
+          trainerNames: new Set<string>(),
+          registeredByCohort: new Map<string, number>(),
+          allCohortsRegistrationCount: null,
+        };
+        byUnit.set(groupKey, group);
+      }
+      item.equivalentUnitIds.forEach((unitId) => group?.unitIds.add(unitId));
+      item.equivalentUnitCodes.forEach((unitCode) => group?.unitCodes.add(unitCode));
+      if (item.canonicalUnitName) group.unitName = item.canonicalUnitName;
+      item.trainerNames.forEach((trainer) => group?.trainerNames.add(trainer));
+      if (item.cohortId) {
+        group.registeredByCohort.set(
+          item.cohortId,
+          Math.max(group.registeredByCohort.get(item.cohortId) ?? 0, item.populationCount),
+        );
+      } else {
+        group.allCohortsRegistrationCount = Math.max(group.allCohortsRegistrationCount ?? 0, item.populationCount);
+      }
+    }
+
+    return [...byUnit.values()]
+      .map((group) => ({
+        ...group,
+        unitCode: [...group.unitCodes].join(' · '),
+        trainerList: [...group.trainerNames],
+        registrationCount: group.allCohortsRegistrationCount ?? [...group.registeredByCohort.values()].reduce((total, count) => total + count, 0),
+      }))
+      .sort((first, second) => first.unitCode.localeCompare(second.unitCode));
+  }, [data.items]);
+
+  const filteredUnitGroups = useMemo(() => {
     const query = search.trim().toLocaleLowerCase();
-    if (!query) return data.items;
-    return data.items.filter((item) =>
-      item.unitCode.toLocaleLowerCase().includes(query) ||
-      item.unitName.toLocaleLowerCase().includes(query) ||
-      item.trainerNames.some((trainer) => trainer.toLocaleLowerCase().includes(query)),
+    if (!query) return unitGroups;
+    return unitGroups.filter((group) =>
+      group.unitCode.toLocaleLowerCase().includes(query) ||
+      group.unitName.toLocaleLowerCase().includes(query) ||
+      group.trainerList.some((trainer) => trainer.toLocaleLowerCase().includes(query)) ||
+      data.items.some((item) => group.unitIds.has(item.unitId) && item.cohortName.toLocaleLowerCase().includes(query)),
     );
-  }, [data.items, search]);
+  }, [data.items, search, unitGroups]);
+
+  const totalCurrentRegistrations = useMemo(() => {
+    return unitGroups.reduce((total, group) => total + group.registrationCount, 0);
+  }, [unitGroups]);
 
   const handlePeriodChange = (periodId: string) => {
     router.push(`/assessment?periodId=${periodId}`);
   };
 
   const statCards = [
-    { label: 'Markbooks', value: data.summary.totalMarkbooks, note: data.selectedPeriodName, icon: ClipboardList },
-    { label: 'Current unit registrations', value: data.summary.totalPopulation, note: 'Each student is counted once per registered unit', icon: UsersRound },
+    { label: 'Units', value: unitGroups.length, note: data.selectedPeriodName, icon: ClipboardList },
+    { label: 'Current unit registrations', value: totalCurrentRegistrations, note: 'Each student is counted once per registered unit', icon: UsersRound },
     { label: 'Submitted markbooks', value: `${data.summary.submittedCount} / ${data.summary.totalMarkbooks}`, note: 'Marks submitted for HOD review', icon: GraduationCap },
   ];
 
@@ -108,54 +164,48 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
           </label>
         </div>
 
-        {filteredItems.length === 0 ? (
+        {filteredUnitGroups.length === 0 ? (
           <div className="rounded-xl border border-border bg-surface p-8 text-center">
             <p className="text-sm font-medium text-slate-600">{search ? `No units match “${search}”` : 'No unit markbooks found for this period.'}</p>
           </div>
         ) : (
           <div className="overflow-x-auto rounded-xl border border-border bg-surface shadow-2xs">
-            <table className="w-full min-w-[760px] table-fixed text-left text-xs">
+            <table className="w-full min-w-[640px] table-fixed text-left text-xs">
               <colgroup>
-                <col className="w-[38%]" />
-                <col className="w-[22%]" />
-                <col className="w-[14%]" />
-                <col className="w-[16%]" />
-                <col className="w-[10%]" />
+                <col className="w-[45%]" />
+                <col className="w-[30%]" />
+                <col className="w-[13%]" />
+                <col className="w-[12%]" />
               </colgroup>
               <thead className="border-b border-border bg-surface-subtle text-[10px] font-medium uppercase tracking-wide text-slate-500">
                 <tr>
                   <th className="px-4 py-3">Unit</th>
                   <th className="px-3 py-3">Trainer</th>
                   <th className="px-3 py-3 text-center">Registered</th>
-                  <th className="px-3 py-3">Marks recorded</th>
                   <th className="px-4 py-3 text-right"> </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filteredItems.map((item) => (
-                  <tr key={item.id} className="transition-colors hover:bg-surface-subtle/60">
+                {filteredUnitGroups.map((unit) => (
+                  <tr key={[...unit.unitIds].sort().join(':')} className="transition-colors hover:bg-surface-subtle/60">
                     <td className="px-4 py-3">
                       <div className="flex min-w-0 items-center gap-2.5">
                         <span className="shrink-0 whitespace-nowrap rounded-md border border-primary/10 bg-primary/5 px-2 py-1 text-[10px] font-medium text-primary">
-                          {item.unitCode}
+                          <span className="block max-w-full truncate whitespace-nowrap" title={unit.unitCode}>{unit.unitCode}</span>
                         </span>
-                        <span className="min-w-0 truncate font-medium text-slate-700" title={item.unitName}>{item.unitName}</span>
+                        <span className="min-w-0 truncate font-medium text-slate-700" title={unit.unitName}>{unit.unitName}</span>
                       </div>
                     </td>
                     <td className="px-3 py-3 text-slate-600">
-                      <span className="block truncate" title={item.trainerNames.join(', ')}>{item.trainerNames.join(', ') || 'Unassigned'}</span>
+                      <span className="block truncate" title={unit.trainerList.join(', ')}>{unit.trainerList.join(', ') || 'Unassigned'}</span>
                     </td>
-                    <td className="px-3 py-3 text-center font-medium tabular-nums text-slate-600">{item.populationCount}</td>
-                    <td className="px-3 py-3">
-                      <span className="font-medium tabular-nums text-slate-600">{item.satCount} / {item.populationCount}</span>
-                      <span className="ml-1.5 text-[10px] text-slate-500">{item.missingCount > 0 ? `${item.missingCount} pending` : 'complete'}</span>
-                    </td>
+                    <td className="px-3 py-3 text-center font-medium tabular-nums text-slate-600">{unit.registrationCount}</td>
                     <td className="px-4 py-3 text-right">
                       <Link
-                        href={`/assessment/marks/${item.id}`}
+                        href={`/assessment/unit/${unit.unitId}?periodId=${data.selectedPeriodId}`}
                         className="inline-flex h-7 items-center justify-center rounded-lg border border-primary/20 bg-surface px-2.5 text-[11px] font-medium text-primary transition hover:bg-primary/5"
                       >
-                        Markbook
+                        Open unit
                       </Link>
                     </td>
                   </tr>

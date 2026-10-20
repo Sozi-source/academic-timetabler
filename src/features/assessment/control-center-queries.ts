@@ -12,10 +12,16 @@ function one<T>(value: Relation<T>): T | null {
 export interface AssessmentControlCenterItem {
   id: string;
   unitId: string;
+  equivalenceGroupId: string | null;
+  equivalentUnitIds: string[];
+  equivalentUnitCodes: string[];
+  canonicalUnitName: string | null;
   unitCode: string;
   unitName: string;
   academicPeriodId: string;
   academicPeriodName: string;
+  cohortId: string | null;
+  cohortName: string;
   trainerNames: string[];
   populationCount: number;
   populationLocked: boolean;
@@ -136,6 +142,7 @@ export const getAssessmentControlCenterData = cache(
         title,
         unit_id,
         academic_period_id,
+        cohort_id,
         status,
         operational_assessment_type,
         operational_workflow_status,
@@ -147,6 +154,7 @@ export const getAssessmentControlCenterData = cache(
         cat_marks_finalized_at,
         exam_marks_finalized_at,
         unit:units(id, code, name),
+        cohort:cohorts(id, name),
         academic_period:academic_periods(id, code, name)
       `)
       .eq('department_id', profile.activeDepartmentId)
@@ -184,20 +192,62 @@ export const getAssessmentControlCenterData = cache(
     const eventIds = eventRows.map((e) => e.id);
     const unitIds = [...new Set(eventRows.map((e) => e.unit_id).filter(Boolean))];
 
+    // Only HOD-approved equivalence groups combine programme-specific unit records.
+    const { data: equivalenceRows, error: equivalenceError } = await admin
+      .from('unit_equivalence_members')
+      .select('unit_id,equivalence_group_id,group:unit_equivalence_groups!inner(id,canonical_name,status)')
+      .in('unit_id', unitIds)
+      .eq('status', 'approved')
+      .eq('group.status', 'active');
+    if (equivalenceError) throw new Error(`Unable to load approved unit equivalences: ${equivalenceError.message}`);
+    const equivalenceByUnit = new Map<string, { id: string; canonicalName: string }>();
+    for (const row of equivalenceRows ?? []) {
+      const group = one(row.group as Relation<{ id: string; canonical_name: string; status: string }>);
+      if (group) equivalenceByUnit.set(row.unit_id, { id: group.id, canonicalName: group.canonical_name });
+    }
+    const groupIds = [...new Set([...equivalenceByUnit.values()].map((group) => group.id))];
+    const { data: groupMembers, error: groupMembersError } = groupIds.length
+      ? await admin.from('unit_equivalence_members')
+        .select('equivalence_group_id,unit_id')
+        .in('equivalence_group_id', groupIds)
+        .eq('status', 'approved')
+      : { data: [], error: null };
+    if (groupMembersError) throw new Error(`Unable to load equivalent unit members: ${groupMembersError.message}`);
+    const membersByGroup = new Map<string, string[]>();
+    for (const member of groupMembers ?? []) {
+      membersByGroup.set(member.equivalence_group_id, [...(membersByGroup.get(member.equivalence_group_id) ?? []), member.unit_id]);
+    }
+    const candidateEquivalentUnitIds = [...new Set([...unitIds, ...[...membersByGroup.values()].flat()])];
+    const { data: equivalentUnits, error: equivalentUnitsError } = await admin
+      .from('units')
+      .select('id,code,programme:programmes!inner(department_id)')
+      .in('id', candidateEquivalentUnitIds)
+      .eq('programme.department_id', profile.activeDepartmentId);
+    if (equivalentUnitsError) throw new Error(`Unable to load equivalent unit codes: ${equivalentUnitsError.message}`);
+    const allowedUnitIds = new Set((equivalentUnits ?? []).map((unit) => unit.id));
+    const equivalentUnitIdsByUnit = new Map<string, string[]>();
+    for (const [groupId, memberIds] of membersByGroup) {
+      if (![...equivalenceByUnit.values()].some((group) => group.id === groupId)) continue;
+      const departmentMemberIds = memberIds.filter((memberUnitId) => allowedUnitIds.has(memberUnitId));
+      for (const memberUnitId of departmentMemberIds) equivalentUnitIdsByUnit.set(memberUnitId, departmentMemberIds);
+    }
+    const allUnitIds = [...allowedUnitIds];
+    const unitCodeById = new Map((equivalentUnits ?? []).map((unit) => [unit.id, unit.code]));
+
     // 3. Use current unit registrations as the candidate source; assessment populations are snapshots
     // and can drift after a student's unit registration is corrected.
     const fetchCurrentRegistrations = async () => {
       const pageSize = 1000;
-      const rows: Array<{ unit_id: string; student_id: string }> = [];
+      const rows: Array<{ unit_id: string; student_id: string; cohort_id: string }> = [];
       let offset = 0;
 
       while (true) {
         const { data, error } = await admin
           .from('student_unit_registrations')
-          .select('unit_id,student_id')
+          .select('unit_id,student_id,cohort_id')
           .eq('academic_period_id', activePeriod.id)
           .eq('registration_status', 'registered')
-          .in('unit_id', unitIds)
+          .in('unit_id', allUnitIds)
           .order('unit_id', { ascending: true })
           .order('student_id', { ascending: true })
           .range(offset, offset + pageSize - 1);
@@ -236,7 +286,7 @@ export const getAssessmentControlCenterData = cache(
         .from('teaching_allocations')
         .select('unit_id, cohort_id, participant_cohort_ids, trainer:trainers(id, full_name)')
         .eq('academic_period_id', activePeriod.id)
-        .in('unit_id', unitIds)
+        .in('unit_id', allUnitIds)
         .in('status', ['draft', 'active']),
     ]);
 
@@ -266,12 +316,13 @@ export const getAssessmentControlCenterData = cache(
       eventPopulationsMap.get(pop.assessment_event_id)!.push(pop);
     }
 
-    const registrationsByUnitMap = new Map<string, typeof registrations>();
+    const registrationsByUnitCohortMap = new Map<string, typeof registrations>();
     for (const registration of registrations ?? []) {
-      if (!registrationsByUnitMap.has(registration.unit_id)) {
-        registrationsByUnitMap.set(registration.unit_id, []);
+      const key = `${registration.unit_id}:${registration.cohort_id}`;
+      if (!registrationsByUnitCohortMap.has(key)) {
+        registrationsByUnitCohortMap.set(key, []);
       }
-      registrationsByUnitMap.get(registration.unit_id)!.push(registration);
+      registrationsByUnitCohortMap.get(key)!.push(registration);
     }
 
     // Map results per event
@@ -297,9 +348,12 @@ export const getAssessmentControlCenterData = cache(
 
     for (const event of eventRows) {
       const unit = one(event.unit as Relation<{ id: string; code: string; name: string }>);
+      const cohort = one(event.cohort as Relation<{ id: string; name: string }>);
       const period = one(event.academic_period as Relation<{ id: string; code: string; name: string }>);
       const evPops = eventPopulationsMap.get(event.id) ?? [];
-      const currentRegistrations = registrationsByUnitMap.get(event.unit_id) ?? [];
+      const currentRegistrations = event.cohort_id
+        ? registrationsByUnitCohortMap.get(`${event.unit_id}:${event.cohort_id}`) ?? []
+        : registrations?.filter((registration) => registration.unit_id === event.unit_id) ?? [];
       const evResults = eventResultsMap.get(event.id) ?? [];
       const evDrafts = eventDraftsMap.get(event.id) ?? [];
 
@@ -376,10 +430,18 @@ export const getAssessmentControlCenterData = cache(
       items.push({
         id: event.id,
         unitId: event.unit_id,
+        equivalenceGroupId: equivalenceByUnit.get(event.unit_id)?.id ?? null,
+        equivalentUnitIds: equivalentUnitIdsByUnit.get(event.unit_id) ?? [event.unit_id],
+        equivalentUnitCodes: (equivalentUnitIdsByUnit.get(event.unit_id) ?? [event.unit_id])
+          .map((memberUnitId) => unitCodeById.get(memberUnitId))
+          .filter((code): code is string => Boolean(code)),
+        canonicalUnitName: equivalenceByUnit.get(event.unit_id)?.canonicalName ?? null,
         unitCode: unit?.code ?? 'Unit',
         unitName: unit?.name ?? 'Unit markbook',
         academicPeriodId: activePeriod.id,
         academicPeriodName: period?.name ?? activePeriod.name,
+        cohortId: event.cohort_id,
+        cohortName: cohort?.name ?? 'All cohorts',
         trainerNames,
         populationCount: totalExpected,
         populationLocked: isLocked,

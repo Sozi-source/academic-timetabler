@@ -1,3 +1,9 @@
+### 2026-10-20: Bind cohort unit additions to their programme stages
+
+**Modified:** `src/features/unit-offerings/cohort-unit-editor.tsx`, `CHANGES.md`
+- Filter the cohort unit picker to units assigned to the selected cohort's programme, remove the cross-programme override, and show the six programme stages Y1S1 through Y2S3 for every cohort. Stage filtering continues to use each unit's curriculum stage number.
+- The existing `add_special_unit_offering` database function already rejects units from another programme. No migration or manual database follow-up is required.
+
 ### 2026-10-21: Improve individual and batch unit registration
 
 **Added:** `src/features/student-unit-registration/student-unit-registration-lines.tsx`, `supabase/migrations/20261021100000_exclude_attachment_from_batch_registration.sql`

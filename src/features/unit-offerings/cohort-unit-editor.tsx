@@ -34,6 +34,15 @@ const REASON_PRESETS = [
   'Special curriculum arrangement',
 ];
 
+const PROGRAMME_STAGES = [
+  { number: 1, label: 'Y1S1' },
+  { number: 2, label: 'Y1S2' },
+  { number: 3, label: 'Y1S3' },
+  { number: 4, label: 'Y2S1' },
+  { number: 5, label: 'Y2S2' },
+  { number: 6, label: 'Y2S3' },
+];
+
 export function CohortUnitEditor({
   academicPeriodId,
   cohorts,
@@ -50,7 +59,6 @@ export function CohortUnitEditor({
   const [stageFilter, setStageFilter] = useState<
     'current' | 'all' | 'unassigned' | string
   >('all');
-  const [showAllProgrammes, setShowAllProgrammes] = useState(false);
   const [reason, setReason] = useState('');
 
   const cohort = cohorts.find((item) => item.id === cohortId);
@@ -65,10 +73,7 @@ export function CohortUnitEditor({
 
     return units
       .filter((unit) => {
-        const matchesProgramme =
-          showAllProgrammes ||
-          !unit.programmeId ||
-          unit.programmeId === cohort.programmeId;
+        const matchesProgramme = unit.programmeId === cohort.programmeId;
 
         const alreadyOffered = existing.has(`${cohortId}:${unit.id}`);
 
@@ -80,7 +85,7 @@ export function CohortUnitEditor({
 
         return stageA - stageB || a.code.localeCompare(b.code);
       });
-  }, [cohort, units, existing, cohortId, showAllProgrammes]);
+  }, [cohort, units, existing, cohortId]);
 
   const availableUnits = useMemo(() => {
     if (!cohort) return [];
@@ -139,17 +144,7 @@ export function CohortUnitEditor({
     };
   }, [availableUnits]);
 
-  const availableStages = useMemo(() => {
-    const stageSet = new Set<number>();
-
-    for (const unit of programmeUnits) {
-      if (unit.stage && unit.stage > 0) {
-        stageSet.add(unit.stage);
-      }
-    }
-
-    return Array.from(stageSet).sort((a, b) => a - b);
-  }, [programmeUnits]);
+  const availableStages = PROGRAMME_STAGES;
 
   const selectedUnit = units.find((unit) => unit.id === unitId);
 
@@ -162,10 +157,7 @@ export function CohortUnitEditor({
   );
 
   const isCrossProgramme = Boolean(
-    cohort &&
-      selectedUnit &&
-      selectedUnit.programmeId &&
-      selectedUnit.programmeId !== cohort.programmeId
+    cohort && selectedUnit && selectedUnit.programmeId !== cohort.programmeId
   );
 
   const isUnassignedStage =
@@ -264,9 +256,9 @@ export function CohortUnitEditor({
             ) : null}
 
             {availableStages.map((stage) => (
-              <option key={stage} value={String(stage)}>
-                Stage {stage}
-                {cohort && stage === cohort.currentStage
+              <option key={stage.number} value={String(stage.number)}>
+                {stage.label}
+                {cohort && stage.number === cohort.currentStage
                   ? ' · Current'
                   : ''}
               </option>
@@ -397,19 +389,6 @@ export function CohortUnitEditor({
             ))}
           </div>
 
-          <label className="inline-flex cursor-pointer items-center gap-1.5 text-[11px] text-text-secondary hover:text-text-primary">
-            <input
-              type="checkbox"
-              checked={showAllProgrammes}
-              onChange={(event) => {
-                setShowAllProgrammes(event.target.checked);
-                setUnitId('');
-              }}
-              className="rounded border-border"
-            />
-
-            <span>Other programmes</span>
-          </label>
         </div>
       ) : null}
 

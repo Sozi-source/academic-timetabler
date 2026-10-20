@@ -11,17 +11,20 @@ interface RouteContext {
 }
 
 export async function POST(request: Request, { params }: RouteContext) {
-  await requireHodAccess();
+  const profile = await requireHodAccess();
   const { assessmentId } = await params;
   const body = await request.json().catch(() => null) as { url?: string } | null;
   if (!body || typeof body.url !== 'string') return NextResponse.json({ message: 'Enter a Google Sheets URL.' }, { status: 400 });
 
   try {
+    if (!profile.activeDepartmentId) {
+      return NextResponse.json({ message: 'Select an active department before syncing marks.' }, { status: 409 });
+    }
     const population = await getAssessmentPopulationWorkspace(assessmentId);
     if (population.workflowStatus === 'finalised' || population.workflowStatus === 'archived') {
       return NextResponse.json({ message: 'This assessment is finalized and cannot accept marks.' }, { status: 409 });
     }
-    const rows = await readTrainerSpreadsheet(body.url);
+    const rows = await readTrainerSpreadsheet(body.url, profile.activeDepartmentId);
     const rawRows = await parseBulkMarksSpreadsheet(rowsToCsv(rows));
     const roster: StudentRosterCandidate[] = population.students.map((student) => ({
       studentId: student.studentId,

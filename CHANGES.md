@@ -1,10 +1,21 @@
-### 2026-10-20: Clarify Google Sheets permission failures
+### 2026-10-20: Add assessment-scoped trainer mark entry links
 
-**Modified:** `src/features/assessment/google-sheets.ts`, `CHANGES.md`
-- Identify which Google Sheets or Drive operation failed, including its HTTP status.
-- When service-account impersonation is denied, show the required Workload Identity User role and IAM Credentials API setup.
+**Added:** `src/features/assessment/trainer-mark-entry.ts`, `src/features/assessment/trainer-mark-entry-types.ts`, `src/features/assessment/trainer-mark-entry-portal.tsx`, `src/features/assessment/trainer-mark-invites.tsx`, `src/app/trainer-mark-entry/page.tsx`, trainer invite and public portal API routes, `supabase/migrations/20261020150000_external_trainer_mark_entry.sql`
+**Modified:** `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`, `src/app/api/assessment/markbooks/[assessmentId]/trainer-invites/route.ts`, `src/features/assessment/trainer-mark-invites.tsx`, `CHANGES.md`
+- HODs can create assessment-specific bearer links for external trainers, set 1–14 day expiry, review access/submission state, and revoke active links. Links are displayed once; trainers are instructed to share them privately.
+- External trainers can save mark drafts and submit complete marks to the HOD for review without an Academic Planner account. Server-side validation restricts each link to its locked roster and institutional component limits; submissions never finalize official results.
+- The HOD markbook displays trainer draft marks, student details, trainer identity, and draft/submitted status for review. HODs continue with the existing markbook correction and finalization workflow.
+- Invitation tokens are stored as SHA-256 hashes, exchanged from URL fragments into HttpOnly cookies, and recorded against draft rows and activity history. No email delivery provider is configured; HODs share links manually.
+- Manual follow-up: apply the new Supabase migration, then run checks and deploy before testing.
+
+### 2026-10-20: Use college Google OAuth for trainer mark sheets
+
+**Added:** `src/features/assessment/google-oauth.ts`, `src/app/api/assessment/google-auth/start/route.ts`, `src/app/api/assessment/google-auth/callback/route.ts`, `src/app/api/assessment/google-auth/status/route.ts`, `supabase/migrations/20261020130000_department_google_oauth.sql`
+**Modified:** `.env.example`, `src/features/assessment/google-sheets.ts`, `src/features/assessment/google-sheet-mark-entry.tsx`, Google Sheets creation and sync API routes, `CHANGES.md`
+- Replace service-account and Shared Drive access with a department connection to a college Google account. The connected account creates files in its own My Drive and shares them with trainers.
+- Store Google refresh tokens encrypted with AES-256-GCM in a department-scoped table readable only by the server service role.
+- Configure a Google OAuth web client, its production callback URL, and a base64-encoded 32-byte encryption key. Apply the new Supabase migration before deployment.
 - Verification: not run (requested for the user to run locally).
-
 ### 2026-10-20: Correct Google Workload Identity audience
 
 **Modified:** `.env.example`, `src/features/assessment/google-sheets.ts`, `CHANGES.md`
@@ -18,7 +29,7 @@
 **Modified:** `.env.example`, `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`, `CHANGES.md`
 - HODs can create a private roster sheet for a markbook and share edit access with a trainer's Google account. The trainer does not need an Academic Planner account.
 - HODs can sync the sheet through the existing roster and mark validation path. Valid entries are saved as draft marks; validation failures, unmatched students, blank sheets, and finalized assessments are rejected.
-- Authenticate the Vercel deployment to Google Cloud using Workload Identity Federation and short-lived service account impersonation. This requires no downloadable service-account key. Configure the project, service account, pool, and provider environment variables in Vercel. No database migration is required.
+- The initial release used Google Cloud Workload Identity Federation. It was later replaced with college Google OAuth because service accounts cannot own files in personal My Drive.
 
 ### 2026-10-20: Make individual and batch unit registration stage-first
 

@@ -1,51 +1,4 @@
-import { getVercelOidcToken } from '@vercel/oidc';
-import { ExternalAccountClient } from 'google-auth-library';
-
-async function accessToken(): Promise<string> {
-  const projectNumber = process.env.GCP_PROJECT_NUMBER;
-  const poolId = process.env.GCP_WORKLOAD_IDENTITY_POOL_ID;
-  const providerId = process.env.GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID;
-  const serviceAccount = process.env.GCP_SERVICE_ACCOUNT_EMAIL;
-  if (!projectNumber || !poolId || !providerId || !serviceAccount) {
-    throw new Error('Google Sheets integration is not configured. Set the Vercel OIDC federation environment variables.');
-  }
-
-  const configuredAudience = process.env.GCP_AUDIENCE;
-  const audience = configuredAudience
-    ? configuredAudience.replace(/^https:\/\/iam\.googleapis\.com\//, '//iam.googleapis.com/')
-    :
-    `//iam.googleapis.com/projects/${projectNumber}/locations/global/workloadIdentityPools/${poolId}/providers/${providerId}`;
-  const subjectTokenAudience = `https:${audience}`;
-  const authClient = ExternalAccountClient.fromJSON({
-    type: 'external_account',
-    audience,
-    subject_token_type: 'urn:ietf:params:oauth:token-type:jwt',
-    token_url: 'https://sts.googleapis.com/v1/token',
-    service_account_impersonation_url: `https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${serviceAccount}:generateAccessToken`,
-    scopes: [
-      'https://www.googleapis.com/auth/spreadsheets',
-      'https://www.googleapis.com/auth/drive.file',
-    ],
-    subject_token_supplier: {
-      getSubjectToken: () => getVercelOidcToken({ audience: subjectTokenAudience }),
-    },
-  });
-  if (!authClient) throw new Error('Could not initialize Google workload identity federation.');
-  let accessTokenResponse: Awaited<ReturnType<typeof authClient.getAccessToken>>;
-  try {
-    accessTokenResponse = await authClient.getAccessToken();
-  } catch (error) {
-    const details = error instanceof Error ? error.message : 'Unknown authentication error.';
-    if (/caller does not have permission|permission denied|\b403\b/i.test(details)) {
-      throw new Error(
-        `Google could not impersonate ${serviceAccount}. Grant the Vercel workload identity principal the Workload Identity User role (roles/iam.workloadIdentityUser) on this service account, and ensure the IAM Service Account Credentials API is enabled. Google response: ${details}`,
-      );
-    }
-    throw new Error(`Google authentication failed while obtaining a service account token: ${details}`);
-  }
-  if (!accessTokenResponse.token) throw new Error('Google workload identity federation did not return an access token.');
-  return accessTokenResponse.token;
-}
+import { getGoogleAccessToken } from '@/features/assessment/google-oauth';
 
 async function googleRequest<T>(url: string, token: string, operation: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, {
@@ -71,12 +24,13 @@ export async function createTrainerSpreadsheet(input: {
   title: string;
   trainerEmail: string;
   rows: Array<Array<string | number>>;
+  departmentId: string;
 }): Promise<string> {
-  const token = await accessToken();
+  const token = await getGoogleAccessToken(input.departmentId);
   const spreadsheet = await googleRequest<{ spreadsheetId: string }>(
     'https://sheets.googleapis.com/v4/spreadsheets',
     token,
-    'Creating the spreadsheet',
+    'Creating the spreadsheet in the connected college Google Drive',
     { method: 'POST', body: JSON.stringify({ properties: { title: input.title }, sheets: [{ properties: { title: 'Marks' } }] }) },
   );
 
@@ -98,9 +52,9 @@ export async function createTrainerSpreadsheet(input: {
   return `https://docs.google.com/spreadsheets/d/${spreadsheet.spreadsheetId}/edit`;
 }
 
-export async function readTrainerSpreadsheet(url: string): Promise<string[][]> {
+export async function readTrainerSpreadsheet(url: string, departmentId: string): Promise<string[][]> {
   const spreadsheetId = getSpreadsheetId(url);
-  const token = await accessToken();
+  const token = await getGoogleAccessToken(departmentId);
   const result = await googleRequest<{ values?: unknown[][] }>(
     `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Marks%21A%3AG`,
     token,

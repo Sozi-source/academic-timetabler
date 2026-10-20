@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/ui/page-header';
 import { DownloadAssessmentMarkbookButton } from '@/features/assessment/markbook-controls';
 import { BulkUploadDialog } from '@/features/assessment/marks/bulk-upload-dialog';
-import { GoogleSheetMarkEntry } from '@/features/assessment/google-sheet-mark-entry';
+import { TrainerMarkInvites } from '@/features/assessment/trainer-mark-invites';
 import { getAssessmentById, getAssessmentPopulation } from '@/features/assessment/queries';
 import { getAssessmentResultCount } from '@/features/assessment/marks/queries';
 import { requireHodAccess } from '@/features/auth/authorization';
@@ -88,7 +88,7 @@ export default async function AssessmentMarkWorkflowPage({
         }
       />
 
-      {!isComplete ? <GoogleSheetMarkEntry assessmentId={assessment.id} /> : null}
+      {!isComplete ? <TrainerMarkInvites assessmentId={assessment.id} /> : null}
 
       {/* Summary Telemetry */}
       <div className="grid gap-3 sm:grid-cols-3">

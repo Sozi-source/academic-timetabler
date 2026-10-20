@@ -1,18 +1,37 @@
 'use client';
 
 import { ExternalLink, RefreshCw, Sheet } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 
 export function GoogleSheetMarkEntry({ assessmentId }: { assessmentId: string }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [email, setEmail] = useState('');
   const [url, setUrl] = useState('');
+  const [googleEmail, setGoogleEmail] = useState<string | null>(null);
+  const [connectionLoaded, setConnectionLoaded] = useState(false);
   const [busy, setBusy] = useState<'create' | 'sync' | null>(null);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    void fetch('/api/assessment/google-auth/status', { cache: 'no-store' })
+      .then(async (response) => {
+        const result = await response.json() as { connected?: boolean; email?: string | null };
+        if (response.ok && result.connected && result.email) setGoogleEmail(result.email);
+      })
+      .catch(() => setError('Could not check the college Google account connection.'))
+      .finally(() => setConnectionLoaded(true));
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('googleConnection') === 'connected') setMessage('College Google account connected.');
+    if (params.get('googleConnection') === 'error') setError('Google account connection did not complete. Please try again.');
+    if (params.has('googleConnection')) window.history.replaceState({}, '', pathname);
+  }, [pathname]);
 
   async function post(path: string, payload: Record<string, string>) {
     const response = await fetch(path, {
@@ -56,16 +75,29 @@ export function GoogleSheetMarkEntry({ assessmentId }: { assessmentId: string })
           <p className="mt-0.5 text-xs text-slate-600">Create a private roster sheet and share it with a trainer. Sync imports validated marks as drafts; review them before finalizing.</p>
         </div>
       </div>
+      <div className="flex flex-wrap items-center gap-3 text-xs">
+        {googleEmail ? (
+          <p className="font-medium text-emerald-800">Connected to {googleEmail}</p>
+        ) : (
+          <p className="text-slate-600">Connect the college Google account to create sheets in its Drive.</p>
+        )}
+        <Link
+          href={`/api/assessment/google-auth/start?returnTo=${encodeURIComponent(`/assessment/marks/${assessmentId}`)}`}
+          className="font-semibold text-primary underline"
+        >
+          {googleEmail ? 'Switch Google account' : 'Connect college Google account'}
+        </Link>
+      </div>
       <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
         <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Trainer Google account email" className="h-9 rounded-lg border border-slate-300 bg-white px-3 text-xs" />
-        <Button type="button" variant="outline" disabled={!email || busy !== null} onClick={createSheet}>
-          <Sheet className="size-4" />{busy === 'create' ? 'Creating…' : 'Create and share sheet'}
+        <Button type="button" variant="outline" disabled={!connectionLoaded || !googleEmail || !email || busy !== null} onClick={createSheet}>
+          <Sheet className="size-4" />{busy === 'create' ? 'Creating...' : 'Create and share sheet'}
         </Button>
       </div>
       <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
         <input type="url" value={url} onChange={(event) => setUrl(event.target.value)} placeholder="Paste the trainer's Google Sheets URL" className="h-9 rounded-lg border border-slate-300 bg-white px-3 text-xs" />
-        <Button type="button" disabled={!url || busy !== null} onClick={syncSheet}>
-          <RefreshCw className={`size-4 ${busy === 'sync' ? 'animate-spin' : ''}`} />{busy === 'sync' ? 'Syncing…' : 'Sync marks'}
+        <Button type="button" disabled={!connectionLoaded || !googleEmail || !url || busy !== null} onClick={syncSheet}>
+          <RefreshCw className={`size-4 ${busy === 'sync' ? 'animate-spin' : ''}`} />{busy === 'sync' ? 'Syncing...' : 'Sync marks'}
         </Button>
       </div>
       {url ? <a href={url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold text-primary underline">Open sheet <ExternalLink className="size-3" /></a> : null}

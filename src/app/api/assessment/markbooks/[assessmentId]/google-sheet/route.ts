@@ -9,7 +9,7 @@ interface RouteContext {
 }
 
 export async function POST(request: Request, { params }: RouteContext) {
-  await requireHodAccess();
+  const profile = await requireHodAccess();
   const { assessmentId } = await params;
   const body = await request.json().catch(() => null) as { trainerEmail?: string } | null;
   if (!body || typeof body.trainerEmail !== 'string') {
@@ -17,6 +17,9 @@ export async function POST(request: Request, { params }: RouteContext) {
   }
 
   try {
+    if (!profile.activeDepartmentId) {
+      return NextResponse.json({ message: 'Select an active department before creating a trainer sheet.' }, { status: 409 });
+    }
     const population = await getAssessmentPopulationWorkspace(assessmentId);
     if (!population.students.length) return NextResponse.json({ message: 'Generate the assessment roster before creating a trainer sheet.' }, { status: 409 });
     if (population.workflowStatus === 'finalised' || population.workflowStatus === 'archived') {
@@ -26,6 +29,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     const url = await createTrainerSpreadsheet({
       title: `${population.unit.code ?? 'Unit'} ${population.unit.name} · ${population.academicPeriod.name} Mark Entry`,
       trainerEmail: body.trainerEmail,
+      departmentId: profile.activeDepartmentId,
       rows: [
         ['Admission Number', 'Student Name', 'Assignment /5', 'Presentation /10', 'RAT /15', 'CAT /15', 'Exam /70'],
         ...population.students.map((student) => [

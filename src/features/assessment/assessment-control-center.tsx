@@ -21,8 +21,7 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
       unitCodes: Set<string>;
       unitName: string;
       trainerNames: Set<string>;
-      registeredByCohort: Map<string, number>;
-      allCohortsRegistrationCount: number | null;
+      registrationCount: number;
     }>();
     for (const item of data.items) {
       const groupKey = item.equivalenceGroupId ? `equivalence:${item.equivalenceGroupId}` : `unit:${item.unitId}`;
@@ -35,8 +34,7 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
           unitCodes: new Set(item.equivalentUnitCodes.length ? item.equivalentUnitCodes : [item.unitCode]),
           unitName: item.canonicalUnitName ?? item.unitName,
           trainerNames: new Set<string>(),
-          registeredByCohort: new Map<string, number>(),
-          allCohortsRegistrationCount: null,
+          registrationCount: 0,
         };
         byUnit.set(groupKey, group);
       }
@@ -44,14 +42,10 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
       item.equivalentUnitCodes.forEach((unitCode) => group?.unitCodes.add(unitCode));
       if (item.canonicalUnitName) group.unitName = item.canonicalUnitName;
       item.trainerNames.forEach((trainer) => group?.trainerNames.add(trainer));
-      if (item.cohortId) {
-        group.registeredByCohort.set(
-          item.cohortId,
-          Math.max(group.registeredByCohort.get(item.cohortId) ?? 0, item.populationCount),
-        );
-      } else {
-        group.allCohortsRegistrationCount = Math.max(group.allCohortsRegistrationCount ?? 0, item.populationCount);
-      }
+      group.registrationCount = Math.max(
+        group.registrationCount,
+        ...[...group.unitIds].map((unitId) => data.unitRegistrationCounts[unitId] ?? 0),
+      );
     }
 
     return [...byUnit.values()]
@@ -59,10 +53,10 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
         ...group,
         unitCode: [...group.unitCodes].join(' · '),
         trainerList: [...group.trainerNames],
-        registrationCount: group.allCohortsRegistrationCount ?? [...group.registeredByCohort.values()].reduce((total, count) => total + count, 0),
+        registrationCount: group.registrationCount,
       }))
       .sort((first, second) => first.unitCode.localeCompare(second.unitCode));
-  }, [data.items]);
+  }, [data.items, data.unitRegistrationCounts]);
 
   const filteredUnitGroups = useMemo(() => {
     const query = search.trim().toLocaleLowerCase();
@@ -172,14 +166,16 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
           <div className="overflow-x-auto rounded-xl border border-border bg-surface shadow-2xs">
             <table className="w-full min-w-[640px] table-fixed text-left text-xs">
               <colgroup>
-                <col className="w-[45%]" />
-                <col className="w-[30%]" />
-                <col className="w-[13%]" />
+                <col className="w-[24%]" />
+                <col className="w-[24%]" />
+                <col className="w-[28%]" />
+                <col className="w-[12%]" />
                 <col className="w-[12%]" />
               </colgroup>
               <thead className="border-b border-border bg-surface-subtle text-[10px] font-medium uppercase tracking-wide text-slate-500">
                 <tr>
-                  <th className="px-4 py-3">Unit</th>
+                  <th className="px-4 py-3">Unit name</th>
+                  <th className="px-3 py-3">Unit code</th>
                   <th className="px-3 py-3">Trainer</th>
                   <th className="px-3 py-3 text-center">Registered</th>
                   <th className="px-4 py-3 text-right"> </th>
@@ -188,13 +184,15 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
               <tbody className="divide-y divide-border">
                 {filteredUnitGroups.map((unit) => (
                   <tr key={[...unit.unitIds].sort().join(':')} className="transition-colors hover:bg-surface-subtle/60">
-                    <td className="px-4 py-3">
-                      <div className="flex min-w-0 items-center gap-2.5">
-                        <span className="shrink-0 whitespace-nowrap rounded-md border border-primary/10 bg-primary/5 px-2 py-1 text-[10px] font-medium text-primary">
-                          <span className="block max-w-full truncate whitespace-nowrap" title={unit.unitCode}>{unit.unitCode}</span>
-                        </span>
-                        <span className="min-w-0 truncate font-medium text-slate-700" title={unit.unitName}>{unit.unitName}</span>
-                      </div>
+                    <td className="px-4 py-3 font-medium text-slate-700" title={unit.unitName}>
+                      <span className="block break-words">{unit.unitName}</span>
+                    </td>
+                    <td className="px-3 py-3">
+                      <span className="inline-flex flex-wrap gap-x-1 rounded-md border border-primary/10 bg-primary/5 px-2 py-1 text-[10px] font-medium text-primary" title={unit.unitCode}>
+                        {[...unit.unitCodes].map((code, index) => (
+                          <span key={code} className="whitespace-nowrap">{index > 0 ? '· ' : ''}{code}</span>
+                        ))}
+                      </span>
                     </td>
                     <td className="px-3 py-3 text-slate-600">
                       <span className="block truncate" title={unit.trainerList.join(', ')}>{unit.trainerList.join(', ') || 'Unassigned'}</span>

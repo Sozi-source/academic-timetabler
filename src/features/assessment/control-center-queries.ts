@@ -60,6 +60,7 @@ export interface AssessmentControlCenterData {
   departmentName: string;
   summary: AssessmentControlCenterSummary;
   items: AssessmentControlCenterItem[];
+  unitRegistrationCounts: Record<string, number>;
 }
 
 export const getAssessmentControlCenterData = cache(
@@ -84,6 +85,7 @@ export const getAssessmentControlCenterData = cache(
           totalMissingMarks: 0,
         },
         items: [],
+        unitRegistrationCounts: {},
       };
     }
 
@@ -131,6 +133,7 @@ export const getAssessmentControlCenterData = cache(
           totalMissingMarks: 0,
         },
         items: [],
+        unitRegistrationCounts: {},
       };
     }
 
@@ -186,6 +189,7 @@ export const getAssessmentControlCenterData = cache(
           totalMissingMarks: 0,
         },
         items: [],
+        unitRegistrationCounts: {},
       };
     }
 
@@ -323,6 +327,20 @@ export const getAssessmentControlCenterData = cache(
         registrationsByUnitCohortMap.set(key, []);
       }
       registrationsByUnitCohortMap.get(key)!.push(registration);
+    }
+
+    const registrationKeysByUnitGroup = new Map<string, Set<string>>();
+    for (const registration of registrations ?? []) {
+      const equivalenceGroupId = equivalenceByUnit.get(registration.unit_id)?.id;
+      const groupKey = equivalenceGroupId ? `equivalence:${equivalenceGroupId}` : `unit:${registration.unit_id}`;
+      if (!registrationKeysByUnitGroup.has(groupKey)) registrationKeysByUnitGroup.set(groupKey, new Set());
+      registrationKeysByUnitGroup.get(groupKey)!.add(`${registration.cohort_id}:${registration.student_id}`);
+    }
+    const unitRegistrationCounts: Record<string, number> = {};
+    for (const unitId of allUnitIds) {
+      const equivalenceGroupId = equivalenceByUnit.get(unitId)?.id;
+      const groupKey = equivalenceGroupId ? `equivalence:${equivalenceGroupId}` : `unit:${unitId}`;
+      unitRegistrationCounts[unitId] = registrationKeysByUnitGroup.get(groupKey)?.size ?? 0;
     }
 
     // Map results per event
@@ -482,6 +500,7 @@ export const getAssessmentControlCenterData = cache(
       departmentName: profile.departmentName ?? 'Department',
       summary,
       items,
+      unitRegistrationCounts,
     };
   }
 );

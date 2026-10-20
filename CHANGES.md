@@ -16,6 +16,7 @@
 **Modified:** `src/features/assessment/trainer-unit-mark-invites.tsx`, `src/features/assessment/assessment-unit-cohorts.tsx`, `CHANGES.md`
 - Display the newly created trainer URL as a clickable unit name and keep the copy-link button. Show the raw URL only if clipboard access fails.
 - Include a readable unit code/name slug in the generated URL so trainers can identify the link when it is pasted into a message.
+- When trainer-link creation is blocked by exam-roster setup, identify the cohort(s) that still need an open, locked roster.
 
 ### 2026-10-21: Improve individual and batch unit registration
 

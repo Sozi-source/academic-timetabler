@@ -149,8 +149,16 @@ export async function POST(request: Request, { params }: RouteContext) {
     if (registrationError) return NextResponse.json({ message: 'Could not verify the registered cohorts for this unit.' }, { status: 500 });
     const expectedCohorts = new Set((registrations ?? []).map((row) => row.cohort_id).filter((cohortId): cohortId is string => Boolean(cohortId)));
     const availableCohorts = new Set(readyScopes.map((item) => item.cohortId).filter((cohortId): cohortId is string => Boolean(cohortId)));
-    if ([...expectedCohorts].some((cohortId) => !availableCohorts.has(cohortId))) {
-      return NextResponse.json({ message: 'Lock and generate an open exam roster for every currently registered cohort before creating one unit-level trainer link.' }, { status: 409 });
+    const missingCohortIds = [...expectedCohorts].filter((cohortId) => !availableCohorts.has(cohortId));
+    if (missingCohortIds.length > 0) {
+      const { data: missingCohorts } = await admin.from('cohorts')
+        .select('code,name')
+        .eq('department_id', profile.activeDepartmentId)
+        .in('id', missingCohortIds)
+        .order('name');
+      const cohortNames = (missingCohorts ?? []).map((cohort) => cohort.code || cohort.name);
+      const detail = cohortNames.length > 0 ? ` Missing: ${cohortNames.join(', ')}.` : '';
+      return NextResponse.json({ message: `Lock and generate an open exam roster for every currently registered cohort before creating one unit-level trainer link.${detail}` }, { status: 409 });
     }
 
     const token = randomBytes(32).toString('base64url');

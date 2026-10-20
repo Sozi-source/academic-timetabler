@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
 
 import {
   batchRegisterOverrideUnits,
@@ -281,6 +282,13 @@ export function BatchUnitRegistration({
 
       <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-border bg-[#eef3f3] px-5 py-4 sm:px-6">
+          <Link
+            href="/students/unit-registration"
+            className="mb-3 inline-flex items-center gap-1.5 text-xs font-medium text-text-secondary transition-colors hover:text-text-primary"
+          >
+            <ArrowLeft className="size-3.5" aria-hidden="true" />
+            Back to registrations
+          </Link>
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#dce7e7]">
               <svg

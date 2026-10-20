@@ -352,6 +352,7 @@ export async function getDepartmentRegistrationEditor(
         academicPeriodId: registration.academic_period_id,
         academicPeriodName: periodNameById.get(registration.academic_period_id) ?? 'Academic period',
         stageName: stageInfo?.stageName ?? (unitPeriodNumber ? `Semester ${unitPeriodNumber}` : '—'),
+        stageId: stageInfo?.stageId ?? null,
         unitId: unit.id,
         unitCode: unit.code,
         unitName: unit.name,

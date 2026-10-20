@@ -183,6 +183,43 @@ export async function registerStudentUnitsByDepartment(formData: FormData) {
   redirect(studentRegistrationUrl('saved=1'));
 }
 
+export async function dropStudentUnitRegistration(formData: FormData) {
+  await requireHodAccess();
+
+  const studentId = String(formData.get('studentId') ?? '');
+  const registrationUnitId = String(formData.get('registrationUnitId') ?? '');
+  const returnCohort = String(formData.get('returnCohort') ?? '');
+  if (!studentId || !registrationUnitId) return;
+
+  const supabase = await createClient();
+  const { data: period, error: periodError } = await supabase
+    .from('academic_periods')
+    .select('id')
+    .eq('status', 'active')
+    .maybeSingle();
+
+  if (periodError || !period) {
+    redirect(`/students/unit-registration/register/${studentId}?error=${encodeURIComponent('No active academic period is available.')}`);
+  }
+
+  const { error } = await supabase
+    .from('student_unit_registrations')
+    .update({ registration_status: 'dropped' })
+    .eq('student_id', studentId)
+    .eq('academic_period_id', period.id)
+    .eq('unit_id', registrationUnitId)
+    .eq('registration_status', 'registered');
+
+  if (error) {
+    redirect(`/students/unit-registration/register/${studentId}?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath(`/students/unit-registration/register/${studentId}`);
+  revalidatePath('/students/unit-registration');
+  const cohortQuery = returnCohort ? `&cohort=${encodeURIComponent(returnCohort)}` : '';
+  redirect(`/students/unit-registration/register/${studentId}?deleted=1${cohortQuery}`);
+}
+
 
 export async function setStudentProgrammeStage(formData: FormData) {
   await requireHodAccess();

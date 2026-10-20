@@ -4,6 +4,12 @@
 - Filter the cohort unit picker to units assigned to the selected cohort's programme, remove the cross-programme override, and show the six programme stages Y1S1 through Y2S3 for every cohort. Stage filtering continues to use each unit's curriculum stage number.
 - The existing `add_special_unit_offering` database function already rejects units from another programme. No migration or manual database follow-up is required.
 
+### 2026-10-20: Add edit and delete actions to current student unit registrations
+
+**Modified:** `src/features/student-unit-registration/student-unit-registration-lines.tsx`, `src/features/student-unit-registration/actions.ts`, `src/features/student-unit-registration/queries.ts`, `src/features/student-unit-registration/types.ts`, `src/app/(dashboard)/students/unit-registration/register/[studentId]/page.tsx`, `CHANGES.md`
+- Add a three-dot menu to active-period registered unit rows. HODs can activate an inline stage/unit edit and save it with the existing registration form, or mark the registration dropped immediately while retaining its history row.
+- No database migration required; existing registration status and department update RLS policy are used.
+
 ### 2026-10-21: Improve individual and batch unit registration
 
 **Added:** `src/features/student-unit-registration/student-unit-registration-lines.tsx`, `supabase/migrations/20261021100000_exclude_attachment_from_batch_registration.sql`

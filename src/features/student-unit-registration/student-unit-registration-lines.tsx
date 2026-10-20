@@ -1,7 +1,9 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { MoreVertical } from 'lucide-react';
 
+import { dropStudentUnitRegistration } from './actions';
 import type { DepartmentRegistrationEditor } from './types';
 
 interface RegistrationLine {
@@ -16,10 +18,13 @@ export function StudentUnitRegistrationLines({
   context: DepartmentRegistrationEditor;
 }) {
   const [lines, setLines] = useState<RegistrationLine[]>([{ id: 0, stageId: '', unitId: '' }]);
+  const [replacements, setReplacements] = useState<Record<string, string>>({});
+  const [editing, setEditing] = useState<{ unitId: string; stageId: string; replacementId: string } | null>(null);
   const currentIds = useMemo(() => new Set(context.currentRegisteredUnitIds), [context.currentRegisteredUnitIds]);
   const chosenIds = new Set(lines.map((line) => line.unitId).filter(Boolean));
   const expectedIds = new Set(context.stageUnitIds[context.student.currentStageId ?? ''] ?? []);
-  const hasOffStageSelection = [...currentIds, ...chosenIds].some((unitId) => !expectedIds.has(unitId));
+  const selectedCurrentIds = context.currentRegisteredUnitIds.map((unitId) => replacements[unitId] ?? unitId);
+  const hasOffStageSelection = [...selectedCurrentIds, ...chosenIds].some((unitId) => !expectedIds.has(unitId));
 
   const updateLine = (id: number, updates: Partial<Omit<RegistrationLine, 'id'>>) => {
     setLines((current) => current.map((line) => line.id === id ? { ...line, ...updates } : line));
@@ -40,11 +45,12 @@ export function StudentUnitRegistrationLines({
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] table-fixed text-left text-xs">
               <colgroup>
-                <col className="w-[19%]" />
                 <col className="w-[18%]" />
-                <col className="w-[16%]" />
-                <col className="w-[32%]" />
+                <col className="w-[17%]" />
                 <col className="w-[15%]" />
+                <col className="w-[28%]" />
+                <col className="w-[15%]" />
+                <col className="w-[7%]" />
               </colgroup>
               <thead className="border-b border-border bg-surface-subtle text-[10px] font-medium uppercase tracking-wide text-text-muted">
                 <tr>
@@ -53,23 +59,67 @@ export function StudentUnitRegistrationLines({
                   <th className="px-3 py-2.5">Unit code</th>
                   <th className="px-3 py-2.5">Unit name</th>
                   <th className="px-3 py-2.5">Status</th>
+                  <th className="px-3 py-2.5"><span className="sr-only">Actions</span></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {context.registrationHistory.map((registration) => (
-                  <tr key={`${registration.academicPeriodId}:${registration.unitId}`}>
-                    <td className="px-3 py-2.5 text-text-secondary">{registration.academicPeriodName}</td>
-                    <td className="px-3 py-2.5 text-text-secondary">{registration.stageName}</td>
-                    <td className="px-3 py-2.5 font-mono text-text-secondary">{registration.unitCode}</td>
-                    <td className="px-3 py-2.5 text-text-primary">{registration.unitName}</td>
-                    <td className="px-3 py-2.5">
-                      <span className={registration.registrationStatus === 'registered' ? 'inline-flex items-center gap-1.5 text-emerald-700' : 'text-text-muted'}>
-                        {registration.registrationStatus === 'registered' ? <span aria-hidden="true">✓</span> : null}
-                        {registration.registrationStatus.replaceAll('_', ' ')}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                {context.registrationHistory.map((registration) => {
+                  const isCurrent = registration.academicPeriodId === context.period.id && registration.registrationStatus === 'registered';
+                  const isEditing = editing?.unitId === registration.unitId && isCurrent;
+                  const replacement = context.units.find((unit) => unit.id === (replacements[registration.unitId] ?? registration.unitId));
+                  const stageId = isEditing ? editing.stageId : replacements[registration.unitId] ? replacement?.stageId ?? '' : registration.stageId ?? '';
+                  const occupiedIds = new Set([...currentIds].filter((unitId) => unitId !== registration.unitId).map((unitId) => replacements[unitId] ?? unitId));
+                  const rowUnits = context.units.filter((unit) => unit.stageId === stageId && (!occupiedIds.has(unit.id) || unit.id === registration.unitId) && (!chosenIds.has(unit.id) || unit.id === registration.unitId));
+
+                  return (
+                    <tr key={`${registration.academicPeriodId}:${registration.unitId}`} className={isEditing ? 'bg-primary/5' : undefined}>
+                      <td className="px-3 py-2.5 text-text-secondary">{registration.academicPeriodName}</td>
+                      <td className="px-3 py-2.5 text-text-secondary">
+                        {isEditing ? (
+                          <select aria-label="Edit unit stage" value={editing.stageId} onChange={(event) => setEditing({ ...editing, stageId: event.target.value, replacementId: '' })} className="h-8 w-full rounded-md border border-border bg-surface px-2 text-xs">
+                            <option value="">Select stage</option>
+                            {context.stageOptions.map((stage) => <option key={stage.id} value={stage.id}>{stage.name}</option>)}
+                          </select>
+                        ) : replacement?.stageName ?? registration.stageName}
+                      </td>
+                      <td className="px-3 py-2.5 font-mono text-text-secondary">{isEditing ? registration.unitCode : replacement?.code ?? registration.unitCode}</td>
+                      <td className="px-3 py-2.5 text-text-primary">
+                        {isEditing ? (
+                          <select aria-label="Edit registered unit" value={editing.replacementId} onChange={(event) => setEditing({ ...editing, replacementId: event.target.value })} className="h-8 w-full rounded-md border border-border bg-surface px-2 text-xs" disabled={!editing.stageId}>
+                            <option value="">Select unit</option>
+                            {rowUnits.map((unit) => <option key={unit.id} value={unit.id}>{unit.code} · {unit.name}</option>)}
+                          </select>
+                        ) : replacement?.name ?? registration.unitName}
+                      </td>
+                      <td className="px-3 py-2.5">
+                        {isEditing ? (
+                          <div className="flex items-center gap-2">
+                            <button type="button" disabled={!editing.replacementId} onClick={() => { setReplacements((current) => ({ ...current, [registration.unitId]: editing.replacementId })); setEditing(null); }} className="font-medium text-primary disabled:opacity-40">Apply</button>
+                            <button type="button" onClick={() => setEditing(null)} className="text-text-muted hover:text-text-primary">Cancel</button>
+                          </div>
+                        ) : (
+                          <span className={registration.registrationStatus === 'registered' ? 'inline-flex items-center gap-1.5 text-emerald-700' : 'text-text-muted'}>
+                            {registration.registrationStatus === 'registered' ? <span aria-hidden="true">✓</span> : null}
+                            {registration.registrationStatus.replaceAll('_', ' ')}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2.5 text-right">
+                        {isCurrent && !isEditing ? (
+                          <details className="group relative inline-block text-left">
+                            <summary aria-label={`Actions for ${registration.unitCode}`} className="flex size-7 cursor-pointer list-none items-center justify-center rounded-md text-text-secondary hover:bg-surface-subtle [&::-webkit-details-marker]:hidden">
+                              <MoreVertical className="size-4" aria-hidden="true" />
+                            </summary>
+                            <div className="absolute right-0 z-10 mt-1 min-w-28 rounded-md border border-border bg-surface p-1 shadow-lg">
+                              <button type="button" onClick={() => { setEditing({ unitId: registration.unitId, stageId: registration.stageId ?? context.student.currentStageId ?? '', replacementId: replacements[registration.unitId] ?? registration.unitId }); }} className="block w-full rounded px-2 py-1.5 text-left text-xs text-text-primary hover:bg-surface-subtle">Edit</button>
+                              <button type="submit" formAction={dropStudentUnitRegistration} name="registrationUnitId" value={registration.unitId} className="block w-full rounded px-2 py-1.5 text-left text-xs text-danger hover:bg-danger-subtle">Delete</button>
+                            </div>
+                          </details>
+                        ) : null}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -89,7 +139,7 @@ export function StudentUnitRegistrationLines({
           </button>
         </div>
         <input type="hidden" name="academicPeriodId" value={context.period.id} />
-        {[...currentIds].map((unitId) => <input key={unitId} type="hidden" name="unitIds" value={unitId} />)}
+        {selectedCurrentIds.map((unitId) => <input key={unitId} type="hidden" name="unitIds" value={unitId} />)}
         <div className="overflow-x-auto">
           <table className="w-full min-w-[760px] table-fixed text-left text-xs">
             <colgroup>

@@ -13,7 +13,7 @@ import { StudentUnitRegistrationLines } from '@/features/student-unit-registrati
 
 interface PageProps {
   params: Promise<{ studentId: string }>;
-  searchParams: Promise<{ error?: string; saved?: string; stage_updated?: string; cohort?: string | string[] }>;
+  searchParams: Promise<{ error?: string; saved?: string; deleted?: string; stage_updated?: string; cohort?: string | string[] }>;
 }
 
 export default async function DepartmentStudentUnitRegistrationPage({
@@ -82,6 +82,10 @@ export default async function DepartmentStudentUnitRegistrationPage({
             Back to Student List
           </Link>
         </div>
+      ) : null}
+
+      {query.deleted === '1' ? (
+        <p role="status" className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-800">Unit registration deleted.</p>
       ) : null}
 
       {query.stage_updated === '1' ? (

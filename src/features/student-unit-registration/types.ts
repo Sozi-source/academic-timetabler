@@ -66,6 +66,7 @@ export interface DepartmentRegistrationEditor {
     academicPeriodId: string;
     academicPeriodName: string;
     stageName: string;
+    stageId: string | null;
     unitId: string;
     unitCode: string;
     unitName: string;

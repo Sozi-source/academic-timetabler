@@ -14,6 +14,7 @@ export async function getBatchRegistrationContext(): Promise<BatchRegistrationCo
       cohorts: [],
       students: [],
       units: [],
+      stages: [],
     };
   }
 
@@ -59,6 +60,7 @@ export async function getBatchRegistrationContext(): Promise<BatchRegistrationCo
       cohorts: [],
       students: [],
       units: [],
+      stages: [],
     };
   }
 
@@ -291,7 +293,9 @@ export async function getBatchRegistrationContext(): Promise<BatchRegistrationCo
         name: unit.name,
         programmeCode: programmeCode.get(unit.programme_id) ?? '-',
         stageName: stage?.name ?? (unit.academic_period_number ? `Semester ${unit.academic_period_number}` : null),
+        stageId: stage?.id ?? null,
       };
     }),
+    stages: (allStageResult.data ?? []).map((stage) => ({ id: stage.id, name: stage.name, sequenceNumber: stage.sequence_number })),
   };
 }

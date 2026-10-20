@@ -1,3 +1,10 @@
+### 2026-10-20: Make individual and batch unit registration stage-first
+
+**Added:** `src/features/student-unit-registration/stage-unit-picker.tsx`
+**Modified:** `src/app/(dashboard)/students/unit-registration/register/[studentId]/page.tsx`, `src/features/student-unit-registration/actions.ts`, `src/features/student-unit-registration/batch-actions.ts`, `src/features/student-unit-registration/batch-queries.ts`, `src/features/student-unit-registration/batch-types.ts`, `src/features/student-unit-registration/batch-unit-registration.tsx`, `src/features/student-unit-registration/queries.ts`, `src/features/student-unit-registration/types.ts`, `CHANGES.md`
+- Individual registration now selects a curriculum stage and shows only units mapped to that stage. Checked units are retained while changing stages, and the selected set can span stages for retakes and missed units.
+- Batch override registration now selects a stage first and offers only its mapped units. Server validation checks that units and selected students match the selected stage's programme.
+- The target registration stage is separate from the student's current progression stage. No database migration or manual follow-up is required.
 ### 2026-10-19: Fix Gemini exam generation, draft paper commit (`exam_commit_generated_paper`), and add Word (`.docx`) paper download
 
 **Added:** `supabase/migrations/20261019005500_fix_exam_commit_generated_paper_item_ambiguity.sql`, `src/features/exam-setting/export-docx.ts`, `src/app/api/exam-setting/papers/[paperId]/download/route.ts`

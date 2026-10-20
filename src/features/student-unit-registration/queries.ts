@@ -296,6 +296,7 @@ export async function getDepartmentRegistrationEditor(
       category,
       stageName: stageInfo?.stageName ?? (unit.academic_period_number ? `Semester ${unit.academic_period_number}` : null),
       stageCode: stageInfo?.stageCode ?? (unit.academic_period_number ? `S${unit.academic_period_number}` : null),
+      stageId: stageInfo?.stageId ?? null,
     });
   }
 
@@ -340,6 +341,11 @@ export async function getDepartmentRegistrationEditor(
       name: stage.name,
       sequenceNumber: stage.sequence_number,
     })),
+    stageUnitIds: Object.fromEntries(
+      (stageResult.data ?? []).map((stage) => [stage.id,
+        (stageUnitResult.data ?? []).filter((binding) => binding.stage_id === stage.id).map((binding) => binding.unit_id),
+      ]),
+    ),
     units: sortedUnits,
     existingStatus: submissionResult.data?.status ?? 'not_submitted',
     existingNote:

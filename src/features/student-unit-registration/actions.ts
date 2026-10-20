@@ -63,6 +63,14 @@ export async function registerStudentUnitsByDepartment(formData: FormData) {
 
   const supabase = await createClient();
 
+  const { data: mappedSelectedUnits, error: mappedUnitsError } = await supabase
+    .from('programme_stage_units')
+    .select('unit_id')
+    .in('unit_id', unitIds);
+  if (mappedUnitsError || new Set((mappedSelectedUnits ?? []).map((unit) => unit.unit_id)).size !== new Set(unitIds).size) {
+    redirect(`/students/unit-registration/register/${studentId}?error=${encodeURIComponent('Selected units must be mapped to a programme stage.')}`);
+  }
+
   const { data: eligibility } = await supabase
     .from('students')
     .select('academic_phase, lifecycle_status, current_cohort_id')

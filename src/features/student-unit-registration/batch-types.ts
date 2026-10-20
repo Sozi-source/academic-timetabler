@@ -25,6 +25,13 @@ export interface BatchRegistrationUnit {
   name: string;
   programmeCode: string;
   stageName: string | null;
+  stageId: string | null;
+}
+
+export interface BatchRegistrationStage {
+  id: string;
+  name: string;
+  sequenceNumber: number;
 }
 
 export interface BatchRegistrationCohort {
@@ -42,4 +49,5 @@ export interface BatchRegistrationContext {
   cohorts: BatchRegistrationCohort[];
   students: BatchRegistrationStudent[];
   units: BatchRegistrationUnit[];
+  stages: BatchRegistrationStage[];
 }

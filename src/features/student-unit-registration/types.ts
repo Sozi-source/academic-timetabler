@@ -45,6 +45,7 @@ export interface DepartmentRegistrationUnit {
   category?: 'expected' | 'offered' | 'curriculum';
   stageName?: string | null;
   stageCode?: string | null;
+  stageId?: string | null;
 }
 
 export interface DepartmentRegistrationEditor {
@@ -59,6 +60,7 @@ export interface DepartmentRegistrationEditor {
     currentStageName: string | null;
   };
   stageOptions: ProgrammeStageOption[];
+  stageUnitIds: Record<string, string[]>;
   units: DepartmentRegistrationUnit[];
   existingStatus: DepartmentRegistrationStatus;
   existingNote: string | null;

@@ -120,6 +120,7 @@ export async function batchRegisterOverrideUnits(
     typeof reasonValue === 'string'
       ? reasonValue.trim()
       : '';
+  const registrationStageId = formData.get('registrationStageId');
 
   if (typeof academicPeriodId !== 'string' || !academicPeriodId) {
     redirect('/students/unit-registration/batch?error=period');
@@ -145,7 +146,17 @@ export async function batchRegisterOverrideUnits(
     effectiveStudentIds = (cohortStudents ?? []).map((s) => s.id);
   }
 
-  if (effectiveStudentIds.length === 0 || unitIds.length === 0) {
+  if (effectiveStudentIds.length === 0 || unitIds.length === 0 || typeof registrationStageId !== 'string' || !registrationStageId) {
+    redirect('/students/unit-registration/batch?error=override_selection');
+  }
+
+  const { data: stage } = await supabase.from('programme_stages').select('id, programme_id').eq('id', registrationStageId).eq('is_active', true).maybeSingle();
+  const { data: mappedUnits } = await supabase.from('programme_stage_units').select('unit_id').eq('stage_id', registrationStageId).in('unit_id', unitIds);
+  if (!stage || new Set((mappedUnits ?? []).map((unit) => unit.unit_id)).size !== new Set(unitIds).size) {
+    redirect('/students/unit-registration/batch?error=override_selection');
+  }
+  const { data: targetStudents } = await supabase.from('students').select('id, programme_id').in('id', effectiveStudentIds);
+  if (!targetStudents?.length || targetStudents.some((student) => student.programme_id !== stage.programme_id)) {
     redirect('/students/unit-registration/batch?error=override_selection');
   }
 

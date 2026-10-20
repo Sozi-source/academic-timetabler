@@ -92,6 +92,7 @@ export function BatchUnitRegistration({
   const [mode, setMode] = useState<'cohort' | 'selected'>('cohort');
   const [registrationPath, setRegistrationPath] = useState<'expected' | 'override'>('expected');
   const [selectedUnitIds, setSelectedUnitIds] = useState<Set<string>>(new Set());
+  const [registrationStageId, setRegistrationStageId] = useState('');
   const [cohortId, setCohortId] = useState(initialCohortId ?? '');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => {
     if (!initialCohortId) return new Set();
@@ -383,6 +384,7 @@ export function BatchUnitRegistration({
               <input key={unitId} type="hidden" name="unitIds" value={unitId} />
             ))
           : null}
+        {registrationPath === 'override' && registrationStageId ? <input type="hidden" name="registrationStageId" value={registrationStageId} /> : null}
 
         <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
           <h2 className="text-sm font-semibold text-slate-950">
@@ -572,8 +574,14 @@ export function BatchUnitRegistration({
               </div>
               <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-primary ring-1 ring-primary/20">{selectedUnitIds.size} selected</span>
             </div>
+            <label className="mt-3 block text-xs font-semibold text-text-secondary">Registration stage
+              <select value={registrationStageId} onChange={(event) => { setRegistrationStageId(event.target.value); setSelectedUnitIds(new Set()); }} className="mt-1 block h-10 w-full rounded-lg border border-border bg-white px-3 text-sm" required>
+                <option value="">Select stage</option>
+                {context.stages.map((stage) => <option key={stage.id} value={stage.id}>{stage.name}</option>)}
+              </select>
+            </label>
             <div className="mt-3 grid max-h-72 gap-2 overflow-y-auto pr-1 sm:grid-cols-2 lg:grid-cols-3">
-              {context.units.map((unit) => (
+              {context.units.filter((unit) => unit.stageId === registrationStageId).map((unit) => (
                 <label key={unit.id} className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-border bg-white p-2.5 hover:border-primary/50">
                   <input type="checkbox" checked={selectedUnitIds.has(unit.id)} onChange={() => toggleUnit(unit.id)} className="mt-0.5 size-4 accent-primary" />
                   <span className="min-w-0 text-xs">

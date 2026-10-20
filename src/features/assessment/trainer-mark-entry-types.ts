@@ -11,9 +11,13 @@ export interface TrainerMarkInviteRow {
   last_accessed_at: string | null;
   submitted_at: string | null;
   revoked_at: string | null;
+  parent_invite_id?: string | null;
+  cohort_id?: string | null;
+  scope_unit_id?: string | null;
 }
 
 export interface TrainerMarkEntryRow {
+  assessmentId: string;
   studentId: string;
   admissionNumber: string;
   fullName: string;

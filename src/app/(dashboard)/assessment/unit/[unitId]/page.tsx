@@ -140,6 +140,7 @@ export default async function AssessmentUnitPage({ params, searchParams }: PageP
     <AssessmentUnitCohorts
       unit={{ id: unit.id, code: unit.code, name: canonicalUnitName }}
       periodName={periodResult.data.name}
+      periodId={periodId}
       cohorts={cohorts}
     />
   );

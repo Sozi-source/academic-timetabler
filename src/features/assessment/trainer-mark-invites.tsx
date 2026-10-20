@@ -29,7 +29,7 @@ interface TrainerReviewMark {
   trainer: { trainer_name: string; submitted_at: string | null } | null;
 }
 
-export function TrainerMarkInvites({ assessmentId }: { assessmentId: string }) {
+export function TrainerMarkInvites({ assessmentId, allowInviteCreation = true }: { assessmentId: string; allowInviteCreation?: boolean }) {
   const [invites, setInvites] = useState<TrainerInvite[]>([]);
   const [reviewMarks, setReviewMarks] = useState<TrainerReviewMark[]>([]);
   const [trainerName, setTrainerName] = useState('');
@@ -120,7 +120,7 @@ export function TrainerMarkInvites({ assessmentId }: { assessmentId: string }) {
         </div>
       </div>
 
-      <form onSubmit={createInvite} className="grid gap-2 sm:grid-cols-[1fr_1fr_110px_auto]">
+      {allowInviteCreation ? <form onSubmit={createInvite} className="grid gap-2 sm:grid-cols-[1fr_1fr_110px_auto]">
         <input
           required
           minLength={2}
@@ -146,9 +146,9 @@ export function TrainerMarkInvites({ assessmentId }: { assessmentId: string }) {
         <Button type="submit" disabled={busy || !trainerName.trim()}>
           <Link2 className="size-4" />{busy ? 'Working...' : 'Create link'}
         </Button>
-      </form>
+      </form> : <p className="rounded-lg border border-sky-100 bg-white px-3 py-2 text-xs text-slate-600">New trainer links are created once per unit from the unit cohort workspace.</p>}
 
-      <p className="text-[11px] text-slate-500">Anyone with the link can enter marks for this roster until it expires or you revoke it. Share it privately.</p>
+      {allowInviteCreation ? <p className="text-[11px] text-slate-500">Anyone with the link can enter marks for this roster until it expires or you revoke it. Share it privately.</p> : null}
 
       {inviteUrl ? (
         <div className="space-y-2 rounded-lg border border-emerald-200 bg-white p-3">

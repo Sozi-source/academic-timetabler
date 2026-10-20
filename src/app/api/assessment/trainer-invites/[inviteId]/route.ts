@@ -27,5 +27,11 @@ export async function DELETE(_request: Request, { params }: RouteContext) {
 
   if (error) return NextResponse.json({ message: 'Could not revoke this trainer invitation.' }, { status: 500 });
   if (!data) return NextResponse.json({ message: 'Invitation is already closed or unavailable.' }, { status: 409 });
+  const { error: childError } = await admin.from('assessment_trainer_mark_invites')
+    .update({ revoked_at: new Date().toISOString() })
+    .eq('parent_invite_id', inviteId)
+    .is('revoked_at', null)
+    .is('submitted_at', null);
+  if (childError) return NextResponse.json({ message: 'The unit link was revoked, but some cohort scopes could not be closed.' }, { status: 500 });
   return NextResponse.json({ success: true });
 }

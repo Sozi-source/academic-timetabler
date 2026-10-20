@@ -36,7 +36,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
 
   const { data: invites, error } = await admin
     .from('assessment_trainer_mark_invites')
-    .select('id,trainer_name,trainer_email,created_at,expires_at,last_accessed_at,submitted_at,revoked_at')
+    .select('id,trainer_name,trainer_email,created_at,expires_at,last_accessed_at,submitted_at,revoked_at,parent_invite_id,scope_unit_id')
     .eq('assessment_id', assessmentId)
     .eq('department_id', profile.activeDepartmentId)
     .order('created_at', { ascending: false });
@@ -59,9 +59,10 @@ export async function GET(_request: Request, { params }: RouteContext) {
 
   const studentById = new Map((students ?? []).map((student) => [student.id, student]));
   const inviteById = new Map((invites ?? []).map((invite) => [invite.id, invite]));
+  const individualInvites = (invites ?? []).filter((invite) => !invite.parent_invite_id && !invite.scope_unit_id);
 
   return NextResponse.json({
-    invites: (invites ?? []).map((invite) => ({
+    invites: individualInvites.map((invite) => ({
       ...invite,
       status: invite.revoked_at ? 'revoked' : invite.submitted_at ? 'submitted' : Date.parse(invite.expires_at) <= Date.now() ? 'expired' : 'active',
     })),

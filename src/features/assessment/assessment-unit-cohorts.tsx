@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, UsersRound } from 'lucide-react';
+import { TrainerUnitMarkInvites } from './trainer-unit-mark-invites';
 
 interface UnitCohort {
   id: string;
@@ -15,10 +16,11 @@ interface UnitCohort {
 interface AssessmentUnitCohortsProps {
   unit: { id: string; code: string; name: string };
   periodName: string;
+  periodId: string;
   cohorts: UnitCohort[];
 }
 
-export function AssessmentUnitCohorts({ unit, periodName, cohorts }: AssessmentUnitCohortsProps) {
+export function AssessmentUnitCohorts({ unit, periodName, periodId, cohorts }: AssessmentUnitCohortsProps) {
   const [selectedCohortId, setSelectedCohortId] = useState<string | null>(null);
   const selectedCohort = cohorts.find((cohort) => cohort.id === selectedCohortId) ?? null;
 
@@ -114,6 +116,8 @@ export function AssessmentUnitCohorts({ unit, periodName, cohorts }: AssessmentU
           </div>
         </section>
       ) : null}
+
+      <TrainerUnitMarkInvites unitId={unit.id} periodId={periodId} />
     </div>
   );
 }

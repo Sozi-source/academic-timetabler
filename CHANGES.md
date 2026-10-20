@@ -1,3 +1,12 @@
+### 2026-10-20: Add one unit-level trainer link with cohort-by-cohort submission
+
+**Added:** `src/app/api/assessment/units/[unitId]/trainer-invites/route.ts`, `src/features/assessment/trainer-unit-mark-invites.tsx`, `supabase/migrations/20261020180000_unit_level_trainer_invites.sql`
+**Modified:** `src/app/(dashboard)/assessment/unit/[unitId]/page.tsx`, `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`, `src/app/api/assessment/markbooks/[assessmentId]/trainer-invites/route.ts`, `src/app/api/assessment/trainer-invites/[inviteId]/route.ts`, `src/app/api/trainer-mark-entry/save/route.ts`, `src/features/assessment/assessment-unit-cohorts.tsx`, `src/features/assessment/trainer-mark-entry-portal.tsx`, `src/features/assessment/trainer-mark-entry-types.ts`, `src/features/assessment/trainer-mark-entry.ts`, `src/features/assessment/trainer-mark-invites.tsx`, `CHANGES.md`
+- Create one expiring trainer URL for the unit. The trainer can switch between the unit's registered cohorts and save or submit each cohort independently; each underlying assessment remains separately reviewable by the HOD.
+- Scope private invite tokens to the unit, assessment, and cohort. Cohort submissions are checked against that assessment roster, and revoking the unit link closes its cohort scopes.
+- Keep the existing per-assessment trainer link creation disabled in individual markbooks; new trainer links are created from the unit cohort workspace.
+- Manual follow-up: apply the new Supabase migration before deployment, then run `npm run check` and verify a trainer link with multiple cohorts.
+
 ### 2026-10-20: Preserve cohort filter during individual unit registration
 
 **Modified:** `src/app/(dashboard)/students/unit-registration/page.tsx`, `src/app/(dashboard)/students/unit-registration/register/[studentId]/page.tsx`, `src/features/student-unit-registration/student-unit-registration-table.tsx`, `src/features/student-unit-registration/actions.ts`, `CHANGES.md`

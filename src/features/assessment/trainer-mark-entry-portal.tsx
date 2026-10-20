@@ -14,7 +14,13 @@ interface TrainerMarkSession {
   locked: boolean;
   unit: { code: string | null; name: string };
   academicPeriod: string;
-  students: TrainerMarkEntryRow[];
+  cohorts: Array<{
+    id: string | null;
+    name: string;
+    students: TrainerMarkEntryRow[];
+    submittedAt: string | null;
+    locked: boolean;
+  }>;
 }
 
 type MarkField = 'assignment' | 'presentation' | 'rat' | 'cat' | 'exam';
@@ -29,7 +35,9 @@ const markFields: Array<{ key: MarkField; label: string; maximum: number }> = [
 
 export function TrainerMarkEntryPortal() {
   const [session, setSession] = useState<TrainerMarkSession | null>(null);
+  const [selectedCohortId, setSelectedCohortId] = useState<string | null>(null);
   const [students, setStudents] = useState<TrainerMarkEntryRow[]>([]);
+  const [studentsByCohort, setStudentsByCohort] = useState<Record<string, TrainerMarkEntryRow[]>>({});
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<'save' | 'submit' | null>(null);
   const [error, setError] = useState('');
@@ -39,8 +47,7 @@ export function TrainerMarkEntryPortal() {
     const response = await fetch('/api/trainer-mark-entry/session', { cache: 'no-store' });
     const result = await response.json() as TrainerMarkSession & { message?: string };
     if (!response.ok) throw new Error(result.message ?? 'Could not load this markbook.');
-    setSession(result);
-    setStudents(result.students);
+    return result;
   }, []);
 
   useEffect(() => {
@@ -58,7 +65,12 @@ export function TrainerMarkEntryPortal() {
         const exchangeResult = await exchangeResponse.json() as { message?: string };
         if (!exchangeResponse.ok) throw new Error(exchangeResult.message ?? 'This trainer link is invalid or expired.');
       }
-      await loadSession();
+      const loadedSession = await loadSession();
+      setSession(loadedSession);
+      const firstCohort = loadedSession.cohorts[0] ?? null;
+      setSelectedCohortId(firstCohort?.id ?? null);
+      setStudents(firstCohort?.students ?? []);
+      setStudentsByCohort(Object.fromEntries(loadedSession.cohorts.map((cohort) => [cohort.id ?? 'all', cohort.students])));
     }
 
     void connect()
@@ -66,15 +78,23 @@ export function TrainerMarkEntryPortal() {
       .finally(() => setLoading(false));
   }, [loadSession]);
 
-  function updateMark(studentId: string, field: MarkField, value: string) {
-    setStudents((current) => current.map((student) => (
-      student.studentId === studentId
+  function updateMark(assessmentId: string, studentId: string, field: MarkField, value: string) {
+    const update = (current: TrainerMarkEntryRow[]) => current.map((student) => (
+      student.assessmentId === assessmentId && student.studentId === studentId
         ? { ...student, [field]: value === '' ? null : Number(value) }
         : student
-    )));
+    ));
+    setStudents((current) => update(current));
+    const cohortKey = selectedCohortId ?? 'all';
+    setStudentsByCohort((current) => ({ ...current, [cohortKey]: update(current[cohortKey] ?? []) }));
   }
 
+  const selectedCohort = session?.cohorts.find((cohort) => cohort.id === selectedCohortId) ?? null;
+  const readOnly = Boolean(selectedCohort?.submittedAt || selectedCohort?.locked);
+  const expiresLabel = session ? new Date(session.expiresAt).toLocaleString() : '';
+
   async function saveMarks(submit: boolean) {
+    if (!selectedCohort) return;
     setBusy(submit ? 'submit' : 'save');
     setError('');
     setMessage('');
@@ -83,8 +103,10 @@ export function TrainerMarkEntryPortal() {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
+          cohort_id: selectedCohort.id,
           submit,
           entries: students.map((student) => ({
+            assessment_id: student.assessmentId,
             student_id: student.studentId,
             assignment: student.assignment,
             presentation: student.presentation,
@@ -97,10 +119,14 @@ export function TrainerMarkEntryPortal() {
       const result = await response.json() as { message?: string; result?: { savedCount?: number } };
       if (!response.ok) throw new Error(result.message ?? 'Could not save marks.');
       if (submit) {
-        setMessage('Marks submitted to the HOD for review. This link is now read-only.');
-        await loadSession();
+        setMessage(`Marks for ${selectedCohort.name} were submitted to the HOD for review.`);
+        const refreshed = await loadSession();
+        setSession(refreshed);
+        const updatedCohort = refreshed.cohorts.find((cohort) => cohort.id === selectedCohort.id) ?? null;
+        setStudents(updatedCohort?.students ?? []);
+        setStudentsByCohort((current) => ({ ...current, [selectedCohort.id ?? 'all']: updatedCohort?.students ?? [] }));
       } else {
-        setMessage(`Draft marks saved for ${result.result?.savedCount ?? students.length} students.`);
+        setMessage(`Draft marks saved for ${selectedCohort.name} (${result.result?.savedCount ?? students.length} student records).`);
       }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Could not save marks.');
@@ -108,9 +134,6 @@ export function TrainerMarkEntryPortal() {
       setBusy(null);
     }
   }
-
-  const readOnly = Boolean(session?.submittedAt || session?.locked);
-  const expiresLabel = session ? new Date(session.expiresAt).toLocaleString() : '';
 
   return (
     <main className="min-h-screen bg-slate-50 px-3 py-6 sm:px-6">
@@ -121,7 +144,7 @@ export function TrainerMarkEntryPortal() {
             <>
               <h1 className="mt-2 text-xl font-bold text-slate-900">{session.unit.code ? `${session.unit.code} · ` : ''}{session.unit.name}</h1>
               <p className="mt-1 text-sm text-slate-600">{session.academicPeriod} · Mark entry for {session.trainerName}</p>
-              <p className="mt-2 text-xs text-slate-500">Link expires {expiresLabel}. Marks remain drafts until the HOD reviews them.</p>
+              <p className="mt-2 text-xs text-slate-500">Link expires {expiresLabel}. Save and submit marks one cohort at a time.</p>
             </>
           ) : (
             <h1 className="mt-2 text-xl font-bold text-slate-900">Trainer mark entry</h1>
@@ -134,13 +157,32 @@ export function TrainerMarkEntryPortal() {
           <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900"><AlertCircle className="mt-0.5 size-5 shrink-0" /><p>{error}</p></div>
         ) : session ? (
           <>
-            {session.submittedAt ? <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">Submitted {new Date(session.submittedAt).toLocaleString()}. Your markbook is read-only while the HOD reviews it.</div> : null}
-            {session.locked && !session.submittedAt ? <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">This markbook is closed and no longer accepts edits.</div> : null}
+            {session.cohorts.length > 0 ? (
+              <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
+                <div>
+                  <h2 className="text-sm font-semibold text-slate-800">Choose a cohort</h2>
+                  <p className="mt-0.5 text-xs text-slate-500">All cohorts assigned to this unit are available through this one link. Submit each cohort separately.</p>
+                </div>
+                <div className="flex flex-wrap gap-2" role="group" aria-label="Cohorts">
+                  {session.cohorts.map((cohort) => (
+                    <button key={cohort.id ?? 'all'} type="button" aria-pressed={cohort.id === selectedCohortId}
+                      onClick={() => { setSelectedCohortId(cohort.id); setStudents(studentsByCohort[cohort.id ?? 'all'] ?? cohort.students); setMessage(''); setError(''); }}
+                      className={`inline-flex min-h-9 items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium ${cohort.id === selectedCohortId ? 'border-teal-600 bg-teal-50 text-teal-800' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}>
+                      <span>{cohort.name}</span><span className="rounded-full bg-slate-100 px-1.5 py-0.5 tabular-nums text-[10px]">{cohort.students.length}</span>
+                      {cohort.submittedAt ? <span className="text-emerald-700">Submitted</span> : null}
+                    </button>
+                  ))}
+                </div>
+              </section>
+            ) : <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">No cohort rosters are available on this trainer link.</div>}
 
-            <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xs">
+            {selectedCohort?.submittedAt ? <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">{selectedCohort.name} submitted {new Date(selectedCohort.submittedAt).toLocaleString()}. This cohort is read-only while the HOD reviews it.</div> : null}
+            {selectedCohort?.locked && !selectedCohort.submittedAt ? <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">This cohort is closed and no longer accepts edits.</div> : null}
+
+            {selectedCohort ? <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xs">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
                 <div>
-                  <h2 className="text-sm font-semibold text-slate-900">Registered candidates ({students.length})</h2>
+                  <h2 className="text-sm font-semibold text-slate-900">{selectedCohort.name} · {students.length} candidates</h2>
                   <p className="mt-0.5 text-xs text-slate-500">Enter marks within each component limit. Exam is fixed as AB for absent students.</p>
                 </div>
                 {!readOnly ? (
@@ -167,7 +209,7 @@ export function TrainerMarkEntryPortal() {
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {students.map((student, index) => (
-                      <tr key={student.studentId} className="hover:bg-slate-50/70">
+                      <tr key={`${student.assessmentId}:${student.studentId}`} className="hover:bg-slate-50/70">
                         <td className="px-3 py-2.5 text-slate-400">{index + 1}</td>
                         <td className="whitespace-nowrap px-3 py-2.5 font-medium text-slate-900">{student.admissionNumber}</td>
                         <td className="min-w-52 px-3 py-2.5 text-slate-800">{student.fullName}{student.attendanceStatus === 'absent' ? <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">Absent</span> : null}</td>
@@ -184,7 +226,7 @@ export function TrainerMarkEntryPortal() {
                                 step="0.01"
                                 value={student[field.key] ?? ''}
                                 disabled={readOnly}
-                                onChange={(event) => updateMark(student.studentId, field.key, event.target.value)}
+                                onChange={(event) => updateMark(student.assessmentId, student.studentId, field.key, event.target.value)}
                                 className="h-8 w-20 rounded-md border border-slate-300 bg-white px-2 text-center text-xs disabled:bg-slate-100"
                               />
                             )}
@@ -195,12 +237,12 @@ export function TrainerMarkEntryPortal() {
                   </tbody>
                 </table>
               </div>
-            </section>
+            </section> : null}
 
             {error ? <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p> : null}
             {message ? <p role="status" className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800"><CheckCircle2 className="size-4" />{message}</p> : null}
 
-            {!readOnly ? (
+            {selectedCohort && !readOnly ? (
               <div className="flex justify-end gap-2 rounded-xl border border-slate-200 bg-white p-3">
                 <Button type="button" variant="outline" disabled={busy !== null || students.length === 0} onClick={() => void saveMarks(false)}><Save className="size-4" />Save draft</Button>
                 <Button type="button" disabled={busy !== null || students.length === 0} onClick={() => void saveMarks(true)}><Send className="size-4" />Submit to HOD</Button>
@@ -208,7 +250,7 @@ export function TrainerMarkEntryPortal() {
             ) : null}
           </>
         ) : null}
-        <p className="text-center text-[11px] text-slate-400">This link only grants access to the markbook assigned by your HOD.</p>
+        <p className="text-center text-[11px] text-slate-400">This link grants access only to the unit cohorts assigned by your HOD.</p>
       </div>
     </main>
   );

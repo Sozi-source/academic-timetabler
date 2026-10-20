@@ -78,11 +78,13 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
     const student = studentById.get(studentId);
     if (!student) return [];
     const draft = draftByStudentId.get(studentId);
+    const attendanceStatus: TrainerMarkEntryRow['attendanceStatus'] =
+      row.pre_assessment_status === 'absent' ? 'absent' : 'expected';
     return [{
       studentId,
       admissionNumber: student.admission_number,
       fullName: student.full_name,
-      attendanceStatus: row.pre_assessment_status === 'absent' ? 'absent' : 'expected',
+      attendanceStatus,
       assignment: draft?.assignment_mark ?? null,
       presentation: draft?.presentation_mark ?? null,
       rat: draft?.rat_mark ?? null,

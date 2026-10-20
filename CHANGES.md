@@ -1,3 +1,9 @@
+### 2026-10-20: Correct Google Workload Identity audience
+
+**Modified:** `.env.example`, `src/features/assessment/google-sheets.ts`, `CHANGES.md`
+- Use Google's canonical `//iam.googleapis.com/...` resource name for the STS exchange audience, and let Vercel issue its token with the configured team audience.
+- If `GCP_AUDIENCE` is set in Vercel, update it to the `//iam.googleapis.com/...` value or remove it to use the default. Redeploy after changing the environment variable.
+
 ### 2026-10-20: Add Google Sheets mark entry for external trainers
 
 **Added:** `src/app/api/assessment/markbooks/[assessmentId]/google-sheet/route.ts`, `src/app/api/assessment/markbooks/[assessmentId]/google-sheet/sync/route.ts`, `src/features/assessment/google-sheet-mark-entry.tsx`, `src/features/assessment/google-sheets.ts`

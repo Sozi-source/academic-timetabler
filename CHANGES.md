@@ -1,3 +1,10 @@
+### 2026-10-20: Clarify Google Sheets permission failures
+
+**Modified:** `src/features/assessment/google-sheets.ts`, `CHANGES.md`
+- Identify which Google Sheets or Drive operation failed, including its HTTP status.
+- When service-account impersonation is denied, show the required Workload Identity User role and IAM Credentials API setup.
+- Verification: not run (requested for the user to run locally).
+
 ### 2026-10-20: Correct Google Workload Identity audience
 
 **Modified:** `.env.example`, `src/features/assessment/google-sheets.ts`, `CHANGES.md`

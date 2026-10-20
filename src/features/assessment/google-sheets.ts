@@ -31,19 +31,33 @@ async function accessToken(): Promise<string> {
     },
   });
   if (!authClient) throw new Error('Could not initialize Google workload identity federation.');
-  const accessTokenResponse = await authClient.getAccessToken();
+  let accessTokenResponse: Awaited<ReturnType<typeof authClient.getAccessToken>>;
+  try {
+    accessTokenResponse = await authClient.getAccessToken();
+  } catch (error) {
+    const details = error instanceof Error ? error.message : 'Unknown authentication error.';
+    if (/caller does not have permission|permission denied|\b403\b/i.test(details)) {
+      throw new Error(
+        `Google could not impersonate ${serviceAccount}. Grant the Vercel workload identity principal the Workload Identity User role (roles/iam.workloadIdentityUser) on this service account, and ensure the IAM Service Account Credentials API is enabled. Google response: ${details}`,
+      );
+    }
+    throw new Error(`Google authentication failed while obtaining a service account token: ${details}`);
+  }
   if (!accessTokenResponse.token) throw new Error('Google workload identity federation did not return an access token.');
   return accessTokenResponse.token;
 }
 
-async function googleRequest<T>(url: string, token: string, init?: RequestInit): Promise<T> {
+async function googleRequest<T>(url: string, token: string, operation: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, {
     ...init,
     headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json', ...init?.headers },
     cache: 'no-store',
   });
   const payload = await response.json().catch(() => ({})) as T & { error?: { message?: string } };
-  if (!response.ok) throw new Error(payload.error?.message ?? 'Google Sheets request failed.');
+  if (!response.ok) {
+    const details = payload.error?.message ?? 'Unknown Google API error.';
+    throw new Error(`${operation} failed (Google HTTP ${response.status}): ${details}`);
+  }
   return payload;
 }
 
@@ -62,12 +76,14 @@ export async function createTrainerSpreadsheet(input: {
   const spreadsheet = await googleRequest<{ spreadsheetId: string }>(
     'https://sheets.googleapis.com/v4/spreadsheets',
     token,
+    'Creating the spreadsheet',
     { method: 'POST', body: JSON.stringify({ properties: { title: input.title }, sheets: [{ properties: { title: 'Marks' } }] }) },
   );
 
   await googleRequest(
     `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheet.spreadsheetId}/values/Marks%21A1%3AG${input.rows.length}?valueInputOption=RAW`,
     token,
+    'Filling the spreadsheet roster',
     { method: 'PUT', body: JSON.stringify({ values: input.rows }) },
   );
 
@@ -76,6 +92,7 @@ export async function createTrainerSpreadsheet(input: {
   await googleRequest(
     `https://www.googleapis.com/drive/v3/files/${spreadsheet.spreadsheetId}/permissions?sendNotificationEmail=true`,
     token,
+    'Sharing the spreadsheet with the trainer',
     { method: 'POST', body: JSON.stringify({ type: 'user', role: 'writer', emailAddress: email }) },
   );
   return `https://docs.google.com/spreadsheets/d/${spreadsheet.spreadsheetId}/edit`;
@@ -87,6 +104,7 @@ export async function readTrainerSpreadsheet(url: string): Promise<string[][]> {
   const result = await googleRequest<{ values?: unknown[][] }>(
     `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Marks%21A%3AG`,
     token,
+    'Reading marks from the spreadsheet',
   );
   return (result.values ?? []).map((row) => row.map((cell) => String(cell ?? '')));
 }

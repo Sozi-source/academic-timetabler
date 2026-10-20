@@ -9,7 +9,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { registerStudentUnitsByDepartment } from '@/features/student-unit-registration/actions';
 import { getDepartmentRegistrationEditor } from '@/features/student-unit-registration/queries';
-import { StageUnitPicker } from '@/features/student-unit-registration/stage-unit-picker';
+import { StudentUnitRegistrationLines } from '@/features/student-unit-registration/student-unit-registration-lines';
 
 interface PageProps {
   params: Promise<{ studentId: string }>;
@@ -28,8 +28,6 @@ export default async function DepartmentStudentUnitRegistrationPage({
   const studentListHref = `/students/unit-registration${cohort ? `?cohort=${encodeURIComponent(cohort)}` : ''}`;
 
   if (!context) notFound();
-
-  const expected = context.units.filter((unit) => unit.isExpected).length;
 
   return (
     <div className="space-y-4">
@@ -100,16 +98,12 @@ export default async function DepartmentStudentUnitRegistrationPage({
       ) : null}
 
       <Card className="p-4">
-        <h2 className="text-sm font-bold text-text-primary">Register units</h2>
-        <p className="mb-4 mt-1 text-xs text-text-muted">Choose a curriculum stage, then select its units. The student&apos;s current stage stays unchanged.</p>
+        <h2 className="text-sm font-medium text-text-primary">Manage unit registrations</h2>
+        <p className="mb-4 mt-1 text-xs text-text-muted">Review the student&apos;s registered units across academic periods, then add units for the active period.</p>
         <form action={registerStudentUnitsByDepartment} className="space-y-4">
           <input type="hidden" name="studentId" value={context.student.id} />
-          <input type="hidden" name="academicPeriodId" value={context.period.id} />
           {cohort ? <input type="hidden" name="returnCohort" value={cohort} /> : null}
-          <StageUnitPicker stages={context.stageOptions} units={context.units} stageUnitIds={context.stageUnitIds} initialSelected={context.units.filter((unit) => unit.isSelected).map((unit) => unit.id)} />
-          <label htmlFor="registrationNote" className="block text-xs font-semibold text-text-secondary">Reason for retakes or off-stage units
-            <textarea id="registrationNote" name="registrationNote" defaultValue={context.existingNote ?? ''} rows={2} maxLength={1000} placeholder="For example: approved retake or missed unit" className="mt-1.5 w-full resize-none rounded-lg border border-border px-3 py-2 text-xs outline-none focus:border-primary" />
-          </label>
+          <StudentUnitRegistrationLines context={context} />
           <div className="flex justify-end"><Button type="submit"><CheckCircle2 className="size-4" />Register selected units</Button></div>
         </form>
       </Card>

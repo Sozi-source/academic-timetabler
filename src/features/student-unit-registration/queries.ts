@@ -200,10 +200,9 @@ export async function getDepartmentRegistrationEditor(
       .neq('status', 'cancelled'),
     supabase
       .from('student_unit_registrations')
-      .select('unit_id')
+      .select('unit_id, academic_period_id, registration_status')
       .eq('student_id', student.id)
-      .eq('academic_period_id', period.id)
-      .eq('registration_status', 'registered'),
+      .order('academic_period_id', { ascending: false }),
     supabase
       .from('student_unit_registration_submissions')
       .select('status, exception_reason, verification_note')
@@ -212,9 +211,8 @@ export async function getDepartmentRegistrationEditor(
       .maybeSingle(),
     supabase
       .from('programme_stages')
-      .select('id, name, code, sequence_number')
+      .select('id, name, code, sequence_number, is_active')
       .eq('programme_id', student.programme_id)
-      .eq('is_active', true)
       .order('sequence_number', { ascending: true }),
     supabase
       .from('programme_stage_units')
@@ -227,11 +225,25 @@ export async function getDepartmentRegistrationEditor(
   ]);
 
   if (offeringResult.error) throw new Error(`Unable to load offered units: ${offeringResult.error.message}`);
-  if (registrationResult.error) throw new Error(`Unable to load selected units: ${registrationResult.error.message}`);
+  if (registrationResult.error) throw new Error(`Unable to load registration history: ${registrationResult.error.message}`);
   if (submissionResult.error) throw new Error(`Unable to load registration status: ${submissionResult.error.message}`);
   if (stageResult.error) throw new Error(`Unable to load programme stages: ${stageResult.error.message}`);
   if (stageUnitResult.error) throw new Error(`Unable to load stage units: ${stageUnitResult.error.message}`);
   if (programmeUnitsResult.error) throw new Error(`Unable to load programme units: ${programmeUnitsResult.error.message}`);
+
+  const registrationRows = registrationResult.data ?? [];
+  const historicalUnitIds = [...new Set(registrationRows.map((row) => row.unit_id))];
+  const historicalPeriodIds = [...new Set(registrationRows.map((row) => row.academic_period_id))];
+  const [historyUnitResult, historyPeriodResult] = await Promise.all([
+    historicalUnitIds.length
+      ? supabase.from('units').select('id, code, name, academic_period_number').in('id', historicalUnitIds)
+      : Promise.resolve({ data: [], error: null }),
+    historicalPeriodIds.length
+      ? supabase.from('academic_periods').select('id, name, starts_on').in('id', historicalPeriodIds)
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+  if (historyUnitResult.error) throw new Error(`Unable to load registered unit details: ${historyUnitResult.error.message}`);
+  if (historyPeriodResult.error) throw new Error(`Unable to load registration academic periods: ${historyPeriodResult.error.message}`);
 
   const stagesById = new Map((stageResult.data ?? []).map((s) => [s.id, s]));
   const stageByUnitId = new Map<string, { stageId: string; stageName: string; stageCode: string; sequenceNumber: number }>();
@@ -247,7 +259,10 @@ export async function getDepartmentRegistrationEditor(
     }
   }
 
-  const selected = new Set((registrationResult.data ?? []).map((row) => row.unit_id));
+  const currentRegisteredUnitIds = [...new Set(registrationRows
+    .filter((row) => row.academic_period_id === period.id && row.registration_status === 'registered')
+    .map((row) => row.unit_id))];
+  const selected = new Set(currentRegisteredUnitIds);
   const cohort = Array.isArray(student.current_cohort) ? student.current_cohort[0] : student.current_cohort;
   const effectiveStageId = student.current_stage_id || cohort?.current_stage_id || null;
 
@@ -324,6 +339,27 @@ export async function getDepartmentRegistrationEditor(
     return a.code.localeCompare(b.code);
   });
 
+  const unitDetailsById = new Map((historyUnitResult.data ?? []).map((unit) => [unit.id, unit]));
+  const periodNameById = new Map((historyPeriodResult.data ?? []).map((academicPeriod) => [academicPeriod.id, academicPeriod.name]));
+  const periodStartById = new Map((historyPeriodResult.data ?? []).map((academicPeriod) => [academicPeriod.id, academicPeriod.starts_on]));
+  const registrationHistory = registrationRows
+    .flatMap((registration) => {
+      const unit = unitDetailsById.get(registration.unit_id);
+      if (!unit) return [];
+      const stageInfo = stageByUnitId.get(unit.id);
+      const unitPeriodNumber = (unit as { academic_period_number?: number | null }).academic_period_number;
+      return [{
+        academicPeriodId: registration.academic_period_id,
+        academicPeriodName: periodNameById.get(registration.academic_period_id) ?? 'Academic period',
+        stageName: stageInfo?.stageName ?? (unitPeriodNumber ? `Semester ${unitPeriodNumber}` : '—'),
+        unitId: unit.id,
+        unitCode: unit.code,
+        unitName: unit.name,
+        registrationStatus: registration.registration_status,
+      }];
+    })
+    .sort((first, second) => (periodStartById.get(second.academicPeriodId) ?? '').localeCompare(periodStartById.get(first.academicPeriodId) ?? '') || first.stageName.localeCompare(second.stageName) || first.unitCode.localeCompare(second.unitCode));
+
   return {
     period: { id: period.id, code: period.code, name: period.name },
     student: {
@@ -335,7 +371,7 @@ export async function getDepartmentRegistrationEditor(
       currentStageId: effectiveStageId,
       currentStageName: currentStage?.name ?? cohortStage?.name ?? null,
     },
-    stageOptions: (stageResult.data ?? []).map((stage) => ({
+    stageOptions: (stageResult.data ?? []).filter((stage) => stage.is_active).map((stage) => ({
       id: stage.id,
       code: stage.code,
       name: stage.name,
@@ -347,6 +383,8 @@ export async function getDepartmentRegistrationEditor(
       ]),
     ),
     units: sortedUnits,
+    registrationHistory,
+    currentRegisteredUnitIds,
     existingStatus: submissionResult.data?.status ?? 'not_submitted',
     existingNote:
       submissionResult.data?.verification_note ??

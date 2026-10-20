@@ -140,10 +140,12 @@ export async function batchRegisterOverrideUnits(
   ) {
     const { data: cohortStudents } = await supabase
       .from('students')
-      .select('id')
+      .select('id, academic_phase')
       .eq('current_cohort_id', cohortId)
       .in('lifecycle_status', ['admitted', 'active']);
-    effectiveStudentIds = (cohortStudents ?? []).map((s) => s.id);
+    effectiveStudentIds = (cohortStudents ?? [])
+      .filter((student) => student.academic_phase !== 'attachment')
+      .map((student) => student.id);
   }
 
   if (effectiveStudentIds.length === 0 || unitIds.length === 0 || typeof registrationStageId !== 'string' || !registrationStageId) {
@@ -155,8 +157,17 @@ export async function batchRegisterOverrideUnits(
   if (!stage || new Set((mappedUnits ?? []).map((unit) => unit.unit_id)).size !== new Set(unitIds).size) {
     redirect('/students/unit-registration/batch?error=override_selection');
   }
-  const { data: targetStudents } = await supabase.from('students').select('id, programme_id').in('id', effectiveStudentIds);
-  if (!targetStudents?.length || targetStudents.some((student) => student.programme_id !== stage.programme_id)) {
+  const { data: targetStudents } = await supabase.from('students').select('id, programme_id, lifecycle_status, academic_phase, current_cohort_id').in('id', effectiveStudentIds);
+  if (
+    !targetStudents?.length ||
+    targetStudents.length !== new Set(effectiveStudentIds).size ||
+    targetStudents.some((student) =>
+      student.programme_id !== stage.programme_id ||
+      !['admitted', 'active'].includes(student.lifecycle_status) ||
+      student.academic_phase === 'attachment' ||
+      !student.current_cohort_id,
+    )
+  ) {
     redirect('/students/unit-registration/batch?error=override_selection');
   }
 

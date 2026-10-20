@@ -62,6 +62,16 @@ export interface DepartmentRegistrationEditor {
   stageOptions: ProgrammeStageOption[];
   stageUnitIds: Record<string, string[]>;
   units: DepartmentRegistrationUnit[];
+  registrationHistory: Array<{
+    academicPeriodId: string;
+    academicPeriodName: string;
+    stageName: string;
+    unitId: string;
+    unitCode: string;
+    unitName: string;
+    registrationStatus: string;
+  }>;
+  currentRegisteredUnitIds: string[];
   existingStatus: DepartmentRegistrationStatus;
   existingNote: string | null;
 }

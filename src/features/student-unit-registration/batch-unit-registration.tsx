@@ -386,12 +386,11 @@ export function BatchUnitRegistration({
           : null}
         {registrationPath === 'override' && registrationStageId ? <input type="hidden" name="registrationStageId" value={registrationStageId} /> : null}
 
-        <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-          <h2 className="text-sm font-semibold text-slate-950">
-            Registration approach
-          </h2>
-
-          <div className="mt-3 grid max-w-2xl gap-2.5 sm:grid-cols-2">
+        <section className="space-y-4 rounded-xl border border-border bg-surface p-4">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <fieldset>
+              <legend className="mb-1.5 text-[10px] font-medium uppercase tracking-wide text-text-muted">Registration task</legend>
+              <div className="inline-flex rounded-lg border border-border bg-surface-subtle p-1">
             <button
               type="button"
               onClick={() => {
@@ -408,11 +407,10 @@ export function BatchUnitRegistration({
                 }
               }}
               className={registrationPath === 'expected'
-                ? 'rounded-lg border-2 border-slate-950 bg-slate-50 p-3 text-left'
-                : 'rounded-lg border border-slate-200 p-3 text-left transition hover:bg-slate-50'}
+                ? 'rounded-md bg-surface px-3 py-2 text-xs font-medium text-primary shadow-2xs'
+                : 'rounded-md px-3 py-2 text-xs font-medium text-text-secondary hover:text-text-primary'}
             >
-              <span className="block text-sm font-semibold text-slate-950">Stage curriculum</span>
-              <span className="mt-0.5 block text-xs leading-5 text-slate-500">Register the normal units bound to each student&apos;s current stage.</span>
+              Register stage units
             </button>
             <button
               type="button"
@@ -430,49 +428,27 @@ export function BatchUnitRegistration({
                 }
               }}
               className={registrationPath === 'override'
-                ? 'rounded-lg border-2 border-primary bg-primary/5 p-3 text-left'
-                : 'rounded-lg border border-slate-200 p-3 text-left transition hover:bg-slate-50'}
+                ? 'rounded-md bg-surface px-3 py-2 text-xs font-medium text-primary shadow-2xs'
+                : 'rounded-md px-3 py-2 text-xs font-medium text-text-secondary hover:text-text-primary'}
             >
-              <span className="block text-sm font-semibold text-slate-950">Additional / cross-stage units</span>
-              <span className="mt-0.5 block text-xs leading-5 text-slate-500">Add missed, repeat, or future-stage units with a recorded HOD reason.</span>
+              Add extra units
             </button>
-          </div>
+              </div>
+            </fieldset>
 
-          <div className="mt-3 grid max-w-xl gap-2.5 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={() => setMode('cohort')}
-              className={
-                mode === 'cohort'
-                  ? 'rounded-lg border-2 border-slate-950 bg-slate-50 p-3 text-left'
-                  : 'rounded-lg border border-slate-200 p-3 text-left transition hover:bg-slate-50'
-              }
-            >
-              <span className="block text-sm font-semibold text-slate-950">
-                Entire cohort
-              </span>
-              <span className="mt-0.5 block text-xs leading-5 text-slate-500">
-                Register every eligible student in one cohort.
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setMode('selected')}
-              className={
-                mode === 'selected'
-                  ? 'rounded-lg border-2 border-slate-950 bg-slate-50 p-3 text-left'
-                  : 'rounded-lg border border-slate-200 p-3 text-left transition hover:bg-slate-50'
-              }
-            >
-              <span className="block text-sm font-semibold text-slate-950">
-                Selected students
-              </span>
-              <span className="mt-0.5 block text-xs leading-5 text-slate-500">
-                Check only the students you want to process.
-              </span>
-            </button>
+            <fieldset>
+              <legend className="mb-1.5 text-[10px] font-medium uppercase tracking-wide text-text-muted">Students</legend>
+              <div className="inline-flex rounded-lg border border-border bg-surface-subtle p-1">
+                <button type="button" onClick={() => setMode('cohort')} className={mode === 'cohort' ? 'rounded-md bg-surface px-3 py-2 text-xs font-medium text-primary shadow-2xs' : 'rounded-md px-3 py-2 text-xs font-medium text-text-secondary hover:text-text-primary'}>Entire cohort</button>
+                <button type="button" onClick={() => setMode('selected')} className={mode === 'selected' ? 'rounded-md bg-surface px-3 py-2 text-xs font-medium text-primary shadow-2xs' : 'rounded-md px-3 py-2 text-xs font-medium text-text-secondary hover:text-text-primary'}>Selected students</button>
+              </div>
+            </fieldset>
           </div>
+          <p className="text-xs text-text-muted">
+            {registrationPath === 'expected'
+              ? 'Register curriculum units for the students’ current stage.'
+              : 'After stage registration, add missed or cross-stage units with an HOD reason.'}
+          </p>
 
           {mode === 'cohort' ? (
             <div className="mt-4">

@@ -74,6 +74,7 @@ export async function getBatchRegistrationContext(): Promise<BatchRegistrationCo
       current_cohort_id,
       current_stage_id,
       lifecycle_status,
+      academic_phase,
       current_cohort:cohorts!students_current_cohort_id_fkey(
         id,
         name,
@@ -83,7 +84,7 @@ export async function getBatchRegistrationContext(): Promise<BatchRegistrationCo
       current_stage:programme_stages!students_current_stage_id_fkey(id, code, name, sequence_number)
     `)
     .in('programme_id', programmeIds)
-    .in('lifecycle_status', ['admitted', 'active', 'deferred', 'dropped_out'])
+    .in('lifecycle_status', ['admitted', 'active'])
     .order('full_name', { ascending: true });
 
   if (studentError) {
@@ -173,7 +174,7 @@ export async function getBatchRegistrationContext(): Promise<BatchRegistrationCo
     unitsByCohort.set(row.cohort_id, set);
   }
 
-  const mappedStudents = (students ?? []).map((student) => {
+  const mappedStudents = (students ?? []).filter((student) => student.academic_phase !== 'attachment').map((student) => {
     const cohort = Array.isArray(student.current_cohort)
       ? student.current_cohort[0]
       : student.current_cohort;

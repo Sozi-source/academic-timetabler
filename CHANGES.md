@@ -1,3 +1,12 @@
+### 2026-10-21: Improve individual and batch unit registration
+
+**Added:** `src/features/student-unit-registration/student-unit-registration-lines.tsx`, `supabase/migrations/20261021100000_exclude_attachment_from_batch_registration.sql`
+**Modified:** `src/app/(dashboard)/students/unit-registration/register/[studentId]/page.tsx`, `src/features/student-unit-registration/batch-actions.ts`, `src/features/student-unit-registration/batch-queries.ts`, `src/features/student-unit-registration/batch-unit-registration.tsx`, `src/features/student-unit-registration/queries.ts`, `src/features/student-unit-registration/types.ts`, `CHANGES.md`
+- Exclude deferred and dropped out students from the batch registration roster, exclude students on attachment in both batch RPCs, and validate batch override targets on the server.
+- Replace registration option cards with compact task and student scope controls. Stage curriculum remains the default action; additional or cross-stage units can be added as a separate step.
+- Show individual registration history by academic period, mapped stage, unit code, unit name, and registration status. Add active-period units through repeatable stage-then-unit rows while preserving existing current-period registrations.
+- Manual follow-up: apply the Supabase migration before deploying. Run `npm run check` and verify batch selection and an individual cross-stage addition.
+
 ### 2026-10-20: Add one unit-level trainer link with cohort-by-cohort submission
 
 **Added:** `src/app/api/assessment/units/[unitId]/trainer-invites/route.ts`, `src/features/assessment/trainer-unit-mark-invites.tsx`, `supabase/migrations/20261020180000_unit_level_trainer_invites.sql`

@@ -6,11 +6,16 @@ describe('assessment control center calculations', () => {
     const item: AssessmentControlCenterItem = {
       id: 'event-1',
       unitId: 'unit-1',
+      equivalenceGroupId: null,
+      equivalentUnitIds: [],
+      equivalentUnitCodes: [],
+      canonicalUnitName: null,
       unitCode: 'NUTR 101',
       unitName: 'Introduction to Nutrition',
       academicPeriodId: 'period-1',
       academicPeriodName: 'Jan-Apr 2026',
-      cohortNames: ['CND JAN 2026'],
+      cohortId: 'cohort-1',
+      cohortName: 'CND JAN 2026',
       trainerNames: ['Jane Doe'],
       populationCount: 30,
       populationLocked: true,
@@ -27,7 +32,6 @@ describe('assessment control center calculations', () => {
       finalisedAt: '2026-08-21T14:00:00Z',
       isPublished: true,
       publishedAt: '2026-08-21T16:00:00Z',
-      analysisId: 'event-1',
     };
 
     expect(item.populationLocked).toBe(true);
@@ -42,11 +46,16 @@ describe('assessment control center calculations', () => {
     const item: AssessmentControlCenterItem = {
       id: 'event-2',
       unitId: 'unit-2',
+      equivalenceGroupId: null,
+      equivalentUnitIds: [],
+      equivalentUnitCodes: [],
+      canonicalUnitName: null,
       unitCode: 'NUTR 102',
       unitName: 'Clinical Nutrition',
       academicPeriodId: 'period-1',
       academicPeriodName: 'Jan-Apr 2026',
-      cohortNames: ['DND JAN 2026'],
+      cohortId: 'cohort-2',
+      cohortName: 'DND JAN 2026',
       trainerNames: ['John Smith'],
       populationCount: 25,
       populationLocked: false,
@@ -63,7 +72,6 @@ describe('assessment control center calculations', () => {
       finalisedAt: null,
       isPublished: false,
       publishedAt: null,
-      analysisId: 'event-2',
     };
 
     expect(item.populationLocked).toBe(false);

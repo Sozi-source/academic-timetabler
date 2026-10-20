@@ -67,7 +67,11 @@ export async function POST(request: Request) {
       }
       results.push(data);
     }
-    const savedCount = results.reduce((total, result) => total + (typeof result === 'object' && result !== null && 'savedCount' in result && typeof result.savedCount === 'number' ? result.savedCount : 0), 0);
+    const savedCount = results.reduce<number>((total, result) => {
+      if (typeof result !== 'object' || result === null || !('savedCount' in result)) return total;
+      const count = result.savedCount;
+      return total + (typeof count === 'number' ? count : 0);
+    }, 0);
     return NextResponse.json({ success: true, result: { scopes: results, savedCount } }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
     return NextResponse.json({ message: error instanceof Error ? error.message : 'Unable to save trainer marks.' }, { status: 500 });

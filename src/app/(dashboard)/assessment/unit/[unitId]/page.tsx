@@ -63,7 +63,7 @@ export default async function AssessmentUnitPage({ params, searchParams }: PageP
 
   const [eventResult, registrationRows] = await Promise.all([
     admin.from('assessment_events')
-      .select('id,cohort_id,assessment_type,title')
+      .select('id,unit_id,cohort_id,assessment_type,title')
       .eq('department_id', profile.activeDepartmentId)
       .eq('academic_period_id', periodId)
       .in('unit_id', equivalentUnitIds)
@@ -71,6 +71,7 @@ export default async function AssessmentUnitPage({ params, searchParams }: PageP
       .order('created_at', { ascending: true }),
     (async () => {
       const rows: Array<{
+        unit_id: string;
         student_id: string;
         cohort_id: string;
         student: Relation<{ id: string; admission_number: string; full_name: string }>;
@@ -80,7 +81,7 @@ export default async function AssessmentUnitPage({ params, searchParams }: PageP
       let offset = 0;
       while (true) {
         const { data, error } = await admin.from('student_unit_registrations')
-          .select('student_id,cohort_id,student:students!inner(id,admission_number,full_name),cohort:cohorts!inner(id,code,name)')
+          .select('unit_id,student_id,cohort_id,student:students!inner(id,admission_number,full_name),cohort:cohorts!inner(id,code,name)')
           .eq('academic_period_id', periodId)
           .in('unit_id', equivalentUnitIds)
           .eq('registration_status', 'registered')
@@ -100,7 +101,7 @@ export default async function AssessmentUnitPage({ params, searchParams }: PageP
   if (eventResult.error) throw new Error('Unable to load cohort markbooks.');
   if (!eventResult.data?.length) notFound();
   const unit = unitResult.data;
-  const studentsByCohort = new Map<string, { id: string; code: string; name: string; students: Array<{ id: string; admissionNumber: string; fullName: string }> }>();
+  const studentsByCohort = new Map<string, { id: string; code: string; name: string; unitIds: Set<string>; students: Array<{ id: string; admissionNumber: string; fullName: string }> }>();
   for (const row of registrationRows) {
     const student = one(row.student);
     const cohort = one(row.cohort);
@@ -110,10 +111,12 @@ export default async function AssessmentUnitPage({ params, searchParams }: PageP
         id: cohort.id,
         code: cohort.code ?? '',
         name: cohort.name,
+        unitIds: new Set<string>(),
         students: [],
       });
     }
     const cohortRoster = studentsByCohort.get(row.cohort_id);
+    cohortRoster?.unitIds.add(row.unit_id);
     if (cohortRoster && !cohortRoster.students.some((existing) => existing.id === student.id)) {
       cohortRoster.students.push({
         id: student.id,
@@ -128,7 +131,7 @@ export default async function AssessmentUnitPage({ params, searchParams }: PageP
       ...cohort,
       students: cohort.students.sort((first, second) => first.admissionNumber.localeCompare(second.admissionNumber, undefined, { numeric: true })),
       markbooks: (eventResult.data ?? [])
-        .filter((event) => event.cohort_id === cohort.id || event.cohort_id === null)
+        .filter((event) => cohort.unitIds.has(event.unit_id) && (event.cohort_id === cohort.id || event.cohort_id === null))
         .map((event) => ({ id: event.id, assessmentType: event.assessment_type })),
     }))
     .sort((first, second) => first.name.localeCompare(second.name));

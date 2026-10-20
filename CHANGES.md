@@ -12,6 +12,7 @@
 - Restyle the page with muted text and medium font weights, align the table using fixed column widths, and keep unit codes on a single line.
 - Group cohort-specific assessment events into one unit row. Its single unit link opens a workspace with cohort toggle buttons and the current registered student roster for the selected cohort, plus links to that cohort's existing markbooks.
 - Combine programme-specific unit records only when they belong to an active, HOD-approved unit-equivalence group. Show the member unit codes together, count registrations across the group, and load the combined current roster and markbooks from its unit link. Similar unit names alone do not trigger a merge; approve the intended equivalence group in Unit Equivalence before expecting Human Anatomy and Physiology to appear as one row.
+- In the combined unit workspace, show each cohort only the markbooks for equivalent unit records that actually have registrations in that cohort. This prevents no-cohort markbooks for other programmes from appearing as duplicate links.
 
 ### 2026-10-20: Add assessment-scoped trainer mark entry links
 

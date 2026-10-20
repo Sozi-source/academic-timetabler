@@ -47,6 +47,22 @@ export async function registerStudentUnitsByDepartment(formData: FormData) {
 
   const studentId = formData.get('studentId');
   const academicPeriodId = formData.get('academicPeriodId');
+  const returnCohortValue = formData.get('returnCohort');
+  const returnCohort = typeof returnCohortValue === 'string' ? returnCohortValue : '';
+  const studentListUrl = (query?: string) => {
+    const params = new URLSearchParams();
+    if (returnCohort) params.set('cohort', returnCohort);
+    if (query) {
+      const [key, value] = query.split('=', 2);
+      if (key && value) params.set(key, decodeURIComponent(value));
+    }
+    const serialized = params.toString();
+    return `/students/unit-registration${serialized ? `?${serialized}` : ''}`;
+  };
+  const studentRegistrationUrl = (query: string) => {
+    const cohortParam = returnCohort ? `?cohort=${encodeURIComponent(returnCohort)}&` : '?';
+    return `/students/unit-registration/register/${studentId}${cohortParam}${query}`;
+  };
   const unitIds = formData
     .getAll('unitIds')
     .filter((value): value is string => typeof value === 'string' && value.length > 0);
@@ -54,11 +70,11 @@ export async function registerStudentUnitsByDepartment(formData: FormData) {
   const note = typeof noteValue === 'string' ? noteValue.trim() : '';
 
   if (typeof studentId !== 'string' || typeof academicPeriodId !== 'string') {
-    redirect('/students/unit-registration?error=invalid');
+    redirect(studentListUrl('error=invalid'));
   }
 
   if (unitIds.length === 0) {
-    redirect(`/students/unit-registration/register/${studentId}?error=units`);
+    redirect(studentRegistrationUrl('error=units'));
   }
 
   const supabase = await createClient();
@@ -68,7 +84,7 @@ export async function registerStudentUnitsByDepartment(formData: FormData) {
     .select('unit_id')
     .in('unit_id', unitIds);
   if (mappedUnitsError || new Set((mappedSelectedUnits ?? []).map((unit) => unit.unit_id)).size !== new Set(unitIds).size) {
-    redirect(`/students/unit-registration/register/${studentId}?error=${encodeURIComponent('Selected units must be mapped to a programme stage.')}`);
+    redirect(studentRegistrationUrl(`error=${encodeURIComponent('Selected units must be mapped to a programme stage.')}`));
   }
 
   const { data: eligibility } = await supabase
@@ -83,7 +99,7 @@ export async function registerStudentUnitsByDepartment(formData: FormData) {
     !['admitted', 'active'].includes(eligibility.lifecycle_status) ||
     !eligibility.current_cohort_id
   ) {
-    redirect(`/students/unit-registration?error=${encodeURIComponent('This student is not currently eligible for unit registration.')}`);
+    redirect(studentListUrl(`error=${encodeURIComponent('This student is not currently eligible for unit registration.')}`));
   }
 
   const { data: stageContext } = await supabase
@@ -106,7 +122,7 @@ export async function registerStudentUnitsByDepartment(formData: FormData) {
   const hasOverride = !stageId || unitIds.some((unitId) => !expectedUnitIds.has(unitId));
 
   if (hasOverride && note.length < 3) {
-    redirect(`/students/unit-registration/register/${studentId}?error=${encodeURIComponent('Provide a reason for additional or cross-stage units.')}`);
+    redirect(studentRegistrationUrl(`error=${encodeURIComponent('Provide a reason for additional or cross-stage units.')}`));
   }
 
   // Ensure every selected unit has an active unit offering in this period for registration validity
@@ -158,13 +174,13 @@ export async function registerStudentUnitsByDepartment(formData: FormData) {
 
   if (error) {
     redirect(
-      `/students/unit-registration/register/${studentId}?error=${encodeURIComponent(error.message)}`,
+      studentRegistrationUrl(`error=${encodeURIComponent(error.message)}`),
     );
   }
 
   revalidatePath('/students/unit-registration');
   revalidatePath(`/students/unit-registration/register/${studentId}`);
-  redirect(`/students/unit-registration/register/${studentId}?saved=1`);
+  redirect(studentRegistrationUrl('saved=1'));
 }
 
 

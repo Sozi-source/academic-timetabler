@@ -12,9 +12,14 @@ import { getUnitRegistrationContext } from '@/features/student-unit-registration
 import { BatchRegistrationLink } from '@/features/student-unit-registration/batch-registration-link';
 import { StudentUnitRegistrationTable } from '@/features/student-unit-registration/student-unit-registration-table';
 
-export default async function UnitRegistrationPage() {
+interface PageProps {
+  searchParams: Promise<{ cohort?: string | string[] }>;
+}
+
+export default async function UnitRegistrationPage({ searchParams }: PageProps) {
   await requireHodAccess();
-  const context = await getUnitRegistrationContext();
+  const [context, query] = await Promise.all([getUnitRegistrationContext(), searchParams]);
+  const initialCohort = typeof query.cohort === 'string' ? query.cohort : 'all';
 
   if (!context.period) {
     return (
@@ -81,6 +86,7 @@ export default async function UnitRegistrationPage() {
       ) : (
         <StudentUnitRegistrationTable
           students={context.students}
+          initialCohort={initialCohort}
         />
       )}
     </div>

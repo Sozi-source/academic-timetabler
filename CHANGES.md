@@ -1,3 +1,8 @@
+### 2026-10-20: Preserve cohort filter during individual unit registration
+
+**Modified:** `src/app/(dashboard)/students/unit-registration/page.tsx`, `src/app/(dashboard)/students/unit-registration/register/[studentId]/page.tsx`, `src/features/student-unit-registration/student-unit-registration-table.tsx`, `src/features/student-unit-registration/actions.ts`, `CHANGES.md`
+- Carry the selected cohort through student links, registration save/error redirects, and return-to-list actions. The registration list restores that cohort filter so HODs can register another student from the same cohort without reselecting it. Selecting All Cohorts clears the filter as before.
+
 ### 2026-10-20: Reconcile assessment overview with live unit registrations and simplify layout
 
 **Added:** `src/app/(dashboard)/assessment/unit/[unitId]/page.tsx`, `src/features/assessment/assessment-unit-cohorts.tsx`

@@ -13,7 +13,7 @@ import { StageUnitPicker } from '@/features/student-unit-registration/stage-unit
 
 interface PageProps {
   params: Promise<{ studentId: string }>;
-  searchParams: Promise<{ error?: string; saved?: string; stage_updated?: string }>;
+  searchParams: Promise<{ error?: string; saved?: string; stage_updated?: string; cohort?: string | string[] }>;
 }
 
 export default async function DepartmentStudentUnitRegistrationPage({
@@ -24,6 +24,8 @@ export default async function DepartmentStudentUnitRegistrationPage({
   const { studentId } = await params;
   const query = await searchParams;
   const context = await getDepartmentRegistrationEditor(studentId);
+  const cohort = typeof query.cohort === 'string' ? query.cohort : null;
+  const studentListHref = `/students/unit-registration${cohort ? `?cohort=${encodeURIComponent(cohort)}` : ''}`;
 
   if (!context) notFound();
 
@@ -53,7 +55,7 @@ export default async function DepartmentStudentUnitRegistrationPage({
               <span>Student Profile</span>
             </Link>
             <Link
-              href="/students/unit-registration"
+              href={studentListHref}
               className="inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-white px-3 text-xs font-semibold text-text-secondary hover:bg-surface-subtle transition"
             >
               <ArrowLeft className="size-4" />
@@ -75,7 +77,7 @@ export default async function DepartmentStudentUnitRegistrationPage({
             </div>
           </div>
           <Link
-            href="/students/unit-registration"
+            href={studentListHref}
             className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-emerald-300 bg-white px-3 text-xs font-bold text-emerald-900 shadow-2xs hover:bg-emerald-100/50 transition active:scale-95"
           >
             <ArrowLeft className="size-3.5" />
@@ -103,6 +105,7 @@ export default async function DepartmentStudentUnitRegistrationPage({
         <form action={registerStudentUnitsByDepartment} className="space-y-4">
           <input type="hidden" name="studentId" value={context.student.id} />
           <input type="hidden" name="academicPeriodId" value={context.period.id} />
+          {cohort ? <input type="hidden" name="returnCohort" value={cohort} /> : null}
           <StageUnitPicker stages={context.stageOptions} units={context.units} stageUnitIds={context.stageUnitIds} initialSelected={context.units.filter((unit) => unit.isSelected).map((unit) => unit.id)} />
           <label htmlFor="registrationNote" className="block text-xs font-semibold text-text-secondary">Reason for retakes or off-stage units
             <textarea id="registrationNote" name="registrationNote" defaultValue={context.existingNote ?? ''} rows={2} maxLength={1000} placeholder="For example: approved retake or missed unit" className="mt-1.5 w-full resize-none rounded-lg border border-border px-3 py-2 text-xs outline-none focus:border-primary" />

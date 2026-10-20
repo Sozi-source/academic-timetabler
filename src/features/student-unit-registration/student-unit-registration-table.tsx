@@ -18,6 +18,7 @@ import type { RegistrationStudent } from './types';
 interface StudentUnitRegistrationTableProps {
   students: RegistrationStudent[];
   academicPeriodId?: string | null;
+  initialCohort?: string;
 }
 
 function statusBadge(student: RegistrationStudent) {
@@ -45,10 +46,11 @@ function statusBadge(student: RegistrationStudent) {
 
 export function StudentUnitRegistrationTable({
   students,
+  initialCohort = 'all',
 }: StudentUnitRegistrationTableProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [cohortFilter, setCohortFilter] = useState<string>('all');
+  const [cohortFilter, setCohortFilter] = useState<string>(initialCohort);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
@@ -279,7 +281,7 @@ export function StudentUnitRegistrationTable({
 
                   {student.academicPhase !== 'attachment' ? (
                     <Link
-                      href={`/students/unit-registration/register/${student.id}`}
+                      href={`/students/unit-registration/register/${student.id}${cohortFilter !== 'all' ? `?cohort=${encodeURIComponent(cohortFilter)}` : ''}`}
                       className="inline-flex h-8 shrink-0 items-center justify-center whitespace-nowrap rounded-lg bg-primary px-2.5 sm:px-3 text-[11px] font-bold text-white shadow-2xs hover:bg-primary-hover transition active:scale-95"
                     >
                       <span>{student.status === 'verified' ? 'Manage' : 'Register'}</span>

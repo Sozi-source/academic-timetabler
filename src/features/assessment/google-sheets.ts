@@ -10,7 +10,10 @@ async function accessToken(): Promise<string> {
     throw new Error('Google Sheets integration is not configured. Set the Vercel OIDC federation environment variables.');
   }
 
-  const audience = process.env.GCP_AUDIENCE ??
+  const configuredAudience = process.env.GCP_AUDIENCE;
+  const audience = configuredAudience
+    ? configuredAudience.replace(/^https:\/\/iam\.googleapis\.com\//, '//iam.googleapis.com/')
+    :
     `//iam.googleapis.com/projects/${projectNumber}/locations/global/workloadIdentityPools/${poolId}/providers/${providerId}`;
   const authClient = ExternalAccountClient.fromJSON({
     type: 'external_account',

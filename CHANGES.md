@@ -1,3 +1,11 @@
+### 2026-10-20: Add Google Sheets mark entry for external trainers
+
+**Added:** `src/app/api/assessment/markbooks/[assessmentId]/google-sheet/route.ts`, `src/app/api/assessment/markbooks/[assessmentId]/google-sheet/sync/route.ts`, `src/features/assessment/google-sheet-mark-entry.tsx`, `src/features/assessment/google-sheets.ts`
+**Modified:** `.env.example`, `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`, `CHANGES.md`
+- HODs can create a private roster sheet for a markbook and share edit access with a trainer's Google account. The trainer does not need an Academic Planner account.
+- HODs can sync the sheet through the existing roster and mark validation path. Valid entries are saved as draft marks; validation failures, unmatched students, blank sheets, and finalized assessments are rejected.
+- Authenticate the Vercel deployment to Google Cloud using Workload Identity Federation and short-lived service account impersonation. This requires no downloadable service-account key. Configure the project, service account, pool, and provider environment variables in Vercel. No database migration is required.
+
 ### 2026-10-20: Make individual and batch unit registration stage-first
 
 **Added:** `src/features/student-unit-registration/stage-unit-picker.tsx`

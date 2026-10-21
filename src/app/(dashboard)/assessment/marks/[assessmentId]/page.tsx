@@ -72,6 +72,13 @@ export default async function AssessmentMarkWorkflowPage({
               <BarChart3 className="size-3.5 text-slate-500" />
               <span>Unit Analysis</span>
             </Link>
+            <Link
+              href={`/assessment/population/${assessment.id}`}
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50"
+            >
+              <UsersRound className="size-3.5 text-slate-500" />
+              <span>Assessment Population</span>
+            </Link>
             {!isComplete ? (
               <BulkUploadDialog
                 assessmentId={assessment.id}

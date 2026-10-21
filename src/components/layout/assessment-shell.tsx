@@ -4,11 +4,13 @@ import {
   ArrowLeft,
   BarChart3,
   BookOpenCheck,
+  ClipboardList,
   FileText,
   GraduationCap,
   LayoutDashboard,
   LogOut,
   Menu,
+  UsersRound,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -28,6 +30,8 @@ interface AssessmentShellProps {
 
 const NAVIGATION_ITEMS = [
   { label: 'Overview', href: '/assessment', icon: LayoutDashboard },
+  { label: 'Unit Markbooks', href: '/assessment/assessments', icon: ClipboardList },
+  { label: 'Assessment Population', href: '/assessment/population', icon: UsersRound },
   { label: 'Exam Setting', href: '/assessment/exam-setting', icon: BookOpenCheck },
   { label: 'CAT & Exam Analysis', href: '/assessment/analysis', icon: BarChart3 },
   { label: 'Reports', href: '/assessment/reports', icon: FileText },

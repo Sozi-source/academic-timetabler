@@ -18,6 +18,11 @@
 - Include a readable unit code/name slug in the generated URL so trainers can identify the link when it is pasted into a message.
 - When trainer-link creation is blocked by exam-roster setup, identify the cohort(s) that still need an open, locked roster.
 
+### 2026-10-21: Expose assessment roster setup from Results & Exams
+
+**Modified:** `src/components/layout/assessment-shell.tsx`, `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`, `CHANGES.md`
+- Add Unit Markbooks and Assessment Population to the Results & Exams navigation, and link each markbook workflow directly to its population controls. The trainer-link prerequisite can now be prepared from visible app navigation.
+
 ### 2026-10-21: Improve individual and batch unit registration
 
 **Added:** `src/features/student-unit-registration/student-unit-registration-lines.tsx`, `supabase/migrations/20261021100000_exclude_attachment_from_batch_registration.sql`

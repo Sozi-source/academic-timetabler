@@ -15,6 +15,18 @@ export function isTrainerMarkToken(value: unknown): value is string {
   return typeof value === 'string' && /^[A-Za-z0-9_-]{40,60}$/.test(value);
 }
 
+function isMissingComponentSubmissionsTable(error: { code?: string; message: string } | null) {
+  return Boolean(error && (
+    error.code === '42P01'
+    || error.code === 'PGRST205'
+    || error.message.includes('assessment_mark_component_submissions')
+  ));
+}
+
+function componentSubmissionsMigrationError() {
+  return new Error('The database is missing the component marks update. Apply migration 20261021160000_component_level_trainer_mark_submissions.sql, then reload this link.');
+}
+
 export async function getTrainerMarkInvite(token: string) {
   const admin = createAdminClient();
   const { data, error } = await admin
@@ -59,6 +71,7 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
       cohortIds.length ? admin.from('cohorts').select('id,name').in('id', cohortIds) : Promise.resolve({ data: [], error: null }),
       admin.from('assessment_mark_component_submissions').select('assessment_id,cohort_id,component_key,submitted_at').in('assessment_id', assessmentIds),
     ]);
+    if (isMissingComponentSubmissionsTable(componentSubmissionsError)) throw componentSubmissionsMigrationError();
     if (unitsError || periodsError || studentsError || draftsError || cohortsError || componentSubmissionsError) throw new Error('Could not load the assigned unit roster.');
     const unitById = new Map((units ?? []).map((unit) => [unit.id, unit]));
     const periodNames = [...new Set((periods ?? []).map((period) => period.name))];
@@ -185,6 +198,7 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
       .eq('assessment_id', invite.assessment_id)
       .is('cohort_id', invite.cohort_id ?? null),
   ]);
+  if (isMissingComponentSubmissionsTable(componentError)) throw componentSubmissionsMigrationError();
   if (studentsError || draftsError || componentError) throw new Error('Could not load current draft marks.');
 
   const studentById = new Map((students ?? []).map((student) => [student.id, student]));

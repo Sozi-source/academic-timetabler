@@ -3,6 +3,7 @@
 **Modified:** `src/features/assessment/trainer-mark-entry-portal.tsx`, `CHANGES.md`
 - Remove trainer instructions and expiration copy from the entry screen; retain the unit and period identifier, cohort switcher, mark field tabs, and save/submit actions.
 - Add All, Assignment, Presentation, RAT, and CAT views. The All view includes exam marks; switching views does not change saved marks.
+- On small screens, combine each student's name and admission number in a frozen first column while the selected mark fields scroll horizontally.
 - Keep arrow navigation aligned to the visible fields in the selected view.
 - No database migration or manual follow-up required.
 

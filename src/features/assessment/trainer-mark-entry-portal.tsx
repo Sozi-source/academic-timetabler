@@ -212,9 +212,9 @@ export function TrainerMarkEntryPortal() {
 
             {selectedCohort ? <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xs">
               <div className="flex flex-col gap-2 border-b border-slate-200 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
-                <div className="flex gap-1 overflow-x-auto" role="tablist" aria-label="Mark fields">
+                <div className="flex gap-1 overflow-x-auto" role="group" aria-label="Mark fields">
                   {markViews.map((view) => (
-                    <button key={view.key} type="button" role="tab" aria-selected={selectedView === view.key} onClick={() => setSelectedView(view.key)}
+                    <button key={view.key} type="button" aria-pressed={selectedView === view.key} onClick={() => setSelectedView(view.key)}
                       className={`min-h-10 shrink-0 rounded-lg px-3 text-xs font-semibold ${selectedView === view.key ? 'bg-teal-700 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>
                       {view.label}
                     </button>
@@ -233,23 +233,28 @@ export function TrainerMarkEntryPortal() {
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[980px] text-left text-xs">
+                <table className={`w-full text-left text-xs ${selectedView === 'all' ? 'min-w-[640px]' : 'min-w-[320px]'} md:min-w-[980px]`}>
                   <thead className="border-b border-slate-200 bg-slate-50 text-[11px] font-semibold text-slate-600">
                     <tr>
-                      <th className="px-3 py-3">No.</th>
-                      <th className="px-3 py-3">Admission number</th>
-                      <th className="px-3 py-3">Student</th>
+                      <th className="sticky left-0 z-30 w-[190px] min-w-[190px] bg-slate-50 px-3 py-3 shadow-[2px_0_4px_rgba(15,23,42,0.08)] md:hidden">Student</th>
+                      <th className="hidden px-3 py-3 md:table-cell">No.</th>
+                      <th className="hidden px-3 py-3 md:table-cell">Admission number</th>
+                      <th className="hidden px-3 py-3 md:table-cell">Student</th>
                       {visibleFields.map((field) => <th key={field.key} className="px-2 py-3 text-center">{field.label}</th>)}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {students.map((student, index) => (
-                      <tr key={`${student.assessmentId}:${student.studentId}`} className="hover:bg-slate-50/70">
-                        <td className="px-3 py-2.5 text-slate-400">{index + 1}</td>
-                        <td className="whitespace-nowrap px-3 py-2.5 font-medium text-slate-900">{student.admissionNumber}</td>
-                        <td className="min-w-52 px-3 py-2.5 text-slate-800">{student.fullName}{student.attendanceStatus === 'absent' ? <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">Absent</span> : null}</td>
+                      <tr key={`${student.assessmentId}:${student.studentId}`} className="group hover:bg-slate-50/70">
+                        <td className="sticky left-0 z-20 w-[190px] min-w-[190px] bg-white px-3 py-2.5 shadow-[2px_0_4px_rgba(15,23,42,0.08)] group-hover:bg-slate-50 md:hidden">
+                          <div className="font-semibold leading-4 text-slate-800">{student.fullName}{student.attendanceStatus === 'absent' ? <span className="ml-1 rounded bg-slate-100 px-1 py-0.5 text-[9px] font-semibold text-slate-600">Absent</span> : null}</div>
+                          <div className="mt-0.5 text-[10px] leading-3 text-slate-500">{student.admissionNumber}</div>
+                        </td>
+                        <td className="hidden px-3 py-2.5 text-slate-400 md:table-cell">{index + 1}</td>
+                        <td className="hidden whitespace-nowrap px-3 py-2.5 font-medium text-slate-900 md:table-cell">{student.admissionNumber}</td>
+                        <td className="hidden min-w-52 px-3 py-2.5 text-slate-800 md:table-cell">{student.fullName}{student.attendanceStatus === 'absent' ? <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">Absent</span> : null}</td>
                         {visibleFields.map((field, fieldIndex) => (
-                          <td key={field.key} className="px-2 py-2 text-center">
+                          <td key={field.key} className="min-w-[92px] px-2 py-2 text-center">
                             {field.key === 'exam' && student.attendanceStatus === 'absent' ? (
                               <span className="text-xs font-semibold text-slate-500">AB</span>
                             ) : (

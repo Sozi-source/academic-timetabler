@@ -58,7 +58,7 @@ export function MarkbookDeleteButton({
       <DialogTrigger asChild>
         <button
           type="button"
-          className="inline-flex h-7 items-center justify-center gap-1.5 rounded-md border border-danger-border bg-surface px-2.5 text-[11px] font-semibold text-danger transition hover:bg-danger-surface hover:border-danger/40 cursor-pointer"
+          className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md border border-danger-border bg-surface px-3 text-xs font-semibold text-danger transition hover:bg-danger-surface hover:border-danger/40 cursor-pointer sm:min-h-9"
           aria-label="Delete generated markbook"
         >
           <Trash2 className="size-3" aria-hidden="true" />

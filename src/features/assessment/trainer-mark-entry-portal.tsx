@@ -1,7 +1,7 @@
 'use client';
 
 import { AlertCircle, CheckCircle2, LoaderCircle, Save, Send } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type KeyboardEvent } from 'react';
 
 import { Button } from '@/components/ui/button';
 import type { TrainerMarkEntryRow } from './trainer-mark-entry-types';
@@ -79,14 +79,40 @@ export function TrainerMarkEntryPortal() {
   }, [loadSession]);
 
   function updateMark(assessmentId: string, studentId: string, field: MarkField, value: string) {
+    const maximum = markFields.find((markField) => markField.key === field)?.maximum ?? 0;
+    const wholeNumber = value === '' ? null : Math.min(Number(value.replace(/\D/g, '')), maximum);
     const update = (current: TrainerMarkEntryRow[]) => current.map((student) => (
       student.assessmentId === assessmentId && student.studentId === studentId
-        ? { ...student, [field]: value === '' ? null : Number(value) }
+        ? { ...student, [field]: wholeNumber }
         : student
     ));
     setStudents((current) => update(current));
     const cohortKey = selectedCohortId ?? 'all';
     setStudentsByCohort((current) => ({ ...current, [cohortKey]: update(current[cohortKey] ?? []) }));
+  }
+
+  function moveMarkCell(event: KeyboardEvent<HTMLInputElement>) {
+    const directions: Record<string, { row: number; column: number }> = {
+      ArrowLeft: { row: 0, column: -1 }, ArrowRight: { row: 0, column: 1 },
+      ArrowUp: { row: -1, column: 0 }, ArrowDown: { row: 1, column: 0 },
+    };
+    const direction = directions[event.key];
+    if (!direction) return;
+    const inputs = Array.from(event.currentTarget.closest('table')?.querySelectorAll<HTMLInputElement>('input[data-mark-cell="true"]') ?? []);
+    const currentRow = Number(event.currentTarget.dataset.markRow);
+    const currentColumn = Number(event.currentTarget.dataset.markColumn);
+    let target: HTMLInputElement | undefined;
+    for (let distance = 1; distance <= students.length; distance += 1) {
+      const row = currentRow + direction.row * distance;
+      const column = currentColumn + direction.column * distance;
+      if (row < 0 || row >= students.length || column < 0 || column >= markFields.length) break;
+      target = inputs.find((input) => Number(input.dataset.markRow) === row && Number(input.dataset.markColumn) === column);
+      if (target) break;
+    }
+    if (!target) return;
+    event.preventDefault();
+    target.focus();
+    target.select();
   }
 
   const selectedCohort = session?.cohorts.find((cohort) => cohort.id === selectedCohortId) ?? null;
@@ -186,11 +212,11 @@ export function TrainerMarkEntryPortal() {
                   <p className="mt-0.5 text-xs text-slate-500">Enter marks within each component limit. Exam is fixed as AB for absent students.</p>
                 </div>
                 {!readOnly ? (
-                  <div className="flex gap-2">
-                    <Button type="button" variant="outline" disabled={busy !== null || students.length === 0} onClick={() => void saveMarks(false)}>
+                <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
+                    <Button className="w-full sm:w-auto" type="button" variant="outline" disabled={busy !== null || students.length === 0} onClick={() => void saveMarks(false)}>
                       {busy === 'save' ? <LoaderCircle className="size-4 animate-spin" /> : <Save className="size-4" />}{busy === 'save' ? 'Saving...' : 'Save draft'}
                     </Button>
-                    <Button type="button" disabled={busy !== null || students.length === 0} onClick={() => void saveMarks(true)}>
+                    <Button className="w-full sm:w-auto" type="button" disabled={busy !== null || students.length === 0} onClick={() => void saveMarks(true)}>
                       {busy === 'submit' ? <LoaderCircle className="size-4 animate-spin" /> : <Send className="size-4" />}{busy === 'submit' ? 'Submitting...' : 'Submit to HOD'}
                     </Button>
                   </div>
@@ -198,7 +224,7 @@ export function TrainerMarkEntryPortal() {
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[900px] text-left text-xs">
+                <table className="w-full min-w-[980px] text-left text-xs">
                   <thead className="border-b border-slate-200 bg-slate-50 text-[11px] font-semibold text-slate-600">
                     <tr>
                       <th className="px-3 py-3">No.</th>
@@ -213,21 +239,26 @@ export function TrainerMarkEntryPortal() {
                         <td className="px-3 py-2.5 text-slate-400">{index + 1}</td>
                         <td className="whitespace-nowrap px-3 py-2.5 font-medium text-slate-900">{student.admissionNumber}</td>
                         <td className="min-w-52 px-3 py-2.5 text-slate-800">{student.fullName}{student.attendanceStatus === 'absent' ? <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">Absent</span> : null}</td>
-                        {markFields.map((field) => (
+                        {markFields.map((field, fieldIndex) => (
                           <td key={field.key} className="px-2 py-2 text-center">
                             {field.key === 'exam' && student.attendanceStatus === 'absent' ? (
                               <span className="text-xs font-semibold text-slate-500">AB</span>
                             ) : (
                               <input
                                 aria-label={`${field.label} for ${student.admissionNumber}`}
-                                type="number"
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                data-mark-cell="true"
+                                data-mark-row={index}
+                                data-mark-column={fieldIndex}
+                                onKeyDown={moveMarkCell}
                                 min="0"
                                 max={field.maximum}
-                                step="0.01"
                                 value={student[field.key] ?? ''}
                                 disabled={readOnly}
                                 onChange={(event) => updateMark(student.assessmentId, student.studentId, field.key, event.target.value)}
-                                className="h-8 w-20 rounded-md border border-slate-300 bg-white px-2 text-center text-xs disabled:bg-slate-100"
+                                className="h-10 w-20 rounded-md border border-slate-300 bg-white px-2 text-center text-base tabular-nums outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100 disabled:bg-slate-100 sm:h-9 sm:text-xs"
                               />
                             )}
                           </td>
@@ -242,12 +273,6 @@ export function TrainerMarkEntryPortal() {
             {error ? <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p> : null}
             {message ? <p role="status" className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800"><CheckCircle2 className="size-4" />{message}</p> : null}
 
-            {selectedCohort && !readOnly ? (
-              <div className="flex justify-end gap-2 rounded-xl border border-slate-200 bg-white p-3">
-                <Button type="button" variant="outline" disabled={busy !== null || students.length === 0} onClick={() => void saveMarks(false)}><Save className="size-4" />Save draft</Button>
-                <Button type="button" disabled={busy !== null || students.length === 0} onClick={() => void saveMarks(true)}><Send className="size-4" />Submit to HOD</Button>
-              </div>
-            ) : null}
           </>
         ) : null}
         <p className="text-center text-[11px] text-slate-400">This link grants access only to the unit cohorts assigned by your HOD.</p>

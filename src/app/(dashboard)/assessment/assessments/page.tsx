@@ -37,7 +37,7 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
               <input type="hidden" name="academicPeriodId" value={activePeriod.id} />
               <button
                 type="submit"
-                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3.5 text-xs font-semibold text-white shadow-xs transition hover:bg-primary-hover active:scale-95"
+                className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 text-xs font-semibold text-white shadow-xs transition hover:bg-primary-hover active:scale-95 sm:w-auto"
               >
                 <Sparkles className="size-3.5" />
                 Generate all allocated markbooks
@@ -56,19 +56,52 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
       <Card className="p-4">
         <div className="mb-3 flex items-center gap-2"><ClipboardPlus className="size-4 text-primary" /><h2 className="text-sm font-bold text-text-primary">New unit markbook</h2></div>
         {errorText ? <p className="mb-3 rounded-lg bg-danger-subtle px-3 py-2 text-xs font-semibold text-danger">{errorText}</p> : null}
-        <form action={createAssessmentAction} className="grid gap-3 md:grid-cols-[1fr_2fr_1fr_auto]">
+        <form action={createAssessmentAction} className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[1fr_2fr_1fr_auto]">
           <div className="space-y-1 text-xs font-semibold text-text-secondary">
             <span>Academic period</span>
             {activePeriod ? <><input type="hidden" name="academicPeriodId" value={activePeriod.id} /><div className="flex h-9 items-center rounded-lg border border-border bg-surface-subtle px-2.5 text-xs font-semibold text-text-primary">{activePeriod.name}</div></> : <div className="flex h-9 items-center rounded-lg border border-danger/30 bg-danger-subtle px-2.5 text-xs font-semibold text-danger">No active academic period</div>}
           </div>
           <label className="space-y-1 text-xs font-semibold text-text-secondary">Unit<select name="unitId" required disabled={!activePeriod} className="h-9 w-full rounded-lg border border-border bg-surface px-2.5 text-xs text-text-primary disabled:cursor-not-allowed disabled:opacity-60"><option value="">Select unit</option>{options.units.map((unit) => <option key={unit.id} value={unit.id}>{unit.programmeCode} · {unit.code} · {unit.name}</option>)}</select></label>
           <label className="space-y-1 text-xs font-semibold text-text-secondary">Exam date <span className="font-normal text-text-muted">(optional)</span><input name="assessmentDate" type="date" className="h-9 w-full rounded-lg border border-border bg-surface px-2.5 text-xs text-text-primary" /></label>
-          <div className="flex items-end"><button type="submit" disabled={!activePeriod} className="inline-flex h-9 items-center rounded-lg bg-primary px-3.5 text-xs font-semibold text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60">Create markbook</button></div>
+          <div className="flex items-end"><button type="submit" disabled={!activePeriod} className="inline-flex min-h-10 w-full items-center justify-center rounded-lg bg-primary px-3.5 text-xs font-semibold text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60 xl:w-auto">Create markbook</button></div>
         </form>
       </Card>
 
       <Card className="overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="space-y-3 p-3 md:hidden">
+          {markbooks.map((assessment) => {
+            const finalized = Boolean(assessment.exam_marks_finalized_at || assessment.status === 'closed');
+            return (
+              <article key={assessment.id} className="space-y-3 rounded-lg border border-border p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-text-primary">{assessment.unit?.code ?? '—'}</p>
+                    <p className="text-xs text-text-secondary">{assessment.unit?.name ?? ''}</p>
+                    <p className="mt-1 text-xs text-text-muted">{assessment.academic_period?.name ?? '—'}</p>
+                  </div>
+                  <Badge variant={assessment.trainer_entry_open ? 'success' : 'neutral'}>{assessment.trainer_entry_open ? 'Open' : 'Locked'}</Badge>
+                </div>
+                <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                  <span className="text-text-secondary">{assessment.population?.[0]?.count ?? 0} students</span>
+                  <TrainerEntryControl assessmentId={assessment.id} isOpen={assessment.trainer_entry_open} disabled={finalized || !assessment.population?.[0]?.count} />
+                </div>
+                <div className="border-t border-border pt-2 text-xs">
+                  <p className="mb-1 font-semibold text-text-secondary">Assigned trainers</p>
+                  {assessment.assigned_trainers?.length ? assessment.assigned_trainers.map((trainer) => (
+                    <p key={trainer.id} className="break-words text-text-primary">
+                      {trainer.name}<span className="text-text-muted"> · {trainer.cohorts.join(', ') || 'No cohort'}</span>
+                    </p>
+                  )) : <span className="text-text-muted">No trainer assigned</span>}
+                </div>
+                <div className="grid grid-cols-[1fr_auto] gap-2">
+                  <Link href={`/assessment/marks/${assessment.id}`} className="inline-flex min-h-11 items-center justify-center rounded-lg border border-border-strong bg-surface px-3 text-center text-xs font-semibold text-text-secondary hover:border-primary hover:text-primary">Open workflow</Link>
+                  <MarkbookDeleteButton assessmentId={assessment.id} />
+                </div>
+              </article>
+            );
+          })}
+        </div>
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full min-w-[900px] text-left text-xs">
             <thead className="bg-surface-subtle text-text-muted">
               <tr>

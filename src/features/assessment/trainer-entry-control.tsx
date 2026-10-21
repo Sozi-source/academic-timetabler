@@ -42,8 +42,8 @@ export function TrainerEntryControl({
         disabled={disabled || busy}
         onClick={() => void toggle()}
         className={isOpen
-          ? 'inline-flex h-8 items-center rounded-lg border border-warning-border bg-warning-surface px-3 font-semibold text-warning-ink hover:bg-warning-surface/70 disabled:opacity-50'
-          : 'inline-flex h-8 items-center rounded-lg border border-success-border bg-success-surface px-3 font-semibold text-success hover:bg-success-surface/70 disabled:opacity-50'}
+          ? 'inline-flex min-h-10 items-center justify-center rounded-lg border border-warning-border bg-warning-surface px-3 text-xs font-semibold text-warning-ink hover:bg-warning-surface/70 disabled:opacity-50 sm:min-h-9'
+          : 'inline-flex min-h-10 items-center justify-center rounded-lg border border-success-border bg-success-surface px-3 text-xs font-semibold text-success hover:bg-success-surface/70 disabled:opacity-50 sm:min-h-9'}
       >
         {busy ? 'Saving…' : isOpen ? 'Lock entry' : 'Open entry'}
       </button>

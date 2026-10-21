@@ -1,3 +1,11 @@
+### 2026-10-21: Improve mark entry and unit markbook responsiveness
+
+**Modified:** `src/features/assessment/trainer-mark-entry-portal.tsx`, `src/app/(dashboard)/assessment/assessments/page.tsx`, `src/features/assessment/trainer-entry-control.tsx`, `src/features/assessment/markbook-delete-button.tsx`, `CHANGES.md`
+- Make trainer mark entry fields whole-number inputs with mobile numeric keyboards, remove number spinners, and cap values at each component maximum.
+- Add arrow-key movement between mark cells in all four directions, skipping disabled exam cells for absent students.
+- Improve phone layouts for markbook creation, generation, lock controls, and unit actions; use compact unit cards on narrow screens and larger touch targets.
+- No database migration or manual follow-up required.
+
 ### 2026-10-21: Restore manual unit trainer links with WhatsApp sharing
 
 **Modified:** `src/features/assessment/assessment-unit-cohorts.tsx`, `src/features/assessment/trainer-unit-mark-invites.tsx`, `src/features/assessment/assessment-control-center.tsx`, `src/app/(dashboard)/assessment/assessments/page.tsx`, `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`, `src/features/assessment/trainer-mark-invites.tsx`, `src/features/assessment/queries.ts`, `src/features/assessment/types.ts`, `CHANGES.md`

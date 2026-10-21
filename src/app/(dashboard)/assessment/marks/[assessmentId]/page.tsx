@@ -95,7 +95,7 @@ export default async function AssessmentMarkWorkflowPage({
         }
       />
 
-      {!isComplete ? <TrainerMarkInvites assessmentId={assessment.id} allowInviteCreation={false} /> : null}
+      {!isComplete ? <TrainerMarkInvites assessmentId={assessment.id} /> : null}
 
       {/* Summary Telemetry */}
       <div className="grid gap-3 sm:grid-cols-3">

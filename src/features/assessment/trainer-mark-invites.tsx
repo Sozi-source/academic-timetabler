@@ -1,7 +1,7 @@
 'use client';
 
-import { Ban, Check, Clipboard, Link2, ShieldCheck } from 'lucide-react';
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { Ban, ShieldCheck } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 
@@ -29,14 +29,9 @@ interface TrainerReviewMark {
   trainer: { trainer_name: string; submitted_at: string | null } | null;
 }
 
-export function TrainerMarkInvites({ assessmentId, allowInviteCreation = true }: { assessmentId: string; allowInviteCreation?: boolean }) {
+export function TrainerMarkInvites({ assessmentId }: { assessmentId: string }) {
   const [invites, setInvites] = useState<TrainerInvite[]>([]);
   const [reviewMarks, setReviewMarks] = useState<TrainerReviewMark[]>([]);
-  const [trainerName, setTrainerName] = useState('');
-  const [trainerEmail, setTrainerEmail] = useState('');
-  const [expiryDays, setExpiryDays] = useState('7');
-  const [inviteUrl, setInviteUrl] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -51,47 +46,26 @@ export function TrainerMarkInvites({ assessmentId, allowInviteCreation = true }:
   }, [assessmentId]);
 
   useEffect(() => {
-    void loadInvites()
-      .catch((cause: unknown) => setError(cause instanceof Error ? cause.message : 'Could not load trainer links.'))
-      .finally(() => setLoading(false));
-  }, [loadInvites]);
-
-  async function createInvite(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setBusy(true);
-    setError('');
-    setMessage('');
-    setInviteUrl(null);
-    setCopied(false);
-    try {
-      const response = await fetch(`/api/assessment/markbooks/${assessmentId}/trainer-invites`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ trainerName, trainerEmail, expiryDays: Number(expiryDays) }),
-      });
-      const result = await response.json() as { inviteUrl?: string; message?: string };
-      if (!response.ok || !result.inviteUrl) throw new Error(result.message ?? 'Could not create the trainer link.');
-      setInviteUrl(result.inviteUrl);
-      setTrainerName('');
-      setTrainerEmail('');
-      setMessage('Trainer link created. Copy it and send it to the trainer privately.');
-      await loadInvites();
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Could not create the trainer link.');
-    } finally {
-      setBusy(false);
+    let isCurrent = true;
+    async function loadInitialData() {
+      try {
+        const response = await fetch(`/api/assessment/markbooks/${assessmentId}/trainer-invites`, { cache: 'no-store' });
+        const result = await response.json() as { invites?: TrainerInvite[]; reviewMarks?: TrainerReviewMark[]; message?: string };
+        if (!response.ok) throw new Error(result.message ?? 'Could not load trainer marks.');
+        if (isCurrent) {
+          setInvites(result.invites ?? []);
+          setReviewMarks(result.reviewMarks ?? []);
+        }
+      } catch (cause) {
+        if (isCurrent) setError(cause instanceof Error ? cause.message : 'Could not load trainer marks.');
+      } finally {
+        if (isCurrent) setLoading(false);
+      }
     }
-  }
 
-  async function copyInvite() {
-    if (!inviteUrl) return;
-    try {
-      await navigator.clipboard.writeText(inviteUrl);
-      setCopied(true);
-    } catch {
-      setError('Could not copy automatically. Select and copy the link shown below.');
-    }
-  }
+    void loadInitialData();
+    return () => { isCurrent = false; };
+  }, [assessmentId]);
 
   async function revokeInvite(inviteId: string) {
     setBusy(true);
@@ -111,64 +85,12 @@ export function TrainerMarkInvites({ assessmentId, allowInviteCreation = true }:
   }
 
   return (
-    <section className="space-y-4 rounded-xl border border-sky-200 bg-sky-50/50 p-4">
-      <div className="flex items-start gap-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white text-sky-700"><ShieldCheck className="size-5" /></span>
-        <div>
-          <h2 className="text-sm font-semibold text-slate-900">External trainer access</h2>
-          <p className="mt-0.5 text-xs text-slate-600">Create a private, expiring link for this markbook. Trainers need no Academic Planner account.</p>
-        </div>
-      </div>
-
-      {allowInviteCreation ? <form onSubmit={createInvite} className="grid gap-2 sm:grid-cols-[1fr_1fr_110px_auto]">
-        <input
-          required
-          minLength={2}
-          maxLength={120}
-          value={trainerName}
-          onChange={(event) => setTrainerName(event.target.value)}
-          placeholder="Trainer name"
-          className="h-9 rounded-lg border border-slate-300 bg-white px-3 text-xs"
-        />
-        <input
-          type="email"
-          value={trainerEmail}
-          onChange={(event) => setTrainerEmail(event.target.value)}
-          placeholder="Email (optional)"
-          className="h-9 rounded-lg border border-slate-300 bg-white px-3 text-xs"
-        />
-        <select value={expiryDays} onChange={(event) => setExpiryDays(event.target.value)} className="h-9 rounded-lg border border-slate-300 bg-white px-3 text-xs">
-          <option value="1">1 day</option>
-          <option value="3">3 days</option>
-          <option value="7">7 days</option>
-          <option value="14">14 days</option>
-        </select>
-        <Button type="submit" disabled={busy || !trainerName.trim()}>
-          <Link2 className="size-4" />{busy ? 'Working...' : 'Create link'}
-        </Button>
-      </form> : <p className="rounded-lg border border-sky-100 bg-white px-3 py-2 text-xs text-slate-600">New trainer links are created once per unit from the unit cohort workspace.</p>}
-
-      {allowInviteCreation ? <p className="text-[11px] text-slate-500">Anyone with the link can enter marks for this roster until it expires or you revoke it. Share it privately.</p> : null}
-
-      {inviteUrl ? (
-        <div className="space-y-2 rounded-lg border border-emerald-200 bg-white p-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs font-semibold text-emerald-900">Copy this link now. It is shown only once.</p>
-            <Button type="button" size="sm" variant="outline" onClick={copyInvite}>
-              {copied ? <Check className="size-3.5" /> : <Clipboard className="size-3.5" />}
-              {copied ? 'Copied' : 'Copy link'}
-            </Button>
-          </div>
-          <input readOnly value={inviteUrl} onFocus={(event) => event.currentTarget.select()} className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs text-slate-700" aria-label="Trainer invitation link" />
-        </div>
-      ) : null}
-
+    <section className="space-y-4">
       {message ? <p role="status" className="text-xs font-medium text-emerald-800">{message}</p> : null}
       {error ? <p role="alert" className="text-xs font-medium text-red-700">{error}</p> : null}
 
-      <div className="space-y-2 border-t border-sky-100 pt-3">
-        <h3 className="text-xs font-semibold text-slate-800">Trainer links</h3>
-        {loading ? <p className="text-xs text-slate-500">Loading links...</p> : invites.length === 0 ? <p className="text-xs text-slate-500">No trainer links yet.</p> : (
+      {invites.length > 0 ? <div className="space-y-2 rounded-xl border border-slate-200 bg-white p-4">
+        <h3 className="text-xs font-semibold text-slate-800">Older individual trainer links</h3>
           <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white">
             {invites.map((invite) => (
               <li key={invite.id} className="flex flex-wrap items-center justify-between gap-3 p-3">
@@ -187,13 +109,12 @@ export function TrainerMarkInvites({ assessmentId, allowInviteCreation = true }:
               </li>
             ))}
           </ul>
-        )}
-      </div>
+      </div> : null}
 
-      <div className="space-y-2 border-t border-sky-100 pt-3">
-        <div>
+      <div className="space-y-2 rounded-xl border border-slate-200 bg-white p-4">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="size-4 text-primary" />
           <h3 className="text-xs font-semibold text-slate-800">Trainer marks for HOD review</h3>
-          <p className="mt-0.5 text-[11px] text-slate-500">These are unfinalized drafts. Review them here, then use the existing markbook workflow to make any corrections and finalize results.</p>
         </div>
         {loading ? <p className="text-xs text-slate-500">Loading trainer marks...</p> : reviewMarks.length === 0 ? <p className="text-xs text-slate-500">No trainer marks have been saved yet.</p> : (
           <div className="max-h-[28rem] overflow-auto rounded-lg border border-slate-200 bg-white">

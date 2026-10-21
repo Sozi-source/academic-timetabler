@@ -163,7 +163,28 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
             <p className="text-sm font-medium text-slate-600">{search ? `No units match “${search}”` : 'No unit markbooks found for this period.'}</p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-border bg-surface shadow-2xs">
+          <>
+          <div className="space-y-3 md:hidden">
+            {filteredUnitGroups.map((unit) => (
+              <article key={[...unit.unitIds].sort().join(':')} className="space-y-3 rounded-xl border border-border bg-surface p-4 shadow-2xs">
+                <div>
+                  <p className="font-semibold text-slate-800">{unit.unitName}</p>
+                  <p className="mt-1 text-xs text-primary">{unit.unitCode}</p>
+                </div>
+                <div className="flex items-center justify-between gap-3 text-xs text-slate-500">
+                  <span className="min-w-0 truncate" title={unit.trainerList.join(', ')}>{unit.trainerList.join(', ') || 'Unassigned'}</span>
+                  <span className="shrink-0">{unit.registrationCount} registered</span>
+                </div>
+                <Link
+                  href={`/assessment/unit/${unit.unitId}?periodId=${data.selectedPeriodId}`}
+                  className="inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-primary/20 bg-primary/5 px-3 text-sm font-semibold text-primary transition hover:bg-primary/10"
+                >
+                  Trainer links
+                </Link>
+              </article>
+            ))}
+          </div>
+          <div className="hidden overflow-x-auto rounded-xl border border-border bg-surface shadow-2xs md:block">
             <table className="w-full min-w-[640px] table-fixed text-left text-xs">
               <colgroup>
                 <col className="w-[24%]" />
@@ -203,7 +224,7 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                         href={`/assessment/unit/${unit.unitId}?periodId=${data.selectedPeriodId}`}
                         className="inline-flex h-7 items-center justify-center rounded-lg border border-primary/20 bg-surface px-2.5 text-[11px] font-medium text-primary transition hover:bg-primary/5"
                       >
-                        Open unit
+                        Trainer links
                       </Link>
                     </td>
                   </tr>
@@ -211,6 +232,7 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
               </tbody>
             </table>
           </div>
+          </>
         )}
       </section>
     </div>

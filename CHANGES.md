@@ -1,10 +1,11 @@
-### 2026-10-21: Add mobile trainer WhatsApp sharing to unit markbooks
+### 2026-10-21: Restore manual unit trainer links with WhatsApp sharing
 
-**Added:** `src/features/assessment/trainer-whatsapp-share.tsx`, `CHANGES.md`
-**Modified:** `src/app/(dashboard)/assessment/assessments/page.tsx`, `src/features/assessment/queries.ts`, `src/features/assessment/types.ts`
-- Add a per-trainer WhatsApp action that opens a prefilled message with assigned unit, academic period, cohort and authenticated staff workspace link. The message accurately reflects whether mark entry is open or locked. Kenyan local phone formats are normalized to international format for WhatsApp.
-- Add a phone-sized markbook card layout with full-width WhatsApp actions; retain the existing table for desktop screens.
-- No schema migration required. Trainer phone numbers must be present in the trainer records; missing or unrecognized numbers show an instruction to add a phone number.
+**Modified:** `src/features/assessment/assessment-unit-cohorts.tsx`, `src/features/assessment/trainer-unit-mark-invites.tsx`, `src/features/assessment/assessment-control-center.tsx`, `src/app/(dashboard)/assessment/assessments/page.tsx`, `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`, `src/features/assessment/trainer-mark-invites.tsx`, `src/features/assessment/queries.ts`, `src/features/assessment/types.ts`, `CHANGES.md`
+- Remove `src/features/assessment/trainer-whatsapp-share.tsx`.
+- Restore per-trainer unit invitation creation on the unit workspace. Each link covers the unit's prepared cohorts, and the trainer can switch cohorts and submit them separately without signing in.
+- Add mobile-sized fields and buttons, plus a manual WhatsApp share action that opens a prefilled message containing that trainer's new link. The HOD chooses the recipient and sends the message in WhatsApp.
+- Remove the authenticated portal WhatsApp action from the unit markbooks list. No schema migration required; the existing unit invitation API and cohort scopes are used.
+- Remove the empty, disabled per-markbook invite creation panel. Show legacy per-markbook invite management only when such links exist; keep the trainer mark review section.
 
 ### 2026-10-20: Bind cohort unit additions to their programme stages
 

@@ -20,6 +20,7 @@ import {
   OnlineMarksEditor,
 } from '@/features/staff-assessment/online-marks-editor';
 import {
+  getStaffOnlineMarkComponentSubmissions,
   getStaffOnlineMarkState,
 } from '@/features/staff-assessment/online-marks-query';
 import {
@@ -61,6 +62,7 @@ export default async function StaffOnlineMarksPage({
     access,
     population,
     markState,
+    componentSubmissions,
   ] =
     await Promise.all([
       requireStaffAssessment({
@@ -77,6 +79,7 @@ export default async function StaffOnlineMarksPage({
       getStaffOnlineMarkState(
         targetAssessmentId,
       ),
+      getStaffOnlineMarkComponentSubmissions(targetAssessmentId),
     ]);
 
   if (
@@ -142,6 +145,7 @@ export default async function StaffOnlineMarksPage({
         workflowStatus={
           population.workflowStatus
         }
+        componentSubmissions={componentSubmissions}
         students={
           population.students.map(
             (student) => {
@@ -159,6 +163,8 @@ export default async function StaffOnlineMarksPage({
                   student.fullName,
                 cohortName:
                   student.cohortName,
+                cohortId:
+                  student.cohortId ?? null,
                 attendanceStatus:
                   student.attendanceStatus,
                 initialMarks: {

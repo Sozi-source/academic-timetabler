@@ -46,11 +46,18 @@ import {
 
 interface StudentRow {
   studentId: string;
+  cohortId: string | null;
   admissionNumber: string;
   fullName: string;
   cohortName?: string;
   attendanceStatus: 'expected' | 'absent';
   initialMarks: OnlineMarkValues;
+}
+
+interface ComponentSubmission {
+  cohortId: string | null;
+  component: string;
+  submittedAt: string;
 }
 
 type InputValues = Record<
@@ -66,11 +73,13 @@ export function OnlineMarksEditor({
   assessmentId,
   trainerEntryOpen,
   workflowStatus,
+  componentSubmissions,
   students,
 }: {
   assessmentId: string;
   trainerEntryOpen: boolean;
   workflowStatus: string | null;
+  componentSubmissions: ComponentSubmission[];
   students: StudentRow[];
 }) {
   const router = useRouter();
@@ -238,6 +247,30 @@ export function OnlineMarksEditor({
     )
     .find((item) => !item.value.valid);
 
+  function componentIsSubmitted(component: OnlineMarkComponentKey, cohortId: string | null) {
+    return componentSubmissions.some((submission) =>
+      submission.component === component && submission.cohortId === cohortId,
+    );
+  }
+
+  function componentSubmittedForAllStudents(component: OnlineMarkComponentKey) {
+    return students.length > 0 && students.every((student) => componentIsSubmitted(component, student.cohortId));
+  }
+
+  const selectedComponentAlreadyComplete = visibleComponent !== 'all' && componentSubmittedForAllStudents(visibleComponent);
+
+  const invalidForSelectedComponent = visibleComponent === 'all'
+    ? invalid
+    : parsedRows
+      .map((row) => ({ student: row.student, value: row.fields[visibleComponent] }))
+      .find((row) => !row.value.valid && !(visibleComponent === 'exam' && row.student.attendanceStatus === 'absent'));
+
+  const selectedComponentMissing = visibleComponent === 'cat'
+    ? parsedRows.some((row) => row.marks.cat === null)
+    : visibleComponent === 'exam'
+      ? parsedRows.some((row) => row.student.attendanceStatus !== 'absent' && row.marks.exam === null)
+      : false;
+
   const absent = students.filter((s) => s.attendanceStatus === 'absent').length;
   const missing = parsedRows.reduce((sum, row) => sum + row.missing, 0);
 
@@ -273,9 +306,10 @@ export function OnlineMarksEditor({
   }
 
   async function saveDraft({ silent = false } = {}) {
-    if (invalid) {
+    const invalidToSave = invalidForSelectedComponent;
+    if (invalidToSave) {
       setError(
-        `${invalid.student.fullName}: ${invalid.value.message ?? 'Invalid mark.'}`,
+        `${invalidToSave.student.fullName}: ${invalidToSave.value.message ?? 'Invalid mark.'}`,
       );
       return false;
     }
@@ -291,6 +325,7 @@ export function OnlineMarksEditor({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            component: visibleComponent,
             entries: parsedRows.map((row) => ({
               studentId: row.student.studentId,
               assignment: row.marks.assignment ?? 0,
@@ -324,17 +359,23 @@ export function OnlineMarksEditor({
   }
 
   async function submitMarks() {
-    if (invalid) {
+    if (visibleComponent === 'all') {
+      setError('Select one mark component to submit.');
+      return;
+    }
+    if (selectedComponentAlreadyComplete) {
+      setError('This component has already been submitted for all selected cohorts.');
+      return;
+    }
+    if (invalidForSelectedComponent) {
       setError(
-        `${invalid.student.fullName}: ${invalid.value.message ?? 'Invalid mark.'}`,
+        `${invalidForSelectedComponent.student.fullName}: ${invalidForSelectedComponent.value.message ?? 'Invalid mark.'}`,
       );
       return;
     }
 
-    if (missing > 0) {
-      setError(
-        `${missing} required mark${missing === 1 ? '' : 's'} remain blank.`,
-      );
+    if (selectedComponentMissing) {
+      setError(`Enter all ${singleComponent?.label ?? 'component'} marks before submitting.`);
       return;
     }
 
@@ -343,36 +384,23 @@ export function OnlineMarksEditor({
     setMessage(null);
 
     try {
-      const saveResponse = await fetch(
-        `/api/staff/assessment/${assessmentId}/online/save`,
+      const response = await fetch(
+        `/api/staff/assessment/${assessmentId}/online/submit`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            component: visibleComponent,
             entries: parsedRows.map((row) => ({
               studentId: row.student.studentId,
               assignment: row.marks.assignment ?? 0,
               presentation: row.marks.presentation ?? 0,
               rat: row.marks.rat ?? 0,
               cat: row.marks.cat,
-              exam:
-                row.student.attendanceStatus === 'absent'
-                  ? null
-                  : row.marks.exam,
+              exam: row.student.attendanceStatus === 'absent' ? null : row.marks.exam,
             })),
           }),
         },
-      );
-
-      if (!saveResponse.ok) {
-        const payload = await saveResponse.json().catch(() => null);
-        setError(payload?.message ?? 'Latest marks could not be saved.');
-        return;
-      }
-
-      const response = await fetch(
-        `/api/staff/assessment/${assessmentId}/online/submit`,
-        { method: 'POST' },
       );
 
       const payload = await response.json().catch(() => null);
@@ -382,7 +410,7 @@ export function OnlineMarksEditor({
         return;
       }
 
-      setMessage('Marks submitted successfully.');
+      setMessage(`${singleComponent?.label ?? 'Component'} submitted successfully.`);
       router.refresh();
     } finally {
       setBusy(null);
@@ -393,7 +421,7 @@ export function OnlineMarksEditor({
     setBusy('download');
     setError(null);
     try {
-      if (editable && !invalid) {
+      if (editable && !(visibleComponent === 'all' ? invalid : invalidForSelectedComponent)) {
         await saveDraft({ silent: true });
       }
 
@@ -516,7 +544,7 @@ export function OnlineMarksEditor({
                   : 'border border-slate-300 bg-[#fffdf5] text-slate-800 hover:bg-[#f2ece0]'
               }`}
             >
-              {component.label} /{component.maximum}
+            {component.label} /{component.maximum}{componentSubmittedForAllStudents(component.key) ? ' ✓' : ''}
             </button>
           ))}
         </div>
@@ -650,7 +678,7 @@ export function OnlineMarksEditor({
                                 ? '0'
                                 : '—'
                             }
-                            disabled={!editable || busy !== null}
+                            disabled={!editable || busy !== null || componentIsSubmitted(key, row.student.cohortId)}
                             onChange={(event) =>
                               setField(
                                 row.student.studentId,
@@ -761,7 +789,7 @@ export function OnlineMarksEditor({
                                     ? '0'
                                     : '—'
                                 }
-                                disabled={!editable || busy !== null}
+                                disabled={!editable || busy !== null || componentIsSubmitted(key, row.student.cohortId)}
                                 onChange={(event) =>
                                   setField(
                                     row.student.studentId,
@@ -921,7 +949,7 @@ export function OnlineMarksEditor({
               <Button
                 type="button"
                 size="sm"
-                disabled={busy !== null || missing > 0 || Boolean(invalid)}
+                disabled={busy !== null || visibleComponent === 'all' || selectedComponentAlreadyComplete || selectedComponentMissing || Boolean(invalidForSelectedComponent)}
                 onClick={() => void submitMarks()}
                 leadingIcon={
                   busy === 'submit' ? (
@@ -931,7 +959,7 @@ export function OnlineMarksEditor({
                   )
                 }
               >
-                Submit marks
+                {singleComponent ? `Submit ${singleComponent.label}` : 'Select a component'}
               </Button>
             </>
           ) : null}

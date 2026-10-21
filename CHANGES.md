@@ -1,11 +1,19 @@
+### 2026-10-21: Submit and lock trainer marks by component
+
+**Added:** `supabase/migrations/20261021160000_component_level_trainer_mark_submissions.sql`
+**Modified:** `src/app/api/trainer-mark-entry/save/route.ts`, `src/app/api/staff/assessment/[assessmentId]/online/save/route.ts`, `src/app/api/staff/assessment/[assessmentId]/online/submit/route.ts`, `src/app/api/assessment/markbooks/[assessmentId]/trainer-invites/route.ts`, `src/app/(staff)/staff/units/[allocationId]/assessment/[assessmentId]/marks/page.tsx`, `src/features/assessment/trainer-mark-entry.ts`, `src/features/assessment/trainer-mark-entry-types.ts`, `src/features/assessment/trainer-mark-entry-portal.tsx`, `src/features/assessment/reports/queries.ts`, `src/features/assessment/trainer-mark-invites.tsx`, `src/features/staff-assessment/online-marks-query.ts`, `src/features/staff-assessment/online-marks-editor.tsx`, `CHANGES.md`
+- Add component submission records by markbook and cohort. CAT, Assignment, Presentation, RAT, and Exam can each be submitted and locked independently; other components remain editable.
+- Add component-scoped draft saving and submission for both public trainer links and authenticated trainer portal access. The authenticated final result is committed only after all five components are submitted for every cohort.
+- Include submitted CAT draft marks in the HOD CAT analysis report and show component submission status in mark review.
+- Manual follow-up: apply the new Supabase migration before deploying the application.
+
 ### 2026-10-21: Simplify trainer mark entry and add field tabs
 
 **Modified:** `src/features/assessment/trainer-mark-entry-portal.tsx`, `CHANGES.md`
 - Remove trainer instructions and expiration copy from the entry screen; retain the unit and period identifier, cohort switcher, mark field tabs, and save/submit actions.
-- Add All, Assignment, Presentation, RAT, and CAT views. The All view includes exam marks; switching views does not change saved marks.
+- Add All, Assignment, Presentation, RAT, CAT, and Exam views. The All view shows all marks; switching views does not change saved marks.
 - On small screens, combine each student's name and admission number in a frozen first column while the selected mark fields scroll horizontally.
 - Keep arrow navigation aligned to the visible fields in the selected view.
-- No database migration or manual follow-up required.
 
 ### 2026-10-21: Improve mark entry and unit markbook responsiveness
 

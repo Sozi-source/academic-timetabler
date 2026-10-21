@@ -24,6 +24,7 @@ interface TrainerReviewMark {
   rat_mark: number | null;
   cat_mark: number | null;
   exam_mark: number | null;
+  submittedComponents: string[];
   updated_at: string;
   student: { admission_number: string | null; full_name: string | null } | null;
   trainer: { trainer_name: string; submitted_at: string | null } | null;
@@ -142,7 +143,7 @@ export function TrainerMarkInvites({ assessmentId }: { assessmentId: string }) {
                       <td key={index} className="px-3 py-2 text-center font-semibold text-slate-800">{value ?? '—'}</td>
                     ))}
                     <td className="px-3 py-2">
-                      {mark.trainer?.submitted_at ? <span className="font-semibold text-emerald-700">Submitted</span> : <span className="text-amber-700">Draft</span>}
+                      {mark.submittedComponents.length ? <span className="font-semibold text-emerald-700">{mark.submittedComponents.map((component) => component.toUpperCase()).join(', ')} submitted</span> : mark.trainer?.submitted_at ? <span className="font-semibold text-emerald-700">Submitted</span> : <span className="text-amber-700">Draft</span>}
                     </td>
                   </tr>
                 ))}

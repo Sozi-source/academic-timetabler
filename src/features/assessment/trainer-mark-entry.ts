@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 
 import { createAdminClient } from '@/lib/supabase/admin';
-import type { TrainerMarkEntryRow, TrainerMarkInviteRow } from './trainer-mark-entry-types';
+import type { TrainerMarkComponentKey, TrainerMarkComponentSubmissions, TrainerMarkEntryRow, TrainerMarkInviteRow } from './trainer-mark-entry-types';
 
 export function hashTrainerMarkToken(token: string): string {
   return createHash('sha256').update(token).digest('hex');
@@ -51,14 +51,15 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
     const allRosterRows = rosterRows ?? [];
     const studentIds = [...new Set(allRosterRows.map((row) => row.student_id))];
     const cohortIds = [...new Set(allRosterRows.map((row) => row.cohort_id).filter((value): value is string => Boolean(value)))];
-    const [{ data: units, error: unitsError }, { data: periods, error: periodsError }, { data: students, error: studentsError }, { data: drafts, error: draftsError }, { data: cohortRows, error: cohortsError }] = await Promise.all([
+    const [{ data: units, error: unitsError }, { data: periods, error: periodsError }, { data: students, error: studentsError }, { data: drafts, error: draftsError }, { data: cohortRows, error: cohortsError }, { data: componentSubmissionRows, error: componentSubmissionsError }] = await Promise.all([
       admin.from('units').select('id,code,name').in('id', [...new Set(eventRows.map((event) => event.unit_id))]),
       admin.from('academic_periods').select('id,name').in('id', [...new Set(eventRows.map((event) => event.academic_period_id))]),
       studentIds.length ? admin.from('students').select('id,admission_number,full_name').in('id', studentIds) : Promise.resolve({ data: [], error: null }),
       assessmentIds.length ? admin.from('assessment_online_mark_drafts').select('assessment_id,student_id,assignment_mark,presentation_mark,rat_mark,cat_mark,exam_mark').in('assessment_id', assessmentIds) : Promise.resolve({ data: [], error: null }),
       cohortIds.length ? admin.from('cohorts').select('id,name').in('id', cohortIds) : Promise.resolve({ data: [], error: null }),
+      admin.from('assessment_mark_component_submissions').select('assessment_id,cohort_id,component_key,submitted_at').in('assessment_id', assessmentIds),
     ]);
-    if (unitsError || periodsError || studentsError || draftsError || cohortsError) throw new Error('Could not load the assigned unit roster.');
+    if (unitsError || periodsError || studentsError || draftsError || cohortsError || componentSubmissionsError) throw new Error('Could not load the assigned unit roster.');
     const unitById = new Map((units ?? []).map((unit) => [unit.id, unit]));
     const periodNames = [...new Set((periods ?? []).map((period) => period.name))];
     const studentById = new Map((students ?? []).map((student) => [student.id, student]));
@@ -66,6 +67,7 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
     const cohortNameById = new Map((cohortRows ?? []).map((cohort) => [cohort.id, cohort.name]));
     const eventById = new Map(eventRows.map((event) => [event.id, event]));
     const scopeByKey = new Map(scopeRows.map((scope) => [`${scope.assessment_id}:${scope.cohort_id ?? 'all'}`, scope]));
+    const componentSubmissionByKey = new Map((componentSubmissionRows ?? []).map((row) => [`${row.assessment_id}:${row.cohort_id ?? 'all'}:${row.component_key}`, row.submitted_at]));
     const cohorts = new Map<string, {
       id: string | null;
       name: string;
@@ -110,6 +112,12 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
       name: cohort.name,
       students: cohort.students.sort((first, second) => first.admissionNumber.localeCompare(second.admissionNumber, undefined, { numeric: true })),
       locked: cohort.locked,
+      componentSubmissions: Object.fromEntries((['assignment', 'presentation', 'rat', 'cat', 'exam'] as TrainerMarkComponentKey[]).flatMap((component) => {
+        const timestamps = cohort.scopeRows.map((scope) => componentSubmissionByKey.get(`${scope.assessment_id}:${scope.cohort_id ?? 'all'}:${component}`));
+        return timestamps.length > 0 && timestamps.every((timestamp) => typeof timestamp === 'string')
+          ? [[component, [...timestamps].sort().at(-1) as string]]
+          : [];
+      })) as TrainerMarkComponentSubmissions,
       submittedAt: cohort.scopeRows.length > 0 && cohort.scopeRows.every((scope) => scope.submitted_at)
         ? [...cohort.scopeRows.map((scope) => scope.submitted_at)].sort().pop() ?? null
         : null,
@@ -167,13 +175,17 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
   }
 
   const studentIds = rosterRows.map((row) => row.student_id as string);
-  const [{ data: students, error: studentsError }, { data: drafts, error: draftsError }] = await Promise.all([
+  const [{ data: students, error: studentsError }, { data: drafts, error: draftsError }, { data: componentRows, error: componentError }] = await Promise.all([
     admin.from('students').select('id,admission_number,full_name').in('id', studentIds),
     admin.from('assessment_online_mark_drafts')
       .select('student_id,assignment_mark,presentation_mark,rat_mark,cat_mark,exam_mark')
       .eq('assessment_id', invite.assessment_id),
+    admin.from('assessment_mark_component_submissions')
+      .select('component_key,submitted_at')
+      .eq('assessment_id', invite.assessment_id)
+      .is('cohort_id', invite.cohort_id ?? null),
   ]);
-  if (studentsError || draftsError) throw new Error('Could not load current draft marks.');
+  if (studentsError || draftsError || componentError) throw new Error('Could not load current draft marks.');
 
   const studentById = new Map((students ?? []).map((student) => [student.id, student]));
   const draftByStudentId = new Map((drafts ?? []).map((draft) => [draft.student_id, draft]));
@@ -198,6 +210,7 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
     }];
   }).sort((first, second) => first.admissionNumber.localeCompare(second.admissionNumber, undefined, { numeric: true }));
 
+  const componentSubmissions = Object.fromEntries((componentRows ?? []).map((row) => [row.component_key, row.submitted_at])) as TrainerMarkComponentSubmissions;
   const locked = ['submitted', 'finalised', 'archived'].includes(event.workflow_status) || assessmentResult.data?.status === 'closed' || Boolean(assessmentResult.data?.exam_marks_finalized_at);
   return {
     trainerName: invite.trainer_name,
@@ -208,6 +221,6 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
     unit: { code: unitResult.data.code, name: unitResult.data.name },
     academicPeriod: periodResult.data.name,
     students: roster,
-    cohorts: [{ id: null, name: 'All cohorts', students: roster, submittedAt: invite.submitted_at, locked }],
+    cohorts: [{ id: invite.cohort_id ?? null, name: 'All cohorts', students: roster, submittedAt: invite.submitted_at, locked, componentSubmissions }],
   };
 }

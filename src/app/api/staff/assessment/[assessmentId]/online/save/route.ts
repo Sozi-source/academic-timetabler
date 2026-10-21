@@ -28,8 +28,8 @@ interface OnlineEntry {
 }
 
 interface SavePayload {
-  entries?:
-    unknown;
+  entries?: unknown;
+  component?: unknown;
 }
 
 interface RouteContext {
@@ -275,6 +275,25 @@ export async function POST(
       { status: 400 },
     );
   }
+
+  const component = payload.component;
+  if (component !== undefined) {
+    if (typeof component !== 'string' || !['all', 'assignment', 'presentation', 'rat', 'cat', 'exam'].includes(component)) {
+      return NextResponse.json({ message: 'Select a valid mark component.' }, { status: 400 });
+    }
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc('save_assessment_online_component_marks', {
+      target_assessment_id: targetAssessmentId,
+      target_component: component,
+      target_entries: entries,
+      submit_component: false,
+    });
+    if (error) {
+      return NextResponse.json({ message: error.message }, { status: error.code === '42501' ? 403 : 409 });
+    }
+    return NextResponse.json({ success: true, draft: data });
+  }
+
 
   const {
     data,

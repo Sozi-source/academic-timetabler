@@ -79,6 +79,50 @@ export interface StaffOnlineMarkState {
     null;
 }
 
+export interface StaffOnlineComponentSubmission {
+  cohortId: string | null;
+  component: string;
+  submittedAt: string;
+}
+
+export async function getStaffOnlineMarkComponentSubmissions(
+  assessmentId: string,
+): Promise<StaffOnlineComponentSubmission[]> {
+  const supabase = await createClient();
+  let targetId = assessmentId;
+
+  if (targetId.startsWith('alloc-')) {
+    const allocationId = targetId.replace('alloc-', '');
+    const { data: allocation } = await supabase
+      .from('teaching_allocations')
+      .select('academic_period_id, unit_id')
+      .eq('id', allocationId)
+      .maybeSingle();
+    if (!allocation) return [];
+
+    const { data: event } = await supabase
+      .from('assessment_events')
+      .select('id')
+      .eq('academic_period_id', allocation.academic_period_id)
+      .eq('unit_id', allocation.unit_id)
+      .eq('assessment_type', 'exam')
+      .maybeSingle();
+    if (!event) return [];
+    targetId = event.id;
+  }
+
+  const { data, error } = await supabase
+    .from('assessment_mark_component_submissions')
+    .select('cohort_id,component_key,submitted_at')
+    .eq('assessment_id', targetId);
+  if (error) throw new Error(`Unable to load submitted mark components: ${error.message}`);
+  return (data ?? []).map((row) => ({
+    cohortId: row.cohort_id,
+    component: row.component_key,
+    submittedAt: row.submitted_at,
+  }));
+}
+
 export async function getStaffOnlineMarkState(
   assessmentId: string,
 ): Promise<StaffOnlineMarkState[]> {

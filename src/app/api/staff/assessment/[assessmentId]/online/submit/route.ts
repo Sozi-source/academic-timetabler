@@ -21,7 +21,7 @@ interface RouteContext {
 }
 
 export async function POST(
-  _request:
+  request:
     Request,
   {
     params,
@@ -97,6 +97,41 @@ export async function POST(
       { message: 'Unable to identify unit assessment event.' },
       { status: 400 },
     );
+  }
+
+  const requestPayload = await request.json().catch(() => null) as {
+    component?: unknown;
+    entries?: unknown;
+  } | null;
+  if (requestPayload?.component !== undefined) {
+    if (typeof requestPayload.component !== 'string' || !['assignment', 'presentation', 'rat', 'cat', 'exam'].includes(requestPayload.component) || !Array.isArray(requestPayload.entries)) {
+      return NextResponse.json({ message: 'Choose a component and provide its marks.' }, { status: 400 });
+    }
+    const componentEntries = requestPayload.entries.flatMap((entry) => {
+      if (!entry || typeof entry !== 'object' || !('studentId' in entry) || typeof entry.studentId !== 'string') return [];
+      const row = entry as Record<string, unknown>;
+      return [{
+        student_id: row.studentId,
+        assignment: row.assignment ?? null,
+        presentation: row.presentation ?? null,
+        rat: row.rat ?? null,
+        cat: row.cat ?? null,
+        exam: row.exam ?? null,
+      }];
+    });
+    if (componentEntries.length !== requestPayload.entries.length) {
+      return NextResponse.json({ message: 'Every row must identify a student.' }, { status: 400 });
+    }
+    const { data: submission, error: componentError } = await supabase.rpc('save_assessment_online_component_marks', {
+      target_assessment_id: targetAssessmentId,
+      target_component: requestPayload.component,
+      target_entries: componentEntries,
+      submit_component: true,
+    });
+    if (componentError) {
+      return NextResponse.json({ message: componentError.message }, { status: componentError.code === '42501' ? 403 : 409 });
+    }
+    return NextResponse.json({ success: true, submission });
   }
 
   const {

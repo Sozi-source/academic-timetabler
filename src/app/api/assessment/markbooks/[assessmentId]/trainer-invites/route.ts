@@ -45,11 +45,16 @@ export async function GET(_request: Request, { params }: RouteContext) {
 
   const { data: drafts, error: draftsError } = await admin
     .from('assessment_online_mark_drafts')
-    .select('student_id,assignment_mark,presentation_mark,rat_mark,cat_mark,exam_mark,source_trainer_invite_id,updated_at')
+    .select('student_id,cohort_id,assignment_mark,presentation_mark,rat_mark,cat_mark,exam_mark,source_trainer_invite_id,updated_at')
     .eq('assessment_id', assessmentId)
-    .not('source_trainer_invite_id', 'is', null)
     .order('updated_at', { ascending: false });
   if (draftsError) return NextResponse.json({ message: 'Could not load trainer mark drafts.' }, { status: 500 });
+
+  const { data: componentSubmissions, error: componentSubmissionsError } = await admin
+    .from('assessment_mark_component_submissions')
+    .select('cohort_id,component_key,submitted_at')
+    .eq('assessment_id', assessmentId);
+  if (componentSubmissionsError) return NextResponse.json({ message: 'Could not load component submissions.' }, { status: 500 });
 
   const studentIds = [...new Set((drafts ?? []).map((draft) => draft.student_id))];
   const { data: students, error: studentsError } = studentIds.length
@@ -68,6 +73,9 @@ export async function GET(_request: Request, { params }: RouteContext) {
     })),
     reviewMarks: (drafts ?? []).map((draft) => ({
       ...draft,
+      submittedComponents: (componentSubmissions ?? [])
+        .filter((submission) => submission.cohort_id === draft.cohort_id)
+        .map((submission) => submission.component_key),
       student: studentById.get(draft.student_id) ?? null,
       trainer: draft.source_trainer_invite_id ? inviteById.get(draft.source_trainer_invite_id) ?? null : null,
     })),

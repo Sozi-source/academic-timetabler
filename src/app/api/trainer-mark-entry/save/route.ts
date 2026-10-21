@@ -16,7 +16,7 @@ const entriesSchema = z.array(z.object({
   cat: markValue,
   exam: markValue,
 })).min(1).max(2000);
-const saveSchema = z.object({ cohort_id: z.string().uuid().nullable().optional(), entries: entriesSchema.min(1).max(2000), submit: z.boolean().default(false) });
+const saveSchema = z.object({ cohort_id: z.string().uuid().nullable().optional(), component: z.enum(['all', 'assignment', 'presentation', 'rat', 'cat', 'exam']).default('all'), entries: entriesSchema.min(1).max(2000), submit: z.boolean().default(false) });
 
 export async function POST(request: Request) {
   const cookieStore = await cookies();
@@ -56,10 +56,11 @@ export async function POST(request: Request) {
         return NextResponse.json({ message: 'This invitation does not support cohort-specific submission.' }, { status: 400 });
       }
 
-      const { data, error } = await admin.rpc('save_assessment_marks_with_trainer_invite', {
+      const { data, error } = await admin.rpc('save_assessment_component_with_trainer_invite', {
         target_token_hash: scopeTokenHash,
+        target_component: parsed.data.component,
         target_entries: entries.map(({ assessment_id: _assessmentId, ...entry }) => entry),
-        submit_marks: parsed.data.submit,
+        submit_component: parsed.data.submit,
       });
       if (error) {
         const status = error.code === '42501' ? 403 : error.code === '23514' ? 422 : 409;

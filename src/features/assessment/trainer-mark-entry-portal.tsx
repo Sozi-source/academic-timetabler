@@ -4,7 +4,7 @@ import { AlertCircle, CheckCircle2, LoaderCircle, Save, Send } from 'lucide-reac
 import { useCallback, useEffect, useState, type KeyboardEvent } from 'react';
 
 import { Button } from '@/components/ui/button';
-import type { TrainerMarkEntryRow } from './trainer-mark-entry-types';
+import type { TrainerMarkComponentKey, TrainerMarkComponentSubmissions, TrainerMarkEntryRow } from './trainer-mark-entry-types';
 
 interface TrainerMarkSession {
   trainerName: string;
@@ -20,11 +20,12 @@ interface TrainerMarkSession {
     students: TrainerMarkEntryRow[];
     submittedAt: string | null;
     locked: boolean;
+    componentSubmissions: TrainerMarkComponentSubmissions;
   }>;
 }
 
-type MarkField = 'assignment' | 'presentation' | 'rat' | 'cat' | 'exam';
-type MarkView = 'all' | Exclude<MarkField, 'exam'>;
+type MarkField = TrainerMarkComponentKey;
+type MarkView = 'all' | MarkField;
 
 const markFields: Array<{ key: MarkField; label: string; maximum: number }> = [
   { key: 'assignment', label: 'Assignment /5', maximum: 5 },
@@ -40,6 +41,7 @@ const markViews: Array<{ key: MarkView; label: string }> = [
   { key: 'presentation', label: 'Presentation' },
   { key: 'rat', label: 'RAT' },
   { key: 'cat', label: 'CAT' },
+  { key: 'exam', label: 'Exam' },
 ];
 
 export function TrainerMarkEntryPortal() {
@@ -128,10 +130,18 @@ export function TrainerMarkEntryPortal() {
 
   const selectedCohort = session?.cohorts.find((cohort) => cohort.id === selectedCohortId) ?? null;
   const visibleFields = selectedView === 'all' ? markFields : markFields.filter((field) => field.key === selectedView);
-  const readOnly = Boolean(selectedCohort?.submittedAt || selectedCohort?.locked);
+  const readOnly = Boolean(selectedCohort?.locked || selectedCohort?.submittedAt);
 
   async function saveMarks(submit: boolean) {
     if (!selectedCohort) return;
+    if (submit && selectedView === 'all') {
+      setError('Choose one component tab to submit.');
+      return;
+    }
+    if (submit && selectedCohort.componentSubmissions[selectedView as MarkField]) {
+      setError('This component has already been submitted.');
+      return;
+    }
     setBusy(submit ? 'submit' : 'save');
     setError('');
     setMessage('');
@@ -141,6 +151,7 @@ export function TrainerMarkEntryPortal() {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
           cohort_id: selectedCohort.id,
+          component: selectedView,
           submit,
           entries: students.map((student) => ({
             assessment_id: student.assessmentId,
@@ -156,7 +167,7 @@ export function TrainerMarkEntryPortal() {
       const result = await response.json() as { message?: string; result?: { savedCount?: number } };
       if (!response.ok) throw new Error(result.message ?? 'Could not save marks.');
       if (submit) {
-        setMessage(`Marks for ${selectedCohort.name} were submitted to the HOD for review.`);
+        setMessage(`${markFields.find((field) => field.key === selectedView)?.label ?? 'Component'} submitted.`);
         const refreshed = await loadSession();
         setSession(refreshed);
         const updatedCohort = refreshed.cohorts.find((cohort) => cohort.id === selectedCohort.id) ?? null;
@@ -214,20 +225,22 @@ export function TrainerMarkEntryPortal() {
               <div className="flex flex-col gap-2 border-b border-slate-200 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
                 <div className="flex gap-1 overflow-x-auto" role="group" aria-label="Mark fields">
                   {markViews.map((view) => (
-                    <button key={view.key} type="button" aria-pressed={selectedView === view.key} onClick={() => setSelectedView(view.key)}
+                      <button key={view.key} type="button" aria-pressed={selectedView === view.key} onClick={() => setSelectedView(view.key)}
                       className={`min-h-10 shrink-0 rounded-lg px-3 text-xs font-semibold ${selectedView === view.key ? 'bg-teal-700 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>
-                      {view.label}
+                        {view.label}{view.key !== 'all' && selectedCohort?.componentSubmissions[view.key] ? ' ✓' : ''}
                     </button>
                   ))}
                 </div>
                 {!readOnly ? (
                   <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
-                    <Button className="w-full sm:w-auto" type="button" variant="outline" disabled={busy !== null || students.length === 0} onClick={() => void saveMarks(false)}>
+                    <Button className="w-full sm:w-auto" type="button" variant="outline" disabled={busy !== null || students.length === 0 || (selectedView !== 'all' && Boolean(selectedCohort?.componentSubmissions[selectedView]))} onClick={() => void saveMarks(false)}>
                       {busy === 'save' ? <LoaderCircle className="size-4 animate-spin" /> : <Save className="size-4" />}{busy === 'save' ? 'Saving...' : 'Save draft'}
                     </Button>
-                    <Button className="w-full sm:w-auto" type="button" disabled={busy !== null || students.length === 0} onClick={() => void saveMarks(true)}>
-                      {busy === 'submit' ? <LoaderCircle className="size-4 animate-spin" /> : <Send className="size-4" />}{busy === 'submit' ? 'Submitting...' : 'Submit to HOD'}
-                    </Button>
+                    {selectedView !== 'all' && !selectedCohort?.componentSubmissions[selectedView] ? (
+                      <Button className="w-full sm:w-auto" type="button" disabled={busy !== null || students.length === 0} onClick={() => void saveMarks(true)}>
+                        {busy === 'submit' ? <LoaderCircle className="size-4 animate-spin" /> : <Send className="size-4" />}{busy === 'submit' ? 'Submitting...' : `Submit ${markViews.find((view) => view.key === selectedView)?.label}`}
+                      </Button>
+                    ) : null}
                   </div>
                 ) : null}
               </div>
@@ -270,7 +283,7 @@ export function TrainerMarkEntryPortal() {
                                 min="0"
                                 max={field.maximum}
                                 value={student[field.key] ?? ''}
-                                disabled={readOnly}
+                                disabled={readOnly || Boolean(selectedCohort?.componentSubmissions[field.key])}
                                 onChange={(event) => updateMark(student.assessmentId, student.studentId, field.key, event.target.value)}
                                 className="h-10 w-20 rounded-md border border-slate-300 bg-white px-2 text-center text-base tabular-nums outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100 disabled:bg-slate-100 sm:h-9 sm:text-xs"
                               />

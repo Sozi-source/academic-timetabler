@@ -62,7 +62,7 @@ export async function getActiveAssessmentPeriodReportData(): Promise<AssessmentP
 
   const eventIds = events.map((event) => event.id);
   const unitIds = [...new Set(events.map((event) => event.unit_id))];
-  const [{ data: populations, error: populationError }, { data: results, error: resultsError }, { data: allocations, error: allocationError }] = await Promise.all([
+  const [{ data: populations, error: populationError }, { data: results, error: resultsError }, { data: allocations, error: allocationError }, { data: drafts, error: draftsError }, { data: componentSubmissions, error: componentSubmissionsError }] = await Promise.all([
     admin.from('assessment_population').select(`
       assessment_event_id,student_id,cohort_id,attendance_status,
       cat_absence_reason,cat_absence_recommendation,exam_absence_reason,exam_absence_recommendation,
@@ -70,16 +70,22 @@ export async function getActiveAssessmentPeriodReportData(): Promise<AssessmentP
     `).in('assessment_event_id', eventIds).eq('population_status', 'expected'),
     admin.from('assessment_results').select('assessment_event_id,student_id,component_marks,total_mark,grade').in('assessment_event_id', eventIds),
     admin.from('teaching_allocations').select('unit_id,cohort_id,participant_cohort_ids,trainer:trainers(full_name)').eq('academic_period_id', period.id).in('unit_id', unitIds).in('status', ['draft','active']),
+    admin.from('assessment_online_mark_drafts').select('assessment_id,student_id,cat_mark').in('assessment_id', eventIds),
+    admin.from('assessment_mark_component_submissions').select('assessment_id,cohort_id,component_key').in('assessment_id', eventIds).eq('component_key', 'cat'),
   ]);
   if (populationError) throw new Error(`Unable to load assessment populations: ${populationError.message}`);
   if (resultsError) throw new Error(`Unable to load assessment results: ${resultsError.message}`);
   if (allocationError) throw new Error(`Unable to load trainers: ${allocationError.message}`);
+  if (draftsError) throw new Error(`Unable to load CAT mark drafts: ${draftsError.message}`);
+  if (componentSubmissionsError) throw new Error(`Unable to load submitted CAT marks: ${componentSubmissionsError.message}`);
 
   const eventMap = new Map(events.map((event) => {
     const unit = one(event.unit as Relation<{ id: string; code: string; name: string }>);
     return [event.id, { unitId: event.unit_id, unitCode: unit?.code ?? '', unitName: unit?.name ?? '' }];
   }));
   const resultMap = new Map((results ?? []).map((result) => [`${result.assessment_event_id}:${result.student_id}`, result]));
+  const draftCatByStudent = new Map((drafts ?? []).map((draft) => [`${draft.assessment_id}:${draft.student_id}`, num(draft.cat_mark)]));
+  const submittedCatScopes = new Set((componentSubmissions ?? []).map((submission) => `${submission.assessment_id}:${submission.cohort_id ?? 'all'}`));
   const trainerMap = new Map<string, string>();
   for (const allocation of allocations ?? []) {
     const trainer = one(allocation.trainer as Relation<{ full_name: string }>);
@@ -95,6 +101,8 @@ export async function getActiveAssessmentPeriodReportData(): Promise<AssessmentP
     if (!student || !cohort || !event) continue;
     const result = resultMap.get(`${population.assessment_event_id}:${student.id}`);
     const marks = (result?.component_marks ?? {}) as Record<string, unknown>;
+    const catWasSubmitted = submittedCatScopes.has(`${population.assessment_event_id}:${population.cohort_id ?? 'all'}`);
+    const submittedDraftCat = catWasSubmitted ? draftCatByStudent.get(`${population.assessment_event_id}:${student.id}`) ?? null : null;
     rows.push({
       eventId: population.assessment_event_id,
       unitId: event.unitId,
@@ -114,7 +122,7 @@ export async function getActiveAssessmentPeriodReportData(): Promise<AssessmentP
       assignment: num(marks.assignment),
       presentation: num(marks.presentation),
       rat: num(marks.rat),
-      cat1: num(marks.cat1),
+      cat1: submittedDraftCat ?? num(marks.cat1),
       exam: num(marks.exam),
       total: num(result?.total_mark),
       grade: typeof result?.grade === 'string' ? result.grade : null,

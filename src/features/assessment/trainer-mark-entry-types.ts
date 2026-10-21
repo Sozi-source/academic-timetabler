@@ -28,3 +28,7 @@ export interface TrainerMarkEntryRow {
   cat: number | null;
   exam: number | null;
 }
+
+export type TrainerMarkComponentKey = 'assignment' | 'presentation' | 'rat' | 'cat' | 'exam';
+
+export type TrainerMarkComponentSubmissions = Partial<Record<TrainerMarkComponentKey, string>>;

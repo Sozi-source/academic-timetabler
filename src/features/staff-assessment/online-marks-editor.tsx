@@ -64,10 +64,12 @@ function toInput(value: number | null): string {
 
 export function OnlineMarksEditor({
   assessmentId,
+  trainerEntryOpen,
   workflowStatus,
   students,
 }: {
   assessmentId: string;
+  trainerEntryOpen: boolean;
   workflowStatus: string | null;
   students: StudentRow[];
 }) {
@@ -119,7 +121,7 @@ export function OnlineMarksEditor({
     setMessage(`Bulk upload applied for ${matched.length} student(s). Review and save when ready.`);
   };
 
-  const editable = canEditOnlineMarks(workflowStatus);
+  const editable = trainerEntryOpen && canEditOnlineMarks(workflowStatus);
 
   const isSingleMode = visibleComponent !== 'all';
   const singleComponent = isSingleMode
@@ -430,6 +432,11 @@ export function OnlineMarksEditor({
 
   return (
     <div className="space-y-3.5 pb-24">
+      {!trainerEntryOpen ? (
+        <section className="rounded-xl border border-warning-border bg-warning-surface px-4 py-3 text-xs font-semibold text-warning-ink">
+          Mark entry is locked by the department.
+        </section>
+      ) : null}
       {/* Sleek Compact Stats Strip */}
       <section className="flex flex-wrap items-center justify-between gap-2 rounded-none border border-slate-300 bg-[#fbf9f1] px-3.5 py-2.5 shadow-2xs">
         <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-700">

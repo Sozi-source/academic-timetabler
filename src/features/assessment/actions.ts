@@ -104,10 +104,12 @@ export async function createAllAllocatedMarkbooksAction(formData: FormData) {
 
   const supabase = await createClient();
 
-  // 1. Get all units with active teaching allocations in this academic period
+  // Prepare one unit markbook for each allocated unit. The database function
+  // is idempotent and synchronizes the current registered population.
   const { data: allocations, error: allocError } = await supabase
     .from('teaching_allocations')
     .select('unit_id')
+    .eq('department_id', profile.activeDepartmentId)
     .eq('academic_period_id', academicPeriodId)
     .in('status', ['draft', 'active']);
 
@@ -120,41 +122,36 @@ export async function createAllAllocatedMarkbooksAction(formData: FormData) {
     redirect('/assessment/assessments?bulk_created=0');
   }
 
-  // 2. Find existing assessment events for these units
-  const { data: existingEvents } = await supabase
-    .from('assessment_events')
-    .select('unit_id')
-    .eq('department_id', profile.activeDepartmentId)
-    .eq('academic_period_id', academicPeriodId)
-    .in('unit_id', unitIds);
-
-  const existingUnitSet = new Set((existingEvents ?? []).map((e) => e.unit_id));
-  const missingUnitIds = unitIds.filter((id) => !existingUnitSet.has(id));
-
   let createdCount = 0;
+  let failedCount = 0;
 
-  for (const unitId of missingUnitIds) {
-    const { data: newEvent, error: insertError } = await supabase
+  for (const unitId of unitIds) {
+    const { data: existingEvent, error: existingError } = await supabase
       .from('assessment_events')
-      .insert({
-        department_id: profile.activeDepartmentId,
-        academic_period_id: academicPeriodId,
-        unit_id: unitId,
-        cohort_id: null,
-        assessment_type: 'exam',
-        title: 'Unit Markbook',
-        max_mark: 100,
-        pass_mark: 40,
-        status: 'draft',
-      })
       .select('id')
-      .single();
+      .eq('department_id', profile.activeDepartmentId)
+      .eq('academic_period_id', academicPeriodId)
+      .eq('unit_id', unitId)
+      .eq('title', 'Unit Markbook')
+      .maybeSingle();
 
-    if (!insertError && newEvent?.id) {
+    if (existingError) {
+      failedCount++;
+      continue;
+    }
+
+    const { data: preparedEvent, error: prepareError } = await supabase.rpc(
+      'ensure_unit_markbook_ready',
+      {
+        p_academic_period_id: academicPeriodId,
+        p_unit_id: unitId,
+      },
+    );
+
+    if (prepareError || !preparedEvent) {
+      failedCount++;
+    } else if (!existingEvent?.id) {
       createdCount++;
-      await supabase.rpc('refresh_assessment_population', {
-        target_assessment_event_id: newEvent.id,
-      });
     }
   }
 
@@ -165,6 +162,6 @@ export async function createAllAllocatedMarkbooksAction(formData: FormData) {
   revalidatePath('/staff');
   revalidatePath('/staff/units');
 
-  redirect(`/assessment/assessments?bulk_created=${createdCount}`);
+  redirect(`/assessment/assessments?bulk_created=${createdCount}&bulk_failed=${failedCount}`);
 }
 

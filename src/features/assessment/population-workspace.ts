@@ -66,6 +66,7 @@ export interface AssessmentPopulationWorkspace {
     | 'exam'
     | null;
   workflowStatus: string | null;
+  trainerEntryOpen: boolean;
   populationGeneratedAt: string | null;
   populationLockedAt: string | null;
   unit: {
@@ -137,10 +138,11 @@ export const getAllocationPopulationWorkspace = cache(
     // Look up or provision the authoritative assessment event for this allocation
     let resolvedAssessmentId = `alloc-${alloc.id}`;
     let resolvedWorkflowStatus = 'open';
+    let trainerEntryOpen = false;
 
     const { data: existingEvent } = await supabase
       .from('assessment_events')
-      .select('id, operational_workflow_status')
+      .select('id, operational_workflow_status, trainer_entry_open')
       .eq('academic_period_id', alloc.academic_period_id)
       .eq('unit_id', alloc.unit_id)
       .eq('assessment_type', 'exam')
@@ -149,6 +151,7 @@ export const getAllocationPopulationWorkspace = cache(
     if (existingEvent?.id) {
       resolvedAssessmentId = existingEvent.id;
       resolvedWorkflowStatus = (existingEvent.operational_workflow_status as string) || 'open';
+      trainerEntryOpen = existingEvent.trainer_entry_open === true;
     } else {
       const { data: provisionedId } = await supabase.rpc(
         'ensure_unit_markbook_ready',
@@ -159,6 +162,12 @@ export const getAllocationPopulationWorkspace = cache(
       );
       if (provisionedId) {
         resolvedAssessmentId = provisionedId as string;
+        const { data: provisionedEvent } = await supabase
+          .from('assessment_events')
+          .select('trainer_entry_open')
+          .eq('id', resolvedAssessmentId)
+          .maybeSingle();
+        trainerEntryOpen = provisionedEvent?.trainer_entry_open === true;
       }
     }
 
@@ -166,6 +175,7 @@ export const getAllocationPopulationWorkspace = cache(
       assessmentId: resolvedAssessmentId,
       assessmentType: 'exam',
       workflowStatus: resolvedWorkflowStatus,
+      trainerEntryOpen,
       populationGeneratedAt: null,
       populationLockedAt: null,
       unit: {
@@ -229,6 +239,13 @@ export const getAssessmentPopulationWorkspace =
 
     const event =
       eventData as UnknownRow;
+
+    const { data: eventControl, error: controlError } = await supabase
+      .from('assessment_events')
+      .select('trainer_entry_open')
+      .eq('id', assessmentId)
+      .maybeSingle();
+    if (controlError) throw new Error(`Unable to load trainer entry status: ${controlError.message}`);
 
     const periodId =
       asString(event.academic_period_id);
@@ -430,6 +447,7 @@ export const getAssessmentPopulationWorkspace =
         asString(
           event.workflow_status,
         ),
+      trainerEntryOpen: eventControl?.trainer_entry_open === true,
       populationGeneratedAt:
         asString(
           event.population_generated_at,

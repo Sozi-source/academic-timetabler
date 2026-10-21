@@ -1,6 +1,7 @@
 import { cache } from 'react';
 
 import { requireHodAccess } from '@/features/auth/authorization';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 
 import type {
@@ -9,6 +10,11 @@ import type {
   AssessmentOverview,
   AssessmentSetupOptions,
 } from './types';
+
+function relationRow(value: unknown): Record<string, unknown> | null {
+  const candidate = Array.isArray(value) ? value[0] : value;
+  return candidate && typeof candidate === 'object' ? candidate as Record<string, unknown> : null;
+}
 
 const assessmentSelection = `
   id,
@@ -21,6 +27,7 @@ const assessmentSelection = `
   attendance_finalized_at,
   cat_marks_finalized_at,
   exam_marks_finalized_at,
+  trainer_entry_open,
   academic_period:academic_periods(id, code, name),
   unit:units(id, code, name),
   cohort:cohorts(id, code, name)
@@ -43,19 +50,93 @@ export const getAssessments = cache(async (): Promise<AssessmentEventRow[]> => {
   const rows = (data ?? []) as unknown as Omit<AssessmentEventRow, 'population'>[];
   if (rows.length === 0) return [];
 
-  const { data: populationRows, error: populationError } = await supabase
-    .from('assessment_population')
-    .select('assessment_event_id')
-    .in('assessment_event_id', rows.map((row) => row.id));
+  const [
+    { data: populationRows, error: populationError },
+    { data: allocationRows, error: allocationError },
+  ] = await Promise.all([
+    supabase
+      .from('assessment_population')
+      .select('assessment_event_id')
+      .in('assessment_event_id', rows.map((row) => row.id)),
+    supabase
+      .from('teaching_allocations')
+      .select('unit_id,academic_period_id,cohort_id,participant_cohort_ids,trainer:trainers(id,full_name,email,profile_id),cohort:cohorts(id,name,code)')
+      .in('academic_period_id', [...new Set(rows.map((row) => row.academic_period?.id).filter((id): id is string => Boolean(id)))])
+      .in('status', ['draft', 'active']),
+  ]);
 
   if (populationError) throw new Error(`Unable to load assessment population totals: ${populationError.message}`);
+  if (allocationError) throw new Error(`Unable to load assigned trainers: ${allocationError.message}`);
+
+  const linkedProfileIds = [...new Set((allocationRows ?? [])
+    .map((allocation) => relationRow(allocation.trainer)?.profile_id)
+    .filter((id): id is string => typeof id === 'string'))];
+  const admin = createAdminClient();
+  const { data: linkedProfiles, error: profileError } = linkedProfileIds.length
+    ? await admin.from('profiles').select('id,email,is_active').in('id', linkedProfileIds)
+    : { data: [], error: null };
+  if (profileError) throw new Error(`Unable to verify trainer accounts: ${profileError.message}`);
+  const profileById = new Map((linkedProfiles ?? []).map((profile) => [profile.id, profile]));
+
+  const cohortIds = [...new Set((allocationRows ?? []).flatMap((allocation) => [
+    allocation.cohort_id,
+    ...(allocation.participant_cohort_ids ?? []),
+  ]).filter((id): id is string => Boolean(id)))];
+  const { data: participantCohorts, error: cohortError } = cohortIds.length
+    ? await supabase.from('cohorts').select('id,name,code').in('id', cohortIds)
+    : { data: [], error: null };
+  if (cohortError) throw new Error(`Unable to load allocated cohorts: ${cohortError.message}`);
+  const cohortNameById = new Map((participantCohorts ?? []).map((cohort) => [cohort.id, cohort.code || cohort.name]));
 
   const counts = new Map<string, number>();
   for (const row of populationRows ?? []) {
     counts.set(row.assessment_event_id, (counts.get(row.assessment_event_id) ?? 0) + 1);
   }
 
-  return rows.map((row) => ({ ...row, population: [{ count: counts.get(row.id) ?? 0 }] }));
+  const allocationsByAssessment = new Map<string, Array<{
+    id: string;
+    name: string;
+    email: string | null;
+    accountLinked: boolean;
+    cohorts: string[];
+  }>>();
+  for (const allocation of allocationRows ?? []) {
+    const trainer = relationRow(allocation.trainer);
+    const cohort = relationRow(allocation.cohort);
+    const trainerId = typeof trainer?.id === 'string' ? trainer.id : null;
+    const trainerName = typeof trainer?.full_name === 'string' ? trainer.full_name : null;
+    if (!trainerId || !trainerName) continue;
+    const assessment = rows.find((row) => row.unit?.id === allocation.unit_id && row.academic_period?.id === allocation.academic_period_id);
+    if (!assessment) continue;
+    const assigned = allocationsByAssessment.get(assessment.id) ?? [];
+    let trainerEntry = assigned.find((entry) => entry.id === trainerId);
+    if (!trainerEntry) {
+      const trainerProfileId = typeof trainer.profile_id === 'string' ? trainer.profile_id : null;
+      const linkedProfile = trainerProfileId ? profileById.get(trainerProfileId) : null;
+      trainerEntry = {
+        id: trainerId,
+        name: trainerName,
+        email: linkedProfile?.email ?? (typeof trainer.email === 'string' ? trainer.email : null),
+        accountLinked: Boolean(linkedProfile?.is_active),
+        cohorts: [],
+      };
+      assigned.push(trainerEntry);
+    }
+    const assignedCohortIds = [allocation.cohort_id, ...(allocation.participant_cohort_ids ?? [])];
+    const names = assignedCohortIds
+      .map((cohortId) => cohortNameById.get(cohortId) ?? (cohortId === cohort?.id ? cohort.code || cohort.name : null))
+      .filter((name): name is string => Boolean(name));
+    for (const cohortName of names) {
+      if (!trainerEntry.cohorts.includes(cohortName)) trainerEntry.cohorts.push(cohortName);
+    }
+    allocationsByAssessment.set(assessment.id, assigned);
+  }
+
+  return rows.map((row) => ({
+    ...row,
+    population: [{ count: counts.get(row.id) ?? 0 }],
+    assigned_trainers: allocationsByAssessment.get(row.id) ?? [],
+  }));
 });
 
 export const getAssessmentById = cache(async (assessmentId: string): Promise<AssessmentEventRow | null> => {

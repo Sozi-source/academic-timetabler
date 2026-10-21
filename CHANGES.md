@@ -48,6 +48,17 @@
 - Add a database-level trainer entry gate, closed by default, with an HOD/system-admin RPC to open or lock a unit markbook within the active department.
 - Trainer mark saves now require the unit gate to be open. Existing roster, mark range, absence, submission, and finalization checks remain in the save function.
 - Manual follow-up: apply the Supabase migration. Use `set_unit_markbook_trainer_entry(assessment_id, true)` to open and `(..., false)` to lock trainer entry.
+
+### 2026-10-21: Add authenticated trainer markbook preparation and entry controls
+
+**Added:** `src/features/assessment/trainer-entry-control.tsx`, `src/app/api/assessment/markbooks/[assessmentId]/trainer-entry/route.ts`, `supabase/migrations/20261021140000_gate_authenticated_trainer_mark_saves.sql`, `supabase/migrations/20261021150000_freeze_roster_while_trainer_entry_open.sql`
+**Modified:** `src/features/assessment/actions.ts`, `src/features/assessment/queries.ts`, `src/features/assessment/types.ts`, `src/features/assessment/population-workspace.ts`, `src/features/assessment/assessment-unit-cohorts.tsx`, `src/features/staff-assessment/online-marks-editor.tsx`, `src/app/(dashboard)/assessment/assessments/page.tsx`, `src/app/(staff)/staff/units/[allocationId]/assessment/[assessmentId]/marks/page.tsx`, `CHANGES.md`
+- Bulk preparation now runs the idempotent database markbook/roster provisioner for every allocated unit, including existing markbooks.
+- Remove the manual bearer-link generator from the unit cohort page; trainers use their authenticated My Units workspace and existing allocation-scoped mark entry.
+- The HOD markbook list previews assigned trainers, their cohort scope, missing email addresses, and missing account links. Add a per-unit open/lock action.
+- Apply the database entry gate to authenticated trainer draft saves and submissions as well as bearer-link saves. The staff mark-entry page reports locked state and disables editing while locked.
+- Keep the registered roster stable while mark entry is open; reopening after a lock refreshes the roster before trainers can continue.
+- Manual follow-up: apply both pending migrations before deploying; senders and email delivery are intentionally not included yet.
 - Keep the existing per-assessment trainer link creation disabled in individual markbooks; new trainer links are created from the unit cohort workspace.
 - Manual follow-up: apply the new Supabase migration before deployment, then run `npm run check` and verify a trainer link with multiple cohorts.
 

@@ -138,6 +138,7 @@ export default async function StaffOnlineMarksPage({
         assessmentId={
           population.assessmentId
         }
+        trainerEntryOpen={population.trainerEntryOpen}
         workflowStatus={
           population.workflowStatus
         }

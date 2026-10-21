@@ -8,6 +8,7 @@ import { createAllAllocatedMarkbooksAction, createAssessmentAction } from '@/fea
 import { getAssessments, getAssessmentSetupOptions } from '@/features/assessment/queries';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { MarkbookDeleteButton } from '@/features/assessment/markbook-delete-button';
+import { TrainerEntryControl } from '@/features/assessment/trainer-entry-control';
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -16,6 +17,7 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
   const [params, assessments, options] = await Promise.all([searchParams, getAssessments(), getAssessmentSetupOptions()]);
   const error = typeof params.error === 'string' ? params.error : '';
   const bulkCreated = typeof params.bulk_created === 'string' ? params.bulk_created : null;
+  const bulkFailed = Number(params.bulk_failed ?? 0);
   const activePeriod = options.periods.find((period) => period.status === 'active') ?? null;
   const markbooks = assessments.filter((assessment) => assessment.title === 'Unit Markbook');
   const errorText = error === 'duplicate' ? 'This unit markbook already exists.' : error ? 'Unit markbook could not be saved.' : '';
@@ -47,9 +49,7 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
 
       {bulkCreated !== null ? (
         <p className="rounded-lg bg-success-subtle px-3 py-2 text-xs font-semibold text-success">
-          {bulkCreated === '0'
-            ? 'All allocated units already have markbooks configured.'
-            : `Successfully generated ${bulkCreated} unit markbook(s) with student rosters!`}
+          Prepared markbooks for this period. {bulkCreated} created{bulkFailed ? ` · ${bulkFailed} failed` : ''}.
         </p>
       ) : null}
 
@@ -68,13 +68,62 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
       </Card>
 
       <Card className="overflow-hidden">
-        <div className="overflow-x-auto"><table className="w-full min-w-[720px] text-left text-xs"><thead className="bg-surface-subtle text-text-muted"><tr><th className="px-4 py-2.5 font-semibold">Unit</th><th className="px-3 py-2.5 font-semibold">Period</th><th className="px-3 py-2.5 font-semibold">Population</th><th className="px-3 py-2.5 font-semibold">Stage</th><th className="px-3 py-2.5" />          <th className="px-4 py-3 text-right">Actions</th>
-</tr></thead><tbody className="divide-y divide-border">{markbooks.map((assessment) => <tr key={assessment.id}><td className="px-4 py-2.5 font-semibold text-text-primary">{assessment.unit?.code ?? '—'}<div className="mt-0.5 text-[0.6875rem] font-normal text-text-muted">{assessment.unit?.name ?? ''}</div></td><td className="px-3 py-2.5 text-text-secondary">{assessment.academic_period?.name ?? '—'}</td><td className="px-3 py-2.5 font-semibold text-text-primary">{assessment.population?.[0]?.count ?? 0}</td><td className="px-3 py-2.5"><Badge variant={assessment.exam_marks_finalized_at ? 'success' : 'neutral'}>{assessment.exam_marks_finalized_at ? 'Final complete' : assessment.attendance_finalized_at ? 'Exam marking' : assessment.cat_marks_finalized_at ? 'CAT complete' : 'CAT marking'}</Badge></td><td className="px-3 py-2.5 text-right"><Link href={`/assessment/marks/${assessment.id}`} className="inline-flex h-8 items-center rounded-lg border border-border-strong bg-surface px-3 font-semibold text-text-secondary hover:border-primary hover:text-primary">Open workflow</Link></td>          <td className="px-4 py-3 text-right">
-            <MarkbookDeleteButton
-              assessmentId={assessment.id}
-            />
-          </td>
-</tr>)}</tbody></table></div>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[900px] text-left text-xs">
+            <thead className="bg-surface-subtle text-text-muted">
+              <tr>
+                <th className="px-4 py-2.5 font-semibold">Unit</th>
+                <th className="px-3 py-2.5 font-semibold">Period</th>
+                <th className="px-3 py-2.5 font-semibold">Population</th>
+                <th className="px-3 py-2.5 font-semibold">Assigned trainers</th>
+                <th className="px-3 py-2.5 font-semibold">Trainer entry</th>
+                <th className="px-4 py-3 text-right font-semibold">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {markbooks.map((assessment) => {
+                const finalized = Boolean(assessment.exam_marks_finalized_at || assessment.status === 'closed');
+                return (
+                  <tr key={assessment.id}>
+                    <td className="px-4 py-2.5 font-semibold text-text-primary">
+                      {assessment.unit?.code ?? '—'}
+                      <div className="mt-0.5 text-[0.6875rem] font-normal text-text-muted">{assessment.unit?.name ?? ''}</div>
+                    </td>
+                    <td className="px-3 py-2.5 text-text-secondary">{assessment.academic_period?.name ?? '—'}</td>
+                    <td className="px-3 py-2.5 font-semibold text-text-primary">{assessment.population?.[0]?.count ?? 0}</td>
+                    <td className="max-w-72 px-3 py-2.5">
+                      {assessment.assigned_trainers?.length ? (
+                        <ul className="space-y-1">
+                          {assessment.assigned_trainers.map((trainer) => (
+                            <li key={trainer.id} className="text-text-primary">
+                              <span className="font-semibold">{trainer.name}</span>
+                              <span className="text-text-muted"> · {trainer.cohorts.join(', ') || 'No cohort'}</span>
+                              {trainer.email ? <span className="ml-1 text-text-muted">· {trainer.email}</span> : null}
+                              {!trainer.email ? <span className="ml-1 text-warning-ink">· email needed</span> : null}
+                              {!trainer.accountLinked ? <span className="ml-1 text-danger">· account not linked</span> : null}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : <span className="text-text-muted">No trainer assigned</span>}
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <div className="flex flex-col gap-1">
+                        <Badge variant={assessment.trainer_entry_open ? 'success' : 'neutral'}>{assessment.trainer_entry_open ? 'Open' : 'Locked'}</Badge>
+                        <TrainerEntryControl assessmentId={assessment.id} isOpen={assessment.trainer_entry_open} disabled={finalized || !assessment.population?.[0]?.count} />
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex justify-end gap-2">
+                        <Link href={`/assessment/marks/${assessment.id}`} className="inline-flex h-8 items-center rounded-lg border border-border-strong bg-surface px-3 font-semibold text-text-secondary hover:border-primary hover:text-primary">Open workflow</Link>
+                        <MarkbookDeleteButton assessmentId={assessment.id} />
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
         {markbooks.length === 0 ? <div className="px-4 py-8 text-center text-xs text-text-muted">No unit markbooks configured.</div> : null}
       </Card>
     </div>

@@ -1,3 +1,11 @@
+### 2026-10-21: Add mobile trainer WhatsApp sharing to unit markbooks
+
+**Added:** `src/features/assessment/trainer-whatsapp-share.tsx`, `CHANGES.md`
+**Modified:** `src/app/(dashboard)/assessment/assessments/page.tsx`, `src/features/assessment/queries.ts`, `src/features/assessment/types.ts`
+- Add a per-trainer WhatsApp action that opens a prefilled message with assigned unit, academic period, cohort and authenticated staff workspace link. The message accurately reflects whether mark entry is open or locked. Kenyan local phone formats are normalized to international format for WhatsApp.
+- Add a phone-sized markbook card layout with full-width WhatsApp actions; retain the existing table for desktop screens.
+- No schema migration required. Trainer phone numbers must be present in the trainer records; missing or unrecognized numbers show an instruction to add a phone number.
+
 ### 2026-10-20: Bind cohort unit additions to their programme stages
 
 **Modified:** `src/features/unit-offerings/cohort-unit-editor.tsx`, `CHANGES.md`

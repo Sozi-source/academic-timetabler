@@ -60,7 +60,7 @@ export const getAssessments = cache(async (): Promise<AssessmentEventRow[]> => {
       .in('assessment_event_id', rows.map((row) => row.id)),
     supabase
       .from('teaching_allocations')
-      .select('unit_id,academic_period_id,cohort_id,participant_cohort_ids,trainer:trainers(id,full_name,email,profile_id),cohort:cohorts(id,name,code)')
+      .select('unit_id,academic_period_id,cohort_id,participant_cohort_ids,trainer:trainers(id,full_name,email,phone_number,profile_id),cohort:cohorts(id,name,code)')
       .in('academic_period_id', [...new Set(rows.map((row) => row.academic_period?.id).filter((id): id is string => Boolean(id)))])
       .in('status', ['draft', 'active']),
   ]);
@@ -97,6 +97,7 @@ export const getAssessments = cache(async (): Promise<AssessmentEventRow[]> => {
     id: string;
     name: string;
     email: string | null;
+    phone: string | null;
     accountLinked: boolean;
     cohorts: string[];
   }>>();
@@ -117,6 +118,7 @@ export const getAssessments = cache(async (): Promise<AssessmentEventRow[]> => {
         id: trainerId,
         name: trainerName,
         email: linkedProfile?.email ?? (typeof trainer.email === 'string' ? trainer.email : null),
+        phone: typeof trainer.phone_number === 'string' ? trainer.phone_number : null,
         accountLinked: Boolean(linkedProfile?.is_active),
         cohorts: [],
       };

@@ -21,6 +21,7 @@ export interface AssessmentEventRow {
     id: string;
     name: string;
     email: string | null;
+    phone: string | null;
     accountLinked: boolean;
     cohorts: string[];
   }>;

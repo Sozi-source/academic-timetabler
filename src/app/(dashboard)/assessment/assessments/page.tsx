@@ -9,6 +9,7 @@ import { getAssessments, getAssessmentSetupOptions } from '@/features/assessment
 import { requireHodAccess } from '@/features/auth/authorization';
 import { MarkbookDeleteButton } from '@/features/assessment/markbook-delete-button';
 import { TrainerEntryControl } from '@/features/assessment/trainer-entry-control';
+import { TrainerWhatsAppShare } from '@/features/assessment/trainer-whatsapp-share';
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -68,7 +69,54 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
       </Card>
 
       <Card className="overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="space-y-3 p-3 md:hidden">
+          {markbooks.map((assessment) => {
+            const finalized = Boolean(assessment.exam_marks_finalized_at || assessment.status === 'closed');
+            return (
+              <article key={assessment.id} className="space-y-3 rounded-xl border border-border bg-surface p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h2 className="font-semibold text-text-primary">{assessment.unit?.code ?? '—'} · {assessment.unit?.name ?? 'Unit'}</h2>
+                    <p className="mt-1 text-xs text-text-secondary">{assessment.academic_period?.name ?? '—'} · {assessment.population?.[0]?.count ?? 0} students</p>
+                  </div>
+                  <Badge variant={assessment.trainer_entry_open ? 'success' : 'neutral'}>{assessment.trainer_entry_open ? 'Open' : 'Locked'}</Badge>
+                </div>
+
+                <div className="space-y-3 border-t border-border pt-3">
+                  <h3 className="text-xs font-semibold text-text-secondary">Assigned trainers</h3>
+                  {assessment.assigned_trainers?.length ? assessment.assigned_trainers.map((trainer) => (
+                    <div key={trainer.id} className="space-y-2 rounded-lg bg-surface-subtle p-3">
+                      <div>
+                        <p className="font-semibold text-text-primary">{trainer.name}</p>
+                        <p className="mt-0.5 break-words text-xs text-text-muted">{trainer.cohorts.join(', ') || 'No cohort'}{trainer.phone ? ` · ${trainer.phone}` : ''}</p>
+                      </div>
+                      <TrainerWhatsAppShare
+                        trainerName={trainer.name}
+                        phone={trainer.phone}
+                        unitCode={assessment.unit?.code ?? 'Unit'}
+                        unitName={assessment.unit?.name ?? ''}
+                        academicPeriod={assessment.academic_period?.name ?? 'current academic period'}
+                        cohorts={trainer.cohorts}
+                        trainerEntryOpen={assessment.trainer_entry_open}
+                        compact
+                      />
+                    </div>
+                  )) : <p className="text-xs text-text-muted">No trainer assigned</p>}
+                </div>
+
+                <div className="flex flex-col gap-2 border-t border-border pt-3">
+                  <TrainerEntryControl assessmentId={assessment.id} isOpen={assessment.trainer_entry_open} disabled={finalized || !assessment.population?.[0]?.count} />
+                  <div className="grid grid-cols-[1fr_auto] gap-2">
+                    <Link href={`/assessment/marks/${assessment.id}`} className="inline-flex min-h-10 items-center justify-center rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary hover:border-primary hover:text-primary">Open workflow</Link>
+                    <MarkbookDeleteButton assessmentId={assessment.id} />
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+          {markbooks.length === 0 ? <div className="px-4 py-8 text-center text-xs text-text-muted">No unit markbooks configured.</div> : null}
+        </div>
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full min-w-[900px] text-left text-xs">
             <thead className="bg-surface-subtle text-text-muted">
               <tr>
@@ -95,12 +143,15 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
                       {assessment.assigned_trainers?.length ? (
                         <ul className="space-y-1">
                           {assessment.assigned_trainers.map((trainer) => (
-                            <li key={trainer.id} className="text-text-primary">
-                              <span className="font-semibold">{trainer.name}</span>
-                              <span className="text-text-muted"> · {trainer.cohorts.join(', ') || 'No cohort'}</span>
-                              {trainer.email ? <span className="ml-1 text-text-muted">· {trainer.email}</span> : null}
-                              {!trainer.email ? <span className="ml-1 text-warning-ink">· email needed</span> : null}
-                              {!trainer.accountLinked ? <span className="ml-1 text-danger">· account not linked</span> : null}
+                            <li key={trainer.id} className="flex flex-wrap items-center gap-x-2 gap-y-1 text-text-primary">
+                              <span>
+                                <span className="font-semibold">{trainer.name}</span>
+                                <span className="text-text-muted"> · {trainer.cohorts.join(', ') || 'No cohort'}</span>
+                                {trainer.email ? <span className="ml-1 text-text-muted">· {trainer.email}</span> : null}
+                                {!trainer.email ? <span className="ml-1 text-warning-ink">· email needed</span> : null}
+                                {!trainer.accountLinked ? <span className="ml-1 text-danger">· account not linked</span> : null}
+                              </span>
+                              <TrainerWhatsAppShare trainerName={trainer.name} phone={trainer.phone} unitCode={assessment.unit?.code ?? 'Unit'} unitName={assessment.unit?.name ?? ''} academicPeriod={assessment.academic_period?.name ?? 'current academic period'} cohorts={trainer.cohorts} trainerEntryOpen={assessment.trainer_entry_open} />
                             </li>
                           ))}
                         </ul>
@@ -124,7 +175,6 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
             </tbody>
           </table>
         </div>
-        {markbooks.length === 0 ? <div className="px-4 py-8 text-center text-xs text-text-muted">No unit markbooks configured.</div> : null}
       </Card>
     </div>
   );

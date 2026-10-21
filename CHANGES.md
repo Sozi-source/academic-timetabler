@@ -38,6 +38,16 @@
 **Modified:** `src/app/(dashboard)/assessment/unit/[unitId]/page.tsx`, `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`, `src/app/api/assessment/markbooks/[assessmentId]/trainer-invites/route.ts`, `src/app/api/assessment/trainer-invites/[inviteId]/route.ts`, `src/app/api/trainer-mark-entry/save/route.ts`, `src/features/assessment/assessment-unit-cohorts.tsx`, `src/features/assessment/trainer-mark-entry-portal.tsx`, `src/features/assessment/trainer-mark-entry-types.ts`, `src/features/assessment/trainer-mark-entry.ts`, `src/features/assessment/trainer-mark-invites.tsx`, `CHANGES.md`
 - Create one expiring trainer URL for the unit. The trainer can switch between the unit's registered cohorts and save or submit each cohort independently; each underlying assessment remains separately reviewable by the HOD.
 - Scope private invite tokens to the unit, assessment, and cohort. Cohort submissions are checked against that assessment roster, and revoking the unit link closes its cohort scopes.
+
+### 2026-10-21: Prepare unit markbooks automatically and add a database trainer lock
+
+**Added:** `supabase/migrations/20261021120000_auto_ready_unit_markbooks_and_trainer_lock.sql`, `CHANGES.md`
+**Modified:** `src/app/api/assessment/units/[unitId]/trainer-invites/route.ts`
+- Automatically prepare unit markbook populations and 100-mark exam rules when a unit markbook is created, and bring existing unit markbooks up to date during migration.
+- Prepare every equivalent unit markbook before creating a trainer link, removing manual per-cohort roster/rule setup from that path.
+- Add a database-level trainer entry gate, closed by default, with an HOD/system-admin RPC to open or lock a unit markbook within the active department.
+- Trainer mark saves now require the unit gate to be open. Existing roster, mark range, absence, submission, and finalization checks remain in the save function.
+- Manual follow-up: apply the Supabase migration. Use `set_unit_markbook_trainer_entry(assessment_id, true)` to open and `(..., false)` to lock trainer entry.
 - Keep the existing per-assessment trainer link creation disabled in individual markbooks; new trainer links are created from the unit cohort workspace.
 - Manual follow-up: apply the new Supabase migration before deployment, then run `npm run check` and verify a trainer link with multiple cohorts.
 

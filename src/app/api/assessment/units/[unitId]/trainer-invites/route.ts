@@ -53,6 +53,14 @@ async function getUnitScope(admin: ReturnType<typeof createAdminClient>, unitId:
 }
 
 async function loadReadyScopes(admin: ReturnType<typeof createAdminClient>, unitIds: string[], departmentId: string, periodId: string) {
+  for (const unitId of unitIds) {
+    const { error } = await admin.rpc('ensure_unit_markbook_ready', {
+      p_academic_period_id: periodId,
+      p_unit_id: unitId,
+    });
+    if (error) throw new Error('Could not prepare every unit markbook and cohort roster.');
+  }
+
   const { data: events, error: eventsError } = await admin.from('assessment_events')
     .select('id,unit_id,assessment_type,status,exam_marks_finalized_at')
     .eq('department_id', departmentId)
@@ -64,23 +72,21 @@ async function loadReadyScopes(admin: ReturnType<typeof createAdminClient>, unit
   const eventIds = examEvents.map((event) => event.id);
   if (!eventIds.length) return [];
 
-  const [{ data: workspaces, error: workspaceError }, { data: rosters, error: rosterError }, { data: results, error: resultsError }, { data: rules, error: rulesError }] = await Promise.all([
+  const [{ data: workspaces, error: workspaceError }, { data: rosters, error: rosterError }, { data: results, error: resultsError }] = await Promise.all([
     admin.from('assessment_event_workspace').select('id,workflow_status,population_locked_at,academic_period_id,unit_id').in('id', eventIds),
     admin.from('assessment_roster').select('assessment_id,cohort_id').in('assessment_id', eventIds),
     admin.from('assessment_results').select('assessment_event_id').in('assessment_event_id', eventIds),
-    admin.from('assessment_rules').select('unit_id,maximum_mark').eq('academic_period_id', periodId).eq('assessment_type', 'exam').in('unit_id', unitIds),
   ]);
-  if (workspaceError || rosterError || resultsError || rulesError) throw new Error('Could not validate unit markbook readiness.');
+  if (workspaceError || rosterError || resultsError) throw new Error('Could not validate unit markbook readiness.');
   const workspaceById = new Map((workspaces ?? []).map((workspace) => [workspace.id, workspace]));
   const resultIds = new Set((results ?? []).map((result) => result.assessment_event_id));
-  const validRules = new Set((rules ?? []).filter((rule) => Number(rule.maximum_mark) === 100).map((rule) => rule.unit_id));
   const rostersByAssessment = new Map<string, Array<{ cohort_id: string | null }>>();
   for (const row of rosters ?? []) rostersByAssessment.set(row.assessment_id, [...(rostersByAssessment.get(row.assessment_id) ?? []), row]);
 
   return examEvents.flatMap((event) => {
     const workspace = workspaceById.get(event.id);
     const rosterRows = rostersByAssessment.get(event.id) ?? [];
-    if (!workspace?.population_locked_at || !rosterRows.length || resultIds.has(event.id) || !validRules.has(event.unit_id) || ['submitted', 'finalised', 'archived'].includes(workspace.workflow_status)) return [];
+    if (!workspace?.population_locked_at || !rosterRows.length || resultIds.has(event.id) || ['submitted', 'finalised', 'archived'].includes(workspace.workflow_status)) return [];
     const cohortIds = [...new Set(rosterRows.map((row) => row.cohort_id))];
     return cohortIds.map((cohortId) => ({ assessmentId: event.id, cohortId }));
   });
@@ -140,7 +146,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     const scope = await getUnitScope(admin, unitId, profile.activeDepartmentId);
     if (!scope) return NextResponse.json({ message: 'This unit is unavailable.' }, { status: 404 });
     const readyScopes = await loadReadyScopes(admin, scope.unitIds, profile.activeDepartmentId, parsed.data.periodId);
-    if (!readyScopes.length) return NextResponse.json({ message: 'No open, locked exam rosters with a 100-mark rule are available in this unit.' }, { status: 409 });
+    if (!readyScopes.length) return NextResponse.json({ message: 'No active unit markbooks are available for trainer entry.' }, { status: 409 });
     const { data: registrations, error: registrationError } = await admin.from('student_unit_registrations')
       .select('cohort_id')
       .eq('academic_period_id', parsed.data.periodId)
@@ -158,7 +164,7 @@ export async function POST(request: Request, { params }: RouteContext) {
         .order('name');
       const cohortNames = (missingCohorts ?? []).map((cohort) => cohort.code || cohort.name);
       const detail = cohortNames.length > 0 ? ` Missing: ${cohortNames.join(', ')}.` : '';
-      return NextResponse.json({ message: `Lock and generate an open exam roster for every currently registered cohort before creating one unit-level trainer link.${detail}` }, { status: 409 });
+      return NextResponse.json({ message: `The unit rosters could not be prepared for every registered cohort.${detail}` }, { status: 409 });
     }
 
     const token = randomBytes(32).toString('base64url');

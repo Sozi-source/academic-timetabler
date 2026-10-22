@@ -7,8 +7,9 @@ import type {
 } from '@tanstack/react-table';
 import {
   MoreVertical,
-CalendarCheck2,
+  CalendarCheck2,
   CalendarX2,
+  Download,
   Pencil,
   RotateCcw,
   Users,
@@ -209,6 +210,18 @@ const columns: ColumnDef<Cohort>[] = [
                 Edit Cohort
               </Link>
 
+              <a
+                href={`/api/cohorts/export?cohortId=${row.original.id}`}
+                download
+                className="flex h-9 w-full items-center gap-2 rounded-lg px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+              >
+                <Download
+                  className="size-3.5"
+                  aria-hidden="true"
+                />
+                Export Cohort Data
+              </a>
+
               {canToggleAvailability ? (
                 <form
                   action={
@@ -356,6 +369,15 @@ export function CohortTable({
     status !== 'all' ||
     availability !== 'all';
 
+  const exportUrl = useMemo(() => {
+    const params = new URLSearchParams();
+    if (programmeId !== 'all') params.set('programmeId', programmeId);
+    if (status !== 'all') params.set('status', status);
+    if (availability !== 'all') params.set('availability', availability);
+    const qs = params.toString();
+    return `/api/cohorts/export${qs ? `?${qs}` : ''}`;
+  }, [programmeId, status, availability]);
+
   return (
     <DataTable
       columns={columns}
@@ -474,6 +496,16 @@ export function CohortTable({
               Clear filters
             </Button>
           ) : null}
+
+          <a
+            href={exportUrl}
+            download
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-surface px-2.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary shadow-2xs"
+            title="Export filtered cohort data to Excel"
+          >
+            <Download className="size-3.5" aria-hidden="true" />
+            <span>Export Excel</span>
+          </a>
         </div>
       }
     />

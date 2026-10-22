@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import {
   ArrowLeft,
   CalendarCheck2,
+  Download,
   GraduationCap,
   Plus,
   Upload,
@@ -124,6 +125,16 @@ export default async function CohortsPage() {
               <Upload className="size-4" aria-hidden="true" />
               Import cohorts
             </Link>
+
+            <a
+              href="/api/cohorts/export"
+              download
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+              title="Export all cohort data to Excel"
+            >
+              <Download className="size-4" aria-hidden="true" />
+              Export Excel
+            </a>
 
           {availableProgrammes.length > 0 ? (
             <Drawer>

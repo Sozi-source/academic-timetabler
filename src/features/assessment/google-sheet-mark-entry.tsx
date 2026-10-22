@@ -15,8 +15,20 @@ export function GoogleSheetMarkEntry({ assessmentId }: { assessmentId: string })
   const [googleEmail, setGoogleEmail] = useState<string | null>(null);
   const [connectionLoaded, setConnectionLoaded] = useState(false);
   const [busy, setBusy] = useState<'create' | 'sync' | null>(null);
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
+  const [message, setMessage] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('googleConnection') === 'connected' ? 'College Google account connected.' : '';
+    }
+    return '';
+  });
+  const [error, setError] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('googleConnection') === 'error' ? 'Google account connection did not complete. Please try again.' : '';
+    }
+    return '';
+  });
 
   useEffect(() => {
     void fetch('/api/assessment/google-auth/status', { cache: 'no-store' })
@@ -28,8 +40,6 @@ export function GoogleSheetMarkEntry({ assessmentId }: { assessmentId: string })
       .finally(() => setConnectionLoaded(true));
 
     const params = new URLSearchParams(window.location.search);
-    if (params.get('googleConnection') === 'connected') setMessage('College Google account connected.');
-    if (params.get('googleConnection') === 'error') setError('Google account connection did not complete. Please try again.');
     if (params.has('googleConnection')) window.history.replaceState({}, '', pathname);
   }, [pathname]);
 

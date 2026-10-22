@@ -1,3 +1,15 @@
+### 2026-10-22: Add cohort data Excel export
+
+**Added:** `src/features/cohorts/workbook.ts`, `src/app/api/cohorts/export/route.ts`, `src/app/api/timetable/cohorts/export/route.ts`, `src/tests/cohort-excel-export.test.ts`
+**Modified:** `src/app/(dashboard)/timetable/cohorts/page.tsx`, `src/app/(dashboard)/timetable/cohorts/[id]/edit/page.tsx`, `src/features/cohorts/cohort-table.tsx`, `CHANGES.md`
+- Add ExcelJS workbook generator for cohort data with three comprehensive worksheets:
+  - `Cohorts`: Full master registry containing cohort codes, names, programme details, study periods (Y/S), lifecycle statuses, timetable availability, enrolled learner counts, planned capacity, capacity utilisation %, intake dates, completion dates, and administrative notes.
+  - `Summary & Census`: Executive KPI metrics (active, planned, suspended, completed, archived, timetable availability, average cohort size) with breakdowns by programme and lifecycle status.
+  - `Enrolled Students`: Roster of students linked to the exported cohorts including admission numbers, names, programmes, stages, lifecycle statuses, academic phases, phone, email, and verification status.
+- Implement API export route at `/api/cohorts/export` (with symmetry alias at `/api/timetable/cohorts/export`) respecting HOD role access, multi-department tenant isolation, and query filters (`programmeId`, `status`, `availability`, `search`, and single `cohortId`).
+- Add "Export Excel" buttons to the main Cohorts page header actions, dynamic filter-reactive export in `CohortTable` toolbar, single cohort export in table row dropdown menus, and in the Edit Cohort page header.
+- No database migration or manual follow-up required.
+
 ### 2026-10-21: Submit and lock trainer marks by component
 
 **Added:** `supabase/migrations/20261021160000_component_level_trainer_mark_submissions.sql`

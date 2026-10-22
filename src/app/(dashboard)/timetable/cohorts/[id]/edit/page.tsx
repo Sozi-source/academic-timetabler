@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import {
   ArrowLeft,
+  Download,
   GraduationCap,
   Users,
   UsersRound,
@@ -128,16 +129,31 @@ export default async function EditCohortPage({
           </div>
         }
         actions={
-          <Link
-            href="/timetable/cohorts"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
-          >
-            <ArrowLeft
-              className="size-4"
-              aria-hidden="true"
-            />
-            Back to cohorts
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/timetable/cohorts"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+            >
+              <ArrowLeft
+                className="size-4"
+                aria-hidden="true"
+              />
+              Back to cohorts
+            </Link>
+
+            <a
+              href={`/api/cohorts/export?cohortId=${cohort.id}`}
+              download
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface px-4 text-sm font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary shadow-2xs"
+              title="Export this cohort data to Excel"
+            >
+              <Download
+                className="size-4"
+                aria-hidden="true"
+              />
+              Export Cohort
+            </a>
+          </div>
         }
       />
 

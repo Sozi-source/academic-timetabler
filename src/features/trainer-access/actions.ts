@@ -141,22 +141,15 @@ export async function generateTrainerAccessPinsBulkAction(
     }
 
     const admin = createAdminClient({ timeoutMs: 15_000 });
-    let trainerQuery = admin
+    const trainerQuery = admin
       .from('trainers')
       .select('id,full_name,email,profile_id,is_active,department_id')
       .in('id', trainerIds);
 
-    if (hod.role !== 'system_admin') {
-      if (!hod.activeDepartmentId) {
-        return { status: 'error', message: 'Select a working department before generating PINs.' };
-      }
-      trainerQuery = trainerQuery.eq('department_id', hod.activeDepartmentId);
-    }
-
     const { data: selectedTrainers, error: trainerError } = await trainerQuery;
     if (trainerError) return { status: 'error', message: 'Unable to load the selected trainers.' };
     if (!selectedTrainers || selectedTrainers.length === 0) {
-      return { status: 'error', message: 'No selected trainers are available in your working department.' };
+      return { status: 'error', message: 'No selected trainers are available in the app.' };
     }
 
     const eligibleTrainers = selectedTrainers.filter(
@@ -191,6 +184,7 @@ export async function generateTrainerAccessPinsBulkAction(
       const result = await generateTrainerAccessPin(trainerFormData, {
         hod,
         replaceExisting: false,
+        allowCrossDepartment: true,
       });
 
       if (result.status !== 'success' || !result.pin || !trainer.email) {
@@ -232,6 +226,7 @@ async function generateTrainerAccessPin(
   options: {
     hod?: Awaited<ReturnType<typeof requireHodAccess>>;
     replaceExisting?: boolean;
+    allowCrossDepartment?: boolean;
   } = {},
 ): Promise<TrainerAccessActionState> {
   const hod = options.hod ?? await requireHodAccess();
@@ -246,7 +241,7 @@ async function generateTrainerAccessPin(
     .maybeSingle();
 
   if (trainerError || !trainer) return { status: 'error', message: 'Trainer not found.' };
-  if (hod.role !== 'system_admin' && trainer.department_id !== hod.activeDepartmentId) {
+  if (!options.allowCrossDepartment && hod.role !== 'system_admin' && trainer.department_id !== hod.activeDepartmentId) {
     return { status: 'error', message: 'You cannot manage access for this department.' };
   }
   if (!trainer.is_active || !trainer.email?.trim()) {

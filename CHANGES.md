@@ -1,3 +1,10 @@
+### 2026-10-23: Include all departments in bulk trainer PIN generation
+
+**Modified:** `src/features/trainer-access/actions.ts`, `src/app/(dashboard)/trainers/access/page.tsx`, `CHANGES.md`
+- Allow the HOD-authorized bulk PIN action to generate PINs for eligible trainers across departments. The existing individual PIN action remains department-scoped.
+- Clarify that bulk generation covers all departments in the app.
+- No migration or manual follow-up required. Per user instruction, `npm run check` was not run after this fix.
+
 ### 2026-10-23: Add bulk external trainer PIN generation
 
 **Added:** `src/features/trainer-access/trainer-access-bulk-pin-action.tsx`

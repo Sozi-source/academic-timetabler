@@ -126,7 +126,7 @@ export default async function TrainerAccessPage() {
           <div>
             <h3 className="text-xs font-semibold text-text-primary">Bulk PIN generation</h3>
             <p className="mt-1 max-w-2xl text-[11px] leading-4 text-text-muted">
-              Generate PINs for eligible active trainers who do not have one yet. Existing PINs stay valid.
+              Generate PINs for eligible active trainers across the app who do not have one yet. Existing PINs stay valid.
             </p>
           </div>
           <TrainerAccessBulkPinAction trainers={bulkPinTrainers} />

@@ -1,3 +1,10 @@
+### 2026-10-24: Clarify unit markbook creation errors
+
+**Modified:** `src/features/assessment/actions.ts`, `src/app/(dashboard)/assessment/assessments/page.tsx`, `CHANGES.md`
+- Show a clear prompt when no unit is selected and give distinct messages for duplicate, unavailable, or unauthorized markbook creation.
+- Log safe database error diagnostics on the server and report when a markbook was created without a prepared population.
+- No migration or manual follow-up required.
+
 ### 2026-10-24: Scope markbook rosters to registered unit students
 
 **Added:** `supabase/migrations/20261024103000_scope_markbook_rosters_to_registered_units.sql`

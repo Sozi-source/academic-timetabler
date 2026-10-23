@@ -19,7 +19,19 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
   const bulkFailed = Number(params.bulk_failed ?? 0);
   const activePeriod = options.periods.find((period) => period.status === 'active') ?? null;
   const markbooks = assessments.filter((assessment) => assessment.title === 'Unit Markbook');
-  const errorText = error === 'duplicate' ? 'This unit markbook already exists.' : error ? 'Unit markbook could not be saved.' : '';
+  const errorText = error === 'required'
+    ? 'Select a unit before creating its markbook.'
+    : error === 'duplicate'
+      ? 'This unit markbook already exists.'
+      : error === 'lookup'
+        ? 'Could not check for an existing markbook. Refresh the page and try again.'
+        : error === 'invalid'
+          ? 'The selected unit or academic period is no longer available. Refresh and try again.'
+          : error === 'access'
+            ? 'You do not have permission to create this markbook.'
+            : error
+              ? 'Unit markbook could not be saved. Refresh the page and try again.'
+              : '';
 
   return (
     <div className="space-y-4">
@@ -60,6 +72,12 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
       {bulkCreated !== null ? (
         <p className="rounded-lg bg-success-subtle px-3 py-2 text-xs font-semibold text-success">
           Prepared markbooks for this period. {bulkCreated} created{bulkFailed ? ` · ${bulkFailed} failed` : ''}.
+        </p>
+      ) : null}
+
+      {params.created === '1' && params.population === 'failed' ? (
+        <p className="rounded-lg bg-warning-subtle px-3 py-2 text-xs font-semibold text-warning">
+          The markbook was created, but its student population could not be prepared. Open the marksheet and check unit registrations.
         </p>
       ) : null}
 

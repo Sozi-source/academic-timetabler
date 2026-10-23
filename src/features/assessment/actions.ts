@@ -29,7 +29,7 @@ export async function createAssessmentAction(formData: FormData) {
   }
 
   const supabase = await createClient();
-  const { data: existing } = await supabase
+  const { data: existing, error: lookupError } = await supabase
     .from('assessment_events')
     .select('id')
     .eq('department_id', profile.activeDepartmentId)
@@ -37,6 +37,14 @@ export async function createAssessmentAction(formData: FormData) {
     .eq('unit_id', unitId)
     .eq('title', 'Unit Markbook')
     .maybeSingle();
+
+  if (lookupError) {
+    console.error('Unable to check for an existing unit markbook.', {
+      code: lookupError.code,
+      message: lookupError.message,
+    });
+    redirect('/assessment/assessments?error=lookup');
+  }
 
   if (existing?.id) redirect(`/assessment/marks/${existing.id}`);
 
@@ -58,7 +66,21 @@ export async function createAssessmentAction(formData: FormData) {
     .single();
 
   if (error || !data) {
-    redirect(`/assessment/assessments?error=${error?.code === '23505' ? 'duplicate' : 'save'}`);
+    if (error) {
+      console.error('Unable to create a unit markbook.', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+      });
+    }
+    const errorType = error?.code === '23505'
+      ? 'duplicate'
+      : error?.code === '23503'
+        ? 'invalid'
+        : error?.code === '42501'
+          ? 'access'
+          : 'save';
+    redirect(`/assessment/assessments?error=${errorType}`);
   }
 
   const { error: populationError } = await supabase.rpc('refresh_assessment_population', {

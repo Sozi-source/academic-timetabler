@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
-import { CalendarDays, KeyRound } from 'lucide-react';
+import { KeyRound } from 'lucide-react';
 
 import { ExternalTrainerPinForm } from '@/features/trainer-access/external-trainer-pin-form';
 
 export const metadata: Metadata = {
   title: 'External Trainer Sign In | Academic Planning System',
-  description: 'Sign in to access teaching allocations assigned by the department.',
+  description: 'Access your assigned units, mark entry, and signing sheets.',
 };
 
 export default function ExternalTrainerLoginPage() {
@@ -18,21 +18,16 @@ export default function ExternalTrainerLoginPage() {
             <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-white">
               <KeyRound className="size-4" aria-hidden="true" />
             </span>
-            <h1 className="text-sm font-bold text-text-primary">External Trainer Access</h1>
+            <h1 className="text-sm font-bold text-text-primary">External Trainer Portal</h1>
           </div>
           <p className="mt-2 text-xs leading-5 text-text-secondary">
-            For trainers from other departments with an active trainer record and assigned teaching allocations.
-            Sign in to access marks entry and signing sheets for your units.
+            Access your assigned units, mark entry, and signing sheets.
           </p>
         </div>
         <section className="rounded-xl border border-border bg-white p-5 shadow-lg" aria-labelledby="pin-login-title">
           <h2 id="pin-login-title" className="mb-3 text-sm font-bold text-text-primary">Sign in with your PIN</h2>
           <ExternalTrainerPinForm />
         </section>
-        <p className="flex items-center justify-center gap-1.5 text-center text-[11px] text-text-muted">
-          <CalendarDays className="size-3" aria-hidden="true" />
-          Access is enabled by the department after your trainer details are linked.
-        </p>
       </div>
     </main>
   );

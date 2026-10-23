@@ -32,6 +32,7 @@ import {
   TrainerAccessAction,
 } from '@/features/trainer-access/trainer-access-action';
 import { TrainerAccessPinAction } from '@/features/trainer-access/trainer-access-pin-action';
+import { TrainerAccessBulkPinAction } from '@/features/trainer-access/trainer-access-bulk-pin-action';
 
 export default async function TrainerAccessPage() {
   await requireHodAccess();
@@ -43,6 +44,13 @@ export default async function TrainerAccessPage() {
     summarizeTrainerAccess(
       records,
     );
+  const bulkPinTrainers = records.flatMap((record) => (
+    record.trainerActive
+      && record.email
+      && ['linked', 'ready_to_link', 'account_required'].includes(record.accessState)
+      ? [{ trainerId: record.trainerId, fullName: record.fullName, email: record.email }]
+      : []
+  ));
 
   return (
     <div className="admin-screen space-y-5">
@@ -112,6 +120,16 @@ export default async function TrainerAccessPage() {
               Staff registration
             </Link>
           </div>
+        </div>
+
+        <div className="flex flex-col gap-3 border-b border-border bg-surface-subtle/40 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 className="text-xs font-semibold text-text-primary">Bulk PIN generation</h3>
+            <p className="mt-1 max-w-2xl text-[11px] leading-4 text-text-muted">
+              Generate PINs for eligible active trainers who do not have one yet. Existing PINs stay valid.
+            </p>
+          </div>
+          <TrainerAccessBulkPinAction trainers={bulkPinTrainers} />
         </div>
 
         {records.length ===

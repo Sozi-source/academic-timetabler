@@ -26,6 +26,16 @@ export interface TrainerAccessActionState {
     | 'error';
   message: string | null;
   pin?: string | null;
+  pins?: TrainerAccessPinGrant[];
+  skippedCount?: number;
+  pinErrors?: Array<{ trainerName: string; message: string }>;
+}
+
+export interface TrainerAccessPinGrant {
+  trainerId: string;
+  fullName: string;
+  email: string;
+  pin: string;
 }
 
 export const initialTrainerAccessActionState:

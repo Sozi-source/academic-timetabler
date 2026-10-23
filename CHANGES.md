@@ -1,3 +1,12 @@
+### 2026-10-23: Add bulk external trainer PIN generation
+
+**Added:** `src/features/trainer-access/trainer-access-bulk-pin-action.tsx`
+**Modified:** `src/app/(dashboard)/trainers/access/page.tsx`, `src/features/trainer-access/actions.ts`, `src/features/trainer-access/types.ts`, `CHANGES.md`
+- Generate PINs for selected eligible active trainers in one action and download the one-time results as CSV.
+- Skip trainers who already have a PIN; bulk generation does not replace their existing PINs. The per-trainer Generate PIN action can still replace a PIN when needed.
+- PINs are returned only in the current page response and are not stored in the application. The downloaded CSV contains plain-text PINs and should be deleted after distribution.
+- No migration or manual follow-up required.
+
 ### 2026-10-23: Polish the external trainer portal for desktop and mobile
 
 **Modified:** `src/app/external-trainer/units/page.tsx`, `src/app/external-trainer/units/[allocationId]/page.tsx`, `src/app/external-trainer/units/[allocationId]/assessment/[assessmentId]/marks/page.tsx`, `src/app/external-trainer/documents/page.tsx`, `src/app/portal-theme.css`, `src/features/staff-assessment/online-marks-editor.tsx`, `src/features/trainer-access/external-trainer-shell.tsx`, `src/features/trainer-access/external-trainer-navigation.tsx`, `CHANGES.md`

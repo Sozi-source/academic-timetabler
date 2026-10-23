@@ -4099,6 +4099,7 @@ No database or application runtime changes were executed while preparing this pa
 **Modified:** `src/app/(dashboard)/assessment/assessments/page.tsx`, `CHANGES.md`
 - Replace per-unit Open/Lock entry buttons with one department-wide toggle in the Unit Markbooks header.
 - Keep per-unit Open/Locked status badges. Bulk control only targets non-finalized markbooks with registered students and reports partial failures.
+- Show trainer names only in the Assigned trainers column on desktop and mobile.
 - No migration required.
 
 ### 2026-10-24: Add HOD component mark unlock control

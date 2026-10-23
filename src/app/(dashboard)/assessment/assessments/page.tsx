@@ -97,9 +97,7 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
                 <div className="border-t border-border pt-2 text-xs">
                   <p className="mb-1 font-semibold text-text-secondary">Assigned trainers</p>
                   {assessment.assigned_trainers?.length ? assessment.assigned_trainers.map((trainer) => (
-                    <p key={trainer.id} className="break-words text-text-primary">
-                      {trainer.name}<span className="text-text-muted"> · {trainer.cohorts.join(', ') || 'No cohort'}</span>
-                    </p>
+                    <p key={trainer.id} className="break-words text-text-primary">{trainer.name}</p>
                   )) : <span className="text-text-muted">No trainer assigned</span>}
                 </div>
                 <div className="grid grid-cols-[1fr_auto] gap-2">
@@ -138,10 +136,6 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
                           {assessment.assigned_trainers.map((trainer) => (
                             <li key={trainer.id} className="text-text-primary">
                               <span className="font-semibold">{trainer.name}</span>
-                              <span className="text-text-muted"> · {trainer.cohorts.join(', ') || 'No cohort'}</span>
-                              {trainer.email ? <span className="ml-1 text-text-muted">· {trainer.email}</span> : null}
-                              {!trainer.email ? <span className="ml-1 text-warning-ink">· email needed</span> : null}
-                              {!trainer.accountLinked ? <span className="ml-1 text-danger">· account not linked</span> : null}
                             </li>
                           ))}
                         </ul>

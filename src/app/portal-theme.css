@@ -343,3 +343,55 @@
     animation-iteration-count: 1 !important;
   }
 }
+
+/* External trainer portal: soft, native system typography and calm mark-entry controls. */
+.external-trainer {
+  --text-primary: #24433d;
+  --text-secondary: #526760;
+  --text-muted: #73817c;
+  --font-external: "Segoe UI Variable", "Aptos", "Segoe UI", system-ui, sans-serif;
+  font-family: var(--font-external);
+  color: var(--text-primary);
+  font-weight: 400;
+}
+
+.external-trainer :where(h1, h2, h3) {
+  color: #174d46;
+  font-family: "Aptos Display", "Segoe UI Variable Display", "Segoe UI Variable", "Segoe UI", sans-serif;
+  font-weight: 550;
+  letter-spacing: -0.025em;
+}
+
+.external-trainer :where(.font-bold, .font-semibold) {
+  font-weight: 550;
+}
+
+.external-trainer .external-marks-editor :where(.rounded-none) {
+  border-radius: 0.75rem;
+}
+
+.external-trainer .external-marks-editor :where(.border-slate-300) {
+  border-color: #d7e4e0;
+}
+
+.external-trainer .external-marks-editor :where(.bg-\[\#fffdf5\], .bg-\[\#fbf9f1\]) {
+  background-color: #fff;
+}
+
+.external-trainer .external-marks-editor :where(.bg-\[\#f2ece0\]) {
+  background-color: #f2f7f5;
+}
+
+.external-trainer .external-marks-editor :where(.text-slate-950, .text-slate-900, .text-slate-800) {
+  color: #29443e;
+}
+
+.external-trainer .external-marks-editor :where(.font-bold) {
+  font-weight: 550;
+}
+
+.external-trainer .external-marks-editor :where(.bg-warning-surface) {
+  background-color: #eef2f1;
+  border-color: #d9e2df;
+  color: #5f706a;
+}

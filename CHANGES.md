@@ -1,3 +1,15 @@
+### 2026-10-23: Polish the external trainer portal for desktop and mobile
+
+**Modified:** `src/app/external-trainer/units/page.tsx`, `src/app/external-trainer/units/[allocationId]/page.tsx`, `src/app/external-trainer/units/[allocationId]/assessment/[assessmentId]/marks/page.tsx`, `src/app/external-trainer/documents/page.tsx`, `src/app/portal-theme.css`, `src/features/staff-assessment/online-marks-editor.tsx`, `src/features/trainer-access/external-trainer-shell.tsx`, `src/features/trainer-access/external-trainer-navigation.tsx`, `CHANGES.md`
+- Expand unit and register cards with clearer visual hierarchy and responsive spacing on large screens. Unit cards open the selected cohort's marks directly; the intermediate unit detail URL redirects to marks entry.
+- Align brand, section tabs, and account action in one desktop toolbar. Add a compact bottom navigation bar with safe-area padding and larger touch targets on mobile.
+- Remove the repeated cohort label from external trainer student rows while keeping it visible in the unit context.
+- Use softer system typography, teal title color, and rounded mark-entry controls across the external trainer pages.
+- Remove repeated academic-period labels from external trainer cards and page sections.
+- Wrap compact marks category controls into a visible phone grid, reduce control text sizes, and use a neutral gray background for the locked notice.
+- Remove the large Documents intro panel and retain a compact section heading.
+- No migration or manual follow-up required.
+
 ### 2026-10-23: Simplify and scope the external trainer portal
 
 **Added:** `src/app/(dashboard)/trainers/access/page.tsx`, `src/app/external-trainer/layout.tsx`, `src/app/external-trainer/units/page.tsx`, `src/app/external-trainer/units/[allocationId]/page.tsx`, `src/app/external-trainer/units/[allocationId]/assessment/[assessmentId]/marks/page.tsx`, `src/app/external-trainer/documents/page.tsx`, `src/features/trainer-access/external-trainer-navigation.tsx`, `src/features/trainer-access/external-trainer-session.ts`, `src/features/trainer-access/external-trainer-shell.tsx`

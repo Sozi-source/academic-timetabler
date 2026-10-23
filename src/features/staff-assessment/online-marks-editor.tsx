@@ -75,12 +75,14 @@ export function OnlineMarksEditor({
   workflowStatus,
   componentSubmissions,
   students,
+  showStudentCohort = true,
 }: {
   assessmentId: string;
   trainerEntryOpen: boolean;
   workflowStatus: string | null;
   componentSubmissions: ComponentSubmission[];
   students: StudentRow[];
+  showStudentCohort?: boolean;
 }) {
   const router = useRouter();
 
@@ -459,7 +461,7 @@ export function OnlineMarksEditor({
   }
 
   return (
-    <div className="space-y-3.5 pb-24">
+    <div className={`space-y-3.5 pb-24${showStudentCohort ? '' : ' external-marks-editor'}`}>
       {!trainerEntryOpen ? (
         <section className="rounded-xl border border-warning-border bg-warning-surface px-4 py-3 text-xs font-semibold text-warning-ink">
           Mark entry is locked by the department.
@@ -518,14 +520,15 @@ export function OnlineMarksEditor({
       {/* Mode Switcher & Search Filter */}
       <section className="space-y-2.5 rounded-none border border-slate-300 bg-[#fbf9f1] p-2.5 sm:p-3 shadow-2xs">
         {/* Component Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 [scrollbar-width:none] [-webkit-overflow-scrolling:touch]">
-          <span className="shrink-0 px-1 text-[10px] font-bold uppercase tracking-wide text-slate-600">
+        <div className="space-y-2 pb-0.5">
+          <span className="block px-1 text-[9px] font-bold uppercase tracking-wide text-slate-600">
             Mode:
           </span>
+          <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:flex lg:flex-wrap">
           <button
             type="button"
             onClick={() => setVisibleComponent('all')}
-            className={`h-8 shrink-0 rounded-none px-2.5 text-xs font-bold transition ${
+            className={`min-h-9 w-full rounded-none px-1.5 text-[11px] font-bold leading-4 transition lg:min-h-8 lg:w-auto lg:px-2.5 ${
               visibleComponent === 'all'
                 ? 'bg-[#0b4f4a] text-white shadow-2xs'
                 : 'border border-slate-300 bg-[#fffdf5] text-slate-800 hover:bg-[#f2ece0]'
@@ -538,7 +541,7 @@ export function OnlineMarksEditor({
               key={component.key}
               type="button"
               onClick={() => setVisibleComponent(component.key)}
-              className={`h-8 shrink-0 rounded-none px-2.5 text-xs font-bold transition ${
+              className={`min-h-9 w-full rounded-none px-1.5 text-[11px] font-bold leading-4 transition lg:min-h-8 lg:w-auto lg:px-2.5 ${
                 visibleComponent === component.key
                   ? 'bg-[#0b4f4a] text-white shadow-2xs'
                   : 'border border-slate-300 bg-[#fffdf5] text-slate-800 hover:bg-[#f2ece0]'
@@ -547,11 +550,12 @@ export function OnlineMarksEditor({
             {component.label} /{component.maximum}{componentSubmittedForAllStudents(component.key) ? ' ✓' : ''}
             </button>
           ))}
+          </div>
         </div>
 
         {/* Search Bar & Page Size Selector */}
-        <div className="flex flex-wrap items-center gap-2 pt-1">
-          <div className="relative min-w-[200px] flex-1">
+        <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+          <div className="relative min-w-0 flex-1 basis-48">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-slate-500" />
             <input
               type="text"
@@ -561,7 +565,7 @@ export function OnlineMarksEditor({
                 setCurrentPage(1);
               }}
               placeholder="Search by student name or admission no..."
-              className="h-8 w-full rounded-none border border-slate-300 bg-[#fffdf5] pl-8 pr-8 text-xs text-slate-900 placeholder:text-slate-500 outline-none transition focus:border-[#0b4f4a] focus:bg-white focus:ring-2 focus:ring-[#0b4f4a]/20"
+              className="h-8 w-full rounded-none border border-slate-300 bg-[#fffdf5] pl-8 pr-8 text-[11px] text-slate-900 placeholder:text-slate-500 outline-none transition focus:border-[#0b4f4a] focus:bg-white focus:ring-2 focus:ring-[#0b4f4a]/20"
             />
             {searchQuery ? (
               <button
@@ -638,7 +642,7 @@ export function OnlineMarksEditor({
                       </p>
                       <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] font-medium text-slate-600">
                         <span>{row.student.admissionNumber}</span>
-                        {row.student.cohortName ? (
+                        {showStudentCohort && row.student.cohortName ? (
                           <span className="rounded bg-slate-200/80 px-1 py-0.5 text-[9px] font-bold text-slate-700">
                             {row.student.cohortName}
                           </span>
@@ -749,7 +753,7 @@ export function OnlineMarksEditor({
                       </p>
                       <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-medium text-slate-600">
                         <span className="font-mono whitespace-nowrap">{row.student.admissionNumber}</span>
-                        {row.student.cohortName ? (
+                        {showStudentCohort && row.student.cohortName ? (
                           <span className="rounded bg-slate-200/80 px-1 py-0.5 text-[9px] font-bold text-slate-700">
                             {row.student.cohortName}
                           </span>

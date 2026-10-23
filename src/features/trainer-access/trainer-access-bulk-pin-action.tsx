@@ -64,7 +64,7 @@ export function TrainerAccessBulkPinAction({
           className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-[11px] font-semibold text-white shadow-2xs transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-55"
         >
           {pending ? <LoaderCircle className="size-3.5 animate-spin" aria-hidden="true" /> : <KeyRound className="size-3.5" aria-hidden="true" />}
-          {pending ? 'Generating PINs…' : 'Generate missing PINs'}
+          {pending ? 'Generating PINs…' : 'Regenerate all PINs'}
         </button>
       </form>
 
@@ -76,10 +76,6 @@ export function TrainerAccessBulkPinAction({
             : 'rounded-xl border border-border bg-surface-subtle p-3 text-xs text-text-secondary'}
         >
           <p>{state.message}</p>
-          {state.skippedCount ? (
-            <p className="mt-1 text-[11px]">{state.skippedCount} existing PIN{state.skippedCount === 1 ? ' was' : 's were'} kept.</p>
-          ) : null}
-
           {state.pins?.length ? (
             <div className="mt-3 space-y-2">
               <div className="flex flex-wrap items-center justify-between gap-2">

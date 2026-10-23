@@ -47,7 +47,6 @@ export default async function TrainerAccessPage() {
   const bulkPinTrainers = records.flatMap((record) => (
     record.trainerActive
       && record.email
-      && ['linked', 'ready_to_link', 'account_required'].includes(record.accessState)
       ? [{ trainerId: record.trainerId, fullName: record.fullName, email: record.email }]
       : []
   ));
@@ -126,7 +125,7 @@ export default async function TrainerAccessPage() {
           <div>
             <h3 className="text-xs font-semibold text-text-primary">Bulk PIN generation</h3>
             <p className="mt-1 max-w-2xl text-[11px] leading-4 text-text-muted">
-              Generate PINs for eligible active trainers across the app who do not have one yet. Existing PINs stay valid.
+              Generate or replace PINs for all active trainers across the app with an email address. Existing PINs will stop working.
             </p>
           </div>
           <TrainerAccessBulkPinAction trainers={bulkPinTrainers} />

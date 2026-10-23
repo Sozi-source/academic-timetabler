@@ -159,31 +159,12 @@ export async function generateTrainerAccessPinsBulkAction(
       return { status: 'error', message: 'The selected trainers need an active record and registered email.' };
     }
 
-    const { data: currentPins, error: currentPinsError } = await admin
-      .from('external_trainer_access_pins')
-      .select('trainer_id')
-      .in('trainer_id', eligibleTrainers.map((trainer) => trainer.id));
-    if (currentPinsError) return { status: 'error', message: 'Unable to check existing trainer PINs.' };
-
-    const trainersWithPins = new Set((currentPins ?? []).map((pin) => pin.trainer_id));
-    const trainersToGenerate = eligibleTrainers.filter((trainer) => !trainersWithPins.has(trainer.id));
-    const skippedCount = eligibleTrainers.length - trainersToGenerate.length;
-
-    if (trainersToGenerate.length === 0) {
-      return {
-        status: 'success',
-        message: 'All selected trainers already have PINs. Existing PINs were kept.',
-        pins: [],
-        skippedCount,
-      };
-    }
-
-    const results = await mapWithConcurrency(trainersToGenerate, 4, async (trainer) => {
+    const results = await mapWithConcurrency(eligibleTrainers, 4, async (trainer) => {
       const trainerFormData = new FormData();
       trainerFormData.set('trainerId', trainer.id);
       const result = await generateTrainerAccessPin(trainerFormData, {
         hod,
-        replaceExisting: false,
+        replaceExisting: true,
         allowCrossDepartment: true,
       });
 
@@ -210,10 +191,9 @@ export async function generateTrainerAccessPinsBulkAction(
     return {
       status: pins.length > 0 ? 'success' : 'error',
       message: pins.length > 0
-        ? `Generated ${pins.length} PIN${pins.length === 1 ? '' : 's'}. Download or copy them now; the existing PINs were left unchanged.`
-        : 'No new PINs were generated. Existing PINs were left unchanged.',
+        ? `Generated or replaced ${pins.length} PIN${pins.length === 1 ? '' : 's'}. Previous PINs for these trainers are no longer valid.`
+        : 'No PINs were generated. Existing PINs remain valid for trainers whose generation failed.',
       pins,
-      skippedCount,
       pinErrors,
     };
   } catch {

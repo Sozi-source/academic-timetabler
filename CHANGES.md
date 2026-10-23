@@ -1,3 +1,9 @@
+### 2026-10-23: Link external trainer login from staff sign-in
+
+**Modified:** `src/features/auth/unified-login-card.tsx`, `CHANGES.md`
+- Add an external trainer PIN sign-in link beneath the regular staff login form. The link appears when the Staff tab is selected and points to `/external-trainer/login`.
+- Keep staff and student authentication flows unchanged. No migration or manual follow-up required.
+
 ### 2026-10-23: Add PIN sign-in for the external trainer portal
 
 **Added:** `supabase/migrations/20261023140000_external_trainer_access_pins.sql`, `supabase/migrations/20261023150000_external_trainer_pin_rate_limits.sql`, `src/app/(auth)/external-trainer/login/page.tsx`, `src/app/api/external-trainer/pin-login/route.ts`, `src/app/external-trainer/page.tsx`, `src/features/trainer-access/external-trainer-pin-form.tsx`, `src/features/trainer-access/trainer-access-pin-action.tsx`

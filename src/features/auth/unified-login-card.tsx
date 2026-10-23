@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   CalendarDays,
   GraduationCap,
@@ -75,7 +76,18 @@ export function UnifiedLoginCard({
 
         {/* Selected Form Component */}
         {role === 'staff' ? (
-          <LoginForm nextPath={nextPath} />
+          <>
+            <LoginForm nextPath={nextPath} />
+            <p className="mt-4 border-t border-border pt-3 text-center text-xs text-text-muted">
+              External trainer?{' '}
+              <Link
+                href="/external-trainer/login"
+                className="font-semibold text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+              >
+                Sign in with your PIN
+              </Link>
+            </p>
+          </>
         ) : (
           <StudentLoginForm />
         )}

@@ -25,10 +25,12 @@ export interface TrainerAccessActionState {
     | 'success'
     | 'error';
   message: string | null;
+  pin?: string | null;
 }
 
 export const initialTrainerAccessActionState:
 TrainerAccessActionState = {
   status: 'idle',
   message: null,
+  pin: null,
 };

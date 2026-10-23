@@ -31,6 +31,7 @@ import {
 import {
   TrainerAccessAction,
 } from '@/features/trainer-access/trainer-access-action';
+import { TrainerAccessPinAction } from '@/features/trainer-access/trainer-access-pin-action';
 
 export default async function TrainerAccessPage() {
   await requireHodAccess();
@@ -93,8 +94,7 @@ export default async function TrainerAccessPage() {
             </h2>
 
             <p className="mt-0.5 text-[11px] text-text-muted">
-              Trainers use their registered
-              email to create an account.
+              Link trainer accounts and generate one time shareable PINs for the external trainer portal.
             </p>
           </div>
 
@@ -194,6 +194,10 @@ export default async function TrainerAccessPage() {
                           >
                             Add email
                           </Link>
+                        ) : null}
+
+                        {record.trainerActive && record.email && ['linked', 'ready_to_link', 'account_required'].includes(record.accessState) ? (
+                          <TrainerAccessPinAction trainerId={record.trainerId} />
                         ) : null}
 
                         <Link

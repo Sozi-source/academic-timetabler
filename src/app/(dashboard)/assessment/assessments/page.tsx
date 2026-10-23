@@ -7,7 +7,6 @@ import { PageHeader } from '@/components/ui/page-header';
 import { createAllAllocatedMarkbooksAction, createAssessmentAction } from '@/features/assessment/actions';
 import { getAssessments, getAssessmentSetupOptions } from '@/features/assessment/queries';
 import { requireHodAccess } from '@/features/auth/authorization';
-import { MarkbookDeleteButton } from '@/features/assessment/markbook-delete-button';
 import { DepartmentTrainerEntryControl } from '@/features/assessment/department-trainer-entry-control';
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -101,8 +100,7 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
                   )) : <span className="text-text-muted">No trainer assigned</span>}
                 </div>
                 <div className="grid grid-cols-[1fr_auto] gap-2">
-                  <Link href={`/assessment/marks/${assessment.id}`} className="inline-flex min-h-11 items-center justify-center rounded-lg border border-border-strong bg-surface px-3 text-center text-xs font-semibold text-text-secondary hover:border-primary hover:text-primary">Open workflow</Link>
-                  <MarkbookDeleteButton assessmentId={assessment.id} />
+                  <Link href={`/assessment/marks/${assessment.id}`} className="col-span-2 inline-flex min-h-11 items-center justify-center rounded-lg border border-border-strong bg-surface px-3 text-center text-xs font-semibold text-text-secondary hover:border-primary hover:text-primary">Open marksheet</Link>
                 </div>
               </article>
             );
@@ -148,8 +146,7 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end gap-2">
-                        <Link href={`/assessment/marks/${assessment.id}`} className="inline-flex h-8 items-center rounded-lg border border-border-strong bg-surface px-3 font-semibold text-text-secondary hover:border-primary hover:text-primary">Open workflow</Link>
-                        <MarkbookDeleteButton assessmentId={assessment.id} />
+                        <Link href={`/assessment/marks/${assessment.id}`} className="inline-flex h-8 items-center rounded-lg border border-border-strong bg-surface px-3 font-semibold text-text-secondary hover:border-primary hover:text-primary">Open marksheet</Link>
                       </div>
                     </td>
                   </tr>

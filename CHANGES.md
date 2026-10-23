@@ -1,3 +1,10 @@
+### 2026-10-24: Simplify unit markbook list actions
+
+**Modified:** `src/app/(dashboard)/assessment/assessments/page.tsx`, `CHANGES.md`
+- Make the unit row action open the marksheet directly and remove the Delete action from the unit list.
+- Keep zero-population markbooks accessible so their registration roster can be reviewed and corrected.
+- No migration or manual follow-up required.
+
 ### 2026-10-24: Match assigned trainers across equivalent units
 
 **Modified:** `src/features/assessment/queries.ts`, `CHANGES.md`

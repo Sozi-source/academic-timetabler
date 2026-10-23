@@ -3,6 +3,11 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { createAdminClient } from '@/lib/supabase/admin';
+import { createClient } from '@/lib/supabase/server';
+import {
+  createExternalTrainerSessionToken,
+  externalTrainerSessionCookieName,
+} from '@/features/trainer-access/external-trainer-session';
 import { getServerEnvironment } from '@/lib/validation/environment';
 
 const pinSchema = z.object({
@@ -81,5 +86,28 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'Unable to sign in right now. Please try again.' }, { status: 503 });
   }
 
-  return NextResponse.json({ tokenHash: linkData.properties.hashed_token });
+  const supabase = await createClient();
+  const { data: sessionData, error: sessionError } = await supabase.auth.verifyOtp({
+    token_hash: linkData.properties.hashed_token,
+    type: 'magiclink',
+  });
+
+  if (sessionError || !sessionData.user) {
+    return NextResponse.json({ message: 'PIN accepted, but sign-in could not be completed. Please contact the department.' }, { status: 503 });
+  }
+
+  const response = NextResponse.json({ success: true });
+  response.cookies.set(
+    externalTrainerSessionCookieName,
+    createExternalTrainerSessionToken(profile.id),
+    {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7,
+      path: '/',
+    },
+  );
+
+  return response;
 }

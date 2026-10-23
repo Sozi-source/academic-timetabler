@@ -4,8 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AlertCircle, LoaderCircle, LogIn, LockKeyhole } from 'lucide-react';
 
-import { createClient } from '@/lib/supabase/client';
-
 export function ExternalTrainerPinForm() {
   const router = useRouter();
   const [pin, setPin] = useState('');
@@ -23,25 +21,14 @@ export function ExternalTrainerPinForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pin }),
       });
-      const result = await response.json() as { message?: string; tokenHash?: string };
+      const result = await response.json() as { message?: string; success?: boolean };
 
-      if (!response.ok || !result.tokenHash) {
+      if (!response.ok || !result.success) {
         setMessage(result.message ?? 'Unable to sign in. Check your PIN and try again.');
         return;
       }
 
-      const supabase = createClient();
-      const { error } = await supabase.auth.verifyOtp({
-        token_hash: result.tokenHash,
-        type: 'magiclink',
-      });
-
-      if (error) {
-        setMessage('Unable to sign in. Ask the department to generate a new PIN.');
-        return;
-      }
-
-      router.replace('/external-trainer');
+      router.replace('/external-trainer/units');
       router.refresh();
     } catch {
       setMessage('Unable to sign in right now. Please try again.');

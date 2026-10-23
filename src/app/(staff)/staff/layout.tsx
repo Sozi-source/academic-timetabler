@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
+import { redirect } from 'next/navigation';
 
 import { ServiceWorkerRegistration } from '@/components/pwa/service-worker-registration';
 import {
@@ -8,6 +9,7 @@ import {
 import {
   requireTrainerAccess,
 } from '@/features/auth/authorization';
+import { isExternalTrainerSession } from '@/features/trainer-access/external-trainer-session';
 
 export const metadata: Metadata = {
   title: 'Trainer Portal',
@@ -46,8 +48,11 @@ export default async function StaffLayout({
 }: Readonly<{
   children: ReactNode;
 }>) {
-  const profile =
-    await requireTrainerAccess();
+  const profile = await requireTrainerAccess();
+
+  if (profile.role === 'trainer' && await isExternalTrainerSession(profile.id)) {
+    redirect('/external-trainer/units');
+  }
 
   return (
     <>

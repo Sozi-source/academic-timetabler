@@ -1,19 +1,12 @@
-### 2026-10-23: Move trainer access under Staff & Trainers
+### 2026-10-23: Simplify and scope the external trainer portal
 
-**Added:** `src/app/(dashboard)/trainers/access/page.tsx`
-**Modified:** `src/app/(dashboard)/timetable/trainers/access/page.tsx`, `src/app/(dashboard)/timetable/trainers/page.tsx`, `src/app/(dashboard)/trainers/page.tsx`, `src/features/trainer-access/actions.ts`, `CHANGES.md`
-- Move the trainer access register and PIN management page to `/trainers/access` and add its entry point to Staff & Trainer Management.
-- Remove the Staff Access link from the Timetable trainers page. Redirect the previous `/timetable/trainers/access` URL to the new route and revalidate the new page after access changes.
-- No migration or manual follow-up required.
-
-### 2026-10-23: Move trainer access under Staff & Trainers
-
-**Added:** `src/app/(dashboard)/trainers/access/page.tsx`
-**Modified:** `src/app/(dashboard)/timetable/trainers/access/page.tsx`, `src/app/(dashboard)/timetable/trainers/page.tsx`, `src/app/(dashboard)/trainers/page.tsx`, `src/features/trainer-access/actions.ts`, `src/features/trainer-access/external-trainer-pin-form.tsx`, `src/app/api/external-trainer/pin-login/route.ts`, `CHANGES.md`
-- Move trainer access register and PIN management to `/trainers/access`, with its entry point on Staff & Trainer Management. Remove the link from the Timetable trainers page.
-- Redirect the previous `/timetable/trainers/access` URL to the new page and revalidate the new route after access changes.
-- Verify the magic-link token hash with Supabase using its token hash and type, without an extra email field. This addresses the PIN sign-in error shown after the PIN was accepted.
-- No migration or manual follow-up required.
+**Added:** `src/app/(dashboard)/trainers/access/page.tsx`, `src/app/external-trainer/layout.tsx`, `src/app/external-trainer/units/page.tsx`, `src/app/external-trainer/units/[allocationId]/page.tsx`, `src/app/external-trainer/units/[allocationId]/assessment/[assessmentId]/marks/page.tsx`, `src/app/external-trainer/documents/page.tsx`, `src/features/trainer-access/external-trainer-navigation.tsx`, `src/features/trainer-access/external-trainer-session.ts`, `src/features/trainer-access/external-trainer-shell.tsx`
+**Modified:** `src/app/(dashboard)/timetable/trainers/access/page.tsx`, `src/app/(dashboard)/timetable/trainers/page.tsx`, `src/app/(dashboard)/trainers/page.tsx`, `src/app/(staff)/staff/layout.tsx`, `src/app/(auth)/external-trainer/login/page.tsx`, `src/app/api/external-trainer/pin-login/route.ts`, `src/app/external-trainer/page.tsx`, `src/features/auth/actions.ts`, `src/features/staff-assessment/authorization.ts`, `src/features/staff-assessment/queries.ts`, `src/features/trainer-access/actions.ts`, `src/features/trainer-access/external-trainer-pin-form.tsx`, `CHANGES.md`
+- Move Trainer Access to Staff & Trainer Management at `/trainers/access`; retain the old timetable URL as a redirect.
+- Give PIN sessions a compact portal with only My Units and Documents. My Units opens assigned unit marks entry. Documents provides class, CAT, and exam attendance registers for assigned cohorts only.
+- Reuse the online marks editor and existing component submission workflow so Assignment, Presentation, RAT, CAT, and Exam can be submitted separately by cohort. A submitted component remains locked while other components stay editable.
+- Verify PINs into server-managed sessions and keep PIN sessions out of the full `/staff` workspace. Enforce assigned allocation checks for trainer unit pages and attendance downloads.
+- Keep the PIN sign-in screen to a single card. No migration or manual follow-up required; component-level submission migration already exists.
 
 ### 2026-10-23: Link external trainer login from staff sign-in
 

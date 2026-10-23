@@ -1,10 +1,11 @@
 'use server';
 
-import { headers } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
 import { createClient } from '@/lib/supabase/server';
+import { externalTrainerSessionCookieName } from '@/features/trainer-access/external-trainer-session';
 
 import type {
   LoginActionState,
@@ -114,6 +115,15 @@ export async function loginAction(
 
 export async function logoutAction(): Promise<void> {
   const supabase = await createClient();
+  const cookieStore = await cookies();
+
+  cookieStore.set(externalTrainerSessionCookieName, '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 0,
+    path: '/',
+  });
 
   await supabase.auth.signOut();
 

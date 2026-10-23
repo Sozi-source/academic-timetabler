@@ -3,6 +3,8 @@ import 'server-only';
 import {
   createClient,
 } from '@/lib/supabase/server';
+import { getAuthenticatedProfile } from '@/features/auth/queries';
+import { getStaffWorkspace } from './queries';
 
 export async function trainerCanAccessAssessment(
   assessmentId: string,
@@ -15,6 +17,13 @@ export async function trainerCanAccessAssessment(
 
   if (assessmentId.startsWith('alloc-')) {
     const allocId = assessmentId.replace('alloc-', '');
+    const profile = await getAuthenticatedProfile();
+
+    if (profile?.role === 'trainer') {
+      const workspace = await getStaffWorkspace(profile.id).catch(() => null);
+      return Boolean(workspace?.allocations.some((allocation) => allocation.allocationId === allocId));
+    }
+
     const { data: alloc } = await supabase
       .from('teaching_allocations')
       .select('id')

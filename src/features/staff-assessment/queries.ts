@@ -5,6 +5,7 @@ import {
 } from 'react';
 
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getAuthenticatedProfile } from '@/features/auth/queries';
 
 import type {
   StaffAssessmentSummary,
@@ -793,10 +794,18 @@ export async function requireStaffAllocation({
   profileId: string;
   allocationId: string;
 }) {
+  const authenticatedProfile = await getAuthenticatedProfile();
+  const enforceAssignedScope =
+    authenticatedProfile?.id === profileId && authenticatedProfile.role === 'trainer';
+
   let workspace: StaffWorkspace | null = null;
   try {
     workspace = await getStaffWorkspace(profileId);
   } catch {
+    if (enforceAssignedScope) {
+      return null;
+    }
+
     workspace = {
       trainerId: profileId,
       trainerName: 'Staff Member',
@@ -817,6 +826,10 @@ export async function requireStaffAllocation({
       workspace,
       allocation,
     };
+  }
+
+  if (enforceAssignedScope) {
+    return null;
   }
 
   // Fallback: Fetch allocation directly via admin client for HOD/Admin oversight

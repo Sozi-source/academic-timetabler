@@ -1,3 +1,12 @@
+### 2026-10-24: Scope markbook rosters to registered unit students
+
+**Added:** `supabase/migrations/20261024103000_scope_markbook_rosters_to_registered_units.sql`
+**Modified:** `CHANGES.md`
+- Build automatic markbook rosters only from admitted/active students with a registered unit registration for the markbook unit or an explicitly confirmed shared offering.
+- Require the student, unit, and confirmed shared offering to belong to the same department. Cohort membership alone no longer enrolls students across every unit assigned to that cohort.
+- Keep trainer-entry rosters frozen and leave existing saved marks and populations untouched. Existing markbooks with questionable candidates need review before their roster is regenerated.
+- Manual follow-up: apply the migration with `supabase db push`; review existing markbooks that already contain cohort-only candidates before refreshing them.
+
 ### 2026-10-24: Simplify unit markbook list actions
 
 **Modified:** `src/app/(dashboard)/assessment/assessments/page.tsx`, `CHANGES.md`

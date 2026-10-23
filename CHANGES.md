@@ -4093,6 +4093,14 @@ No database or application runtime changes were executed while preparing this pa
 - Manual follow-up: apply the migration with `npx supabase db push`, then open a student's registry profile and use **Class Assignments** to attach their registered units to existing classes. This migration does not assign any student automatically.
 - No existing records are rewritten. Assignments do not make a student part of the target cohort for timetable or cohort reports.
 
+### 2026-10-24: Add department-wide trainer entry lock control
+
+**Added:** `src/features/assessment/department-trainer-entry-control.tsx`
+**Modified:** `src/app/(dashboard)/assessment/assessments/page.tsx`, `CHANGES.md`
+- Replace per-unit Open/Lock entry buttons with one department-wide toggle in the Unit Markbooks header.
+- Keep per-unit Open/Locked status badges. Bulk control only targets non-finalized markbooks with registered students and reports partial failures.
+- No migration required.
+
 ### 2026-10-24: Add HOD component mark unlock control
 
 **Added:** `supabase/migrations/20261024090000_unlock_submitted_mark_components.sql`

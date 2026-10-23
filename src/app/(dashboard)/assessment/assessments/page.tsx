@@ -8,7 +8,7 @@ import { createAllAllocatedMarkbooksAction, createAssessmentAction } from '@/fea
 import { getAssessments, getAssessmentSetupOptions } from '@/features/assessment/queries';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { MarkbookDeleteButton } from '@/features/assessment/markbook-delete-button';
-import { TrainerEntryControl } from '@/features/assessment/trainer-entry-control';
+import { DepartmentTrainerEntryControl } from '@/features/assessment/department-trainer-entry-control';
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -32,18 +32,29 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
         backLabel="Assessments"
         context={<Badge variant="neutral">{markbooks.length} units</Badge>}
         actions={
-          activePeriod ? (
-            <form action={createAllAllocatedMarkbooksAction}>
-              <input type="hidden" name="academicPeriodId" value={activePeriod.id} />
-              <button
-                type="submit"
-                className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 text-xs font-semibold text-white shadow-xs transition hover:bg-primary-hover active:scale-95 sm:w-auto"
-              >
-                <Sparkles className="size-3.5" />
-                Generate all allocated markbooks
-              </button>
-            </form>
-          ) : null
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <DepartmentTrainerEntryControl
+              markbooks={markbooks.flatMap((assessment) => (
+                assessment.status !== 'closed'
+                  && !assessment.exam_marks_finalized_at
+                  && (assessment.population?.[0]?.count ?? 0) > 0
+                  ? [{ assessmentId: assessment.id, isOpen: assessment.trainer_entry_open }]
+                  : []
+              ))}
+            />
+            {activePeriod ? (
+              <form action={createAllAllocatedMarkbooksAction}>
+                <input type="hidden" name="academicPeriodId" value={activePeriod.id} />
+                <button
+                  type="submit"
+                  className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 text-xs font-semibold text-white shadow-xs transition hover:bg-primary-hover active:scale-95 sm:w-auto"
+                >
+                  <Sparkles className="size-3.5" />
+                  Generate all allocated markbooks
+                </button>
+              </form>
+            ) : null}
+          </div>
         }
       />
 
@@ -70,7 +81,6 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
       <Card className="overflow-hidden">
         <div className="space-y-3 p-3 md:hidden">
           {markbooks.map((assessment) => {
-            const finalized = Boolean(assessment.exam_marks_finalized_at || assessment.status === 'closed');
             return (
               <article key={assessment.id} className="space-y-3 rounded-lg border border-border p-3">
                 <div className="flex items-start justify-between gap-3">
@@ -83,7 +93,6 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
                 </div>
                 <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
                   <span className="text-text-secondary">{assessment.population?.[0]?.count ?? 0} students</span>
-                  <TrainerEntryControl assessmentId={assessment.id} isOpen={assessment.trainer_entry_open} disabled={finalized || !assessment.population?.[0]?.count} />
                 </div>
                 <div className="border-t border-border pt-2 text-xs">
                   <p className="mb-1 font-semibold text-text-secondary">Assigned trainers</p>
@@ -115,7 +124,6 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
             </thead>
             <tbody className="divide-y divide-border">
               {markbooks.map((assessment) => {
-                const finalized = Boolean(assessment.exam_marks_finalized_at || assessment.status === 'closed');
                 return (
                   <tr key={assessment.id}>
                     <td className="px-4 py-2.5 font-semibold text-text-primary">
@@ -142,7 +150,6 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
                     <td className="px-3 py-2.5">
                       <div className="flex flex-col gap-1">
                         <Badge variant={assessment.trainer_entry_open ? 'success' : 'neutral'}>{assessment.trainer_entry_open ? 'Open' : 'Locked'}</Badge>
-                        <TrainerEntryControl assessmentId={assessment.id} isOpen={assessment.trainer_entry_open} disabled={finalized || !assessment.population?.[0]?.count} />
                       </div>
                     </td>
                     <td className="px-4 py-3 text-right">

@@ -53,6 +53,10 @@ export function canUsePostLoginPath(
         '/staff' ||
       path.startsWith(
         '/staff/',
+      ) ||
+      path === '/external-trainer'
+      || path.startsWith(
+        '/external-trainer/',
       )
     );
   }
@@ -62,6 +66,10 @@ export function canUsePostLoginPath(
       '/staff' ||
     path.startsWith(
       '/staff/',
+    ) ||
+    path === '/external-trainer'
+    || path.startsWith(
+      '/external-trainer/',
     )
   );
 }

@@ -1,3 +1,12 @@
+### 2026-10-23: Add provisioned external trainer portal
+
+**Added:** `src/app/(auth)/external-trainer/login/page.tsx`, `src/app/external-trainer/page.tsx`
+**Modified:** `src/features/auth/routing.ts`, `CHANGES.md`
+- Add a separate external trainer sign-in path at `/external-trainer/login` and portal at `/external-trainer` for trainers whose accounts are provisioned and linked to trainer allocations.
+- Show allocated unit marks-entry routes and signing-sheet downloads, using existing trainer-scoped workspace queries and protected staff endpoints.
+- Keep the standard staff sign-in and `/trainer` exam attendance routes unchanged. Existing generated trainer unit invite links remain available.
+- No database migration required. HODs continue to provision trainer access from the trainer access register after the trainer account matches the registered trainer email.
+
 ### 2026-10-22: Add cohort data Excel export
 
 **Added:** `src/features/cohorts/workbook.ts`, `src/app/api/cohorts/export/route.ts`, `src/app/api/timetable/cohorts/export/route.ts`, `src/tests/cohort-excel-export.test.ts`

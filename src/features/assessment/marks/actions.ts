@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 import { getAssessmentById, getAssessmentPopulation } from '@/features/assessment/queries';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { createClient } from '@/lib/supabase/server';
+import { z } from 'zod';
 
 function text(formData: FormData, name: string) {
   const value = formData.get(name);
@@ -43,4 +44,33 @@ export async function saveAssessmentAttendanceAction(formData: FormData) {
   revalidatePath(`/assessment/population/${assessmentId}`);
   if (error) redirect(`/assessment/marks/${assessmentId}?error=attendance`);
   redirect(`/assessment/marks/${assessmentId}?attendance=saved`);
+}
+
+export async function unlockAssessmentMarkComponentAction(formData: FormData) {
+  await requireHodAccess();
+  const parsed = z.object({
+    assessmentId: z.uuid(),
+    cohortId: z.union([z.uuid(), z.literal('all')]),
+    component: z.enum(['assignment', 'presentation', 'rat', 'cat', 'exam']),
+  }).safeParse({
+    assessmentId: formData.get('assessmentId'),
+    cohortId: formData.get('cohortId'),
+    component: formData.get('component'),
+  });
+
+  if (!parsed.success) return;
+  const { assessmentId, cohortId, component } = parsed.data;
+  const assessment = await getAssessmentById(assessmentId);
+  if (!assessment) redirect('/assessment/marks?error=not-found');
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc('unlock_assessment_mark_component_submission', {
+    target_assessment_id: assessmentId,
+    target_cohort_id: cohortId === 'all' ? null : cohortId,
+    target_component_key: component,
+  });
+
+  if (error) redirect(`/assessment/marks/${assessmentId}?error=component-unlock`);
+  revalidatePath(`/assessment/marks/${assessmentId}`);
+  redirect(`/assessment/marks/${assessmentId}?component_unlocked=${component}`);
 }

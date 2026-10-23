@@ -43,3 +43,33 @@ export const getAssessmentResultCount = cache(async (assessmentId: string) => {
   if (error) throw new Error(`Unable to load assessment results count: ${error.message}`);
   return count ?? 0;
 });
+
+export const getAssessmentMarkComponentSubmissions = cache(async (assessmentId: string) => {
+  await requireHodAccess();
+  const supabase = await createClient();
+  const [submissionResult, assessmentResult] = await Promise.all([
+    supabase
+      .from('assessment_mark_component_submissions')
+      .select('id,cohort_id,component_key,submitted_at,cohort:cohorts(code,name)')
+      .eq('assessment_id', assessmentId)
+      .order('submitted_at', { ascending: false }),
+    supabase
+      .from('assessment_events')
+      .select('operational_workflow_status,marks_submitted_at,exam_marks_finalized_at,status')
+      .eq('id', assessmentId)
+      .maybeSingle(),
+  ]);
+  if (submissionResult.error) throw new Error(`Unable to load submitted mark components: ${submissionResult.error.message}`);
+  if (assessmentResult.error) throw new Error(`Unable to load markbook status: ${assessmentResult.error.message}`);
+
+  const assessment = assessmentResult.data;
+  const workflowStatus = assessment?.operational_workflow_status;
+  return {
+    submissions: submissionResult.data ?? [],
+    canUnlock: Boolean(assessment)
+      && !assessment?.marks_submitted_at
+      && !assessment?.exam_marks_finalized_at
+      && assessment?.status !== 'closed'
+      && !['submitted', 'finalised', 'archived'].includes(workflowStatus ?? ''),
+  };
+});

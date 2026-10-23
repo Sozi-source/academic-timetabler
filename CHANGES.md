@@ -4093,3 +4093,11 @@ No database or application runtime changes were executed while preparing this pa
 - Manual follow-up: apply the migration with `npx supabase db push`, then open a student's registry profile and use **Class Assignments** to attach their registered units to existing classes. This migration does not assign any student automatically.
 - No existing records are rewritten. Assignments do not make a student part of the target cohort for timetable or cohort reports.
 
+### 2026-10-24: Add HOD component mark unlock control
+
+**Added:** `supabase/migrations/20261024090000_unlock_submitted_mark_components.sql`
+**Modified:** `src/features/assessment/marks/actions.ts`, `src/features/assessment/marks/queries.ts`, `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`, `CHANGES.md`
+- Add HOD/system administrator controls to unlock an individual submitted component for its cohort from Assessment → Unit markbooks → Open workflow.
+- Unlocking removes only the component submission lock; saved marks remain available for correction. Department membership is checked in the database, and finalized markbooks cannot be reopened through this control.
+- Apply the new Supabase migration before using the button.
+

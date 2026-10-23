@@ -8,7 +8,8 @@ import { DownloadAssessmentMarkbookButton } from '@/features/assessment/markbook
 import { BulkUploadDialog } from '@/features/assessment/marks/bulk-upload-dialog';
 import { TrainerMarkInvites } from '@/features/assessment/trainer-mark-invites';
 import { getAssessmentById, getAssessmentPopulation } from '@/features/assessment/queries';
-import { getAssessmentResultCount } from '@/features/assessment/marks/queries';
+import { unlockAssessmentMarkComponentAction } from '@/features/assessment/marks/actions';
+import { getAssessmentMarkComponentSubmissions, getAssessmentResultCount } from '@/features/assessment/marks/queries';
 import { requireHodAccess } from '@/features/auth/authorization';
 
 export default async function AssessmentMarkWorkflowPage({
@@ -18,10 +19,11 @@ export default async function AssessmentMarkWorkflowPage({
 }) {
   await requireHodAccess();
   const { assessmentId } = await params;
-  const [assessment, population, resultCount] = await Promise.all([
+  const [assessment, population, resultCount, componentSubmissionState] = await Promise.all([
     getAssessmentById(assessmentId),
     getAssessmentPopulation(assessmentId),
     getAssessmentResultCount(assessmentId),
+    getAssessmentMarkComponentSubmissions(assessmentId),
   ]);
 
   if (!assessment) notFound();
@@ -96,6 +98,47 @@ export default async function AssessmentMarkWorkflowPage({
       />
 
       {!isComplete ? <TrainerMarkInvites assessmentId={assessment.id} /> : null}
+
+      {componentSubmissionState.submissions.length > 0 ? (
+        <section className="space-y-3 rounded-xl border border-border bg-surface p-4">
+          <div>
+            <h2 className="text-sm font-semibold text-text-primary">Submitted mark components</h2>
+            <p className="mt-1 text-xs leading-5 text-text-muted">
+              Unlock a submitted component for correction. Its saved marks remain in place and become editable again.
+            </p>
+          </div>
+          <ul className="divide-y divide-border rounded-lg border border-border">
+            {componentSubmissionState.submissions.map((submission) => {
+              const cohort = Array.isArray(submission.cohort) ? submission.cohort[0] : submission.cohort;
+              const componentLabel = submission.component_key.toUpperCase();
+              const cohortLabel = cohort?.code || cohort?.name || 'All cohorts';
+              return (
+                <li key={submission.id} className="flex flex-wrap items-center justify-between gap-3 px-3 py-2.5">
+                  <p className="text-xs text-text-primary">
+                    <span className="font-semibold">{componentLabel}</span>
+                    <span className="text-text-muted"> Â· {cohortLabel}</span>
+                  </p>
+                  <form action={unlockAssessmentMarkComponentAction}>
+                    <input type="hidden" name="assessmentId" value={assessment.id} />
+                    <input type="hidden" name="cohortId" value={submission.cohort_id ?? 'all'} />
+                    <input type="hidden" name="component" value={submission.component_key} />
+                    <button
+                      type="submit"
+                      disabled={!componentSubmissionState.canUnlock}
+                      className="inline-flex min-h-9 items-center justify-center rounded-lg border border-warning-border bg-warning-surface px-3 text-xs font-semibold text-warning-ink transition hover:bg-warning-surface/70 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      Unlock {componentLabel}
+                    </button>
+                  </form>
+                </li>
+              );
+            })}
+          </ul>
+          {!componentSubmissionState.canUnlock ? (
+            <p className="text-[11px] text-text-muted">This markbook has been finalized and cannot be reopened from this control.</p>
+          ) : null}
+        </section>
+      ) : null}
 
       {/* Summary Telemetry */}
       <div className="grid gap-3 sm:grid-cols-3">

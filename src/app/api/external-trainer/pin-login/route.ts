@@ -81,5 +81,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'Unable to sign in right now. Please try again.' }, { status: 503 });
   }
 
-  return NextResponse.json({ email: profile.email, tokenHash: linkData.properties.hashed_token });
+  return NextResponse.json({ tokenHash: linkData.properties.hashed_token });
 }

@@ -66,11 +66,17 @@ export default async function StaffManagementPage() {
         backHref="/dashboard"
         backLabel="Dashboard"
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
               <Link href="/timetable/trainers/availability">
                 <CalendarCheck className="size-4" aria-hidden="true" />
                 Availability
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/trainers/access">
+                <KeyRound className="size-4" aria-hidden="true" />
+                Trainer Access
               </Link>
             </Button>
             <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">

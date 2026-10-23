@@ -97,7 +97,11 @@ export async function provisionTrainerAccessAction(
   );
 
   revalidatePath(
-    '/timetable/trainers/access',
+    '/trainers',
+  );
+
+  revalidatePath(
+    '/trainers/access',
   );
 
   return {
@@ -202,6 +206,6 @@ async function generateTrainerAccessPin(
 
   if (pinError) return { status: 'error', message: `Unable to save trainer PIN: ${pinError.message}` };
 
-  revalidatePath('/timetable/trainers/access');
+  revalidatePath('/trainers/access');
   return { status: 'success', message: 'Share this PIN with the trainer. It will not be shown again.', pin };
 }

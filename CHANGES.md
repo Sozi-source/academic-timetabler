@@ -1,3 +1,20 @@
+### 2026-10-23: Move trainer access under Staff & Trainers
+
+**Added:** `src/app/(dashboard)/trainers/access/page.tsx`
+**Modified:** `src/app/(dashboard)/timetable/trainers/access/page.tsx`, `src/app/(dashboard)/timetable/trainers/page.tsx`, `src/app/(dashboard)/trainers/page.tsx`, `src/features/trainer-access/actions.ts`, `CHANGES.md`
+- Move the trainer access register and PIN management page to `/trainers/access` and add its entry point to Staff & Trainer Management.
+- Remove the Staff Access link from the Timetable trainers page. Redirect the previous `/timetable/trainers/access` URL to the new route and revalidate the new page after access changes.
+- No migration or manual follow-up required.
+
+### 2026-10-23: Move trainer access under Staff & Trainers
+
+**Added:** `src/app/(dashboard)/trainers/access/page.tsx`
+**Modified:** `src/app/(dashboard)/timetable/trainers/access/page.tsx`, `src/app/(dashboard)/timetable/trainers/page.tsx`, `src/app/(dashboard)/trainers/page.tsx`, `src/features/trainer-access/actions.ts`, `src/features/trainer-access/external-trainer-pin-form.tsx`, `src/app/api/external-trainer/pin-login/route.ts`, `CHANGES.md`
+- Move trainer access register and PIN management to `/trainers/access`, with its entry point on Staff & Trainer Management. Remove the link from the Timetable trainers page.
+- Redirect the previous `/timetable/trainers/access` URL to the new page and revalidate the new route after access changes.
+- Verify the magic-link token hash with Supabase using its token hash and type, without an extra email field. This addresses the PIN sign-in error shown after the PIN was accepted.
+- No migration or manual follow-up required.
+
 ### 2026-10-23: Link external trainer login from staff sign-in
 
 **Modified:** `src/features/auth/unified-login-card.tsx`, `CHANGES.md`

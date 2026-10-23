@@ -23,16 +23,15 @@ export function ExternalTrainerPinForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pin }),
       });
-      const result = await response.json() as { message?: string; email?: string; tokenHash?: string };
+      const result = await response.json() as { message?: string; tokenHash?: string };
 
-      if (!response.ok || !result.email || !result.tokenHash) {
+      if (!response.ok || !result.tokenHash) {
         setMessage(result.message ?? 'Unable to sign in. Check your PIN and try again.');
         return;
       }
 
       const supabase = createClient();
       const { error } = await supabase.auth.verifyOtp({
-        email: result.email,
         token_hash: result.tokenHash,
         type: 'magiclink',
       });

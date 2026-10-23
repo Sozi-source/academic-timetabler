@@ -1,11 +1,12 @@
 ### 2026-10-23: Add PIN sign-in for the external trainer portal
 
-**Added:** `supabase/migrations/20261023140000_external_trainer_access_pins.sql`, `src/app/(auth)/external-trainer/login/page.tsx`, `src/app/api/external-trainer/pin-login/route.ts`, `src/app/external-trainer/page.tsx`, `src/features/trainer-access/external-trainer-pin-form.tsx`, `src/features/trainer-access/trainer-access-pin-action.tsx`
-**Modified:** `src/features/trainer-access/actions.ts`, `src/features/trainer-access/types.ts`, `src/app/(dashboard)/timetable/trainers/access/page.tsx`, `src/features/auth/routing.ts`, `CHANGES.md`
-- Add a PIN-only external trainer sign-in. PINs are 16-digit random codes; only their SHA-256 hashes are stored. A successful PIN exchange establishes a Supabase magic-link session for the matched trainer profile, so existing trainer allocation checks continue to scope data access.
+**Added:** `supabase/migrations/20261023140000_external_trainer_access_pins.sql`, `supabase/migrations/20261023150000_external_trainer_pin_rate_limits.sql`, `src/app/(auth)/external-trainer/login/page.tsx`, `src/app/api/external-trainer/pin-login/route.ts`, `src/app/external-trainer/page.tsx`, `src/features/trainer-access/external-trainer-pin-form.tsx`, `src/features/trainer-access/trainer-access-pin-action.tsx`
+**Modified:** `src/features/trainer-access/actions.ts`, `src/features/trainer-access/types.ts`, `src/features/trainer-access/external-trainer-pin-form.tsx`, `src/app/(dashboard)/timetable/trainers/access/page.tsx`, `src/app/api/external-trainer/pin-login/route.ts`, `src/lib/supabase/admin.ts`, `src/features/auth/routing.ts`, `CHANGES.md`
+- Add a PIN-only external trainer sign-in. PINs are 8-digit random codes; only their SHA-256 hashes are stored. PIN login is limited to five attempts per client IP per 15-minute window. A successful PIN exchange establishes a Supabase magic-link session for the matched trainer profile, so existing trainer allocation checks continue to scope data access.
+- Bound PIN generation database requests and convert failures/timeouts into a visible action result so the Generate button exits its pending state instead of spinning indefinitely.
 - HODs can generate or replace a PIN from Trainer > Staff Access. PIN generation provisions a trainer account from the pre-registered trainer email when needed, or links an eligible matching account; the PIN is shown once and replacing it invalidates the old PIN.
 - Keep normal staff sign-in, the `/trainer` exam attendance route, and generated per-unit trainer invitation links unchanged.
-- Manual follow-up: apply the new Supabase migration before deploying. Share `/external-trainer/login` and the generated PIN with each trainer.
+- Manual follow-up: apply both Supabase migrations before deploying. Share `/external-trainer/login` and the generated PIN with each trainer.
 
 ### 2026-10-22: Add cohort data Excel export
 

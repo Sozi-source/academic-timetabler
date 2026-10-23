@@ -23,6 +23,29 @@ import type {
 const trainerIdSchema =
   z.uuid();
 
+function withTimeout<T>(
+  promise: PromiseLike<T>,
+  timeoutMs: number,
+): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(
+      () => reject(new Error('The access request timed out.')),
+      timeoutMs,
+    );
+
+    Promise.resolve(promise).then(
+      (value) => {
+        clearTimeout(timeoutId);
+        resolve(value);
+      },
+      (error: unknown) => {
+        clearTimeout(timeoutId);
+        reject(error);
+      },
+    );
+  });
+}
+
 export async function provisionTrainerAccessAction(
   _previousState:
     TrainerAccessActionState,
@@ -89,11 +112,21 @@ export async function generateTrainerAccessPinAction(
   _previousState: TrainerAccessActionState,
   formData: FormData,
 ): Promise<TrainerAccessActionState> {
+  try {
+    return await generateTrainerAccessPin(formData);
+  } catch {
+    return { status: 'error', message: 'PIN generation could not be completed. Please try again.' };
+  }
+}
+
+async function generateTrainerAccessPin(
+  formData: FormData,
+): Promise<TrainerAccessActionState> {
   const hod = await requireHodAccess();
   const parsed = trainerIdSchema.safeParse(formData.get('trainerId'));
   if (!parsed.success) return { status: 'error', message: 'Invalid trainer.' };
 
-  const admin = createAdminClient();
+  const admin = createAdminClient({ timeoutMs: 15_000 });
   const { data: trainer, error: trainerError } = await admin
     .from('trainers')
     .select('id,full_name,email,profile_id,is_active,department_id')
@@ -124,9 +157,12 @@ export async function generateTrainerAccessPinAction(
       }
 
       const supabase = await createClient();
-      const { error } = await supabase.rpc('provision_trainer_access', {
-        target_trainer_id: trainer.id,
-      });
+      const { error } = await withTimeout(
+        supabase.rpc('provision_trainer_access', {
+          target_trainer_id: trainer.id,
+        }),
+        15_000,
+      );
       if (error) return { status: 'error', message: error.message };
       profileId = matchingProfile.id;
     } else {
@@ -153,9 +189,7 @@ export async function generateTrainerAccessPinAction(
     return { status: 'error', message: 'Trainer account is not linked and active. Review the trainer access register.' };
   }
 
-  const pin = Array.from({ length: 4 }, () =>
-    randomInt(0, 10_000).toString().padStart(4, '0'),
-  ).join('');
+  const pin = randomInt(0, 100_000_000).toString().padStart(8, '0');
   const pinHash = createHash('sha256').update(pin).digest('hex');
   const { error: pinError } = await admin
     .from('external_trainer_access_pins')

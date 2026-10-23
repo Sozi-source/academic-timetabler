@@ -69,20 +69,20 @@ export function ExternalTrainerPinForm() {
             type="password"
             inputMode="numeric"
             autoComplete="one-time-code"
-            pattern="[0-9]{16}"
-            maxLength={16}
-            minLength={16}
+            pattern="[0-9]{8}"
+            maxLength={8}
+            minLength={8}
             required
             disabled={pending}
             value={pin}
-            onChange={(event) => setPin(event.target.value.replace(/\D/g, '').slice(0, 16))}
-            placeholder="16-digit PIN"
+            onChange={(event) => setPin(event.target.value.replace(/\D/g, '').slice(0, 8))}
+            placeholder="8-digit PIN"
             className="h-11 w-full rounded-lg border border-border bg-surface pl-9 pr-3 text-sm tracking-[0.2em] text-text-primary outline-none transition placeholder:text-text-muted placeholder:tracking-normal focus:border-focus-border focus:ring-2 focus:ring-focus-ring/25 disabled:bg-surface-muted"
           />
         </div>
       </div>
 
-      <button type="submit" disabled={pending || pin.length !== 16} className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white shadow-2xs transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60">
+      <button type="submit" disabled={pending || pin.length !== 8} className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white shadow-2xs transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60">
         {pending ? <LoaderCircle className="size-3.5 animate-spin" aria-hidden="true" /> : <LogIn className="size-3.5" aria-hidden="true" />}
         {pending ? 'Signing in...' : 'Sign in'}
       </button>

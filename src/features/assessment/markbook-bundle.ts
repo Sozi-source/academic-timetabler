@@ -282,7 +282,15 @@ export async function loadAssessmentMarkbookBundle({
       []
     ) as UnknownRow[];
 
-  // Augment with unified roster candidates across all taking cohorts
+  // Augment with unified roster candidates across all taking cohorts.
+  // This is a safety-net for the case where the database assessment_roster is
+  // stale — e.g. a student registered while trainer_entry_open was true, which
+  // freezes the server-side sync inside ensure_unit_markbook_ready.
+  // Students found here that are not in the DB roster are injected into the
+  // in-memory list so the downloaded markbook is always complete.
+  // rosterAugmentedCount is returned so the download route can emit a warning
+  // header, and the HOD knows to re-sync the roster after closing trainer entry.
+  let rosterAugmentedCount = 0;
   try {
     const unifiedRoster = await getUnifiedUnitRoster({
       supabase,
@@ -305,7 +313,16 @@ export async function loadAssessmentMarkbookBundle({
           snapshot_registration_status: st.registrationStatus,
         });
         existingStudentIds.add(st.studentId);
+        rosterAugmentedCount += 1;
       }
+    }
+
+    if (rosterAugmentedCount > 0) {
+      console.warn(
+        `[markbook-bundle] Roster for unit ${unitId} (period ${periodId}) was stale: ` +
+        `${rosterAugmentedCount} student(s) added from the live unified roster. ` +
+        `Close trainer entry and call ensure_unit_markbook_ready to persist the roster.`,
+      );
     }
   } catch (err) {
     console.warn('Could not augment markbook bundle with unified roster:', err);
@@ -610,5 +627,6 @@ export async function loadAssessmentMarkbookBundle({
     },
     cohorts,
     generatedAt,
+    rosterAugmentedCount,
   };
 }

@@ -44,6 +44,14 @@ export interface AssessmentMarkbookBundle {
   };
   cohorts: AssessmentMarkbookCohort[];
   generatedAt: Date;
+  /**
+   * Number of students added from the live unified roster that were not yet
+   * present in the persisted assessment_roster. A non-zero value means the
+   * database roster was stale at generation time — typically because a student
+   * registered while trainer entry was open (which freezes roster sync) or
+   * because ensure_unit_markbook_ready has not been called since registration.
+   */
+  rosterAugmentedCount: number;
 }
 
 const navy =

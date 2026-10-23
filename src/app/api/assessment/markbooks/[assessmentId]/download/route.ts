@@ -208,6 +208,11 @@ export async function POST(
             generationId,
           'X-Markbook-Template-Version':
             assessmentMarkbookTemplateVersion,
+          // Non-zero value means the DB roster was stale at generation time.
+          // The HOD should close trainer entry (which triggers a roster re-sync)
+          // to persist the missing students for subsequent downloads.
+          'X-Markbook-Roster-Augmented':
+            String(bundle.rosterAugmentedCount),
         },
       },
     );

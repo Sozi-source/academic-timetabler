@@ -263,6 +263,21 @@ export function DownloadAssessmentMarkbookButton({
         url,
       );
 
+      // If the DB roster was stale, warn the HOD so they know to close
+      // trainer entry (which triggers a roster re-sync) to persist the fix.
+      const augmentedCount = Number(
+        response.headers.get('X-Markbook-Roster-Augmented') ?? '0',
+      );
+      if (augmentedCount > 0) {
+        window.alert(
+          `⚠️ Roster notice: ${augmentedCount} student(s) registered after the markbook ` +
+          `roster was last synced. They have been included in this download, but the ` +
+          `database roster is still stale.\n\n` +
+          `To persist the fix: close Trainer Entry for this unit — this triggers an ` +
+          `automatic roster re-sync so future downloads are correct without this warning.`,
+        );
+      }
+
       router.refresh();
     } finally {
       setBusy(false);

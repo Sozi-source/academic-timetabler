@@ -39,6 +39,8 @@ describe('assessment markbook generator', () => {
           new Date(
             '2026-08-21T12:00:00Z',
           ),
+        rosterAugmentedCount:
+          0,
         cohorts: [
           {
             assessmentId:

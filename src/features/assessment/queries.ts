@@ -68,10 +68,51 @@ export const getAssessments = cache(async (): Promise<AssessmentEventRow[]> => {
   if (populationError) throw new Error(`Unable to load assessment population totals: ${populationError.message}`);
   if (allocationError) throw new Error(`Unable to load assigned trainers: ${allocationError.message}`);
 
+  // Shared units can have separate programme-specific records. Match allocations
+  // across HOD-approved equivalencies, while keeping them within this department.
+  const unitIds = [...new Set(rows.map((row) => row.unit?.id).filter((id): id is string => Boolean(id)))];
+  const admin = createAdminClient();
+  const { data: equivalenceRows, error: equivalenceError } = unitIds.length
+    ? await admin.from('unit_equivalence_members')
+      .select('unit_id,equivalence_group_id,group:unit_equivalence_groups!inner(id,status)')
+      .in('unit_id', unitIds)
+      .eq('status', 'approved')
+      .eq('group.status', 'active')
+    : { data: [], error: null };
+  if (equivalenceError) throw new Error(`Unable to load approved unit equivalences: ${equivalenceError.message}`);
+  const groupIds = [...new Set((equivalenceRows ?? []).map((row) => row.equivalence_group_id))];
+  const { data: equivalenceMembers, error: equivalenceMembersError } = groupIds.length
+    ? await admin.from('unit_equivalence_members')
+      .select('equivalence_group_id,unit_id')
+      .in('equivalence_group_id', groupIds)
+      .eq('status', 'approved')
+    : { data: [], error: null };
+  if (equivalenceMembersError) throw new Error(`Unable to load equivalent units: ${equivalenceMembersError.message}`);
+  const candidateUnitIds = [...new Set([...unitIds, ...(equivalenceMembers ?? []).map((member) => member.unit_id)])];
+  const { data: departmentUnits, error: departmentUnitsError } = candidateUnitIds.length
+    ? await admin.from('units')
+      .select('id,programme:programmes!inner(department_id)')
+      .in('id', candidateUnitIds)
+      .eq('programme.department_id', profile.activeDepartmentId)
+    : { data: [], error: null };
+  if (departmentUnitsError) throw new Error(`Unable to verify equivalent units: ${departmentUnitsError.message}`);
+  const departmentUnitIds = new Set((departmentUnits ?? []).map((unit) => unit.id));
+  const equivalentUnitIdsByUnit = new Map<string, Set<string>>();
+  for (const member of equivalenceMembers ?? []) {
+    if (!departmentUnitIds.has(member.unit_id)) continue;
+    const groupMembers = (equivalenceMembers ?? [])
+      .filter((candidate) => candidate.equivalence_group_id === member.equivalence_group_id && departmentUnitIds.has(candidate.unit_id));
+    equivalentUnitIdsByUnit.set(member.unit_id, new Set(groupMembers.map((candidate) => candidate.unit_id)));
+  }
+  for (const unitId of unitIds) {
+    if (departmentUnitIds.has(unitId) && !equivalentUnitIdsByUnit.has(unitId)) {
+      equivalentUnitIdsByUnit.set(unitId, new Set([unitId]));
+    }
+  }
+
   const linkedProfileIds = [...new Set((allocationRows ?? [])
     .map((allocation) => relationRow(allocation.trainer)?.profile_id)
     .filter((id): id is string => typeof id === 'string'))];
-  const admin = createAdminClient();
   const { data: linkedProfiles, error: profileError } = linkedProfileIds.length
     ? await admin.from('profiles').select('id,email,is_active').in('id', linkedProfileIds)
     : { data: [], error: null };
@@ -106,8 +147,10 @@ export const getAssessments = cache(async (): Promise<AssessmentEventRow[]> => {
     const trainerId = typeof trainer?.id === 'string' ? trainer.id : null;
     const trainerName = typeof trainer?.full_name === 'string' ? trainer.full_name : null;
     if (!trainerId || !trainerName) continue;
-    const assessment = rows.find((row) => row.unit?.id === allocation.unit_id && row.academic_period?.id === allocation.academic_period_id);
-    if (!assessment) continue;
+    const assessmentMatches = rows.filter((row) =>
+      row.academic_period?.id === allocation.academic_period_id
+      && (equivalentUnitIdsByUnit.get(row.unit?.id ?? '')?.has(allocation.unit_id) ?? false));
+    for (const assessment of assessmentMatches) {
     const assigned = allocationsByAssessment.get(assessment.id) ?? [];
     let trainerEntry = assigned.find((entry) => entry.id === trainerId);
     if (!trainerEntry) {
@@ -130,6 +173,7 @@ export const getAssessments = cache(async (): Promise<AssessmentEventRow[]> => {
       if (!trainerEntry.cohorts.includes(cohortName)) trainerEntry.cohorts.push(cohortName);
     }
     allocationsByAssessment.set(assessment.id, assigned);
+    }
   }
 
   return rows.map((row) => ({

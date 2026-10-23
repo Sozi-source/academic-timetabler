@@ -1,3 +1,10 @@
+### 2026-10-24: Match assigned trainers across equivalent units
+
+**Modified:** `src/features/assessment/queries.ts`, `CHANGES.md`
+- Resolve trainer allocations through active, HOD-approved unit equivalency groups so markbooks for equivalent programme units show the assigned trainer.
+- Restrict equivalency matching to units in the active department and keep academic-period matching in place.
+- No migration or manual follow-up required.
+
 ### 2026-10-23: Regenerate bulk PINs across departments
 
 **Modified:** `src/features/trainer-access/actions.ts`, `src/app/(dashboard)/trainers/access/page.tsx`, `CHANGES.md`

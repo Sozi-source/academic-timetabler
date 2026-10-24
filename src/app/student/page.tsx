@@ -172,7 +172,7 @@ export default async function StudentPortalPage() {
                   </span>
                 </div>
                 <p className="text-[11px] text-rose-800/90">
-                  Regular attendance is required by TVET policy for Continuous Assessment Tests & exams.
+                  It is against school regulations to miss class without permission.
                 </p>
               </div>
             </div>

@@ -36,7 +36,7 @@ export async function POST(request: Request) {
 
     if (invite.scope_unit_id) {
       let scopeQuery = admin.from('assessment_trainer_mark_invites')
-        .select('id,assessment_id,token_hash,expires_at,submitted_at,revoked_at')
+        .select('id,assessment_id,cohort_id,token_hash,expires_at,submitted_at,revoked_at')
         .eq('parent_invite_id', invite.id);
       scopeQuery = parsed.data.cohort_id
         ? scopeQuery.eq('cohort_id', parsed.data.cohort_id)

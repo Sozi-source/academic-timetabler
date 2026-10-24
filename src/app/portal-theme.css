@@ -362,6 +362,11 @@
   letter-spacing: -0.025em;
 }
 
+.external-trainer .unit-card-title,
+.external-trainer [class*="unit-card"] :where(h1, h2, h3) {
+  color: #ffffff !important;
+}
+
 .external-trainer :where(.font-bold, .font-semibold) {
   font-weight: 550;
 }

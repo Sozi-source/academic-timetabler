@@ -13,8 +13,8 @@ export function ExternalTrainerShell({
   children: ReactNode;
 }) {
   return (
-    <div className="external-trainer min-h-screen bg-[#f4f7f6] text-text-primary">
-      <header className="sticky top-0 z-20 border-b border-border/80 bg-white/95 shadow-xs backdrop-blur-md">
+    <div className="external-trainer min-h-screen bg-[#fbfaf7] text-text-primary">
+      <header className="sticky top-0 z-20 border-b border-[#ece7de] bg-white/95 shadow-xs backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
           <div className="flex min-w-0 items-center gap-3">
             <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary text-white shadow-sm">
@@ -32,7 +32,7 @@ export function ExternalTrainerShell({
             <button
               type="submit"
               aria-label="Sign out"
-              className="inline-flex h-9 items-center gap-2 rounded-lg border border-border px-3 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+              className="inline-flex h-9 items-center gap-2 rounded-lg border border-[#e4ded3] bg-white px-3 text-xs font-semibold text-text-secondary transition hover:bg-[#f6f3ec] hover:text-text-primary"
             >
               <LogOut className="size-3.5" aria-hidden="true" />
               <span className="hidden sm:inline">Sign out</span>
@@ -40,10 +40,10 @@ export function ExternalTrainerShell({
           </form>
         </div>
       </header>
-      <main className="mx-auto max-w-7xl px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-5 sm:px-6 sm:pb-12 sm:pt-8 lg:px-8">
+      <main className="mx-auto max-w-7xl px-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pb-12 sm:pt-6 lg:px-8">
         {children}
       </main>
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border/80 bg-white/95 px-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-2 shadow-[0_-8px_24px_rgba(15,23,42,0.06)] backdrop-blur-md lg:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[#ece7de] bg-white/95 px-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-2 shadow-[0_-6px_20px_rgba(28,57,51,0.06)] backdrop-blur-md lg:hidden">
         <div className="mx-auto max-w-lg">
           <ExternalTrainerNavigation />
         </div>

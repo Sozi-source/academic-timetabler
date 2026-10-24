@@ -48,8 +48,8 @@ export default async function ExternalTrainerMarksPage({ params }: PageProps) {
         eyebrow={`${access.allocation.unitCode} · ${population.cohort?.name || access.allocation.cohortName}`}
         title="Enter marks"
         description={access.allocation.unitName}
-        backHref={`/external-trainer/units/${allocationId}`}
-        backLabel="Unit"
+        backHref="/external-trainer/units"
+        backLabel="My Units"
       />
       {access.assessment.maximumMark !== 100 ? (
         <section className="rounded-xl border border-warning-border bg-warning-surface px-4 py-3">

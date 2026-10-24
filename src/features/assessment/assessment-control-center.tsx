@@ -7,6 +7,7 @@ import { ArrowLeft, ClipboardList, FileText, GraduationCap, Search, UsersRound }
 
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/ui/page-header';
+import { AdminDepartmentMarksEntryControl } from './admin-department-marks-entry-control';
 import type { AssessmentControlCenterData } from './control-center-queries';
 
 export function AssessmentControlCenter({ data }: { data: AssessmentControlCenterData }) {
@@ -107,6 +108,12 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
         }
         actions={
           <div className="flex flex-wrap items-center gap-2">
+            <AdminDepartmentMarksEntryControl
+              periodId={data.selectedPeriodId}
+              isOpen={data.marksEntryStatus.isOpen}
+              openCount={data.marksEntryStatus.openCount}
+              totalCount={data.marksEntryStatus.totalCount}
+            />
             <Link
               href="/dashboard"
               className="inline-flex h-8.5 items-center gap-1.5 rounded-lg border border-border bg-surface px-3 text-xs font-medium text-slate-600 shadow-2xs transition hover:bg-surface-subtle"

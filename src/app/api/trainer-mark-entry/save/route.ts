@@ -55,6 +55,15 @@ export async function POST(request: Request) {
         }
       }
 
+      const { data: rawEvents } = await admin
+        .from('assessment_events')
+        .select('id,trainer_entry_open,status,exam_marks_finalized_at')
+        .in('id', scopes.map((s) => s.assessment_id));
+      const isLocked = (rawEvents ?? []).some((e) => !e.trainer_entry_open || e.status === 'closed' || e.exam_marks_finalized_at !== null);
+      if (isLocked) {
+        return NextResponse.json({ message: 'Marks entry is currently closed by the department administration.' }, { status: 403 });
+      }
+
       const { data: scopeRosterRows } = await admin
         .from('assessment_roster')
         .select('assessment_id,student_id')
@@ -91,6 +100,14 @@ export async function POST(request: Request) {
     } else {
       if (parsed.data.cohort_id) {
         return NextResponse.json({ message: 'This invitation does not support cohort-specific submission.' }, { status: 400 });
+      }
+      const { data: eventData } = await admin
+        .from('assessment_events')
+        .select('id,trainer_entry_open,status,exam_marks_finalized_at')
+        .eq('id', invite.assessment_id)
+        .maybeSingle();
+      if (!eventData?.trainer_entry_open || eventData?.status === 'closed' || eventData?.exam_marks_finalized_at !== null) {
+        return NextResponse.json({ message: 'Marks entry is currently closed by the department administration.' }, { status: 403 });
       }
       const { data, error } = await admin.rpc('save_assessment_component_with_trainer_invite', {
         target_token_hash: invite.token_hash,

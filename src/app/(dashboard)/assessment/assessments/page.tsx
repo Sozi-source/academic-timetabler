@@ -7,7 +7,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { createAssessmentAction } from '@/features/assessment/actions';
 import { getAssessments, getAssessmentSetupOptions } from '@/features/assessment/queries';
 import { requireHodAccess } from '@/features/auth/authorization';
-import { DepartmentTrainerEntryControl } from '@/features/assessment/department-trainer-entry-control';
+import { AdminDepartmentMarksEntryControl } from '@/features/assessment/admin-department-marks-entry-control';
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -17,6 +17,7 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
   const error = typeof params.error === 'string' ? params.error : '';
   const activePeriod = options.periods.find((period) => period.status === 'active') ?? null;
   const markbooks = assessments.filter((assessment) => assessment.title === 'Unit Markbook');
+  const openMarkbooks = markbooks.filter((assessment) => assessment.trainer_entry_open);
   const errorText = error === 'required'
     ? 'Select a unit before creating its markbook.'
     : error === 'duplicate'
@@ -42,15 +43,14 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
         context={<Badge variant="neutral">{markbooks.length} units</Badge>}
         actions={
           <div className="flex flex-wrap items-center justify-end gap-2">
-            <DepartmentTrainerEntryControl
-              markbooks={markbooks.flatMap((assessment) => (
-                assessment.status !== 'closed'
-                  && !assessment.exam_marks_finalized_at
-                  && (assessment.population?.[0]?.count ?? 0) > 0
-                  ? [{ assessmentId: assessment.id, isOpen: assessment.trainer_entry_open }]
-                  : []
-              ))}
-            />
+            {activePeriod ? (
+              <AdminDepartmentMarksEntryControl
+                periodId={activePeriod.id}
+                isOpen={openMarkbooks.length > 0}
+                openCount={openMarkbooks.length}
+                totalCount={markbooks.length}
+              />
+            ) : null}
           </div>
         }
       />

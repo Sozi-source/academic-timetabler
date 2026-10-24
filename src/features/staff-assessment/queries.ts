@@ -366,7 +366,7 @@ export const getStaffWorkspace =
                 'assessment_events',
               )
               .select(
-                'id, published_at',
+                'id, published_at, trainer_entry_open',
               )
               .in(
                 'id',
@@ -416,6 +416,21 @@ export const getStaffWorkspace =
             row.id,
             Boolean(
               row.published_at,
+            ),
+          ],
+        ),
+      );
+
+    const trainerEntryOpenByAssessment =
+      new Map(
+        (
+          releaseResult.data ??
+          []
+        ).map(
+          (row) => [
+            row.id,
+            Boolean(
+              (row as { trainer_entry_open?: boolean }).trainer_entry_open,
             ),
           ],
         ),
@@ -570,6 +585,11 @@ export const getStaffWorkspace =
               ),
             published:
               publishedByAssessment.get(
+                id,
+              ) ===
+              true,
+            trainerEntryOpen:
+              trainerEntryOpenByAssessment.get(
                 id,
               ) ===
               true,
@@ -860,7 +880,7 @@ export async function requireStaffAllocation({
 
   const { data: rawEvent } = await admin
     .from('assessment_events')
-    .select('id, workflow_status, population_locked_at, assessment_type, published_at')
+    .select('id, workflow_status, population_locked_at, assessment_type, published_at, trainer_entry_open')
     .eq('academic_period_id', rawAlloc.academic_period_id)
     .eq('unit_id', rawAlloc.unit_id)
     .eq('assessment_type', 'exam')
@@ -886,6 +906,7 @@ export async function requireStaffAllocation({
       passMark: 40,
       rosterLocked: Boolean(rawEvent.population_locked_at),
       published: Boolean(rawEvent.published_at),
+      trainerEntryOpen: Boolean(rawEvent.trainer_entry_open),
     };
   } else {
     // Dynamic student registration count lookup
@@ -917,6 +938,7 @@ export async function requireStaffAllocation({
       passMark: 40,
       rosterLocked: false,
       published: false,
+      trainerEntryOpen: false,
     };
   }
 

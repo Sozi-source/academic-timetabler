@@ -11,6 +11,7 @@ export interface StaffAssessmentSummary {
   passMark: number | null;
   rosterLocked: boolean;
   published: boolean;
+  trainerEntryOpen?: boolean;
 }
 
 export interface StaffUnitAllocation {

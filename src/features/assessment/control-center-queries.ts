@@ -38,6 +38,7 @@ export interface AssessmentControlCenterItem {
   finalisedAt: string | null;
   isPublished: boolean;
   publishedAt: string | null;
+  trainerEntryOpen: boolean;
 }
 
 export interface AssessmentControlCenterSummary {
@@ -51,6 +52,8 @@ export interface AssessmentControlCenterSummary {
   excelSourceCount: number;
   onlineSourceCount: number;
   totalMissingMarks: number;
+  entryOpenCount: number;
+  entryLockedCount: number;
 }
 
 export interface AssessmentControlCenterData {
@@ -61,6 +64,11 @@ export interface AssessmentControlCenterData {
   summary: AssessmentControlCenterSummary;
   items: AssessmentControlCenterItem[];
   unitRegistrationCounts: Record<string, number>;
+  marksEntryStatus: {
+    isOpen: boolean;
+    openCount: number;
+    totalCount: number;
+  };
 }
 
 export const getAssessmentControlCenterData = cache(
@@ -83,9 +91,16 @@ export const getAssessmentControlCenterData = cache(
           excelSourceCount: 0,
           onlineSourceCount: 0,
           totalMissingMarks: 0,
+          entryOpenCount: 0,
+          entryLockedCount: 0,
         },
         items: [],
         unitRegistrationCounts: {},
+        marksEntryStatus: {
+          isOpen: false,
+          openCount: 0,
+          totalCount: 0,
+        },
       };
     }
 
@@ -131,9 +146,16 @@ export const getAssessmentControlCenterData = cache(
           excelSourceCount: 0,
           onlineSourceCount: 0,
           totalMissingMarks: 0,
+          entryOpenCount: 0,
+          entryLockedCount: 0,
         },
         items: [],
         unitRegistrationCounts: {},
+        marksEntryStatus: {
+          isOpen: false,
+          openCount: 0,
+          totalCount: 0,
+        },
       };
     }
 
@@ -156,6 +178,7 @@ export const getAssessmentControlCenterData = cache(
         attendance_finalized_at,
         cat_marks_finalized_at,
         exam_marks_finalized_at,
+        trainer_entry_open,
         unit:units(id, code, name),
         cohort:cohorts(id, name),
         academic_period:academic_periods(id, code, name)
@@ -187,9 +210,16 @@ export const getAssessmentControlCenterData = cache(
           excelSourceCount: 0,
           onlineSourceCount: 0,
           totalMissingMarks: 0,
+          entryOpenCount: 0,
+          entryLockedCount: 0,
         },
         items: [],
         unitRegistrationCounts: {},
+        marksEntryStatus: {
+          isOpen: false,
+          openCount: 0,
+          totalCount: 0,
+        },
       };
     }
 
@@ -476,6 +506,7 @@ export const getAssessmentControlCenterData = cache(
         finalisedAt: event.finalised_at ?? event.exam_marks_finalized_at,
         isPublished,
         publishedAt: event.published_at,
+        trainerEntryOpen: Boolean(event.trainer_entry_open),
       });
     }
 
@@ -491,7 +522,11 @@ export const getAssessmentControlCenterData = cache(
       excelSourceCount: items.filter((item) => item.marksSource === 'excel').length,
       onlineSourceCount: items.filter((item) => item.marksSource === 'online').length,
       totalMissingMarks: items.reduce((acc, item) => acc + item.missingCount, 0),
+      entryOpenCount: items.filter((item) => item.trainerEntryOpen).length,
+      entryLockedCount: items.filter((item) => !item.trainerEntryOpen).length,
     };
+
+    const openCount = items.filter((item) => item.trainerEntryOpen).length;
 
     return {
       periods,
@@ -501,6 +536,11 @@ export const getAssessmentControlCenterData = cache(
       summary,
       items,
       unitRegistrationCounts,
+      marksEntryStatus: {
+        isOpen: openCount > 0,
+        openCount,
+        totalCount: items.length,
+      },
     };
   }
 );

@@ -32,6 +32,7 @@ describe('assessment control center calculations', () => {
       finalisedAt: '2026-08-21T14:00:00Z',
       isPublished: true,
       publishedAt: '2026-08-21T16:00:00Z',
+      trainerEntryOpen: true,
     };
 
     expect(item.populationLocked).toBe(true);
@@ -72,6 +73,7 @@ describe('assessment control center calculations', () => {
       finalisedAt: null,
       isPublished: false,
       publishedAt: null,
+      trainerEntryOpen: false,
     };
 
     expect(item.populationLocked).toBe(false);

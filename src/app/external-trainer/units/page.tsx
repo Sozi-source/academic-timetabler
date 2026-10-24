@@ -55,6 +55,17 @@ export default async function ExternalTrainerUnitsPage() {
                     <span className="text-[11px] font-bold uppercase tracking-wider text-teal-200">
                       {allocation.unitCode}
                     </span>
+                    {allocation.exam?.trainerEntryOpen ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-200 ring-1 ring-emerald-400/30">
+                        <span className="size-1.5 rounded-full bg-emerald-400" aria-hidden="true" />
+                        Entry open
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-teal-200/80 ring-1 ring-white/15">
+                        <span className="size-1.5 rounded-full bg-amber-400" aria-hidden="true" />
+                        Entry locked
+                      </span>
+                    )}
                   </div>
                   <h2 className="mt-2 text-base font-bold leading-snug text-white sm:text-lg">
                     {allocation.unitName}

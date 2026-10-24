@@ -50,13 +50,16 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
     if (scopesError) throw new Error(`Could not load unit trainer scopes: ${scopesError.message}`);
     const scopeRows = scopes ?? [];
     const assessmentIds = [...new Set(scopeRows.map((scope) => scope.assessment_id))];
-    const [{ data: events, error: eventsError }, { data: rosterRows, error: rosterError }] = await Promise.all([
+    const [{ data: events, error: eventsError }, { data: rosterRows, error: rosterError }, { data: assessmentEvents }] = await Promise.all([
       admin.from('assessment_event_workspace')
         .select('id,assessment_type,workflow_status,population_locked_at,academic_period_id,unit_id')
         .in('id', assessmentIds),
       admin.from('assessment_roster')
         .select('assessment_id,student_id,cohort_id,pre_assessment_status')
         .in('assessment_id', assessmentIds),
+      admin.from('assessment_events')
+        .select('id,trainer_entry_open,status,exam_marks_finalized_at')
+        .in('id', assessmentIds),
     ]);
     if (eventsError || rosterError) throw new Error('Could not load the assigned unit markbooks.');
     const eventRows = events ?? [];
@@ -90,6 +93,7 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
         }
       }
     }
+    const assessmentEventById = new Map((assessmentEvents ?? []).map((e) => [e.id, e]));
     const cohortNameById = new Map((cohortRows ?? []).map((cohort) => [cohort.id, cohort.name]));
     const eventById = new Map(eventRows.map((event) => [event.id, event]));
     const scopeByKey = new Map(scopeRows.map((scope) => [`${scope.assessment_id}:${scope.cohort_id ?? 'all'}`, scope]));
@@ -121,7 +125,9 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
       }
       const cohort = cohorts.get(cohortKey)!;
       if (!cohort.scopeRows.some((row) => row.id === scope.id)) cohort.scopeRows.push(scope);
-      cohort.locked ||= ['submitted', 'finalised', 'archived'].includes(event.workflow_status) || scope.revoked_at !== null || Date.parse(scope.expires_at) <= Date.now();
+      const rawEvent = assessmentEventById.get(scope.assessment_id);
+      const isEntryOpen = rawEvent?.trainer_entry_open === true;
+      cohort.locked ||= !isEntryOpen || ['submitted', 'finalised', 'archived'].includes(event.workflow_status) || rawEvent?.status === 'closed' || Boolean(rawEvent?.exam_marks_finalized_at) || scope.revoked_at !== null || Date.parse(scope.expires_at) <= Date.now();
 
       const seenStudents = seenStudentIdsByCohort.get(cohortKey)!;
       const draft = draftByKey.get(`${roster.assessment_id}:${roster.student_id}`) ?? draftByStudentId.get(roster.student_id);
@@ -176,12 +182,13 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
     if (!firstEvent || !periodNames.length) throw new Error('This unit invitation has no available markbooks.');
     const firstUnit = unitById.get(firstEvent.unit_id);
     if (!firstUnit) throw new Error('Could not load the assigned unit.');
+    const allCohortsLocked = cohortPayload.length === 0 || cohortPayload.every((cohort) => cohort.locked);
     return {
       trainerName: invite.trainer_name,
       trainerEmail: invite.trainer_email,
       expiresAt: invite.expires_at,
       submittedAt: null,
-      locked: false,
+      locked: allCohortsLocked,
       unit: { code: firstUnit.code, name: firstUnit.name },
       academicPeriod: periodNames[0],
       cohorts: cohortPayload,
@@ -212,9 +219,9 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
       .select('student_id,cohort_id,pre_assessment_status')
       .eq('assessment_id', invite.assessment_id),
     admin.from('assessment_events')
-      .select('status,exam_marks_finalized_at')
+      .select('status,exam_marks_finalized_at,trainer_entry_open')
       .eq('id', invite.assessment_id)
-      .maybeSingle<{ status: string; exam_marks_finalized_at: string | null }>(),
+      .maybeSingle<{ status: string; exam_marks_finalized_at: string | null; trainer_entry_open: boolean }>(),
   ]);
   const rosterRows = rosterResult.data ?? [];
   if (unitResult.error || periodResult.error || rosterResult.error || assessmentResult.error) {
@@ -265,7 +272,8 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
   }).sort((first, second) => first.admissionNumber.localeCompare(second.admissionNumber, undefined, { numeric: true }));
 
   const componentSubmissions = Object.fromEntries((componentRows ?? []).map((row) => [row.component_key, row.submitted_at])) as TrainerMarkComponentSubmissions;
-  const locked = ['submitted', 'finalised', 'archived'].includes(event.workflow_status) || assessmentResult.data?.status === 'closed' || Boolean(assessmentResult.data?.exam_marks_finalized_at);
+  const isTrainerEntryOpen = assessmentResult.data?.trainer_entry_open === true;
+  const locked = !isTrainerEntryOpen || ['submitted', 'finalised', 'archived'].includes(event.workflow_status) || assessmentResult.data?.status === 'closed' || Boolean(assessmentResult.data?.exam_marks_finalized_at);
   return {
     trainerName: invite.trainer_name,
     trainerEmail: invite.trainer_email,

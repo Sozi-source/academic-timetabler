@@ -11,6 +11,9 @@ import {
 import {
   createClient,
 } from '@/lib/supabase/server';
+import {
+  createAdminClient,
+} from '@/lib/supabase/admin';
 
 interface RouteContext {
   params:
@@ -53,12 +56,11 @@ export async function POST(
 
   const supabase =
     await createClient();
+  const admin = createAdminClient();
 
   let targetAssessmentId = assessmentId;
   if (targetAssessmentId.startsWith('alloc-')) {
     const allocId = targetAssessmentId.replace('alloc-', '');
-    const { createAdminClient } = await import('@/lib/supabase/admin');
-    const admin = createAdminClient();
     const { data: alloc } = await admin
       .from('teaching_allocations')
       .select('academic_period_id, unit_id')
@@ -156,40 +158,66 @@ export async function POST(
   }
 
   // Milestone 2: Final marks submission ('all' or 'exam')
-  // Verify that EVERY column is filled across all students
-  const missingSummary = {
-    assignment: componentEntries.filter((e) => e.assignment === null).length,
-    presentation: componentEntries.filter((e) => e.presentation === null).length,
-    rat: componentEntries.filter((e) => e.rat === null).length,
-    cat: componentEntries.filter((e) => e.cat === null).length,
-    exam: componentEntries.filter((e) => e.attendance_status !== 'absent' && e.exam === null).length,
-  };
+  // Prepare final entries: students with null exam marks are confirmed as absent;
+  // unsubmitted coursework (assignment, presentation, rat, cat) automatically defaults to 0.
+  const finalEntries = componentEntries.map((e) => {
+    const isAbsent = e.attendance_status === 'absent' || e.exam === null;
+    return {
+      student_id: e.student_id,
+      assignment: typeof e.assignment === 'number' ? e.assignment : 0,
+      presentation: typeof e.presentation === 'number' ? e.presentation : 0,
+      rat: typeof e.rat === 'number' ? e.rat : 0,
+      cat: typeof e.cat === 'number' ? e.cat : 0,
+      exam: isAbsent ? null : e.exam,
+      attendance_status: isAbsent ? ('absent' as const) : ('expected' as const),
+    };
+  });
 
-  const missingParts: string[] = [];
-  if (missingSummary.assignment) missingParts.push(`${missingSummary.assignment} in Assignment`);
-  if (missingSummary.presentation) missingParts.push(`${missingSummary.presentation} in Presentation`);
-  if (missingSummary.rat) missingParts.push(`${missingSummary.rat} in RAT`);
-  if (missingSummary.cat) missingParts.push(`${missingSummary.cat} in CAT`);
-  if (missingSummary.exam) missingParts.push(`${missingSummary.exam} in Exam`);
+  const absentStudentIds = finalEntries
+    .filter((e) => e.attendance_status === 'absent')
+    .map((e) => e.student_id);
+  const presentStudentIds = finalEntries
+    .filter((e) => e.attendance_status !== 'absent')
+    .map((e) => e.student_id);
 
-  if (missingParts.length > 0) {
-    return NextResponse.json({
-      message: `Every column must be filled before submitting final marks. Missing entries: ${missingParts.join(', ')}. (If a student missed coursework, enter 0).`,
-    }, { status: 422 });
+  if (absentStudentIds.length > 0) {
+    await admin
+      .from('assessment_roster')
+      .update({ pre_assessment_status: 'absent' })
+      .eq('assessment_id', targetAssessmentId)
+      .in('student_id', absentStudentIds);
+
+    await admin
+      .from('assessment_population')
+      .update({ attendance_status: 'absent' })
+      .eq('assessment_event_id', targetAssessmentId)
+      .in('student_id', absentStudentIds);
   }
 
-  // 1. Save all drafts
+  if (presentStudentIds.length > 0) {
+    await admin
+      .from('assessment_roster')
+      .update({ pre_assessment_status: 'expected' })
+      .eq('assessment_id', targetAssessmentId)
+      .in('student_id', presentStudentIds);
+
+    await admin
+      .from('assessment_population')
+      .update({ attendance_status: 'expected' })
+      .eq('assessment_event_id', targetAssessmentId)
+      .in('student_id', presentStudentIds);
+  }
+
+  // 1. Save all drafts with prepared marks
   const { error: saveError } = await supabase.rpc('save_assessment_online_marks', {
     target_assessment_id: targetAssessmentId,
-    target_entries: componentEntries.map(({ attendance_status: _a, ...e }) => e),
+    target_entries: finalEntries.map(({ attendance_status: _a, ...e }) => e),
   });
   if (saveError) {
     return NextResponse.json({ message: saveError.message }, { status: 409 });
   }
 
   // 2. Insert component submission records for all components
-  const { createAdminClient } = await import('@/lib/supabase/admin');
-  const admin = createAdminClient();
   const { data: rosterCohorts } = await admin
     .from('assessment_roster')
     .select('cohort_id')

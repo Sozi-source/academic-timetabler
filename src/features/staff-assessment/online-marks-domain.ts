@@ -71,6 +71,8 @@ export interface ParsedOnlineMarkInput {
   message:
     string |
     null;
+  isAbsent?:
+    boolean;
 }
 
 export function parseOnlineMarkInput(
@@ -78,6 +80,7 @@ export function parseOnlineMarkInput(
     string,
   maximum:
     number,
+  allowAbsent = false,
 ): ParsedOnlineMarkInput {
   const trimmed =
     value.trim();
@@ -88,6 +91,24 @@ export function parseOnlineMarkInput(
         true,
       mark:
         null,
+      message:
+        null,
+    };
+  }
+
+  if (
+    allowAbsent &&
+    (trimmed.toUpperCase() === 'AB' ||
+     trimmed.toLowerCase() === 'absent' ||
+     trimmed.toUpperCase() === 'A')
+  ) {
+    return {
+      valid:
+        true,
+      mark:
+        null,
+      isAbsent:
+        true,
       message:
         null,
     };
@@ -109,7 +130,7 @@ export function parseOnlineMarkInput(
       mark:
         null,
       message:
-        'Enter a numeric mark.',
+        allowAbsent ? 'Enter a mark (0–70) or AB.' : 'Enter a numeric mark.',
     };
   }
 
@@ -244,6 +265,7 @@ export function getUnfilledColumnsSummary(
   rows: Array<{
     student: { fullName: string; attendanceStatus: 'expected' | 'absent' };
     marks: OnlineMarkValues;
+    isAbsent?: boolean;
   }>,
 ): {
   totalMissing: number;
@@ -279,7 +301,8 @@ export function getUnfilledColumnsSummary(
       missingCat += 1;
       studentIncomplete = true;
     }
-    if (row.student.attendanceStatus !== 'absent' && row.marks.exam === null) {
+    const isAbsent = Boolean(row.isAbsent || row.student.attendanceStatus === 'absent');
+    if (!isAbsent && row.marks.exam === null) {
       missingExam += 1;
       studentIncomplete = true;
     }

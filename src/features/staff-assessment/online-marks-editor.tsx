@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  AlertCircle,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
@@ -46,6 +47,7 @@ import {
   parseOnlineMarkInput,
   type OnlineMarkComponentKey,
   type OnlineMarkValues,
+  type ParsedOnlineMarkInput,
 } from './online-marks-domain';
 
 interface StudentRow {
@@ -101,7 +103,7 @@ export function OnlineMarksEditor({
           cat: toInput(student.initialMarks.cat),
           exam:
             student.attendanceStatus === 'absent'
-              ? ''
+              ? (student.initialMarks.exam !== null ? toInput(student.initialMarks.exam) : 'AB')
               : toInput(student.initialMarks.exam),
         },
       ]),
@@ -119,6 +121,7 @@ export function OnlineMarksEditor({
   const [submissions, setSubmissions] = useState<ComponentSubmission[]>(componentSubmissions);
   const [revisionDialogOpen, setRevisionDialogOpen] = useState(false);
   const [revisionReason, setRevisionReason] = useState('');
+  const [submitConfirmDialogOpen, setSubmitConfirmDialogOpen] = useState(false);
 
   useEffect(() => {
     setSubmissions(componentSubmissions);
@@ -135,7 +138,7 @@ export function OnlineMarksEditor({
           presentation: m.presentation !== null ? String(m.presentation) : '',
           rat: m.rat !== null ? String(m.rat) : '',
           cat: m.cat !== null ? String(m.cat) : '',
-          exam: m.attendanceStatus === 'absent' ? '' : m.exam !== null ? String(m.exam) : '',
+          exam: m.attendanceStatus === 'absent' ? 'AB' : m.exam !== null ? String(m.exam) : '',
         };
       }
       return next;
@@ -169,23 +172,38 @@ export function OnlineMarksEditor({
 
         const cat = parseOnlineMarkInput(studentValues?.cat ?? '', 15);
 
-        const exam =
-          student.attendanceStatus === 'absent'
-            ? { valid: true, mark: null, message: null }
-            : parseOnlineMarkInput(studentValues?.exam ?? '', 70);
+        const examParsed = parseOnlineMarkInput(
+          studentValues?.exam ?? '',
+          70,
+          true,
+        );
+
+        const isAbsent = examParsed.mark !== null
+          ? false
+          : Boolean(
+              examParsed.isAbsent ||
+              student.attendanceStatus === 'absent' ||
+              studentValues?.exam?.trim().toUpperCase() === 'AB'
+            );
+
+        const exam: ParsedOnlineMarkInput = {
+          ...examParsed,
+          isAbsent,
+        };
 
         const marks: OnlineMarkValues = {
           assignment: assignment.mark,
           presentation: presentation.mark,
           rat: rat.mark,
           cat: cat.mark,
-          exam: exam.mark,
+          exam: isAbsent ? null : exam.mark,
         };
 
         return {
           studentIndex,
           student,
           marks,
+          isAbsent,
           fields: {
             assignment,
             presentation,
@@ -195,7 +213,7 @@ export function OnlineMarksEditor({
           },
           missing: missingOnlineComponentCount({
             values: marks,
-            absent: student.attendanceStatus === 'absent',
+            absent: isAbsent,
           }),
           ratCatAverage: calculateRatCatAverage({
             rat: marks.rat,
@@ -203,7 +221,7 @@ export function OnlineMarksEditor({
           }),
           total: calculateOnlineFinalTotal(
             marks,
-            student.attendanceStatus === 'absent',
+            isAbsent,
           ),
         };
       }),
@@ -288,17 +306,22 @@ export function OnlineMarksEditor({
   const invalidForSelectedComponent = visibleComponent === 'all'
     ? invalid
     : parsedRows
-      .map((row) => ({ student: row.student, value: row.fields[visibleComponent] }))
-      .find((row) => !row.value.valid && !(visibleComponent === 'exam' && row.student.attendanceStatus === 'absent'));
+      .map((row) => ({ student: row.student, value: row.fields[visibleComponent], isAbsent: row.isAbsent }))
+      .find((row) => !row.value.valid && !(visibleComponent === 'exam' && row.isAbsent));
 
-  const selectedComponentMissing = visibleComponent === 'cat'
-    ? unfilledSummary.missingCat > 0
-    : visibleComponent === 'exam' || visibleComponent === 'all'
-      ? unfilledSummary.totalMissing > 0
-      : false;
-
-  const absent = students.filter((s) => s.attendanceStatus === 'absent').length;
+  const absent = parsedRows.filter((row) => row.isAbsent).length;
   const missing = parsedRows.reduce((sum, row) => sum + row.missing, 0);
+
+  const absentExamStudents = useMemo(
+    () => parsedRows.filter((row) => row.isAbsent || row.marks.exam === null),
+    [parsedRows],
+  );
+
+  const missingCourseworkCount =
+    unfilledSummary.missingAssignment +
+    unfilledSummary.missingPresentation +
+    unfilledSummary.missingRat +
+    unfilledSummary.missingCat;
 
   function setField(
     studentId: string,
@@ -426,7 +449,7 @@ export function OnlineMarksEditor({
               rat: row.marks.rat,
               cat: row.marks.cat,
               exam:
-                row.student.attendanceStatus === 'absent'
+                row.isAbsent
                   ? null
                   : row.marks.exam,
             })),
@@ -493,8 +516,8 @@ export function OnlineMarksEditor({
                 presentation: row.marks.presentation,
                 rat: row.marks.rat,
                 cat: row.marks.cat,
-                exam: row.student.attendanceStatus === 'absent' ? null : row.marks.exam,
-                attendanceStatus: row.student.attendanceStatus,
+                exam: row.isAbsent ? null : row.marks.exam,
+                attendanceStatus: row.isAbsent ? 'absent' : 'expected',
               })),
             }),
           },
@@ -531,13 +554,16 @@ export function OnlineMarksEditor({
       return;
     }
 
-    if (unfilledSummary.totalMissing > 0) {
-      setError(
-        `Every column must be filled before submitting final marks. Missing entries: ${formatUnfilledColumnsMessage(unfilledSummary)}. (If a student missed coursework, enter 0).`,
-      );
+    if (absentExamStudents.length > 0 || missingCourseworkCount > 0) {
+      setSubmitConfirmDialogOpen(true);
       return;
     }
 
+    await executeFinalSubmit();
+  }
+
+  async function executeFinalSubmit() {
+    setSubmitConfirmDialogOpen(false);
     setBusy('submit');
     setError(null);
     setMessage(null);
@@ -550,15 +576,18 @@ export function OnlineMarksEditor({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             component: 'all',
-            entries: parsedRows.map((row) => ({
-              studentId: row.student.studentId,
-              assignment: row.marks.assignment,
-              presentation: row.marks.presentation,
-              rat: row.marks.rat,
-              cat: row.marks.cat,
-              exam: row.student.attendanceStatus === 'absent' ? null : row.marks.exam,
-              attendanceStatus: row.student.attendanceStatus,
-            })),
+            entries: parsedRows.map((row) => {
+              const isAbsent = row.isAbsent || row.marks.exam === null;
+              return {
+                studentId: row.student.studentId,
+                assignment: row.marks.assignment ?? 0,
+                presentation: row.marks.presentation ?? 0,
+                rat: row.marks.rat ?? 0,
+                cat: row.marks.cat ?? 0,
+                exam: isAbsent ? null : row.marks.exam,
+                attendanceStatus: isAbsent ? 'absent' : 'expected',
+              };
+            }),
           }),
         },
       );
@@ -575,6 +604,8 @@ export function OnlineMarksEditor({
       setSubmissions(allComps.map((comp) => ({ component: comp, cohortId: null, submittedAt: now })));
       setMessage('Final marks submitted and markbook finalized successfully.');
       router.refresh();
+    } catch {
+      setError('Failed to submit final marks.');
     } finally {
       setBusy(null);
     }
@@ -859,8 +890,7 @@ export function OnlineMarksEditor({
               {paginatedRows.map((row, rowIndex) => {
                 const key = singleComponent.key;
                 const field = row.fields[key];
-                const isExamAbsent =
-                  key === 'exam' && row.student.attendanceStatus === 'absent';
+                const isExamAbsent = key === 'exam' && row.isAbsent;
 
                 return (
                   <div
@@ -889,55 +919,53 @@ export function OnlineMarksEditor({
 
                     {/* Right: Input box (shrink-0, fixed width w-20, NEVER truncated) */}
                     <div className="shrink-0">
-                      {isExamAbsent ? (
-                        <div className="flex h-10 w-20 items-center justify-center rounded-none border border-slate-300 bg-[#eee8d7] text-xs font-bold text-slate-700">
-                          AB
-                        </div>
-                      ) : (
-                        <div>
-                          <input
-                            data-mark-cell="true"
-                            data-mark-row={rowIndex}
-                            data-mark-col={0}
-                            data-student-index={row.studentIndex}
-                            data-component-key={key}
-                            value={values[row.student.studentId]?.[key] ?? ''}
-                            type="text"
-                            inputMode="decimal"
-                            autoComplete="off"
-                            autoCorrect="off"
-                            spellCheck={false}
-                            placeholder={
-                              ['assignment', 'presentation', 'rat'].includes(key)
-                                ? '0'
+                      <div>
+                        <input
+                          data-mark-cell="true"
+                          data-mark-row={rowIndex}
+                          data-mark-col={0}
+                          data-student-index={row.studentIndex}
+                          data-component-key={key}
+                          value={values[row.student.studentId]?.[key] ?? ''}
+                          type="text"
+                          inputMode={key === 'exam' ? 'text' : 'decimal'}
+                          autoComplete="off"
+                          autoCorrect="off"
+                          spellCheck={false}
+                          placeholder={
+                            ['assignment', 'presentation', 'rat'].includes(key)
+                              ? '0'
+                              : isExamAbsent
+                                ? 'AB'
                                 : '—'
-                            }
-                            disabled={!editable || busy !== null || componentIsSubmitted(key, row.student.cohortId)}
-                            onFocus={(e) => e.currentTarget.select()}
-                            onChange={(event) =>
-                              setField(
-                                row.student.studentId,
-                                key,
-                                event.target.value,
-                              )
-                            }
-                            onKeyDown={(e) =>
-                              handleKeyDown(e, rowIndex, 0)
-                            }
-                            aria-label={`${key} mark for ${row.student.fullName}`}
-                            className={`h-10 w-20 rounded-none border bg-[#fffdf5] px-2 text-center text-base font-bold text-slate-900 outline-none transition focus:border-[#0b4f4a] focus:ring-2 focus:ring-[#0b4f4a]/20 disabled:bg-[#eee8d7] disabled:text-slate-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-                              field.valid
-                                ? 'border-slate-400 focus:border-[#0b4f4a]'
-                                : 'border-red-600 focus:ring-red-600/20'
-                            }`}
-                          />
-                          {!field.valid ? (
-                            <p className="mt-0.5 text-right text-[9px] font-semibold text-red-600">
-                              {field.message}
-                            </p>
-                          ) : null}
-                        </div>
-                      )}
+                          }
+                          disabled={!editable || busy !== null || componentIsSubmitted(key, row.student.cohortId)}
+                          onFocus={(e) => e.currentTarget.select()}
+                          onChange={(event) =>
+                            setField(
+                              row.student.studentId,
+                              key,
+                              event.target.value,
+                            )
+                          }
+                          onKeyDown={(e) =>
+                            handleKeyDown(e, rowIndex, 0)
+                          }
+                          aria-label={`${key} mark for ${row.student.fullName}`}
+                          className={`h-10 w-20 rounded-none border px-2 text-center text-base font-bold outline-none transition focus:border-[#0b4f4a] focus:ring-2 focus:ring-[#0b4f4a]/20 disabled:bg-[#eee8d7] disabled:text-slate-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                            isExamAbsent
+                              ? 'border-amber-300 bg-amber-50/70 text-amber-900'
+                              : 'border-slate-400 bg-[#fffdf5] text-slate-900 focus:border-[#0b4f4a]'
+                          } ${
+                            !field.valid ? 'border-red-600 focus:ring-red-600/20' : ''
+                          }`}
+                        />
+                        {!field.valid ? (
+                          <p className="mt-0.5 text-right text-[9px] font-semibold text-red-600">
+                            {field.message}
+                          </p>
+                        ) : null}
+                      </div>
                     </div>
                   </div>
                 );
@@ -985,7 +1013,7 @@ export function OnlineMarksEditor({
                       <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-medium text-slate-600">
                         <span className="font-mono whitespace-nowrap">{row.student.admissionNumber}</span>
                       </div>
-                      {row.student.attendanceStatus === 'absent' ? (
+                      {row.isAbsent ? (
                         <Badge variant="warning" className="mt-0.5 rounded-none text-[9px]">
                           Exam absent
                         </Badge>
@@ -994,60 +1022,57 @@ export function OnlineMarksEditor({
 
                     {onlineMarkComponents.map(({ key }, colIndex) => {
                       const field = row.fields[key];
-                      const examAbsent =
-                        key === 'exam' && row.student.attendanceStatus === 'absent';
+                      const isAbsentExam = key === 'exam' && row.isAbsent;
 
                       return (
                         <td key={key} className="px-1.5 py-2.5">
-                          {examAbsent ? (
-                            <div className="mx-auto flex h-9 w-16 items-center justify-center rounded-none border border-slate-300 bg-[#eee8d7] text-xs font-bold text-slate-700">
-                              AB
-                            </div>
-                          ) : (
-                            <div className="mx-auto w-16">
-                              <input
-                                data-mark-cell="true"
-                                data-mark-row={rowIndex}
-                                data-mark-col={colIndex}
-                                data-student-index={row.studentIndex}
-                                data-component-key={key}
-                                value={values[row.student.studentId]?.[key] ?? ''}
-                                type="text"
-                                inputMode="decimal"
-                                autoComplete="off"
-                                autoCorrect="off"
-                                spellCheck={false}
-                                placeholder={
-                                  ['assignment', 'presentation', 'rat'].includes(key)
-                                    ? '0'
+                          <div className="mx-auto w-16">
+                            <input
+                              data-mark-cell="true"
+                              data-mark-row={rowIndex}
+                              data-mark-col={colIndex}
+                              data-student-index={row.studentIndex}
+                              data-component-key={key}
+                              value={values[row.student.studentId]?.[key] ?? ''}
+                              type="text"
+                              inputMode={key === 'exam' ? 'text' : 'decimal'}
+                              autoComplete="off"
+                              autoCorrect="off"
+                              spellCheck={false}
+                              placeholder={
+                                ['assignment', 'presentation', 'rat'].includes(key)
+                                  ? '0'
+                                  : isAbsentExam
+                                    ? 'AB'
                                     : '—'
-                                }
-                                disabled={!editable || busy !== null || componentIsSubmitted(key, row.student.cohortId)}
-                                onFocus={(e) => e.currentTarget.select()}
-                                onChange={(event) =>
-                                  setField(
-                                    row.student.studentId,
-                                    key,
-                                    event.target.value,
-                                  )
-                                }
-                                onKeyDown={(e) =>
-                                  handleKeyDown(e, rowIndex, colIndex)
-                                }
-                                aria-label={`${key} mark for ${row.student.fullName}`}
-                                className={`h-9 w-full rounded-none border bg-[#fffdf5] px-1 text-center text-xs font-bold text-slate-900 outline-none transition focus:border-[#0b4f4a] focus:ring-2 focus:ring-[#0b4f4a]/20 disabled:bg-[#eee8d7] disabled:text-slate-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-                                  field.valid
-                                    ? 'border-slate-400 focus:border-[#0b4f4a]'
-                                    : 'border-red-600 focus:ring-red-600/20'
-                                }`}
-                              />
-                              {!field.valid ? (
-                                <p className="mt-0.5 text-center text-[9px] font-semibold text-red-600">
-                                  {field.message}
-                                </p>
-                              ) : null}
-                            </div>
-                          )}
+                              }
+                              disabled={!editable || busy !== null || componentIsSubmitted(key, row.student.cohortId)}
+                              onFocus={(e) => e.currentTarget.select()}
+                              onChange={(event) =>
+                                setField(
+                                  row.student.studentId,
+                                  key,
+                                  event.target.value,
+                                )
+                              }
+                              onKeyDown={(e) =>
+                                handleKeyDown(e, rowIndex, colIndex)
+                              }
+                              aria-label={`${key} mark for ${row.student.fullName}`}
+                              className={`h-9 w-full rounded-none border px-1 text-center text-xs font-bold outline-none transition focus:border-[#0b4f4a] focus:ring-2 focus:ring-[#0b4f4a]/20 disabled:bg-[#eee8d7] disabled:text-slate-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                                isAbsentExam
+                                  ? 'border-amber-300 bg-amber-50/70 text-amber-900'
+                                  : 'border-slate-400 bg-[#fffdf5] text-slate-900 focus:border-[#0b4f4a]'
+                              } ${
+                                !field.valid ? 'border-red-600 focus:ring-red-600/20' : ''
+                              }`}
+                            />
+                            {!field.valid ? (
+                              <p className="mt-0.5 text-center text-[9px] font-semibold text-red-600">
+                                {field.message}
+                              </p>
+                            ) : null}
+                          </div>
                         </td>
                       );
                     })}
@@ -1058,7 +1083,7 @@ export function OnlineMarksEditor({
                         : row.ratCatAverage.toFixed(2)}
                     </td>
                     <td className="px-3 py-2.5 text-center text-sm font-extrabold text-slate-950">
-                      {row.student.attendanceStatus === 'absent'
+                      {row.isAbsent
                         ? 'AB'
                         : row.total === null
                           ? '—'
@@ -1151,7 +1176,7 @@ export function OnlineMarksEditor({
               {finalSubmitted
                 ? 'Final marks submitted and markbook finalized.'
                 : unfilledSummary.totalMissing > 0
-                  ? `${unfilledSummary.totalMissing} mark(s) remaining before final submission (${formatUnfilledColumnsMessage(unfilledSummary)}).`
+                  ? `${unfilledSummary.totalMissing} mark(s) unentered. On final submission, empty coursework becomes 0 and empty exams are recorded as Absent (AB).`
                   : 'All columns complete and ready for final submission.'}
             </p>
           )}
@@ -1264,7 +1289,6 @@ export function OnlineMarksEditor({
                   size="sm"
                   disabled={
                     busy !== null ||
-                    unfilledSummary.totalMissing > 0 ||
                     Boolean(invalid)
                   }
                   onClick={() => void submitMarks()}
@@ -1342,6 +1366,103 @@ export function OnlineMarksEditor({
                 }
               >
                 {busy === 'reopen' ? 'Unlocking...' : 'Unlock for editing'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {submitConfirmDialogOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-2xs">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+                  <AlertCircle className="size-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">
+                    Confirm Final Marks Submission
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Review unentered marks and absent students before finalizing.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSubmitConfirmDialogOpen(false)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-3.5 text-xs">
+              {/* Absent students notice */}
+              {absentExamStudents.length > 0 ? (
+                <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-3.5">
+                  <div className="flex items-center gap-2 font-bold text-amber-900">
+                    <span>
+                      {absentExamStudents.length} student{absentExamStudents.length === 1 ? '' : 's'} will be recorded as Absent (AB)
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[11px] leading-relaxed text-amber-800">
+                    The following students have no final exam mark entered and will receive an official grade of <strong>ABSENT</strong> on their academic transcript:
+                  </p>
+                  <div className="mt-2.5 max-h-36 overflow-y-auto divide-y divide-amber-200/60 rounded-lg border border-amber-200 bg-white px-2.5 py-1 text-[11px]">
+                    {absentExamStudents.map((row) => (
+                      <div key={row.student.studentId} className="flex items-center justify-between py-1.5">
+                        <span className="font-semibold text-slate-900">{row.student.fullName}</span>
+                        <span className="font-mono text-slate-600">{row.student.admissionNumber}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {/* Coursework zeros notice */}
+              {missingCourseworkCount > 0 ? (
+                <div className="rounded-xl border border-blue-200 bg-blue-50/80 p-3.5 text-blue-900">
+                  <div className="font-bold">
+                    {missingCourseworkCount} unentered coursework mark{missingCourseworkCount === 1 ? '' : 's'}
+                  </div>
+                  <p className="mt-1 text-[11px] leading-relaxed text-blue-800">
+                    Blank cells in continuous assessment (Assignment, Presentation, RAT, or CAT) will automatically be recorded as <strong>0 marks</strong>.
+                  </p>
+                </div>
+              ) : null}
+
+              <p className="text-[11px] leading-relaxed text-slate-500">
+                Once submitted, marks will be submitted for departmental moderation. You can unlock them for revisions while the assessment entry window remains open.
+              </p>
+            </div>
+
+            <div className="mt-5 flex items-center justify-end gap-2.5">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={busy !== null}
+                onClick={() => setSubmitConfirmDialogOpen(false)}
+              >
+                Return to Markbook
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                disabled={busy !== null}
+                onClick={() => void executeFinalSubmit()}
+                className="bg-[#0b4f4a] text-white hover:bg-[#083e3a]"
+                leadingIcon={
+                  busy === 'submit' ? (
+                    <LoaderCircle className="size-3.5 animate-spin" />
+                  ) : (
+                    <Send className="size-3.5" />
+                  )
+                }
+              >
+                {busy === 'submit' ? 'Submitting...' : 'Confirm & Submit Final Marks'}
               </Button>
             </div>
           </div>

@@ -56,6 +56,7 @@ export function TrainerMarkEntryPortal() {
   const [message, setMessage] = useState('');
   const [revisionDialogOpen, setRevisionDialogOpen] = useState(false);
   const [revisionReason, setRevisionReason] = useState('');
+  const [submitConfirmDialogOpen, setSubmitConfirmDialogOpen] = useState(false);
 
   const loadSession = useCallback(async () => {
     const response = await fetch('/api/trainer-mark-entry/session', { cache: 'no-store' });
@@ -93,13 +94,32 @@ export function TrainerMarkEntryPortal() {
   }, [loadSession]);
 
   function updateMark(assessmentId: string, studentId: string, field: MarkField, value: string) {
+    if (field === 'exam') {
+      const trimmed = value.trim().toUpperCase();
+      if (trimmed === 'AB' || trimmed === 'ABSENT' || trimmed === 'A') {
+        const update = (current: TrainerMarkEntryRow[]) => current.map((student) => (
+          student.assessmentId === assessmentId && student.studentId === studentId
+            ? { ...student, exam: null, attendanceStatus: 'absent' as const }
+            : student
+        ));
+        setStudents((current) => update(current));
+        const cohortKey = selectedCohortId ?? 'all';
+        setStudentsByCohort((current) => ({ ...current, [cohortKey]: update(current[cohortKey] ?? []) }));
+        return;
+      }
+    }
     const maximum = markFields.find((markField) => markField.key === field)?.maximum ?? 0;
     const wholeNumber = value === '' ? null : Math.min(Number(value.replace(/\D/g, '')), maximum);
-    const update = (current: TrainerMarkEntryRow[]) => current.map((student) => (
-      student.assessmentId === assessmentId && student.studentId === studentId
-        ? { ...student, [field]: wholeNumber }
-        : student
-    ));
+    const update = (current: TrainerMarkEntryRow[]) => current.map((student) => {
+      if (student.assessmentId === assessmentId && student.studentId === studentId) {
+        return {
+          ...student,
+          [field]: wholeNumber,
+          attendanceStatus: field === 'exam' && wholeNumber !== null ? ('expected' as const) : student.attendanceStatus,
+        };
+      }
+      return student;
+    });
     setStudents((current) => update(current));
     const cohortKey = selectedCohortId ?? 'all';
     setStudentsByCohort((current) => ({ ...current, [cohortKey]: update(current[cohortKey] ?? []) }));
@@ -200,6 +220,9 @@ export function TrainerMarkEntryPortal() {
   const missingExam = students.filter((s) => s.attendanceStatus !== 'absent' && s.exam === null).length;
   const totalMissing = missingAssignment + missingPresentation + missingRat + missingCat + missingExam;
 
+  const absentExamStudents = students.filter((s) => s.attendanceStatus === 'absent' || s.exam === null);
+  const missingCourseworkCount = missingAssignment + missingPresentation + missingRat + missingCat;
+
   async function saveMarks(submit: boolean) {
     if (!selectedCohort) return;
     if (submit) {
@@ -224,21 +247,19 @@ export function TrainerMarkEntryPortal() {
           setError('Final marks have already been submitted.');
           return;
         }
-        if (totalMissing > 0) {
-          const parts: string[] = [];
-          if (missingAssignment) parts.push(`${missingAssignment} in Assignment`);
-          if (missingPresentation) parts.push(`${missingPresentation} in Presentation`);
-          if (missingRat) parts.push(`${missingRat} in RAT`);
-          if (missingCat) parts.push(`${missingCat} in CAT`);
-          if (missingExam) parts.push(`${missingExam} in Exam`);
-          setError(
-            `Every column must be filled before submitting final marks. Missing entries: ${parts.join(', ')}. (If a student missed coursework, enter 0).`,
-          );
+        if (absentExamStudents.length > 0 || missingCourseworkCount > 0) {
+          setSubmitConfirmDialogOpen(true);
           return;
         }
       }
     }
 
+    await executeTrainerSaveOrSubmit(submit);
+  }
+
+  async function executeTrainerSaveOrSubmit(submit: boolean) {
+    if (!selectedCohort) return;
+    setSubmitConfirmDialogOpen(false);
     setBusy(submit ? 'submit' : 'save');
     setError('');
     setMessage('');
@@ -250,15 +271,19 @@ export function TrainerMarkEntryPortal() {
           cohort_id: selectedCohort.id,
           component: submit ? (selectedView === 'cat' ? 'cat' : 'all') : selectedView,
           submit,
-          entries: students.map((student) => ({
-            assessment_id: student.assessmentId,
-            student_id: student.studentId,
-            assignment: student.assignment,
-            presentation: student.presentation,
-            rat: student.rat,
-            cat: student.cat,
-            exam: student.attendanceStatus === 'absent' ? null : student.exam,
-          })),
+          entries: students.map((student) => {
+            const isAbsent = student.attendanceStatus === 'absent' || student.exam === null;
+            return {
+              assessment_id: student.assessmentId,
+              student_id: student.studentId,
+              assignment: submit && student.assignment === null ? 0 : student.assignment,
+              presentation: submit && student.presentation === null ? 0 : student.presentation,
+              rat: submit && student.rat === null ? 0 : student.rat,
+              cat: submit && student.cat === null ? 0 : student.cat,
+              exam: isAbsent ? null : student.exam,
+              attendance_status: isAbsent ? ('absent' as const) : ('expected' as const),
+            };
+          }),
         }),
       });
       const result = await response.json() as { message?: string; result?: { savedCount?: number } };
@@ -454,7 +479,7 @@ export function TrainerMarkEntryPortal() {
                         Revise Final Marks
                       </Button>
                     ) : (
-                      <Button className="w-full sm:w-auto" type="button" disabled={busy !== null || students.length === 0 || totalMissing > 0} onClick={() => void saveMarks(true)}>
+                      <Button className="w-full sm:w-auto" type="button" disabled={busy !== null || students.length === 0} onClick={() => void saveMarks(true)}>
                         {busy === 'submit' ? <LoaderCircle className="size-4 animate-spin" /> : <Send className="size-4" />}{busy === 'submit' ? 'Submitting...' : 'Submit Final Marks'}
                       </Button>
                     )}
@@ -483,31 +508,38 @@ export function TrainerMarkEntryPortal() {
                         <td className="hidden px-3 py-2.5 text-slate-400 md:table-cell">{index + 1}</td>
                         <td className="hidden whitespace-nowrap px-3 py-2.5 font-medium text-slate-900 md:table-cell">{student.admissionNumber}</td>
                         <td className="hidden min-w-52 px-3 py-2.5 text-slate-800 md:table-cell">{student.fullName}{student.attendanceStatus === 'absent' ? <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">Absent</span> : null}</td>
-                        {visibleFields.map((field, fieldIndex) => (
-                          <td key={field.key} className="min-w-[92px] px-2 py-2 text-center">
-                            {field.key === 'exam' && student.attendanceStatus === 'absent' ? (
-                              <span className="text-xs font-semibold text-slate-500">AB</span>
-                            ) : (
+                        {visibleFields.map((field, fieldIndex) => {
+                          const isAbsentExam = field.key === 'exam' && student.attendanceStatus === 'absent';
+                          const displayVal = field.key === 'exam'
+                            ? (student.exam !== null ? student.exam : (student.attendanceStatus === 'absent' ? 'AB' : ''))
+                            : (student[field.key] ?? '');
+
+                          return (
+                            <td key={field.key} className="min-w-[92px] px-2 py-2 text-center">
                               <input
                                 aria-label={`${field.label} for ${student.admissionNumber}`}
                                 type="text"
-                                inputMode="numeric"
-                                pattern="[0-9]*"
+                                inputMode={field.key === 'exam' ? 'text' : 'numeric'}
                                 data-mark-cell="true"
                                 data-mark-row={index}
                                 data-mark-column={fieldIndex}
                                 onKeyDown={moveMarkCell}
                                 min="0"
                                 max={field.maximum}
-                                value={student[field.key] ?? ''}
+                                value={displayVal}
+                                placeholder={['assignment', 'presentation', 'rat'].includes(field.key) ? '0' : isAbsentExam ? 'AB' : '—'}
                                 disabled={readOnly || (field.key === 'cat' && isCatSubmitted) || (field.key === 'exam' && isFinalSubmitted)}
                                 onFocus={(e) => e.currentTarget.select()}
                                 onChange={(event) => updateMark(student.assessmentId, student.studentId, field.key, event.target.value)}
-                                className="h-10 w-20 rounded-md border border-slate-300 bg-white px-2 text-center text-base tabular-nums outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100 disabled:bg-slate-100 sm:h-9 sm:text-xs"
+                                className={`h-10 w-20 rounded-md border px-2 text-center text-base tabular-nums outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100 disabled:bg-slate-100 sm:h-9 sm:text-xs ${
+                                  isAbsentExam
+                                    ? 'border-amber-300 bg-amber-50/70 font-semibold text-amber-900'
+                                    : 'border-slate-300 bg-white text-slate-900'
+                                }`}
                               />
-                            )}
-                          </td>
-                        ))}
+                            </td>
+                          );
+                        })}
                       </tr>
                     ))}
                   </tbody>
@@ -575,6 +607,103 @@ export function TrainerMarkEntryPortal() {
                     >
                       {busy === 'save' ? <LoaderCircle className="mr-1.5 size-3.5 animate-spin" /> : <RotateCcw className="mr-1.5 size-3.5" />}
                       Unlock for editing
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
+            {submitConfirmDialogOpen ? (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-2xs">
+                <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+                        <AlertCircle className="size-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-base font-bold text-slate-900">
+                          Confirm Final Marks Submission
+                        </h3>
+                        <p className="text-xs text-slate-500">
+                          Review unentered marks and absent students before finalizing.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSubmitConfirmDialogOpen(false)}
+                      className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                    >
+                      <X className="size-4" />
+                    </button>
+                  </div>
+
+                  <div className="mt-4 space-y-3.5 text-xs">
+                    {/* Absent students notice */}
+                    {absentExamStudents.length > 0 ? (
+                      <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-3.5">
+                        <div className="flex items-center gap-2 font-bold text-amber-900">
+                          <span>
+                            {absentExamStudents.length} student{absentExamStudents.length === 1 ? '' : 's'} will be recorded as Absent (AB)
+                          </span>
+                        </div>
+                        <p className="mt-1 text-[11px] leading-relaxed text-amber-800">
+                          The following students have no final exam mark entered and will receive an official grade of <strong>ABSENT</strong> on their academic transcript:
+                        </p>
+                        <div className="mt-2.5 max-h-36 overflow-y-auto divide-y divide-amber-200/60 rounded-lg border border-amber-200 bg-white px-2.5 py-1 text-[11px]">
+                          {absentExamStudents.map((s) => (
+                            <div key={s.studentId} className="flex items-center justify-between py-1.5">
+                              <span className="font-semibold text-slate-900">{s.fullName}</span>
+                              <span className="font-mono text-slate-600">{s.admissionNumber}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {/* Coursework zeros notice */}
+                    {missingCourseworkCount > 0 ? (
+                      <div className="rounded-xl border border-blue-200 bg-blue-50/80 p-3.5 text-blue-900">
+                        <div className="font-bold">
+                          {missingCourseworkCount} unentered coursework mark{missingCourseworkCount === 1 ? '' : 's'}
+                        </div>
+                        <p className="mt-1 text-[11px] leading-relaxed text-blue-800">
+                          Blank cells in continuous assessment (Assignment, Presentation, RAT, or CAT) will automatically be recorded as <strong>0 marks</strong>.
+                        </p>
+                      </div>
+                    ) : null}
+
+                    <p className="text-[11px] leading-relaxed text-slate-500">
+                      Once submitted, marks will be locked and routed for departmental moderation. You can unlock them for revisions while the assessment entry window remains open.
+                    </p>
+                  </div>
+
+                  <div className="mt-5 flex items-center justify-end gap-2.5">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={busy !== null}
+                      onClick={() => setSubmitConfirmDialogOpen(false)}
+                    >
+                      Return to Markbook
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={busy !== null}
+                      onClick={() => void executeTrainerSaveOrSubmit(true)}
+                      className="bg-teal-700 text-white hover:bg-teal-800"
+                      leadingIcon={
+                        busy === 'submit' ? (
+                          <LoaderCircle className="size-3.5 animate-spin" />
+                        ) : (
+                          <Send className="size-3.5" />
+                        )
+                      }
+                    >
+                      {busy === 'submit' ? 'Submitting...' : 'Confirm & Submit Final Marks'}
                     </Button>
                   </div>
                 </div>

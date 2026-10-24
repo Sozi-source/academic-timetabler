@@ -15,6 +15,7 @@ const entriesSchema = z.array(z.object({
   rat: markValue,
   cat: markValue,
   exam: markValue,
+  attendance_status: z.enum(['expected', 'absent']).optional(),
 })).min(1).max(2000);
 const saveSchema = z.object({ cohort_id: z.string().uuid().nullable().optional(), component: z.enum(['all', 'assignment', 'presentation', 'rat', 'cat', 'exam']).default('all'), entries: entriesSchema.min(1).max(2000), submit: z.boolean().default(false) });
 
@@ -113,30 +114,59 @@ export async function POST(request: Request) {
             results.push(data);
           } else {
             // Final marks submission ('all' or 'exam')
-            const missingSummary = {
-              assignment: relevantEntries.filter((e) => e.assignment === null).length,
-              presentation: relevantEntries.filter((e) => e.presentation === null).length,
-              rat: relevantEntries.filter((e) => e.rat === null).length,
-              cat: relevantEntries.filter((e) => e.cat === null).length,
-              exam: relevantEntries.filter((e) => studentStatusMap.get(e.student_id) !== 'absent' && e.exam === null).length,
-            };
-            const missingParts: string[] = [];
-            if (missingSummary.assignment) missingParts.push(`${missingSummary.assignment} in Assignment`);
-            if (missingSummary.presentation) missingParts.push(`${missingSummary.presentation} in Presentation`);
-            if (missingSummary.rat) missingParts.push(`${missingSummary.rat} in RAT`);
-            if (missingSummary.cat) missingParts.push(`${missingSummary.cat} in CAT`);
-            if (missingSummary.exam) missingParts.push(`${missingSummary.exam} in Exam`);
+            // Prepare final entries: students with null exam marks are confirmed as absent;
+            // unsubmitted coursework automatically defaults to 0.
+            const finalEntries = relevantEntries.map((e) => {
+              const isAbsent = e.attendance_status === 'absent' || e.exam === null;
+              return {
+                student_id: e.student_id,
+                assignment: typeof e.assignment === 'number' ? e.assignment : 0,
+                presentation: typeof e.presentation === 'number' ? e.presentation : 0,
+                rat: typeof e.rat === 'number' ? e.rat : 0,
+                cat: typeof e.cat === 'number' ? e.cat : 0,
+                exam: isAbsent ? null : e.exam,
+              };
+            });
 
-            if (missingParts.length > 0) {
-              return NextResponse.json({
-                message: `Every column must be filled before submitting final marks. Missing entries: ${missingParts.join(', ')}. (If a student missed coursework, enter 0).`,
-              }, { status: 422 });
+            const absentStudentIds = relevantEntries
+              .filter((e) => e.attendance_status === 'absent' || e.exam === null)
+              .map((e) => e.student_id);
+            const presentStudentIds = relevantEntries
+              .filter((e) => e.attendance_status !== 'absent' && e.exam !== null)
+              .map((e) => e.student_id);
+
+            if (absentStudentIds.length > 0) {
+              await admin
+                .from('assessment_roster')
+                .update({ pre_assessment_status: 'absent' })
+                .eq('assessment_id', scope.assessment_id)
+                .in('student_id', absentStudentIds);
+
+              await admin
+                .from('assessment_population')
+                .update({ attendance_status: 'absent' })
+                .eq('assessment_event_id', scope.assessment_id)
+                .in('student_id', absentStudentIds);
+            }
+
+            if (presentStudentIds.length > 0) {
+              await admin
+                .from('assessment_roster')
+                .update({ pre_assessment_status: 'expected' })
+                .eq('assessment_id', scope.assessment_id)
+                .in('student_id', presentStudentIds);
+
+              await admin
+                .from('assessment_population')
+                .update({ attendance_status: 'expected' })
+                .eq('assessment_event_id', scope.assessment_id)
+                .in('student_id', presentStudentIds);
             }
 
             // Save all marks and submit
             const { data: savedData, error: saveError } = await admin.rpc('save_assessment_marks_with_trainer_invite', {
               target_token_hash: scope.token_hash,
-              target_entries: relevantEntries,
+              target_entries: finalEntries,
               submit_marks: true,
             });
             if (saveError) {
@@ -230,35 +260,58 @@ export async function POST(request: Request) {
           results.push(data);
         } else {
           // Final marks submission ('all' or 'exam')
-          const { data: rosterRows } = await admin
-            .from('assessment_roster')
-            .select('student_id,pre_assessment_status')
-            .eq('assessment_id', invite.assessment_id);
-          const studentStatusMap = new Map((rosterRows ?? []).map((r) => [r.student_id, r.pre_assessment_status ?? 'expected']));
+          // Prepare final entries: students with null exam marks are confirmed as absent;
+          // unsubmitted coursework automatically defaults to 0.
+          const finalEntries = rawEntries.map((e) => {
+            const isAbsent = e.attendance_status === 'absent' || e.exam === null;
+            return {
+              student_id: e.student_id,
+              assignment: typeof e.assignment === 'number' ? e.assignment : 0,
+              presentation: typeof e.presentation === 'number' ? e.presentation : 0,
+              rat: typeof e.rat === 'number' ? e.rat : 0,
+              cat: typeof e.cat === 'number' ? e.cat : 0,
+              exam: isAbsent ? null : e.exam,
+            };
+          });
 
-          const missingSummary = {
-            assignment: rawEntries.filter((e) => e.assignment === null).length,
-            presentation: rawEntries.filter((e) => e.presentation === null).length,
-            rat: rawEntries.filter((e) => e.rat === null).length,
-            cat: rawEntries.filter((e) => e.cat === null).length,
-            exam: rawEntries.filter((e) => studentStatusMap.get(e.student_id) !== 'absent' && e.exam === null).length,
-          };
-          const missingParts: string[] = [];
-          if (missingSummary.assignment) missingParts.push(`${missingSummary.assignment} in Assignment`);
-          if (missingSummary.presentation) missingParts.push(`${missingSummary.presentation} in Presentation`);
-          if (missingSummary.rat) missingParts.push(`${missingSummary.rat} in RAT`);
-          if (missingSummary.cat) missingParts.push(`${missingSummary.cat} in CAT`);
-          if (missingSummary.exam) missingParts.push(`${missingSummary.exam} in Exam`);
+          const absentStudentIds = rawEntries
+            .filter((e) => e.attendance_status === 'absent' || e.exam === null)
+            .map((e) => e.student_id);
+          const presentStudentIds = rawEntries
+            .filter((e) => e.attendance_status !== 'absent' && e.exam !== null)
+            .map((e) => e.student_id);
 
-          if (missingParts.length > 0) {
-            return NextResponse.json({
-              message: `Every column must be filled before submitting final marks. Missing entries: ${missingParts.join(', ')}. (If a student missed coursework, enter 0).`,
-            }, { status: 422 });
+          if (absentStudentIds.length > 0) {
+            await admin
+              .from('assessment_roster')
+              .update({ pre_assessment_status: 'absent' })
+              .eq('assessment_id', invite.assessment_id)
+              .in('student_id', absentStudentIds);
+
+            await admin
+              .from('assessment_population')
+              .update({ attendance_status: 'absent' })
+              .eq('assessment_event_id', invite.assessment_id)
+              .in('student_id', absentStudentIds);
+          }
+
+          if (presentStudentIds.length > 0) {
+            await admin
+              .from('assessment_roster')
+              .update({ pre_assessment_status: 'expected' })
+              .eq('assessment_id', invite.assessment_id)
+              .in('student_id', presentStudentIds);
+
+            await admin
+              .from('assessment_population')
+              .update({ attendance_status: 'expected' })
+              .eq('assessment_event_id', invite.assessment_id)
+              .in('student_id', presentStudentIds);
           }
 
           const { data: savedData, error: saveError } = await admin.rpc('save_assessment_marks_with_trainer_invite', {
             target_token_hash: invite.token_hash,
-            target_entries: rawEntries,
+            target_entries: finalEntries,
             submit_marks: true,
           });
           if (saveError) {

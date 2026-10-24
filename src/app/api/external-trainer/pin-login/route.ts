@@ -83,6 +83,7 @@ export async function POST(request: Request) {
   });
 
   if (linkError || !linkData.properties.hashed_token) {
+    console.error('[pin-login] generateLink failed:', linkError);
     return NextResponse.json({ message: 'Unable to sign in right now. Please try again.' }, { status: 503 });
   }
 
@@ -93,6 +94,7 @@ export async function POST(request: Request) {
   });
 
   if (sessionError || !sessionData.user) {
+    console.error('[pin-login] verifyOtp failed:', sessionError);
     return NextResponse.json({ message: 'PIN accepted, but sign-in could not be completed. Please contact the department.' }, { status: 503 });
   }
 

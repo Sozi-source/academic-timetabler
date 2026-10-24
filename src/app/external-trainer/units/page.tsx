@@ -1,4 +1,4 @@
-import { ArrowUpRight, BookOpenCheck, ChevronRight, GraduationCap } from 'lucide-react';
+import { BookOpenCheck, ChevronRight, GraduationCap } from 'lucide-react';
 import Link from 'next/link';
 
 import { getAuthenticatedProfile } from '@/features/auth/queries';
@@ -39,32 +39,34 @@ export default async function ExternalTrainerUnitsPage() {
           </p>
         </section>
       ) : (
-        <section aria-label="Assigned units" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:gap-5">
+        <section aria-label="Assigned units" className="grid gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
           {allocations.map((allocation) => (
             <Link
               key={allocation.allocationId}
               href={`/external-trainer/units/${allocation.allocationId}/assessment/${allocation.exam?.assessmentId ?? 'exam'}/marks`}
-              className="group flex min-h-64 flex-col rounded-2xl border border-border/80 bg-white p-5 shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:min-h-72 sm:p-6"
+              className="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-gradient-to-br from-[#005f54] via-[#006e62] to-[#004d44] p-4 text-white shadow-xs ring-1 ring-white/10 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:ring-white/25 sm:p-5"
             >
               <div className="flex items-center justify-between gap-3">
-                <span className="flex size-12 items-center justify-center rounded-xl bg-primary-subtle text-primary transition group-hover:bg-primary group-hover:text-white">
-                  <GraduationCap className="size-5" aria-hidden="true" />
-                </span>
-                <span className="flex size-9 items-center justify-center rounded-full border border-border text-text-muted transition group-hover:border-primary/20 group-hover:bg-primary-subtle group-hover:text-primary">
-                  <ArrowUpRight className="size-4" aria-hidden="true" />
-                </span>
-              </div>
-              <div className="mt-5 min-w-0">
-                <p className="text-xs font-bold tracking-wide text-primary">
-                  {allocation.unitCode}
-                </p>
-                <h2 className="mt-2 text-lg font-bold leading-snug text-text-primary sm:text-xl">{allocation.unitName}</h2>
-                <p className="mt-2 text-sm text-text-muted">{allocation.cohortName}</p>
-              </div>
-              <div className="mt-auto flex items-center justify-between border-t border-border/70 pt-4 sm:mt-6">
-                <p className="text-sm font-semibold text-text-primary">Enter marks</p>
-                <span className="flex size-9 items-center justify-center rounded-full bg-primary text-white transition group-hover:translate-x-0.5 group-hover:bg-primary-hover">
-                  <ChevronRight className="size-4" aria-hidden="true" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="flex size-6 items-center justify-center rounded-lg bg-white/15 text-teal-100 backdrop-blur-xs">
+                      <GraduationCap className="size-3.5" aria-hidden="true" />
+                    </span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-teal-200">
+                      {allocation.unitCode}
+                    </span>
+                  </div>
+                  <h2 className="mt-2 text-base font-bold leading-snug text-white sm:text-lg">
+                    {allocation.unitName}
+                  </h2>
+                  <p className="mt-1 text-xs font-medium text-teal-100/75">
+                    {allocation.cohortName}
+                  </p>
+                </div>
+
+                <span className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-white px-3 py-2 text-xs font-bold text-[#005247] shadow-xs transition duration-150 group-hover:bg-teal-50 group-hover:shadow-md group-hover:scale-[1.02] active:scale-95">
+                  <span>Enter marks</span>
+                  <ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
                 </span>
               </div>
             </Link>

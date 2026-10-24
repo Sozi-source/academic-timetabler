@@ -1,10 +1,10 @@
-import { ClipboardPlus, ListChecks, Sparkles } from 'lucide-react';
+import { ClipboardPlus, ListChecks } from 'lucide-react';
 import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
-import { createAllAllocatedMarkbooksAction, createAssessmentAction } from '@/features/assessment/actions';
+import { createAssessmentAction } from '@/features/assessment/actions';
 import { getAssessments, getAssessmentSetupOptions } from '@/features/assessment/queries';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { DepartmentTrainerEntryControl } from '@/features/assessment/department-trainer-entry-control';
@@ -15,8 +15,6 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
   await requireHodAccess();
   const [params, assessments, options] = await Promise.all([searchParams, getAssessments(), getAssessmentSetupOptions()]);
   const error = typeof params.error === 'string' ? params.error : '';
-  const bulkCreated = typeof params.bulk_created === 'string' ? params.bulk_created : null;
-  const bulkFailed = Number(params.bulk_failed ?? 0);
   const activePeriod = options.periods.find((period) => period.status === 'active') ?? null;
   const markbooks = assessments.filter((assessment) => assessment.title === 'Unit Markbook');
   const errorText = error === 'required'
@@ -53,27 +51,9 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
                   : []
               ))}
             />
-            {activePeriod ? (
-              <form action={createAllAllocatedMarkbooksAction}>
-                <input type="hidden" name="academicPeriodId" value={activePeriod.id} />
-                <button
-                  type="submit"
-                  className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 text-xs font-semibold text-white shadow-xs transition hover:bg-primary-hover active:scale-95 sm:w-auto"
-                >
-                  <Sparkles className="size-3.5" />
-                  Generate all allocated markbooks
-                </button>
-              </form>
-            ) : null}
           </div>
         }
       />
-
-      {bulkCreated !== null ? (
-        <p className="rounded-lg bg-success-subtle px-3 py-2 text-xs font-semibold text-success">
-          Prepared markbooks for this period. {bulkCreated} created{bulkFailed ? ` · ${bulkFailed} failed` : ''}.
-        </p>
-      ) : null}
 
       {params.created === '1' && params.population === 'failed' ? (
         <p className="rounded-lg bg-warning-subtle px-3 py-2 text-xs font-semibold text-warning">

@@ -1319,26 +1319,21 @@ export function OnlineMarksEditor({
       </div>
 
       {revisionDialogOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xl">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200/60 shadow-2xs">
-                  <RotateCcw className="size-4" />
-                </span>
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900 tracking-tight">
-                    Revise {visibleComponent === 'all' || visibleComponent === 'exam' ? 'Final' : singleComponent?.label ?? ''} Marks
-                  </h3>
-                  <p className="mt-0.5 text-xs text-slate-500">
-                    Provide a brief reason to unlock marks for correction.
-                  </p>
-                </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-base font-semibold text-slate-900">
+                  Revise {visibleComponent === 'all' || visibleComponent === 'exam' ? 'Final' : singleComponent?.label ?? ''} Marks
+                </h3>
+                <p className="mt-1 text-xs text-slate-500">
+                  State why you need to unlock these marks.
+                </p>
               </div>
               <button
                 type="button"
                 onClick={() => setRevisionDialogOpen(false)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
                 aria-label="Close modal"
               >
                 <X className="size-4" />
@@ -1346,39 +1341,35 @@ export function OnlineMarksEditor({
             </div>
 
             <div className="mt-4">
-              <label htmlFor="staff-revision-reason" className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Reason for revision
-              </label>
               <textarea
                 id="staff-revision-reason"
-                rows={3}
+                rows={2}
                 value={revisionReason}
                 onChange={(e) => setRevisionReason(e.target.value)}
-                placeholder="e.g. Correcting misplaced score for student, paper re-marked..."
-                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 p-3 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-amber-500 focus:bg-white focus:ring-2 focus:ring-amber-500/15"
+                placeholder="e.g. Mark correction or paper re-mark..."
+                className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50/50 p-3 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-slate-900 focus:bg-white focus:ring-1 focus:ring-slate-900"
+                autoFocus
               />
             </div>
 
             <div className="mt-5 flex items-center justify-end gap-2">
-              <Button
+              <button
                 type="button"
-                variant="outline"
-                size="sm"
                 disabled={busy !== null}
                 onClick={() => setRevisionDialogOpen(false)}
-                className="rounded-xl px-3.5 text-xs font-medium"
+                className="h-8.5 rounded-lg px-3 text-xs font-medium text-slate-500 hover:text-slate-900 transition"
               >
                 Cancel
-              </Button>
+              </button>
               <Button
                 type="button"
                 size="sm"
                 disabled={busy !== null || revisionReason.trim().length < 3}
                 onClick={() => void reopenComponent()}
-                className="rounded-xl bg-amber-600 px-3.5 text-xs font-semibold text-white shadow-2xs transition hover:bg-amber-700"
+                className="h-8.5 rounded-lg bg-amber-600 px-3.5 text-xs font-medium text-white shadow-2xs hover:bg-amber-700"
               >
-                {busy === 'reopen' ? <LoaderCircle className="mr-1.5 size-3.5 animate-spin" /> : <RotateCcw className="mr-1.5 size-3.5" />}
-                Unlock for editing
+                {busy === 'reopen' ? <LoaderCircle className="mr-1.5 size-3.5 animate-spin" /> : null}
+                Unlock Marks
               </Button>
             </div>
           </div>
@@ -1386,52 +1377,35 @@ export function OnlineMarksEditor({
       ) : null}
 
       {closedNoticeDialogOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xl">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-rose-50 text-rose-700 border border-rose-200/60 shadow-2xs">
-                  <Lock className="size-4.5" />
-                </span>
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900 tracking-tight">
-                    Marks Entry Closed
-                  </h3>
-                  <p className="mt-0.5 text-xs text-slate-500">
-                    Department marks entry window is inactive.
-                  </p>
-                </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="flex items-start justify-between">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+                <Lock className="size-5" />
               </div>
               <button
                 type="button"
                 onClick={() => setClosedNoticeDialogOpen(false)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
                 aria-label="Close modal"
               >
                 <X className="size-4" />
               </button>
             </div>
 
-            <div className="mt-4 rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 text-xs leading-relaxed text-slate-700 space-y-2">
-              <p className="font-semibold text-slate-900">
-                Marks cannot be edited at this time.
-              </p>
-              <p className="text-[11.5px] text-slate-600 leading-normal">
-                The department has closed the marks entry period for this assessment. Any amendments or late entries must be authorized by department administration.
-              </p>
-              <div className="pt-2 border-t border-slate-200/60 flex items-center gap-2 text-[11px] font-semibold text-slate-800">
-                <Info className="size-3.5 shrink-0 text-slate-600" />
-                <span>Please see your Head of Department (HoD) to request reopening.</span>
-              </div>
-            </div>
+            <h3 className="mt-4 text-base font-semibold text-slate-900">
+              Marks Entry Closed
+            </h3>
+            <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
+              Marks cannot be edited because the entry period has closed. Please see your Head of Department (HoD) to request reopening.
+            </p>
 
-            <div className="mt-5 flex justify-end">
+            <div className="mt-6 flex justify-end">
               <Button
                 type="button"
-                variant="secondary"
                 size="sm"
                 onClick={() => setClosedNoticeDialogOpen(false)}
-                className="rounded-xl px-4 text-xs font-semibold"
+                className="h-8.5 rounded-lg bg-slate-900 px-4 text-xs font-medium text-white hover:bg-slate-800"
               >
                 Understood
               </Button>

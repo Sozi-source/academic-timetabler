@@ -25,9 +25,13 @@ export const metadata: Metadata = {
   description: 'Manage units offered for the active academic period.',
 };
 
+interface PageProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
 export default async function UnitOfferingsPage({
   searchParams,
-}: PageProps<'/timetable/unit-offerings'>) {
+}: PageProps) {
   const query = await searchParams;
   const activePeriod = await getActiveAcademicPeriod();
 

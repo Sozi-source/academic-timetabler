@@ -6,7 +6,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
+  Info,
   LoaderCircle,
+  Lock,
   RotateCcw,
   Save,
   Search,
@@ -121,7 +123,17 @@ export function OnlineMarksEditor({
   const [submissions, setSubmissions] = useState<ComponentSubmission[]>(componentSubmissions);
   const [revisionDialogOpen, setRevisionDialogOpen] = useState(false);
   const [revisionReason, setRevisionReason] = useState('');
+  const [closedNoticeDialogOpen, setClosedNoticeDialogOpen] = useState(false);
   const [submitConfirmDialogOpen, setSubmitConfirmDialogOpen] = useState(false);
+
+  const handleRequestEditMarks = () => {
+    if (!trainerEntryOpen) {
+      setClosedNoticeDialogOpen(true);
+      return;
+    }
+    setRevisionReason('');
+    setRevisionDialogOpen(true);
+  };
 
   useEffect(() => {
     setSubmissions(componentSubmissions);
@@ -634,6 +646,11 @@ export function OnlineMarksEditor({
       const payload = await response.json().catch(() => null);
 
       if (!response.ok) {
+        if (response.status === 403 || payload?.message?.toLowerCase().includes('closed')) {
+          setRevisionDialogOpen(false);
+          setClosedNoticeDialogOpen(true);
+          return;
+        }
         setError(payload?.message ?? 'Marks could not be unlocked.');
         return;
       }
@@ -853,14 +870,11 @@ export function OnlineMarksEditor({
               <strong>{singleComponent.label}</strong> marks have been submitted and are currently locked.
             </span>
           </div>
-          {editable ? (
+          {canEditOnlineMarks(workflowStatus) ? (
             <button
               type="button"
               disabled={busy !== null}
-              onClick={() => {
-                setRevisionReason('');
-                setRevisionDialogOpen(true);
-              }}
+              onClick={handleRequestEditMarks}
               className="inline-flex items-center gap-1.5 rounded-none border border-amber-400 bg-white px-2.5 py-1 text-xs font-bold text-amber-900 shadow-2xs transition hover:bg-amber-100"
             >
               <RotateCcw className="size-3.5 text-amber-700" />
@@ -1200,24 +1214,26 @@ export function OnlineMarksEditor({
             Download Excel (.xlsx)
           </Button>
 
-          {editable ? (
+          {canEditOnlineMarks(workflowStatus) ? (
             <>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={busy !== null}
-                onClick={() => void saveDraft()}
-                leadingIcon={
-                  busy === 'save' ? (
-                    <LoaderCircle className="size-3.5 animate-spin" />
-                  ) : (
-                    <Save className="size-3.5" />
-                  )
-                }
-              >
-                Save draft
-              </Button>
+              {trainerEntryOpen ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={busy !== null}
+                  onClick={() => void saveDraft()}
+                  leadingIcon={
+                    busy === 'save' ? (
+                      <LoaderCircle className="size-3.5 animate-spin" />
+                    ) : (
+                      <Save className="size-3.5" />
+                    )
+                  }
+                >
+                  Save draft
+                </Button>
+              ) : null}
 
               {['assignment', 'presentation', 'rat'].includes(visibleComponent) ? null : visibleComponent === 'cat' ? (
                 catSubmitted ? (
@@ -1226,10 +1242,7 @@ export function OnlineMarksEditor({
                     variant="outline"
                     size="sm"
                     disabled={busy !== null}
-                    onClick={() => {
-                      setRevisionReason('');
-                      setRevisionDialogOpen(true);
-                    }}
+                    onClick={handleRequestEditMarks}
                     className="border-amber-400 bg-amber-50 text-amber-900 hover:bg-amber-100"
                     leadingIcon={
                       busy === 'reopen' ? (
@@ -1241,7 +1254,7 @@ export function OnlineMarksEditor({
                   >
                     Revise CAT marks
                   </Button>
-                ) : (
+                ) : trainerEntryOpen ? (
                   <Button
                     type="button"
                     size="sm"
@@ -1261,17 +1274,14 @@ export function OnlineMarksEditor({
                   >
                     Submit CAT marks
                   </Button>
-                )
+                ) : null
               ) : finalSubmitted ? (
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   disabled={busy !== null}
-                  onClick={() => {
-                    setRevisionReason('');
-                    setRevisionDialogOpen(true);
-                  }}
+                  onClick={handleRequestEditMarks}
                   className="border-amber-400 bg-amber-50 text-amber-900 hover:bg-amber-100"
                   leadingIcon={
                     busy === 'reopen' ? (
@@ -1283,7 +1293,7 @@ export function OnlineMarksEditor({
                 >
                   Revise Final Marks
                 </Button>
-              ) : (
+              ) : trainerEntryOpen ? (
                 <Button
                   type="button"
                   size="sm"
@@ -1302,52 +1312,61 @@ export function OnlineMarksEditor({
                 >
                   Submit Final Marks
                 </Button>
-              )}
+              ) : null}
             </>
           ) : null}
         </div>
       </div>
 
       {revisionDialogOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-2xs">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xl">
             <div className="flex items-start justify-between gap-3">
-              <div>
-                <h3 className="text-base font-bold text-slate-900">
-                  Revise {visibleComponent === 'all' || visibleComponent === 'exam' ? 'Final' : singleComponent?.label ?? ''} Marks
-                </h3>
-                <p className="mt-1 text-xs leading-5 text-slate-600">
-                  You previously submitted these marks. As marks entry is currently open, you can unlock them to correct errors. State the reason below for the audit trail:
-                </p>
+              <div className="flex items-center gap-3">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200/60 shadow-2xs">
+                  <RotateCcw className="size-4" />
+                </span>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+                    Revise {visibleComponent === 'all' || visibleComponent === 'exam' ? 'Final' : singleComponent?.label ?? ''} Marks
+                  </h3>
+                  <p className="mt-0.5 text-xs text-slate-500">
+                    Provide a brief reason to unlock marks for correction.
+                  </p>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={() => setRevisionDialogOpen(false)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+                aria-label="Close modal"
               >
                 <X className="size-4" />
               </button>
             </div>
-            <div className="mt-3.5 space-y-1.5">
-              <label htmlFor="revision-reason" className="text-xs font-semibold text-slate-700">
-                Reason for revision <span className="text-red-500">*</span>
+
+            <div className="mt-4">
+              <label htmlFor="staff-revision-reason" className="block text-xs font-semibold text-slate-700 mb-1.5">
+                Reason for revision
               </label>
               <textarea
-                id="revision-reason"
+                id="staff-revision-reason"
                 rows={3}
                 value={revisionReason}
                 onChange={(e) => setRevisionReason(e.target.value)}
-                placeholder="e.g. Typo in student mark / script recount correction"
-                className="w-full rounded-lg border border-slate-300 p-2.5 text-xs text-slate-900 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                placeholder="e.g. Correcting misplaced score for student, paper re-marked..."
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 p-3 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-amber-500 focus:bg-white focus:ring-2 focus:ring-amber-500/15"
               />
             </div>
-            <div className="mt-4 flex items-center justify-end gap-2">
+
+            <div className="mt-5 flex items-center justify-end gap-2">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 disabled={busy !== null}
                 onClick={() => setRevisionDialogOpen(false)}
+                className="rounded-xl px-3.5 text-xs font-medium"
               >
                 Cancel
               </Button>
@@ -1356,16 +1375,65 @@ export function OnlineMarksEditor({
                 size="sm"
                 disabled={busy !== null || revisionReason.trim().length < 3}
                 onClick={() => void reopenComponent()}
-                className="bg-amber-600 text-white hover:bg-amber-700"
-                leadingIcon={
-                  busy === 'reopen' ? (
-                    <LoaderCircle className="size-3.5 animate-spin" />
-                  ) : (
-                    <RotateCcw className="size-3.5" />
-                  )
-                }
+                className="rounded-xl bg-amber-600 px-3.5 text-xs font-semibold text-white shadow-2xs transition hover:bg-amber-700"
               >
-                {busy === 'reopen' ? 'Unlocking...' : 'Unlock for editing'}
+                {busy === 'reopen' ? <LoaderCircle className="mr-1.5 size-3.5 animate-spin" /> : <RotateCcw className="mr-1.5 size-3.5" />}
+                Unlock for editing
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {closedNoticeDialogOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-rose-50 text-rose-700 border border-rose-200/60 shadow-2xs">
+                  <Lock className="size-4.5" />
+                </span>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+                    Marks Entry Closed
+                  </h3>
+                  <p className="mt-0.5 text-xs text-slate-500">
+                    Department marks entry window is inactive.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setClosedNoticeDialogOpen(false)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+                aria-label="Close modal"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <div className="mt-4 rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 text-xs leading-relaxed text-slate-700 space-y-2">
+              <p className="font-semibold text-slate-900">
+                Marks cannot be edited at this time.
+              </p>
+              <p className="text-[11.5px] text-slate-600 leading-normal">
+                The department has closed the marks entry period for this assessment. Any amendments or late entries must be authorized by department administration.
+              </p>
+              <div className="pt-2 border-t border-slate-200/60 flex items-center gap-2 text-[11px] font-semibold text-slate-800">
+                <Info className="size-3.5 shrink-0 text-slate-600" />
+                <span>Please see your Head of Department (HoD) to request reopening.</span>
+              </div>
+            </div>
+
+            <div className="mt-5 flex justify-end">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setClosedNoticeDialogOpen(false)}
+                className="rounded-xl px-4 text-xs font-semibold"
+              >
+                Understood
               </Button>
             </div>
           </div>

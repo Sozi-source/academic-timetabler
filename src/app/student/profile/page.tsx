@@ -10,6 +10,9 @@ import {
   StudentPortalShell,
 } from '@/components/student/student-portal-shell';
 import {
+  Badge,
+} from '@/components/ui/badge';
+import {
   Button,
 } from '@/components/ui/button';
 import {
@@ -80,19 +83,29 @@ export default async function StudentProfilePage({
       }
     >
       <div className="mx-auto max-w-3xl space-y-4">
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
-            Student details
-          </p>
+        {/* Header Banner */}
+        <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-4 sm:p-5 shadow-2xs">
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <span className="flex size-7 items-center justify-center rounded-lg bg-primary-soft text-primary font-bold">
+                <ShieldCheck className="size-4" aria-hidden="true" />
+              </span>
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
+                Student Record
+              </p>
+            </div>
+            <h1 className="text-xl font-bold text-text-primary sm:text-2xl">
+              Student Profile
+            </h1>
+            <p className="text-xs text-text-muted">
+              {student.programmeName} · <span className="font-mono">{student.admissionNumber}</span>
+            </p>
+          </div>
 
-          <h1 className="mt-1 text-xl font-bold text-text-primary">
-            Profile
-          </h1>
-
-          <p className="mt-1 text-xs text-text-muted">
-            Review and confirm your details.
-          </p>
-        </div>
+          <Badge variant={profile.detailsVerifiedAt ? 'success' : 'warning'} className="px-3 py-1 text-xs font-semibold">
+            {profile.detailsVerifiedAt ? 'Verified Record' : 'Pending Verification'}
+          </Badge>
+        </section>
 
         {parameters.saved ===
         '1' ? (

@@ -12,7 +12,11 @@ import { getUnitEquivalenceWorkspace } from '@/features/unit-equivalence/queries
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Unit equivalence review' };
 
-export default async function UnitEquivalencePage({ searchParams }: PageProps<'/timetable/unit-equivalence'>) {
+interface PageProps {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export default async function UnitEquivalencePage({ searchParams }: PageProps) {
   const params = await searchParams;
   const { candidates, groups } = await getUnitEquivalenceWorkspace();
   const exact = new Map<string, typeof candidates>();

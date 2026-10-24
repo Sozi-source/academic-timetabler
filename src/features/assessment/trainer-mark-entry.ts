@@ -104,6 +104,7 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
       students: TrainerMarkEntryRow[];
       scopeRows: typeof scopeRows;
       locked: boolean;
+      trainerEntryOpen: boolean;
     }>();
     const seenStudentIdsByCohort = new Map<string, Set<string>>();
 
@@ -120,6 +121,7 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
           students: [],
           scopeRows: [],
           locked: false,
+          trainerEntryOpen: true,
         });
         seenStudentIdsByCohort.set(cohortKey, new Set());
       }
@@ -127,6 +129,7 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
       if (!cohort.scopeRows.some((row) => row.id === scope.id)) cohort.scopeRows.push(scope);
       const rawEvent = assessmentEventById.get(scope.assessment_id);
       const isEntryOpen = rawEvent?.trainer_entry_open === true;
+      cohort.trainerEntryOpen = isEntryOpen;
       cohort.locked ||= !isEntryOpen || ['submitted', 'finalised', 'archived'].includes(event.workflow_status) || rawEvent?.status === 'closed' || Boolean(rawEvent?.exam_marks_finalized_at) || scope.revoked_at !== null || Date.parse(scope.expires_at) <= Date.now();
 
       const seenStudents = seenStudentIdsByCohort.get(cohortKey)!;
@@ -166,6 +169,7 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
       name: cohort.name,
       students: cohort.students.sort((first, second) => first.admissionNumber.localeCompare(second.admissionNumber, undefined, { numeric: true })),
       locked: cohort.locked,
+      trainerEntryOpen: cohort.trainerEntryOpen,
       componentSubmissions: Object.fromEntries((['assignment', 'presentation', 'rat', 'cat', 'exam'] as TrainerMarkComponentKey[]).flatMap((component) => {
         const timestamps = cohort.scopeRows
           .map((scope) => componentSubmissionByKey.get(`${scope.assessment_id}:${scope.cohort_id ?? 'all'}:${component}`))
@@ -183,12 +187,14 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
     const firstUnit = unitById.get(firstEvent.unit_id);
     if (!firstUnit) throw new Error('Could not load the assigned unit.');
     const allCohortsLocked = cohortPayload.length === 0 || cohortPayload.every((cohort) => cohort.locked);
+    const anyEntryOpen = cohortPayload.some((cohort) => cohort.trainerEntryOpen);
     return {
       trainerName: invite.trainer_name,
       trainerEmail: invite.trainer_email,
       expiresAt: invite.expires_at,
       submittedAt: null,
       locked: allCohortsLocked,
+      trainerEntryOpen: anyEntryOpen,
       unit: { code: firstUnit.code, name: firstUnit.name },
       academicPeriod: periodNames[0],
       cohorts: cohortPayload,
@@ -280,9 +286,10 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
     expiresAt: invite.expires_at,
     submittedAt: invite.submitted_at,
     locked,
+    trainerEntryOpen: isTrainerEntryOpen,
     unit: { code: unitResult.data.code, name: unitResult.data.name },
     academicPeriod: periodResult.data.name,
     students: roster,
-    cohorts: [{ id: invite.cohort_id ?? null, name: 'All cohorts', students: roster, submittedAt: invite.submitted_at, locked, componentSubmissions }],
+    cohorts: [{ id: invite.cohort_id ?? null, name: 'All cohorts', students: roster, submittedAt: invite.submitted_at, locked, trainerEntryOpen: isTrainerEntryOpen, componentSubmissions }],
   };
 }

@@ -124,38 +124,32 @@ export default async function StudentTimetablePage() {
       }
     >
       <div className="space-y-4">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
-              Published schedule
-            </p>
-
-            <h1 className="mt-1 text-xl font-bold text-text-primary">
+        {/* Header Banner */}
+        <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-4 sm:p-5 shadow-2xs">
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <span className="flex size-7 items-center justify-center rounded-lg bg-primary-soft text-primary font-bold">
+                <CalendarDays className="size-4" aria-hidden="true" />
+              </span>
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
+                Class Schedule
+              </p>
+            </div>
+            <h1 className="text-xl font-bold text-text-primary sm:text-2xl">
               My Timetable
             </h1>
-
-            <p className="mt-1 text-xs text-text-muted">
-              {
-                period
-                  ?.name ??
-                'No active academic period'
-              }
+            <p className="text-xs text-text-muted">
+              {period?.name ?? 'No active academic period'} · {student.programmeName}
             </p>
           </div>
 
           <Badge
-            variant={
-              sessions.length >
-              0
-                ? 'success'
-                : 'neutral'
-            }
+            variant={sessions.length > 0 ? 'success' : 'neutral'}
+            className="px-3 py-1 font-mono text-xs"
           >
-            {
-              sessions.length
-            } sessions
+            {sessions.length} session{sessions.length === 1 ? '' : 's'}
           </Badge>
-        </div>
+        </section>
 
         {sessions.length ===
         0 ? (

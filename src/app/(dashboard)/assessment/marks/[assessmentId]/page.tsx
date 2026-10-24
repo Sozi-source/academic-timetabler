@@ -31,7 +31,8 @@ export default async function AssessmentMarkWorkflowPage({
   const isComplete = Boolean(
     assessment.exam_marks_finalized_at || assessment.status === 'closed',
   );
-  const isDraft = !isComplete && resultCount > 0;
+  const marksSubmitted = Boolean(assessment.marks_submitted_at);
+  const isDraft = !isComplete && !marksSubmitted && resultCount > 0;
 
   return (
     <div className="space-y-5 pb-12">
@@ -46,6 +47,10 @@ export default async function AssessmentMarkWorkflowPage({
             {isComplete ? (
               <Badge variant="neutral" className="bg-slate-100 text-slate-800">
                 Finalized
+              </Badge>
+            ) : marksSubmitted ? (
+              <Badge variant="neutral" className="bg-green-50 text-green-800">
+                Marks Submitted
               </Badge>
             ) : isDraft ? (
               <Badge variant="neutral" className="bg-slate-100 text-slate-700">
@@ -81,7 +86,7 @@ export default async function AssessmentMarkWorkflowPage({
               <UsersRound className="size-3.5 text-slate-500" />
               <span>Assessment Population</span>
             </Link>
-            {!isComplete ? (
+            {!isComplete && !marksSubmitted ? (
               <BulkUploadDialog
                 assessmentId={assessment.id}
                 unitName={assessment.unit?.name ?? 'Unit Marksheet'}
@@ -92,6 +97,7 @@ export default async function AssessmentMarkWorkflowPage({
               assessmentId={assessment.id}
               unitName={assessment.unit?.name ?? 'Unit Marksheet'}
               disabled={population.length === 0}
+              marksSubmitted={marksSubmitted || isComplete}
             />
           </div>
         }

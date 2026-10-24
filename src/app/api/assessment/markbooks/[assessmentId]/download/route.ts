@@ -79,6 +79,32 @@ export async function POST(
   const supabase =
     await createClient();
 
+  // Gate: markbook can only be generated after the trainer has submitted marks.
+  // We check marks_submitted_at (set by submit_assessment_online_marks or a
+  // finalised bulk-upload commit). A non-null value means at least one
+  // submission has been recorded and results exist in assessment_results.
+  const { data: eventGate } = await supabase
+    .from('assessment_events')
+    .select('marks_submitted_at, operational_workflow_status')
+    .eq('id', assessmentId)
+    .maybeSingle();
+
+  const marksSubmitted = Boolean(eventGate?.marks_submitted_at);
+  const workflowStatus = eventGate?.operational_workflow_status ?? null;
+  const isTerminal = ['submitted', 'finalised', 'archived'].includes(
+    workflowStatus ?? '',
+  );
+
+  if (!marksSubmitted && !isTerminal) {
+    return NextResponse.json(
+      {
+        message:
+          'The markbook cannot be generated yet. The trainer must submit all marks before the HOD can download the markbook.',
+      },
+      { status: 409 },
+    );
+  }
+
   // Attempt to lock/ensure bundle without blocking download
   await supabase.rpc(
     'lock_assessment_markbook_bundle',

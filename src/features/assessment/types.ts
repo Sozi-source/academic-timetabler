@@ -12,6 +12,7 @@ export interface AssessmentEventRow {
   attendance_finalized_at: string | null;
   cat_marks_finalized_at: string | null;
   exam_marks_finalized_at: string | null;
+  marks_submitted_at: string | null;
   trainer_entry_open: boolean;
   academic_period: { id: string; code: string; name: string } | null;
   unit: { id: string; code: string; name: string } | null;

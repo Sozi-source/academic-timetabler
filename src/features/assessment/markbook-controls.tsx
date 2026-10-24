@@ -186,16 +186,25 @@ export function DownloadAssessmentMarkbookButton({
   assessmentId,
   unitName,
   disabled = false,
+  marksSubmitted = false,
 }: {
   assessmentId: string;
   unitName: string;
   disabled?: boolean;
+  /**
+   * Set to true only when the trainer has submitted all marks
+   * (marks_submitted_at IS NOT NULL on the assessment event).
+   * The download is blocked server-side until this is true.
+   */
+  marksSubmitted?: boolean;
 }) {
   const router =
     useRouter();
 
   const [busy, setBusy] =
     useState(false);
+
+  const isLocked = !marksSubmitted;
 
   async function download() {
     setBusy(true);
@@ -282,6 +291,21 @@ export function DownloadAssessmentMarkbookButton({
     } finally {
       setBusy(false);
     }
+  }
+
+  if (isLocked) {
+    return (
+      <div
+        title="Waiting for trainer to submit marks before the markbook can be downloaded."
+        className="inline-flex h-9 cursor-not-allowed items-center justify-center gap-1.5 rounded-lg bg-slate-200 px-3.5 text-xs font-semibold text-slate-500"
+      >
+        <Download
+          className="size-3.5"
+          aria-hidden="true"
+        />
+        Awaiting mark submission
+      </div>
+    );
   }
 
   return (

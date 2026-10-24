@@ -214,6 +214,10 @@ export default async function AssessmentPopulationPage({
               disabled={
                 !canDownload
               }
+              marksSubmitted={
+                Boolean(workspace.marksSubmittedAt) ||
+                ['submitted', 'finalised', 'archived'].includes(workspace.workflowStatus ?? '')
+              }
             />
 
             <DownloadAssessmentSigningSheetButton

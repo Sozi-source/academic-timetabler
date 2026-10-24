@@ -27,6 +27,7 @@ const assessmentSelection = `
   attendance_finalized_at,
   cat_marks_finalized_at,
   exam_marks_finalized_at,
+  marks_submitted_at,
   trainer_entry_open,
   academic_period:academic_periods(id, code, name),
   unit:units(id, code, name),

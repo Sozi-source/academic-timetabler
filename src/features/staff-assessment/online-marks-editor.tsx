@@ -6,6 +6,7 @@ import {
   ChevronRight,
   Download,
   LoaderCircle,
+  RotateCcw,
   Save,
   Search,
   Send,
@@ -13,6 +14,7 @@ import {
   X,
 } from 'lucide-react';
 import {
+  useEffect,
   useMemo,
   useState,
 } from 'react';
@@ -75,7 +77,7 @@ export function OnlineMarksEditor({
   workflowStatus,
   componentSubmissions,
   students,
-  showStudentCohort = true,
+  showStudentCohort = false,
 }: {
   assessmentId: string;
   trainerEntryOpen: boolean;
@@ -86,7 +88,7 @@ export function OnlineMarksEditor({
 }) {
   const router = useRouter();
 
-  const [values, setValues] = useState<InputValues>(
+  const [values, setValues] = useState<InputValues>(() =>
     Object.fromEntries(
       students.map((student) => [
         student.studentId,
@@ -108,10 +110,17 @@ export function OnlineMarksEditor({
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState<number | 'all'>(10);
 
-  const [busy, setBusy] = useState<'save' | 'submit' | 'download' | null>(null);
+  const [busy, setBusy] = useState<'save' | 'submit' | 'download' | 'reopen' | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [visibleComponent, setVisibleComponent] = useState<'all' | OnlineMarkComponentKey>('all');
+  const [submissions, setSubmissions] = useState<ComponentSubmission[]>(componentSubmissions);
+  const [revisionDialogOpen, setRevisionDialogOpen] = useState(false);
+  const [revisionReason, setRevisionReason] = useState('');
+
+  useEffect(() => {
+    setSubmissions(componentSubmissions);
+  }, [componentSubmissions]);
 
   // Callback invoked by BulkUploadDialog: merges spreadsheet data into editor state
   const applyBulkMarks = (matched: MatchedBulkStudentResult[]) => {
@@ -250,8 +259,8 @@ export function OnlineMarksEditor({
     .find((item) => !item.value.valid);
 
   function componentIsSubmitted(component: OnlineMarkComponentKey, cohortId: string | null) {
-    return componentSubmissions.some((submission) =>
-      submission.component === component && submission.cohortId === cohortId,
+    return submissions.some((submission) =>
+      submission.component === component && (cohortId === null || submission.cohortId === cohortId),
     );
   }
 
@@ -292,18 +301,85 @@ export function OnlineMarksEditor({
 
   function handleKeyDown(
     e: React.KeyboardEvent<HTMLInputElement>,
-    currentIndex: number,
-    componentKey: OnlineMarkComponentKey,
+    currentRow: number,
+    currentCol: number,
   ) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const nextInput = document.querySelector<HTMLInputElement>(
-        `input[data-student-index="${currentIndex + 1}"][data-component-key="${componentKey}"]`,
-      );
-      if (nextInput) {
-        nextInput.focus();
-        nextInput.select();
+    const input = e.currentTarget;
+    const key = e.key;
+
+    let deltaRow = 0;
+    let deltaCol = 0;
+
+    if (key === 'ArrowDown') {
+      deltaRow = 1;
+    } else if (key === 'ArrowUp') {
+      deltaRow = -1;
+    } else if (key === 'Enter') {
+      deltaRow = e.shiftKey ? -1 : 1;
+    } else if (key === 'Tab') {
+      deltaCol = e.shiftKey ? -1 : 1;
+    } else if (key === 'ArrowRight') {
+      const isAtEnd = input.selectionEnd === input.value.length;
+      const isAllSelected =
+        input.selectionStart === 0 && input.selectionEnd === input.value.length;
+      if (input.value === '' || isAtEnd || isAllSelected) {
+        deltaCol = 1;
+      } else {
+        return;
       }
+    } else if (key === 'ArrowLeft') {
+      const isAtStart = input.selectionStart === 0 && input.selectionEnd === 0;
+      const isAllSelected =
+        input.selectionStart === 0 && input.selectionEnd === input.value.length;
+      if (input.value === '' || isAtStart || isAllSelected) {
+        deltaCol = -1;
+      } else {
+        return;
+      }
+    } else {
+      return;
+    }
+
+    const container = input.closest('section') || document;
+    const totalCols = isSingleMode ? 1 : onlineMarkComponents.length;
+    const totalRows = paginatedRows.length;
+
+    let targetRow = currentRow;
+    let targetCol = currentCol;
+    let foundTarget: HTMLInputElement | null = null;
+
+    const maxSteps = totalRows * totalCols + 5;
+    for (let step = 1; step <= maxSteps; step += 1) {
+      if (deltaRow !== 0) {
+        targetRow += deltaRow;
+      }
+      if (deltaCol !== 0) {
+        targetCol += deltaCol;
+        if (targetCol >= totalCols) {
+          targetCol = 0;
+          targetRow += 1;
+        } else if (targetCol < 0) {
+          targetCol = totalCols - 1;
+          targetRow -= 1;
+        }
+      }
+
+      if (targetRow < 0 || targetRow >= totalRows) break;
+
+      const candidate = container.querySelector<HTMLInputElement>(
+        `input[data-mark-cell="true"][data-mark-row="${targetRow}"][data-mark-col="${targetCol}"]:not(:disabled)`,
+      );
+
+      if (candidate) {
+        foundTarget = candidate;
+        break;
+      }
+    }
+
+    if (foundTarget) {
+      e.preventDefault();
+      foundTarget.focus();
+      foundTarget.select();
     }
   }
 
@@ -412,8 +488,52 @@ export function OnlineMarksEditor({
         return;
       }
 
+      setSubmissions((current) => [
+        ...current.filter((s) => s.component !== visibleComponent),
+        { component: visibleComponent, cohortId: null, submittedAt: new Date().toISOString() },
+      ]);
       setMessage(`${singleComponent?.label ?? 'Component'} submitted successfully.`);
       router.refresh();
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function reopenComponent() {
+    if (!singleComponent || !revisionReason.trim()) return;
+    setBusy('reopen');
+    setError(null);
+    setMessage(null);
+
+    try {
+      const response = await fetch(
+        `/api/staff/assessment/${assessmentId}/online/reopen`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            component: visibleComponent,
+            reason: revisionReason.trim(),
+          }),
+        },
+      );
+
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        setError(payload?.message ?? 'Marks could not be unlocked.');
+        return;
+      }
+
+      setSubmissions((current) =>
+        current.filter((sub) => sub.component !== visibleComponent),
+      );
+      setRevisionDialogOpen(false);
+      setRevisionReason('');
+      setMessage(`${singleComponent.label} marks unlocked for revision. You can now edit and re-save or re-submit.`);
+      router.refresh();
+    } catch {
+      setError('Failed to unlock component marks.');
     } finally {
       setBusy(null);
     }
@@ -607,6 +727,32 @@ export function OnlineMarksEditor({
         </div>
       </section>
 
+      {/* Submitted Component Status Banner */}
+      {selectedComponentAlreadyComplete && singleComponent ? (
+        <section className="flex flex-wrap items-center justify-between gap-2 rounded-none border border-amber-300 bg-amber-50/90 px-3.5 py-2.5 text-xs text-amber-900 shadow-2xs">
+          <div className="flex items-center gap-2">
+            <span className="size-2 rounded-full bg-emerald-600 shrink-0" aria-hidden="true" />
+            <span>
+              <strong>{singleComponent.label}</strong> marks have been submitted and are currently locked.
+            </span>
+          </div>
+          {editable ? (
+            <button
+              type="button"
+              disabled={busy !== null}
+              onClick={() => {
+                setRevisionReason('');
+                setRevisionDialogOpen(true);
+              }}
+              className="inline-flex items-center gap-1.5 rounded-none border border-amber-400 bg-white px-2.5 py-1 text-xs font-bold text-amber-900 shadow-2xs transition hover:bg-amber-100"
+            >
+              <RotateCcw className="size-3.5 text-amber-700" />
+              <span>Revise / Edit</span>
+            </button>
+          ) : null}
+        </section>
+      ) : null}
+
       {/* Main Table / List View */}
       {isSingleMode && singleComponent ? (
         /* SINGLE ENTRY MODE: Guaranteed 100% visible on all mobile screens without truncation */
@@ -624,7 +770,7 @@ export function OnlineMarksEditor({
             </div>
           ) : (
             <div className="divide-y divide-slate-200">
-              {paginatedRows.map((row) => {
+              {paginatedRows.map((row, rowIndex) => {
                 const key = singleComponent.key;
                 const field = row.fields[key];
                 const isExamAbsent =
@@ -642,11 +788,6 @@ export function OnlineMarksEditor({
                       </p>
                       <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] font-medium text-slate-600">
                         <span>{row.student.admissionNumber}</span>
-                        {showStudentCohort && row.student.cohortName ? (
-                          <span className="rounded bg-slate-200/80 px-1 py-0.5 text-[9px] font-bold text-slate-700">
-                            {row.student.cohortName}
-                          </span>
-                        ) : null}
                         {row.total !== null ? (
                           <span className="font-bold text-[#0b4f4a]">
                             · {row.total.toFixed(1)}/100
@@ -669,6 +810,9 @@ export function OnlineMarksEditor({
                       ) : (
                         <div>
                           <input
+                            data-mark-cell="true"
+                            data-mark-row={rowIndex}
+                            data-mark-col={0}
                             data-student-index={row.studentIndex}
                             data-component-key={key}
                             value={values[row.student.studentId]?.[key] ?? ''}
@@ -683,6 +827,7 @@ export function OnlineMarksEditor({
                                 : '—'
                             }
                             disabled={!editable || busy !== null || componentIsSubmitted(key, row.student.cohortId)}
+                            onFocus={(e) => e.currentTarget.select()}
                             onChange={(event) =>
                               setField(
                                 row.student.studentId,
@@ -691,7 +836,7 @@ export function OnlineMarksEditor({
                               )
                             }
                             onKeyDown={(e) =>
-                              handleKeyDown(e, row.studentIndex, key)
+                              handleKeyDown(e, rowIndex, 0)
                             }
                             aria-label={`${key} mark for ${row.student.fullName}`}
                             className={`h-10 w-20 rounded-none border bg-[#fffdf5] px-2 text-center text-base font-bold text-slate-900 outline-none transition focus:border-[#0b4f4a] focus:ring-2 focus:ring-[#0b4f4a]/20 disabled:bg-[#eee8d7] disabled:text-slate-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
@@ -742,7 +887,7 @@ export function OnlineMarksEditor({
                   </td>
                 </tr>
               ) : (
-                paginatedRows.map((row) => (
+                paginatedRows.map((row, rowIndex) => (
                   <tr
                     key={row.student.studentId}
                     className="align-middle transition hover:bg-[#fbf9f1]"
@@ -753,11 +898,6 @@ export function OnlineMarksEditor({
                       </p>
                       <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-medium text-slate-600">
                         <span className="font-mono whitespace-nowrap">{row.student.admissionNumber}</span>
-                        {showStudentCohort && row.student.cohortName ? (
-                          <span className="rounded bg-slate-200/80 px-1 py-0.5 text-[9px] font-bold text-slate-700">
-                            {row.student.cohortName}
-                          </span>
-                        ) : null}
                       </div>
                       {row.student.attendanceStatus === 'absent' ? (
                         <Badge variant="warning" className="mt-0.5 rounded-none text-[9px]">
@@ -766,7 +906,7 @@ export function OnlineMarksEditor({
                       ) : null}
                     </td>
 
-                    {onlineMarkComponents.map(({ key }) => {
+                    {onlineMarkComponents.map(({ key }, colIndex) => {
                       const field = row.fields[key];
                       const examAbsent =
                         key === 'exam' && row.student.attendanceStatus === 'absent';
@@ -780,6 +920,9 @@ export function OnlineMarksEditor({
                           ) : (
                             <div className="mx-auto w-16">
                               <input
+                                data-mark-cell="true"
+                                data-mark-row={rowIndex}
+                                data-mark-col={colIndex}
                                 data-student-index={row.studentIndex}
                                 data-component-key={key}
                                 value={values[row.student.studentId]?.[key] ?? ''}
@@ -794,6 +937,7 @@ export function OnlineMarksEditor({
                                     : '—'
                                 }
                                 disabled={!editable || busy !== null || componentIsSubmitted(key, row.student.cohortId)}
+                                onFocus={(e) => e.currentTarget.select()}
                                 onChange={(event) =>
                                   setField(
                                     row.student.studentId,
@@ -802,7 +946,7 @@ export function OnlineMarksEditor({
                                   )
                                 }
                                 onKeyDown={(e) =>
-                                  handleKeyDown(e, row.studentIndex, key)
+                                  handleKeyDown(e, rowIndex, colIndex)
                                 }
                                 aria-label={`${key} mark for ${row.student.fullName}`}
                                 className={`h-9 w-full rounded-none border bg-[#fffdf5] px-1 text-center text-xs font-bold text-slate-900 outline-none transition focus:border-[#0b4f4a] focus:ring-2 focus:ring-[#0b4f4a]/20 disabled:bg-[#eee8d7] disabled:text-slate-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
@@ -950,25 +1094,117 @@ export function OnlineMarksEditor({
                 Save draft
               </Button>
 
-              <Button
-                type="button"
-                size="sm"
-                disabled={busy !== null || visibleComponent === 'all' || selectedComponentAlreadyComplete || selectedComponentMissing || Boolean(invalidForSelectedComponent)}
-                onClick={() => void submitMarks()}
-                leadingIcon={
-                  busy === 'submit' ? (
-                    <LoaderCircle className="size-3.5 animate-spin" />
-                  ) : (
-                    <Send className="size-3.5" />
-                  )
-                }
-              >
-                {singleComponent ? `Submit ${singleComponent.label}` : 'Select a component'}
-              </Button>
+              {selectedComponentAlreadyComplete ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={busy !== null}
+                  onClick={() => {
+                    setRevisionReason('');
+                    setRevisionDialogOpen(true);
+                  }}
+                  className="border-amber-400 bg-amber-50 text-amber-900 hover:bg-amber-100"
+                  leadingIcon={
+                    busy === 'reopen' ? (
+                      <LoaderCircle className="size-3.5 animate-spin" />
+                    ) : (
+                      <RotateCcw className="size-3.5 text-amber-700" />
+                    )
+                  }
+                >
+                  Revise {singleComponent?.label}
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={
+                    busy !== null ||
+                    visibleComponent === 'all' ||
+                    selectedComponentMissing ||
+                    Boolean(invalidForSelectedComponent)
+                  }
+                  onClick={() => void submitMarks()}
+                  leadingIcon={
+                    busy === 'submit' ? (
+                      <LoaderCircle className="size-3.5 animate-spin" />
+                    ) : (
+                      <Send className="size-3.5" />
+                    )
+                  }
+                >
+                  {singleComponent ? `Submit ${singleComponent.label}` : 'Select a component'}
+                </Button>
+              )}
             </>
           ) : null}
         </div>
       </div>
+
+      {revisionDialogOpen && singleComponent ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-2xs">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-base font-bold text-slate-900">
+                  Revise {singleComponent.label} Marks
+                </h3>
+                <p className="mt-1 text-xs leading-5 text-slate-600">
+                  You previously submitted this component. As marks entry is currently open, you can unlock it to correct errors. State the reason below for the audit trail:
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setRevisionDialogOpen(false)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+            <div className="mt-3.5 space-y-1.5">
+              <label htmlFor="revision-reason" className="text-xs font-semibold text-slate-700">
+                Reason for revision <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                id="revision-reason"
+                rows={3}
+                value={revisionReason}
+                onChange={(e) => setRevisionReason(e.target.value)}
+                placeholder="e.g. Typo in student mark / script recount correction"
+                className="w-full rounded-lg border border-slate-300 p-2.5 text-xs text-slate-900 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+              />
+            </div>
+            <div className="mt-4 flex items-center justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={busy !== null}
+                onClick={() => setRevisionDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                disabled={busy !== null || revisionReason.trim().length < 3}
+                onClick={() => void reopenComponent()}
+                className="bg-amber-600 text-white hover:bg-amber-700"
+                leadingIcon={
+                  busy === 'reopen' ? (
+                    <LoaderCircle className="size-3.5 animate-spin" />
+                  ) : (
+                    <RotateCcw className="size-3.5" />
+                  )
+                }
+              >
+                {busy === 'reopen' ? 'Unlocking...' : 'Unlock for editing'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

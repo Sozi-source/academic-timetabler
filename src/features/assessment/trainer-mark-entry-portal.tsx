@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertCircle, CheckCircle2, LoaderCircle, Save, Send } from 'lucide-react';
+import { AlertCircle, CheckCircle2, LoaderCircle, RotateCcw, Save, Send, X } from 'lucide-react';
 import { useCallback, useEffect, useState, type KeyboardEvent } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -54,6 +54,8 @@ export function TrainerMarkEntryPortal() {
   const [busy, setBusy] = useState<'save' | 'submit' | null>(null);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [revisionDialogOpen, setRevisionDialogOpen] = useState(false);
+  const [revisionReason, setRevisionReason] = useState('');
 
   const loadSession = useCallback(async () => {
     const response = await fetch('/api/trainer-mark-entry/session', { cache: 'no-store' });
@@ -104,24 +106,81 @@ export function TrainerMarkEntryPortal() {
   }
 
   function moveMarkCell(event: KeyboardEvent<HTMLInputElement>) {
-    const directions: Record<string, { row: number; column: number }> = {
-      ArrowLeft: { row: 0, column: -1 }, ArrowRight: { row: 0, column: 1 },
-      ArrowUp: { row: -1, column: 0 }, ArrowDown: { row: 1, column: 0 },
-    };
-    const direction = directions[event.key];
-    if (!direction) return;
-    const inputs = Array.from(event.currentTarget.closest('table')?.querySelectorAll<HTMLInputElement>('input[data-mark-cell="true"]') ?? []);
-    const visibleFields = selectedView === 'all' ? markFields : markFields.filter((field) => field.key === selectedView);
-    const currentRow = Number(event.currentTarget.dataset.markRow);
-    const currentColumn = Number(event.currentTarget.dataset.markColumn);
-    let target: HTMLInputElement | undefined;
-    for (let distance = 1; distance <= students.length; distance += 1) {
-      const row = currentRow + direction.row * distance;
-      const column = currentColumn + direction.column * distance;
-      if (row < 0 || row >= students.length || column < 0 || column >= visibleFields.length) break;
-      target = inputs.find((input) => Number(input.dataset.markRow) === row && Number(input.dataset.markColumn) === column);
-      if (target) break;
+    const input = event.currentTarget;
+    const key = event.key;
+
+    let deltaRow = 0;
+    let deltaCol = 0;
+
+    if (key === 'ArrowDown') {
+      deltaRow = 1;
+    } else if (key === 'ArrowUp') {
+      deltaRow = -1;
+    } else if (key === 'Enter') {
+      deltaRow = event.shiftKey ? -1 : 1;
+    } else if (key === 'Tab') {
+      deltaCol = event.shiftKey ? -1 : 1;
+    } else if (key === 'ArrowRight') {
+      const isAtEnd = input.selectionEnd === input.value.length;
+      const isAllSelected =
+        input.selectionStart === 0 && input.selectionEnd === input.value.length;
+      if (input.value === '' || isAtEnd || isAllSelected) {
+        deltaCol = 1;
+      } else {
+        return;
+      }
+    } else if (key === 'ArrowLeft') {
+      const isAtStart = input.selectionStart === 0 && input.selectionEnd === 0;
+      const isAllSelected =
+        input.selectionStart === 0 && input.selectionEnd === input.value.length;
+      if (input.value === '' || isAtStart || isAllSelected) {
+        deltaCol = -1;
+      } else {
+        return;
+      }
+    } else {
+      return;
     }
+
+    const visibleFields = selectedView === 'all' ? markFields : markFields.filter((field) => field.key === selectedView);
+    const totalCols = visibleFields.length;
+    const totalRows = students.length;
+
+    let targetRow = Number(input.dataset.markRow);
+    let targetCol = Number(input.dataset.markColumn);
+    const table = input.closest('table');
+    if (!table) return;
+
+    let target: HTMLInputElement | null = null;
+    const maxSteps = totalRows * totalCols + 5;
+
+    for (let step = 1; step <= maxSteps; step += 1) {
+      if (deltaRow !== 0) {
+        targetRow += deltaRow;
+      }
+      if (deltaCol !== 0) {
+        targetCol += deltaCol;
+        if (targetCol >= totalCols) {
+          targetCol = 0;
+          targetRow += 1;
+        } else if (targetCol < 0) {
+          targetCol = totalCols - 1;
+          targetRow -= 1;
+        }
+      }
+
+      if (targetRow < 0 || targetRow >= totalRows) break;
+
+      const candidate = table.querySelector<HTMLInputElement>(
+        `input[data-mark-cell="true"][data-mark-row="${targetRow}"][data-mark-column="${targetCol}"]:not(:disabled)`,
+      );
+
+      if (candidate) {
+        target = candidate;
+        break;
+      }
+    }
+
     if (!target) return;
     event.preventDefault();
     target.focus();
@@ -183,6 +242,38 @@ export function TrainerMarkEntryPortal() {
     }
   }
 
+  async function reopenComponent() {
+    if (!selectedCohort || selectedView === 'all' || !revisionReason.trim()) return;
+    setBusy('save');
+    setError('');
+    setMessage('');
+    try {
+      const response = await fetch('/api/trainer-mark-entry/reopen', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          component: selectedView,
+          cohort_id: selectedCohort.id,
+          reason: revisionReason.trim(),
+        }),
+      });
+      const result = await response.json() as { message?: string };
+      if (!response.ok) throw new Error(result.message ?? 'Could not unlock this component.');
+      setRevisionDialogOpen(false);
+      setRevisionReason('');
+      setMessage(`${markViews.find((view) => view.key === selectedView)?.label ?? 'Component'} unlocked for revision.`);
+      const refreshed = await loadSession();
+      setSession(refreshed);
+      const updatedCohort = refreshed.cohorts.find((cohort) => cohort.id === selectedCohort.id) ?? null;
+      setStudents(updatedCohort?.students ?? []);
+      setStudentsByCohort((current) => ({ ...current, [selectedCohort.id ?? 'all']: updatedCohort?.students ?? [] }));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not unlock marks for revision.');
+    } finally {
+      setBusy(null);
+    }
+  }
+
   return (
     <main className="min-h-screen bg-slate-50 px-2 py-3 sm:px-5 sm:py-5">
       <div className="mx-auto max-w-7xl space-y-3">
@@ -220,6 +311,27 @@ export function TrainerMarkEntryPortal() {
 
             {selectedCohort?.submittedAt ? <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-900">Submitted - read only</div> : null}
             {selectedCohort?.locked && !selectedCohort.submittedAt ? <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">Entry closed</div> : null}
+            {selectedView !== 'all' && selectedCohort?.componentSubmissions[selectedView] && !selectedCohort?.locked ? (
+              <div className="flex flex-col gap-2 rounded-lg border border-emerald-200 bg-emerald-50/80 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="text-xs text-emerald-900">
+                  <span className="font-semibold">{markViews.find((view) => view.key === selectedView)?.label}</span> has been submitted. Need to correct an entry?
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={busy !== null}
+                  onClick={() => {
+                    setRevisionReason('');
+                    setRevisionDialogOpen(true);
+                  }}
+                  className="h-8 shrink-0 border-amber-300 bg-amber-50 text-xs font-medium text-amber-900 hover:bg-amber-100"
+                >
+                  <RotateCcw className="mr-1.5 size-3.5 text-amber-700" />
+                  Revise marks
+                </Button>
+              </div>
+            ) : null}
 
             {selectedCohort ? <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xs">
               <div className="flex flex-col gap-2 border-b border-slate-200 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
@@ -239,6 +351,21 @@ export function TrainerMarkEntryPortal() {
                     {selectedView !== 'all' && !selectedCohort?.componentSubmissions[selectedView] ? (
                       <Button className="w-full sm:w-auto" type="button" disabled={busy !== null || students.length === 0} onClick={() => void saveMarks(true)}>
                         {busy === 'submit' ? <LoaderCircle className="size-4 animate-spin" /> : <Send className="size-4" />}{busy === 'submit' ? 'Submitting...' : `Submit ${markViews.find((view) => view.key === selectedView)?.label}`}
+                      </Button>
+                    ) : null}
+                    {selectedView !== 'all' && selectedCohort?.componentSubmissions[selectedView] ? (
+                      <Button
+                        className="w-full sm:w-auto border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100"
+                        type="button"
+                        variant="outline"
+                        disabled={busy !== null}
+                        onClick={() => {
+                          setRevisionReason('');
+                          setRevisionDialogOpen(true);
+                        }}
+                      >
+                        <RotateCcw className="size-4 text-amber-700" />
+                        Revise {markViews.find((view) => view.key === selectedView)?.label}
                       </Button>
                     ) : null}
                   </div>
@@ -284,6 +411,7 @@ export function TrainerMarkEntryPortal() {
                                 max={field.maximum}
                                 value={student[field.key] ?? ''}
                                 disabled={readOnly || Boolean(selectedCohort?.componentSubmissions[field.key])}
+                                onFocus={(e) => e.currentTarget.select()}
                                 onChange={(event) => updateMark(student.assessmentId, student.studentId, field.key, event.target.value)}
                                 className="h-10 w-20 rounded-md border border-slate-300 bg-white px-2 text-center text-base tabular-nums outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100 disabled:bg-slate-100 sm:h-9 sm:text-xs"
                               />
@@ -300,6 +428,68 @@ export function TrainerMarkEntryPortal() {
             {error ? <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p> : null}
             {message ? <p role="status" className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800"><CheckCircle2 className="size-4" />{message}</p> : null}
 
+            {revisionDialogOpen ? (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
+                <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="text-base font-bold text-slate-900">
+                        Revise {markViews.find((view) => view.key === selectedView)?.label} Marks
+                      </h3>
+                      <p className="mt-1 text-xs text-slate-500">
+                        Unlocking this component allows you to correct submitted marks. Please state why you are revising. This action is recorded in the institutional audit log.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setRevisionDialogOpen(false)}
+                      className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                    >
+                      <X className="size-4" />
+                    </button>
+                  </div>
+
+                  <div className="mt-4 space-y-2">
+                    <label htmlFor="trainer-revision-reason" className="block text-xs font-semibold text-slate-700">
+                      Reason for revision <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      id="trainer-revision-reason"
+                      rows={3}
+                      value={revisionReason}
+                      onChange={(e) => setRevisionReason(e.target.value)}
+                      placeholder="e.g. Correcting misplaced score for student, paper re-marked..."
+                      className="w-full rounded-lg border border-slate-300 p-2.5 text-xs text-slate-900 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                    />
+                    <p className="text-[11px] text-slate-400">
+                      Minimum 3 characters. Recorded for departmental compliance.
+                    </p>
+                  </div>
+
+                  <div className="mt-5 flex justify-end gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={busy !== null}
+                      onClick={() => setRevisionDialogOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={busy !== null || revisionReason.trim().length < 3}
+                      onClick={() => void reopenComponent()}
+                      className="bg-amber-600 text-white hover:bg-amber-700"
+                    >
+                      {busy === 'save' ? <LoaderCircle className="mr-1.5 size-3.5 animate-spin" /> : <RotateCcw className="mr-1.5 size-3.5" />}
+                      Unlock for editing
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : null}
           </>
         ) : null}
       </div>

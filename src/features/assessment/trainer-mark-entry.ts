@@ -77,6 +77,19 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
     const periodNames = [...new Set((periods ?? []).map((period) => period.name))];
     const studentById = new Map((students ?? []).map((student) => [student.id, student]));
     const draftByKey = new Map((drafts ?? []).map((draft) => [`${draft.assessment_id}:${draft.student_id}`, draft]));
+    const draftByStudentId = new Map<string, (typeof drafts extends (infer T)[] | null ? T : never)>();
+    for (const draft of drafts ?? []) {
+      const existing = draftByStudentId.get(draft.student_id);
+      if (!existing) {
+        draftByStudentId.set(draft.student_id, draft);
+      } else {
+        const hasExistingMarks = existing.assignment_mark !== null || existing.presentation_mark !== null || existing.rat_mark !== null || existing.cat_mark !== null || existing.exam_mark !== null;
+        const hasNewMarks = draft.assignment_mark !== null || draft.presentation_mark !== null || draft.rat_mark !== null || draft.cat_mark !== null || draft.exam_mark !== null;
+        if (!hasExistingMarks && hasNewMarks) {
+          draftByStudentId.set(draft.student_id, draft);
+        }
+      }
+    }
     const cohortNameById = new Map((cohortRows ?? []).map((cohort) => [cohort.id, cohort.name]));
     const eventById = new Map(eventRows.map((event) => [event.id, event]));
     const scopeByKey = new Map(scopeRows.map((scope) => [`${scope.assessment_id}:${scope.cohort_id ?? 'all'}`, scope]));
@@ -88,6 +101,8 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
       scopeRows: typeof scopeRows;
       locked: boolean;
     }>();
+    const seenStudentIdsByCohort = new Map<string, Set<string>>();
+
     for (const roster of allRosterRows) {
       const scope = scopeByKey.get(`${roster.assessment_id}:${roster.cohort_id ?? 'all'}`);
       const student = studentById.get(roster.student_id);
@@ -102,11 +117,31 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
           scopeRows: [],
           locked: false,
         });
+        seenStudentIdsByCohort.set(cohortKey, new Set());
       }
       const cohort = cohorts.get(cohortKey)!;
       if (!cohort.scopeRows.some((row) => row.id === scope.id)) cohort.scopeRows.push(scope);
       cohort.locked ||= ['submitted', 'finalised', 'archived'].includes(event.workflow_status) || scope.revoked_at !== null || Date.parse(scope.expires_at) <= Date.now();
-      const draft = draftByKey.get(`${roster.assessment_id}:${roster.student_id}`);
+
+      const seenStudents = seenStudentIdsByCohort.get(cohortKey)!;
+      const draft = draftByKey.get(`${roster.assessment_id}:${roster.student_id}`) ?? draftByStudentId.get(roster.student_id);
+
+      if (seenStudents.has(roster.student_id)) {
+        // Deduplicate: If already added from another equivalent/sibling event, backfill any non-null marks
+        const existingStudent = cohort.students.find((s) => s.studentId === roster.student_id);
+        if (existingStudent && draft) {
+          existingStudent.assignment = existingStudent.assignment ?? draft.assignment_mark ?? null;
+          existingStudent.presentation = existingStudent.presentation ?? draft.presentation_mark ?? null;
+          existingStudent.rat = existingStudent.rat ?? draft.rat_mark ?? null;
+          existingStudent.cat = existingStudent.cat ?? draft.cat_mark ?? null;
+          if (existingStudent.attendanceStatus !== 'absent') {
+            existingStudent.exam = existingStudent.exam ?? draft.exam_mark ?? null;
+          }
+        }
+        continue;
+      }
+      seenStudents.add(roster.student_id);
+
       cohort.students.push({
         assessmentId: roster.assessment_id,
         studentId: roster.student_id,
@@ -126,13 +161,15 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
       students: cohort.students.sort((first, second) => first.admissionNumber.localeCompare(second.admissionNumber, undefined, { numeric: true })),
       locked: cohort.locked,
       componentSubmissions: Object.fromEntries((['assignment', 'presentation', 'rat', 'cat', 'exam'] as TrainerMarkComponentKey[]).flatMap((component) => {
-        const timestamps = cohort.scopeRows.map((scope) => componentSubmissionByKey.get(`${scope.assessment_id}:${scope.cohort_id ?? 'all'}:${component}`));
-        return timestamps.length > 0 && timestamps.every((timestamp) => typeof timestamp === 'string')
+        const timestamps = cohort.scopeRows
+          .map((scope) => componentSubmissionByKey.get(`${scope.assessment_id}:${scope.cohort_id ?? 'all'}:${component}`))
+          .filter((timestamp): timestamp is string => typeof timestamp === 'string');
+        return timestamps.length > 0
           ? [[component, [...timestamps].sort().at(-1) as string]]
           : [];
       })) as TrainerMarkComponentSubmissions,
-      submittedAt: cohort.scopeRows.length > 0 && cohort.scopeRows.every((scope) => scope.submitted_at)
-        ? [...cohort.scopeRows.map((scope) => scope.submitted_at)].sort().pop() ?? null
+      submittedAt: cohort.scopeRows.some((scope) => scope.submitted_at)
+        ? [...cohort.scopeRows.map((scope) => scope.submitted_at)].filter(Boolean).sort().pop() ?? null
         : null,
     })).sort((first, second) => first.name.localeCompare(second.name));
     const firstEvent = eventRows[0];
@@ -203,8 +240,11 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
 
   const studentById = new Map((students ?? []).map((student) => [student.id, student]));
   const draftByStudentId = new Map((drafts ?? []).map((draft) => [draft.student_id, draft]));
+  const seenStudentIds = new Set<string>();
   const roster: TrainerMarkEntryRow[] = rosterRows.flatMap((row) => {
     const studentId = row.student_id as string;
+    if (seenStudentIds.has(studentId)) return [];
+    seenStudentIds.add(studentId);
     const student = studentById.get(studentId);
     if (!student) return [];
     const draft = draftByStudentId.get(studentId);

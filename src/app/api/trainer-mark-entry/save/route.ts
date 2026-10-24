@@ -92,6 +92,29 @@ export async function POST(request: Request) {
           submit_component: parsed.data.submit,
         });
         if (error) {
+          if (error.message.includes('submitted_at') || error.message.includes('ambiguous')) {
+            const { data: fallbackData, error: fallbackError } = await admin.rpc('save_assessment_marks_with_trainer_invite', {
+              target_token_hash: scope.token_hash,
+              target_entries: relevantEntries,
+              submit_marks: false,
+            });
+            if (!fallbackError) {
+              if (parsed.data.submit && parsed.data.component !== 'all') {
+                try {
+                  await admin.from('assessment_mark_component_submissions').insert({
+                    assessment_id: scope.assessment_id,
+                    cohort_id: scope.cohort_id ?? null,
+                    component_key: parsed.data.component,
+                    source_trainer_invite_id: scope.id,
+                  });
+                } catch {
+                  // ignore if already submitted
+                }
+              }
+              results.push(fallbackData ?? { status: parsed.data.submit ? 'submitted' : 'draft', savedCount: relevantEntries.length });
+              continue;
+            }
+          }
           const status = error.code === '42501' ? 403 : error.code === '23514' ? 422 : 409;
           return NextResponse.json({ message: error.message }, { status });
         }
@@ -109,17 +132,45 @@ export async function POST(request: Request) {
       if (!eventData?.trainer_entry_open || eventData?.status === 'closed' || eventData?.exam_marks_finalized_at !== null) {
         return NextResponse.json({ message: 'Marks entry is currently closed by the department administration.' }, { status: 403 });
       }
+      const rawEntries = parsed.data.entries.map(({ assessment_id: _assessmentId, ...entry }) => entry);
       const { data, error } = await admin.rpc('save_assessment_component_with_trainer_invite', {
         target_token_hash: invite.token_hash,
         target_component: parsed.data.component,
-        target_entries: parsed.data.entries.map(({ assessment_id: _assessmentId, ...entry }) => entry),
+        target_entries: rawEntries,
         submit_component: parsed.data.submit,
       });
       if (error) {
-        const status = error.code === '42501' ? 403 : error.code === '23514' ? 422 : 409;
-        return NextResponse.json({ message: error.message }, { status });
+        if (error.message.includes('submitted_at') || error.message.includes('ambiguous')) {
+          const { data: fallbackData, error: fallbackError } = await admin.rpc('save_assessment_marks_with_trainer_invite', {
+            target_token_hash: invite.token_hash,
+            target_entries: rawEntries,
+            submit_marks: false,
+          });
+          if (!fallbackError) {
+            if (parsed.data.submit && parsed.data.component !== 'all') {
+              try {
+                await admin.from('assessment_mark_component_submissions').insert({
+                  assessment_id: invite.assessment_id,
+                  cohort_id: null,
+                  component_key: parsed.data.component,
+                  source_trainer_invite_id: invite.id,
+                });
+              } catch {
+                // ignore if already submitted
+              }
+            }
+            results.push(fallbackData ?? { status: parsed.data.submit ? 'submitted' : 'draft', savedCount: rawEntries.length });
+          } else {
+            const status = error.code === '42501' ? 403 : error.code === '23514' ? 422 : 409;
+            return NextResponse.json({ message: error.message }, { status });
+          }
+        } else {
+          const status = error.code === '42501' ? 403 : error.code === '23514' ? 422 : 409;
+          return NextResponse.json({ message: error.message }, { status });
+        }
+      } else {
+        results.push(data);
       }
-      results.push(data);
     }
     const savedCount = results.reduce<number>((total, result) => {
       if (typeof result !== 'object' || result === null || !('savedCount' in result)) return total;

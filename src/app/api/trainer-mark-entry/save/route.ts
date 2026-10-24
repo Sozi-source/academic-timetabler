@@ -34,6 +34,12 @@ export async function POST(request: Request) {
     const admin = createAdminClient();
     const results: unknown[] = [];
 
+    if (parsed.data.submit && ['assignment', 'presentation', 'rat'].includes(parsed.data.component)) {
+      return NextResponse.json({
+        message: 'Assignment, Presentation, and RAT marks are saved as drafts and submitted together with final marks at the end of the semester.',
+      }, { status: 400 });
+    }
+
     if (invite.scope_unit_id) {
       let scopeQuery = admin.from('assessment_trainer_mark_invites')
         .select('id,assessment_id,cohort_id,token_hash,expires_at,submitted_at,revoked_at')
@@ -50,7 +56,7 @@ export async function POST(request: Request) {
         if (scope.revoked_at || Date.parse(scope.expires_at) <= Date.now()) {
           return NextResponse.json({ message: 'This cohort link has expired or was revoked.' }, { status: 410 });
         }
-        if (scope.submitted_at) {
+        if (scope.submitted_at && parsed.data.submit) {
           return NextResponse.json({ message: 'Marks for this cohort have already been submitted.' }, { status: 409 });
         }
       }
@@ -66,64 +72,131 @@ export async function POST(request: Request) {
 
       const { data: scopeRosterRows } = await admin
         .from('assessment_roster')
-        .select('assessment_id,student_id')
+        .select('assessment_id,student_id,pre_assessment_status')
         .in('assessment_id', scopes.map((s) => s.assessment_id));
 
-      const studentsByAssessment = new Map<string, Set<string>>();
+      const rosterByAssessment = new Map<string, Map<string, string>>();
       for (const row of scopeRosterRows ?? []) {
-        if (!studentsByAssessment.has(row.assessment_id)) {
-          studentsByAssessment.set(row.assessment_id, new Set());
+        if (!rosterByAssessment.has(row.assessment_id)) {
+          rosterByAssessment.set(row.assessment_id, new Map());
         }
-        studentsByAssessment.get(row.assessment_id)!.add(row.student_id);
+        rosterByAssessment.get(row.assessment_id)!.set(row.student_id, row.pre_assessment_status ?? 'expected');
       }
 
       for (const scope of scopes) {
-        const allowedStudentIds = studentsByAssessment.get(scope.assessment_id) ?? new Set();
+        const studentStatusMap = rosterByAssessment.get(scope.assessment_id) ?? new Map<string, string>();
         const relevantEntries = parsed.data.entries
-          .filter((entry) => allowedStudentIds.has(entry.student_id))
+          .filter((entry) => studentStatusMap.has(entry.student_id))
           .map(({ assessment_id: _assessmentId, ...entry }) => entry);
 
         if (relevantEntries.length === 0) continue;
 
-        const { data, error } = await admin.rpc('save_assessment_component_with_trainer_invite', {
-          target_token_hash: scope.token_hash,
-          target_component: parsed.data.component,
-          target_entries: relevantEntries,
-          submit_component: parsed.data.submit,
-        });
-        if (error) {
-          if (error.message.includes('submitted_at') || error.message.includes('ambiguous')) {
+        if (parsed.data.submit) {
+          if (parsed.data.component === 'cat') {
+            const missingCat = relevantEntries.filter((e) => e.cat === null).length;
+            if (missingCat > 0) {
+              return NextResponse.json({
+                message: `Cannot submit CAT: ${missingCat} student(s) are missing CAT marks.`,
+              }, { status: 422 });
+            }
+
+            const { data, error } = await admin.rpc('save_assessment_component_with_trainer_invite', {
+              target_token_hash: scope.token_hash,
+              target_component: 'cat',
+              target_entries: relevantEntries,
+              submit_component: true,
+            });
+            if (error) {
+              const status = error.code === '42501' ? 403 : error.code === '23514' ? 422 : 409;
+              return NextResponse.json({ message: error.message }, { status });
+            }
+            results.push(data);
+          } else {
+            // Final marks submission ('all' or 'exam')
+            const missingSummary = {
+              assignment: relevantEntries.filter((e) => e.assignment === null).length,
+              presentation: relevantEntries.filter((e) => e.presentation === null).length,
+              rat: relevantEntries.filter((e) => e.rat === null).length,
+              cat: relevantEntries.filter((e) => e.cat === null).length,
+              exam: relevantEntries.filter((e) => studentStatusMap.get(e.student_id) !== 'absent' && e.exam === null).length,
+            };
+            const missingParts: string[] = [];
+            if (missingSummary.assignment) missingParts.push(`${missingSummary.assignment} in Assignment`);
+            if (missingSummary.presentation) missingParts.push(`${missingSummary.presentation} in Presentation`);
+            if (missingSummary.rat) missingParts.push(`${missingSummary.rat} in RAT`);
+            if (missingSummary.cat) missingParts.push(`${missingSummary.cat} in CAT`);
+            if (missingSummary.exam) missingParts.push(`${missingSummary.exam} in Exam`);
+
+            if (missingParts.length > 0) {
+              return NextResponse.json({
+                message: `Every column must be filled before submitting final marks. Missing entries: ${missingParts.join(', ')}. (If a student missed coursework, enter 0).`,
+              }, { status: 422 });
+            }
+
+            // Save all marks and submit
+            const { data: savedData, error: saveError } = await admin.rpc('save_assessment_marks_with_trainer_invite', {
+              target_token_hash: scope.token_hash,
+              target_entries: relevantEntries,
+              submit_marks: true,
+            });
+            if (saveError) {
+              return NextResponse.json({ message: saveError.message }, { status: 409 });
+            }
+
+            // Record submissions for all components
+            const allComponents = ['assignment', 'presentation', 'rat', 'cat', 'exam'] as const;
+            for (const comp of allComponents) {
+              try {
+                await admin.from('assessment_mark_component_submissions').upsert({
+                  assessment_id: scope.assessment_id,
+                  cohort_id: scope.cohort_id ?? null,
+                  component_key: comp,
+                  source_trainer_invite_id: scope.id,
+                }, {
+                  onConflict: 'assessment_id,coalesce(cohort_id, \'00000000-0000-0000-0000-000000000000\'::uuid),component_key',
+                });
+              } catch {
+                // ignore
+              }
+            }
+
+            results.push(savedData ?? { status: 'submitted', savedCount: relevantEntries.length });
+          }
+        } else {
+          // Draft save
+          const { data, error } = await admin.rpc('save_assessment_component_with_trainer_invite', {
+            target_token_hash: scope.token_hash,
+            target_component: parsed.data.component,
+            target_entries: relevantEntries,
+            submit_component: false,
+          });
+          if (error) {
             const { data: fallbackData, error: fallbackError } = await admin.rpc('save_assessment_marks_with_trainer_invite', {
               target_token_hash: scope.token_hash,
               target_entries: relevantEntries,
               submit_marks: false,
             });
-            if (!fallbackError) {
-              if (parsed.data.submit && parsed.data.component !== 'all') {
-                try {
-                  await admin.from('assessment_mark_component_submissions').insert({
-                    assessment_id: scope.assessment_id,
-                    cohort_id: scope.cohort_id ?? null,
-                    component_key: parsed.data.component,
-                    source_trainer_invite_id: scope.id,
-                  });
-                } catch {
-                  // ignore if already submitted
-                }
-              }
-              results.push(fallbackData ?? { status: parsed.data.submit ? 'submitted' : 'draft', savedCount: relevantEntries.length });
-              continue;
+            if (fallbackError) {
+              const status = error.code === '42501' ? 403 : error.code === '23514' ? 422 : 409;
+              return NextResponse.json({ message: error.message }, { status });
             }
+            results.push(fallbackData ?? { status: 'draft', savedCount: relevantEntries.length });
+          } else {
+            results.push(data);
           }
-          const status = error.code === '42501' ? 403 : error.code === '23514' ? 422 : 409;
-          return NextResponse.json({ message: error.message }, { status });
         }
-        results.push(data);
       }
     } else {
       if (parsed.data.cohort_id) {
         return NextResponse.json({ message: 'This invitation does not support cohort-specific submission.' }, { status: 400 });
       }
+      if (invite.revoked_at || Date.parse(invite.expires_at) <= Date.now()) {
+        return NextResponse.json({ message: 'This trainer link has expired or was revoked.' }, { status: 410 });
+      }
+      if (invite.submitted_at && parsed.data.submit) {
+        return NextResponse.json({ message: 'Marks for this markbook have already been submitted.' }, { status: 409 });
+      }
+
       const { data: eventData } = await admin
         .from('assessment_events')
         .select('id,trainer_entry_open,status,exam_marks_finalized_at')
@@ -132,44 +205,106 @@ export async function POST(request: Request) {
       if (!eventData?.trainer_entry_open || eventData?.status === 'closed' || eventData?.exam_marks_finalized_at !== null) {
         return NextResponse.json({ message: 'Marks entry is currently closed by the department administration.' }, { status: 403 });
       }
+
       const rawEntries = parsed.data.entries.map(({ assessment_id: _assessmentId, ...entry }) => entry);
-      const { data, error } = await admin.rpc('save_assessment_component_with_trainer_invite', {
-        target_token_hash: invite.token_hash,
-        target_component: parsed.data.component,
-        target_entries: rawEntries,
-        submit_component: parsed.data.submit,
-      });
-      if (error) {
-        if (error.message.includes('submitted_at') || error.message.includes('ambiguous')) {
+
+      if (parsed.data.submit) {
+        if (parsed.data.component === 'cat') {
+          const missingCat = rawEntries.filter((e) => e.cat === null).length;
+          if (missingCat > 0) {
+            return NextResponse.json({
+              message: `Cannot submit CAT: ${missingCat} student(s) are missing CAT marks.`,
+            }, { status: 422 });
+          }
+
+          const { data, error } = await admin.rpc('save_assessment_component_with_trainer_invite', {
+            target_token_hash: invite.token_hash,
+            target_component: 'cat',
+            target_entries: rawEntries,
+            submit_component: true,
+          });
+          if (error) {
+            const status = error.code === '42501' ? 403 : error.code === '23514' ? 422 : 409;
+            return NextResponse.json({ message: error.message }, { status });
+          }
+          results.push(data);
+        } else {
+          // Final marks submission ('all' or 'exam')
+          const { data: rosterRows } = await admin
+            .from('assessment_roster')
+            .select('student_id,pre_assessment_status')
+            .eq('assessment_id', invite.assessment_id);
+          const studentStatusMap = new Map((rosterRows ?? []).map((r) => [r.student_id, r.pre_assessment_status ?? 'expected']));
+
+          const missingSummary = {
+            assignment: rawEntries.filter((e) => e.assignment === null).length,
+            presentation: rawEntries.filter((e) => e.presentation === null).length,
+            rat: rawEntries.filter((e) => e.rat === null).length,
+            cat: rawEntries.filter((e) => e.cat === null).length,
+            exam: rawEntries.filter((e) => studentStatusMap.get(e.student_id) !== 'absent' && e.exam === null).length,
+          };
+          const missingParts: string[] = [];
+          if (missingSummary.assignment) missingParts.push(`${missingSummary.assignment} in Assignment`);
+          if (missingSummary.presentation) missingParts.push(`${missingSummary.presentation} in Presentation`);
+          if (missingSummary.rat) missingParts.push(`${missingSummary.rat} in RAT`);
+          if (missingSummary.cat) missingParts.push(`${missingSummary.cat} in CAT`);
+          if (missingSummary.exam) missingParts.push(`${missingSummary.exam} in Exam`);
+
+          if (missingParts.length > 0) {
+            return NextResponse.json({
+              message: `Every column must be filled before submitting final marks. Missing entries: ${missingParts.join(', ')}. (If a student missed coursework, enter 0).`,
+            }, { status: 422 });
+          }
+
+          const { data: savedData, error: saveError } = await admin.rpc('save_assessment_marks_with_trainer_invite', {
+            target_token_hash: invite.token_hash,
+            target_entries: rawEntries,
+            submit_marks: true,
+          });
+          if (saveError) {
+            return NextResponse.json({ message: saveError.message }, { status: 409 });
+          }
+
+          const allComponents = ['assignment', 'presentation', 'rat', 'cat', 'exam'] as const;
+          for (const comp of allComponents) {
+            try {
+              await admin.from('assessment_mark_component_submissions').upsert({
+                assessment_id: invite.assessment_id,
+                cohort_id: null,
+                component_key: comp,
+                source_trainer_invite_id: invite.id,
+              }, {
+                onConflict: 'assessment_id,coalesce(cohort_id, \'00000000-0000-0000-0000-000000000000\'::uuid),component_key',
+              });
+            } catch {
+              // ignore
+            }
+          }
+
+          results.push(savedData ?? { status: 'submitted', savedCount: rawEntries.length });
+        }
+      } else {
+        // Draft save
+        const { data, error } = await admin.rpc('save_assessment_component_with_trainer_invite', {
+          target_token_hash: invite.token_hash,
+          target_component: parsed.data.component,
+          target_entries: rawEntries,
+          submit_component: false,
+        });
+        if (error) {
           const { data: fallbackData, error: fallbackError } = await admin.rpc('save_assessment_marks_with_trainer_invite', {
             target_token_hash: invite.token_hash,
             target_entries: rawEntries,
             submit_marks: false,
           });
-          if (!fallbackError) {
-            if (parsed.data.submit && parsed.data.component !== 'all') {
-              try {
-                await admin.from('assessment_mark_component_submissions').insert({
-                  assessment_id: invite.assessment_id,
-                  cohort_id: null,
-                  component_key: parsed.data.component,
-                  source_trainer_invite_id: invite.id,
-                });
-              } catch {
-                // ignore if already submitted
-              }
-            }
-            results.push(fallbackData ?? { status: parsed.data.submit ? 'submitted' : 'draft', savedCount: rawEntries.length });
-          } else {
+          if (fallbackError) {
             const status = error.code === '42501' ? 403 : error.code === '23514' ? 422 : 409;
             return NextResponse.json({ message: error.message }, { status });
           }
+          results.push(fallbackData ?? { status: 'draft', savedCount: rawEntries.length });
         } else {
-          const status = error.code === '42501' ? 403 : error.code === '23514' ? 422 : 409;
-          return NextResponse.json({ message: error.message }, { status });
+          results.push(data);
         }
-      } else {
-        results.push(data);
       }
     }
     const savedCount = results.reduce<number>((total, result) => {

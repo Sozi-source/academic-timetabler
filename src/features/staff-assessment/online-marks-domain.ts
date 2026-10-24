@@ -219,19 +219,103 @@ export function missingOnlineComponentCount({
   absent:
     boolean;
 }): number {
-  // Assignment, Presentation, and RAT default to 0 if missed.
-  // Required components to complete are CAT and Exam (unless absent).
   let missing = 0;
 
+  if (values.assignment === null) {
+    missing += 1;
+  }
+  if (values.presentation === null) {
+    missing += 1;
+  }
+  if (values.rat === null) {
+    missing += 1;
+  }
   if (values.cat === null) {
     missing += 1;
   }
-
   if (!absent && values.exam === null) {
     missing += 1;
   }
 
   return missing;
+}
+
+export function getUnfilledColumnsSummary(
+  rows: Array<{
+    student: { fullName: string; attendanceStatus: 'expected' | 'absent' };
+    marks: OnlineMarkValues;
+  }>,
+): {
+  totalMissing: number;
+  missingAssignment: number;
+  missingPresentation: number;
+  missingRat: number;
+  missingCat: number;
+  missingExam: number;
+  incompleteStudentCount: number;
+} {
+  let missingAssignment = 0;
+  let missingPresentation = 0;
+  let missingRat = 0;
+  let missingCat = 0;
+  let missingExam = 0;
+  let incompleteStudentCount = 0;
+
+  for (const row of rows) {
+    let studentIncomplete = false;
+    if (row.marks.assignment === null) {
+      missingAssignment += 1;
+      studentIncomplete = true;
+    }
+    if (row.marks.presentation === null) {
+      missingPresentation += 1;
+      studentIncomplete = true;
+    }
+    if (row.marks.rat === null) {
+      missingRat += 1;
+      studentIncomplete = true;
+    }
+    if (row.marks.cat === null) {
+      missingCat += 1;
+      studentIncomplete = true;
+    }
+    if (row.student.attendanceStatus !== 'absent' && row.marks.exam === null) {
+      missingExam += 1;
+      studentIncomplete = true;
+    }
+    if (studentIncomplete) {
+      incompleteStudentCount += 1;
+    }
+  }
+
+  const totalMissing =
+    missingAssignment + missingPresentation + missingRat + missingCat + missingExam;
+
+  return {
+    totalMissing,
+    missingAssignment,
+    missingPresentation,
+    missingRat,
+    missingCat,
+    missingExam,
+    incompleteStudentCount,
+  };
+}
+
+export function formatUnfilledColumnsMessage(summary: {
+  missingAssignment: number;
+  missingPresentation: number;
+  missingRat: number;
+  missingCat: number;
+  missingExam: number;
+}): string {
+  const parts: string[] = [];
+  if (summary.missingAssignment) parts.push(`${summary.missingAssignment} in Assignment`);
+  if (summary.missingPresentation) parts.push(`${summary.missingPresentation} in Presentation`);
+  if (summary.missingRat) parts.push(`${summary.missingRat} in RAT`);
+  if (summary.missingCat) parts.push(`${summary.missingCat} in CAT`);
+  if (summary.missingExam) parts.push(`${summary.missingExam} in Exam`);
+  return parts.join(', ');
 }
 
 export function canEditOnlineMarks(

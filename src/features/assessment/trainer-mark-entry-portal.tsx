@@ -189,18 +189,56 @@ export function TrainerMarkEntryPortal() {
 
   const selectedCohort = session?.cohorts.find((cohort) => cohort.id === selectedCohortId) ?? null;
   const visibleFields = selectedView === 'all' ? markFields : markFields.filter((field) => field.key === selectedView);
-  const readOnly = Boolean(selectedCohort?.locked || selectedCohort?.submittedAt);
+  const isFinalSubmitted = Boolean(selectedCohort?.submittedAt || selectedCohort?.componentSubmissions.exam);
+  const isCatSubmitted = Boolean(selectedCohort?.componentSubmissions.cat);
+  const readOnly = Boolean(selectedCohort?.locked || isFinalSubmitted);
+
+  const missingAssignment = students.filter((s) => s.assignment === null).length;
+  const missingPresentation = students.filter((s) => s.presentation === null).length;
+  const missingRat = students.filter((s) => s.rat === null).length;
+  const missingCat = students.filter((s) => s.cat === null).length;
+  const missingExam = students.filter((s) => s.attendanceStatus !== 'absent' && s.exam === null).length;
+  const totalMissing = missingAssignment + missingPresentation + missingRat + missingCat + missingExam;
 
   async function saveMarks(submit: boolean) {
     if (!selectedCohort) return;
-    if (submit && selectedView === 'all') {
-      setError('Choose one component tab to submit.');
-      return;
+    if (submit) {
+      if (['assignment', 'presentation', 'rat'].includes(selectedView)) {
+        setError(
+          'Assignment, Presentation, and RAT marks are saved as drafts and submitted together with final exam marks at the end of the semester.',
+        );
+        return;
+      }
+      if (selectedView === 'cat') {
+        if (isCatSubmitted) {
+          setError('CAT marks have already been submitted.');
+          return;
+        }
+        if (missingCat > 0) {
+          setError(`Cannot submit CAT: ${missingCat} student(s) are missing CAT marks.`);
+          return;
+        }
+      } else {
+        // Final marks submission ('all' or 'exam')
+        if (isFinalSubmitted) {
+          setError('Final marks have already been submitted.');
+          return;
+        }
+        if (totalMissing > 0) {
+          const parts: string[] = [];
+          if (missingAssignment) parts.push(`${missingAssignment} in Assignment`);
+          if (missingPresentation) parts.push(`${missingPresentation} in Presentation`);
+          if (missingRat) parts.push(`${missingRat} in RAT`);
+          if (missingCat) parts.push(`${missingCat} in CAT`);
+          if (missingExam) parts.push(`${missingExam} in Exam`);
+          setError(
+            `Every column must be filled before submitting final marks. Missing entries: ${parts.join(', ')}. (If a student missed coursework, enter 0).`,
+          );
+          return;
+        }
+      }
     }
-    if (submit && selectedCohort.componentSubmissions[selectedView as MarkField]) {
-      setError('This component has already been submitted.');
-      return;
-    }
+
     setBusy(submit ? 'submit' : 'save');
     setError('');
     setMessage('');
@@ -210,7 +248,7 @@ export function TrainerMarkEntryPortal() {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
           cohort_id: selectedCohort.id,
-          component: selectedView,
+          component: submit ? (selectedView === 'cat' ? 'cat' : 'all') : selectedView,
           submit,
           entries: students.map((student) => ({
             assessment_id: student.assessmentId,
@@ -219,14 +257,14 @@ export function TrainerMarkEntryPortal() {
             presentation: student.presentation,
             rat: student.rat,
             cat: student.cat,
-            exam: student.exam,
+            exam: student.attendanceStatus === 'absent' ? null : student.exam,
           })),
         }),
       });
       const result = await response.json() as { message?: string; result?: { savedCount?: number } };
       if (!response.ok) throw new Error(result.message ?? 'Could not save marks.');
       if (submit) {
-        setMessage(`${markFields.find((field) => field.key === selectedView)?.label ?? 'Component'} submitted.`);
+        setMessage(selectedView === 'cat' ? 'CAT marks submitted successfully.' : 'Final marks submitted successfully.');
         const refreshed = await loadSession();
         setSession(refreshed);
         const updatedCohort = refreshed.cohorts.find((cohort) => cohort.id === selectedCohort.id) ?? null;
@@ -243,7 +281,8 @@ export function TrainerMarkEntryPortal() {
   }
 
   async function reopenComponent() {
-    if (!selectedCohort || selectedView === 'all' || !revisionReason.trim()) return;
+    if (!selectedCohort || !revisionReason.trim()) return;
+    const targetComp = selectedView === 'all' || selectedView === 'exam' ? 'all' : selectedView;
     setBusy('save');
     setError('');
     setMessage('');
@@ -252,7 +291,7 @@ export function TrainerMarkEntryPortal() {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
-          component: selectedView,
+          component: targetComp,
           cohort_id: selectedCohort.id,
           reason: revisionReason.trim(),
         }),
@@ -261,7 +300,7 @@ export function TrainerMarkEntryPortal() {
       if (!response.ok) throw new Error(result.message ?? 'Could not unlock this component.');
       setRevisionDialogOpen(false);
       setRevisionReason('');
-      setMessage(`${markViews.find((view) => view.key === selectedView)?.label ?? 'Component'} unlocked for revision.`);
+      setMessage(`${targetComp === 'all' ? 'Final' : markViews.find((view) => view.key === targetComp)?.label ?? targetComp} marks unlocked for revision.`);
       const refreshed = await loadSession();
       setSession(refreshed);
       const updatedCohort = refreshed.cohorts.find((cohort) => cohort.id === selectedCohort.id) ?? null;
@@ -311,10 +350,36 @@ export function TrainerMarkEntryPortal() {
 
             {selectedCohort?.submittedAt ? <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-900">Submitted - read only</div> : null}
             {selectedCohort?.locked && !selectedCohort.submittedAt ? <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">Entry closed</div> : null}
-            {selectedView !== 'all' && selectedCohort?.componentSubmissions[selectedView] && !selectedCohort?.locked ? (
+            {['assignment', 'presentation', 'rat'].includes(selectedView) && !readOnly ? (
+              <div className="rounded-lg border border-slate-200 bg-[#fbf9f1] px-3 py-2 text-xs text-slate-700">
+                Coursework marks (Assignment, Presentation, RAT) are saved as drafts and submitted together with final exam marks at the end of the semester.
+              </div>
+            ) : null}
+            {selectedView === 'cat' && isCatSubmitted && !selectedCohort?.locked ? (
               <div className="flex flex-col gap-2 rounded-lg border border-emerald-200 bg-emerald-50/80 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="text-xs text-emerald-900">
-                  <span className="font-semibold">{markViews.find((view) => view.key === selectedView)?.label}</span> has been submitted. Need to correct an entry?
+                  <span className="font-semibold">CAT marks</span> have been submitted. Need to correct an entry?
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={busy !== null}
+                  onClick={() => {
+                    setRevisionReason('');
+                    setRevisionDialogOpen(true);
+                  }}
+                  className="h-8 shrink-0 border-amber-300 bg-amber-50 text-xs font-medium text-amber-900 hover:bg-amber-100"
+                >
+                  <RotateCcw className="mr-1.5 size-3.5 text-amber-700" />
+                  Revise marks
+                </Button>
+              </div>
+            ) : null}
+            {(selectedView === 'all' || selectedView === 'exam') && isFinalSubmitted && !selectedCohort?.locked ? (
+              <div className="flex flex-col gap-2 rounded-lg border border-emerald-200 bg-emerald-50/80 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="text-xs text-emerald-900">
+                  <span className="font-semibold">Final marks</span> have been submitted. Need to correct an entry?
                 </div>
                 <Button
                   type="button"
@@ -336,24 +401,45 @@ export function TrainerMarkEntryPortal() {
             {selectedCohort ? <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xs">
               <div className="flex flex-col gap-2 border-b border-slate-200 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
                 <div className="flex gap-1 overflow-x-auto" role="group" aria-label="Mark fields">
-                  {markViews.map((view) => (
+                  {markViews.map((view) => {
+                    const isChecked =
+                      view.key === 'all' || view.key === 'exam'
+                        ? isFinalSubmitted
+                        : Boolean(selectedCohort?.componentSubmissions[view.key]);
+                    return (
                       <button key={view.key} type="button" aria-pressed={selectedView === view.key} onClick={() => setSelectedView(view.key)}
                       className={`min-h-10 shrink-0 rounded-lg px-3 text-xs font-semibold ${selectedView === view.key ? 'bg-teal-700 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>
-                        {view.label}{view.key !== 'all' && selectedCohort?.componentSubmissions[view.key] ? ' ✓' : ''}
-                    </button>
-                  ))}
+                        {view.label}{isChecked ? ' ✓' : ''}
+                      </button>
+                    );
+                  })}
                 </div>
                 {!readOnly ? (
                   <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
-                    <Button className="w-full sm:w-auto" type="button" variant="outline" disabled={busy !== null || students.length === 0 || (selectedView !== 'all' && Boolean(selectedCohort?.componentSubmissions[selectedView]))} onClick={() => void saveMarks(false)}>
+                    <Button className="w-full sm:w-auto" type="button" variant="outline" disabled={busy !== null || students.length === 0} onClick={() => void saveMarks(false)}>
                       {busy === 'save' ? <LoaderCircle className="size-4 animate-spin" /> : <Save className="size-4" />}{busy === 'save' ? 'Saving...' : 'Save draft'}
                     </Button>
-                    {selectedView !== 'all' && !selectedCohort?.componentSubmissions[selectedView] ? (
-                      <Button className="w-full sm:w-auto" type="button" disabled={busy !== null || students.length === 0} onClick={() => void saveMarks(true)}>
-                        {busy === 'submit' ? <LoaderCircle className="size-4 animate-spin" /> : <Send className="size-4" />}{busy === 'submit' ? 'Submitting...' : `Submit ${markViews.find((view) => view.key === selectedView)?.label}`}
-                      </Button>
-                    ) : null}
-                    {selectedView !== 'all' && selectedCohort?.componentSubmissions[selectedView] ? (
+                    {['assignment', 'presentation', 'rat'].includes(selectedView) ? null : selectedView === 'cat' ? (
+                      isCatSubmitted ? (
+                        <Button
+                          className="w-full sm:w-auto border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100"
+                          type="button"
+                          variant="outline"
+                          disabled={busy !== null}
+                          onClick={() => {
+                            setRevisionReason('');
+                            setRevisionDialogOpen(true);
+                          }}
+                        >
+                          <RotateCcw className="size-4 text-amber-700" />
+                          Revise CAT marks
+                        </Button>
+                      ) : (
+                        <Button className="w-full sm:w-auto" type="button" disabled={busy !== null || students.length === 0 || missingCat > 0} onClick={() => void saveMarks(true)}>
+                          {busy === 'submit' ? <LoaderCircle className="size-4 animate-spin" /> : <Send className="size-4" />}{busy === 'submit' ? 'Submitting...' : 'Submit CAT marks'}
+                        </Button>
+                      )
+                    ) : isFinalSubmitted ? (
                       <Button
                         className="w-full sm:w-auto border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100"
                         type="button"
@@ -365,9 +451,13 @@ export function TrainerMarkEntryPortal() {
                         }}
                       >
                         <RotateCcw className="size-4 text-amber-700" />
-                        Revise {markViews.find((view) => view.key === selectedView)?.label}
+                        Revise Final Marks
                       </Button>
-                    ) : null}
+                    ) : (
+                      <Button className="w-full sm:w-auto" type="button" disabled={busy !== null || students.length === 0 || totalMissing > 0} onClick={() => void saveMarks(true)}>
+                        {busy === 'submit' ? <LoaderCircle className="size-4 animate-spin" /> : <Send className="size-4" />}{busy === 'submit' ? 'Submitting...' : 'Submit Final Marks'}
+                      </Button>
+                    )}
                   </div>
                 ) : null}
               </div>
@@ -410,7 +500,7 @@ export function TrainerMarkEntryPortal() {
                                 min="0"
                                 max={field.maximum}
                                 value={student[field.key] ?? ''}
-                                disabled={readOnly || Boolean(selectedCohort?.componentSubmissions[field.key])}
+                                disabled={readOnly || (field.key === 'cat' && isCatSubmitted) || (field.key === 'exam' && isFinalSubmitted)}
                                 onFocus={(e) => e.currentTarget.select()}
                                 onChange={(event) => updateMark(student.assessmentId, student.studentId, field.key, event.target.value)}
                                 className="h-10 w-20 rounded-md border border-slate-300 bg-white px-2 text-center text-base tabular-nums outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100 disabled:bg-slate-100 sm:h-9 sm:text-xs"
@@ -434,7 +524,7 @@ export function TrainerMarkEntryPortal() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <h3 className="text-base font-bold text-slate-900">
-                        Revise {markViews.find((view) => view.key === selectedView)?.label} Marks
+                        Revise {selectedView === 'all' || selectedView === 'exam' ? 'Final' : markViews.find((view) => view.key === selectedView)?.label} Marks
                       </h3>
                       <p className="mt-1 text-xs text-slate-500">
                         Unlocking this component allows you to correct submitted marks. Please state why you are revising. This action is recorded in the institutional audit log.

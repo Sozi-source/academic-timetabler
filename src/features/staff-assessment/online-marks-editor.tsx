@@ -39,6 +39,8 @@ import {
   calculateOnlineFinalTotal,
   calculateRatCatAverage,
   canEditOnlineMarks,
+  formatUnfilledColumnsMessage,
+  getUnfilledColumnsSummary,
   missingOnlineComponentCount,
   onlineMarkComponents,
   parseOnlineMarkInput,
@@ -268,7 +270,20 @@ export function OnlineMarksEditor({
     return students.length > 0 && students.every((student) => componentIsSubmitted(component, student.cohortId));
   }
 
-  const selectedComponentAlreadyComplete = visibleComponent !== 'all' && componentSubmittedForAllStudents(visibleComponent);
+  const unfilledSummary = useMemo(
+    () => getUnfilledColumnsSummary(parsedRows),
+    [parsedRows],
+  );
+
+  const catSubmitted = componentSubmittedForAllStudents('cat');
+  const finalSubmitted = componentSubmittedForAllStudents('exam') || !editable;
+
+  const selectedComponentAlreadyComplete =
+    visibleComponent === 'cat'
+      ? catSubmitted
+      : visibleComponent === 'all' || visibleComponent === 'exam'
+        ? finalSubmitted
+        : componentSubmittedForAllStudents(visibleComponent);
 
   const invalidForSelectedComponent = visibleComponent === 'all'
     ? invalid
@@ -277,9 +292,9 @@ export function OnlineMarksEditor({
       .find((row) => !row.value.valid && !(visibleComponent === 'exam' && row.student.attendanceStatus === 'absent'));
 
   const selectedComponentMissing = visibleComponent === 'cat'
-    ? parsedRows.some((row) => row.marks.cat === null)
-    : visibleComponent === 'exam'
-      ? parsedRows.some((row) => row.student.attendanceStatus !== 'absent' && row.marks.exam === null)
+    ? unfilledSummary.missingCat > 0
+    : visibleComponent === 'exam' || visibleComponent === 'all'
+      ? unfilledSummary.totalMissing > 0
       : false;
 
   const absent = students.filter((s) => s.attendanceStatus === 'absent').length;
@@ -406,9 +421,9 @@ export function OnlineMarksEditor({
             component: visibleComponent,
             entries: parsedRows.map((row) => ({
               studentId: row.student.studentId,
-              assignment: row.marks.assignment ?? 0,
-              presentation: row.marks.presentation ?? 0,
-              rat: row.marks.rat ?? 0,
+              assignment: row.marks.assignment,
+              presentation: row.marks.presentation,
+              rat: row.marks.rat,
               cat: row.marks.cat,
               exam:
                 row.student.attendanceStatus === 'absent'
@@ -437,23 +452,89 @@ export function OnlineMarksEditor({
   }
 
   async function submitMarks() {
-    if (visibleComponent === 'all') {
-      setError('Select one mark component to submit.');
-      return;
-    }
-    if (selectedComponentAlreadyComplete) {
-      setError('This component has already been submitted for all selected cohorts.');
-      return;
-    }
-    if (invalidForSelectedComponent) {
+    if (['assignment', 'presentation', 'rat'].includes(visibleComponent)) {
       setError(
-        `${invalidForSelectedComponent.student.fullName}: ${invalidForSelectedComponent.value.message ?? 'Invalid mark.'}`,
+        'Assignment, Presentation, and RAT marks are saved as drafts and submitted together with final exam marks at the end of the semester.',
       );
       return;
     }
 
-    if (selectedComponentMissing) {
-      setError(`Enter all ${singleComponent?.label ?? 'component'} marks before submitting.`);
+    if (visibleComponent === 'cat') {
+      if (catSubmitted) {
+        setError('CAT marks have already been submitted.');
+        return;
+      }
+      if (invalidForSelectedComponent) {
+        setError(
+          `${invalidForSelectedComponent.student.fullName}: ${invalidForSelectedComponent.value.message ?? 'Invalid mark.'}`,
+        );
+        return;
+      }
+      if (unfilledSummary.missingCat > 0) {
+        setError(`Cannot submit CAT: ${unfilledSummary.missingCat} student(s) are missing CAT marks.`);
+        return;
+      }
+
+      setBusy('submit');
+      setError(null);
+      setMessage(null);
+
+      try {
+        const response = await fetch(
+          `/api/staff/assessment/${assessmentId}/online/submit`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              component: 'cat',
+              entries: parsedRows.map((row) => ({
+                studentId: row.student.studentId,
+                assignment: row.marks.assignment,
+                presentation: row.marks.presentation,
+                rat: row.marks.rat,
+                cat: row.marks.cat,
+                exam: row.student.attendanceStatus === 'absent' ? null : row.marks.exam,
+                attendanceStatus: row.student.attendanceStatus,
+              })),
+            }),
+          },
+        );
+
+        const payload = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          setError(payload?.message ?? 'CAT marks could not be submitted.');
+          return;
+        }
+
+        setSubmissions((current) => [
+          ...current.filter((s) => s.component !== 'cat'),
+          { component: 'cat', cohortId: null, submittedAt: new Date().toISOString() },
+        ]);
+        setMessage('CAT marks submitted successfully.');
+        router.refresh();
+      } finally {
+        setBusy(null);
+      }
+      return;
+    }
+
+    // Milestone 2: Final marks submission ('all' or 'exam')
+    if (finalSubmitted) {
+      setError('Final marks have already been submitted.');
+      return;
+    }
+    if (invalid) {
+      setError(
+        `${invalid.student.fullName}: ${invalid.value.message ?? 'Invalid mark.'}`,
+      );
+      return;
+    }
+
+    if (unfilledSummary.totalMissing > 0) {
+      setError(
+        `Every column must be filled before submitting final marks. Missing entries: ${formatUnfilledColumnsMessage(unfilledSummary)}. (If a student missed coursework, enter 0).`,
+      );
       return;
     }
 
@@ -468,14 +549,15 @@ export function OnlineMarksEditor({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            component: visibleComponent,
+            component: 'all',
             entries: parsedRows.map((row) => ({
               studentId: row.student.studentId,
-              assignment: row.marks.assignment ?? 0,
-              presentation: row.marks.presentation ?? 0,
-              rat: row.marks.rat ?? 0,
+              assignment: row.marks.assignment,
+              presentation: row.marks.presentation,
+              rat: row.marks.rat,
               cat: row.marks.cat,
               exam: row.student.attendanceStatus === 'absent' ? null : row.marks.exam,
+              attendanceStatus: row.student.attendanceStatus,
             })),
           }),
         },
@@ -484,15 +566,14 @@ export function OnlineMarksEditor({
       const payload = await response.json().catch(() => null);
 
       if (!response.ok) {
-        setError(payload?.message ?? 'Marks could not be submitted.');
+        setError(payload?.message ?? 'Final marks could not be submitted.');
         return;
       }
 
-      setSubmissions((current) => [
-        ...current.filter((s) => s.component !== visibleComponent),
-        { component: visibleComponent, cohortId: null, submittedAt: new Date().toISOString() },
-      ]);
-      setMessage(`${singleComponent?.label ?? 'Component'} submitted successfully.`);
+      const allComps = ['assignment', 'presentation', 'rat', 'cat', 'exam'];
+      const now = new Date().toISOString();
+      setSubmissions(allComps.map((comp) => ({ component: comp, cohortId: null, submittedAt: now })));
+      setMessage('Final marks submitted and markbook finalized successfully.');
       router.refresh();
     } finally {
       setBusy(null);
@@ -500,7 +581,8 @@ export function OnlineMarksEditor({
   }
 
   async function reopenComponent() {
-    if (!singleComponent || !revisionReason.trim()) return;
+    const targetComp = visibleComponent === 'all' || visibleComponent === 'exam' ? 'all' : visibleComponent;
+    if (!revisionReason.trim()) return;
     setBusy('reopen');
     setError(null);
     setMessage(null);
@@ -512,7 +594,7 @@ export function OnlineMarksEditor({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            component: visibleComponent,
+            component: targetComp,
             reason: revisionReason.trim(),
           }),
         },
@@ -525,12 +607,16 @@ export function OnlineMarksEditor({
         return;
       }
 
-      setSubmissions((current) =>
-        current.filter((sub) => sub.component !== visibleComponent),
-      );
+      if (targetComp === 'all') {
+        setSubmissions([]);
+      } else {
+        setSubmissions((current) =>
+          current.filter((sub) => sub.component !== targetComp),
+        );
+      }
       setRevisionDialogOpen(false);
       setRevisionReason('');
-      setMessage(`${singleComponent.label} marks unlocked for revision. You can now edit and re-save or re-submit.`);
+      setMessage(`${targetComp === 'all' ? 'Final' : singleComponent?.label ?? targetComp} marks unlocked for revision. You can now edit and re-save or re-submit.`);
       router.refresh();
     } catch {
       setError('Failed to unlock component marks.');
@@ -1048,11 +1134,25 @@ export function OnlineMarksEditor({
             <p className="text-xs font-medium text-slate-600">
               Results are submitted and finalized. Download the completed spreadsheet below.
             </p>
+          ) : ['assignment', 'presentation', 'rat'].includes(visibleComponent) ? (
+            <p className="text-[11px] text-text-muted">
+              Coursework marks (Assignment, Presentation, RAT) are saved as drafts and submitted together with final exam marks at the end of the semester.
+            </p>
+          ) : visibleComponent === 'cat' ? (
+            <p className="text-[11px] text-text-muted">
+              {catSubmitted
+                ? 'CAT marks submitted successfully.'
+                : unfilledSummary.missingCat > 0
+                  ? `${unfilledSummary.missingCat} student(s) missing CAT marks before submission.`
+                  : 'All CAT marks entered and ready for submission.'}
+            </p>
           ) : (
             <p className="text-[11px] text-text-muted">
-              {missing > 0
-                ? `${missing} mark(s) remaining before submission.`
-                : 'All marks complete and ready for submission.'}
+              {finalSubmitted
+                ? 'Final marks submitted and markbook finalized.'
+                : unfilledSummary.totalMissing > 0
+                  ? `${unfilledSummary.totalMissing} mark(s) remaining before final submission (${formatUnfilledColumnsMessage(unfilledSummary)}).`
+                  : 'All columns complete and ready for final submission.'}
             </p>
           )}
         </div>
@@ -1094,7 +1194,50 @@ export function OnlineMarksEditor({
                 Save draft
               </Button>
 
-              {selectedComponentAlreadyComplete ? (
+              {['assignment', 'presentation', 'rat'].includes(visibleComponent) ? null : visibleComponent === 'cat' ? (
+                catSubmitted ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={busy !== null}
+                    onClick={() => {
+                      setRevisionReason('');
+                      setRevisionDialogOpen(true);
+                    }}
+                    className="border-amber-400 bg-amber-50 text-amber-900 hover:bg-amber-100"
+                    leadingIcon={
+                      busy === 'reopen' ? (
+                        <LoaderCircle className="size-3.5 animate-spin" />
+                      ) : (
+                        <RotateCcw className="size-3.5 text-amber-700" />
+                      )
+                    }
+                  >
+                    Revise CAT marks
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={
+                      busy !== null ||
+                      unfilledSummary.missingCat > 0 ||
+                      Boolean(invalidForSelectedComponent)
+                    }
+                    onClick={() => void submitMarks()}
+                    leadingIcon={
+                      busy === 'submit' ? (
+                        <LoaderCircle className="size-3.5 animate-spin" />
+                      ) : (
+                        <Send className="size-3.5" />
+                      )
+                    }
+                  >
+                    Submit CAT marks
+                  </Button>
+                )
+              ) : finalSubmitted ? (
                 <Button
                   type="button"
                   variant="outline"
@@ -1113,7 +1256,7 @@ export function OnlineMarksEditor({
                     )
                   }
                 >
-                  Revise {singleComponent?.label}
+                  Revise Final Marks
                 </Button>
               ) : (
                 <Button
@@ -1121,9 +1264,8 @@ export function OnlineMarksEditor({
                   size="sm"
                   disabled={
                     busy !== null ||
-                    visibleComponent === 'all' ||
-                    selectedComponentMissing ||
-                    Boolean(invalidForSelectedComponent)
+                    unfilledSummary.totalMissing > 0 ||
+                    Boolean(invalid)
                   }
                   onClick={() => void submitMarks()}
                   leadingIcon={
@@ -1134,7 +1276,7 @@ export function OnlineMarksEditor({
                     )
                   }
                 >
-                  {singleComponent ? `Submit ${singleComponent.label}` : 'Select a component'}
+                  Submit Final Marks
                 </Button>
               )}
             </>
@@ -1142,16 +1284,16 @@ export function OnlineMarksEditor({
         </div>
       </div>
 
-      {revisionDialogOpen && singleComponent ? (
+      {revisionDialogOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-2xs">
           <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="text-base font-bold text-slate-900">
-                  Revise {singleComponent.label} Marks
+                  Revise {visibleComponent === 'all' || visibleComponent === 'exam' ? 'Final' : singleComponent?.label ?? ''} Marks
                 </h3>
                 <p className="mt-1 text-xs leading-5 text-slate-600">
-                  You previously submitted this component. As marks entry is currently open, you can unlock it to correct errors. State the reason below for the audit trail:
+                  You previously submitted these marks. As marks entry is currently open, you can unlock them to correct errors. State the reason below for the audit trail:
                 </p>
               </div>
               <button

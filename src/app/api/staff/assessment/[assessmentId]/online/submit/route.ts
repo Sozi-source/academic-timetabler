@@ -103,69 +103,131 @@ export async function POST(
     component?: unknown;
     entries?: unknown;
   } | null;
-  if (requestPayload?.component !== undefined) {
-    if (typeof requestPayload.component !== 'string' || !['assignment', 'presentation', 'rat', 'cat', 'exam'].includes(requestPayload.component) || !Array.isArray(requestPayload.entries)) {
-      return NextResponse.json({ message: 'Choose a component and provide its marks.' }, { status: 400 });
+
+  const component = typeof requestPayload?.component === 'string' ? requestPayload.component : 'all';
+
+  if (!Array.isArray(requestPayload?.entries) || requestPayload.entries.length === 0) {
+    return NextResponse.json({ message: 'Provide mark entries to submit.' }, { status: 400 });
+  }
+
+  if (['assignment', 'presentation', 'rat'].includes(component)) {
+    return NextResponse.json({
+      message: 'Assignment, Presentation, and RAT marks are saved as drafts and submitted together with final marks at the end of the semester.',
+    }, { status: 400 });
+  }
+
+  const componentEntries = requestPayload.entries.flatMap((entry) => {
+    if (!entry || typeof entry !== 'object' || !('studentId' in entry) || typeof entry.studentId !== 'string') return [];
+    const row = entry as Record<string, unknown>;
+    return [{
+      student_id: row.studentId,
+      assignment: typeof row.assignment === 'number' ? row.assignment : null,
+      presentation: typeof row.presentation === 'number' ? row.presentation : null,
+      rat: typeof row.rat === 'number' ? row.rat : null,
+      cat: typeof row.cat === 'number' ? row.cat : null,
+      exam: typeof row.exam === 'number' ? row.exam : null,
+      attendance_status: row.attendanceStatus === 'absent' ? 'absent' : 'expected',
+    }];
+  });
+
+  if (componentEntries.length !== requestPayload.entries.length) {
+    return NextResponse.json({ message: 'Every row must identify a student.' }, { status: 400 });
+  }
+
+  if (component === 'cat') {
+    // Milestone 1: CAT marks submission
+    const missingCat = componentEntries.filter((e) => e.cat === null).length;
+    if (missingCat > 0) {
+      return NextResponse.json({
+        message: `Cannot submit CAT: ${missingCat} student(s) are missing CAT marks.`,
+      }, { status: 422 });
     }
-    const componentEntries = requestPayload.entries.flatMap((entry) => {
-      if (!entry || typeof entry !== 'object' || !('studentId' in entry) || typeof entry.studentId !== 'string') return [];
-      const row = entry as Record<string, unknown>;
-      return [{
-        student_id: row.studentId,
-        assignment: row.assignment ?? null,
-        presentation: row.presentation ?? null,
-        rat: row.rat ?? null,
-        cat: row.cat ?? null,
-        exam: row.exam ?? null,
-      }];
-    });
-    if (componentEntries.length !== requestPayload.entries.length) {
-      return NextResponse.json({ message: 'Every row must identify a student.' }, { status: 400 });
-    }
+
     const { data: submission, error: componentError } = await supabase.rpc('save_assessment_online_component_marks', {
       target_assessment_id: targetAssessmentId,
-      target_component: requestPayload.component,
-      target_entries: componentEntries,
+      target_component: 'cat',
+      target_entries: componentEntries.map(({ attendance_status: _a, ...e }) => e),
       submit_component: true,
     });
     if (componentError) {
       return NextResponse.json({ message: componentError.message }, { status: componentError.code === '42501' ? 403 : 409 });
     }
-    return NextResponse.json({ success: true, submission });
+    return NextResponse.json({ success: true, submission, message: 'CAT marks submitted successfully.' });
   }
 
-  const {
-    data,
-    error,
-  } =
-    await supabase.rpc(
-      'submit_assessment_online_marks',
-      {
-        target_assessment_id:
-          targetAssessmentId,
-      },
-    );
+  // Milestone 2: Final marks submission ('all' or 'exam')
+  // Verify that EVERY column is filled across all students
+  const missingSummary = {
+    assignment: componentEntries.filter((e) => e.assignment === null).length,
+    presentation: componentEntries.filter((e) => e.presentation === null).length,
+    rat: componentEntries.filter((e) => e.rat === null).length,
+    cat: componentEntries.filter((e) => e.cat === null).length,
+    exam: componentEntries.filter((e) => e.attendance_status !== 'absent' && e.exam === null).length,
+  };
 
-  if (error) {
-    return NextResponse.json(
-      {
-        message:
-          error.message,
-      },
-      {
-        status:
-          error.code ===
-          '42501'
-            ? 403
-            : 409,
-      },
-    );
+  const missingParts: string[] = [];
+  if (missingSummary.assignment) missingParts.push(`${missingSummary.assignment} in Assignment`);
+  if (missingSummary.presentation) missingParts.push(`${missingSummary.presentation} in Presentation`);
+  if (missingSummary.rat) missingParts.push(`${missingSummary.rat} in RAT`);
+  if (missingSummary.cat) missingParts.push(`${missingSummary.cat} in CAT`);
+  if (missingSummary.exam) missingParts.push(`${missingSummary.exam} in Exam`);
+
+  if (missingParts.length > 0) {
+    return NextResponse.json({
+      message: `Every column must be filled before submitting final marks. Missing entries: ${missingParts.join(', ')}. (If a student missed coursework, enter 0).`,
+    }, { status: 422 });
+  }
+
+  // 1. Save all drafts
+  const { error: saveError } = await supabase.rpc('save_assessment_online_marks', {
+    target_assessment_id: targetAssessmentId,
+    target_entries: componentEntries.map(({ attendance_status: _a, ...e }) => e),
+  });
+  if (saveError) {
+    return NextResponse.json({ message: saveError.message }, { status: 409 });
+  }
+
+  // 2. Insert component submission records for all components
+  const { createAdminClient } = await import('@/lib/supabase/admin');
+  const admin = createAdminClient();
+  const { data: rosterCohorts } = await admin
+    .from('assessment_roster')
+    .select('cohort_id')
+    .eq('assessment_id', targetAssessmentId);
+
+  const cohortIds = [...new Set((rosterCohorts ?? []).map((r) => r.cohort_id))];
+  const allComponents = ['assignment', 'presentation', 'rat', 'cat', 'exam'] as const;
+
+  for (const comp of allComponents) {
+    for (const cId of cohortIds.length > 0 ? cohortIds : [null]) {
+      await admin
+        .from('assessment_mark_component_submissions')
+        .upsert({
+          assessment_id: targetAssessmentId,
+          cohort_id: cId,
+          component_key: comp,
+        }, {
+          onConflict: 'assessment_id,coalesce(cohort_id, \'00000000-0000-0000-0000-000000000000\'::uuid),component_key',
+        });
+    }
+  }
+
+  // 3. Finalize results in official assessment_results
+  const { data: finalSubmission, error: finalError } = await supabase.rpc(
+    'submit_assessment_online_marks',
+    { target_assessment_id: targetAssessmentId },
+  );
+
+  if (finalError) {
+    return NextResponse.json({
+      message: finalError.message,
+    }, { status: finalError.code === '42501' ? 403 : 409 });
   }
 
   return NextResponse.json({
-    success:
-      true,
-    submission:
-      data,
+    success: true,
+    final: true,
+    submission: finalSubmission,
+    message: 'Final marks submitted and markbook finalized successfully.',
   });
 }

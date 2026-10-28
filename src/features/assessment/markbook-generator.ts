@@ -32,6 +32,9 @@ export interface AssessmentMarkbookBundle {
   assessmentType:
     | 'cat'
     | 'exam';
+  marksheetType?:
+    | 'cat'
+    | 'final';
   academicPeriod: {
     id: string;
     code: string | null;
@@ -252,9 +255,11 @@ function createCohortSheet(
     sheet.getCell('A2');
 
   assessmentTitle.value =
-    assessmentLabel(
-      bundle.assessmentType,
-    );
+    bundle.marksheetType === 'cat' || bundle.assessmentType === 'cat'
+      ? 'CONTINUOUS ASSESSMENT TEST (CAT /15) MARKSHEET'
+      : assessmentLabel(
+          bundle.assessmentType,
+        );
 
   assessmentTitle.font = {
     bold: true,
@@ -360,7 +365,7 @@ function createCohortSheet(
     'Admission Number',
     'Student Name',
     'Attendance',
-    'Mark',
+    bundle.marksheetType === 'cat' || bundle.assessmentType === 'cat' ? 'CAT /15' : 'Mark',
     'Remarks',
   ];
 
@@ -424,6 +429,7 @@ function createCohortSheet(
           rowNumber,
         );
 
+      const catMark = student.marks?.cat ?? null;
       row.values = [
         index + 1,
         student.admissionNumber,
@@ -435,8 +441,10 @@ function createCohortSheet(
         student.attendanceStatus ===
         'absent'
           ? 'AB'
-          : '',
-        '',
+          : catMark !== null
+            ? catMark
+            : '',
+        student.attendanceStatus === 'absent' ? 'Absent from CAT' : '',
       ];
 
       row.height = 20;
@@ -603,22 +611,22 @@ function createOnlineMarksReportSheet(
     },
   );
 
-  sheet.mergeCells('A1:L1');
+  sheet.mergeCells('A1:I1');
   sheet.getCell('A1').value = 'ACADEMIC PLANNER';
   sheet.getCell('A1').font = { bold: true, size: 14, color: { argb: navy } };
   sheet.getCell('A1').alignment = { horizontal: 'center', vertical: 'middle' };
 
-  sheet.mergeCells('A2:L2');
-  sheet.getCell('A2').value = 'UNIT MARKSHEET REPORT';
+  sheet.mergeCells('A2:I2');
+  sheet.getCell('A2').value = 'FINAL MARKSHEET (CAT /30 + EXAM /70)';
   sheet.getCell('A2').font = { bold: true, size: 12 };
   sheet.getCell('A2').alignment = { horizontal: 'center' };
 
-  sheet.mergeCells('A4:L4');
+  sheet.mergeCells('A4:I4');
   sheet.getCell('A4').value = `${bundle.unit.code ?? ''} ${bundle.unit.name} · ${cohort.cohortName}`.trim();
   sheet.getCell('A4').font = { bold: true, size: 10 };
   sheet.getCell('A4').alignment = { horizontal: 'center' };
 
-  sheet.mergeCells('A5:L5');
+  sheet.mergeCells('A5:I5');
   sheet.getCell('A5').value = `${bundle.academicPeriod.name} · Generated ${bundle.generatedAt.toLocaleString('en-GB')}`;
   sheet.getCell('A5').font = { size: 9, color: { argb: 'FF4B5563' } };
   sheet.getCell('A5').alignment = { horizontal: 'center' };
@@ -629,14 +637,11 @@ function createOnlineMarksReportSheet(
     'Admission Number',
     'Student Name',
     'Attendance',
-    'Assignment /5',
-    'Presentation /10',
-    'RAT /15',
-    'CAT /15',
+    'CAT /30',
     'Exam /70',
-    'RAT/CAT /15',
     'Final /100',
     'Grade',
+    'Remarks',
   ];
   headerRow.height = 28;
   headerRow.eachCell((cell) => {
@@ -661,29 +666,30 @@ function createOnlineMarksReportSheet(
       cat: null,
       exam: null,
     };
-    const ratCatAverage =
-      marks.rat === null || marks.cat === null
+    const rawCoursework =
+      (marks.assignment ?? 0) +
+      (marks.presentation ?? 0) +
+      (marks.rat ?? 0) +
+      (marks.cat ?? 0);
+    // Aggregate of all coursework scaled out of 30
+    const cat30 = Math.round(((rawCoursework / 45) * 30) * 10) / 10;
+    const isAbsent = student.attendanceStatus === 'absent';
+    const examMark = isAbsent ? null : marks.exam;
+    const finalTotal =
+      isAbsent || examMark === null
         ? null
-        : (marks.rat + marks.cat) / 2;
-    const final =
-      student.attendanceStatus === 'absent' ||
-      marks.assignment === null ||
-      marks.presentation === null ||
-      ratCatAverage === null ||
-      marks.exam === null
-        ? null
-        : marks.assignment + marks.presentation + ratCatAverage + marks.exam;
+        : Math.round((cat30 + examMark) * 10) / 10;
 
     const grade =
-      student.attendanceStatus === 'absent'
+      isAbsent
         ? 'ABSENT'
-        : final === null
+        : finalTotal === null
           ? '—'
-          : final >= 75
+          : finalTotal >= 75
             ? 'DISTINCTION'
-            : final >= 65
+            : finalTotal >= 65
               ? 'CREDIT'
-              : final >= 40
+              : finalTotal >= 40
                 ? 'PASS'
                 : 'REFER';
 
@@ -692,15 +698,12 @@ function createOnlineMarksReportSheet(
       index + 1,
       student.admissionNumber,
       student.fullName,
-      student.attendanceStatus === 'absent' ? 'Absent' : 'Expected',
-      marks.assignment,
-      marks.presentation,
-      marks.rat,
-      marks.cat,
-      student.attendanceStatus === 'absent' ? 'AB' : marks.exam,
-      ratCatAverage !== null ? Number(ratCatAverage.toFixed(2)) : null,
-      student.attendanceStatus === 'absent' ? 'AB' : final !== null ? Number(final.toFixed(2)) : null,
+      isAbsent ? 'Absent' : 'Expected',
+      cat30,
+      isAbsent ? 'AB' : examMark ?? '—',
+      isAbsent ? 'AB' : finalTotal ?? '—',
       grade,
+      isAbsent ? 'Absent from Exam' : finalTotal !== null && finalTotal < 40 ? 'Referral' : 'Sat',
     ];
     row.height = 20;
     row.eachCell((cell, colNumber) => {
@@ -708,7 +711,7 @@ function createOnlineMarksReportSheet(
       cell.alignment = { vertical: 'middle', wrapText: colNumber !== 2 };
       applyThinBorder(cell);
     });
-    for (let column = 1; column <= 12; column += 1) {
+    for (let column = 1; column <= 9; column += 1) {
       if (column !== 2 && column !== 3) {
         sheet.getCell(rowNumber, column).alignment = {
           horizontal: 'center',
@@ -725,19 +728,16 @@ function createOnlineMarksReportSheet(
 
   sheet.columns = [
     { width: 6 },
-    { width: 26 },
-    { width: 28 },
-    { width: 12 },
-    { width: 13 },
-    { width: 15 },
-    { width: 10 },
-    { width: 10 },
-    { width: 11 },
-    { width: 13 },
-    { width: 12 },
+    { width: 22 },
+    { width: 30 },
     { width: 14 },
+    { width: 14 },
+    { width: 14 },
+    { width: 14 },
+    { width: 16 },
+    { width: 22 },
   ];
-  sheet.autoFilter = { from: { row: 7, column: 1 }, to: { row: 7, column: 12 } };
+  sheet.autoFilter = { from: { row: 7, column: 1 }, to: { row: 7, column: 9 } };
   sheet.headerFooter.oddFooter = '&LGenerated from online marks&CPage &P of &N&RTrainer Portal';
 
   return { sheet, firstStudentRow: 8, students };
@@ -745,6 +745,7 @@ function createOnlineMarksReportSheet(
 
 export async function generateAssessmentMarkbook(
   bundle: AssessmentMarkbookBundle,
+  options?: { marksheetType?: 'cat' | 'final' },
 ): Promise<Buffer> {
   if (
     bundle.cohorts.length === 0
@@ -753,6 +754,11 @@ export async function generateAssessmentMarkbook(
       'The markbook bundle has no cohorts.',
     );
   }
+
+  const isCatMarksheet =
+    options?.marksheetType === 'cat' ||
+    bundle.marksheetType === 'cat' ||
+    bundle.assessmentType === 'cat';
 
   const totalStudents =
     bundle.cohorts.reduce(
@@ -811,9 +817,9 @@ export async function generateAssessmentMarkbook(
       firstStudentRow,
       students,
     } =
-      bundle.assessmentType === 'exam'
-        ? createOnlineMarksReportSheet(workbook, bundle, cohort)
-        : createCohortSheet(workbook, bundle, cohort);
+      isCatMarksheet
+        ? createCohortSheet(workbook, bundle, cohort)
+        : createOnlineMarksReportSheet(workbook, bundle, cohort);
 
     students.forEach(
       (
@@ -842,7 +848,7 @@ export async function generateAssessmentMarkbook(
       },
     );
 
-    if (bundle.assessmentType !== 'exam') {
+    if (isCatMarksheet) {
       await sheet.protect(
         '',
         {

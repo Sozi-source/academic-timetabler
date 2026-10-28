@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/ui/page-header';
 import { DownloadAssessmentMarkbookButton } from '@/features/assessment/markbook-controls';
 import { BulkUploadDialog } from '@/features/assessment/marks/bulk-upload-dialog';
-import { TrainerMarkInvites } from '@/features/assessment/trainer-mark-invites';
 import { getAssessmentById, getAssessmentPopulation } from '@/features/assessment/queries';
 import { unlockAssessmentMarkComponentAction } from '@/features/assessment/marks/actions';
 import { getAssessmentMarkComponentSubmissions, getAssessmentResultCount } from '@/features/assessment/marks/queries';
@@ -103,7 +102,6 @@ export default async function AssessmentMarkWorkflowPage({
         }
       />
 
-      {!isComplete ? <TrainerMarkInvites assessmentId={assessment.id} /> : null}
 
       {componentSubmissionState.submissions.length > 0 ? (
         <section className="space-y-3 rounded-xl border border-border bg-surface p-4">

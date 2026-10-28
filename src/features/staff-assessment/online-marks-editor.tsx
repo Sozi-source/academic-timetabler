@@ -741,7 +741,8 @@ export function OnlineMarksEditor({
     }
   }
 
-  async function downloadExcel() {
+  async function downloadExcel(targetType?: 'cat' | 'final') {
+    const type = targetType ?? (visibleComponent === 'cat' ? 'cat' : finalSubmitted ? 'final' : catSubmitted ? 'cat' : 'final');
     setBusy('download');
     setError(null);
     try {
@@ -750,7 +751,7 @@ export function OnlineMarksEditor({
       }
 
       const response = await fetch(
-        `/api/staff/assessment/${assessmentId}/markbook`,
+        `/api/staff/assessment/${assessmentId}/markbook?type=${type}`,
         { method: 'POST' },
       );
 
@@ -765,7 +766,7 @@ export function OnlineMarksEditor({
       const filenameMatch = disposition?.match(/filename\*=UTF-8''([^;]+)|filename="?([^";]+)"?/i);
       const filename = filenameMatch?.[1]
         ? decodeURIComponent(filenameMatch[1])
-        : (filenameMatch?.[2] ?? 'Unit Marksheet.xlsx');
+        : (filenameMatch?.[2] ?? `${type === 'cat' ? 'CAT' : 'Final'} Marksheet.xlsx`);
 
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -845,7 +846,7 @@ export function OnlineMarksEditor({
             type="button"
             variant="outline"
             size="sm"
-            disabled={busy !== null}
+            disabled={busy !== null || (!catSubmitted && !finalSubmitted)}
             onClick={() => void downloadExcel()}
             leadingIcon={
               busy === 'download' ? (
@@ -855,7 +856,7 @@ export function OnlineMarksEditor({
               )
             }
           >
-            Export Excel
+            {finalSubmitted ? 'Download Final Marksheet' : catSubmitted ? 'Download CAT Marksheet' : 'Marksheet (Submit to download)'}
           </Button>
         </div>
       </section>
@@ -1286,22 +1287,45 @@ export function OnlineMarksEditor({
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={busy !== null}
-            onClick={() => void downloadExcel()}
-            leadingIcon={
-              busy === 'download' ? (
-                <LoaderCircle className="size-3.5 animate-spin" />
-              ) : (
-                <Download className="size-3.5" />
-              )
-            }
-          >
-            Download Excel (.xlsx)
-          </Button>
+          {visibleComponent === 'cat' ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={busy !== null || !catSubmitted}
+              onClick={() => void downloadExcel('cat')}
+              leadingIcon={
+                busy === 'download' ? (
+                  <LoaderCircle className="size-3.5 animate-spin" />
+                ) : (
+                  <Download className="size-3.5" />
+                )
+              }
+            >
+              {catSubmitted ? 'Download CAT Marksheet (.xlsx)' : 'Submit CAT to download'}
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={busy !== null || (!finalSubmitted && !catSubmitted)}
+              onClick={() => void downloadExcel(finalSubmitted ? 'final' : 'cat')}
+              leadingIcon={
+                busy === 'download' ? (
+                  <LoaderCircle className="size-3.5 animate-spin" />
+                ) : (
+                  <Download className="size-3.5" />
+                )
+              }
+            >
+              {finalSubmitted
+                ? 'Download Final Marksheet (.xlsx)'
+                : catSubmitted
+                  ? 'Download CAT Marksheet (.xlsx)'
+                  : 'Submit marks to download'}
+            </Button>
+          )}
 
           {canEditOnlineMarks(workflowStatus) ? (
             <>

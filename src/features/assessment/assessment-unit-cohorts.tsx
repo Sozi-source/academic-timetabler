@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, UsersRound } from 'lucide-react';
-import { TrainerUnitMarkInvites } from './trainer-unit-mark-invites';
 
 interface UnitCohort {
   id: string;
@@ -40,7 +39,6 @@ export function AssessmentUnitCohorts({ unit, periodName, periodId, cohorts }: A
         </Link>
       </header>
 
-      <TrainerUnitMarkInvites unitId={unit.id} unitName={`${unit.code} · ${unit.name}`} periodId={periodId} periodName={periodName} />
 
       <section className="space-y-3 rounded-xl border border-border bg-surface p-4 shadow-2xs">
         <div>

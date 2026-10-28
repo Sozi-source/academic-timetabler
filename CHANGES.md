@@ -1,3 +1,17 @@
+### 2026-10-29: Authenticated trainer entry unification & tailored marksheet downloads
+
+**Added:**
+- `supabase/migrations/20261029010000_clear_trainer_mark_invites.sql` — revokes all active legacy link-based trainer invite tokens and detaches `source_trainer_invite_id` from drafts, enforcing authenticated mark entry via Staff Portal or External Trainer PIN Portal.
+
+**Modified:**
+- `src/features/assessment/markbook-generator.ts` — tailored marksheet generator to match TVET institutional standards:
+  - For CAT submission (`marksheetType: 'cat'`): outputs `CAT /15` column with marks entered.
+  - For Final Exam submission (`marksheetType: 'final'`): outputs `CAT /30` (aggregate of all courseworks: Assignment /5 + Presentation /10 + RAT /15 + CAT /15 scaled out of 30) and `Exam /70`, plus `Final /100` and institutional grade.
+- `src/app/api/staff/assessment/[assessmentId]/markbook/route.ts` & `src/app/api/assessment/markbooks/[assessmentId]/download/route.ts` — supports `?type=cat` and `?type=final` query params, ensures marksheets are only downloadable after marks are submitted, and outputs clean filenames.
+- `src/features/staff-assessment/online-marks-editor.tsx` — updated action bar and toolbar to download CAT Marksheet (`/15`) after CAT submission, or Final Marksheet (`CAT /30 + Exam /70 = 100`) after final submission.
+- `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx` & `src/features/assessment/assessment-unit-cohorts.tsx` — removed confusing token invite link generator components (`TrainerMarkInvites` and `TrainerUnitMarkInvites`).
+- `src/app/trainer-mark-entry/page.tsx` — replaced token invite interface with an informative portal router directing trainers to External Trainer PIN Login (`/external-trainer/login`) or Staff Portal (`/staff`).
+
 ### 2026-10-28: Trainer marks entry — enum fix, security hardening, UX simplification
 
 **Added:**

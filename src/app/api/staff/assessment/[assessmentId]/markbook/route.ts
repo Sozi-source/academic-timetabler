@@ -57,7 +57,7 @@ function safeFilenameBase(
 }
 
 export async function POST(
-  _request: Request,
+  request: Request,
   {
     params,
   }: RouteContext,
@@ -67,6 +67,9 @@ export async function POST(
   const {
     assessmentId,
   } = await params;
+
+  const url = new URL(request.url);
+  const requestedType = url.searchParams.get('type') as 'cat' | 'final' | null;
 
   const trainerAllowed =
     await trainerCanAccessAssessment(
@@ -135,6 +138,49 @@ export async function POST(
     }
   }
 
+  // Check event submission status to ensure marksheet can only be downloaded after submission
+  const { data: eventStatus } = await supabase
+    .from('assessment_events')
+    .select('cat_marks_finalized_at, exam_marks_finalized_at, marks_submitted_at')
+    .eq('id', targetAssessmentId)
+    .maybeSingle();
+
+  const isCatSubmitted = Boolean(eventStatus?.cat_marks_finalized_at);
+  const isFinalSubmitted = Boolean(
+    eventStatus?.exam_marks_finalized_at || eventStatus?.marks_submitted_at,
+  );
+
+  let resolvedType: 'cat' | 'final';
+  if (requestedType === 'cat') {
+    if (!isCatSubmitted) {
+      return NextResponse.json(
+        { message: 'CAT marks must be submitted before downloading the CAT marksheet.' },
+        { status: 400 },
+      );
+    }
+    resolvedType = 'cat';
+  } else if (requestedType === 'final') {
+    if (!isFinalSubmitted) {
+      return NextResponse.json(
+        { message: 'Final marks must be submitted before downloading the Final marksheet.' },
+        { status: 400 },
+      );
+    }
+    resolvedType = 'final';
+  } else {
+    // Auto-detect based on submission state
+    if (isFinalSubmitted) {
+      resolvedType = 'final';
+    } else if (isCatSubmitted) {
+      resolvedType = 'cat';
+    } else {
+      return NextResponse.json(
+        { message: 'Marksheet download is available after submitting CAT marks or final marks.' },
+        { status: 400 },
+      );
+    }
+  }
+
   // Attempt to lock/ensure bundle without blocking download
   if (!targetAssessmentId.startsWith('alloc-')) {
     await supabase.rpc(
@@ -161,15 +207,15 @@ export async function POST(
         generatedAt,
       });
 
+    bundle.marksheetType = resolvedType;
+
     const workbook =
       await generateAssessmentMarkbook(
         bundle,
+        { marksheetType: resolvedType },
       );
 
-    const filename =
-      `${safeFilenameBase(
-        bundle.unit.name,
-      )}.xlsx`;
+    const filename = `${safeFilenameBase(bundle.unit.name)} - ${resolvedType === 'cat' ? 'CAT Marksheet' : 'Final Marksheet'}.xlsx`;
 
     const sha256 =
       createHash(

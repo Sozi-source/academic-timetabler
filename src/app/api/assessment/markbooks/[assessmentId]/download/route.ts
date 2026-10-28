@@ -53,7 +53,7 @@ function safeFilenameBase(
 }
 
 export async function POST(
-  _request: Request,
+  request: Request,
   {
     params,
   }: RouteContext,
@@ -76,33 +76,56 @@ export async function POST(
     );
   }
 
+  const url = new URL(request.url);
+  const requestedType = url.searchParams.get('type') as 'cat' | 'final' | null;
+
   const supabase =
     await createClient();
 
-  // Gate: markbook can only be generated after the trainer has submitted marks.
-  // We check marks_submitted_at (set by submit_assessment_online_marks or a
-  // finalised bulk-upload commit). A non-null value means at least one
-  // submission has been recorded and results exist in assessment_results.
   const { data: eventGate } = await supabase
     .from('assessment_events')
-    .select('marks_submitted_at, operational_workflow_status')
+    .select('marks_submitted_at, cat_marks_finalized_at, exam_marks_finalized_at, operational_workflow_status')
     .eq('id', assessmentId)
     .maybeSingle();
 
-  const marksSubmitted = Boolean(eventGate?.marks_submitted_at);
+  const marksSubmitted = Boolean(eventGate?.marks_submitted_at || eventGate?.exam_marks_finalized_at);
+  const catSubmitted = Boolean(eventGate?.cat_marks_finalized_at);
   const workflowStatus = eventGate?.operational_workflow_status ?? null;
   const isTerminal = ['submitted', 'finalised', 'archived'].includes(
     workflowStatus ?? '',
   );
 
-  if (!marksSubmitted && !isTerminal) {
-    return NextResponse.json(
-      {
-        message:
-          'The markbook cannot be generated yet. The trainer must submit all marks before the HOD can download the markbook.',
-      },
-      { status: 409 },
-    );
+  let resolvedType: 'cat' | 'final';
+  if (requestedType === 'cat') {
+    if (!catSubmitted) {
+      return NextResponse.json(
+        { message: 'CAT marks must be submitted before downloading the CAT marksheet.' },
+        { status: 409 },
+      );
+    }
+    resolvedType = 'cat';
+  } else if (requestedType === 'final') {
+    if (!marksSubmitted && !isTerminal) {
+      return NextResponse.json(
+        { message: 'Final marks must be submitted before downloading the Final marksheet.' },
+        { status: 409 },
+      );
+    }
+    resolvedType = 'final';
+  } else {
+    if (marksSubmitted || isTerminal) {
+      resolvedType = 'final';
+    } else if (catSubmitted) {
+      resolvedType = 'cat';
+    } else {
+      return NextResponse.json(
+        {
+          message:
+            'Marksheet cannot be generated yet. The trainer must submit CAT marks or final marks before downloading.',
+        },
+        { status: 409 },
+      );
+    }
   }
 
   // Attempt to lock/ensure bundle without blocking download
@@ -129,15 +152,15 @@ export async function POST(
         generatedAt,
       });
 
+    bundle.marksheetType = resolvedType;
+
     const workbook =
       await generateAssessmentMarkbook(
         bundle,
+        { marksheetType: resolvedType },
       );
 
-    const filename =
-      `${safeFilenameBase(
-        bundle.unit.name,
-      )}.xlsx`;
+    const filename = `${safeFilenameBase(bundle.unit.name)} - ${resolvedType === 'cat' ? 'CAT Marksheet' : 'Final Marksheet'}.xlsx`;
 
     const sha256 =
       createHash(

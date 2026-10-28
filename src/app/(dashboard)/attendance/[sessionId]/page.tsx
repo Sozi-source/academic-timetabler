@@ -47,7 +47,7 @@ export default async function AttendanceReviewPage({
               </Link>
             ) : null}
 
-            {workspace.sessionStatus === 'completed' ? (
+            {(workspace.sessionStatus === 'completed' || workspace.sessionStatus === 'cancelled') ? (
               <ReopenAttendanceButton sessionId={workspace.classSessionId} />
             ) : null}
             
@@ -73,10 +73,10 @@ export default async function AttendanceReviewPage({
       <div className="flex flex-wrap gap-2">
         <Badge
           variant={
-            workspace.sessionStatus === 'completed' ? 'success' : 'warning'
+            workspace.sessionStatus === 'completed' ? 'success' : workspace.sessionStatus === 'cancelled' ? 'danger' : 'warning'
           }
         >
-          {workspace.sessionStatus}
+          {workspace.sessionStatus === 'cancelled' ? 'Did Not Take Place' : workspace.sessionStatus}
         </Badge>
 
         <Badge variant="neutral">{workspace.rosterCount} students</Badge>

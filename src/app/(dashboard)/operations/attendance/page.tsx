@@ -48,6 +48,13 @@ export default async function AttendanceOversightPage() {
         'open',
     ).length;
 
+  const cancelled =
+    sessions.filter(
+      (session) =>
+        session.sessionStatus ===
+        'cancelled',
+    ).length;
+
   const incomplete =
     sessions.filter(
       (session) =>
@@ -75,7 +82,7 @@ export default async function AttendanceOversightPage() {
         }
       />
 
-      <section className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+      <section className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <MetricCard
           label="Open"
           value={String(
@@ -100,6 +107,15 @@ export default async function AttendanceOversightPage() {
             completed,
           )}
           description="Read only"
+          icon={ClipboardCheck}
+        />
+
+        <MetricCard
+          label="Did Not Take Place"
+          value={String(
+            cancelled,
+          )}
+          description="Trainer-cancelled — can be reopened"
           icon={ClipboardCheck}
         />
       </section>
@@ -160,13 +176,17 @@ export default async function AttendanceOversightPage() {
                       session.sessionStatus ===
                       'completed'
                         ? 'success'
-                        : 'warning'
+                        : session.sessionStatus === 'cancelled'
+                          ? 'danger'
+                          : 'warning'
                     }
                   >
                     {session.sessionStatus ===
                     'completed'
                       ? 'Completed'
-                      : 'Open'}
+                      : session.sessionStatus === 'cancelled'
+                        ? 'Did Not Take Place'
+                        : 'Open'}
                   </Badge>
 
                   <p className="text-[10px] text-text-muted">
@@ -184,8 +204,8 @@ export default async function AttendanceOversightPage() {
                   </p>
 
                   <div className="lg:justify-self-end">
-                    {session.sessionStatus ===
-                    'completed' ? (
+                    {(session.sessionStatus ===
+                    'completed' || session.sessionStatus === 'cancelled') ? (
                       <AttendanceOversightActions
                         sessionId={
                           session.classSessionId

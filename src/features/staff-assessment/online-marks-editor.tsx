@@ -135,9 +135,11 @@ export function OnlineMarksEditor({
     setRevisionDialogOpen(true);
   };
 
-  useEffect(() => {
+  const [prevComponentSubmissions, setPrevComponentSubmissions] = useState(componentSubmissions);
+  if (prevComponentSubmissions !== componentSubmissions) {
+    setPrevComponentSubmissions(componentSubmissions);
     setSubmissions(componentSubmissions);
-  }, [componentSubmissions]);
+  }
 
   // Callback invoked by BulkUploadDialog: merges spreadsheet data into editor state
   const applyBulkMarks = (matched: MatchedBulkStudentResult[]) => {

@@ -281,7 +281,9 @@ export async function getDepartmentAttendanceOverview(
             status !==
               'open' &&
             status !==
-              'completed'
+              'completed' &&
+            status !==
+              'cancelled'
           )
         ) {
           return null;
@@ -618,6 +620,7 @@ export async function getAttendanceOversight(
           ) as
             | 'open'
             | 'completed'
+            | 'cancelled'
             | null;
 
         if (

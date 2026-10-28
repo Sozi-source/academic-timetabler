@@ -78,10 +78,10 @@ export function AttendanceAdminTable({ items }: { items: DepartmentAttendanceSes
                     {item.unitName}
                   </Link>
                   <Badge
-                    variant={item.sessionStatus === 'completed' ? 'success' : 'warning'}
+                    variant={item.sessionStatus === 'completed' ? 'success' : item.sessionStatus === 'cancelled' ? 'danger' : 'warning'}
                     className="shrink-0 lg:hidden"
                   >
-                    {item.sessionStatus === 'completed' ? 'Complete' : 'Open'}
+                    {item.sessionStatus === 'completed' ? 'Complete' : item.sessionStatus === 'cancelled' ? 'Did Not Take Place' : 'Open'}
                   </Badge>
                 </div>
                 <p className="mt-0.5 truncate text-[10px] text-text-muted">
@@ -92,8 +92,8 @@ export function AttendanceAdminTable({ items }: { items: DepartmentAttendanceSes
               <p className="hidden text-[11px] text-text-secondary lg:block">{item.sessionDate}</p>
 
               <div className="hidden lg:block">
-                <Badge variant={item.sessionStatus === 'completed' ? 'success' : 'warning'}>
-                  {item.sessionStatus === 'completed' ? 'Complete' : 'Open'}
+                <Badge variant={item.sessionStatus === 'completed' ? 'success' : item.sessionStatus === 'cancelled' ? 'danger' : 'warning'}>
+                  {item.sessionStatus === 'completed' ? 'Complete' : item.sessionStatus === 'cancelled' ? 'Did Not Take Place' : 'Open'}
                 </Badge>
               </div>
 
@@ -134,7 +134,8 @@ export function AttendanceAdminTable({ items }: { items: DepartmentAttendanceSes
                     </Link>
                   )}
 
-                  {item.sessionStatus === 'completed' ? (
+                  {/* Reopen is available for both completed AND cancelled (Did Not Take Place) sessions */}
+                  {(item.sessionStatus === 'completed' || item.sessionStatus === 'cancelled') ? (
                     <Button
                       type="button"
                       size="sm"

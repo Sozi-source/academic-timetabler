@@ -67,8 +67,8 @@ export default async function AttendanceReviewPage({
         icon={CalendarCheck2}
         actions={
           <div className="flex gap-2">
-            {workspace.sessionStatus ===
-            'completed' ? (
+            {(workspace.sessionStatus ===
+            'completed' || workspace.sessionStatus === 'cancelled') ? (
               <ReopenAttendanceButton
                 sessionId={
                   workspace.classSessionId
@@ -96,12 +96,12 @@ export default async function AttendanceReviewPage({
             workspace.sessionStatus ===
             'completed'
               ? 'success'
-              : 'warning'
+              : workspace.sessionStatus === 'cancelled'
+                ? 'danger'
+                : 'warning'
           }
         >
-          {
-            workspace.sessionStatus
-          }
+          {workspace.sessionStatus === 'cancelled' ? 'Did Not Take Place' : workspace.sessionStatus}
         </Badge>
 
         <Badge variant="neutral">

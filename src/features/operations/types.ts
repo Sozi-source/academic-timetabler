@@ -87,7 +87,8 @@ export interface DepartmentAttendanceOverview {
     string;
   sessionStatus:
     'open' |
-    'completed';
+    'completed' |
+    'cancelled';
   academicPeriodName:
     string;
   unitName:
@@ -182,7 +183,8 @@ export interface AttendanceOversightItem {
     string;
   sessionStatus:
     'open' |
-    'completed';
+    'completed' |
+    'cancelled';
   unitName:
     string;
   cohortName:

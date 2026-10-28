@@ -1,3 +1,23 @@
+### 2026-10-28: Allow HOD/admin to reopen "Did Not Take Place" (cancelled) attendance sessions
+
+**Added:** `supabase/migrations/20261028210000_allow_reopen_cancelled_attendance.sql`
+**Modified:**
+- `src/features/class-attendance/admin-table.tsx`
+- `src/app/(dashboard)/attendance/[sessionId]/page.tsx`
+- `src/app/(dashboard)/attendance-clinical/class-attendance/[sessionId]/page.tsx`
+- `src/app/(dashboard)/operations/attendance/page.tsx`
+
+**Problem:** If a trainer mistakenly marked a session as "Did Not Take Place" (status = `cancelled`) using the exception dialog, there was no way for the HOD or system admin to undo it. The database function `reopen_class_attendance_session` explicitly rejected any session that wasn't in `completed` status, and the UI never rendered a Reopen button for cancelled sessions.
+
+**Changes:**
+- **DB function** (`reopen_class_attendance_session`): Extended the status guard from `current_status <> 'completed'` to `current_status not in ('completed', 'cancelled')`. Cancelled sessions are now also reopened to `open`, with `notes` cleared (so the trainer can record real attendance), `reopened_at/reopened_by` stamped, and a `session_reopened` audit event inserted with `from_status = 'cancelled'`.
+- **`/attendance?view=sessions` admin table** (`admin-table.tsx`): Cancelled sessions now display a `danger`-variant "Did Not Take Place" badge instead of the old fallthrough "Open". The Reopen button is shown for both `completed` AND `cancelled` sessions.
+- **`/attendance/[sessionId]` detail page**: Reopen button is now conditional on `completed || cancelled`. Status badge shows "Did Not Take Place" in `danger` variant for cancelled sessions.
+- **`/attendance-clinical/class-attendance/[sessionId]` detail page**: Same as above.
+- **`/operations/attendance` oversight page**: Cancelled sessions now display a `danger` badge with "Did Not Take Place" label. The `AttendanceOversightActions` (Reopen) component is rendered for both `completed` and `cancelled` sessions. Added a fourth metric card counting "Did Not Take Place" sessions.
+
+**Manual follow-up required:** Run `supabase db push` to apply the migration.
+
 ### 2026-10-24: Clarify unit markbook creation errors
 
 **Modified:** `src/features/assessment/actions.ts`, `src/app/(dashboard)/assessment/assessments/page.tsx`, `CHANGES.md`

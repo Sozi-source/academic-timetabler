@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import {
   NextResponse,
 } from 'next/server';
@@ -21,6 +22,54 @@ interface RouteContext {
       assessmentId:
         string;
     }>;
+}
+
+const VALID_COMPONENTS = ['all', 'assignment', 'presentation', 'rat', 'cat', 'exam'] as const;
+type MarkComponent = typeof VALID_COMPONENTS[number];
+
+/** Server-side mark range bounds. Must mirror DB CHECK constraints. */
+const MARK_BOUNDS: Record<'assignment' | 'presentation' | 'rat' | 'cat' | 'exam', [number, number]> = {
+  assignment:   [0, 5],
+  presentation: [0, 10],
+  rat:          [0, 15],
+  cat:          [0, 15],
+  exam:         [0, 70],
+};
+
+const entrySchema = z.object({
+  studentId: z.string().min(1),
+  assignment: z.number().finite().nullable(),
+  presentation: z.number().finite().nullable(),
+  rat: z.number().finite().nullable(),
+  cat: z.number().finite().nullable(),
+  exam: z.number().finite().nullable(),
+  attendanceStatus: z.enum(['expected', 'absent']).optional(),
+});
+
+const submitSchema = z.object({
+  component: z.enum(VALID_COMPONENTS).default('all'),
+  entries: z.array(entrySchema).min(1).max(2000),
+});
+
+function validateMarkBounds(
+  entries: Array<z.infer<typeof entrySchema>>,
+  component: MarkComponent,
+): string | null {
+  const fields = (component === 'all' || component === 'exam')
+    ? (['assignment', 'presentation', 'rat', 'cat', 'exam'] as const)
+    : [component] as Array<'assignment' | 'presentation' | 'rat' | 'cat' | 'exam'>;
+
+  for (const entry of entries) {
+    for (const field of fields) {
+      const val = entry[field];
+      if (val === null) continue;
+      const [min, max] = MARK_BOUNDS[field];
+      if (val < min || val > max) {
+        return `${field} mark ${val} is out of range (${min}–${max}).`;
+      }
+    }
+  }
+  return null;
 }
 
 export async function POST(
@@ -101,43 +150,43 @@ export async function POST(
     );
   }
 
-  const requestPayload = await request.json().catch(() => null) as {
-    component?: unknown;
-    entries?: unknown;
-  } | null;
-
-  const component = typeof requestPayload?.component === 'string' ? requestPayload.component : 'all';
-
-  if (!Array.isArray(requestPayload?.entries) || requestPayload.entries.length === 0) {
-    return NextResponse.json({ message: 'Provide mark entries to submit.' }, { status: 400 });
+  // Validate and parse request body with Zod
+  const rawBody = await request.json().catch(() => null);
+  const parsed = submitSchema.safeParse(rawBody);
+  if (!parsed.success) {
+    const firstError = parsed.error.issues[0];
+    return NextResponse.json(
+      { message: firstError?.message ?? 'Invalid submission payload.' },
+      { status: 400 },
+    );
   }
+
+  const { component, entries } = parsed.data;
 
   if (['assignment', 'presentation', 'rat'].includes(component)) {
     return NextResponse.json({
-      message: 'Assignment, Presentation, and RAT marks are saved as drafts and submitted together with final marks at the end of the semester.',
+      message: 'Assignment, Presentation, and RAT marks are saved continuously and submitted together with final marks at the end of the semester.',
     }, { status: 400 });
   }
 
-  const componentEntries = requestPayload.entries.flatMap((entry) => {
-    if (!entry || typeof entry !== 'object' || !('studentId' in entry) || typeof entry.studentId !== 'string') return [];
-    const row = entry as Record<string, unknown>;
-    return [{
-      student_id: row.studentId,
-      assignment: typeof row.assignment === 'number' ? row.assignment : null,
-      presentation: typeof row.presentation === 'number' ? row.presentation : null,
-      rat: typeof row.rat === 'number' ? row.rat : null,
-      cat: typeof row.cat === 'number' ? row.cat : null,
-      exam: typeof row.exam === 'number' ? row.exam : null,
-      attendance_status: row.attendanceStatus === 'absent' ? 'absent' : 'expected',
-    }];
-  });
-
-  if (componentEntries.length !== requestPayload.entries.length) {
-    return NextResponse.json({ message: 'Every row must identify a student.' }, { status: 400 });
+  // Server-side mark range validation
+  const boundsError = validateMarkBounds(entries, component);
+  if (boundsError) {
+    return NextResponse.json({ message: boundsError }, { status: 422 });
   }
 
+  const componentEntries = entries.map((entry) => ({
+    student_id: entry.studentId,
+    assignment: entry.assignment,
+    presentation: entry.presentation,
+    rat: entry.rat,
+    cat: entry.cat,
+    exam: entry.exam,
+    attendance_status: entry.attendanceStatus === 'absent' ? 'absent' : 'expected',
+  }));
+
   if (component === 'cat') {
-    // Milestone 1: CAT marks submission
+    // Milestone 1: CAT marks submission (midterm milestone)
     const missingCat = componentEntries.filter((e) => e.cat === null).length;
     if (missingCat > 0) {
       return NextResponse.json({
@@ -173,6 +222,29 @@ export async function POST(
     };
   });
 
+  // 1. Save all drafts with prepared marks first (RLS-enforced via user client).
+  const { error: saveError } = await supabase.rpc('save_assessment_online_marks', {
+    target_assessment_id: targetAssessmentId,
+    target_entries: finalEntries.map(({ attendance_status: _a, ...e }) => e),
+  });
+  if (saveError) {
+    return NextResponse.json({ message: saveError.message }, { status: 409 });
+  }
+
+  // 2. Finalize results in official assessment_results (RLS-enforced).
+  const { data: finalSubmission, error: finalError } = await supabase.rpc(
+    'submit_assessment_online_marks',
+    { target_assessment_id: targetAssessmentId },
+  );
+
+  if (finalError) {
+    return NextResponse.json({
+      message: finalError.message,
+    }, { status: finalError.code === '42501' ? 403 : 409 });
+  }
+
+  // 3. Only after successful DB submission: sync attendance status in roster/population.
+  //    This is best-effort — failures here do not roll back the submission.
   const absentStudentIds = finalEntries
     .filter((e) => e.attendance_status === 'absent')
     .map((e) => e.student_id);
@@ -208,16 +280,7 @@ export async function POST(
       .in('student_id', presentStudentIds);
   }
 
-  // 1. Save all drafts with prepared marks
-  const { error: saveError } = await supabase.rpc('save_assessment_online_marks', {
-    target_assessment_id: targetAssessmentId,
-    target_entries: finalEntries.map(({ attendance_status: _a, ...e }) => e),
-  });
-  if (saveError) {
-    return NextResponse.json({ message: saveError.message }, { status: 409 });
-  }
-
-  // 2. Insert component submission records for all components
+  // 4. Insert component submission records for all components.
   const { data: rosterCohorts } = await admin
     .from('assessment_roster')
     .select('cohort_id')
@@ -238,18 +301,6 @@ export async function POST(
           onConflict: 'assessment_id,coalesce(cohort_id, \'00000000-0000-0000-0000-000000000000\'::uuid),component_key',
         });
     }
-  }
-
-  // 3. Finalize results in official assessment_results
-  const { data: finalSubmission, error: finalError } = await supabase.rpc(
-    'submit_assessment_online_marks',
-    { target_assessment_id: targetAssessmentId },
-  );
-
-  if (finalError) {
-    return NextResponse.json({
-      message: finalError.message,
-    }, { status: finalError.code === '42501' ? 403 : 409 });
   }
 
   return NextResponse.json({

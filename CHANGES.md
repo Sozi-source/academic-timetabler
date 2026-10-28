@@ -1,3 +1,25 @@
+### 2026-10-28: Trainer marks entry — enum fix, security hardening, UX simplification
+
+**Added:**
+- `supabase/migrations/20261028190000_fix_assessment_event_type_enum.sql` — adds `'unit_markbook'` to the `assessment_event_type` PostgreSQL enum (idempotent DO block), fixing the runtime error _"invalid input value for enum assessment_event_type: 'unit_markbook'"_ thrown when reading the `operational_assessment_type` computed column.
+
+**Modified:**
+- `src/features/assessment/trainer-mark-entry-portal.tsx` — eliminated the confusing "Save draft" button; unified all component tabs (`assignment`, `presentation`, `rat`, `cat`, and `all`/`exam`) with clear single `Submit [Component] Marks` and `Revise [Component] Marks` actions. Removed unused `Save` icon import.
+- `src/features/staff-assessment/online-marks-editor.tsx` — eliminated the "Save draft" button from the action bar; unified all component modes with clear single `Submit [Component] Marks` and `Revise [Component] Marks` actions. The `saveDraft()` function is retained internally for automatic background save on Excel download. Removed unused `Save` icon import.
+- `src/app/api/staff/assessment/[assessmentId]/online/submit/route.ts` — full rewrite with Zod input validation, server-side mark range bounds check (assignment 0–5, presentation 0–10, rat 0–15, cat 0–15, exam 0–70), generalized component submission to support all components, and fixed operation order: `save_assessment_online_marks` RPC runs first, then `submit_assessment_online_marks`, and attendance roster/population writes happen **after** successful DB commit (previously they ran before and could not be rolled back on RPC failure).
+- `src/app/api/staff/assessment/[assessmentId]/online/save/route.ts` — added server-side mark range bounds validation (`validateMarkBounds`) matching DB constraints.
+- `src/app/api/trainer-mark-entry/save/route.ts` — added Zod-level mark range bounds validation, enabled submission of any component, and ensured attendance roster/population updates occur only after DB commit succeeds.
+- `src/features/staff-assessment/authorization.ts` — **security fix**: `trainerCanAccessAssessment` for HOD/admin on `alloc-` IDs now verifies that the teaching allocation belongs to the user's active department (previously only checked the allocation existed, allowing cross-department access if the UUID was known).
+
+**Security fixes:**
+| Severity | Fix |
+|----------|-----|
+| High | HOD/admin cross-department assessment access via `alloc-` IDs — now department-scoped |
+| Medium | Non-atomic admin writes before RPC in submit route — fixed operation order in both staff & trainer routes |
+| Low | Missing API-level mark range validation in save & submit routes — added strict bounds checks across all endpoints |
+
+**Manual follow-up required:** Run `supabase db push` to apply the enum migration.
+
 ### 2026-10-28: Allow HOD/admin to reopen "Did Not Take Place" (cancelled) attendance sessions
 
 **Added:** `supabase/migrations/20261028210000_allow_reopen_cancelled_attendance.sql`

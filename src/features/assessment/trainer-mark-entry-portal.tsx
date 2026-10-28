@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertCircle, CheckCircle2, Info, LoaderCircle, Lock, RotateCcw, Save, Send, X } from 'lucide-react';
+import { AlertCircle, CheckCircle2, LoaderCircle, Lock, RotateCcw, Send, X } from 'lucide-react';
 import { useCallback, useEffect, useState, type KeyboardEvent } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -54,6 +54,8 @@ export function TrainerMarkEntryPortal() {
   const [studentsByCohort, setStudentsByCohort] = useState<Record<string, TrainerMarkEntryRow[]>>({});
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<'save' | 'submit' | null>(null);
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved' | 'error'>('saved');
+  const [isDirty, setIsDirty] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [revisionDialogOpen, setRevisionDialogOpen] = useState(false);
@@ -97,6 +99,8 @@ export function TrainerMarkEntryPortal() {
   }, [loadSession]);
 
   function updateMark(assessmentId: string, studentId: string, field: MarkField, value: string) {
+    setIsDirty(true);
+    setSaveStatus('unsaved');
     if (field === 'exam') {
       const trimmed = value.trim().toUpperCase();
       if (trimmed === 'AB' || trimmed === 'ABSENT' || trimmed === 'A') {
@@ -127,6 +131,53 @@ export function TrainerMarkEntryPortal() {
     const cohortKey = selectedCohortId ?? 'all';
     setStudentsByCohort((current) => ({ ...current, [cohortKey]: update(current[cohortKey] ?? []) }));
   }
+
+  const selectedCohort = session?.cohorts.find((cohort) => cohort.id === selectedCohortId) ?? null;
+  const visibleFields = selectedView === 'all' ? markFields : markFields.filter((field) => field.key === selectedView);
+  const isFinalSubmitted = Boolean(selectedCohort?.submittedAt || selectedCohort?.componentSubmissions.exam);
+  const isCatSubmitted = Boolean(selectedCohort?.componentSubmissions.cat);
+  const readOnly = Boolean(selectedCohort?.locked || isFinalSubmitted);
+
+  // Automatic background save for continuous grading
+  useEffect(() => {
+    if (!isDirty || !selectedCohort || readOnly) return;
+
+    const timer = setTimeout(async () => {
+      setSaveStatus('saving');
+      try {
+        const response = await fetch('/api/trainer-mark-entry/save', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            cohort_id: selectedCohort.id,
+            component: 'all',
+            submit: false,
+            entries: students.map((student) => ({
+              assessment_id: student.assessmentId,
+              student_id: student.studentId,
+              assignment: student.assignment,
+              presentation: student.presentation,
+              rat: student.rat,
+              cat: student.cat,
+              exam: student.attendanceStatus === 'absent' ? null : student.exam,
+              attendance_status: student.attendanceStatus,
+            })),
+          }),
+        });
+
+        if (response.ok) {
+          setIsDirty(false);
+          setSaveStatus('saved');
+        } else {
+          setSaveStatus('error');
+        }
+      } catch {
+        setSaveStatus('error');
+      }
+    }, 1200);
+
+    return () => clearTimeout(timer);
+  }, [students, isDirty, selectedCohort, readOnly]);
 
   function moveMarkCell(event: KeyboardEvent<HTMLInputElement>) {
     const input = event.currentTarget;
@@ -165,7 +216,6 @@ export function TrainerMarkEntryPortal() {
       return;
     }
 
-    const visibleFields = selectedView === 'all' ? markFields : markFields.filter((field) => field.key === selectedView);
     const totalCols = visibleFields.length;
     const totalRows = students.length;
 
@@ -210,18 +260,11 @@ export function TrainerMarkEntryPortal() {
     target.select();
   }
 
-  const selectedCohort = session?.cohorts.find((cohort) => cohort.id === selectedCohortId) ?? null;
-  const visibleFields = selectedView === 'all' ? markFields : markFields.filter((field) => field.key === selectedView);
-  const isFinalSubmitted = Boolean(selectedCohort?.submittedAt || selectedCohort?.componentSubmissions.exam);
-  const isCatSubmitted = Boolean(selectedCohort?.componentSubmissions.cat);
-  const readOnly = Boolean(selectedCohort?.locked || isFinalSubmitted);
-
   const missingAssignment = students.filter((s) => s.assignment === null).length;
   const missingPresentation = students.filter((s) => s.presentation === null).length;
   const missingRat = students.filter((s) => s.rat === null).length;
   const missingCat = students.filter((s) => s.cat === null).length;
   const missingExam = students.filter((s) => s.attendanceStatus !== 'absent' && s.exam === null).length;
-  const totalMissing = missingAssignment + missingPresentation + missingRat + missingCat + missingExam;
 
   const absentExamStudents = students.filter((s) => s.attendanceStatus === 'absent' || s.exam === null);
   const missingCourseworkCount = missingAssignment + missingPresentation + missingRat + missingCat;
@@ -231,7 +274,7 @@ export function TrainerMarkEntryPortal() {
     if (submit) {
       if (['assignment', 'presentation', 'rat'].includes(selectedView)) {
         setError(
-          'Assignment, Presentation, and RAT marks are saved as drafts and submitted together with final exam marks at the end of the semester.',
+          'Coursework marks (Assignment, Presentation, RAT) are saved automatically and submitted together with final exam marks at the end of the semester.',
         );
         return;
       }
@@ -299,7 +342,7 @@ export function TrainerMarkEntryPortal() {
         setStudents(updatedCohort?.students ?? []);
         setStudentsByCohort((current) => ({ ...current, [selectedCohort.id ?? 'all']: updatedCohort?.students ?? [] }));
       } else {
-        setMessage(`Draft marks saved for ${selectedCohort.name} (${result.result?.savedCount ?? students.length} student records).`);
+        setMessage(`Marks saved for ${selectedCohort.name} (${result.result?.savedCount ?? students.length} student records).`);
       }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Could not save marks.');
@@ -362,15 +405,36 @@ export function TrainerMarkEntryPortal() {
   return (
     <main className="min-h-screen bg-slate-50 px-2 py-3 sm:px-5 sm:py-5">
       <div className="mx-auto max-w-7xl space-y-3">
-        <header className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-2xs">
-          {session ? (
-            <>
-              <h1 className="text-base font-bold text-slate-900">{session.unit.code ? `${session.unit.code} | ` : ''}{session.unit.name}</h1>
-              <p className="mt-0.5 text-xs text-slate-500">{session.academicPeriod}</p>
-            </>
-          ) : (
-            <h1 className="text-base font-bold text-slate-900">Trainer mark entry</h1>
-          )}
+        <header className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-2xs">
+          <div>
+            {session ? (
+              <>
+                <h1 className="text-base font-bold text-slate-900">{session.unit.code ? `${session.unit.code} | ` : ''}{session.unit.name}</h1>
+                <p className="mt-0.5 text-xs text-slate-500">{session.academicPeriod}</p>
+              </>
+            ) : (
+              <h1 className="text-base font-bold text-slate-900">Trainer mark entry</h1>
+            )}
+          </div>
+          {session && !readOnly ? (
+            <div className="flex items-center gap-1.5 text-xs">
+              {saveStatus === 'saving' ? (
+                <span className="flex items-center gap-1 text-slate-500">
+                  <LoaderCircle className="size-3.5 animate-spin" /> Saving...
+                </span>
+              ) : saveStatus === 'saved' ? (
+                <span className="flex items-center gap-1 text-emerald-700 font-medium">
+                  <CheckCircle2 className="size-3.5 text-emerald-600" /> All changes saved
+                </span>
+              ) : saveStatus === 'unsaved' ? (
+                <span className="text-slate-400">Unsaved changes</span>
+              ) : (
+                <span className="flex items-center gap-1 text-amber-700 font-medium">
+                  <AlertCircle className="size-3.5 text-amber-600" /> Save failed
+                </span>
+              )}
+            </div>
+          ) : null}
         </header>
 
         {loading ? (
@@ -387,7 +451,6 @@ export function TrainerMarkEntryPortal() {
                       onClick={() => { setSelectedCohortId(cohort.id); setStudents(studentsByCohort[cohort.id ?? 'all'] ?? cohort.students); setMessage(''); setError(''); }}
                       className={`inline-flex min-h-10 shrink-0 items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium ${cohort.id === selectedCohortId ? 'border-teal-600 bg-teal-50 text-teal-800' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}>
                       <span>{cohort.name}</span>
-                     
                     </button>
                   ))}
                 </div>
@@ -396,11 +459,13 @@ export function TrainerMarkEntryPortal() {
 
             {selectedCohort?.submittedAt ? <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-900">Submitted - read only</div> : null}
             {selectedCohort?.locked && !selectedCohort.submittedAt ? <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">Entry closed</div> : null}
+
             {['assignment', 'presentation', 'rat'].includes(selectedView) && !readOnly ? (
               <div className="rounded-lg border border-slate-200 bg-[#fbf9f1] px-3 py-2 text-xs text-slate-700">
-                Coursework marks (Assignment, Presentation, RAT) are saved as drafts and submitted together with final exam marks at the end of the semester.
+                Coursework marks (Assignment, Presentation, RAT) are saved automatically and submitted together with final exam marks at the end of the semester.
               </div>
             ) : null}
+
             {selectedView === 'cat' && isCatSubmitted ? (
               <div className="flex flex-col gap-2 rounded-lg border border-emerald-200 bg-emerald-50/80 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="text-xs text-emerald-900">
@@ -455,10 +520,7 @@ export function TrainerMarkEntryPortal() {
                   })}
                 </div>
                 {!readOnly ? (
-                  <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
-                    <Button className="w-full sm:w-auto" type="button" variant="outline" disabled={busy !== null || students.length === 0} onClick={() => void saveMarks(false)}>
-                      {busy === 'save' ? <LoaderCircle className="size-4 animate-spin" /> : <Save className="size-4" />}{busy === 'save' ? 'Saving...' : 'Save draft'}
-                    </Button>
+                  <div className="flex w-full justify-end sm:w-auto">
                     {['assignment', 'presentation', 'rat'].includes(selectedView) ? null : selectedView === 'cat' ? (
                       isCatSubmitted ? (
                         <Button
@@ -473,7 +535,8 @@ export function TrainerMarkEntryPortal() {
                         </Button>
                       ) : (
                         <Button className="w-full sm:w-auto" type="button" disabled={busy !== null || students.length === 0 || missingCat > 0} onClick={() => void saveMarks(true)}>
-                          {busy === 'submit' ? <LoaderCircle className="size-4 animate-spin" /> : <Send className="size-4" />}{busy === 'submit' ? 'Submitting...' : 'Submit CAT marks'}
+                          {busy === 'submit' ? <LoaderCircle className="size-4 animate-spin" /> : <Send className="size-4" />}
+                          {busy === 'submit' ? 'Submitting...' : 'Submit CAT marks'}
                         </Button>
                       )
                     ) : isFinalSubmitted ? (
@@ -489,7 +552,8 @@ export function TrainerMarkEntryPortal() {
                       </Button>
                     ) : (
                       <Button className="w-full sm:w-auto" type="button" disabled={busy !== null || students.length === 0} onClick={() => void saveMarks(true)}>
-                        {busy === 'submit' ? <LoaderCircle className="size-4 animate-spin" /> : <Send className="size-4" />}{busy === 'submit' ? 'Submitting...' : 'Submit Final Marks'}
+                        {busy === 'submit' ? <LoaderCircle className="size-4 animate-spin" /> : <Send className="size-4" />}
+                        {busy === 'submit' ? 'Submitting...' : 'Submit Final Marks'}
                       </Button>
                     )}
                   </div>
@@ -519,6 +583,9 @@ export function TrainerMarkEntryPortal() {
                         <td className="hidden min-w-52 px-3 py-2.5 text-slate-800 md:table-cell">{student.fullName}{student.attendanceStatus === 'absent' ? <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">Absent</span> : null}</td>
                         {visibleFields.map((field, fieldIndex) => {
                           const isAbsentExam = field.key === 'exam' && student.attendanceStatus === 'absent';
+                          const isFieldSubmitted = field.key === 'exam'
+                            ? isFinalSubmitted
+                            : Boolean(selectedCohort?.componentSubmissions[field.key]);
                           const displayVal = field.key === 'exam'
                             ? (student.exam !== null ? student.exam : (student.attendanceStatus === 'absent' ? 'AB' : ''))
                             : (student[field.key] ?? '');
@@ -536,8 +603,8 @@ export function TrainerMarkEntryPortal() {
                                 min="0"
                                 max={field.maximum}
                                 value={displayVal}
-                                placeholder={['assignment', 'presentation', 'rat'].includes(field.key) ? '0' : isAbsentExam ? 'AB' : '—'}
-                                disabled={readOnly || (field.key === 'cat' && isCatSubmitted) || (field.key === 'exam' && isFinalSubmitted)}
+                                placeholder={isAbsentExam ? 'AB' : '—'}
+                                disabled={readOnly || isFieldSubmitted}
                                 onFocus={(e) => e.currentTarget.select()}
                                 onChange={(event) => updateMark(student.assessmentId, student.studentId, field.key, event.target.value)}
                                 className={`h-10 w-20 rounded-md border px-2 text-center text-base tabular-nums outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100 disabled:bg-slate-100 sm:h-9 sm:text-xs ${

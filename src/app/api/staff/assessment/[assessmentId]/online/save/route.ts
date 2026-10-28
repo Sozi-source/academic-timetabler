@@ -12,6 +12,38 @@ import {
   createClient,
 } from '@/lib/supabase/server';
 
+/** Server-side mark range bounds — mirrors DB CHECK constraints. */
+const MARK_BOUNDS: Record<'assignment' | 'presentation' | 'rat' | 'cat' | 'exam', [number, number]> = {
+  assignment:   [0, 5],
+  presentation: [0, 10],
+  rat:          [0, 15],
+  cat:          [0, 15],
+  exam:         [0, 70],
+};
+
+function validateMarkBounds(
+  entries: Array<{
+    student_id: string;
+    assignment: number | null;
+    presentation: number | null;
+    rat: number | null;
+    cat: number | null;
+    exam: number | null;
+  }>,
+): string | null {
+  for (const entry of entries) {
+    for (const field of Object.keys(MARK_BOUNDS) as Array<keyof typeof MARK_BOUNDS>) {
+      const val = entry[field];
+      if (val === null) continue;
+      const [min, max] = MARK_BOUNDS[field];
+      if (val < min || val > max) {
+        return `${field} mark ${val} is out of range (${min}–${max}).`;
+      }
+    }
+  }
+  return null;
+}
+
 interface OnlineEntry {
   studentId?:
     unknown;
@@ -226,6 +258,15 @@ export async function POST(
       cat,
       exam,
     });
+  }
+
+  // Server-side mark range validation
+  const boundsError = validateMarkBounds(entries);
+  if (boundsError) {
+    return NextResponse.json(
+      { message: boundsError },
+      { status: 422 },
+    );
   }
 
   const supabase =

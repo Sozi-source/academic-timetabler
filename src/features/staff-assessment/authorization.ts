@@ -24,13 +24,26 @@ export async function trainerCanAccessAssessment(
       return Boolean(workspace?.allocations.some((allocation) => allocation.allocationId === allocId));
     }
 
+    // For HOD / system_admin: verify the allocation exists AND belongs to their active department.
+    // Using the user (RLS-scoped) client so department isolation is enforced.
+    if (!profile?.activeDepartmentId) return false;
+
     const { data: alloc } = await supabase
       .from('teaching_allocations')
-      .select('id')
+      .select('id, unit:units!inner(department_id, programme:programmes!inner(department_id))')
       .eq('id', allocId)
       .maybeSingle();
 
-    return Boolean(alloc);
+    if (!alloc) return false;
+
+    // Resolve the effective department id from the unit or its programme.
+    const unit = Array.isArray(alloc.unit) ? alloc.unit[0] : alloc.unit;
+    const programme = unit
+      ? (Array.isArray(unit.programme) ? unit.programme[0] : unit.programme)
+      : null;
+    const effectiveDeptId = unit?.department_id ?? programme?.department_id ?? null;
+
+    return effectiveDeptId === profile.activeDepartmentId;
   }
 
   const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(assessmentId);

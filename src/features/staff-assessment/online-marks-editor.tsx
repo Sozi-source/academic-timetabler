@@ -10,7 +10,6 @@ import {
   LoaderCircle,
   Lock,
   RotateCcw,
-  Save,
   Search,
   Send,
   Upload,
@@ -117,6 +116,8 @@ export function OnlineMarksEditor({
   const [pageSize, setPageSize] = useState<number | 'all'>(10);
 
   const [busy, setBusy] = useState<'save' | 'submit' | 'download' | 'reopen' | null>(null);
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved' | 'error'>('saved');
+  const [isDirty, setIsDirty] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [visibleComponent, setVisibleComponent] = useState<'all' | OnlineMarkComponentKey>('all');
@@ -143,6 +144,8 @@ export function OnlineMarksEditor({
 
   // Callback invoked by BulkUploadDialog: merges spreadsheet data into editor state
   const applyBulkMarks = (matched: MatchedBulkStudentResult[]) => {
+    setIsDirty(true);
+    setSaveStatus('unsaved');
     setValues((prev) => {
       const next = { ...prev };
       for (const m of matched) {
@@ -307,6 +310,17 @@ export function OnlineMarksEditor({
     [parsedRows],
   );
 
+  const getMissingForComponent = (key: OnlineMarkComponentKey) => {
+    switch (key) {
+      case 'assignment': return unfilledSummary.missingAssignment;
+      case 'presentation': return unfilledSummary.missingPresentation;
+      case 'rat': return unfilledSummary.missingRat;
+      case 'cat': return unfilledSummary.missingCat;
+      case 'exam': return unfilledSummary.missingExam;
+      default: return 0;
+    }
+  };
+
   const catSubmitted = componentSubmittedForAllStudents('cat');
   const finalSubmitted = componentSubmittedForAllStudents('exam') || !editable;
 
@@ -342,6 +356,8 @@ export function OnlineMarksEditor({
     key: 'assignment' | 'presentation' | 'rat' | 'cat' | 'exam',
     value: string,
   ) {
+    setIsDirty(true);
+    setSaveStatus('unsaved');
     setValues((current) => ({
       ...current,
       [studentId]: {
@@ -350,6 +366,56 @@ export function OnlineMarksEditor({
       },
     }));
   }
+
+  // Automatic background save for continuous grading
+  useEffect(() => {
+    if (!isDirty || !editable) return;
+
+    const hasInvalid = parsedRows.some((row) =>
+      !row.fields.assignment.valid ||
+      !row.fields.presentation.valid ||
+      !row.fields.rat.valid ||
+      !row.fields.cat.valid ||
+      (!row.isAbsent && !row.fields.exam.valid)
+    );
+
+    if (hasInvalid) return;
+
+    const timer = setTimeout(async () => {
+      setSaveStatus('saving');
+      try {
+        const response = await fetch(
+          `/api/staff/assessment/${assessmentId}/online/save`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              component: 'all',
+              entries: parsedRows.map((row) => ({
+                studentId: row.student.studentId,
+                assignment: row.marks.assignment,
+                presentation: row.marks.presentation,
+                rat: row.marks.rat,
+                cat: row.marks.cat,
+                exam: row.isAbsent ? null : row.marks.exam,
+              })),
+            }),
+          },
+        );
+
+        if (response.ok) {
+          setIsDirty(false);
+          setSaveStatus('saved');
+        } else {
+          setSaveStatus('error');
+        }
+      } catch {
+        setSaveStatus('error');
+      }
+    }, 1200);
+
+    return () => clearTimeout(timer);
+  }, [values, isDirty, editable, parsedRows, assessmentId]);
 
   function handleKeyDown(
     e: React.KeyboardEvent<HTMLInputElement>,
@@ -491,7 +557,7 @@ export function OnlineMarksEditor({
   async function submitMarks() {
     if (['assignment', 'presentation', 'rat'].includes(visibleComponent)) {
       setError(
-        'Assignment, Presentation, and RAT marks are saved as drafts and submitted together with final exam marks at the end of the semester.',
+        'Coursework marks (Assignment, Presentation, RAT) are saved automatically and submitted together with final exam marks at the end of the semester.',
       );
       return;
     }
@@ -732,6 +798,27 @@ export function OnlineMarksEditor({
           {absent > 0 ? (
             <span className="text-amber-800">
               · <strong>{absent}</strong> Absent
+            </span>
+          ) : null}
+          {editable ? (
+            <span className="flex items-center gap-1.5 text-[11px] font-medium border-l border-slate-300 pl-3">
+              {saveStatus === 'saving' ? (
+                <span className="flex items-center gap-1 text-slate-500">
+                  <LoaderCircle className="size-3 animate-spin" /> Saving...
+                </span>
+              ) : saveStatus === 'saved' ? (
+                <span className="flex items-center gap-1 text-emerald-700">
+                  <CheckCircle2 className="size-3 text-emerald-600" /> All changes saved
+                </span>
+              ) : saveStatus === 'unsaved' ? (
+                <span className="flex items-center gap-1 text-slate-400">
+                  Unsaved changes
+                </span>
+              ) : (
+                <span className="flex items-center gap-1 text-amber-700">
+                  <AlertCircle className="size-3 text-amber-600" /> Save failed
+                </span>
+              )}
             </span>
           ) : null}
         </div>
@@ -1177,15 +1264,15 @@ export function OnlineMarksEditor({
             </p>
           ) : ['assignment', 'presentation', 'rat'].includes(visibleComponent) ? (
             <p className="text-[11px] text-text-muted">
-              Coursework marks (Assignment, Presentation, RAT) are saved as drafts and submitted together with final exam marks at the end of the semester.
+              Coursework marks ({singleComponent?.label ?? 'Assignment, Presentation, RAT'}) are saved automatically and submitted together with final exam marks at the end of the semester.
             </p>
           ) : visibleComponent === 'cat' ? (
             <p className="text-[11px] text-text-muted">
               {catSubmitted
                 ? 'CAT marks submitted successfully.'
                 : unfilledSummary.missingCat > 0
-                  ? `${unfilledSummary.missingCat} student(s) missing CAT marks before submission.`
-                  : 'All CAT marks entered and ready for submission.'}
+                  ? `${unfilledSummary.missingCat} student(s) missing CAT marks before midterm submission.`
+                  : 'All CAT marks entered and ready for midterm submission.'}
             </p>
           ) : (
             <p className="text-[11px] text-text-muted">
@@ -1218,25 +1305,6 @@ export function OnlineMarksEditor({
 
           {canEditOnlineMarks(workflowStatus) ? (
             <>
-              {trainerEntryOpen ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={busy !== null}
-                  onClick={() => void saveDraft()}
-                  leadingIcon={
-                    busy === 'save' ? (
-                      <LoaderCircle className="size-3.5 animate-spin" />
-                    ) : (
-                      <Save className="size-3.5" />
-                    )
-                  }
-                >
-                  Save draft
-                </Button>
-              ) : null}
-
               {['assignment', 'presentation', 'rat'].includes(visibleComponent) ? null : visibleComponent === 'cat' ? (
                 catSubmitted ? (
                   <Button

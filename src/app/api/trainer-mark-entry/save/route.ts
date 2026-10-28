@@ -6,18 +6,29 @@ import { getTrainerMarkInvite } from '@/features/assessment/trainer-mark-entry';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 const inviteCookieName = 'trainer_mark_invite';
-const markValue = z.number().finite().nullable();
+const assignmentValue = z.number().finite().min(0, 'Assignment must be between 0 and 5').max(5, 'Assignment must be between 0 and 5').nullable();
+const presentationValue = z.number().finite().min(0, 'Presentation must be between 0 and 10').max(10, 'Presentation must be between 0 and 10').nullable();
+const ratValue = z.number().finite().min(0, 'RAT must be between 0 and 15').max(15, 'RAT must be between 0 and 15').nullable();
+const catValue = z.number().finite().min(0, 'CAT must be between 0 and 15').max(15, 'CAT must be between 0 and 15').nullable();
+const examValue = z.number().finite().min(0, 'Exam must be between 0 and 70').max(70, 'Exam must be between 0 and 70').nullable();
+
 const entriesSchema = z.array(z.object({
   assessment_id: z.string().uuid(),
   student_id: z.string().uuid(),
-  assignment: markValue,
-  presentation: markValue,
-  rat: markValue,
-  cat: markValue,
-  exam: markValue,
+  assignment: assignmentValue,
+  presentation: presentationValue,
+  rat: ratValue,
+  cat: catValue,
+  exam: examValue,
   attendance_status: z.enum(['expected', 'absent']).optional(),
 })).min(1).max(2000);
-const saveSchema = z.object({ cohort_id: z.string().uuid().nullable().optional(), component: z.enum(['all', 'assignment', 'presentation', 'rat', 'cat', 'exam']).default('all'), entries: entriesSchema.min(1).max(2000), submit: z.boolean().default(false) });
+
+const saveSchema = z.object({
+  cohort_id: z.string().uuid().nullable().optional(),
+  component: z.enum(['all', 'assignment', 'presentation', 'rat', 'cat', 'exam']).default('all'),
+  entries: entriesSchema.min(1).max(2000),
+  submit: z.boolean().default(false),
+});
 
 export async function POST(request: Request) {
   const cookieStore = await cookies();
@@ -26,7 +37,10 @@ export async function POST(request: Request) {
 
   const rawBody = await request.json().catch(() => null);
   const parsed = saveSchema.safeParse(rawBody);
-  if (!parsed.success) return NextResponse.json({ message: 'Check the marks and try again.' }, { status: 400 });
+  if (!parsed.success) {
+    const firstError = parsed.error.issues[0]?.message ?? 'Check the marks and try again.';
+    return NextResponse.json({ message: firstError }, { status: 400 });
+  }
 
   try {
     const invite = await getTrainerMarkInvite(token);
@@ -37,7 +51,7 @@ export async function POST(request: Request) {
 
     if (parsed.data.submit && ['assignment', 'presentation', 'rat'].includes(parsed.data.component)) {
       return NextResponse.json({
-        message: 'Assignment, Presentation, and RAT marks are saved as drafts and submitted together with final marks at the end of the semester.',
+        message: 'Assignment, Presentation, and RAT marks are saved continuously and submitted together with final marks at the end of the semester.',
       }, { status: 400 });
     }
 
@@ -128,6 +142,17 @@ export async function POST(request: Request) {
               };
             });
 
+            // 1. Save all marks and submit FIRST to ensure atomic DB validation passes
+            const { data: savedData, error: saveError } = await admin.rpc('save_assessment_marks_with_trainer_invite', {
+              target_token_hash: scope.token_hash,
+              target_entries: finalEntries,
+              submit_marks: true,
+            });
+            if (saveError) {
+              return NextResponse.json({ message: saveError.message }, { status: 409 });
+            }
+
+            // 2. Only after DB commit succeeds, update attendance status in roster and population
             const absentStudentIds = relevantEntries
               .filter((e) => e.attendance_status === 'absent' || e.exam === null)
               .map((e) => e.student_id);
@@ -161,16 +186,6 @@ export async function POST(request: Request) {
                 .update({ attendance_status: 'expected' })
                 .eq('assessment_event_id', scope.assessment_id)
                 .in('student_id', presentStudentIds);
-            }
-
-            // Save all marks and submit
-            const { data: savedData, error: saveError } = await admin.rpc('save_assessment_marks_with_trainer_invite', {
-              target_token_hash: scope.token_hash,
-              target_entries: finalEntries,
-              submit_marks: true,
-            });
-            if (saveError) {
-              return NextResponse.json({ message: saveError.message }, { status: 409 });
             }
 
             // Record submissions for all components
@@ -274,6 +289,17 @@ export async function POST(request: Request) {
             };
           });
 
+          // 1. Save all marks and submit FIRST to ensure atomic DB validation passes
+          const { data: savedData, error: saveError } = await admin.rpc('save_assessment_marks_with_trainer_invite', {
+            target_token_hash: invite.token_hash,
+            target_entries: finalEntries,
+            submit_marks: true,
+          });
+          if (saveError) {
+            return NextResponse.json({ message: saveError.message }, { status: 409 });
+          }
+
+          // 2. Only after DB commit succeeds, update attendance status in roster and population
           const absentStudentIds = rawEntries
             .filter((e) => e.attendance_status === 'absent' || e.exam === null)
             .map((e) => e.student_id);
@@ -307,15 +333,6 @@ export async function POST(request: Request) {
               .update({ attendance_status: 'expected' })
               .eq('assessment_event_id', invite.assessment_id)
               .in('student_id', presentStudentIds);
-          }
-
-          const { data: savedData, error: saveError } = await admin.rpc('save_assessment_marks_with_trainer_invite', {
-            target_token_hash: invite.token_hash,
-            target_entries: finalEntries,
-            submit_marks: true,
-          });
-          if (saveError) {
-            return NextResponse.json({ message: saveError.message }, { status: 409 });
           }
 
           const allComponents = ['assignment', 'presentation', 'rat', 'cat', 'exam'] as const;

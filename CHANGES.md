@@ -1,3 +1,19 @@
+### 2026-10-29: UI contrast, font smoothing, and clear text enhancements
+
+**Modified:**
+- `src/app/layout.tsx` — switched global HTML font-smoothing from `antialiased` (grayscale smoothing) to `subpixel-antialiased`, restoring crisp subpixel font rasterization across all screens and operating systems.
+- `src/app/globals.css` — elevated design system color tokens to high-contrast WCAG AAA/AA standards:
+  - Text tokens: `--text-primary: #111827`, `--text-secondary: #374151`, `--text-muted: #4b5563`, `--text-subtle: #6b7280`.
+  - Border tokens strengthened to $\ge 3:1$ non-text contrast: `--border: #c4c8cd`, `--border-soft: #d5d9de`, `--border-strong: #9ca3af`.
+  - Global `::placeholder` rule added with `opacity: 1` to override browser-default 50% opacity fading on inputs and tables.
+- `src/app/portal-theme.css` — aligned academic portal tokens to high-contrast values (`--text-primary: #0f172a`, `--text-secondary: #334155`, `--text-muted: #475569`, `--border: #b8c7c3`).
+- `src/components/ui/data-table.tsx` — upgraded table header text to `text-text-primary` and cell records to `font-medium text-text-primary`, eliminating faded table data.
+- `src/components/ui/input.tsx` — enforced `font-medium` and `placeholder:opacity-100` on form inputs.
+- `src/components/layout/admin-sidebar.tsx` & `src/components/staff/staff-shell.tsx` — boosted sidebar navigation text (`text-white/85`), section headings (`text-white/75`), and icons (`text-white/70`).
+- `src/components/layout/mobile-bottom-nav.tsx` — darkened inactive mobile tabs from `text-gray-400` to `text-slate-600 font-bold`.
+- `src/features/staff-assessment/online-marks-editor.tsx` & `trainer-mark-entry-portal.tsx` — marksheet cells styled with bold high-contrast text (`text-slate-950`), crisp borders (`border-slate-400`), visible empty dashes (`placeholder:text-slate-600 placeholder:opacity-100 placeholder:font-bold`), and bold helper instructions.
+- `src/features/student-access/access-manager.tsx`, `src/features/staff-downloads/staff-downloads-view.tsx`, and `src/features/teaching-documents/tvet-document-viewer.tsx` — eliminated pale `text-slate-400` placeholder dashes and labels in favor of high-contrast typography.
+
 ### 2026-10-29: Authenticated trainer entry unification & tailored marksheet downloads
 
 **Added:**

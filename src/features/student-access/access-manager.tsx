@@ -196,21 +196,21 @@ export function StudentPortalAccessManager({
   return (
     <div className="space-y-4 pb-12">
       {/* Search & Filter Bar */}
-      <section className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs sm:flex-row sm:items-center sm:justify-between">
+      <section className="flex flex-col gap-3 rounded-xl border border-slate-300 bg-white p-3.5 shadow-2xs sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full max-w-md">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-slate-500" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search student, admission number, cohort..."
-            className="h-9 w-full rounded-lg border border-slate-200 bg-white pl-8 pr-7 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-slate-400"
+            className="h-9 w-full rounded-lg border border-slate-300 bg-white pl-8 pr-7 text-xs font-medium text-slate-900 placeholder:text-slate-500 placeholder:opacity-100 outline-none transition focus:border-slate-500"
           />
           {query ? (
             <button
               type="button"
               onClick={() => setQuery('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800"
             >
               <X className="size-3.5" />
             </button>
@@ -257,10 +257,10 @@ export function StudentPortalAccessManager({
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-200">
               {visibleRows.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-xs text-slate-400">
+                  <td colSpan={6} className="px-4 py-8 text-center text-xs font-medium text-slate-600">
                     No students match this view.
                   </td>
                 </tr>
@@ -274,16 +274,16 @@ export function StudentPortalAccessManager({
                       {/* Student Name & Adm */}
                       <td className="px-4 py-3">
                         <p className="font-bold text-slate-900">{row.fullName}</p>
-                        <p className="text-[11px] font-medium text-slate-500">{row.admissionNumber}</p>
+                        <p className="text-[11px] font-semibold text-slate-700">{row.admissionNumber}</p>
                       </td>
 
                       {/* Programme */}
-                      <td className="px-3 py-3 text-slate-600">
+                      <td className="px-3 py-3 font-medium text-slate-800">
                         {row.programmeCode}
                       </td>
 
                       {/* Cohort */}
-                      <td className="px-3 py-3 text-slate-600">
+                      <td className="px-3 py-3 font-medium text-slate-800">
                         {row.cohortName}
                       </td>
 
@@ -293,12 +293,12 @@ export function StudentPortalAccessManager({
                           variant="neutral"
                           className={
                             status === 'active'
-                              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-200 font-bold'
                               : status === 'not_issued'
-                                ? 'bg-slate-100 text-slate-500'
+                                ? 'bg-slate-100 text-slate-700 border-slate-300 font-bold'
                                 : status === 'locked'
-                                  ? 'bg-amber-50 text-amber-800 border-amber-200'
-                                  : 'bg-red-50 text-red-700 border-red-200'
+                                  ? 'bg-amber-50 text-amber-800 border-amber-200 font-bold'
+                                  : 'bg-red-50 text-red-700 border-red-200 font-bold'
                           }
                         >
                           {status === 'not_issued' ? 'Not Activated' : studentPortalAccessStatusLabel(status)}
@@ -306,7 +306,7 @@ export function StudentPortalAccessManager({
                       </td>
 
                       {/* Last Login */}
-                      <td className="px-3 py-3 text-center text-[11px] text-slate-400">
+                      <td className="px-3 py-3 text-center text-[11px] font-medium text-slate-700">
                         {formatStudentPortalAccessTime(row.lastLoginAt)}
                       </td>
 
@@ -320,7 +320,7 @@ export function StudentPortalAccessManager({
                               variant="outline"
                               disabled={busy !== null}
                               onClick={() => handleToggleState(row, !row.isActive)}
-                              className="h-7 px-2.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
+                              className="h-7 px-2.5 text-[11px] font-semibold text-slate-800 hover:bg-slate-50"
                               leadingIcon={
                                 isBusyState ? (
                                   <LoaderCircle className="size-3 animate-spin" />
@@ -334,7 +334,7 @@ export function StudentPortalAccessManager({
                               {row.isActive ? 'Disable Access' : 'Enable Access'}
                             </Button>
                           ) : (
-                            <span className="text-[11px] font-medium text-slate-400 italic">
+                            <span className="text-[11px] font-semibold text-slate-600 italic">
                               Pending Activation
                             </span>
                           )}

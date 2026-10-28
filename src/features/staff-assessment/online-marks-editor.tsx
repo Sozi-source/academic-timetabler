@@ -933,8 +933,8 @@ export function OnlineMarksEditor({
       {/* Main Table / List View */}
       {isSingleMode && singleComponent ? (
         /* SINGLE ENTRY MODE: Guaranteed 100% visible on all mobile screens without truncation */
-        <section className="overflow-hidden rounded-none border border-slate-300 bg-[#fffdf5] shadow-2xs">
-          <div className="flex items-center justify-between border-b border-slate-300 bg-[#f2ece0] px-3.5 py-2.5 text-[10px] font-bold uppercase tracking-wide text-slate-800">
+        <section className="overflow-hidden rounded-none border border-slate-400 bg-[#fffdf5] shadow-2xs">
+          <div className="flex items-center justify-between border-b border-slate-400 bg-[#e8e0d0] px-3.5 py-2.5 text-[10px] font-bold uppercase tracking-wide text-slate-900">
             <span>Student</span>
             <span className="shrink-0 text-right">
               {singleComponent.label} /{singleComponent.maximum}
@@ -942,11 +942,11 @@ export function OnlineMarksEditor({
           </div>
 
           {paginatedRows.length === 0 ? (
-            <div className="px-4 py-8 text-center text-xs text-slate-500">
+            <div className="px-4 py-8 text-center text-xs text-slate-600 font-medium">
               No students match &ldquo;{searchQuery}&rdquo;
             </div>
           ) : (
-            <div className="divide-y divide-slate-200">
+            <div className="divide-y divide-slate-300">
               {paginatedRows.map((row, rowIndex) => {
                 const key = singleComponent.key;
                 const field = row.fields[key];
@@ -962,7 +962,7 @@ export function OnlineMarksEditor({
                       <p className="text-xs font-bold text-slate-900 leading-tight truncate">
                         {row.student.fullName}
                       </p>
-                      <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] font-medium text-slate-600">
+                      <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-slate-700">
                         <span>{row.student.admissionNumber}</span>
                         {row.total !== null ? (
                           <span className="font-bold text-[#0b4f4a]">
@@ -971,7 +971,7 @@ export function OnlineMarksEditor({
                         ) : null}
                       </div>
                       {isExamAbsent ? (
-                        <Badge variant="warning" className="mt-0.5 rounded-none text-[9px] py-0 px-1">
+                        <Badge variant="warning" className="mt-0.5 rounded-none text-[9px] py-0 px-1 font-bold">
                           Absent
                         </Badge>
                       ) : null}
@@ -1012,10 +1012,10 @@ export function OnlineMarksEditor({
                             handleKeyDown(e, rowIndex, 0)
                           }
                           aria-label={`${key} mark for ${row.student.fullName}`}
-                          className={`h-10 w-20 rounded-none border px-2 text-center text-base font-bold outline-none transition focus:border-[#0b4f4a] focus:ring-2 focus:ring-[#0b4f4a]/20 disabled:bg-[#eee8d7] disabled:text-slate-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                          className={`h-10 w-20 rounded-none border px-2 text-center text-base font-bold outline-none transition placeholder:text-slate-600 placeholder:opacity-100 placeholder:font-bold focus:border-[#0b4f4a] focus:ring-2 focus:ring-[#0b4f4a]/20 disabled:bg-[#eee8d7] disabled:text-slate-600 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                             isExamAbsent
-                              ? 'border-amber-300 bg-amber-50/70 text-amber-900'
-                              : 'border-slate-400 bg-[#fffdf5] text-slate-900 focus:border-[#0b4f4a]'
+                              ? 'border-amber-400 bg-amber-50 text-amber-950 font-bold'
+                              : 'border-slate-400 bg-[#fffdf5] text-slate-950 focus:border-[#0b4f4a]'
                           } ${
                             !field.valid ? 'border-red-600 focus:ring-red-600/20' : ''
                           }`}
@@ -1035,9 +1035,9 @@ export function OnlineMarksEditor({
         </section>
       ) : (
         /* ALL MARKS MODE: Full scrollable spreadsheet table */
-        <section className="overflow-x-auto rounded-none border border-slate-300 bg-[#fffdf5] shadow-2xs">
+        <section className="overflow-x-auto rounded-none border border-slate-400 bg-[#fffdf5] shadow-2xs">
           <table className="w-full min-w-[760px] border-collapse text-left">
-            <thead className="bg-[#f2ece0] border-b border-slate-300 text-[10px] font-bold uppercase tracking-wide text-slate-800">
+            <thead className="bg-[#e8e0d0] border-b border-slate-400 text-[10px] font-bold uppercase tracking-wide text-slate-900">
               <tr>
                 <th className="px-3 py-2.5">Student</th>
                 {onlineMarkComponents.map((c) => (
@@ -1070,11 +1070,11 @@ export function OnlineMarksEditor({
                       <p className="text-xs font-bold text-slate-900 line-clamp-1">
                         {row.student.fullName}
                       </p>
-                      <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-medium text-slate-600">
+                      <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-slate-700">
                         <span className="font-mono whitespace-nowrap">{row.student.admissionNumber}</span>
                       </div>
                       {row.isAbsent ? (
-                        <Badge variant="warning" className="mt-0.5 rounded-none text-[9px]">
+                        <Badge variant="warning" className="mt-0.5 rounded-none text-[9px] font-bold">
                           Exam absent
                         </Badge>
                       ) : null}
@@ -1119,10 +1119,10 @@ export function OnlineMarksEditor({
                                 handleKeyDown(e, rowIndex, colIndex)
                               }
                               aria-label={`${key} mark for ${row.student.fullName}`}
-                              className={`h-9 w-full rounded-none border px-1 text-center text-xs font-bold outline-none transition focus:border-[#0b4f4a] focus:ring-2 focus:ring-[#0b4f4a]/20 disabled:bg-[#eee8d7] disabled:text-slate-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                              className={`h-9 w-full rounded-none border px-1 text-center text-xs font-bold outline-none transition placeholder:text-slate-600 placeholder:opacity-100 placeholder:font-bold focus:border-[#0b4f4a] focus:ring-2 focus:ring-[#0b4f4a]/20 disabled:bg-[#eee8d7] disabled:text-slate-600 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                                 isAbsentExam
-                                  ? 'border-amber-300 bg-amber-50/70 text-amber-900'
-                                  : 'border-slate-400 bg-[#fffdf5] text-slate-900 focus:border-[#0b4f4a]'
+                                  ? 'border-amber-400 bg-amber-50 text-amber-950 font-bold'
+                                  : 'border-slate-400 bg-[#fffdf5] text-slate-950 focus:border-[#0b4f4a]'
                               } ${
                                 !field.valid ? 'border-red-600 focus:ring-red-600/20' : ''
                               }`}
@@ -1137,7 +1137,7 @@ export function OnlineMarksEditor({
                       );
                     })}
 
-                    <td className="px-2 py-2.5 text-center text-xs font-bold text-slate-700">
+                    <td className="px-2 py-2.5 text-center text-xs font-bold text-slate-800">
                       {row.ratCatAverage === null
                         ? '—'
                         : row.ratCatAverage.toFixed(2)}
@@ -1159,7 +1159,7 @@ export function OnlineMarksEditor({
 
       {/* Pagination Strip */}
       {totalItems > 0 && pageSize !== 'all' && totalPages > 1 ? (
-        <section className="flex flex-wrap items-center justify-between gap-2 rounded-none border border-slate-300 bg-[#fbf9f1] px-3.5 py-2.5 text-xs text-slate-700 shadow-2xs">
+        <section className="flex flex-wrap items-center justify-between gap-2 rounded-none border border-slate-400 bg-[#fbf9f1] px-3.5 py-2.5 text-xs text-slate-800 shadow-2xs">
           <span className="text-[11px] font-semibold">
             Showing <strong className="text-slate-950">{startIndex}–{endIndex}</strong> of <strong className="text-slate-950">{totalItems}</strong> students
           </span>
@@ -1169,7 +1169,7 @@ export function OnlineMarksEditor({
               type="button"
               disabled={safeCurrentPage <= 1}
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              className="inline-flex h-8 items-center gap-1 rounded-none border border-slate-300 bg-[#fffdf5] px-2.5 text-xs font-bold text-slate-800 transition hover:bg-[#f2ece0] disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex h-8 items-center gap-1 rounded-none border border-slate-400 bg-[#fffdf5] px-2.5 text-xs font-bold text-slate-900 transition hover:bg-[#f2ece0] disabled:cursor-not-allowed disabled:opacity-40"
             >
               <ChevronLeft className="size-3.5" />
               <span>Prev</span>
@@ -1183,7 +1183,7 @@ export function OnlineMarksEditor({
               type="button"
               disabled={safeCurrentPage >= totalPages}
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              className="inline-flex h-8 items-center gap-1 rounded-none border border-slate-300 bg-[#fffdf5] px-2.5 text-xs font-bold text-slate-800 transition hover:bg-[#f2ece0] disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex h-8 items-center gap-1 rounded-none border border-slate-400 bg-[#fffdf5] px-2.5 text-xs font-bold text-slate-900 transition hover:bg-[#f2ece0] disabled:cursor-not-allowed disabled:opacity-40"
             >
               <span>Next</span>
               <ChevronRight className="size-3.5" />
@@ -1193,20 +1193,20 @@ export function OnlineMarksEditor({
       ) : null}
 
       {/* Helper Note */}
-      <p className="text-[10px] leading-4 text-text-muted">
+      <p className="text-xs font-semibold leading-relaxed text-slate-800">
         Missed Assignment, Presentation, or RAT default to 0. Press <strong>Enter</strong> on
         your keyboard to jump directly to the next student.
       </p>
 
       {/* Feedback Messages */}
       {error ? (
-        <p className="rounded-lg border border-danger-border bg-danger-surface px-3 py-2.5 text-[11px] text-danger">
+        <p className="rounded-lg border border-danger-border bg-danger-surface px-3 py-2.5 text-[11px] font-semibold text-danger">
           {error}
         </p>
       ) : null}
 
       {message ? (
-        <p className="flex items-center gap-1.5 text-[11px] font-medium text-success">
+        <p className="flex items-center gap-1.5 text-[11px] font-semibold text-success">
           <CheckCircle2 className="size-3.5" aria-hidden="true" />
           {message}
         </p>
@@ -1216,15 +1216,15 @@ export function OnlineMarksEditor({
       <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-200">
         <div>
           {!editable ? (
-            <p className="text-xs font-medium text-slate-600">
+            <p className="text-xs font-semibold text-slate-700">
               Results are submitted and finalized. Download the completed spreadsheet below.
             </p>
           ) : ['assignment', 'presentation', 'rat'].includes(visibleComponent) ? (
-            <p className="text-[11px] text-text-muted">
+            <p className="text-xs font-semibold text-slate-800">
               Coursework marks ({singleComponent?.label ?? 'Assignment, Presentation, RAT'}) are saved automatically and submitted together with final exam marks at the end of the semester.
             </p>
           ) : visibleComponent === 'cat' ? (
-            <p className="text-[11px] text-text-muted">
+            <p className="text-xs font-semibold text-slate-800">
               {catSubmitted
                 ? 'CAT marks submitted successfully.'
                 : unfilledSummary.missingCat > 0
@@ -1232,7 +1232,7 @@ export function OnlineMarksEditor({
                   : 'All CAT marks entered and ready for midterm submission.'}
             </p>
           ) : (
-            <p className="text-[11px] text-text-muted">
+            <p className="text-xs font-semibold text-slate-800">
               {finalSubmitted
                 ? 'Final marks submitted and markbook finalized.'
                 : unfilledSummary.totalMissing > 0

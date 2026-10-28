@@ -88,8 +88,8 @@ export default async function StudentResultsAdminPage({
       {results.length === 0 ? (
         <Card className="p-8 text-center shadow-2xs">
           <GraduationCap className="mx-auto mb-3 size-8 text-slate-300" />
-          <p className="text-sm font-semibold text-slate-600">No published results yet</p>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="text-sm font-semibold text-slate-700">No published results yet</p>
+          <p className="mt-1 text-xs font-medium text-slate-600">
             Results will appear here once assessment marks have been submitted and published by the HoD.
           </p>
         </Card>
@@ -104,11 +104,11 @@ export default async function StudentResultsAdminPage({
                 {/* Period header */}
                 <div className="flex items-center gap-2">
                   <BookOpenCheck className="size-3.5 text-primary" />
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800">
                     {periodName}
                   </h2>
                   <span className="h-px flex-1 bg-slate-200" />
-                  <span className="text-[10px] font-semibold text-slate-400">
+                  <span className="text-[10px] font-semibold text-slate-600">
                     {periodResults.length} unit{periodResults.length !== 1 ? 's' : ''}
                   </span>
                 </div>
@@ -169,16 +169,16 @@ export default async function StudentResultsAdminPage({
                                     {result.mark !== null ? result.mark : '—'}
                                   </span>
                                   {result.maximumMark ? (
-                                    <span className="text-[10px] text-slate-400"> /{result.maximumMark}</span>
+                                    <span className="text-[10px] font-medium text-slate-600"> /{result.maximumMark}</span>
                                   ) : null}
                                 </td>
                                 <td className="px-3 py-2.5 text-center">
                                   {result.mark !== null ? (
-                                    <Badge variant={grade.variant} className="text-[10px]">
+                                    <Badge variant={grade.variant} className="text-[10px] font-bold">
                                       {grade.label}
                                     </Badge>
                                   ) : (
-                                    <span className="text-[10px] text-slate-400">—</span>
+                                    <span className="text-[10px] font-bold text-slate-600">—</span>
                                   )}
                                 </td>
                               </tr>
@@ -201,7 +201,7 @@ export default async function StudentResultsAdminPage({
                     </div>
                     <div className="overflow-x-auto">
                       <table className="w-full text-left text-xs">
-                        <thead className="border-b border-slate-100 bg-slate-50 text-[11px] font-bold text-slate-500">
+                        <thead className="border-b border-slate-100 bg-slate-50 text-[11px] font-bold text-slate-700">
                           <tr>
                             <th className="px-4 py-2.5">Unit</th>
                             <th className="px-3 py-2.5 text-center">Mark</th>
@@ -218,16 +218,16 @@ export default async function StudentResultsAdminPage({
                                 <td className="px-3 py-2.5 text-center font-mono font-bold text-slate-900">
                                   {result.mark !== null ? result.mark : '—'}
                                 </td>
-                                <td className="px-3 py-2.5 text-center font-mono text-slate-400">
+                                <td className="px-3 py-2.5 text-center font-mono font-medium text-slate-700">
                                   {result.maximumMark ?? '—'}
                                 </td>
                                 <td className="px-3 py-2.5 text-center">
                                   {result.mark !== null ? (
-                                    <Badge variant={grade.variant} className="text-[10px]">
+                                    <Badge variant={grade.variant} className="text-[10px] font-bold">
                                       {grade.label}
                                     </Badge>
                                   ) : (
-                                    <span className="text-[10px] text-slate-400">—</span>
+                                    <span className="text-[10px] font-bold text-slate-600">—</span>
                                   )}
                                 </td>
                               </tr>

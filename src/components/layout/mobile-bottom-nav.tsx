@@ -53,8 +53,8 @@ export function MobileBottomNav({
           );
 
           const tabClassName = cn(
-            'flex flex-col items-center gap-0.5 py-2 text-[10px] font-semibold transition active:bg-gray-50',
-            item.isActive ? activeClassName : 'text-gray-400',
+            'flex flex-col items-center gap-0.5 py-2 text-[10px] font-bold transition active:bg-gray-50',
+            item.isActive ? activeClassName : 'text-slate-600 hover:text-slate-900',
           );
 
           if (item.href) {

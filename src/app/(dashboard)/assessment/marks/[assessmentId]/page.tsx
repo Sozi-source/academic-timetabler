@@ -138,12 +138,12 @@ export default async function AssessmentMarkWorkflowPage({
 
       {/* Summary Telemetry */}
       <div className="grid gap-3 sm:grid-cols-3">
-        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
+        <div className="flex items-center gap-3 rounded-xl border border-slate-300 bg-white p-3.5 shadow-2xs">
           <span className="flex size-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
             <UsersRound className="size-4" />
           </span>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-600">
               Total Candidates
             </p>
             <p className="text-sm font-bold text-slate-900">
@@ -152,12 +152,12 @@ export default async function AssessmentMarkWorkflowPage({
           </div>
         </div>
 
-        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
+        <div className="flex items-center gap-3 rounded-xl border border-slate-300 bg-white p-3.5 shadow-2xs">
           <span className="flex size-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
             <CheckCircle2 className="size-4" />
           </span>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-600">
               Recorded Results
             </p>
             <p className="text-sm font-bold text-slate-900">
@@ -166,12 +166,12 @@ export default async function AssessmentMarkWorkflowPage({
           </div>
         </div>
 
-        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
+        <div className="flex items-center gap-3 rounded-xl border border-slate-300 bg-white p-3.5 shadow-2xs">
           <span className="flex size-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
             <FileText className="size-4" />
           </span>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-600">
               Markbook Mode
             </p>
             <p className="text-sm font-bold text-slate-900">

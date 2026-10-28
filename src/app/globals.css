@@ -37,23 +37,23 @@
 
   /* Navigation */
   --navigation-background: #ffffff;
-  --navigation-border: #e1dfdd;
-  --navigation-text: #605e5c;
-  --navigation-hover: #f3f2f1;
+  --navigation-border: #cbd5e1;
+  --navigation-text: #334155;
+  --navigation-hover: #f1f5f9;
   --navigation-active: #e6f4f2;
   --navigation-active-text: #00756a;
 
-  /* Typography Colors — Microsoft Dynamics 365 Business Central standard */
-  --text-primary: #201f1e;
-  --text-secondary: #605e5c;
-  --text-muted: #797775;
-  --text-subtle: #a19f9d;
+  /* Typography Colors — Accessible high-contrast standards */
+  --text-primary: #111827;
+  --text-secondary: #374151;
+  --text-muted: #4b5563;
+  --text-subtle: #6b7280;
   --text-inverse: #ffffff;
 
-  /* Borders & Dividers — Microsoft Fluent standard */
-  --border: #e1dfdd;
-  --border-soft: #edebe9;
-  --border-strong: #c8c6c4;
+  /* Borders & Dividers — High-contrast boundaries (>= 3:1 contrast against surface) */
+  --border: #c4c8cd;
+  --border-soft: #d5d9de;
+  --border-strong: #9ca3af;
 
   /* Focus & Controls */
   --focus-ring: #91c5c0;
@@ -193,8 +193,19 @@ body {
   font-kerning: normal;
   font-variant-numeric: proportional-nums;
   text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+}
+
+::placeholder {
+  color: var(--text-subtle);
+  opacity: 1;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-subtle);
+  opacity: 1;
 }
 
 button, input, select, textarea {

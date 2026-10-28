@@ -133,7 +133,7 @@ export function DataTable<TData, TValue>({
                             key={header.id}
                             colSpan={header.colSpan}
                             style={widthStyle}
-                            className="min-w-0 break-words px-2.5 py-2.5 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted xl:px-3"
+                            className="min-w-0 break-words px-2.5 py-2.5 text-[10px] font-bold uppercase tracking-[0.14em] text-text-primary xl:px-3"
                           >
                             {header.isPlaceholder ? null : (
                               <button
@@ -203,7 +203,7 @@ export function DataTable<TData, TValue>({
                         <td
                           key={cell.id}
                           style={widthStyle}
-                          className="min-w-0 break-words px-2.5 py-2.5 h-11 align-middle text-[12px] leading-5 xl:px-3 xl:text-[13px] text-text-secondary"
+                          className="min-w-0 break-words px-2.5 py-2.5 h-11 align-middle text-[12px] font-medium leading-5 xl:px-3 xl:text-[13px] text-text-primary"
                         >
                           {flexRender(
                             cell.column.columnDef.cell,

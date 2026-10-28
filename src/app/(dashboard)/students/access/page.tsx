@@ -54,63 +54,63 @@ export default async function StudentPortalAccessPage() {
 
       {/* Summary Telemetry Strip */}
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
+        <div className="flex items-center gap-3 rounded-xl border border-slate-300 bg-white p-3.5 shadow-2xs">
           <span className="flex size-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
             <UsersRound className="size-4" />
           </span>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-600">
               Eligible Students
             </p>
             <p className="text-sm font-bold text-slate-900">
               {summary.eligible}
             </p>
-            <p className="text-[11px] text-slate-500">Active enrollments</p>
+            <p className="text-[11px] font-medium text-slate-600">Active enrollments</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
+        <div className="flex items-center gap-3 rounded-xl border border-slate-300 bg-white p-3.5 shadow-2xs">
           <span className="flex size-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
             <UserCheck className="size-4" />
           </span>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-600">
               Accounts Activated
             </p>
             <p className="text-sm font-bold text-slate-900">
               {summary.issued} / {summary.eligible}
             </p>
-            <p className="text-[11px] text-slate-500">{summary.notIssued} not yet activated</p>
+            <p className="text-[11px] font-medium text-slate-600">{summary.notIssued} not yet activated</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
+        <div className="flex items-center gap-3 rounded-xl border border-slate-300 bg-white p-3.5 shadow-2xs">
           <span className="flex size-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
             <ShieldCheck className="size-4" />
           </span>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-600">
               Active Access
             </p>
             <p className="text-sm font-bold text-slate-900">
               {summary.active} Active
             </p>
-            <p className="text-[11px] text-slate-500">{summary.disabled} disabled</p>
+            <p className="text-[11px] font-medium text-slate-600">{summary.disabled} disabled</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
+        <div className="flex items-center gap-3 rounded-xl border border-slate-300 bg-white p-3.5 shadow-2xs">
           <span className="flex size-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
             <LockKeyhole className="size-4" />
           </span>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-600">
               Locked Accounts
             </p>
             <p className="text-sm font-bold text-slate-900">
               {summary.locked}
             </p>
-            <p className="text-[11px] text-slate-500">{summary.neverSignedIn} never signed in</p>
+            <p className="text-[11px] font-medium text-slate-600">{summary.neverSignedIn} never signed in</p>
           </div>
         </div>
       </section>

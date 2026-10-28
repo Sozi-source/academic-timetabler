@@ -128,7 +128,7 @@ export function StaffShell({ profile, children }: StaffShellProps) {
         <div className="space-y-6 px-3 py-5 overflow-y-auto max-h-[calc(100vh-140px)]">
           {NAV_SECTIONS.map((section) => (
             <div key={section.title} className="space-y-1.5">
-              <p className="px-3 text-[10px] font-bold uppercase tracking-[0.08em] text-white/55">
+              <p className="px-3 text-[10px] font-bold uppercase tracking-[0.08em] text-white/75">
                 {section.title}
               </p>
               <div className="space-y-1">
@@ -146,7 +146,7 @@ export function StaffShell({ profile, children }: StaffShellProps) {
                         'group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs transition',
                         isActive
                           ? 'border-l-[3px] border-l-[#ffd400] bg-white/13 text-white font-bold shadow-sm'
-                          : 'text-white/75 hover:bg-white/8 hover:text-white font-bold'
+                          : 'text-white/85 hover:bg-white/10 hover:text-white font-bold'
                       )}
                     >
                       <NavigationProgress />
@@ -156,7 +156,7 @@ export function StaffShell({ profile, children }: StaffShellProps) {
                       <Icon
                         className={cn(
                           'size-4.5 shrink-0 transition',
-                          isActive ? 'text-[#ffd400]' : 'text-white/65 group-hover:text-white'
+                          isActive ? 'text-[#ffd400]' : 'text-white/75 group-hover:text-white'
                         )}
                       />
                       <span className="truncate">{item.label}</span>

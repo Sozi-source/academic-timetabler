@@ -185,17 +185,17 @@ export default async function StaffTimetablePage() {
                                         <p className="font-bold text-slate-900 leading-snug">
                                           {session.unitName}
                                         </p>
-                                        <div className="mt-1 flex items-center justify-between text-[11px] text-slate-600">
-                                          <span className="flex items-center gap-1 font-medium">
-                                            <MapPin className="size-3 text-slate-400" />
+                                        <div className="mt-1 flex items-center justify-between text-[11px] text-slate-700">
+                                          <span className="flex items-center gap-1 font-semibold">
+                                            <MapPin className="size-3 text-slate-600" />
                                             {session.roomLabel}
                                           </span>
-                                          <span className="capitalize text-[10px] text-slate-500">
+                                          <span className="capitalize text-[10px] font-semibold text-slate-600">
                                             {session.deliveryMode}
                                           </span>
                                         </div>
                                         {session.cohortNames.length > 0 && (
-                                          <p className="mt-0.5 text-[10px] text-slate-500 truncate" title={session.cohortNames.join(', ')}>
+                                          <p className="mt-0.5 text-[10px] font-medium text-slate-700 truncate" title={session.cohortNames.join(', ')}>
                                             {session.cohortNames.join(' · ')}
                                           </p>
                                         )}
@@ -266,14 +266,14 @@ export default async function StaffTimetablePage() {
                               {session.unitName}
                             </p>
 
-                            <div className="flex items-center justify-between text-[11px] text-slate-600 pt-0.5">
-                              <span className="flex items-center gap-1">
-                                <MapPin className="size-3 text-slate-400" />
+                            <div className="flex items-center justify-between text-[11px] text-slate-700 pt-0.5">
+                              <span className="flex items-center gap-1 font-semibold">
+                                <MapPin className="size-3 text-slate-600" />
                                 {session.roomLabel}
                               </span>
                               {session.cohortNames.length > 0 && (
-                                <span className="flex items-center gap-1 text-slate-500 truncate max-w-[160px]">
-                                  <Users className="size-3 text-slate-400" />
+                                <span className="flex items-center gap-1 font-medium text-slate-700 truncate max-w-[160px]">
+                                  <Users className="size-3 text-slate-600" />
                                   {session.cohortNames.join(' · ')}
                                 </span>
                               )}

@@ -61,7 +61,7 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-[0.72rem] font-bold leading-tight text-white tracking-tight">Results & Exams</p>
-            <p className="mt-0.5 truncate text-[0.64rem] font-medium text-slate-400">Academic Analytics</p>
+            <p className="mt-0.5 truncate text-[0.64rem] font-medium text-slate-300">Academic Analytics</p>
           </div>
         </Link>
       </div>
@@ -69,19 +69,19 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
       <nav className="flex min-h-0 flex-1 flex-col overflow-y-auto px-2.5 py-4">
         <div className="space-y-3.5">
           <div>
-            <p className="mb-1.5 px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">Navigation</p>
+            <p className="mb-1.5 px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-300">Navigation</p>
             <Link
               href="/dashboard"
               onClick={() => setMobileOpen(false)}
-              className="flex min-h-10 w-full items-center gap-2 rounded-xl px-2.5 py-2 text-[0.72rem] font-semibold text-slate-300 transition hover:bg-[#16273e] hover:text-white"
+              className="flex min-h-10 w-full items-center gap-2 rounded-xl px-2.5 py-2 text-[0.72rem] font-semibold text-slate-200 transition hover:bg-[#16273e] hover:text-white"
             >
-              <ArrowLeft className="size-3.5 shrink-0 text-slate-400" />
+              <ArrowLeft className="size-3.5 shrink-0 text-slate-300" />
               <span className="truncate">Module Hub</span>
             </Link>
           </div>
 
           <div>
-            <p className="mb-1.5 px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">Analysis & Reports</p>
+            <p className="mb-1.5 px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-300">Analysis & Reports</p>
             <div className="space-y-1">
               {NAVIGATION_ITEMS.map((item) => {
                 const active = pathname === item.href || (item.href !== '/assessment' && pathname.startsWith(item.href));
@@ -95,10 +95,10 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
                       'relative flex min-h-10 w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-[0.72rem] font-semibold transition-all duration-150',
                       active
                         ? 'bg-[#16273e] text-white shadow-xs border-l-2 border-l-sky-400 font-bold'
-                        : 'text-slate-300 hover:bg-[#16273e]/60 hover:text-white',
+                        : 'text-slate-200 hover:bg-[#16273e]/60 hover:text-white',
                     )}
                   >
-                    <Icon className={cn('size-3.5 shrink-0', active ? 'text-sky-400' : 'text-slate-400')} />
+                    <Icon className={cn('size-3.5 shrink-0', active ? 'text-sky-400' : 'text-slate-300')} />
                     <span className="truncate">{item.label}</span>
                   </Link>
                 );

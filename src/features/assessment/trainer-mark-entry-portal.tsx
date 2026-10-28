@@ -607,10 +607,10 @@ export function TrainerMarkEntryPortal() {
                                 disabled={readOnly || isFieldSubmitted}
                                 onFocus={(e) => e.currentTarget.select()}
                                 onChange={(event) => updateMark(student.assessmentId, student.studentId, field.key, event.target.value)}
-                                className={`h-10 w-20 rounded-md border px-2 text-center text-base tabular-nums outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100 disabled:bg-slate-100 sm:h-9 sm:text-xs ${
+                                className={`h-10 w-20 rounded-md border px-2 text-center text-base tabular-nums font-bold outline-none placeholder:text-slate-600 placeholder:opacity-100 placeholder:font-bold focus:border-teal-600 focus:ring-2 focus:ring-teal-100 disabled:bg-slate-100 sm:h-9 sm:text-xs ${
                                   isAbsentExam
-                                    ? 'border-amber-300 bg-amber-50/70 font-semibold text-amber-900'
-                                    : 'border-slate-300 bg-white text-slate-900'
+                                    ? 'border-amber-400 bg-amber-50 font-bold text-amber-950'
+                                    : 'border-slate-400 bg-white text-slate-950'
                                 }`}
                               />
                             </td>

@@ -199,7 +199,7 @@ export function AdminSidebar({
             <h1 className="truncate text-[0.72rem] font-bold tracking-tight text-white leading-tight">
               Department Management
             </h1>
-            <p className="truncate text-[0.64rem] font-medium text-white/55">
+            <p className="truncate text-[0.64rem] font-medium text-white/80">
               {departmentName}
             </p>
           </div>
@@ -210,7 +210,7 @@ export function AdminSidebar({
             type="button"
             onClick={onMobileClose}
             aria-label="Close navigation"
-            className="flex size-7 items-center justify-center rounded-lg text-white/45 transition hover:bg-white/10 hover:text-white lg:hidden"
+            className="flex size-7 items-center justify-center rounded-lg text-white/70 transition hover:bg-white/10 hover:text-white lg:hidden"
           >
             <X className="size-4" aria-hidden="true" />
           </button>
@@ -222,7 +222,7 @@ export function AdminSidebar({
         {adminNavSections.map((section, sIdx) => (
           <div key={section.title || `section-${sIdx}`} className="space-y-1">
             {section.title ? (
-              <p className="px-3 pt-1 pb-1 text-[0.62rem] font-bold uppercase tracking-[0.16em] text-white/40">
+              <p className="px-3 pt-1 pb-1 text-[0.62rem] font-bold uppercase tracking-[0.16em] text-white/75">
                 {section.title}
               </p>
             ) : null}
@@ -245,8 +245,8 @@ export function AdminSidebar({
                   className={cn(
                     'group relative flex min-h-10 items-center gap-2.5 rounded-xl px-3 py-2 text-[0.72rem] font-semibold transition-all duration-150',
                     isActive
-                      ? 'bg-white/10 text-[#f5c400] font-semibold shadow-sm ring-1 ring-white/5'
-                      : 'text-white/65 hover:bg-white/8 hover:text-white',
+                      ? 'bg-white/10 text-[#f5c400] font-bold shadow-sm ring-1 ring-white/10'
+                      : 'text-white/85 hover:bg-white/10 hover:text-white',
                   )}
                 >
                   {/* Left Accent Bar for Active State */}
@@ -260,7 +260,7 @@ export function AdminSidebar({
                   <Icon
                     className={cn(
                       'size-4 shrink-0 transition-colors',
-                      isActive ? 'text-[#f5c400]' : 'text-white/45 group-hover:text-white',
+                      isActive ? 'text-[#f5c400]' : 'text-white/70 group-hover:text-white',
                     )}
                     aria-hidden="true"
                   />
@@ -284,9 +284,9 @@ export function AdminSidebar({
         <Link
           href="/staff"
           onClick={onMobileClose}
-          className="flex w-full items-center gap-2.5 min-h-10 rounded-xl px-2.5 py-2 text-[0.72rem] font-semibold text-white/65 transition-colors hover:bg-white/8 hover:text-white"
+          className="flex w-full items-center gap-2.5 min-h-10 rounded-xl px-2.5 py-2 text-[0.72rem] font-semibold text-white/85 transition-colors hover:bg-white/10 hover:text-white"
         >
-          <User className="size-4 shrink-0 text-white/45" aria-hidden="true" />
+          <User className="size-4 shrink-0 text-white/70" aria-hidden="true" />
           <span>My Trainer Workspace</span>
         </Link>
 

@@ -770,7 +770,7 @@ export function TVETDocumentViewer({
                               ))}
                             </ul>
                           ) : (
-                            <span className="text-slate-400 italic text-[9px]">—</span>
+                            <span className="text-slate-600 font-bold italic text-[9px]">—</span>
                           )}
                         </td>
                         {/* SLOs: bold preamble followed by individual bullet lines */}
@@ -789,7 +789,7 @@ export function TVETDocumentViewer({
                               ))}
                             </ul>
                           ) : (
-                            <span className="text-slate-400 italic">—</span>
+                            <span className="text-slate-600 font-bold italic">—</span>
                           )}
                         </td>
                         {/* Resources: each resource on a new line, widened column */}
@@ -804,7 +804,7 @@ export function TVETDocumentViewer({
                               ))}
                             </ul>
                           ) : (
-                            <span className="text-slate-400 italic">—</span>
+                            <span className="text-slate-600 font-bold italic">—</span>
                           )}
                         </td>
                         {/* Assessment & Remarks: with college scheduled dates */}
@@ -828,7 +828,7 @@ export function TVETDocumentViewer({
                               )}
                             </div>
                           ) : (
-                            <span className="text-slate-400">—</span>
+                            <span className="text-slate-600 font-bold">—</span>
                           )}
                         </td>
                       </tr>
@@ -948,12 +948,12 @@ function SectionHeading({ number, title }: { number: string; title: string }) {
  * followed by each outcome on its own discrete line.
  */
 export function SLOBullets({ text }: { text?: string | null }) {
-  if (!text || !text.trim()) return <span className="text-slate-400 italic">—</span>;
+  if (!text || !text.trim()) return <span className="text-slate-600 font-bold italic">—</span>;
 
   const outcomes = parseSLOOutcomes(text);
 
   if (outcomes.length === 0) {
-    return <span className="text-slate-400 italic">—</span>;
+    return <span className="text-slate-600 font-bold italic">—</span>;
   }
 
   return (

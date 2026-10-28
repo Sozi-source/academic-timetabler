@@ -31,7 +31,7 @@ function ReportCard({
             className={`flex size-7 items-center justify-center rounded-lg ${
               ready
                 ? 'bg-slate-100 text-slate-700'
-                : 'bg-slate-50 text-slate-400'
+                : 'bg-slate-100 text-slate-600'
             }`}
           >
             {ready ? (
@@ -42,10 +42,10 @@ function ReportCard({
           </div>
         </div>
 
-        <p className="mt-3 text-[11px] font-medium text-slate-600">{status}</p>
+        <p className="mt-3 text-[11px] font-semibold text-slate-700">{status}</p>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-slate-100">
+      <div className="mt-4 pt-3 border-t border-slate-200">
         {ready ? (
           <a
             href={href}
@@ -55,7 +55,7 @@ function ReportCard({
             Download Word (.docx)
           </a>
         ) : (
-          <span className="inline-flex h-8 items-center rounded-lg border border-slate-100 bg-slate-50 px-3 text-xs font-semibold text-slate-400">
+          <span className="inline-flex h-8 items-center rounded-lg border border-slate-200 bg-slate-100 px-3 text-xs font-semibold text-slate-600">
             Awaiting mark submissions
           </span>
         )}

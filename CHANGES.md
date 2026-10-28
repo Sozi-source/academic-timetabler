@@ -9,6 +9,10 @@
   - For Final Exam submission (`marksheetType: 'final'`): outputs `CAT /30` (aggregate of all courseworks: Assignment /5 + Presentation /10 + RAT /15 + CAT /15 scaled out of 30) and `Exam /70`, plus `Final /100` and institutional grade.
 - `src/app/api/staff/assessment/[assessmentId]/markbook/route.ts` & `src/app/api/assessment/markbooks/[assessmentId]/download/route.ts` — supports `?type=cat` and `?type=final` query params, ensures marksheets are only downloadable after marks are submitted, and outputs clean filenames.
 - `src/features/staff-assessment/online-marks-editor.tsx` — updated action bar and toolbar to download CAT Marksheet (`/15`) after CAT submission, or Final Marksheet (`CAT /30 + Exam /70 = 100`) after final submission.
+- `src/app/(dashboard)/assessment/assessments/page.tsx` — retired the redundant "New unit markbook" manual creation form, streamlining the page into a clean "Unit markbooks & grading oversight" view aligned with the online workflow.
+- `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx` & `src/features/staff-assessment/online-marks-editor.tsx` — removed the legacy offline Excel `BulkUploadDialog` from both the HOD markbook page and the trainer online editor toolbar in favor of unified online marks entry.
+- `src/features/assessment/assessment-control-center.tsx` — updated action labels from "Trainer links" to "View cohorts & marks".
+- `vitest.config.mts` & `src/tests/empty-module.ts` — configured `server-only` alias to ensure test runner passes without module resolution conflicts on Next.js server actions.
 - `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx` & `src/features/assessment/assessment-unit-cohorts.tsx` — removed confusing token invite link generator components (`TrainerMarkInvites` and `TrainerUnitMarkInvites`).
 - `src/app/trainer-mark-entry/page.tsx` — replaced token invite interface with an informative portal router directing trainers to External Trainer PIN Login (`/external-trainer/login`) or Staff Portal (`/staff`).
 

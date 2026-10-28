@@ -5,7 +5,6 @@ import { notFound } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/ui/page-header';
 import { DownloadAssessmentMarkbookButton } from '@/features/assessment/markbook-controls';
-import { BulkUploadDialog } from '@/features/assessment/marks/bulk-upload-dialog';
 import { getAssessmentById, getAssessmentPopulation } from '@/features/assessment/queries';
 import { unlockAssessmentMarkComponentAction } from '@/features/assessment/marks/actions';
 import { getAssessmentMarkComponentSubmissions, getAssessmentResultCount } from '@/features/assessment/marks/queries';
@@ -85,13 +84,6 @@ export default async function AssessmentMarkWorkflowPage({
               <UsersRound className="size-3.5 text-slate-500" />
               <span>Assessment Population</span>
             </Link>
-            {!isComplete && !marksSubmitted ? (
-              <BulkUploadDialog
-                assessmentId={assessment.id}
-                unitName={assessment.unit?.name ?? 'Unit Marksheet'}
-                mode="admin"
-              />
-            ) : null}
             <DownloadAssessmentMarkbookButton
               assessmentId={assessment.id}
               unitName={assessment.unit?.name ?? 'Unit Marksheet'}

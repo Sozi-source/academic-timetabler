@@ -186,7 +186,7 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                   href={`/assessment/unit/${unit.unitId}?periodId=${data.selectedPeriodId}`}
                   className="inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-primary/20 bg-primary/5 px-3 text-sm font-semibold text-primary transition hover:bg-primary/10"
                 >
-                  Trainer links
+                  View cohorts & marks
                 </Link>
               </article>
             ))}
@@ -231,7 +231,7 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                         href={`/assessment/unit/${unit.unitId}?periodId=${data.selectedPeriodId}`}
                         className="inline-flex h-7 items-center justify-center rounded-lg border border-primary/20 bg-surface px-2.5 text-[11px] font-medium text-primary transition hover:bg-primary/5"
                       >
-                        Trainer links
+                        View cohorts & marks
                       </Link>
                     </td>
                   </tr>

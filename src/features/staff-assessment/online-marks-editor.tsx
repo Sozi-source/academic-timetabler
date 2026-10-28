@@ -12,7 +12,6 @@ import {
   RotateCcw,
   Search,
   Send,
-  Upload,
   X,
 } from 'lucide-react';
 import {
@@ -30,12 +29,6 @@ import {
 import {
   Button,
 } from '@/components/ui/button';
-import {
-  BulkUploadDialog,
-} from '@/features/assessment/marks/bulk-upload-dialog';
-import type {
-  MatchedBulkStudentResult,
-} from '@/features/assessment/marks/bulk-upload-parser';
 
 import {
   calculateOnlineFinalTotal,
@@ -142,26 +135,6 @@ export function OnlineMarksEditor({
     setSubmissions(componentSubmissions);
   }
 
-  // Callback invoked by BulkUploadDialog: merges spreadsheet data into editor state
-  const applyBulkMarks = (matched: MatchedBulkStudentResult[]) => {
-    setIsDirty(true);
-    setSaveStatus('unsaved');
-    setValues((prev) => {
-      const next = { ...prev };
-      for (const m of matched) {
-        if (!next[m.studentId]) continue;
-        next[m.studentId] = {
-          assignment: m.assignment !== null ? String(m.assignment) : '',
-          presentation: m.presentation !== null ? String(m.presentation) : '',
-          rat: m.rat !== null ? String(m.rat) : '',
-          cat: m.cat !== null ? String(m.cat) : '',
-          exam: m.attendanceStatus === 'absent' ? 'AB' : m.exam !== null ? String(m.exam) : '',
-        };
-      }
-      return next;
-    });
-    setMessage(`Bulk upload applied for ${matched.length} student(s). Review and save when ready.`);
-  };
 
   const editable = trainerEntryOpen && canEditOnlineMarks(workflowStatus);
 
@@ -825,23 +798,6 @@ export function OnlineMarksEditor({
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="neutral" className="rounded-none border border-slate-300 bg-[#fffdf5] font-semibold text-slate-800">Scale /100</Badge>
-          {editable ? (
-            <BulkUploadDialog
-              assessmentId={assessmentId}
-              mode="staff"
-              onAppliedToEditor={applyBulkMarks}
-              onSaveSuccess={() => router.refresh()}
-              trigger={
-                <button
-                  type="button"
-                  className="inline-flex h-8 items-center gap-1.5 rounded-none border border-slate-300 bg-[#fffdf5] px-2.5 text-xs font-bold text-slate-800 transition hover:bg-[#f2ece0]"
-                >
-                  <Upload className="size-3.5 text-slate-500" />
-                  <span>Bulk Upload</span>
-                </button>
-              }
-            />
-          ) : null}
           <Button
             type="button"
             variant="outline"

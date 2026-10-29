@@ -1,10 +1,8 @@
 import {
   BookOpen,
   CalendarCheck2,
-  ChevronRight,
   Download,
   FileSpreadsheet,
-  Keyboard,
   UploadCloud,
   PlusCircle,
   UsersRound,
@@ -29,10 +27,6 @@ import {
 import {
   requireStaffAllocation,
 } from '@/features/staff-assessment/queries';
-import type {
-  StaffAssessmentSummary,
-  StaffUnitAllocation,
-} from '@/features/staff-assessment/types';
 import {
   getRecordOfWorkContext,
 } from '@/features/teaching-documents/record-of-work-online/queries';
@@ -42,46 +36,6 @@ interface PageProps {
   params: Promise<{
     allocationId: string;
   }>;
-}
-
-function MarksCard({
-  allocation,
-}: {
-  allocation: StaffUnitAllocation;
-}) {
-  const assessment = allocation.exam;
-  const assessmentId = assessment?.assessmentId ?? 'exam';
-  const registeredCount = assessment?.registered ?? 0;
-  const absentCount = assessment?.absent ?? 0;
-  const status = assessment?.workflowStatus ?? 'draft';
-
-  return (
-    <Link
-      href={`/staff/units/${allocation.allocationId}/assessment/${assessmentId}/marks`}
-      className="group flex items-center justify-between rounded-xl border border-border border-l-4 border-l-primary bg-surface p-4 shadow-xs transition hover:border-border-strong hover:bg-surface-subtle"
-    >
-      <div className="flex items-center gap-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary">
-          <Keyboard className="size-4.5" aria-hidden="true" />
-        </span>
-        <div>
-          <div className="flex items-center gap-2">
-            <h3 className="text-sm font-bold text-text-primary">Marks Entry</h3>
-            <Badge variant="neutral" className="capitalize">{status}</Badge>
-            {assessment?.published ? <Badge variant="success">Published</Badge> : null}
-          </div>
-          <p className="mt-0.5 text-xs text-text-muted">
-            {registeredCount} registered students{absentCount > 0 ? ` · ${absentCount} absent` : ''}
-          </p>
-        </div>
-      </div>
-
-      <span className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-white shadow-xs transition group-hover:bg-primary-hover">
-        <Keyboard className="size-3.5" />
-        Enter marks
-      </span>
-    </Link>
-  );
 }
 
 export default async function StaffUnitPage({
@@ -123,17 +77,7 @@ export default async function StaffUnitPage({
         }
       />
 
-      {/* 1. Assessment & Marks */}
-      <section className="space-y-2">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-text-muted">
-          Assessment & Marks
-        </h2>
-        <MarksCard
-          allocation={allocation}
-        />
-      </section>
-
-      {/* 2. Teaching Documents */}
+      {/* Teaching Documents */}
       <section className="space-y-2.5">
         <h2 className="text-xs font-bold uppercase tracking-wider text-text-muted">
           Teaching Documents

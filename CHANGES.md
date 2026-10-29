@@ -1,3 +1,12 @@
+### 2026-10-29: Separate trainer marks entry from unit documents
+
+**Modified:**
+- `src/app/(staff)/staff/units/page.tsx` — converted unit cards into a trainer worklist with distinct **Enter marks** and **Unit documents** actions. A single available assessment opens directly; units with multiple assessment options open the marks chooser.
+- `src/app/(staff)/staff/units/[allocationId]/marks/page.tsx` — added a cohort-aware assessment chooser for grouped units and CAT/exam markbooks, with entry/view states and existing trainer allocation authorization.
+- `src/app/(staff)/staff/units/[allocationId]/page.tsx` — removed the embedded marks entry card so the allocation page is for teaching documents.
+
+Existing roster rules and mark-entry APIs are unchanged. No database or manual follow-up required.
+
 ### 2026-10-29: Hide assessment population screens and correct candidate counts
 
 **Modified:**

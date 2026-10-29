@@ -1,3 +1,11 @@
+### 2026-10-29: Date-filtered student missed-class report
+
+**Modified:**
+- `src/features/attendance-analytics/queries.ts` — added a department-RLS-backed query for completed class absences with student, cohort, date, and unit details.
+- `src/app/(dashboard)/attendance-clinical/class-attendance/analytics/page.tsx` — added start/end date filters and a missed-class table to Attendance Analytics.
+
+No schema changes or manual follow-up required.
+
 ### 2026-10-29: Redundant Markbooks cleanup, floating submit action, and automated AB absent mark workflow
 
 **Modified:**

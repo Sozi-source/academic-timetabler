@@ -23,6 +23,7 @@ import {
 } from '@/features/attendance-analytics/domain';
 import {
   getDepartmentAttendanceAnalytics,
+  getMissedClassReport,
   getDepartmentStudentAttendanceAnalytics,
 } from '@/features/attendance-analytics/queries';
 import { HodAttendanceView } from '@/features/attendance-analytics/hod-attendance-view';
@@ -30,16 +31,26 @@ import {
   requireHodAccess,
 } from '@/features/auth/authorization';
 
-export default async function AttendanceAnalyticsPage() {
+export default async function AttendanceAnalyticsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ startDate?: string; endDate?: string }>;
+}) {
   await requireHodAccess();
+  const params = await searchParams;
+  const today = new Date().toISOString().slice(0, 10);
+  const startDate = /^\d{4}-\d{2}-\d{2}$/.test(params.startDate ?? '') ? params.startDate! : today.slice(0, 8) + '01';
+  const endDate = /^\d{4}-\d{2}-\d{2}$/.test(params.endDate ?? '') ? params.endDate! : today;
 
   const [
     aggregates,
     students,
+    missedClasses,
   ] =
     await Promise.all([
       getDepartmentAttendanceAnalytics(),
       getDepartmentStudentAttendanceAnalytics(),
+      getMissedClassReport(startDate, endDate),
     ]);
 
   const present =
@@ -164,6 +175,18 @@ export default async function AttendanceAnalyticsPage() {
           description="Present ÷ recorded attendance"
           icon={BarChart3}
         />
+      </section>
+
+      <section className="overflow-hidden rounded-xl border border-border bg-white">
+        <div className="flex flex-wrap items-end justify-between gap-3 border-b border-border px-4 py-3">
+          <div><h2 className="text-sm font-bold text-text-primary">Students who missed class</h2><p className="mt-1 text-xs text-text-muted">Recorded absences and the units missed during the selected period.</p></div>
+          <form className="flex flex-wrap items-end gap-2">
+            <label className="grid gap-1 text-xs font-medium text-text-secondary">From<input name="startDate" type="date" defaultValue={startDate} className="h-9 rounded-md border border-border px-2" /></label>
+            <label className="grid gap-1 text-xs font-medium text-text-secondary">To<input name="endDate" type="date" defaultValue={endDate} className="h-9 rounded-md border border-border px-2" /></label>
+            <button className="h-9 rounded-md bg-primary px-3 text-xs font-semibold text-white" type="submit">Filter</button>
+          </form>
+        </div>
+        {missedClasses.length ? <div className="overflow-x-auto"><table className="w-full min-w-[650px] text-left text-xs"><thead className="bg-surface-subtle text-text-muted"><tr><th className="px-4 py-2.5">Date</th><th className="px-3 py-2.5">Admission no.</th><th className="px-3 py-2.5">Student</th><th className="px-3 py-2.5">Cohort</th><th className="px-3 py-2.5">Unit missed</th></tr></thead><tbody className="divide-y divide-border">{missedClasses.map((row, index) => <tr key={`${row.admissionNumber}-${row.sessionDate}-${row.unitCode}-${index}`}><td className="px-4 py-2.5">{row.sessionDate}</td><td className="px-3 py-2.5">{row.admissionNumber}</td><td className="px-3 py-2.5 font-semibold text-text-primary">{row.fullName}</td><td className="px-3 py-2.5">{row.cohortName}</td><td className="px-3 py-2.5">{row.unitCode} {row.unitName}</td></tr>)}</tbody></table></div> : <p className="px-4 py-6 text-center text-xs text-text-muted">No recorded absences from {startDate} to {endDate}.</p>}
       </section>
 
       <HodAttendanceView aggregates={aggregates} students={students} />

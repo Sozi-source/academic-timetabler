@@ -280,6 +280,60 @@ Promise<StudentAttendanceAggregate[]> {
   );
 }
 
+export interface MissedClassReportRow {
+  sessionDate: string;
+  admissionNumber: string;
+  fullName: string;
+  cohortName: string;
+  unitCode: string;
+  unitName: string;
+}
+
+export async function getMissedClassReport(startDate: string, endDate: string): Promise<MissedClassReportRow[]> {
+  const supabase = await createClient();
+  let sessionsQuery = supabase
+    .from('class_sessions')
+    .select('id, session_date, unit_id, units!class_sessions_unit_id_fkey(code, name)')
+    .gte('session_date', startDate)
+    .lte('session_date', endDate)
+    .eq('status', 'completed');
+  const { data: sessions, error: sessionsError } = await sessionsQuery;
+  if (sessionsError) throw new Error(`Unable to load class sessions: ${sessionsError.message}`);
+  if (!sessions?.length) return [];
+
+  const { data: entries, error: entriesError } = await supabase
+    .from('class_attendance_entries')
+    .select('class_session_id, student_id')
+    .in('class_session_id', sessions.map((session) => session.id))
+    .eq('attendance_status', 'absent');
+  if (entriesError) throw new Error(`Unable to load absences: ${entriesError.message}`);
+  if (!entries?.length) return [];
+
+  const { data: students, error: studentsError } = await supabase
+    .from('students')
+    .select('id, admission_number, full_name, current_cohort_id, cohorts!students_current_cohort_id_fkey(name)')
+    .in('id', [...new Set(entries.map((entry) => entry.student_id))]);
+  if (studentsError) throw new Error(`Unable to load absent students: ${studentsError.message}`);
+  const studentMap = new Map((students ?? []).map((student) => [student.id, student]));
+  const sessionMap = new Map(sessions.map((session) => [session.id, session]));
+
+  return entries.flatMap((entry) => {
+    const student = studentMap.get(entry.student_id);
+    const session = sessionMap.get(entry.class_session_id);
+    if (!student || !session) return [];
+    const unit = Array.isArray(session.units) ? session.units[0] : session.units;
+    const cohort = Array.isArray(student.cohorts) ? student.cohorts[0] : student.cohorts;
+    return [{
+      sessionDate: session.session_date,
+      admissionNumber: student.admission_number ?? '',
+      fullName: student.full_name ?? 'Student',
+      cohortName: cohort?.name ?? '',
+      unitCode: unit?.code ?? '',
+      unitName: unit?.name ?? 'Unit',
+    }];
+  }).sort((a, b) => b.sessionDate.localeCompare(a.sessionDate) || a.fullName.localeCompare(b.fullName));
+}
+
 export async function getStudentPortalAttendance(
   studentId: string,
 ): Promise<StudentPortalAttendanceSnapshot> {

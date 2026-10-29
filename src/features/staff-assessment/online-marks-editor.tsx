@@ -51,6 +51,7 @@ interface StudentRow {
   fullName: string;
   cohortName?: string;
   attendanceStatus: 'expected' | 'absent';
+  catAbsent: boolean;
   initialMarks: OnlineMarkValues;
 }
 
@@ -96,7 +97,7 @@ export function OnlineMarksEditor({
           presentation: toInput(student.initialMarks.presentation),
           rat: toInput(student.initialMarks.rat),
           cat:
-            initialCatSubmitted && student.initialMarks.cat === null
+            student.catAbsent || (initialCatSubmitted && student.initialMarks.cat === null)
               ? 'AB'
               : toInput(student.initialMarks.cat),
           exam:
@@ -214,6 +215,7 @@ export function OnlineMarksEditor({
           student,
           marks,
           isAbsent,
+          catAbsent: isAbsentCat,
           fields: {
             assignment,
             presentation,
@@ -347,8 +349,6 @@ export function OnlineMarksEditor({
       parsedRows.filter(
         (row) =>
           row.fields.cat.isAbsent ||
-          row.marks.cat === null ||
-          !values[row.student.studentId]?.cat?.trim() ||
           values[row.student.studentId]?.cat?.trim().toUpperCase() === 'AB',
       ),
     [parsedRows, values],
@@ -358,10 +358,7 @@ export function OnlineMarksEditor({
     () =>
       parsedRows.filter(
         (row) =>
-          row.isAbsent ||
-          row.marks.exam === null ||
-          !values[row.student.studentId]?.exam?.trim() ||
-          values[row.student.studentId]?.exam?.trim().toUpperCase() === 'AB',
+          row.isAbsent,
       ),
     [parsedRows, values],
   );
@@ -418,6 +415,7 @@ export function OnlineMarksEditor({
                 presentation: row.marks.presentation,
                 rat: row.marks.rat,
                 cat: row.marks.cat,
+                catAbsent: row.fields.cat.isAbsent,
                 exam: row.isAbsent ? null : row.marks.exam,
               })),
             }),
@@ -549,6 +547,7 @@ export function OnlineMarksEditor({
               presentation: row.marks.presentation,
               rat: row.marks.rat,
               cat: row.marks.cat,
+              catAbsent: row.fields.cat.isAbsent,
               exam:
                 row.isAbsent
                   ? null
@@ -595,6 +594,14 @@ export function OnlineMarksEditor({
         return;
       }
 
+      const missingCatStudents = parsedRows.filter(
+        (row) => row.marks.cat === null && !row.fields.cat.isAbsent,
+      );
+      if (missingCatStudents.length > 0) {
+        setError(`${missingCatStudents.length} CAT mark(s) are blank. Enter a mark or explicitly enter AB for an absent student.`);
+        return;
+      }
+
       if (absentCatStudents.length > 0) {
         setSubmitConfirmType('cat');
         return;
@@ -609,10 +616,23 @@ export function OnlineMarksEditor({
       setError('Final marks have already been submitted.');
       return;
     }
+    if (!catSubmitted) {
+      setError('Submit CAT marks before submitting final marks.');
+      return;
+    }
     if (invalid) {
       setError(
         `${invalid.student.fullName}: ${invalid.value.message ?? 'Invalid mark.'}`,
       );
+      return;
+    }
+
+    if (parsedRows.some((row) => row.marks.exam === null && !row.isAbsent)) {
+      setError('Blank exam marks remain. Enter a mark or explicitly enter AB for a student who was absent.');
+      return;
+    }
+    if (parsedRows.some((row) => row.marks.assignment === null || row.marks.presentation === null || row.marks.rat === null)) {
+      setError('Enter every Assignment, Presentation, and RAT mark before final submission.');
       return;
     }
 
@@ -664,8 +684,9 @@ export function OnlineMarksEditor({
                 presentation: row.marks.presentation,
                 rat: row.marks.rat,
                 cat: isAbsentCat ? null : row.marks.cat,
+                catAbsent: isAbsentCat,
                 exam: row.isAbsent ? null : row.marks.exam,
-                attendanceStatus: isAbsentCat ? 'absent' : (row.isAbsent ? 'absent' : 'expected'),
+                attendanceStatus: row.isAbsent ? 'absent' : 'expected',
               };
             }),
           }),
@@ -731,7 +752,8 @@ export function OnlineMarksEditor({
                 assignment: row.marks.assignment ?? 0,
                 presentation: row.marks.presentation ?? 0,
                 rat: row.marks.rat ?? 0,
-                cat: row.marks.cat ?? 0,
+                cat: row.marks.cat,
+                catAbsent: row.fields.cat.isAbsent,
                 exam: isAbsent ? null : row.marks.exam,
                 attendanceStatus: isAbsent ? 'absent' : 'expected',
               };
@@ -1578,7 +1600,7 @@ export function OnlineMarksEditor({
                 </h3>
                 <p className="mt-0.5 text-xs text-slate-500">
                   {submitConfirmType === 'cat'
-                    ? 'Please review students with unentered CAT marks before submitting.'
+                    ? 'Please review students explicitly marked AB before submitting.'
                     : 'Please review student exam and coursework statuses before finalizing.'}
                 </p>
               </div>
@@ -1605,7 +1627,7 @@ export function OnlineMarksEditor({
                       </span>
                     </div>
                     <p className="text-[11px] text-amber-900 mb-2 font-medium">
-                      Confirming will automatically record these students as <strong>Absent (AB)</strong> on the CAT marksheet:
+                      These students will be recorded as <strong>Absent (AB)</strong> on the CAT marksheet:
                     </p>
                     <div className="max-h-36 overflow-y-auto divide-y divide-amber-200/60 rounded-lg bg-white border border-amber-200/80 px-2.5">
                       {absentCatStudents.map((row) => (

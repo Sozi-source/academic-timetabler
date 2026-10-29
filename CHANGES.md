@@ -4229,3 +4229,18 @@ No database or application runtime changes were executed while preparing this pa
 - Unlocking removes only the component submission lock; saved marks remain available for correction. Department membership is checked in the database, and finalized markbooks cannot be reopened through this control.
 - Apply the new Supabase migration before using the button.
 
+### 2026-10-29: Explicit CAT absences and gated final marks submission
+
+**Added:**
+- `supabase/migrations/20261029141000_sync_cat_marks_finalized_timestamps.sql` — adds an explicit `assessment_roster.cat_absent` flag, carries forward submitted CAT nulls as confirmed absence, keeps CAT finalization timestamps in sync, and allows CAT submissions with null marks only where the trainer explicitly records `AB`.
+
+**Modified:**
+- `src/features/staff-assessment/online-marks-editor.tsx` — CAT blanks now block CAT submission; only an explicit `AB` opens the absence confirmation. Final submission requires the CAT milestone, complete coursework, and either an exam mark or explicit `AB`.
+- `src/features/staff-assessment/online-marks-domain.ts` — excludes explicitly absent CAT entries from the unresolved component count.
+- `src/app/api/staff/assessment/[assessmentId]/online/submit/route.ts` — validates explicit CAT absence, requires CAT submission before final submission, and rejects unresolved coursework/exam entries instead of silently replacing them with zero/absence.
+- `src/app/api/staff/assessment/[assessmentId]/online/save/route.ts` — persists the explicit CAT absence flag in draft saves.
+
+**Final mark treatment:** Explicit CAT `AB` is preserved as an absence flag and contributes zero CAT points in the final calculation. Exam `AB` follows the existing rule and results in an `ABSENT` final result.
+
+**Manual follow-up required:** Run `supabase db push` to add the CAT absence column and update the submission RPC. No API contract changes for external callers beyond the added optional `catAbsent` field.
+

@@ -66,6 +66,7 @@ export interface StaffOnlineMarkState {
   cat:
     number |
     null;
+  catAbsent: boolean;
   exam:
     number |
     null;
@@ -238,6 +239,7 @@ export async function getStaffOnlineMarkState(
   const [
     draftResult,
     resultResult,
+    rosterResult,
   ] =
     await Promise.all([
       supabase
@@ -263,11 +265,16 @@ export async function getStaffOnlineMarkState(
           'assessment_event_id',
           targetEventIds,
         ),
+      supabase
+        .from('assessment_roster')
+        .select('student_id, cat_absent')
+        .in('assessment_id', targetEventIds),
     ]);
 
   const error =
     draftResult.error ??
-    resultResult.error;
+    resultResult.error ??
+    rosterResult.error;
 
   if (error) {
     throw new Error(
@@ -288,6 +295,10 @@ export async function getStaffOnlineMarkState(
     ) as UnknownRow[];
 
   const draftByStudent = new Map<string, UnknownRow>();
+  const catAbsentByStudent = new Map<string, boolean>();
+  for (const row of rosterResult.data ?? []) {
+    catAbsentByStudent.set(row.student_id, row.cat_absent);
+  }
   for (const row of drafts) {
     const studentId = asString(row.student_id);
     if (!studentId) continue;
@@ -398,6 +409,7 @@ export async function getStaffOnlineMarkState(
             draft
               ?.cat_mark,
           ),
+        catAbsent: catAbsentByStudent.get(studentId) ?? false,
         exam:
           asNumber(
             componentMarks

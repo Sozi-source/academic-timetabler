@@ -266,6 +266,7 @@ export function getUnfilledColumnsSummary(
     student: { fullName: string; attendanceStatus: 'expected' | 'absent' };
     marks: OnlineMarkValues;
     isAbsent?: boolean;
+    catAbsent?: boolean;
   }>,
 ): {
   totalMissing: number;
@@ -297,7 +298,7 @@ export function getUnfilledColumnsSummary(
       missingRat += 1;
       studentIncomplete = true;
     }
-    if (row.marks.cat === null) {
+    if (row.marks.cat === null && !row.catAbsent) {
       missingCat += 1;
       studentIncomplete = true;
     }

@@ -55,6 +55,8 @@ interface OnlineEntry {
     unknown;
   cat?:
     unknown;
+  catAbsent?:
+    unknown;
   exam?:
     unknown;
 }
@@ -173,6 +175,8 @@ export async function POST(
       cat:
         number |
         null;
+      cat_absent:
+        boolean;
       exam:
         number |
         null;
@@ -256,6 +260,7 @@ export async function POST(
       presentation,
       rat,
       cat,
+      cat_absent: raw.catAbsent === true,
       exam,
     });
   }

@@ -73,6 +73,7 @@ export default async function ExternalTrainerMarksPage({ params }: PageProps) {
             cohortName: student.cohortName,
             cohortId: student.cohortId ?? null,
             attendanceStatus: student.attendanceStatus,
+            catAbsent: state?.catAbsent ?? false,
             initialMarks: {
               assignment: state?.assignment ?? null,
               presentation: state?.presentation ?? null,

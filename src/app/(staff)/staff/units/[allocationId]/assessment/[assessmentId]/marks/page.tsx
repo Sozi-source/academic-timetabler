@@ -167,6 +167,8 @@ export default async function StaffOnlineMarksPage({
                   student.cohortId ?? null,
                 attendanceStatus:
                   student.attendanceStatus,
+                catAbsent:
+                  state?.catAbsent ?? false,
                 initialMarks: {
                   assignment:
                     state?.assignment ??

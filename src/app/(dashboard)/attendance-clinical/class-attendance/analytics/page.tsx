@@ -126,7 +126,7 @@ export default async function AttendanceAnalyticsPage({
             </Link>
 
             <a
-              href="/api/attendance-clinical/class-attendance/export"
+              href={`/api/attendance-clinical/class-attendance/export?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`}
               className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-white hover:bg-primary-hover"
             >
               <Download

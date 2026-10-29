@@ -1,3 +1,11 @@
+### 2026-10-29: Export date-filtered missed-class report
+
+**Modified:**
+- `src/app/(dashboard)/attendance-clinical/class-attendance/analytics/page.tsx` — passes the selected report date range through the Excel export link.
+- `src/app/api/attendance-clinical/class-attendance/export/route.ts` — validates the date range and adds a **Missed Classes** worksheet containing matching students, dates, cohorts, and units.
+
+No schema changes or manual follow-up required.
+
 ### 2026-10-29: Date-filtered student missed-class report
 
 **Modified:**

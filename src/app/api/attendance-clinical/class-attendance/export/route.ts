@@ -12,6 +12,7 @@ import {
 import {
   getDepartmentAttendanceAnalytics,
   getDepartmentStudentAttendanceAnalytics,
+  getMissedClassReport,
 } from '@/features/attendance-analytics/queries';
 
 function styleHeader(
@@ -80,16 +81,26 @@ function safeFilename(
     .toLowerCase();
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   await requireHodAccess();
+
+  const url = new URL(request.url);
+  const startDate = url.searchParams.get('startDate') ?? '';
+  const endDate = url.searchParams.get('endDate') ?? '';
+  const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+  if (!datePattern.test(startDate) || !datePattern.test(endDate) || startDate > endDate) {
+    return NextResponse.json({ error: 'A valid start and end date are required.' }, { status: 400 });
+  }
 
   const [
     aggregates,
     students,
+    missedClasses,
   ] =
     await Promise.all([
       getDepartmentAttendanceAnalytics(),
       getDepartmentStudentAttendanceAnalytics(),
+      getMissedClassReport(startDate, endDate),
     ]);
 
   const periodName =
@@ -290,6 +301,28 @@ export async function GET() {
     detail,
   );
 
+  const missed = workbook.addWorksheet('Missed Classes');
+  missed.columns = [
+    { header: 'Session Date', width: 16 },
+    { header: 'Admission Number', width: 22 },
+    { header: 'Student Name', width: 32 },
+    { header: 'Cohort', width: 26 },
+    { header: 'Unit Code', width: 16 },
+    { header: 'Unit Missed', width: 34 },
+  ];
+  styleHeader(missed.getRow(1));
+  for (const item of missedClasses) {
+    missed.addRow([
+      item.sessionDate,
+      item.admissionNumber,
+      item.fullName,
+      item.cohortName,
+      item.unitCode,
+      item.unitName,
+    ]);
+  }
+  styleSheet(missed);
+
   const buffer =
     await workbook.xlsx.writeBuffer();
 
@@ -302,9 +335,7 @@ export async function GET() {
         'Content-Type':
           'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'Content-Disposition':
-          `attachment; filename="class-attendance-${safeFilename(
-            periodName,
-          )}.xlsx"`,
+          `attachment; filename="class-attendance-${safeFilename(startDate)}-to-${safeFilename(endDate)}.xlsx"`,
         'Cache-Control':
           'no-store',
         'X-Content-Type-Options':

@@ -1,3 +1,16 @@
+### 2026-10-29: Redundant Markbooks cleanup, floating submit action, and automated AB absent mark workflow
+
+**Modified:**
+- `src/components/layout/assessment-shell.tsx` — removed redundant "Unit Markbooks" navigation tab; all marksheet oversight is now unified in the Assessment Control Center (`/assessment`).
+- `src/app/(dashboard)/assessment/assessments/page.tsx` & `src/app/(dashboard)/assessment/marks/page.tsx` — replaced redundant legacy pages with clean Next.js `redirect('/assessment')`.
+- `src/app/(dashboard)/operations/page.tsx`, `src/features/operations/action-center-domain.ts`, `src/features/operations/domain.ts`, & `src/features/assessment/actions.ts` — updated internal navigation links and redirects from `/assessment/assessments` to `/assessment`.
+- `src/features/staff-assessment/online-marks-domain.ts` — updated `parseOnlineMarkInput` error message when `allowAbsent` is true to dynamically interpolate maximum allowed score (`Enter a mark (0–${maximum}) or AB.`).
+- `src/app/api/staff/assessment/[assessmentId]/online/submit/route.ts` — removed hard blocking check rejecting submissions with unentered CAT marks; enabled attendance status `'absent'` and `null` marks for absent students during CAT submission.
+- `src/features/staff-assessment/online-marks-editor.tsx`:
+  - **Conspicuous submit button**: Added a high-visibility, floating submit button pinned to the bottom right (`fixed bottom-6 right-6 z-40`) with large hit area (`h-12 px-6`), high contrast (`bg-[#0b4f4a] hover:bg-[#083e3a] text-white shadow-2xl ring-4 ring-[#0b4f4a]/20`), and icon.
+  - **Empty cell submission & automated `AB` prompt**: Allowed submitting CAT and Final Exam marks even when cells are empty. Replaced single-purpose exam dialog with a unified confirmation dialog (`submitConfirmType`) detecting unentered students for CAT or Final Exam.
+  - **Automated `AB` indication**: When the user confirms students missed the paper, the system automatically populates `'AB'` into the input state, marks attendance as absent, applies distinctive amber styling (`border-amber-400 bg-amber-50 text-amber-950 font-bold`), and proceeds with submission.
+
 ### 2026-10-29: UI contrast, font smoothing, and clear text enhancements
 
 **Modified:**

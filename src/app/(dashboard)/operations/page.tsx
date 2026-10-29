@@ -96,7 +96,7 @@ export default async function OperationsPage() {
       description:
         `${readiness.assessments.finalised} finalised`,
       href:
-        '/assessment/assessments',
+        '/assessment',
       icon:
         ShieldCheck,
     },

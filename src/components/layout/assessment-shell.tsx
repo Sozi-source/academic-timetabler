@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   BarChart3,
   BookOpenCheck,
-  ClipboardList,
   FileText,
   GraduationCap,
   LayoutDashboard,
@@ -30,7 +29,6 @@ interface AssessmentShellProps {
 
 const NAVIGATION_ITEMS = [
   { label: 'Overview', href: '/assessment', icon: LayoutDashboard },
-  { label: 'Unit Markbooks', href: '/assessment/assessments', icon: ClipboardList },
   { label: 'Assessment Population', href: '/assessment/population', icon: UsersRound },
   { label: 'Exam Setting', href: '/assessment/exam-setting', icon: BookOpenCheck },
   { label: 'CAT & Exam Analysis', href: '/assessment/analysis', icon: BarChart3 },

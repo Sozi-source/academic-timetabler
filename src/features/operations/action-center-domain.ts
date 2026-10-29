@@ -88,7 +88,7 @@ export function buildActionCenter({
       area: 'Assessment',
       title: `${readiness.assessments.finalisedUnpublished} finalised result set${readiness.assessments.finalisedUnpublished === 1 ? '' : 's'} not published`,
       detail: 'Complete authorised result publication.',
-      href: '/assessment/assessments',
+      href: '/assessment',
     });
   }
 

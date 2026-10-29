@@ -205,7 +205,7 @@ export function operationsReadinessIssues(
       detail:
         'Continue marks entry, validation and finalisation.',
       href:
-        '/assessment/assessments',
+        '/assessment',
     });
   }
 

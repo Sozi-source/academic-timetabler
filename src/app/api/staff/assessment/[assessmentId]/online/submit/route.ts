@@ -187,13 +187,7 @@ export async function POST(
 
   if (component === 'cat') {
     // Milestone 1: CAT marks submission (midterm milestone)
-    const missingCat = componentEntries.filter((e) => e.cat === null).length;
-    if (missingCat > 0) {
-      return NextResponse.json({
-        message: `Cannot submit CAT: ${missingCat} student(s) are missing CAT marks.`,
-      }, { status: 422 });
-    }
-
+    // Students with unentered or confirmed absent CAT marks have cat: null (indicated as AB).
     const { data: submission, error: componentError } = await supabase.rpc('save_assessment_online_component_marks', {
       target_assessment_id: targetAssessmentId,
       target_component: 'cat',

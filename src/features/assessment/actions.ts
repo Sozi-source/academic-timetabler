@@ -25,7 +25,7 @@ export async function createAssessmentAction(formData: FormData) {
   const assessmentDate = optionalText(formData, 'assessmentDate');
 
   if (!academicPeriodId || !unitId) {
-    redirect('/assessment/assessments?error=required');
+    redirect('/assessment?error=required');
   }
 
   const supabase = await createClient();
@@ -43,7 +43,7 @@ export async function createAssessmentAction(formData: FormData) {
       code: lookupError.code,
       message: lookupError.message,
     });
-    redirect('/assessment/assessments?error=lookup');
+    redirect('/assessment?error=lookup');
   }
 
   if (existing?.id) redirect(`/assessment/marks/${existing.id}`);
@@ -80,7 +80,7 @@ export async function createAssessmentAction(formData: FormData) {
         : error?.code === '42501'
           ? 'access'
           : 'save';
-    redirect(`/assessment/assessments?error=${errorType}`);
+    redirect(`/assessment?error=${errorType}`);
   }
 
   const { error: populationError } = await supabase.rpc('refresh_assessment_population', {
@@ -88,11 +88,10 @@ export async function createAssessmentAction(formData: FormData) {
   });
 
   revalidatePath('/assessment');
-  revalidatePath('/assessment/assessments');
   revalidatePath('/assessment/population');
   revalidatePath('/assessment/marks');
 
-  if (populationError) redirect('/assessment/assessments?created=1&population=failed');
+  if (populationError) redirect('/assessment?created=1&population=failed');
   redirect(`/assessment/marks/${data.id}?created=1`);
 }
 

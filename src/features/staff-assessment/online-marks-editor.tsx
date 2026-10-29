@@ -86,23 +86,27 @@ export function OnlineMarksEditor({
 }) {
   const router = useRouter();
 
-  const [values, setValues] = useState<InputValues>(() =>
-    Object.fromEntries(
+  const [values, setValues] = useState<InputValues>(() => {
+    const initialCatSubmitted = componentSubmissions.some((s) => s.component === 'cat');
+    return Object.fromEntries(
       students.map((student) => [
         student.studentId,
         {
           assignment: toInput(student.initialMarks.assignment),
           presentation: toInput(student.initialMarks.presentation),
           rat: toInput(student.initialMarks.rat),
-          cat: toInput(student.initialMarks.cat),
+          cat:
+            initialCatSubmitted && student.initialMarks.cat === null
+              ? 'AB'
+              : toInput(student.initialMarks.cat),
           exam:
             student.attendanceStatus === 'absent'
               ? (student.initialMarks.exam !== null ? toInput(student.initialMarks.exam) : 'AB')
               : toInput(student.initialMarks.exam),
         },
       ]),
-    ),
-  );
+    );
+  });
 
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -118,7 +122,7 @@ export function OnlineMarksEditor({
   const [revisionDialogOpen, setRevisionDialogOpen] = useState(false);
   const [revisionReason, setRevisionReason] = useState('');
   const [closedNoticeDialogOpen, setClosedNoticeDialogOpen] = useState(false);
-  const [submitConfirmDialogOpen, setSubmitConfirmDialogOpen] = useState(false);
+  const [submitConfirmType, setSubmitConfirmType] = useState<'cat' | 'final' | null>(null);
 
   const handleRequestEditMarks = () => {
     if (!trainerEntryOpen) {
@@ -160,7 +164,23 @@ export function OnlineMarksEditor({
 
         const rat = parseOnlineMarkInput(studentValues?.rat ?? '', 15);
 
-        const cat = parseOnlineMarkInput(studentValues?.cat ?? '', 15);
+        const catParsed = parseOnlineMarkInput(
+          studentValues?.cat ?? '',
+          15,
+          true,
+        );
+
+        const isAbsentCat = catParsed.mark !== null
+          ? false
+          : Boolean(
+              catParsed.isAbsent ||
+              studentValues?.cat?.trim().toUpperCase() === 'AB',
+            );
+
+        const cat: ParsedOnlineMarkInput = {
+          ...catParsed,
+          isAbsent: isAbsentCat,
+        };
 
         const examParsed = parseOnlineMarkInput(
           studentValues?.exam ?? '',
@@ -173,7 +193,7 @@ export function OnlineMarksEditor({
           : Boolean(
               examParsed.isAbsent ||
               student.attendanceStatus === 'absent' ||
-              studentValues?.exam?.trim().toUpperCase() === 'AB'
+              studentValues?.exam?.trim().toUpperCase() === 'AB',
             );
 
         const exam: ParsedOnlineMarkInput = {
@@ -185,7 +205,7 @@ export function OnlineMarksEditor({
           assignment: assignment.mark,
           presentation: presentation.mark,
           rat: rat.mark,
-          cat: cat.mark,
+          cat: isAbsentCat ? null : cat.mark,
           exam: isAbsent ? null : exam.mark,
         };
 
@@ -307,15 +327,43 @@ export function OnlineMarksEditor({
   const invalidForSelectedComponent = visibleComponent === 'all'
     ? invalid
     : parsedRows
-      .map((row) => ({ student: row.student, value: row.fields[visibleComponent], isAbsent: row.isAbsent }))
-      .find((row) => !row.value.valid && !(visibleComponent === 'exam' && row.isAbsent));
+      .map((row) => ({
+        student: row.student,
+        value: row.fields[visibleComponent],
+        isAbsent:
+          visibleComponent === 'exam'
+            ? row.isAbsent
+            : visibleComponent === 'cat'
+              ? row.fields.cat.isAbsent
+              : false,
+      }))
+      .find((row) => !row.value.valid && !row.isAbsent);
 
   const absent = parsedRows.filter((row) => row.isAbsent).length;
   const missing = parsedRows.reduce((sum, row) => sum + row.missing, 0);
 
+  const absentCatStudents = useMemo(
+    () =>
+      parsedRows.filter(
+        (row) =>
+          row.fields.cat.isAbsent ||
+          row.marks.cat === null ||
+          !values[row.student.studentId]?.cat?.trim() ||
+          values[row.student.studentId]?.cat?.trim().toUpperCase() === 'AB',
+      ),
+    [parsedRows, values],
+  );
+
   const absentExamStudents = useMemo(
-    () => parsedRows.filter((row) => row.isAbsent || row.marks.exam === null),
-    [parsedRows],
+    () =>
+      parsedRows.filter(
+        (row) =>
+          row.isAbsent ||
+          row.marks.exam === null ||
+          !values[row.student.studentId]?.exam?.trim() ||
+          values[row.student.studentId]?.exam?.trim().toUpperCase() === 'AB',
+      ),
+    [parsedRows, values],
   );
 
   const missingCourseworkCount =
@@ -546,52 +594,13 @@ export function OnlineMarksEditor({
         );
         return;
       }
-      if (unfilledSummary.missingCat > 0) {
-        setError(`Cannot submit CAT: ${unfilledSummary.missingCat} student(s) are missing CAT marks.`);
+
+      if (absentCatStudents.length > 0) {
+        setSubmitConfirmType('cat');
         return;
       }
 
-      setBusy('submit');
-      setError(null);
-      setMessage(null);
-
-      try {
-        const response = await fetch(
-          `/api/staff/assessment/${assessmentId}/online/submit`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              component: 'cat',
-              entries: parsedRows.map((row) => ({
-                studentId: row.student.studentId,
-                assignment: row.marks.assignment,
-                presentation: row.marks.presentation,
-                rat: row.marks.rat,
-                cat: row.marks.cat,
-                exam: row.isAbsent ? null : row.marks.exam,
-                attendanceStatus: row.isAbsent ? 'absent' : 'expected',
-              })),
-            }),
-          },
-        );
-
-        const payload = await response.json().catch(() => null);
-
-        if (!response.ok) {
-          setError(payload?.message ?? 'CAT marks could not be submitted.');
-          return;
-        }
-
-        setSubmissions((current) => [
-          ...current.filter((s) => s.component !== 'cat'),
-          { component: 'cat', cohortId: null, submittedAt: new Date().toISOString() },
-        ]);
-        setMessage('CAT marks submitted successfully.');
-        router.refresh();
-      } finally {
-        setBusy(null);
-      }
+      await executeCatSubmit();
       return;
     }
 
@@ -608,18 +617,100 @@ export function OnlineMarksEditor({
     }
 
     if (absentExamStudents.length > 0 || missingCourseworkCount > 0) {
-      setSubmitConfirmDialogOpen(true);
+      setSubmitConfirmType('final');
       return;
     }
 
     await executeFinalSubmit();
   }
 
-  async function executeFinalSubmit() {
-    setSubmitConfirmDialogOpen(false);
+  async function executeCatSubmit() {
+    setSubmitConfirmType(null);
     setBusy('submit');
     setError(null);
     setMessage(null);
+
+    // If there were unentered/absent students, update their local values to 'AB'
+    if (absentCatStudents.length > 0) {
+      setValues((current) => {
+        const next = { ...current };
+        for (const row of absentCatStudents) {
+          next[row.student.studentId] = {
+            ...next[row.student.studentId],
+            cat: 'AB',
+          };
+        }
+        return next;
+      });
+    }
+
+    try {
+      const response = await fetch(
+        `/api/staff/assessment/${assessmentId}/online/submit`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            component: 'cat',
+            entries: parsedRows.map((row) => {
+              const isAbsentCat =
+                row.fields.cat.isAbsent ||
+                row.marks.cat === null ||
+                !values[row.student.studentId]?.cat?.trim() ||
+                values[row.student.studentId]?.cat?.trim().toUpperCase() === 'AB';
+              return {
+                studentId: row.student.studentId,
+                assignment: row.marks.assignment,
+                presentation: row.marks.presentation,
+                rat: row.marks.rat,
+                cat: isAbsentCat ? null : row.marks.cat,
+                exam: row.isAbsent ? null : row.marks.exam,
+                attendanceStatus: isAbsentCat ? 'absent' : (row.isAbsent ? 'absent' : 'expected'),
+              };
+            }),
+          }),
+        },
+      );
+
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        setError(payload?.message ?? 'CAT marks could not be submitted.');
+        return;
+      }
+
+      setSubmissions((current) => [
+        ...current.filter((s) => s.component !== 'cat'),
+        { component: 'cat', cohortId: null, submittedAt: new Date().toISOString() },
+      ]);
+      setMessage('CAT marks submitted successfully. Unentered students recorded as Absent (AB).');
+      router.refresh();
+    } catch {
+      setError('Failed to submit CAT marks.');
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function executeFinalSubmit() {
+    setSubmitConfirmType(null);
+    setBusy('submit');
+    setError(null);
+    setMessage(null);
+
+    // If there were unentered/absent students, update their local values to 'AB'
+    if (absentExamStudents.length > 0) {
+      setValues((current) => {
+        const next = { ...current };
+        for (const row of absentExamStudents) {
+          next[row.student.studentId] = {
+            ...next[row.student.studentId],
+            exam: 'AB',
+          };
+        }
+        return next;
+      });
+    }
 
     try {
       const response = await fetch(
@@ -630,7 +721,11 @@ export function OnlineMarksEditor({
           body: JSON.stringify({
             component: 'all',
             entries: parsedRows.map((row) => {
-              const isAbsent = row.isAbsent || row.marks.exam === null;
+              const isAbsent =
+                row.isAbsent ||
+                row.marks.exam === null ||
+                !values[row.student.studentId]?.exam?.trim() ||
+                values[row.student.studentId]?.exam?.trim().toUpperCase() === 'AB';
               return {
                 studentId: row.student.studentId,
                 assignment: row.marks.assignment ?? 0,
@@ -655,7 +750,7 @@ export function OnlineMarksEditor({
       const allComps = ['assignment', 'presentation', 'rat', 'cat', 'exam'];
       const now = new Date().toISOString();
       setSubmissions(allComps.map((comp) => ({ component: comp, cohortId: null, submittedAt: now })));
-      setMessage('Final marks submitted and markbook finalized successfully.');
+      setMessage('Final marks submitted and markbook finalized successfully. Unentered students recorded as Absent (AB).');
       router.refresh();
     } catch {
       setError('Failed to submit final marks.');
@@ -951,6 +1046,8 @@ export function OnlineMarksEditor({
                 const key = singleComponent.key;
                 const field = row.fields[key];
                 const isExamAbsent = key === 'exam' && row.isAbsent;
+                const isCatAbsent = key === 'cat' && row.fields.cat.isAbsent;
+                const isAbsentField = isExamAbsent || isCatAbsent;
 
                 return (
                   <div
@@ -970,9 +1067,9 @@ export function OnlineMarksEditor({
                           </span>
                         ) : null}
                       </div>
-                      {isExamAbsent ? (
+                      {isAbsentField ? (
                         <Badge variant="warning" className="mt-0.5 rounded-none text-[9px] py-0 px-1 font-bold">
-                          Absent
+                          Absent (AB)
                         </Badge>
                       ) : null}
                     </div>
@@ -988,14 +1085,14 @@ export function OnlineMarksEditor({
                           data-component-key={key}
                           value={values[row.student.studentId]?.[key] ?? ''}
                           type="text"
-                          inputMode={key === 'exam' ? 'text' : 'decimal'}
+                          inputMode={['exam', 'cat'].includes(key) ? 'text' : 'decimal'}
                           autoComplete="off"
                           autoCorrect="off"
                           spellCheck={false}
                           placeholder={
                             ['assignment', 'presentation', 'rat'].includes(key)
                               ? '0'
-                              : isExamAbsent
+                              : isAbsentField
                                 ? 'AB'
                                 : '—'
                           }
@@ -1013,7 +1110,7 @@ export function OnlineMarksEditor({
                           }
                           aria-label={`${key} mark for ${row.student.fullName}`}
                           className={`h-10 w-20 rounded-none border px-2 text-center text-base font-bold outline-none transition placeholder:text-slate-600 placeholder:opacity-100 placeholder:font-bold focus:border-[#0b4f4a] focus:ring-2 focus:ring-[#0b4f4a]/20 disabled:bg-[#eee8d7] disabled:text-slate-600 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-                            isExamAbsent
+                            isAbsentField
                               ? 'border-amber-400 bg-amber-50 text-amber-950 font-bold'
                               : 'border-slate-400 bg-[#fffdf5] text-slate-950 focus:border-[#0b4f4a]'
                           } ${
@@ -1075,7 +1172,11 @@ export function OnlineMarksEditor({
                       </div>
                       {row.isAbsent ? (
                         <Badge variant="warning" className="mt-0.5 rounded-none text-[9px] font-bold">
-                          Exam absent
+                          Exam absent (AB)
+                        </Badge>
+                      ) : row.fields.cat.isAbsent ? (
+                        <Badge variant="warning" className="mt-0.5 rounded-none text-[9px] font-bold">
+                          CAT absent (AB)
                         </Badge>
                       ) : null}
                     </td>
@@ -1083,6 +1184,8 @@ export function OnlineMarksEditor({
                     {onlineMarkComponents.map(({ key }, colIndex) => {
                       const field = row.fields[key];
                       const isAbsentExam = key === 'exam' && row.isAbsent;
+                      const isAbsentCat = key === 'cat' && row.fields.cat.isAbsent;
+                      const isAbsentField = isAbsentExam || isAbsentCat;
 
                       return (
                         <td key={key} className="px-1.5 py-2.5">
@@ -1095,14 +1198,14 @@ export function OnlineMarksEditor({
                               data-component-key={key}
                               value={values[row.student.studentId]?.[key] ?? ''}
                               type="text"
-                              inputMode={key === 'exam' ? 'text' : 'decimal'}
+                              inputMode={['exam', 'cat'].includes(key) ? 'text' : 'decimal'}
                               autoComplete="off"
                               autoCorrect="off"
                               spellCheck={false}
                               placeholder={
                                 ['assignment', 'presentation', 'rat'].includes(key)
                                   ? '0'
-                                  : isAbsentExam
+                                  : isAbsentField
                                     ? 'AB'
                                     : '—'
                               }
@@ -1120,7 +1223,7 @@ export function OnlineMarksEditor({
                               }
                               aria-label={`${key} mark for ${row.student.fullName}`}
                               className={`h-9 w-full rounded-none border px-1 text-center text-xs font-bold outline-none transition placeholder:text-slate-600 placeholder:opacity-100 placeholder:font-bold focus:border-[#0b4f4a] focus:ring-2 focus:ring-[#0b4f4a]/20 disabled:bg-[#eee8d7] disabled:text-slate-600 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-                                isAbsentExam
+                                isAbsentField
                                   ? 'border-amber-400 bg-amber-50 text-amber-950 font-bold'
                                   : 'border-slate-400 bg-[#fffdf5] text-slate-950 focus:border-[#0b4f4a]'
                               } ${
@@ -1310,7 +1413,6 @@ export function OnlineMarksEditor({
                     size="sm"
                     disabled={
                       busy !== null ||
-                      unfilledSummary.missingCat > 0 ||
                       Boolean(invalidForSelectedComponent)
                     }
                     onClick={() => void submitMarks()}
@@ -1464,21 +1566,25 @@ export function OnlineMarksEditor({
         </div>
       ) : null}
 
-      {submitConfirmDialogOpen ? (
+      {submitConfirmType !== null ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-xs">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="text-base font-semibold text-slate-900">
-                  Submit Final Marks
+                <h3 className="text-base font-bold text-slate-900">
+                  {submitConfirmType === 'cat'
+                    ? 'Confirm Student Absence from CAT'
+                    : 'Confirm Student Absence from Final Exam'}
                 </h3>
                 <p className="mt-0.5 text-xs text-slate-500">
-                  Please review student statuses before finalizing.
+                  {submitConfirmType === 'cat'
+                    ? 'Please review students with unentered CAT marks before submitting.'
+                    : 'Please review student exam and coursework statuses before finalizing.'}
                 </p>
               </div>
               <button
                 type="button"
-                onClick={() => setSubmitConfirmDialogOpen(false)}
+                onClick={() => setSubmitConfirmType(null)}
                 className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
                 aria-label="Close modal"
               >
@@ -1487,39 +1593,68 @@ export function OnlineMarksEditor({
             </div>
 
             <div className="mt-4 space-y-3">
-              {/* Absent students */}
-              {absentExamStudents.length > 0 ? (
-                <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3">
-                  <div className="flex items-center justify-between text-xs mb-2">
-                    <span className="font-semibold text-slate-900">
-                      Absent from Exam ({absentExamStudents.length})
-                    </span>
-                    <span className="rounded-md bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800">
-                      Grade: AB
-                    </span>
+              {submitConfirmType === 'cat' ? (
+                <>
+                  <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-3">
+                    <div className="flex items-center justify-between text-xs mb-2">
+                      <span className="font-bold text-amber-950">
+                        Missing CAT Marks ({absentCatStudents.length})
+                      </span>
+                      <span className="rounded-md bg-amber-200 px-1.5 py-0.5 text-[10px] font-bold text-amber-900">
+                        Will Mark: AB
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-amber-900 mb-2 font-medium">
+                      Confirming will automatically record these students as <strong>Absent (AB)</strong> on the CAT marksheet:
+                    </p>
+                    <div className="max-h-36 overflow-y-auto divide-y divide-amber-200/60 rounded-lg bg-white border border-amber-200/80 px-2.5">
+                      {absentCatStudents.map((row) => (
+                        <div key={row.student.studentId} className="flex items-center justify-between py-1.5 text-xs">
+                          <span className="font-medium text-slate-800">{row.student.fullName}</span>
+                          <span className="font-mono text-[11px] text-slate-500">{row.student.admissionNumber}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="max-h-32 overflow-y-auto divide-y divide-slate-200/60 rounded-lg bg-white border border-slate-200/80 px-2.5">
-                    {absentExamStudents.map((row) => (
-                      <div key={row.student.studentId} className="flex items-center justify-between py-1.5 text-xs">
-                        <span className="font-medium text-slate-800">{row.student.fullName}</span>
-                        <span className="font-mono text-[11px] text-slate-500">{row.student.admissionNumber}</span>
+                </>
+              ) : (
+                <>
+                  {absentExamStudents.length > 0 ? (
+                    <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-3">
+                      <div className="flex items-center justify-between text-xs mb-2">
+                        <span className="font-bold text-amber-950">
+                          Absent from Exam ({absentExamStudents.length})
+                        </span>
+                        <span className="rounded-md bg-amber-200 px-1.5 py-0.5 text-[10px] font-bold text-amber-900">
+                          Grade: AB
+                        </span>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
+                      <p className="text-[11px] text-amber-900 mb-2 font-medium">
+                        Confirming will automatically record these students as <strong>Absent from Exam (AB)</strong>:
+                      </p>
+                      <div className="max-h-36 overflow-y-auto divide-y divide-amber-200/60 rounded-lg bg-white border border-amber-200/80 px-2.5">
+                        {absentExamStudents.map((row) => (
+                          <div key={row.student.studentId} className="flex items-center justify-between py-1.5 text-xs">
+                            <span className="font-medium text-slate-800">{row.student.fullName}</span>
+                            <span className="font-mono text-[11px] text-slate-500">{row.student.admissionNumber}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
 
-              {/* Unentered coursework */}
-              {missingCourseworkCount > 0 ? (
-                <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-700">
-                  <span className="size-2 rounded-full bg-amber-500 shrink-0" />
-                  <span>
-                    <strong className="font-semibold text-slate-900">{missingCourseworkCount} unentered coursework {missingCourseworkCount === 1 ? 'mark' : 'marks'}</strong> will be recorded as <strong>0</strong>.
-                  </span>
-                </div>
-              ) : null}
+                  {missingCourseworkCount > 0 ? (
+                    <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-700">
+                      <span className="size-2 rounded-full bg-amber-500 shrink-0" />
+                      <span>
+                        <strong className="font-semibold text-slate-900">{missingCourseworkCount} unentered coursework {missingCourseworkCount === 1 ? 'mark' : 'marks'}</strong> will be recorded as <strong>0</strong>.
+                      </span>
+                    </div>
+                  ) : null}
+                </>
+              )}
 
-              <p className="text-[11px] text-slate-400 leading-normal">
+              <p className="text-[11px] text-slate-500 leading-normal">
                 Marks can still be unlocked for revision while the entry window remains open.
               </p>
             </div>
@@ -1528,7 +1663,7 @@ export function OnlineMarksEditor({
               <button
                 type="button"
                 disabled={busy !== null}
-                onClick={() => setSubmitConfirmDialogOpen(false)}
+                onClick={() => setSubmitConfirmType(null)}
                 className="h-8.5 rounded-lg px-3.5 text-xs font-medium text-slate-500 hover:text-slate-900 transition"
               >
                 Cancel
@@ -1537,14 +1672,99 @@ export function OnlineMarksEditor({
                 type="button"
                 size="sm"
                 disabled={busy !== null}
-                onClick={() => void executeFinalSubmit()}
-                className="h-8.5 rounded-lg bg-[#0b4f4a] px-4 text-xs font-medium text-white shadow-2xs hover:bg-[#083e3a]"
+                onClick={() => {
+                  if (submitConfirmType === 'cat') {
+                    void executeCatSubmit();
+                  } else {
+                    void executeFinalSubmit();
+                  }
+                }}
+                className="h-8.5 rounded-lg bg-[#0b4f4a] px-4 text-xs font-semibold text-white shadow-2xs hover:bg-[#083e3a]"
               >
                 {busy === 'submit' ? <LoaderCircle className="mr-1.5 size-3.5 animate-spin" /> : null}
-                Confirm & Submit
+                Confirm & Submit (Mark AB)
               </Button>
             </div>
           </div>
+        </div>
+      ) : null}
+
+      {/* Floating Conspicuous Submit Button (Bottom Right) */}
+      {editable && trainerEntryOpen ? (
+        <div className="fixed bottom-6 right-6 z-40 flex items-center gap-3 drop-shadow-xl print:hidden">
+          {visibleComponent === 'cat' ? (
+            catSubmitted ? (
+              <Button
+                type="button"
+                size="lg"
+                variant="outline"
+                disabled={busy !== null}
+                onClick={handleRequestEditMarks}
+                className="h-12 rounded-xl border-amber-400 bg-amber-50 px-5 text-xs sm:text-sm font-bold text-amber-950 shadow-xl hover:bg-amber-100"
+                leadingIcon={
+                  busy === 'reopen' ? (
+                    <LoaderCircle className="size-4 animate-spin" />
+                  ) : (
+                    <RotateCcw className="size-4 text-amber-700" />
+                  )
+                }
+              >
+                Revise CAT Marks
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                size="lg"
+                disabled={busy !== null || Boolean(invalidForSelectedComponent)}
+                onClick={() => void submitMarks()}
+                className="h-12 rounded-xl bg-[#0b4f4a] px-6 text-xs sm:text-sm font-bold text-white shadow-2xl hover:bg-[#083e3a] hover:scale-105 active:scale-95 transition-all ring-4 ring-[#0b4f4a]/20"
+                leadingIcon={
+                  busy === 'submit' ? (
+                    <LoaderCircle className="size-4 animate-spin" />
+                  ) : (
+                    <Send className="size-4" />
+                  )
+                }
+              >
+                Submit CAT Marks
+              </Button>
+            )
+          ) : finalSubmitted ? (
+            <Button
+              type="button"
+              size="lg"
+              variant="outline"
+              disabled={busy !== null}
+              onClick={handleRequestEditMarks}
+              className="h-12 rounded-xl border-amber-400 bg-amber-50 px-5 text-xs sm:text-sm font-bold text-amber-950 shadow-xl hover:bg-amber-100"
+              leadingIcon={
+                busy === 'reopen' ? (
+                  <LoaderCircle className="size-4 animate-spin" />
+                ) : (
+                  <RotateCcw className="size-4 text-amber-700" />
+                )
+              }
+            >
+              Revise Final Marks
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              size="lg"
+              disabled={busy !== null || Boolean(invalid)}
+              onClick={() => void submitMarks()}
+              className="h-12 rounded-xl bg-[#0b4f4a] px-6 text-xs sm:text-sm font-bold text-white shadow-2xl hover:bg-[#083e3a] hover:scale-105 active:scale-95 transition-all ring-4 ring-[#0b4f4a]/20"
+              leadingIcon={
+                busy === 'submit' ? (
+                  <LoaderCircle className="size-4 animate-spin" />
+                ) : (
+                  <Send className="size-4" />
+                )
+              }
+            >
+              Submit Final Marks
+            </Button>
+          )}
         </div>
       ) : null}
     </div>

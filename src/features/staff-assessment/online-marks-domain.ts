@@ -130,7 +130,7 @@ export function parseOnlineMarkInput(
       mark:
         null,
       message:
-        allowAbsent ? 'Enter a mark (0–70) or AB.' : 'Enter a numeric mark.',
+        allowAbsent ? `Enter a mark (0–${maximum}) or AB.` : 'Enter a numeric mark.',
     };
   }
 

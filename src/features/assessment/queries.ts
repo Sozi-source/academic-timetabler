@@ -51,14 +51,33 @@ export const getAssessments = cache(async (): Promise<AssessmentEventRow[]> => {
   const rows = (data ?? []) as unknown as Omit<AssessmentEventRow, 'population'>[];
   if (rows.length === 0) return [];
 
-  const [
-    { data: populationRows, error: populationError },
-    { data: allocationRows, error: allocationError },
-  ] = await Promise.all([
-    supabase
-      .from('assessment_population')
-      .select('assessment_event_id')
-      .in('assessment_event_id', rows.map((row) => row.id)),
+  const fetchExpectedPopulationRows = async () => {
+    const populationRows: Array<{ assessment_event_id: string }> = [];
+    const pageSize = 1000;
+    let offset = 0;
+
+    while (true) {
+      const { data, error } = await supabase
+        .from('assessment_population')
+        .select('assessment_event_id,id')
+        .in('assessment_event_id', rows.map((row) => row.id))
+        .eq('population_status', 'expected')
+        .order('assessment_event_id', { ascending: true })
+        .order('id', { ascending: true })
+        .range(offset, offset + pageSize - 1);
+
+      if (error) throw new Error(`Unable to load assessment population totals: ${error.message}`);
+      if (!data?.length) break;
+      populationRows.push(...data.map(({ assessment_event_id }) => ({ assessment_event_id })));
+      if (data.length < pageSize) break;
+      offset += pageSize;
+    }
+
+    return populationRows;
+  };
+
+  const [populationRows, { data: allocationRows, error: allocationError }] = await Promise.all([
+    fetchExpectedPopulationRows(),
     supabase
       .from('teaching_allocations')
       .select('unit_id,academic_period_id,cohort_id,participant_cohort_ids,trainer:trainers(id,full_name,email,profile_id),cohort:cohorts(id,name,code)')
@@ -66,7 +85,6 @@ export const getAssessments = cache(async (): Promise<AssessmentEventRow[]> => {
       .in('status', ['draft', 'active']),
   ]);
 
-  if (populationError) throw new Error(`Unable to load assessment population totals: ${populationError.message}`);
   if (allocationError) throw new Error(`Unable to load assigned trainers: ${allocationError.message}`);
 
   // Shared units can have separate programme-specific records. Match allocations
@@ -203,7 +221,8 @@ export const getAssessmentById = cache(async (assessmentId: string): Promise<Ass
   const { count, error: countError } = await supabase
     .from('assessment_population')
     .select('id', { count: 'exact', head: true })
-    .eq('assessment_event_id', assessmentId);
+    .eq('assessment_event_id', assessmentId)
+    .eq('population_status', 'expected');
 
   if (countError) throw new Error(`Unable to load assessment population total: ${countError.message}`);
 
@@ -280,6 +299,7 @@ export const getAssessmentPopulation = cache(async (assessmentId: string): Promi
       cohort:cohorts(id, code, name)
     `)
     .eq('assessment_event_id', assessmentId)
+    .eq('population_status', 'expected')
     .order('created_at', { ascending: true });
 
   if (error) throw new Error(`Unable to load assessment population: ${error.message}`);

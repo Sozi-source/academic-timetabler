@@ -1,3 +1,15 @@
+### 2026-10-29: Hide assessment population screens and correct candidate counts
+
+**Modified:**
+- `src/components/layout/assessment-shell.tsx` — removed the standalone Assessment Population navigation item.
+- `src/app/(dashboard)/assessment/population/page.tsx` — redirects the retired population index to the Assessment Control Center.
+- `src/app/(dashboard)/assessment/population/[assessmentId]/page.tsx` — redirects legacy population URLs to the corresponding markbook.
+- `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx` — removed the standalone population-screen link.
+- `src/features/assessment/control-center-queries.ts` — derives candidates from the current reporting-confirmed registration view, matching the assessment roster generation rule.
+- `src/features/assessment/queries.ts` — counts only expected students and paginates population rows so Supabase's 1,000-row response limit cannot make later markbooks appear empty.
+
+Assessment population records and API workflows remain intact. No migration or manual database action is required.
+
 ### 2026-10-29: Export date-filtered missed-class report
 
 **Modified:**

@@ -268,8 +268,8 @@ export const getAssessmentControlCenterData = cache(
     const allUnitIds = [...allowedUnitIds];
     const unitCodeById = new Map((equivalentUnits ?? []).map((unit) => [unit.id, unit.code]));
 
-    // 3. Use current unit registrations as the candidate source; assessment populations are snapshots
-    // and can drift after a student's unit registration is corrected.
+    // Use current reporting-confirmed registrations as the candidate source. Assessment populations
+    // are snapshots and can drift after a student's unit registration is corrected.
     const fetchCurrentRegistrations = async () => {
       const pageSize = 1000;
       const rows: Array<{ unit_id: string; student_id: string; cohort_id: string }> = [];
@@ -277,7 +277,7 @@ export const getAssessmentControlCenterData = cache(
 
       while (true) {
         const { data, error } = await admin
-          .from('student_unit_registrations')
+          .from('assessment_registration_candidates')
           .select('unit_id,student_id,cohort_id')
           .eq('academic_period_id', activePeriod.id)
           .eq('registration_status', 'registered')
@@ -286,7 +286,7 @@ export const getAssessmentControlCenterData = cache(
           .order('student_id', { ascending: true })
           .range(offset, offset + pageSize - 1);
 
-        if (error) throw new Error(`Unable to load current unit registrations: ${error.message}`);
+        if (error) throw new Error(`Unable to load reporting-confirmed unit registrations: ${error.message}`);
         if (!data?.length) break;
         rows.push(...data);
         if (data.length < pageSize) break;

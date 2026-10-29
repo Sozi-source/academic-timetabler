@@ -56,6 +56,18 @@ export interface AssessmentControlCenterSummary {
   entryLockedCount: number;
 }
 
+export interface AssessmentSubmissionTrackerRow {
+  id: string;
+  assessmentId: string;
+  unit: string;
+  unitCode: string;
+  cohort: string;
+  component: string;
+  status: 'Submitted' | 'In progress' | 'Not started';
+  submittedAt: string | null;
+  submittedBy: string | null;
+}
+
 export interface AssessmentControlCenterData {
   periods: Array<{ id: string; code: string; name: string; status: string }>;
   selectedPeriodId: string;
@@ -63,6 +75,7 @@ export interface AssessmentControlCenterData {
   departmentName: string;
   summary: AssessmentControlCenterSummary;
   items: AssessmentControlCenterItem[];
+  submissions: AssessmentSubmissionTrackerRow[];
   unitRegistrationCounts: Record<string, number>;
   marksEntryStatus: {
     isOpen: boolean;
@@ -95,6 +108,7 @@ export const getAssessmentControlCenterData = cache(
           entryLockedCount: 0,
         },
         items: [],
+        submissions: [],
         unitRegistrationCounts: {},
         marksEntryStatus: {
           isOpen: false,
@@ -150,6 +164,7 @@ export const getAssessmentControlCenterData = cache(
           entryLockedCount: 0,
         },
         items: [],
+        submissions: [],
         unitRegistrationCounts: {},
         marksEntryStatus: {
           isOpen: false,
@@ -214,6 +229,7 @@ export const getAssessmentControlCenterData = cache(
           entryLockedCount: 0,
         },
         items: [],
+        submissions: [],
         unitRegistrationCounts: {},
         marksEntryStatus: {
           isOpen: false,
@@ -391,6 +407,70 @@ export const getAssessmentControlCenterData = cache(
       eventDraftsMap.get(draft.assessment_id)!.push(draft);
     }
 
+    const { data: submissionRecords, error: submissionsError } = await admin
+      .from('assessment_mark_component_submissions')
+      .select('assessment_id,cohort_id,component_key,submitted_at,submitted_by')
+      .in('assessment_id', eventIds);
+    if (submissionsError) throw new Error(`Unable to load component submissions: ${submissionsError.message}`);
+    const submitterIds = [...new Set((submissionRecords ?? []).map((row) => row.submitted_by).filter((id): id is string => Boolean(id)))];
+    const { data: submitterProfiles, error: submittersError } = submitterIds.length
+      ? await admin.from('profiles').select('id,full_name').in('id', submitterIds)
+      : { data: [], error: null };
+    if (submittersError) throw new Error(`Unable to load submission names: ${submittersError.message}`);
+    const submitterNameById = new Map((submitterProfiles ?? []).map((row) => [row.id, row.full_name]));
+    const cohortIds = [...new Set((registrations ?? []).map((row) => row.cohort_id).filter(Boolean))];
+    const { data: cohortRows, error: cohortsError } = cohortIds.length
+      ? await admin.from('cohorts').select('id,name,code').in('id', cohortIds)
+      : { data: [], error: null };
+    if (cohortsError) throw new Error(`Unable to load cohort names: ${cohortsError.message}`);
+    const cohortNameById = new Map((cohortRows ?? []).map((row) => [row.id, row.name || row.code || 'Cohort']));
+    const submissionByScope = new Map((submissionRecords ?? []).map((row) => [
+      `${row.assessment_id}:${row.cohort_id ?? 'all'}:${row.component_key}`,
+      row,
+    ]));
+    const componentKeys = ['assignment', 'presentation', 'rat', 'cat', 'exam'] as const;
+    const submissions: AssessmentSubmissionTrackerRow[] = [];
+    for (const event of eventRows) {
+      const unit = one(event.unit as Relation<{ id: string; code: string; name: string }>);
+      const cohort = one(event.cohort as Relation<{ id: string; name: string }>);
+      const eventCohortIds = event.cohort_id
+        ? [event.cohort_id]
+        : [...new Set((registrations ?? []).filter((row) => row.unit_id === event.unit_id).map((row) => row.cohort_id))];
+      const scopes: Array<string | null> = eventCohortIds.length ? eventCohortIds : [null];
+      const drafts = eventDraftsMap.get(event.id) ?? [];
+      const resultsForEvent = eventResultsMap.get(event.id) ?? [];
+      for (const scopeId of scopes) {
+        for (const component of componentKeys) {
+          const record = submissionByScope.get(`${event.id}:${scopeId ?? 'all'}:${component}`)
+            ?? submissionByScope.get(`${event.id}:all:${component}`);
+          const hasDraft = drafts.some((draft) =>
+            component === 'assignment' ? draft.assignment_mark !== null
+              : component === 'presentation' ? draft.presentation_mark !== null
+                : component === 'rat' ? draft.rat_mark !== null
+                  : component === 'cat' ? draft.cat_mark !== null : draft.exam_mark !== null,
+          );
+          const hasImportedMarks = resultsForEvent.some((result) => {
+            const marks = result.component_marks;
+            if (!marks || typeof marks !== 'object' || Array.isArray(marks)) return false;
+            const markKey = component === 'cat' ? 'cat1' : component;
+            const value = (marks as Record<string, unknown>)[markKey];
+            return value !== null && value !== undefined;
+          });
+          submissions.push({
+            id: `${event.id}:${scopeId ?? 'all'}:${component}`,
+            assessmentId: event.id,
+            unit: unit?.name ?? 'Unit markbook',
+            unitCode: unit?.code ?? '',
+            cohort: scopeId ? (cohort?.id === scopeId ? cohort.name : cohortNameById.get(scopeId) ?? 'Cohort') : 'All cohorts',
+            component: component === 'rat' ? 'RAT' : component.toUpperCase(),
+            status: record ? 'Submitted' : hasDraft || hasImportedMarks ? 'In progress' : 'Not started',
+            submittedAt: record?.submitted_at ?? null,
+            submittedBy: record?.submitted_by ? submitterNameById.get(record.submitted_by) ?? 'Trainer' : null,
+          });
+        }
+      }
+    }
+
     // Build items
     const items: AssessmentControlCenterItem[] = [];
 
@@ -535,6 +615,7 @@ export const getAssessmentControlCenterData = cache(
       departmentName: profile.departmentName ?? 'Department',
       summary,
       items,
+      submissions,
       unitRegistrationCounts,
       marksEntryStatus: {
         isOpen: openCount > 0,

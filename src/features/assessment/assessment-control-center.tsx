@@ -13,6 +13,21 @@ import type { AssessmentControlCenterData } from './control-center-queries';
 export function AssessmentControlCenter({ data }: { data: AssessmentControlCenterData }) {
   const router = useRouter();
   const [search, setSearch] = useState('');
+  const [submissionSearch, setSubmissionSearch] = useState('');
+  const [submissionComponent, setSubmissionComponent] = useState('all');
+  const [submissionStatus, setSubmissionStatus] = useState('all');
+  const [needsAttention, setNeedsAttention] = useState(false);
+
+  const submissionRows = useMemo(() => {
+    const query = submissionSearch.trim().toLocaleLowerCase();
+    return data.submissions.filter((row) => {
+      if (submissionComponent !== 'all' && row.component !== submissionComponent) return false;
+      if (submissionStatus !== 'all' && row.status !== submissionStatus) return false;
+      if (needsAttention && row.status === 'Submitted') return false;
+      if (!query) return true;
+      return `${row.unit} ${row.unitCode} ${row.cohort} ${row.component} ${row.submittedBy ?? ''}`.toLocaleLowerCase().includes(query);
+    });
+  }, [data.submissions, needsAttention, submissionComponent, submissionSearch, submissionStatus]);
 
   const unitGroups = useMemo(() => {
     const byUnit = new Map<string, {
@@ -145,6 +160,49 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
             </div>
           </div>
         ))}
+      </section>
+
+      <section className="overflow-hidden rounded-xl border border-border bg-surface shadow-2xs">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
+          <div>
+            <h2 className="text-sm font-semibold text-slate-700">Submission tracker</h2>
+            <p className="mt-0.5 text-xs text-slate-500">{submissionRows.length} components shown</p>
+          </div>
+          <button type="button" onClick={() => setNeedsAttention((current) => !current)} aria-pressed={needsAttention}
+            className={`h-8 rounded-lg border px-3 text-xs font-medium ${needsAttention ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-border bg-surface text-slate-600 hover:bg-surface-subtle'}`}>
+            Needs attention
+          </button>
+        </div>
+        <div className="grid gap-2 border-b border-border p-3 sm:grid-cols-[minmax(180px,1fr)_150px_150px]">
+          <label className="relative">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-slate-400" />
+            <input type="search" value={submissionSearch} onChange={(event) => setSubmissionSearch(event.target.value)} placeholder="Search unit, cohort or trainer"
+              className="h-9 w-full rounded-lg border border-border bg-surface pl-8 pr-3 text-xs text-slate-600 placeholder:text-slate-400 outline-none focus:border-primary" />
+          </label>
+          <select aria-label="Filter by component" value={submissionComponent} onChange={(event) => setSubmissionComponent(event.target.value)} className="h-9 rounded-lg border border-border bg-surface px-2.5 text-xs text-slate-600">
+            <option value="all">All components</option>{['ASSIGNMENT', 'PRESENTATION', 'RAT', 'CAT', 'EXAM'].map((value) => <option key={value}>{value}</option>)}
+          </select>
+          <select aria-label="Filter by status" value={submissionStatus} onChange={(event) => setSubmissionStatus(event.target.value)} className="h-9 rounded-lg border border-border bg-surface px-2.5 text-xs text-slate-600">
+            <option value="all">All statuses</option>{['Submitted', 'In progress', 'Not started'].map((value) => <option key={value}>{value}</option>)}
+          </select>
+        </div>
+        {submissionRows.length === 0 ? <p className="px-4 py-8 text-center text-xs text-slate-500">No submissions match these filters.</p> : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[680px] text-left text-xs">
+              <thead className="bg-surface-subtle text-[10px] font-medium uppercase tracking-wide text-slate-500"><tr>
+                <th className="px-4 py-2.5">Unit / cohort</th><th className="px-3 py-2.5">Component</th><th className="px-3 py-2.5">Status</th><th className="px-3 py-2.5">Submitted by</th><th className="px-3 py-2.5">Submitted</th><th className="px-4 py-2.5 text-right"> </th>
+              </tr></thead>
+              <tbody className="divide-y divide-border">{submissionRows.map((row) => <tr key={row.id} className="hover:bg-surface-subtle/60">
+                <td className="px-4 py-2.5"><span className="block font-medium text-slate-700">{row.unit}</span><span className="text-[10px] text-slate-500">{row.unitCode}{row.unitCode ? ' · ' : ''}{row.cohort}</span></td>
+                <td className="px-3 py-2.5 text-slate-600">{row.component}</td>
+                <td className="px-3 py-2.5"><span className={`rounded-full px-2 py-1 text-[10px] font-medium ${row.status === 'Submitted' ? 'bg-emerald-50 text-emerald-700' : row.status === 'In progress' ? 'bg-amber-50 text-amber-800' : 'bg-slate-100 text-slate-600'}`}>{row.status}</span></td>
+                <td className="px-3 py-2.5 text-slate-600">{row.submittedBy ?? '—'}</td>
+                <td className="px-3 py-2.5 text-slate-600">{row.submittedAt ? new Date(row.submittedAt).toLocaleString() : '—'}</td>
+                <td className="px-4 py-2.5 text-right"><Link href={`/assessment/marks/${row.assessmentId}`} className="font-medium text-primary hover:underline">Open</Link></td>
+              </tr>)}</tbody>
+            </table>
+          </div>
+        )}
       </section>
 
       <section className="space-y-3">

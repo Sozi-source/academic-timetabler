@@ -1,3 +1,11 @@
+### 2026-10-29: Add HOD trainer submission tracker
+
+**Modified:**
+- `src/features/assessment/control-center-queries.ts` — loads component submissions, submitter names, cohort names, and current mark-entry state for the selected period.
+- `src/features/assessment/assessment-control-center.tsx` — adds a compact filterable component status table with submitter, submission time, and markbook links.
+
+No schema changes or manual follow-up required. Verification was left to the user as requested.
+
 ### 2026-10-29: Separate trainer marks entry from unit documents
 
 **Modified:**

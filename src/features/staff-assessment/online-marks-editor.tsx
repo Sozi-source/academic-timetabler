@@ -1317,12 +1317,6 @@ export function OnlineMarksEditor({
         </section>
       ) : null}
 
-      {/* Helper Note */}
-      <p className="text-xs font-semibold leading-relaxed text-slate-800">
-        Missed Assignment, Presentation, or RAT default to 0. Press <strong>Enter</strong> on
-        your keyboard to jump directly to the next student.
-      </p>
-
       {/* Feedback Messages */}
       {error ? (
         <p className="rounded-lg border border-danger-border bg-danger-surface px-3 py-2.5 text-[11px] font-semibold text-danger">
@@ -1338,35 +1332,7 @@ export function OnlineMarksEditor({
       ) : null}
 
       {/* Action Buttons */}
-      <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-200">
-        <div>
-          {!editable ? (
-            <p className="text-xs font-semibold text-slate-700">
-              Results are submitted and finalized. Download the completed spreadsheet below.
-            </p>
-          ) : ['assignment', 'presentation', 'rat'].includes(visibleComponent) ? (
-            <p className="text-xs font-semibold text-slate-800">
-              Coursework marks ({singleComponent?.label ?? 'Assignment, Presentation, RAT'}) are saved automatically and submitted together with final exam marks at the end of the semester.
-            </p>
-          ) : visibleComponent === 'cat' ? (
-            <p className="text-xs font-semibold text-slate-800">
-              {catSubmitted
-                ? 'CAT marks submitted successfully.'
-                : unfilledSummary.missingCat > 0
-                  ? `${unfilledSummary.missingCat} student(s) missing CAT marks before midterm submission.`
-                  : 'All CAT marks entered and ready for midterm submission.'}
-            </p>
-          ) : (
-            <p className="text-xs font-semibold text-slate-800">
-              {finalSubmitted
-                ? 'Final marks submitted and markbook finalized.'
-                : unfilledSummary.totalMissing > 0
-                  ? `${unfilledSummary.totalMissing} mark(s) unentered. On final submission, empty coursework becomes 0 and empty exams are recorded as Absent (AB).`
-                  : 'All columns complete and ready for final submission.'}
-            </p>
-          )}
-        </div>
-
+      <div className="flex flex-wrap items-center justify-end gap-2 pt-1 border-t border-slate-200">
         <div className="flex items-center gap-2">
           {visibleComponent === 'cat' ? (
             <Button

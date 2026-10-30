@@ -36,6 +36,7 @@ interface DataTableProps<TData, TValue> {
   emptyDescription?: string;
   initialPageSize?: number;
   getRowId?: (row: TData) => string;
+  className?: string;
 }
 
 export function DataTable<TData, TValue>({
@@ -50,6 +51,7 @@ export function DataTable<TData, TValue>({
     'Create the first record or adjust the current filters.',
   initialPageSize = 10,
   getRowId,
+  className,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] =
     useState<SortingState>([]);
@@ -87,7 +89,7 @@ export function DataTable<TData, TValue>({
   const rows = table.getRowModel().rows;
 
   return (
-    <div className="rounded-xl border border-border bg-surface shadow-sm">
+    <div className={cn('rounded-xl border border-border bg-surface shadow-sm', className)}>
       <TableToolbar
         searchValue={globalFilter}
         onSearchChange={setGlobalFilter}
@@ -202,6 +204,9 @@ export function DataTable<TData, TValue>({
                       return (
                         <td
                           key={cell.id}
+                          data-label={typeof cell.column.columnDef.header === 'string' && cell.column.columnDef.header
+                            ? cell.column.columnDef.header
+                            : cell.column.id === 'actions' ? 'Actions' : cell.column.id}
                           style={widthStyle}
                           className="min-w-0 break-words px-2.5 py-2.5 h-11 align-middle text-[12px] font-medium leading-5 xl:px-3 xl:text-[13px] text-text-primary"
                         >

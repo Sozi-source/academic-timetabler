@@ -61,7 +61,7 @@ export function TrainerAccessBulkPinAction({
         <button
           type="submit"
           disabled={pending || trainers.length === 0}
-          className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-[11px] font-semibold text-white shadow-2xs transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-55"
+          className="inline-flex min-h-9 w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-[11px] font-semibold text-white shadow-2xs transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-55 sm:w-auto"
         >
           {pending ? <LoaderCircle className="size-3.5 animate-spin" aria-hidden="true" /> : <KeyRound className="size-3.5" aria-hidden="true" />}
           {pending ? 'Generating PINs…' : 'Regenerate all PINs'}

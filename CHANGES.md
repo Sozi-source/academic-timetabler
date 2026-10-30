@@ -4289,3 +4289,24 @@ No database or application runtime changes were executed while preparing this pa
 
 **Manual follow-up required:** Run `supabase db push` to add the CAT absence column and update the submission RPC. No API contract changes for external callers beyond the added optional `catAbsent` field.
 
+### 2026-10-30: Make trainer access register responsive on phones
+
+**Modified:** `src/app/(dashboard)/trainers/access/page.tsx`, `src/features/trainer-access/trainer-access-bulk-pin-action.tsx`, `src/app/globals.css`, `CHANGES.md`
+- The trainer access register now changes from a wide, horizontally scrolling table into labeled trainer cards on narrow screens. Actions wrap and remain easy to reach.
+- Bulk PIN generation fills the available mobile width; the register header badges and link can wrap instead of forcing overflow.
+- No breaking changes, database migration, or manual follow-up required.
+
+### 2026-10-30: Make trainer management lists responsive on phones
+
+**Modified:** `src/app/(dashboard)/trainers/page.tsx`, `src/components/ui/data-table.tsx`, `src/features/trainers/trainer-table.tsx`, `src/app/globals.css`, `CHANGES.md`
+- The workspace approvals and teaching staff directory now display as labeled cards on narrow screens, keeping trainer details, workload controls, and actions within the viewport.
+- Desktop table layouts remain in place. The shared data table receives an optional styling class and labels its cells for accessible small-screen presentation.
+- No breaking changes, database migration, or manual follow-up required.
+
+### 2026-10-30: Adapt trainer management layouts to laptop widths
+
+**Modified:** `src/app/globals.css`, `CHANGES.md`
+- Trainer register and directory tables now switch to labeled cards below 1200px, accounting for the space used by the desktop navigation sidebar and page gutters.
+- The trainers page header stacks its title and actions at these widths so the action buttons do not compete with the title for horizontal space.
+- No breaking changes, database migration, or manual follow-up required.
+

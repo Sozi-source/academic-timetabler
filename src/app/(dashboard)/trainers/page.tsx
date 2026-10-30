@@ -58,7 +58,7 @@ export default async function StaffManagementPage() {
   const summary = summarizeTrainerAccess(accessRecords);
 
   return (
-    <div className="space-y-7">
+    <div className="trainer-management-screen space-y-7">
       <PageHeader
         eyebrow="Institutional Personnel"
         title="Staff & Trainer Management"
@@ -180,7 +180,7 @@ export default async function StaffManagementPage() {
       </section>
 
       {/* 2. Workspace Access & Account Approvals Panel */}
-      <section aria-labelledby="access-approvals-heading" className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xs">
+      <section aria-labelledby="access-approvals-heading" className="trainer-approvals-register overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 bg-gray-50/60 px-5 py-3.5">
           <div className="flex items-center gap-2.5">
             <span className="flex size-8 items-center justify-center rounded-lg bg-[#033B36]/10 text-[#033B36]">
@@ -196,7 +196,7 @@ export default async function StaffManagementPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Badge variant="neutral">
               {accessRecords.length} accounts recorded
             </Badge>
@@ -210,7 +210,7 @@ export default async function StaffManagementPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs min-w-[760px]">
+            <table className="w-full min-w-[760px] text-left text-xs">
               <thead className="border-b border-gray-100 bg-gray-50/75 text-[10px] font-bold uppercase tracking-wider text-gray-500">
                 <tr>
                   <th scope="col" className="px-5 py-3 w-[28%]">Trainer</th>
@@ -225,7 +225,7 @@ export default async function StaffManagementPage() {
                     key={record.trainerId}
                     className="transition hover:bg-gray-50/50"
                   >
-                    <td className="px-5 py-3.5 align-middle">
+                    <td data-label="Trainer" className="px-5 py-3.5 align-middle">
                       <Link
                         href={`/trainers/${record.trainerId}`}
                         className="truncate text-xs font-bold text-gray-900 transition hover:text-[#033B36] hover:underline block"
@@ -237,7 +237,7 @@ export default async function StaffManagementPage() {
                       </p>
                     </td>
 
-                    <td className="px-5 py-3.5 align-middle">
+                    <td data-label="Workspace" className="px-5 py-3.5 align-middle">
                       <p className="text-xs font-medium text-gray-700">
                         {trainerAccessDetail(record)}
                       </p>
@@ -248,7 +248,7 @@ export default async function StaffManagementPage() {
                       ) : null}
                     </td>
 
-                    <td className="px-5 py-3.5 align-middle whitespace-nowrap">
+                    <td data-label="Access status" className="px-5 py-3.5 align-middle whitespace-nowrap">
                       <Badge
                         variant={
                           record.accessState === 'linked'
@@ -266,8 +266,8 @@ export default async function StaffManagementPage() {
                       </Badge>
                     </td>
 
-                    <td className="px-5 py-3.5 align-middle text-right whitespace-nowrap">
-                      <div className="inline-flex items-center justify-end gap-2">
+                    <td data-label="Actions" className="px-5 py-3.5 align-middle text-right whitespace-nowrap">
+                      <div className="trainer-access-actions inline-flex items-center justify-end gap-2">
                         {canProvisionTrainerAccess(record.accessState) ? (
                           <TrainerAccessAction trainerId={record.trainerId} />
                         ) : record.accessState === 'email_required' ? (
@@ -308,7 +308,7 @@ export default async function StaffManagementPage() {
 
       {/* 3. Master Trainer Directory & Workload Table */}
       <section aria-labelledby="trainer-directory-heading" className="space-y-3.5">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 id="trainer-directory-heading" className="text-sm font-bold uppercase tracking-wider text-gray-700">
             Teaching Staff Directory
           </h2>

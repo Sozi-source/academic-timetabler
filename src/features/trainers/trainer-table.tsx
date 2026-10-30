@@ -173,6 +173,7 @@ export function TrainerTable({ trainers }: TrainerTableProps) {
 
   return (
     <DataTable
+      className="trainer-directory-table"
       columns={columns}
       data={filteredTrainers}
       getRowId={(row) => row.id}

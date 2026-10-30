@@ -52,7 +52,7 @@ export default async function TrainerAccessPage() {
   ));
 
   return (
-    <div className="admin-screen space-y-5">
+    <div className="admin-screen trainer-access-screen space-y-5">
       <PageHeader
         eyebrow="Trainers"
         title="Trainer Access"
@@ -93,7 +93,7 @@ export default async function TrainerAccessPage() {
         />
       </section>
 
-      <section className="overflow-hidden rounded-xl border border-border bg-surface">
+      <section className="trainer-access-register overflow-hidden rounded-xl border border-border bg-surface">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
           <div>
             <h2 className="text-sm font-semibold text-text-primary">
@@ -105,7 +105,7 @@ export default async function TrainerAccessPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Badge variant="neutral">
               {
                 summary.total
@@ -128,7 +128,9 @@ export default async function TrainerAccessPage() {
               Generate or replace PINs for all active trainers across the app with an email address. Existing PINs will stop working.
             </p>
           </div>
-          <TrainerAccessBulkPinAction trainers={bulkPinTrainers} />
+          <div className="w-full min-w-0 sm:w-auto sm:shrink-0">
+            <TrainerAccessBulkPinAction trainers={bulkPinTrainers} />
+          </div>
         </div>
 
         {records.length ===
@@ -144,7 +146,7 @@ export default async function TrainerAccessPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs min-w-[760px]">
+            <table className="w-full min-w-[760px] text-left text-xs">
               <thead className="border-b border-border bg-surface-subtle/60 text-[10px] font-bold uppercase tracking-wider text-text-muted">
                 <tr>
                   <th scope="col" className="px-4 py-3 w-[28%]">Trainer</th>
@@ -159,7 +161,7 @@ export default async function TrainerAccessPage() {
                     key={record.trainerId}
                     className="transition hover:bg-surface-subtle/40"
                   >
-                    <td className="px-4 py-3.5 align-middle">
+                    <td data-label="Trainer" className="px-4 py-3.5 align-middle">
                       <Link
                         href={`/trainers/${record.trainerId}`}
                         className="truncate text-xs font-semibold text-text-primary transition hover:text-header-blue hover:underline block"
@@ -171,7 +173,7 @@ export default async function TrainerAccessPage() {
                       </p>
                     </td>
 
-                    <td className="px-4 py-3.5 align-middle">
+                    <td data-label="Workspace" className="px-4 py-3.5 align-middle">
                       <p className="text-[11px] font-medium text-text-secondary">
                         {trainerAccessDetail(record)}
                       </p>
@@ -182,7 +184,7 @@ export default async function TrainerAccessPage() {
                       ) : null}
                     </td>
 
-                    <td className="px-4 py-3.5 align-middle whitespace-nowrap">
+                    <td data-label="Access status" className="px-4 py-3.5 align-middle whitespace-nowrap">
                       <Badge
                         variant={
                           record.accessState === 'linked'
@@ -200,8 +202,8 @@ export default async function TrainerAccessPage() {
                       </Badge>
                     </td>
 
-                    <td className="px-4 py-3.5 align-middle text-right whitespace-nowrap">
-                      <div className="inline-flex items-center justify-end gap-2">
+                    <td data-label="Actions" className="px-4 py-3.5 align-middle text-right whitespace-nowrap">
+                      <div className="trainer-access-actions inline-flex items-center justify-end gap-2">
                         {canProvisionTrainerAccess(record.accessState) ? (
                           <TrainerAccessAction trainerId={record.trainerId} />
                         ) : record.accessState === 'email_required' ? (

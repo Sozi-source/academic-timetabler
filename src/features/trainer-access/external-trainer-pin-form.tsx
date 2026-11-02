@@ -38,7 +38,7 @@ export function ExternalTrainerPinForm() {
   }
 
   return (
-    <form onSubmit={submit} className="space-y-3.5">
+    <form onSubmit={submit} className="space-y-3">
       {message ? (
         <div role="alert" className="flex items-start gap-2.5 rounded-xl border border-danger-border bg-danger-surface px-3.5 py-3 text-sm text-danger">
           <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
@@ -49,7 +49,7 @@ export function ExternalTrainerPinForm() {
       <div className="space-y-2">
         <div className="flex items-center justify-between gap-3">
           <label htmlFor="external-trainer-pin" className="sr-only">Access PIN</label>
-          <span className="text-[11px] font-medium text-[#73847f]">8 digits</span>
+          <span className="rounded-full border border-[#f0dfa0] bg-[#fff9df] px-2 py-0.5 text-[10px] font-semibold text-[#77621a]">8 digits</span>
         </div>
         <div className="relative">
           <LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[#71837e]" aria-hidden="true" />
@@ -71,8 +71,8 @@ export function ExternalTrainerPinForm() {
         </div>
       </div>
 
-      <button type="submit" disabled={pending || pin.length !== 8} className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#0f766e] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0b625b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0f766e] disabled:cursor-not-allowed disabled:opacity-55">
-        {pending ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : <LogIn className="size-4" aria-hidden="true" />}
+      <button type="submit" disabled={pending || pin.length !== 8} className="flex h-10.5 w-full items-center justify-center gap-2 rounded-xl bg-[#0f766e] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0b625b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0f766e] disabled:cursor-not-allowed disabled:bg-[#83bdb3]">
+        {pending ? <LoaderCircle className="size-4 animate-spin text-[#fff2b2]" aria-hidden="true" /> : <LogIn className="size-4 text-[#fff2b2]" aria-hidden="true" />}
         {pending ? 'Verifying PIN…' : 'Continue'}
       </button>
       <p className="text-center text-xs leading-5 text-[#71817c]">

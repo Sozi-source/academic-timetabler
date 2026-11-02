@@ -1,3 +1,10 @@
+### 2026-11-02: Brand trainer assessment marksheets for Imperial College
+
+**Modified:**
+- `src/features/assessment/markbook-generator.ts` — updated CAT and final marksheet headings, workbook metadata, and footers to Imperial College of Medical and Health Sciences; removed the visible attendance column while retaining absence notation in marks and remarks; advanced the marksheet template version to 1.1.
+
+No schema changes or manual follow-up required.
+
 ### 2026-10-29: Add HOD trainer submission tracker
 
 **Modified:**

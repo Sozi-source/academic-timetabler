@@ -1,10 +1,10 @@
-### 2026-11-02: Align external trainer mark entry and add draft downloads
+### 2026-11-02: Align trainer mark entry and draft downloads
 
 **Modified:**
-- `src/features/staff-assessment/online-marks-editor.tsx` — removed the floating submit button, retained the submit action at the bottom of the editor, and added external trainer draft marksheet download controls after marks are entered and saved.
-- `src/app/external-trainer/units/[allocationId]/assessment/[assessmentId]/marks/page.tsx` — enables draft marksheet downloads in the shared mark entry editor.
-- `src/app/api/staff/assessment/[assessmentId]/markbook/route.ts` — permits draft workbook generation only for authenticated external trainer sessions while trainer entry is open.
-- `src/app/portal-theme.css` — removed external-only mark entry styling so external trainers use the shared internal mark entry appearance.
+- `src/features/staff-assessment/online-marks-editor.tsx` — removed the floating submit button, retained the submit action at the bottom, and enabled draft marksheet downloads for both trainer portals after marks are entered and saved.
+- `src/app/(staff)/staff/units/[allocationId]/assessment/[assessmentId]/marks/page.tsx` and `src/app/external-trainer/units/[allocationId]/assessment/[assessmentId]/marks/page.tsx` — aligned the mark entry page headers and validation notices, and enabled draft downloads in both portals.
+- `src/app/api/staff/assessment/[assessmentId]/markbook/route.ts` — permits draft workbook generation for allocated trainers while trainer entry is open.
+- `src/app/portal-theme.css` — applied matching mark input colors across both portals and removed external-only mark entry styling.
 
 No schema changes or manual follow-up required.
 

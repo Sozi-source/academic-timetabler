@@ -1109,6 +1109,7 @@ export function OnlineMarksEditor({
                           data-mark-col={0}
                           data-student-index={row.studentIndex}
                           data-component-key={key}
+                          data-mark-absent={isAbsentField}
                           value={values[row.student.studentId]?.[key] ?? ''}
                           type="text"
                           inputMode={['exam', 'cat'].includes(key) ? 'text' : 'decimal'}
@@ -1222,6 +1223,7 @@ export function OnlineMarksEditor({
                               data-mark-col={colIndex}
                               data-student-index={row.studentIndex}
                               data-component-key={key}
+                              data-mark-absent={isAbsentField}
                               value={values[row.student.studentId]?.[key] ?? ''}
                               type="text"
                               inputMode={['exam', 'cat'].includes(key) ? 'text' : 'decimal'}

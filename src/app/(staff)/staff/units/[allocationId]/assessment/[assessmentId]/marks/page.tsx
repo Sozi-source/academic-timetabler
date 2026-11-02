@@ -117,6 +117,8 @@ export default async function StaffOnlineMarksPage({
       <PageHeader
         title="Enter marks"
         description={`${access.allocation.unitName} · ${population.cohort?.name || access.allocation.cohortName}`}
+        backHref="/staff/units"
+        backLabel="My Units"
       />
 
 
@@ -141,6 +143,7 @@ export default async function StaffOnlineMarksPage({
         assessmentId={
           population.assessmentId
         }
+        allowDraftDownload
         trainerEntryOpen={population.trainerEntryOpen}
         workflowStatus={
           population.workflowStatus

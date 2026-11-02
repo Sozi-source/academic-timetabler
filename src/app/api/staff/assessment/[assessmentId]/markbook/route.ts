@@ -15,9 +15,6 @@ import {
   requireTrainerAccess,
 } from '@/features/auth/authorization';
 import {
-  isExternalTrainerSession,
-} from '@/features/trainer-access/external-trainer-session';
-import {
   loadAssessmentMarkbookBundle,
 } from '@/features/assessment/markbook-bundle';
 import {
@@ -65,7 +62,7 @@ export async function POST(
     params,
   }: RouteContext,
 ) {
-  const profile = await requireTrainerAccess();
+  await requireTrainerAccess();
 
   const {
     assessmentId,
@@ -74,7 +71,6 @@ export async function POST(
   const url = new URL(request.url);
   const requestedType = url.searchParams.get('type') as 'cat' | 'final' | null;
   const draftRequested = url.searchParams.get('draft') === '1';
-  const externalTrainer = await isExternalTrainerSession(profile.id);
 
   const trainerAllowed =
     await trainerCanAccessAssessment(
@@ -143,7 +139,7 @@ export async function POST(
     }
   }
 
-  // Draft markbooks are available to external trainers while their entry window is open.
+  // Draft markbooks are available to allocated trainers while their entry window is open.
   const { data: eventStatus } = await supabase
     .from('assessment_events')
     .select('cat_marks_finalized_at, exam_marks_finalized_at, marks_submitted_at, trainer_entry_open')
@@ -154,7 +150,7 @@ export async function POST(
   const isFinalSubmitted = Boolean(
     eventStatus?.exam_marks_finalized_at || eventStatus?.marks_submitted_at,
   );
-  const canDownloadDraft = draftRequested && externalTrainer && eventStatus?.trainer_entry_open === true;
+  const canDownloadDraft = draftRequested && eventStatus?.trainer_entry_open === true;
 
   let resolvedType: 'cat' | 'final';
   if (requestedType === 'cat') {

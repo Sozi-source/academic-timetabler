@@ -45,15 +45,14 @@ export default async function ExternalTrainerMarksPage({ params }: PageProps) {
   return (
     <div className="space-y-5">
       <PageHeader
-        eyebrow={`${access.allocation.unitCode} · ${population.cohort?.name || access.allocation.cohortName}`}
         title="Enter marks"
-        description={access.allocation.unitName}
+        description={`${access.allocation.unitName} · ${population.cohort?.name || access.allocation.cohortName}`}
         backHref="/external-trainer/units"
         backLabel="My Units"
       />
       {access.assessment.maximumMark !== 100 ? (
         <section className="rounded-xl border border-warning-border bg-warning-surface px-4 py-3">
-          <p className="text-xs leading-5 text-warning-ink">
+          <p className="text-[11px] leading-5 text-text-secondary">
             The final Exam assessment rule must use maximum 100 before online marks can be saved or submitted. Current maximum: {access.assessment.maximumMark ?? 'not configured'}.
           </p>
         </section>

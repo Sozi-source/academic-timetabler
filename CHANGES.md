@@ -1,3 +1,13 @@
+### 2026-11-02: Align external trainer mark entry and add draft downloads
+
+**Modified:**
+- `src/features/staff-assessment/online-marks-editor.tsx` — removed the floating submit button, retained the submit action at the bottom of the editor, and added external trainer draft marksheet download controls after marks are entered and saved.
+- `src/app/external-trainer/units/[allocationId]/assessment/[assessmentId]/marks/page.tsx` — enables draft marksheet downloads in the shared mark entry editor.
+- `src/app/api/staff/assessment/[assessmentId]/markbook/route.ts` — permits draft workbook generation only for authenticated external trainer sessions while trainer entry is open.
+- `src/app/portal-theme.css` — removed external-only mark entry styling so external trainers use the shared internal mark entry appearance.
+
+No schema changes or manual follow-up required.
+
 ### 2026-11-02: Brand trainer assessment marksheets for Imperial College
 
 **Modified:**

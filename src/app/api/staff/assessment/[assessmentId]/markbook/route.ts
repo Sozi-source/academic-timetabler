@@ -15,6 +15,9 @@ import {
   requireTrainerAccess,
 } from '@/features/auth/authorization';
 import {
+  isExternalTrainerSession,
+} from '@/features/trainer-access/external-trainer-session';
+import {
   loadAssessmentMarkbookBundle,
 } from '@/features/assessment/markbook-bundle';
 import {
@@ -62,7 +65,7 @@ export async function POST(
     params,
   }: RouteContext,
 ) {
-  await requireTrainerAccess();
+  const profile = await requireTrainerAccess();
 
   const {
     assessmentId,
@@ -70,6 +73,8 @@ export async function POST(
 
   const url = new URL(request.url);
   const requestedType = url.searchParams.get('type') as 'cat' | 'final' | null;
+  const draftRequested = url.searchParams.get('draft') === '1';
+  const externalTrainer = await isExternalTrainerSession(profile.id);
 
   const trainerAllowed =
     await trainerCanAccessAssessment(
@@ -138,10 +143,10 @@ export async function POST(
     }
   }
 
-  // Check event submission status to ensure marksheet can only be downloaded after submission
+  // Draft markbooks are available to external trainers while their entry window is open.
   const { data: eventStatus } = await supabase
     .from('assessment_events')
-    .select('cat_marks_finalized_at, exam_marks_finalized_at, marks_submitted_at')
+    .select('cat_marks_finalized_at, exam_marks_finalized_at, marks_submitted_at, trainer_entry_open')
     .eq('id', targetAssessmentId)
     .maybeSingle();
 
@@ -149,10 +154,11 @@ export async function POST(
   const isFinalSubmitted = Boolean(
     eventStatus?.exam_marks_finalized_at || eventStatus?.marks_submitted_at,
   );
+  const canDownloadDraft = draftRequested && externalTrainer && eventStatus?.trainer_entry_open === true;
 
   let resolvedType: 'cat' | 'final';
   if (requestedType === 'cat') {
-    if (!isCatSubmitted) {
+    if (!isCatSubmitted && !canDownloadDraft) {
       return NextResponse.json(
         { message: 'CAT marks must be submitted before downloading the CAT marksheet.' },
         { status: 400 },
@@ -160,7 +166,7 @@ export async function POST(
     }
     resolvedType = 'cat';
   } else if (requestedType === 'final') {
-    if (!isFinalSubmitted) {
+    if (!isFinalSubmitted && !canDownloadDraft) {
       return NextResponse.json(
         { message: 'Final marks must be submitted before downloading the Final marksheet.' },
         { status: 400 },
@@ -173,6 +179,8 @@ export async function POST(
       resolvedType = 'final';
     } else if (isCatSubmitted) {
       resolvedType = 'cat';
+    } else if (canDownloadDraft) {
+      resolvedType = 'final';
     } else {
       return NextResponse.json(
         { message: 'Marksheet download is available after submitting CAT marks or final marks.' },
@@ -182,7 +190,7 @@ export async function POST(
   }
 
   // Attempt to lock/ensure bundle without blocking download
-  if (!targetAssessmentId.startsWith('alloc-')) {
+  if (!canDownloadDraft && !targetAssessmentId.startsWith('alloc-')) {
     await supabase.rpc(
       'lock_assessment_markbook_bundle',
       {

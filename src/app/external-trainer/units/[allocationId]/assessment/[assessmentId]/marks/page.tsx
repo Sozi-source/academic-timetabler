@@ -63,7 +63,7 @@ export default async function ExternalTrainerMarksPage({ params }: PageProps) {
         trainerEntryOpen={population.trainerEntryOpen}
         workflowStatus={population.workflowStatus}
         componentSubmissions={componentSubmissions}
-        showStudentCohort={false}
+        allowDraftDownload
         students={population.students.map((student) => {
           const state = marksByStudent.get(student.studentId);
           return {

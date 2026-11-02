@@ -19,8 +19,8 @@ export default function ExternalTrainerLoginPage() {
               <BookOpenCheck className="size-5" aria-hidden="true" />
             </span>
             <div>
-              <p className="text-[12px] font-bold leading-tight tracking-tight text-[#183b35]">Imperial College of Medical and Health Sciences</p>
-              <p className="mt-0.5 text-[11px] font-medium text-[#667a74]">External Trainer Portal</p>
+              <p className="text-[12px] font-bold leading-tight tracking-tight text-[#183b35]">Department of Human Nutrition & Dietetics</p>
+              <p className="mt-0.5 text-[11px] font-medium text-[#667a74]">External Trainer Access</p>
             </div>
           </div>
           <h1 id="pin-login-title" className="text-xl font-bold tracking-tight text-[#173b35]">Sign in</h1>

@@ -1138,7 +1138,7 @@ export function OnlineMarksEditor({
                           className={`h-10 w-20 rounded-none border px-2 text-center text-base font-bold outline-none transition placeholder:text-slate-600 placeholder:opacity-100 placeholder:font-bold focus:border-[#0b4f4a] focus:ring-2 focus:ring-[#0b4f4a]/20 disabled:bg-[#eee8d7] disabled:text-slate-600 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                             isAbsentField
                               ? 'border-amber-400 bg-amber-50 text-amber-950 font-bold'
-                              : 'border-slate-400 bg-[#fffdf5] text-slate-950 focus:border-[#0b4f4a]'
+                              : 'border-slate-400 bg-[#FFF3B0] text-slate-950 focus:border-[#0b4f4a]'
                           } ${
                             !field.valid ? 'border-red-600 focus:ring-red-600/20' : ''
                           }`}
@@ -1251,7 +1251,7 @@ export function OnlineMarksEditor({
                               className={`h-9 w-full rounded-none border px-1 text-center text-xs font-bold outline-none transition placeholder:text-slate-600 placeholder:opacity-100 placeholder:font-bold focus:border-[#0b4f4a] focus:ring-2 focus:ring-[#0b4f4a]/20 disabled:bg-[#eee8d7] disabled:text-slate-600 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                                 isAbsentField
                                   ? 'border-amber-400 bg-amber-50 text-amber-950 font-bold'
-                                  : 'border-slate-400 bg-[#fffdf5] text-slate-950 focus:border-[#0b4f4a]'
+                                  : 'border-slate-400 bg-[#FFF3B0] text-slate-950 focus:border-[#0b4f4a]'
                               } ${
                                 !field.valid ? 'border-red-600 focus:ring-red-600/20' : ''
                               }`}

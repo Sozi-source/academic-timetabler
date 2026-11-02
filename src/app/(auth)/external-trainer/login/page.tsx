@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function ExternalTrainerLoginPage() {
   return (
-    <main className="relative flex min-h-screen items-center justify-center bg-[#f4f7f6] px-4 py-10 sm:px-6">
+    <main className="external-trainer relative flex min-h-screen items-center justify-center bg-[#f4f7f6] px-4 py-10 sm:px-6">
       <div className="absolute inset-x-0 top-0 h-1 bg-[#0f766e]" aria-hidden="true" />
       <section className="w-full max-w-md rounded-3xl border border-[#dce7e4] bg-white p-6 shadow-[0_20px_60px_rgba(20,55,48,0.10)] sm:p-8" aria-labelledby="pin-login-title">
         <header className="mb-7">

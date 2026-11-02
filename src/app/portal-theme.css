@@ -361,7 +361,7 @@ main input[data-mark-cell="true"][data-mark-absent="true"]:not(:disabled) {
   --text-primary: #24433d;
   --text-secondary: #526760;
   --text-muted: #73817c;
-  --font-external: "Segoe UI Variable", "Aptos", "Segoe UI", system-ui, sans-serif;
+  --font-external: Inter, "Helvetica Neue", Arial, "Segoe UI", sans-serif;
   font-family: var(--font-external);
   color: var(--text-primary);
   font-weight: 400;
@@ -369,7 +369,7 @@ main input[data-mark-cell="true"][data-mark-absent="true"]:not(:disabled) {
 
 .external-trainer :where(h1, h2, h3) {
   color: #174d46;
-  font-family: "Aptos Display", "Segoe UI Variable Display", "Segoe UI Variable", "Segoe UI", sans-serif;
+  font-family: inherit;
   font-weight: 550;
   letter-spacing: -0.025em;
 }

@@ -48,7 +48,7 @@ export function ExternalTrainerPinForm() {
 
       <div className="space-y-2">
         <div className="flex items-center justify-between gap-3">
-          <label htmlFor="external-trainer-pin" className="block text-sm font-semibold text-[#203d37]">Access PIN</label>
+          <label htmlFor="external-trainer-pin" className="sr-only">Access PIN</label>
           <span className="text-[11px] font-medium text-[#73847f]">8 digits</span>
         </div>
         <div className="relative">

@@ -24,9 +24,6 @@ export default function ExternalTrainerLoginPage() {
             </div>
           </div>
           <h1 id="pin-login-title" className="text-2xl font-bold tracking-tight text-[#173b35]">Sign in</h1>
-          <p className="mt-1.5 text-sm leading-5 text-[#60736e]">
-            Enter the 8-digit access PIN provided by your department.
-          </p>
         </header>
         <ExternalTrainerPinForm />
       </section>

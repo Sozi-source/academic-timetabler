@@ -1,3 +1,12 @@
+### 2026-11-02: Polish external trainer unit cards and sign-in
+
+**Modified:**
+- `src/app/external-trainer/units/page.tsx` — replaced the dark gradient allocation cards with compact white cards, teal accent details, clearer status badges, and consistent calls to action.
+- `src/app/(auth)/external-trainer/login/page.tsx` and `src/features/trainer-access/external-trainer-pin-form.tsx` — refined the branded sign-in panel, PIN field hierarchy, validation feedback, and primary action.
+- `src/app/portal-theme.css` — removed the obsolete white-heading override from the former dark unit cards.
+
+No schema changes or manual follow-up required.
+
 ### 2026-11-02: Align trainer mark entry and draft downloads
 
 **Modified:**

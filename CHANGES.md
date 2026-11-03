@@ -1,3 +1,13 @@
+### 2026-11-03: Enforce examination paper question formats
+
+**Modified:**
+- `src/features/exam-setting/generation-actions.ts` — added section-aware Gemini instructions and validation, requiring direct Section A short-answer prompts and 2–3 marked subquestions for Section B structured questions; reduced generation temperature for more consistent wording.
+- `src/features/exam-setting/generation-format.ts` — added shared format rules and prompt instructions.
+- `src/tests/exam-setting-generation-format.test.ts` — added unit coverage for Section A and Section B format enforcement.
+- `supabase/migrations/20261103123000_harden_generated_exam_question_format.sql` — added a database trigger that rejects invalid generated question bodies outside the TypeScript action.
+
+No schema tables changed. Apply the new Supabase migration before generating additional papers.
+
 ### 2026-11-03: Harden multi-page attendance sheet exports
 
 **Modified:**

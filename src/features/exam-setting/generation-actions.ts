@@ -8,6 +8,10 @@ import { z } from 'zod';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { createClient } from '@/lib/supabase/server';
 
+import {
+  generationFormatInstruction,
+  validateGeneratedQuestionFormat,
+} from './generation-format';
 import { getParsedHistoricalQuestions } from './question-bank';
 
 const generationInput = z.object({
@@ -140,6 +144,7 @@ async function generateBatch(
 ): Promise<Array<z.infer<typeof generatedQuestionSchema>>> {
   const input = slots.map((slot, index) => ({
     index,
+    section: slot.sectionLabel,
     targetType: slot.questionType,
     marks: slot.marks,
     topic: slot.seed.topic,
@@ -147,13 +152,14 @@ async function generateBatch(
     difficulty: slot.seed.difficulty,
     cognitiveLevel: slot.seed.cognitiveLevel,
     sourceQuestion: slot.seed.bodyText,
+    formatInstruction: generationFormatInstruction(slot),
   }));
   const prompt = [
     'You write draft college-level examination questions for a Human Nutrition and Dietetics programme.',
     'Return only a valid JSON array, with exactly one object for each input item and the same index order.',
-    'Use each historical item only as a guide to its topic and learning intent. Create a genuinely new question: change the scenario, data, framing, and sentence structure; never copy a sentence or merely swap synonyms. Preserve scientific meaning and the requested difficulty and cognitive level. Keep standard clinical and scientific terminology accurate.',
+    'Use each historical item only as a guide to its topic and learning intent. Create a genuinely new question by varying the scenario, data, framing, and wording without changing the requested section structure; never copy a sentence or merely swap synonyms. Preserve scientific meaning and the requested difficulty and cognitive level. Keep standard clinical and scientific terminology accurate.',
     'This college paper format does not allow multiple-choice questions. Never produce options or answer choices. Every item is a written short-answer or structured question.',
-    'Options must always be an empty array. Provide a clear stem and numbered/lettered parts whose marks add up exactly to the requested marks when parts are used. For a short-answer item without parts, use an empty parts array.',
+    'Options must always be an empty array. Follow each item formatInstruction exactly. Do not move a question between short-answer and structured formats.',
     'Every part mark must be a whole number (1, 2, 3, ...). Never use half or decimal marks, even if the historical item did. The historical item may carry a different mark value from the target; always scale the question to the requested marks.',
     'Include topic, learningOutcome, difficulty (easy|medium|hard), cognitiveLevel (recall|comprehension|application|analysis), and derivationMode (reword|rescenario|new_from_notes). Use rescenario when introducing a new clinical, community, laboratory, or food-service scenario; otherwise use reword.',
     'Each object must contain: index, stem, options, parts (objects with label,text,marks), topic, learningOutcome, difficulty, cognitiveLevel, derivationMode.',
@@ -179,6 +185,8 @@ async function generateBatch(
         && parsed.data.parts.reduce((sum, part) => sum + part.marks, 0) !== slot.marks) {
         throw new GenerationFormatError(`Generated question ${slot.sectionLabel}${slot.itemNumber} does not add to ${slot.marks} marks. Try again.`);
       }
+      const formatError = validateGeneratedQuestionFormat(parsed.data, slot);
+      if (formatError) throw new GenerationFormatError(formatError);
       return parsed.data;
     });
   };
@@ -194,7 +202,7 @@ async function generateBatch(
           generationConfig: {
             responseMimeType: 'application/json',
             responseSchema: generatedBatchResponseSchema,
-            temperature: 0.75,
+            temperature: 0.35,
           },
         });
         break;

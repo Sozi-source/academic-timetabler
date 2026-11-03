@@ -1,3 +1,11 @@
+### 2026-11-03: Harden multi-page attendance sheet exports
+
+**Modified:**
+- `src/features/assessment/attendance-sheet-pdf.tsx` — split large cohort registers into explicit pages, repeat the complete register header on every page, keep blank entry rows and certification blocks on the final page, and apply the same pagination rules to class, CAT, and exam sheets.
+- `src/tests/attendance-sheet-pdf.test.ts` — added regression coverage that parses overflow PDFs and verifies every page contains its sheet heading and table header, including Agricultural Production.
+
+No schema changes or manual follow-up required.
+
 ### 2026-11-02: Polish external trainer unit cards and sign-in
 
 **Modified:**

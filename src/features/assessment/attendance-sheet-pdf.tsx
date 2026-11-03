@@ -363,16 +363,57 @@ export async function generateAttendanceSheetPdf(
   const COL_CAT_SCORE = 56;
   const COL_CAT_DATE = 56; // Total = 562pt
 
+  // Keep enough room for the repeated header and the final certification block.
+  // React-PDF's automatic overflow can otherwise create a continuation page
+  // without the register header (or leave the first page with only that header).
+  const rowsPerPage = isClass ? 12 : 16;
+  type RegisterPageRow = {
+    candidate: AttendanceSheetDocumentCandidate | null;
+    rowNumber: number;
+  };
+  type AttendanceSheetPage = {
+    group: (typeof groups)[number];
+    rows: RegisterPageRow[];
+    isFirstPage: boolean;
+    isLastPage: boolean;
+  };
+
+  const pages: AttendanceSheetPage[] = groups.flatMap((group) => {
+    const blankCount = group.candidates.length === 0 ? 25 : 4;
+    const rows: RegisterPageRow[] = [
+      ...group.candidates.map((candidate, index) => ({
+        candidate,
+        rowNumber: index + 1,
+      })),
+      ...Array.from({ length: blankCount }, (_, index) => ({
+        candidate: null,
+        rowNumber: group.candidates.length + index + 1,
+      })),
+    ];
+    const pageRows = Array.from(
+      { length: Math.max(1, Math.ceil(rows.length / rowsPerPage)) },
+      (_, index) => rows.slice(index * rowsPerPage, (index + 1) * rowsPerPage),
+    );
+
+    return pageRows.map((pageRowsForGroup, index) => ({
+      group,
+      rows: pageRowsForGroup,
+      isFirstPage: index === 0,
+      isLastPage: index === pageRows.length - 1,
+    }));
+  });
+
   const doc = (
     <Document
       title={`${data.unitName} - ${heading}`}
       author={data.institutionName}
       creator={data.institutionName}
     >
-      {groups.map((group) => {
+      {pages.map((page, pageIndex) => {
+        const { group } = page;
         return (
           <Page
-            key={group.cohortName}
+            key={`${group.cohortName}-${pageIndex}`}
             size="A4"
             orientation={isClass ? 'landscape' : 'portrait'}
             style={isClass ? styles.pageLandscape : styles.pagePortrait}
@@ -428,7 +469,7 @@ export async function generateAttendanceSheetPdf(
             </View>
 
             {/* Multi-Cohort Distinction Banner if multiple cohorts present */}
-            {groups.length > 1 ? (
+            {groups.length > 1 && page.isFirstPage ? (
               <View style={styles.cohortBanner}>
                 <Text>
                   REGISTER FOR COHORT: {group.cohortName} ({group.candidates.length} Registered Students)
@@ -437,7 +478,7 @@ export async function generateAttendanceSheetPdf(
             ) : null}
 
             {/* Notice if no pre-registered students found */}
-            {group.candidates.length === 0 ? (
+            {group.candidates.length === 0 && page.isFirstPage ? (
               <View style={[styles.cohortBanner, { backgroundColor: '#fef3c7', borderColor: '#fde68a' }]}>
                 <Text style={{ color: '#92400e' }}>
                   CLASS REGISTER (MANUAL ENTRY): No pre-registered student records were found in the system for this cohort. Use the manual rows below to record attending students.
@@ -517,12 +558,14 @@ export async function generateAttendanceSheetPdf(
               )}
 
               {/* Student Candidate Rows */}
-              {group.candidates.map((cand, idx) => {
+              {page.rows
+                .filter((row): row is RegisterPageRow & { candidate: AttendanceSheetDocumentCandidate } => Boolean(row.candidate))
+                .map(({ candidate: cand, rowNumber }) => {
                 if (isClass) {
                   return (
                     <View key={cand.studentId} wrap={false} style={styles.tableRow}>
                       <View style={[styles.tdCell, { width: COL_CLASS_NO }]}>
-                        <Text style={styles.centerText}>{idx + 1}.</Text>
+                        <Text style={styles.centerText}>{rowNumber}.</Text>
                       </View>
                       <View style={[styles.tdCell, { width: COL_CLASS_ADM }]}>
                         <Text wrap={false} style={styles.boldText}>{cand.admissionNumber}</Text>
@@ -550,7 +593,7 @@ export async function generateAttendanceSheetPdf(
                   return (
                     <View key={cand.studentId} wrap={false} style={styles.tableRow}>
                       <View style={[styles.tdCell, { width: COL_EXAM_NO }]}>
-                        <Text style={styles.centerText}>{idx + 1}.</Text>
+                        <Text style={styles.centerText}>{rowNumber}.</Text>
                       </View>
                       <View style={[styles.tdCell, { width: COL_EXAM_ADM }]}>
                         <Text wrap={false} style={styles.boldText}>{cand.admissionNumber}</Text>
@@ -574,7 +617,7 @@ export async function generateAttendanceSheetPdf(
                 return (
                   <View key={cand.studentId} wrap={false} style={styles.tableRow}>
                     <View style={[styles.tdCell, { width: COL_CAT_NO }]}>
-                      <Text style={styles.centerText}>{idx + 1}.</Text>
+                      <Text style={styles.centerText}>{rowNumber}.</Text>
                     </View>
                     <View style={[styles.tdCell, { width: COL_CAT_ADM }]}>
                       <Text wrap={false} style={styles.boldText}>{cand.admissionNumber}</Text>
@@ -595,13 +638,13 @@ export async function generateAttendanceSheetPdf(
                 );
               })}
 
-              {/* Blank Candidate Entry Rows: 25 rows for manual entry if empty, else 4 buffer rows */}
-              {(() => {
-                const blankCount = group.candidates.length === 0 ? 25 : 4;
-                return Array.from({ length: blankCount }, (_, bIdx) => {
-                  const rowNum = group.candidates.length + bIdx + 1;
-                  const isLast = bIdx === blankCount - 1;
-                  const rowStyle = isLast ? styles.tableRowLast : styles.tableRow;
+              {/* Blank Candidate Entry Rows */}
+              {page.rows
+                .filter((row) => !row.candidate)
+                .map(({ rowNumber }, bIdx, blankRows) => {
+                const rowNum = rowNumber;
+                const isLast = bIdx === blankRows.length - 1;
+                const rowStyle = isLast ? styles.tableRowLast : styles.tableRow;
 
                 if (isClass) {
                   return (
@@ -678,12 +721,11 @@ export async function generateAttendanceSheetPdf(
                     </View>
                   </View>
                 );
-              });
-            })()}
+              })}
             </View>
 
             {/* Exam Script Count Summary Box */}
-            {isExam ? (
+            {isExam && page.isLastPage ? (
               <View style={styles.examSummaryBox}>
                 <Text>Total Registered Candidates: {group.candidates.length}</Text>
                 <Text>Total Scripts Collected: ___________</Text>
@@ -692,7 +734,7 @@ export async function generateAttendanceSheetPdf(
             ) : null}
 
             {/* Official Sign-off Footer */}
-            {isClass ? (
+            {isClass && page.isLastPage ? (
               <View style={styles.signoffContainerLandscape}>
                 {/* Row 1: Class Representative */}
                 <View style={styles.signoffRowLandscape}>
@@ -728,7 +770,7 @@ export async function generateAttendanceSheetPdf(
                   <View style={styles.signoffLineSign} />
                 </View>
               </View>
-            ) : (
+            ) : !isClass && page.isLastPage ? (
               <View style={styles.signoffContainerPortrait}>
                 {/* Row 1: Invigilator */}
                 <View style={styles.signoffRowPortrait}>
@@ -764,7 +806,7 @@ export async function generateAttendanceSheetPdf(
                   <View style={styles.signoffLinePortraitDate} />
                 </View>
               </View>
-            )}
+            ) : null}
 
             {/* Page Numbering Footer */}
             <Text

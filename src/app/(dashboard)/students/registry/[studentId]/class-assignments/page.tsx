@@ -1,8 +1,8 @@
-import Link from 'next/link';
-import { ArrowLeft, UsersRound } from 'lucide-react';
+import { UsersRound } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { FastTab } from '@/components/ui/fast-tab';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { deactivateStudentClassAssignment } from '@/features/students/class-assignment-actions';
 import { StudentClassAssignmentForm, type StudentClassAssignmentOption } from '@/features/students/student-class-assignment-form';
@@ -125,42 +125,71 @@ export default async function StudentClassAssignmentsPage({
       });
   }
 
-  const cohort = relation(student.current_cohort);
+  const activeCount = assignments?.length ?? 0;
   return (
-    <div className="mx-auto max-w-5xl space-y-4 p-4 sm:p-6">
-      <Link href={`/students/registry/${studentId}`} className="inline-flex items-center gap-2 text-sm font-medium text-text-secondary hover:text-text-primary">
-        <ArrowLeft className="size-4" /> Student profile
-      </Link>
-      <Card className="p-5">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">Individual class assignments</p>
-            <h1 className="mt-1 text-xl font-bold text-text-primary">{student.full_name}</h1>
-            <p className="mt-1 text-sm text-text-secondary">{student.admission_number} · Home cohort: {cohort?.name ?? 'Not assigned'}</p>
-          </div>
-          <Badge variant="neutral">Cohort and timetable stay unchanged</Badge>
-        </div>
-        <p className="mt-4 max-w-3xl text-sm leading-6 text-text-secondary">Assign the student to an existing class for an approved equivalent unit. This affects attendance, CAT, and exam rosters only.</p>
+    <div className="space-y-3">
+      <Card className="flex flex-wrap items-center justify-between gap-3 p-3.5 shadow-2xs">
+        <p className="text-xs leading-5 text-text-secondary">
+          Assign the student to an existing class for an approved equivalent unit. This affects attendance, CAT, and exam rosters only.
+        </p>
+        <Badge variant="neutral">Cohort &amp; timetable stay unchanged</Badge>
       </Card>
 
-      {query.error ? <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">Assignment failed: {query.error === 'duplicate' ? 'This student is already assigned to this class for this unit.' : query.error}</p> : null}
-      {query.saved ? <p role="status" className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">Assignment saved.</p> : null}
-      {query.removed ? <p role="status" className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">Assignment removed.</p> : null}
+      {query.error ? (
+        <p
+          role="alert"
+          className="rounded-lg border border-danger/30 bg-danger-subtle px-3.5 py-2.5 text-xs font-semibold text-danger"
+        >
+          Assignment failed:{' '}
+          {query.error === 'duplicate'
+            ? 'This student is already assigned to this class for this unit.'
+            : query.error}
+        </p>
+      ) : null}
+      {query.saved ? (
+        <p
+          role="status"
+          className="rounded-lg border border-primary/20 bg-primary-soft px-3.5 py-2.5 text-xs font-semibold text-primary-deep"
+        >
+          Assignment saved.
+        </p>
+      ) : null}
+      {query.removed ? (
+        <p
+          role="status"
+          className="rounded-lg border border-primary/20 bg-primary-soft px-3.5 py-2.5 text-xs font-semibold text-primary-deep"
+        >
+          Assignment removed.
+        </p>
+      ) : null}
 
-      <Card className="p-5">
-        <h2 className="font-semibold text-text-primary">Add a class assignment</h2>
+      <FastTab
+        title="Add a class assignment"
+        summary={`${eligibleRegistrations.length} eligible unit${eligibleRegistrations.length === 1 ? '' : 's'}`}
+      >
         {eligibleRegistrations.length ? (
           <StudentClassAssignmentForm
             studentId={studentId}
             registrations={registrationOptions}
             allocationsByRegistration={allocationsByRegistration}
           />
-        ) : <p className="mt-3 text-sm text-text-secondary">No registered units in an active period.</p>}
-      </Card>
+        ) : (
+          <p className="text-xs text-text-secondary">
+            No registered units in an active period.
+          </p>
+        )}
+      </FastTab>
 
-      <Card className="overflow-hidden">
-        <div className="flex items-center gap-2 border-b border-border p-4"><UsersRound className="size-4 text-primary" /><h2 className="font-semibold text-text-primary">Current assignments</h2></div>
-        {!assignments?.length ? <p className="p-5 text-sm text-text-secondary">No assignments yet.</p> : (
+      <FastTab
+        title="Current assignments"
+        summary={`${activeCount} active assignment${activeCount === 1 ? '' : 's'}`}
+      >
+        {!assignments?.length ? (
+          <div className="flex items-center gap-2 py-2 text-xs text-text-muted">
+            <UsersRound className="size-4 text-text-subtle" />
+            <span>No assignments yet.</span>
+          </div>
+        ) : (
           <ul className="divide-y divide-border">
             {assignments.map((assignment) => {
               const source = relation(assignment.registration);
@@ -168,14 +197,39 @@ export default async function StudentClassAssignmentsPage({
               const target = relation(assignment.allocation);
               const targetUnit = relation(target?.unit);
               const targetCohort = relation(target?.cohort);
-              return <li key={assignment.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
-                <div><p className="text-sm font-semibold text-text-primary">{sourceUnit?.name} → {targetUnit?.name} · {targetCohort?.name}</p><p className="mt-1 text-xs text-text-muted">{assignment.reason}</p></div>
-                <form action={deactivateStudentClassAssignment}><input type="hidden" name="studentId" value={studentId} /><input type="hidden" name="assignmentId" value={assignment.id} /><button className="rounded-lg border border-border px-3 py-2 text-xs font-semibold text-text-secondary hover:bg-surface-subtle">Remove</button></form>
-              </li>;
+              return (
+                <li
+                  key={assignment.id}
+                  className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
+                >
+                  <div>
+                    <p className="text-xs font-semibold text-text-primary">
+                      {sourceUnit?.name} → {targetUnit?.name} · {targetCohort?.name}
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-text-muted">
+                      {assignment.reason}
+                    </p>
+                  </div>
+                  <form action={deactivateStudentClassAssignment}>
+                    <input type="hidden" name="studentId" value={studentId} />
+                    <input
+                      type="hidden"
+                      name="assignmentId"
+                      value={assignment.id}
+                    />
+                    <button
+                      type="submit"
+                      className="inline-flex h-8 items-center justify-center rounded-md border border-border-strong bg-surface px-2.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+                    >
+                      Remove
+                    </button>
+                  </form>
+                </li>
+              );
             })}
           </ul>
         )}
-      </Card>
+      </FastTab>
     </div>
   );
 }

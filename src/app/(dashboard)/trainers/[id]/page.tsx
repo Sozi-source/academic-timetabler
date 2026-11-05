@@ -1,28 +1,26 @@
-import type { Metadata } from 'next';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import {
-  AlertCircle,
-  ArrowLeft,
   Briefcase,
   CalendarCheck2,
   CalendarX2,
   CheckCircle2,
   CircleOff,
-  Clock,
-  Eye,
   GraduationCap,
-  KeyRound,
   Mail,
   Pencil,
   Phone,
   Plus,
-  Presentation,
   ShieldCheck,
 } from 'lucide-react';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { FastTab } from '@/components/ui/fast-tab';
 import { Progress } from '@/components/ui/progress';
+import { RecordShell } from '@/components/ui/record-shell';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { getTrainerAccessRegister } from '@/features/trainer-access/queries';
 import { TrainerAccessAction } from '@/features/trainer-access/trainer-access-action';
@@ -30,11 +28,11 @@ import {
   setTrainerActiveAction,
   setTrainerTimetableAvailabilityAction,
 } from '@/features/trainers/actions';
-import { ResetTrainerPassword } from '@/features/trainers/reset-trainer-password';
 import {
   getTrainerAllocations,
   getTrainerById,
 } from '@/features/trainers/queries';
+import { ResetTrainerPassword } from '@/features/trainers/reset-trainer-password';
 
 export const dynamic = 'force-dynamic';
 
@@ -76,12 +74,6 @@ function formatEmploymentType(type: string): string {
   }
 }
 
-function getInitials(name: string): string {
-  const parts = name.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
-
 export async function generateMetadata({
   params,
 }: TrainerDetailsPageProps): Promise<Metadata> {
@@ -92,7 +84,8 @@ export async function generateMetadata({
     title: trainer
       ? `${trainer.fullName} - Staff Profile | Academic Planning System`
       : 'Trainer Not Found',
-    description: 'Detailed trainer profile, workspace access status, and teaching allocations.',
+    description:
+      'Detailed trainer profile, workspace access status, and teaching allocations.',
   };
 }
 
@@ -126,45 +119,74 @@ export default async function TrainerDetailsPage({
   );
 
   const targetHours = trainer.normalWeeklyHours || 20;
-  const utilizationPercentage = Math.round((totalAllocatedHours / targetHours) * 100);
+  const utilizationPercentage = Math.round(
+    (totalAllocatedHours / targetHours) * 100,
+  );
+
+  const subtitleParts = [
+    trainer.staffNumber,
+    formatWorkloadRole(trainer.workloadRole),
+    trainer.homeDepartment || 'Human Nutrition & Dietetics',
+  ].filter(Boolean);
 
   return (
-    <div className="space-y-4">
-      {/* 1. Executive Top Navigation & Management Toolbar */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <Link
-          href="/timetable/trainers"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-muted hover:text-text-primary transition"
-        >
-          <ArrowLeft className="size-3.5" />
-          Trainers Directory
-        </Link>
-
+    <RecordShell
+      title={trainer.fullName}
+      subtitle={subtitleParts.join(' · ')}
+      status={{
+        label: !trainer.isActive
+          ? 'Inactive'
+          : trainer.isTimetableAvailable
+            ? 'Active · Timetable Available'
+            : 'Active · Timetable Unavailable',
+        variant: !trainer.isActive
+          ? 'neutral'
+          : trainer.isTimetableAvailable
+            ? 'success'
+            : 'warning',
+      }}
+      activeTab="overview"
+      tabs={[
+        {
+          key: 'overview',
+          label: 'Overview',
+          href: `/trainers/${trainer.id}`,
+        },
+        {
+          key: 'portal',
+          label: 'Staff portal view',
+          href: `/trainers/${trainer.id}/portal-view`,
+        },
+        {
+          key: 'edit',
+          label: 'Edit profile',
+          href: `/timetable/trainers/${trainer.id}/edit`,
+        },
+      ]}
+      actions={
         <div className="flex flex-wrap items-center gap-1.5">
-          {accessState === 'ready_to_link' && (
+          {accessState === 'linked' ? (
+            <Badge variant="success">Portal Active</Badge>
+          ) : accessState === 'ready_to_link' ? (
             <TrainerAccessAction trainerId={trainer.id} />
+          ) : accessState === 'account_required' ? (
+            <Badge variant="neutral">Pending Signup</Badge>
+          ) : (
+            <Badge variant="danger">Email Required</Badge>
           )}
 
           <Button
             asChild
-            variant="primary"
+            variant="outline"
             size="sm"
-            className="bg-primary text-white hover:bg-primary/90 shadow-2xs h-8 text-xs font-semibold"
+            className="h-8 text-xs font-semibold"
           >
-            <Link href={`/trainers/${trainer.id}/portal-view`}>
-              <Eye className="size-3.5 mr-1.5" aria-hidden="true" />
-              Staff Portal
-            </Link>
-          </Button>
-
-          <Button asChild variant="outline" size="sm" className="h-8 text-xs font-semibold">
             <Link href={`/timetable/trainers/${trainer.id}/edit`}>
-              <Pencil className="size-3.5 mr-1.5" aria-hidden="true" />
+              <Pencil className="mr-1.5 size-3.5" aria-hidden="true" />
               Edit Profile
             </Link>
           </Button>
 
-          {/* Timetable Availability Action */}
           {trainer.isActive ? (
             <form action={setTrainerTimetableAvailabilityAction}>
               <input type="hidden" name="id" value={trainer.id} />
@@ -177,21 +199,27 @@ export default async function TrainerDetailsPage({
                 type="submit"
                 variant="outline"
                 size="sm"
-                className={`h-8 text-xs font-semibold ${
+                className="h-8 text-xs font-semibold"
+                title={
                   trainer.isTimetableAvailable
-                    ? 'text-gray-700 hover:text-amber-800'
-                    : 'text-emerald-700 border-emerald-300 bg-emerald-50/60'
-                }`}
-                title={trainer.isTimetableAvailable ? 'Mark unavailable for timetabling' : 'Make available for timetabling'}
+                    ? 'Mark unavailable for timetabling'
+                    : 'Make available for timetabling'
+                }
               >
                 {trainer.isTimetableAvailable ? (
                   <>
-                    <CalendarX2 className="size-3.5 mr-1.5 text-gray-400" aria-hidden="true" />
+                    <CalendarX2
+                      className="mr-1.5 size-3.5 text-text-subtle"
+                      aria-hidden="true"
+                    />
                     Disable Timetable
                   </>
                 ) : (
                   <>
-                    <CalendarCheck2 className="size-3.5 mr-1.5 text-emerald-600" aria-hidden="true" />
+                    <CalendarCheck2
+                      className="mr-1.5 size-3.5 text-primary"
+                      aria-hidden="true"
+                    />
                     Enable Timetable
                   </>
                 )}
@@ -199,29 +227,38 @@ export default async function TrainerDetailsPage({
             </form>
           ) : null}
 
-          {/* Active / Deactivate Action */}
           <form action={setTrainerActiveAction}>
             <input type="hidden" name="id" value={trainer.id} />
-            <input type="hidden" name="isActive" value={trainer.isActive ? 'false' : 'true'} />
+            <input
+              type="hidden"
+              name="isActive"
+              value={trainer.isActive ? 'false' : 'true'}
+            />
             <Button
               type="submit"
               variant="outline"
               size="sm"
-              className={`h-8 text-xs font-semibold ${
+              className="h-8 text-xs font-semibold"
+              title={
                 trainer.isActive
-                  ? 'text-gray-700 hover:text-rose-700 hover:border-rose-200'
-                  : 'text-emerald-700 border-emerald-300 bg-emerald-50/60'
-              }`}
-              title={trainer.isActive ? 'Deactivate trainer record' : 'Activate trainer record'}
+                  ? 'Deactivate trainer record'
+                  : 'Activate trainer record'
+              }
             >
               {trainer.isActive ? (
                 <>
-                  <CircleOff className="size-3.5 mr-1.5 text-rose-500" aria-hidden="true" />
+                  <CircleOff
+                    className="mr-1.5 size-3.5 text-danger"
+                    aria-hidden="true"
+                  />
                   Deactivate
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="size-3.5 mr-1.5 text-emerald-600" aria-hidden="true" />
+                  <CheckCircle2
+                    className="mr-1.5 size-3.5 text-primary"
+                    aria-hidden="true"
+                  />
                   Activate
                 </>
               )}
@@ -239,299 +276,181 @@ export default async function TrainerDetailsPage({
             />
           ) : null}
         </div>
-      </div>
-
-      {/* 2. Compact Executive Hero Card */}
-      <section
-        aria-label="Trainer Profile Overview"
-        className="rounded-xl border border-gray-200 bg-white p-5 shadow-xs"
-      >
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-3.5">
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-[#033B36] text-sm font-bold text-white shadow-2xs">
-              {getInitials(trainer.fullName)}
-            </div>
-
-            <div className="space-y-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-lg font-bold text-gray-900 tracking-tight">
-                  {trainer.fullName}
-                </h1>
-                {trainer.staffNumber && (
-                  <span className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-gray-700">
-                    {trainer.staffNumber}
-                  </span>
-                )}
-              </div>
-
-              <p className="text-xs text-gray-500">
-                <span>{formatWorkloadRole(trainer.workloadRole)}</span>
-                <span className="mx-1.5 text-gray-300">·</span>
-                <span>{trainer.homeDepartment || 'Human Nutrition & Dietetics'}</span>
-              </p>
-
-              {/* Status Badges Row */}
-              <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                <span
-                  className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold ${
-                    trainer.isActive
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/70'
-                      : 'bg-gray-100 text-gray-600 border border-gray-200'
-                  }`}
-                >
-                  <span
-                    className={`size-1.5 rounded-full ${
-                      trainer.isActive ? 'bg-emerald-500' : 'bg-gray-400'
-                    }`}
-                  />
-                  {trainer.isActive ? 'Active' : 'Inactive'}
+      }
+    >
+      <div className="space-y-3">
+        <FastTab
+          title="Profile and workload"
+          summary={`${totalAllocatedHours}/${targetHours}h weekly (${utilizationPercentage}%) · ${formatEmploymentType(trainer.employmentType)}`}
+        >
+          <div className="grid gap-3 lg:grid-cols-3">
+            {/* Workload Card */}
+            <Card className="space-y-2 p-3 shadow-2xs">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-text-muted">
+                  Weekly Workload
                 </span>
-
-                <span
-                  className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold ${
-                    trainer.isTimetableAvailable
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/70'
-                      : 'bg-amber-50 text-amber-800 border border-amber-200'
-                  }`}
-                >
-                  <span
-                    className={`size-1.5 rounded-full ${
-                      trainer.isTimetableAvailable ? 'bg-emerald-500' : 'bg-amber-500'
-                    }`}
-                  />
-                  {trainer.isTimetableAvailable ? 'Timetable Available' : 'Timetable Unavailable'}
-                </span>
-
-                {accessState === 'linked' ? (
-                  <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 border border-emerald-200/70">
-                    <CheckCircle2 className="size-2.5 text-emerald-600" />
-                    Portal Active
-                  </span>
-                ) : accessState === 'ready_to_link' ? (
-                  <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800 border border-amber-200">
-                    <KeyRound className="size-2.5 text-amber-600" />
-                    Link Ready
-                  </span>
-                ) : accessState === 'account_required' ? (
-                  <span className="inline-flex items-center gap-1 rounded-md bg-gray-50 px-2 py-0.5 text-[10px] font-semibold text-gray-600 border border-gray-200">
-                    <Clock className="size-2.5 text-gray-400" />
-                    Pending Signup
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 rounded-md bg-rose-50 px-2 py-0.5 text-[10px] font-semibold text-rose-700 border border-rose-200">
-                    <AlertCircle className="size-2.5 text-rose-600" />
-                    Email Required
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Compact Workload Gauge */}
-          <div className="flex flex-col gap-1.5 rounded-xl border border-gray-100 bg-gray-50/80 p-3 lg:min-w-[240px]">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-gray-600">Weekly Workload</span>
-              <span className="font-bold text-gray-900 font-mono">
-                {totalAllocatedHours} / {targetHours} hrs
-              </span>
-            </div>
-
-            <Progress
-              value={utilizationPercentage}
-              max={100}
-              className="h-1.5 bg-gray-200"
-              indicatorClassName={
-                utilizationPercentage > 100
-                  ? 'bg-amber-600'
-                  : utilizationPercentage >= 75
-                  ? 'bg-[#033B36]'
-                  : 'bg-emerald-600'
-              }
-            />
-
-            <div className="flex items-center justify-between text-[10px] text-gray-500 font-medium">
-              <span>{utilizationPercentage}% Allocated</span>
-              <span>Max {trainer.maximumDailyHours}h/day</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. Main Content: Allocations & Details */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-        {/* Approved Teaching Allocations (col-span-8) */}
-        <div className="space-y-4 lg:col-span-8">
-          <section
-            aria-labelledby="teaching-allocations-heading"
-            className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xs"
-          >
-            <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50/70 px-4 py-2.5">
-              <div className="flex items-center gap-2">
-                <h2
-                  id="teaching-allocations-heading"
-                  className="text-xs font-bold uppercase tracking-wider text-gray-900"
-                >
-                  Teaching Allocations
-                </h2>
-                <span className="rounded-full bg-gray-200/80 px-2 py-0.2 text-[10px] font-bold text-gray-700">
-                  {allocations.length}
+                <span className="font-mono font-bold text-text-primary">
+                  {totalAllocatedHours} / {targetHours} hrs
                 </span>
               </div>
 
-              <Link
-                href="/timetable/teaching-allocations"
-                className="inline-flex h-7 items-center gap-1 rounded-lg border border-gray-200 bg-white px-2.5 text-xs font-semibold text-gray-700 shadow-2xs transition hover:bg-gray-50"
-              >
-                <Plus className="size-3 text-gray-500" />
-                Assign Unit
-              </Link>
-            </div>
+              <Progress
+                value={utilizationPercentage}
+                max={100}
+                className="h-1.5 bg-surface-muted"
+                indicatorClassName={
+                  utilizationPercentage > 100
+                    ? 'bg-warning'
+                    : 'bg-primary'
+                }
+              />
 
-            {allocations.length === 0 ? (
-              <div className="py-8 px-4 text-center text-xs text-gray-500">
-                No units currently assigned to this trainer.
+              <div className="flex items-center justify-between text-[11px] font-medium text-text-muted">
+                <span>{utilizationPercentage}% allocated</span>
+                <span>Max {trainer.maximumDailyHours}h/day</span>
               </div>
-            ) : (
-              <div className="divide-y divide-gray-100">
-                {allocations.map((item) => (
-                  <article
-                    key={item.id}
-                    className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between transition hover:bg-gray-50/50"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs font-bold text-[#033B36]">
-                          {item.unitCode}
-                        </span>
-                        <span className="text-xs font-semibold text-gray-900 truncate">
-                          {item.unitName}
-                        </span>
-                        {item.deliveryMode &&
-                          item.deliveryMode.toLowerCase() !== 'theory' && (
-                            <span className="rounded bg-amber-50 px-1.5 py-0.2 text-[9px] font-semibold uppercase text-amber-700 border border-amber-200">
-                              {item.deliveryMode}
-                            </span>
-                          )}
-                      </div>
-                      <p className="mt-0.5 text-[11px] text-gray-500">
-                        {item.cohortName} · {item.cohortSize} students
-                      </p>
-                    </div>
+            </Card>
 
-                    <div className="flex items-center gap-4 sm:shrink-0 text-right">
-                      <span className="font-mono text-xs font-bold text-gray-900">
-                        {item.weeklyHours}h / wk
-                      </span>
-                      <span className="text-[11px] text-gray-400">
-                        {item.weeklySessions} session{item.weeklySessions === 1 ? '' : 's'}
-                      </span>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-          </section>
-        </div>
-
-        {/* Credentials & Administrative Information (col-span-4) */}
-        <div className="space-y-4 lg:col-span-4">
-          <section
-            aria-labelledby="contact-credentials-heading"
-            className="rounded-xl border border-gray-200 bg-white p-4 shadow-xs space-y-3"
-          >
-            <h2
-              id="contact-credentials-heading"
-              className="text-xs font-bold uppercase tracking-wider text-gray-500 border-b border-gray-100 pb-2"
-            >
-              Staff Profile Details
-            </h2>
-
-            <div className="space-y-2.5 text-xs">
-              <div className="flex items-center justify-between py-0.5">
-                <span className="text-gray-500 flex items-center gap-1.5">
-                  <Mail className="size-3.5 text-gray-400" />
+            {/* Contact & Employment Card */}
+            <Card className="space-y-2 p-3 text-xs shadow-2xs">
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1.5 text-text-muted">
+                  <Mail className="size-3.5 text-text-subtle" />
                   Email
                 </span>
                 {trainer.email ? (
                   <a
                     href={`mailto:${trainer.email}`}
-                    className="font-semibold text-gray-900 hover:text-[#033B36] hover:underline truncate max-w-[180px]"
+                    className="max-w-[200px] truncate font-semibold text-text-primary hover:text-primary hover:underline"
                   >
                     {trainer.email}
                   </a>
                 ) : (
-                  <span className="text-rose-600 font-medium text-[11px]">Not set</span>
+                  <span className="text-[11px] font-medium text-danger">
+                    Not set
+                  </span>
                 )}
               </div>
 
-              <div className="flex items-center justify-between py-0.5">
-                <span className="text-gray-500 flex items-center gap-1.5">
-                  <Phone className="size-3.5 text-gray-400" />
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1.5 text-text-muted">
+                  <Phone className="size-3.5 text-text-subtle" />
                   Phone
                 </span>
                 {trainer.phoneNumber ? (
                   <a
                     href={`tel:${trainer.phoneNumber}`}
-                    className="font-semibold text-gray-900 hover:text-[#033B36] hover:underline"
+                    className="font-semibold text-text-primary hover:text-primary hover:underline"
                   >
                     {trainer.phoneNumber}
                   </a>
                 ) : (
-                  <span className="text-gray-400 text-[11px]">—</span>
+                  <span className="text-[11px] text-text-subtle">—</span>
                 )}
               </div>
 
-              <div className="flex items-center justify-between py-0.5">
-                <span className="text-gray-500 flex items-center gap-1.5">
-                  <Briefcase className="size-3.5 text-gray-400" />
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1.5 text-text-muted">
+                  <Briefcase className="size-3.5 text-text-subtle" />
                   Employment
                 </span>
-                <span className="font-semibold text-gray-900">
+                <span className="font-semibold text-text-primary">
                   {formatEmploymentType(trainer.employmentType)}
                 </span>
               </div>
+            </Card>
 
-              <div className="flex items-center justify-between py-0.5">
-                <span className="text-gray-500 flex items-center gap-1.5">
-                  <GraduationCap className="size-3.5 text-gray-400" />
+            {/* Academic Credentials Card */}
+            <Card className="space-y-2 p-3 text-xs shadow-2xs">
+              <div className="flex items-center justify-between gap-2">
+                <span className="flex items-center gap-1.5 text-text-muted">
+                  <GraduationCap className="size-3.5 text-text-subtle" />
                   Specialization
                 </span>
-                <span className="font-semibold text-gray-900">
+                <span className="truncate font-semibold text-text-primary">
                   {trainer.specialization || 'General'}
                 </span>
               </div>
 
-              <div className="flex items-start justify-between py-0.5">
-                <span className="text-gray-500 flex items-center gap-1.5 shrink-0 pt-0.5">
-                  <ShieldCheck className="size-3.5 text-gray-400" />
+              <div className="flex items-start justify-between gap-2">
+                <span className="flex shrink-0 items-center gap-1.5 pt-0.5 text-text-muted">
+                  <ShieldCheck className="size-3.5 text-text-subtle" />
                   Qualifications
                 </span>
-                <span className="font-semibold text-gray-900 text-right leading-snug max-w-[180px]">
+                <span className="max-w-[200px] text-right font-semibold leading-snug text-text-primary">
                   {trainer.qualifications || 'On file'}
                 </span>
               </div>
-            </div>
-          </section>
+            </Card>
+          </div>
+        </FastTab>
 
-          {/* Administrative Notes (Only rendered if notes exist) */}
-          {trainer.notes && (
-            <section
-              aria-labelledby="admin-notes-heading"
-              className="rounded-xl border border-gray-200 bg-white p-4 shadow-xs"
+        <FastTab
+          title="Teaching allocations"
+          summary={`${allocations.length} unit${allocations.length === 1 ? '' : 's'} · ${totalAllocatedHours}h/wk`}
+          actions={
+            <Link
+              href="/timetable/teaching-allocations"
+              className="inline-flex h-7 items-center gap-1 rounded-md border border-border-strong bg-surface px-2.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
             >
-              <h2
-                id="admin-notes-heading"
-                className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5"
-              >
-                Notes
-              </h2>
-              <p className="text-xs text-gray-700 whitespace-pre-wrap leading-relaxed">
-                {trainer.notes}
-              </p>
-            </section>
+              <Plus className="size-3 text-text-muted" />
+              <span>Assign unit</span>
+            </Link>
+          }
+        >
+          {allocations.length === 0 ? (
+            <p className="py-4 text-center text-xs text-text-muted">
+              No units currently assigned to this trainer.
+            </p>
+          ) : (
+            <div className="divide-y divide-border-soft">
+              {allocations.map((item) => (
+                <article
+                  key={item.id}
+                  className="flex flex-col gap-2 py-2.5 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-mono text-xs font-bold text-primary-deep">
+                        {item.unitCode}
+                      </span>
+                      <span className="truncate text-xs font-semibold text-text-primary">
+                        {item.unitName}
+                      </span>
+                      {item.deliveryMode &&
+                        item.deliveryMode.toLowerCase() !== 'theory' && (
+                          <Badge variant="warning">{item.deliveryMode}</Badge>
+                        )}
+                    </div>
+                    <p className="mt-0.5 text-[11px] text-text-muted">
+                      {item.cohortName} · {item.cohortSize} students
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-4 text-right sm:shrink-0">
+                    <span className="font-mono text-xs font-bold text-text-primary">
+                      {item.weeklyHours}h / wk
+                    </span>
+                    <span className="text-[11px] text-text-subtle">
+                      {item.weeklySessions} session
+                      {item.weeklySessions === 1 ? '' : 's'}
+                    </span>
+                  </div>
+                </article>
+              ))}
+            </div>
           )}
-        </div>
+        </FastTab>
+
+        {trainer.notes ? (
+          <FastTab title="Administrative notes">
+            <p className="whitespace-pre-wrap text-xs leading-relaxed text-text-secondary">
+              {trainer.notes}
+            </p>
+          </FastTab>
+        ) : null}
       </div>
-    </div>
+    </RecordShell>
   );
 }

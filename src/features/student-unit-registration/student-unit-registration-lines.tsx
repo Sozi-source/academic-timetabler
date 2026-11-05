@@ -1,7 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { MoreVertical } from 'lucide-react';
+import { useMemo, useState, useTransition } from 'react';
+import { LoaderCircle, MoreVertical } from 'lucide-react';
 
 import { dropStudentUnitRegistration } from './actions';
 import type { DepartmentRegistrationEditor } from './types';
@@ -14,9 +14,13 @@ interface RegistrationLine {
 
 export function StudentUnitRegistrationLines({
   context,
+  returnCohort,
 }: {
   context: DepartmentRegistrationEditor;
+  returnCohort?: string | null;
 }) {
+  const [pendingUnitId, setPendingUnitId] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
   const [lines, setLines] = useState<RegistrationLine[]>([{ id: 0, stageId: '', unitId: '' }]);
   const [replacements, setReplacements] = useState<Record<string, string>>({});
   const [editing, setEditing] = useState<{ unitId: string; stageId: string; replacementId: string } | null>(null);
@@ -32,6 +36,21 @@ export function StudentUnitRegistrationLines({
 
   const addLine = () => {
     setLines((current) => [...current, { id: Math.max(-1, ...current.map((line) => line.id)) + 1, stageId: '', unitId: '' }]);
+  };
+
+  const handleDelete = (unitId: string, academicPeriodId: string, unitCode: string) => {
+    if (!window.confirm(`Are you sure you want to delete the unit registration for ${unitCode}? This will remove the student from this unit.`)) {
+      return;
+    }
+    setPendingUnitId(unitId);
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.set('studentId', context.student.id);
+      formData.set('registrationUnitId', unitId);
+      formData.set('academicPeriodId', academicPeriodId);
+      if (returnCohort) formData.set('returnCohort', returnCohort);
+      await dropStudentUnitRegistration(formData);
+    });
   };
 
   return (
@@ -111,8 +130,44 @@ export function StudentUnitRegistrationLines({
                               <MoreVertical className="size-4" aria-hidden="true" />
                             </summary>
                             <div className="absolute right-0 z-10 mt-1 min-w-28 rounded-md border border-border bg-surface p-1 shadow-lg">
-                              <button type="button" onClick={() => { setEditing({ unitId: registration.unitId, stageId: registration.stageId ?? context.student.currentStageId ?? '', replacementId: replacements[registration.unitId] ?? registration.unitId }); }} className="block w-full rounded px-2 py-1.5 text-left text-xs text-text-primary hover:bg-surface-subtle">Edit</button>
-                              <button type="submit" formAction={dropStudentUnitRegistration} name="registrationUnitId" value={registration.unitId} className="block w-full rounded px-2 py-1.5 text-left text-xs text-danger hover:bg-danger-subtle">Delete</button>
+                              {registration.registrationStatus === 'registered' ? (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    const details = e.currentTarget.closest('details');
+                                    if (details) details.open = false;
+                                    setEditing({
+                                      unitId: registration.unitId,
+                                      stageId: registration.stageId ?? context.student.currentStageId ?? '',
+                                      replacementId: replacements[registration.unitId] ?? registration.unitId,
+                                    });
+                                  }}
+                                  className="block w-full rounded px-2 py-1.5 text-left text-xs text-text-primary hover:bg-surface-subtle"
+                                >
+                                  Edit
+                                </button>
+                              ) : null}
+                              <button
+                                type="button"
+                                disabled={isPending && pendingUnitId === registration.unitId}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  const details = e.currentTarget.closest('details');
+                                  if (details) details.open = false;
+                                  handleDelete(registration.unitId, registration.academicPeriodId, registration.unitCode);
+                                }}
+                                className="flex w-full items-center gap-1.5 rounded px-2 py-1.5 text-left text-xs font-medium text-danger hover:bg-danger-subtle disabled:opacity-50"
+                              >
+                                {isPending && pendingUnitId === registration.unitId ? (
+                                  <>
+                                    <LoaderCircle className="size-3 animate-spin" />
+                                    <span>Deleting...</span>
+                                  </>
+                                ) : (
+                                  <span>Delete</span>
+                                )}
+                              </button>
                             </div>
                           </details>
                         ) : null}
@@ -166,13 +221,13 @@ export function StudentUnitRegistrationLines({
                       <span className="mb-1 block text-[10px] text-text-muted">{context.period.name}</span>
                     </td>
                     <td className="px-3 py-2">
-                      <select aria-label="Unit stage" value={line.stageId} onChange={(event) => updateLine(line.id, { stageId: event.target.value, unitId: '' })} className="h-9 w-full rounded-md border border-border bg-surface px-2 text-xs" required>
+                      <select aria-label="Unit stage" value={line.stageId} onChange={(event) => updateLine(line.id, { stageId: event.target.value, unitId: '' })} className="h-9 w-full rounded-md border border-border bg-surface px-2 text-xs">
                         <option value="">Select stage</option>
                         {context.stageOptions.map((stage) => <option key={stage.id} value={stage.id}>{stage.name}</option>)}
                       </select>
                     </td>
                     <td className="px-3 py-2">
-                      <select aria-label="Unit to add" value={line.unitId} onChange={(event) => updateLine(line.id, { unitId: event.target.value })} className="h-9 w-full rounded-md border border-border bg-surface px-2 text-xs disabled:bg-surface-subtle" disabled={!line.stageId} required>
+                      <select aria-label="Unit to add" value={line.unitId} onChange={(event) => updateLine(line.id, { unitId: event.target.value })} className="h-9 w-full rounded-md border border-border bg-surface px-2 text-xs disabled:bg-surface-subtle" disabled={!line.stageId} required={Boolean(line.stageId)}>
                         <option value="">Select unit</option>
                         {stageUnits.filter((candidate) => !otherChosenIds.has(candidate.id)).map((candidate) => <option key={candidate.id} value={candidate.id}>{candidate.code} · {candidate.name}</option>)}
                       </select>

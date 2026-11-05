@@ -6,6 +6,7 @@ import {
 } from 'vitest';
 
 import {
+  assessmentMarkbookTemplateVersion,
   generateAssessmentMarkbook,
 } from '@/features/assessment/markbook-generator';
 
@@ -142,7 +143,19 @@ describe('assessment markbook generator', () => {
         'B2',
       ).value,
     ).toBe(
-      '1.0',
+      assessmentMarkbookTemplateVersion,
+    );
+
+    expect(
+      workbook
+        .getWorksheet(
+          'DHN SEPT 25',
+        )
+        ?.getCell(
+          'D9',
+        ).value,
+    ).toBe(
+      'AB',
     );
 
     expect(
@@ -154,7 +167,7 @@ describe('assessment markbook generator', () => {
           'E9',
         ).value,
     ).toBe(
-      'AB',
+      'Absent from CAT',
     );
   });
 });

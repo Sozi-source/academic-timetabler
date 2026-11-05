@@ -107,7 +107,7 @@ export default async function DepartmentStudentUnitRegistrationPage({
         <form action={registerStudentUnitsByDepartment} className="space-y-4">
           <input type="hidden" name="studentId" value={context.student.id} />
           {cohort ? <input type="hidden" name="returnCohort" value={cohort} /> : null}
-          <StudentUnitRegistrationLines context={context} />
+          <StudentUnitRegistrationLines context={context} returnCohort={cohort} />
           <div className="flex justify-end"><Button type="submit"><CheckCircle2 className="size-4" />Register selected units</Button></div>
         </form>
       </Card>

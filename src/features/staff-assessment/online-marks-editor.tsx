@@ -352,6 +352,8 @@ export function OnlineMarksEditor({
       parsedRows.filter(
         (row) =>
           row.fields.cat.isAbsent ||
+          row.marks.cat === null ||
+          !values[row.student.studentId]?.cat?.trim() ||
           values[row.student.studentId]?.cat?.trim().toUpperCase() === 'AB',
       ),
     [parsedRows, values],
@@ -361,7 +363,10 @@ export function OnlineMarksEditor({
     () =>
       parsedRows.filter(
         (row) =>
-          row.isAbsent,
+          row.isAbsent ||
+          row.marks.exam === null ||
+          !values[row.student.studentId]?.exam?.trim() ||
+          values[row.student.studentId]?.exam?.trim().toUpperCase() === 'AB',
       ),
     [parsedRows, values],
   );
@@ -597,14 +602,6 @@ export function OnlineMarksEditor({
         return;
       }
 
-      const missingCatStudents = parsedRows.filter(
-        (row) => row.marks.cat === null && !row.fields.cat.isAbsent,
-      );
-      if (missingCatStudents.length > 0) {
-        setError(`${missingCatStudents.length} CAT mark(s) are blank. Enter a mark or explicitly enter AB for an absent student.`);
-        return;
-      }
-
       if (absentCatStudents.length > 0) {
         setSubmitConfirmType('cat');
         return;
@@ -627,15 +624,6 @@ export function OnlineMarksEditor({
       setError(
         `${invalid.student.fullName}: ${invalid.value.message ?? 'Invalid mark.'}`,
       );
-      return;
-    }
-
-    if (parsedRows.some((row) => row.marks.exam === null && !row.isAbsent)) {
-      setError('Blank exam marks remain. Enter a mark or explicitly enter AB for a student who was absent.');
-      return;
-    }
-    if (parsedRows.some((row) => row.marks.assignment === null || row.marks.presentation === null || row.marks.rat === null)) {
-      setError('Enter every Assignment, Presentation, and RAT mark before final submission.');
       return;
     }
 
@@ -722,19 +710,40 @@ export function OnlineMarksEditor({
     setError(null);
     setMessage(null);
 
-    // If there were unentered/absent students, update their local values to 'AB'
-    if (absentExamStudents.length > 0) {
-      setValues((current) => {
-        const next = { ...current };
-        for (const row of absentExamStudents) {
-          next[row.student.studentId] = {
-            ...next[row.student.studentId],
-            exam: 'AB',
-          };
+    // Update local state: record unentered/absent exam students as 'AB', and unentered coursework as '0'
+    setValues((current) => {
+      const next = { ...current };
+      for (const row of absentExamStudents) {
+        next[row.student.studentId] = {
+          ...next[row.student.studentId],
+          exam: 'AB',
+        };
+      }
+      for (const row of parsedRows) {
+        const sId = row.student.studentId;
+        const cur = next[sId];
+        if (cur) {
+          let updated = false;
+          const updatedStudent = { ...cur };
+          if (!updatedStudent.assignment?.trim()) {
+            updatedStudent.assignment = '0';
+            updated = true;
+          }
+          if (!updatedStudent.presentation?.trim()) {
+            updatedStudent.presentation = '0';
+            updated = true;
+          }
+          if (!updatedStudent.rat?.trim()) {
+            updatedStudent.rat = '0';
+            updated = true;
+          }
+          if (updated) {
+            next[sId] = updatedStudent;
+          }
         }
-        return next;
-      });
-    }
+      }
+      return next;
+    });
 
     try {
       const response = await fetch(
@@ -750,13 +759,18 @@ export function OnlineMarksEditor({
                 row.marks.exam === null ||
                 !values[row.student.studentId]?.exam?.trim() ||
                 values[row.student.studentId]?.exam?.trim().toUpperCase() === 'AB';
+              const isCatAbsent =
+                row.fields.cat.isAbsent ||
+                row.marks.cat === null ||
+                !values[row.student.studentId]?.cat?.trim() ||
+                values[row.student.studentId]?.cat?.trim().toUpperCase() === 'AB';
               return {
                 studentId: row.student.studentId,
                 assignment: row.marks.assignment ?? 0,
                 presentation: row.marks.presentation ?? 0,
                 rat: row.marks.rat ?? 0,
-                cat: row.marks.cat,
-                catAbsent: row.fields.cat.isAbsent,
+                cat: isCatAbsent ? 0 : (row.marks.cat ?? 0),
+                catAbsent: isCatAbsent,
                 exam: isAbsent ? null : row.marks.exam,
                 attendanceStatus: isAbsent ? 'absent' : 'expected',
               };

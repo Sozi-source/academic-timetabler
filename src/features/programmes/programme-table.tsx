@@ -400,6 +400,9 @@ export function ProgrammeTable({
           : 'Register academic programmes before creating cohorts, curriculum units and teaching allocations.'
       }
       initialPageSize={20}
+      enableColumnToggle
+      enableDensityToggle
+      exportFileName="programmes"
       toolbarFilters={
         <div className="flex w-full flex-wrap items-center gap-2 md:w-auto md:flex-1 md:justify-end">
           <Select

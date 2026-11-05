@@ -396,6 +396,9 @@ export function CohortTable({
           : 'Create cohorts after registering the academic programmes they belong to.'
       }
       initialPageSize={20}
+      enableColumnToggle
+      enableDensityToggle
+      exportFileName="cohorts"
       toolbarFilters={
         <div className="flex w-full flex-wrap items-center gap-2 md:w-auto md:flex-1 md:justify-end">
           <Select

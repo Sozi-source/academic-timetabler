@@ -182,6 +182,9 @@ export function TrainerTable({ trainers }: TrainerTableProps) {
       emptyTitle={filtersActive ? 'No matching trainers' : 'No trainers registered'}
       emptyDescription={filtersActive ? 'Adjust or clear the filters.' : 'Add a trainer to begin.'}
       initialPageSize={20}
+      enableColumnToggle
+      enableDensityToggle
+      exportFileName="trainers"
       toolbarFilters={
         <div className="flex flex-wrap items-center gap-2">
           <Select

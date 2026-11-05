@@ -200,6 +200,9 @@ export function RoomTable({ rooms }: RoomTableProps) {
       emptyTitle={filtersActive ? 'No matching rooms' : 'No rooms registered'}
       emptyDescription={filtersActive ? 'Adjust or clear the filters.' : 'Add a room to begin.'}
       initialPageSize={20}
+      enableColumnToggle
+      enableDensityToggle
+      exportFileName="rooms"
       toolbarFilters={
         <div className="flex flex-wrap items-center gap-2">
           <Select

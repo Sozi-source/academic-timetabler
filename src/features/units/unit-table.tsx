@@ -437,6 +437,9 @@ export function UnitTable({
           : 'Register curriculum units before creating teaching allocations.'
       }
       initialPageSize={10}
+      enableColumnToggle
+      enableDensityToggle
+      exportFileName="curriculum-units"
       toolbarFilters={
         <div className="flex w-full flex-wrap items-center gap-2 lg:w-auto lg:flex-1 lg:flex-nowrap">
           <Select

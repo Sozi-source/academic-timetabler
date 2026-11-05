@@ -6,6 +6,7 @@ import { useState, type ReactNode } from 'react';
 
 import type { AuthenticatedProfile } from '@/features/auth/types';
 
+import { AutoBreadcrumb } from './auto-breadcrumb';
 import { AdminHeader } from './admin-header';
 import { adminNavItems, AdminSidebar, isNavItemActive } from './admin-sidebar';
 import { MobileBottomNav } from './mobile-bottom-nav';
@@ -49,6 +50,7 @@ export function PlatformShell({ profile, children }: PlatformShellProps) {
 
         {/* Page Content */}
         <main className="admin-screen mx-auto w-full max-w-[var(--content-max-width)] flex-1 px-[var(--content-gutter)] py-3.5 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] sm:py-5 lg:py-6 lg:pb-6">
+          <AutoBreadcrumb className="mb-3" />
           {children}
         </main>
       </div>

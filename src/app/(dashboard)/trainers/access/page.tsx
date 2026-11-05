@@ -1,9 +1,7 @@
 import {
-  CheckCircle2,
   KeyRound,
   UserCheck,
   UserPlus,
-  Users,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -20,18 +18,12 @@ import {
   requireHodAccess,
 } from '@/features/auth/authorization';
 import {
-  canProvisionTrainerAccess,
   summarizeTrainerAccess,
-  trainerAccessDetail,
-  trainerAccessLabel,
 } from '@/features/trainer-access/domain';
 import {
   getTrainerAccessRegister,
 } from '@/features/trainer-access/queries';
-import {
-  TrainerAccessAction,
-} from '@/features/trainer-access/trainer-access-action';
-import { TrainerAccessPinAction } from '@/features/trainer-access/trainer-access-pin-action';
+import { TrainerAccessTable } from '@/features/trainer-access/trainer-access-table';
 import { TrainerAccessBulkPinAction } from '@/features/trainer-access/trainer-access-bulk-pin-action';
 
 export default async function TrainerAccessPage() {
@@ -54,7 +46,6 @@ export default async function TrainerAccessPage() {
   return (
     <div className="admin-screen trainer-access-screen space-y-5">
       <PageHeader
-        eyebrow="Trainers"
         title="Trainer Access"
         icon={KeyRound}
         backHref="/trainers"
@@ -133,106 +124,7 @@ export default async function TrainerAccessPage() {
           </div>
         </div>
 
-        {records.length ===
-        0 ? (
-          <div className="px-5 py-10 text-center">
-            <Users
-              className="mx-auto size-5 text-text-muted"
-              aria-hidden="true"
-            />
-            <p className="mt-3 text-xs font-semibold text-text-primary">
-              No trainers found
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-left text-xs">
-              <thead className="border-b border-border bg-surface-subtle/60 text-[10px] font-bold uppercase tracking-wider text-text-muted">
-                <tr>
-                  <th scope="col" className="px-4 py-3 w-[28%]">Trainer</th>
-                  <th scope="col" className="px-4 py-3 w-[32%]">Workspace Details</th>
-                  <th scope="col" className="px-4 py-3 w-[16%]">Access Status</th>
-                  <th scope="col" className="px-4 py-3 w-[24%] text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {records.map((record) => (
-                  <tr
-                    key={record.trainerId}
-                    className="transition hover:bg-surface-subtle/40"
-                  >
-                    <td data-label="Trainer" className="px-4 py-3.5 align-middle">
-                      <Link
-                        href={`/trainers/${record.trainerId}`}
-                        className="truncate text-xs font-semibold text-text-primary transition hover:text-header-blue hover:underline block"
-                      >
-                        {record.fullName}
-                      </Link>
-                      <p className="mt-0.5 truncate text-[10px] text-text-muted">
-                        {record.email ?? 'No email'}
-                      </p>
-                    </td>
-
-                    <td data-label="Workspace" className="px-4 py-3.5 align-middle">
-                      <p className="text-[11px] font-medium text-text-secondary">
-                        {trainerAccessDetail(record)}
-                      </p>
-                      {record.profileRole ? (
-                        <p className="mt-0.5 text-[10px] text-text-muted">
-                          Profile: {record.profileRole}
-                        </p>
-                      ) : null}
-                    </td>
-
-                    <td data-label="Access status" className="px-4 py-3.5 align-middle whitespace-nowrap">
-                      <Badge
-                        variant={
-                          record.accessState === 'linked'
-                            ? 'success'
-                            : record.accessState === 'ready_to_link'
-                              ? 'primary'
-                              : 'neutral'
-                        }
-                        className="inline-flex items-center gap-1"
-                      >
-                        {record.accessState === 'linked' ? (
-                          <CheckCircle2 className="size-3 text-emerald-600" aria-hidden="true" />
-                        ) : null}
-                        {record.accessState === 'linked' ? 'Active' : trainerAccessLabel(record.accessState)}
-                      </Badge>
-                    </td>
-
-                    <td data-label="Actions" className="px-4 py-3.5 align-middle text-right whitespace-nowrap">
-                      <div className="trainer-access-actions inline-flex items-center justify-end gap-2">
-                        {canProvisionTrainerAccess(record.accessState) ? (
-                          <TrainerAccessAction trainerId={record.trainerId} />
-                        ) : record.accessState === 'email_required' ? (
-                          <Link
-                            href={`/timetable/trainers/${record.trainerId}/edit`}
-                            className="inline-flex h-8 items-center justify-center rounded-lg border border-border bg-white px-2.5 text-[11px] font-semibold text-header-blue transition hover:bg-surface-subtle shadow-2xs"
-                          >
-                            Add email
-                          </Link>
-                        ) : null}
-
-                        {record.trainerActive && record.email && ['linked', 'ready_to_link', 'account_required'].includes(record.accessState) ? (
-                          <TrainerAccessPinAction trainerId={record.trainerId} />
-                        ) : null}
-
-                        <Link
-                          href={`/trainers/${record.trainerId}`}
-                          className="inline-flex h-8 items-center justify-center rounded-lg border border-border-strong bg-white px-2.5 text-[11px] font-medium text-text-secondary transition hover:bg-surface-subtle shadow-2xs"
-                        >
-                          Profile
-                        </Link>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <TrainerAccessTable records={records} />
       </section>
     </div>
   );

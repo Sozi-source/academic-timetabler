@@ -148,16 +148,16 @@ export function ResetTrainerPassword({
           aria-modal="true"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs"
         >
-          <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-xl animate-in fade-in zoom-in-95">
+          <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-xl animate-in fade-in zoom-in-95">
             {/* Header */}
-            <div className="flex items-start justify-between border-b border-gray-100 pb-4">
+            <div className="flex items-start justify-between border-b border-border-soft pb-4">
               <div className="flex items-center gap-3">
                 <span className="flex size-10 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
                   <KeyRound className="size-5" aria-hidden="true" />
                 </span>
                 <div>
-                  <h3 className="text-sm font-bold text-gray-900">Set Temporary Password</h3>
-                  <p className="text-xs text-gray-500">{trainerName}</p>
+                  <h3 className="text-sm font-bold text-text-primary">Set Temporary Password</h3>
+                  <p className="text-xs text-text-muted">{trainerName}</p>
                 </div>
               </div>
 
@@ -165,7 +165,7 @@ export function ResetTrainerPassword({
                 type="button"
                 onClick={close}
                 disabled={saving}
-                className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition"
+                className="rounded-lg p-1 text-text-muted hover:bg-surface-subtle hover:text-text-primary transition"
               >
                 <X className="size-4" aria-hidden="true" />
               </button>
@@ -174,8 +174,8 @@ export function ResetTrainerPassword({
             {/* Content */}
             <div className="mt-4 space-y-4">
               {trainerEmail ? (
-                <p className="text-xs text-gray-600">
-                  Account login email: <strong className="font-semibold text-gray-900">{trainerEmail}</strong>
+                <p className="text-xs text-text-secondary">
+                  Account login email: <strong className="font-semibold text-text-primary">{trainerEmail}</strong>
                 </p>
               ) : (
                 <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3 text-xs text-amber-800">
@@ -194,8 +194,8 @@ export function ResetTrainerPassword({
                     The trainer can now log in immediately at <code>/staff/login</code> using this password.
                   </p>
 
-                  <div className="flex items-center justify-between rounded-lg border border-emerald-200 bg-white px-3 py-2">
-                    <span className="font-mono text-xs font-bold text-gray-900">{password}</span>
+                  <div className="flex items-center justify-between rounded-lg border border-emerald-200 bg-surface px-3 py-2">
+                    <span className="font-mono text-xs font-bold text-text-primary">{password}</span>
                     <button
                       type="button"
                       onClick={handleCopy}
@@ -228,11 +228,11 @@ export function ResetTrainerPassword({
                   )}
 
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-gray-700">Temporary Password</label>
+                    <label className="text-xs font-bold text-text-secondary">Temporary Password</label>
                     <button
                       type="button"
                       onClick={handleGenerate}
-                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#033B36] hover:underline"
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
                     >
                       <Sparkles className="size-3" />
                       Auto-generate
@@ -247,15 +247,15 @@ export function ResetTrainerPassword({
                       placeholder="Minimum 8 characters"
                       required
                       disabled={saving || !trainerEmail}
-                      className="h-10 w-full rounded-xl border border-gray-300 bg-white px-3 pr-20 text-xs text-gray-900 shadow-2xs focus:border-[#033B36] focus:outline-none focus:ring-1 focus:ring-[#033B36]"
+                      className="h-10 w-full rounded-xl border border-border-strong bg-surface px-3 pr-20 text-xs text-text-primary shadow-2xs focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
                     />
-                    <div className="absolute right-2.5 top-1/2 flex -translate-y-1/2 items-center gap-1 text-gray-400">
+                    <div className="absolute right-2.5 top-1/2 flex -translate-y-1/2 items-center gap-1 text-text-muted">
                       {password && (
                         <button
                           type="button"
                           onClick={handleCopy}
                           title="Copy"
-                          className="rounded p-1 hover:text-gray-700"
+                          className="rounded p-1 hover:text-text-primary"
                         >
                           {copied ? <Check className="size-3.5 text-emerald-600" /> : <Copy className="size-3.5" />}
                         </button>
@@ -263,7 +263,7 @@ export function ResetTrainerPassword({
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="rounded p-1 hover:text-gray-700"
+                        className="rounded p-1 hover:text-text-primary"
                       >
                         {showPassword ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
                       </button>
@@ -271,7 +271,7 @@ export function ResetTrainerPassword({
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold text-gray-700">Confirm Password</label>
+                    <label className="text-xs font-bold text-text-secondary">Confirm Password</label>
                     <input
                       type={showPassword ? 'text' : 'password'}
                       value={confirmPassword}
@@ -279,11 +279,11 @@ export function ResetTrainerPassword({
                       placeholder="Re-enter password"
                       required
                       disabled={saving || !trainerEmail}
-                      className="mt-1.5 h-10 w-full rounded-xl border border-gray-300 bg-white px-3 text-xs text-gray-900 shadow-2xs focus:border-[#033B36] focus:outline-none focus:ring-1 focus:ring-[#033B36]"
+                      className="mt-1.5 h-10 w-full rounded-xl border border-border-strong bg-surface px-3 text-xs text-text-primary shadow-2xs focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
                     />
                   </div>
 
-                  <p className="text-[11px] text-gray-500 leading-relaxed">
+                  <p className="text-[11px] text-text-muted leading-relaxed">
                     Setting a temporary password auto-activates and confirms the trainer account. You can copy and provide it to the trainer directly.
                   </p>
 
@@ -295,7 +295,7 @@ export function ResetTrainerPassword({
                       type="submit"
                       size="sm"
                       disabled={saving || !password || !trainerEmail}
-                      className="bg-[#033B36] hover:bg-[#022A26]"
+                      className="bg-primary hover:bg-primary-hover text-white"
                     >
                       {saving ? (
                         <>

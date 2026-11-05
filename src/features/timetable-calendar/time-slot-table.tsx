@@ -189,6 +189,9 @@ export function TimeSlotTable({
       emptyTitle="No Time Slots configured"
       emptyDescription="Create teaching, break and lunch slots for the selected Academic Period."
       initialPageSize={20}
+      enableColumnToggle
+      enableDensityToggle
+      exportFileName="time-slots"
     />
   );
 }

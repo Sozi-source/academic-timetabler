@@ -154,7 +154,7 @@ export default async function OperationsPage() {
       {/* Mobile: one grouped card, divided like a native widget */}
       <section
         aria-label="Operational Telemetry"
-        className="grid grid-cols-2 divide-x divide-y divide-gray-100 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xs sm:hidden"
+        className="grid grid-cols-2 divide-x divide-y divide-border-soft overflow-hidden rounded-2xl border border-border bg-white shadow-xs sm:hidden"
       >
         {cards.map((card) => {
           const Icon = card.icon;
@@ -163,14 +163,14 @@ export default async function OperationsPage() {
             <Link
               key={card.label}
               href={card.href}
-              className="flex min-h-[44px] flex-col gap-1 px-3.5 py-3.5 text-left transition active:bg-gray-50"
+              className="flex min-h-[44px] flex-col gap-1 px-3.5 py-3.5 text-left transition active:bg-surface-subtle"
             >
               <span className="flex items-center gap-1.5">
-                <Icon className={`size-3.5 ${needsAction ? 'text-amber-600' : 'text-[#033B36]'}`} aria-hidden="true" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{card.label}</span>
+                <Icon className={`size-3.5 ${needsAction ? 'text-amber-600' : 'text-primary-deep'}`} aria-hidden="true" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">{card.label}</span>
               </span>
-              <span className="text-lg font-bold leading-none tracking-tight text-gray-900">{card.value}</span>
-              <span className="text-[11px] text-gray-500">{card.description}</span>
+              <span className="text-lg font-bold leading-none tracking-tight text-text-primary">{card.value}</span>
+              <span className="text-[11px] text-text-muted">{card.description}</span>
             </Link>
           );
         })}
@@ -185,23 +185,23 @@ export default async function OperationsPage() {
             <Link
               key={card.label}
               href={card.href}
-              className="group flex flex-col justify-between rounded-xl border border-gray-200/90 bg-white p-4 shadow-xs transition hover:border-[#033B36]/30 hover:shadow-sm"
+              className="group flex flex-col justify-between rounded-xl border border-border/90 bg-white p-4 shadow-xs transition hover:border-[#033B36]/30 hover:shadow-sm"
             >
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
                   {card.label}
                 </span>
                 <span className={`flex size-7.5 shrink-0 items-center justify-center rounded-lg ${
-                  needsAction ? 'bg-amber-50 text-amber-700' : 'bg-[#033B36]/10 text-[#033B36]'
+                  needsAction ? 'bg-amber-50 text-amber-700' : 'bg-[#033B36]/10 text-primary-deep'
                 }`}>
                   <Icon className="size-4" aria-hidden="true" />
                 </span>
               </div>
               <div className="mt-2">
-                <p className="text-xl font-bold text-gray-900 tracking-tight">
+                <p className="text-xl font-bold text-text-primary tracking-tight">
                   {card.value}
                 </p>
-                <p className="text-[11px] text-gray-500 mt-0.5">{card.description}</p>
+                <p className="text-[11px] text-text-muted mt-0.5">{card.description}</p>
               </div>
               <div className={`mt-3 h-0.5 w-7 rounded-full ${needsAction ? 'bg-amber-500' : 'bg-[#033B36]'}`} />
             </Link>
@@ -210,11 +210,11 @@ export default async function OperationsPage() {
       </section>
 
       {/* 2. Operations Workspaces — mobile: one grouped list card */}
-      <section aria-label="Operations Workspaces" className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xs sm:hidden">
-        <p className="border-b border-gray-100 px-4 py-3 text-xs font-bold uppercase tracking-wider text-gray-700">
+      <section aria-label="Operations Workspaces" className="overflow-hidden rounded-2xl border border-border bg-white shadow-xs sm:hidden">
+        <p className="border-b border-border-soft px-4 py-3 text-xs font-bold uppercase tracking-wider text-text-secondary">
           Workspaces
         </p>
-        <div className="divide-y divide-gray-100">
+        <div className="divide-y divide-border-soft">
           {[
             { href: '/operations/action-center', label: 'Action Center', sub: 'Prioritised release follow-up', icon: ListChecks, tint: '#033B36' },
             { href: '/operations/incidents', label: 'Operational Incidents', sub: 'Production incident log', icon: AlertTriangle, tint: '#B45309' },
@@ -222,13 +222,13 @@ export default async function OperationsPage() {
             { href: '/teaching-documents/releases', label: 'Student Documents', sub: 'Publish approved documents', icon: FileCheck2, tint: '#033B36' },
             { href: '/assessment/reports', label: 'Academic Reports', sub: 'Assessment & marks summary', icon: ShieldCheck, tint: '#F59E0B' },
           ].map(({ href, label, sub, icon: Icon, tint }) => (
-            <Link key={href} href={href} className="flex min-h-[44px] items-center gap-3 px-4 py-3.5 transition active:bg-gray-50">
+            <Link key={href} href={href} className="flex min-h-[44px] items-center gap-3 px-4 py-3.5 transition active:bg-surface-subtle">
               <span className="flex size-8 shrink-0 items-center justify-center rounded-full text-white" style={{ backgroundColor: tint }}>
                 <Icon className="size-4" aria-hidden="true" />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-xs font-semibold text-gray-800">{label}</span>
-                <span className="block text-[11px] text-gray-500">{sub}</span>
+                <span className="block text-xs font-semibold text-text-primary">{label}</span>
+                <span className="block text-[11px] text-text-muted">{sub}</span>
               </span>
             </Link>
           ))}
@@ -239,75 +239,75 @@ export default async function OperationsPage() {
       <section aria-label="Operations Workspaces" className="hidden gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <Link
           href="/operations/action-center"
-          className="group rounded-xl border border-gray-200 bg-white p-4 shadow-2xs transition hover:border-gray-300 hover:bg-gray-50/70"
+          className="group rounded-xl border border-border bg-white p-4 shadow-2xs transition hover:border-border-strong hover:bg-surface-subtle/70"
         >
           <div className="flex size-9 items-center justify-center rounded-lg bg-[#033B36] text-white shadow-2xs transition group-hover:scale-105">
             <ListChecks className="size-4.5 text-[#FACC15]" aria-hidden="true" />
           </div>
-          <p className="mt-3 text-xs font-bold text-gray-900 group-hover:text-[#033B36] transition-colors">
+          <p className="mt-3 text-xs font-bold text-text-primary group-hover:text-primary-deep transition-colors">
             Action Center
           </p>
-          <p className="mt-1 text-[11px] text-gray-500">
+          <p className="mt-1 text-[11px] text-text-muted">
             Prioritised release follow-up.
           </p>
         </Link>
 
         <Link
           href="/operations/incidents"
-          className="group rounded-xl border border-gray-200 bg-white p-4 shadow-2xs transition hover:border-gray-300 hover:bg-gray-50/70"
+          className="group rounded-xl border border-border bg-white p-4 shadow-2xs transition hover:border-border-strong hover:bg-surface-subtle/70"
         >
           <div className="flex size-9 items-center justify-center rounded-lg bg-amber-500 text-white shadow-2xs transition group-hover:scale-105">
             <AlertTriangle className="size-4.5 text-white" aria-hidden="true" />
           </div>
-          <p className="mt-3 text-xs font-bold text-gray-900 group-hover:text-amber-700 transition-colors">
+          <p className="mt-3 text-xs font-bold text-text-primary group-hover:text-amber-700 transition-colors">
             Operational Incidents
           </p>
-          <p className="mt-1 text-[11px] text-gray-500">
+          <p className="mt-1 text-[11px] text-text-muted">
             Production incident log.
           </p>
         </Link>
 
         <Link
           href="/operations/attendance"
-          className="group rounded-xl border border-gray-200 bg-white p-4 shadow-2xs transition hover:border-gray-300 hover:bg-gray-50/70"
+          className="group rounded-xl border border-border bg-white p-4 shadow-2xs transition hover:border-border-strong hover:bg-surface-subtle/70"
         >
           <div className="flex size-9 items-center justify-center rounded-lg bg-[#033B36] text-white shadow-2xs transition group-hover:scale-105">
             <ClipboardCheck className="size-4.5 text-white" aria-hidden="true" />
           </div>
-          <p className="mt-3 text-xs font-bold text-gray-900 group-hover:text-[#033B36] transition-colors">
+          <p className="mt-3 text-xs font-bold text-text-primary group-hover:text-primary-deep transition-colors">
             Attendance Oversight
           </p>
-          <p className="mt-1 text-[11px] text-gray-500">
+          <p className="mt-1 text-[11px] text-text-muted">
             Audit class attendance registers.
           </p>
         </Link>
 
         <Link
           href="/teaching-documents/releases"
-          className="group rounded-xl border border-gray-200 bg-white p-4 shadow-2xs transition hover:border-gray-300 hover:bg-gray-50/70"
+          className="group rounded-xl border border-border bg-white p-4 shadow-2xs transition hover:border-border-strong hover:bg-surface-subtle/70"
         >
           <div className="flex size-9 items-center justify-center rounded-lg bg-[#033B36] text-white shadow-2xs transition group-hover:scale-105">
             <FileCheck2 className="size-4.5 text-white" aria-hidden="true" />
           </div>
-          <p className="mt-3 text-xs font-bold text-gray-900 group-hover:text-[#033B36] transition-colors">
+          <p className="mt-3 text-xs font-bold text-text-primary group-hover:text-primary-deep transition-colors">
             Student Documents
           </p>
-          <p className="mt-1 text-[11px] text-gray-500">
+          <p className="mt-1 text-[11px] text-text-muted">
             Publish approved documents.
           </p>
         </Link>
 
         <Link
           href="/assessment/reports"
-          className="group rounded-xl border border-gray-200 bg-white p-4 shadow-2xs transition hover:border-gray-300 hover:bg-gray-50/70 sm:col-span-2 lg:col-span-1"
+          className="group rounded-xl border border-border bg-white p-4 shadow-2xs transition hover:border-border-strong hover:bg-surface-subtle/70 sm:col-span-2 lg:col-span-1"
         >
           <div className="flex size-9 items-center justify-center rounded-lg bg-[#F59E0B] text-white shadow-2xs transition group-hover:scale-105">
             <ShieldCheck className="size-4.5 text-white" aria-hidden="true" />
           </div>
-          <p className="mt-3 text-xs font-bold text-gray-900 group-hover:text-[#B45309] transition-colors">
+          <p className="mt-3 text-xs font-bold text-text-primary group-hover:text-[#B45309] transition-colors">
             Academic Reports
           </p>
-          <p className="mt-1 text-[11px] text-gray-500">
+          <p className="mt-1 text-[11px] text-text-muted">
             Assessment & marks summary.
           </p>
         </Link>

@@ -1,14 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  BookOpen,
-  Clock3,
-  GraduationCap,
-  ShieldCheck,
-  User,
-} from 'lucide-react';
 
+import { FastTab } from '@/components/ui/fast-tab';
 import { FormField } from '@/components/ui/form-field';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
@@ -74,18 +68,16 @@ export function TrainerFormFields({
   const notesError = state.fieldErrors?.notes?.[0];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <input type="hidden" name="availabilityMode" value={availabilityMode} />
       <input type="hidden" name="homeDepartment" value={trainer?.homeDepartment ?? ''} />
       <input type="hidden" name="maximumWeeklyHours" value="80" />
 
       {/* Section 1: Institutional & Employment Profile */}
-      <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-4 space-y-3.5">
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-700">
-          <ShieldCheck className="size-4 text-[#033B36]" />
-          <span>Institutional & Role Profile</span>
-        </div>
-
+      <FastTab
+        title="Institutional & Role Profile"
+        summary={`${employmentType.replace('_', ' ')} · ${workloadRole.replace('_', ' ')}`}
+      >
         <div className="grid gap-3 sm:grid-cols-2">
           <FormField
             id="trainer-department-id"
@@ -99,11 +91,11 @@ export function TrainerFormFields({
               required
               disabled={pending}
               defaultValue={trainer?.departmentId ?? departments[0]?.id ?? ''}
+              hasError={Boolean(state.fieldErrors?.departmentId?.[0])}
             >
-              <option value="">Select workspace</option>
-              {departments.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
+              {departments.map((dept) => (
+                <option key={dept.id} value={dept.id}>
+                  {dept.name} ({dept.schoolName})
                 </option>
               ))}
             </Select>
@@ -111,14 +103,15 @@ export function TrainerFormFields({
 
           <FormField
             id="trainer-staff-number"
-            label="Staff Number"
+            label="Staff Payroll / Employee ID"
+            optional
             error={staffNumberError}
           >
             <Input
               id="trainer-staff-number"
               name="staffNumber"
-              placeholder="Auto-generated if blank"
               disabled={pending}
+              placeholder="e.g. TR-2024-001"
               defaultValue={trainer?.staffNumber ?? ''}
               hasError={Boolean(staffNumberError)}
             />
@@ -126,7 +119,7 @@ export function TrainerFormFields({
 
           <FormField
             id="trainer-employment-type"
-            label="Employment Type"
+            label="Contract / Employment Type"
             required
             error={employmentTypeError}
           >
@@ -137,7 +130,6 @@ export function TrainerFormFields({
               disabled={pending}
               value={employmentType}
               onChange={(e) => setEmploymentType(e.target.value as TrainerEmploymentType)}
-              hasError={Boolean(employmentTypeError)}
             >
               {trainerEmploymentTypeOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -149,9 +141,8 @@ export function TrainerFormFields({
 
           <FormField
             id="trainer-workload-role"
-            label="Workload Role"
+            label="Workload Designation"
             required
-            error={state.fieldErrors?.workloadRole?.[0]}
           >
             <Select
               id="trainer-workload-role"
@@ -169,15 +160,13 @@ export function TrainerFormFields({
             </Select>
           </FormField>
         </div>
-      </div>
+      </FastTab>
 
       {/* Section 2: Identity & Contact Info */}
-      <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-4 space-y-3.5">
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-700">
-          <User className="size-4 text-[#033B36]" />
-          <span>Identity & Contact Details</span>
-        </div>
-
+      <FastTab
+        title="Identity & Contact Details"
+        summary={trainer?.fullName ? `${trainer.fullName} · ${trainer.email ?? 'No email'}` : 'Name and contact information'}
+      >
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <FormField
@@ -232,15 +221,13 @@ export function TrainerFormFields({
             />
           </FormField>
         </div>
-      </div>
+      </FastTab>
 
       {/* Section 3: Workload & Availability Safeguards */}
-      <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-4 space-y-3.5">
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-700">
-          <Clock3 className="size-4 text-[#033B36]" />
-          <span>Workload Limits & Safeguards</span>
-        </div>
-
+      <FastTab
+        title="Workload Limits & Safeguards"
+        summary={`${weeklyTargetValue}h/week · max ${trainer?.maximumDailyHours ?? 6}h/day`}
+      >
         <div className="grid gap-3 sm:grid-cols-2">
           <FormField
             id="trainer-normal-hours"
@@ -260,7 +247,7 @@ export function TrainerFormFields({
               readOnly={fixedTarget !== undefined}
               value={weeklyTargetValue}
               onChange={(e) => setCustomTarget(e.target.value)}
-              className={fixedTarget !== undefined ? 'bg-gray-100/80 font-bold text-gray-700' : undefined}
+              className={fixedTarget !== undefined ? 'bg-surface-subtle font-bold text-text-primary' : undefined}
               hasError={Boolean(normalWeeklyHoursError)}
             />
           </FormField>
@@ -285,69 +272,69 @@ export function TrainerFormFields({
             />
           </FormField>
         </div>
-      </div>
+      </FastTab>
 
       {/* Section 4: Academic Background & Notes */}
-      <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-4 space-y-3.5">
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-700">
-          <GraduationCap className="size-4 text-[#033B36]" />
-          <span>Specialization & Qualifications</span>
-        </div>
-
-        <FormField
-          id="trainer-specialization"
-          label="Teaching Specialization"
-          optional
-          error={specializationError}
-        >
-          <Input
+      <FastTab
+        title="Specialization & Qualifications"
+        summary={trainer?.specialization || 'Teaching specialization and qualifications'}
+      >
+        <div className="space-y-3">
+          <FormField
             id="trainer-specialization"
-            name="specialization"
-            disabled={pending}
-            placeholder="e.g. Clinical Nutrition, Food Microbiology, Dietetics"
-            defaultValue={trainer?.specialization ?? ''}
-            hasError={Boolean(specializationError)}
-          />
-        </FormField>
-
-        <div className="grid gap-3 sm:grid-cols-2">
-          <FormField
-            id="trainer-qualifications"
-            label="Academic Qualifications"
+            label="Teaching Specialization"
             optional
-            error={qualificationsError}
+            error={specializationError}
           >
-            <Textarea
+            <Input
+              id="trainer-specialization"
+              name="specialization"
+              disabled={pending}
+              placeholder="e.g. Clinical Nutrition, Food Microbiology, Dietetics"
+              defaultValue={trainer?.specialization ?? ''}
+              hasError={Boolean(specializationError)}
+            />
+          </FormField>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <FormField
               id="trainer-qualifications"
-              name="qualifications"
-              rows={2}
-              maxLength={1000}
-              disabled={pending}
-              placeholder="e.g. MSc. Clinical Nutrition (UoN), BSc. Food Science"
-              defaultValue={trainer?.qualifications ?? ''}
-              hasError={Boolean(qualificationsError)}
-            />
-          </FormField>
+              label="Academic Qualifications"
+              optional
+              error={qualificationsError}
+            >
+              <Textarea
+                id="trainer-qualifications"
+                name="qualifications"
+                rows={2}
+                maxLength={1000}
+                disabled={pending}
+                placeholder="e.g. MSc. Clinical Nutrition (UoN), BSc. Food Science"
+                defaultValue={trainer?.qualifications ?? ''}
+                hasError={Boolean(qualificationsError)}
+              />
+            </FormField>
 
-          <FormField
-            id="trainer-notes"
-            label="Administrative Notes"
-            optional
-            error={notesError}
-          >
-            <Textarea
+            <FormField
               id="trainer-notes"
-              name="notes"
-              rows={2}
-              maxLength={1000}
-              disabled={pending}
-              placeholder="Additional departmental notes or constraints..."
-              defaultValue={trainer?.notes ?? ''}
-              hasError={Boolean(notesError)}
-            />
-          </FormField>
+              label="Administrative Notes"
+              optional
+              error={notesError}
+            >
+              <Textarea
+                id="trainer-notes"
+                name="notes"
+                rows={2}
+                maxLength={1000}
+                disabled={pending}
+                placeholder="Additional departmental notes or constraints..."
+                defaultValue={trainer?.notes ?? ''}
+                hasError={Boolean(notesError)}
+              />
+            </FormField>
+          </div>
         </div>
-      </div>
+      </FastTab>
     </div>
   );
 }

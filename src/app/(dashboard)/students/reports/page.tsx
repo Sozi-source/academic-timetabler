@@ -7,22 +7,16 @@ import { MetricCard } from '@/components/ui/metric-card';
 import { PageHeader } from '@/components/ui/page-header';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { getStudents, getStudentSummary } from '@/features/students/queries';
-
-interface CountRow {
-  label: string;
-  total: number;
-  active: number;
-  deferred: number;
-  attachment: number;
-  completed: number;
-  graduated: number;
-}
+import {
+  StudentCountTable,
+  type StudentCountRow,
+} from '@/features/students/student-count-table';
 
 function groupStudents(
   students: Awaited<ReturnType<typeof getStudents>>,
   getLabel: (student: Awaited<ReturnType<typeof getStudents>>[number]) => string,
-): CountRow[] {
-  const grouped = new Map<string, CountRow>();
+): StudentCountRow[] {
+  const grouped = new Map<string, StudentCountRow>();
 
   for (const student of students) {
     const label = getLabel(student) || 'Unassigned';
@@ -85,64 +79,23 @@ export default async function StudentReportsPage() {
         <div className="border-b border-border px-4 py-3">
           <h2 className="text-sm font-bold text-text-primary">By programme</h2>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-left text-xs">
-            <thead className="bg-surface-subtle text-text-muted">
-              <tr>
-                <th className="px-4 py-2.5 font-semibold">Programme</th>
-                <th className="px-3 py-2.5 font-semibold">Total</th>
-                <th className="px-3 py-2.5 font-semibold">Active</th>
-                <th className="px-3 py-2.5 font-semibold">Attachment</th>
-                <th className="px-3 py-2.5 font-semibold">Deferred</th>
-                <th className="px-3 py-2.5 font-semibold">Completed</th>
-                <th className="px-3 py-2.5 font-semibold">Graduated</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {byProgramme.map((row) => (
-                <tr key={row.label} className="hover:bg-surface-subtle/60">
-                  <td className="px-4 py-2.5 font-semibold text-text-primary">{row.label}</td>
-                  <td className="px-3 py-2.5 font-semibold text-text-primary">{row.total}</td>
-                  <td className="px-3 py-2.5 text-text-secondary">{row.active}</td>
-                  <td className="px-3 py-2.5 text-text-secondary">{row.attachment}</td>
-                  <td className="px-3 py-2.5 text-text-secondary">{row.deferred}</td>
-                  <td className="px-3 py-2.5 text-text-secondary">{row.completed}</td>
-                  <td className="px-3 py-2.5 text-text-secondary">{row.graduated}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <StudentCountTable
+          rows={byProgramme}
+          firstColumnLabel="Programme"
+          includeOutcomes
+          exportFileName="students-by-programme"
+        />
       </Card>
 
       <Card className="overflow-hidden">
         <div className="border-b border-border px-4 py-3">
           <h2 className="text-sm font-bold text-text-primary">Current cohort census</h2>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[680px] text-left text-xs">
-            <thead className="bg-surface-subtle text-text-muted">
-              <tr>
-                <th className="px-4 py-2.5 font-semibold">Cohort</th>
-                <th className="px-3 py-2.5 font-semibold">Total</th>
-                <th className="px-3 py-2.5 font-semibold">Active</th>
-                <th className="px-3 py-2.5 font-semibold">Attachment</th>
-                <th className="px-3 py-2.5 font-semibold">Deferred</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {byCohort.map((row) => (
-                <tr key={row.label} className="hover:bg-surface-subtle/60">
-                  <td className="px-4 py-2.5 font-semibold text-text-primary">{row.label}</td>
-                  <td className="px-3 py-2.5 font-semibold text-text-primary">{row.total}</td>
-                  <td className="px-3 py-2.5 text-text-secondary">{row.active}</td>
-                  <td className="px-3 py-2.5 text-text-secondary">{row.attachment}</td>
-                  <td className="px-3 py-2.5 text-text-secondary">{row.deferred}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <StudentCountTable
+          rows={byCohort}
+          firstColumnLabel="Cohort"
+          exportFileName="current-cohort-census"
+        />
       </Card>
     </div>
   );

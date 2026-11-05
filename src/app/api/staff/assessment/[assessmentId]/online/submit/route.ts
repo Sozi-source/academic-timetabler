@@ -187,19 +187,21 @@ export async function POST(
   }));
 
   if (component === 'cat') {
-    const unresolved = entries.find((entry) => entry.cat === null && entry.catAbsent !== true);
-    if (unresolved) {
-      return NextResponse.json({ message: 'Every CAT entry must be a mark or an explicit AB absence.' }, { status: 422 });
-    }
     // Milestone 1: CAT marks submission (midterm milestone)
-    // A null CAT mark is accepted only when the trainer explicitly recorded AB.
+    // Any unentered CAT mark is automatically recorded as an explicit AB absence.
+    const normalizedEntries = componentEntries.map((entry, index) => {
+      const isAbsentCat = entries[index].catAbsent === true || entry.cat === null;
+      return {
+        ...entry,
+        cat: isAbsentCat ? null : entry.cat,
+        cat_absent: isAbsentCat,
+      };
+    });
+
     const { data: submission, error: componentError } = await supabase.rpc('save_assessment_online_component_marks', {
       target_assessment_id: targetAssessmentId,
       target_component: 'cat',
-      target_entries: componentEntries.map((entry, index) => ({
-        ...entry,
-        cat_absent: entries[index].catAbsent === true,
-      })).map(({ attendance_status: _a, ...entry }) => entry),
+      target_entries: normalizedEntries.map(({ attendance_status: _a, ...entry }) => entry),
       submit_component: true,
     });
     if (componentError) {
@@ -220,52 +222,27 @@ export async function POST(
   }
 
   // Milestone 2: Final marks submission ('all' or 'exam')
-  // Absence is explicit; coursework blanks remain incomplete. An explicit CAT
-  // absence contributes zero CAT points while its absence flag stays on roster.
+  // Absence is recorded as 'absent' with null exam mark.
+  // Missing coursework is automatically recorded as 0.
   const finalEntries = componentEntries.map((e, index) => {
-    const isAbsent = e.attendance_status === 'absent';
+    const isAbsent = e.attendance_status === 'absent' || e.exam === null;
+    const isCatAbsent = entries[index].catAbsent === true || e.cat === null;
     return {
       student_id: e.student_id,
-      assignment: e.assignment,
-      presentation: e.presentation,
-      rat: e.rat,
-      cat: entries[index].catAbsent ? 0 : e.cat,
-      cat_absent: entries[index].catAbsent === true,
+      assignment: e.assignment ?? 0,
+      presentation: e.presentation ?? 0,
+      rat: e.rat ?? 0,
+      cat: isCatAbsent ? 0 : (e.cat ?? 0),
+      cat_absent: isCatAbsent,
       exam: isAbsent ? null : e.exam,
       attendance_status: isAbsent ? ('absent' as const) : ('expected' as const),
     };
   });
 
-  const incompleteEntry = finalEntries.find((entry) =>
-    entry.assignment === null || entry.presentation === null || entry.rat === null || entry.cat === null || entry.exam === null && entry.attendance_status !== 'absent',
-  );
-  if (incompleteEntry) {
-    return NextResponse.json({ message: 'Final submission requires every coursework mark and either an exam mark or an explicit AB absence.' }, { status: 422 });
-  }
-
-  // 1. Save all drafts with prepared marks first (RLS-enforced via user client).
-  const { error: saveError } = await supabase.rpc('save_assessment_online_marks', {
-    target_assessment_id: targetAssessmentId,
-    target_entries: finalEntries.map(({ attendance_status: _a, ...e }) => e),
-  });
-  if (saveError) {
-    return NextResponse.json({ message: saveError.message }, { status: 409 });
-  }
-
-  // 2. Finalize results in official assessment_results (RLS-enforced).
-  const { data: finalSubmission, error: finalError } = await supabase.rpc(
-    'submit_assessment_online_marks',
-    { target_assessment_id: targetAssessmentId },
-  );
-
-  if (finalError) {
-    return NextResponse.json({
-      message: finalError.message,
-    }, { status: finalError.code === '42501' ? 403 : 409 });
-  }
-
-  // 3. Only after successful DB submission: sync attendance status in roster/population.
-  //    This is best-effort — failures here do not roll back the submission.
+  // 1. Sync attendance status in roster and population BEFORE final submit,
+  // because submit_assessment_online_marks validates:
+  // (roster.pre_assessment_status = 'expected' and draft.exam_mark is null) -> rejected
+  // (roster.pre_assessment_status = 'absent'   and draft.exam_mark is not null) -> rejected
   const absentStudentIds = finalEntries
     .filter((e) => e.attendance_status === 'absent')
     .map((e) => e.student_id);
@@ -299,6 +276,27 @@ export async function POST(
       .update({ attendance_status: 'expected' })
       .eq('assessment_event_id', targetAssessmentId)
       .in('student_id', presentStudentIds);
+  }
+
+  // 2. Save all drafts with prepared marks (RLS-enforced via user client).
+  const { error: saveError } = await supabase.rpc('save_assessment_online_marks', {
+    target_assessment_id: targetAssessmentId,
+    target_entries: finalEntries.map(({ attendance_status: _a, ...e }) => e),
+  });
+  if (saveError) {
+    return NextResponse.json({ message: saveError.message }, { status: 409 });
+  }
+
+  // 3. Finalize results in official assessment_results (RLS-enforced).
+  const { data: finalSubmission, error: finalError } = await supabase.rpc(
+    'submit_assessment_online_marks',
+    { target_assessment_id: targetAssessmentId },
+  );
+
+  if (finalError) {
+    return NextResponse.json({
+      message: finalError.message,
+    }, { status: finalError.code === '42501' ? 403 : 409 });
   }
 
   // 4. Insert component submission records for all components.

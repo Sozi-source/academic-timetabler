@@ -1,24 +1,30 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import type { ColumnDef } from '@tanstack/react-table';
 import {
-  ChevronDown,
+  CheckCircle2,
   ChevronRight,
-  ChevronUp,
-  Database,
+  Clock,
   Download,
-  Search,
+  RotateCcw,
+  UserX,
   UsersRound,
   X,
 } from 'lucide-react';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { useMemo, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
-import { EmptyState } from '@/components/ui/empty-state';
-import { Input } from '@/components/ui/input';
-import { Pagination } from '@/components/ui/pagination';
+import { Button } from '@/components/ui/button';
+import { DataTable } from '@/components/ui/data-table';
+import { Select } from '@/components/ui/select';
+
+import { compareAdmissionNumbers } from './admission-number-sort';
+import {
+  BatchActionDialogs,
+  type BatchActionType,
+} from './batch-action-dialogs';
 import type { RegistryCohortOption } from './queries';
 import {
   getStatusBadgeVariant,
@@ -26,9 +32,6 @@ import {
   getStudentStatusLabel,
 } from './student-status-stage';
 import type { StudentRow } from './types';
-
-type SortField = 'name' | 'status' | 'stage';
-type SortOrder = 'asc' | 'desc';
 
 interface StudentRegistryTableProps {
   students: StudentRow[];
@@ -48,14 +51,16 @@ export function StudentRegistryTable({
   const [activeStatus, setActiveStatus] = useState(
     () => searchParams.get('status') || initialStatus || '',
   );
+  const [cohortFilter, setCohortFilter] = useState(
+    () => searchParams.get('cohortId') || '',
+  );
 
-  // Filter & Search states
-  const [cohortFilter, setCohortFilter] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-  const [sortField, setSortField] = useState<SortField>('name');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  // Bulk action dialog state
+  const [batchAction, setBatchAction] = useState<{
+    type: BatchActionType;
+    rows: StudentRow[];
+  } | null>(null);
+  const [batchFeedback, setBatchFeedback] = useState<string | null>(null);
 
   const statusCounts = useMemo(() => {
     const counts = {
@@ -85,101 +90,54 @@ export function StudentRegistryTable({
     return counts;
   }, [students]);
 
-  // 1. Status Filter
-  const statusFiltered = useMemo(() => {
-    if (!activeStatus) return students;
-    return students.filter((student) => {
-      const status = student.lifecycle_status;
-      const phase = student.academic_phase;
-      if (activeStatus === 'in_class') {
-        return (status === 'active' || status === 'admitted') && phase !== 'attachment';
-      }
-      if (activeStatus === 'on_attachment') {
-        return (status === 'active' || status === 'admitted') && phase === 'attachment';
-      }
-      return status === activeStatus;
-    });
-  }, [students, activeStatus]);
-
-  // 2. Cohort Filter & Search Query Filter
   const filteredStudents = useMemo(() => {
-    let result = statusFiltered;
-
-    if (cohortFilter) {
-      result = result.filter(
-        (student) =>
-          student.current_cohort?.id === cohortFilter ||
-          student.admission_cohort?.id === cohortFilter,
-      );
-    }
-
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return result;
-
-    return result.filter((student) => {
-      const name = (student.full_name ?? '').toLowerCase();
-      const adm = (student.admission_number ?? '').toLowerCase();
-      const statusLabel = getStudentStatusLabel(
-        student.lifecycle_status,
-        student.academic_phase,
-      ).toLowerCase();
-      const stageLabel = getStudentStageLabel(student).toLowerCase();
-
-      return (
-        name.includes(q) ||
-        adm.includes(q) ||
-        statusLabel.includes(q) ||
-        stageLabel.includes(q)
-      );
-    });
-  }, [statusFiltered, cohortFilter, searchQuery]);
-
-  // 3. Sorting
-  const sortedStudents = useMemo(() => {
-    const items = [...filteredStudents];
-    items.sort((a, b) => {
-      let valA = '';
-      let valB = '';
-
-      if (sortField === 'name') {
-        valA = a.full_name ?? '';
-        valB = b.full_name ?? '';
-      } else if (sortField === 'status') {
-        valA = getStudentStatusLabel(a.lifecycle_status, a.academic_phase);
-        valB = getStudentStatusLabel(b.lifecycle_status, b.academic_phase);
-      } else if (sortField === 'stage') {
-        valA = getStudentStageLabel(a);
-        valB = getStudentStageLabel(b);
+    return students.filter((student) => {
+      if (activeStatus) {
+        const status = student.lifecycle_status;
+        const phase = student.academic_phase;
+        if (activeStatus === 'in_class') {
+          if (
+            (status !== 'active' && status !== 'admitted') ||
+            phase === 'attachment'
+          ) {
+            return false;
+          }
+        } else if (activeStatus === 'on_attachment') {
+          if (
+            (status !== 'active' && status !== 'admitted') ||
+            phase !== 'attachment'
+          ) {
+            return false;
+          }
+        } else if (status !== activeStatus) {
+          return false;
+        }
       }
 
-      const cmp = valA.localeCompare(valB, 'en', {
-        numeric: true,
-        sensitivity: 'base',
-      });
-      return sortOrder === 'asc' ? cmp : -cmp;
+      if (cohortFilter) {
+        const matchesCohort =
+          student.current_cohort?.id === cohortFilter ||
+          student.admission_cohort?.id === cohortFilter;
+        if (!matchesCohort) {
+          return false;
+        }
+      }
+
+      return true;
     });
-    return items;
-  }, [filteredStudents, sortField, sortOrder]);
+  }, [students, activeStatus, cohortFilter]);
 
-  // 4. Paginated Slice
-  const pageCount = Math.max(1, Math.ceil(sortedStudents.length / pageSize));
-  const currentPageIndex = Math.min(pageIndex, pageCount - 1);
-  const paginatedStudents = useMemo(() => {
-    const start = currentPageIndex * pageSize;
-    return sortedStudents.slice(start, start + pageSize);
-  }, [sortedStudents, currentPageIndex, pageSize]);
-
-  // Handle Tab Switch — filtering is done client-side on the already-loaded
-  // roster, so update local state instantly and only mirror the choice into the
-  // URL (shareable/refresh-safe) without triggering a server re-render.
-  const handleTabChange = (value: string) => {
-    setPageIndex(0);
-    setActiveStatus(value);
+  const syncUrlParams = (nextStatus: string, nextCohort: string) => {
     const params = new URLSearchParams(window.location.search);
-    if (value) {
-      params.set('status', value);
+    if (nextStatus) {
+      params.set('status', nextStatus);
     } else {
       params.delete('status');
+    }
+    if (nextCohort) {
+      params.set('cohortId', nextCohort);
+    } else {
+      params.delete('cohortId');
     }
     const qs = params.toString();
     window.history.replaceState(
@@ -189,30 +147,33 @@ export function StudentRegistryTable({
     );
   };
 
-  // Sort Handler
-  const toggleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortOrder('asc');
-    }
+  const handleTabChange = (value: string) => {
+    setActiveStatus(value);
+    syncUrlParams(value, cohortFilter);
   };
 
-  // Single Dynamic Excel Export URL based on active filters
+  const handleCohortChange = (value: string) => {
+    setCohortFilter(value);
+    syncUrlParams(activeStatus, value);
+  };
+
+  // Server-side Excel export URL reflecting active status and cohort filters
   const exportUrl = useMemo(() => {
     const params = new URLSearchParams();
     if (activeStatus) params.set('status', activeStatus);
     if (cohortFilter) params.set('cohortId', cohortFilter);
-    if (searchQuery.trim()) params.set('search', searchQuery.trim());
     const qs = params.toString();
     return `/api/students/export${qs ? `?${qs}` : ''}`;
-  }, [activeStatus, cohortFilter, searchQuery]);
+  }, [activeStatus, cohortFilter]);
 
   const statusTabs = [
     { value: '', label: 'All', count: statusCounts.all },
     { value: 'in_class', label: 'In Class', count: statusCounts.in_class },
-    { value: 'on_attachment', label: 'On Attachment', count: statusCounts.on_attachment },
+    {
+      value: 'on_attachment',
+      label: 'On Attachment',
+      count: statusCounts.on_attachment,
+    },
     { value: 'deferred', label: 'Deferred', count: statusCounts.deferred },
     {
       value: 'dropped_out',
@@ -224,350 +185,376 @@ export function StudentRegistryTable({
     { value: 'graduated', label: 'Graduated', count: statusCounts.graduated },
   ];
 
+  const columns = useMemo<ColumnDef<StudentRow>[]>(
+    () => [
+      {
+        id: 'student',
+        header: 'Student',
+        accessorFn: (student) => student.full_name ?? '',
+        size: 240,
+        cell: ({ row }) => {
+          const student = row.original;
+
+          return (
+            <div className="min-w-0">
+              <Link
+                href={`/students/registry/${student.id}`}
+                className="block truncate text-xs font-semibold text-text-primary transition hover:text-primary hover:underline"
+              >
+                {student.full_name}
+              </Link>
+              {student.programme?.code ? (
+                <p className="mt-0.5 truncate text-[10px] text-text-muted">
+                  {student.programme.code}
+                  {student.current_cohort?.name
+                    ? ` · ${student.current_cohort.name}`
+                    : ''}
+                </p>
+              ) : null}
+            </div>
+          );
+        },
+      },
+      {
+        id: 'admission_number',
+        header: 'Admission No.',
+        accessorFn: (student) => student.admission_number ?? '',
+        sortingFn: (rowA, rowB) =>
+          compareAdmissionNumbers(
+            rowA.original.admission_number ?? '',
+            rowB.original.admission_number ?? '',
+          ),
+        size: 160,
+        cell: ({ row }) => (
+          <Link
+            href={`/students/registry/${row.original.id}`}
+            className="whitespace-nowrap font-mono text-[11px] text-text-secondary transition hover:text-primary"
+          >
+            {row.original.admission_number}
+          </Link>
+        ),
+      },
+      {
+        id: 'cohort',
+        header: 'Cohort',
+        accessorFn: (student) =>
+          student.current_cohort?.name ??
+          student.admission_cohort?.name ??
+          '',
+        size: 150,
+        cell: ({ getValue }) => (
+          <span className="text-xs text-text-secondary">
+            {getValue<string>() || '—'}
+          </span>
+        ),
+      },
+      {
+        id: 'programme',
+        header: 'Programme',
+        accessorFn: (student) => student.programme?.code ?? '',
+        size: 110,
+        cell: ({ getValue }) => (
+          <span className="text-xs font-semibold text-text-secondary">
+            {getValue<string>() || '—'}
+          </span>
+        ),
+      },
+      {
+        id: 'status',
+        header: 'Status',
+        accessorFn: (student) =>
+          getStudentStatusLabel(
+            student.lifecycle_status,
+            student.academic_phase,
+          ),
+        size: 150,
+        cell: ({ row, getValue }) => (
+          <Badge
+            variant={getStatusBadgeVariant(
+              row.original.lifecycle_status,
+              row.original.academic_phase,
+            )}
+          >
+            {getValue<string>()}
+          </Badge>
+        ),
+      },
+      {
+        id: 'stage',
+        header: 'Stage',
+        accessorFn: (student) => getStudentStageLabel(student),
+        size: 90,
+        cell: ({ getValue }) => (
+          <span className="text-xs font-semibold text-text-secondary">
+            {getValue<string>()}
+          </span>
+        ),
+      },
+      {
+        id: 'phone',
+        header: 'Phone',
+        accessorFn: (student) => student.phone_number ?? '',
+        size: 130,
+        cell: ({ getValue }) => (
+          <span className="font-mono text-[11px] text-text-secondary">
+            {getValue<string>() || '—'}
+          </span>
+        ),
+      },
+      {
+        id: 'email',
+        header: 'Email',
+        accessorFn: (student) => student.email ?? '',
+        size: 200,
+        cell: ({ getValue }) => (
+          <span className="truncate text-xs text-text-secondary">
+            {getValue<string>() || '—'}
+          </span>
+        ),
+      },
+      {
+        id: 'actions',
+        header: '',
+        enableSorting: false,
+        enableHiding: false,
+        size: 90,
+        cell: ({ row }) => (
+          <div className="flex items-center justify-end">
+            <Link
+              href={`/students/registry/${row.original.id}`}
+              className="inline-flex h-8 items-center gap-1 rounded-md border border-border-strong bg-surface px-2.5 text-[11px] font-medium text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+              aria-label={`Open record for ${row.original.full_name}`}
+            >
+              <span>Record</span>
+              <ChevronRight className="size-3.5" aria-hidden="true" />
+            </Link>
+          </div>
+        ),
+      },
+    ],
+    [],
+  );
+
+  const filtersActive = Boolean(activeStatus || cohortFilter);
+
   return (
     <div className="space-y-3">
-      {/* STATUS FILTER PILLS & CONTROLS TOOLBAR */}
-      <div className="rounded-xl border border-border-soft bg-surface p-3 shadow-2xs sm:p-4">
-        <div className="flex flex-col gap-3">
-          {/* Status filter — mobile: compact dropdown */}
-          <div className="flex h-8.5 items-center gap-1.5 rounded-lg border border-border-strong bg-surface px-2.5 text-xs sm:hidden">
-            <UsersRound className="size-3.5 shrink-0 text-text-muted" />
-            <select
-              value={activeStatus}
-              onChange={(e) => handleTabChange(e.target.value)}
-              className="w-full min-w-0 bg-transparent text-xs font-semibold text-text-primary outline-none"
-            >
-              {statusTabs.map((tab) => (
-                <option key={tab.label} value={tab.value}>
-                  {tab.label} ({tab.count})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Status Pills — sm: and up (Slim, compact styling) */}
-          <div className="hidden sm:flex sm:flex-wrap sm:gap-1.5">
-            {statusTabs.map((tab) => {
-              const isActive = activeStatus === tab.value;
-              return (
-                <button
-                  key={tab.label}
-                  type="button"
-                  onClick={() => handleTabChange(tab.value)}
-                  className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold transition cursor-pointer ${
-                    isActive
-                      ? 'border-primary bg-primary text-white shadow-xs'
-                      : 'border-border bg-surface text-text-secondary hover:border-primary/40 hover:bg-surface-subtle'
-                  }`}
-                >
-                  <span>{tab.label}</span>
-                  <span
-                    className={`rounded-full px-1.5 py-0 text-[10px] font-bold ${
-                      isActive
-                        ? 'bg-white/20 text-white'
-                        : 'bg-surface-subtle text-text-muted'
-                    }`}
-                  >
-                    {tab.count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+      {/* Status filter pills bar */}
+      <div className="rounded-lg border border-border bg-surface px-3 py-2.5">
+        {/* Mobile dropdown */}
+        <div className="flex items-center gap-2 sm:hidden">
+          <UsersRound
+            className="size-3.5 shrink-0 text-text-muted"
+            aria-hidden="true"
+          />
+          <Select
+            aria-label="Filter by student lifecycle status"
+            value={activeStatus}
+            onChange={(event) => handleTabChange(event.target.value)}
+            className="h-8 w-full text-xs"
+          >
+            {statusTabs.map((tab) => (
+              <option key={tab.label} value={tab.value}>
+                {tab.label} ({tab.count})
+              </option>
+            ))}
+          </Select>
         </div>
 
-        {/* Filters: Cohort Selector, Search Input, and Single Excel Export */}
-        <div className="mt-3 flex flex-col gap-2 border-t border-border-soft pt-3 sm:flex-row sm:items-center">
-          {/* Cohort Dropdown Filter */}
-          {cohorts.length > 0 && (
-            <div className="flex items-center gap-1.5 rounded-lg border border-border-strong bg-surface px-2 h-8.5 text-xs">
-              <UsersRound className="size-3.5 text-text-muted" />
-              <select
-                value={cohortFilter}
-                onChange={(e) => {
-                  setCohortFilter(e.target.value);
-                  setPageIndex(0);
-                }}
-                className="max-w-[14rem] bg-transparent text-xs font-semibold text-text-primary outline-none cursor-pointer"
-              >
-                <option value="">All Cohorts</option>
-                {cohorts.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name} {c.programmeCode ? `(${c.programmeCode})` : ''}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* Search Input Box */}
-          <div className="relative w-full min-w-0 sm:w-auto sm:min-w-48 sm:flex-1 lg:max-w-[28rem]">
-            <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-text-muted" />
-            <Input
-              type="text"
-              placeholder="Search student or adm no..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPageIndex(0);
-              }}
-              className="h-8.5 pl-8 pr-7 text-xs rounded-lg border-border-strong bg-surface focus:border-primary"
-            />
-            {searchQuery ? (
+        {/* Desktop pills */}
+        <div className="hidden sm:flex sm:flex-wrap sm:items-center sm:gap-1.5">
+          {statusTabs.map((tab) => {
+            const isActive = activeStatus === tab.value;
+            return (
               <button
+                key={tab.label}
                 type="button"
-                onClick={() => {
-                  setSearchQuery('');
-                  setPageIndex(0);
-                }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary cursor-pointer p-0.5"
-                aria-label="Clear search"
+                onClick={() => handleTabChange(tab.value)}
+                className={`inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold transition ${
+                  isActive
+                    ? 'border-primary bg-primary text-white'
+                    : 'border-border bg-surface text-text-secondary hover:border-primary/40 hover:bg-surface-subtle hover:text-text-primary'
+                }`}
               >
-                <X className="size-3.5" />
+                <span>{tab.label}</span>
+                <span
+                  className={`rounded-full px-1.5 py-0 text-[10px] font-bold tabular-nums ${
+                    isActive
+                      ? 'bg-white/20 text-white'
+                      : 'bg-surface-subtle text-text-muted'
+                  }`}
+                >
+                  {tab.count}
+                </span>
               </button>
-            ) : null}
-          </div>
-
-          {/* Single Excel Export Button (reacts to active filters) */}
-          <a
-            href={exportUrl}
-            download
-            className="inline-flex h-8.5 items-center gap-1.5 rounded-lg border border-border-strong bg-surface px-2.5 text-xs font-semibold text-text-secondary hover:bg-surface-subtle transition shrink-0 cursor-pointer shadow-2xs"
-            title="Export filtered student list to Excel"
-          >
-            <Download className="size-3.5" />
-            <span>Export Excel</span>
-          </a>
+            );
+          })}
         </div>
       </div>
 
-      {/* REGISTRY DATA TABLE CARD */}
-      {filteredStudents.length === 0 ? (
-        <Card className="p-6 text-center">
-          <EmptyState
-            icon={Database}
-            title={
-              searchQuery || cohortFilter
-                ? 'No matching students found'
-                : 'No students in this status'
-            }
-            description={
-              searchQuery || cohortFilter
-                ? 'No student record matches your search or cohort filter. Try resetting your filter criteria.'
-                : 'No student records were found under the selected status filter.'
-            }
-            action={
-              searchQuery || cohortFilter ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearchQuery('');
-                    setCohortFilter('');
-                    setPageIndex(0);
-                  }}
-                  className="mt-2 inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-surface px-3 text-xs font-semibold text-text-primary hover:bg-surface-subtle cursor-pointer"
-                >
-                  Reset filters
-                </button>
-              ) : undefined
-            }
-          />
-        </Card>
-      ) : (
-        <Card className="overflow-hidden shadow-2xs">
-          {/* Table Header Bar (Slimmer height) */}
-          <div className="flex flex-wrap items-center justify-between border-b border-border bg-surface-subtle px-3.5 py-2 gap-2">
-            <div>
-              <p className="text-xs font-bold text-text-primary sm:text-sm">
-                {activeStatus
-                  ? `${activeStatus.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase())} Student Records`
-                  : 'Current & Historical Student Records'}
-              </p>
-              <p className="text-[11px] text-text-muted">
-                Showing {sortedStudents.length} student
-                {sortedStudents.length === 1 ? '' : 's'}
-                {searchQuery ? ` matching "${searchQuery}"` : ''}
-                {cohortFilter
-                  ? ` in ${cohorts.find((c) => c.id === cohortFilter)?.name ?? 'cohort'}`
-                  : ''}
-              </p>
-            </div>
-            {searchQuery || cohortFilter ? (
-              <Badge variant="neutral" className="text-[10px] px-2 py-0 min-h-5">
-                Filtered: {sortedStudents.length} of {statusFiltered.length}
-              </Badge>
+      {batchFeedback ? (
+        <div
+          role="status"
+          className="flex items-center justify-between gap-2 rounded-lg border border-border bg-primary-soft px-3.5 py-2 text-xs font-semibold text-primary-deep"
+        >
+          <span>{batchFeedback}</span>
+          <button
+            type="button"
+            onClick={() => setBatchFeedback(null)}
+            className="inline-flex size-6 items-center justify-center rounded-md text-primary-deep hover:bg-surface/60"
+            aria-label="Dismiss message"
+          >
+            <X className="size-3.5" aria-hidden="true" />
+          </button>
+        </div>
+      ) : null}
+
+      <DataTable
+        columns={columns}
+        data={filteredStudents}
+        getRowId={(student) => student.id}
+        searchPlaceholder="Search student name, admission no., cohort or stage..."
+        emptyIcon={UsersRound}
+        emptyTitle={
+          filtersActive
+            ? 'No matching students found'
+            : 'No students registered'
+        }
+        emptyDescription={
+          filtersActive
+            ? 'No student record matches the active status or cohort filter.'
+            : 'Import or register students to populate the departmental registry.'
+        }
+        initialPageSize={25}
+        initialHiddenColumns={['programme', 'phone', 'email']}
+        enableColumnToggle
+        enableDensityToggle
+        enableRowSelection
+        exportFileName="student-registry"
+        stickyHeader
+        toolbarFilters={
+          <div className="flex w-full flex-wrap items-center gap-2 md:w-auto md:flex-1 md:justify-end">
+            {cohorts.length > 0 ? (
+              <Select
+                aria-label="Filter by cohort"
+                value={cohortFilter}
+                onChange={(event) => handleCohortChange(event.target.value)}
+                className="h-9 w-full text-xs sm:w-auto sm:min-w-44"
+              >
+                <option value="">All cohorts</option>
+                {cohorts.map((cohort) => (
+                  <option key={cohort.id} value={cohort.id}>
+                    {cohort.name}
+                    {cohort.programmeCode ? ` (${cohort.programmeCode})` : ''}
+                  </option>
+                ))}
+              </Select>
+            ) : null}
+
+            {filtersActive ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                leadingIcon={
+                  <RotateCcw className="size-3.5" aria-hidden="true" />
+                }
+                onClick={() => {
+                  setActiveStatus('');
+                  setCohortFilter('');
+                  syncUrlParams('', '');
+                }}
+              >
+                Clear filters
+              </Button>
             ) : null}
           </div>
+        }
+        toolbarActions={
+          <a
+            href={exportUrl}
+            download
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-strong bg-surface px-2.5 text-xs font-semibold text-text-secondary shadow-sm transition hover:bg-surface-subtle hover:text-text-primary"
+            title="Export filtered student list to Excel"
+          >
+            <Download className="size-4" aria-hidden="true" />
+            <span>Excel</span>
+          </a>
+        }
+        bulkActions={(selectedRows) => (
+          <>
+            <button
+              type="button"
+              onClick={() =>
+                setBatchAction({
+                  type: 'confirm_reported',
+                  rows: selectedRows,
+                })
+              }
+              className="inline-flex h-7 items-center gap-1 rounded-md border border-border-strong bg-surface px-2.5 text-xs font-semibold text-text-primary transition hover:bg-surface-subtle"
+            >
+              <CheckCircle2
+                className="size-3.5 text-primary"
+                aria-hidden="true"
+              />
+              <span>Confirm reported</span>
+            </button>
 
-          {/* Desktop & Mobile Table View */}
-          <div className="divide-y divide-border">
-            {/* Desktop Column Titles with Sort Toggles (Slimmer height) */}
-            <div className="hidden border-b border-border bg-surface px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.1em] text-text-muted md:grid md:grid-cols-[minmax(10rem,2fr)_minmax(11rem,1.5fr)_minmax(7rem,1fr)_minmax(6rem,0.8fr)_1.5rem] md:items-center md:gap-3">
-              <button
-                type="button"
-                onClick={() => toggleSort('name')}
-                className="flex items-center gap-1 text-left font-bold hover:text-text-primary cursor-pointer"
-              >
-                <span>Student</span>
-                {sortField === 'name' ? (
-                  sortOrder === 'asc' ? (
-                    <ChevronUp className="size-3" />
-                  ) : (
-                    <ChevronDown className="size-3" />
-                  )
-                ) : null}
-              </button>
+            <button
+              type="button"
+              onClick={() =>
+                setBatchAction({
+                  type: 'reassign_cohort',
+                  rows: selectedRows,
+                })
+              }
+              className="inline-flex h-7 items-center gap-1 rounded-md border border-border-strong bg-surface px-2.5 text-xs font-semibold text-text-primary transition hover:bg-surface-subtle"
+            >
+              <UsersRound
+                className="size-3.5 text-primary"
+                aria-hidden="true"
+              />
+              <span>Reassign cohort</span>
+            </button>
 
-              <span>Admission Number</span>
+            <button
+              type="button"
+              onClick={() =>
+                setBatchAction({
+                  type: 'defer',
+                  rows: selectedRows,
+                })
+              }
+              className="inline-flex h-7 items-center gap-1 rounded-md border border-border-strong bg-surface px-2.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
+            >
+              <Clock className="size-3.5" aria-hidden="true" />
+              <span>Defer</span>
+            </button>
 
-              <button
-                type="button"
-                onClick={() => toggleSort('status')}
-                className="flex items-center gap-1 text-left font-bold hover:text-text-primary cursor-pointer"
-              >
-                <span>Status</span>
-                {sortField === 'status' ? (
-                  sortOrder === 'asc' ? (
-                    <ChevronUp className="size-3" />
-                  ) : (
-                    <ChevronDown className="size-3" />
-                  )
-                ) : null}
-              </button>
+            <button
+              type="button"
+              onClick={() =>
+                setBatchAction({
+                  type: 'dropout',
+                  rows: selectedRows,
+                })
+              }
+              className="inline-flex h-7 items-center gap-1 rounded-md border border-border-strong bg-surface px-2.5 text-xs font-semibold text-danger transition hover:bg-danger-subtle"
+            >
+              <UserX className="size-3.5" aria-hidden="true" />
+              <span>Mark dropped out</span>
+            </button>
+          </>
+        )}
+      />
 
-              <button
-                type="button"
-                onClick={() => toggleSort('stage')}
-                className="flex items-center gap-1 text-left font-bold hover:text-text-primary cursor-pointer"
-              >
-                <span>Stage</span>
-                {sortField === 'stage' ? (
-                  sortOrder === 'asc' ? (
-                    <ChevronUp className="size-3" />
-                  ) : (
-                    <ChevronDown className="size-3" />
-                  )
-                ) : null}
-              </button>
-
-              <span aria-hidden="true" />
-            </div>
-
-            {/* Student Rows — mobile: native stacked cards (Slimmer padding) */}
-            <div className="divide-y divide-border/70 md:hidden">
-              {paginatedStudents.map((student) => (
-                <div
-                  key={student.id}
-                  className="px-3.5 py-2 text-xs transition hover:bg-surface-subtle/80"
-                >
-                  <Link
-                    href={`/students/registry/${student.id}`}
-                    className="block"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="min-w-0 truncate text-[12.5px] font-semibold leading-tight text-[#35534f]">
-                        {student.full_name}
-                      </p>
-                      <ChevronRight className="size-3.5 shrink-0 text-text-muted" aria-hidden="true" />
-                    </div>
-
-                    <p className="mt-0.5 font-mono text-[10.5px] text-text-muted leading-tight">
-                      {student.admission_number}
-                    </p>
-
-                    <div className="mt-1.5 flex items-center justify-between gap-2">
-                      <Badge
-                        variant={getStatusBadgeVariant(student.lifecycle_status, student.academic_phase)}
-                        className="text-[10px] px-2 py-0 min-h-5"
-                      >
-                        {getStudentStatusLabel(student.lifecycle_status, student.academic_phase)}
-                      </Badge>
-                      <span className="text-[11px] font-semibold text-text-secondary">
-                        {getStudentStageLabel(student)}
-                      </span>
-                    </div>
-                  </Link>
-                </div>
-              ))}
-            </div>
-
-            {/* Student Rows — md and up: dense slim grid rows */}
-            <div className="hidden divide-y divide-border/70 md:block">
-              {paginatedStudents.map((student) => (
-                <div
-                  key={student.id}
-                  className="grid items-center gap-3 px-4 py-2.5 text-xs transition hover:bg-surface-subtle/80 md:grid-cols-[minmax(10rem,2fr)_minmax(11rem,1.5fr)_minmax(7rem,1fr)_minmax(6rem,0.8fr)_1.5rem]"
-                >
-                  {/* Student Details Link */}
-                  <Link
-                    href={`/students/registry/${student.id}`}
-                    className="min-w-0 group"
-                  >
-                    <p className="font-semibold tracking-[0.005em] text-[#35534f] group-hover:text-primary transition truncate leading-tight">
-                      {student.full_name}
-                    </p>
-                  </Link>
-
-                  {/* Admission Number */}
-                  <Link
-                    href={`/students/registry/${student.id}`}
-                    className="font-mono text-[11px] text-text-secondary whitespace-nowrap"
-                  >
-                    {student.admission_number}
-                  </Link>
-
-                  {/* Status */}
-                  <Link href={`/students/registry/${student.id}`}>
-                    <Badge
-                      variant={getStatusBadgeVariant(student.lifecycle_status, student.academic_phase)}
-                      className="text-[10px] px-2 py-0 min-h-5 inline-flex"
-                    >
-                      {getStudentStatusLabel(student.lifecycle_status, student.academic_phase)}
-                    </Badge>
-                  </Link>
-
-                  {/* Stage */}
-                  <Link href={`/students/registry/${student.id}`}>
-                    <span className="font-semibold text-text-secondary text-xs">
-                      {getStudentStageLabel(student)}
-                    </span>
-                  </Link>
-
-                  {/* Arrow Icon */}
-                  <Link
-                    href={`/students/registry/${student.id}`}
-                    className="flex justify-end text-text-muted hover:text-text-primary"
-                    aria-label={`Open details for ${student.full_name}`}
-                  >
-                    <ChevronRight className="size-3.5" />
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* PAGINATION FOOTER */}
-          <Pagination
-            pageIndex={currentPageIndex}
-            pageCount={pageCount}
-            pageSize={pageSize}
-            totalRows={sortedStudents.length}
-            canPreviousPage={currentPageIndex > 0}
-            canNextPage={currentPageIndex < pageCount - 1}
-            onFirstPage={() => setPageIndex(0)}
-            onPreviousPage={() => setPageIndex((p) => Math.max(0, p - 1))}
-            onNextPage={() =>
-              setPageIndex((p) => Math.min(pageCount - 1, p + 1))
-            }
-            onLastPage={() => setPageIndex(pageCount - 1)}
-            onPageSizeChange={(newSize) => {
-              setPageSize(newSize);
-              setPageIndex(0);
-            }}
-            pageSizeOptions={[15, 25, 50, 100]}
-          />
-        </Card>
-      )}
+      <BatchActionDialogs
+        openAction={batchAction?.type ?? null}
+        onClose={() => setBatchAction(null)}
+        selectedStudents={batchAction?.rows ?? []}
+        cohorts={cohorts}
+        onSuccess={(message) => setBatchFeedback(message)}
+      />
     </div>
   );
 }

@@ -20,6 +20,7 @@ import type { AuthenticatedProfile } from '@/features/auth/types';
 import { cn } from '@/lib/utils/cn';
 
 import { MobileBottomNav } from './mobile-bottom-nav';
+import { AutoBreadcrumb } from './auto-breadcrumb';
 
 interface AssessmentShellProps {
   profile: AuthenticatedProfile;
@@ -175,6 +176,7 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
           </header>
 
           <main className="admin-screen mx-auto w-full max-w-[var(--content-max-width)] px-[var(--content-gutter)] py-3.5 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] sm:py-5 lg:py-6 lg:pb-6">
+            <AutoBreadcrumb className="mb-3" />
             {children}
           </main>
         </div>

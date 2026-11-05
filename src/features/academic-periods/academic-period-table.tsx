@@ -226,6 +226,9 @@ export function AcademicPeriodTable({
           : 'Create the first Academic Period to define the teaching and timetable calendar.'
       }
       initialPageSize={10}
+      enableColumnToggle
+      enableDensityToggle
+      exportFileName="academic-periods"
       toolbarFilters={
         <div className="grid w-full gap-2 sm:grid-cols-2 lg:flex lg:w-auto lg:flex-1 lg:flex-wrap lg:items-center">
           <Select

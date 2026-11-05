@@ -120,9 +120,9 @@ export function ResetStudentPasswordDialog({
           aria-labelledby="reset-student-pwd-title"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs"
         >
-          <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-xl animate-in fade-in zoom-in-95">
+          <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-xl animate-in fade-in zoom-in-95">
             {/* Header */}
-            <div className="flex items-start justify-between border-b border-gray-100 pb-4">
+            <div className="flex items-start justify-between border-b border-border-soft pb-4">
               <div className="flex items-center gap-3">
                 <span className="flex size-10 items-center justify-center rounded-xl bg-rose-50 text-rose-700">
                   <KeyRound className="size-5" aria-hidden="true" />
@@ -130,11 +130,11 @@ export function ResetStudentPasswordDialog({
                 <div>
                   <h3
                     id="reset-student-pwd-title"
-                    className="text-sm font-bold text-gray-900"
+                    className="text-sm font-bold text-text-primary"
                   >
                     Reset student password
                   </h3>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-text-muted">
                     {studentName} · {admissionNumber}
                   </p>
                 </div>
@@ -144,7 +144,7 @@ export function ResetStudentPasswordDialog({
                 type="button"
                 onClick={close}
                 disabled={saving}
-                className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition"
+                className="rounded-lg p-1 text-text-muted hover:bg-surface-subtle hover:text-text-primary transition"
               >
                 <X className="size-4" aria-hidden="true" />
               </button>
@@ -161,11 +161,11 @@ export function ResetStudentPasswordDialog({
               {result ? (
                 /* ── Success State ── */
                 <div className="space-y-3">
-                  <p className="text-xs font-semibold text-gray-700">
+                  <p className="text-xs font-semibold text-text-secondary">
                     Password reset successfully. Share this with the student:
                   </p>
                   <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50/60 px-3 py-2.5">
-                    <span className="font-mono text-sm font-bold tracking-wide text-gray-900">
+                    <span className="font-mono text-sm font-bold tracking-wide text-text-primary">
                       {result}
                     </span>
                     <button
@@ -184,7 +184,7 @@ export function ResetStudentPasswordDialog({
                       )}
                     </button>
                   </div>
-                  <p className="text-[11px] text-gray-500">
+                  <p className="text-[11px] text-text-muted">
                     The student can log in using their admission number and this
                     password.
                   </p>
@@ -198,10 +198,10 @@ export function ResetStudentPasswordDialog({
                   <div>
                     <label
                       htmlFor="student-custom-pwd"
-                      className="block text-xs font-bold text-gray-700"
+                      className="block text-xs font-bold text-text-secondary"
                     >
                       Custom password{' '}
-                      <span className="font-normal text-gray-400">
+                      <span className="font-normal text-text-muted">
                         (Optional)
                       </span>
                     </label>
@@ -213,9 +213,9 @@ export function ResetStudentPasswordDialog({
                       placeholder="student"
                       disabled={saving}
                       autoComplete="off"
-                      className="mt-1.5 h-10 w-full rounded-xl border border-gray-300 bg-white px-3 text-xs text-gray-900 shadow-2xs placeholder:text-gray-400 focus:border-[#033B36] focus:outline-none focus:ring-1 focus:ring-[#033B36]"
+                      className="mt-1.5 h-10 w-full rounded-xl border border-border-strong bg-surface px-3 text-xs text-text-primary shadow-2xs placeholder:text-text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
                     />
-                    <p className="mt-1.5 text-[11px] text-gray-500 leading-relaxed">
+                    <p className="mt-1.5 text-[11px] text-text-muted leading-relaxed">
                       If left blank, the system will generate a secure temporary
                       password (e.g.{' '}
                       <code className="font-mono">Icmhs@xxxx</code>) that you

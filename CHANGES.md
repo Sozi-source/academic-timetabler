@@ -1,3 +1,38 @@
+### 2026-11-05: Fix student unit registration deletion workflow
+
+**Added & Modified:**
+- `src/features/student-unit-registration/actions.ts`:
+  - Fixed `dropStudentUnitRegistration` to physically and cleanly delete the unit registration from `student_unit_registrations` using the admin client (previously, an update to `registration_status: 'dropped'` left the row visible in the table and failed to remove it from registration lists).
+  - Resolved the target academic period from form data or fallback to active period.
+  - Automatically cleaned up orphaned entries in `assessment_roster` and `assessment_population` for the deleted unit when no finalized results exist.
+- `src/features/student-unit-registration/student-unit-registration-lines.tsx`:
+  - Replaced the submit button inside `<details>` with a dedicated, transition-wrapped button (`type="button"`) and confirmation prompt (`window.confirm`), preventing browser constraint validation from blocking deletion due to unselected lines in the "Add units" section.
+  - Removed unnecessary `required` validation on empty "Add units" select rows, ensuring existing registrations can be managed without forcing an additional unit selection.
+  - Added pending feedback (`Deleting...` spinner) during registration removal.
+- `src/app/(dashboard)/students/unit-registration/register/[studentId]/page.tsx`:
+  - Passed `returnCohort` to `StudentUnitRegistrationLines` to preserve cohort filter context across deletion.
+
+No database schema changes or manual follow-up required.
+
+### 2026-11-04: ERP UI upgrade rollout & exam marks submission fix
+
+**Added & Modified:**
+- `src/features/staff-assessment/online-marks-editor.tsx` & `src/app/api/staff/assessment/[assessmentId]/online/submit/route.ts`:
+  - **Fixed exam and CAT submission with empty cells**: eliminated hard-blocking errors in `submitMarks()` when students have empty or unentered cells.
+  - Allowed empty cells to trigger the confirmation modal: unentered CAT cells are marked as Absent (`AB`), unentered exam cells are recorded as Absent (`AB`), and unentered coursework (assignment, presentation, RAT) marks are defaulted to `0`.
+  - Fixed database constraint check failure in `submit/route.ts`: updated `assessment_roster.pre_assessment_status = 'absent'` and `assessment_population.attendance_status = 'absent'` *before* executing the `submit_assessment_online_marks` RPC. This prevents error 23514 caused by exam drafts having null marks while the roster was still marked as `expected`.
+  - Updated client-side state in `executeFinalSubmit()` and `executeCatSubmit()` so submitted cells immediately display 'AB' or '0'.
+- `src/features/students/student-registry-table.tsx` — migrated the Student Registry list onto `DataTable` with natural admission-number sorting (`compareAdmissionNumbers`), URL-synced lifecycle status pills and cohort filter, column visibility toggle (Programme, Phone, Email optional columns), density toggle, sticky header, row selection with `BatchActionDialogs` bulk actions (Confirm reported, Reassign cohort, Defer, Mark dropped out), client CSV export, and filtered server Excel export (`/api/students/export`).
+- `src/components/ui/record-shell.tsx` — enhanced with automatic active tab matching via `usePathname()` supporting nested sub-route paths.
+- `src/app/(dashboard)/students/registry/[studentId]/layout.tsx` — added persistent `RecordShell` sub-page layout with navigation tabs (Overview, Class assignments, Results, Student view).
+- `src/app/(dashboard)/students/registry/[studentId]/{page,class-assignments/page,results/page,portal-view/page}.tsx` — simplified sub-pages by removing duplicate headers and leveraging `FastTab` sections.
+- `src/app/(dashboard)/trainers/[id]/page.tsx` & `src/features/trainers/trainer-form-fields.tsx` — rebuilt trainer profile using `RecordShell` + `FastTab`, replacing raw `gray-*` utilities with design tokens.
+- `src/features/{trainers,students}/reset-*-password*.tsx` — polished password dialogs, replacing raw `gray-*`/`slate-*` utilities with institutional design tokens.
+- `src/features/{cohorts,trainers,rooms,units,programmes,academic-periods,timetable-calendar}/*-table.tsx` — opted existing `DataTable` instances into ERP features (`enableColumnToggle`, `enableDensityToggle`, and `exportFileName`).
+- `src/tests/assessment-markbook-generator.test.ts` — updated test assertions to reference `assessmentMarkbookTemplateVersion` (1.1) and cell D9 (mark: AB) / E9 (remark: Absent from CAT).
+
+No database migrations or manual follow-up required.
+
 ### 2026-11-03: Enforce examination paper question formats
 
 **Modified:**

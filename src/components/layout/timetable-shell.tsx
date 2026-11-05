@@ -11,6 +11,7 @@ import type { AuthenticatedProfile } from '@/features/auth/types';
 
 import { DashboardSidebar } from './dashboard-sidebar';
 import { MobileBottomNav } from './mobile-bottom-nav';
+import { AutoBreadcrumb } from './auto-breadcrumb';
 
 // The four everyday timetabling steps; master-setup pages (rooms, offerings,
 // constraints, imports, etc.) stay one tap away behind "More".
@@ -102,6 +103,7 @@ export function TimetableShell({ profile, children }: TimetableShellProps) {
         </header>
 
         <main className="admin-screen mx-auto min-w-0 w-full max-w-none overflow-x-clip px-[var(--content-gutter)] py-3.5 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] sm:py-5 lg:py-6 lg:pb-6">
+          <AutoBreadcrumb className="mb-3" />
           {children}
         </main>
       </div>

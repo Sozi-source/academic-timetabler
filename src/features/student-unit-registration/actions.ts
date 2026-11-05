@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 
 import { requireHodAccess } from '@/features/auth/authorization';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export async function verifyStudentUnitRegistration(formData: FormData) {
   await requireHodAccess();
@@ -189,29 +190,76 @@ export async function dropStudentUnitRegistration(formData: FormData) {
   const studentId = String(formData.get('studentId') ?? '');
   const registrationUnitId = String(formData.get('registrationUnitId') ?? '');
   const returnCohort = String(formData.get('returnCohort') ?? '');
+  const formPeriodId = String(formData.get('academicPeriodId') ?? '');
   if (!studentId || !registrationUnitId) return;
 
   const supabase = await createClient();
-  const { data: period, error: periodError } = await supabase
-    .from('academic_periods')
-    .select('id')
-    .eq('status', 'active')
-    .maybeSingle();
+  let targetPeriodId = formPeriodId;
+  if (!targetPeriodId) {
+    const { data: period, error: periodError } = await supabase
+      .from('academic_periods')
+      .select('id')
+      .eq('status', 'active')
+      .maybeSingle();
 
-  if (periodError || !period) {
-    redirect(`/students/unit-registration/register/${studentId}?error=${encodeURIComponent('No active academic period is available.')}`);
+    if (periodError || !period) {
+      redirect(`/students/unit-registration/register/${studentId}?error=${encodeURIComponent('No active academic period is available.')}`);
+    }
+    targetPeriodId = period.id;
   }
 
-  const { error } = await supabase
+  const { data: student } = await supabase
+    .from('students')
+    .select('id, department_id')
+    .eq('id', studentId)
+    .maybeSingle();
+
+  if (!student) {
+    redirect('/students/unit-registration?error=student');
+  }
+
+  const admin = createAdminClient();
+  const { error } = await admin
     .from('student_unit_registrations')
-    .update({ registration_status: 'dropped' })
+    .delete()
     .eq('student_id', studentId)
-    .eq('academic_period_id', period.id)
-    .eq('unit_id', registrationUnitId)
-    .eq('registration_status', 'registered');
+    .eq('academic_period_id', targetPeriodId)
+    .eq('unit_id', registrationUnitId);
 
   if (error) {
     redirect(`/students/unit-registration/register/${studentId}?error=${encodeURIComponent(error.message)}`);
+  }
+
+  // Also clean up markbook roster & population if event exists and student has no committed results
+  const { data: event } = await admin
+    .from('assessment_events')
+    .select('id')
+    .eq('academic_period_id', targetPeriodId)
+    .eq('unit_id', registrationUnitId)
+    .eq('assessment_type', 'exam')
+    .maybeSingle();
+
+  if (event?.id) {
+    const { data: results } = await admin
+      .from('assessment_results')
+      .select('id')
+      .eq('assessment_event_id', event.id)
+      .eq('student_id', studentId)
+      .maybeSingle();
+
+    if (!results) {
+      await admin
+        .from('assessment_roster')
+        .delete()
+        .eq('assessment_id', event.id)
+        .eq('student_id', studentId);
+
+      await admin
+        .from('assessment_population')
+        .delete()
+        .eq('assessment_event_id', event.id)
+        .eq('student_id', studentId);
+    }
   }
 
   revalidatePath(`/students/unit-registration/register/${studentId}`);

@@ -1,9 +1,16 @@
 'use client';
 
 import { useMemo, useState, useTransition } from 'react';
-import { LoaderCircle, MoreVertical } from 'lucide-react';
+import { LoaderCircle, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 
-import { dropStudentUnitRegistration } from './actions';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+import { batchDropStudentUnitRegistrations, dropStudentUnitRegistration } from './actions';
 import type { DepartmentRegistrationEditor } from './types';
 
 interface RegistrationLine {
@@ -20,6 +27,7 @@ export function StudentUnitRegistrationLines({
   returnCohort?: string | null;
 }) {
   const [pendingUnitId, setPendingUnitId] = useState<string | null>(null);
+  const [selectedUnitIds, setSelectedUnitIds] = useState<Set<string>>(new Set());
   const [isPending, startTransition] = useTransition();
   const [lines, setLines] = useState<RegistrationLine[]>([{ id: 0, stageId: '', unitId: '' }]);
   const [replacements, setReplacements] = useState<Record<string, string>>({});
@@ -29,6 +37,36 @@ export function StudentUnitRegistrationLines({
   const expectedIds = new Set(context.stageUnitIds[context.student.currentStageId ?? ''] ?? []);
   const selectedCurrentIds = context.currentRegisteredUnitIds.map((unitId) => replacements[unitId] ?? unitId);
   const hasOffStageSelection = [...selectedCurrentIds, ...chosenIds].some((unitId) => !expectedIds.has(unitId));
+
+  const currentRegistrations = useMemo(
+    () => context.registrationHistory.filter(
+      (r) => r.academicPeriodId === context.period.id && r.registrationStatus === 'registered',
+    ),
+    [context.registrationHistory, context.period.id],
+  );
+
+  const allCurrentSelected = currentRegistrations.length > 0 && currentRegistrations.every((r) => selectedUnitIds.has(r.unitId));
+  const someCurrentSelected = currentRegistrations.some((r) => selectedUnitIds.has(r.unitId)) && !allCurrentSelected;
+
+  const toggleSelectAll = () => {
+    if (allCurrentSelected) {
+      setSelectedUnitIds(new Set());
+    } else {
+      setSelectedUnitIds(new Set(currentRegistrations.map((r) => r.unitId)));
+    }
+  };
+
+  const toggleSelectUnit = (unitId: string) => {
+    setSelectedUnitIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(unitId)) {
+        next.delete(unitId);
+      } else {
+        next.add(unitId);
+      }
+      return next;
+    });
+  };
 
   const updateLine = (id: number, updates: Partial<Omit<RegistrationLine, 'id'>>) => {
     setLines((current) => current.map((line) => line.id === id ? { ...line, ...updates } : line));
@@ -53,26 +91,121 @@ export function StudentUnitRegistrationLines({
     });
   };
 
+  const handleBatchDelete = (unitIdsToDelete?: string[]) => {
+    const targets = unitIdsToDelete ?? Array.from(selectedUnitIds);
+    if (targets.length === 0) return;
+
+    const count = targets.length;
+    const unitCodes = currentRegistrations
+      .filter((r) => targets.includes(r.unitId))
+      .map((r) => r.unitCode)
+      .join(', ');
+
+    const message = count === 1
+      ? `Are you sure you want to delete the unit registration for ${unitCodes}? This will remove the student from this unit.`
+      : `Are you sure you want to delete ${count} unit registrations (${unitCodes})? This will remove the student from these units' markbook rosters.`;
+
+    if (!window.confirm(message)) {
+      return;
+    }
+
+    setPendingUnitId('batch');
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.set('studentId', context.student.id);
+      for (const id of targets) {
+        formData.append('unitIds', id);
+      }
+      formData.set('academicPeriodId', context.period.id);
+      if (returnCohort) formData.set('returnCohort', returnCohort);
+      await batchDropStudentUnitRegistrations(formData);
+    });
+  };
+
   return (
     <div className="space-y-4">
       <section className="overflow-hidden rounded-xl border border-border bg-surface">
-        <div className="border-b border-border px-4 py-3">
-          <h2 className="text-sm font-medium text-text-primary">Registered units</h2>
-          <p className="mt-0.5 text-xs text-text-muted">Previous and current registrations are listed by academic period and curriculum stage.</p>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
+          <div>
+            <h2 className="text-sm font-medium text-text-primary">Registered units</h2>
+            <p className="mt-0.5 text-xs text-text-muted">Previous and current registrations are listed by academic period and curriculum stage.</p>
+          </div>
+          {currentRegistrations.length > 0 ? (
+            <div className="flex flex-wrap items-center gap-2">
+              {selectedUnitIds.size > 0 ? (
+                <>
+                  <span className="rounded-md bg-amber-100 dark:bg-amber-950/40 px-2 py-0.5 text-xs font-semibold text-amber-900 dark:text-amber-200">
+                    {selectedUnitIds.size} of {currentRegistrations.length} selected
+                  </span>
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={() => handleBatchDelete()}
+                    className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-danger px-3 text-xs font-semibold text-white shadow-2xs hover:bg-danger-hover transition disabled:opacity-50 active:scale-95"
+                  >
+                    {isPending && pendingUnitId === 'batch' ? (
+                      <>
+                        <LoaderCircle className="size-3.5 animate-spin" />
+                        <span>Deleting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="size-3.5" />
+                        <span>Delete selected ({selectedUnitIds.size})</span>
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedUnitIds(new Set())}
+                    className="h-8 rounded-lg border border-border bg-surface px-2.5 text-xs font-medium text-text-secondary hover:bg-surface-subtle transition"
+                  >
+                    Clear
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => handleBatchDelete(currentRegistrations.map((r) => r.unitId))}
+                  className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-danger/30 bg-danger/5 px-3 text-xs font-semibold text-danger hover:bg-danger/10 transition active:scale-95 disabled:opacity-50"
+                  title="Delete all units registered in this academic period"
+                >
+                  <Trash2 className="size-3.5" />
+                  <span>Unregister all ({currentRegistrations.length})</span>
+                </button>
+              )}
+            </div>
+          ) : null}
         </div>
         {context.registrationHistory.length ? (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] table-fixed text-left text-xs">
               <colgroup>
-                <col className="w-[18%]" />
+                <col className="w-10" />
                 <col className="w-[17%]" />
-                <col className="w-[15%]" />
-                <col className="w-[28%]" />
+                <col className="w-[16%]" />
+                <col className="w-[14%]" />
+                <col className="w-[27%]" />
                 <col className="w-[15%]" />
                 <col className="w-[7%]" />
               </colgroup>
               <thead className="border-b border-border bg-surface-subtle text-[10px] font-medium uppercase tracking-wide text-text-muted">
                 <tr>
+                  <th className="w-10 px-3 py-2.5 text-center">
+                    {currentRegistrations.length > 0 ? (
+                      <input
+                        type="checkbox"
+                        checked={allCurrentSelected}
+                        ref={(el) => {
+                          if (el) el.indeterminate = someCurrentSelected;
+                        }}
+                        onChange={toggleSelectAll}
+                        aria-label="Select all current registrations"
+                        className="size-3.5 rounded border-border text-primary focus:ring-primary"
+                      />
+                    ) : null}
+                  </th>
                   <th className="px-3 py-2.5">Academic year</th>
                   <th className="px-3 py-2.5">Student stage</th>
                   <th className="px-3 py-2.5">Unit code</th>
@@ -85,13 +218,34 @@ export function StudentUnitRegistrationLines({
                 {context.registrationHistory.map((registration) => {
                   const isCurrent = registration.academicPeriodId === context.period.id && registration.registrationStatus === 'registered';
                   const isEditing = editing?.unitId === registration.unitId && isCurrent;
+                  const isSelected = selectedUnitIds.has(registration.unitId);
                   const replacement = context.units.find((unit) => unit.id === (replacements[registration.unitId] ?? registration.unitId));
                   const stageId = isEditing ? editing.stageId : replacements[registration.unitId] ? replacement?.stageId ?? '' : registration.stageId ?? '';
                   const occupiedIds = new Set([...currentIds].filter((unitId) => unitId !== registration.unitId).map((unitId) => replacements[unitId] ?? unitId));
                   const rowUnits = context.units.filter((unit) => unit.stageId === stageId && (!occupiedIds.has(unit.id) || unit.id === registration.unitId) && (!chosenIds.has(unit.id) || unit.id === registration.unitId));
 
                   return (
-                    <tr key={`${registration.academicPeriodId}:${registration.unitId}`} className={isEditing ? 'bg-primary/5' : undefined}>
+                    <tr
+                      key={`${registration.academicPeriodId}:${registration.unitId}`}
+                      className={
+                        isSelected
+                          ? 'bg-amber-50/60 dark:bg-amber-950/20'
+                          : isEditing
+                            ? 'bg-primary/5'
+                            : undefined
+                      }
+                    >
+                      <td className="w-10 px-3 py-2.5 text-center">
+                        {isCurrent ? (
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleSelectUnit(registration.unitId)}
+                            aria-label={`Select ${registration.unitCode}`}
+                            className="size-3.5 rounded border-border text-primary focus:ring-primary"
+                          />
+                        ) : null}
+                      </td>
                       <td className="px-3 py-2.5 text-text-secondary">{registration.academicPeriodName}</td>
                       <td className="px-3 py-2.5 text-text-secondary">
                         {isEditing ? (
@@ -125,51 +279,58 @@ export function StudentUnitRegistrationLines({
                       </td>
                       <td className="px-3 py-2.5 text-right">
                         {isCurrent && !isEditing ? (
-                          <details className="group relative inline-block text-left">
-                            <summary aria-label={`Actions for ${registration.unitCode}`} className="flex size-7 cursor-pointer list-none items-center justify-center rounded-md text-text-secondary hover:bg-surface-subtle [&::-webkit-details-marker]:hidden">
-                              <MoreVertical className="size-4" aria-hidden="true" />
-                            </summary>
-                            <div className="absolute right-0 z-10 mt-1 min-w-28 rounded-md border border-border bg-surface p-1 shadow-lg">
-                              {registration.registrationStatus === 'registered' ? (
+                          <div className="flex items-center justify-end">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
                                 <button
                                   type="button"
-                                  onClick={(e) => {
-                                    const details = e.currentTarget.closest('details');
-                                    if (details) details.open = false;
-                                    setEditing({
-                                      unitId: registration.unitId,
-                                      stageId: registration.stageId ?? context.student.currentStageId ?? '',
-                                      replacementId: replacements[registration.unitId] ?? registration.unitId,
-                                    });
-                                  }}
-                                  className="block w-full rounded px-2 py-1.5 text-left text-xs text-text-primary hover:bg-surface-subtle"
+                                  aria-label={`Actions for ${registration.unitCode}`}
+                                  className="flex size-7 cursor-pointer items-center justify-center rounded-md text-text-secondary transition hover:bg-surface-subtle"
                                 >
-                                  Edit
+                                  <MoreVertical className="size-4" aria-hidden="true" />
                                 </button>
-                              ) : null}
-                              <button
-                                type="button"
-                                disabled={isPending && pendingUnitId === registration.unitId}
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  const details = e.currentTarget.closest('details');
-                                  if (details) details.open = false;
-                                  handleDelete(registration.unitId, registration.academicPeriodId, registration.unitCode);
-                                }}
-                                className="flex w-full items-center gap-1.5 rounded px-2 py-1.5 text-left text-xs font-medium text-danger hover:bg-danger-subtle disabled:opacity-50"
-                              >
-                                {isPending && pendingUnitId === registration.unitId ? (
-                                  <>
-                                    <LoaderCircle className="size-3 animate-spin" />
-                                    <span>Deleting...</span>
-                                  </>
-                                ) : (
-                                  <span>Delete</span>
-                                )}
-                              </button>
-                            </div>
-                          </details>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="min-w-32 p-1">
+                                {registration.registrationStatus === 'registered' ? (
+                                  <DropdownMenuItem
+                                    onSelect={() => {
+                                      setEditing({
+                                        unitId: registration.unitId,
+                                        stageId: registration.stageId ?? context.student.currentStageId ?? '',
+                                        replacementId: replacements[registration.unitId] ?? registration.unitId,
+                                      });
+                                    }}
+                                    className="flex cursor-pointer items-center gap-2 rounded px-2.5 py-1.5 text-xs text-text-primary hover:bg-surface-subtle"
+                                  >
+                                    <Pencil className="size-3.5 text-text-muted" aria-hidden="true" />
+                                    <span>Edit</span>
+                                  </DropdownMenuItem>
+                                ) : null}
+                                <DropdownMenuItem
+                                  destructive
+                                  disabled={isPending && pendingUnitId === registration.unitId}
+                                  onSelect={() => {
+                                    setTimeout(() => {
+                                      handleDelete(registration.unitId, registration.academicPeriodId, registration.unitCode);
+                                    }, 50);
+                                  }}
+                                  className="flex cursor-pointer items-center gap-2 rounded px-2.5 py-1.5 text-xs font-medium text-danger hover:bg-danger-subtle disabled:opacity-50"
+                                >
+                                  {isPending && pendingUnitId === registration.unitId ? (
+                                    <>
+                                      <LoaderCircle className="size-3.5 animate-spin" aria-hidden="true" />
+                                      <span>Deleting...</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Trash2 className="size-3.5" aria-hidden="true" />
+                                      <span>Delete</span>
+                                    </>
+                                  )}
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                         ) : null}
                       </td>
                     </tr>

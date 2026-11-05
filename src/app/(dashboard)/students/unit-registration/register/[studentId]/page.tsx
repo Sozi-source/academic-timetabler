@@ -84,8 +84,10 @@ export default async function DepartmentStudentUnitRegistrationPage({
         </div>
       ) : null}
 
-      {query.deleted === '1' ? (
-        <p role="status" className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-800">Unit registration deleted.</p>
+      {query.deleted ? (
+        <p role="status" className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-800">
+          {query.deleted === '1' ? 'Unit registration deleted.' : `${query.deleted} unit registrations deleted.`}
+        </p>
       ) : null}
 
       {query.stage_updated === '1' ? (

@@ -1,15 +1,21 @@
-### 2026-11-05: Fix student unit registration deletion workflow
+### 2026-11-05: Fix student unit registration deletion workflow & add batch/select-all unregister
 
 **Added & Modified:**
 - `src/features/student-unit-registration/actions.ts`:
-  - Fixed `dropStudentUnitRegistration` to physically and cleanly delete the unit registration from `student_unit_registrations` using the admin client (previously, an update to `registration_status: 'dropped'` left the row visible in the table and failed to remove it from registration lists).
-  - Resolved the target academic period from form data or fallback to active period.
-  - Automatically cleaned up orphaned entries in `assessment_roster` and `assessment_population` for the deleted unit when no finalized results exist.
+  - Implemented `batchDropStudentUnitRegistrations(formData)` to physically and cleanly delete unit registrations from `student_unit_registrations` using the admin client (fixing issue where row updates were failing or remaining visible).
+  - Cleaned up `student_unit_registration_submissions` if all units for the student in that period are dropped/unregistered, properly restoring the student's status to unsubmitted/unregistered.
+  - Automatically cleaned up orphaned entries in `assessment_roster` and `assessment_population` for the deleted units when no finalized exam results exist.
+  - Maintained backward compatibility by delegating `dropStudentUnitRegistration` to `batchDropStudentUnitRegistrations`.
 - `src/features/student-unit-registration/student-unit-registration-lines.tsx`:
-  - Replaced the submit button inside `<details>` with a dedicated, transition-wrapped button (`type="button"`) and confirmation prompt (`window.confirm`), preventing browser constraint validation from blocking deletion due to unselected lines in the "Add units" section.
-  - Removed unnecessary `required` validation on empty "Add units" select rows, ensuring existing registrations can be managed without forcing an additional unit selection.
-  - Added pending feedback (`Deleting...` spinner) during registration removal.
+  - Replaced the unmanaged native `<details>` action popup with Radix UI's `DropdownMenu` (`DropdownMenuTrigger`, `DropdownMenuContent`, `DropdownMenuItem`). This eliminates persisting menus across table rows by automatically closing when clicking outside, opening another row's menu, or selecting an action.
+  - Added checkboxes to each registered unit row and a header master checkbox (with tri-state/indeterminate support) for current period registrations.
+  - Added multi-select action controls: "Delete selected (N)" with clear selection, plus an "Unregister all (N)" quick-action button.
+  - Replaced the form-embedded submit buttons with dedicated, transition-wrapped actions (`type="button"`) and explicit confirmation dialogs (`window.confirm`) indicating affected units.
+  - Decoupled registration removal from the outer `<form>`, preventing browser constraint validation from blocking deletion due to unselected lines in the "Add units" section.
+  - Removed unnecessary `required` validation on empty "Add units" select rows.
+  - Added pending visual feedback (`Deleting...` spinner and button disabling) during registration removal.
 - `src/app/(dashboard)/students/unit-registration/register/[studentId]/page.tsx`:
+  - Updated deletion success banner to display accurate counts (e.g. "Unit registration deleted." vs "N unit registrations deleted.").
   - Passed `returnCohort` to `StudentUnitRegistrationLines` to preserve cohort filter context across deletion.
 
 No database schema changes or manual follow-up required.

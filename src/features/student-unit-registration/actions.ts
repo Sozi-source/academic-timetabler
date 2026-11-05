@@ -184,14 +184,24 @@ export async function registerStudentUnitsByDepartment(formData: FormData) {
   redirect(studentRegistrationUrl('saved=1'));
 }
 
-export async function dropStudentUnitRegistration(formData: FormData) {
+export async function batchDropStudentUnitRegistrations(formData: FormData) {
   await requireHodAccess();
 
   const studentId = String(formData.get('studentId') ?? '');
-  const registrationUnitId = String(formData.get('registrationUnitId') ?? '');
   const returnCohort = String(formData.get('returnCohort') ?? '');
   const formPeriodId = String(formData.get('academicPeriodId') ?? '');
-  if (!studentId || !registrationUnitId) return;
+
+  // Accept unitIds via multiple getAll('unitIds') or a single registrationUnitId or comma-separated string
+  const rawUnitIds = formData.getAll('unitIds');
+  const singleUnitId = formData.get('registrationUnitId');
+  const unitIds = [
+    ...rawUnitIds.flatMap((v) => typeof v === 'string' ? v.split(',') : []),
+    ...(typeof singleUnitId === 'string' && singleUnitId ? [singleUnitId] : []),
+  ].filter((id): id is string => Boolean(id && id.trim()));
+
+  const uniqueUnitIds = Array.from(new Set(unitIds));
+
+  if (!studentId || uniqueUnitIds.length === 0) return;
 
   const supabase = await createClient();
   let targetPeriodId = formPeriodId;
@@ -224,48 +234,70 @@ export async function dropStudentUnitRegistration(formData: FormData) {
     .delete()
     .eq('student_id', studentId)
     .eq('academic_period_id', targetPeriodId)
-    .eq('unit_id', registrationUnitId);
+    .in('unit_id', uniqueUnitIds);
 
   if (error) {
     redirect(`/students/unit-registration/register/${studentId}?error=${encodeURIComponent(error.message)}`);
   }
 
-  // Also clean up markbook roster & population if event exists and student has no committed results
-  const { data: event } = await admin
-    .from('assessment_events')
-    .select('id')
+  // Check if student still has any remaining registered units in this period
+  const { count: remainingCount } = await admin
+    .from('student_unit_registrations')
+    .select('id', { count: 'exact', head: true })
+    .eq('student_id', studentId)
     .eq('academic_period_id', targetPeriodId)
-    .eq('unit_id', registrationUnitId)
-    .eq('assessment_type', 'exam')
-    .maybeSingle();
+    .eq('registration_status', 'registered');
 
-  if (event?.id) {
-    const { data: results } = await admin
-      .from('assessment_results')
-      .select('id')
-      .eq('assessment_event_id', event.id)
+  if (!remainingCount || remainingCount === 0) {
+    // Reset submission record so status reflects not registered
+    await admin
+      .from('student_unit_registration_submissions')
+      .delete()
       .eq('student_id', studentId)
-      .maybeSingle();
+      .eq('academic_period_id', targetPeriodId);
+  }
 
-    if (!results) {
-      await admin
-        .from('assessment_roster')
-        .delete()
-        .eq('assessment_id', event.id)
-        .eq('student_id', studentId);
+  // Also clean up markbook roster & population for the deleted units if no results exist
+  const { data: events } = await admin
+    .from('assessment_events')
+    .select('id, unit_id')
+    .eq('academic_period_id', targetPeriodId)
+    .in('unit_id', uniqueUnitIds)
+    .eq('assessment_type', 'exam');
 
-      await admin
-        .from('assessment_population')
-        .delete()
+  if (events && events.length > 0) {
+    for (const event of events) {
+      const { data: results } = await admin
+        .from('assessment_results')
+        .select('id')
         .eq('assessment_event_id', event.id)
-        .eq('student_id', studentId);
+        .eq('student_id', studentId)
+        .maybeSingle();
+
+      if (!results) {
+        await admin
+          .from('assessment_roster')
+          .delete()
+          .eq('assessment_id', event.id)
+          .eq('student_id', studentId);
+
+        await admin
+          .from('assessment_population')
+          .delete()
+          .eq('assessment_event_id', event.id)
+          .eq('student_id', studentId);
+      }
     }
   }
 
   revalidatePath(`/students/unit-registration/register/${studentId}`);
   revalidatePath('/students/unit-registration');
   const cohortQuery = returnCohort ? `&cohort=${encodeURIComponent(returnCohort)}` : '';
-  redirect(`/students/unit-registration/register/${studentId}?deleted=1${cohortQuery}`);
+  redirect(`/students/unit-registration/register/${studentId}?deleted=${uniqueUnitIds.length}${cohortQuery}`);
+}
+
+export async function dropStudentUnitRegistration(formData: FormData) {
+  return batchDropStudentUnitRegistrations(formData);
 }
 
 

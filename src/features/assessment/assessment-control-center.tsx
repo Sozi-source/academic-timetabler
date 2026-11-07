@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ClipboardList, FileText, GraduationCap, Search, UsersRound } from 'lucide-react';
+import { ArrowLeft, ClipboardList, FileSpreadsheet, FileText, GraduationCap, Search, UsersRound } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/ui/page-header';
@@ -140,8 +140,8 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
               href="/assessment/reports"
               className="inline-flex h-8.5 items-center gap-1.5 rounded-lg border border-border bg-surface px-3 text-xs font-medium text-slate-600 shadow-2xs transition hover:bg-surface-subtle"
             >
-              <FileText className="size-3.5" />
-              Reports
+              <FileSpreadsheet className="size-3.5" />
+              Consolidated Marksheets
             </Link>
           </div>
         }

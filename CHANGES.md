@@ -1,3 +1,11 @@
+### 2026-11-07: Markbook view — remove Cohort / Exam Status columns, show AB for missed CAT & Exam
+
+**Modified:**
+- `src/features/assessment/marks/assessment-markbook-view-table.tsx`:
+  - Removed the **Cohort** column (header, cells, footer colspan) and the **Exam Status** column from the exam markbook (cohort filter dropdown retained).
+  - Missed CAT / Exam now render **AB**: in addition to explicit absence flags, once marks are submitted (or a row is committed) a missing CAT or Exam mark is shown as AB, with Total = AB and Grade = ABSENT for missed exams.
+- No schema changes; no manual follow-up required.
+
 ### 2026-11-07: Display full student marks in unit markbook view (`/assessment/marks/[id]`)
 
 **Added & Modified:**

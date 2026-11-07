@@ -373,7 +373,6 @@ export function AssessmentMarkbookViewTable({
               <th className="w-12 px-3 py-2.5 text-center">No.</th>
               <th className="px-3 py-2.5 whitespace-nowrap">Admission No.</th>
               <th className="px-3 py-2.5 min-w-[180px]">Student Full Name</th>
-              <th className="px-3 py-2.5 whitespace-nowrap">Cohort</th>
 
               {assessmentType === 'exam' ? (
                 <>
@@ -396,7 +395,6 @@ export function AssessmentMarkbookViewTable({
                     Total <span className="text-[10px] font-normal text-slate-500">/{maxMark}</span>
                   </th>
                   <th className="px-3 py-2.5 text-center whitespace-nowrap">Grade</th>
-                  <th className="px-3 py-2.5 text-center whitespace-nowrap">Exam Status</th>
                 </>
               ) : (
                 <>
@@ -414,7 +412,7 @@ export function AssessmentMarkbookViewTable({
             {filteredRows.length === 0 ? (
               <tr>
                 <td
-                  colSpan={assessmentType === 'exam' ? 12 : 7}
+                  colSpan={assessmentType === 'exam' ? 10 : 6}
                   className="px-4 py-12 text-center text-xs text-slate-500"
                 >
                   <p className="font-semibold text-slate-700">No candidates match your filter criteria.</p>
@@ -426,8 +424,14 @@ export function AssessmentMarkbookViewTable({
             ) : (
               filteredRows.map((row, idx) => {
                 const m = row.marks;
-                const isAbsent = row.isAbsent;
-                const isCatAbsent = Boolean(m?.catAbsent);
+                // Once marks are submitted/committed, a missing CAT or exam mark means the
+                // candidate missed that sitting and is shown as AB (absent).
+                const isFinalized = marksSubmitted || Boolean(m?.isCommitted);
+                const isAbsent =
+                  row.isAbsent ||
+                  (assessmentType === 'exam' && isFinalized && (m?.exam === null || m?.exam === undefined));
+                const isCatAbsent =
+                  Boolean(m?.catAbsent) || (isFinalized && (m?.cat === null || m?.cat === undefined));
 
                 return (
                   <tr
@@ -449,11 +453,6 @@ export function AssessmentMarkbookViewTable({
                     {/* Full Name */}
                     <td className="px-3 py-2.5 font-medium text-slate-800">
                       {row.fullName}
-                    </td>
-
-                    {/* Cohort */}
-                    <td className="px-3 py-2.5 text-slate-500 whitespace-nowrap">
-                      {row.cohortName}
                     </td>
 
                     {assessmentType === 'exam' ? (
@@ -526,27 +525,6 @@ export function AssessmentMarkbookViewTable({
                             <span className="text-slate-300">—</span>
                           )}
                         </td>
-
-                        {/* Status */}
-                        <td className="px-3 py-2.5 text-center whitespace-nowrap">
-                          {isAbsent ? (
-                            <span className="inline-block rounded bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-700 border border-rose-200">
-                              Exam Absent (AB)
-                            </span>
-                          ) : m?.isCommitted ? (
-                            <span className="inline-block rounded bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-800 border border-emerald-200">
-                              Submitted / Sat
-                            </span>
-                          ) : m?.total !== null && m?.total !== undefined ? (
-                            <span className="inline-block rounded bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800 border border-amber-200">
-                              Draft Saved
-                            </span>
-                          ) : (
-                            <span className="inline-block rounded bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
-                              Expected / Sat
-                            </span>
-                          )}
-                        </td>
                       </>
                     ) : (
                       <>
@@ -602,7 +580,7 @@ export function AssessmentMarkbookViewTable({
           {stats.markedCandidates > 0 ? (
             <tfoot className="border-t-2 border-slate-300 bg-slate-50 font-bold text-slate-800">
               <tr>
-                <td colSpan={4} className="px-3.5 py-3 text-right uppercase tracking-wider text-[11px] text-slate-600 font-extrabold">
+                <td colSpan={3} className="px-3.5 py-3 text-right uppercase tracking-wider text-[11px] text-slate-600 font-extrabold">
                   Class Average ({stats.markedCandidates} candidates):
                 </td>
 
@@ -636,9 +614,6 @@ export function AssessmentMarkbookViewTable({
                           ? 'PASS'
                           : 'REFER'
                         : '—'}
-                    </td>
-                    <td className="px-3 py-3 text-center text-[10px] text-slate-500 font-semibold">
-                      {stats.passRate !== null ? `${stats.passRate}% Passed` : '—'}
                     </td>
                   </>
                 ) : (

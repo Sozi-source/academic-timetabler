@@ -83,6 +83,13 @@ export default async function AssessmentMarkWorkflowPage({
               <BarChart3 className="size-3.5 text-slate-500" />
               <span>Unit Analysis</span>
             </Link>
+            <Link
+              href={`/assessment/reports?view=unit&unitId=${assessment.unit?.id ?? ''}`}
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50"
+            >
+              <FileSpreadsheet className="size-3.5 text-slate-500" />
+              <span>Consolidated Reports</span>
+            </Link>
             <DownloadAssessmentMarkbookButton
               assessmentId={assessment.id}
               unitName={assessment.unit?.name ?? 'Unit Marksheet'}

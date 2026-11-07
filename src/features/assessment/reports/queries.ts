@@ -184,7 +184,10 @@ export async function getActiveAssessmentPeriodReportData(
 
     let total = num(result?.total_mark) ?? num(marks.total);
     if (total === null && !isExamAbsent && assignment !== null && presentation !== null && rat !== null && cat1 !== null && exam !== null) {
-      total = calculateOnlineFinalTotal({ assignment, presentation, rat, cat: cat1, exam }, false);
+      const calculated = calculateOnlineFinalTotal({ assignment, presentation, rat, cat: cat1, exam }, false);
+      total = calculated !== null ? Math.round(calculated) : null;
+    } else if (total !== null) {
+      total = Math.round(total);
     }
 
     let grade = typeof result?.grade === 'string' ? result.grade : null;

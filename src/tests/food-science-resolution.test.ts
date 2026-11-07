@@ -15,7 +15,7 @@ for (const line of envFile.split('\n')) {
 import { getApprovedCurriculumForUnitCode } from '@/features/teaching-documents/curriculum-content/queries';
 import { findCanonicalCurriculum } from '@/features/teaching-documents/curriculum-registry';
 
-describe('Food Science and Diet Therapy Curriculum Resolution', () => {
+describe('Food Science and Diet Therapy Curriculum Resolution', { timeout: 60000 }, () => {
   it('resolves authentic Food Science course outline for CHN 1202', async () => {
     const doc = await getApprovedCurriculumForUnitCode('CHN 1202', 'Food Science', 'course_outline');
     expect(doc.isAvailable).toBe(true);

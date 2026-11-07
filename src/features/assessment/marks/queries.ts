@@ -193,15 +193,20 @@ export const getAssessmentCandidateMarks = cache(
 
       let coursework: number | null = asNum(cm?.coursework);
       if (coursework === null && (assignment !== null || presentation !== null || ratCatAverage !== null)) {
-        coursework = (assignment ?? 0) + (presentation ?? 0) + (ratCatAverage ?? 0);
+        coursework = Math.round((assignment ?? 0) + (presentation ?? 0) + (ratCatAverage ?? 0));
+      } else if (coursework !== null) {
+        coursework = Math.round(coursework);
       }
 
       let total: number | null = asNum(res?.total_mark) ?? asNum(cm?.total);
       if (total === null && !isExamAbsent) {
-        total = calculateOnlineFinalTotal(
+        const calculated = calculateOnlineFinalTotal(
           { assignment, presentation, rat, cat, exam },
           isExamAbsent,
         );
+        total = calculated !== null ? Math.round(calculated) : null;
+      } else if (total !== null) {
+        total = Math.round(total);
       }
 
       let grade = res?.grade ?? null;

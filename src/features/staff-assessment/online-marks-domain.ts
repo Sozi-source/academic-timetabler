@@ -223,7 +223,7 @@ export function calculateOnlineFinalTotal(
   const effectiveAssignment = values.assignment ?? 0;
   const effectivePresentation = values.presentation ?? 0;
 
-  return (
+  return Math.round(
     effectiveAssignment +
     effectivePresentation +
     ratCatAverage +

@@ -29,8 +29,7 @@ interface ConsolidatedMarksheetViewerProps {
 
 function formatMark(value: number | null | undefined): string {
   if (value === null || value === undefined) return '—';
-  const rounded = Math.round(value * 10) / 10;
-  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+  return String(Math.round(value));
 }
 
 function getGradeBadgeClass(grade: string | null | undefined): string {
@@ -227,7 +226,7 @@ export function ConsolidatedMarksheetViewer({
         }
       }
 
-      const average = scoredCount > 0 ? Math.round((sumTotal / scoredCount) * 10) / 10 : null;
+      const average = scoredCount > 0 ? Math.round(sumTotal / scoredCount) : null;
       const isComplete = scoredCount === cohortUnits.length;
       let status: 'PASS' | 'REFER' | 'INCOMPLETE' | 'ABSENT' = 'INCOMPLETE';
 
@@ -291,13 +290,13 @@ export function ConsolidatedMarksheetViewer({
 
       return {
         unitId: u.id,
-        mean: count > 0 ? Math.round((sum / count) * 10) / 10 : null,
+        mean: count > 0 ? Math.round(sum / count) : null,
         passRate: count > 0 ? Math.round((pass / count) * 100) : null,
         satCount: count,
       };
     });
 
-    const cohortMean = scoredAvgCount > 0 ? Math.round((sumCohortAvg / scoredAvgCount) * 10) / 10 : null;
+    const cohortMean = scoredAvgCount > 0 ? Math.round(sumCohortAvg / scoredAvgCount) : null;
     const overallPassRate = students.length > 0 ? Math.round((passedAllCount / students.length) * 100) : null;
 
     return {
@@ -410,7 +409,7 @@ export function ConsolidatedMarksheetViewer({
       }
     }
 
-    const meanTotal = countTotal > 0 ? Math.round((sumTotal / countTotal) * 10) / 10 : null;
+    const meanTotal = countTotal > 0 ? Math.round(sumTotal / countTotal) : null;
     const passedCount = distinction + credit + pass;
     const passRate = countTotal > 0 ? Math.round((passedCount / countTotal) * 100) : null;
 
@@ -422,11 +421,11 @@ export function ConsolidatedMarksheetViewer({
         satCount: allUnitRows.length - absent,
         absentCount: absent,
         markedCount: countTotal,
-        meanAssignment: countAssign > 0 ? Math.round((sumAssign / countAssign) * 10) / 10 : null,
-        meanPresentation: countPres > 0 ? Math.round((sumPres / countPres) * 10) / 10 : null,
-        meanRat: countRat > 0 ? Math.round((sumRat / countRat) * 10) / 10 : null,
-        meanCat: countCat > 0 ? Math.round((sumCat / countCat) * 10) / 10 : null,
-        meanExam: countExam > 0 ? Math.round((sumExam / countExam) * 10) / 10 : null,
+        meanAssignment: countAssign > 0 ? Math.round(sumAssign / countAssign) : null,
+        meanPresentation: countPres > 0 ? Math.round(sumPres / countPres) : null,
+        meanRat: countRat > 0 ? Math.round(sumRat / countRat) : null,
+        meanCat: countCat > 0 ? Math.round(sumCat / countCat) : null,
+        meanExam: countExam > 0 ? Math.round(sumExam / countExam) : null,
         meanTotal,
         passRate,
         distinction,

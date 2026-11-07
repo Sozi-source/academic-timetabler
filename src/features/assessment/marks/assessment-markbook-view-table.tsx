@@ -22,9 +22,7 @@ interface AssessmentMarkbookViewTableProps {
 
 function formatMark(value: number | null | undefined): string {
   if (value === null || value === undefined) return '—';
-  // Display cleanly: e.g. 12 or 12.5, at most 2 decimal places
-  const rounded = Math.round(value * 100) / 100;
-  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+  return String(Math.round(value));
 }
 
 function getGradeBadgeClass(grade: string | null | undefined): string {
@@ -183,7 +181,7 @@ export function AssessmentMarkbookViewTable({
       }
     }
 
-    const meanTotal = countTotal > 0 ? Math.round((sumTotal / countTotal) * 10) / 10 : null;
+    const meanTotal = countTotal > 0 ? Math.round(sumTotal / countTotal) : null;
     const passCountTotal = distinctionCount + creditCount + passCount;
     const passRate = countTotal > 0 ? Math.round((passCountTotal / countTotal) * 100) : null;
 
@@ -192,11 +190,11 @@ export function AssessmentMarkbookViewTable({
       satCandidates: satRows.length,
       absentCandidates: absentCount,
       markedCandidates: markedSatRows.length,
-      meanAssignment: countAssignment > 0 ? Math.round((sumAssignment / countAssignment) * 10) / 10 : null,
-      meanPresentation: countPresentation > 0 ? Math.round((sumPresentation / countPresentation) * 10) / 10 : null,
-      meanRat: countRat > 0 ? Math.round((sumRat / countRat) * 10) / 10 : null,
-      meanCat: countCat > 0 ? Math.round((sumCat / countCat) * 10) / 10 : null,
-      meanExam: countExam > 0 ? Math.round((sumExam / countExam) * 10) / 10 : null,
+      meanAssignment: countAssignment > 0 ? Math.round(sumAssignment / countAssignment) : null,
+      meanPresentation: countPresentation > 0 ? Math.round(sumPresentation / countPresentation) : null,
+      meanRat: countRat > 0 ? Math.round(sumRat / countRat) : null,
+      meanCat: countCat > 0 ? Math.round(sumCat / countCat) : null,
+      meanExam: countExam > 0 ? Math.round(sumExam / countExam) : null,
       meanTotal,
       passRate,
       passCountTotal,

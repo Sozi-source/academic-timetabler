@@ -1107,7 +1107,7 @@ export function OnlineMarksEditor({
                         <span>{row.student.admissionNumber}</span>
                         {row.total !== null ? (
                           <span className="font-bold text-[#0b4f4a]">
-                            · {row.total.toFixed(1)}/100
+                            · {Math.round(row.total)}/100
                           </span>
                         ) : null}
                       </div>
@@ -1291,14 +1291,14 @@ export function OnlineMarksEditor({
                     <td className="px-2 py-2.5 text-center text-xs font-bold text-slate-800">
                       {row.ratCatAverage === null
                         ? '—'
-                        : row.ratCatAverage.toFixed(2)}
+                        : Math.round(row.ratCatAverage)}
                     </td>
                     <td className="px-3 py-2.5 text-center text-sm font-extrabold text-slate-950">
                       {row.isAbsent
                         ? 'AB'
                         : row.total === null
                           ? '—'
-                          : row.total.toFixed(2)}
+                          : Math.round(row.total)}
                     </td>
                   </tr>
                 ))

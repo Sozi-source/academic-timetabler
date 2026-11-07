@@ -1,3 +1,24 @@
+### 2026-11-08: Round off all assessment marks, totals, and averages to whole numbers only
+
+**Modified:**
+- `src/features/assessment/marks/assessment-markbook-view-table.tsx`:
+  - Updated `formatMark` to round all displayed candidate marks, component marks, and totals to integers using `Math.round(value)`.
+  - Updated class average telemetry calculations (`meanAssignment`, `meanPresentation`, `meanRat`, `meanCat`, `meanExam`, `meanTotal`) in both the table footer and performance summary banner to return clean whole numbers.
+- `src/features/assessment/reports/consolidated-marksheet-viewer.tsx`:
+  - Updated `formatMark` in both Broadsheet Matrix and Consolidated Marksheet view modes to round all marks and totals to whole numbers.
+  - Updated cohort mean, student average, and unit mean calculations to return whole numbers.
+  - Ensures exported CSV files for both Broadsheets and Consolidated Marksheets output whole numbers only.
+- `src/features/staff-assessment/online-marks-editor.tsx`:
+  - Rounded `ratCatAverage` and `total` to whole numbers in both the desktop mark table and mobile candidate cards (`· {Math.round(row.total)}/100`).
+- `src/features/staff-assessment/online-marks-domain.ts`:
+  - Updated `calculateOnlineFinalTotal` to round its return value with `Math.round(...)`, ensuring computed online totals are strictly whole numbers.
+- `src/features/assessment/marks/queries.ts` & `src/features/assessment/reports/queries.ts`:
+  - Enforced integer rounding on `coursework`, `ratCatAverage`, and `total` marks when aggregating results and drafts.
+- `src/features/assessment/reports/docx.ts`:
+  - Rounded mean totals and failed student totals in Word document export reports to whole numbers.
+- `src/tests/food-science-resolution.test.ts`:
+  - Added explicit test suite timeout to ensure deterministic test runs.
+
 ### 2026-11-08: Fix responsiveness & title crushing in Assessment Control Center header
 
 **Modified:**

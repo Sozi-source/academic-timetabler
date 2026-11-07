@@ -502,7 +502,7 @@ function examPerformance(data: AssessmentPeriodReportData) {
       .map((row) => row.total)
       .filter((value): value is number => typeof value === 'number');
 
-    const mean = totals.length ? totals.reduce((sum, value) => sum + value, 0) / totals.length : null;
+    const mean = totals.length ? Math.round(totals.reduce((sum, value) => sum + value, 0) / totals.length) : null;
 
     rows.push(
       new TableRow({
@@ -517,7 +517,7 @@ function examPerformance(data: AssessmentPeriodReportData) {
           cell(totals.filter((value) => value >= 50 && value < 65).length),
           cell(totals.filter((value) => value >= 40 && value < 50).length),
           cell(totals.filter((value) => value < 40).length),
-          cell(mean === null ? '—' : mean.toFixed(1)),
+          cell(mean === null ? '—' : String(mean)),
           cell(mean === null ? '—' : gradeFor(mean)),
         ],
       }),
@@ -643,7 +643,7 @@ function failedStudents(data: AssessmentPeriodReportData) {
           cell(row.fullName),
           cell(row.admissionNumber),
           cell(row.unitName),
-          cell(row.total?.toFixed(1) ?? ''),
+          cell(row.total !== null && row.total !== undefined ? String(Math.round(row.total)) : ''),
           cell(recommendation),
         ],
       }),

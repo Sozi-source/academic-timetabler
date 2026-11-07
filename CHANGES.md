@@ -1,3 +1,13 @@
+### 2026-11-08: Standardized Status Pills across Assessment Control Center
+
+**Modified:**
+- `src/features/assessment/assessment-control-center.tsx`:
+  - Created a unified `StatusPill` component providing standard height (`h-6`), padding (`px-2.5`), typography (`text-[11px] font-semibold`), rounded-full border styling, and strict `whitespace-nowrap` across all milestone and workflow status columns.
+  - Eliminated text wrapping inside status pills (such as `"In \n progress"` wrapping into two lines).
+  - Standardized casing to Title Case across all statuses: `In Progress`, `Not Started`, `Submitted`, `Closed`, `Open`, `Finalised`.
+  - Added consistent leading status dots and icons (`check`, `clock`, `lock`, `dot`) with `shrink-0` to guarantee identical vertical alignment and horizontal spacing.
+  - Added `whitespace-nowrap` to table headers and table data cells for CAT Milestone, Final Exam, and Status columns.
+
 ### 2026-11-08: Unified, executive-grade Assessment Deliverables Tracker
 
 **Modified:**

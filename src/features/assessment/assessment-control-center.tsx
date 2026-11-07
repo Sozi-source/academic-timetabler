@@ -33,6 +33,56 @@ import type {
   AssessmentSubmissionTrackerRow,
 } from './control-center-queries';
 
+type StatusPillVariant = 'success' | 'warning' | 'neutral' | 'purple' | 'closed';
+
+function StatusPill({
+  label,
+  variant,
+  icon = 'dot',
+  subtext,
+}: {
+  label: string;
+  variant: StatusPillVariant;
+  icon?: 'check' | 'clock' | 'lock' | 'dot';
+  subtext?: string | null;
+}) {
+  const styles = {
+    success: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+    warning: 'bg-amber-50 text-amber-800 border-amber-200',
+    neutral: 'bg-slate-100 text-slate-600 border-slate-200',
+    purple: 'bg-purple-50 text-purple-700 border-purple-200',
+    closed: 'bg-slate-100 text-slate-500 border-slate-200',
+  }[variant];
+
+  const dotStyles = {
+    success: 'bg-emerald-500',
+    warning: 'bg-amber-500',
+    neutral: 'bg-slate-400',
+    purple: 'bg-purple-500',
+    closed: 'bg-slate-400',
+  }[variant];
+
+  return (
+    <div className="inline-flex flex-col items-start whitespace-nowrap">
+      <span
+        className={`inline-flex h-6 items-center gap-1.5 rounded-full border px-2.5 text-[11px] font-semibold whitespace-nowrap shadow-2xs ${styles}`}
+      >
+        {icon === 'check' ? (
+          <CheckCircle2 className="size-3 shrink-0 text-emerald-600" aria-hidden="true" />
+        ) : icon === 'clock' ? (
+          <Clock className="size-3 shrink-0 text-amber-600" aria-hidden="true" />
+        ) : icon === 'lock' ? (
+          <Lock className="size-3 shrink-0 text-slate-400" aria-hidden="true" />
+        ) : (
+          <span className={`size-1.5 shrink-0 rounded-full ${dotStyles}`} aria-hidden="true" />
+        )}
+        <span>{label}</span>
+      </span>
+      {subtext ? <span className="mt-0.5 text-[10px] text-slate-400">{subtext}</span> : null}
+    </div>
+  );
+}
+
 interface UnifiedUnitDeliverable {
   key: string;
   unitId: string;
@@ -43,15 +93,15 @@ interface UnifiedUnitDeliverable {
   trainerNames: string[];
   registrationCount: number;
   items: AssessmentControlCenterItem[];
-  catStatus: 'Submitted' | 'In progress' | 'Not started';
+  catStatus: 'Submitted' | 'In Progress' | 'Not Started';
   catSubmittedCount: number;
   catSubmittedAt: string | null;
   catSubmittedBy: string | null;
-  examStatus: 'Submitted' | 'In progress' | 'Closed' | 'Not started';
+  examStatus: 'Submitted' | 'In Progress' | 'Closed' | 'Not Started';
   examSubmittedCount: number;
   examSubmittedAt: string | null;
   examSubmittedBy: string | null;
-  workflowStatus: 'Finalised' | 'Submitted' | 'In progress' | 'Open';
+  workflowStatus: 'Finalised' | 'Submitted' | 'In Progress' | 'Open';
   isComplete: boolean;
   needsAttention: boolean;
 }
@@ -170,19 +220,19 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
       }
 
       const totalItems = group.items.length;
-      let catStatus: 'Submitted' | 'In progress' | 'Not started' = 'Not started';
+      let catStatus: 'Submitted' | 'In Progress' | 'Not Started' = 'Not Started';
       if (catSubmittedCount > 0 && catSubmittedCount === totalItems) {
         catStatus = 'Submitted';
       } else if (catSubmittedCount > 0 || catInProgressCount > 0) {
-        catStatus = 'In progress';
+        catStatus = 'In Progress';
       }
 
       const allExamClosed = group.items.every((it) => !it.trainerExamEntryOpen);
-      let examStatus: 'Submitted' | 'In progress' | 'Closed' | 'Not started' = 'Not started';
+      let examStatus: 'Submitted' | 'In Progress' | 'Closed' | 'Not Started' = 'Not Started';
       if (examSubmittedCount > 0 && examSubmittedCount === totalItems) {
         examStatus = 'Submitted';
       } else if (examSubmittedCount > 0 || examInProgressCount > 0) {
-        examStatus = 'In progress';
+        examStatus = 'In Progress';
       } else if (allExamClosed) {
         examStatus = 'Closed';
       }
@@ -191,17 +241,17 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
       const allSubmitted = group.items.length > 0 && (allFinalised || (catSubmittedCount === totalItems && examSubmittedCount === totalItems));
       const hasAnyProgress = catSubmittedCount > 0 || catInProgressCount > 0 || examSubmittedCount > 0 || examInProgressCount > 0;
 
-      let workflowStatus: 'Finalised' | 'Submitted' | 'In progress' | 'Open' = 'Open';
+      let workflowStatus: 'Finalised' | 'Submitted' | 'In Progress' | 'Open' = 'Open';
       if (allFinalised) {
         workflowStatus = 'Finalised';
       } else if (allSubmitted) {
         workflowStatus = 'Submitted';
       } else if (hasAnyProgress) {
-        workflowStatus = 'In progress';
+        workflowStatus = 'In Progress';
       }
 
       const isComplete = allFinalised || allSubmitted;
-      const needsAttention = !isComplete && (catStatus !== 'Submitted' || examStatus === 'In progress');
+      const needsAttention = !isComplete && (catStatus !== 'Submitted' || examStatus === 'In Progress');
 
       return {
         key: groupKey,
@@ -248,7 +298,7 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
       if (filterStatus === 'cat-submitted' && unit.catStatus !== 'Submitted') return false;
       if (filterStatus === 'exam-submitted' && unit.examStatus !== 'Submitted') return false;
       if (filterStatus === 'completed' && !unit.isComplete) return false;
-      if (filterStatus === 'not-started' && (unit.catStatus !== 'Not started' || unit.examStatus === 'Submitted')) return false;
+      if (filterStatus === 'not-started' && (unit.catStatus !== 'Not Started' || unit.examStatus === 'Submitted')) return false;
 
       if (!query) return true;
       const cohortStr = unit.cohortNames.join(' ').toLocaleLowerCase();
@@ -446,19 +496,25 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                       <p className="text-sm font-semibold text-slate-900">{unit.unitName}</p>
                       <p className="font-mono text-xs font-medium text-slate-500">{unit.unitCode}</p>
                     </div>
-                    <span
-                      className={`inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[10px] font-semibold border ${
+                    <StatusPill
+                      label={unit.workflowStatus}
+                      variant={
                         unit.workflowStatus === 'Finalised'
-                          ? 'bg-purple-50 text-purple-700 border-purple-200'
+                          ? 'purple'
                           : unit.workflowStatus === 'Submitted'
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                            : unit.workflowStatus === 'In progress'
-                              ? 'bg-amber-50 text-amber-700 border-amber-200'
-                              : 'bg-slate-100 text-slate-600 border-slate-200'
-                      }`}
-                    >
-                      {unit.workflowStatus}
-                    </span>
+                            ? 'success'
+                            : unit.workflowStatus === 'In Progress'
+                              ? 'warning'
+                              : 'neutral'
+                      }
+                      icon={
+                        unit.workflowStatus === 'Finalised' || unit.workflowStatus === 'Submitted'
+                          ? 'check'
+                          : unit.workflowStatus === 'In Progress'
+                            ? 'clock'
+                            : 'dot'
+                      }
+                    />
                   </div>
 
                   {/* Cohorts & Trainer */}
@@ -483,15 +539,15 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">CAT Milestone</span>
                       <div className="mt-1">
                         {unit.catStatus === 'Submitted' ? (
-                          <span className="inline-flex items-center gap-1 font-semibold text-emerald-700">
-                            <CheckCircle2 className="size-3 text-emerald-600" /> Submitted
-                          </span>
-                        ) : unit.catStatus === 'In progress' ? (
-                          <span className="inline-flex items-center gap-1 font-semibold text-amber-700">
-                            <Clock className="size-3 text-amber-600" /> In Progress
-                          </span>
+                          <StatusPill label="Submitted" variant="success" icon="check" />
+                        ) : unit.catStatus === 'In Progress' ? (
+                          <StatusPill
+                            label={unit.catSubmittedCount > 0 ? `${unit.catSubmittedCount}/${unit.items.length} Submitted` : 'In Progress'}
+                            variant="warning"
+                            icon="clock"
+                          />
                         ) : (
-                          <span className="font-medium text-slate-400">Not started</span>
+                          <StatusPill label="Not Started" variant="neutral" icon="dot" />
                         )}
                       </div>
                     </div>
@@ -499,19 +555,13 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Final Exam</span>
                       <div className="mt-1">
                         {unit.examStatus === 'Submitted' ? (
-                          <span className="inline-flex items-center gap-1 font-semibold text-emerald-700">
-                            <CheckCircle2 className="size-3 text-emerald-600" /> Submitted
-                          </span>
-                        ) : unit.examStatus === 'In progress' ? (
-                          <span className="inline-flex items-center gap-1 font-semibold text-amber-700">
-                            <Clock className="size-3 text-amber-600" /> In Progress
-                          </span>
+                          <StatusPill label="Submitted" variant="success" icon="check" />
+                        ) : unit.examStatus === 'In Progress' ? (
+                          <StatusPill label="In Progress" variant="warning" icon="clock" />
                         ) : unit.examStatus === 'Closed' ? (
-                          <span className="inline-flex items-center gap-1 font-medium text-slate-500">
-                            <Lock className="size-3 text-slate-400" /> Closed
-                          </span>
+                          <StatusPill label="Closed" variant="closed" icon="lock" />
                         ) : (
-                          <span className="font-medium text-slate-400">Not started</span>
+                          <StatusPill label="Not Started" variant="neutral" icon="dot" />
                         )}
                       </div>
                     </div>
@@ -548,9 +598,9 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                     <th className="px-3 py-3">Cohorts</th>
                     <th className="px-3 py-3">Lead trainer</th>
                     <th className="px-3 py-3 text-center">Candidates</th>
-                    <th className="px-3 py-3">CAT milestone</th>
-                    <th className="px-3 py-3">Final exam</th>
-                    <th className="px-3 py-3">Status</th>
+                    <th className="px-3 py-3 whitespace-nowrap">CAT milestone</th>
+                    <th className="px-3 py-3 whitespace-nowrap">Final exam</th>
+                    <th className="px-3 py-3 whitespace-nowrap">Status</th>
                     <th className="px-4 py-3 text-right">Action</th>
                   </tr>
                 </thead>
@@ -605,84 +655,76 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                       </td>
 
                       {/* CAT Milestone */}
-                      <td className="px-3 py-3">
+                      <td className="px-3 py-3 whitespace-nowrap">
                         {unit.catStatus === 'Submitted' ? (
-                          <div>
-                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-200">
-                              <CheckCircle2 className="size-3 text-emerald-600" />
-                              Submitted
-                            </span>
-                            {unit.catSubmittedAt ? (
-                              <p className="mt-0.5 text-[10px] text-slate-400">
-                                {new Date(unit.catSubmittedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                {unit.catSubmittedBy ? ` · ${unit.catSubmittedBy}` : ''}
-                              </p>
-                            ) : null}
-                          </div>
-                        ) : unit.catStatus === 'In progress' ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-700 border border-amber-200">
-                            <Clock className="size-3 text-amber-600" />
-                            {unit.catSubmittedCount > 0
-                              ? `${unit.catSubmittedCount}/${unit.items.length} Submitted`
-                              : 'In Progress'}
-                          </span>
+                          <StatusPill
+                            label="Submitted"
+                            variant="success"
+                            icon="check"
+                            subtext={
+                              unit.catSubmittedAt
+                                ? `${new Date(unit.catSubmittedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}${unit.catSubmittedBy ? ` · ${unit.catSubmittedBy}` : ''}`
+                                : null
+                            }
+                          />
+                        ) : unit.catStatus === 'In Progress' ? (
+                          <StatusPill
+                            label={
+                              unit.catSubmittedCount > 0
+                                ? `${unit.catSubmittedCount}/${unit.items.length} Submitted`
+                                : 'In Progress'
+                            }
+                            variant="warning"
+                            icon="clock"
+                          />
                         ) : (
-                          <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-500 border border-slate-200">
-                            Not started
-                          </span>
+                          <StatusPill label="Not Started" variant="neutral" icon="dot" />
                         )}
                       </td>
 
                       {/* Final Exam Milestone */}
-                      <td className="px-3 py-3">
+                      <td className="px-3 py-3 whitespace-nowrap">
                         {unit.examStatus === 'Submitted' ? (
-                          <div>
-                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-200">
-                              <CheckCircle2 className="size-3 text-emerald-600" />
-                              Submitted
-                            </span>
-                            {unit.examSubmittedAt ? (
-                              <p className="mt-0.5 text-[10px] text-slate-400">
-                                {new Date(unit.examSubmittedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                {unit.examSubmittedBy ? ` · ${unit.examSubmittedBy}` : ''}
-                              </p>
-                            ) : null}
-                          </div>
-                        ) : unit.examStatus === 'In progress' ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-700 border border-amber-200">
-                            <Clock className="size-3 text-amber-600" />
-                            In Progress
-                          </span>
+                          <StatusPill
+                            label="Submitted"
+                            variant="success"
+                            icon="check"
+                            subtext={
+                              unit.examSubmittedAt
+                                ? `${new Date(unit.examSubmittedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}${unit.examSubmittedBy ? ` · ${unit.examSubmittedBy}` : ''}`
+                                : null
+                            }
+                          />
+                        ) : unit.examStatus === 'In Progress' ? (
+                          <StatusPill label="In Progress" variant="warning" icon="clock" />
                         ) : unit.examStatus === 'Closed' ? (
-                          <span
-                            className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500 border border-slate-200"
-                            title="Final exam entry window is closed by HOD"
-                          >
-                            <Lock className="size-3 text-slate-400" />
-                            Closed
-                          </span>
+                          <StatusPill label="Closed" variant="closed" icon="lock" />
                         ) : (
-                          <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-500 border border-slate-200">
-                            Not started
-                          </span>
+                          <StatusPill label="Not Started" variant="neutral" icon="dot" />
                         )}
                       </td>
 
                       {/* Workflow Status */}
-                      <td className="px-3 py-3">
-                        <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold border ${
+                      <td className="px-3 py-3 whitespace-nowrap">
+                        <StatusPill
+                          label={unit.workflowStatus}
+                          variant={
                             unit.workflowStatus === 'Finalised'
-                              ? 'bg-purple-50 text-purple-700 border-purple-200'
+                              ? 'purple'
                               : unit.workflowStatus === 'Submitted'
-                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                : unit.workflowStatus === 'In progress'
-                                  ? 'bg-amber-50 text-amber-700 border-amber-200'
-                                  : 'bg-slate-100 text-slate-600 border-slate-200'
-                          }`}
-                        >
-                          {unit.workflowStatus}
-                        </span>
+                                ? 'success'
+                                : unit.workflowStatus === 'In Progress'
+                                  ? 'warning'
+                                  : 'neutral'
+                          }
+                          icon={
+                            unit.workflowStatus === 'Finalised' || unit.workflowStatus === 'Submitted'
+                              ? 'check'
+                              : unit.workflowStatus === 'In Progress'
+                                ? 'clock'
+                                : 'dot'
+                          }
+                        />
                       </td>
 
                       {/* Action */}

@@ -264,6 +264,68 @@ export function AssessmentMarkbookViewTable({
         </div>
       ) : null}
 
+      {/* Sharing Cohorts Interactive Tabs */}
+      {cohorts.length > 1 ? (
+        <div
+          role="tablist"
+          aria-label="Filter candidates by sharing cohort"
+          className="flex flex-wrap items-center gap-1.5 rounded-xl border border-slate-300 bg-slate-100/80 p-1.5 shadow-2xs print:hidden"
+        >
+          <span className="flex items-center gap-1.5 px-2 text-[11px] font-black uppercase tracking-wider text-slate-500">
+            <Users className="size-3.5 text-slate-400" />
+            Sharing Cohorts:
+          </span>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={selectedCohort === 'all'}
+            onClick={() => setSelectedCohort('all')}
+            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all shadow-2xs ${
+              selectedCohort === 'all'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:text-slate-900'
+            }`}
+          >
+            <span>All Cohorts</span>
+            <span
+              className={`rounded-full px-1.5 py-0.2 text-[10px] font-extrabold ${
+                selectedCohort === 'all' ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'
+              }`}
+            >
+              {rows.length}
+            </span>
+          </button>
+
+          {cohorts.map((c) => {
+            const count = rows.filter((r) => r.cohortId === c.id).length;
+            const isSelected = selectedCohort === c.id;
+            return (
+              <button
+                key={c.id}
+                type="button"
+                role="tab"
+                aria-selected={isSelected}
+                onClick={() => setSelectedCohort(c.id)}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all shadow-2xs ${
+                  isSelected
+                    ? 'bg-slate-900 text-white shadow-xs'
+                    : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:text-slate-900'
+                }`}
+              >
+                <span>{c.name}</span>
+                <span
+                  className={`rounded-full px-1.5 py-0.2 text-[10px] font-extrabold ${
+                    isSelected ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'
+                  }`}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+
       {/* Filter and Action Bar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
         <div className="flex flex-1 flex-wrap items-center gap-2.5">

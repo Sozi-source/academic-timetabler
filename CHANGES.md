@@ -1,3 +1,20 @@
+### 2026-11-07: Consolidate shared units into single line with interactive cohort tabs
+
+**Modified:**
+- `src/features/assessment/assessment-control-center.tsx`:
+  - **Single Unit Line per Deliverable**: Re-grouped submissions by `(assessmentId, component)` so units taken by multiple cohorts (such as Biochemistry II taken by both `DHN JAN/MAR 25` and `DHN MAY 24`) appear as exactly **one row** instead of repeating duplicate rows.
+  - **Interactive Cohort Tabs in Tracker Table**: Added tabbed cohort selector (`[ ● DHN JAN/MAR 25 ]`, `[ ● DHN MAY 24 ]`) with status indicators (emerald for submitted, amber for in progress, slate for not started). Clicking a cohort instantly switches the displayed status, submitter name, and timestamp.
+  - **Consolidated Status Badging**: Displayed overall completion badges (e.g. `Submitted · All 2 Cohorts`) when all cohorts have completed their submissions.
+- `src/features/assessment/marks/assessment-markbook-view-table.tsx`:
+  - Added an interactive sharing cohort tab bar (`[ All Cohorts (12) ]`, `[ DHN JAN/MAR 25 (10) ]`, `[ DHN MAY 24 (2) ]`) directly above the marksheet table and filter toolbar when multiple cohorts share the unit.
+  - Synchronized selection with table filtering, candidate totals, and performance summary statistics.
+- `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`:
+  - Computed distinct sharing cohorts and surfaced them in the page header description metadata line (`DHN 2304 · September-December 2026 · Sharing Cohorts: DHN JAN/MAR 25, DHN MAY 24 · Unit Markbook`).
+  - Corrected character encoding glitch in component unlock section.
+- `src/features/assessment/reports/consolidated-marksheet-viewer.tsx`:
+  - Added interactive sharing cohorts tabs for multi-cohort units in View Mode 2 (`Per Unit Consolidated Marksheet`), allowing instant filtering between all enrolled candidates or individual sharing cohorts with candidate counts.
+- No schema changes; no manual follow-up required.
+
 ### 2026-11-07: Clarify multi-cohort entries in assessment submission tracker
 
 **Modified:**

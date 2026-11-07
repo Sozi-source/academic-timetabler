@@ -41,6 +41,15 @@ export default async function AssessmentMarkWorkflowPage({
   const unitCode = assessment.unit?.code;
   const periodName = assessment.academic_period?.name ?? 'Academic period';
 
+  // Distinct cohorts sharing this unit
+  const distinctCohorts = Array.from(
+    new Map(
+      population
+        .filter((r) => r.cohort?.id)
+        .map((r) => [r.cohort!.id, r.cohort!.name || r.cohort!.code || 'Unnamed Cohort'])
+    ).values()
+  );
+
   return (
     <div className="space-y-5 pb-12">
       {/* Header */}
@@ -58,6 +67,16 @@ export default async function AssessmentMarkWorkflowPage({
             <span className="font-medium text-slate-600">
               {periodName}
             </span>
+            {distinctCohorts.length > 1 ? (
+              <>
+                <span className="text-slate-300">·</span>
+                <span className="inline-flex items-center gap-1 font-medium text-slate-600">
+                  <UsersRound className="size-3 text-slate-400" />
+                  <span>Sharing Cohorts:</span>
+                  <span className="font-bold text-slate-800">{distinctCohorts.join(', ')}</span>
+                </span>
+              </>
+            ) : null}
             <span className="text-slate-300">·</span>
             <span className="text-slate-500">Unit Markbook</span>
           </div>
@@ -141,7 +160,7 @@ export default async function AssessmentMarkWorkflowPage({
                 <li key={submission.id} className="flex flex-wrap items-center justify-between gap-3 px-3 py-2.5">
                   <p className="text-xs text-text-primary">
                     <span className="font-semibold">{componentLabel}</span>
-                    <span className="text-text-muted"> Â· {cohortLabel}</span>
+                    <span className="text-text-muted"> · {cohortLabel}</span>
                   </p>
                   <form action={unlockAssessmentMarkComponentAction}>
                     <input type="hidden" name="assessmentId" value={assessment.id} />

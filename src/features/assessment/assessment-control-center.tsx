@@ -17,17 +17,63 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
   const [submissionComponent, setSubmissionComponent] = useState('all');
   const [submissionStatus, setSubmissionStatus] = useState('all');
   const [needsAttention, setNeedsAttention] = useState(false);
+  const [selectedCohortTabs, setSelectedCohortTabs] = useState<Record<string, string>>({});
 
-  const submissionRows = useMemo(() => {
+  // Group submissions by unit and component so multi-cohort units appear as ONE unit line with cohort tabs
+  const groupedSubmissions = useMemo(() => {
+    const groupsMap = new Map<string, {
+      key: string;
+      assessmentId: string;
+      unit: string;
+      unitCode: string;
+      component: string;
+      cohorts: Array<{
+        cohortName: string;
+        status: 'Submitted' | 'In progress' | 'Not started';
+        submittedAt: string | null;
+        submittedBy: string | null;
+      }>;
+    }>();
+
+    for (const row of data.submissions) {
+      const key = `${row.assessmentId}:${row.component}`;
+      let group = groupsMap.get(key);
+      if (!group) {
+        group = {
+          key,
+          assessmentId: row.assessmentId,
+          unit: row.unit,
+          unitCode: row.unitCode,
+          component: row.component,
+          cohorts: [],
+        };
+        groupsMap.set(key, group);
+      }
+      group.cohorts.push({
+        cohortName: row.cohort,
+        status: row.status,
+        submittedAt: row.submittedAt,
+        submittedBy: row.submittedBy,
+      });
+    }
+
+    return Array.from(groupsMap.values());
+  }, [data.submissions]);
+
+  const filteredGroupedSubmissions = useMemo(() => {
     const query = submissionSearch.trim().toLocaleLowerCase();
-    return data.submissions.filter((row) => {
-      if (submissionComponent !== 'all' && row.component !== submissionComponent) return false;
-      if (submissionStatus !== 'all' && row.status !== submissionStatus) return false;
-      if (needsAttention && row.status === 'Submitted') return false;
+    return groupedSubmissions.filter((group) => {
+      if (submissionComponent !== 'all' && group.component !== submissionComponent) return false;
+      if (submissionStatus !== 'all' && !group.cohorts.some((c) => c.status === submissionStatus)) return false;
+      if (needsAttention && !group.cohorts.some((c) => c.status !== 'Submitted')) return false;
       if (!query) return true;
-      return `${row.unit} ${row.unitCode} ${row.cohort} ${row.component} ${row.submittedBy ?? ''}`.toLocaleLowerCase().includes(query);
+      const cohortNames = group.cohorts.map((c) => c.cohortName).join(' ');
+      const submitters = group.cohorts.map((c) => c.submittedBy ?? '').join(' ');
+      return `${group.unit} ${group.unitCode} ${cohortNames} ${group.component} ${submitters}`
+        .toLocaleLowerCase()
+        .includes(query);
     });
-  }, [data.submissions, needsAttention, submissionComponent, submissionSearch, submissionStatus]);
+  }, [groupedSubmissions, needsAttention, submissionComponent, submissionSearch, submissionStatus]);
 
   const unitGroups = useMemo(() => {
     const byUnit = new Map<string, {
@@ -166,7 +212,7 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
           <div>
             <h2 className="text-sm font-semibold text-slate-700">Submission tracker</h2>
-            <p className="mt-0.5 text-xs text-slate-500">{submissionRows.length} components shown</p>
+            <p className="mt-0.5 text-xs text-slate-500">{filteredGroupedSubmissions.length} unit deliverables tracked</p>
           </div>
           <button type="button" onClick={() => setNeedsAttention((current) => !current)} aria-pressed={needsAttention}
             className={`h-8 rounded-lg border px-3 text-xs font-medium ${needsAttention ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-border bg-surface text-slate-600 hover:bg-surface-subtle'}`}>
@@ -186,28 +232,92 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
             <option value="all">All statuses</option>{['Submitted', 'In progress', 'Not started'].map((value) => <option key={value}>{value}</option>)}
           </select>
         </div>
-        {submissionRows.length === 0 ? <p className="px-4 py-8 text-center text-xs text-slate-500">No submissions match these filters.</p> : (
+        {filteredGroupedSubmissions.length === 0 ? <p className="px-4 py-8 text-center text-xs text-slate-500">No submissions match these filters.</p> : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[680px] text-left text-xs">
+            <table className="w-full min-w-[720px] text-left text-xs">
               <thead className="bg-surface-subtle text-[10px] font-medium uppercase tracking-wide text-slate-500"><tr>
-                <th className="px-4 py-2.5">Unit / cohort</th><th className="px-3 py-2.5">Component</th><th className="px-3 py-2.5">Status</th><th className="px-3 py-2.5">Submitted by</th><th className="px-3 py-2.5">Submitted</th><th className="px-4 py-2.5 text-right"> </th>
+                <th className="px-4 py-2.5">Unit / Sharing cohorts</th><th className="px-3 py-2.5">Component</th><th className="px-3 py-2.5">Status</th><th className="px-3 py-2.5">Submitted by</th><th className="px-3 py-2.5">Submitted</th><th className="px-4 py-2.5 text-right"> </th>
               </tr></thead>
-              <tbody className="divide-y divide-border">{submissionRows.map((row) => <tr key={row.id} className="hover:bg-surface-subtle/60">
-                <td className="px-4 py-2.5">
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="font-semibold text-slate-800">{row.unit}</span>
-                    <span className="inline-flex items-center rounded-md bg-sky-50 px-2 py-0.5 text-[10px] font-semibold text-sky-800 border border-sky-200/80 shadow-2xs">
-                      {row.cohort}
-                    </span>
-                  </div>
-                  <span className="text-[10px] font-mono text-slate-400">{row.unitCode}</span>
-                </td>
-                <td className="px-3 py-2.5 text-slate-600">{row.component}</td>
-                <td className="px-3 py-2.5"><span className={`rounded-full px-2 py-1 text-[10px] font-medium ${row.status === 'Submitted' ? 'bg-emerald-50 text-emerald-700' : row.status === 'In progress' ? 'bg-amber-50 text-amber-800' : 'bg-slate-100 text-slate-600'}`}>{row.status}</span></td>
-                <td className="px-3 py-2.5 text-slate-600">{row.submittedBy ?? '—'}</td>
-                <td className="px-3 py-2.5 text-slate-600">{row.submittedAt ? new Date(row.submittedAt).toLocaleString() : '—'}</td>
-                <td className="px-4 py-2.5 text-right"><Link href={`/assessment/marks/${row.assessmentId}`} className="font-medium text-primary hover:underline">Open</Link></td>
-              </tr>)}</tbody>
+              <tbody className="divide-y divide-border">
+                {filteredGroupedSubmissions.map((group) => {
+                  const activeCohort = group.cohorts.find((c) => c.cohortName === selectedCohortTabs[group.key]) ?? group.cohorts[0];
+                  const allSubmitted = group.cohorts.length > 1 && group.cohorts.every((c) => c.status === 'Submitted');
+
+                  return (
+                    <tr key={group.key} className="hover:bg-surface-subtle/60">
+                      <td className="px-4 py-2.5">
+                        <div className="flex flex-wrap items-baseline gap-1.5">
+                          <span className="font-bold text-slate-900">{group.unit}</span>
+                          {group.unitCode ? (
+                            <span className="font-mono text-[11px] font-medium text-slate-400">
+                              ({group.unitCode})
+                            </span>
+                          ) : null}
+                        </div>
+
+                        {/* Sharing Cohort Tabs */}
+                        {group.cohorts.length > 1 ? (
+                          <div className="mt-1.5 flex flex-wrap items-center gap-1" role="tablist" aria-label={`Sharing cohorts for ${group.unit}`}>
+                            <span className="text-[10px] font-bold text-slate-400 mr-1 uppercase tracking-wider">Cohorts:</span>
+                            {group.cohorts.map((c) => {
+                              const isActive = activeCohort.cohortName === c.cohortName;
+                              const isSub = c.status === 'Submitted';
+                              const isInProg = c.status === 'In progress';
+                              return (
+                                <button
+                                  key={c.cohortName}
+                                  type="button"
+                                  role="tab"
+                                  aria-selected={isActive}
+                                  onClick={() => setSelectedCohortTabs((prev) => ({ ...prev, [group.key]: c.cohortName }))}
+                                  className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-bold transition border shadow-2xs ${
+                                    isActive
+                                      ? 'bg-slate-900 text-white border-slate-900'
+                                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900'
+                                  }`}
+                                >
+                                  <span
+                                    className={`size-1.5 rounded-full ${
+                                      isSub ? 'bg-emerald-400' : isInProg ? 'bg-amber-400' : 'bg-slate-300'
+                                    }`}
+                                  />
+                                  <span>{c.cohortName}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div className="mt-0.5">
+                            <span className="inline-flex items-center rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600 border border-slate-200/80">
+                              {group.cohorts[0]?.cohortName || 'All cohorts'}
+                            </span>
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-3 py-2.5 font-bold text-slate-700">{group.component}</td>
+                      <td className="px-3 py-2.5">
+                        <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold border ${
+                          activeCohort.status === 'Submitted'
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                            : activeCohort.status === 'In progress'
+                              ? 'bg-amber-50 text-amber-800 border-amber-200'
+                              : 'bg-slate-100 text-slate-600 border-slate-200'
+                        }`}>
+                          {activeCohort.status}
+                          {allSubmitted ? (
+                            <span className="text-[9px] font-semibold text-emerald-700 font-sans">
+                              · All {group.cohorts.length} Cohorts
+                            </span>
+                          ) : null}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2.5 text-slate-600 font-medium">{activeCohort.submittedBy ?? '—'}</td>
+                      <td className="px-3 py-2.5 text-slate-600">{activeCohort.submittedAt ? new Date(activeCohort.submittedAt).toLocaleString() : '—'}</td>
+                      <td className="px-4 py-2.5 text-right"><Link href={`/assessment/marks/${group.assessmentId}`} className="font-bold text-primary hover:underline">Open</Link></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
             </table>
           </div>
         )}

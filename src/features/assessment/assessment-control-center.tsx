@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ClipboardList, FileSpreadsheet, FileText, GraduationCap, Search, UsersRound } from 'lucide-react';
+import { ArrowLeft, ClipboardList, FileSpreadsheet, FileText, GraduationCap, Lock, Search, UsersRound } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/ui/page-header';
@@ -169,14 +169,6 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
         }
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <AdminDepartmentMarksEntryControl
-              periodId={data.selectedPeriodId}
-              isOpen={data.marksEntryStatus.isOpen}
-              openCount={data.marksEntryStatus.openCount}
-              totalCount={data.marksEntryStatus.totalCount}
-              cat={data.marksEntryStatus.cat}
-              exam={data.marksEntryStatus.exam}
-            />
             <Link
               href="/dashboard"
               className="inline-flex h-8.5 items-center gap-1.5 rounded-lg border border-border bg-surface px-3 text-xs font-medium text-slate-600 shadow-2xs transition hover:bg-surface-subtle"
@@ -194,6 +186,38 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
           </div>
         }
       />
+
+      {/* Department Marks Entry Windows Administration */}
+      <section
+        aria-label="Department marks entry windows"
+        className="flex flex-col gap-3 rounded-xl border border-border bg-surface px-4 py-3 shadow-2xs lg:flex-row lg:items-center lg:justify-between"
+      >
+        <div className="flex items-center gap-2.5">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-teal-700 border border-teal-200/80">
+            <Lock className="size-4" aria-hidden="true" />
+          </span>
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-xs font-bold text-slate-900">Department Marks Entry Windows</h2>
+              <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600 border border-slate-200">
+                {data.summary.totalMarkbooks} unit cohorts
+              </span>
+            </div>
+            <p className="mt-0.5 text-[11px] text-slate-500">
+              Control trainer marks submission windows for Continuous Assessment (CAT) and Final Examinations
+            </p>
+          </div>
+        </div>
+
+        <AdminDepartmentMarksEntryControl
+          periodId={data.selectedPeriodId}
+          isOpen={data.marksEntryStatus.isOpen}
+          openCount={data.marksEntryStatus.openCount}
+          totalCount={data.marksEntryStatus.totalCount}
+          cat={data.marksEntryStatus.cat}
+          exam={data.marksEntryStatus.exam}
+        />
+      </section>
 
       <section aria-label="Assessment summary" className="grid gap-3 sm:grid-cols-3">
         {statCards.map(({ label, value, note, icon: Icon }) => (

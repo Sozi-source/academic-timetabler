@@ -1,3 +1,18 @@
+### 2026-11-08: Fix responsiveness & title crushing in Assessment Control Center header
+
+**Modified:**
+- `src/components/ui/page-header.tsx`:
+  - Upgraded header row layout from rigid `md:flex-row md:items-center` to responsive `md:flex-row md:flex-wrap lg:flex-nowrap md:items-center md:justify-between`.
+  - Added `sm:min-w-fit` to the title wrapper and changed `break-words` on `h1` to `break-normal` to prevent awkward mid-word breaks (e.g. `Analysi s`).
+  - Removed rigid `shrink-0` from `actions` container to allow action buttons to wrap naturally instead of starving and crushing the title.
+- `src/features/assessment/assessment-control-center.tsx`:
+  - Moved `AdminDepartmentMarksEntryControl` out of the congested header actions slot into its own dedicated administrative section: **Department Marks Entry Windows**.
+  - Sits directly below `PageHeader` with title, candidate cohort scope badge (`{total} unit cohorts`), and subtext description.
+  - Leaves `PageHeader` with clean page title and navigation links (`Operations` and `Consolidated Marksheets`), ensuring zero title wrapping or crushing on all screen resolutions.
+- `src/features/assessment/admin-department-marks-entry-control.tsx`:
+  - Enhanced layout responsiveness: `flex-col sm:items-end w-full sm:w-auto` and `flex-wrap sm:flex-nowrap` within each component box (`CAT Entry Window` and `Final Exam Entry Window`).
+  - Ensures seamless responsiveness and touch accessibility on mobile, tablet, and desktop viewports.
+
 ### 2026-11-08: Phased CAT and Exam entry control & reversal of premature exam marks
 
 **Modified / Added:**

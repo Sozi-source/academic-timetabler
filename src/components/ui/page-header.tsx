@@ -57,8 +57,8 @@ export function PageHeader({
 
       {context ? <div className="mb-3">{context}</div> : null}
 
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="flex min-w-0 flex-1 items-start gap-2.5 sm:gap-3">
+      <div className="flex flex-col gap-3 md:flex-row md:flex-wrap lg:flex-nowrap md:items-center md:justify-between">
+        <div className="flex min-w-0 flex-1 sm:min-w-fit items-start gap-2.5 sm:gap-3">
           {backHref ? (
             <Link
               href={backHref}
@@ -78,7 +78,7 @@ export function PageHeader({
 
             <h1
               className={cn(
-                'flex min-w-0 items-start gap-2 break-words text-lg font-semibold leading-snug tracking-tight sm:text-xl',
+                'flex min-w-0 items-start gap-2 text-lg font-semibold leading-snug tracking-tight sm:text-xl',
                 titleClassName ?? 'text-text-primary',
               )}
             >
@@ -93,7 +93,7 @@ export function PageHeader({
                   <Icon className={cn('size-4', iconClassName)} aria-hidden="true" />
                 </span>
               ) : null}
-              <span className="min-w-0">{title}</span>
+              <span className="min-w-0 break-normal">{title}</span>
             </h1>
 
             {description ? (
@@ -111,7 +111,7 @@ export function PageHeader({
         </div>
 
         {actions ? (
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2 md:justify-end">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 md:justify-end">
             {actions}
           </div>
         ) : null}

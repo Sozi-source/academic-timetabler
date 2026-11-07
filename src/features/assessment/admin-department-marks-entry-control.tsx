@@ -80,12 +80,12 @@ export function AdminDepartmentMarksEntryControl({
   }
 
   return (
-    <div className="flex flex-col items-end gap-1.5">
-      <div className="flex flex-wrap items-center justify-end gap-2.5">
+    <div className="flex flex-col sm:items-end gap-1.5 w-full sm:w-auto">
+      <div className="flex flex-wrap items-center sm:justify-end gap-2 w-full sm:w-auto">
         {/* ========================================================= */}
         {/* 1. CAT ENTRY WINDOW CONTROL                               */}
         {/* ========================================================= */}
-        <div className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-1 shadow-2xs">
+        <div className="inline-flex flex-wrap sm:flex-nowrap items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-1 shadow-2xs">
           {!compact ? (
             <span
               className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-bold tracking-wide ${
@@ -137,7 +137,7 @@ export function AdminDepartmentMarksEntryControl({
         {/* ========================================================= */}
         {/* 2. FINAL EXAM ENTRY WINDOW CONTROL                        */}
         {/* ========================================================= */}
-        <div className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-1 shadow-2xs">
+        <div className="inline-flex flex-wrap sm:flex-nowrap items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-1 shadow-2xs">
           {!compact ? (
             <span
               className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-bold tracking-wide ${

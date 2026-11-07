@@ -7,7 +7,12 @@ import { PageHeader } from '@/components/ui/page-header';
 import { DownloadAssessmentMarkbookButton } from '@/features/assessment/markbook-controls';
 import { getAssessmentById, getAssessmentPopulation } from '@/features/assessment/queries';
 import { unlockAssessmentMarkComponentAction } from '@/features/assessment/marks/actions';
-import { getAssessmentMarkComponentSubmissions, getAssessmentResultCount } from '@/features/assessment/marks/queries';
+import {
+  getAssessmentCandidateMarks,
+  getAssessmentMarkComponentSubmissions,
+  getAssessmentResultCount,
+} from '@/features/assessment/marks/queries';
+import { AssessmentMarkbookViewTable } from '@/features/assessment/marks/assessment-markbook-view-table';
 import { requireHodAccess } from '@/features/auth/authorization';
 
 export default async function AssessmentMarkWorkflowPage({
@@ -17,11 +22,12 @@ export default async function AssessmentMarkWorkflowPage({
 }) {
   await requireHodAccess();
   const { assessmentId } = await params;
-  const [assessment, population, resultCount, componentSubmissionState] = await Promise.all([
+  const [assessment, population, resultCount, componentSubmissionState, marksByStudent] = await Promise.all([
     getAssessmentById(assessmentId),
     getAssessmentPopulation(assessmentId),
     getAssessmentResultCount(assessmentId),
     getAssessmentMarkComponentSubmissions(assessmentId),
+    getAssessmentCandidateMarks(assessmentId),
   ]);
 
   if (!assessment) notFound();
@@ -174,60 +180,19 @@ export default async function AssessmentMarkWorkflowPage({
         </div>
       </div>
 
-      {/* Candidates Roster */}
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-            Registered Candidates ({population.length})
-          </h2>
-        </div>
-
-        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-2xs">
-          <table className="w-full text-left text-xs">
-            <thead className="border-b border-slate-200 bg-slate-50 text-[11px] font-bold text-slate-600">
-              <tr>
-                <th className="w-12 px-3.5 py-2.5 text-center">No.</th>
-                <th className="px-3 py-2.5">Admission No.</th>
-                <th className="px-3 py-2.5">Student Full Name</th>
-                <th className="px-3 py-2.5">Cohort</th>
-                <th className="px-3 py-2.5 text-center">Exam Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {population.map((row, idx) => {
-                const isAbsent = row.attendance_status === 'absent';
-                return (
-                  <tr key={row.id} className="transition hover:bg-slate-50/50">
-                    <td className="px-3.5 py-2.5 text-center font-medium text-slate-400">
-                      {idx + 1}.
-                    </td>
-                    <td className="px-3 py-2.5 font-semibold text-slate-900 whitespace-nowrap">
-                      {row.student?.admission_number ?? '—'}
-                    </td>
-                    <td className="px-3 py-2.5 font-medium text-slate-800">
-                      {row.student?.full_name ?? 'Unknown Student'}
-                    </td>
-                    <td className="px-3 py-2.5 text-slate-500">
-                      {row.cohort?.name ?? '—'}
-                    </td>
-                    <td className="px-3 py-2.5 text-center">
-                      {isAbsent ? (
-                        <span className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-700">
-                          Absent (AB)
-                        </span>
-                      ) : (
-                        <span className="rounded bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
-                          Expected / Sat
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      {/* Candidates Markbook Roster & Marks View */}
+      <AssessmentMarkbookViewTable
+        population={population}
+        marksByStudent={marksByStudent}
+        assessmentType={assessment.assessment_type}
+        maxMark={assessment.max_mark ?? 100}
+        passMark={assessment.pass_mark ?? 40}
+        marksSubmitted={marksSubmitted}
+        isComplete={isComplete}
+        unitCode={assessment.unit?.code ?? 'Unit'}
+        unitName={assessment.unit?.name ?? ''}
+        periodName={assessment.academic_period?.name ?? ''}
+      />
     </div>
   );
 }

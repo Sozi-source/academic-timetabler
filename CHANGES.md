@@ -1,3 +1,25 @@
+### 2026-11-07: Display full student marks in unit markbook view (`/assessment/marks/[id]`)
+
+**Added & Modified:**
+- `src/features/staff-assessment/online-marks-query.ts`:
+  - Exported `resolveAssessmentIdsWithSiblings` so HOD and administrative marks queries can discover sibling offerings and equivalence group assessment events.
+- `src/features/assessment/marks/types.ts`:
+  - Added `CandidateMarkRecord` domain interface capturing all student component marks (Assignment, Presentation, RAT, CAT, Exam, Total, Grade, Comment, absence flags, and commit status).
+- `src/features/assessment/marks/queries.ts`:
+  - Implemented `getAssessmentCandidateMarks(assessmentId)` to fetch, merge, and normalize candidate marks from `assessment_results` (submitted/official marks), `assessment_online_mark_drafts` (draft marks), and `assessment_roster` (absence statuses).
+- `src/features/assessment/marks/assessment-markbook-view-table.tsx`:
+  - Created interactive markbook table component displaying all student marks (Assignment /5, Presentation /10, RAT /15, CAT /15, Exam /70, Total /100, Grade, and Exam Status).
+  - Included search filter by candidate name or admission number, cohort filter dropdown (for multi-cohort / shared unit markbooks), and attendance/mark status filters.
+  - Added summary performance telemetry (Candidates Sat, Recorded Results, Class Mean Total Score, Pass Rate %, and Grade distribution badges).
+  - Added a class average footer calculating mean scores across all marked candidates for each component.
+  - Added print view button and print layout styles for administrative filing and recordkeeping.
+- `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`:
+  - Updated markbook page to fetch candidate marks via `getAssessmentCandidateMarks` and render `AssessmentMarkbookViewTable`.
+- `src/tests/assessment-candidate-marks-view.test.ts`:
+  - Added unit test suite covering mark calculation, zero-mark preservation, exam/CAT absence handling, and institutional grade thresholds.
+
+No database migrations or manual follow-up required.
+
 ### 2026-11-05: Fix student unit registration deletion workflow & add batch/select-all unregister
 
 **Added & Modified:**

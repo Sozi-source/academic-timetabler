@@ -86,7 +86,7 @@ export interface StaffOnlineComponentSubmission {
   submittedAt: string;
 }
 
-async function resolveAssessmentIdsWithSiblings(
+export async function resolveAssessmentIdsWithSiblings(
   supabase: Awaited<ReturnType<typeof createClient>>,
   assessmentId: string,
 ): Promise<string[]> {

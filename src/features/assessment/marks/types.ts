@@ -1,3 +1,21 @@
+export interface CandidateMarkRecord {
+  studentId: string;
+  assignment: number | null;
+  presentation: number | null;
+  rat: number | null;
+  cat: number | null;
+  catAbsent: boolean;
+  exam: number | null;
+  isExamAbsent: boolean;
+  ratCatAverage: number | null;
+  coursework: number | null;
+  total: number | null;
+  grade: string | null;
+  comment: string | null;
+  isCommitted: boolean;
+  source: 'official' | 'draft' | 'none';
+}
+
 export type MarkImportRowStatus = 'ready' | 'invalid';
 
 export interface AssessmentMarkImportRow {

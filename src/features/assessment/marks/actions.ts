@@ -74,3 +74,60 @@ export async function unlockAssessmentMarkComponentAction(formData: FormData) {
   revalidatePath(`/assessment/marks/${assessmentId}`);
   redirect(`/assessment/marks/${assessmentId}?component_unlocked=${component}`);
 }
+
+/**
+ * HOD "submit on behalf": submits a trainer's saved CAT drafts when the trainer
+ * forgot to press Submit. Mirrors the trainer submit route exactly — unentered
+ * CAT marks are recorded as AB — and runs through the same RLS-guarded RPC, so
+ * `submitted_by` records the HOD who performed the submission.
+ */
+export async function submitCatOnBehalfAction(formData: FormData) {
+  const profile = await requireHodAccess();
+  const parsed = z.object({ assessmentId: z.uuid() }).safeParse({ assessmentId: formData.get('assessmentId') });
+  if (!parsed.success) return;
+  const { assessmentId } = parsed.data;
+
+  const assessment = await getAssessmentById(assessmentId);
+  if (!assessment) redirect('/assessment/marks?error=not-found');
+  if (assessment.exam_marks_finalized_at || assessment.status === 'closed') {
+    redirect(`/assessment/marks/${assessmentId}?error=locked`);
+  }
+
+  const supabase = await createClient();
+  const [eventRes, rosterRes, draftRes, subRes] = await Promise.all([
+    supabase.from('assessment_events').select('department_id').eq('id', assessmentId).maybeSingle(),
+    supabase.from('assessment_roster').select('student_id').eq('assessment_id', assessmentId),
+    supabase.from('assessment_online_mark_drafts').select('student_id, cat_mark').eq('assessment_id', assessmentId),
+    supabase.from('assessment_mark_component_submissions').select('id').eq('assessment_id', assessmentId).eq('component_key', 'cat').limit(1),
+  ]);
+
+  // Tenant isolation: only markbooks in the HOD's active department.
+  if (!eventRes.data || (profile.activeDepartmentId && eventRes.data.department_id !== profile.activeDepartmentId)) {
+    redirect(`/assessment/marks/${assessmentId}?error=not-found`);
+  }
+  if ((subRes.data ?? []).length > 0) redirect(`/assessment/marks/${assessmentId}?error=cat-already-submitted`);
+
+  const roster = rosterRes.data ?? [];
+  const catByStudent = new Map<string, number | null>();
+  for (const d of draftRes.data ?? []) {
+    if (d.student_id && d.cat_mark !== null) catByStudent.set(d.student_id, d.cat_mark);
+  }
+  if (roster.length === 0 || catByStudent.size === 0) redirect(`/assessment/marks/${assessmentId}?error=no-saved-cat`);
+
+  const entries = roster.map((r) => {
+    const cat = catByStudent.get(r.student_id) ?? null;
+    return { student_id: r.student_id, cat, cat_absent: cat === null };
+  });
+
+  const { error } = await supabase.rpc('save_assessment_online_component_marks', {
+    target_assessment_id: assessmentId,
+    target_component: 'cat',
+    target_entries: entries,
+    submit_component: true,
+  });
+
+  revalidatePath('/assessment');
+  revalidatePath(`/assessment/marks/${assessmentId}`);
+  if (error) redirect(`/assessment/marks/${assessmentId}?error=cat-submit-on-behalf`);
+  redirect(`/assessment/marks/${assessmentId}?cat_submitted_on_behalf=1`);
+}

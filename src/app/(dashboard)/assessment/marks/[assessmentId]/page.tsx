@@ -13,21 +13,37 @@ import {
   getAssessmentResultCount,
 } from '@/features/assessment/marks/queries';
 import { AssessmentMarkbookViewTable } from '@/features/assessment/marks/assessment-markbook-view-table';
+import { getCatOnBehalfStatus } from '@/features/assessment/marks/pending-submissions';
+import { SubmitCatOnBehalfButton } from '@/features/assessment/marks/submit-cat-on-behalf-button';
 import { requireHodAccess } from '@/features/auth/authorization';
+
+const ON_BEHALF_ERRORS: Record<string, string> = {
+  'cat-already-submitted': 'CAT marks for this markbook were already submitted.',
+  'no-saved-cat': 'There are no saved CAT marks to submit for this markbook.',
+  'cat-submit-on-behalf': 'CAT marks could not be submitted on behalf of the trainer. Please try again.',
+  locked: 'This markbook is finalized and can no longer be changed.',
+};
 
 export default async function AssessmentMarkWorkflowPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ assessmentId: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   await requireHodAccess();
   const { assessmentId } = await params;
-  const [assessment, population, resultCount, componentSubmissionState, marksByStudent] = await Promise.all([
+  const query = await searchParams;
+  const errorKey = typeof query.error === 'string' ? query.error : undefined;
+  const onBehalfError = errorKey ? ON_BEHALF_ERRORS[errorKey] : undefined;
+  const submittedOnBehalf = query.cat_submitted_on_behalf === '1';
+  const [assessment, population, resultCount, componentSubmissionState, marksByStudent, catOnBehalf] = await Promise.all([
     getAssessmentById(assessmentId),
     getAssessmentPopulation(assessmentId),
     getAssessmentResultCount(assessmentId),
     getAssessmentMarkComponentSubmissions(assessmentId),
     getAssessmentCandidateMarks(assessmentId),
+    getCatOnBehalfStatus(assessmentId),
   ]);
 
   if (!assessment) notFound();
@@ -141,6 +157,37 @@ export default async function AssessmentMarkWorkflowPage({
           </div>
         }
       />
+
+      {submittedOnBehalf ? (
+        <section className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-800">
+          CAT marks were submitted on behalf of the trainer. Unentered students were recorded as AB.
+        </section>
+      ) : null}
+      {onBehalfError ? (
+        <section className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-800">
+          {onBehalfError}
+        </section>
+      ) : null}
+
+      {catOnBehalf.canSubmitOnBehalf && !isComplete ? (
+        <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+          <div>
+            <h2 className="text-sm font-semibold text-amber-900">CAT marks saved but not submitted</h2>
+            <p className="mt-1 text-xs leading-5 text-amber-800">
+              {catOnBehalf.trainerNames.length ? catOnBehalf.trainerNames.join(', ') : 'The trainer'} saved CAT marks for{' '}
+              <strong>{catOnBehalf.enteredCount}</strong> of <strong>{catOnBehalf.rosterCount}</strong> students but has not submitted them.
+              {catOnBehalf.missingCount > 0
+                ? ` ${catOnBehalf.missingCount} student(s) without a mark will be recorded as AB if you submit now.`
+                : ' All students have a mark recorded.'}
+            </p>
+          </div>
+          <SubmitCatOnBehalfButton
+            assessmentId={assessment.id}
+            trainerLabel={catOnBehalf.trainerNames.length ? catOnBehalf.trainerNames.join(', ') : 'the trainer'}
+            missingCount={catOnBehalf.missingCount}
+          />
+        </section>
+      ) : null}
 
 
       {componentSubmissionState.submissions.length > 0 ? (

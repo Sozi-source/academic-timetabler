@@ -505,7 +505,6 @@ export function ConsolidatedMarksheetViewer({
       'S/No',
       'Admission No',
       'Student Full Name',
-      'Cohort',
       'Assignment (/5)',
       'Presentation (/10)',
       'RAT (/15)',
@@ -513,7 +512,6 @@ export function ConsolidatedMarksheetViewer({
       'Exam (/70)',
       'Total (/100)',
       'Grade',
-      'Attendance Status',
     ];
 
     const lines = filteredUnitRows.map((r, idx) => {
@@ -521,7 +519,6 @@ export function ConsolidatedMarksheetViewer({
         idx + 1,
         `"${r.admissionNumber}"`,
         `"${r.fullName.replace(/"/g, '""')}"`,
-        `"${r.cohortName.replace(/"/g, '""')}"`,
         formatMark(r.assignment),
         formatMark(r.presentation),
         formatMark(r.rat),
@@ -529,7 +526,6 @@ export function ConsolidatedMarksheetViewer({
         r.attendance === 'absent' ? 'AB' : formatMark(r.exam),
         r.attendance === 'absent' ? 'AB' : formatMark(r.total),
         r.attendance === 'absent' ? 'ABSENT' : r.grade ?? '—',
-        r.attendance === 'absent' ? 'Absent' : 'Present / Sat',
       ].join(',');
     });
 
@@ -1094,7 +1090,6 @@ export function ConsolidatedMarksheetViewer({
                     <th className="w-12 px-3.5 py-2.5 text-center">No.</th>
                     <th className="px-3 py-2.5 whitespace-nowrap">Admission No.</th>
                     <th className="px-3 py-2.5 min-w-[180px]">Student Full Name</th>
-                    <th className="px-3 py-2.5 whitespace-nowrap">Cohort</th>
                     <th className="px-2.5 py-2.5 text-center whitespace-nowrap">Assignment /5</th>
                     <th className="px-2.5 py-2.5 text-center whitespace-nowrap">Presentation /10</th>
                     <th className="px-2.5 py-2.5 text-center whitespace-nowrap">RAT /15</th>
@@ -1104,14 +1099,13 @@ export function ConsolidatedMarksheetViewer({
                       Total /100
                     </th>
                     <th className="px-3 py-2.5 text-center whitespace-nowrap">Grade</th>
-                    <th className="px-3 py-2.5 text-center whitespace-nowrap">Status</th>
                   </tr>
                 </thead>
 
                 <tbody className="divide-y divide-slate-100">
                   {filteredUnitRows.length === 0 ? (
                     <tr>
-                      <td colSpan={12} className="px-4 py-12 text-center text-xs text-slate-500">
+                      <td colSpan={10} className="px-4 py-12 text-center text-xs text-slate-500">
                         <p className="font-semibold text-slate-700">No candidates match your filter criteria.</p>
                         <p className="mt-1 text-[11px] text-slate-400">Try adjusting your search query above.</p>
                       </td>
@@ -1132,9 +1126,6 @@ export function ConsolidatedMarksheetViewer({
                           </td>
                           <td className="px-3 py-2.5 font-medium text-slate-800">
                             {r.fullName}
-                          </td>
-                          <td className="px-3 py-2.5 text-slate-500 whitespace-nowrap">
-                            {r.cohortName}
                           </td>
 
                           {/* Marks columns */}
@@ -1187,23 +1178,6 @@ export function ConsolidatedMarksheetViewer({
                               <span className="text-slate-300">—</span>
                             )}
                           </td>
-
-                          {/* Status */}
-                          <td className="px-3 py-2.5 text-center whitespace-nowrap">
-                            {isAbsent ? (
-                              <span className="inline-block rounded bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-700 border border-rose-200">
-                                Exam Absent (AB)
-                              </span>
-                            ) : r.total !== null ? (
-                              <span className="inline-block rounded bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-800 border border-emerald-200">
-                                Recorded / Sat
-                              </span>
-                            ) : (
-                              <span className="inline-block rounded bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
-                                Expected / Sat
-                              </span>
-                            )}
-                          </td>
                         </tr>
                       );
                     })
@@ -1214,7 +1188,7 @@ export function ConsolidatedMarksheetViewer({
                 {unitData.stats && unitData.stats.markedCount > 0 ? (
                   <tfoot className="border-t-2 border-slate-300 bg-slate-50 font-bold text-slate-800">
                     <tr>
-                      <td colSpan={4} className="px-3.5 py-3 text-right uppercase tracking-wider text-[11px] text-slate-600 font-extrabold">
+                      <td colSpan={3} className="px-3.5 py-3 text-right uppercase tracking-wider text-[11px] text-slate-600 font-extrabold">
                         Class Average ({unitData.stats.markedCount} scored):
                       </td>
                       <td className="px-2.5 py-3 text-center text-slate-700">{formatMark(unitData.stats.meanAssignment)}</td>
@@ -1225,7 +1199,7 @@ export function ConsolidatedMarksheetViewer({
                       <td className="px-2.5 py-3 text-center bg-slate-100 font-black text-slate-900 text-xs">
                         {formatMark(unitData.stats.meanTotal)}
                       </td>
-                      <td colSpan={2} className="px-3 py-3 text-center text-[10px] text-slate-600">
+                      <td className="px-3 py-3 text-center text-[10px] text-slate-600">
                         {unitData.stats.passRate !== null ? `${unitData.stats.passRate}% Pass Rate` : '—'}
                       </td>
                     </tr>

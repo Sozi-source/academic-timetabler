@@ -1,3 +1,12 @@
+### 2026-11-07: Remove Cohort and Status (Exam Status) columns from consolidated unit dashboard
+
+**Modified:**
+- `src/features/assessment/reports/consolidated-marksheet-viewer.tsx`:
+  - Removed **Cohort** and **Status** (Exam Status / Attendance Status) columns from the Consolidated Unit Marksheet table (`<thead />`, `<tbody />`, and `<tfoot />`).
+  - Adjusted table empty state `colSpan` from 12 to 10 and footer label `colSpan` from 4 to 3 to keep layout perfectly aligned across the 10 remaining columns (No., Admission No., Student Full Name, Assignment /5, Presentation /10, RAT /15, CAT /15, Exam /70, Total /100, Grade).
+  - Updated CSV export in unit mode to exclude `Cohort` and `Attendance Status` for consistency with the table view.
+- No schema changes; no manual follow-up required.
+
 ### 2026-11-07: Consolidated Marksheets per Unit & per Cohort Broadsheet Matrix (`/assessment/reports`)
 
 **Added & Modified:**

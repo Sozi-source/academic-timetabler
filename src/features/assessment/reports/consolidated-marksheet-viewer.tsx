@@ -540,35 +540,43 @@ export function ConsolidatedMarksheetViewer({
       <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-2xs print:hidden">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
           {/* Mode Switcher Buttons */}
-          <div className="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-1">
+          <div
+            role="tablist"
+            aria-label="Marksheet view mode"
+            className="inline-flex items-center rounded-xl border border-slate-300 bg-slate-100 p-1 shadow-2xs"
+          >
             <button
               type="button"
+              role="tab"
+              aria-selected={viewMode === 'cohort'}
               onClick={() => {
                 setViewMode('cohort');
                 setSearchQuery('');
               }}
-              className={`inline-flex items-center gap-2 rounded-md px-3.5 py-1.5 text-xs font-bold transition ${
+              className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all ${
                 viewMode === 'cohort'
-                  ? 'bg-header-blue text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-slate-900 text-white shadow-xs'
+                  : 'text-slate-700 hover:text-slate-950 hover:bg-slate-200/70'
               }`}
             >
-              <GraduationCap className="size-4" />
+              <GraduationCap className={`size-4 ${viewMode === 'cohort' ? 'text-sky-300' : 'text-slate-500'}`} />
               <span>Per Cohort Broadsheet Matrix</span>
             </button>
             <button
               type="button"
+              role="tab"
+              aria-selected={viewMode === 'unit'}
               onClick={() => {
                 setViewMode('unit');
                 setSearchQuery('');
               }}
-              className={`inline-flex items-center gap-2 rounded-md px-3.5 py-1.5 text-xs font-bold transition ${
+              className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all ${
                 viewMode === 'unit'
-                  ? 'bg-header-blue text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-slate-900 text-white shadow-xs'
+                  : 'text-slate-700 hover:text-slate-950 hover:bg-slate-200/70'
               }`}
             >
-              <BookOpen className="size-4" />
+              <BookOpen className={`size-4 ${viewMode === 'unit' ? 'text-sky-300' : 'text-slate-500'}`} />
               <span>Per Unit Consolidated Marksheet</span>
             </button>
           </div>

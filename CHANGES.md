@@ -1,3 +1,15 @@
+### 2026-11-07: Fix consolidated marksheet view switcher button contrast & visibility
+
+**Modified:**
+- `src/features/assessment/reports/consolidated-marksheet-viewer.tsx`:
+  - Replaced missing `bg-header-blue` utility with high-contrast, robust button styles for both active and inactive states:
+    - Active tab: `bg-slate-900 text-white shadow-xs` with a highlighted `text-sky-300` icon.
+    - Inactive tab: `text-slate-700 hover:text-slate-950 hover:bg-slate-200/70` with `text-slate-500` icon.
+  - Upgraded container to `border border-slate-300 bg-slate-100 p-1 shadow-2xs` with `role="tablist"` and `role="tab"` accessibility attributes.
+- `src/app/globals.css`:
+  - Added `--color-header-blue: #081725;` to `@theme inline` in Tailwind CSS v4 to prevent undefined color classes.
+- No schema changes; no manual follow-up required.
+
 ### 2026-11-07: Remove Cohort and Status (Exam Status) columns from consolidated unit dashboard
 
 **Modified:**

@@ -1,3 +1,22 @@
+### 2026-11-07: Table contrast upgrade & golden yellow highlights for markbooks & consolidated reports
+
+**Modified:**
+- `src/features/assessment/marks/assessment-markbook-view-table.tsx`:
+  - **Golden Yellow Highlights**:
+    - Highlighted the key outcome column (`Total /100`): golden-yellow header (`bg-amber-100/90 text-amber-950 border-amber-300`), golden-yellow tinted cells (`bg-amber-50/70 text-amber-950 font-black font-mono border-x border-amber-200/90`), and golden footer average (`bg-amber-200/80 text-amber-950 border-amber-300`).
+    - Highlighted the overview banner `Mean Total` metric (`bg-amber-50/90 text-amber-950 border-amber-300`) and `Distinction` count badge (`bg-amber-100/90 text-amber-950 border-amber-300`).
+  - **Visual Hierarchy & Demographic Anchor Wall**:
+    - Introduced a 2-tier super-header organizing columns into: Candidate Details, Continuous Assessment (Coursework · 30%), Final Exam (70%), and Final Aggregate.
+    - Added a vertical boundary wall (`border-r-2 border-slate-300`) after `Student Full Name` to visually separate student demographics from numeric marks and prevent horizontal line drift.
+    - Added subtle zebra striping (`odd:bg-white even:bg-slate-50/60`) and warm golden hover states (`hover:bg-amber-50/35`).
+    - Enhanced mark score typography with `font-mono tabular-nums font-bold text-slate-800`.
+- `src/features/assessment/reports/consolidated-marksheet-viewer.tsx`:
+  - **Consolidated Unit Marksheet**:
+    - Added 2-tier category super-header, vertical demographics border wall on `Student Full Name`, golden-yellow highlighted `Total /100` column, zebra striping, and golden hover transitions.
+  - **Cohort Broadsheet Matrix**:
+    - Added vertical demographics border wall on `Student Full Name`, golden-yellow highlighted `Average` and `Total` columns, zebra striping, and golden hover transitions.
+- No schema changes; no manual follow-up required.
+
 ### 2026-11-07: Fix consolidated marksheet view switcher button contrast & visibility
 
 **Modified:**

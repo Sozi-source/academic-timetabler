@@ -223,9 +223,9 @@ export function AssessmentMarkbookViewTable({
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3 text-xs">
-              <div className="flex items-center gap-1.5 rounded-lg bg-slate-50 px-3 py-1.5 border border-slate-200">
-                <span className="text-slate-500 font-medium">Mean Total:</span>
-                <span className="font-bold text-slate-900">
+              <div className="flex items-center gap-1.5 rounded-lg bg-amber-50/90 px-3 py-1.5 border border-amber-300 shadow-2xs">
+                <span className="text-amber-800 font-bold">Mean Total:</span>
+                <span className="font-black text-amber-950 font-mono">
                   {stats.meanTotal !== null ? `${stats.meanTotal} / ${maxMark}` : '—'}
                 </span>
               </div>
@@ -241,7 +241,7 @@ export function AssessmentMarkbookViewTable({
           {/* Grade Distribution Badges */}
           <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
             <span className="text-[11px] font-semibold text-slate-500 mr-1">Grade Distribution:</span>
-            <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-800 border border-emerald-200">
+            <span className="inline-flex items-center gap-1 rounded-md bg-amber-100/90 px-2.5 py-1 text-[11px] font-bold text-amber-950 border border-amber-300 shadow-2xs">
               Distinction: {stats.distinctionCount}
             </span>
             <span className="inline-flex items-center gap-1 rounded-md bg-teal-50 px-2.5 py-1 text-[11px] font-bold text-teal-800 border border-teal-200">
@@ -366,46 +366,82 @@ export function AssessmentMarkbookViewTable({
       </div>
 
       {/* Candidate Marks Table */}
-      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-2xs">
+      <div className="overflow-x-auto rounded-xl border border-slate-300 bg-white shadow-2xs">
         <table className="w-full min-w-[800px] text-left text-xs">
-          <thead className="border-b border-slate-200 bg-slate-50 text-[11px] font-bold text-slate-600">
-            <tr>
-              <th className="w-12 px-3 py-2.5 text-center">No.</th>
-              <th className="px-3 py-2.5 whitespace-nowrap">Admission No.</th>
-              <th className="px-3 py-2.5 min-w-[180px]">Student Full Name</th>
+          <thead className="border-b border-slate-300 bg-slate-50 text-[11px] font-bold text-slate-700">
+            {assessmentType === 'exam' ? (
+              <>
+                {/* Tier 1 Category Super-Header */}
+                <tr className="border-b border-slate-200 text-[10px] font-black uppercase tracking-wider text-slate-600">
+                  <th
+                    colSpan={3}
+                    scope="colgroup"
+                    className="px-3.5 py-1.5 text-left bg-slate-100/90 border-r-2 border-slate-300 text-slate-800"
+                  >
+                    Candidate Details
+                  </th>
+                  <th
+                    colSpan={4}
+                    scope="colgroup"
+                    className="px-2.5 py-1.5 text-center bg-slate-50 border-r border-slate-200 text-slate-700"
+                  >
+                    Continuous Assessment (Coursework · 30%)
+                  </th>
+                  <th
+                    colSpan={1}
+                    scope="colgroup"
+                    className="px-2.5 py-1.5 text-center bg-slate-100/80 border-r border-slate-200 text-slate-800"
+                  >
+                    Final Exam (70%)
+                  </th>
+                  <th
+                    colSpan={2}
+                    scope="colgroup"
+                    className="px-3 py-1.5 text-center bg-amber-100/90 border-l border-amber-300 text-amber-950 font-black shadow-2xs"
+                  >
+                    Final Aggregate
+                  </th>
+                </tr>
 
-              {assessmentType === 'exam' ? (
-                <>
-                  <th className="px-2.5 py-2.5 text-center whitespace-nowrap">
+                {/* Tier 2 Column Detail Header */}
+                <tr className="border-b border-slate-300 bg-slate-50 text-[11px] font-bold text-slate-700">
+                  <th scope="col" className="w-12 px-3.5 py-2.5 text-center text-slate-500">No.</th>
+                  <th scope="col" className="px-3 py-2.5 whitespace-nowrap text-slate-800">Admission No.</th>
+                  <th scope="col" className="px-3 py-2.5 min-w-[180px] border-r-2 border-slate-300 text-slate-900">Student Full Name</th>
+
+                  <th scope="col" className="px-2.5 py-2.5 text-center whitespace-nowrap">
                     Assignment <span className="text-[10px] font-normal text-slate-400">/5</span>
                   </th>
-                  <th className="px-2.5 py-2.5 text-center whitespace-nowrap">
+                  <th scope="col" className="px-2.5 py-2.5 text-center whitespace-nowrap">
                     Presentation <span className="text-[10px] font-normal text-slate-400">/10</span>
                   </th>
-                  <th className="px-2.5 py-2.5 text-center whitespace-nowrap">
+                  <th scope="col" className="px-2.5 py-2.5 text-center whitespace-nowrap">
                     RAT <span className="text-[10px] font-normal text-slate-400">/15</span>
                   </th>
-                  <th className="px-2.5 py-2.5 text-center whitespace-nowrap">
+                  <th scope="col" className="px-2.5 py-2.5 text-center whitespace-nowrap border-r border-slate-200">
                     CAT <span className="text-[10px] font-normal text-slate-400">/15</span>
                   </th>
-                  <th className="px-2.5 py-2.5 text-center whitespace-nowrap">
+                  <th scope="col" className="px-2.5 py-2.5 text-center whitespace-nowrap border-r border-slate-200">
                     Exam <span className="text-[10px] font-normal text-slate-400">/70</span>
                   </th>
-                  <th className="px-2.5 py-2.5 text-center whitespace-nowrap bg-slate-100/70 font-black text-slate-900">
-                    Total <span className="text-[10px] font-normal text-slate-500">/{maxMark}</span>
+                  <th scope="col" className="px-2.5 py-2.5 text-center whitespace-nowrap bg-amber-100/90 text-amber-950 font-black border-x border-amber-300 shadow-2xs">
+                    Total <span className="text-[10px] font-bold text-amber-800">/{maxMark}</span>
                   </th>
-                  <th className="px-3 py-2.5 text-center whitespace-nowrap">Grade</th>
-                </>
-              ) : (
-                <>
-                  <th className="px-3 py-2.5 text-center whitespace-nowrap bg-slate-100/70 font-black text-slate-900">
-                    CAT Mark <span className="text-[10px] font-normal text-slate-500">/{maxMark}</span>
-                  </th>
-                  <th className="px-3 py-2.5 text-center whitespace-nowrap">Grade</th>
-                  <th className="px-3 py-2.5 text-center whitespace-nowrap">Status</th>
-                </>
-              )}
-            </tr>
+                  <th scope="col" className="px-3 py-2.5 text-center whitespace-nowrap bg-amber-50/50">Grade</th>
+                </tr>
+              </>
+            ) : (
+              <tr>
+                <th scope="col" className="w-12 px-3.5 py-2.5 text-center text-slate-500">No.</th>
+                <th scope="col" className="px-3 py-2.5 whitespace-nowrap text-slate-800">Admission No.</th>
+                <th scope="col" className="px-3 py-2.5 min-w-[180px] border-r-2 border-slate-300 text-slate-900">Student Full Name</th>
+                <th scope="col" className="px-3 py-2.5 text-center whitespace-nowrap bg-amber-100/90 text-amber-950 font-black border-x border-amber-300">
+                  CAT Mark <span className="text-[10px] font-bold text-amber-800">/{maxMark}</span>
+                </th>
+                <th scope="col" className="px-3 py-2.5 text-center whitespace-nowrap bg-amber-50/50">Grade</th>
+                <th scope="col" className="px-3 py-2.5 text-center whitespace-nowrap">Status</th>
+              </tr>
+            )}
           </thead>
 
           <tbody className="divide-y divide-slate-100">
@@ -436,79 +472,79 @@ export function AssessmentMarkbookViewTable({
                 return (
                   <tr
                     key={row.rowId}
-                    className={`transition hover:bg-slate-50/80 ${
-                      isAbsent ? 'bg-amber-50/30' : ''
+                    className={`transition-colors odd:bg-white even:bg-slate-50/60 hover:bg-amber-50/35 ${
+                      isAbsent ? 'bg-rose-50/30' : ''
                     }`}
                   >
                     {/* Index */}
-                    <td className="px-3 py-2.5 text-center font-medium text-slate-400">
+                    <td className="px-3.5 py-2.5 text-center font-medium text-slate-400">
                       {idx + 1}.
                     </td>
 
                     {/* Admission No */}
-                    <td className="px-3 py-2.5 font-mono font-semibold text-slate-900 whitespace-nowrap">
+                    <td className="px-3 py-2.5 font-mono font-bold text-slate-950 whitespace-nowrap">
                       {row.admissionNumber}
                     </td>
 
-                    {/* Full Name */}
-                    <td className="px-3 py-2.5 font-medium text-slate-800">
+                    {/* Full Name with vertical boundary wall */}
+                    <td className="px-3 py-2.5 font-semibold text-slate-900 border-r-2 border-slate-200">
                       {row.fullName}
                     </td>
 
                     {assessmentType === 'exam' ? (
                       <>
                         {/* Assignment /5 */}
-                        <td className="px-2.5 py-2.5 text-center font-medium text-slate-700">
+                        <td className="px-2.5 py-2.5 text-center font-mono font-medium text-slate-800 tabular-nums">
                           {formatMark(m?.assignment)}
                         </td>
 
                         {/* Presentation /10 */}
-                        <td className="px-2.5 py-2.5 text-center font-medium text-slate-700">
+                        <td className="px-2.5 py-2.5 text-center font-mono font-medium text-slate-800 tabular-nums">
                           {formatMark(m?.presentation)}
                         </td>
 
                         {/* RAT /15 */}
-                        <td className="px-2.5 py-2.5 text-center font-medium text-slate-700">
+                        <td className="px-2.5 py-2.5 text-center font-mono font-medium text-slate-800 tabular-nums">
                           {formatMark(m?.rat)}
                         </td>
 
                         {/* CAT /15 */}
-                        <td className="px-2.5 py-2.5 text-center font-medium">
+                        <td className="px-2.5 py-2.5 text-center font-mono font-medium tabular-nums border-r border-slate-200">
                           {isCatAbsent ? (
-                            <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-900">
+                            <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-900 border border-amber-300">
                               AB
                             </span>
                           ) : (
-                            <span className="text-slate-700">{formatMark(m?.cat)}</span>
+                            <span className="text-slate-800">{formatMark(m?.cat)}</span>
                           )}
                         </td>
 
                         {/* Exam /70 */}
-                        <td className="px-2.5 py-2.5 text-center font-medium">
+                        <td className="px-2.5 py-2.5 text-center font-mono font-medium tabular-nums border-r border-slate-200">
                           {isAbsent ? (
-                            <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-bold text-rose-900">
+                            <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-bold text-rose-900 border border-rose-300">
                               AB
                             </span>
                           ) : (
-                            <span className="text-slate-900 font-semibold">{formatMark(m?.exam)}</span>
+                            <span className="text-slate-900 font-bold">{formatMark(m?.exam)}</span>
                           )}
                         </td>
 
-                        {/* Total /100 */}
-                        <td className="px-2.5 py-2.5 text-center bg-slate-50/70">
+                        {/* Total /100 — GOLDEN YELLOW SHADE COLUMN */}
+                        <td className="px-2.5 py-2.5 text-center bg-amber-50/70 border-x border-amber-200/90">
                           {isAbsent ? (
                             <span className="text-[11px] font-bold text-rose-700">AB</span>
                           ) : m?.total !== null && m?.total !== undefined ? (
-                            <span className="text-xs font-black text-slate-900">
+                            <span className="text-xs font-black text-amber-950 font-mono tabular-nums">
                               {formatMark(m.total)}
                             </span>
                           ) : (
-                            <span className="text-slate-300">—</span>
+                            <span className="text-amber-300/80 font-light">—</span>
                           )}
                         </td>
 
                         {/* Grade */}
-                        <td className="px-3 py-2.5 text-center whitespace-nowrap">
+                        <td className="px-3 py-2.5 text-center whitespace-nowrap bg-amber-50/30">
                           {isAbsent ? (
                             <span className="inline-block rounded px-2 py-0.5 text-[10px] font-bold bg-rose-50 text-rose-800 border border-rose-200">
                               ABSENT
@@ -528,21 +564,21 @@ export function AssessmentMarkbookViewTable({
                       </>
                     ) : (
                       <>
-                        {/* CAT Mark */}
-                        <td className="px-3 py-2.5 text-center bg-slate-50/70">
+                        {/* CAT Mark — GOLDEN YELLOW SHADE */}
+                        <td className="px-3 py-2.5 text-center bg-amber-50/70 border-x border-amber-200/90">
                           {isAbsent || isCatAbsent ? (
                             <span className="text-[11px] font-bold text-rose-700">AB</span>
                           ) : m?.cat !== null && m?.cat !== undefined ? (
-                            <span className="text-xs font-black text-slate-900">
+                            <span className="text-xs font-black text-amber-950 font-mono tabular-nums">
                               {formatMark(m.cat)}
                             </span>
                           ) : (
-                            <span className="text-slate-300">—</span>
+                            <span className="text-amber-300/80 font-light">—</span>
                           )}
                         </td>
 
                         {/* Grade */}
-                        <td className="px-3 py-2.5 text-center whitespace-nowrap">
+                        <td className="px-3 py-2.5 text-center whitespace-nowrap bg-amber-50/30">
                           {m?.grade ? (
                             <span
                               className={`inline-block rounded px-2 py-0.5 text-[10px] ${getGradeBadgeClass(
@@ -578,33 +614,34 @@ export function AssessmentMarkbookViewTable({
 
           {/* Table Footer: Class Average */}
           {stats.markedCandidates > 0 ? (
-            <tfoot className="border-t-2 border-slate-300 bg-slate-50 font-bold text-slate-800">
+            <tfoot className="border-t-2 border-slate-300 bg-slate-100/90 font-bold text-slate-800">
               <tr>
-                <td colSpan={3} className="px-3.5 py-3 text-right uppercase tracking-wider text-[11px] text-slate-600 font-extrabold">
+                <td colSpan={3} className="px-3.5 py-3 text-right uppercase tracking-wider text-[11px] text-slate-700 font-extrabold border-r-2 border-slate-300">
                   Class Average ({stats.markedCandidates} candidates):
                 </td>
 
                 {assessmentType === 'exam' ? (
                   <>
-                    <td className="px-2.5 py-3 text-center text-slate-700">
+                    <td className="px-2.5 py-3 text-center text-slate-800 font-mono tabular-nums">
                       {formatMark(stats.meanAssignment)}
                     </td>
-                    <td className="px-2.5 py-3 text-center text-slate-700">
+                    <td className="px-2.5 py-3 text-center text-slate-800 font-mono tabular-nums">
                       {formatMark(stats.meanPresentation)}
                     </td>
-                    <td className="px-2.5 py-3 text-center text-slate-700">
+                    <td className="px-2.5 py-3 text-center text-slate-800 font-mono tabular-nums">
                       {formatMark(stats.meanRat)}
                     </td>
-                    <td className="px-2.5 py-3 text-center text-slate-700">
+                    <td className="px-2.5 py-3 text-center text-slate-800 font-mono tabular-nums border-r border-slate-200">
                       {formatMark(stats.meanCat)}
                     </td>
-                    <td className="px-2.5 py-3 text-center text-slate-900 font-black">
+                    <td className="px-2.5 py-3 text-center text-slate-900 font-mono font-black border-r border-slate-200">
                       {formatMark(stats.meanExam)}
                     </td>
-                    <td className="px-2.5 py-3 text-center bg-slate-100 font-black text-slate-900 text-xs">
+                    {/* Golden Yellow Highlight on Total Average */}
+                    <td className="px-2.5 py-3 text-center bg-amber-200/80 border-x border-amber-300 font-black text-amber-950 font-mono text-xs tabular-nums shadow-2xs">
                       {formatMark(stats.meanTotal)}
                     </td>
-                    <td className="px-3 py-3 text-center text-[10px] text-slate-600">
+                    <td className="px-3 py-3 text-center text-[10px] text-slate-700 bg-amber-50/40 font-bold">
                       {stats.meanTotal !== null
                         ? stats.meanTotal >= 75
                           ? 'DISTINCTION'
@@ -618,10 +655,11 @@ export function AssessmentMarkbookViewTable({
                   </>
                 ) : (
                   <>
-                    <td className="px-3 py-3 text-center bg-slate-100 font-black text-slate-900 text-xs">
+                    {/* Golden Yellow Highlight on CAT Average */}
+                    <td className="px-3 py-3 text-center bg-amber-200/80 border-x border-amber-300 font-black text-amber-950 font-mono text-xs tabular-nums shadow-2xs">
                       {formatMark(stats.meanCat)}
                     </td>
-                    <td colSpan={2} className="px-3 py-3 text-center text-[10px] text-slate-500 font-semibold">
+                    <td colSpan={2} className="px-3 py-3 text-center text-[10px] text-slate-600 bg-amber-50/40 font-bold">
                       {stats.passRate !== null ? `${stats.passRate}% Passed` : '—'}
                     </td>
                   </>

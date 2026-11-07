@@ -1,3 +1,10 @@
+### 2026-11-08: Remove Cohorts column from Assessment Deliverables & Submissions table
+
+**Modified:**
+- `src/features/assessment/assessment-control-center.tsx`:
+  - Removed the `Cohorts` column (`<th>` and `<td>`) from the desktop deliverables table and removed the inline cohort badges from the mobile card view. The cohort filter dropdown and cohort-aware search remain intact.
+- No schema changes; no manual follow-up required.
+
 ### 2026-11-08: Standardized Status Pills across Assessment Control Center
 
 **Modified:**

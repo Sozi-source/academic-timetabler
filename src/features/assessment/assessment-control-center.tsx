@@ -517,17 +517,8 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                     />
                   </div>
 
-                  {/* Cohorts & Trainer */}
+                  {/* Trainer & Candidates */}
                   <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                    {unit.cohortNames.map((c) => (
-                      <span
-                        key={c}
-                        className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600 border border-slate-200"
-                      >
-                        {c}
-                      </span>
-                    ))}
-                    <span className="text-slate-300">·</span>
                     <span className="text-slate-600">{unit.trainerNames.join(', ') || 'Unassigned'}</span>
                     <span className="text-slate-300">·</span>
                     <span className="font-semibold text-slate-700">{unit.registrationCount} candidates</span>
@@ -595,7 +586,6 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                 <thead className="border-b border-border bg-surface-subtle text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                   <tr>
                     <th className="px-4 py-3">Unit name & code</th>
-                    <th className="px-3 py-3">Cohorts</th>
                     <th className="px-3 py-3">Lead trainer</th>
                     <th className="px-3 py-3 text-center">Candidates</th>
                     <th className="px-3 py-3 whitespace-nowrap">CAT milestone</th>
@@ -614,24 +604,6 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                         </div>
                         <div className="mt-0.5 font-mono text-[11px] font-medium text-slate-400">
                           {unit.unitCode}
-                        </div>
-                      </td>
-
-                      {/* Clean Cohorts Display */}
-                      <td className="px-3 py-3">
-                        <div className="flex flex-wrap items-center gap-1">
-                          {unit.cohortNames.length === 0 ? (
-                            <span className="text-slate-400 text-xs">All cohorts</span>
-                          ) : (
-                            unit.cohortNames.map((c) => (
-                              <span
-                                key={c}
-                                className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700 border border-slate-200/80"
-                              >
-                                {c}
-                              </span>
-                            ))
-                          )}
                         </div>
                       </td>
 

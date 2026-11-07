@@ -1,3 +1,26 @@
+### 2026-11-07: Consolidated Marksheets per Unit & per Cohort Broadsheet Matrix (`/assessment/reports`)
+
+**Added & Modified:**
+- `src/features/assessment/reports/queries.ts`:
+  - Extended `getActiveAssessmentPeriodReportData` with an optional `targetPeriodId?: string` parameter to allow historical academic period selection while remaining backward compatible with existing report routes (`/api/assessment/reports/cat` & `/api/assessment/reports/exam`).
+  - Added query logic to fetch draft marks from `assessment_online_mark_drafts` and absence status from `assessment_roster` alongside official results, computing totals and letter grades accurately.
+  - Added multi-department isolation and period metadata queries.
+- `src/features/assessment/reports/consolidated-marksheet-viewer.tsx`:
+  - Created a dual-mode interactive consolidated marksheet viewer:
+    - **Per Cohort Broadsheet Matrix**: Select any cohort to inspect the entire semester broadsheet across all units. Shows each student as a row with individual unit scores, overall average, total marks, TVET recommendation status (`PASS`, `REFER (X)`, `INCOMPLETE`), and unit column statistics (mean mark, pass rate %).
+    - **Per Unit Consolidated Marksheet**: Select any unit to view all registered students across cohorts who took the unit, complete with component mark breakdowns (Assignment, Presentation, RAT, CAT, Exam, Total /100, Grade), component average footers, and direct navigation links to individual unit markbooks.
+  - Added cohort & unit search, status filters (Passed, Referred, Incomplete), academic period selector, CSV export for both views, and print view styling.
+- `src/app/(dashboard)/assessment/reports/page.tsx`:
+  - Embedded `ConsolidatedMarksheetViewer` as the core view on `/assessment/reports`, accepting URL query parameters (`periodId`, `view`, `cohortId`, `unitId`).
+- `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`:
+  - Added quick-access link to `/assessment/reports?view=unit&unitId=${assessment.unit?.id}` directly from the unit markbook toolbar.
+- `src/features/assessment/assessment-control-center.tsx`:
+  - Added "Consolidated Marksheets" navigation card to the Assessment Control Center.
+- `src/tests/consolidated-marksheet-broadsheet.test.ts`:
+  - Added comprehensive test suite verifying student average calculations, unit column statistics, TVET recommendation determination, and multi-cohort student grouping.
+
+No database migrations or manual follow-up required.
+
 ### 2026-11-07: Markbook view — remove Cohort / Exam Status columns, show AB for missed CAT & Exam
 
 **Modified:**

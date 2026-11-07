@@ -193,7 +193,15 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                 <th className="px-4 py-2.5">Unit / cohort</th><th className="px-3 py-2.5">Component</th><th className="px-3 py-2.5">Status</th><th className="px-3 py-2.5">Submitted by</th><th className="px-3 py-2.5">Submitted</th><th className="px-4 py-2.5 text-right"> </th>
               </tr></thead>
               <tbody className="divide-y divide-border">{submissionRows.map((row) => <tr key={row.id} className="hover:bg-surface-subtle/60">
-                <td className="px-4 py-2.5"><span className="block font-medium text-slate-700">{row.unit}</span><span className="text-[10px] text-slate-500">{row.unitCode}{row.unitCode ? ' · ' : ''}{row.cohort}</span></td>
+                <td className="px-4 py-2.5">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="font-semibold text-slate-800">{row.unit}</span>
+                    <span className="inline-flex items-center rounded-md bg-sky-50 px-2 py-0.5 text-[10px] font-semibold text-sky-800 border border-sky-200/80 shadow-2xs">
+                      {row.cohort}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-400">{row.unitCode}</span>
+                </td>
                 <td className="px-3 py-2.5 text-slate-600">{row.component}</td>
                 <td className="px-3 py-2.5"><span className={`rounded-full px-2 py-1 text-[10px] font-medium ${row.status === 'Submitted' ? 'bg-emerald-50 text-emerald-700' : row.status === 'In progress' ? 'bg-amber-50 text-amber-800' : 'bg-slate-100 text-slate-600'}`}>{row.status}</span></td>
                 <td className="px-3 py-2.5 text-slate-600">{row.submittedBy ?? '—'}</td>

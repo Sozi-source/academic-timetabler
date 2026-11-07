@@ -1,3 +1,10 @@
+### 2026-11-07: Clarify multi-cohort entries in assessment submission tracker
+
+**Modified:**
+- `src/features/assessment/assessment-control-center.tsx`:
+  - Upgraded the `Unit / cohort` cell in the Submission Tracker to prominently display the cohort as a distinct, colored badge (`bg-sky-50 text-sky-800 border border-sky-200/80`) alongside the unit name. This makes it immediately clear that multi-cohort units (such as Biochemistry II taken by both `DHN JAN/MAR 25` and `DHN MAY 24`) represent separate cohort-specific tracking lines rather than duplicate records.
+- No schema changes; no manual follow-up required.
+
 ### 2026-11-07: Account for online drafts in assessment result count & show component submission status
 
 **Modified:**

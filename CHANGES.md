@@ -1,3 +1,12 @@
+### 2026-11-07: Account for online drafts in assessment result count & show component submission status
+
+**Modified:**
+- `src/features/assessment/marks/queries.ts`:
+  - Updated `getAssessmentResultCount` to query both `assessment_results` and `assessment_online_mark_drafts` so progressive component submissions (e.g. CAT drafts entered by trainers before exam finalization) are accurately counted rather than reporting 0 recorded results.
+- `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`:
+  - Added contextual status badge when components are submitted (e.g. `CAT Submitted (12)`), preventing premature `Pending Marks` labels when trainer submissions are already recorded.
+- No schema changes; no manual follow-up required.
+
 ### 2026-11-07: Refine unit name presentation and prevent name/admission column wrapping
 
 **Modified:**

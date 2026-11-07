@@ -75,6 +75,10 @@ export default async function AssessmentMarkWorkflowPage({
               <Badge variant="neutral" className="bg-green-50 text-green-800">
                 Marks Submitted
               </Badge>
+            ) : componentSubmissionState.submissions.length > 0 ? (
+              <Badge variant="neutral" className="bg-emerald-50 text-emerald-800 border border-emerald-200">
+                {componentSubmissionState.submissions.map((s) => s.component_key.toUpperCase()).filter((v, i, a) => a.indexOf(v) === i).join(', ')} Submitted ({resultCount})
+              </Badge>
             ) : isDraft ? (
               <Badge variant="neutral" className="bg-slate-100 text-slate-700">
                 In Progress ({resultCount})

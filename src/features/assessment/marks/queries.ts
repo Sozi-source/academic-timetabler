@@ -38,12 +38,20 @@ export const getAssessmentMarkImportBatch = cache(async (batchId: string) => {
 
 export const getAssessmentResultCount = cache(async (assessmentId: string) => {
   const supabase = await createClient();
-  const { count, error } = await supabase
-    .from('assessment_results')
-    .select('id', { count: 'exact', head: true })
-    .eq('assessment_event_id', assessmentId);
-  if (error) throw new Error(`Unable to load assessment results count: ${error.message}`);
-  return count ?? 0;
+  const [resultsRes, draftsRes] = await Promise.all([
+    supabase
+      .from('assessment_results')
+      .select('id', { count: 'exact', head: true })
+      .eq('assessment_event_id', assessmentId),
+    supabase
+      .from('assessment_online_mark_drafts')
+      .select('id', { count: 'exact', head: true })
+      .eq('assessment_id', assessmentId),
+  ]);
+  if (resultsRes.error) throw new Error(`Unable to load assessment results count: ${resultsRes.error.message}`);
+  const resultsCount = resultsRes.count ?? 0;
+  const draftsCount = draftsRes.count ?? 0;
+  return Math.max(resultsCount, draftsCount);
 });
 
 export const getAssessmentMarkComponentSubmissions = cache(async (assessmentId: string) => {

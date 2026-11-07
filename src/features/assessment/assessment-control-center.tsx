@@ -174,6 +174,8 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
               isOpen={data.marksEntryStatus.isOpen}
               openCount={data.marksEntryStatus.openCount}
               totalCount={data.marksEntryStatus.totalCount}
+              cat={data.marksEntryStatus.cat}
+              exam={data.marksEntryStatus.exam}
             />
             <Link
               href="/dashboard"

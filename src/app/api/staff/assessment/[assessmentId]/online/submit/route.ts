@@ -186,6 +186,28 @@ export async function POST(
     attendance_status: entry.attendanceStatus === 'absent' ? 'absent' : 'expected',
   }));
 
+  // Verify phased component entry permissions
+  const { data: eventData } = await admin
+    .from('assessment_events')
+    .select('*')
+    .eq('id', targetAssessmentId)
+    .maybeSingle();
+
+  const isCatOpen = eventData ? ((eventData.trainer_cat_entry_open ?? eventData.trainer_entry_open) === true && eventData.status !== 'closed') : false;
+  const isExamOpen = eventData ? (Boolean(eventData.trainer_exam_entry_open) && eventData.status !== 'closed' && eventData.exam_marks_finalized_at === null) : false;
+
+  if (component === 'cat' && !isCatOpen) {
+    return NextResponse.json({
+      message: 'Continuous Assessment (CAT) mark entry is currently closed by the department administration.',
+    }, { status: 403 });
+  }
+
+  if ((component === 'all' || component === 'exam') && !isExamOpen) {
+    return NextResponse.json({
+      message: 'Final examination mark entry is currently closed by the department administration. Only CAT marks may be submitted at this time.',
+    }, { status: 403 });
+  }
+
   if (component === 'cat') {
     // Milestone 1: CAT marks submission (midterm milestone)
     // Any unentered CAT mark is automatically recorded as an explicit AB absence.

@@ -33,6 +33,8 @@ describe('assessment control center calculations', () => {
       isPublished: true,
       publishedAt: '2026-08-21T16:00:00Z',
       trainerEntryOpen: true,
+      trainerCatEntryOpen: true,
+      trainerExamEntryOpen: true,
     };
 
     expect(item.populationLocked).toBe(true);
@@ -74,6 +76,8 @@ describe('assessment control center calculations', () => {
       isPublished: false,
       publishedAt: null,
       trainerEntryOpen: false,
+      trainerCatEntryOpen: false,
+      trainerExamEntryOpen: false,
     };
 
     expect(item.populationLocked).toBe(false);

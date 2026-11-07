@@ -73,6 +73,8 @@ function toInput(value: number | null): string {
 export function OnlineMarksEditor({
   assessmentId,
   trainerEntryOpen,
+  trainerCatEntryOpen = trainerEntryOpen,
+  trainerExamEntryOpen = false,
   workflowStatus,
   componentSubmissions,
   students,
@@ -80,6 +82,8 @@ export function OnlineMarksEditor({
 }: {
   assessmentId: string;
   trainerEntryOpen: boolean;
+  trainerCatEntryOpen?: boolean;
+  trainerExamEntryOpen?: boolean;
   workflowStatus: string | null;
   componentSubmissions: ComponentSubmission[];
   students: StudentRow[];
@@ -1137,7 +1141,8 @@ export function OnlineMarksEditor({
                                 ? 'AB'
                                 : '—'
                           }
-                          disabled={!editable || busy !== null || componentIsSubmitted(key, row.student.cohortId)}
+                          disabled={!editable || busy !== null || componentIsSubmitted(key, row.student.cohortId) || (key === 'exam' && !trainerExamEntryOpen)}
+                          title={key === 'exam' && !trainerExamEntryOpen ? 'Final exam mark entry is locked by HOD' : undefined}
                           onFocus={(e) => e.currentTarget.select()}
                           onChange={(event) =>
                             setField(
@@ -1251,7 +1256,8 @@ export function OnlineMarksEditor({
                                     ? 'AB'
                                     : '—'
                               }
-                              disabled={!editable || busy !== null || componentIsSubmitted(key, row.student.cohortId)}
+                              disabled={!editable || busy !== null || componentIsSubmitted(key, row.student.cohortId) || (key === 'exam' && !trainerExamEntryOpen)}
+                          title={key === 'exam' && !trainerExamEntryOpen ? 'Final exam mark entry is locked by HOD' : undefined}
                               onFocus={(e) => e.currentTarget.select()}
                               onChange={(event) =>
                                 setField(
@@ -1455,6 +1461,11 @@ export function OnlineMarksEditor({
                 >
                   Revise Final Marks
                 </Button>
+              ) : !trainerExamEntryOpen ? (
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-900">
+                  <Lock className="size-3.5 text-amber-700" />
+                  Final Exam Entry closed by HOD
+                </span>
               ) : trainerEntryOpen ? (
                 <Button
                   type="button"

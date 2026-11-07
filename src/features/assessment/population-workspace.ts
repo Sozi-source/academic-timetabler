@@ -67,6 +67,8 @@ export interface AssessmentPopulationWorkspace {
     | null;
   workflowStatus: string | null;
   trainerEntryOpen: boolean;
+  trainerCatEntryOpen?: boolean;
+  trainerExamEntryOpen?: boolean;
   marksSubmittedAt: string | null;
   populationGeneratedAt: string | null;
   populationLockedAt: string | null;
@@ -167,7 +169,7 @@ export const getAllocationPopulationWorkspace = cache(
         resolvedAssessmentId = provisionedId as string;
         const { data: provisionedEvent } = await supabase
           .from('assessment_events')
-          .select('trainer_entry_open, marks_submitted_at')
+          .select('*')
           .eq('id', resolvedAssessmentId)
           .maybeSingle();
         trainerEntryOpen = provisionedEvent?.trainer_entry_open === true;
@@ -247,7 +249,7 @@ export const getAssessmentPopulationWorkspace =
 
     const { data: eventControl, error: controlError } = await supabase
       .from('assessment_events')
-      .select('trainer_entry_open, marks_submitted_at')
+      .select('*')
       .eq('id', assessmentId)
       .maybeSingle();
     if (controlError) throw new Error(`Unable to load trainer entry status: ${controlError.message}`);
@@ -453,6 +455,8 @@ export const getAssessmentPopulationWorkspace =
           event.workflow_status,
         ),
       trainerEntryOpen: eventControl?.trainer_entry_open === true,
+      trainerCatEntryOpen: ((eventControl as Record<string, unknown> | null)?.trainer_cat_entry_open ?? eventControl?.trainer_entry_open) === true,
+      trainerExamEntryOpen: Boolean((eventControl as Record<string, unknown> | null)?.trainer_exam_entry_open),
       marksSubmittedAt: asString(eventControl?.marks_submitted_at),
       populationGeneratedAt:
         asString(

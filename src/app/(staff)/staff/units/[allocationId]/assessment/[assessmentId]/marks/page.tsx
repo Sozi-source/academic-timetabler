@@ -145,6 +145,8 @@ export default async function StaffOnlineMarksPage({
         }
         allowDraftDownload
         trainerEntryOpen={population.trainerEntryOpen}
+        trainerCatEntryOpen={(population as unknown as { trainerCatEntryOpen?: boolean }).trainerCatEntryOpen}
+        trainerExamEntryOpen={(population as unknown as { trainerExamEntryOpen?: boolean }).trainerExamEntryOpen}
         workflowStatus={
           population.workflowStatus
         }

@@ -78,11 +78,38 @@ export async function POST(request: Request) {
 
       const { data: rawEvents } = await admin
         .from('assessment_events')
-        .select('id,trainer_entry_open,status,exam_marks_finalized_at')
+        .select('*')
         .in('id', scopes.map((s) => s.assessment_id));
-      const isLocked = (rawEvents ?? []).some((e) => !e.trainer_entry_open || e.status === 'closed' || e.exam_marks_finalized_at !== null);
-      if (isLocked) {
+
+      const isCatOpen = (rawEvents ?? []).every((e) => (e.trainer_cat_entry_open ?? e.trainer_entry_open) === true && e.status !== 'closed');
+      const isExamOpen = (rawEvents ?? []).every((e) => Boolean(e.trainer_exam_entry_open) && e.status !== 'closed' && e.exam_marks_finalized_at === null);
+      const isGeneralOpen = (rawEvents ?? []).some((e) => e.trainer_entry_open && e.status !== 'closed' && e.exam_marks_finalized_at === null);
+
+      if (!isGeneralOpen && !isCatOpen && !isExamOpen) {
         return NextResponse.json({ message: 'Marks entry is currently closed by the department administration.' }, { status: 403 });
+      }
+
+      if (parsed.data.submit) {
+        if (parsed.data.component === 'cat' && !isCatOpen) {
+          return NextResponse.json({ message: 'Continuous Assessment (CAT) mark entry is currently closed by the department administration.' }, { status: 403 });
+        }
+        if ((parsed.data.component === 'all' || parsed.data.component === 'exam')) {
+          if (!isExamOpen) {
+            return NextResponse.json({
+              message: 'Final examination mark entry is currently closed by the department administration. Only CAT marks may be submitted at this time.',
+            }, { status: 403 });
+          }
+          const { data: catSubmissions } = await admin
+            .from('assessment_mark_component_submissions')
+            .select('id')
+            .in('assessment_id', scopes.map((s) => s.assessment_id))
+            .eq('component_key', 'cat');
+          if (!catSubmissions || catSubmissions.length === 0) {
+            return NextResponse.json({
+              message: 'Continuous assessment (CAT) marks must be submitted before final examination marks can be submitted.',
+            }, { status: 409 });
+          }
+        }
       }
 
       const { data: scopeRosterRows } = await admin
@@ -244,11 +271,41 @@ export async function POST(request: Request) {
 
       const { data: eventData } = await admin
         .from('assessment_events')
-        .select('id,trainer_entry_open,status,exam_marks_finalized_at')
+        .select('*')
         .eq('id', invite.assessment_id)
         .maybeSingle();
-      if (!eventData?.trainer_entry_open || eventData?.status === 'closed' || eventData?.exam_marks_finalized_at !== null) {
+
+      const isCatOpen = eventData ? ((eventData.trainer_cat_entry_open ?? eventData.trainer_entry_open) === true && eventData.status !== 'closed') : false;
+      const isExamOpen = eventData ? (Boolean(eventData.trainer_exam_entry_open) && eventData.status !== 'closed' && eventData.exam_marks_finalized_at === null) : false;
+      const isGeneralOpen = eventData ? (eventData.trainer_entry_open && eventData.status !== 'closed' && eventData.exam_marks_finalized_at === null) : false;
+
+      if (!isGeneralOpen && !isCatOpen && !isExamOpen) {
         return NextResponse.json({ message: 'Marks entry is currently closed by the department administration.' }, { status: 403 });
+      }
+
+      if (parsed.data.submit) {
+        if (parsed.data.component === 'cat' && !isCatOpen) {
+          return NextResponse.json({ message: 'Continuous Assessment (CAT) mark entry is currently closed by the department administration.' }, { status: 403 });
+        }
+        if ((parsed.data.component === 'all' || parsed.data.component === 'exam')) {
+          if (!isExamOpen) {
+            return NextResponse.json({
+              message: 'Final examination mark entry is currently closed by the department administration. Only CAT marks may be submitted at this time.',
+            }, { status: 403 });
+          }
+          const { data: catSub } = await admin
+            .from('assessment_mark_component_submissions')
+            .select('id')
+            .eq('assessment_id', invite.assessment_id)
+            .eq('component_key', 'cat')
+            .limit(1)
+            .maybeSingle();
+          if (!catSub) {
+            return NextResponse.json({
+              message: 'Continuous assessment (CAT) marks must be submitted before final examination marks can be submitted.',
+            }, { status: 409 });
+          }
+        }
       }
 
       const rawEntries = parsed.data.entries.map(({ assessment_id: _assessmentId, ...entry }) => entry);

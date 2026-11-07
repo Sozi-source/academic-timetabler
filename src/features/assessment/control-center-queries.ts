@@ -39,6 +39,22 @@ export interface AssessmentControlCenterItem {
   isPublished: boolean;
   publishedAt: string | null;
   trainerEntryOpen: boolean;
+  trainerCatEntryOpen: boolean;
+  trainerExamEntryOpen: boolean;
+}
+
+export interface MarksEntryComponentStatus {
+  isOpen: boolean;
+  openCount: number;
+  totalCount: number;
+}
+
+export interface MarksEntryStatus {
+  isOpen: boolean;
+  openCount: number;
+  totalCount: number;
+  cat?: MarksEntryComponentStatus;
+  exam?: MarksEntryComponentStatus;
 }
 
 export interface AssessmentControlCenterSummary {
@@ -77,11 +93,7 @@ export interface AssessmentControlCenterData {
   items: AssessmentControlCenterItem[];
   submissions: AssessmentSubmissionTrackerRow[];
   unitRegistrationCounts: Record<string, number>;
-  marksEntryStatus: {
-    isOpen: boolean;
-    openCount: number;
-    totalCount: number;
-  };
+  marksEntryStatus: MarksEntryStatus;
 }
 
 export const getAssessmentControlCenterData = cache(
@@ -587,6 +599,8 @@ export const getAssessmentControlCenterData = cache(
         isPublished,
         publishedAt: event.published_at,
         trainerEntryOpen: Boolean(event.trainer_entry_open),
+        trainerCatEntryOpen: Boolean((event as Record<string, unknown>).trainer_cat_entry_open ?? event.trainer_entry_open),
+        trainerExamEntryOpen: Boolean((event as Record<string, unknown>).trainer_exam_entry_open ?? false),
       });
     }
 
@@ -607,6 +621,8 @@ export const getAssessmentControlCenterData = cache(
     };
 
     const openCount = items.filter((item) => item.trainerEntryOpen).length;
+    const catOpenCount = items.filter((item) => item.trainerCatEntryOpen).length;
+    const examOpenCount = items.filter((item) => item.trainerExamEntryOpen).length;
 
     return {
       periods,
@@ -621,6 +637,16 @@ export const getAssessmentControlCenterData = cache(
         isOpen: openCount > 0,
         openCount,
         totalCount: items.length,
+        cat: {
+          isOpen: catOpenCount > 0,
+          openCount: catOpenCount,
+          totalCount: items.length,
+        },
+        exam: {
+          isOpen: examOpenCount > 0,
+          openCount: examOpenCount,
+          totalCount: items.length,
+        },
       },
     };
   }

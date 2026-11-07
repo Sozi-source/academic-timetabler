@@ -58,7 +58,7 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
         .select('assessment_id,student_id,cohort_id,pre_assessment_status')
         .in('assessment_id', assessmentIds),
       admin.from('assessment_events')
-        .select('id,trainer_entry_open,status,exam_marks_finalized_at')
+        .select('*')
         .in('id', assessmentIds),
     ]);
     if (eventsError || rosterError) throw new Error('Could not load the assigned unit markbooks.');
@@ -105,6 +105,8 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
       scopeRows: typeof scopeRows;
       locked: boolean;
       trainerEntryOpen: boolean;
+      trainerCatEntryOpen?: boolean;
+      trainerExamEntryOpen?: boolean;
     }>();
     const seenStudentIdsByCohort = new Map<string, Set<string>>();
 
@@ -122,6 +124,8 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
           scopeRows: [],
           locked: false,
           trainerEntryOpen: true,
+          trainerCatEntryOpen: true,
+          trainerExamEntryOpen: false,
         });
         seenStudentIdsByCohort.set(cohortKey, new Set());
       }
@@ -130,6 +134,9 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
       const rawEvent = assessmentEventById.get(scope.assessment_id);
       const isEntryOpen = rawEvent?.trainer_entry_open === true;
       cohort.trainerEntryOpen = isEntryOpen;
+      const rawEventRecord = rawEvent as (Record<string, unknown> & { trainer_cat_entry_open?: boolean; trainer_exam_entry_open?: boolean }) | undefined;
+      cohort.trainerCatEntryOpen = (rawEventRecord?.trainer_cat_entry_open ?? isEntryOpen) === true;
+      cohort.trainerExamEntryOpen = Boolean(rawEventRecord?.trainer_exam_entry_open);
       cohort.locked ||= !isEntryOpen || ['submitted', 'finalised', 'archived'].includes(event.workflow_status) || rawEvent?.status === 'closed' || Boolean(rawEvent?.exam_marks_finalized_at) || scope.revoked_at !== null || Date.parse(scope.expires_at) <= Date.now();
 
       const seenStudents = seenStudentIdsByCohort.get(cohortKey)!;
@@ -225,7 +232,7 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
       .select('student_id,cohort_id,pre_assessment_status')
       .eq('assessment_id', invite.assessment_id),
     admin.from('assessment_events')
-      .select('status,exam_marks_finalized_at,trainer_entry_open')
+      .select('*')
       .eq('id', invite.assessment_id)
       .maybeSingle<{ status: string; exam_marks_finalized_at: string | null; trainer_entry_open: boolean }>(),
   ]);
@@ -279,6 +286,9 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
 
   const componentSubmissions = Object.fromEntries((componentRows ?? []).map((row) => [row.component_key, row.submitted_at])) as TrainerMarkComponentSubmissions;
   const isTrainerEntryOpen = assessmentResult.data?.trainer_entry_open === true;
+  const singleEventRecord = assessmentResult.data as Record<string, unknown> | null;
+  const isTrainerCatOpen = (singleEventRecord?.trainer_cat_entry_open ?? isTrainerEntryOpen) === true;
+  const isTrainerExamOpen = Boolean(singleEventRecord?.trainer_exam_entry_open);
   const locked = !isTrainerEntryOpen || ['submitted', 'finalised', 'archived'].includes(event.workflow_status) || assessmentResult.data?.status === 'closed' || Boolean(assessmentResult.data?.exam_marks_finalized_at);
   return {
     trainerName: invite.trainer_name,
@@ -287,6 +297,8 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
     submittedAt: invite.submitted_at,
     locked,
     trainerEntryOpen: isTrainerEntryOpen,
+    trainerCatEntryOpen: isTrainerCatOpen,
+    trainerExamEntryOpen: isTrainerExamOpen,
     unit: { code: unitResult.data.code, name: unitResult.data.name },
     academicPeriod: periodResult.data.name,
     students: roster,

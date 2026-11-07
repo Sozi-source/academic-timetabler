@@ -1,3 +1,28 @@
+### 2026-11-08: Phased CAT and Exam entry control & reversal of premature exam marks
+
+**Modified / Added:**
+- `supabase/migrations/20261107234800_phased_cat_and_exam_marks_entry_control.sql`:
+  - Added `trainer_cat_entry_open` (default `true`) and `trainer_exam_entry_open` (default `false`) columns to `assessment_events`.
+  - Added overloaded stored procedure `set_department_trainer_entry(p_academic_period_id uuid, p_should_open boolean, p_component text)` allowing HODs to independently control Continuous Assessment (`'cat'`) and Final Examination (`'exam'`) submission windows.
+- Database Reversal (Applied Biological Sciences / Hannah Kahoro):
+  - Reversed accidental final exam submission for `CND 2107` / `CHN 1303` (`a8c2edf1-2128-4b2d-b7ff-405657a618ba`).
+  - Cleared `exam_marks_finalized_at`, `marks_submitted_at`, and `attendance_finalized_at` on the assessment event, returning status to `'open'`.
+  - Restored student attendance in `assessment_population` back to `'present'` and `assessment_roster` back to `'expected'`.
+  - Cleared `exam_mark` to `null` across all 17 students in `assessment_online_mark_drafts` while preserving genuine Assignment (4), RAT (8–13), and CAT (3–11) marks.
+- `src/features/assessment/admin-department-marks-entry-control.tsx` & `src/features/assessment/assessment-control-center.tsx`:
+  - Upgraded HOD assessment controls to feature dual independent entry windows: **CAT Entry Window** and **Exam Entry Window**, with individual status indicators and Lock/Unlock actions.
+- `src/app/api/assessment/trainer-entry/department/route.ts`:
+  - Added `component: 'cat' | 'exam' | 'all'` to API payload schema with graceful database fallback when migrations are pending.
+- `src/app/api/trainer-mark-entry/save/route.ts` & `src/app/api/staff/assessment/[assessmentId]/online/submit/route.ts`:
+  - Enforced phased component permissions: rejects exam marks submission with HTTP 403 when `trainerExamEntryOpen` is locked.
+  - Requires CAT submission before final examination marks can be submitted.
+  - Ensured CAT submissions never overwrite candidate attendance status or register false absenteeism.
+- `src/features/assessment/trainer-mark-entry-portal.tsx` & `src/features/staff-assessment/online-marks-editor.tsx`:
+  - Disabled the Exam `/70` input column with a lock indicator (`🔒`) when the final examination entry window is closed by the HOD.
+  - Automatically switches trainer action from "Submit Final Marks" to "Submit CAT marks" when only the CAT window is open.
+- `src/features/assessment/control-center-queries.ts`, `src/features/assessment/trainer-mark-entry.ts`, `src/features/assessment/population-workspace.ts`, `src/tests/assessment-control-center.test.ts`:
+  - Propagated `trainerCatEntryOpen` and `trainerExamEntryOpen` flags through session and cohort data structures.
+
 ### 2026-11-07: Consolidate shared units into single line with interactive cohort tabs
 
 **Modified:**

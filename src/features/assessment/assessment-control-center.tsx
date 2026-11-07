@@ -3,79 +3,82 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ClipboardList, FileSpreadsheet, FileText, GraduationCap, Lock, Search, UsersRound } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  ChevronDown,
+  ClipboardList,
+  Clock,
+  FileSpreadsheet,
+  GraduationCap,
+  Lock,
+  Search,
+  UsersRound,
+} from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/ui/page-header';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { AdminDepartmentMarksEntryControl } from './admin-department-marks-entry-control';
-import type { AssessmentControlCenterData } from './control-center-queries';
+import type {
+  AssessmentControlCenterData,
+  AssessmentControlCenterItem,
+  AssessmentSubmissionTrackerRow,
+} from './control-center-queries';
+
+interface UnifiedUnitDeliverable {
+  key: string;
+  unitId: string;
+  unitCode: string;
+  unitCodes: string[];
+  unitName: string;
+  cohortNames: string[];
+  trainerNames: string[];
+  registrationCount: number;
+  items: AssessmentControlCenterItem[];
+  catStatus: 'Submitted' | 'In progress' | 'Not started';
+  catSubmittedCount: number;
+  catSubmittedAt: string | null;
+  catSubmittedBy: string | null;
+  examStatus: 'Submitted' | 'In progress' | 'Closed' | 'Not started';
+  examSubmittedCount: number;
+  examSubmittedAt: string | null;
+  examSubmittedBy: string | null;
+  workflowStatus: 'Finalised' | 'Submitted' | 'In progress' | 'Open';
+  isComplete: boolean;
+  needsAttention: boolean;
+}
 
 export function AssessmentControlCenter({ data }: { data: AssessmentControlCenterData }) {
   const router = useRouter();
   const [search, setSearch] = useState('');
-  const [submissionSearch, setSubmissionSearch] = useState('');
-  const [submissionComponent, setSubmissionComponent] = useState('all');
-  const [submissionStatus, setSubmissionStatus] = useState('all');
-  const [needsAttention, setNeedsAttention] = useState(false);
-  const [selectedCohortTabs, setSelectedCohortTabs] = useState<Record<string, string>>({});
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterCohort, setFilterCohort] = useState('all');
+  const [needsAttentionOnly, setNeedsAttentionOnly] = useState(false);
 
-  // Group submissions by unit and component so multi-cohort units appear as ONE unit line with cohort tabs
-  const groupedSubmissions = useMemo(() => {
-    const groupsMap = new Map<string, {
-      key: string;
-      assessmentId: string;
-      unit: string;
-      unitCode: string;
-      component: string;
-      cohorts: Array<{
-        cohortName: string;
-        status: 'Submitted' | 'In progress' | 'Not started';
-        submittedAt: string | null;
-        submittedBy: string | null;
-      }>;
-    }>();
-
-    for (const row of data.submissions) {
-      const key = `${row.assessmentId}:${row.component}`;
-      let group = groupsMap.get(key);
-      if (!group) {
-        group = {
-          key,
-          assessmentId: row.assessmentId,
-          unit: row.unit,
-          unitCode: row.unitCode,
-          component: row.component,
-          cohorts: [],
-        };
-        groupsMap.set(key, group);
+  // Map submissions by assessmentId and component for instant lookup
+  const submissionsByAssessmentId = useMemo(() => {
+    const map = new Map<string, Map<string, AssessmentSubmissionTrackerRow>>();
+    for (const sub of data.submissions) {
+      let forEvent = map.get(sub.assessmentId);
+      if (!forEvent) {
+        forEvent = new Map();
+        map.set(sub.assessmentId, forEvent);
       }
-      group.cohorts.push({
-        cohortName: row.cohort,
-        status: row.status,
-        submittedAt: row.submittedAt,
-        submittedBy: row.submittedBy,
-      });
+      forEvent.set(sub.component.toUpperCase(), sub);
     }
-
-    return Array.from(groupsMap.values());
+    return map;
   }, [data.submissions]);
 
-  const filteredGroupedSubmissions = useMemo(() => {
-    const query = submissionSearch.trim().toLocaleLowerCase();
-    return groupedSubmissions.filter((group) => {
-      if (submissionComponent !== 'all' && group.component !== submissionComponent) return false;
-      if (submissionStatus !== 'all' && !group.cohorts.some((c) => c.status === submissionStatus)) return false;
-      if (needsAttention && !group.cohorts.some((c) => c.status !== 'Submitted')) return false;
-      if (!query) return true;
-      const cohortNames = group.cohorts.map((c) => c.cohortName).join(' ');
-      const submitters = group.cohorts.map((c) => c.submittedBy ?? '').join(' ');
-      return `${group.unit} ${group.unitCode} ${cohortNames} ${group.component} ${submitters}`
-        .toLocaleLowerCase()
-        .includes(query);
-    });
-  }, [groupedSubmissions, needsAttention, submissionComponent, submissionSearch, submissionStatus]);
-
-  const unitGroups = useMemo(() => {
+  // Aggregate assessment items by unit / equivalence group into clean, single-row deliverables
+  const unifiedUnits = useMemo<UnifiedUnitDeliverable[]>(() => {
     const byUnit = new Map<string, {
       unitId: string;
       unitIds: Set<string>;
@@ -83,8 +86,11 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
       unitCodes: Set<string>;
       unitName: string;
       trainerNames: Set<string>;
+      cohortNames: Set<string>;
       registrationCount: number;
+      items: AssessmentControlCenterItem[];
     }>();
+
     for (const item of data.items) {
       const groupKey = item.equivalenceGroupId ? `equivalence:${item.equivalenceGroupId}` : `unit:${item.unitId}`;
       let group = byUnit.get(groupKey);
@@ -96,51 +102,176 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
           unitCodes: new Set(item.equivalentUnitCodes.length ? item.equivalentUnitCodes : [item.unitCode]),
           unitName: item.canonicalUnitName ?? item.unitName,
           trainerNames: new Set<string>(),
+          cohortNames: new Set<string>(),
           registrationCount: 0,
+          items: [],
         };
         byUnit.set(groupKey, group);
       }
-      item.equivalentUnitIds.forEach((unitId) => group?.unitIds.add(unitId));
-      item.equivalentUnitCodes.forEach((unitCode) => group?.unitCodes.add(unitCode));
+
+      item.equivalentUnitIds.forEach((uid) => group?.unitIds.add(uid));
+      item.equivalentUnitCodes.forEach((code) => group?.unitCodes.add(code));
       if (item.canonicalUnitName) group.unitName = item.canonicalUnitName;
       item.trainerNames.forEach((trainer) => group?.trainerNames.add(trainer));
+      if (item.cohortName) group.cohortNames.add(item.cohortName);
+      group.items.push(item);
       group.registrationCount = Math.max(
         group.registrationCount,
-        ...[...group.unitIds].map((unitId) => data.unitRegistrationCounts[unitId] ?? 0),
+        ...[...group.unitIds].map((uid) => data.unitRegistrationCounts[uid] ?? 0),
       );
     }
 
-    return [...byUnit.values()]
-      .map((group) => ({
-        ...group,
-        unitCode: [...group.unitCodes].join(' · '),
-        trainerList: [...group.trainerNames],
-        registrationCount: group.registrationCount,
-      }))
-      .sort((first, second) => first.unitCode.localeCompare(second.unitCode));
-  }, [data.items, data.unitRegistrationCounts]);
+    return [...byUnit.entries()].map(([groupKey, group]) => {
+      let catSubmittedCount = 0;
+      let catInProgressCount = 0;
+      let examSubmittedCount = 0;
+      let examInProgressCount = 0;
+      let latestCatSubmittedAt: string | null = null;
+      let latestCatSubmittedBy: string | null = null;
+      let latestExamSubmittedAt: string | null = null;
+      let latestExamSubmittedBy: string | null = null;
 
-  const filteredUnitGroups = useMemo(() => {
+      for (const it of group.items) {
+        const eventSubs = submissionsByAssessmentId.get(it.id);
+        const catSub = eventSubs?.get('CAT');
+        const examSub = eventSubs?.get('EXAM');
+
+        // Check if any coursework sub-component has progress
+        const courseworkHasProgress = ['ASSIGNMENT', 'PRESENTATION', 'RAT', 'CAT'].some((comp) => {
+          const s = eventSubs?.get(comp);
+          return s && s.status !== 'Not started';
+        });
+
+        const isCatSub = it.isSubmitted || it.isFinalised || catSub?.status === 'Submitted';
+        const isCatProg = !isCatSub && (catSub?.status === 'In progress' || courseworkHasProgress || it.satCount > 0);
+
+        if (isCatSub) {
+          catSubmittedCount++;
+          if (catSub?.submittedAt && (!latestCatSubmittedAt || catSub.submittedAt > latestCatSubmittedAt)) {
+            latestCatSubmittedAt = catSub.submittedAt;
+            latestCatSubmittedBy = catSub.submittedBy;
+          }
+        } else if (isCatProg) {
+          catInProgressCount++;
+        }
+
+        const isExamSub = it.isFinalised || it.isSubmitted || examSub?.status === 'Submitted';
+        const isExamProg = !isExamSub && (examSub?.status === 'In progress');
+
+        if (isExamSub) {
+          examSubmittedCount++;
+          if (examSub?.submittedAt && (!latestExamSubmittedAt || examSub.submittedAt > latestExamSubmittedAt)) {
+            latestExamSubmittedAt = examSub.submittedAt;
+            latestExamSubmittedBy = examSub.submittedBy;
+          }
+        } else if (isExamProg) {
+          examInProgressCount++;
+        }
+      }
+
+      const totalItems = group.items.length;
+      let catStatus: 'Submitted' | 'In progress' | 'Not started' = 'Not started';
+      if (catSubmittedCount > 0 && catSubmittedCount === totalItems) {
+        catStatus = 'Submitted';
+      } else if (catSubmittedCount > 0 || catInProgressCount > 0) {
+        catStatus = 'In progress';
+      }
+
+      const allExamClosed = group.items.every((it) => !it.trainerExamEntryOpen);
+      let examStatus: 'Submitted' | 'In progress' | 'Closed' | 'Not started' = 'Not started';
+      if (examSubmittedCount > 0 && examSubmittedCount === totalItems) {
+        examStatus = 'Submitted';
+      } else if (examSubmittedCount > 0 || examInProgressCount > 0) {
+        examStatus = 'In progress';
+      } else if (allExamClosed) {
+        examStatus = 'Closed';
+      }
+
+      const allFinalised = group.items.length > 0 && group.items.every((it) => it.isFinalised);
+      const allSubmitted = group.items.length > 0 && (allFinalised || (catSubmittedCount === totalItems && examSubmittedCount === totalItems));
+      const hasAnyProgress = catSubmittedCount > 0 || catInProgressCount > 0 || examSubmittedCount > 0 || examInProgressCount > 0;
+
+      let workflowStatus: 'Finalised' | 'Submitted' | 'In progress' | 'Open' = 'Open';
+      if (allFinalised) {
+        workflowStatus = 'Finalised';
+      } else if (allSubmitted) {
+        workflowStatus = 'Submitted';
+      } else if (hasAnyProgress) {
+        workflowStatus = 'In progress';
+      }
+
+      const isComplete = allFinalised || allSubmitted;
+      const needsAttention = !isComplete && (catStatus !== 'Submitted' || examStatus === 'In progress');
+
+      return {
+        key: groupKey,
+        unitId: group.unitId,
+        unitCode: [...group.unitCodes].join(' · '),
+        unitCodes: [...group.unitCodes],
+        unitName: group.unitName,
+        cohortNames: [...group.cohortNames].sort(),
+        trainerNames: [...group.trainerNames],
+        registrationCount: group.registrationCount,
+        items: group.items,
+        catStatus,
+        catSubmittedCount,
+        catSubmittedAt: latestCatSubmittedAt,
+        catSubmittedBy: latestCatSubmittedBy,
+        examStatus,
+        examSubmittedCount,
+        examSubmittedAt: latestExamSubmittedAt,
+        examSubmittedBy: latestExamSubmittedBy,
+        workflowStatus,
+        isComplete,
+        needsAttention,
+      };
+    }).sort((a, b) => a.unitCode.localeCompare(b.unitCode));
+  }, [data.items, data.unitRegistrationCounts, submissionsByAssessmentId]);
+
+  // Distinct cohort list for filtering
+  const allCohorts = useMemo(() => {
+    const set = new Set<string>();
+    for (const item of data.items) {
+      if (item.cohortName) set.add(item.cohortName);
+    }
+    return [...set].sort();
+  }, [data.items]);
+
+  // Filtered deliverables list
+  const filteredUnits = useMemo(() => {
     const query = search.trim().toLocaleLowerCase();
-    if (!query) return unitGroups;
-    return unitGroups.filter((group) =>
-      group.unitCode.toLocaleLowerCase().includes(query) ||
-      group.unitName.toLocaleLowerCase().includes(query) ||
-      group.trainerList.some((trainer) => trainer.toLocaleLowerCase().includes(query)) ||
-      data.items.some((item) => group.unitIds.has(item.unitId) && item.cohortName.toLocaleLowerCase().includes(query)),
-    );
-  }, [data.items, search, unitGroups]);
+    return unifiedUnits.filter((unit) => {
+      if (needsAttentionOnly && !unit.needsAttention) return false;
+      if (filterCohort !== 'all' && !unit.cohortNames.includes(filterCohort)) return false;
+
+      if (filterStatus === 'needs-attention' && !unit.needsAttention) return false;
+      if (filterStatus === 'cat-submitted' && unit.catStatus !== 'Submitted') return false;
+      if (filterStatus === 'exam-submitted' && unit.examStatus !== 'Submitted') return false;
+      if (filterStatus === 'completed' && !unit.isComplete) return false;
+      if (filterStatus === 'not-started' && (unit.catStatus !== 'Not started' || unit.examStatus === 'Submitted')) return false;
+
+      if (!query) return true;
+      const cohortStr = unit.cohortNames.join(' ').toLocaleLowerCase();
+      const trainerStr = unit.trainerNames.join(' ').toLocaleLowerCase();
+      return (
+        unit.unitName.toLocaleLowerCase().includes(query) ||
+        unit.unitCode.toLocaleLowerCase().includes(query) ||
+        cohortStr.includes(query) ||
+        trainerStr.includes(query)
+      );
+    });
+  }, [filterCohort, filterStatus, needsAttentionOnly, search, unifiedUnits]);
 
   const totalCurrentRegistrations = useMemo(() => {
-    return unitGroups.reduce((total, group) => total + group.registrationCount, 0);
-  }, [unitGroups]);
+    return unifiedUnits.reduce((total, group) => total + group.registrationCount, 0);
+  }, [unifiedUnits]);
 
   const handlePeriodChange = (periodId: string) => {
     router.push(`/assessment?periodId=${periodId}`);
   };
 
   const statCards = [
-    { label: 'Units', value: unitGroups.length, note: data.selectedPeriodName, icon: ClipboardList },
+    { label: 'Units', value: unifiedUnits.length, note: data.selectedPeriodName, icon: ClipboardList },
     { label: 'Current unit registrations', value: totalCurrentRegistrations, note: 'Each student is counted once per registered unit', icon: UsersRound },
     { label: 'Submitted markbooks', value: `${data.summary.submittedCount} / ${data.summary.totalMarkbooks}`, note: 'Marks submitted for HOD review', icon: GraduationCap },
   ];
@@ -219,6 +350,7 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
         />
       </section>
 
+      {/* Summary KPI Cards */}
       <section aria-label="Assessment summary" className="grid gap-3 sm:grid-cols-3">
         {statCards.map(({ label, value, note, icon: Icon }) => (
           <div key={label} className="flex min-h-24 items-center gap-3 rounded-xl border border-border bg-surface px-4 py-3 shadow-2xs">
@@ -234,213 +366,379 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
         ))}
       </section>
 
+      {/* Master Assessment Deliverables Tracker */}
       <section className="overflow-hidden rounded-xl border border-border bg-surface shadow-2xs">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
           <div>
-            <h2 className="text-sm font-semibold text-slate-700">Submission tracker</h2>
-            <p className="mt-0.5 text-xs text-slate-500">{filteredGroupedSubmissions.length} unit deliverables tracked</p>
+            <h2 className="text-sm font-semibold text-slate-800">Assessment Deliverables & Submissions</h2>
+            <p className="mt-0.5 text-xs text-slate-500">
+              {filteredUnits.length} {filteredUnits.length === 1 ? 'unit' : 'units'} · Monitor Continuous Assessment (CAT) and Final Examination milestones
+            </p>
           </div>
-          <button type="button" onClick={() => setNeedsAttention((current) => !current)} aria-pressed={needsAttention}
-            className={`h-8 rounded-lg border px-3 text-xs font-medium ${needsAttention ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-border bg-surface text-slate-600 hover:bg-surface-subtle'}`}>
+          <button
+            type="button"
+            onClick={() => setNeedsAttentionOnly((current) => !current)}
+            aria-pressed={needsAttentionOnly}
+            className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition ${
+              needsAttentionOnly
+                ? 'border-amber-300 bg-amber-50 text-amber-800 shadow-2xs'
+                : 'border-border bg-surface text-slate-600 hover:bg-surface-subtle'
+            }`}
+          >
+            <Clock className="size-3.5" />
             Needs attention
           </button>
         </div>
-        <div className="grid gap-2 border-b border-border p-3 sm:grid-cols-[minmax(180px,1fr)_150px_150px]">
+
+        {/* Filters bar */}
+        <div className="grid gap-2 border-b border-border p-3 sm:grid-cols-[minmax(200px,1fr)_160px_160px]">
           <label className="relative">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-slate-400" />
-            <input type="search" value={submissionSearch} onChange={(event) => setSubmissionSearch(event.target.value)} placeholder="Search unit, cohort or trainer"
-              className="h-9 w-full rounded-lg border border-border bg-surface pl-8 pr-3 text-xs text-slate-600 placeholder:text-slate-400 outline-none focus:border-primary" />
-          </label>
-          <select aria-label="Filter by component" value={submissionComponent} onChange={(event) => setSubmissionComponent(event.target.value)} className="h-9 rounded-lg border border-border bg-surface px-2.5 text-xs text-slate-600">
-            <option value="all">All components</option>{['ASSIGNMENT', 'PRESENTATION', 'RAT', 'CAT', 'EXAM'].map((value) => <option key={value}>{value}</option>)}
-          </select>
-          <select aria-label="Filter by status" value={submissionStatus} onChange={(event) => setSubmissionStatus(event.target.value)} className="h-9 rounded-lg border border-border bg-surface px-2.5 text-xs text-slate-600">
-            <option value="all">All statuses</option>{['Submitted', 'In progress', 'Not started'].map((value) => <option key={value}>{value}</option>)}
-          </select>
-        </div>
-        {filteredGroupedSubmissions.length === 0 ? <p className="px-4 py-8 text-center text-xs text-slate-500">No submissions match these filters.</p> : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-left text-xs">
-              <thead className="bg-surface-subtle text-[10px] font-medium uppercase tracking-wide text-slate-500"><tr>
-                <th className="px-4 py-2.5">Unit / Sharing cohorts</th><th className="px-3 py-2.5">Component</th><th className="px-3 py-2.5">Status</th><th className="px-3 py-2.5">Submitted by</th><th className="px-3 py-2.5">Submitted</th><th className="px-4 py-2.5 text-right"> </th>
-              </tr></thead>
-              <tbody className="divide-y divide-border">
-                {filteredGroupedSubmissions.map((group) => {
-                  const activeCohort = group.cohorts.find((c) => c.cohortName === selectedCohortTabs[group.key]) ?? group.cohorts[0];
-                  const allSubmitted = group.cohorts.length > 1 && group.cohorts.every((c) => c.status === 'Submitted');
-
-                  return (
-                    <tr key={group.key} className="hover:bg-surface-subtle/60">
-                      <td className="px-4 py-2.5">
-                        <div className="flex flex-wrap items-baseline gap-1.5">
-                          <span className="font-bold text-slate-900">{group.unit}</span>
-                          {group.unitCode ? (
-                            <span className="font-mono text-[11px] font-medium text-slate-400">
-                              ({group.unitCode})
-                            </span>
-                          ) : null}
-                        </div>
-
-                        {/* Sharing Cohort Tabs */}
-                        {group.cohorts.length > 1 ? (
-                          <div className="mt-1.5 flex flex-wrap items-center gap-1" role="tablist" aria-label={`Sharing cohorts for ${group.unit}`}>
-                            <span className="text-[10px] font-bold text-slate-400 mr-1 uppercase tracking-wider">Cohorts:</span>
-                            {group.cohorts.map((c) => {
-                              const isActive = activeCohort.cohortName === c.cohortName;
-                              const isSub = c.status === 'Submitted';
-                              const isInProg = c.status === 'In progress';
-                              return (
-                                <button
-                                  key={c.cohortName}
-                                  type="button"
-                                  role="tab"
-                                  aria-selected={isActive}
-                                  onClick={() => setSelectedCohortTabs((prev) => ({ ...prev, [group.key]: c.cohortName }))}
-                                  className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-bold transition border shadow-2xs ${
-                                    isActive
-                                      ? 'bg-slate-900 text-white border-slate-900'
-                                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900'
-                                  }`}
-                                >
-                                  <span
-                                    className={`size-1.5 rounded-full ${
-                                      isSub ? 'bg-emerald-400' : isInProg ? 'bg-amber-400' : 'bg-slate-300'
-                                    }`}
-                                  />
-                                  <span>{c.cohortName}</span>
-                                </button>
-                              );
-                            })}
-                          </div>
-                        ) : (
-                          <div className="mt-0.5">
-                            <span className="inline-flex items-center rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600 border border-slate-200/80">
-                              {group.cohorts[0]?.cohortName || 'All cohorts'}
-                            </span>
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-3 py-2.5 font-bold text-slate-700">{group.component}</td>
-                      <td className="px-3 py-2.5">
-                        <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold border ${
-                          activeCohort.status === 'Submitted'
-                            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                            : activeCohort.status === 'In progress'
-                              ? 'bg-amber-50 text-amber-800 border-amber-200'
-                              : 'bg-slate-100 text-slate-600 border-slate-200'
-                        }`}>
-                          {activeCohort.status}
-                          {allSubmitted ? (
-                            <span className="text-[9px] font-semibold text-emerald-700 font-sans">
-                              · All {group.cohorts.length} Cohorts
-                            </span>
-                          ) : null}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2.5 text-slate-600 font-medium">{activeCohort.submittedBy ?? '—'}</td>
-                      <td className="px-3 py-2.5 text-slate-600">{activeCohort.submittedAt ? new Date(activeCohort.submittedAt).toLocaleString() : '—'}</td>
-                      <td className="px-4 py-2.5 text-right"><Link href={`/assessment/marks/${group.assessmentId}`} className="font-bold text-primary hover:underline">Open</Link></td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
-
-      <section className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-sm font-semibold text-slate-700">Unit markbooks</h2>
-            <p className="mt-0.5 text-xs text-slate-500">Candidate totals use current registered unit enrolments for the selected period.</p>
-          </div>
-          <label className="relative block w-full sm:w-72">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-slate-400" />
             <input
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search unit or trainer"
-              className="h-9 w-full rounded-lg border border-border bg-surface pl-8 pr-3 text-xs text-slate-600 placeholder:text-slate-400 shadow-2xs outline-none focus:border-primary"
+              placeholder="Search unit name, code, cohort, or trainer..."
+              className="h-9 w-full rounded-lg border border-border bg-surface pl-8 pr-3 text-xs text-slate-600 placeholder:text-slate-400 outline-none focus:border-primary"
             />
           </label>
+          <select
+            aria-label="Filter by milestone status"
+            value={filterStatus}
+            onChange={(event) => setFilterStatus(event.target.value)}
+            className="h-9 rounded-lg border border-border bg-surface px-2.5 text-xs font-medium text-slate-600 focus:border-primary focus:outline-none"
+          >
+            <option value="all">All statuses</option>
+            <option value="needs-attention">Needs attention</option>
+            <option value="cat-submitted">CAT Submitted</option>
+            <option value="exam-submitted">Exam Submitted</option>
+            <option value="completed">Completed / Finalised</option>
+            <option value="not-started">Not started</option>
+          </select>
+          <select
+            aria-label="Filter by cohort"
+            value={filterCohort}
+            onChange={(event) => setFilterCohort(event.target.value)}
+            className="h-9 rounded-lg border border-border bg-surface px-2.5 text-xs font-medium text-slate-600 focus:border-primary focus:outline-none"
+          >
+            <option value="all">All cohorts</option>
+            {allCohorts.map((cohort) => (
+              <option key={cohort} value={cohort}>
+                {cohort}
+              </option>
+            ))}
+          </select>
         </div>
 
-        {filteredUnitGroups.length === 0 ? (
-          <div className="rounded-xl border border-border bg-surface p-8 text-center">
-            <p className="text-sm font-medium text-slate-600">{search ? `No units match “${search}”` : 'No unit markbooks found for this period.'}</p>
+        {filteredUnits.length === 0 ? (
+          <div className="px-4 py-12 text-center">
+            <p className="text-sm font-medium text-slate-600">No units match these filters.</p>
+            <p className="mt-1 text-xs text-slate-400">Try adjusting your search or clearing active filters.</p>
           </div>
         ) : (
           <>
-          <div className="space-y-3 md:hidden">
-            {filteredUnitGroups.map((unit) => (
-              <article key={[...unit.unitIds].sort().join(':')} className="space-y-3 rounded-xl border border-border bg-surface p-4 shadow-2xs">
-                <div>
-                  <p className="font-semibold text-slate-800">{unit.unitName}</p>
-                  <p className="mt-1 text-xs text-primary">{unit.unitCode}</p>
-                </div>
-                <div className="flex items-center justify-between gap-3 text-xs text-slate-500">
-                  <span className="min-w-0 truncate" title={unit.trainerList.join(', ')}>{unit.trainerList.join(', ') || 'Unassigned'}</span>
-                  <span className="shrink-0">{unit.registrationCount} registered</span>
-                </div>
-                <Link
-                  href={`/assessment/unit/${unit.unitId}?periodId=${data.selectedPeriodId}`}
-                  className="inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-primary/20 bg-primary/5 px-3 text-sm font-semibold text-primary transition hover:bg-primary/10"
-                >
-                  View cohorts & marks
-                </Link>
-              </article>
-            ))}
-          </div>
-          <div className="hidden overflow-x-auto rounded-xl border border-border bg-surface shadow-2xs md:block">
-            <table className="w-full min-w-[640px] table-fixed text-left text-xs">
-              <colgroup>
-                <col className="w-[24%]" />
-                <col className="w-[24%]" />
-                <col className="w-[28%]" />
-                <col className="w-[12%]" />
-                <col className="w-[12%]" />
-              </colgroup>
-              <thead className="border-b border-border bg-surface-subtle text-[10px] font-medium uppercase tracking-wide text-slate-500">
-                <tr>
-                  <th className="px-4 py-3">Unit name</th>
-                  <th className="px-3 py-3">Unit code</th>
-                  <th className="px-3 py-3">Trainer</th>
-                  <th className="px-3 py-3 text-center">Registered</th>
-                  <th className="px-4 py-3 text-right"> </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {filteredUnitGroups.map((unit) => (
-                  <tr key={[...unit.unitIds].sort().join(':')} className="transition-colors hover:bg-surface-subtle/60">
-                    <td className="px-4 py-3 font-medium text-slate-700" title={unit.unitName}>
-                      <span className="block break-words">{unit.unitName}</span>
-                    </td>
-                    <td className="px-3 py-3">
-                      <span className="inline-flex flex-wrap gap-x-1 rounded-md border border-primary/10 bg-primary/5 px-2 py-1 text-[10px] font-medium text-primary" title={unit.unitCode}>
-                        {[...unit.unitCodes].map((code, index) => (
-                          <span key={code} className="whitespace-nowrap">{index > 0 ? '· ' : ''}{code}</span>
-                        ))}
-                      </span>
-                    </td>
-                    <td className="px-3 py-3 text-slate-600">
-                      <span className="block truncate" title={unit.trainerList.join(', ')}>{unit.trainerList.join(', ') || 'Unassigned'}</span>
-                    </td>
-                    <td className="px-3 py-3 text-center font-medium tabular-nums text-slate-600">{unit.registrationCount}</td>
-                    <td className="px-4 py-3 text-right">
-                      <Link
-                        href={`/assessment/unit/${unit.unitId}?periodId=${data.selectedPeriodId}`}
-                        className="inline-flex h-7 items-center justify-center rounded-lg border border-primary/20 bg-surface px-2.5 text-[11px] font-medium text-primary transition hover:bg-primary/5"
+            {/* Mobile Cards (sm and down) */}
+            <div className="divide-y divide-border md:hidden">
+              {filteredUnits.map((unit) => (
+                <article key={unit.key} className="space-y-3 p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">{unit.unitName}</p>
+                      <p className="font-mono text-xs font-medium text-slate-500">{unit.unitCode}</p>
+                    </div>
+                    <span
+                      className={`inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[10px] font-semibold border ${
+                        unit.workflowStatus === 'Finalised'
+                          ? 'bg-purple-50 text-purple-700 border-purple-200'
+                          : unit.workflowStatus === 'Submitted'
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            : unit.workflowStatus === 'In progress'
+                              ? 'bg-amber-50 text-amber-700 border-amber-200'
+                              : 'bg-slate-100 text-slate-600 border-slate-200'
+                      }`}
+                    >
+                      {unit.workflowStatus}
+                    </span>
+                  </div>
+
+                  {/* Cohorts & Trainer */}
+                  <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                    {unit.cohortNames.map((c) => (
+                      <span
+                        key={c}
+                        className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600 border border-slate-200"
                       >
-                        View cohorts & marks
-                      </Link>
-                    </td>
+                        {c}
+                      </span>
+                    ))}
+                    <span className="text-slate-300">·</span>
+                    <span className="text-slate-600">{unit.trainerNames.join(', ') || 'Unassigned'}</span>
+                    <span className="text-slate-300">·</span>
+                    <span className="font-semibold text-slate-700">{unit.registrationCount} candidates</span>
+                  </div>
+
+                  {/* Milestone status row */}
+                  <div className="grid grid-cols-2 gap-2 rounded-lg bg-surface-subtle p-2.5 text-xs">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">CAT Milestone</span>
+                      <div className="mt-1">
+                        {unit.catStatus === 'Submitted' ? (
+                          <span className="inline-flex items-center gap-1 font-semibold text-emerald-700">
+                            <CheckCircle2 className="size-3 text-emerald-600" /> Submitted
+                          </span>
+                        ) : unit.catStatus === 'In progress' ? (
+                          <span className="inline-flex items-center gap-1 font-semibold text-amber-700">
+                            <Clock className="size-3 text-amber-600" /> In Progress
+                          </span>
+                        ) : (
+                          <span className="font-medium text-slate-400">Not started</span>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Final Exam</span>
+                      <div className="mt-1">
+                        {unit.examStatus === 'Submitted' ? (
+                          <span className="inline-flex items-center gap-1 font-semibold text-emerald-700">
+                            <CheckCircle2 className="size-3 text-emerald-600" /> Submitted
+                          </span>
+                        ) : unit.examStatus === 'In progress' ? (
+                          <span className="inline-flex items-center gap-1 font-semibold text-amber-700">
+                            <Clock className="size-3 text-amber-600" /> In Progress
+                          </span>
+                        ) : unit.examStatus === 'Closed' ? (
+                          <span className="inline-flex items-center gap-1 font-medium text-slate-500">
+                            <Lock className="size-3 text-slate-400" /> Closed
+                          </span>
+                        ) : (
+                          <span className="font-medium text-slate-400">Not started</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Mobile Action Link */}
+                  {unit.items.length <= 1 ? (
+                    <Link
+                      href={`/assessment/marks/${unit.items[0]?.id ?? unit.unitId}`}
+                      className="inline-flex min-h-9 w-full items-center justify-center gap-1.5 rounded-lg border border-border bg-surface px-3 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-surface-subtle transition"
+                    >
+                      Open Markbook
+                      <ArrowRight className="size-3.5 text-slate-400" />
+                    </Link>
+                  ) : (
+                    <Link
+                      href={`/assessment/unit/${unit.unitId}?periodId=${data.selectedPeriodId}`}
+                      className="inline-flex min-h-9 w-full items-center justify-center gap-1.5 rounded-lg border border-border bg-surface px-3 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-surface-subtle transition"
+                    >
+                      View Cohort Markbooks ({unit.items.length})
+                      <ArrowRight className="size-3.5 text-slate-400" />
+                    </Link>
+                  )}
+                </article>
+              ))}
+            </div>
+
+            {/* Desktop Table (md and up) */}
+            <div className="hidden overflow-x-auto md:block">
+              <table className="w-full min-w-[840px] text-left text-xs">
+                <thead className="border-b border-border bg-surface-subtle text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                  <tr>
+                    <th className="px-4 py-3">Unit name & code</th>
+                    <th className="px-3 py-3">Cohorts</th>
+                    <th className="px-3 py-3">Lead trainer</th>
+                    <th className="px-3 py-3 text-center">Candidates</th>
+                    <th className="px-3 py-3">CAT milestone</th>
+                    <th className="px-3 py-3">Final exam</th>
+                    <th className="px-3 py-3">Status</th>
+                    <th className="px-4 py-3 text-right">Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {filteredUnits.map((unit) => (
+                    <tr key={unit.key} className="transition-colors hover:bg-surface-subtle/50">
+                      {/* Unit name & code */}
+                      <td className="px-4 py-3">
+                        <div className="font-semibold text-slate-900 leading-snug">
+                          {unit.unitName}
+                        </div>
+                        <div className="mt-0.5 font-mono text-[11px] font-medium text-slate-400">
+                          {unit.unitCode}
+                        </div>
+                      </td>
+
+                      {/* Clean Cohorts Display */}
+                      <td className="px-3 py-3">
+                        <div className="flex flex-wrap items-center gap-1">
+                          {unit.cohortNames.length === 0 ? (
+                            <span className="text-slate-400 text-xs">All cohorts</span>
+                          ) : (
+                            unit.cohortNames.map((c) => (
+                              <span
+                                key={c}
+                                className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700 border border-slate-200/80"
+                              >
+                                {c}
+                              </span>
+                            ))
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Lead Trainer */}
+                      <td className="px-3 py-3">
+                        {unit.trainerNames.length > 0 ? (
+                          <span className="font-medium text-slate-700 text-xs" title={unit.trainerNames.join(', ')}>
+                            {unit.trainerNames.join(', ')}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-slate-400 italic">Unassigned</span>
+                        )}
+                      </td>
+
+                      {/* Candidates Count */}
+                      <td className="px-3 py-3 text-center">
+                        <span className="font-semibold tabular-nums text-slate-800 text-xs">
+                          {unit.registrationCount}
+                        </span>
+                        <span className="ml-1 text-[11px] text-slate-400">students</span>
+                      </td>
+
+                      {/* CAT Milestone */}
+                      <td className="px-3 py-3">
+                        {unit.catStatus === 'Submitted' ? (
+                          <div>
+                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-200">
+                              <CheckCircle2 className="size-3 text-emerald-600" />
+                              Submitted
+                            </span>
+                            {unit.catSubmittedAt ? (
+                              <p className="mt-0.5 text-[10px] text-slate-400">
+                                {new Date(unit.catSubmittedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                {unit.catSubmittedBy ? ` · ${unit.catSubmittedBy}` : ''}
+                              </p>
+                            ) : null}
+                          </div>
+                        ) : unit.catStatus === 'In progress' ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-700 border border-amber-200">
+                            <Clock className="size-3 text-amber-600" />
+                            {unit.catSubmittedCount > 0
+                              ? `${unit.catSubmittedCount}/${unit.items.length} Submitted`
+                              : 'In Progress'}
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-500 border border-slate-200">
+                            Not started
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Final Exam Milestone */}
+                      <td className="px-3 py-3">
+                        {unit.examStatus === 'Submitted' ? (
+                          <div>
+                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-200">
+                              <CheckCircle2 className="size-3 text-emerald-600" />
+                              Submitted
+                            </span>
+                            {unit.examSubmittedAt ? (
+                              <p className="mt-0.5 text-[10px] text-slate-400">
+                                {new Date(unit.examSubmittedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                {unit.examSubmittedBy ? ` · ${unit.examSubmittedBy}` : ''}
+                              </p>
+                            ) : null}
+                          </div>
+                        ) : unit.examStatus === 'In progress' ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-700 border border-amber-200">
+                            <Clock className="size-3 text-amber-600" />
+                            In Progress
+                          </span>
+                        ) : unit.examStatus === 'Closed' ? (
+                          <span
+                            className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500 border border-slate-200"
+                            title="Final exam entry window is closed by HOD"
+                          >
+                            <Lock className="size-3 text-slate-400" />
+                            Closed
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-500 border border-slate-200">
+                            Not started
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Workflow Status */}
+                      <td className="px-3 py-3">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold border ${
+                            unit.workflowStatus === 'Finalised'
+                              ? 'bg-purple-50 text-purple-700 border-purple-200'
+                              : unit.workflowStatus === 'Submitted'
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                : unit.workflowStatus === 'In progress'
+                                  ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                  : 'bg-slate-100 text-slate-600 border-slate-200'
+                          }`}
+                        >
+                          {unit.workflowStatus}
+                        </span>
+                      </td>
+
+                      {/* Action */}
+                      <td className="px-4 py-3 text-right">
+                        {unit.items.length <= 1 ? (
+                          <Link
+                            href={`/assessment/marks/${unit.items[0]?.id ?? unit.unitId}`}
+                            className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 transition"
+                          >
+                            Open Markbook
+                            <ArrowRight className="size-3 text-slate-400" />
+                          </Link>
+                        ) : (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <button
+                                type="button"
+                                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 transition"
+                              >
+                                Open Markbook
+                                <ChevronDown className="size-3 text-slate-400" />
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-56 p-1.5">
+                              <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                Select Cohort Markbook
+                              </div>
+                              {unit.items.map((it) => (
+                                <DropdownMenuItem key={it.id} asChild>
+                                  <Link
+                                    href={`/assessment/marks/${it.id}`}
+                                    className="flex w-full items-center justify-between text-xs font-medium cursor-pointer"
+                                  >
+                                    <span>{it.cohortName}</span>
+                                    <span className="text-[10px] text-slate-400">{it.totalExpected} std</span>
+                                  </Link>
+                                </DropdownMenuItem>
+                              ))}
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem asChild>
+                                <Link
+                                  href={`/assessment/unit/${unit.unitId}?periodId=${data.selectedPeriodId}`}
+                                  className="flex w-full items-center text-xs font-medium text-primary cursor-pointer"
+                                >
+                                  View Cohorts & Rosters
+                                </Link>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </>
         )}
       </section>

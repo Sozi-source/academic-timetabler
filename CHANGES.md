@@ -1,3 +1,23 @@
+### 2026-11-08: Unified, executive-grade Assessment Deliverables Tracker
+
+**Modified:**
+- `src/features/assessment/assessment-control-center.tsx`:
+  - Consolidated the previous 580-row split-component submission tracker and redundant 54-row lower "Unit markbooks" table into **ONE unified, executive-grade Assessment Deliverables Tracker** (~54 clean unit rows).
+  - Eliminated repetitive split sub-component rows (`ASSIGNMENT`, `PRESENTATION`, `RAT`, `CAT`, `EXAM`) in favor of tracking the two authoritative assessment milestones: **CAT Milestone** and **Final Exam**.
+  - Replaced cluttered interactive cohort button bars (`COHORTS: [● DND MAY 26] [DND SEPT 25]`) with clean, elegant, non-crowded cohort badges.
+  - Implemented 8 executive columns:
+    1. **Unit Name & Code**: Clear visual hierarchy with unit name in bold and unit code in subtle mono typography below.
+    2. **Cohorts**: Clean inline cohort badges (e.g. `[DND MAY 26]`, `[DHN JAN/MAR 25] [DHN MAY 24]`).
+    3. **Lead Trainer**: Clear display of assigned trainer(s) or `Unassigned`.
+    4. **Candidates**: Enrolled student count per unit.
+    5. **CAT Milestone**: Live status badge (`✓ Submitted` with timestamp/trainer tooltip, `In Progress`, or `Not Started`).
+    6. **Final Exam**: Live status badge (`✓ Submitted`, `In Progress`, `🔒 Closed`, or `Not Started`).
+    7. **Workflow Status**: Overall status pill (`Finalised`, `Submitted`, `In Progress`, `Open`).
+    8. **Action**: Direct `Open Markbook →` link for single-cohort units, and an intuitive `Open Markbook ▾` dropdown menu for multi-cohort units enabling direct jumping to any cohort's markbook or roster view.
+  - Added streamlined filters: Search (unit name, code, cohort, trainer), Milestone Status (`Needs attention`, `CAT Submitted`, `Exam Submitted`, `Completed`, `Not started`), Cohort filter, and one-click "Needs attention" toggle.
+  - Added responsive mobile cards (`md:hidden`) with matching milestone indicators and touch-friendly actions.
+  - Removed duplicate bottom "Unit markbooks" table to streamline page load and eliminate redundancy.
+
 ### 2026-11-08: Round off all assessment marks, totals, and averages to whole numbers only
 
 **Modified:**
@@ -177,6 +197,23 @@
   - Added comprehensive test suite verifying student average calculations, unit column statistics, TVET recommendation determination, and multi-cohort student grouping.
 
 No database migrations or manual follow-up required.
+
+### 2026-11-08: HOD "submit on behalf" for unsubmitted CAT marks + trainer reminders
+
+No automatic submission — trainers are reminded, and the HOD can manually submit saved CAT marks on a trainer's behalf.
+
+**Added:**
+- `src/features/assessment/marks/pending-submissions.ts`: `getPendingMarkSubmissions()` (department-scoped list of markbooks with saved but unsubmitted CAT/Exam marks; explicit AB counts as recorded) and `getCatOnBehalfStatus(assessmentId)`.
+- `src/features/assessment/marks/pending-mark-submissions-panel.tsx`: "Saved but not submitted" panel (unit, component, trainer, recorded/roster, last saved, link to markbook).
+- `src/features/assessment/marks/submit-cat-on-behalf-button.tsx`: confirm-and-submit client button.
+
+**Modified:**
+- `src/features/assessment/marks/actions.ts`: new `submitCatOnBehalfAction` — HOD-only, active-department check, refuses if CAT already submitted or nothing saved; submits via the existing `save_assessment_online_component_marks` RPC (unentered CAT → AB, same as trainer submit). `submitted_by` records the HOD.
+- `src/app/(dashboard)/assessment/page.tsx`: renders the pending panel above the control center.
+- `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`: "CAT marks saved but not submitted" banner with the on-behalf button, plus success/error notices (now reads `searchParams`).
+- `src/features/staff-assessment/online-marks-editor.tsx`: trainer reminder banners when CAT (entry open, not submitted) or exam (exam entry open, CAT submitted, final not submitted) marks are saved but unsubmitted.
+
+**Notes:** No migration required (HOD already authorised by `assessment_actor_can_manage_assessment`). Exam on-behalf submission is not included; exam rows appear in the panel for follow-up only.
 
 ### 2026-11-07: Markbook view — remove Cohort / Exam Status columns, show AB for missed CAT & Exam
 

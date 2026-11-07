@@ -29,9 +29,18 @@ export function AssessmentUnitCohorts({ unit, periodName, periodId, cohorts }: A
         <div className="flex min-w-0 items-center gap-3">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/5 text-primary"><UsersRound className="size-4" /></span>
           <div className="min-w-0">
-            <p className="whitespace-nowrap text-xs font-medium text-primary">{unit.code}</p>
             <h1 className="truncate text-base font-semibold text-slate-700" title={unit.name}>{unit.name}</h1>
-            <p className="mt-0.5 text-xs text-slate-500">{periodName} · current registered students</p>
+            <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
+              {unit.code ? (
+                <span className="inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-[11px] font-medium text-slate-500 border border-slate-200">
+                  {unit.code}
+                </span>
+              ) : null}
+              <span className="text-slate-300">·</span>
+              <span>{periodName}</span>
+              <span className="text-slate-300">·</span>
+              <span>Registered Students</span>
+            </div>
           </div>
         </div>
         <Link href="/assessment" className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border px-3 text-xs font-medium text-slate-600 hover:bg-surface-subtle">

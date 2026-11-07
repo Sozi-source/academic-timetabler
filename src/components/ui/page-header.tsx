@@ -8,9 +8,11 @@ import { Breadcrumb, type BreadcrumbItem } from './breadcrumb';
 
 interface PageHeaderProps {
   eyebrow?: string;
-  title: string;
-  description?: string;
+  title: ReactNode;
+  titleClassName?: string;
+  description?: ReactNode;
   icon?: LucideIcon;
+  iconClassName?: string;
   actions?: ReactNode;
   context?: ReactNode;
   backHref?: string;
@@ -27,8 +29,10 @@ interface PageHeaderProps {
 export function PageHeader({
   eyebrow,
   title,
+  titleClassName,
   description,
   icon: Icon,
+  iconClassName,
   actions,
   context,
   backHref,
@@ -54,7 +58,7 @@ export function PageHeader({
       {context ? <div className="mb-3">{context}</div> : null}
 
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="flex min-w-0 flex-1 items-center gap-2.5 sm:gap-3">
+        <div className="flex min-w-0 flex-1 items-start gap-2.5 sm:gap-3">
           {backHref ? (
             <Link
               href={backHref}
@@ -72,25 +76,36 @@ export function PageHeader({
               </p>
             ) : null}
 
-            <h1 className="flex min-w-0 items-center gap-2 break-words text-lg font-semibold leading-snug tracking-tight text-text-primary sm:text-xl">
+            <h1
+              className={cn(
+                'flex min-w-0 items-start gap-2 break-words text-lg font-semibold leading-snug tracking-tight sm:text-xl',
+                titleClassName ?? 'text-text-primary',
+              )}
+            >
               {!isCard && Icon ? (
                 <Icon
-                  className="size-5 shrink-0 text-primary"
+                  className={cn('size-5 shrink-0 text-primary mt-0.5', iconClassName)}
                   aria-hidden="true"
                 />
               ) : null}
               {isCard && !backHref && Icon ? (
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-md border border-primary/15 bg-primary/5 text-primary">
-                  <Icon className="size-4" aria-hidden="true" />
+                  <Icon className={cn('size-4', iconClassName)} aria-hidden="true" />
                 </span>
               ) : null}
               <span className="min-w-0">{title}</span>
             </h1>
 
             {description ? (
-              <p className="mt-1 line-clamp-1 text-[13px] leading-normal text-text-muted sm:mt-0.5 sm:line-clamp-2 sm:text-xs">
-                {description}
-              </p>
+              typeof description === 'string' ? (
+                <p className="mt-1 line-clamp-1 text-[13px] leading-normal text-text-muted sm:mt-0.5 sm:line-clamp-2 sm:text-xs">
+                  {description}
+                </p>
+              ) : (
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-text-muted sm:mt-0.5">
+                  {description}
+                </div>
+              )
             ) : null}
           </div>
         </div>

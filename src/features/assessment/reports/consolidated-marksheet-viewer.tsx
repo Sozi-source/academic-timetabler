@@ -831,12 +831,12 @@ export function ConsolidatedMarksheetViewer({
 
             {/* Master Cohort Broadsheet Matrix Table */}
             <div className="overflow-x-auto rounded-xl border border-slate-300 bg-white shadow-2xs">
-              <table className="w-full min-w-[900px] text-left text-xs">
+              <table className="w-full min-w-[1100px] text-left text-xs">
                 <thead className="border-b border-slate-300 bg-slate-50 text-[11px] font-bold text-slate-700">
                   <tr>
-                    <th className="w-10 px-3 py-2.5 text-center text-slate-500">No.</th>
-                    <th className="px-3 py-2.5 whitespace-nowrap text-slate-800">Admission No.</th>
-                    <th className="px-3 py-2.5 min-w-[170px] border-r-2 border-slate-300 text-slate-900">Student Full Name</th>
+                    <th className="w-10 px-3.5 py-2.5 text-center text-slate-500 whitespace-nowrap">No.</th>
+                    <th className="px-3.5 py-2.5 whitespace-nowrap min-w-[170px] text-slate-800">Admission No.</th>
+                    <th className="px-3.5 py-2.5 min-w-[260px] whitespace-nowrap border-r-2 border-slate-300 text-slate-900">Student Full Name</th>
 
                     {/* Dynamic Unit Headers */}
                     {cohortData.units.map((unit) => (
@@ -885,13 +885,13 @@ export function ConsolidatedMarksheetViewer({
                         key={student.studentId}
                         className="transition-colors odd:bg-white even:bg-slate-50/60 hover:bg-amber-50/35"
                       >
-                        <td className="px-3 py-2.5 text-center font-medium text-slate-400">
+                        <td className="px-3.5 py-2.5 text-center font-medium text-slate-400 whitespace-nowrap">
                           {idx + 1}.
                         </td>
-                        <td className="px-3 py-2.5 font-mono font-bold text-slate-950 whitespace-nowrap">
+                        <td className="px-3.5 py-2.5 font-mono font-bold text-slate-950 whitespace-nowrap min-w-[170px]">
                           {student.admissionNumber}
                         </td>
-                        <td className="px-3 py-2.5 font-semibold text-slate-900 border-r-2 border-slate-200">
+                        <td className="px-3.5 py-2.5 font-semibold text-slate-900 whitespace-nowrap min-w-[260px] border-r-2 border-slate-200">
                           {student.fullName}
                         </td>
 
@@ -978,7 +978,7 @@ export function ConsolidatedMarksheetViewer({
                   <tfoot className="border-t-2 border-slate-300 bg-slate-50 font-bold text-slate-800">
                     {/* Row 1: Mean Scores */}
                     <tr>
-                      <td colSpan={3} className="px-3.5 py-2.5 text-right uppercase tracking-wider text-[11px] text-slate-600 font-extrabold">
+                      <td colSpan={3} className="px-3.5 py-2.5 text-right uppercase tracking-wider text-[11px] text-slate-600 font-extrabold whitespace-nowrap border-r-2 border-slate-300">
                         Unit Mean Score:
                       </td>
                       {cohortData.stats.unitStats.map((us) => (
@@ -989,14 +989,14 @@ export function ConsolidatedMarksheetViewer({
                       <td className="px-3 py-2.5 text-center border-l-2 border-slate-300 bg-slate-100 font-black text-slate-900">
                         {formatMark(cohortData.stats.cohortMean)}
                       </td>
-                      <td colSpan={3} className="px-3 py-2.5 text-center text-[10px] text-slate-500 font-medium">
+                      <td colSpan={3} className="px-3 py-2.5 text-center text-[10px] text-slate-500 font-medium whitespace-nowrap">
                         Cohort Average
                       </td>
                     </tr>
 
                     {/* Row 2: Pass Rates */}
                     <tr className="border-t border-slate-200/60">
-                      <td colSpan={3} className="px-3.5 py-2 text-right uppercase tracking-wider text-[10px] text-slate-500 font-bold">
+                      <td colSpan={3} className="px-3.5 py-2 text-right uppercase tracking-wider text-[10px] text-slate-500 font-bold whitespace-nowrap border-r-2 border-slate-300">
                         Unit Pass Rate:
                       </td>
                       {cohortData.stats.unitStats.map((us) => (
@@ -1095,14 +1095,14 @@ export function ConsolidatedMarksheetViewer({
 
             {/* Consolidated Unit Marksheet Table */}
             <div className="overflow-x-auto rounded-xl border border-slate-300 bg-white shadow-2xs">
-              <table className="w-full min-w-[800px] text-left text-xs">
+              <table className="w-full min-w-[980px] text-left text-xs">
                 <thead className="border-b border-slate-300 bg-slate-50 text-[11px] font-bold text-slate-700">
                   {/* Tier 1 Category Super-Header */}
                   <tr className="border-b border-slate-200 text-[10px] font-black uppercase tracking-wider text-slate-600">
                     <th
                       colSpan={3}
                       scope="colgroup"
-                      className="px-3.5 py-1.5 text-left bg-slate-100/90 border-r-2 border-slate-300 text-slate-800"
+                      className="px-3.5 py-1.5 text-left bg-slate-100/90 border-r-2 border-slate-300 text-slate-800 whitespace-nowrap"
                     >
                       Candidate Details
                     </th>
@@ -1131,9 +1131,9 @@ export function ConsolidatedMarksheetViewer({
 
                   {/* Tier 2 Detail Header */}
                   <tr className="border-b border-slate-300 bg-slate-50 text-[11px] font-bold text-slate-700">
-                    <th scope="col" className="w-12 px-3.5 py-2.5 text-center text-slate-500">No.</th>
-                    <th scope="col" className="px-3 py-2.5 whitespace-nowrap text-slate-800">Admission No.</th>
-                    <th scope="col" className="px-3 py-2.5 min-w-[180px] border-r-2 border-slate-300 text-slate-900">Student Full Name</th>
+                    <th scope="col" className="w-12 px-3.5 py-2.5 text-center text-slate-500 whitespace-nowrap">No.</th>
+                    <th scope="col" className="px-3.5 py-2.5 whitespace-nowrap min-w-[170px] text-slate-800">Admission No.</th>
+                    <th scope="col" className="px-3.5 py-2.5 min-w-[260px] whitespace-nowrap border-r-2 border-slate-300 text-slate-900">Student Full Name</th>
                     <th scope="col" className="px-2.5 py-2.5 text-center whitespace-nowrap">
                       Assignment <span className="text-[10px] font-normal text-slate-400">/5</span>
                     </th>
@@ -1172,13 +1172,13 @@ export function ConsolidatedMarksheetViewer({
                           key={`${r.eventId}:${r.studentId}`}
                           className={`transition-colors odd:bg-white even:bg-slate-50/60 hover:bg-amber-50/35 ${isAbsent ? 'bg-rose-50/30' : ''}`}
                         >
-                          <td className="px-3.5 py-2.5 text-center font-medium text-slate-400">
+                          <td className="px-3.5 py-2.5 text-center font-medium text-slate-400 whitespace-nowrap">
                             {idx + 1}.
                           </td>
-                          <td className="px-3 py-2.5 font-mono font-bold text-slate-950 whitespace-nowrap">
+                          <td className="px-3.5 py-2.5 font-mono font-bold text-slate-950 whitespace-nowrap min-w-[170px]">
                             {r.admissionNumber}
                           </td>
-                          <td className="px-3 py-2.5 font-semibold text-slate-900 border-r-2 border-slate-200">
+                          <td className="px-3.5 py-2.5 font-semibold text-slate-900 whitespace-nowrap min-w-[260px] border-r-2 border-slate-200">
                             {r.fullName}
                           </td>
 
@@ -1246,7 +1246,7 @@ export function ConsolidatedMarksheetViewer({
                 {unitData.stats && unitData.stats.markedCount > 0 ? (
                   <tfoot className="border-t-2 border-slate-300 bg-slate-100/90 font-bold text-slate-800">
                     <tr>
-                      <td colSpan={3} className="px-3.5 py-3 text-right uppercase tracking-wider text-[11px] text-slate-700 font-extrabold border-r-2 border-slate-300">
+                      <td colSpan={3} className="px-3.5 py-3 text-right uppercase tracking-wider text-[11px] text-slate-700 font-extrabold border-r-2 border-slate-300 whitespace-nowrap">
                         Class Average ({unitData.stats.markedCount} scored):
                       </td>
                       <td className="px-2.5 py-3 text-center text-slate-800 font-mono tabular-nums">{formatMark(unitData.stats.meanAssignment)}</td>

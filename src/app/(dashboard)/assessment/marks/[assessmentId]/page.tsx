@@ -37,14 +37,33 @@ export default async function AssessmentMarkWorkflowPage({
   );
   const marksSubmitted = Boolean(assessment.marks_submitted_at);
   const isDraft = !isComplete && !marksSubmitted && resultCount > 0;
+  const unitName = assessment.unit?.name || 'Unit Markbook';
+  const unitCode = assessment.unit?.code;
+  const periodName = assessment.academic_period?.name ?? 'Academic period';
 
   return (
     <div className="space-y-5 pb-12">
       {/* Header */}
       <PageHeader
-        title={`${assessment.unit?.code ?? 'Unit'} · ${assessment.unit?.name ?? ''}`}
-        description={`${assessment.academic_period?.name ?? 'Academic period'} · Unit Markbook`}
+        title={unitName}
+        titleClassName="text-slate-700 font-bold tracking-tight text-lg sm:text-xl"
+        description={
+          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+            {unitCode ? (
+              <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 font-mono text-[11px] font-medium text-slate-500 border border-slate-200/90 shadow-2xs">
+                {unitCode}
+              </span>
+            ) : null}
+            <span className="text-slate-300">·</span>
+            <span className="font-medium text-slate-600">
+              {periodName}
+            </span>
+            <span className="text-slate-300">·</span>
+            <span className="text-slate-500">Unit Markbook</span>
+          </div>
+        }
         icon={FileSpreadsheet}
+        iconClassName="text-slate-500"
         context={
           <div className="flex items-center gap-2">
             <Badge variant="neutral">{population.length} Candidates</Badge>

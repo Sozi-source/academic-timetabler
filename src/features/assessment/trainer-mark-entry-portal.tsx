@@ -580,7 +580,7 @@ export function TrainerMarkEntryPortal() {
                         </td>
                         <td className="hidden px-3 py-2.5 text-slate-400 md:table-cell">{index + 1}</td>
                         <td className="hidden whitespace-nowrap px-3 py-2.5 font-medium text-slate-900 md:table-cell">{student.admissionNumber}</td>
-                        <td className="hidden min-w-52 px-3 py-2.5 text-slate-800 md:table-cell">{student.fullName}{student.attendanceStatus === 'absent' ? <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">Absent</span> : null}</td>
+                        <td className="hidden whitespace-nowrap min-w-56 px-3 py-2.5 text-slate-800 md:table-cell">{student.fullName}{student.attendanceStatus === 'absent' ? <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">Absent</span> : null}</td>
                         {visibleFields.map((field, fieldIndex) => {
                           const isAbsentExam = field.key === 'exam' && student.attendanceStatus === 'absent';
                           const isFieldSubmitted = field.key === 'exam'

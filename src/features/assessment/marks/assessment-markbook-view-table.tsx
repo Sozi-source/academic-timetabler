@@ -367,7 +367,7 @@ export function AssessmentMarkbookViewTable({
 
       {/* Candidate Marks Table */}
       <div className="overflow-x-auto rounded-xl border border-slate-300 bg-white shadow-2xs">
-        <table className="w-full min-w-[800px] text-left text-xs">
+        <table className="w-full min-w-[980px] text-left text-xs">
           <thead className="border-b border-slate-300 bg-slate-50 text-[11px] font-bold text-slate-700">
             {assessmentType === 'exam' ? (
               <>
@@ -376,7 +376,7 @@ export function AssessmentMarkbookViewTable({
                   <th
                     colSpan={3}
                     scope="colgroup"
-                    className="px-3.5 py-1.5 text-left bg-slate-100/90 border-r-2 border-slate-300 text-slate-800"
+                    className="px-3.5 py-1.5 text-left bg-slate-100/90 border-r-2 border-slate-300 text-slate-800 whitespace-nowrap"
                   >
                     Candidate Details
                   </th>
@@ -405,9 +405,9 @@ export function AssessmentMarkbookViewTable({
 
                 {/* Tier 2 Column Detail Header */}
                 <tr className="border-b border-slate-300 bg-slate-50 text-[11px] font-bold text-slate-700">
-                  <th scope="col" className="w-12 px-3.5 py-2.5 text-center text-slate-500">No.</th>
-                  <th scope="col" className="px-3 py-2.5 whitespace-nowrap text-slate-800">Admission No.</th>
-                  <th scope="col" className="px-3 py-2.5 min-w-[180px] border-r-2 border-slate-300 text-slate-900">Student Full Name</th>
+                  <th scope="col" className="w-12 px-3.5 py-2.5 text-center text-slate-500 whitespace-nowrap">No.</th>
+                  <th scope="col" className="px-3.5 py-2.5 whitespace-nowrap min-w-[170px] text-slate-800">Admission No.</th>
+                  <th scope="col" className="px-3.5 py-2.5 min-w-[260px] whitespace-nowrap border-r-2 border-slate-300 text-slate-900">Student Full Name</th>
 
                   <th scope="col" className="px-2.5 py-2.5 text-center whitespace-nowrap">
                     Assignment <span className="text-[10px] font-normal text-slate-400">/5</span>
@@ -432,9 +432,9 @@ export function AssessmentMarkbookViewTable({
               </>
             ) : (
               <tr>
-                <th scope="col" className="w-12 px-3.5 py-2.5 text-center text-slate-500">No.</th>
-                <th scope="col" className="px-3 py-2.5 whitespace-nowrap text-slate-800">Admission No.</th>
-                <th scope="col" className="px-3 py-2.5 min-w-[180px] border-r-2 border-slate-300 text-slate-900">Student Full Name</th>
+                <th scope="col" className="w-12 px-3.5 py-2.5 text-center text-slate-500 whitespace-nowrap">No.</th>
+                <th scope="col" className="px-3.5 py-2.5 whitespace-nowrap min-w-[170px] text-slate-800">Admission No.</th>
+                <th scope="col" className="px-3.5 py-2.5 min-w-[260px] whitespace-nowrap border-r-2 border-slate-300 text-slate-900">Student Full Name</th>
                 <th scope="col" className="px-3 py-2.5 text-center whitespace-nowrap bg-amber-100/90 text-amber-950 font-black border-x border-amber-300">
                   CAT Mark <span className="text-[10px] font-bold text-amber-800">/{maxMark}</span>
                 </th>
@@ -477,17 +477,17 @@ export function AssessmentMarkbookViewTable({
                     }`}
                   >
                     {/* Index */}
-                    <td className="px-3.5 py-2.5 text-center font-medium text-slate-400">
+                    <td className="px-3.5 py-2.5 text-center font-medium text-slate-400 whitespace-nowrap">
                       {idx + 1}.
                     </td>
 
                     {/* Admission No */}
-                    <td className="px-3 py-2.5 font-mono font-bold text-slate-950 whitespace-nowrap">
+                    <td className="px-3.5 py-2.5 font-mono font-bold text-slate-950 whitespace-nowrap min-w-[170px]">
                       {row.admissionNumber}
                     </td>
 
-                    {/* Full Name with vertical boundary wall */}
-                    <td className="px-3 py-2.5 font-semibold text-slate-900 border-r-2 border-slate-200">
+                    {/* Full Name with vertical boundary wall - guaranteed no wrapping */}
+                    <td className="px-3.5 py-2.5 font-semibold text-slate-900 whitespace-nowrap min-w-[260px] border-r-2 border-slate-200">
                       {row.fullName}
                     </td>
 
@@ -616,7 +616,7 @@ export function AssessmentMarkbookViewTable({
           {stats.markedCandidates > 0 ? (
             <tfoot className="border-t-2 border-slate-300 bg-slate-100/90 font-bold text-slate-800">
               <tr>
-                <td colSpan={3} className="px-3.5 py-3 text-right uppercase tracking-wider text-[11px] text-slate-700 font-extrabold border-r-2 border-slate-300">
+                <td colSpan={3} className="px-3.5 py-3 text-right uppercase tracking-wider text-[11px] text-slate-700 font-extrabold border-r-2 border-slate-300 whitespace-nowrap">
                   Class Average ({stats.markedCandidates} candidates):
                 </td>
 

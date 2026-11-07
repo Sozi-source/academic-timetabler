@@ -1,3 +1,26 @@
+### 2026-11-07: Refine unit name presentation and prevent name/admission column wrapping
+
+**Modified:**
+- `src/components/ui/page-header.tsx`:
+  - Extended `PageHeaderProps` to support `title: ReactNode`, `titleClassName?: string`, `description?: ReactNode`, and `iconClassName?: string`.
+  - Replaced hardcoded `text-text-primary` with customizable `titleClassName ?? 'text-text-primary'` and aligned icons to `items-start mt-0.5` so multi-line wrapped unit titles remain visually anchored.
+  - Allowed rich JSX elements in `description` while maintaining backward compatibility for string descriptions.
+- `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`:
+  - Refactored header layout to make the unit name the primary title rendered in a refined slate gray (`text-slate-700 font-bold tracking-tight text-lg sm:text-xl`).
+  - Moved the unit code below the unit name into the metadata line as a smaller, non-conspicuous micro-tag (`font-mono text-[11px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/90 shadow-2xs`).
+  - Muted the spreadsheet icon to `text-slate-500` for a calm, professional aesthetic.
+- `src/features/assessment/assessment-unit-cohorts.tsx`:
+  - Aligned the unit roster header with the same pattern: prominent unit name in `text-slate-700` and small, muted unit code pill placed below in the metadata description line.
+- `src/features/assessment/marks/assessment-markbook-view-table.tsx` & `src/features/assessment/reports/consolidated-marksheet-viewer.tsx`:
+  - Guaranteed `Student Full Name` and `Admission No.` accommodate their entire length of characters without wrapping onto a second line:
+    - Added `whitespace-nowrap min-w-[260px]` to all `Student Full Name` table header and data cells.
+    - Added `whitespace-nowrap min-w-[170px]` to all `Admission No.` table header and data cells.
+    - Added `whitespace-nowrap` to `No.` index and footer average summary cells.
+    - Expanded table minimum container widths (`min-w-[980px]` and `min-w-[1100px]`) with smooth horizontal scrolling to prevent content compression.
+- `src/features/assessment/trainer-mark-entry-portal.tsx`:
+  - Added `whitespace-nowrap min-w-56` to the trainer mark entry table student name column.
+- No schema changes; no manual follow-up required.
+
 ### 2026-11-07: Table contrast upgrade & golden yellow highlights for markbooks & consolidated reports
 
 **Modified:**

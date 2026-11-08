@@ -191,40 +191,52 @@ export default async function AssessmentMarkWorkflowPage({
 
 
       {componentSubmissionState.submissions.length > 0 ? (
-        <section className="space-y-3 rounded-xl border border-border bg-surface p-4">
-          <div>
-            <h2 className="text-sm font-semibold text-text-primary">Submitted mark components</h2>
-            <p className="mt-1 text-xs leading-5 text-text-muted">
-              Unlock a submitted component for correction. Its saved marks remain in place and become editable again.
-            </p>
+        <section className="space-y-2.5 rounded-xl border border-border bg-surface p-4 shadow-2xs">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 className="text-sm font-semibold text-text-primary">Submitted mark components</h2>
+              <p className="mt-0.5 text-xs leading-5 text-text-muted">
+                Unlock a submitted component for correction. Its saved marks remain in place and become editable again.
+              </p>
+            </div>
+            {!componentSubmissionState.canUnlock ? (
+              <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500 border border-slate-200">
+                Markbook finalized · Locked
+              </span>
+            ) : null}
           </div>
-          <ul className="divide-y divide-border rounded-lg border border-border">
+          <div className="flex flex-wrap items-center gap-2 pt-0.5">
             {componentSubmissionState.submissions.map((submission) => {
               const cohort = Array.isArray(submission.cohort) ? submission.cohort[0] : submission.cohort;
               const componentLabel = submission.component_key.toUpperCase();
               const cohortLabel = cohort?.code || cohort?.name || 'All cohorts';
               return (
-                <li key={submission.id} className="flex flex-wrap items-center justify-between gap-3 px-3 py-2.5">
-                  <p className="text-xs text-text-primary">
-                    <span className="font-semibold">{componentLabel}</span>
-                    <span className="text-text-muted"> · {cohortLabel}</span>
-                  </p>
-                  <form action={unlockAssessmentMarkComponentAction}>
+                <div
+                  key={submission.id}
+                  className="inline-flex items-center gap-2.5 rounded-lg border border-border bg-surface-subtle/70 py-1 pl-3 pr-1 shadow-2xs transition hover:bg-surface-subtle"
+                >
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <span className="font-bold text-text-primary">{componentLabel}</span>
+                    <span className="rounded bg-slate-200/80 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-slate-700">
+                      {cohortLabel}
+                    </span>
+                  </div>
+                  <form action={unlockAssessmentMarkComponentAction} className="inline">
                     <input type="hidden" name="assessmentId" value={assessment.id} />
                     <input type="hidden" name="cohortId" value={submission.cohort_id ?? 'all'} />
                     <input type="hidden" name="component" value={submission.component_key} />
                     <button
                       type="submit"
                       disabled={!componentSubmissionState.canUnlock}
-                      className="inline-flex min-h-9 items-center justify-center rounded-lg border border-warning-border bg-warning-surface px-3 text-xs font-semibold text-warning-ink transition hover:bg-warning-surface/70 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="inline-flex h-7 items-center justify-center rounded-md border border-warning-border bg-warning-surface px-2.5 text-xs font-semibold text-warning-ink shadow-2xs transition hover:bg-warning-surface/70 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       Unlock {componentLabel}
                     </button>
                   </form>
-                </li>
+                </div>
               );
             })}
-          </ul>
+          </div>
           {!componentSubmissionState.canUnlock ? (
             <p className="text-[11px] text-text-muted">This markbook has been finalized and cannot be reopened from this control.</p>
           ) : null}

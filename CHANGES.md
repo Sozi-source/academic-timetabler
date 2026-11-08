@@ -5,6 +5,14 @@
   - Removed the `Cohorts` column (`<th>` and `<td>`) from the desktop deliverables table and removed the inline cohort badges from the mobile card view. The cohort filter dropdown and cohort-aware search remain intact.
 - No schema changes; no manual follow-up required.
 
+### 2026-11-08: Compact horizontal layout for submitted mark components
+
+**Modified:**
+- `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`:
+  - Converted the vertical 4-row list of submitted mark components in the Unit Markbook into a compact horizontal flex-wrap layout.
+  - Replaced full-width stacked list rows with space-efficient horizontal chips: `[ CAT | DND-SEP-2026 | Unlock CAT ]`.
+  - Used compact `h-7` unlock buttons and streamlined padding, reducing the vertical space consumed by this control by over 70%.
+
 ### 2026-11-08: Standardized Status Pills across Assessment Control Center
 
 **Modified:**

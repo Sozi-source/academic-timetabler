@@ -155,20 +155,29 @@ function enrichWithCanonical(
 
   const isDescCorrupt = isCorruptedText(def.unitDescription);
   const isCompCorrupt = isCorruptedText(def.overallCompetency);
-  const isScheduleCorrupt = normalizedDefSchedule?.some(
-    (w) => isCorruptedText(w.topicTitle) || isCorruptedText(w.specificLearningOutcomes)
-  ) || hasTopicCoverageContamination(
-    (normalizedDefSchedule ?? []).map((week) => ({
-      topic: week.topicTitle,
-      coverage: week.subTopics.join('\n'),
-    })),
+  const isZeroHoursStub = Boolean(
+    normalizedDefSchedule &&
+      normalizedDefSchedule.length > 0 &&
+      normalizedDefSchedule.every((w) => !w.hours || Number(w.hours) === 0),
   );
 
-  // Authoritative schedules (uploaded by user/HOD or trainer) MUST NOT be overwritten by canonical defaults
+  const isScheduleCorrupt =
+    isZeroHoursStub ||
+    normalizedDefSchedule?.some(
+      (w) => isCorruptedText(w.topicTitle) || isCorruptedText(w.specificLearningOutcomes),
+    ) ||
+    hasTopicCoverageContamination(
+      (normalizedDefSchedule ?? []).map((week) => ({
+        topic: week.topicTitle,
+        coverage: week.subTopics.join('\n'),
+      })),
+    );
+
+  // Authoritative schedules (uploaded by user/HOD or trainer) MUST NOT be overwritten by canonical defaults unless corrupted
   let weeklySchedule = normalizedDefSchedule;
   const canonicalSchedule = canonical.weeklySchedule;
 
-  if (isAuthoritative && weeklySchedule && weeklySchedule.length > 0) {
+  if (isAuthoritative && weeklySchedule && weeklySchedule.length > 0 && !isScheduleCorrupt) {
     // Retain verbatim authoritative schedule uploaded by user/trainer
   } else {
     const canonicalHasRichSLOs =

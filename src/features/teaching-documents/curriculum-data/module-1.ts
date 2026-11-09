@@ -178,7 +178,7 @@ export const MODULE_1_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     nominalHours: 55,
     theoryHours: 35,
     practicalHours: 20,
-    aliases: ["CND 1102", "DND 1102", "CCU 1105", "DCU 1105", "4.1.0"],
+    aliases: ["CND 1102", "DND 1102", "CCU 1102", "DCU 1102", "CCU 1105", "DCU 1105", "4.1.0"],
     unitDescription: "This module unit is intended to equip the trainee with knowledge, skills, values and attitudes that will enable him/her plan, start and manage a personal, group, private or public business enterprise. It is also intended to instil in the trainee the drive to venture into profit-making business activities.",
     overallCompetency: "By the end of the module unit, the trainee should be able to: acquire entrepreneurial competences necessary for planning, starting and managing a business; demonstrate positive attitude towards self-employment; portray desire to venture into business activities.",
     learningOutcomes: [

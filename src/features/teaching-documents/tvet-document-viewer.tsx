@@ -579,14 +579,19 @@ export function TVETDocumentViewer({
 
               <section>
                 <SectionHeading number="3" title="Weekly Delivery & Topical Breakdown" />
-                <div className="mt-3 overflow-x-auto overscroll-x-contain rounded border border-slate-300 print:overflow-visible">
+                <div
+                  tabIndex={0}
+                  role="region"
+                  aria-label="Weekly Delivery & Topical Breakdown"
+                  className="mt-3 overflow-x-auto overscroll-x-contain rounded border border-slate-300 print:overflow-visible focus:outline-none focus:ring-1 focus:ring-slate-900"
+                >
                 <table className="w-full min-w-[44rem] border-collapse text-[11px] table-fixed print:min-w-0">
                   <thead>
                     <tr className="bg-slate-100 text-slate-900 border-b-2 border-slate-900">
-                      <th className="border border-slate-300 px-2 py-2 text-center w-[8%] font-black uppercase text-[9px] tracking-wider text-slate-900">Week</th>
-                      <th className="border border-slate-300 px-3 py-2 text-left w-[32%] font-black uppercase text-[9px] tracking-wider text-slate-900">Topic Title</th>
-                      <th className="border border-slate-300 px-3 py-2 text-left w-[52%] font-black uppercase text-[9px] tracking-wider text-slate-900">Content / Sub-topics to be Covered</th>
-                      <th className="border border-slate-300 px-2 py-2 text-center w-[8%] font-black uppercase text-[9px] tracking-wider text-slate-900">Hours</th>
+                      <th className="border border-slate-300 px-2 py-2.5 text-center w-[8%] font-black uppercase text-[9.5px] tracking-wider text-slate-900">Week</th>
+                      <th className="border border-slate-300 px-3 py-2.5 text-left w-[32%] font-black uppercase text-[9.5px] tracking-wider text-slate-900">Topic Title</th>
+                      <th className="border border-slate-300 px-3 py-2.5 text-left w-[52%] font-black uppercase text-[9.5px] tracking-wider text-slate-900">Content / Sub-topics to be Covered</th>
+                      <th className="border border-slate-300 px-2 py-2.5 text-center w-[8%] font-black uppercase text-[9.5px] tracking-wider text-slate-900">Hours</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -595,25 +600,27 @@ export function TVETDocumentViewer({
                       const topicSpan = getContiguousTopicSpan(courseOutlineSchedule, idx);
 
                       return (
-                        <tr key={sched.weekNumber} className={idx % 2 === 0 ? 'bg-white align-top' : 'bg-slate-50 align-top'}>
-                          <td className="border border-slate-300 px-2 py-2 text-center font-black text-slate-900">
-                            W{sched.weekNumber}
+                        <tr key={sched.weekNumber} className={idx % 2 === 0 ? 'bg-white align-top' : 'bg-slate-50/70 align-top'}>
+                          <td className="border border-slate-300 px-2 py-2.5 text-center font-black text-slate-900">
+                            <span className="font-mono text-[11px] font-bold text-slate-900 bg-slate-100 rounded px-1.5 py-0.5 inline-block">
+                              W{sched.weekNumber}
+                            </span>
                           </td>
                           {topicSpan.isStart && (
                             <td
                               rowSpan={topicSpan.rowSpan}
-                              className="border border-slate-300 px-3 py-2 align-middle font-bold text-slate-900 leading-snug bg-white"
+                              className="border border-slate-300 px-3 py-2.5 align-middle font-bold text-slate-900 leading-snug bg-white"
                             >
                               {sched.topicTitle}
                             </td>
                           )}
-                          <td className="border border-slate-300 px-3 py-2 text-slate-800 leading-relaxed">
+                          <td className="border border-slate-300 px-3 py-2.5 text-slate-800 leading-relaxed">
                             {allSubtopics.length > 0 ? (
                               <ul className="m-0 space-y-1.5 p-0">
                                 {allSubtopics.map((sub, sIdx) => (
-                                  <li key={sIdx} className="block leading-snug">
-                                    <span className="font-bold text-slate-900">• </span>
-                                    <span>{sub.trim()}</span>
+                                  <li key={sIdx} className="flex items-start gap-2 leading-relaxed text-slate-800 text-[11.5px]">
+                                    <span className="shrink-0 font-bold text-slate-900 select-none">•</span>
+                                    <span className="flex-1">{sub.trim()}</span>
                                   </li>
                                 ))}
                               </ul>
@@ -621,7 +628,7 @@ export function TVETDocumentViewer({
                               <span className="text-slate-400 italic">• Core topic mastery and practical coverage.</span>
                             )}
                           </td>
-                          <td className="border border-slate-300 px-2 py-2 text-center font-semibold text-slate-800">
+                          <td className="border border-slate-300 px-2 py-2.5 text-center font-semibold text-slate-800">
                             {sched.hours} hrs
                           </td>
                         </tr>
@@ -731,7 +738,12 @@ export function TVETDocumentViewer({
               </div>
             ) : (
             <div className="space-y-4">
-              <div className="overflow-x-auto overscroll-x-contain rounded border border-slate-300 print:overflow-visible">
+              <div
+                tabIndex={0}
+                role="region"
+                aria-label="14-Week Balanced Scheme of Work"
+                className="overflow-x-auto overscroll-x-contain rounded border border-slate-300 print:overflow-visible focus:outline-none focus:ring-1 focus:ring-slate-900"
+              >
               <table className="w-full min-w-[62rem] border-collapse text-[10px] table-fixed print:min-w-0">
                 <thead>
                   <tr className="bg-slate-100 text-slate-900 border-b-2 border-slate-900">
@@ -862,7 +874,12 @@ export function TVETDocumentViewer({
                 </span>
               </div>
 
-              <div className="overflow-x-auto overscroll-x-contain rounded border border-slate-300 print:overflow-visible">
+              <div
+                tabIndex={0}
+                role="region"
+                aria-label="14-Week Session Delivery Progress Log"
+                className="overflow-x-auto overscroll-x-contain rounded border border-slate-300 print:overflow-visible focus:outline-none focus:ring-1 focus:ring-slate-900"
+              >
               <table className="w-full min-w-[52rem] border-collapse text-[10px] table-fixed print:min-w-0">
                 <thead>
                   <tr className="bg-slate-100 text-slate-900 border-b-2 border-slate-900">
@@ -943,11 +960,11 @@ export function TVETDocumentViewer({
 /** Styled section heading used across Course Outline sections */
 function SectionHeading({ number, title }: { number: string; title: string }) {
   return (
-    <div className="flex items-center gap-2 border-b-2 border-slate-900 pb-1.5 print:border-black">
-      <span className="flex size-5 shrink-0 items-center justify-center rounded border border-slate-900 bg-slate-100 text-[10px] font-black text-slate-900">
+    <div className="flex items-center gap-2.5 border-b-2 border-slate-900 pb-2 print:border-black">
+      <span className="flex size-5 shrink-0 items-center justify-center rounded bg-slate-900 text-[10px] font-black text-white print:bg-black print:text-white">
         {number}
       </span>
-      <h2 className="text-[11px] font-black uppercase tracking-wider text-slate-900 print:text-black">{title}</h2>
+      <h2 className="text-xs font-black uppercase tracking-wider text-slate-900 print:text-black">{title}</h2>
     </div>
   );
 }

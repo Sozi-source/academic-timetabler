@@ -10,6 +10,26 @@
 const RAW_BULLET_CHARS = '\\u2022\\u00b7\\u25cf\\u25aa\\u25e6\\u25cb\\u25c9\\u2043\\u2023\\u204e*';
 const BULLET_CHARS = `[${RAW_BULLET_CHARS}]`;
 
+const COMMON_ACRONYMS = new Set([
+  'ICT', 'HIV', 'AIDS', 'CAT', 'RAT', 'PPE', 'DNA', 'RNA', 'ATP', 'BMI',
+  'WHO', 'KNEC', 'SME', 'SMEs', 'TVET', 'CATs', 'RATs', 'CBD', 'IT', 'ERP',
+]);
+
+/** Convert uppercase headings into standard readable title case */
+export function toCurriculumTitleCase(text: string): string {
+  const minorWords = new Set(['of', 'and', 'the', 'in', 'on', 'at', 'to', 'a', 'an', 'for', 'vs', 'via', 'by', 'with']);
+  const words = text.trim().split(/\s+/);
+  return words
+    .map((w, idx) => {
+      const upper = w.toUpperCase();
+      if (COMMON_ACRONYMS.has(upper)) return upper;
+      const lower = w.toLowerCase();
+      if (idx > 0 && minorWords.has(lower)) return lower;
+      return lower.charAt(0).toUpperCase() + lower.slice(1);
+    })
+    .join(' ');
+}
+
 /**
  * Detects whether a string is a presentation/formatting artifact rather than
  * real subtopic content (for example `1`, `1-2`, `(1)`, `•`, `• •`, `CAT`, `Week 1`).
@@ -100,28 +120,61 @@ export function normalizeCurriculumSubtopics(input?: string | string[] | null): 
 
   for (const rawValue of rawValues) {
     if (rawValue === null || rawValue === undefined) continue;
-    const raw = String(rawValue).replace(/\r\n?/g, '\n').trim();
+    // Strip carriage returns and mojibake middle dots/bullets (e.g. `Â·` or `Â•`)
+    const raw = String(rawValue)
+      .replace(/\r\n?/g, '\n')
+      .replace(/\u00c2(?=[\u2022\u00b7\u25cf\u25aa\u25e6\u25cb\u25c9\u2043\u2023\u204e*\s]|$)/gu, '')
+      .trim();
     if (!raw) continue;
 
     // First preserve explicit Word paragraphs/new lines. Then split inline
     // bullet/semicolon/middle-dot delimiters that may have been flattened by
-    // a DOCX parser.
+    // a DOCX or Excel parser.
     const lines = raw.split(/\n+/u);
 
     for (const line of lines) {
       if (!line.trim()) continue;
 
       const withMarkersAsLines = line
+        // Clean mojibake middle dots
+        .replace(/\u00c2(?=[\u2022\u00b7\u25cf\u25aa\u25e6\u25cb\u25c9\u2043\u2023\u204e*\s]|$)/gu, '')
+        // Split when followed by a bullet character or middle dot
         .replace(new RegExp(`\\s*(?=${BULLET_CHARS})`, 'gu'), '\n')
         // Inline numbered lists: `1. Foo 2. Bar` / `1) Foo 2) Bar`.
         .replace(/\s+(?=\d{1,3}\s*[.)]\s+)/gu, '\n')
         // Imported ranges acting as list labels before bullets: `1-2 • Foo 3-4 • Bar`.
-        .replace(new RegExp(`\\s+(?=\\d+\\s*[-–—]\\s*\\d+\\s*(?:[:.)\\-–—]|(?=${BULLET_CHARS})))`, 'gu'), '\n');
+        .replace(new RegExp(`\\s+(?=\\d+\\s*[-–—]\\s*\\d+\\s*(?:[:.)\\-–—]|(?=${BULLET_CHARS})))`, 'gu'), '\n')
+        // Split squashed sentence boundary: period followed by space and Capitalized phrase of 2+ words
+        .replace(/\.\s+(?=[A-Z][a-z]+(?:\s+[a-z]+){1,})/gu, '\n')
+        // Split concatenated clauses where lowercase word/digit is immediately followed by a TVET subtopic starter
+        .replace(
+          /([a-z0-9)])\s+(?=(?:Meaning|Definition|Concept|Types|Forms|Sources|Role|Roles|Qualities|Characteristics|Functions|Importance|Benefits|Objectives|Factors|Barriers|Challenges|Procedure|Methods|Techniques|Strategies|Ways|Preparation|Recording|Evaluation|Assessment|Management|Support services|Cultural habits|Theories|Myths|History|Ethical behaviour)\s+(?:of|to|in|for|and|faced|available|affecting|inhibiting|influencing|associated|promoted|promoting|transactions|business)\b)/gu,
+          '$1\n',
+        )
+        // Split before embedded ALL-CAPS section headings (e.g. `EVOLUTION OF ENTREPRENEURSHIP`)
+        .replace(/\s+(?=[A-Z]{3,}(?:\s+[A-Z]{2,}){1,5}(?:\s*·|\s*\n|\s*$))/gu, '\n');
 
       const segments = withMarkersAsLines
         .split(new RegExp(`${BULLET_CHARS}+|[;|\\t]+|\\n+`, 'u'))
         .map(stripCurriculumListPrefix)
-        .map((part) => part.replace(/^[,;|]+|[,;|]+$/g, '').trim())
+        .map((part) => {
+          let cleaned = part.replace(/^[,;|]+|[,;|]+$/g, '').trim();
+          // Remove trailing period if it is not an abbreviation
+          if (cleaned.endsWith('.') && !/(?:etc|e\.g|i\.e)\.$/i.test(cleaned)) {
+            cleaned = cleaned.slice(0, -1).trim();
+          }
+          // Convert embedded ALL-CAPS chapter headings to Title Case for visual polish
+          if (
+            cleaned.length >= 6 &&
+            cleaned === cleaned.toUpperCase() &&
+            cleaned.includes(' ') &&
+            /[A-Z]{3,}/.test(cleaned) &&
+            !COMMON_ACRONYMS.has(cleaned)
+          ) {
+            cleaned = toCurriculumTitleCase(cleaned);
+          }
+          return cleaned;
+        })
         .filter((part) => part.length > 0 && !isCurriculumArtifactToken(part));
 
       items.push(...segments);

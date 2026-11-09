@@ -304,4 +304,48 @@ describe('curriculum content normalization', () => {
       expect(stripCurriculumListPrefix('10-15 mg/100g')).toBe('10-15 mg/100g');
     });
   });
+
+  describe('TVET syllabus edge case: Entrepreneurship and squashed clauses', () => {
+    it('splits concatenated run-on sentences without punctuation into discrete subtopics', () => {
+      const input = 'Meaning of financial management Sources of business finance · Types of business records · Recording business transactions in the books of accounts · Preparation and interpretation of financial statements · Importance of budgeting to a business';
+      const result = normalizeCurriculumSubtopics(input);
+      expect(result).toEqual([
+        'Meaning of financial management',
+        'Sources of business finance',
+        'Types of business records',
+        'Recording business transactions in the books of accounts',
+        'Preparation and interpretation of financial statements',
+        'Importance of budgeting to a business',
+      ]);
+    });
+
+    it('formats embedded ALL-CAPS section titles into Title Case subtopics', () => {
+      const input = 'Definition of terms · Differences between self and salaried employment · Contribution of entrepreneurship towards national development · EVOLUTION OF ENTREPRENEURSHIP · History of entrepreneurship in Kenya · Myths associated with entrepreneurship · Theories of entrepreneurship · Economic, political and social factors affecting entrepreneurial development';
+      const result = normalizeCurriculumSubtopics(input);
+      expect(result).toContain('Evolution of Entrepreneurship');
+      expect(result[0]).toBe('Definition of terms');
+      expect(result).toHaveLength(8);
+    });
+
+    it('cleans UTF-8 mojibake middle dots and bullets', () => {
+      const input = 'Definition of terms Â· Differences between self and salaried employment Â· Contribution of entrepreneurship';
+      const result = normalizeCurriculumSubtopics(input);
+      expect(result).toEqual([
+        'Definition of terms',
+        'Differences between self and salaried employment',
+        'Contribution of entrepreneurship',
+      ]);
+    });
+
+    it('removes trailing sentence periods while keeping abbreviation periods', () => {
+      const input = 'The process of creativity and innovation · Importance of creativity and innovation. · Barriers to creativity and innovation · Ways of managing barriers to creativity.';
+      const result = normalizeCurriculumSubtopics(input);
+      expect(result).toEqual([
+        'The process of creativity and innovation',
+        'Importance of creativity and innovation',
+        'Barriers to creativity and innovation',
+        'Ways of managing barriers to creativity',
+      ]);
+    });
+  });
 });

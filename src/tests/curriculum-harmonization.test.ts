@@ -268,5 +268,19 @@ describe('Authoritative TVET KNEC Curriculum & Shared CND/DND Harmonization', ()
       expect(findCanonicalCurriculum('', 'Project Coordination')).toBeUndefined();
       expect(findCanonicalCurriculum('', 'General Science')).toBeUndefined();
     });
+
+    it('resolves Entrepreneurship correctly for DCU 1102, CCU 1102, CND 1102, and DND 1102', () => {
+      const dcu = getUnitCurriculum('DCU 1102', 'Entrepreneurship');
+      expect(dcu.isAvailable !== false).toBe(true);
+      expect(dcu.weeklySchedule?.length).toBe(14);
+      expect(dcu.weeklySchedule?.[0].topicTitle).toContain('Introduction to Entrepreneurship');
+
+      const ccu = getUnitCurriculum('CCU 1102', 'Entrepreneurship');
+      expect(ccu.weeklySchedule?.length).toBe(14);
+
+      const dcuCanonical = findCanonicalCurriculum('DCU 1102', 'Entrepreneurship');
+      expect(dcuCanonical?.canonicalKey).toBe('entrepreneurship');
+      expect(dcuCanonical?.weeklySchedule).toHaveLength(14);
+    });
   });
 });

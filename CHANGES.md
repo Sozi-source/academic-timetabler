@@ -1,3 +1,34 @@
+### 2026-11-09: Polish Entrepreneurship Course Outlines Formatting and Modernize Document Typography
+
+**Summary:**
+- Resolved formatting issues in the Entrepreneurship course outline (DCU 1102 / CCU 1102), retiring corrupted upload version 2 from `Clean_Batch_39_Units_Corrected_Codes.xlsx` and cleanly falling back to the authentic 14-week canonical TVET curriculum.
+- Enhanced `normalizeCurriculumSubtopics` to automatically split concatenated/unpunctuated run-on sentences, format embedded all-caps chapter titles into title-case subtopics, strip UTF-8 mojibake middle dots, and clean sentence-ending punctuation.
+- Modernized document typography across web viewers and Word (.docx) export with crisp hierarchy, accessible table regions, and proportional bullet styling.
+
+**Modified:**
+- `src/features/teaching-documents/curriculum-content-normalizer.ts`:
+  - Added `toCurriculumTitleCase` to transform embedded all-caps section titles (e.g. `EVOLUTION OF ENTREPRENEURSHIP`) into polished title case subtopics (`Evolution of Entrepreneurship`).
+  - Added run-on clause boundary splitting before canonical TVET keyword phrases (`Meaning of`, `Sources of`, `Types of`, `Role of`, `Importance of`, `Factors affecting`, `Barriers to`, `Challenges faced`, etc.) when preceded by unpunctuated lowercase words.
+  - Added clean mojibake stripping for UTF-8 middle dots (`\u00c2\u00b7`) and bullet symbols.
+  - Added trailing sentence period stripping to maintain uniform bullet aesthetics.
+- `src/features/teaching-documents/curriculum-data/module-1.ts`:
+  - Added `"DCU 1102"` and `"CCU 1102"` to the `aliases` list for `entrepreneurship` so canonical lookup resolves immediately.
+- `src/features/teaching-documents/curriculum-content/queries.ts`:
+  - Added `isZeroHoursStub` detection to prevent 0-hour or corrupted uploads from overriding rich canonical TVET curriculums, even when marked authoritative.
+- `supabase/migrations/20261109110000_retire_malformed_dcu_entrepreneurship_v2.sql`:
+  - Migration retiring the malformed DCU 1102 upload from `Clean_Batch_39_Units_Corrected_Codes.xlsx` in `curriculum_document_versions`.
+- `src/features/teaching-documents/tvet-document-viewer.tsx`:
+  - Elevated section headings with high-contrast solid badges (`bg-slate-900 text-white font-black`) and crisp uppercase tracking.
+  - Upgraded table containers to follow `responsive-table` accessibility standards (`tabIndex={0} role="region" aria-label="..."`).
+  - Refined subtopics and approaches lists with flex hanging bullets (`flex items-start gap-2`) and proportional spacing.
+- `src/features/teaching-documents/export-docx.ts`:
+  - Upgraded academic font from `Arial` to `Calibri` for superior document legibility and balanced tabular typography.
+  - Increased cell font sizes from 7pt (`size: 14`) to standard 8pt/8.5pt (`size: 16`/`17`) with clean hanging bullet indentation (`indent: { left: 160 }`).
+- `src/tests/curriculum-content-normalizer.test.ts`:
+  - Added 4 test cases validating unpunctuated sentence splitting, title-casing of embedded chapter headers, mojibake middle dot cleanup, and trailing period normalization.
+- `src/tests/curriculum-harmonization.test.ts`:
+  - Added test case validating that DCU 1102, CCU 1102, CND 1102, and DND 1102 resolve to the 14-week canonical Entrepreneurship syllabus.
+
 ### 2026-11-09: Include Record of Work in Trainer Submissions and 3 Folders per Trainer in QA Examination Export
 
 **Summary:**

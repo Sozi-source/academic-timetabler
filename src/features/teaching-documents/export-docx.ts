@@ -36,7 +36,7 @@ import {
   type TVETRecordOfWorkData,
 } from './tvet-standards';
 
-const FONT = 'Arial';
+const FONT = 'Calibri';
 const PRIMARY_DARK = '0F172A';
 const SECONDARY_DARK = '334155';
 const LIGHT_BG = 'F1F5F9';
@@ -78,7 +78,7 @@ function p(
         text,
         font: FONT,
         bold: options.bold,
-        size: options.size ?? 18,
+        size: options.size ?? 20,
         color: options.color ?? PRIMARY_DARK,
       }),
     ],
@@ -93,7 +93,7 @@ function sectionHeader(number: string, title: string) {
         text: `${number}. ${title.toUpperCase()}`,
         font: FONT,
         bold: true,
-        size: 20,
+        size: 21,
         color: PRIMARY_DARK,
       }),
     ],
@@ -124,7 +124,7 @@ function cell(
               text: String(content),
               font: FONT,
               bold: options.bold || options.isHeader,
-              size: options.size ?? (options.isHeader ? 16 : 16),
+              size: options.size ?? (options.isHeader ? 17 : 16),
               color: options.color ?? (options.isHeader ? PRIMARY_DARK : '222222'),
             }),
           ],
@@ -383,21 +383,21 @@ export async function buildTVETDocumentDocx(
                       (s) =>
                         new Paragraph({
                           alignment: AlignmentType.LEFT,
-                          spacing: { before: 8, after: 8, line: 220 },
-                          indent: { left: 140 },
+                          spacing: { before: 8, after: 8, line: 230 },
+                          indent: { left: 160 },
                           children: [
-                            new TextRun({ text: '•  ', font: FONT, bold: true, size: 14, color: PRIMARY_DARK }),
-                            new TextRun({ text: clean(s), font: FONT, size: 14, color: '222222' }),
+                            new TextRun({ text: '•  ', font: FONT, bold: true, size: 16, color: PRIMARY_DARK }),
+                            new TextRun({ text: clean(s), font: FONT, size: 16, color: '222222' }),
                           ],
                         }),
                     )
                   : [
                       new Paragraph({
                         alignment: AlignmentType.LEFT,
-                        spacing: { before: 8, after: 8, line: 220 },
+                        spacing: { before: 8, after: 8, line: 230 },
                         children: [
-                          new TextRun({ text: '•  ', font: FONT, bold: true, size: 14, color: PRIMARY_DARK }),
-                          new TextRun({ text: 'Core topic coverage and practical mastery', font: FONT, size: 14, color: '555555' }),
+                          new TextRun({ text: '•  ', font: FONT, bold: true, size: 16, color: PRIMARY_DARK }),
+                          new TextRun({ text: 'Core topic coverage and practical mastery', font: FONT, size: 16, color: '555555' }),
                         ],
                       }),
                     ];
@@ -430,18 +430,18 @@ export async function buildTVETDocumentDocx(
         alignment: AlignmentType.LEFT,
         spacing: { before: 20, after: 40, line: 240 },
         children: [
-          new TextRun({ text: 'Teaching / Learning Approaches:', font: FONT, bold: true, size: 15, color: PRIMARY_DARK }),
+          new TextRun({ text: 'Teaching / Learning Approaches:', font: FONT, bold: true, size: 16, color: PRIMARY_DARK }),
         ],
       }),
       ...teachingItems.map(
         (item) =>
           new Paragraph({
             alignment: AlignmentType.LEFT,
-            spacing: { before: 8, after: 8, line: 220 },
-            indent: { left: 140 },
+            spacing: { before: 8, after: 8, line: 230 },
+            indent: { left: 160 },
             children: [
-              new TextRun({ text: '•  ', font: FONT, bold: true, size: 14, color: PRIMARY_DARK }),
-              new TextRun({ text: clean(item), font: FONT, size: 14, color: '222222' }),
+              new TextRun({ text: '•  ', font: FONT, bold: true, size: 16, color: PRIMARY_DARK }),
+              new TextRun({ text: clean(item), font: FONT, size: 16, color: '222222' }),
             ],
           }),
       ),
@@ -457,18 +457,18 @@ export async function buildTVETDocumentDocx(
         alignment: AlignmentType.LEFT,
         spacing: { before: 20, after: 40, line: 240 },
         children: [
-          new TextRun({ text: 'Assessment Weighting & Evaluation:', font: FONT, bold: true, size: 15, color: PRIMARY_DARK }),
+          new TextRun({ text: 'Assessment Weighting & Evaluation:', font: FONT, bold: true, size: 16, color: PRIMARY_DARK }),
         ],
       }),
       ...assessmentItems.map(
         (item) =>
           new Paragraph({
             alignment: AlignmentType.LEFT,
-            spacing: { before: 8, after: 8, line: 220 },
-            indent: { left: 140 },
+            spacing: { before: 8, after: 8, line: 230 },
+            indent: { left: 160 },
             children: [
-              new TextRun({ text: '•  ', font: FONT, bold: true, size: 14, color: PRIMARY_DARK }),
-              new TextRun({ text: clean(item), font: FONT, size: 14, color: '222222' }),
+              new TextRun({ text: '•  ', font: FONT, bold: true, size: 16, color: PRIMARY_DARK }),
+              new TextRun({ text: clean(item), font: FONT, size: 16, color: '222222' }),
             ],
           }),
       ),
@@ -502,18 +502,18 @@ export async function buildTVETDocumentDocx(
         alignment: AlignmentType.LEFT,
         spacing: { before: 20, after: 40, line: 240 },
         children: [
-          new TextRun({ text: 'Prescribed References & Textbooks:', font: FONT, bold: true, size: 15, color: PRIMARY_DARK }),
+          new TextRun({ text: 'Prescribed References & Textbooks:', font: FONT, bold: true, size: 16, color: PRIMARY_DARK }),
         ],
       }),
       ...refItems.map(
         (r) =>
           new Paragraph({
             alignment: AlignmentType.LEFT,
-            spacing: { before: 8, after: 8, line: 220 },
-            indent: { left: 140 },
+            spacing: { before: 8, after: 8, line: 230 },
+            indent: { left: 160 },
             children: [
-              new TextRun({ text: '•  ', font: FONT, bold: true, size: 14, color: PRIMARY_DARK }),
-              new TextRun({ text: clean(r), font: FONT, size: 14, color: '222222' }),
+              new TextRun({ text: '•  ', font: FONT, bold: true, size: 16, color: PRIMARY_DARK }),
+              new TextRun({ text: clean(r), font: FONT, size: 16, color: '222222' }),
             ],
           }),
       ),
@@ -530,18 +530,18 @@ export async function buildTVETDocumentDocx(
         alignment: AlignmentType.LEFT,
         spacing: { before: 20, after: 40, line: 240 },
         children: [
-          new TextRun({ text: 'Instructional Equipment & Safety Materials:', font: FONT, bold: true, size: 15, color: PRIMARY_DARK }),
+          new TextRun({ text: 'Instructional Equipment & Safety Materials:', font: FONT, bold: true, size: 16, color: PRIMARY_DARK }),
         ],
       }),
       ...equipItems.map(
         (e) =>
           new Paragraph({
             alignment: AlignmentType.LEFT,
-            spacing: { before: 8, after: 8, line: 220 },
-            indent: { left: 140 },
+            spacing: { before: 8, after: 8, line: 230 },
+            indent: { left: 160 },
             children: [
-              new TextRun({ text: '•  ', font: FONT, bold: true, size: 14, color: PRIMARY_DARK }),
-              new TextRun({ text: clean(e), font: FONT, size: 14, color: '222222' }),
+              new TextRun({ text: '•  ', font: FONT, bold: true, size: 16, color: PRIMARY_DARK }),
+              new TextRun({ text: clean(e), font: FONT, size: 16, color: '222222' }),
             ],
           }),
       ),
@@ -608,17 +608,17 @@ export async function buildTVETDocumentDocx(
                 alignment: AlignmentType.LEFT,
                 spacing: { before: 20, after: subtopics.length > 0 ? 30 : 20, line: 240 },
                 children: [
-                  new TextRun({ text: clean(w.topic), font: FONT, bold: true, size: 15, color: PRIMARY_DARK }),
+                  new TextRun({ text: clean(w.topic), font: FONT, bold: true, size: 16, color: PRIMARY_DARK }),
                 ],
               }),
               ...subtopics.map((st) =>
                 new Paragraph({
                   alignment: AlignmentType.LEFT,
-                  spacing: { before: 10, after: 10, line: 220 },
+                  spacing: { before: 10, after: 10, line: 230 },
                   indent: { left: 140 },
                   children: [
-                    new TextRun({ text: '•  ', font: FONT, bold: true, size: 14, color: PRIMARY_DARK }),
-                    new TextRun({ text: clean(st), font: FONT, size: 14, color: '333333' }),
+                    new TextRun({ text: '•  ', font: FONT, bold: true, size: 15, color: PRIMARY_DARK }),
+                    new TextRun({ text: clean(st), font: FONT, size: 15, color: '333333' }),
                   ],
                 }),
               ),
@@ -637,7 +637,7 @@ export async function buildTVETDocumentDocx(
                         text: 'By the end of the lesson/topic, the trainee should be able to:',
                         font: FONT,
                         bold: true,
-                        size: 14,
+                        size: 15,
                         color: PRIMARY_DARK,
                       }),
                     ],
@@ -645,11 +645,11 @@ export async function buildTVETDocumentDocx(
                   ...sloOutcomes.map((lo) =>
                     new Paragraph({
                       alignment: AlignmentType.LEFT,
-                      spacing: { before: 10, after: 10, line: 220 },
+                      spacing: { before: 10, after: 10, line: 230 },
                       indent: { left: 140 },
                       children: [
-                        new TextRun({ text: '•  ', font: FONT, bold: true, size: 14, color: PRIMARY_DARK }),
-                        new TextRun({ text: clean(lo), font: FONT, size: 14, color: '333333' }),
+                        new TextRun({ text: '•  ', font: FONT, bold: true, size: 15, color: PRIMARY_DARK }),
+                        new TextRun({ text: clean(lo), font: FONT, size: 15, color: '333333' }),
                       ],
                     }),
                   ),
@@ -658,7 +658,7 @@ export async function buildTVETDocumentDocx(
                   new Paragraph({
                     alignment: AlignmentType.LEFT,
                     spacing: { before: 20, after: 20, line: 240 },
-                    children: [new TextRun({ text: '—', font: FONT, size: 14, color: '777777' })],
+                    children: [new TextRun({ text: '—', font: FONT, size: 15, color: '777777' })],
                   }),
                 ];
 
@@ -668,11 +668,11 @@ export async function buildTVETDocumentDocx(
               ? activities.map((act) =>
                   new Paragraph({
                     alignment: AlignmentType.LEFT,
-                    spacing: { before: 10, after: 10, line: 220 },
+                    spacing: { before: 10, after: 10, line: 230 },
                     indent: { left: 140 },
                     children: [
-                      new TextRun({ text: '•  ', font: FONT, bold: true, size: 14, color: PRIMARY_DARK }),
-                      new TextRun({ text: clean(act), font: FONT, size: 14, color: '333333' }),
+                      new TextRun({ text: '•  ', font: FONT, bold: true, size: 15, color: PRIMARY_DARK }),
+                      new TextRun({ text: clean(act), font: FONT, size: 15, color: '333333' }),
                     ],
                   }),
                 )
@@ -680,7 +680,7 @@ export async function buildTVETDocumentDocx(
                   new Paragraph({
                     alignment: AlignmentType.LEFT,
                     spacing: { before: 20, after: 20, line: 240 },
-                    children: [new TextRun({ text: '—', font: FONT, size: 14, color: '777777' })],
+                    children: [new TextRun({ text: '—', font: FONT, size: 15, color: '777777' })],
                   }),
                 ];
 
@@ -690,11 +690,11 @@ export async function buildTVETDocumentDocx(
               ? resources.map((res) =>
                   new Paragraph({
                     alignment: AlignmentType.LEFT,
-                    spacing: { before: 10, after: 10, line: 220 },
+                    spacing: { before: 10, after: 10, line: 230 },
                     indent: { left: 140 },
                     children: [
-                      new TextRun({ text: '•  ', font: FONT, bold: true, size: 14, color: PRIMARY_DARK }),
-                      new TextRun({ text: clean(res), font: FONT, size: 14, color: '333333' }),
+                      new TextRun({ text: '•  ', font: FONT, bold: true, size: 15, color: PRIMARY_DARK }),
+                      new TextRun({ text: clean(res), font: FONT, size: 15, color: '333333' }),
                     ],
                   }),
                 )
@@ -702,7 +702,7 @@ export async function buildTVETDocumentDocx(
                   new Paragraph({
                     alignment: AlignmentType.LEFT,
                     spacing: { before: 20, after: 20, line: 240 },
-                    children: [new TextRun({ text: '—', font: FONT, size: 14, color: '777777' })],
+                    children: [new TextRun({ text: '—', font: FONT, size: 15, color: '777777' })],
                   }),
                 ];
 
@@ -720,7 +720,7 @@ export async function buildTVETDocumentDocx(
                     text: clean(mainRemark),
                     font: FONT,
                     bold: isMilestone,
-                    size: 14,
+                    size: 15,
                     color: isMilestone ? PRIMARY_DARK : '333333',
                   }),
                 ],

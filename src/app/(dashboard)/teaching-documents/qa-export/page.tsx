@@ -56,7 +56,7 @@ export default async function TeachingDocumentQaExportPage() {
               <div>
                 <h2 className="text-sm font-bold text-text-primary">Create examination pack</h2>
                 <p className="mt-1 max-w-3xl text-xs leading-relaxed text-text-secondary">
-                  The ZIP includes a folder for every allocated trainer, separate Course Outlines and Schemes of Work folders, and a QA index. Only the exact approved revision is included. The index lists missing or unavailable documents.
+                  The ZIP includes a folder for every allocated trainer with 3 dedicated folders (Course Outlines, Schemes of Work, and Records of Work), and a QA index. Only the exact approved revision is included. The index lists missing or unavailable documents.
                 </p>
               </div>
             </div>

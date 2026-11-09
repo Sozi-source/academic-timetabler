@@ -1,3 +1,44 @@
+### 2026-11-09: Include Record of Work in Trainer Submissions and 3 Folders per Trainer in QA Examination Export
+
+**Summary:**
+- Extended the teaching documents submission workflow to fully support **Record of Work**, alongside Course Outlines and Schemes of Work.
+- Enhanced the QA examination export to package **3 dedicated folders per trainer**: `Course Outlines`, `Schemes of Work`, and `Records of Work`.
+- Enabled Word export (.docx), real-time status tracking (Draft, Submitted/In Review, Approved by HOD, Returned for Notes), and HOD submission for Record of Work documents.
+
+**Modified:**
+- `src/features/teaching-documents/qa-export.ts`:
+  - Added `record_of_work` to `qaDocumentTypes` (now `['course_outline', 'scheme_of_work', 'record_of_work']`).
+  - Updated folder generator to create exactly 3 dedicated folders per trainer: `${folder}/Course Outlines/`, `${folder}/Schemes of Work/`, and `${folder}/Records of Work/`.
+  - Added dynamic fallback generator for `record_of_work` using `getRecordOfWorkContext` and `buildTVETDocumentDocx`.
+  - Updated QA index Excel generator to record `Record of Work` documents with corresponding status and ZIP file paths.
+  - Updated `README.txt` in QA export pack to document the 3 folders per trainer.
+- `src/app/(dashboard)/teaching-documents/qa-export/page.tsx`:
+  - Updated UI description to state that examination ZIPs include 3 dedicated folders for every trainer (Course Outlines, Schemes of Work, and Records of Work).
+- `src/features/teaching-documents/trainer-submission-actions.ts`:
+  - Updated `submitTrainerTeachingDocumentAction` to accept `record_of_work`.
+  - Compiles the official TVET Word (.docx) document with delivery progress and logged sessions, stores the file in `teaching-documents-private`, registers an immutable revision in `teaching_document_revisions`, logs submission in `teaching_document_submissions`, and marks the document approved for QA download.
+  - Revalidates relevant document hubs, review queues, and QA export routes.
+- `src/features/teaching-documents/export-docx.ts`:
+  - Implemented the official TVET Word (.docx) layout for `record_of_work`, including institutional crest, metadata matrix, delivery progress banner (`X of Y Weeks Logged, Z% Delivered`), 7-column weekly sessions table (`Wk`, `Date`, `Work Covered / Activities`, `Specific Outcomes Achieved`, `Attendance`, `Remarks`, `Sign`), and 3-part institutional sign-off block.
+- `src/app/api/teaching-documents/export-word/route.ts`:
+  - Added support for `type=record_of_work` in the GET route handler, generating and streaming the `.docx` file.
+- `src/features/teaching-documents/tvet-document-viewer.tsx`:
+  - Enabled "Export Word" and "Confirm & Submit for Review" for Record of Work documents.
+  - Added real-time status banners and badges (Approved, Submitted, Returned with HOD Note) and modal confirmation customized for Record of Work delivery statistics.
+  - Added direct "Log Lessons" quick action link.
+- `src/app/(staff)/staff/units/[allocationId]/documents/page.tsx`:
+  - Upgraded Card 3 (Record of Work Covered) to display live submission status badges (Approved, Submitted in Review, Returned for Notes, Draft), HOD feedback notes, and paired actions ("Log Progress" and "Confirm & Submit" / "View Record").
+- `src/app/(staff)/staff/units/[allocationId]/documents/record-of-work/viewer/page.tsx`:
+  - Added dedicated TVET Record of Work document viewer page supporting on-screen inspection, printing, Word export, and one-click submission to HOD review.
+- `src/features/teaching-documents/record-of-work-online/manager.tsx`:
+  - Added "View / Submit Document" action button linking directly to the TVET viewer.
+- `src/features/teaching-documents/record-of-work-actions.ts`:
+  - Added resilient fallback in `getRecordOfWorkContext` to query `record_of_work_entries` table if legacy JSON string is not yet populated.
+- `src/tests/tvet-teaching-documents.test.ts`:
+  - Added tests for Record of Work Word (.docx) compilation with and without logged entries.
+- `src/tests/qa-export-three-folders.test.ts`:
+  - Added unit test validating 3 dedicated folders per trainer and archive creation.
+
 ### 2026-11-08: Remove Cohorts column from Assessment Deliverables & Submissions table
 
 **Modified:**

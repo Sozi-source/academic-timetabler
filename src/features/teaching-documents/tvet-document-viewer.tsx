@@ -99,7 +99,7 @@ export function TVETDocumentViewer({
 
   const isDocumentReady =
     type === 'record_of_work'
-      ? true
+      ? Boolean(recordOfWork && recordOfWork.entries && recordOfWork.entries.length > 0)
       : type === 'course_outline'
       ? courseOutline?.isAvailable !== false && (courseOutline?.weeklySchedule?.length ?? 0) > 0
       : schemeOfWork?.isAvailable !== false && (schemeOfWork?.plannedWeeks?.length ?? 0) > 0;
@@ -138,7 +138,6 @@ export function TVETDocumentViewer({
   };
 
   const handleSubmitForReview = async () => {
-    if (type === 'record_of_work') return;
     setIsSubmitting(true);
     setSubmitError(null);
     setSubmitSuccess(null);
@@ -209,7 +208,16 @@ export function TVETDocumentViewer({
             <span className="hidden sm:inline">Assessment Schedule</span>
           </Link>
 
-          {type !== 'record_of_work' && isDocumentReady && (
+          {type === 'record_of_work' ? (
+            <Link
+              href={`/staff/units/${allocationId}/documents/record-of-work`}
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
+            >
+              <CalendarCheck className="size-3.5 text-slate-600" aria-hidden="true" />
+              <span className="sm:hidden">Log</span>
+              <span className="hidden sm:inline">Log Lessons</span>
+            </Link>
+          ) : isDocumentReady ? (
             <Link
               href={`/teaching-documents/curriculum/individual-upload?unitCode=${encodeURIComponent(header.unitCode)}`}
               className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
@@ -218,7 +226,7 @@ export function TVETDocumentViewer({
               <span className="sm:hidden">Update</span>
               <span className="hidden sm:inline">Update Document</span>
             </Link>
-          )}
+          ) : null}
 
           <button
             type="button"
@@ -229,7 +237,13 @@ export function TVETDocumentViewer({
                 ? 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
                 : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
             }`}
-            title={isDocumentReady ? 'Export Word (.docx)' : 'Curriculum content is not yet ready'}
+            title={
+              isDocumentReady
+                ? 'Export Word (.docx)'
+                : type === 'record_of_work'
+                  ? 'At least one lesson must be logged before exporting'
+                  : 'Curriculum content is not yet ready'
+            }
           >
             <FileDown className="size-3.5" aria-hidden="true" />
             <span className="sm:hidden">Word</span>
@@ -237,143 +251,140 @@ export function TVETDocumentViewer({
           </button>
 
           {/* Trainer Confirm & Submit Action */}
-          {type !== 'record_of_work' && (
-            <>
-              {statusInfo?.status === 'approved' ? (
-                <span className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-3.5 text-xs font-bold text-emerald-800 shadow-2xs">
-                  <Check className="size-3.5 text-emerald-600" />
-                  <span className="hidden sm:inline">Approved by HOD</span>
-                  <span className="sm:hidden">Approved</span>
-                </span>
-              ) : statusInfo?.status === 'submitted' ? (
-                <span className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-sky-300 bg-sky-50 px-3.5 text-xs font-bold text-sky-800 shadow-2xs">
-                  <Clock className="size-3.5 text-sky-600" />
-                  <span className="hidden sm:inline">Submitted · Awaiting HOD</span>
-                  <span className="sm:hidden">Submitted</span>
-                </span>
-              ) : statusInfo?.status === 'returned' ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSubmitError(null);
-                    setIsConfirmOpen(true);
-                  }}
-                  disabled={!isDocumentReady || isSubmitting}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-amber-600 px-3.5 text-xs font-bold text-white shadow-sm hover:bg-amber-700 transition"
-                  title="Resubmit after addressing HOD feedback"
-                >
-                  <RotateCcw className="size-3.5" />
-                  <span className="hidden sm:inline">Resubmit for HOD Review</span>
-                  <span className="sm:hidden">Resubmit</span>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSubmitError(null);
-                    setIsConfirmOpen(true);
-                  }}
-                  disabled={!isDocumentReady || isSubmitting}
-                  className={`inline-flex h-9 items-center gap-1.5 rounded-lg px-4 text-xs font-bold text-white shadow-sm transition ${
-                    isDocumentReady
-                      ? 'bg-emerald-600 hover:bg-emerald-700'
-                      : 'bg-emerald-300 cursor-not-allowed opacity-60'
-                  }`}
-                  title={
-                    isDocumentReady
-                      ? 'Confirm and submit this official document to your HOD for review'
-                      : 'Curriculum syllabus must be ready before submission'
-                  }
-                >
-                  <Send className="size-3.5" />
-                  <span className="hidden sm:inline">Confirm & Submit for Review</span>
-                  <span className="sm:hidden">Submit to HOD</span>
-                </button>
-              )}
-            </>
+          {statusInfo?.status === 'approved' ? (
+            <span className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-3.5 text-xs font-bold text-emerald-800 shadow-2xs">
+              <Check className="size-3.5 text-emerald-600" />
+              <span className="hidden sm:inline">Approved by HOD</span>
+              <span className="sm:hidden">Approved</span>
+            </span>
+          ) : statusInfo?.status === 'submitted' ? (
+            <span className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-sky-300 bg-sky-50 px-3.5 text-xs font-bold text-sky-800 shadow-2xs">
+              <Clock className="size-3.5 text-sky-600" />
+              <span className="hidden sm:inline">Submitted · Awaiting HOD</span>
+              <span className="sm:hidden">Submitted</span>
+            </span>
+          ) : statusInfo?.status === 'returned' ? (
+            <button
+              type="button"
+              onClick={() => {
+                setSubmitError(null);
+                setIsConfirmOpen(true);
+              }}
+              disabled={!isDocumentReady || isSubmitting}
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-amber-600 px-3.5 text-xs font-bold text-white shadow-sm hover:bg-amber-700 transition"
+              title="Resubmit after addressing HOD feedback"
+            >
+              <RotateCcw className="size-3.5" />
+              <span className="hidden sm:inline">Resubmit for HOD Review</span>
+              <span className="sm:hidden">Resubmit</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                setSubmitError(null);
+                setIsConfirmOpen(true);
+              }}
+              disabled={!isDocumentReady || isSubmitting}
+              className={`inline-flex h-9 items-center gap-1.5 rounded-lg px-4 text-xs font-bold text-white shadow-sm transition ${
+                isDocumentReady
+                  ? 'bg-emerald-600 hover:bg-emerald-700'
+                  : 'bg-emerald-300 cursor-not-allowed opacity-60'
+              }`}
+              title={
+                isDocumentReady
+                  ? 'Confirm and submit this official document to your HOD for review'
+                  : type === 'record_of_work'
+                    ? 'At least one lesson must be logged before submission'
+                    : 'Curriculum syllabus must be ready before submission'
+              }
+            >
+              <Send className="size-3.5" />
+              <span className="hidden sm:inline">Confirm & Submit for Review</span>
+              <span className="sm:hidden">Submit to HOD</span>
+            </button>
           )}
         </div>
       </div>
 
       {/* Status Notice Banners (Hidden during printing) */}
-      {type !== 'record_of_work' && (
-        <div className="space-y-3 print:hidden">
-          {submitSuccess && (
-            <div className="flex items-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 p-3 text-xs font-medium text-emerald-900 shadow-2xs">
-              <CheckCircle2 className="size-4 shrink-0 text-emerald-600" />
-              <span>{submitSuccess}</span>
-            </div>
-          )}
+      <div className="space-y-3 print:hidden">
+        {submitSuccess && (
+          <div className="flex items-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 p-3 text-xs font-medium text-emerald-900 shadow-2xs">
+            <CheckCircle2 className="size-4 shrink-0 text-emerald-600" />
+            <span>{submitSuccess}</span>
+          </div>
+        )}
 
-          {statusInfo?.status === 'approved' && (
-            <div className="flex items-start gap-3 rounded-xl border border-emerald-300 bg-emerald-50/90 p-4 text-xs text-emerald-950 shadow-2xs">
-              <CheckCircle2 className="size-5 shrink-0 text-emerald-600 mt-0.5" />
-              <div>
-                <p className="font-bold text-emerald-950 text-sm">
-                  Verified & Approved by Head of Department
-                </p>
-                <p className="mt-1 text-emerald-800 leading-relaxed">
-                  Approved on {formatStatusTimestamp(statusInfo.approvedAt)}. This official document is locked and will be bundled into the Quality Assurance (QA) examination export pack.
-                </p>
-              </div>
+        {statusInfo?.status === 'approved' && (
+          <div className="flex items-start gap-3 rounded-xl border border-emerald-300 bg-emerald-50/90 p-4 text-xs text-emerald-950 shadow-2xs">
+            <CheckCircle2 className="size-5 shrink-0 text-emerald-600 mt-0.5" />
+            <div>
+              <p className="font-bold text-emerald-950 text-sm">
+                Verified & Approved by Head of Department
+              </p>
+              <p className="mt-1 text-emerald-800 leading-relaxed">
+                Approved on {formatStatusTimestamp(statusInfo.approvedAt)}. This official document is locked and will be bundled into the Quality Assurance (QA) examination export pack.
+              </p>
             </div>
-          )}
+          </div>
+        )}
 
-          {statusInfo?.status === 'submitted' && (
-            <div className="flex items-start gap-3 rounded-xl border border-sky-300 bg-sky-50/90 p-4 text-xs text-sky-950 shadow-2xs">
-              <Clock className="size-5 shrink-0 text-sky-600 mt-0.5" />
-              <div>
-                <p className="font-bold text-sky-950 text-sm">
-                  Submitted for HOD Review & Verification
-                </p>
-                <p className="mt-1 text-sky-800 leading-relaxed">
-                  Submitted on {formatStatusTimestamp(statusInfo.submittedAt)} (Revision {statusInfo.submittedRevisionNumber ?? 1}). Your Head of Department has received this file in their review queue. You will see approval status updated here once reviewed.
-                </p>
-              </div>
+        {statusInfo?.status === 'submitted' && (
+          <div className="flex items-start gap-3 rounded-xl border border-sky-300 bg-sky-50/90 p-4 text-xs text-sky-950 shadow-2xs">
+            <Clock className="size-5 shrink-0 text-sky-600 mt-0.5" />
+            <div>
+              <p className="font-bold text-sky-950 text-sm">
+                Submitted for HOD Review & Verification
+              </p>
+              <p className="mt-1 text-sky-800 leading-relaxed">
+                Submitted on {formatStatusTimestamp(statusInfo.submittedAt)} (Revision {statusInfo.submittedRevisionNumber ?? 1}). Your Head of Department has received this file in their review queue. You will see approval status updated here once reviewed.
+              </p>
             </div>
-          )}
+          </div>
+        )}
 
-          {statusInfo?.status === 'returned' && (
-            <div className="flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50/90 p-4 text-xs text-amber-950 shadow-2xs">
-              <AlertTriangle className="size-5 shrink-0 text-amber-600 mt-0.5" />
-              <div className="flex-1">
-                <p className="font-bold text-amber-950 text-sm">
-                  Returned by Head of Department for Correction
-                </p>
-                {statusInfo.reviewNote && (
-                  <div className="mt-2 rounded-lg border border-amber-300 bg-white p-3 text-xs font-medium text-amber-900 shadow-2xs">
-                    <span className="font-bold uppercase tracking-wider text-[10px] text-amber-700 block mb-1">
-                      HOD Feedback Note:
-                    </span>
-                    {statusInfo.reviewNote}
-                  </div>
-                )}
-                <p className="mt-2 text-amber-800">
-                  Please update the curriculum as requested, then click <strong>Resubmit for HOD Review</strong> above.
-                </p>
-              </div>
+        {statusInfo?.status === 'returned' && (
+          <div className="flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50/90 p-4 text-xs text-amber-950 shadow-2xs">
+            <AlertTriangle className="size-5 shrink-0 text-amber-600 mt-0.5" />
+            <div className="flex-1">
+              <p className="font-bold text-amber-950 text-sm">
+                Returned by Head of Department for Correction
+              </p>
+              {statusInfo.reviewNote && (
+                <div className="mt-2 rounded-lg border border-amber-300 bg-white p-3 text-xs font-medium text-amber-900 shadow-2xs">
+                  <span className="font-bold uppercase tracking-wider text-[10px] text-amber-700 block mb-1">
+                    HOD Feedback Note:
+                  </span>
+                  {statusInfo.reviewNote}
+                </div>
+              )}
+              <p className="mt-2 text-amber-800">
+                Please update the curriculum as requested, then click <strong>Resubmit for HOD Review</strong> above.
+              </p>
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
 
       {/* Confirm & Submit Modal */}
-      {type !== 'record_of_work' && (
-        <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 mb-2">
-                <Send className="size-5" />
-              </div>
-              <DialogTitle className="text-base font-bold text-slate-900">
-                {statusInfo?.status === 'returned'
-                  ? 'Resubmit Document for HOD Review'
-                  : 'Confirm & Submit to HOD'}
-              </DialogTitle>
-              <DialogDescription className="text-xs text-slate-600">
-                Please confirm that the curriculum topics, schedule, and assessment milestones for this unit are accurate before submission.
-              </DialogDescription>
-            </DialogHeader>
+      <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 mb-2">
+              <Send className="size-5" />
+            </div>
+            <DialogTitle className="text-base font-bold text-slate-900">
+              {statusInfo?.status === 'returned'
+                ? 'Resubmit Document for HOD Review'
+                : 'Confirm & Submit to HOD'}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-600">
+              {type === 'record_of_work'
+                ? `Please confirm that the logged lessons (${recordOfWork?.completedWeeksCount ?? 0} of ${recordOfWork?.totalPlannedWeeks ?? 14} weeks) and session details for this unit are accurate before submission.`
+                : 'Please confirm that the curriculum topics, schedule, and assessment milestones for this unit are accurate before submission.'}
+            </DialogDescription>
+          </DialogHeader>
 
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs space-y-2">
               <div className="flex justify-between gap-4">
@@ -445,7 +456,6 @@ export function TVETDocumentViewer({
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      )}
 
       {/* Printable Document Container (Professional Academic Layout) */}
       <div className="mx-auto min-w-0 max-w-5xl overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-md print:m-0 print:max-w-none print:overflow-visible print:border-none print:shadow-none">

@@ -180,6 +180,32 @@ export async function getRecordOfWorkContext(allocationId: string): Promise<{
     }
   }
 
+  // Fallback: check record_of_work_entries table
+  if (entries.length === 0) {
+    const { data: rows } = await admin
+      .from('record_of_work_entries')
+      .select('*')
+      .eq('allocation_id', allocationId)
+      .order('occurrence_date', { ascending: true })
+      .order('start_time', { ascending: true });
+
+    if (rows && rows.length > 0) {
+      entries = rows.map((r: Record<string, unknown>, idx: number) => ({
+        id: String(r.id || `row-${idx}`),
+        allocationId,
+        weekNumber: Number(r.week_number) || 1,
+        sessionDate: String(r.occurrence_date || ''),
+        workCovered: String(r.topic_covered || ''),
+        outcomesAchieved: String(r.objectives || 'Competencies achieved in accordance with syllabus.'),
+        attendanceSummary: r.delivery_mode ? `Delivery: ${r.delivery_mode}` : 'Recorded in attendance sheet',
+        remarks: String(r.remarks || 'Delivered as scheduled'),
+        trainerSignature: header.trainerName,
+        signedAt: String(r.created_at || new Date().toISOString()),
+        hodStatus: r.review_status === 'approved' ? 'verified' : 'pending',
+      }));
+    }
+  }
+
   return {
     header,
     entries,

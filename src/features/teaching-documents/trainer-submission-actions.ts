@@ -4,10 +4,14 @@ import { randomUUID } from 'node:crypto';
 import { revalidatePath } from 'next/cache';
 import { requireTrainerAccess } from '@/features/auth/authorization';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { getDocumentHeaderContext } from './record-of-work-actions';
+import {
+  getDocumentHeaderContext,
+  getRecordOfWorkContext,
+} from './record-of-work-actions';
 import { getApprovedCurriculumForUnitCode } from './curriculum-content/queries';
 import { getAssessmentMilestones } from './assessment-milestones';
 import {
+  computeRecordOfWorkSummary,
   generateTVETCourseOutline,
   generateTVETSchemeOfWork,
 } from './tvet-standards';
@@ -178,7 +182,7 @@ export async function submitTrainerTeachingDocumentAction({
   documentType,
 }: {
   allocationId: string;
-  documentType: 'course_outline' | 'scheme_of_work';
+  documentType: 'course_outline' | 'scheme_of_work' | 'record_of_work';
 }): Promise<{
   success: boolean;
   message: string;
@@ -221,55 +225,69 @@ export async function submitTrainerTeachingDocumentAction({
     );
   }
 
-  // 3. Load approved curriculum syllabus & assessment schedule milestones
-  const [curriculum, milestones] = await Promise.all([
-    getApprovedCurriculumForUnitCode(
-      header.unitCode,
-      header.unitName,
-      documentType,
-    ),
-    getAssessmentMilestones(header.academicPeriodId ?? undefined),
-  ]);
-
-  if (!curriculum || curriculum.isAvailable === false) {
-    throw new Error(
-      curriculum?.notReadyMessage ||
-        'Curriculum syllabus content is not available or verified for this unit. Please upload syllabus or contact the department.',
-    );
-  }
-
-  // 4. Generate the official TVET Word (.docx) buffer
+  // 3. Generate the official TVET Word (.docx) buffer
   let docxBuffer: Buffer;
-  if (documentType === 'course_outline') {
-    const courseOutline = generateTVETCourseOutline(
-      header,
-      curriculum,
-      milestones,
-    );
-    if (
-      !courseOutline.weeklySchedule ||
-      courseOutline.weeklySchedule.length === 0
-    ) {
-      throw new Error('Course outline weekly schedule is incomplete.');
+
+  if (documentType === 'record_of_work') {
+    const rowContext = await getRecordOfWorkContext(allocationId);
+    if (!rowContext || rowContext.entries.length === 0) {
+      throw new Error(
+        'Cannot submit Record of Work without any logged entries. Please record at least one completed lesson before submitting.',
+      );
     }
-    docxBuffer = await buildTVETDocumentDocx('course_outline', {
-      courseOutline,
+    const recordOfWork = computeRecordOfWorkSummary(header, rowContext.entries);
+    docxBuffer = await buildTVETDocumentDocx('record_of_work', {
+      recordOfWork,
     });
   } else {
-    const schemeOfWork = generateTVETSchemeOfWork(
-      header,
-      curriculum,
-      milestones,
-    );
-    if (
-      !schemeOfWork.plannedWeeks ||
-      schemeOfWork.plannedWeeks.length === 0
-    ) {
-      throw new Error('Scheme of work weekly planned schedule is incomplete.');
+    // Load approved curriculum syllabus & assessment schedule milestones
+    const [curriculum, milestones] = await Promise.all([
+      getApprovedCurriculumForUnitCode(
+        header.unitCode,
+        header.unitName,
+        documentType,
+      ),
+      getAssessmentMilestones(header.academicPeriodId ?? undefined),
+    ]);
+
+    if (!curriculum || curriculum.isAvailable === false) {
+      throw new Error(
+        curriculum?.notReadyMessage ||
+          'Curriculum syllabus content is not available or verified for this unit. Please upload syllabus or contact the department.',
+      );
     }
-    docxBuffer = await buildTVETDocumentDocx('scheme_of_work', {
-      schemeOfWork,
-    });
+
+    if (documentType === 'course_outline') {
+      const courseOutline = generateTVETCourseOutline(
+        header,
+        curriculum,
+        milestones,
+      );
+      if (
+        !courseOutline.weeklySchedule ||
+        courseOutline.weeklySchedule.length === 0
+      ) {
+        throw new Error('Course outline weekly schedule is incomplete.');
+      }
+      docxBuffer = await buildTVETDocumentDocx('course_outline', {
+        courseOutline,
+      });
+    } else {
+      const schemeOfWork = generateTVETSchemeOfWork(
+        header,
+        curriculum,
+        milestones,
+      );
+      if (
+        !schemeOfWork.plannedWeeks ||
+        schemeOfWork.plannedWeeks.length === 0
+      ) {
+        throw new Error('Scheme of work weekly planned schedule is incomplete.');
+      }
+      docxBuffer = await buildTVETDocumentDocx('scheme_of_work', {
+        schemeOfWork,
+      });
+    }
   }
 
   const cleanUnitCode = header.unitCode
@@ -515,12 +533,18 @@ export async function submitTrainerTeachingDocumentAction({
   revalidatePath(`/staff/units/${allocationId}/documents`);
   revalidatePath(`/staff/units/${allocationId}/documents/course-outline`);
   revalidatePath(`/staff/units/${allocationId}/documents/scheme-of-work`);
+  revalidatePath(`/staff/units/${allocationId}/documents/record-of-work`);
+  revalidatePath(`/staff/units/${allocationId}/documents/record-of-work/viewer`);
   revalidatePath('/teaching-documents/review');
   revalidatePath('/teaching-documents/qa-export');
 
   const nowIso = new Date().toISOString();
   const docTitle =
-    documentType === 'course_outline' ? 'Course Outline' : 'Scheme of Work';
+    documentType === 'course_outline'
+      ? 'Course Outline'
+      : documentType === 'scheme_of_work'
+        ? 'Scheme of Work'
+        : 'Record of Work';
 
   return {
     success: true,

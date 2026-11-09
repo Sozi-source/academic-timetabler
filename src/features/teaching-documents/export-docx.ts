@@ -760,6 +760,102 @@ export async function buildTVETDocumentDocx(
       p('', { after: 120 }),
     );
     }
+  } else if (type === 'record_of_work' && data.recordOfWork) {
+    const row = data.recordOfWork;
+
+    children.push(
+      sectionHeader('1', 'Delivery Progress Summary'),
+      new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        layout: TableLayoutType.FIXED,
+        rows: [
+          new TableRow({
+            children: [
+              cell(
+                `Completed: ${row.completedWeeksCount} of ${row.totalPlannedWeeks} Planned Weeks Logged (${row.syllabusCompletionRate}% Syllabus Delivered)`,
+                { bold: true, size: 16, color: PRIMARY_DARK, fill: LIGHT_BG, widthPct: 100 },
+              ),
+            ],
+          }),
+        ],
+      }),
+      p('', { after: 80 }),
+    );
+
+    children.push(
+      sectionHeader('2', 'Weekly Record of Work Covered'),
+      new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        layout: TableLayoutType.FIXED,
+        rows: [
+          new TableRow({
+            children: [
+              cell('Wk', { isHeader: true, align: AlignmentType.CENTER, widthPct: 6 }),
+              cell('Date', { isHeader: true, widthPct: 12 }),
+              cell('Work Covered / Activities', { isHeader: true, widthPct: 28 }),
+              cell('Specific Outcomes Achieved', { isHeader: true, widthPct: 28 }),
+              cell('Attendance', { isHeader: true, widthPct: 10 }),
+              cell('Remarks', { isHeader: true, widthPct: 10 }),
+              cell('Sign', { isHeader: true, align: AlignmentType.CENTER, widthPct: 6 }),
+            ],
+          }),
+          ...(row.entries.length === 0
+            ? [
+                new TableRow({
+                  children: [
+                    cell('No record of work entries logged yet.', {
+                      align: AlignmentType.CENTER,
+                      color: '666666',
+                      widthPct: 100,
+                    }),
+                  ],
+                }),
+              ]
+            : row.entries.map((entry, idx) => {
+                const fill = idx % 2 === 1 ? ZEBRA_BG : 'FFFFFF';
+                return new TableRow({
+                  children: [
+                    cell(`W${entry.weekNumber}`, {
+                      align: AlignmentType.CENTER,
+                      bold: true,
+                      color: PRIMARY_DARK,
+                      fill,
+                      widthPct: 6,
+                    }),
+                    cell(clean(entry.sessionDate), { fill, widthPct: 12 }),
+                    cell(clean(entry.workCovered), { bold: true, fill, widthPct: 28 }),
+                    cell(clean(entry.outcomesAchieved), { fill, widthPct: 28 }),
+                    cell(clean(entry.attendanceSummary, 'Recorded'), { fill, widthPct: 10 }),
+                    cell(clean(entry.remarks, 'Delivered as scheduled'), { fill, widthPct: 10 }),
+                    cell(
+                      [
+                        p(clean(entry.trainerSignature.split(' ')[0], 'Signed'), {
+                          bold: true,
+                          size: 14,
+                          align: AlignmentType.CENTER,
+                          after: 20,
+                        }),
+                        p(
+                          entry.signedAt
+                            ? new Date(entry.signedAt).toLocaleDateString('en-GB')
+                            : '',
+                          {
+                            size: 12,
+                            color: '666666',
+                            align: AlignmentType.CENTER,
+                            after: 0,
+                          },
+                        ),
+                      ],
+                      { fill, widthPct: 6 },
+                    ),
+                  ],
+                });
+              })),
+        ],
+      }),
+      p('', { after: 120 }),
+    );
   }
 
   // 5. Sign-off Blocks

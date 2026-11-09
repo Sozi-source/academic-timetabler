@@ -6,12 +6,17 @@ import { requireHodAccess } from '@/features/auth/authorization';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 import { createZipArchive } from './zip-archive';
-import { generateTVETCourseOutline, type TVETDocumentHeaderContext } from './tvet-standards';
+import {
+  computeRecordOfWorkSummary,
+  generateTVETCourseOutline,
+  type TVETDocumentHeaderContext,
+} from './tvet-standards';
 import { buildTVETDocumentDocx } from './export-docx';
+import { getRecordOfWorkContext } from './record-of-work-actions';
 import { getApprovedCurriculumForUnitCode } from './curriculum-content/queries';
 import { getAssessmentMilestones } from './assessment-milestones';
 
-const qaDocumentTypes = ['course_outline', 'scheme_of_work'] as const;
+const qaDocumentTypes = ['course_outline', 'scheme_of_work', 'record_of_work'] as const;
 type QaDocumentType = (typeof qaDocumentTypes)[number];
 
 type UnitRow = { id: string; code: string; name: string };
@@ -89,7 +94,9 @@ function fileExtension(fileName: string): string {
 }
 
 function documentLabel(type: QaDocumentType): string {
-  return type === 'course_outline' ? 'Course Outline' : 'Scheme of Work';
+  if (type === 'course_outline') return 'Course Outline';
+  if (type === 'scheme_of_work') return 'Scheme of Work';
+  return 'Record of Work';
 }
 
 function cleanUuidList(ids: Array<string | null | undefined>): string[] {
@@ -374,7 +381,12 @@ export async function createQaExaminationPack(
         ? revisionByKey.get(`${document.id}:${revisionNumber}`)
         : undefined;
       const cohortName = cohortById.get(allocation.cohort_id)?.name ?? 'Cohort';
-      const directory = documentType === 'course_outline' ? 'Course Outlines' : 'Schemes of Work';
+      const directory =
+        documentType === 'course_outline'
+          ? 'Course Outlines'
+          : documentType === 'scheme_of_work'
+            ? 'Schemes of Work'
+            : 'Records of Work';
       const ext = revision ? fileExtension(revision.original_filename) : 'docx';
       const relativePath =
         documentType === 'course_outline'
@@ -474,6 +486,25 @@ export async function createQaExaminationPack(
         }
       }
 
+      if (line.documentType === 'record_of_work') {
+        try {
+          const rowContext = await getRecordOfWorkContext(allocation.id);
+          if (rowContext && rowContext.entries.length > 0) {
+            const recordOfWork = computeRecordOfWorkSummary(rowContext.header, rowContext.entries);
+            file = await buildTVETDocumentDocx('record_of_work', { recordOfWork });
+            admin.storage
+              .from(revision.storage_bucket)
+              .upload(revision.storage_path, file, {
+                upsert: true,
+                contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+              })
+              .catch(() => {});
+          }
+        } catch (err) {
+          console.warn(`Dynamic QA record of work generation failed for ${unit.code}, falling back to storage:`, err);
+        }
+      }
+
       if (!file) {
         const result = await admin.storage.from(revision.storage_bucket).download(revision.storage_path);
         if (result.error || !result.data) {
@@ -532,6 +563,7 @@ export async function createQaExaminationPack(
     entries.push({ name: `${folder}/`, data: Buffer.alloc(0), isDirectory: true });
     entries.push({ name: `${folder}/Course Outlines/`, data: Buffer.alloc(0), isDirectory: true });
     entries.push({ name: `${folder}/Schemes of Work/`, data: Buffer.alloc(0), isDirectory: true });
+    entries.push({ name: `${folder}/Records of Work/`, data: Buffer.alloc(0), isDirectory: true });
   }
   const addedZipPaths = new Set<string>();
   for (const line of lines) {
@@ -551,6 +583,7 @@ export async function createQaExaminationPack(
     `Approved documents included: ${lines.filter((line) => Boolean(line.buffer)).length}`,
     `Required documents unavailable or not approved: ${unavailableDocuments}`,
     '',
+    'Each trainer folder contains 3 dedicated document folders: Course Outlines, Schemes of Work, and Records of Work.',
     'Only the exact revisions approved by the department are included. See QA_Index.xlsx for each trainer, unit, approval status, and ZIP file path.',
     'Rows marked Not approved or Approved record; file unavailable are not included as document files.',
   ].join('\n');

@@ -3,6 +3,7 @@
 import { useState, useActionState } from 'react';
 import {
   ArrowLeft,
+  BookOpen,
   CheckCircle2,
   Clock3,
   FileCheck2,
@@ -243,6 +244,13 @@ export function OnlineRecordOfWorkManager({ context }: { context: OnlineRecordOf
               </p>
             </div>
           </div>
+          <Link
+            href={`/staff/units/${context.allocationId}/documents/record-of-work/viewer`}
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-teal-900 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-teal-800 transition"
+          >
+            <BookOpen className="size-3.5" />
+            View / Submit Document
+          </Link>
         </div>
 
         {/* Meta Row */}

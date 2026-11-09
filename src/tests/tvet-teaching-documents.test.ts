@@ -283,6 +283,57 @@ describe('TVET Standardised Teaching Documents Suite', () => {
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(1000);
     });
+
+    it('generates a valid DOCX export for TVET Record of Work Covered with progress summary and entries table', async () => {
+      const { buildTVETDocumentDocx } = await import('@/features/teaching-documents/export-docx');
+      const mockEntries: TVETRecordOfWorkEntry[] = [
+        {
+          id: 'row-1',
+          allocationId: 'alloc-1',
+          weekNumber: 1,
+          sessionDate: '2026-01-12',
+          workCovered: 'Introduction to Nutrition Concepts',
+          outcomesAchieved: 'Trainees defined core nutrition terminologies and principles.',
+          attendanceSummary: '28/30 present',
+          remarks: 'Conducted successfully',
+          trainerSignature: 'Dr. Jane Mwangi',
+          signedAt: '2026-01-12T10:00:00Z',
+          hodStatus: 'verified',
+        },
+        {
+          id: 'row-2',
+          allocationId: 'alloc-1',
+          weekNumber: 2,
+          sessionDate: '2026-01-19',
+          workCovered: 'Macronutrients & Digestion Mechanisms',
+          outcomesAchieved: 'Trainees categorized carbohydrates, lipids, and proteins.',
+          attendanceSummary: '30/30 present',
+          remarks: 'Delivered as scheduled',
+          trainerSignature: 'Dr. Jane Mwangi',
+          signedAt: '2026-01-19T10:00:00Z',
+          hodStatus: 'verified',
+        },
+      ];
+
+      const recordOfWork = computeRecordOfWorkSummary(mockHeader, mockEntries);
+      expect(recordOfWork.completedWeeksCount).toBe(2);
+      expect(recordOfWork.syllabusCompletionRate).toBe(14); // 2/14 = 14%
+
+      const buffer = await buildTVETDocumentDocx('record_of_work', { recordOfWork });
+      expect(buffer).toBeInstanceOf(Buffer);
+      expect(buffer.length).toBeGreaterThan(1000);
+    });
+
+    it('generates a valid DOCX export for TVET Record of Work even when no entries are logged yet', async () => {
+      const { buildTVETDocumentDocx } = await import('@/features/teaching-documents/export-docx');
+      const emptyRow = computeRecordOfWorkSummary(mockHeader, []);
+      expect(emptyRow.completedWeeksCount).toBe(0);
+      expect(emptyRow.syllabusCompletionRate).toBe(0);
+
+      const buffer = await buildTVETDocumentDocx('record_of_work', { recordOfWork: emptyRow });
+      expect(buffer).toBeInstanceOf(Buffer);
+      expect(buffer.length).toBeGreaterThan(1000);
+    });
   });
 });
 

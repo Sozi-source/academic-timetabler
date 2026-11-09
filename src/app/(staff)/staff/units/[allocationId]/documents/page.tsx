@@ -45,6 +45,7 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
 
   const coStatus = docStatuses['course_outline'];
   const sowStatus = docStatuses['scheme_of_work'];
+  const rowStatus = docStatuses['record_of_work'];
 
   const entriesCount = rowContext?.entries.length ?? 0;
   const uniqueWeeksCount = new Set(rowContext?.entries.map((e) => e.weekNumber) ?? []).size;
@@ -191,25 +192,56 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
                 <span className="rounded-lg bg-primary text-white p-2">
                   <CalendarCheck2 className="size-4" />
                 </span>
-                <Badge variant={entriesCount > 0 ? 'success' : 'warning'}>
-                  {entriesCount > 0 ? `${syllabusRate}% Delivered` : 'Update Required'}
-                </Badge>
+                {rowStatus?.status === 'approved' ? (
+                  <Badge variant="success">Approved</Badge>
+                ) : rowStatus?.status === 'submitted' ? (
+                  <Badge variant="info">Submitted (In Review)</Badge>
+                ) : rowStatus?.status === 'returned' ? (
+                  <Badge variant="warning">Returned for Notes</Badge>
+                ) : (
+                  <Badge variant={entriesCount > 0 ? 'success' : 'neutral'}>
+                    {entriesCount > 0 ? `${syllabusRate}% Delivered` : 'Draft · Not Submitted'}
+                  </Badge>
+                )}
               </div>
               <h3 className="mt-3 text-sm font-bold text-text-primary">Record of Work Covered</h3>
               <p className="mt-1 text-[11px] leading-relaxed text-text-secondary">
                 Weekly delivery and attendance log.
               </p>
+              {rowStatus?.status === 'returned' && rowStatus.reviewNote && (
+                <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 p-2 text-[11px] text-amber-800 leading-snug">
+                  <span className="font-semibold block text-[10px] uppercase tracking-wider text-amber-700">HOD Note:</span>
+                  {rowStatus.reviewNote}
+                </p>
+              )}
+              {rowStatus?.status === 'approved' && (
+                <p className="mt-2 text-[10px] font-semibold text-emerald-700">
+                  ✓ Verified by HOD · Ready for QA
+                </p>
+              )}
               <div className="mt-2 text-[10px] font-semibold text-primary">
                 {uniqueWeeksCount} of 14 Weeks Logged ({entriesCount} sessions)
               </div>
             </div>
-            <div className="mt-4 pt-3 border-t border-primary/20">
+            <div className="mt-4 pt-3 border-t border-primary/20 flex gap-2">
               <Link
                 href={`/staff/units/${allocationId}/documents/record-of-work`}
-                className="inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-2 text-xs font-semibold text-white hover:bg-primary-hover"
+                className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary px-2 text-xs font-semibold text-white hover:bg-primary-hover"
               >
-                <PlusCircle className="size-3.5" />
+                <CalendarCheck2 className="size-3.5" />
                 Log Progress
+              </Link>
+              <Link
+                href={`/staff/units/${allocationId}/documents/record-of-work/viewer`}
+                className="inline-flex h-8 items-center justify-center gap-1 rounded-lg border border-border bg-white px-2.5 text-xs font-semibold text-text-secondary hover:bg-surface-subtle"
+                title="View & Submit Record of Work"
+              >
+                <BookOpen className="size-3.5" />
+                {rowStatus?.status === 'returned'
+                  ? 'Resubmit'
+                  : !rowStatus || rowStatus.status === 'draft'
+                    ? 'Confirm & Submit'
+                    : 'View Record'}
               </Link>
             </div>
           </Card>

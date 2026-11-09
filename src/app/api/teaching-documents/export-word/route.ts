@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
-import { getDocumentHeaderContext } from '@/features/teaching-documents/record-of-work-actions';
+import {
+  getDocumentHeaderContext,
+  getRecordOfWorkContext,
+} from '@/features/teaching-documents/record-of-work-actions';
 import { getApprovedCurriculumForUnitCode } from '@/features/teaching-documents/curriculum-content/queries';
 import { getAssessmentMilestones } from '@/features/teaching-documents/assessment-milestones';
 import {
+  computeRecordOfWorkSummary,
   generateTVETCourseOutline,
   generateTVETSchemeOfWork,
 } from '@/features/teaching-documents/tvet-standards';
@@ -28,33 +32,42 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Teaching allocation not found' }, { status: 404 });
     }
 
-    const docType = type === 'scheme_of_work' ? 'scheme_of_work' : 'course_outline';
-    const [curriculum, milestones] = await Promise.all([
-      getApprovedCurriculumForUnitCode(header.unitCode, header.unitName, docType),
-      getAssessmentMilestones(header.academicPeriodId ?? undefined),
-    ]);
-
-    if (!curriculum || curriculum.isAvailable === false || (!curriculum.weeklySchedule || curriculum.weeklySchedule.length === 0)) {
-      return NextResponse.json(
-        {
-          error:
-            curriculum?.notReadyMessage ||
-            'Curriculum content for this unit is not yet ready. The verified syllabus has not been uploaded by the department.',
-        },
-        { status: 400 }
-      );
-    }
-
     let docxBuffer: Buffer;
 
-    if (type === 'course_outline') {
-      const courseOutline = generateTVETCourseOutline(header, curriculum, milestones);
-      docxBuffer = await buildTVETDocumentDocx('course_outline', { courseOutline });
-    } else if (type === 'scheme_of_work') {
-      const schemeOfWork = generateTVETSchemeOfWork(header, curriculum, milestones);
-      docxBuffer = await buildTVETDocumentDocx('scheme_of_work', { schemeOfWork });
+    if (type === 'record_of_work') {
+      const rowContext = await getRecordOfWorkContext(allocationId);
+      const recordOfWork = computeRecordOfWorkSummary(
+        header,
+        rowContext?.entries ?? [],
+      );
+      docxBuffer = await buildTVETDocumentDocx('record_of_work', { recordOfWork });
     } else {
-      return NextResponse.json({ error: 'Unsupported document type' }, { status: 400 });
+      const docType = type === 'scheme_of_work' ? 'scheme_of_work' : 'course_outline';
+      const [curriculum, milestones] = await Promise.all([
+        getApprovedCurriculumForUnitCode(header.unitCode, header.unitName, docType),
+        getAssessmentMilestones(header.academicPeriodId ?? undefined),
+      ]);
+
+      if (!curriculum || curriculum.isAvailable === false || (!curriculum.weeklySchedule || curriculum.weeklySchedule.length === 0)) {
+        return NextResponse.json(
+          {
+            error:
+              curriculum?.notReadyMessage ||
+              'Curriculum content for this unit is not yet ready. The verified syllabus has not been uploaded by the department.',
+          },
+          { status: 400 }
+        );
+      }
+
+      if (type === 'course_outline') {
+        const courseOutline = generateTVETCourseOutline(header, curriculum, milestones);
+        docxBuffer = await buildTVETDocumentDocx('course_outline', { courseOutline });
+      } else if (type === 'scheme_of_work') {
+        const schemeOfWork = generateTVETSchemeOfWork(header, curriculum, milestones);
+        docxBuffer = await buildTVETDocumentDocx('scheme_of_work', { schemeOfWork });
+      } else {
+        return NextResponse.json({ error: 'Unsupported document type' }, { status: 400 });
+      }
     }
 
     const filename =

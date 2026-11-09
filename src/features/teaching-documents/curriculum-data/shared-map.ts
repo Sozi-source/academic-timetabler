@@ -130,10 +130,12 @@ export const SHARED_UNIT_ALIAS_MAP: Record<string, string> = {
   "introductiontobiostatistics": "intro_biostatistics",
   "biostatistics": "intro_biostatistics",
 
-  // Basic Biochemistry (Module 2, 26.2.0)
+  // Basic Biochemistry (Module 2, 26.2.0) & Biochemistry II
   "basicbiochemistry": "basic_biochemistry",
   "biochemistryi": "basic_biochemistry",
-  "biochemistryii": "basic_biochemistry",
+  "biochemistry1": "basic_biochemistry",
+  "biochemistryii": "biochemistry_ii",
+  "biochemistry2": "biochemistry_ii",
   "biochemistry": "basic_biochemistry",
 
   // Nutrition in the Lifespan (Module 2, 27.2.0)
@@ -303,7 +305,7 @@ export const SHARED_UNIT_ALIAS_MAP: Record<string, string> = {
   "dnd3103": "food_microbiology_parasitology",
   "dnd3104": "diet_therapy_iii",
   "dnd3105": "community_partnership_skills",
-  "dnd3106": "basic_biochemistry",
+  "dnd3106": "biochemistry_ii",
   "dnd3201": "product_development_marketing_sales",
   "dnd3202": "industrial_organization_management",
   "dnd3203": "nutrition_epidemiology",
@@ -339,7 +341,7 @@ export const SHARED_UNIT_ALIAS_MAP: Record<string, string> = {
   "dhn2207": "primary_health_care",
   "dhn2302": "nutrition_in_lifespan",
   "dhn2303": "communicable_non_communicable",
-  "dhn2304": "basic_biochemistry",
+  "dhn2304": "biochemistry_ii",
   "dhn2305": "nutrition_and_behaviour",
   "dhn2307": "research_methods",
   "dhn3101": "communicable_non_communicable",
@@ -369,7 +371,7 @@ export const SHARED_UNIT_ALIAS_MAP: Record<string, string> = {
   "dndt1204": "diet_therapy_iii",
   "dndt1205": "community_partnership_skills",
   "dndt1206": "communicable_non_communicable",
-  "dndt1207": "basic_biochemistry",
+  "dndt1207": "biochemistry_ii",
   "dndt1301": "nutrition_education_counselling",
   "dndt1302": "food_microbiology_parasitology",
   "dndt1303": "nutrition_epidemiology",

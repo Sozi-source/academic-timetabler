@@ -335,7 +335,7 @@ export async function generateAttendanceSheetDocx(
             cell('Candidate Name', { bold: true, shading: 'E8EEF5' }),
             cell('Booklet Serial No.', { bold: true, align: AlignmentType.CENTER, shading: 'E8EEF5' }),
             cell('Candidate Signature', { bold: true, align: AlignmentType.CENTER, shading: 'E8EEF5' }),
-            cell('Marks', { bold: true, align: AlignmentType.CENTER, shading: 'E8EEF5' }),
+            cell('Score', { bold: true, align: AlignmentType.CENTER, shading: 'E8EEF5' }),
           ],
         }),
         ...group.candidates.map((candidate, index) =>

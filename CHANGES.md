@@ -1,3 +1,49 @@
+### 2026-11-10: Update Biochemistry II Course Outline and Purge Erroneous Topics
+
+**Summary:**
+- Separated **Biochemistry II** (`DHN 2304`, `DND 3106`, `DNDT 1207`) into its own canonical curriculum definition (`biochemistry_ii`) distinct from `Basic Biochemistry` (`Biochemistry I`), purging erroneously added topics (such as *Introduction to Biochemistry*, *Energy Metabolism/Balance*, *Ornithine Cycle*, *Amino Acid Anabolism*, *Fat-Soluble Vitamins*, *Water-Soluble Vitamins*, *Minerals and Trace Elements*, and *Biochemistry Laboratory: Qualitative Analysis*).
+- Updated the **Biochemistry II** unit purpose, general objectives, and 6 core topics across the 14-week schedule:
+  1. **Carbohydrate Metabolism**: Meaning of terms, Glycolysis, Fate of pyruvate, Krebs cycle, Electron transport & oxidative phosphorylation (energy).
+  2. **Protein Metabolism**: Deamination & Transamination (Amino Acids), Urea cycle, Diseases associated with protein metabolism.
+  3. **Lipid Metabolism**: Fatty acid activation, Beta-oxidation of fatty acids, Diseases associated with lipid metabolism.
+  4. **Nucleic Acids and Nucleotides**: Meaning of terms, DNA, RNA.
+  5. **Enzymology**: Classification of enzymes, Properties of enzymes, Mechanism of enzyme action, Factors affecting enzyme action.
+  6. **Emerging Issues and Trends**.
+- Superseded the legacy active upload in `curriculum_document_versions` for `Biochemistry II` (`DHN 2304`) and added a read-boundary guard so outdated uploads with erroneous topics cannot override the clean syllabus.
+
+**Modified:**
+- `src/features/teaching-documents/curriculum-data/module-2.ts`:
+  - Added canonical unit `biochemistry_ii` (`DHN 2304` / `DND 3106` / `DNDT 1207`) with the exact unit description, general objectives, and 6-topic 14-week schedule.
+  - Scoped `basic_biochemistry` aliases strictly to `Biochemistry I` / `Basic Biochemistry` (`CND 2105`, `DND 2305`, `DHN 2203`, `DNDT 1105`).
+- `src/features/teaching-documents/curriculum-data/shared-map.ts`:
+  - Mapped `biochemistryii`, `biochemistry2`, `dhn2304`, `dnd3106`, and `dndt1207` to `biochemistry_ii`.
+- `src/features/teaching-documents/curriculum-content/queries.ts`:
+  - Added a mismatch guard in `isMismatchedPayload` for `Biochemistry II` to reject legacy payloads containing erroneous topics (`Introduction to Biochemistry`, `Energy Metabolism/Balance`, `Ornithine Cycle`, `Amino Acid Anabolism`, etc.).
+- `src/app/api/curriculum/template/route.ts`:
+  - Updated the sample `DHN 2304` (`Biochemistry II`) guidance rows in the downloadable Excel template to match the official 6-topic outline.
+- `supabase/migrations/20261110003000_update_biochemistry_ii_course_outline.sql`:
+  - Added SQL migration superseding legacy active `curriculum_document_versions` records for `Biochemistry II` (`DHN 2304`, `DND 3106`, `DNDT 1207`) and applied the update against the database.
+- `src/tests/curriculum-harmonization.test.ts`:
+  - Updated canonical unit count assertions (52 canonical units) and added a test verifying that `DHN 2304`, `DND 3106`, and `DNDT 1207` resolve to the clean 6-topic `Biochemistry II` course outline.
+
+### 2026-11-09: Add Score Column to Exam Attendance Sheet
+
+**Summary:**
+- Added a dedicated `Score` column to the Final Examination Attendance & Script Register across PDF downloads, Word (.docx) generators, Excel signing sheets, and printable web signing sheets, matching the CAT Attendance Sheet layout (`No.`, `Admission No.`, `Candidate's Full Name`, `Booklet No.`, `Sign`, `Score`, `Date`).
+
+**Modified:**
+- `src/features/assessment/attendance-sheet-pdf.tsx`:
+  - Added `COL_EXAM_SCORE` and adjusted portrait exam column widths (`COL_EXAM_NO = 24`, `COL_EXAM_ADM = 136`, `COL_EXAM_NAME = 178`, `COL_EXAM_BOOKLET = 60`, `COL_EXAM_SIGN = 60`, `COL_EXAM_SCORE = 52`, `COL_EXAM_DATE = 52`, keeping the exact 562pt A4 portrait total width).
+  - Added the `Score` header cell and candidate/blank row data cells between `Sign` and `Date` on the Exam Attendance Sheet PDF.
+- `src/features/assessment/attendance-sheet-docx.ts`:
+  - Updated the Exam Attendance & Script Register table header label from `Marks` to `Score` for consistency.
+- `src/features/assessment/printable-signing-sheet.tsx`:
+  - Updated the printable signing sheet column header from `Marks` to `Score`.
+- `src/app/api/assessment/[assessmentId]/attendance-sheet/route.ts`:
+  - Added the `Score` column to the Excel attendance signing sheet export (`['S/No.', 'Admission No.', 'Student Name', 'Signature', 'Score']`) and expanded header merges to `A1:E1` / `A2:E2`.
+- `src/tests/attendance-sheet-pdf.test.ts`:
+  - Added assertions verifying that the generated Exam Attendance PDF pages include `Booklet No.`, `Sign`, `Score`, and `Date` columns.
+
 ### 2026-11-09: Polish Entrepreneurship Course Outlines Formatting and Modernize Document Typography
 
 **Summary:**

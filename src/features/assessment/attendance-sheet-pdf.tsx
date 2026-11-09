@@ -350,11 +350,12 @@ export async function generateAttendanceSheetPdf(
 
   // Column width constants for Portrait CAT / Exam Attendance (Total: 562pt)
   const COL_EXAM_NO = 24;
-  const COL_EXAM_ADM = 140;
-  const COL_EXAM_NAME = 196;
-  const COL_EXAM_BOOKLET = 68;
-  const COL_EXAM_SIGN = 67;
-  const COL_EXAM_DATE = 67; // Total = 562pt
+  const COL_EXAM_ADM = 136;
+  const COL_EXAM_NAME = 178;
+  const COL_EXAM_BOOKLET = 60;
+  const COL_EXAM_SIGN = 60;
+  const COL_EXAM_SCORE = 52;
+  const COL_EXAM_DATE = 52; // Total = 562pt
 
   const COL_CAT_NO = 24;
   const COL_CAT_ADM = 140;
@@ -530,6 +531,9 @@ export async function generateAttendanceSheetPdf(
                   <View style={[styles.thCell, { width: COL_EXAM_SIGN }]}>
                     <Text>Sign</Text>
                   </View>
+                  <View style={[styles.thCell, { width: COL_EXAM_SCORE }]}>
+                    <Text>Score</Text>
+                  </View>
                   <View style={[styles.thCell, { width: COL_EXAM_DATE }, styles.cellNoBorderRight]}>
                     <Text>Date</Text>
                   </View>
@@ -605,6 +609,9 @@ export async function generateAttendanceSheetPdf(
                         <Text>&nbsp;</Text>
                       </View>
                       <View style={[styles.tdCell, { width: COL_EXAM_SIGN }]}>
+                        <Text>&nbsp;</Text>
+                      </View>
+                      <View style={[styles.tdCell, { width: COL_EXAM_SCORE }]}>
                         <Text>&nbsp;</Text>
                       </View>
                       <View style={[styles.tdCell, { width: COL_EXAM_DATE }, styles.cellNoBorderRight]}>
@@ -690,6 +697,9 @@ export async function generateAttendanceSheetPdf(
                         <Text>&nbsp;</Text>
                       </View>
                       <View style={[styles.tdCell, { width: COL_EXAM_SIGN }]}>
+                        <Text>&nbsp;</Text>
+                      </View>
+                      <View style={[styles.tdCell, { width: COL_EXAM_SCORE }]}>
                         <Text>&nbsp;</Text>
                       </View>
                       <View style={[styles.tdCell, { width: COL_EXAM_DATE }, styles.cellNoBorderRight]}>

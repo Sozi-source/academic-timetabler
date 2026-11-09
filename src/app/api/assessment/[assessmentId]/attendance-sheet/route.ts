@@ -51,9 +51,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ ass
     // desktop Excel builds attempt to repair files containing those combinations.
     sheet.pageSetup.orientation = 'portrait';
     sheet.pageSetup.paperSize = 9;
-    sheet.mergeCells('A1:D1');
+    sheet.mergeCells('A1:E1');
     sheet.getCell('A1').value = 'IMPERIAL COLLEGE OF MEDICAL AND HEALTH SCIENCES';
-    sheet.mergeCells('A2:D2');
+    sheet.mergeCells('A2:E2');
     sheet.getCell('A2').value = data.context.assessmentType === 'exam' ? 'EXAM ATTENDANCE SIGNING SHEET' : 'CAT ATTENDANCE SIGNING SHEET';
     sheet.getCell('A1').font = { bold: true, size: 13, color: { argb: 'FF173F3B' } };
     sheet.getCell('A2').font = { bold: true, size: 11, color: { argb: 'FF173F3B' } };
@@ -63,12 +63,12 @@ export async function GET(_request: Request, { params }: { params: Promise<{ ass
     sheet.addRow(['Unit', `${data.context.unitCode} · ${data.context.unitName}`, 'Cohort', first.cohortName]);
     sheet.addRow(['Period', data.context.academicPeriodName, 'Date', data.context.assessmentDate ?? '']);
     sheet.addRow([]);
-    const header = sheet.addRow(['S/No.', 'Admission No.', 'Student Name', 'Signature']);
+    const header = sheet.addRow(['S/No.', 'Admission No.', 'Student Name', 'Signature', 'Score']);
     header.font = { bold: true, color: { argb: 'FFFFFFFF' } };
     header.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2F706B' } };
     header.alignment = { horizontal: 'center', vertical: 'middle' };
     students.forEach((student, index) => {
-      const row = sheet.addRow([index + 1, student.admissionNumber, student.fullName, '']);
+      const row = sheet.addRow([index + 1, student.admissionNumber, student.fullName, '', '']);
       row.height = 28;
       row.eachCell((cell, colNumber) => {
         cell.font = { size: 11, color: { argb: 'FF1E293B' } };
@@ -81,7 +81,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ ass
         };
       });
     });
-    sheet.columns = [{ width: 8 }, { width: 30 }, { width: 40 }, { width: 28 }];
+    sheet.columns = [{ width: 8 }, { width: 30 }, { width: 40 }, { width: 24 }, { width: 16 }];
   }
 
   const buffer = await workbook.xlsx.writeBuffer();

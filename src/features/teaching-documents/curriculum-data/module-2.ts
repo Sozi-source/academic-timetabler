@@ -700,7 +700,7 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
     nominalHours: 66,
     theoryHours: 39,
     practicalHours: 27,
-    aliases: ["26.2.0", "Basic Biochemistry", "CND 2105", "DND 2305", "DND 3106", "DHN 2203", "DHN 2304", "DNDT 1105", "DNDT 1207", "Biochemistry I", "Biochemistry II"],
+    aliases: ["26.2.0", "Basic Biochemistry", "CND 2105", "DND 2305", "DHN 2203", "DNDT 1105", "Biochemistry I"],
     isAvailable: true,
     unitDescription: "This module unit equips the trainee with knowledge and skills to understand the chemical composition, structure, and metabolic functions of biological molecules relevant to human nutrition.",
     overallCompetency: "Describe structure and function of carbohydrates, lipids, proteins, vitamins, minerals, and enzymes; explain digestion, absorption, and metabolism; carry out basic biochemistry laboratory analyses.",
@@ -860,6 +860,173 @@ export const MODULE_2_CURRICULUM: Record<string, CanonicalCurriculumUnit> = {
       "Murray, R. K., et al. (2018). Harper's Illustrated Biochemistry (31st ed.). McGraw-Hill."
     ],
     instructionalEquipment: ["Biochemistry laboratory reagents and equipment", "Test tubes and racks", "Microscopes", "Food samples for testing", "Molecular models", "Whiteboard and LCD projector"]
+  },
+
+  "biochemistry_ii": {
+    canonicalKey: "biochemistry_ii",
+    syllabusCode: "DHN 2304",
+    unitCode: "DHN 2304",
+    unitName: "Biochemistry II",
+    moduleNumber: 2,
+    nominalHours: 66,
+    theoryHours: 39,
+    practicalHours: 27,
+    aliases: ["DHN 2304", "DND 3106", "DNDT 1207", "Biochemistry II"],
+    isAvailable: true,
+    unitDescription: "This unit is intended to equip the trainee with knowledge and skills in metabolism pathways of macromolecules and enzymology.",
+    overallCompetency: "By the end of this unit the trainee should be able to: a) Describe metabolism of carbohydrates, proteins & lipids b) Explore the properties of enzymes.",
+    learningOutcomes: [
+      "Describe metabolism of carbohydrates, proteins & lipids",
+      "Explore the properties of enzymes"
+    ],
+    weeklySchedule: [
+      {
+        weekNumber: 1,
+        topicTitle: "Carbohydrate Metabolism",
+        subTopics: ["Meaning of terms", "Glycolysis"],
+        hours: 5,
+        specificLearningOutcomes: "Define terms used in carbohydrate metabolism; explain the steps and significance of glycolysis.",
+        learningActivities: "Interactive lecture, metabolic pathway diagram exercises, group discussions.",
+        resourcesAndReferences: "Biochemistry textbooks; metabolic pathway charts; whiteboard and markers.",
+        assessmentAndRemarks: "Class quiz, oral questions."
+      },
+      {
+        weekNumber: 2,
+        topicTitle: "Carbohydrate Metabolism",
+        subTopics: ["Fate of pyruvate", "Krebs cycle"],
+        hours: 5,
+        specificLearningOutcomes: "Describe the aerobic and anaerobic fates of pyruvate; explain the reactions and energy yield of the Krebs cycle.",
+        learningActivities: "Illustrated lecture, pathway mapping exercises, guided Q&A.",
+        resourcesAndReferences: "Biochemistry textbooks; Krebs cycle charts; handouts.",
+        assessmentAndRemarks: "Oral questions, assignment."
+      },
+      {
+        weekNumber: 3,
+        topicTitle: "Carbohydrate Metabolism",
+        subTopics: ["Electron transport & oxidative phosphorylation (energy)"],
+        hours: 5,
+        specificLearningOutcomes: "Explain the electron transport chain and oxidative phosphorylation in cellular energy (ATP) generation.",
+        learningActivities: "Lecture, diagram illustrations, problem-solving exercises.",
+        resourcesAndReferences: "Biochemistry textbooks; bioenergetics charts; projector.",
+        assessmentAndRemarks: "Oral questions, written exercise."
+      },
+      {
+        weekNumber: 4,
+        topicTitle: "Protein Metabolism",
+        subTopics: ["Deamination & Transamination (Amino Acids)"],
+        hours: 5,
+        specificLearningOutcomes: "Describe transamination and deamination reactions in amino acid metabolism.",
+        learningActivities: "Interactive lecture, biochemical reaction illustrations, group discussions.",
+        resourcesAndReferences: "Biochemistry textbooks; amino acid metabolism charts.",
+        assessmentAndRemarks: "Oral questions, assignment."
+      },
+      {
+        weekNumber: 5,
+        topicTitle: "Protein Metabolism",
+        subTopics: ["Urea cycle", "Diseases associated with protein metabolism"],
+        hours: 5,
+        specificLearningOutcomes: "Outline the steps of the urea cycle; describe diseases and clinical disorders associated with protein metabolism.",
+        learningActivities: "Lecture, clinical case study discussions, pathway mapping.",
+        resourcesAndReferences: "Biochemistry textbooks; clinical case handouts; pathway charts.",
+        assessmentAndRemarks: "Case study review, oral questions."
+      },
+      {
+        weekNumber: 6,
+        topicTitle: "Lipid Metabolism",
+        subTopics: ["Fatty acid activation", "Beta-oxidation of fatty acids"],
+        hours: 5,
+        specificLearningOutcomes: "Explain fatty acid activation and transport; describe the steps and energy yield of beta-oxidation of fatty acids.",
+        learningActivities: "Illustrated lecture, beta-oxidation calculation exercises, group discussion.",
+        resourcesAndReferences: "Biochemistry textbooks; lipid metabolism charts.",
+        assessmentAndRemarks: "Assignment, oral questions."
+      },
+      {
+        weekNumber: 7,
+        topicTitle: "Lipid Metabolism",
+        subTopics: ["Diseases associated with lipid metabolism"],
+        hours: 5,
+        specificLearningOutcomes: "Identify and describe metabolic diseases and disorders associated with lipid metabolism.",
+        learningActivities: "Lecture, clinical case discussions, metabolic pathway review.",
+        resourcesAndReferences: "Biochemistry textbooks; clinical nutrition references.",
+        assessmentAndRemarks: "Oral questions, case analysis."
+      },
+      {
+        weekNumber: 8,
+        topicTitle: "Continuous Assessment Test (CAT)",
+        subTopics: ["Written theory assessment covering topics from Weeks 1–7", "Post-CAT review and feedback session"],
+        hours: 5,
+        specificLearningOutcomes: "Demonstrate mastery of carbohydrate, protein, and lipid metabolism concepts covered in Weeks 1–7.",
+        learningActivities: "Supervised written Continuous Assessment Test (CAT).",
+        resourcesAndReferences: "Official CAT question papers and answer booklets.",
+        assessmentAndRemarks: "Continuous Assessment Test (CAT)."
+      },
+      {
+        weekNumber: 9,
+        topicTitle: "Nucleic Acids and Nucleotides",
+        subTopics: ["Meaning of terms", "DNA"],
+        hours: 5,
+        specificLearningOutcomes: "Define terms related to nucleic acids and nucleotides; describe the structure and functions of DNA.",
+        learningActivities: "Interactive lecture, molecular structure illustrations, group discussion.",
+        resourcesAndReferences: "Biochemistry textbooks; molecular models and charts.",
+        assessmentAndRemarks: "Oral questions, quiz."
+      },
+      {
+        weekNumber: 10,
+        topicTitle: "Nucleic Acids and Nucleotides",
+        subTopics: ["RNA"],
+        hours: 5,
+        specificLearningOutcomes: "Describe the structure, types, and biological functions of RNA in protein synthesis.",
+        learningActivities: "Illustrated lecture, comparative DNA/RNA exercises, Q&A.",
+        resourcesAndReferences: "Biochemistry textbooks; nucleic acid charts.",
+        assessmentAndRemarks: "Assignment, oral questions."
+      },
+      {
+        weekNumber: 11,
+        topicTitle: "Enzymology",
+        subTopics: ["Classification of enzymes", "Properties of enzymes"],
+        hours: 5,
+        specificLearningOutcomes: "Classify enzymes according to standard nomenclature; explore and describe the physical and catalytic properties of enzymes.",
+        learningActivities: "Interactive lecture, enzyme classification exercises, group discussion.",
+        resourcesAndReferences: "Biochemistry textbooks; enzyme classification charts.",
+        assessmentAndRemarks: "Oral questions, assignment."
+      },
+      {
+        weekNumber: 12,
+        topicTitle: "Enzymology",
+        subTopics: ["Mechanism of enzyme action", "Factors affecting enzyme action"],
+        hours: 5,
+        specificLearningOutcomes: "Explain the mechanism of enzyme action; analyze factors affecting enzyme activity and reaction velocity.",
+        learningActivities: "Lecture, enzyme kinetics graphing exercises, practical demonstration.",
+        resourcesAndReferences: "Biochemistry textbooks; enzyme kinetics graphs; laboratory equipment.",
+        assessmentAndRemarks: "Practical/written exercise, oral questions."
+      },
+      {
+        weekNumber: 13,
+        topicTitle: "Emerging Issues and Trends",
+        subTopics: ["Emerging issues and trends in biochemistry and metabolism", "Challenges and coping strategies in metabolic biochemistry"],
+        hours: 5,
+        specificLearningOutcomes: "Discuss emerging issues and trends in biochemistry and metabolism; identify challenges and coping strategies.",
+        learningActivities: "Group discussions, seminar presentations, comprehensive syllabus review.",
+        resourcesAndReferences: "Biochemistry textbooks; scientific journals; handouts.",
+        assessmentAndRemarks: "Oral presentation, formative review."
+      },
+      {
+        weekNumber: 14,
+        topicTitle: "End of Term Examination",
+        subTopics: ["Comprehensive written theory examination covering all prescribed unit topics"],
+        hours: 5,
+        specificLearningOutcomes: "Demonstrate comprehensive mastery of macromolecule metabolism pathways, nucleic acids, and enzymology.",
+        learningActivities: "Supervised summative theory examination.",
+        resourcesAndReferences: "Official examination papers and answer booklets.",
+        assessmentAndRemarks: "End of Term Examination."
+      }
+    ],
+    references: [
+      "Nelson, D. L., & Cox, M. M. (2021). Lehninger Principles of Biochemistry (8th ed.). W. H. Freeman.",
+      "Rodwell, V. W., et al. (2018). Harper's Illustrated Biochemistry (31st ed.). McGraw-Hill.",
+      "Berg, J. M., Tymoczko, J. L., & Stryer, L. (2019). Biochemistry (9th ed.). W. H. Freeman."
+    ],
+    instructionalEquipment: ["Biochemistry laboratory reagents and equipment", "Metabolic pathway charts", "Molecular models", "Whiteboard and LCD projector"]
   },
 
   "nutrition_in_lifespan": {

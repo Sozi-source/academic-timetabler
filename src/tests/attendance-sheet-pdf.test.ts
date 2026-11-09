@@ -96,6 +96,15 @@ describe('attendance sheet PDF document', () => {
 
     expect(document.byteLength).toBeGreaterThan(10_000);
     expect(document.subarray(0, 4).toString()).toBe('%PDF');
+
+    const pages = await getPages(document);
+    expect(pages.length).toBeGreaterThanOrEqual(2);
+    pages.forEach((pageText) => {
+      expect(pageText).toContain('Booklet No.');
+      expect(pageText).toContain('Sign');
+      expect(pageText).toContain('Score');
+      expect(pageText).toContain('Date');
+    });
   });
 
   it('generates landscape class attendance PDF document with full-width signoff table', async () => {

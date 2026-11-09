@@ -151,8 +151,8 @@ export async function GET() {
     const sampleRow = unitSheet.addRow({
       unit_code: 'DHN 2304',
       unit_name: 'Biochemistry II',
-      unit_description: 'Equips learners with principles of biological chemistry, intermediate metabolism, enzyme catalysis, and bioenergetics.',
-      core_learning_outcomes: '1. Demonstrate knowledge of biomolecular structures and enzymes.\n2. Explain cellular energy generation and metabolic pathways.',
+      unit_description: 'This unit is intended to equip the trainee with knowledge and skills in metabolism pathways of macromolecules and enzymology.',
+      core_learning_outcomes: '1. Describe metabolism of carbohydrates, proteins & lipids\n2. Explore the properties of enzymes',
       teaching_learning_approaches: 'Interactive lectures, guided class discussions, practical laboratory sessions.',
       assessment_approaches: 'Continuous Assessment Tests (CATs) · Final Summative Examination',
       references_resources: 'Textbook of Medical Biochemistry · Lehninger Principles of Biochemistry',
@@ -178,12 +178,12 @@ export async function GET() {
 
   // Sample topics for guidance
   const sampleTopics = [
-    { code: 'DHN 2304', name: 'Biochemistry II', seq: 1, topic: 'Introduction to Biochemistry & Molecular Organization', coverage: 'Cellular chemical components · Chemical bonds · Water and aqueous solutions · pH and buffer systems', hours: 4, ref: 'Lehninger Ch. 1' },
-    { code: 'DHN 2304', name: 'Biochemistry II', seq: 2, topic: 'Structure and Function of Carbohydrates', coverage: 'Monosaccharides · Disaccharides · Polysaccharides · Glycosidic bonds', hours: 4, ref: 'Lehninger Ch. 2' },
-    { code: 'DHN 2304', name: 'Biochemistry II', seq: 3, topic: 'Lipids and Biological Membranes', coverage: 'Fatty acids · Triglycerides · Phospholipids · Membrane structure', hours: 4, ref: 'Lehninger Ch. 3' },
-    { code: 'DHN 2304', name: 'Biochemistry II', seq: 4, topic: 'Amino Acids, Peptides and Proteins', coverage: 'Amino acid classification · Peptide bond · Protein structures', hours: 4, ref: 'Lehninger Ch. 4' },
-    { code: 'DHN 2304', name: 'Biochemistry II', seq: 5, topic: 'Enzymes and Biocatalysis', coverage: 'Enzyme classification · Active sites · Enzyme kinetics · Factors affecting velocity', hours: 4, ref: 'Lehninger Ch. 5' },
-    { code: 'DHN 2304', name: 'Biochemistry II', seq: 6, topic: 'Enzyme Regulation & Clinical Diagnostics', coverage: 'Inhibition · Allosteric regulation · Isoenzymes · Diagnostic enzymes', hours: 4, ref: 'Lehninger Ch. 6' },
+    { code: 'DHN 2304', name: 'Biochemistry II', seq: 1, topic: 'Carbohydrate Metabolism', coverage: 'Meaning of terms · Glycolysis · Fate of pyruvate · Krebs cycle · Electron transport & oxidative phosphorylation (energy)', hours: 4, ref: 'Lehninger Ch. 14' },
+    { code: 'DHN 2304', name: 'Biochemistry II', seq: 2, topic: 'Protein Metabolism', coverage: 'Deamination & Transamination (Amino Acids) · Urea cycle · Diseases associated with protein metabolism', hours: 4, ref: 'Lehninger Ch. 18' },
+    { code: 'DHN 2304', name: 'Biochemistry II', seq: 3, topic: 'Lipid Metabolism', coverage: 'Fatty acid activation · Beta-oxidation of fatty acids · Diseases associated with lipid metabolism', hours: 4, ref: 'Lehninger Ch. 17' },
+    { code: 'DHN 2304', name: 'Biochemistry II', seq: 4, topic: 'Nucleic Acids and Nucleotides', coverage: 'Meaning of terms · DNA · RNA', hours: 4, ref: 'Lehninger Ch. 8' },
+    { code: 'DHN 2304', name: 'Biochemistry II', seq: 5, topic: 'Enzymology', coverage: 'Classification of enzymes · Properties of enzymes · Mechanism of enzyme action · Factors affecting enzyme action', hours: 4, ref: 'Lehninger Ch. 6' },
+    { code: 'DHN 2304', name: 'Biochemistry II', seq: 6, topic: 'Emerging Issues and Trends', coverage: 'Emerging issues and trends in biochemistry and metabolism', hours: 4, ref: 'Lehninger Ch. 23' },
   ];
 
   sampleTopics.forEach((item, index) => {

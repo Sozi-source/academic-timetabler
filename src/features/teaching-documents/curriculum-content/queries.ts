@@ -96,6 +96,20 @@ function isMismatchedPayload(targetName: string | undefined, payload: any): bool
     return true;
   }
 
+  // If target unit is Biochemistry II, reject legacy payloads that still contain erroneously added topics
+  // (e.g. "Introduction to Biochemistry", "Energy Metabolism/Balance", "Ornithine Cycle", "Fat-Soluble Vitamins", "Qualitative Analysis")
+  if (
+    /biochemistry\s*ii\b/i.test(targetName) &&
+    Array.isArray(payload.content) &&
+    payload.content.some((row: any) =>
+      /introduction\s+to\s+biochemistry|energy\s+metabolism|dietary\s+requirement|ornithine\s+cycle|amino\s+acid\s+anabolism|fat[\s-]soluble\s+vitamins|water[\s-]soluble\s+vitamins|qualitative\s+analysis/i.test(
+        `${row.topic || ''} ${row.coverage || ''}`,
+      ),
+    )
+  ) {
+    return true;
+  }
+
   // If target unit is NOT communication, but payload is about communication skills
   if (!lowTarget.includes('communication') && !lowTarget.includes('ict') && firstTopic.includes('communication process')) {
     return true;

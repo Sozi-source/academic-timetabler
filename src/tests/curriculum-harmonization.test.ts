@@ -13,22 +13,22 @@ import {
 
 describe('Authoritative TVET KNEC Curriculum & Shared CND/DND Harmonization', () => {
   describe('Master Curriculum Completeness', () => {
-    it('contains all 51 canonical curriculum units across Modules I, II, and III', () => {
+    it('contains all 52 canonical curriculum units across Modules I, II, and III', () => {
       const allUnits = getAllCurriculumUnits();
-      expect(allUnits).toHaveLength(51);
+      expect(allUnits).toHaveLength(52);
 
       const m1Units = allUnits.filter((u) => u.moduleNumber === 1);
       const m2Units = allUnits.filter((u) => u.moduleNumber === 2);
       const m3Units = allUnits.filter((u) => u.moduleNumber === 3);
 
       expect(m1Units).toHaveLength(22);
-      expect(m2Units).toHaveLength(17);
+      expect(m2Units).toHaveLength(18);
       expect(m3Units).toHaveLength(12);
     });
 
-    it('validates that all 51 canonical units have complete schedules, competencies, and references', () => {
+    it('validates that all 52 canonical units have complete schedules, competencies, and references', () => {
       const allUnits = getAllCurriculumUnits();
-      expect(allUnits).toHaveLength(51);
+      expect(allUnits).toHaveLength(52);
 
       for (const unit of allUnits) {
         expect(unit.canonicalKey).toBeTruthy();
@@ -51,10 +51,10 @@ describe('Authoritative TVET KNEC Curriculum & Shared CND/DND Harmonization', ()
       }
     });
 
-    it('validates that Module 2 units (17 units) are fully populated with authentic TVET schedules', () => {
+    it('validates that Module 2 units (18 units) are fully populated with authentic TVET schedules', () => {
       const allUnits = getAllCurriculumUnits();
       const m2Units = allUnits.filter((u) => u.moduleNumber === 2);
-      expect(m2Units).toHaveLength(17);
+      expect(m2Units).toHaveLength(18);
 
       for (const unit of m2Units) {
         expect(unit.isAvailable !== false).toBe(true);
@@ -281,6 +281,54 @@ describe('Authoritative TVET KNEC Curriculum & Shared CND/DND Harmonization', ()
       const dcuCanonical = findCanonicalCurriculum('DCU 1102', 'Entrepreneurship');
       expect(dcuCanonical?.canonicalKey).toBe('entrepreneurship');
       expect(dcuCanonical?.weeklySchedule).toHaveLength(14);
+    });
+
+    it('resolves Biochemistry II (DHN 2304, DND 3106, DNDT 1207) to the dedicated 6-topic outline without erroneous topics', () => {
+      const biochem2 = getUnitCurriculum('DHN 2304', 'Biochemistry II');
+      expect(biochem2.isAvailable !== false).toBe(true);
+      expect(biochem2.unitDescription).toBe(
+        'This unit is intended to equip the trainee with knowledge and skills in metabolism pathways of macromolecules and enzymology.',
+      );
+      expect(biochem2.learningOutcomes).toEqual([
+        'Describe metabolism of carbohydrates, proteins & lipids',
+        'Explore the properties of enzymes',
+      ]);
+
+      const dndBiochem2 = findCanonicalCurriculum('DND 3106', 'Biochemistry II');
+      expect(dndBiochem2?.canonicalKey).toBe('biochemistry_ii');
+
+      const dndtBiochem2 = findCanonicalCurriculum('DNDT 1207', 'Biochemistry II');
+      expect(dndtBiochem2?.canonicalKey).toBe('biochemistry_ii');
+
+      const header: TVETDocumentHeaderContext = {
+        institutionName: 'Imperial College of Medical and Health Sciences',
+        departmentName: 'Human Nutrition and Dietetics',
+        academicPeriodName: 'September-December 2026',
+        unitCode: 'DHN 2304',
+        unitName: 'Biochemistry II',
+        cohortName: 'DHN SEPT 26',
+        trainerName: 'Wilfred Osozi',
+        totalNominalHours: 66,
+        weeklyHours: 5,
+      };
+
+      const outline = generateTVETCourseOutline(header);
+      const uniqueTopics = Array.from(
+        new Set(
+          outline.weeklySchedule
+            .filter((w) => w.weekNumber !== 8 && w.weekNumber !== 14)
+            .map((w) => w.topicTitle),
+        ),
+      );
+
+      expect(uniqueTopics).toEqual([
+        'Carbohydrate Metabolism',
+        'Protein Metabolism',
+        'Lipid Metabolism',
+        'Nucleic Acids and Nucleotides',
+        'Enzymology',
+        'Emerging Issues and Trends',
+      ]);
     });
   });
 });

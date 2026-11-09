@@ -232,7 +232,7 @@ export function PrintableSigningSheet({
                       <th className="border border-slate-500 px-2 py-1.5 text-center whitespace-nowrap">Booklet No.</th>
                     ) : null}
                     <th className="border border-slate-500 px-2 py-1.5 text-center whitespace-nowrap">Signature</th>
-                    <th className="border border-slate-500 px-2 py-1.5 text-center whitespace-nowrap">Marks</th>
+                    <th className="border border-slate-500 px-2 py-1.5 text-center whitespace-nowrap">Score</th>
                   </tr>
                 </thead>
 

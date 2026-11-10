@@ -1,3 +1,51 @@
+### 2026-11-10: CAT Mark Incomplete Submission Oversight & Resilient Markbook Inspection
+
+**Summary:**
+- **Incomplete CAT Marks Visibility & Sibling Cohort Discovery:**
+  - Resolved candidate drops in multi-cohort and shared offering units by making `getAssessmentPopulation`, `getAssessmentResultCount`, and `getCatOnBehalfStatus` aware of sibling assessment events via `resolveAssessmentIdsWithSiblings`.
+  - Added resilient fallback in `getAssessmentPopulation` and `loadDraftState` to query `assessment_roster` or `assessment_population` when either table has not yet been populated.
+- **Fixed Markbook Status Filtering & CAT Specific Oversight:**
+  - Fixed candidate status filtering in `AssessmentMarkbookViewTable`: previously, filtering by "With Marks Recorded" or "Pending Marks" relied solely on `total !== null`, which is always `null` during continuous assessment prior to final exam entry (causing 0 rows to show or all rows to be incorrectly flagged as pending).
+  - Added specific status filters: `cat-entered` (CAT marks recorded), `cat-missing` (pending/unentered CAT marks), and `cat-absent` (recorded as AB).
+  - Fixed `with-marks` and `missing-marks` to respect drafts across all components (`assignment`, `presentation`, `rat`, `cat`, `exam`).
+- **Dedicated "CAT Focus" View Mode:**
+  - Added a responsive view mode toggle (`Full Markbook` vs `CAT Focus`) on `/assessment/marks/[assessmentId]`.
+  - In `CAT Focus` mode, simplified candidate review to 6 streamlined columns (No., Admission No., Student Full Name, Cohort, CAT Mark /15, CAT Status), allowing HODs to immediately scan markbook submissions without clutter from unattempted final exam columns.
+  - Visualized missing CAT marks with a distinct `Pending` badge rather than ambiguous faint dashes.
+- **Performance Summary Banner & CAT Telemetry:**
+  - Enhanced telemetry to compute `catMarkedCount`, `catMissingCount`, `meanCat`, and `catPassRate`.
+  - Rendered interactive quick-filter chips (`CAT Recorded: X`, `Missing CAT: Y`, `Absent: Z`) directly in the overview banner to filter the roster with a single click.
+- **Missing Candidates Notification & One-Click Copy Tool:**
+  - Created `CopyMissingStudentsButton` client component in `src/features/assessment/marks/copy-missing-students-button.tsx`.
+  - When trainers have unsubmitted or incomplete CAT marks, the HOD banner on `/assessment/marks/[assessmentId]` offers a 1-click "Copy Missing Students" button that copies formatted admission numbers, student names, and unit details to the clipboard for instant dispatch to the trainer via WhatsApp/email.
+  - Provided direct "Review missing" links in `PendingMarkSubmissionsPanel` on `/assessment` so HODs can jump straight to unsubmitted candidate lists with `?status=cat-missing&component=cat`.
+
+**Added:**
+- `src/features/assessment/marks/copy-missing-students-button.tsx`:
+  - 1-click clipboard copy component formatting missing candidate admission numbers and names for trainer communication.
+- `src/tests/cat-submission-oversight.test.ts`:
+  - Vitest test suite validating CAT status resolution, filter logic, telemetry computation, and copy formatting.
+
+**Modified:**
+- `src/features/assessment/queries.ts`:
+  - In `getAssessmentPopulation`, resolved sibling assessment events and added fallback to `assessment_roster`.
+- `src/features/assessment/marks/queries.ts`:
+  - In `getAssessmentResultCount`, resolved siblings and counted distinct students with non-null results or drafts.
+- `src/features/assessment/marks/pending-submissions.ts`:
+  - In `loadDraftState`, added fallback to `assessment_population` when roster is empty.
+  - In `getCatOnBehalfStatus`, resolved sibling events and returned `missingStudents: MissingStudentInfo[]`.
+- `src/features/assessment/marks/assessment-markbook-view-table.tsx`:
+  - Added `initialStatus` and `initialView` props.
+  - Added `CAT Focus` view toggle.
+  - Fixed status filtering for `cat-entered`, `cat-missing`, `cat-absent`, `with-marks`, `missing-marks`.
+  - Highlighted pending CAT marks with clear visual badges.
+  - Computed CAT telemetry (`meanCat`, `catPassRate`, `catMarkedCount`, `catMissingCount`).
+- `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`:
+  - Displayed "View Missing" and "Copy Missing Students" buttons in the unsubmitted CAT banner.
+  - Passed query parameters `status` and `component` into table props.
+- `src/features/assessment/marks/pending-mark-submissions-panel.tsx`:
+  - Added direct link to `?status=cat-missing&component=cat` when `item.missingCount > 0`.
+
 ### 2026-11-10: Streamline Document & Trainer Labels and Modernize Record of Work Delivery & Formatting
 
 **Summary:**

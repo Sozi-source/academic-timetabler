@@ -38,20 +38,37 @@ export const getAssessmentMarkImportBatch = cache(async (batchId: string) => {
 
 export const getAssessmentResultCount = cache(async (assessmentId: string) => {
   const supabase = await createClient();
+  const resolvedIds = await resolveAssessmentIdsWithSiblings(supabase, assessmentId);
+  const targetEventIds = resolvedIds.length > 0 ? resolvedIds : [assessmentId];
+
   const [resultsRes, draftsRes] = await Promise.all([
     supabase
       .from('assessment_results')
-      .select('id', { count: 'exact', head: true })
-      .eq('assessment_event_id', assessmentId),
+      .select('student_id')
+      .in('assessment_event_id', targetEventIds),
     supabase
       .from('assessment_online_mark_drafts')
-      .select('id', { count: 'exact', head: true })
-      .eq('assessment_id', assessmentId),
+      .select('student_id, assignment_mark, presentation_mark, rat_mark, cat_mark, exam_mark')
+      .in('assessment_id', targetEventIds),
   ]);
   if (resultsRes.error) throw new Error(`Unable to load assessment results count: ${resultsRes.error.message}`);
-  const resultsCount = resultsRes.count ?? 0;
-  const draftsCount = draftsRes.count ?? 0;
-  return Math.max(resultsCount, draftsCount);
+  if (draftsRes.error) throw new Error(`Unable to load assessment drafts count: ${draftsRes.error.message}`);
+
+  const studentsWithResults = new Set((resultsRes.data ?? []).map((r) => r.student_id).filter(Boolean));
+  const studentsWithDrafts = new Set(
+    (draftsRes.data ?? [])
+      .filter((d) =>
+        d.assignment_mark !== null ||
+        d.presentation_mark !== null ||
+        d.rat_mark !== null ||
+        d.cat_mark !== null ||
+        d.exam_mark !== null,
+      )
+      .map((d) => d.student_id)
+      .filter(Boolean),
+  );
+
+  return new Set([...studentsWithResults, ...studentsWithDrafts]).size;
 });
 
 export const getAssessmentMarkComponentSubmissions = cache(async (assessmentId: string) => {

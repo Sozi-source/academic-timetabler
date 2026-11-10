@@ -3,6 +3,7 @@ import { cache } from 'react';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
+import { resolveAssessmentIdsWithSiblings } from '@/features/staff-assessment/online-marks-query';
 
 import type {
   AssessmentCandidateRow,
@@ -285,6 +286,9 @@ export const getAssessmentOverview = cache(async (): Promise<AssessmentOverview>
 
 export const getAssessmentPopulation = cache(async (assessmentId: string): Promise<AssessmentCandidateRow[]> => {
   const supabase = await createClient();
+  const resolvedIds = await resolveAssessmentIdsWithSiblings(supabase, assessmentId);
+  const targetEventIds = resolvedIds.length > 0 ? resolvedIds : [assessmentId];
+
   const { data, error } = await supabase
     .from('assessment_population')
     .select(`
@@ -298,10 +302,38 @@ export const getAssessmentPopulation = cache(async (assessmentId: string): Promi
       student:students(id, admission_number, full_name),
       cohort:cohorts(id, code, name)
     `)
-    .eq('assessment_event_id', assessmentId)
+    .in('assessment_event_id', targetEventIds)
     .eq('population_status', 'expected')
     .order('created_at', { ascending: true });
 
   if (error) throw new Error(`Unable to load assessment population: ${error.message}`);
-  return (data ?? []) as unknown as AssessmentCandidateRow[];
+  if (data && data.length > 0) {
+    return data as unknown as AssessmentCandidateRow[];
+  }
+
+  // Fallback to assessment_roster if assessment_population has not been populated
+  const { data: rosterData, error: rosterError } = await supabase
+    .from('assessment_roster')
+    .select(`
+      id,
+      cat_absent,
+      pre_assessment_status,
+      student:students(id, admission_number, full_name),
+      cohort:cohorts(id, code, name)
+    `)
+    .in('assessment_id', targetEventIds)
+    .order('created_at', { ascending: true });
+
+  if (rosterError) throw new Error(`Unable to load assessment population from roster: ${rosterError.message}`);
+  return (rosterData ?? []).map((r) => ({
+    id: r.id,
+    population_status: 'expected' as const,
+    attendance_status: (r.pre_assessment_status === 'absent' ? 'absent' : 'expected') as 'expected' | 'absent',
+    cat_absence_reason: null,
+    cat_absence_recommendation: null,
+    exam_absence_reason: null,
+    exam_absence_recommendation: null,
+    student: r.student,
+    cohort: r.cohort,
+  })) as unknown as AssessmentCandidateRow[];
 });

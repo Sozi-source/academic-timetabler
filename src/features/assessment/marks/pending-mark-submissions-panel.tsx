@@ -54,17 +54,36 @@ export function PendingMarkSubmissionsPanel({ items }: { items: PendingMarkSubmi
                   <span className={item.missingCount > 0 ? 'font-semibold text-amber-800' : 'font-semibold text-emerald-700'}>
                     {item.enteredCount}/{item.rosterCount}
                   </span>
+                  {item.missingCount > 0 ? (
+                    <Link
+                      href={`/assessment/marks/${item.assessmentId}?status=cat-missing&component=cat`}
+                      className="mt-0.5 block text-[10px] font-bold text-amber-700 hover:text-amber-900 hover:underline"
+                      title="View candidates missing marks"
+                    >
+                      {item.missingCount} missing
+                    </Link>
+                  ) : null}
                 </td>
                 <td className="px-3 py-2 text-slate-500">
                   {item.lastSavedAt ? dateFormatter.format(new Date(item.lastSavedAt)) : '—'}
                 </td>
                 <td className="px-3 py-2 text-right">
-                  <Link
-                    href={`/assessment/marks/${item.assessmentId}`}
-                    className="inline-flex h-7 items-center rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
-                  >
-                    Open markbook
-                  </Link>
+                  <div className="flex items-center justify-end gap-1.5">
+                    {item.missingCount > 0 ? (
+                      <Link
+                        href={`/assessment/marks/${item.assessmentId}?status=cat-missing&component=cat`}
+                        className="inline-flex h-7 items-center rounded-md border border-amber-300 bg-amber-50 px-2 text-[11px] font-semibold text-amber-900 hover:bg-amber-100 transition"
+                      >
+                        Review missing
+                      </Link>
+                    ) : null}
+                    <Link
+                      href={`/assessment/marks/${item.assessmentId}`}
+                      className="inline-flex h-7 items-center rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      Open markbook
+                    </Link>
+                  </div>
                 </td>
               </tr>
             ))}

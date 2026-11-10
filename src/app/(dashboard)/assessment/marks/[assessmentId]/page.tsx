@@ -14,6 +14,7 @@ import {
 } from '@/features/assessment/marks/queries';
 import { AssessmentMarkbookViewTable } from '@/features/assessment/marks/assessment-markbook-view-table';
 import { getCatOnBehalfStatus } from '@/features/assessment/marks/pending-submissions';
+import { CopyMissingStudentsButton } from '@/features/assessment/marks/copy-missing-students-button';
 import { SubmitCatOnBehalfButton } from '@/features/assessment/marks/submit-cat-on-behalf-button';
 import { requireHodAccess } from '@/features/auth/authorization';
 
@@ -181,11 +182,28 @@ export default async function AssessmentMarkWorkflowPage({
                 : ' All students have a mark recorded.'}
             </p>
           </div>
-          <SubmitCatOnBehalfButton
-            assessmentId={assessment.id}
-            trainerLabel={catOnBehalf.trainerNames.length ? catOnBehalf.trainerNames.join(', ') : 'the trainer'}
-            missingCount={catOnBehalf.missingCount}
-          />
+          <div className="flex flex-wrap items-center gap-2">
+            {catOnBehalf.missingCount > 0 ? (
+              <>
+                <Link
+                  href={`/assessment/marks/${assessment.id}?status=cat-missing&component=cat`}
+                  className="inline-flex min-h-8 items-center justify-center gap-1.5 rounded-lg border border-amber-300 bg-white px-3 text-xs font-semibold text-amber-900 shadow-2xs transition hover:bg-amber-100/70"
+                >
+                  View Missing ({catOnBehalf.missingCount})
+                </Link>
+                <CopyMissingStudentsButton
+                  unitCode={unitCode ?? 'Unit'}
+                  unitName={unitName}
+                  missingStudents={catOnBehalf.missingStudents}
+                />
+              </>
+            ) : null}
+            <SubmitCatOnBehalfButton
+              assessmentId={assessment.id}
+              trainerLabel={catOnBehalf.trainerNames.length ? catOnBehalf.trainerNames.join(', ') : 'the trainer'}
+              missingCount={catOnBehalf.missingCount}
+            />
+          </div>
         </section>
       ) : null}
 
@@ -300,6 +318,8 @@ export default async function AssessmentMarkWorkflowPage({
         unitCode={assessment.unit?.code ?? 'Unit'}
         unitName={assessment.unit?.name ?? ''}
         periodName={assessment.academic_period?.name ?? ''}
+        initialStatus={typeof query.status === 'string' ? query.status : undefined}
+        initialView={typeof query.component === 'string' ? query.component : undefined}
       />
     </div>
   );

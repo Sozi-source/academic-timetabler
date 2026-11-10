@@ -1,6 +1,7 @@
 import { cache } from 'react';
 
 import { requireHodAccess } from '@/features/auth/authorization';
+import { resolveAssessmentIdsWithSiblings } from '@/features/staff-assessment/online-marks-query';
 import { createClient } from '@/lib/supabase/server';
 
 /**
@@ -10,6 +11,12 @@ import { createClient } from '@/lib/supabase/server';
  * (CAT or Exam) but no component submission record exists yet. Nothing is ever
  * submitted automatically — the HOD reviews and submits on the trainer's behalf.
  */
+
+export interface MissingStudentInfo {
+  studentId: string;
+  admissionNumber: string;
+  fullName: string;
+}
 
 export interface PendingMarkSubmission {
   assessmentId: string;
@@ -52,8 +59,26 @@ async function loadDraftState(supabase: SupabaseServerClient, assessmentIds: str
     if (rosterRes.error) throw new Error(`Unable to load assessment rosters: ${rosterRes.error.message}`);
     if (subRes.error) throw new Error(`Unable to load mark submissions: ${subRes.error.message}`);
     drafts.push(...(draftRes.data ?? []));
-    roster.push(...(rosterRes.data ?? []));
     submissions.push(...(subRes.data ?? []));
+
+    const rosterRows = rosterRes.data ?? [];
+    if (rosterRows.length === 0) {
+      const { data: popData } = await supabase
+        .from('assessment_population')
+        .select('assessment_event_id, student_id, attendance_status')
+        .in('assessment_event_id', ids)
+        .eq('population_status', 'expected');
+      for (const p of popData ?? []) {
+        roster.push({
+          assessment_id: p.assessment_event_id,
+          student_id: p.student_id,
+          cat_absent: null,
+          pre_assessment_status: p.attendance_status === 'absent' ? 'absent' : null,
+        });
+      }
+    } else {
+      roster.push(...rosterRows);
+    }
   }
 
   return { drafts, roster, submissions };
@@ -145,19 +170,74 @@ export const getPendingMarkSubmissions = cache(async (): Promise<PendingMarkSubm
 export const getCatOnBehalfStatus = cache(async (assessmentId: string) => {
   await requireHodAccess();
   const supabase = await createClient();
-  const state = await loadDraftState(supabase, [assessmentId]);
-  const catSubmitted = state.submissions.some((s) => s.component_key === 'cat');
-  const counts = countRecorded(state, assessmentId, 'cat');
-  const editorIds = [...new Set(state.drafts.filter((d) => d.cat_mark !== null).map((d) => d.updated_by).filter((v): v is string => Boolean(v)))];
-  const { data: trainers } = editorIds.length
-    ? await supabase.from('trainers').select('full_name').in('profile_id', editorIds)
-    : { data: [] as Array<{ full_name: string }> };
+  const resolvedIds = await resolveAssessmentIdsWithSiblings(supabase, assessmentId);
+  const targetEventIds = resolvedIds.length > 0 ? resolvedIds : [assessmentId];
+  const targetEventSet = new Set(targetEventIds);
+
+  const state = await loadDraftState(supabase, targetEventIds);
+  const catSubmitted = state.submissions.some((s) => targetEventSet.has(s.assessment_id) && s.component_key === 'cat');
+
+  // Discover all marked candidates across target events
+  const relevantDrafts = state.drafts.filter((d) => targetEventSet.has(d.assessment_id) && d.cat_mark !== null);
+  const markedStudents = new Set(relevantDrafts.map((d) => d.student_id));
+
+  // Deduplicate roster across siblings
+  const rosterByStudent = new Map<string, (typeof state.roster)[number]>();
+  for (const r of state.roster) {
+    if (targetEventSet.has(r.assessment_id) && r.student_id && !rosterByStudent.has(r.student_id)) {
+      rosterByStudent.set(r.student_id, r);
+    }
+  }
+
+  const rosterRows = Array.from(rosterByStudent.values());
+  const missingStudentIds: string[] = [];
+  let recorded = 0;
+
+  for (const r of rosterRows) {
+    const hasMark = markedStudents.has(r.student_id);
+    const isAbsent = Boolean(r.cat_absent);
+    if (hasMark || isAbsent) {
+      recorded++;
+    } else {
+      missingStudentIds.push(r.student_id);
+    }
+  }
+
+  const editorIds = [
+    ...new Set(
+      relevantDrafts.map((d) => d.updated_by).filter((v): v is string => Boolean(v)),
+    ),
+  ];
+
+  const [{ data: trainers }, { data: missingStudentData }] = await Promise.all([
+    editorIds.length
+      ? supabase.from('trainers').select('full_name').in('profile_id', editorIds)
+      : Promise.resolve({ data: [] as Array<{ full_name: string }> }),
+    missingStudentIds.length > 0
+      ? supabase
+          .from('students')
+          .select('id, admission_number, full_name')
+          .in('id', missingStudentIds)
+          .order('admission_number')
+      : Promise.resolve({ data: [] as Array<{ id: string; admission_number: string; full_name: string }> }),
+  ]);
+
+  const missingStudents: MissingStudentInfo[] = (missingStudentData ?? []).map((s) => ({
+    studentId: s.id,
+    admissionNumber: s.admission_number,
+    fullName: s.full_name,
+  }));
+
+  const rosterCount = rosterRows.length;
+  const missingCount = Math.max(rosterCount - recorded, 0);
+
   return {
     catSubmitted,
     trainerNames: (trainers ?? []).map((t) => t.full_name),
-    rosterCount: counts.rosterCount,
-    enteredCount: counts.recorded,
-    missingCount: Math.max(counts.rosterCount - counts.recorded, 0),
-    canSubmitOnBehalf: !catSubmitted && counts.markedCount > 0 && counts.rosterCount > 0,
+    rosterCount,
+    enteredCount: recorded,
+    missingCount,
+    missingStudents,
+    canSubmitOnBehalf: !catSubmitted && markedStudents.size > 0 && rosterCount > 0,
   };
 });

@@ -387,7 +387,8 @@ export async function generateRecordOfWorkFromSchemeAction(
       const isCat = week.weekNumber === milestones.catWeek;
       const isRevision = week.weekNumber === 13;
 
-      let workCovered = `${week.topic}: ${week.subTopics}`;
+      const subtopicsJoined = week.subTopics ? week.subTopics.replace(/\n/g, ', ') : '';
+      let workCovered = subtopicsJoined ? `${week.topic}: ${subtopicsJoined}` : week.topic;
       let outcomesAchieved = week.specificLearningOutcomes;
       let remarks = week.assessmentAndRemarks || 'Delivered as scheduled';
 

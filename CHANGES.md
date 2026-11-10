@@ -1,3 +1,27 @@
+### 2026-11-10: Synchronize Record of Work with Scheme of Work and Restore Lipid Metabolism
+
+**Summary:**
+- Synchronized Record of Work directly with the TVET Scheme of Work so that specific learning outcomes on the scheme directly populate the Record of Work outcomes.
+- Added pedagogical depth and clarity around Record of Work outcomes without repeating generic boilerplate phrases across rows:
+  - Eliminated repetitive stock practical phrases (`• Demonstrate practical procedures and hands-on techniques for...`, `• Execute standard operating procedures and safety measures correctly.`, etc.).
+  - Contextualized practical application sessions (Session 2 in multi-session weeks) to derive applied, hands-on objectives directly from the week's specific subtopics and learning outcomes (differentiating metabolic pathway tracing/calculations, clinical disease marker evaluation, enzyme kinetics/assays, molecular models, and diagnostic protocols).
+  - Contextualized tutorial sessions (Session 3+ in multi-session weeks) to focus on quantitative problem-solving and physiological case analysis for the week's focal subtopics.
+  - Formatted assessment weeks (CAT and Examinations) with dedicated evaluation and review/remediation objectives rather than practical boilerplate.
+- Restored **Lipid Metabolism** to the Record of Work for Biochemistry II (`DHN 2304` / `DND 3106` / `DNDT 1207`) at Weeks 6 and 7 (which had been omitted due to stale submitted records from the legacy outline), properly sequencing Continuous Assessment Test (CAT) at Week 8 and Nucleic Acids & Nucleotides at Week 9.
+- Updated all submitted database entries in `record_of_work_entries` for Biochemistry II and implemented self-healing logic in `record-of-work-online/queries.ts` to dynamically harmonize any legacy rows with the authoritative Scheme of Work.
+
+**Modified:**
+- `src/features/teaching-documents/record-of-work-online/queries.ts`:
+  - Completely refactored `schemeSuggestion` with discrete subtopic parsing (`parseSchemeSubtopics`), mojibake cleaning (`cleanMojibakeText`), and contextualized pedagogical outcome generators (`formatTheoryOutcomes`, `formatPracticalOutcomes`, `formatTutorialOutcomes`, `synthesizePracticalObjective`).
+  - Added specialized assessment handling for CAT and Final Examinations.
+  - Added self-healing mapping and database backfill for submitted rows with outdated topics, missing lipids, or legacy stock boilerplate.
+- `src/features/teaching-documents/record-of-work-actions.ts`:
+  - Improved `generateSchemeRecordOfWorkAction` so `workCovered` cleanly joins discrete subtopics without dangling colons on assessment weeks, preserving rich learning outcomes directly from the Scheme of Work.
+- `supabase/migrations/20261110020000_sync_record_of_work_with_scheme_and_restore_lipids.sql`:
+  - Added versioned SQL migration updating all 18 entries in `record_of_work_entries` for DHN 2304 (allocation `7f855ffc-9692-4577-ad9b-9948066aae3f`) and parallel allocation `ffe68fa0-3443-4f57-b8ca-5843b060e958` to reflect authentic topics and scheme-derived outcomes with Lipid Metabolism at Weeks 6 and 7.
+- `src/tests/record-of-work-scheme-sync.test.ts`:
+  - Added unit test suite validating the complete 14-week schedule alignment, presence of Lipid Metabolism at Weeks 6 & 7, and non-empty, rich specific learning outcomes on Scheme and Record of Work.
+
 ### 2026-11-10: Update Biochemistry II Course Outline and Purge Erroneous Topics
 
 **Summary:**

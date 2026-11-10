@@ -301,6 +301,169 @@ function occurrenceDates({
   return result;
 }
 
+function parseSchemeSubtopics(raw: unknown): string[] {
+  if (!raw) return [];
+  const items = Array.isArray(raw) ? raw : String(raw).split(/[\n·;•\r]+/);
+  return items
+    .map((s) => cleanMojibakeText(s).replace(/^[-*•\d.)\s]+/, '').trim())
+    .filter((s) => s.length > 2);
+}
+
+function cleanMojibakeText(text?: string | null): string {
+  if (!text) return '';
+  return text
+    .replaceAll('â€¢', '•')
+    .replaceAll('Â·', '·')
+    .replaceAll('â€”', '—')
+    .replaceAll('â€“', '–')
+    .replaceAll('ÃƒÆ’Ã†â€™', '')
+    .trim();
+}
+
+function isAssessmentTopic(title: string): boolean {
+  return /continuous assessment|summative|end[\s-]*(?:of[\s-]*)?(?:term|semester)|cat\b|rat\b|final examination/i.test(title);
+}
+
+function isCatTopic(title: string): boolean {
+  return /continuous assessment|cat\b|rat\b/i.test(title);
+}
+
+function synthesizePracticalObjective(subtopic: string, index = 0): string {
+  const clean = subtopic.replace(/^[-*•\d.)\s]+/, '').trim().replace(/[:;,\.]\s*$/, '');
+  const lower = clean.toLowerCase();
+
+  if (/glycolysis|krebs|pyruvate|respiratory|phosphorylation|oxidation|beta-oxidation|urea\s+cycle|transamination|deamination|activation|transport|cycle|synthesis|replication|transcription|translation/i.test(lower)) {
+    if (index % 2 === 1) {
+      return `Perform reaction mapping, enzyme cofactor analysis, and quantitative problem-solving on ${clean}.`;
+    }
+    return `Trace biochemical pathway steps, calculate net energy yield (ATP), and diagram intermediate stages of ${clean}.`;
+  }
+  if (/disease|disorder|pathology|syndrome|inborn\s+error|deficiency|alteration|clinical/i.test(lower)) {
+    if (index % 2 === 1) {
+      return `Evaluate patient laboratory findings, pathology risks, and clinical nutritional management for ${clean}.`;
+    }
+    return `Analyze diagnostic markers, clinical case presentations, and metabolic alterations associated with ${clean}.`;
+  }
+  if (/enzyme|enzymology|kinetics|inhibition|catalyst|substrate|michaelis|lineweaver/i.test(lower)) {
+    if (index % 2 === 1) {
+      return `Demonstrate spectrophotometric measurements, enzyme velocity calculations, and catalytic analysis of ${clean}.`;
+    }
+    return `Conduct laboratory assays, construct kinetic plots, and evaluate factors influencing ${clean}.`;
+  }
+  if (/dna|rna|purine|pyrimidine|nucleotide|codon/i.test(lower)) {
+    if (index % 2 === 1) {
+      return `Examine biochemical stability, denaturation dynamics, and molecular diagnostic applications of ${clean}.`;
+    }
+    return `Analyze structural models, differentiate molecular components, and diagram functional mechanisms of ${clean}.`;
+  }
+  if (/meaning\s+of\s+terms|definition|introduction|overview|concept/i.test(lower)) {
+    return `Apply diagnostic principles, terminology, and foundational concepts of ${clean} to practical exercises.`;
+  }
+  if (/stain|microscop|culture|isolat|media|streak|agar/i.test(lower)) {
+    return `Perform laboratory staining, microscopic examination, and aseptic handling relating to ${clean}.`;
+  }
+  if (/calculat|assessment|diet|intake|planning|menu|requirement/i.test(lower)) {
+    return `Perform quantitative nutritional calculations and clinical assessment protocols for ${clean}.`;
+  }
+  if (/quality|preserv|process|storage|hygiene|control/i.test(lower)) {
+    return `Execute quality control procedures, safety protocols, and standard operating procedures for ${clean}.`;
+  }
+
+  return `Demonstrate practical procedures, diagnostic methods, and problem-solving relating to ${clean}.`;
+}
+
+function formatTheoryOutcomes(rawOutcomes: string, subtopics: string[], baseTopic: string): string {
+  const cleanRaw = cleanMojibakeText(rawOutcomes);
+  let bullets: string[] = [];
+
+  if (cleanRaw) {
+    if (cleanRaw.includes('•')) {
+      bullets = cleanRaw
+        .split(/[\n\r]+/)
+        .map((l) => l.trim())
+        .filter((l) => l.startsWith('•') || l.startsWith('-') || l.startsWith('*'))
+        .map((l) => l.replace(/^[-*•\s]+/, '').trim())
+        .filter((l) => l.length > 2);
+    } else if (cleanRaw.includes(';') || cleanRaw.includes('\n')) {
+      bullets = cleanRaw
+        .split(/[;\n\r]+/)
+        .map((l) => l.trim().replace(/^[-*•\s]+/, ''))
+        .filter((l) => l.length > 2);
+    } else if (/^By the end of/i.test(cleanRaw)) {
+      const parts = cleanRaw.replace(/^By the end of[^\n:]+[:\n]/i, '').split(/[\n\r]+/);
+      bullets = parts.map((p) => p.trim().replace(/^[-*•\s]+/, '')).filter((p) => p.length > 2);
+    } else {
+      bullets = [cleanRaw];
+    }
+  }
+
+  if (bullets.length === 0 && subtopics.length > 0) {
+    bullets = subtopics.slice(0, 3).map((st) => {
+      const clean = st.replace(/^[-*•\d.)\s]+/, '').trim().replace(/[:;,\.]\s*$/, '');
+      const lower = clean.toLowerCase();
+      if (/meaning|definition/i.test(lower)) return `Define and explain key terms and foundational principles of ${clean}.`;
+      if (/classification|types/i.test(lower)) return `Classify and differentiate ${clean}.`;
+      if (/factor/i.test(lower)) return `Analyze factors influencing ${clean}.`;
+      return `Explain the principles, biological roles, and regulation of ${clean}.`;
+    });
+  }
+
+  if (bullets.length === 0) {
+    bullets = [
+      `Explain the fundamental principles and concepts of ${baseTopic}.`,
+      `Apply theoretical knowledge of ${baseTopic} to clinical and diagnostic contexts.`
+    ];
+  }
+
+  const formattedBullets = bullets.map((b) => {
+    let s = b.trim();
+    if (s.length > 0) {
+      s = s.charAt(0).toUpperCase() + s.slice(1);
+      if (!s.endsWith('.')) s += '.';
+    }
+    return `• ${s}`;
+  });
+
+  return [
+    'By the end of the lesson/topic, the trainee should be able to:',
+    ...formattedBullets
+  ].join('\n');
+}
+
+function formatPracticalOutcomes(baseTopic: string, subtopics: string[]): string {
+  const bullets: string[] = [];
+  const cleanSubs = subtopics.slice(0, 3);
+
+  for (let i = 0; i < cleanSubs.length; i++) {
+    bullets.push(`• ${synthesizePracticalObjective(cleanSubs[i], i)}`);
+  }
+
+  if (bullets.length === 0) {
+    bullets.push(
+      `• Perform laboratory procedures and hands-on exercises demonstrating ${baseTopic}.`,
+      `• Conduct setup, perform tasks, and record empirical observations accurately.`
+    );
+  } else if (bullets.length === 1) {
+    bullets.push(
+      `• Execute standard diagnostic procedures and record empirical observations accurately.`
+    );
+  }
+
+  return [
+    'By the end of the practical session, the trainee should be able to:',
+    ...bullets
+  ].join('\n');
+}
+
+function formatTutorialOutcomes(baseTopic: string, subtopics: string[]): string {
+  const focal = subtopics.slice(0, 2).join(' and ') || baseTopic;
+  return [
+    'By the end of the session, the trainee should be able to:',
+    `• Solve quantitative problems, case study scenarios, and review exercises on ${focal}.`,
+    `• Synthesize practical findings, review competencies, and evaluate physiological applications of ${baseTopic}.`
+  ].join('\n');
+}
+
 function schemeSuggestion(
   content: UnknownRow[],
   weekNumber: number,
@@ -320,66 +483,92 @@ function schemeSuggestion(
     };
   }
 
-  // Topic title from scheme (without sub-topics)
+  const activeRow = rows[0] || {};
   const baseTopic = rows
     .map((row) => asString(row.topic ?? row.topicTitle).trim())
     .filter(Boolean)[0] || unitName || 'Scheduled Topic';
 
-  // If this is the 2nd session of the week: Practical Application
+  const subtopics = parseSchemeSubtopics(activeRow.subTopics ?? activeRow.coverage);
+
+  // 1. Assessment Weeks (CAT, Midterm, Summative Examination)
+  if (isAssessmentTopic(baseTopic)) {
+    const isCat = isCatTopic(baseTopic);
+    if (isCat) {
+      if (sessionIndexInWeek === 0) {
+        return {
+          topic: baseTopic,
+          objectives: [
+            'By the end of the assessment session, the trainee should be able to:',
+            '• Complete comprehensive test questions evaluating mastery of competencies covered in preceding weeks.',
+            '• Apply critical thinking and analytical problem-solving to continuous assessment tasks.'
+          ].join('\n'),
+          deliveryMode: 'theory',
+        };
+      }
+      return {
+        topic: `${baseTopic} (Review & Remediation)`,
+        objectives: [
+          'By the end of the review session, the trainee should be able to:',
+          '• Review assessment items, discuss marking criteria, and identify areas requiring academic remediation.',
+          '• Resolve common errors and consolidate core competencies in metabolic pathway regulation.'
+        ].join('\n'),
+        deliveryMode: 'theory',
+      };
+    } else {
+      if (sessionIndexInWeek === 0) {
+        return {
+          topic: baseTopic,
+          objectives: [
+            'By the end of the examination session, the trainee should be able to:',
+            '• Demonstrate comprehensive summative mastery of all unit learning outcomes and syllabus competencies.',
+            '• Complete official end-of-term examination papers adhering to institutional examination regulations.'
+          ].join('\n'),
+          deliveryMode: 'theory',
+        };
+      }
+      return {
+        topic: `${baseTopic} (Evaluation & Course Wrap-up)`,
+        objectives: [
+          'By the end of the session, the trainee should be able to:',
+          '• Conclude all unit academic assessments, verify examination submissions, and complete term evaluation.'
+        ].join('\n'),
+        deliveryMode: 'theory',
+      };
+    }
+  }
+
+  // 2. Multi-session practical / applied work (Session 2 in week)
   if (sessionIndexInWeek === 1) {
-    const practicalTopic = `${baseTopic} (Practical Application)`;
-    const practicalObjectives = [
-      'By the end of the practical session, the trainee should be able to:',
-      `• Demonstrate practical procedures and hands-on techniques for ${baseTopic}.`,
-      `• Execute standard operating procedures and safety measures correctly.`,
-      `• Conduct setup, perform tasks, and record empirical observations accurately.`,
-    ].join('\n');
-
     return {
-      topic: practicalTopic,
-      objectives: practicalObjectives,
+      topic: `${baseTopic} (Practical Application)`,
+      objectives: formatPracticalOutcomes(baseTopic, subtopics),
       deliveryMode: 'practical',
     };
   }
 
-  // If this is the 3rd+ session of the week: Tutorial / Review
+  // 3. Multi-session tutorial / case analysis (Session 3+ in week)
   if (sessionIndexInWeek >= 2) {
-    const tutorialTopic = `${baseTopic} (Tutorial & Practical Case Analysis)`;
-    const tutorialObjectives = [
-      'By the end of the session, the trainee should be able to:',
-      `• Analyze practical findings and solve case study exercises on ${baseTopic}.`,
-      `• Complete documentation, review competencies, and troubleshoot challenges.`,
-    ].join('\n');
-
     return {
-      topic: tutorialTopic,
-      objectives: tutorialObjectives,
+      topic: `${baseTopic} (Tutorial & Practical Case Analysis)`,
+      objectives: formatTutorialOutcomes(baseTopic, subtopics),
       deliveryMode: 'practical',
     };
   }
 
-  // Session 1: Theory & Core Concepts from Scheme of Work
+  // 4. Session 1: Theory & Core Concepts read directly from Scheme of Work
   const rawOutcomes = rows
     .map((row) => {
       const outcomes = row.specificLearningOutcomes ?? row.learningOutcomes ?? row.objectives ?? row.outcomes;
-      let text = Array.isArray(outcomes)
+      const text = Array.isArray(outcomes)
         ? outcomes.join('\n')
         : asString(outcomes).trim();
-
-      text = text
-        .replaceAll('â€¢', '•')
-        .replaceAll('Â·', '·')
-        .replaceAll('â€”', '—')
-        .replaceAll('â€“', '–')
-        .replaceAll('ÃƒÆ’Ã†â€™', '');
-
-      return text;
+      return cleanMojibakeText(text);
     })
-    .filter(Boolean);
+    .filter(Boolean)[0] || '';
 
   return {
     topic: baseTopic,
-    objectives: rawOutcomes.length > 0 ? [...new Set(rawOutcomes)].join('\n') : '',
+    objectives: formatTheoryOutcomes(rawOutcomes, subtopics, baseTopic),
     deliveryMode: 'theory',
   };
 }
@@ -933,13 +1122,35 @@ export async function getOnlineRecordOfWorkContext(
     ).map(
       (
         row: UnknownRow,
-      ) =>
-        mapSubmittedEntry(
+      ) => {
+        const isBiochemII = /biochemistry\s*ii\b/i.test(asString(unit.name));
+        const cleanTopic = asString(row.topic_covered).trim();
+        const cleanObj = asString(row.objectives).trim();
+        const hasObsoleteBiochemTopic = isBiochemII && /introduction to biochemistry|amino acid anabolism|ornithine cycle/i.test(cleanTopic);
+        const isMissingLipidsInBiochem = isBiochemII && (asNumber(row.week_number, 0) === 6 || asNumber(row.week_number, 0) === 7) && /protein metabolism/i.test(cleanTopic);
+        const isOutdatedCatInBiochem = isBiochemII && asNumber(row.week_number, 0) === 5 && /continuous assessment/i.test(cleanTopic);
+        const isCatAtWeek8InBiochem = isBiochemII && asNumber(row.week_number, 0) === 8 && !/continuous assessment/i.test(cleanTopic);
+        const isNucleicAtWeek9InBiochem = isBiochemII && asNumber(row.week_number, 0) === 9 && !/nucleic/i.test(cleanTopic);
+
+        const hasStockBoilerplate = cleanObj.includes('Demonstrate practical procedures and hands-on techniques for') ||
+          cleanObj.includes('Execute standard operating procedures and safety measures correctly');
+
+        if (hasObsoleteBiochemTopic || isMissingLipidsInBiochem || isOutdatedCatInBiochem || isCatAtWeek8InBiochem || isNucleicAtWeek9InBiochem || hasStockBoilerplate) {
+          const sessIdx = Math.max(0, asNumber(row.session_number, 1) - 1);
+          const suggestion = schemeSuggestion(schemeContent, asNumber(row.week_number, 1), asString(unit.name), sessIdx);
+          if (suggestion.topic && suggestion.objectives) {
+            row.topic_covered = suggestion.topic;
+            row.objectives = suggestion.objectives;
+          }
+        }
+
+        return mapSubmittedEntry(
           row,
-        ),
+        );
+      },
     );
 
-  // Asynchronously backfill / clean database rows if any had legacy mojibakes or subtopics
+  // Asynchronously backfill / clean database rows if any had legacy mojibakes, subtopics, or stock boilerplate
   if (submittedRows && submittedRows.length > 0) {
     for (const row of submittedRows) {
       const originalTopic = asString(row.topic_covered);

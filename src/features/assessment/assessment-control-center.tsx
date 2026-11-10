@@ -493,7 +493,12 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                 <article key={unit.key} className="space-y-3 p-4">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">{unit.unitName}</p>
+                      <Link
+                        href={`/assessment/marks/${unit.items[0]?.id ?? unit.unitId}`}
+                        className="text-sm font-semibold text-slate-900 hover:text-primary transition hover:underline"
+                      >
+                        {unit.unitName}
+                      </Link>
                       <p className="font-mono text-xs font-medium text-slate-500">{unit.unitCode}</p>
                     </div>
                     <StatusPill
@@ -559,23 +564,15 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                   </div>
 
                   {/* Mobile Action Link */}
-                  {unit.items.length <= 1 ? (
-                    <Link
-                      href={`/assessment/marks/${unit.items[0]?.id ?? unit.unitId}`}
-                      className="inline-flex min-h-9 w-full items-center justify-center gap-1.5 rounded-lg border border-border bg-surface px-3 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-surface-subtle transition"
-                    >
-                      Open Markbook
-                      <ArrowRight className="size-3.5 text-slate-400" />
-                    </Link>
-                  ) : (
-                    <Link
-                      href={`/assessment/unit/${unit.unitId}?periodId=${data.selectedPeriodId}`}
-                      className="inline-flex min-h-9 w-full items-center justify-center gap-1.5 rounded-lg border border-border bg-surface px-3 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-surface-subtle transition"
-                    >
-                      View Cohort Markbooks ({unit.items.length})
-                      <ArrowRight className="size-3.5 text-slate-400" />
-                    </Link>
-                  )}
+                  <Link
+                    href={`/assessment/marks/${unit.items[0]?.id ?? unit.unitId}`}
+                    className="inline-flex min-h-9 w-full items-center justify-center gap-1.5 rounded-lg border border-border bg-surface px-3 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-surface-subtle transition"
+                  >
+                    {unit.items.length > 1
+                      ? `Open Markbook (${unit.items.length} Cohorts)`
+                      : 'Open Markbook'}
+                    <ArrowRight className="size-3.5 text-slate-400" />
+                  </Link>
                 </article>
               ))}
             </div>
@@ -599,9 +596,12 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                     <tr key={unit.key} className="transition-colors hover:bg-surface-subtle/50">
                       {/* Unit name & code */}
                       <td className="px-4 py-3">
-                        <div className="font-semibold text-slate-900 leading-snug">
+                        <Link
+                          href={`/assessment/marks/${unit.items[0]?.id ?? unit.unitId}`}
+                          className="font-semibold text-slate-900 leading-snug hover:text-primary transition hover:underline"
+                        >
                           {unit.unitName}
-                        </div>
+                        </Link>
                         <div className="mt-0.5 font-mono text-[11px] font-medium text-slate-400">
                           {unit.unitCode}
                         </div>
@@ -727,7 +727,7 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                               {unit.items.map((it) => (
                                 <DropdownMenuItem key={it.id} asChild>
                                   <Link
-                                    href={`/assessment/marks/${it.id}`}
+                                    href={`/assessment/marks/${unit.items[0]?.id ?? it.id}${it.cohortId ? `?cohortId=${encodeURIComponent(it.cohortId)}` : ''}`}
                                     className="flex w-full items-center justify-between text-xs font-medium cursor-pointer"
                                   >
                                     <span>{it.cohortName}</span>
@@ -738,10 +738,10 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                               <DropdownMenuSeparator />
                               <DropdownMenuItem asChild>
                                 <Link
-                                  href={`/assessment/unit/${unit.unitId}?periodId=${data.selectedPeriodId}`}
-                                  className="flex w-full items-center text-xs font-medium text-primary cursor-pointer"
+                                  href={`/assessment/marks/${unit.items[0]?.id ?? unit.unitId}`}
+                                  className="flex w-full items-center text-xs font-bold text-primary cursor-pointer"
                                 >
-                                  View Cohorts & Rosters
+                                  Open Consolidated Markbook
                                 </Link>
                               </DropdownMenuItem>
                             </DropdownMenuContent>

@@ -38,6 +38,7 @@ export default async function AssessmentMarkWorkflowPage({
   const errorKey = typeof query.error === 'string' ? query.error : undefined;
   const onBehalfError = errorKey ? ON_BEHALF_ERRORS[errorKey] : undefined;
   const submittedOnBehalf = query.cat_submitted_on_behalf === '1';
+  const initialCohort = typeof query.cohortId === 'string' ? query.cohortId : undefined;
   const [assessment, population, resultCount, componentSubmissionState, marksByStudent, catOnBehalf] = await Promise.all([
     getAssessmentById(assessmentId),
     getAssessmentPopulation(assessmentId),
@@ -318,6 +319,7 @@ export default async function AssessmentMarkWorkflowPage({
         unitCode={assessment.unit?.code ?? 'Unit'}
         unitName={assessment.unit?.name ?? ''}
         periodName={assessment.academic_period?.name ?? ''}
+        initialCohort={initialCohort}
         initialStatus={typeof query.status === 'string' ? query.status : undefined}
         initialView={typeof query.component === 'string' ? query.component : undefined}
       />

@@ -1,3 +1,33 @@
+### 2026-11-10: Streamlined Direct Markbook Navigation & Cohort Pre-Selection
+
+**Summary:**
+- **Eliminated Dead-End Intermediate Roster Page:**
+  - Bypassed the redundant nominal roll page (`/assessment/unit/[unitId]`) that previously presented educators and HODs with an unpopulated student table without marks.
+  - Refactored `src/app/(dashboard)/assessment/unit/[unitId]/page.tsx` to automatically redirect (`307`) to the unit offering's primary markbook event (`/assessment/marks/[assessmentId]`), preserving any requested `cohortId` filter and preventing broken links or bookmarks.
+- **Direct 1-Click Access from Assessment Control Center:**
+  - In `src/features/assessment/assessment-control-center.tsx`:
+    - Updated desktop unit title to a clickable link that opens the markbook directly.
+    - Updated desktop table action dropdown for multi-cohort units: selecting any cohort jumps straight into `/assessment/marks/[assessmentId]?cohortId=[cohortId]` with that cohort pre-filtered; clicking "Open Consolidated Markbook" opens all cohorts unified.
+    - Updated mobile view: unit card headers and action buttons now navigate straight to `/assessment/marks/[assessmentId]`, displaying `Open Markbook (${count} Cohorts)` for multi-cohort units.
+- **URL-Aware Cohort Pre-Selection in Markbook View Table:**
+  - Added `initialCohort` prop in `AssessmentMarkbookViewTable` (`src/features/assessment/marks/assessment-markbook-view-table.tsx`).
+  - Added resilient matching logic supporting both cohort UUID and case-insensitive cohort name/code.
+  - Wired `cohortId` query param through `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx` into the table component.
+
+**Added:**
+- `src/tests/direct-markbook-navigation.test.ts`:
+  - Vitest test suite covering cohort pre-selection resolution, UUID and name matching, and direct URL generation.
+
+**Modified:**
+- `src/features/assessment/assessment-control-center.tsx`:
+  - Replaced legacy `/assessment/unit/...` links with direct consolidated markbook links and cohort pre-filtered links.
+- `src/features/assessment/marks/assessment-markbook-view-table.tsx`:
+  - Added `initialCohort` prop and initialized `selectedCohort` state.
+- `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`:
+  - Extracted `cohortId` search param and forwarded it to `AssessmentMarkbookViewTable`.
+- `src/app/(dashboard)/assessment/unit/[unitId]/page.tsx`:
+  - Changed nominal roll renderer into an instant redirect to `/assessment/marks/[targetEventId]`.
+
 ### 2026-11-10: CAT Mark Incomplete Submission Oversight & Resilient Markbook Inspection
 
 **Summary:**

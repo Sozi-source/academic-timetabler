@@ -18,6 +18,7 @@ interface AssessmentMarkbookViewTableProps {
   unitCode: string;
   unitName: string;
   periodName: string;
+  initialCohort?: string;
   initialStatus?: string;
   initialView?: string;
 }
@@ -59,6 +60,7 @@ export function AssessmentMarkbookViewTable({
   unitCode,
   unitName,
   periodName,
+  initialCohort,
   initialStatus,
   initialView,
 }: AssessmentMarkbookViewTableProps) {
@@ -67,7 +69,19 @@ export function AssessmentMarkbookViewTable({
   const statusSelectId = useId();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCohort, setSelectedCohort] = useState<string>('all');
+  const [selectedCohort, setSelectedCohort] = useState<string>(() => {
+    if (!initialCohort || initialCohort === 'all') return 'all';
+    // Match directly by cohort UUID
+    const matchesId = population.some((p) => p.cohort?.id === initialCohort);
+    if (matchesId) return initialCohort;
+    // Match by cohort name or code
+    const found = population.find(
+      (p) =>
+        p.cohort?.name?.toLowerCase() === initialCohort.toLowerCase() ||
+        p.cohort?.code?.toLowerCase() === initialCohort.toLowerCase(),
+    );
+    return found?.cohort?.id ?? initialCohort;
+  });
   const [selectedStatus, setSelectedStatus] = useState<string>(initialStatus || 'all');
   const [viewMode, setViewMode] = useState<'all' | 'cat'>(initialView === 'cat' ? 'cat' : 'all');
 

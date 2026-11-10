@@ -70,10 +70,14 @@ export async function GET(request: Request) {
       }
     }
 
-    const filename =
-      type === 'course_outline'
-        ? `${header.unitName.replace(/[^a-zA-Z0-9_-]/g, '_')}_Course_Outline.docx`
-        : `${header.unitCode.replace(/\s+/g, '_')}_${type}.docx`;
+    const docTypeLabel =
+      type === 'scheme_of_work'
+        ? 'Scheme_of_Work'
+        : type === 'record_of_work'
+          ? 'Record_of_Work'
+          : 'Course_Outline';
+    const cleanUnitName = header.unitName.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const filename = `${cleanUnitName}_${docTypeLabel}.docx`;
 
     return new NextResponse(docxBuffer as unknown as BodyInit, {
       status: 200,
@@ -108,11 +112,14 @@ export async function POST(request: Request) {
       recordOfWork,
     });
 
-    const unitCode = header?.unitCode?.replace(/\s+/g, '_') || 'Curriculum';
-    const filename =
-      type === 'course_outline' && header?.unitName
-        ? `${header.unitName.replace(/[^a-zA-Z0-9_-]/g, '_')}_Course_Outline.docx`
-        : `${unitCode}_${type}.docx`;
+    const docTypeLabel =
+      type === 'scheme_of_work'
+        ? 'Scheme_of_Work'
+        : type === 'record_of_work'
+          ? 'Record_of_Work'
+          : 'Course_Outline';
+    const cleanUnitName = (header?.unitName || 'Unit').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const filename = `${cleanUnitName}_${docTypeLabel}.docx`;
 
     return new NextResponse(docxBuffer as unknown as BodyInit, {
       status: 200,

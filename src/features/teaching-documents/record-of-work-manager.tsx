@@ -19,6 +19,8 @@ import {
 } from './record-of-work-actions';
 import {
   generateTVETSchemeOfWork,
+  parseSLOOutcomes,
+  resolveRecordOfWorkDeliveryMode,
   type TVETDocumentHeaderContext,
   type TVETRecordOfWorkEntry,
 } from './tvet-standards';
@@ -288,12 +290,12 @@ export function RecordOfWorkManager({
               </label>
 
               <label className="block text-xs font-semibold text-text-secondary">
-                Student Attendance Summary
+                Mode of Delivery
                 <input
                   type="text"
-                  name="attendanceSummary"
-                  defaultValue="28/30 Present"
-                  placeholder="e.g. 28/30 Present"
+                  name="deliveryMode"
+                  defaultValue="Interactive Lecture & Discussion"
+                  placeholder="e.g. Case Study, Video Presentation, Real Life Application Questions"
                   className="mt-1 h-9 w-full rounded-lg border border-border bg-surface px-2.5 text-xs text-text-primary"
                 />
               </label>
@@ -359,8 +361,8 @@ export function RecordOfWorkManager({
                   <th className="px-3 py-2.5 w-16 text-center">Week</th>
                   <th className="px-3 py-2.5 w-28">Date</th>
                   <th className="px-4 py-2.5">Work Covered</th>
-                  <th className="px-3 py-2.5">Outcomes Achieved</th>
-                  <th className="px-3 py-2.5 w-28">Attendance</th>
+                  <th className="px-3 py-2.5">Specific Outcomes Achieved</th>
+                  <th className="px-3 py-2.5 w-36">Mode of Delivery</th>
                   <th className="px-3 py-2.5 w-32">Remarks</th>
                   <th className="px-3 py-2.5 w-16 text-right">Action</th>
                 </tr>
@@ -378,10 +380,18 @@ export function RecordOfWorkManager({
                       {entry.workCovered}
                     </td>
                     <td className="px-3 py-3 text-text-secondary">
-                      {entry.outcomesAchieved}
+                      <ul className="list-disc pl-3.5 space-y-1 text-[11px]">
+                        {parseSLOOutcomes(entry.outcomesAchieved).map((point, pIdx) => (
+                          <li key={pIdx} className="leading-tight">{point}</li>
+                        ))}
+                      </ul>
                     </td>
-                    <td className="px-3 py-3 text-text-secondary">
-                      {entry.attendanceSummary}
+                    <td className="px-3 py-3 text-text-secondary font-medium text-[11px]">
+                      {resolveRecordOfWorkDeliveryMode(
+                        entry.weekNumber,
+                        entry.workCovered,
+                        entry.deliveryMode || entry.attendanceSummary
+                      )}
                     </td>
                     <td className="px-3 py-3 text-text-muted text-[11px]">
                       {entry.remarks}

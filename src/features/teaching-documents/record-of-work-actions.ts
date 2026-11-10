@@ -3,9 +3,10 @@
 import { revalidatePath } from 'next/cache';
 import { requireTrainerAccess } from '@/features/auth/authorization';
 import { createAdminClient } from '@/lib/supabase/admin';
-import type {
-  TVETDocumentHeaderContext,
-  TVETRecordOfWorkEntry,
+import {
+  resolveRecordOfWorkDeliveryMode,
+  type TVETDocumentHeaderContext,
+  type TVETRecordOfWorkEntry,
 } from './tvet-standards';
 
 type Relation<T> = T | T[] | null;
@@ -190,19 +191,31 @@ export async function getRecordOfWorkContext(allocationId: string): Promise<{
       .order('start_time', { ascending: true });
 
     if (rows && rows.length > 0) {
-      entries = rows.map((r: Record<string, unknown>, idx: number) => ({
-        id: String(r.id || `row-${idx}`),
-        allocationId,
-        weekNumber: Number(r.week_number) || 1,
-        sessionDate: String(r.occurrence_date || ''),
-        workCovered: String(r.topic_covered || ''),
-        outcomesAchieved: String(r.objectives || 'Competencies achieved in accordance with syllabus.'),
-        attendanceSummary: r.delivery_mode ? `Delivery: ${r.delivery_mode}` : 'Recorded in attendance sheet',
-        remarks: String(r.remarks || 'Delivered as scheduled'),
-        trainerSignature: header.trainerName,
-        signedAt: String(r.created_at || new Date().toISOString()),
-        hodStatus: r.review_status === 'approved' ? 'verified' : 'pending',
-      }));
+      entries = rows.map((r: Record<string, unknown>, idx: number) => {
+        const weekNum = Number(r.week_number) || 1;
+        const topic = String(r.topic_covered || '');
+        const sessNum = Number(r.session_number) || 1;
+        const deliveryMode = resolveRecordOfWorkDeliveryMode(
+          weekNum,
+          topic,
+          String(r.delivery_mode || ''),
+          sessNum,
+        );
+        return {
+          id: String(r.id || `row-${idx}`),
+          allocationId,
+          weekNumber: weekNum,
+          sessionDate: String(r.occurrence_date || ''),
+          workCovered: topic,
+          outcomesAchieved: String(r.objectives || 'Competencies achieved in accordance with syllabus.'),
+          deliveryMode,
+          attendanceSummary: deliveryMode,
+          remarks: String(r.remarks || 'Delivered as scheduled'),
+          trainerSignature: header.trainerName,
+          signedAt: String(r.created_at || new Date().toISOString()),
+          hodStatus: r.review_status === 'approved' ? 'verified' : 'pending',
+        };
+      });
     }
   }
 
@@ -223,7 +236,8 @@ export async function addRecordOfWorkEntryAction(
   const sessionDate = String(formData.get('sessionDate') || '').trim();
   const workCovered = String(formData.get('workCovered') || '').trim();
   const outcomesAchieved = String(formData.get('outcomesAchieved') || '').trim();
-  const attendanceSummary = String(formData.get('attendanceSummary') || '').trim();
+  const rawDeliveryMode = String(formData.get('deliveryMode') || formData.get('attendanceSummary') || '').trim();
+  const deliveryMode = resolveRecordOfWorkDeliveryMode(weekNumber, workCovered, rawDeliveryMode, 1);
   const remarks = String(formData.get('remarks') || '').trim();
 
   if (!weekNumber || weekNumber < 1 || weekNumber > 14) {
@@ -248,7 +262,8 @@ export async function addRecordOfWorkEntryAction(
     sessionDate,
     workCovered,
     outcomesAchieved: outcomesAchieved || 'Competencies achieved in accordance with syllabus.',
-    attendanceSummary: attendanceSummary || 'Recorded in class attendance sheet.',
+    deliveryMode,
+    attendanceSummary: deliveryMode,
     remarks: remarks || 'Delivered as scheduled.',
     trainerSignature: context.header.trainerName,
     signedAt: new Date().toISOString(),
@@ -406,6 +421,13 @@ export async function generateRecordOfWorkFromSchemeAction(
         remarks = week.assessmentAndRemarks || 'Revision conducted as scheduled';
       }
 
+      const deliveryMode = resolveRecordOfWorkDeliveryMode(
+        week.weekNumber,
+        workCovered,
+        isExam ? 'Summative Examination' : isCat ? 'Continuous Assessment Test' : isRevision ? 'Revision & Remediation' : undefined,
+        1,
+      );
+
       return {
         id: `row-gen-${Date.now()}-${i + 1}`,
         allocationId,
@@ -415,7 +437,8 @@ export async function generateRecordOfWorkFromSchemeAction(
           .split('T')[0],
         workCovered,
         outcomesAchieved,
-        attendanceSummary: 'Recorded in attendance sheet',
+        deliveryMode,
+        attendanceSummary: deliveryMode,
         remarks,
         trainerSignature: context.header.trainerName,
         signedAt: new Date().toISOString(),

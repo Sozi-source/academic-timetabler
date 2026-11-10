@@ -83,6 +83,7 @@ export interface TVETRecordOfWorkEntry {
   workCovered: string;
   outcomesAchieved: string;
   attendanceSummary: string;
+  deliveryMode?: string;
   remarks: string;
   trainerSignature: string;
   signedAt: string;
@@ -218,6 +219,64 @@ export function computeRecordOfWorkSummary(
     completedWeeksCount: uniqueDeliveredWeeks,
     syllabusCompletionRate: Math.min(100,Math.round((uniqueDeliveredWeeks / totalPlannedWeeks) * 100)),
   };
+}
+
+export const PRACTICAL_DELIVERY_MODES = [
+  'Case Study',
+  'Video Presentation',
+  'Real Life Application Questions',
+  'Clinical Case Study & Diagnostic Exercise',
+  'Video Presentation & Guided Analysis',
+  'Real-Life Application & Problem Solving',
+  'Laboratory Demonstration & Practical Exercise',
+  'Case Study & Pathway Analysis',
+] as const;
+
+export function resolveRecordOfWorkDeliveryMode(
+  weekNumber: number,
+  topic: string,
+  existingDeliveryMode?: string | null,
+  sessionNumber = 1,
+): string {
+  const isPractical =
+    sessionNumber > 1 ||
+    /practical|laboratory|case study|clinical|simulation|field/i.test(topic);
+
+  const cleanExisting = (existingDeliveryMode || '').trim();
+
+  // If it's a practical row, it must NEVER be theory
+  if (isPractical) {
+    if (
+      !cleanExisting ||
+      /^(theory|lecture|lecture\s*[\/&]\s*theory|recorded\s+in\s+attendance\s+sheet)$/i.test(cleanExisting) ||
+      cleanExisting.toLowerCase() === 'practical'
+    ) {
+      const modeIndex = (Math.max(1, weekNumber) - 1) % PRACTICAL_DELIVERY_MODES.length;
+      return PRACTICAL_DELIVERY_MODES[modeIndex];
+    }
+    return cleanExisting;
+  }
+
+  // Assessment sessions
+  if (/continuous assessment|cat\b/i.test(topic)) {
+    return 'Continuous Assessment Test';
+  }
+  if (/examination|exam\b/i.test(topic)) {
+    return 'Summative Examination';
+  }
+  if (/revision|remediation/i.test(topic)) {
+    return 'Revision & Remediation';
+  }
+
+  if (
+    cleanExisting &&
+    !/^practical$/i.test(cleanExisting) &&
+    !/^recorded\s+in\s+attendance\s+sheet$/i.test(cleanExisting)
+  ) {
+    return cleanExisting;
+  }
+
+  return 'Interactive Lecture & Discussion';
 }
 
 /**

@@ -6,6 +6,9 @@ import {
 import {
   createAdminClient,
 } from '@/lib/supabase/admin';
+import {
+  resolveRecordOfWorkDeliveryMode,
+} from '../tvet-standards';
 
 import type {
   OnlineRecordOfWorkContext,
@@ -479,7 +482,7 @@ function schemeSuggestion(
     return {
       topic: '',
       objectives: '',
-      deliveryMode: sessionIndexInWeek > 0 ? 'practical' : 'theory',
+      deliveryMode: resolveRecordOfWorkDeliveryMode(weekNumber, unitName, undefined, sessionIndexInWeek + 1),
     };
   }
 
@@ -502,7 +505,7 @@ function schemeSuggestion(
             '• Complete comprehensive test questions evaluating mastery of competencies covered in preceding weeks.',
             '• Apply critical thinking and analytical problem-solving to continuous assessment tasks.'
           ].join('\n'),
-          deliveryMode: 'theory',
+          deliveryMode: 'Continuous Assessment Test',
         };
       }
       return {
@@ -512,7 +515,7 @@ function schemeSuggestion(
           '• Review assessment items, discuss marking criteria, and identify areas requiring academic remediation.',
           '• Resolve common errors and consolidate core competencies in metabolic pathway regulation.'
         ].join('\n'),
-        deliveryMode: 'theory',
+        deliveryMode: 'CAT Review & Guided Remediation',
       };
     } else {
       if (sessionIndexInWeek === 0) {
@@ -523,7 +526,7 @@ function schemeSuggestion(
             '• Demonstrate comprehensive summative mastery of all unit learning outcomes and syllabus competencies.',
             '• Complete official end-of-term examination papers adhering to institutional examination regulations.'
           ].join('\n'),
-          deliveryMode: 'theory',
+          deliveryMode: 'Summative Examination',
         };
       }
       return {
@@ -532,7 +535,7 @@ function schemeSuggestion(
           'By the end of the session, the trainee should be able to:',
           '• Conclude all unit academic assessments, verify examination submissions, and complete term evaluation.'
         ].join('\n'),
-        deliveryMode: 'theory',
+        deliveryMode: 'Evaluation & Course Wrap-up',
       };
     }
   }
@@ -542,7 +545,7 @@ function schemeSuggestion(
     return {
       topic: `${baseTopic} (Practical Application)`,
       objectives: formatPracticalOutcomes(baseTopic, subtopics),
-      deliveryMode: 'practical',
+      deliveryMode: resolveRecordOfWorkDeliveryMode(weekNumber, `${baseTopic} (Practical Application)`, undefined, 2),
     };
   }
 
@@ -551,7 +554,7 @@ function schemeSuggestion(
     return {
       topic: `${baseTopic} (Tutorial & Practical Case Analysis)`,
       objectives: formatTutorialOutcomes(baseTopic, subtopics),
-      deliveryMode: 'practical',
+      deliveryMode: resolveRecordOfWorkDeliveryMode(weekNumber, `${baseTopic} (Tutorial & Practical Case Analysis)`, undefined, sessionIndexInWeek + 1),
     };
   }
 
@@ -569,7 +572,7 @@ function schemeSuggestion(
   return {
     topic: baseTopic,
     objectives: formatTheoryOutcomes(rawOutcomes, subtopics, baseTopic),
-    deliveryMode: 'theory',
+    deliveryMode: resolveRecordOfWorkDeliveryMode(weekNumber, baseTopic, 'Interactive Lecture & Discussion', 1),
   };
 }
 
@@ -738,8 +741,11 @@ function mapSubmittedEntry(
         .replaceAll('ÃƒÆ’Ã†â€™', '');
     })(),
     deliveryMode:
-      asString(
-        row.delivery_mode,
+      resolveRecordOfWorkDeliveryMode(
+        asNumber(row.week_number, 1),
+        asString(row.topic_covered),
+        asString(row.delivery_mode),
+        asNumber(row.session_number, 1),
       ),
     remarks:
       asString(
@@ -1155,6 +1161,7 @@ export async function getOnlineRecordOfWorkContext(
     for (const row of submittedRows) {
       const originalTopic = asString(row.topic_covered);
       const originalObj = asString(row.objectives);
+      const originalDeliveryMode = asString(row.delivery_mode);
       let cleanTopic = originalTopic.trim();
       if (cleanTopic.includes(': ') && !cleanTopic.includes('(')) {
         cleanTopic = cleanTopic.split(/:\s+/)[0].trim() || cleanTopic;
@@ -1166,9 +1173,20 @@ export async function getOnlineRecordOfWorkContext(
         .replaceAll('â€“', '–')
         .replaceAll('ÃƒÆ’Ã†â€™', '');
 
-      if (cleanTopic !== originalTopic || cleanObj !== originalObj) {
+      const resolvedDeliveryMode = resolveRecordOfWorkDeliveryMode(
+        asNumber(row.week_number, 1),
+        cleanTopic,
+        originalDeliveryMode,
+        asNumber(row.session_number, 1),
+      );
+
+      if (cleanTopic !== originalTopic || cleanObj !== originalObj || resolvedDeliveryMode !== originalDeliveryMode) {
         db.from('record_of_work_entries')
-          .update({ topic_covered: cleanTopic, objectives: cleanObj })
+          .update({
+            topic_covered: cleanTopic,
+            objectives: cleanObj,
+            delivery_mode: resolvedDeliveryMode,
+          })
           .eq('id', row.id)
           .then(() => {})
           .catch(() => {});

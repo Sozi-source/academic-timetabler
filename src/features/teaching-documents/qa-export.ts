@@ -367,7 +367,7 @@ export async function createQaExaminationPack(
 
     const staffNumber = trainer.staff_number?.trim() || trainer.id.slice(0, 8);
     const trainerName = trainer.full_name?.trim() || 'Trainer';
-    const folder = `${safePathSegment(staffNumber)}_${safePathSegment(trainerName)}`;
+    const folder = safePathSegment(trainerName);
     folderByTrainer.set(trainer.id, folder);
 
     for (const documentType of qaDocumentTypes) {
@@ -388,10 +388,7 @@ export async function createQaExaminationPack(
             ? 'Schemes of Work'
             : 'Records of Work';
       const ext = revision ? fileExtension(revision.original_filename) : 'docx';
-      const relativePath =
-        documentType === 'course_outline'
-          ? `${folder}/${directory}/${safePathSegment(unit.name)}.${ext}`
-          : `${folder}/${directory}/${safePathSegment(unit.code)}_${safePathSegment(unit.name)}_${safePathSegment(cohortName)}_${documentType}_allocation-${allocation.id.slice(0, 8)}_v${document ? Number(document.version_number) : 0}.${ext}`;
+      const relativePath = `${folder}/${directory}/${safePathSegment(unit.name)}.${ext}`;
       lines.push({
         allocationId: allocation.id,
         trainerId: trainer.id,
@@ -543,8 +540,8 @@ export async function createQaExaminationPack(
   index.addRows(lines.map((line) => ({
     staffNumber: line.staffNumber,
     trainerName: line.trainerName,
-    cohortName: line.documentType === 'course_outline' ? '—' : line.cohortName,
-    unitCode: line.documentType === 'course_outline' ? '—' : line.unitCode,
+    cohortName: '—',
+    unitCode: '—',
     unitName: line.unitName,
     document: documentLabel(line.documentType),
     status: line.status,

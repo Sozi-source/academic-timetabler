@@ -334,6 +334,42 @@ describe('TVET Standardised Teaching Documents Suite', () => {
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(1000);
     });
+
+    it('ensures practical rows never use theory and vary delivery methods (case study, video presentation, real life application questions)', async () => {
+      const { resolveRecordOfWorkDeliveryMode } = await import('@/features/teaching-documents/tvet-standards');
+
+      // Practical sessions (sessionNumber = 2 or topic contains practical)
+      const week1Mode = resolveRecordOfWorkDeliveryMode(1, 'Carbohydrate Metabolism (Practical Application)', 'theory', 2);
+      const week2Mode = resolveRecordOfWorkDeliveryMode(2, 'Carbohydrate Metabolism (Practical Application)', 'theory', 2);
+      const week3Mode = resolveRecordOfWorkDeliveryMode(3, 'Carbohydrate Metabolism (Practical Application)', 'theory', 2);
+      const week4Mode = resolveRecordOfWorkDeliveryMode(4, 'Protein Metabolism (Practical Application)', 'practical', 2);
+
+      expect(week1Mode).not.toMatch(/theory/i);
+      expect(week2Mode).not.toMatch(/theory/i);
+      expect(week3Mode).not.toMatch(/theory/i);
+      expect(week4Mode).not.toMatch(/theory/i);
+
+      expect(week1Mode).toBe('Case Study');
+      expect(week2Mode).toBe('Video Presentation');
+      expect(week3Mode).toBe('Real Life Application Questions');
+
+      // Modes must vary across weeks to prevent duplication
+      const practicalModes = new Set([week1Mode, week2Mode, week3Mode]);
+      expect(practicalModes.size).toBe(3);
+    });
+
+    it('splits Specific Outcomes Achieved into discrete lines for printed layout', async () => {
+      const { parseSLOOutcomes } = await import('@/features/teaching-documents/tvet-standards');
+
+      const outcomeText = `By the end of the lesson/topic, the trainee should be able to:
+• Define fundamental terms used in carbohydrate metabolism.
+• Explain the sequential reactions, regulatory enzymes, and biological significance of glycolysis.`;
+
+      const lines = parseSLOOutcomes(outcomeText);
+      expect(lines).toHaveLength(2);
+      expect(lines[0]).toBe('Define fundamental terms used in carbohydrate metabolism.');
+      expect(lines[1]).toBe('Explain the sequential reactions, regulatory enzymes, and biological significance of glycolysis.');
+    });
   });
 });
 

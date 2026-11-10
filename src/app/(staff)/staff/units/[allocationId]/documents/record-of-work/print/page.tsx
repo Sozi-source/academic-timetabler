@@ -6,6 +6,10 @@ import Image from 'next/image';
 import {
   getOnlineRecordOfWorkContext,
 } from '@/features/teaching-documents/record-of-work-online/queries';
+import {
+  parseSLOOutcomes,
+  resolveRecordOfWorkDeliveryMode,
+} from '@/features/teaching-documents/tvet-standards';
 
 interface PageProps {
   params: Promise<{
@@ -174,7 +178,7 @@ export default async function PrintRecordOfWorkPage({
               'Date',
               'Time',
               'Topic Covered',
-              'Objectives of the Lesson',
+              'Specific Outcomes Achieved',
               'Mode of Delivery',
               'Remarks / Comments',
               'Trainer Signature',
@@ -236,14 +240,21 @@ export default async function PrintRecordOfWorkPage({
                       entry.workCovered
                     }
                   </td>
-                  <td className="whitespace-pre-line border border-black px-2 py-2 align-top">
-                    {
-                      entry.outcomesAchieved
-                    }
+                  <td className="border border-black px-2 py-2 align-top text-[9px] leading-relaxed">
+                    <ul className="list-disc pl-3.5 space-y-1">
+                      {parseSLOOutcomes(entry.outcomesAchieved).map((point, pIdx) => (
+                        <li key={pIdx} className="leading-tight">{point}</li>
+                      ))}
+                    </ul>
                   </td>
-                  <td className="border border-black px-2 py-2 align-top">
+                  <td className="border border-black px-2 py-2 align-top font-medium">
                     {
-                      entry.deliveryMode
+                      resolveRecordOfWorkDeliveryMode(
+                        entry.weekNumber,
+                        entry.workCovered,
+                        entry.deliveryMode,
+                        entry.sessionNumber
+                      )
                     }
                   </td>
                   <td className="border border-black px-2 py-2 align-top">

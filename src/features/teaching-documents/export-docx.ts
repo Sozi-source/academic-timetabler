@@ -31,6 +31,7 @@ import {
   parseResourcesList,
   parseSLOOutcomes,
   parseSubTopics,
+  resolveRecordOfWorkDeliveryMode,
   type TVETCourseOutlineData,
   type TVETSchemeOfWorkData,
   type TVETRecordOfWorkData,
@@ -790,11 +791,11 @@ export async function buildTVETDocumentDocx(
         rows: [
           new TableRow({
             children: [
-              cell('Wk', { isHeader: true, align: AlignmentType.CENTER, widthPct: 6 }),
-              cell('Date', { isHeader: true, widthPct: 12 }),
-              cell('Work Covered / Activities', { isHeader: true, widthPct: 28 }),
+              cell('Wk', { isHeader: true, align: AlignmentType.CENTER, widthPct: 5 }),
+              cell('Date', { isHeader: true, widthPct: 11 }),
+              cell('Work Covered / Activities', { isHeader: true, widthPct: 27 }),
               cell('Specific Outcomes Achieved', { isHeader: true, widthPct: 28 }),
-              cell('Attendance', { isHeader: true, widthPct: 10 }),
+              cell('Mode of Delivery', { isHeader: true, widthPct: 13 }),
               cell('Remarks', { isHeader: true, widthPct: 10 }),
               cell('Sign', { isHeader: true, align: AlignmentType.CENTER, widthPct: 6 }),
             ],
@@ -813,6 +814,27 @@ export async function buildTVETDocumentDocx(
               ]
             : row.entries.map((entry, idx) => {
                 const fill = idx % 2 === 1 ? ZEBRA_BG : 'FFFFFF';
+                const outcomePoints = parseSLOOutcomes(entry.outcomesAchieved);
+                const outcomeChildren: Paragraph[] = outcomePoints.length > 0
+                  ? outcomePoints.map((point) =>
+                      new Paragraph({
+                        alignment: AlignmentType.LEFT,
+                        spacing: { before: 8, after: 8, line: 230 },
+                        indent: { left: 140 },
+                        children: [
+                          new TextRun({ text: '•  ', font: FONT, bold: true, size: 15, color: PRIMARY_DARK }),
+                          new TextRun({ text: clean(point), font: FONT, size: 15, color: '333333' }),
+                        ],
+                      })
+                    )
+                  : [p(clean(entry.outcomesAchieved), { size: 15, color: '333333' })];
+
+                const deliveryModeText = resolveRecordOfWorkDeliveryMode(
+                  entry.weekNumber,
+                  entry.workCovered,
+                  entry.deliveryMode || entry.attendanceSummary,
+                );
+
                 return new TableRow({
                   children: [
                     cell(`W${entry.weekNumber}`, {
@@ -820,12 +842,12 @@ export async function buildTVETDocumentDocx(
                       bold: true,
                       color: PRIMARY_DARK,
                       fill,
-                      widthPct: 6,
+                      widthPct: 5,
                     }),
-                    cell(clean(entry.sessionDate), { fill, widthPct: 12 }),
-                    cell(clean(entry.workCovered), { bold: true, fill, widthPct: 28 }),
-                    cell(clean(entry.outcomesAchieved), { fill, widthPct: 28 }),
-                    cell(clean(entry.attendanceSummary, 'Recorded'), { fill, widthPct: 10 }),
+                    cell(clean(entry.sessionDate), { fill, widthPct: 11 }),
+                    cell(clean(entry.workCovered), { bold: true, fill, widthPct: 27 }),
+                    cell(outcomeChildren, { fill, widthPct: 28 }),
+                    cell(deliveryModeText, { fill, widthPct: 13 }),
                     cell(clean(entry.remarks, 'Delivered as scheduled'), { fill, widthPct: 10 }),
                     cell(
                       [

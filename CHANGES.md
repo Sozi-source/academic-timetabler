@@ -1,3 +1,58 @@
+### 2026-11-10: Streamline Document & Trainer Labels and Modernize Record of Work Delivery & Formatting
+
+**Summary:**
+- **Sanitized Document and Folder Labeling:**
+  - Removed unit code and cohort from file naming across Course Outlines, Schemes of Work, and Records of Work. Files in Word exports, downloads, and the QA examination pack ZIP archive are cleanly titled with unit names and document types (e.g. `<UnitName>.docx` inside respective folders, or `<UnitName>_<DocumentType>.docx` for individual downloads).
+  - Labeled trainer folders in the QA examination pack ZIP using solely trainer names without including trainer codes / staff numbers (e.g. `Dr_Jane_Mwangi/` instead of `EMP001_Dr_Jane_Mwangi/`).
+  - Standardized QA Index (`QA_Index.xlsx`) rows to set cohort and unit code to `—` consistently across all teaching documents.
+- **Record of Work Specific Outcomes Achieved Multi-Line Formatting:**
+  - Enhanced the "Specific Outcomes Achieved" column for both Word (.docx) export and web print layout so each outcome point takes its own discrete bulleted line (`• `) with clean line spacing and indentation rather than a collapsed text block.
+- **Record of Work "Mode of Delivery" Transition & Practical Method Variation:**
+  - Changed the table column header and manager field from "Attendance" to "Mode of Delivery" across Word DOCX export (`export-docx.ts`), the online TVET document viewer (`tvet-document-viewer.tsx`), the Record of Work print layout (`print/page.tsx`), and the management interface (`record-of-work-manager.tsx`).
+  - Enforced that practical rows in Record of Work never default to "theory". Integrated varied, authentic delivery modes (such as **Case Study**, **Video Presentation**, and **Real Life Application Questions**) across practical sessions and prevented duplicated logs across weeks.
+  - Implemented self-healing logic in `record-of-work-online/queries.ts` to automatically detect legacy rows where practical sessions were marked as theory and update them to pedagogical practical delivery modes.
+  - Added timestamped SQL migration `20261110030000_update_record_of_work_practical_delivery_modes.sql` updating practical rows in `record_of_work_entries` with varied delivery methods.
+
+**Modified:**
+- `src/features/teaching-documents/qa-export.ts`:
+  - Labeled trainer folder using `safePathSegment(trainerName)`.
+  - Sanitized document relative paths inside ZIP to `${folder}/${directory}/${safePathSegment(unit.name)}.${ext}` across all document types.
+  - Standardized `cohortName` and `unitCode` to `—` across all document rows in `QA_Index.xlsx`.
+- `src/app/api/teaching-documents/export-word/route.ts`:
+  - Updated filename generator for GET and POST endpoints to `<CleanUnitName>_<DocumentType>.docx` without unit code or cohort.
+- `src/features/teaching-documents/tvet-document-viewer.tsx`:
+  - Updated export download filename to `<CleanUnitName>_<DocumentType>.docx`.
+  - Changed table header from "Attendance" to "Mode of Delivery".
+  - Rendered `Specific Outcomes Achieved` as a bulleted multi-line list.
+  - Rendered `deliveryMode` in the Mode of Delivery column.
+- `src/features/teaching-documents/export-docx.ts`:
+  - Changed 5th column header in Record of Work table from "Attendance" to "Mode of Delivery".
+  - Formatted "Specific Outcomes Achieved" with discrete, bulleted paragraph points per learning outcome.
+  - Resolved varied practical delivery modes for practical sessions.
+- `src/app/(staff)/staff/units/[allocationId]/documents/record-of-work/print/page.tsx`:
+  - Updated header label to "Specific Outcomes Achieved".
+  - Formatted outcomes achieved into individual bulleted items.
+  - Guaranteed `Mode of Delivery` reflects varied practical methods.
+- `src/features/teaching-documents/record-of-work-manager.tsx`:
+  - Renamed "Attendance" to "Mode of Delivery" in the entry form and table header.
+  - Formatted outcomes achieved into a multi-line list.
+- `src/features/teaching-documents/tvet-standards.ts`:
+  - Added `deliveryMode?: string;` to `TVETRecordOfWorkEntry`.
+  - Added `PRACTICAL_DELIVERY_MODES` and `resolveRecordOfWorkDeliveryMode` helper.
+- `src/features/teaching-documents/record-of-work-actions.ts`:
+  - In `getRecordOfWorkContext` and `generateRecordOfWorkFromSchemeAction`, populated `deliveryMode` with varied practical methods for practical sessions.
+- `src/features/teaching-documents/record-of-work-online/queries.ts`:
+  - Updated `schemeSuggestion` and `mapSubmittedEntry` to use varied practical delivery modes.
+  - Added self-healing to update practical rows in `record_of_work_entries` when marked as theory.
+- `src/features/teaching-documents/trainer-submission-actions.ts`:
+  - Updated submission filename to `<CleanUnitName>_<DocumentType>.docx`.
+- `supabase/migrations/20261110030000_update_record_of_work_practical_delivery_modes.sql`:
+  - Versioned migration updating practical sessions in `record_of_work_entries` with varied delivery modes (Case Study, Video Presentation, Real Life Application Questions).
+- `src/tests/qa-export-three-folders.test.ts`:
+  - Updated test to verify trainer folders without trainer codes and document filenames without unit code or cohort.
+- `src/tests/tvet-teaching-documents.test.ts`:
+  - Added test validating practical delivery modes vary and never return theory, and outcome text is split into discrete lines.
+
 ### 2026-11-10: Synchronize Record of Work with Scheme of Work and Restore Lipid Metabolism
 
 **Summary:**

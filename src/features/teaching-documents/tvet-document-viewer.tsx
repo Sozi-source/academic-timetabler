@@ -41,6 +41,7 @@ import {
   parseResourcesList,
   parseSLOOutcomes,
   parseSubTopics,
+  resolveRecordOfWorkDeliveryMode,
   type TVETCourseOutlineData,
   type TVETRecordOfWorkData,
   type TVETSchemeOfWorkData,
@@ -126,10 +127,14 @@ export function TVETDocumentViewer({
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download =
-        type === 'course_outline'
-          ? `${header.unitName.replace(/[^a-zA-Z0-9_-]/g, '_')}_Course_Outline.docx`
-          : `${header.unitCode}_${type}.docx`;
+      const docTypeLabel =
+        type === 'scheme_of_work'
+          ? 'Scheme_of_Work'
+          : type === 'record_of_work'
+            ? 'Record_of_Work'
+            : 'Course_Outline';
+      const cleanUnitName = header.unitName.replace(/[^a-zA-Z0-9_-]/g, '_');
+      a.download = `${cleanUnitName}_${docTypeLabel}.docx`;
       a.click();
       URL.revokeObjectURL(url);
     } catch {
@@ -884,10 +889,10 @@ export function TVETDocumentViewer({
                 <thead>
                   <tr className="bg-slate-100 text-slate-900 border-b-2 border-slate-900">
                     <th className="border border-slate-300 px-2 py-2 text-center w-[5%] font-black uppercase text-[9px] tracking-wider text-slate-900">Wk</th>
-                    <th className="border border-slate-300 px-2 py-2 w-[12%] font-black uppercase text-[9px] tracking-wider text-slate-900">Date</th>
-                    <th className="border border-slate-300 px-2 py-2 w-[28%] font-black uppercase text-[9px] tracking-wider text-slate-900">Work Covered / Activities</th>
+                    <th className="border border-slate-300 px-2 py-2 w-[11%] font-black uppercase text-[9px] tracking-wider text-slate-900">Date</th>
+                    <th className="border border-slate-300 px-2 py-2 w-[27%] font-black uppercase text-[9px] tracking-wider text-slate-900">Work Covered / Activities</th>
                     <th className="border border-slate-300 px-2 py-2 w-[28%] font-black uppercase text-[9px] tracking-wider text-slate-900">Specific Outcomes Achieved</th>
-                    <th className="border border-slate-300 px-2 py-2 w-[11%] font-black uppercase text-[9px] tracking-wider text-slate-900">Attendance</th>
+                    <th className="border border-slate-300 px-2 py-2 w-[13%] font-black uppercase text-[9px] tracking-wider text-slate-900">Mode of Delivery</th>
                     <th className="border border-slate-300 px-2 py-2 w-[10%] font-black uppercase text-[9px] tracking-wider text-slate-900">Remarks</th>
                     <th className="border border-slate-300 px-2 py-2 w-[6%] text-center font-black uppercase text-[9px] tracking-wider text-slate-900">Sign</th>
                   </tr>
@@ -912,10 +917,18 @@ export function TVETDocumentViewer({
                           {entry.workCovered}
                         </td>
                         <td className="border border-slate-300 px-2 py-2 text-slate-800 leading-relaxed print:border-slate-800">
-                          {entry.outcomesAchieved}
+                          <ul className="list-disc pl-3.5 space-y-1 text-[9px]">
+                            {parseSLOOutcomes(entry.outcomesAchieved).map((point, pIdx) => (
+                              <li key={pIdx} className="leading-tight">{point}</li>
+                            ))}
+                          </ul>
                         </td>
-                        <td className="border border-slate-300 px-2 py-2 text-slate-700 print:border-slate-800">
-                          {entry.attendanceSummary}
+                        <td className="border border-slate-300 px-2 py-2 text-slate-700 font-medium text-[9px] print:border-slate-800">
+                          {resolveRecordOfWorkDeliveryMode(
+                            entry.weekNumber,
+                            entry.workCovered,
+                            entry.deliveryMode || entry.attendanceSummary,
+                          )}
                         </td>
                         <td className="border border-slate-300 px-2 py-2 text-slate-600 text-[9px] leading-relaxed print:border-slate-800">
                           {entry.remarks}

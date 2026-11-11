@@ -89,7 +89,8 @@ export async function POST(
     );
   }
 
-  if (currentEvent.status === 'closed' || currentEvent.exam_marks_finalized_at !== null) {
+  const isHodOrAdmin = profile.role === 'hod' || profile.role === 'system_admin';
+  if ((currentEvent.status === 'closed' || currentEvent.exam_marks_finalized_at !== null) && !isHodOrAdmin) {
     return NextResponse.json(
       { message: 'This markbook has been finalised and can no longer be revised.' },
       { status: 403 },
@@ -183,6 +184,50 @@ export async function POST(
       } catch {
         // Revision table might not exist yet if migration pending
       }
+    }
+  }
+
+  // Always ensure finalized timestamps and student absence states are synchronized across all sibling events
+  for (const eventId of targetAssessmentIds) {
+    if (component === 'cat' || component === 'all') {
+      await admin
+        .from('assessment_events')
+        .update({
+          cat_marks_finalized_at: null,
+          marks_submitted_at: null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', eventId);
+    }
+
+    if (component === 'exam' || component === 'all') {
+      await admin
+        .from('assessment_events')
+        .update({
+          exam_marks_finalized_at: null,
+          finalised_at: null,
+          marks_submitted_at: null,
+          status: 'open',
+          operational_workflow_status: 'open',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', eventId);
+
+      let rosterQuery = admin
+        .from('assessment_roster')
+        .update({ pre_assessment_status: 'expected' })
+        .eq('assessment_id', eventId)
+        .eq('pre_assessment_status', 'absent');
+      if (cohortId) {
+        rosterQuery = rosterQuery.eq('cohort_id', cohortId);
+      }
+      await rosterQuery;
+
+      await admin
+        .from('assessment_population')
+        .update({ attendance_status: 'present' })
+        .eq('assessment_event_id', eventId)
+        .eq('attendance_status', 'absent');
     }
   }
 

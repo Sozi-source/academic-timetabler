@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 import { getAssessmentById, getAssessmentPopulation } from '@/features/assessment/queries';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { resolveAssessmentIdsWithSiblings } from '@/features/staff-assessment/online-marks-query';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 
@@ -68,6 +69,8 @@ export async function unlockAssessmentMarkComponentAction(formData: FormData) {
   const resolvedIds = await resolveAssessmentIdsWithSiblings(supabase, assessmentId);
   const targetEventIds = resolvedIds.length > 0 ? resolvedIds : [assessmentId];
 
+  const admin = createAdminClient();
+
   for (const targetId of targetEventIds) {
     const { error } = await supabase.rpc('unlock_assessment_mark_component_submission', {
       target_assessment_id: targetId,
@@ -76,6 +79,45 @@ export async function unlockAssessmentMarkComponentAction(formData: FormData) {
     });
     if (error) {
       redirect(`/assessment/marks/${assessmentId}?error=component-unlock`);
+    }
+
+    if (component === 'cat') {
+      await admin
+        .from('assessment_events')
+        .update({
+          cat_marks_finalized_at: null,
+          marks_submitted_at: null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', targetId);
+    } else if (component === 'exam') {
+      await admin
+        .from('assessment_events')
+        .update({
+          exam_marks_finalized_at: null,
+          finalised_at: null,
+          marks_submitted_at: null,
+          status: 'open',
+          operational_workflow_status: 'open',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', targetId);
+
+      let rosterQuery = admin
+        .from('assessment_roster')
+        .update({ pre_assessment_status: 'expected' })
+        .eq('assessment_id', targetId)
+        .eq('pre_assessment_status', 'absent');
+      if (cohortId !== 'all') {
+        rosterQuery = rosterQuery.eq('cohort_id', cohortId);
+      }
+      await rosterQuery;
+
+      await admin
+        .from('assessment_population')
+        .update({ attendance_status: 'present' })
+        .eq('assessment_event_id', targetId)
+        .eq('attendance_status', 'absent');
     }
   }
 

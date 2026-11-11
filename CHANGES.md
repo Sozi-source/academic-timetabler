@@ -1,3 +1,37 @@
+### 2026-11-11: Food Production Markbook Accidental Final Submission Reversal & Reopen Hardening
+
+**Summary:**
+- **Reversed Premature Final Score Submission for Food Production for Invalids and Convalescents:**
+  - Resolved issue where Food Production (`CND 1304`, `DND 1304`, `DHN 1305`, `CHN 2203`) was submitted as final score before CAT marks were entered, causing all 32 students in `CND 1304` (`5d19833d-e727-48bb-a9ea-a8c295be8c56`) to be marked as `absent` (due to unattempted null exam marks) and permanently locking subsequent markbook actions (including CAT mark submission).
+  - Reverted student absence in `assessment_roster` (`pre_assessment_status: 'expected'`) and `assessment_population` (`attendance_status: 'present'`), restoring all 32 candidates to active status.
+  - Reset `cat_marks_finalized_at = null`, `exam_marks_finalized_at = null`, `marks_submitted_at = null`, and `finalised_at = null` across all 4 sibling assessment events.
+  - Reset markbook status and workflow status to `'open'` and ensured `trainer_cat_entry_open = true` so trainer Maureen Ayuma can proceed with CAT mark entry.
+  - Verified and confirmed that all 32 candidate coursework marks (`assignment_mark`, `presentation_mark`, `rat_mark`) in `assessment_online_mark_drafts` remain 100% intact.
+- **Database RPC Hardening for Reopen & Component Unlocking:**
+  - Added migration `20261111061500_reverse_food_production_final_submission_and_harden_reopen.sql`:
+    - Upgraded `reopen_assessment_component_submission` to clear `cat_marks_finalized_at = null` (when reopening CAT/all) and `exam_marks_finalized_at = null` (when reopening Exam/all) across target and sibling equivalent assessment events.
+    - Added automated restoration of student absence status back to `expected` on `assessment_roster` and `present` on `assessment_population` whenever final submissions are reopened.
+    - Upgraded `unlock_assessment_mark_component_submission` to clear finalized timestamps and restore student attendance across sibling events.
+- **API & Server Actions Alignment:**
+  - In `src/app/api/staff/assessment/[assessmentId]/online/reopen/route.ts`:
+    - Permitted HOD and system administrator roles to reopen finalized submissions.
+    - Cleared `cat_marks_finalized_at` and `exam_marks_finalized_at` across sibling event IDs and reverted accidental `absent` student rows to `expected` and `present`.
+  - In `src/app/api/trainer-mark-entry/reopen/route.ts`:
+    - Resolved sibling assessment events and synchronized timestamp clearing and student attendance restoration across all siblings.
+  - In `src/features/assessment/marks/actions.ts` (`unlockAssessmentMarkComponentAction`):
+    - Added admin client synchronization to clear `cat_marks_finalized_at` upon unlocking CAT, and clear `exam_marks_finalized_at` and restore student presence upon unlocking Exam.
+
+**Added:**
+- `supabase/migrations/20261111061500_reverse_food_production_final_submission_and_harden_reopen.sql`:
+  - Database migration executing the Food Production reversal and hardening reopen/unlock RPCs.
+- `src/tests/food-production-reversal-and-reopen.test.ts`:
+  - Vitest test suite covering student absence reversal, coursework mark retention, and sibling event unlocking.
+
+**Modified:**
+- `src/app/api/staff/assessment/[assessmentId]/online/reopen/route.ts`
+- `src/app/api/trainer-mark-entry/reopen/route.ts`
+- `src/features/assessment/marks/actions.ts`
+
 ### 2026-11-11: Shared Unit Markbook Candidate Deduplication & Submissions Hardening
 
 **Summary:**

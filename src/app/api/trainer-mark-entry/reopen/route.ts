@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { getTrainerMarkInvite } from '@/features/assessment/trainer-mark-entry';
+import { resolveAssessmentIdsWithSiblings } from '@/features/staff-assessment/online-marks-query';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 const inviteCookieName = 'trainer_mark_invite';
@@ -60,6 +61,9 @@ export async function POST(request: Request) {
       );
     }
 
+    const siblingIds = await resolveAssessmentIdsWithSiblings(admin, invite.assessment_id);
+    const targetAssessmentIds = siblingIds.length > 0 ? siblingIds : [invite.assessment_id];
+
     // Try RPC function first
     let rpcDone = false;
     try {
@@ -76,26 +80,9 @@ export async function POST(request: Request) {
       // Fallback
     }
 
-    if (!rpcDone) {
-      // Fallback direct execution
-      let assessmentIds = [invite.assessment_id];
-      if (invite.scope_unit_id) {
-        let scopeQuery = admin
-          .from('assessment_trainer_mark_invites')
-          .select('id, assessment_id')
-          .eq('parent_invite_id', invite.id);
-
-        if (cohortId) {
-          scopeQuery = scopeQuery.eq('cohort_id', cohortId);
-        }
-
-        const { data: scopes } = await scopeQuery;
-        if (scopes?.length) {
-          assessmentIds = [...new Set(scopes.map((s) => s.assessment_id))];
-        }
-      }
-
-      for (const assessmentId of assessmentIds) {
+    // Always synchronize event timestamps and student absences across all sibling events
+    for (const assessmentId of targetAssessmentIds) {
+      if (!rpcDone) {
         let deleteQuery = admin
           .from('assessment_mark_component_submissions')
           .delete()
@@ -114,25 +101,60 @@ export async function POST(request: Request) {
           .from('assessment_trainer_mark_invites')
           .update({ submitted_at: null })
           .or(`id.eq.${invite.id},parent_invite_id.eq.${invite.id}`);
+      }
 
+      if (component === 'cat' || component === 'all') {
         await admin
           .from('assessment_events')
-          .update({ marks_submitted_at: null, updated_at: new Date().toISOString() })
-          .eq('id', assessmentId)
-          .not('marks_submitted_at', 'is', null);
+          .update({
+            cat_marks_finalized_at: null,
+            marks_submitted_at: null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', assessmentId);
+      }
 
-        try {
-          await admin.from('assessment_mark_revisions').insert({
-            assessment_id: assessmentId,
-            cohort_id: cohortId ?? invite.cohort_id ?? null,
-            component_key: component,
-            unlocked_by_user_id: null,
-            unlocked_by_name: invite.trainer_name,
-            reason,
-          });
-        } catch {
-          // table might not exist yet
+      if (component === 'exam' || component === 'all') {
+        await admin
+          .from('assessment_events')
+          .update({
+            exam_marks_finalized_at: null,
+            finalised_at: null,
+            marks_submitted_at: null,
+            status: 'open',
+            operational_workflow_status: 'open',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', assessmentId);
+
+        let rosterUpdate = admin
+          .from('assessment_roster')
+          .update({ pre_assessment_status: 'expected' })
+          .eq('assessment_id', assessmentId)
+          .eq('pre_assessment_status', 'absent');
+        if (cohortId) {
+          rosterUpdate = rosterUpdate.eq('cohort_id', cohortId);
         }
+        await rosterUpdate;
+
+        await admin
+          .from('assessment_population')
+          .update({ attendance_status: 'present' })
+          .eq('assessment_event_id', assessmentId)
+          .eq('attendance_status', 'absent');
+      }
+
+      try {
+        await admin.from('assessment_mark_revisions').insert({
+          assessment_id: assessmentId,
+          cohort_id: cohortId ?? invite.cohort_id ?? null,
+          component_key: component,
+          unlocked_by_user_id: null,
+          unlocked_by_name: invite.trainer_name,
+          reason,
+        });
+      } catch {
+        // table might not exist yet
       }
     }
 

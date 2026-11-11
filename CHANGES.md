@@ -1,3 +1,39 @@
+### 2026-11-11: Shared Unit Markbook Candidate Deduplication & Submissions Hardening
+
+**Summary:**
+- **Shared Unit Candidate Roster Deduplication (Fixing Doubled Candidates 100 → 50):**
+  - Resolved root-cause in `getAssessmentPopulation` (`src/features/assessment/queries.ts`) where resolving sibling event IDs (`resolveAssessmentIdsWithSiblings`) caused student rosters across shared unit offerings (such as Communication Skills shared across CND Sept 26, DND Sept 26, and DND Sept 25) to be merged without deduplication by `student.id`.
+  - In Communication Skills (`ba970275-3e9c-4e62-86e6-885bb145a239`), this had doubled the candidate count to 100 (CND Sept 26: 60, DND Sept 26: 38, DND Sept 25: 2) instead of the true 50 unique students (CND: 30, DND: 19, DND 25: 1).
+  - Deduplicated candidate entries across sibling event queries in both `assessment_population` and `assessment_roster` fallback paths using `seenStudentIds = new Set<string>()`.
+  - Applied institutional `compareAdmissionNumbers` sorting so candidates are consistently sequenced by cohort and admission number.
+- **Fixed Recorded Results Ratio & Control Center Status ("1/2 Submitted" → "Submitted"):**
+  - Corrected markbook header ratio calculation: because total unique marks entered (50) was previously divided by the inflated 100 candidate roster, it displayed `RECORDED RESULTS: 50 / 100` (50% or 1/2 progress). With deduplication, it now correctly displays `50 / 50` (100% complete).
+  - Hardened sibling CAT deliverable recognition in `src/features/assessment/control-center-queries.ts` so shared units inherit component submission timestamps and finalized status across all sibling events, eliminating the stuck "1/2 Submitted" status in the Assessment Control Center.
+- **Trainer Mark Entry API & Server Actions Sibling Propagation:**
+  - In `src/app/api/trainer-mark-entry/save/route.ts`:
+    - Resolved sibling events via `resolveAssessmentIdsWithSiblings`.
+    - Synchronized component submission records and `cat_marks_finalized_at` across all sibling assessment events when a trainer submits CAT marks via public invite link.
+    - Updated submission gate checks so finalized sibling CAT marks do not falsely block final exam submission.
+  - In `src/features/assessment/marks/actions.ts`:
+    - Hardened `submitCatOnBehalfAction` to upsert component submission records across all cohorts for every sibling event in `targetEventIds`.
+- **Database RPC Hardening & Historical Reconciliation Migration:**
+  - Added migration `20261111053000_harden_shared_unit_markbook_submissions.sql`:
+    - Upgraded `save_assessment_online_component_marks` in PostgreSQL to automatically discover sibling assessment events (via shared offerings or approved equivalence groups), propagate component submissions to all sibling events and their roster cohorts, set `cat_marks_finalized_at`, and auto-finalize all sibling events when complete.
+    - Upgraded `save_assessment_component_with_trainer_invite` to propagate submissions and timestamps to sibling events.
+    - Added historical data reconciliation block to backfill `cat_marks_finalized_at` and copy missing component submissions to sibling events across all approved equivalences and shared offerings in production.
+
+**Added:**
+- `supabase/migrations/20261111053000_harden_shared_unit_markbook_submissions.sql`:
+  - PostgreSQL migration upgrading RPCs and backfilling sibling assessment component submissions.
+- `src/tests/shared-unit-markbook-deduplication.test.ts`:
+  - Vitest test suite covering candidate deduplication (100 doubled records → 50 unique students), candidate ratio calculation, and sibling CAT deliverable status resolution.
+
+**Modified:**
+- `src/features/assessment/queries.ts`
+- `src/features/assessment/control-center-queries.ts`
+- `src/features/assessment/marks/actions.ts`
+- `src/app/api/trainer-mark-entry/save/route.ts`
+
 ### 2026-11-11: Sibling Assessment CAT Submission Synchronization & Unified Control Center Visibility
 
 **Summary:**

@@ -116,7 +116,7 @@ export default async function StaffOnlineMarksPage({
     <div className="space-y-5">
       <PageHeader
         title="Enter marks"
-        description={`${access.allocation.unitName} · ${population.cohort?.name || access.allocation.cohortName}`}
+        description={`${access.allocation.unitCode ? `${access.allocation.unitCode} · ` : ''}${access.allocation.unitName}`}
         backHref="/staff/units"
         backLabel="My Units"
       />

@@ -27,6 +27,7 @@ import {
 import { ABSENT_CIRCUMSTANCES } from '@/features/class-attendance/domain';
 import { submitTrainerDailyReportAction, submitDailyReportDirectAction, dismissOverdueReportAction } from './actions';
 import {
+  formatCohortCompact,
   formatDailyReportDate,
   formatDailyReportTime,
   formatStudentTwoNames,
@@ -176,7 +177,7 @@ function SessionExceptionDialog({
             <div className="min-w-0">
               <DialogTitle className="text-sm font-bold text-text-primary">Session exception</DialogTitle>
               <DialogDescription className="mt-1 text-[11px] leading-5 text-text-muted">
-                {session.unitName} · {session.cohortName} · {session.sessionDate}
+                {session.unitName} · {formatCohortCompact(session.cohortName) || session.cohortName} · {session.sessionDate}
               </DialogDescription>
             </div>
           </div>
@@ -391,7 +392,7 @@ function PastUnrecordedBanner({
                   </span>
                 </div>
                 <p className="mt-1 text-[10px] text-text-muted">
-                  {session.cohortName} · {session.dayOfWeek}, {session.sessionDate} · {formatDailyReportTime(session.startsAt)}–{formatDailyReportTime(session.endsAt)}
+                  <span title={session.cohortName}>{formatCohortCompact(session.cohortName) || session.cohortName}</span> · {session.dayOfWeek}, {session.sessionDate} · {formatDailyReportTime(session.startsAt)}–{formatDailyReportTime(session.endsAt)}
                 </p>
               </div>
 
@@ -504,7 +505,7 @@ function ScheduledLessonsSection({
                 </div>
 
                 <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-text-muted">
-                  <span className="font-medium text-text-secondary">{lesson.cohortName || 'Class'}</span>
+                  <span className="font-medium text-text-secondary" title={lesson.cohortName}>{formatCohortCompact(lesson.cohortName) || lesson.cohortName || 'Class'}</span>
                   <span className="text-text-subtle">·</span>
                   <span className="inline-flex items-center gap-1">
                     <Clock className="size-3 text-text-subtle" />
@@ -637,7 +638,7 @@ function ClassAttendanceSummaryTable({
                 {l.unitCode ? <span className="hidden shrink-0 font-mono text-[9.5px] text-text-muted sm:inline">{l.unitCode}</span> : null}
               </div>
               <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[10px] text-text-muted">
-                <span className="truncate">{l.cohortName}</span><span>·</span>
+                <span className="truncate" title={l.cohortName}>{formatCohortCompact(l.cohortName) || l.cohortName}</span><span>·</span>
                 <span className="font-mono">{formatDailyReportTime(l.startsAt)}–{formatDailyReportTime(l.endsAt)}</span>
               </div>
             </div>

@@ -87,4 +87,4 @@ export function formatAbsenteeLine(student: {
   return `${student.fullName} (${student.admissionNumber})${noteSuffix}`;
 }
 
-export { formatStudentTwoNames } from '@/features/class-attendance/domain';
+export { formatStudentTwoNames, formatCohortCompact } from '@/features/class-attendance/domain';

@@ -17,6 +17,7 @@ import {
   ClassAttendanceEditor,
 } from '@/features/class-attendance/attendance-editor';
 import {
+  formatCohortCompact,
   shortTime,
 } from '@/features/class-attendance/domain';
 import {
@@ -64,7 +65,7 @@ export default async function StaffClassAttendanceSessionPage({
 
       <PageHeader
         title={workspace.unitName}
-        description={`${workspace.cohortName} · ${workspace.sessionDate} · ${shortTime(
+        description={`${formatCohortCompact(workspace.cohortName) || workspace.cohortName} · ${workspace.sessionDate} · ${shortTime(
           workspace.startsAt,
         )}–${shortTime(workspace.endsAt)}`}
       />

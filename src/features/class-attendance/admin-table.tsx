@@ -7,7 +7,7 @@ import { useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { shortTime } from './domain';
+import { formatCohortCompact, shortTime } from './domain';
 import type { DepartmentAttendanceSession } from './admin-types';
 
 export function AttendanceAdminTable({ items }: { items: DepartmentAttendanceSession[] }) {
@@ -85,7 +85,13 @@ export function AttendanceAdminTable({ items }: { items: DepartmentAttendanceSes
                   </Badge>
                 </div>
                 <p className="mt-0.5 truncate text-[10px] text-text-muted">
-                  {item.cohortNames} · {item.trainerName} · {shortTime(item.startsAt)}–{shortTime(item.endsAt)}
+                  <span title={item.cohortNames}>
+                    {formatCohortCompact(item.cohortNames) || item.cohortNames}
+                  </span>
+                  {' · '}
+                  {item.trainerName}
+                  {' · '}
+                  {shortTime(item.startsAt)}–{shortTime(item.endsAt)}
                 </p>
               </div>
 

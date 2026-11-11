@@ -80,17 +80,22 @@ export default async function StaffUnitsPage() {
                 </div>
 
                 <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                  {allocation.cohortNames.map((cohort) => (
+                  {allocation.cohortNames.length <= 2 ? (
+                    allocation.cohortNames.map((cohort) => (
+                      <span
+                        key={cohort}
+                        className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10.5px] font-semibold text-slate-700 border border-slate-200"
+                      >
+                        {cohort}
+                      </span>
+                    ))
+                  ) : (
                     <span
-                      key={cohort}
-                      className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10.5px] font-bold text-slate-700 border border-slate-200"
+                      title={allocation.cohortNames.join(', ')}
+                      className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[10.5px] font-semibold text-slate-700 border border-slate-200 cursor-help"
                     >
-                      {cohort}
-                    </span>
-                  ))}
-                  {allocation.cohortNames.length > 1 && (
-                    <span className="text-[10px] font-bold text-primary bg-primary-subtle px-1.5 py-0.5 rounded border border-primary/20">
-                      Combined ({allocation.cohortNames.length})
+                      <span>{allocation.cohortNames[0]}</span>
+                      <span className="font-bold text-primary">+{allocation.cohortNames.length - 1} more</span>
                     </span>
                   )}
                 </div>

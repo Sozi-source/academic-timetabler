@@ -144,3 +144,20 @@ export function formatStudentTwoNames(fullName?: string | null): string {
   if (parts.length <= 2) return parts.join(' ');
   return `${parts[0]} ${parts[1]}`;
 }
+
+/**
+ * Streamlines multi-cohort display strings to prevent visual pollution in headers,
+ * tables, and cards. If there are 3 or more cohorts (e.g. "CHN SEP 24, CHN JAN/MAR 25, ..."),
+ * returns e.g. "7 Shared Cohorts", keeping UI sleek like world-class enterprise institutions.
+ */
+export function formatCohortCompact(cohortName?: string | null): string {
+  if (!cohortName || cohortName === 'Cohort') return '';
+  const delimiter = cohortName.includes('/') ? '/' : cohortName.includes(',') ? ',' : null;
+  if (!delimiter) return cohortName.trim();
+  const parts = cohortName.split(delimiter).map((s) => s.trim()).filter(Boolean);
+  if (parts.length > 2) {
+    return `${parts.length} Shared Cohorts`;
+  }
+  return parts.join(delimiter === '/' ? ' / ' : ', ');
+}
+

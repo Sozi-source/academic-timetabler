@@ -385,7 +385,7 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-xs font-bold text-slate-900">Department Marks Entry Windows</h2>
               <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600 border border-slate-200">
-                {data.summary.totalMarkbooks} unit cohorts
+                {data.summary.totalMarkbooks} unit markbooks
               </span>
             </div>
           </div>
@@ -569,9 +569,7 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                     href={`/assessment/marks/${unit.items[0]?.id ?? unit.unitId}`}
                     className="inline-flex min-h-9 w-full items-center justify-center gap-1.5 rounded-lg border border-border bg-surface px-3 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-surface-subtle transition"
                   >
-                    {unit.items.length > 1
-                      ? `Open Markbook (${unit.items.length} Cohorts)`
-                      : 'Open Markbook'}
+                    Open Markbook
                     <ArrowRight className="size-3.5 text-slate-400" />
                   </Link>
                 </article>

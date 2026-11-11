@@ -215,22 +215,10 @@ export default async function AssessmentAnalysisPage() {
                     </div>
 
                     <p className="mt-1 text-[11px] text-text-muted">
-                      {
-                        bundle.academicPeriodName
-                      }
+                      {bundle.academicPeriodName}
+                      {bundle.cohortCount > 1 ? ` · ${bundle.cohortCount} Cohorts` : ''}
                       {' · '}
-                      {
-                        bundle.cohortCount
-                      } cohort{
-                        bundle.cohortCount ===
-                        1
-                          ? ''
-                          : 's'
-                      }
-                      {' · '}
-                      {statusLabel(
-                        bundle.status,
-                      )}
+                      {statusLabel(bundle.status)}
                     </p>
                   </div>
 

@@ -131,7 +131,7 @@ export default async function AssessmentAnalysisDetailPage({
           value={String(
             analysis.summary.registered,
           )}
-          description={`${analysis.cohorts.length} participating cohort${analysis.cohorts.length === 1 ? '' : 's'}`}
+          description={analysis.cohorts.length > 1 ? `${analysis.cohorts.length} shared cohorts` : 'Enrolled candidates'}
           icon={UsersRound}
           status="Population"
         />

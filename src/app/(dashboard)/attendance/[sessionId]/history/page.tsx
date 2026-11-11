@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/ui/page-header';
 import { requireHodAccess } from '@/features/auth/authorization';
-import { shortTime } from '@/features/class-attendance/domain';
+import { formatCohortCompact, shortTime } from '@/features/class-attendance/domain';
 import { getClassAttendanceWorkspace } from '@/features/class-attendance/queries';
 
 export default async function AttendanceHistoryPage({
@@ -50,7 +50,9 @@ export default async function AttendanceHistoryPage({
         >
           {workspace.sessionStatus}
         </Badge>
-        <Badge variant="neutral">{workspace.cohortName}</Badge>
+        <Badge variant="neutral" title={workspace.cohortName}>
+          {formatCohortCompact(workspace.cohortName) || workspace.cohortName}
+        </Badge>
         <Badge variant="neutral">
           {shortTime(workspace.startsAt)}–{shortTime(workspace.endsAt)}
         </Badge>

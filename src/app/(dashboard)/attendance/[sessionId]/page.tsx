@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { requireHodAccess } from '@/features/auth/authorization';
 import {
   classAttendanceStatusVariant,
+  formatCohortCompact,
   shortTime,
 } from '@/features/class-attendance/domain';
 import { getClassAttendanceWorkspace } from '@/features/class-attendance/queries';
@@ -31,7 +32,7 @@ export default async function AttendanceReviewPage({
       <PageHeader
         eyebrow="Class attendance"
         title={workspace.unitName}
-        description={`${workspace.cohortName} · ${workspace.sessionDate} · ${shortTime(
+        description={`${formatCohortCompact(workspace.cohortName) || workspace.cohortName} · ${workspace.sessionDate} · ${shortTime(
           workspace.startsAt,
         )}–${shortTime(workspace.endsAt)}`}
         icon={CalendarCheck2}

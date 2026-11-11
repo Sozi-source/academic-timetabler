@@ -1,3 +1,33 @@
+### 2026-11-11: Enterprise Cohort Clutter Purge Across System Pages & Cards
+
+**Summary:**
+- **Purged Multi-Cohort Visual Clutter Across Page Headers, Tables & Cards:**
+  - Implemented `formatCohortCompact()` domain utility to eliminate unsightly multi-line cohort dumps across attendance and marks views: when a shared class has 3 or more cohorts, it cleanly displays e.g. `7 Shared Cohorts` while providing full tooltip inspection on hover.
+  - `src/features/class-attendance/admin-table.tsx`: Streamlined class attendance overview table to prevent 7+ cohort strings from clipping trainer name and session times; multi-cohort items now render `X Cohorts` with full tooltip.
+  - `src/app/(dashboard)/attendance/[sessionId]/page.tsx` & `src/app/(staff)/staff/attendance/[sessionId]/page.tsx`: Cleaned page header description from long multi-cohort dumps to concise cohort labels and session timestamps.
+  - `src/app/(dashboard)/attendance/[sessionId]/history/page.tsx`: Standardized session audit badge to compact cohort label with full tooltip.
+  - `src/features/trainer-daily-report/trainer-form.tsx`: Updated session exception modal, overdue lesson cards, and lesson schedule rows to use compact cohort labels with full tooltip inspection.
+  - `src/app/(staff)/staff/units/page.tsx`: Replaced walls of 8+ cohort badges and redundant `Combined (8)` chips on unit cards with a clean `Primary Cohort +X more` badge with hover tooltip.
+  - `src/app/(staff)/staff/units/[allocationId]/assessment/[assessmentId]/marks/page.tsx`: Purged cohort noise from header subtitle; streamlined to sleek `Unit Code · Unit Name`.
+  - `src/features/assessment/assessment-control-center.tsx`: Cleaned mobile markbook action button from awkward `Open Markbook (4 Cohorts)` to clean `Open Markbook`; changed summary chip from `unit cohorts` to `unit markbooks`.
+  - `src/app/(dashboard)/assessment/analysis/page.tsx` & `[assessmentId]/page.tsx`: Removed noisy `· 1 cohorts` tags on every standard unit row; preserved concise `{count} Cohorts` indication only on actual multi-cohort shared units.
+  - `src/components/ui/badge.tsx`: Added optional `title` attribute support to native Badge component for accessible tooltip inspection.
+
+**Modified:**
+- `src/app/(dashboard)/assessment/analysis/[assessmentId]/page.tsx`
+- `src/app/(dashboard)/assessment/analysis/page.tsx`
+- `src/app/(dashboard)/attendance/[sessionId]/history/page.tsx`
+- `src/app/(dashboard)/attendance/[sessionId]/page.tsx`
+- `src/app/(staff)/staff/attendance/[sessionId]/page.tsx`
+- `src/app/(staff)/staff/units/[allocationId]/assessment/[assessmentId]/marks/page.tsx`
+- `src/app/(staff)/staff/units/page.tsx`
+- `src/components/ui/badge.tsx`
+- `src/features/assessment/assessment-control-center.tsx`
+- `src/features/class-attendance/admin-table.tsx`
+- `src/features/class-attendance/domain.ts`
+- `src/features/trainer-daily-report/domain.ts`
+- `src/features/trainer-daily-report/trainer-form.tsx`
+
 ### 2026-11-11: Global Purge of Redundant Description Text Across Marks, Attendance & Daily Reports
 
 **Summary:**

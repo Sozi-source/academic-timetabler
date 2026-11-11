@@ -122,15 +122,9 @@ export default async function StaffAttendancePage() {
       </section>
 
       <section className="space-y-3">
-        <div>
-          <h2 className="text-sm font-bold text-text-primary">
-            Recent sessions
-          </h2>
-
-          <p className="mt-0.5 text-[11px] text-text-muted">
-            Your latest class attendance records.
-          </p>
-        </div>
+        <h2 className="text-sm font-bold text-text-primary">
+          Recent sessions
+        </h2>
 
         {history.length ===
         0 ? (

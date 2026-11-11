@@ -902,23 +902,17 @@ export function OnlineMarksEditor({
           Mark entry is locked by the department.
         </section>
       ) : null}
-      {/* Reminder: marks saved as drafts are not visible as submitted until the trainer presses Submit. */}
+      {/* Draft Save Reminders */}
       {editable && trainerCatEntryOpen && !catSubmitted && parsedRows.some((row) => row.marks.cat !== null) ? (
-        <section className="flex items-start gap-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs text-amber-900">
-          <AlertCircle className="mt-0.5 size-3.5 shrink-0 text-amber-700" />
-          <span>
-            <strong>Reminder:</strong> your CAT marks are saved but <strong>not yet submitted</strong>. Open the{' '}
-            <strong>CAT</strong> tab and press <strong>Submit CAT marks</strong> when you are done. Unentered students will be recorded as AB.
-          </span>
+        <section className="flex items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-3.5 py-2 text-xs font-semibold text-amber-900">
+          <AlertCircle className="size-3.5 shrink-0 text-amber-700" />
+          <span>CAT marks saved as draft · Submit when ready</span>
         </section>
       ) : null}
       {editable && trainerExamEntryOpen && catSubmitted && !finalSubmitted && parsedRows.some((row) => row.marks.exam !== null) ? (
-        <section className="flex items-start gap-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs text-amber-900">
-          <AlertCircle className="mt-0.5 size-3.5 shrink-0 text-amber-700" />
-          <span>
-            <strong>Reminder:</strong> your exam marks are saved but <strong>not yet submitted</strong>. Press{' '}
-            <strong>Submit Final Marks</strong> when you are done.
-          </span>
+        <section className="flex items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-3.5 py-2 text-xs font-semibold text-amber-900">
+          <AlertCircle className="size-3.5 shrink-0 text-amber-700" />
+          <span>Exam marks saved as draft · Submit when ready</span>
         </section>
       ) : null}
       {/* Sleek Compact Stats Strip */}

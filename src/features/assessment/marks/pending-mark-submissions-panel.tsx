@@ -15,17 +15,11 @@ export function PendingMarkSubmissionsPanel({ items }: { items: PendingMarkSubmi
 
   return (
     <section className="rounded-xl border border-amber-200 bg-amber-50/60 p-4 shadow-2xs">
-      <div className="flex items-start gap-2.5">
-        <AlertCircle className="mt-0.5 size-4 shrink-0 text-amber-700" aria-hidden="true" />
-        <div>
-          <h2 className="text-sm font-semibold text-amber-900">
-            Saved but not submitted ({items.length})
-          </h2>
-          <p className="mt-0.5 text-xs text-amber-800">
-            Trainers have saved marks for these markbooks but have not submitted them. Remind the trainer, or open the
-            markbook to submit saved CAT marks on their behalf.
-          </p>
-        </div>
+      <div className="flex items-center gap-2">
+        <AlertCircle className="size-4 shrink-0 text-amber-700" aria-hidden="true" />
+        <h2 className="text-sm font-semibold text-amber-900">
+          Saved but not submitted ({items.length})
+        </h2>
       </div>
 
       <div className="mt-3 overflow-x-auto rounded-lg border border-amber-200 bg-white">

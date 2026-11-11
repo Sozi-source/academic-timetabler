@@ -302,14 +302,11 @@ function PastUnrecordedBanner({
           <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-amber-100/80 text-amber-700 ring-1 ring-amber-200/70">
             <AlertCircle className="size-4" />
           </span>
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-xs font-bold text-text-primary">Pending items</h3>
-              <span className="rounded-full border border-amber-200 bg-white px-2 py-0.5 text-[9px] font-bold text-amber-800">
-                {totalOverdue}
-              </span>
-            </div>
-            <p className="mt-0.5 text-[10px] text-text-muted">Past attendance or reports requiring attention.</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-xs font-bold text-text-primary">Pending items</h3>
+            <span className="rounded-full border border-amber-200 bg-white px-2 py-0.5 text-[9px] font-bold text-amber-800">
+              {totalOverdue}
+            </span>
           </div>
         </div>
 
@@ -479,9 +476,6 @@ function ScheduledLessonsSection({
             Scheduled Lessons <span className="text-text-muted">({lessons.length})</span>
           </h2>
         </div>
-        <span className="hidden text-[10px] font-medium text-text-muted sm:inline">
-          Tap a lesson to take or review attendance
-        </span>
       </div>
 
       <div className="grid gap-3 p-3 sm:p-4">

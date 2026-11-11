@@ -326,8 +326,8 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
 
   const statCards = [
     { label: 'Units', value: unifiedUnits.length, note: data.selectedPeriodName, icon: ClipboardList },
-    { label: 'Current unit registrations', value: totalCurrentRegistrations, note: 'Each student is counted once per registered unit', icon: UsersRound },
-    { label: 'Submitted markbooks', value: `${data.summary.submittedCount} / ${data.summary.totalMarkbooks}`, note: 'Marks submitted for HOD review', icon: GraduationCap },
+    { label: 'Current unit registrations', value: totalCurrentRegistrations, note: null, icon: UsersRound },
+    { label: 'Submitted markbooks', value: `${data.summary.submittedCount} / ${data.summary.totalMarkbooks}`, note: null, icon: GraduationCap },
   ];
 
   return (
@@ -388,9 +388,6 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                 {data.summary.totalMarkbooks} unit cohorts
               </span>
             </div>
-            <p className="mt-0.5 text-[11px] text-slate-500">
-              Control trainer marks submission windows for Continuous Assessment (CAT) and Final Examinations
-            </p>
           </div>
         </div>
 
@@ -414,7 +411,7 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
             <div className="min-w-0">
               <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">{label}</p>
               <p className="mt-0.5 text-xl font-semibold leading-6 tabular-nums text-slate-700">{value}</p>
-              <p className="mt-0.5 truncate text-[11px] text-slate-500">{note}</p>
+              {note ? <p className="mt-0.5 truncate text-[11px] text-slate-500">{note}</p> : null}
             </div>
           </div>
         ))}
@@ -426,7 +423,7 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
           <div>
             <h2 className="text-sm font-semibold text-slate-800">Assessment Deliverables & Submissions</h2>
             <p className="mt-0.5 text-xs text-slate-500">
-              {filteredUnits.length} {filteredUnits.length === 1 ? 'unit' : 'units'} · Monitor Continuous Assessment (CAT) and Final Examination milestones
+              {filteredUnits.length} {filteredUnits.length === 1 ? 'unit' : 'units'}
             </p>
           </div>
           <button

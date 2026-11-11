@@ -13,9 +13,6 @@ export default async function TrainerExamAttendancePage() {
       <div>
         <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">Exam attendance</p>
         <h1 className="mt-1 text-xl font-bold tracking-tight text-text-primary">My units</h1>
-        <p className="mt-1 text-sm text-text-muted">
-          Record only students who did not sign the physical attendance sheet.
-        </p>
       </div>
 
       {units.length === 0 ? (

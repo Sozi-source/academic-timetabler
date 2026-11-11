@@ -221,7 +221,7 @@ export default async function DailyReportsPage({
                   <Clock className="size-4" />
                 </span>
                 <p className="text-xs font-bold leading-snug text-text-primary">
-                  Trainer reports submitted on recent dates awaiting review
+                  Recent Reports Awaiting Review
                 </p>
               </div>
 

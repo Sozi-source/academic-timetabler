@@ -216,15 +216,9 @@ export default async function AssessmentAnalysisDetailPage({
 
       <section className="rounded-xl border border-border bg-white px-4 py-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-sm font-semibold text-text-primary">
-              Performance summary
-            </h2>
-
-            <p className="mt-1 text-[11px] text-text-muted">
-              Numeric marks only
-            </p>
-          </div>
+          <h2 className="text-sm font-semibold text-text-primary">
+            Performance summary
+          </h2>
 
           <Badge variant="neutral">
             {
@@ -295,16 +289,9 @@ export default async function AssessmentAnalysisDetailPage({
       </section>
 
       <section className="space-y-2">
-        <div>
-          <h2 className="text-sm font-semibold text-text-primary">
-            Cohort breakdown
-          </h2>
-
-          <p className="mt-1 text-[11px] text-text-muted">
-            Participation and mean mark by
-            participating cohort.
-          </p>
-        </div>
+        <h2 className="text-sm font-semibold text-text-primary">
+          Cohort breakdown
+        </h2>
 
         <div className="space-y-2">
           {analysis.cohorts.map(
@@ -388,16 +375,9 @@ export default async function AssessmentAnalysisDetailPage({
       </section>
 
       <section className="space-y-2">
-        <div>
-          <h2 className="text-sm font-semibold text-text-primary">
-            Student results
-          </h2>
-
-          <p className="mt-1 text-[11px] text-text-muted">
-            Locked roster matched to
-            committed results.
-          </p>
-        </div>
+        <h2 className="text-sm font-semibold text-text-primary">
+          Student results
+        </h2>
 
         <div className="space-y-1.5">
           {analysis.students.map(
@@ -472,15 +452,6 @@ export default async function AssessmentAnalysisDetailPage({
           )}
         </div>
       </section>
-
-      <p className="text-[11px] leading-5 text-text-muted">
-        Pass/fail uses the configured
-        assessment rule and numeric marks
-        only. Publishing is separate from
-        finalisation so results remain
-        controlled until explicitly
-        released.
-      </p>
     </div>
   );
 }

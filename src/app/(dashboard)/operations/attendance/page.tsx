@@ -88,7 +88,6 @@ export default async function AttendanceOversightPage() {
           value={String(
             open,
           )}
-          description="Still editable"
           icon={ClipboardCheck}
         />
 
@@ -97,7 +96,6 @@ export default async function AttendanceOversightPage() {
           value={String(
             incomplete,
           )}
-          description="Students still unmarked"
           icon={ClipboardCheck}
         />
 
@@ -106,7 +104,6 @@ export default async function AttendanceOversightPage() {
           value={String(
             completed,
           )}
-          description="Read only"
           icon={ClipboardCheck}
         />
 
@@ -115,7 +112,6 @@ export default async function AttendanceOversightPage() {
           value={String(
             cancelled,
           )}
-          description="Trainer-cancelled — can be reopened"
           icon={ClipboardCheck}
         />
       </section>

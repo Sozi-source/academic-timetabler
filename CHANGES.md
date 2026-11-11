@@ -1,3 +1,38 @@
+### 2026-11-11: Global Purge of Redundant Description Text Across Marks, Attendance & Daily Reports
+
+**Summary:**
+- **Purged Verbose Description & Explanatory Text Across Assessment & Marks Pages:**
+  - `src/features/assessment/marks/pending-mark-submissions-panel.tsx`: Removed redundant explanatory sentence explaining trainer mark draft mechanics; streamlined to compact title and direct actions (`Review missing`, `Open markbook`).
+  - `src/features/assessment/assessment-control-center.tsx`: Removed verbose metric card notes and redundant subtitle sentences explaining window controls and deliverable tracking.
+  - `src/app/(dashboard)/assessment/analysis/[assessmentId]/page.tsx`: Purged repetitive explanatory subheadings (`Numeric marks only`, `Participation and mean mark...`, `Locked roster matched to committed results`) and the trailing explanation block at the bottom of the page.
+  - `src/app/(dashboard)/assessment/reports/page.tsx`: Purged redundant descriptive subtitles across report download cards and documentation oversight tiles; streamlined action buttons (`Download Word (.docx)`, `Review Attendance`, `Control Center`).
+  - `src/app/trainer-mark-entry/page.tsx`: Purged lengthy multi-paragraph notice and credentials guidance; tightened layout into focused, actionable login buttons (`External Trainer Login`, `Staff & Internal Trainer Portal`).
+  - `src/features/staff-assessment/online-marks-editor.tsx`: Replaced multi-line instructional paragraphs with sleek, compact inline draft status chips (`CAT marks saved as draft · Submit when ready`).
+- **Purged Redundant Explanatory Text Across Attendance & Oversight Pages:**
+  - `src/features/class-attendance/attendance-editor.tsx`: Removed redundant default-presence instructional banner (`Students are Present by default...`); retained the direct `Reset All to Present` action button when absentees exist.
+  - `src/app/(dashboard)/operations/attendance/page.tsx`: Purged verbose description strings from `MetricCard` statuses (`Open`, `Incomplete`, `Completed`, `Did Not Take Place`).
+  - `src/app/(staff)/staff/attendance/page.tsx`: Removed redundant descriptive subtitle (`Your latest class attendance records.`) under `Recent sessions`.
+  - `src/app/trainer/exam-attendance/page.tsx`: Removed instructional text (`Record only students who did not sign the physical attendance sheet.`).
+  - `src/app/trainer/exam-attendance/[assessmentId]/page.tsx`: Purged verbose card subtitle; tightened header to the self-explanatory title `Record absentees only`.
+- **Streamlined Trainer Daily Report Interfaces:**
+  - `src/features/trainer-daily-report/trainer-form.tsx`: Removed filler descriptions under `Pending items` and removed redundant helper text (`Tap a lesson to take or review attendance`).
+  - `src/app/(dashboard)/operations/daily-reports/page.tsx`: Tightened recent submissions heading to `Recent Reports Awaiting Review`.
+
+**Modified:**
+- `src/app/(dashboard)/assessment/analysis/[assessmentId]/page.tsx`
+- `src/app/(dashboard)/assessment/reports/page.tsx`
+- `src/app/(dashboard)/operations/attendance/page.tsx`
+- `src/app/(dashboard)/operations/daily-reports/page.tsx`
+- `src/app/(staff)/staff/attendance/page.tsx`
+- `src/app/trainer-mark-entry/page.tsx`
+- `src/app/trainer/exam-attendance/[assessmentId]/page.tsx`
+- `src/app/trainer/exam-attendance/page.tsx`
+- `src/features/assessment/assessment-control-center.tsx`
+- `src/features/assessment/marks/pending-mark-submissions-panel.tsx`
+- `src/features/class-attendance/attendance-editor.tsx`
+- `src/features/staff-assessment/online-marks-editor.tsx`
+- `src/features/trainer-daily-report/trainer-form.tsx`
+
 ### 2026-11-11: Assessment Markbook Header & Layout Streamlining
 
 **Summary:**

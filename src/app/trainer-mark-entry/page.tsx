@@ -17,11 +17,8 @@ export default function TrainerMarkEntryPage() {
         </div>
 
         <h1 className="mt-4 text-lg font-bold text-slate-900">
-          Trainer Marks Entry Notice
+          Trainer Marks Entry
         </h1>
-        <p className="mt-2 text-xs leading-5 text-slate-600">
-          Unauthenticated link-based mark entry has been discontinued to ensure academic marks integrity. Please sign in through your designated portal below to access your assigned units and enter marks.
-        </p>
 
         <div className="mt-6 space-y-3">
           <Link
@@ -32,10 +29,7 @@ export default function TrainerMarkEntryPage() {
               <span className="flex size-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-800">
                 <KeyRound className="size-4" />
               </span>
-              <div>
-                <p className="text-xs font-bold text-slate-900">External Trainer Login</p>
-                <p className="text-[11px] text-slate-500">Sign in with your 6-digit access PIN</p>
-              </div>
+              <p className="text-xs font-bold text-slate-900">External Trainer Login</p>
             </div>
             <span className="text-xs font-semibold text-emerald-700">Sign In &rarr;</span>
           </Link>
@@ -48,19 +42,10 @@ export default function TrainerMarkEntryPage() {
               <span className="flex size-9 items-center justify-center rounded-lg bg-blue-100 text-blue-800">
                 <UserCheck className="size-4" />
               </span>
-              <div>
-                <p className="text-xs font-bold text-slate-900">Staff & Internal Trainer Portal</p>
-                <p className="text-[11px] text-slate-500">Sign in with your staff account</p>
-              </div>
+              <p className="text-xs font-bold text-slate-900">Staff & Internal Trainer Portal</p>
             </div>
             <span className="text-xs font-semibold text-blue-700">Sign In &rarr;</span>
           </Link>
-        </div>
-
-        <div className="mt-6 border-t border-slate-100 pt-4 text-center">
-          <p className="text-[11px] text-slate-400">
-            Need a PIN? Contact your Head of Department (HOD) to generate your access credentials.
-          </p>
         </div>
       </div>
     </main>

@@ -60,16 +60,11 @@ export default async function TrainerExamAttendanceWorkspacePage({
       ) : null}
 
       <Card className="p-4">
-        <div className="flex items-start gap-3 border-b border-border pb-3">
+        <div className="flex items-center gap-3 border-b border-border pb-3">
           <span className="flex size-8 items-center justify-center rounded-lg bg-primary-subtle text-primary">
             {locked ? <LockKeyhole className="size-4" /> : <ClipboardCheck className="size-4" />}
           </span>
-          <div>
-            <h2 className="text-sm font-bold text-text-primary">Record absentees only</h2>
-            <p className="mt-1 text-xs text-text-muted">
-              Everyone is treated as present unless you mark them absent from the physical signed attendance sheet.
-            </p>
-          </div>
+          <h2 className="text-sm font-bold text-text-primary">Record absentees only</h2>
         </div>
 
         <div className="mt-4">

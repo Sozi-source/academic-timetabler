@@ -18,13 +18,11 @@ interface PageProps {
 
 function ReportCard({
   title,
-  description,
   href,
   ready,
   status,
 }: {
   title: string;
-  description: string;
   href: string;
   ready: boolean;
   status: string;
@@ -33,10 +31,7 @@ function ReportCard({
     <div className="flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
       <div>
         <div className="flex items-start justify-between gap-3">
-          <div>
-            <h2 className="text-xs font-bold text-slate-900">{title}</h2>
-            <p className="mt-0.5 text-[11px] text-slate-500">{description}</p>
-          </div>
+          <h2 className="text-xs font-bold text-slate-900">{title}</h2>
           <div
             className={`flex size-7 items-center justify-center rounded-lg ${
               ready
@@ -128,15 +123,11 @@ export default async function AssessmentReportsPage({ searchParams }: PageProps)
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500">
             Official Examination Board Downloads & Oversight
           </h2>
-          <p className="mt-0.5 text-xs text-slate-500">
-            Generate formal Word (.docx) documents for Academic Board and Senate deliberations.
-          </p>
         </div>
 
         <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
           <ReportCard
             title="CAT Marks Report"
-            description="Continuous assessment breakdown."
             href="/api/assessment/reports/cat"
             ready={readiness.catReady}
             status={
@@ -148,7 +139,6 @@ export default async function AssessmentReportsPage({ searchParams }: PageProps)
 
           <ReportCard
             title="Final Exam Broadsheet"
-            description="Official end-term grade records."
             href="/api/assessment/reports/exam"
             ready={readiness.examReady}
             status={
@@ -163,10 +153,7 @@ export default async function AssessmentReportsPage({ searchParams }: PageProps)
           <div className="flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
             <div>
               <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h2 className="text-xs font-bold text-slate-900">Attendance Oversight</h2>
-                  <p className="mt-0.5 text-[11px] text-slate-500">Exam sit/absent records.</p>
-                </div>
+                <h2 className="text-xs font-bold text-slate-900">Attendance Oversight</h2>
                 <div className="flex size-7 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
                   <CheckCircle2 className="size-3.5" />
                 </div>
@@ -190,10 +177,7 @@ export default async function AssessmentReportsPage({ searchParams }: PageProps)
           <div className="flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
             <div>
               <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h2 className="text-xs font-bold text-slate-900">Marks Control Center</h2>
-                  <p className="mt-0.5 text-[11px] text-slate-500">Live submission progress.</p>
-                </div>
+                <h2 className="text-xs font-bold text-slate-900">Marks Control Center</h2>
                 <div className="flex size-7 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
                   <CheckCircle2 className="size-3.5" />
                 </div>

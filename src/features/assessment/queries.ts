@@ -3,6 +3,7 @@ import { cache } from 'react';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
+import { compareAdmissionNumbers } from '@/features/students/admission-number-sort';
 import { resolveAssessmentIdsWithSiblings } from '@/features/staff-assessment/online-marks-query';
 
 import type {
@@ -308,7 +309,26 @@ export const getAssessmentPopulation = cache(async (assessmentId: string): Promi
 
   if (error) throw new Error(`Unable to load assessment population: ${error.message}`);
   if (data && data.length > 0) {
-    return data as unknown as AssessmentCandidateRow[];
+    // Deduplicate candidate roster across sibling events to prevent doubled counts for shared units
+    const studentMap = new Map<string, AssessmentCandidateRow>();
+    for (const raw of data as unknown as AssessmentCandidateRow[]) {
+      const studentId = raw.student?.id;
+      if (!studentId) continue;
+      const existing = studentMap.get(studentId);
+      if (!existing) {
+        studentMap.set(studentId, raw);
+      } else {
+        // If an existing row had absent attendance, but another has non-absent or specific reasons, merge gracefully
+        if (existing.attendance_status === 'absent' && raw.attendance_status !== 'absent') {
+          studentMap.set(studentId, { ...existing, ...raw });
+        }
+      }
+    }
+    const deduplicated = Array.from(studentMap.values());
+    deduplicated.sort((a, b) =>
+      compareAdmissionNumbers(a.student?.admission_number, b.student?.admission_number),
+    );
+    return deduplicated;
   }
 
   // Fallback to assessment_roster if assessment_population has not been populated
@@ -325,15 +345,31 @@ export const getAssessmentPopulation = cache(async (assessmentId: string): Promi
     .order('created_at', { ascending: true });
 
   if (rosterError) throw new Error(`Unable to load assessment population from roster: ${rosterError.message}`);
-  return (rosterData ?? []).map((r) => ({
-    id: r.id,
-    population_status: 'expected' as const,
-    attendance_status: (r.pre_assessment_status === 'absent' ? 'absent' : 'expected') as 'expected' | 'absent',
-    cat_absence_reason: null,
-    cat_absence_recommendation: null,
-    exam_absence_reason: null,
-    exam_absence_recommendation: null,
-    student: r.student,
-    cohort: r.cohort,
-  })) as unknown as AssessmentCandidateRow[];
+
+  // Deduplicate roster fallback across sibling events
+  const rosterStudentMap = new Map<string, AssessmentCandidateRow>();
+  for (const r of rosterData ?? []) {
+    const student = Array.isArray(r.student) ? r.student[0] : r.student;
+    const cohort = Array.isArray(r.cohort) ? r.cohort[0] : r.cohort;
+    const studentId = student?.id;
+    if (!studentId) continue;
+    if (!rosterStudentMap.has(studentId)) {
+      rosterStudentMap.set(studentId, {
+        id: r.id,
+        population_status: 'expected' as const,
+        attendance_status: (r.pre_assessment_status === 'absent' ? 'absent' : 'present') as 'present' | 'absent',
+        cat_absence_reason: null,
+        cat_absence_recommendation: null,
+        exam_absence_reason: null,
+        exam_absence_recommendation: null,
+        student: student ?? null,
+        cohort: cohort ?? null,
+      } as unknown as AssessmentCandidateRow);
+    }
+  }
+  const deduplicatedRoster = Array.from(rosterStudentMap.values());
+  deduplicatedRoster.sort((a, b) =>
+    compareAdmissionNumbers(a.student?.admission_number, b.student?.admission_number),
+  );
+  return deduplicatedRoster;
 });

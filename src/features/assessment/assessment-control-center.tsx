@@ -122,7 +122,11 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
         forEvent = new Map();
         map.set(sub.assessmentId, forEvent);
       }
-      forEvent.set(sub.component.toUpperCase(), sub);
+      const key = sub.component.toUpperCase();
+      const existing = forEvent.get(key);
+      if (!existing || sub.status === 'Submitted' || existing.status !== 'Submitted') {
+        forEvent.set(key, sub);
+      }
     }
     return map;
   }, [data.submissions]);
@@ -192,7 +196,7 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
           return s && s.status !== 'Not started';
         });
 
-        const isCatSub = it.isSubmitted || it.isFinalised || catSub?.status === 'Submitted';
+        const isCatSub = it.isSubmitted || it.isFinalised || Boolean(it.catMarksFinalizedAt) || catSub?.status === 'Submitted';
         const isCatProg = !isCatSub && (catSub?.status === 'In progress' || courseworkHasProgress || it.satCount > 0);
 
         if (isCatSub) {
@@ -221,24 +225,24 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
 
       const totalItems = group.items.length;
       let catStatus: 'Submitted' | 'In Progress' | 'Not Started' = 'Not Started';
-      if (catSubmittedCount > 0 && catSubmittedCount === totalItems) {
+      if (catSubmittedCount > 0) {
         catStatus = 'Submitted';
-      } else if (catSubmittedCount > 0 || catInProgressCount > 0) {
+      } else if (catInProgressCount > 0) {
         catStatus = 'In Progress';
       }
 
       const allExamClosed = group.items.every((it) => !it.trainerExamEntryOpen);
       let examStatus: 'Submitted' | 'In Progress' | 'Closed' | 'Not Started' = 'Not Started';
-      if (examSubmittedCount > 0 && examSubmittedCount === totalItems) {
+      if (examSubmittedCount > 0) {
         examStatus = 'Submitted';
-      } else if (examSubmittedCount > 0 || examInProgressCount > 0) {
+      } else if (examInProgressCount > 0) {
         examStatus = 'In Progress';
       } else if (allExamClosed) {
         examStatus = 'Closed';
       }
 
       const allFinalised = group.items.length > 0 && group.items.every((it) => it.isFinalised);
-      const allSubmitted = group.items.length > 0 && (allFinalised || (catSubmittedCount === totalItems && examSubmittedCount === totalItems));
+      const allSubmitted = group.items.length > 0 && (allFinalised || (catStatus === 'Submitted' && examStatus === 'Submitted'));
       const hasAnyProgress = catSubmittedCount > 0 || catInProgressCount > 0 || examSubmittedCount > 0 || examInProgressCount > 0;
 
       let workflowStatus: 'Finalised' | 'Submitted' | 'In Progress' | 'Open' = 'Open';

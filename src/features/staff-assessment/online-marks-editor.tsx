@@ -296,7 +296,7 @@ export function OnlineMarksEditor({
 
   function componentIsSubmitted(component: OnlineMarkComponentKey, cohortId: string | null) {
     return submissions.some((submission) =>
-      submission.component === component && (cohortId === null || submission.cohortId === cohortId),
+      submission.component === component && (cohortId === null || submission.cohortId === null || submission.cohortId === cohortId),
     );
   }
 

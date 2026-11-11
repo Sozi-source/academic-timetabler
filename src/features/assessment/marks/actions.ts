@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 
 import { getAssessmentById, getAssessmentPopulation } from '@/features/assessment/queries';
 import { requireHodAccess } from '@/features/auth/authorization';
+import { resolveAssessmentIdsWithSiblings } from '@/features/staff-assessment/online-marks-query';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 
@@ -64,13 +65,22 @@ export async function unlockAssessmentMarkComponentAction(formData: FormData) {
   if (!assessment) redirect('/assessment/marks?error=not-found');
 
   const supabase = await createClient();
-  const { error } = await supabase.rpc('unlock_assessment_mark_component_submission', {
-    target_assessment_id: assessmentId,
-    target_cohort_id: cohortId === 'all' ? null : cohortId,
-    target_component_key: component,
-  });
+  const resolvedIds = await resolveAssessmentIdsWithSiblings(supabase, assessmentId);
+  const targetEventIds = resolvedIds.length > 0 ? resolvedIds : [assessmentId];
 
-  if (error) redirect(`/assessment/marks/${assessmentId}?error=component-unlock`);
+  for (const targetId of targetEventIds) {
+    const { error } = await supabase.rpc('unlock_assessment_mark_component_submission', {
+      target_assessment_id: targetId,
+      target_cohort_id: cohortId === 'all' ? null : cohortId,
+      target_component_key: component,
+    });
+    if (error) {
+      redirect(`/assessment/marks/${assessmentId}?error=component-unlock`);
+    }
+  }
+
+  revalidatePath('/assessment');
+  revalidatePath('/assessment/marks');
   revalidatePath(`/assessment/marks/${assessmentId}`);
   redirect(`/assessment/marks/${assessmentId}?component_unlocked=${component}`);
 }
@@ -94,11 +104,14 @@ export async function submitCatOnBehalfAction(formData: FormData) {
   }
 
   const supabase = await createClient();
+  const resolvedIds = await resolveAssessmentIdsWithSiblings(supabase, assessmentId);
+  const targetEventIds = resolvedIds.length > 0 ? resolvedIds : [assessmentId];
+
   const [eventRes, rosterRes, draftRes, subRes] = await Promise.all([
     supabase.from('assessment_events').select('department_id').eq('id', assessmentId).maybeSingle(),
-    supabase.from('assessment_roster').select('student_id').eq('assessment_id', assessmentId),
-    supabase.from('assessment_online_mark_drafts').select('student_id, cat_mark').eq('assessment_id', assessmentId),
-    supabase.from('assessment_mark_component_submissions').select('id').eq('assessment_id', assessmentId).eq('component_key', 'cat').limit(1),
+    supabase.from('assessment_roster').select('assessment_id, student_id').in('assessment_id', targetEventIds),
+    supabase.from('assessment_online_mark_drafts').select('student_id, cat_mark').in('assessment_id', targetEventIds),
+    supabase.from('assessment_mark_component_submissions').select('id').in('assessment_id', targetEventIds).eq('component_key', 'cat').limit(1),
   ]);
 
   // Tenant isolation: only markbooks in the HOD's active department.
@@ -114,20 +127,52 @@ export async function submitCatOnBehalfAction(formData: FormData) {
   }
   if (roster.length === 0 || catByStudent.size === 0) redirect(`/assessment/marks/${assessmentId}?error=no-saved-cat`);
 
-  const entries = roster.map((r) => {
-    const cat = catByStudent.get(r.student_id) ?? null;
-    return { student_id: r.student_id, cat, cat_absent: cat === null };
-  });
+  const nowIso = new Date().toISOString();
+  for (const targetId of targetEventIds) {
+    const targetRoster = roster.filter((r) => r.assessment_id === targetId);
+    const effectiveRoster = targetRoster.length > 0 ? targetRoster : roster;
+    const entries = effectiveRoster.map((r) => {
+      const cat = catByStudent.get(r.student_id) ?? null;
+      return { student_id: r.student_id, cat, cat_absent: cat === null };
+    });
 
-  const { error } = await supabase.rpc('save_assessment_online_component_marks', {
-    target_assessment_id: assessmentId,
-    target_component: 'cat',
-    target_entries: entries,
-    submit_component: true,
-  });
+    const { error } = await supabase.rpc('save_assessment_online_component_marks', {
+      target_assessment_id: targetId,
+      target_component: 'cat',
+      target_entries: entries,
+      submit_component: true,
+    });
+    if (error) {
+      redirect(`/assessment/marks/${assessmentId}?error=cat-submit-on-behalf`);
+    }
+
+    await supabase
+      .from('assessment_events')
+      .update({ cat_marks_finalized_at: nowIso })
+      .eq('id', targetId);
+
+    // Maintain component submission records across all cohorts for this event
+    const { data: rosterCohorts } = await supabase
+      .from('assessment_roster')
+      .select('cohort_id')
+      .eq('assessment_id', targetId);
+
+    const cohortIds = [...new Set((rosterCohorts ?? []).map((r) => r.cohort_id))];
+    for (const cId of cohortIds.length > 0 ? cohortIds : [null]) {
+      await supabase
+        .from('assessment_mark_component_submissions')
+        .upsert({
+          assessment_id: targetId,
+          cohort_id: cId,
+          component_key: 'cat',
+        }, {
+          onConflict: 'assessment_id,coalesce(cohort_id, \'00000000-0000-0000-0000-000000000000\'::uuid),component_key',
+        });
+    }
+  }
 
   revalidatePath('/assessment');
+  revalidatePath('/assessment/marks');
   revalidatePath(`/assessment/marks/${assessmentId}`);
-  if (error) redirect(`/assessment/marks/${assessmentId}?error=cat-submit-on-behalf`);
   redirect(`/assessment/marks/${assessmentId}?cat_submitted_on_behalf=1`);
 }

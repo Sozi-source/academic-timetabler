@@ -1,3 +1,46 @@
+### 2026-11-11: Sibling Assessment CAT Submission Synchronization & Unified Control Center Visibility
+
+**Summary:**
+- **Synchronized CAT Submissions Across Sibling Assessment Events:**
+  - Resolved issue where submitting Continuous Assessment Test (CAT) marks in shared / equivalence-grouped units only marked the primary event, leaving 16 grouped equivalence units stuck with `cat_marks_finalized_at = null` and displaying as "In Progress" (e.g. "1/2 Submitted") in the Assessment Control Center.
+  - Added migration `20261111000000_sync_sibling_assessment_cat_submissions.sql` updating `save_assessment_online_component_marks` RPC and backfilling historical CAT submissions across all sibling assessment events in approved equivalence groups and confirmed shared offerings.
+  - Updated trainer submission route (`/api/staff/assessment/[assessmentId]/online/submit/route.ts`) to resolve sibling events using `resolveAssessmentIdsWithSiblings`, synchronizing component submissions and setting `cat_marks_finalized_at` across all sibling events.
+- **Assessment Control Center & Deliverable Aggregation Fixes:**
+  - Added `catMarksFinalizedAt` to `AssessmentControlCenterItem` and included `isCatFinalized` checks in `control-center-queries.ts` so submission rows report status `'Submitted'` when CAT marks are finalized.
+  - In `src/features/assessment/assessment-control-center.tsx`:
+    - Updated `submissionsByAssessmentId` aggregation to prevent an `'In progress'` cohort submission row from overwriting an already `'Submitted'` component status.
+    - Updated unified unit deliverable evaluation so that `catStatus` evaluates to `'Submitted'` whenever CAT marks have been submitted for the deliverable, and correctly matches the `cat-submitted` filter.
+    - Enhanced `allSubmitted` logic to check `catStatus === 'Submitted' && examStatus === 'Submitted'`.
+- **Unit-Wide Submission Cohort Matching in Online Marks Editor:**
+  - Fixed `componentIsSubmitted` in `src/features/staff-assessment/online-marks-editor.tsx` so `submission.cohortId === null` (unit-wide submissions) matches students belonging to any specific cohort.
+- **Marks Queries & Actions Sibling Alignment:**
+  - In `src/features/assessment/marks/queries.ts`:
+    - Updated `getAssessmentMarkComponentSubmissions` to resolve sibling event IDs and query across all siblings, deduplicating submission entries and injecting fallback CAT submissions if `cat_marks_finalized_at` is stamped.
+  - In `src/features/staff-assessment/online-marks-query.ts`:
+    - Updated `getStaffOnlineMarkComponentSubmissions` to recognize `cat_marks_finalized_at` across sibling events.
+  - In `src/features/assessment/marks/actions.ts`:
+    - Updated `unlockAssessmentMarkComponentAction` to unlock across all sibling event IDs.
+    - Updated `submitCatOnBehalfAction` to submit marks and stamp `cat_marks_finalized_at` across all sibling event IDs.
+  - In `src/features/assessment/marks/pending-submissions.ts`:
+    - Updated `getPendingMarkSubmissions` and `getCatOnBehalfStatus` to treat events with `cat_marks_finalized_at` as submitted.
+
+**Added:**
+- `supabase/migrations/20261111000000_sync_sibling_assessment_cat_submissions.sql`:
+  - Database migration backfilling sibling CAT submissions and updating `save_assessment_online_component_marks` RPC.
+- `src/tests/cat-submissions-equivalence-sync.test.ts`:
+  - Vitest test suite covering unit-wide cohort submission matching, cohort status map preservation, and equivalence group deliverable status resolution.
+
+**Modified:**
+- `src/app/api/staff/assessment/[assessmentId]/online/submit/route.ts`
+- `src/features/assessment/control-center-queries.ts`
+- `src/features/assessment/assessment-control-center.tsx`
+- `src/features/staff-assessment/online-marks-editor.tsx`
+- `src/features/staff-assessment/online-marks-query.ts`
+- `src/features/assessment/marks/queries.ts`
+- `src/features/assessment/marks/actions.ts`
+- `src/features/assessment/marks/pending-submissions.ts`
+- `src/tests/assessment-control-center.test.ts`
+
 ### 2026-11-10: Streamlined Direct Markbook Navigation & Cohort Pre-Selection
 
 **Summary:**

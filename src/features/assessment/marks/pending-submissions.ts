@@ -112,7 +112,7 @@ export const getPendingMarkSubmissions = cache(async (): Promise<PendingMarkSubm
 
   const { data: events, error } = await supabase
     .from('assessment_events')
-    .select('id, status, exam_marks_finalized_at, unit:units(code, name), academic_period:academic_periods(name)')
+    .select('id, status, cat_marks_finalized_at, exam_marks_finalized_at, unit:units(code, name), academic_period:academic_periods(name)')
     .eq('department_id', profile.activeDepartmentId)
     .is('exam_marks_finalized_at', null)
     .neq('status', 'closed');
@@ -123,6 +123,11 @@ export const getPendingMarkSubmissions = cache(async (): Promise<PendingMarkSubm
   const { drafts, submissions } = state;
 
   const submitted = new Set(submissions.map((s) => `${s.assessment_id}:${s.component_key}`));
+  for (const event of events) {
+    if (event.cat_marks_finalized_at) {
+      submitted.add(`${event.id}:cat`);
+    }
+  }
 
   const editorIds = new Set(drafts.map((d) => d.updated_by).filter((v): v is string => Boolean(v)));
   const trainerNameByProfile = new Map<string, string>();
@@ -174,8 +179,16 @@ export const getCatOnBehalfStatus = cache(async (assessmentId: string) => {
   const targetEventIds = resolvedIds.length > 0 ? resolvedIds : [assessmentId];
   const targetEventSet = new Set(targetEventIds);
 
-  const state = await loadDraftState(supabase, targetEventIds);
-  const catSubmitted = state.submissions.some((s) => targetEventSet.has(s.assessment_id) && s.component_key === 'cat');
+  const [state, eventsRes] = await Promise.all([
+    loadDraftState(supabase, targetEventIds),
+    supabase
+      .from('assessment_events')
+      .select('id, cat_marks_finalized_at')
+      .in('id', targetEventIds),
+  ]);
+
+  const anyCatFinalized = (eventsRes.data ?? []).some((e) => Boolean(e.cat_marks_finalized_at));
+  const catSubmitted = anyCatFinalized || state.submissions.some((s) => targetEventSet.has(s.assessment_id) && s.component_key === 'cat');
 
   // Discover all marked candidates across target events
   const relevantDrafts = state.drafts.filter((d) => targetEventSet.has(d.assessment_id) && d.cat_mark !== null);

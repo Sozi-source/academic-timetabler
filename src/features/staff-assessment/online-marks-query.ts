@@ -208,14 +208,20 @@ export async function getStaffOnlineMarkComponentSubmissions(
   const targetEventIds = await resolveAssessmentIdsWithSiblings(supabase, assessmentId);
   if (targetEventIds.length === 0) return [];
 
-  const { data, error } = await supabase
-    .from('assessment_mark_component_submissions')
-    .select('cohort_id,component_key,submitted_at')
-    .in('assessment_id', targetEventIds);
-  if (error) throw new Error(`Unable to load submitted mark components: ${error.message}`);
+  const [submissionsRes, eventsRes] = await Promise.all([
+    supabase
+      .from('assessment_mark_component_submissions')
+      .select('cohort_id,component_key,submitted_at')
+      .in('assessment_id', targetEventIds),
+    supabase
+      .from('assessment_events')
+      .select('id,cat_marks_finalized_at')
+      .in('id', targetEventIds),
+  ]);
+  if (submissionsRes.error) throw new Error(`Unable to load submitted mark components: ${submissionsRes.error.message}`);
 
   const submissionMap = new Map<string, StaffOnlineComponentSubmission>();
-  for (const row of data ?? []) {
+  for (const row of submissionsRes.data ?? []) {
     const key = `${row.cohort_id ?? 'all'}:${row.component_key}`;
     const existing = submissionMap.get(key);
     if (!existing || Date.parse(row.submitted_at) > Date.parse(existing.submittedAt)) {
@@ -226,6 +232,16 @@ export async function getStaffOnlineMarkComponentSubmissions(
       });
     }
   }
+
+  const anyCatFinalized = (eventsRes.data ?? []).find((e) => Boolean(e.cat_marks_finalized_at));
+  if (anyCatFinalized && !submissionMap.has('all:cat')) {
+    submissionMap.set('all:cat', {
+      cohortId: null,
+      component: 'cat',
+      submittedAt: anyCatFinalized.cat_marks_finalized_at!,
+    });
+  }
+
   return [...submissionMap.values()];
 }
 

@@ -10,6 +10,9 @@ import {
   trainerCanAccessAssessment,
 } from '@/features/staff-assessment/authorization';
 import {
+  resolveAssessmentIdsWithSiblings,
+} from '@/features/staff-assessment/online-marks-query';
+import {
   createClient,
 } from '@/lib/supabase/server';
 import {
@@ -208,6 +211,9 @@ export async function POST(
     }, { status: 403 });
   }
 
+  const resolvedTargetIds = await resolveAssessmentIdsWithSiblings(supabase, targetAssessmentId);
+  const allTargetIds = resolvedTargetIds.length > 0 ? resolvedTargetIds : [targetAssessmentId];
+
   if (component === 'cat') {
     // Milestone 1: CAT marks submission (midterm milestone)
     // Any unentered CAT mark is automatically recorded as an explicit AB absence.
@@ -220,26 +226,66 @@ export async function POST(
       };
     });
 
-    const { data: submission, error: componentError } = await supabase.rpc('save_assessment_online_component_marks', {
-      target_assessment_id: targetAssessmentId,
-      target_component: 'cat',
-      target_entries: normalizedEntries.map(({ attendance_status: _a, ...entry }) => entry),
-      submit_component: true,
-    });
-    if (componentError) {
-      return NextResponse.json({ message: componentError.message }, { status: componentError.code === '42501' ? 403 : 409 });
+    let firstSubmission = null;
+    const submittedAtIso = new Date().toISOString();
+
+    for (const eventId of allTargetIds) {
+      const { data: submission, error: componentError } = await supabase.rpc('save_assessment_online_component_marks', {
+        target_assessment_id: eventId,
+        target_component: 'cat',
+        target_entries: normalizedEntries.map(({ attendance_status: _a, ...entry }) => entry),
+        submit_component: true,
+      });
+      if (componentError) {
+        return NextResponse.json({ message: componentError.message }, { status: componentError.code === '42501' ? 403 : 409 });
+      }
+      if (!firstSubmission) firstSubmission = submission;
+
+      // Maintain cat_marks_finalized_at on assessment_events
+      await admin
+        .from('assessment_events')
+        .update({ cat_marks_finalized_at: submittedAtIso })
+        .eq('id', eventId)
+        .is('cat_marks_finalized_at', null);
+
+      // Maintain component submission records for all associated cohorts
+      const { data: rosterCohorts } = await admin
+        .from('assessment_roster')
+        .select('cohort_id')
+        .eq('assessment_id', eventId);
+
+      const cohortIds = [...new Set((rosterCohorts ?? []).map((r) => r.cohort_id))];
+      for (const cId of cohortIds.length > 0 ? cohortIds : [null]) {
+        await admin
+          .from('assessment_mark_component_submissions')
+          .upsert({
+            assessment_id: eventId,
+            cohort_id: cId,
+            component_key: 'cat',
+          }, {
+            onConflict: 'assessment_id,coalesce(cohort_id, \'00000000-0000-0000-0000-000000000000\'::uuid),component_key',
+          });
+      }
     }
-    return NextResponse.json({ success: true, submission, message: 'CAT marks submitted successfully.' });
+
+    return NextResponse.json({ success: true, submission: firstSubmission, message: 'CAT marks submitted successfully.' });
   }
 
   const { data: catSubmission } = await supabase
     .from('assessment_mark_component_submissions')
     .select('id')
-    .eq('assessment_id', targetAssessmentId)
+    .in('assessment_id', allTargetIds)
     .eq('component_key', 'cat')
-    .limit(1)
-    .maybeSingle();
-  if (!catSubmission) {
+    .limit(1);
+
+  const { data: catFinalizedEvents } = await admin
+    .from('assessment_events')
+    .select('id')
+    .in('id', allTargetIds)
+    .not('cat_marks_finalized_at', 'is', null)
+    .limit(1);
+
+  if ((!catSubmission || catSubmission.length === 0) && (!catFinalizedEvents || catFinalizedEvents.length === 0)) {
     return NextResponse.json({ message: 'Submit CAT marks before submitting final marks.' }, { status: 409 });
   }
 
@@ -261,10 +307,6 @@ export async function POST(
     };
   });
 
-  // 1. Sync attendance status in roster and population BEFORE final submit,
-  // because submit_assessment_online_marks validates:
-  // (roster.pre_assessment_status = 'expected' and draft.exam_mark is null) -> rejected
-  // (roster.pre_assessment_status = 'absent'   and draft.exam_mark is not null) -> rejected
   const absentStudentIds = finalEntries
     .filter((e) => e.attendance_status === 'absent')
     .map((e) => e.student_id);
@@ -272,82 +314,88 @@ export async function POST(
     .filter((e) => e.attendance_status !== 'absent')
     .map((e) => e.student_id);
 
-  if (absentStudentIds.length > 0) {
-    await admin
-      .from('assessment_roster')
-      .update({ pre_assessment_status: 'absent' })
-      .eq('assessment_id', targetAssessmentId)
-      .in('student_id', absentStudentIds);
+  let lastFinalSubmission = null;
 
-    await admin
-      .from('assessment_population')
-      .update({ attendance_status: 'absent' })
-      .eq('assessment_event_id', targetAssessmentId)
-      .in('student_id', absentStudentIds);
-  }
-
-  if (presentStudentIds.length > 0) {
-    await admin
-      .from('assessment_roster')
-      .update({ pre_assessment_status: 'expected' })
-      .eq('assessment_id', targetAssessmentId)
-      .in('student_id', presentStudentIds);
-
-    await admin
-      .from('assessment_population')
-      .update({ attendance_status: 'expected' })
-      .eq('assessment_event_id', targetAssessmentId)
-      .in('student_id', presentStudentIds);
-  }
-
-  // 2. Save all drafts with prepared marks (RLS-enforced via user client).
-  const { error: saveError } = await supabase.rpc('save_assessment_online_marks', {
-    target_assessment_id: targetAssessmentId,
-    target_entries: finalEntries.map(({ attendance_status: _a, ...e }) => e),
-  });
-  if (saveError) {
-    return NextResponse.json({ message: saveError.message }, { status: 409 });
-  }
-
-  // 3. Finalize results in official assessment_results (RLS-enforced).
-  const { data: finalSubmission, error: finalError } = await supabase.rpc(
-    'submit_assessment_online_marks',
-    { target_assessment_id: targetAssessmentId },
-  );
-
-  if (finalError) {
-    return NextResponse.json({
-      message: finalError.message,
-    }, { status: finalError.code === '42501' ? 403 : 409 });
-  }
-
-  // 4. Insert component submission records for all components.
-  const { data: rosterCohorts } = await admin
-    .from('assessment_roster')
-    .select('cohort_id')
-    .eq('assessment_id', targetAssessmentId);
-
-  const cohortIds = [...new Set((rosterCohorts ?? []).map((r) => r.cohort_id))];
-  const allComponents = ['assignment', 'presentation', 'rat', 'cat', 'exam'] as const;
-
-  for (const comp of allComponents) {
-    for (const cId of cohortIds.length > 0 ? cohortIds : [null]) {
+  for (const eventId of allTargetIds) {
+    // 1. Sync attendance status in roster and population BEFORE final submit
+    if (absentStudentIds.length > 0) {
       await admin
-        .from('assessment_mark_component_submissions')
-        .upsert({
-          assessment_id: targetAssessmentId,
-          cohort_id: cId,
-          component_key: comp,
-        }, {
-          onConflict: 'assessment_id,coalesce(cohort_id, \'00000000-0000-0000-0000-000000000000\'::uuid),component_key',
-        });
+        .from('assessment_roster')
+        .update({ pre_assessment_status: 'absent' })
+        .eq('assessment_id', eventId)
+        .in('student_id', absentStudentIds);
+
+      await admin
+        .from('assessment_population')
+        .update({ attendance_status: 'absent' })
+        .eq('assessment_event_id', eventId)
+        .in('student_id', absentStudentIds);
+    }
+
+    if (presentStudentIds.length > 0) {
+      await admin
+        .from('assessment_roster')
+        .update({ pre_assessment_status: 'expected' })
+        .eq('assessment_id', eventId)
+        .in('student_id', presentStudentIds);
+
+      await admin
+        .from('assessment_population')
+        .update({ attendance_status: 'expected' })
+        .eq('assessment_event_id', eventId)
+        .in('student_id', presentStudentIds);
+    }
+
+    // 2. Save all drafts with prepared marks (RLS-enforced via user client).
+    const { error: saveError } = await supabase.rpc('save_assessment_online_marks', {
+      target_assessment_id: eventId,
+      target_entries: finalEntries.map(({ attendance_status: _a, ...e }) => e),
+    });
+    if (saveError) {
+      return NextResponse.json({ message: saveError.message }, { status: 409 });
+    }
+
+    // 3. Finalize results in official assessment_results (RLS-enforced).
+    const { data: finalSubmission, error: finalError } = await supabase.rpc(
+      'submit_assessment_online_marks',
+      { target_assessment_id: eventId },
+    );
+
+    if (finalError) {
+      return NextResponse.json({
+        message: finalError.message,
+      }, { status: finalError.code === '42501' ? 403 : 409 });
+    }
+    lastFinalSubmission = finalSubmission;
+
+    // 4. Insert component submission records for all components.
+    const { data: rosterCohorts } = await admin
+      .from('assessment_roster')
+      .select('cohort_id')
+      .eq('assessment_id', eventId);
+
+    const cohortIds = [...new Set((rosterCohorts ?? []).map((r) => r.cohort_id))];
+    const allComponents = ['assignment', 'presentation', 'rat', 'cat', 'exam'] as const;
+
+    for (const comp of allComponents) {
+      for (const cId of cohortIds.length > 0 ? cohortIds : [null]) {
+        await admin
+          .from('assessment_mark_component_submissions')
+          .upsert({
+            assessment_id: eventId,
+            cohort_id: cId,
+            component_key: comp,
+          }, {
+            onConflict: 'assessment_id,coalesce(cohort_id, \'00000000-0000-0000-0000-000000000000\'::uuid),component_key',
+          });
+      }
     }
   }
 
   return NextResponse.json({
     success: true,
     final: true,
-    submission: finalSubmission,
+    submission: lastFinalSubmission,
     message: 'Final marks submitted and markbook finalized successfully.',
   });
 }

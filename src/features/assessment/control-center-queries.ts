@@ -34,6 +34,7 @@ export interface AssessmentControlCenterItem {
   workflowStatus: string;
   isSubmitted: boolean;
   submittedAt: string | null;
+  catMarksFinalizedAt: string | null;
   isFinalised: boolean;
   finalisedAt: string | null;
   isPublished: boolean;
@@ -451,10 +452,18 @@ export const getAssessmentControlCenterData = cache(
       const scopes: Array<string | null> = eventCohortIds.length ? eventCohortIds : [null];
       const drafts = eventDraftsMap.get(event.id) ?? [];
       const resultsForEvent = eventResultsMap.get(event.id) ?? [];
+      const equivalentUnitIds = equivalentUnitIdsByUnit.get(event.unit_id) ?? [event.unit_id];
+      const siblingEvents = eventRows.filter((e) => e.id !== event.id && equivalentUnitIds.includes(e.unit_id));
+
       for (const scopeId of scopes) {
         for (const component of componentKeys) {
-          const record = submissionByScope.get(`${event.id}:${scopeId ?? 'all'}:${component}`)
+          const directRecord = submissionByScope.get(`${event.id}:${scopeId ?? 'all'}:${component}`)
             ?? submissionByScope.get(`${event.id}:all:${component}`);
+          const siblingRecord = directRecord ? null : siblingEvents
+            .map((s) => submissionByScope.get(`${s.id}:${scopeId ?? 'all'}:${component}`) ?? submissionByScope.get(`${s.id}:all:${component}`))
+            .find(Boolean);
+          const record = directRecord ?? siblingRecord;
+
           const hasDraft = drafts.some((draft) =>
             component === 'assignment' ? draft.assignment_mark !== null
               : component === 'presentation' ? draft.presentation_mark !== null
@@ -468,6 +477,9 @@ export const getAssessmentControlCenterData = cache(
             const value = (marks as Record<string, unknown>)[markKey];
             return value !== null && value !== undefined;
           });
+          const isCatFinalized = component === 'cat' && Boolean(
+            event.cat_marks_finalized_at || siblingEvents.some((s) => Boolean(s.cat_marks_finalized_at)),
+          );
           submissions.push({
             id: `${event.id}:${scopeId ?? 'all'}:${component}`,
             assessmentId: event.id,
@@ -475,8 +487,8 @@ export const getAssessmentControlCenterData = cache(
             unitCode: unit?.code ?? '',
             cohort: scopeId ? (cohort?.id === scopeId ? cohort.name : cohortNameById.get(scopeId) ?? 'Cohort') : 'All cohorts',
             component: component === 'rat' ? 'RAT' : component.toUpperCase(),
-            status: record ? 'Submitted' : hasDraft || hasImportedMarks ? 'In progress' : 'Not started',
-            submittedAt: record?.submitted_at ?? null,
+            status: (record || isCatFinalized) ? 'Submitted' : hasDraft || hasImportedMarks ? 'In progress' : 'Not started',
+            submittedAt: record?.submitted_at ?? (isCatFinalized ? (event.cat_marks_finalized_at ?? siblingEvents.find((s) => s.cat_marks_finalized_at)?.cat_marks_finalized_at ?? null) : null),
             submittedBy: record?.submitted_by ? submitterNameById.get(record.submitted_by) ?? 'Trainer' : null,
           });
         }
@@ -541,6 +553,9 @@ export const getAssessmentControlCenterData = cache(
         }
       }
 
+      const equivalentUnitIds = equivalentUnitIdsByUnit.get(event.unit_id) ?? [event.unit_id];
+      const siblingEvents = eventRows.filter((e) => e.id !== event.id && equivalentUnitIds.includes(e.unit_id));
+
       const isLocked = Boolean(
         event.population_locked_at ||
           event.cat_marks_finalized_at ||
@@ -548,24 +563,29 @@ export const getAssessmentControlCenterData = cache(
           event.marks_submitted_at ||
           event.finalised_at ||
           event.status === 'submitted' ||
-          event.status === 'closed'
+          event.status === 'closed' ||
+          siblingEvents.some((s) => s.cat_marks_finalized_at || s.exam_marks_finalized_at || s.marks_submitted_at || s.finalised_at),
       );
 
       const isSubmitted = Boolean(
         event.marks_submitted_at ||
           event.operational_workflow_status === 'submitted' ||
-          event.status === 'submitted'
+          event.status === 'submitted' ||
+          siblingEvents.some((s) => s.marks_submitted_at || s.operational_workflow_status === 'submitted' || s.status === 'submitted'),
       );
 
       const isFinalised = Boolean(
         event.finalised_at ||
           event.exam_marks_finalized_at ||
-          event.operational_workflow_status === 'finalised'
+          event.operational_workflow_status === 'finalised' ||
+          siblingEvents.some((s) => s.finalised_at || s.exam_marks_finalized_at || s.operational_workflow_status === 'finalised'),
       );
 
       const isPublished = Boolean(
-        event.published_at || (isFinalised && event.published_at !== null)
+        event.published_at || (isFinalised && event.published_at !== null) || siblingEvents.some((s) => s.published_at),
       );
+
+      const catMarksFinalizedAt = event.cat_marks_finalized_at ?? siblingEvents.find((s) => s.cat_marks_finalized_at)?.cat_marks_finalized_at ?? null;
 
       items.push({
         id: event.id,
@@ -594,6 +614,7 @@ export const getAssessmentControlCenterData = cache(
         workflowStatus: isFinalised ? 'finalised' : isSubmitted ? 'submitted' : event.status ?? 'draft',
         isSubmitted,
         submittedAt: event.marks_submitted_at,
+        catMarksFinalizedAt,
         isFinalised,
         finalisedAt: event.finalised_at ?? event.exam_marks_finalized_at,
         isPublished,

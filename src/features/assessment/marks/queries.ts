@@ -74,29 +74,55 @@ export const getAssessmentResultCount = cache(async (assessmentId: string) => {
 export const getAssessmentMarkComponentSubmissions = cache(async (assessmentId: string) => {
   await requireHodAccess();
   const supabase = await createClient();
+  const resolvedIds = await resolveAssessmentIdsWithSiblings(supabase, assessmentId);
+  const targetEventIds = resolvedIds.length > 0 ? resolvedIds : [assessmentId];
+
   const [submissionResult, assessmentResult] = await Promise.all([
     supabase
       .from('assessment_mark_component_submissions')
       .select('id,cohort_id,component_key,submitted_at,cohort:cohorts(code,name)')
-      .eq('assessment_id', assessmentId)
+      .in('assessment_id', targetEventIds)
       .order('submitted_at', { ascending: false }),
     supabase
       .from('assessment_events')
-      .select('operational_workflow_status,marks_submitted_at,exam_marks_finalized_at,status')
-      .eq('id', assessmentId)
-      .maybeSingle(),
+      .select('id,operational_workflow_status,marks_submitted_at,cat_marks_finalized_at,exam_marks_finalized_at,status')
+      .in('id', targetEventIds),
   ]);
   if (submissionResult.error) throw new Error(`Unable to load submitted mark components: ${submissionResult.error.message}`);
   if (assessmentResult.error) throw new Error(`Unable to load markbook status: ${assessmentResult.error.message}`);
 
-  const assessment = assessmentResult.data;
-  const workflowStatus = assessment?.operational_workflow_status;
+  const assessments = assessmentResult.data ?? [];
+  const primaryAssessment = assessments.find((a) => a.id === assessmentId) ?? assessments[0];
+  const workflowStatus = primaryAssessment?.operational_workflow_status;
+
+  const seenScopes = new Set<string>();
+  const uniqueSubmissions: NonNullable<typeof submissionResult.data> = [];
+  for (const sub of submissionResult.data ?? []) {
+    const key = `${sub.cohort_id ?? 'all'}:${sub.component_key}`;
+    if (!seenScopes.has(key)) {
+      seenScopes.add(key);
+      uniqueSubmissions.push(sub);
+    }
+  }
+
+  const anyCatFinalized = assessments.find((a) => Boolean(a.cat_marks_finalized_at));
+  const hasCatSub = uniqueSubmissions.some((s) => s.component_key === 'cat');
+  if (anyCatFinalized && !hasCatSub) {
+    uniqueSubmissions.push({
+      id: `cat-finalized-${assessmentId}`,
+      cohort_id: null,
+      component_key: 'cat',
+      submitted_at: anyCatFinalized.cat_marks_finalized_at!,
+      cohort: null,
+    });
+  }
+
   return {
-    submissions: submissionResult.data ?? [],
-    canUnlock: Boolean(assessment)
-      && !assessment?.marks_submitted_at
-      && !assessment?.exam_marks_finalized_at
-      && assessment?.status !== 'closed'
+    submissions: uniqueSubmissions,
+    canUnlock: Boolean(primaryAssessment)
+      && !primaryAssessment?.marks_submitted_at
+      && !primaryAssessment?.exam_marks_finalized_at
+      && primaryAssessment?.status !== 'closed'
       && !['submitted', 'finalised', 'archived'].includes(workflowStatus ?? ''),
   };
 });

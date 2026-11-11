@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { getTrainerMarkInvite } from '@/features/assessment/trainer-mark-entry';
+import { resolveAssessmentIdsWithSiblings } from '@/features/staff-assessment/online-marks-query';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 const inviteCookieName = 'trainer_mark_invite';
@@ -215,20 +216,25 @@ export async function POST(request: Request) {
                 .in('student_id', presentStudentIds);
             }
 
-            // Record submissions for all components
+            // Record submissions for all components across target and sibling events
             const allComponents = ['assignment', 'presentation', 'rat', 'cat', 'exam'] as const;
-            for (const comp of allComponents) {
-              try {
-                await admin.from('assessment_mark_component_submissions').upsert({
-                  assessment_id: scope.assessment_id,
-                  cohort_id: scope.cohort_id ?? null,
-                  component_key: comp,
-                  source_trainer_invite_id: scope.id,
-                }, {
-                  onConflict: 'assessment_id,coalesce(cohort_id, \'00000000-0000-0000-0000-000000000000\'::uuid),component_key',
-                });
-              } catch {
-                // ignore
+            const scopeSiblingIds = await resolveAssessmentIdsWithSiblings(admin, scope.assessment_id);
+            const allScopeIds = scopeSiblingIds.length > 0 ? scopeSiblingIds : [scope.assessment_id];
+
+            for (const eventId of allScopeIds) {
+              for (const comp of allComponents) {
+                try {
+                  await admin.from('assessment_mark_component_submissions').upsert({
+                    assessment_id: eventId,
+                    cohort_id: scope.cohort_id ?? null,
+                    component_key: comp,
+                    source_trainer_invite_id: scope.id,
+                  }, {
+                    onConflict: 'assessment_id,coalesce(cohort_id, \'00000000-0000-0000-0000-000000000000\'::uuid),component_key',
+                  });
+                } catch {
+                  // ignore
+                }
               }
             }
 
@@ -293,14 +299,25 @@ export async function POST(request: Request) {
               message: 'Final examination mark entry is currently closed by the department administration. Only CAT marks may be submitted at this time.',
             }, { status: 403 });
           }
-          const { data: catSub } = await admin
-            .from('assessment_mark_component_submissions')
-            .select('id')
-            .eq('assessment_id', invite.assessment_id)
-            .eq('component_key', 'cat')
-            .limit(1)
-            .maybeSingle();
-          if (!catSub) {
+          const inviteSiblingIds = await resolveAssessmentIdsWithSiblings(admin, invite.assessment_id);
+          const allInviteTargetIds = inviteSiblingIds.length > 0 ? inviteSiblingIds : [invite.assessment_id];
+
+          const [{ data: catSub }, { data: catFinalizedEvents }] = await Promise.all([
+            admin
+              .from('assessment_mark_component_submissions')
+              .select('id')
+              .in('assessment_id', allInviteTargetIds)
+              .eq('component_key', 'cat')
+              .limit(1),
+            admin
+              .from('assessment_events')
+              .select('id')
+              .in('id', allInviteTargetIds)
+              .not('cat_marks_finalized_at', 'is', null)
+              .limit(1),
+          ]);
+
+          if ((!catSub || catSub.length === 0) && (!catFinalizedEvents || catFinalizedEvents.length === 0)) {
             return NextResponse.json({
               message: 'Continuous assessment (CAT) marks must be submitted before final examination marks can be submitted.',
             }, { status: 409 });
@@ -393,18 +410,23 @@ export async function POST(request: Request) {
           }
 
           const allComponents = ['assignment', 'presentation', 'rat', 'cat', 'exam'] as const;
-          for (const comp of allComponents) {
-            try {
-              await admin.from('assessment_mark_component_submissions').upsert({
-                assessment_id: invite.assessment_id,
-                cohort_id: null,
-                component_key: comp,
-                source_trainer_invite_id: invite.id,
-              }, {
-                onConflict: 'assessment_id,coalesce(cohort_id, \'00000000-0000-0000-0000-000000000000\'::uuid),component_key',
-              });
-            } catch {
-              // ignore
+          const inviteSiblingIds = await resolveAssessmentIdsWithSiblings(admin, invite.assessment_id);
+          const allInviteTargetIds = inviteSiblingIds.length > 0 ? inviteSiblingIds : [invite.assessment_id];
+
+          for (const targetId of allInviteTargetIds) {
+            for (const comp of allComponents) {
+              try {
+                await admin.from('assessment_mark_component_submissions').upsert({
+                  assessment_id: targetId,
+                  cohort_id: null,
+                  component_key: comp,
+                  source_trainer_invite_id: invite.id,
+                }, {
+                  onConflict: 'assessment_id,coalesce(cohort_id, \'00000000-0000-0000-0000-000000000000\'::uuid),component_key',
+                });
+              } catch {
+                // ignore
+              }
             }
           }
 

@@ -1,3 +1,27 @@
+### 2026-11-11: Trainer Shared Assessment Access Hardening & Food Production Candidate 5529 Roster Reconciliation
+
+**Summary:**
+- **Resolved Candidate 5529 Missing from Food Production Assessment Roster:**
+  - Identified that student `DHN/M-5529/IC/25` was enrolled and registered in the DHN cohort for Food Production for Invalids and Convalescents (`DHN 1305` / `CND 1304` / `DND 1304` / `CHN 2203`), but was missing from the `assessment_roster` on sibling assessment events.
+  - Reconciled and backfilled `assessment_roster` across all 4 sibling events in the shared group, bringing all rosters to 33 candidates.
+- **Fixed Authorization Error (PostgreSQL 42501) on Shared Class Mark Submissions:**
+  - Replaced strict direct unit check in `trainer_can_access_assessment` with support for confirmed shared offerings (`confirmed_shared_offering_id`) and approved equivalence groups (`unit_equivalence_members`), allowing assigned trainers (e.g. Maureen Ayuma) to submit marks for all shared cohorts.
+  - Hardened `ensure_unit_markbook_ready` to discover shared units and ensure idempotent roster population even when `trainer_entry_open` is active.
+  - Upgraded `save_assessment_online_component_marks` to automatically insert any missing candidates into `assessment_roster` prior to saving component marks.
+  - Hardened `src/app/api/staff/assessment/[assessmentId]/online/submit/route.ts` to use admin service client for sibling event synchronization while maintaining user RLS on the primary event.
+- **Automated Verification:**
+  - Added unit test suite `src/tests/trainer-shared-assessment-access.test.ts` validating direct allocations, shared offerings, and equivalence access rules.
+  - Remote database updated via `supabase db push`.
+  - Full check passed: 137 test suites (710 tests) and Next.js 16 production build succeeded.
+
+**Added:**
+- `src/tests/trainer-shared-assessment-access.test.ts`
+- `supabase/migrations/20261111143000_allow_trainer_access_shared_and_equivalent_assessments.sql`
+
+**Modified:**
+- `src/app/api/staff/assessment/[assessmentId]/online/submit/route.ts`
+- `CHANGES.md`
+
 ### 2026-11-11: Enterprise Cohort Clutter Purge Across System Pages & Cards
 
 **Summary:**

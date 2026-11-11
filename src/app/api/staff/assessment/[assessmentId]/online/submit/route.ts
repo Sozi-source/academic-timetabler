@@ -230,7 +230,8 @@ export async function POST(
     const submittedAtIso = new Date().toISOString();
 
     for (const eventId of allTargetIds) {
-      const { data: submission, error: componentError } = await supabase.rpc('save_assessment_online_component_marks', {
+      const client = eventId === targetAssessmentId ? supabase : admin;
+      const { data: submission, error: componentError } = await client.rpc('save_assessment_online_component_marks', {
         target_assessment_id: eventId,
         target_component: 'cat',
         target_entries: normalizedEntries.map(({ attendance_status: _a, ...entry }) => entry),
@@ -346,8 +347,10 @@ export async function POST(
         .in('student_id', presentStudentIds);
     }
 
+    const client = eventId === targetAssessmentId ? supabase : admin;
+
     // 2. Save all drafts with prepared marks (RLS-enforced via user client).
-    const { error: saveError } = await supabase.rpc('save_assessment_online_marks', {
+    const { error: saveError } = await client.rpc('save_assessment_online_marks', {
       target_assessment_id: eventId,
       target_entries: finalEntries.map(({ attendance_status: _a, ...e }) => e),
     });
@@ -356,7 +359,7 @@ export async function POST(
     }
 
     // 3. Finalize results in official assessment_results (RLS-enforced).
-    const { data: finalSubmission, error: finalError } = await supabase.rpc(
+    const { data: finalSubmission, error: finalError } = await client.rpc(
       'submit_assessment_online_marks',
       { target_assessment_id: eventId },
     );

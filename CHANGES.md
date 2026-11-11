@@ -1,3 +1,24 @@
+### 2026-11-11: Assessment Markbook Header & Layout Streamlining
+
+**Summary:**
+- **Professionalized & Tightened Unit Markbook Page Header:**
+  - Removed crowded raw text cohort listing (`Sharing Cohorts: CHN SEP 24, CHN JAN/MAR 25, CHN MAY 25...`) from `PageHeader` description.
+  - Removed redundant `· Unit Markbook` description suffix.
+  - Streamlined header metadata to a clean unit code badge (`[DHN 1305]`) and academic period label (`September-December 2026`).
+  - Added a compact cohort indicator badge (`[👥 {count} Cohorts]`) in the header context area, featuring a hover tooltip displaying all member cohort names on demand without cluttering the screen.
+- **Removed Unnecessary Description Text Across Markbook Components:**
+  - In `Submitted Components` card: removed verbose explanatory paragraphs (`Unlock a submitted component for correction...`) and help text; retained clear action buttons (`Unlock CAT`, `Unlock EXAM`) and lock status indicators.
+  - In `Performance Overview`: eliminated redundant descriptive sentences (`0 of 33 CAT marks recorded · 33 candidate(s) missing marks · Draft / In Progress`) and removed redundant `Quick Filters:` label, as the filter buttons (`CAT Recorded: X`, `Missing CAT: Y`, `Absent: Z`) are completely self-explanatory.
+  - Merged quick filter buttons and aggregate statistics (`Mean CAT`, `Mean Total`, `Pass Rate`) into a single-tier, low-profile toolbar card, saving significant vertical screen space.
+- **Streamlined Cohort Filtering Controls:**
+  - Removed the bulky, multi-row button bar (`SHARING COHORTS: [All Cohorts 33] [CHN SEP 24 1] ...`) that pushed the markbook roster off-screen on units with many shared cohorts.
+  - Consolidated cohort selection into the unified table action bar using a styled dropdown with an icon and per-cohort candidate counts (`[All Cohorts (33)]`, `[CHN MAY 25 (7)]`, etc.).
+  - Added matching icons (`Users` for cohort filter, `Filter` for status filter) to create a clean, consistent, and balanced control row.
+
+**Modified:**
+- `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`
+- `src/features/assessment/marks/assessment-markbook-view-table.tsx`
+
 ### 2026-11-11: Food Production Markbook Accidental Final Submission Reversal & Reopen Hardening
 
 **Summary:**

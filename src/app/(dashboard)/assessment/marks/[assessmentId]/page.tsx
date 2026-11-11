@@ -73,30 +73,16 @@ export default async function AssessmentMarkWorkflowPage({
       {/* Header */}
       <PageHeader
         title={unitName}
-        titleClassName="text-slate-700 font-bold tracking-tight text-lg sm:text-xl"
+        titleClassName="text-slate-800 font-bold tracking-tight text-lg sm:text-xl"
         description={
           <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
             {unitCode ? (
-              <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 font-mono text-[11px] font-medium text-slate-500 border border-slate-200/90 shadow-2xs">
+              <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 font-mono text-[11px] font-semibold text-slate-700 border border-slate-200 shadow-2xs">
                 {unitCode}
               </span>
             ) : null}
             <span className="text-slate-300">·</span>
-            <span className="font-medium text-slate-600">
-              {periodName}
-            </span>
-            {distinctCohorts.length > 1 ? (
-              <>
-                <span className="text-slate-300">·</span>
-                <span className="inline-flex items-center gap-1 font-medium text-slate-600">
-                  <UsersRound className="size-3 text-slate-400" />
-                  <span>Sharing Cohorts:</span>
-                  <span className="font-bold text-slate-800">{distinctCohorts.join(', ')}</span>
-                </span>
-              </>
-            ) : null}
-            <span className="text-slate-300">·</span>
-            <span className="text-slate-500">Unit Markbook</span>
+            <span className="font-medium text-slate-600">{periodName}</span>
           </div>
         }
         icon={FileSpreadsheet}
@@ -104,6 +90,17 @@ export default async function AssessmentMarkWorkflowPage({
         context={
           <div className="flex items-center gap-2">
             <Badge variant="neutral">{population.length} Candidates</Badge>
+            {distinctCohorts.length > 1 ? (
+              <span title={distinctCohorts.join(', ')}>
+                <Badge
+                  variant="neutral"
+                  className="border-slate-300 bg-slate-50 text-slate-700 font-medium cursor-help"
+                >
+                  <UsersRound className="mr-1 size-3 text-slate-500" />
+                  {distinctCohorts.length} Cohorts
+                </Badge>
+              </span>
+            ) : null}
             {isComplete ? (
               <Badge variant="neutral" className="bg-slate-100 text-slate-800">
                 Finalized
@@ -210,21 +207,16 @@ export default async function AssessmentMarkWorkflowPage({
 
 
       {componentSubmissionState.submissions.length > 0 ? (
-        <section className="space-y-2.5 rounded-xl border border-border bg-surface p-4 shadow-2xs">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <h2 className="text-sm font-semibold text-text-primary">Submitted mark components</h2>
-              <p className="mt-0.5 text-xs leading-5 text-text-muted">
-                Unlock a submitted component for correction. Its saved marks remain in place and become editable again.
-              </p>
-            </div>
+        <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2.5 shadow-2xs">
+          <div className="flex items-center gap-2">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">Submitted Components</h2>
             {!componentSubmissionState.canUnlock ? (
               <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500 border border-slate-200">
-                Markbook finalized · Locked
+                Locked
               </span>
             ) : null}
           </div>
-          <div className="flex flex-wrap items-center gap-2 pt-0.5">
+          <div className="flex flex-wrap items-center gap-2">
             {componentSubmissionState.submissions.map((submission) => {
               const cohort = Array.isArray(submission.cohort) ? submission.cohort[0] : submission.cohort;
               const componentLabel = submission.component_key.toUpperCase();
@@ -232,11 +224,11 @@ export default async function AssessmentMarkWorkflowPage({
               return (
                 <div
                   key={submission.id}
-                  className="inline-flex items-center gap-2.5 rounded-lg border border-border bg-surface-subtle/70 py-1 pl-3 pr-1 shadow-2xs transition hover:bg-surface-subtle"
+                  className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/80 py-1 pl-2.5 pr-1 shadow-2xs"
                 >
                   <div className="flex items-center gap-1.5 text-xs">
-                    <span className="font-bold text-text-primary">{componentLabel}</span>
-                    <span className="rounded bg-slate-200/80 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-slate-700">
+                    <span className="font-bold text-slate-900">{componentLabel}</span>
+                    <span className="rounded bg-slate-200/90 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-slate-700">
                       {cohortLabel}
                     </span>
                   </div>
@@ -247,7 +239,7 @@ export default async function AssessmentMarkWorkflowPage({
                     <button
                       type="submit"
                       disabled={!componentSubmissionState.canUnlock}
-                      className="inline-flex h-7 items-center justify-center rounded-md border border-warning-border bg-warning-surface px-2.5 text-xs font-semibold text-warning-ink shadow-2xs transition hover:bg-warning-surface/70 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="inline-flex h-7 items-center justify-center rounded-md border border-amber-300 bg-amber-50 px-2.5 text-xs font-semibold text-amber-900 shadow-2xs transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
                     >
                       Unlock {componentLabel}
                     </button>
@@ -256,9 +248,6 @@ export default async function AssessmentMarkWorkflowPage({
               );
             })}
           </div>
-          {!componentSubmissionState.canUnlock ? (
-            <p className="text-[11px] text-text-muted">This markbook has been finalized and cannot be reopened from this control.</p>
-          ) : null}
         </section>
       ) : null}
 

@@ -5200,3 +5200,15 @@ No database or application runtime changes were executed while preparing this pa
 **Modified:**
 - `src/app/globals.css`
 
+### 2026-11-12: Improve Trainer Detail Responsiveness & Simplify Unit Cards
+
+**Summary:**
+- Updated the shared page-header action layout so record titles and action ribbons wrap cleanly on medium and narrow screens, while preserving the compact wide-screen layout.
+- Removed the academic-period/semester label from trainer portal teaching-unit cards.
+- Hardened teaching-unit card wrapping so unit names, cohort badges, status, and workspace actions remain usable across screen sizes.
+
+**Modified:**
+- `src/components/ui/page-header.tsx`
+- `src/app/(dashboard)/trainers/[id]/portal-view/page.tsx`
+- `CHANGES.md`
+

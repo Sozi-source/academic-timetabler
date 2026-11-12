@@ -377,12 +377,12 @@ export default async function AdminTrainerPortalViewPage({ params, searchParams 
               {groupedUnits.map((item) => (
                 <div
                   key={item.primaryAllocationId || item.allocationId}
-                  className="rounded-xl border border-border bg-surface p-4 shadow-xs flex flex-wrap items-center justify-between gap-3"
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-surface p-4 shadow-xs"
                 >
-                  <div>
-                    <div className="flex items-center gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex min-w-0 items-center gap-2">
                       <span className="font-mono text-xs font-bold text-primary">{item.unitCode}</span>
-                      <span className="font-bold text-xs text-text-primary">{item.unitName}</span>
+                      <span className="min-w-0 break-words font-bold text-xs text-text-primary">{item.unitName}</span>
                     </div>
                     <div className="mt-1 flex flex-wrap items-center gap-1.5">
                       {item.cohortNames.map((c: string) => (
@@ -390,11 +390,8 @@ export default async function AdminTrainerPortalViewPage({ params, searchParams 
                       ))}
                       {item.cohortNames.length > 1 && <Badge variant="primary" className="text-[10px]">Combined ({item.cohortNames.length} Cohorts)</Badge>}
                     </div>
-                    {item.academicPeriodName && (
-                      <p className="mt-0.5 text-[10px] text-text-muted">{item.academicPeriodName}</p>
-                    )}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex w-full flex-wrap items-center justify-between gap-2 sm:w-auto sm:justify-end">
                     <Badge variant={item.allocationStatus === 'active' ? 'success' : 'neutral'} className="capitalize">
                       {item.allocationStatus}
                     </Badge>

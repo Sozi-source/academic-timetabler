@@ -57,8 +57,8 @@ export function PageHeader({
 
       {context ? <div className="mb-3">{context}</div> : null}
 
-      <div className="flex flex-col gap-3 md:flex-row md:flex-wrap lg:flex-nowrap md:items-center md:justify-between">
-        <div className="flex min-w-0 flex-1 sm:min-w-fit items-start gap-2.5 sm:gap-3">
+      <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-start md:justify-between 2xl:flex-nowrap 2xl:items-center">
+        <div className="flex min-w-0 flex-1 items-start gap-2.5 sm:gap-3">
           {backHref ? (
             <Link
               href={backHref}
@@ -111,7 +111,7 @@ export function PageHeader({
         </div>
 
         {actions ? (
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 md:justify-end">
+          <div className="flex w-full min-w-0 flex-wrap items-center gap-1.5 sm:gap-2 md:justify-start 2xl:w-auto 2xl:justify-end">
             {actions}
           </div>
         ) : null}

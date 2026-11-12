@@ -1,3 +1,28 @@
+### 2026-11-11: Harden Assessment Roster Against Inactive Student Lifecycle Changes & Fix CAT Submission
+
+**Summary:**
+- **Resolved "Include every student in a cohort before submitting its component" on CAT Submissions:**
+  - Root cause: Student `CND/M-7922/IC/26` (Claire Wakonyo Mwangi) had dropped out (`lifecycle_status = 'dropped_out'`), but remained present on open unsubmitted `assessment_roster` entries for Diet Therapy I (`DND 1202` / `CND 1202`). The UI unified roster correctly hid her, but the database RPC completeness check (`save_assessment_online_component_marks`) checked all roster entries for cohort `CND MAY 26` regardless of student lifecycle status, rejecting the 21 active submitted entries as incomplete.
+  - Performed database cleanup to delete lingering inactive candidates (`dropped_out`, `deferred`, `suspended`, `withdrawn`, etc. or `academic_phase <> 'in_class'`) from open, unsubmitted assessment rosters with no results.
+- **Automated Lifecycle Synchronization Trigger:**
+  - Added PostgreSQL trigger `trigger_sync_student_lifecycle_assessment_roster` on `public.students` executing `handle_student_lifecycle_assessment_roster_sync()`. Whenever a student's `lifecycle_status` or `academic_phase` updates to an inactive or non-in_class state, they are automatically excised from all open, unsubmitted assessment rosters where no official results have been published.
+- **Hardened Assessment RPCs:**
+  - `ensure_unit_markbook_ready`: Filtered candidate roster population to active candidates only (`lifecycle_status IN ('admitted', 'active') AND academic_phase = 'in_class'`).
+  - `save_assessment_online_component_marks`: Joined `students` table in cohort completeness validation so only active candidates are required to submit component marks. Inactive or dropped-out students can never block legitimate mark submissions.
+  - `submit_assessment_online_marks`: Upgraded markbook finalization queries and official results insertion to strictly target active students.
+- **Verification & Deployment Evidence:**
+  - Remote database migrated and confirmed up to date via `supabase db push`.
+  - Live verification confirmed CAT component marks successfully submitted and finalized across all cohorts (`DND MAY 26`, `CND MAY 26`, `DND SEPT 25`, and global fallback) for Diet Therapy I.
+  - Added unit test suite `src/tests/inactive-student-assessment-exclusion.test.ts` (4 tests).
+  - Full check passed: 138 test files (714 tests), Next.js 16 typecheck, ESLint, and Next.js 16 production build with 142 routes compiled cleanly.
+
+**Added:**
+- `src/tests/inactive-student-assessment-exclusion.test.ts`
+- `supabase/migrations/20261111171500_harden_assessment_roster_inactive_student_filtering.sql`
+
+**Modified:**
+- `CHANGES.md`
+
 ### 2026-11-11: Trainer Shared Assessment Access Hardening & Food Production Candidate 5529 Roster Reconciliation
 
 **Summary:**

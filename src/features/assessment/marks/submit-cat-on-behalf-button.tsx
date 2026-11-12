@@ -18,7 +18,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-600 px-3.5 text-xs font-semibold text-white shadow-2xs transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+      className="inline-flex min-h-11 sm:min-h-9 h-auto w-full sm:w-auto items-center justify-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-600 px-3.5 py-2 sm:py-1.5 text-xs font-semibold text-white shadow-2xs transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
     >
       {pending ? <Loader2 className="size-3.5 animate-spin" aria-hidden="true" /> : <Send className="size-3.5" aria-hidden="true" />}
       <span>{pending ? 'Submitting…' : 'Submit CAT on behalf of trainer'}</span>
@@ -39,7 +39,7 @@ export function SubmitCatOnBehalfButton({ assessmentId, trainerLabel, missingCou
   }
 
   return (
-    <form action={submitCatOnBehalfAction} onSubmit={confirmSubmit}>
+    <form action={submitCatOnBehalfAction} onSubmit={confirmSubmit} className="w-full sm:w-auto">
       <input type="hidden" name="assessmentId" value={assessmentId} />
       <SubmitButton />
     </form>

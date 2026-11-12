@@ -88,7 +88,7 @@
   --radius-xl: 0.75rem;
 
   /* Layout Constraints */
-  --content-max-width: 90rem;
+  --content-max-width: 120rem;
   --sidebar-width: 14.5rem;
   --header-height: 4rem;
 
@@ -179,12 +179,16 @@
 
 html {
   min-height: 100%;
+  min-width: 20rem;
+  overflow-x: hidden;
   background: var(--background);
   -webkit-tap-highlight-color: transparent;
 }
 
 body {
   min-height: 100vh;
+  min-width: 20rem;
+  overflow-x: hidden;
   margin: 0;
   background: var(--background);
   color: var(--text-primary);
@@ -325,7 +329,7 @@ code, kbd, samp, pre {
    Presentation only. No data, routing or business logic.
    ============================================================ */
 :root {
-  --admin-max: 90rem;
+  --admin-max: 120rem;
   --admin-gutter: 0.75rem;
   --admin-gap: 0.75rem;
   --admin-control-h: 2.625rem;
@@ -431,9 +435,10 @@ code, kbd, samp, pre {
 @media(max-width:1199px){
   .trainer-access-register .overflow-x-auto,
   .trainer-approvals-register .overflow-x-auto,
-  .trainer-directory-table .overflow-x-auto{overflow:visible;border:0;border-radius:0}
+  .trainer-directory-table .overflow-x-auto{overflow:visible!important;max-height:none!important;border:0;border-radius:0}
   .trainer-access-register table,
-  .trainer-approvals-register table{width:100%;min-width:0;display:block}
+  .trainer-approvals-register table,
+  .trainer-directory-table table{width:100%;min-width:0;display:block;table-layout:auto}
   .trainer-access-register thead,
   .trainer-approvals-register thead,
   .trainer-directory-table thead{display:none}
@@ -442,13 +447,13 @@ code, kbd, samp, pre {
   .trainer-directory-table tbody{display:grid;gap:.75rem;padding:.75rem}
   .trainer-access-register tbody tr,
   .trainer-approvals-register tbody tr,
-  .trainer-directory-table tbody tr{display:block;overflow:hidden;border:1px solid var(--border);border-radius:.75rem;background:var(--surface)}
+  .trainer-directory-table tbody tr{display:block;height:auto!important;overflow:visible;border:1px solid var(--border);border-radius:.75rem;background:var(--surface)}
   .trainer-access-register tbody tr:hover,
   .trainer-approvals-register tbody tr:hover,
   .trainer-directory-table tbody tr:hover{background:var(--surface)}
   .trainer-access-register tbody td,
   .trainer-approvals-register tbody td,
-  .trainer-directory-table tbody td{display:grid;width:auto!important;min-width:0!important;max-width:none!important;grid-template-columns:6.25rem minmax(0,1fr);align-items:start;gap:.5rem;padding:.625rem .75rem;white-space:normal;text-align:left}
+  .trainer-directory-table tbody td{display:grid;width:auto!important;min-width:0!important;max-width:none!important;height:auto!important;min-height:0!important;grid-template-columns:6.25rem minmax(0,1fr);align-items:start;gap:.5rem;padding:.625rem .75rem;white-space:normal;text-align:left}
   .trainer-access-register tbody td::before,
   .trainer-approvals-register tbody td::before,
   .trainer-directory-table tbody td::before{content:attr(data-label);padding-top:.125rem;color:var(--text-muted);font-size:.625rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
@@ -459,17 +464,17 @@ code, kbd, samp, pre {
   .trainer-approvals-register tbody td[data-label="Trainer"]::before,
   .trainer-directory-table tbody td[data-label="Trainer"]::before{display:none}
   .trainer-access-register tbody td[data-label="Actions"],
-  .trainer-approvals-register tbody td[data-label="Actions"]{display:block;border-top:1px solid var(--border-soft)}
+  .trainer-approvals-register tbody td[data-label="Actions"]{display:block;height:auto!important;min-height:0!important;border-top:1px solid var(--border-soft)}
   .trainer-access-register tbody td[data-label="Actions"]::before,
   .trainer-approvals-register tbody td[data-label="Actions"]::before{display:block;margin-bottom:.5rem}
   .trainer-access-register .trainer-access-actions,
-  .trainer-approvals-register .trainer-access-actions{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:.5rem;white-space:normal}
+  .trainer-approvals-register .trainer-access-actions{display:flex;flex-wrap:wrap;justify-content:flex-start;align-items:flex-start;gap:.5rem;width:100%;white-space:normal}
   .trainer-access-register .trainer-access-actions form,
   .trainer-approvals-register .trainer-access-actions form{max-width:100%}
   .trainer-access-register .trainer-access-actions button,
   .trainer-access-register .trainer-access-actions a,
   .trainer-approvals-register .trainer-access-actions button,
-  .trainer-approvals-register .trainer-access-actions a{max-width:100%;white-space:normal}
+  .trainer-approvals-register .trainer-access-actions a{max-width:100%;height:auto;white-space:normal}
   .trainer-directory-table tbody td[data-label="Trainer"]{display:grid;grid-template-columns:6.25rem minmax(0,1fr)}
   .trainer-directory-table tbody td[data-label="Trainer"]::before{display:block}
   .trainer-directory-table tbody td[data-label="Actions"]{display:block}
@@ -503,3 +508,42 @@ code, kbd, samp, pre {
 /* Avoid accidental horizontal expansion from long labels/cards. */
 .admin-screen :is(.flex,.grid){min-width:0}
 .admin-screen .truncate{min-width:0}
+
+/* Wide-screen clarity: use the available work area while keeping the
+   restrained ERP geometry and readable density used on smaller screens. */
+@media (min-width: 1536px) {
+  :root {
+    --content-gutter: 2.5rem;
+    --admin-gutter: 2.5rem;
+    --admin-gap: 1.25rem;
+  }
+
+  .admin-screen {
+    gap: 1.25rem;
+  }
+
+  .admin-screen .rounded-xl,
+  .admin-screen .rounded-2xl,
+  .admin-screen .admin-metric-card {
+    border-color: var(--border-strong);
+    box-shadow: 0 2px 5px rgb(15 23 42 / 0.07), 0 10px 24px rgb(15 118 110 / 0.045);
+  }
+
+  .admin-screen .admin-metric-card {
+    min-height: 7.25rem;
+    padding: 1rem 1.125rem;
+  }
+
+  .admin-screen .admin-metric-card p:first-child {
+    font-size: 0.75rem;
+  }
+
+  .admin-screen table {
+    font-size: 0.875rem;
+  }
+}
+
+/* Prevent long record names and codes from widening a grid on phones. */
+.admin-screen :is(h1, h2, h3, h4, p, span, td, th, label) {
+  overflow-wrap: anywhere;
+}

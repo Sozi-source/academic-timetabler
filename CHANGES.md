@@ -5190,3 +5190,13 @@ No database or application runtime changes were executed while preparing this pa
 - The trainers page header stacks its title and actions at these widths so the action buttons do not compete with the title for horizontal space.
 - No breaking changes, database migration, or manual follow-up required.
 
+### 2026-11-12: Responsive Workspace Clarity Across Wide and Mobile Screens
+
+**Summary:**
+- Expanded the shared Academic Planner workspace ceiling from 90rem to 120rem so large desktop displays use their available canvas instead of leaving oversized side margins.
+- Added wide-screen card, metric, table, border and shadow tuning to keep content crisp and visually anchored at 1536px and above.
+- Added global horizontal-overflow protection and long-label wrapping safeguards for narrow mobile layouts.
+
+**Modified:**
+- `src/app/globals.css`
+

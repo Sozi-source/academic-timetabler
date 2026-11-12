@@ -537,11 +537,11 @@ export function TrainerMarkEntryPortal() {
                   })}
                 </div>
                 {!readOnly ? (
-                  <div className="flex w-full justify-end sm:w-auto">
+                  <div className="flex w-full flex-col items-stretch justify-end gap-2 sm:w-auto sm:flex-row sm:items-center">
                     {['assignment', 'presentation', 'rat'].includes(selectedView) ? null : selectedView === 'cat' ? (
                       isCatSubmitted ? (
                         <Button
-                          className="w-full sm:w-auto border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100"
+                          className="min-h-11 sm:min-h-9 h-auto w-full py-2 sm:w-auto sm:py-1.5 border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100"
                           type="button"
                           variant="outline"
                           disabled={busy !== null}
@@ -551,14 +551,14 @@ export function TrainerMarkEntryPortal() {
                           Revise CAT marks
                         </Button>
                       ) : (
-                        <Button className="w-full sm:w-auto" type="button" disabled={busy !== null || students.length === 0 || missingCat > 0} onClick={() => void saveMarks(true)}>
+                        <Button className="min-h-11 sm:min-h-9 h-auto w-full py-2 sm:w-auto sm:py-1.5" type="button" disabled={busy !== null || students.length === 0 || missingCat > 0} onClick={() => void saveMarks(true)}>
                           {busy === 'submit' ? <LoaderCircle className="size-4 animate-spin" /> : <Send className="size-4" />}
                           {busy === 'submit' ? 'Submitting...' : 'Submit CAT marks'}
                         </Button>
                       )
                     ) : isFinalSubmitted ? (
                       <Button
-                        className="w-full sm:w-auto border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100"
+                        className="min-h-11 sm:min-h-9 h-auto w-full py-2 sm:w-auto sm:py-1.5 border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100"
                         type="button"
                         variant="outline"
                         disabled={busy !== null}
@@ -568,14 +568,14 @@ export function TrainerMarkEntryPortal() {
                         Revise Final Marks
                       </Button>
                     ) : isExamEntryClosed ? (
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-900">
-                          <Lock className="size-3.5 text-amber-700" />
-                          Final Exam entry closed by HOD
+                      <div className="flex w-full flex-col-reverse items-stretch gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
+                        <span className="inline-flex min-h-10 sm:min-h-8 w-full sm:w-auto items-center justify-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-center text-xs font-semibold text-amber-900">
+                          <Lock className="size-3.5 shrink-0 text-amber-700" />
+                          <span>Final Exam entry closed by HOD</span>
                         </span>
                         {!isCatSubmitted ? (
                           <Button
-                            className="w-full sm:w-auto"
+                            className="min-h-11 sm:min-h-9 h-auto w-full py-2 sm:w-auto sm:py-1.5"
                             type="button"
                             disabled={busy !== null || students.length === 0 || missingCat > 0}
                             onClick={() => void saveMarks(true)}
@@ -586,7 +586,7 @@ export function TrainerMarkEntryPortal() {
                         ) : null}
                       </div>
                     ) : (
-                      <Button className="w-full sm:w-auto" type="button" disabled={busy !== null || students.length === 0} onClick={() => void saveMarks(true)}>
+                      <Button className="min-h-11 sm:min-h-9 h-auto w-full py-2 sm:w-auto sm:py-1.5" type="button" disabled={busy !== null || students.length === 0} onClick={() => void saveMarks(true)}>
                         {busy === 'submit' ? <LoaderCircle className="size-4 animate-spin" /> : <Send className="size-4" />}
                         {busy === 'submit' ? 'Submitting...' : 'Submit Final Marks'}
                       </Button>
@@ -710,12 +710,12 @@ export function TrainerMarkEntryPortal() {
                     />
                   </div>
 
-                  <div className="mt-5 flex items-center justify-end gap-2">
+                  <div className="mt-5 flex flex-col-reverse items-stretch gap-2 sm:flex-row sm:items-center sm:justify-end">
                     <button
                       type="button"
                       disabled={busy !== null}
                       onClick={() => setRevisionDialogOpen(false)}
-                      className="h-8.5 rounded-lg px-3 text-xs font-medium text-slate-500 hover:text-slate-900 transition"
+                      className="min-h-11 sm:min-h-8 w-full sm:w-auto rounded-lg px-3.5 py-2 sm:py-1.5 text-xs font-medium text-slate-500 hover:text-slate-900 transition"
                     >
                       Cancel
                     </button>
@@ -724,7 +724,7 @@ export function TrainerMarkEntryPortal() {
                       size="sm"
                       disabled={busy !== null || revisionReason.trim().length < 3}
                       onClick={() => void reopenComponent()}
-                      className="h-8.5 rounded-lg bg-amber-600 px-3.5 text-xs font-medium text-white shadow-2xs hover:bg-amber-700"
+                      className="min-h-11 sm:min-h-8 h-auto w-full sm:w-auto rounded-lg bg-amber-600 px-3.5 py-2 sm:py-1.5 text-xs font-medium text-white shadow-2xs hover:bg-amber-700"
                     >
                       {busy === 'save' ? <LoaderCircle className="mr-1.5 size-3.5 animate-spin" /> : null}
                       Unlock Marks
@@ -758,12 +758,12 @@ export function TrainerMarkEntryPortal() {
                     Marks cannot be edited because the entry period has closed. Please see your Head of Department (HoD) to request reopening.
                   </p>
 
-                  <div className="mt-6 flex justify-end">
+                  <div className="mt-6 flex flex-col sm:flex-row sm:justify-end">
                     <Button
                       type="button"
                       size="sm"
                       onClick={() => setClosedNoticeDialogOpen(false)}
-                      className="h-8.5 rounded-lg bg-slate-900 px-4 text-xs font-medium text-white hover:bg-slate-800"
+                      className="min-h-11 sm:min-h-8 h-auto w-full sm:w-auto rounded-lg bg-slate-900 px-4 py-2 sm:py-1.5 text-xs font-medium text-white hover:bg-slate-800"
                     >
                       Understood
                     </Button>
@@ -774,7 +774,7 @@ export function TrainerMarkEntryPortal() {
 
             {submitConfirmDialogOpen ? (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-xs">
-                <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+                <div className="w-full max-w-md max-h-[90dvh] overflow-y-auto rounded-2xl bg-white p-5 sm:p-6 shadow-2xl">
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="text-base font-semibold text-slate-900">
@@ -832,12 +832,12 @@ export function TrainerMarkEntryPortal() {
                     </p>
                   </div>
 
-                  <div className="mt-5 flex items-center justify-end gap-2">
+                  <div className="mt-5 flex flex-col-reverse items-stretch gap-2 sm:flex-row sm:items-center sm:justify-end">
                     <button
                       type="button"
                       disabled={busy !== null}
                       onClick={() => setSubmitConfirmDialogOpen(false)}
-                      className="h-8.5 rounded-lg px-3.5 text-xs font-medium text-slate-500 hover:text-slate-900 transition"
+                      className="min-h-11 sm:min-h-8 w-full sm:w-auto rounded-lg px-3.5 py-2 sm:py-1.5 text-xs font-medium text-slate-500 hover:text-slate-900 transition"
                     >
                       Cancel
                     </button>
@@ -846,7 +846,7 @@ export function TrainerMarkEntryPortal() {
                       size="sm"
                       disabled={busy !== null}
                       onClick={() => void executeTrainerSaveOrSubmit(true)}
-                      className="h-8.5 rounded-lg bg-teal-700 px-4 text-xs font-medium text-white shadow-2xs hover:bg-teal-800"
+                      className="min-h-11 sm:min-h-8 h-auto w-full sm:w-auto rounded-lg bg-teal-700 px-4 py-2 sm:py-1.5 text-xs font-medium text-white shadow-2xs hover:bg-teal-800"
                     >
                       {busy === 'submit' ? <LoaderCircle className="mr-1.5 size-3.5 animate-spin" /> : null}
                       Confirm & Submit

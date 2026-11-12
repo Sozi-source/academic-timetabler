@@ -128,13 +128,13 @@ export function TrainerAccessTable({
           const record = row.original;
 
           return (
-            <div className="inline-flex flex-wrap items-center justify-end gap-2">
+            <div className="trainer-access-actions flex w-full flex-wrap items-center justify-start gap-2 xl:justify-end">
               {canProvisionTrainerAccess(record.accessState) ? (
                 <TrainerAccessAction trainerId={record.trainerId} />
               ) : record.accessState === 'email_required' ? (
                 <Link
                   href={`/timetable/trainers/${record.trainerId}/edit`}
-                  className="inline-flex h-8 items-center justify-center rounded-md border border-border bg-surface px-2.5 text-[11px] font-semibold text-primary transition hover:bg-surface-subtle"
+                  className="inline-flex min-h-11 sm:min-h-8 items-center justify-center rounded-md border border-border bg-surface px-3 py-1.5 text-[11px] font-semibold text-primary transition hover:bg-surface-subtle"
                 >
                   Add email
                 </Link>
@@ -162,7 +162,7 @@ export function TrainerAccessTable({
 
               <Link
                 href={`/trainers/${record.trainerId}`}
-                className="inline-flex h-8 items-center justify-center rounded-md border border-border-strong bg-surface px-2.5 text-[11px] font-medium text-text-secondary transition hover:bg-surface-subtle"
+                className="inline-flex min-h-11 sm:min-h-8 items-center justify-center rounded-md border border-border-strong bg-surface px-3 py-1.5 text-[11px] font-medium text-text-secondary transition hover:bg-surface-subtle"
               >
                 Profile
               </Link>

@@ -24,6 +24,7 @@ import { RecordShell } from '@/components/ui/record-shell';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { getTrainerAccessRegister } from '@/features/trainer-access/queries';
 import { TrainerAccessAction } from '@/features/trainer-access/trainer-access-action';
+import { TrainerAccessPinAction } from '@/features/trainer-access/trainer-access-pin-action';
 import {
   setTrainerActiveAction,
   setTrainerTimetableAvailabilityAction,
@@ -164,7 +165,7 @@ export default async function TrainerDetailsPage({
         },
       ]}
       actions={
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-wrap items-start gap-2">
           {accessState === 'linked' ? (
             <Badge variant="success">Portal Active</Badge>
           ) : accessState === 'ready_to_link' ? (
@@ -175,11 +176,17 @@ export default async function TrainerDetailsPage({
             <Badge variant="danger">Email Required</Badge>
           )}
 
+          {trainer.isActive &&
+          trainer.email &&
+          ['linked', 'ready_to_link', 'account_required'].includes(accessState) ? (
+            <TrainerAccessPinAction trainerId={trainer.id} />
+          ) : null}
+
           <Button
             asChild
             variant="outline"
             size="sm"
-            className="h-8 text-xs font-semibold"
+            className="min-h-11 sm:min-h-8 h-auto py-1.5 text-xs font-semibold"
           >
             <Link href={`/timetable/trainers/${trainer.id}/edit`}>
               <Pencil className="mr-1.5 size-3.5" aria-hidden="true" />
@@ -199,7 +206,7 @@ export default async function TrainerDetailsPage({
                 type="submit"
                 variant="outline"
                 size="sm"
-                className="h-8 text-xs font-semibold"
+                className="min-h-11 sm:min-h-8 h-auto py-1.5 text-xs font-semibold"
                 title={
                   trainer.isTimetableAvailable
                     ? 'Mark unavailable for timetabling'
@@ -238,7 +245,7 @@ export default async function TrainerDetailsPage({
               type="submit"
               variant="outline"
               size="sm"
-              className="h-8 text-xs font-semibold"
+              className="min-h-11 sm:min-h-8 h-auto py-1.5 text-xs font-semibold"
               title={
                 trainer.isActive
                   ? 'Deactivate trainer record'

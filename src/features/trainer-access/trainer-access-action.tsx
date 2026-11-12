@@ -48,7 +48,7 @@ export function TrainerAccessAction({
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg bg-[#033B36] hover:bg-[#022A26] px-3 text-[11px] font-semibold text-white shadow-2xs transition disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex min-h-11 sm:min-h-8 h-auto max-w-full items-center justify-center gap-1.5 rounded-lg bg-[#033B36] hover:bg-[#022A26] px-3 py-1.5 text-[11px] font-semibold text-white shadow-2xs transition disabled:cursor-not-allowed disabled:opacity-60"
         >
           {pending ? (
             <LoaderCircle
@@ -73,8 +73,8 @@ export function TrainerAccessAction({
           className={
             state.status ===
             'error'
-              ? 'max-w-48 text-[10px] leading-4 text-red-700'
-              : 'max-w-48 text-[10px] leading-4 text-text-muted'
+              ? 'max-w-full sm:max-w-48 text-[10px] leading-4 text-red-700'
+              : 'max-w-full sm:max-w-48 text-[10px] leading-4 text-text-muted'
           }
         >
           {

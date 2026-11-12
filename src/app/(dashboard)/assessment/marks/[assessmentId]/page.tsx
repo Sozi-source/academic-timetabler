@@ -180,12 +180,12 @@ export default async function AssessmentMarkWorkflowPage({
                 : ' All students have a mark recorded.'}
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
             {catOnBehalf.missingCount > 0 ? (
               <>
                 <Link
                   href={`/assessment/marks/${assessment.id}?status=cat-missing&component=cat`}
-                  className="inline-flex min-h-8 items-center justify-center gap-1.5 rounded-lg border border-amber-300 bg-white px-3 text-xs font-semibold text-amber-900 shadow-2xs transition hover:bg-amber-100/70"
+                  className="inline-flex min-h-11 sm:min-h-8 h-auto w-full sm:w-auto items-center justify-center gap-1.5 rounded-lg border border-amber-300 bg-white px-3 py-2 sm:py-1.5 text-xs font-semibold text-amber-900 shadow-2xs transition hover:bg-amber-100/70"
                 >
                   View Missing ({catOnBehalf.missingCount})
                 </Link>

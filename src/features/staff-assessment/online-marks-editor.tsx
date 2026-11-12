@@ -330,20 +330,28 @@ export function OnlineMarksEditor({
         ? finalSubmitted
         : componentSubmittedForAllStudents(visibleComponent);
 
+  const invalidCatRow = parsedRows
+    .map((row) => ({
+      student: row.student,
+      value: row.fields.cat,
+      isAbsent: row.fields.cat.isAbsent,
+    }))
+    .find((row) => !row.value.valid && !row.isAbsent);
+
   const invalidForSelectedComponent = visibleComponent === 'all'
     ? invalid
-    : parsedRows
-      .map((row) => ({
-        student: row.student,
-        value: row.fields[visibleComponent],
-        isAbsent:
-          visibleComponent === 'exam'
-            ? row.isAbsent
-            : visibleComponent === 'cat'
-              ? row.fields.cat.isAbsent
+    : visibleComponent === 'cat'
+      ? invalidCatRow
+      : parsedRows
+        .map((row) => ({
+          student: row.student,
+          value: row.fields[visibleComponent],
+          isAbsent:
+            visibleComponent === 'exam'
+              ? row.isAbsent
               : false,
-      }))
-      .find((row) => !row.value.valid && !row.isAbsent);
+        }))
+        .find((row) => !row.value.valid && !row.isAbsent);
 
   const absent = parsedRows.filter((row) => row.isAbsent).length;
   const missing = parsedRows.reduce((sum, row) => sum + row.missing, 0);
@@ -586,22 +594,24 @@ export function OnlineMarksEditor({
     }
   }
 
-  async function submitMarks() {
-    if (['assignment', 'presentation', 'rat'].includes(visibleComponent)) {
+  async function submitMarks(targetComponent: 'cat' | 'selected' = 'selected') {
+    const isCatSubmit = targetComponent === 'cat' || visibleComponent === 'cat';
+
+    if (!isCatSubmit && ['assignment', 'presentation', 'rat'].includes(visibleComponent)) {
       setError(
         'Coursework marks (Assignment, Presentation, RAT) are saved automatically and submitted together with final exam marks at the end of the semester.',
       );
       return;
     }
 
-    if (visibleComponent === 'cat') {
+    if (isCatSubmit) {
       if (catSubmitted) {
         setError('CAT marks have already been submitted.');
         return;
       }
-      if (invalidForSelectedComponent) {
+      if (invalidCatRow) {
         setError(
-          `${invalidForSelectedComponent.student.fullName}: ${invalidForSelectedComponent.value.message ?? 'Invalid mark.'}`,
+          `${invalidCatRow.student.fullName}: ${invalidCatRow.value.message ?? 'Invalid mark.'}`,
         );
         return;
       }
@@ -948,12 +958,13 @@ export function OnlineMarksEditor({
             </span>
           ) : null}
         </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="neutral" className="rounded-none border border-slate-300 bg-[#fffdf5] font-semibold text-slate-800">Scale /100</Badge>
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
+          <Badge variant="neutral" className="shrink-0 rounded-none border border-slate-300 bg-[#fffdf5] font-semibold text-slate-800">Scale /100</Badge>
           <Button
             type="button"
             variant="outline"
             size="sm"
+            className="min-h-10 sm:min-h-8 h-auto flex-1 py-1.5 sm:flex-initial"
             disabled={busy !== null || (!catSubmitted && !finalSubmitted && (!allowDraftDownload || !editable || !hasEnteredMarks))}
             onClick={() => void downloadExcel()}
             leadingIcon={
@@ -1371,80 +1382,127 @@ export function OnlineMarksEditor({
       ) : null}
 
       {/* Action Buttons */}
-      <div className="flex flex-wrap items-center justify-end gap-2 pt-1 border-t border-slate-200">
-        <div className="flex items-center gap-2">
-          {visibleComponent === 'cat' ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={busy !== null || (!catSubmitted && (!allowDraftDownload || !editable || !hasEnteredMarks))}
-              onClick={() => void downloadExcel('cat')}
-              leadingIcon={
-                busy === 'download' ? (
-                  <LoaderCircle className="size-3.5 animate-spin" />
-                ) : (
-                  <Download className="size-3.5" />
-                )
-              }
-            >
-              {catSubmitted ? 'Download CAT Marksheet (.xlsx)' : allowDraftDownload && hasEnteredMarks ? 'Download Draft CAT Marksheet (.xlsx)' : 'Submit CAT to download'}
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={busy !== null || (!finalSubmitted && !catSubmitted && (!allowDraftDownload || !editable || !hasEnteredMarks))}
-              onClick={() => void downloadExcel(finalSubmitted ? 'final' : 'cat')}
-              leadingIcon={
-                busy === 'download' ? (
-                  <LoaderCircle className="size-3.5 animate-spin" />
-                ) : (
-                  <Download className="size-3.5" />
-                )
-              }
-            >
-              {finalSubmitted
-                ? 'Download Final Marksheet (.xlsx)'
-                : catSubmitted
-                  ? 'Download CAT Marksheet (.xlsx)'
-                  : allowDraftDownload && hasEnteredMarks
-                    ? 'Download Draft Marksheet (.xlsx)'
-                    : 'Submit marks to download'}
-            </Button>
-          )}
+      <div className="flex w-full flex-col-reverse items-stretch gap-2 border-t border-slate-200 pt-3 pb-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+        {visibleComponent === 'cat' ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="min-h-11 sm:min-h-8 h-auto w-full py-2 sm:w-auto sm:py-1.5"
+            disabled={busy !== null || (!catSubmitted && (!allowDraftDownload || !editable || !hasEnteredMarks))}
+            onClick={() => void downloadExcel('cat')}
+            leadingIcon={
+              busy === 'download' ? (
+                <LoaderCircle className="size-3.5 animate-spin" />
+              ) : (
+                <Download className="size-3.5" />
+              )
+            }
+          >
+            {catSubmitted ? 'Download CAT Marksheet (.xlsx)' : allowDraftDownload && hasEnteredMarks ? 'Download Draft CAT Marksheet (.xlsx)' : 'Submit CAT to download'}
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="min-h-11 sm:min-h-8 h-auto w-full py-2 sm:w-auto sm:py-1.5"
+            disabled={busy !== null || (!finalSubmitted && !catSubmitted && (!allowDraftDownload || !editable || !hasEnteredMarks))}
+            onClick={() => void downloadExcel(finalSubmitted ? 'final' : 'cat')}
+            leadingIcon={
+              busy === 'download' ? (
+                <LoaderCircle className="size-3.5 animate-spin" />
+              ) : (
+                <Download className="size-3.5" />
+              )
+            }
+          >
+            {finalSubmitted
+              ? 'Download Final Marksheet (.xlsx)'
+              : catSubmitted
+                ? 'Download CAT Marksheet (.xlsx)'
+                : allowDraftDownload && hasEnteredMarks
+                  ? 'Download Draft Marksheet (.xlsx)'
+                  : 'Submit marks to download'}
+          </Button>
+        )}
 
-          {canEditOnlineMarks(workflowStatus) ? (
-            <>
-              {['assignment', 'presentation', 'rat'].includes(visibleComponent) ? null : visibleComponent === 'cat' ? (
-                catSubmitted ? (
+        {canEditOnlineMarks(workflowStatus) ? (
+          <>
+            {['assignment', 'presentation', 'rat'].includes(visibleComponent) ? null : visibleComponent === 'cat' ? (
+              catSubmitted ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={busy !== null}
+                  onClick={handleRequestEditMarks}
+                  className="min-h-11 sm:min-h-8 h-auto w-full py-2 sm:w-auto sm:py-1.5 border-amber-400 bg-amber-50 text-amber-900 hover:bg-amber-100"
+                  leadingIcon={
+                    busy === 'reopen' ? (
+                      <LoaderCircle className="size-3.5 animate-spin" />
+                    ) : (
+                      <RotateCcw className="size-3.5 text-amber-700" />
+                    )
+                  }
+                >
+                  Revise CAT marks
+                </Button>
+              ) : trainerCatEntryOpen ? (
+                <Button
+                  type="button"
+                  size="sm"
+                  className="min-h-11 sm:min-h-8 h-auto w-full py-2 sm:w-auto sm:py-1.5"
+                  disabled={
+                    busy !== null ||
+                    Boolean(invalidCatRow)
+                  }
+                  onClick={() => void submitMarks('cat')}
+                  leadingIcon={
+                    busy === 'submit' ? (
+                      <LoaderCircle className="size-3.5 animate-spin" />
+                    ) : (
+                      <Send className="size-3.5" />
+                    )
+                  }
+                >
+                  Submit CAT marks
+                </Button>
+              ) : null
+            ) : finalSubmitted ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={busy !== null}
+                onClick={handleRequestEditMarks}
+                className="min-h-11 sm:min-h-8 h-auto w-full py-2 sm:w-auto sm:py-1.5 border-amber-400 bg-amber-50 text-amber-900 hover:bg-amber-100"
+                leadingIcon={
+                  busy === 'reopen' ? (
+                    <LoaderCircle className="size-3.5 animate-spin" />
+                  ) : (
+                    <RotateCcw className="size-3.5 text-amber-700" />
+                  )
+                }
+              >
+                Revise Final Marks
+              </Button>
+            ) : !trainerExamEntryOpen ? (
+              <>
+                <span className="inline-flex min-h-10 sm:min-h-8 w-full sm:w-auto items-center justify-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-center text-xs font-semibold text-amber-900">
+                  <Lock className="size-3.5 shrink-0 text-amber-700" />
+                  <span>Final Exam Entry closed by HOD</span>
+                </span>
+                {visibleComponent === 'all' && !catSubmitted && trainerCatEntryOpen ? (
                   <Button
                     type="button"
-                    variant="outline"
                     size="sm"
-                    disabled={busy !== null}
-                    onClick={handleRequestEditMarks}
-                    className="border-amber-400 bg-amber-50 text-amber-900 hover:bg-amber-100"
-                    leadingIcon={
-                      busy === 'reopen' ? (
-                        <LoaderCircle className="size-3.5 animate-spin" />
-                      ) : (
-                        <RotateCcw className="size-3.5 text-amber-700" />
-                      )
-                    }
-                  >
-                    Revise CAT marks
-                  </Button>
-                ) : trainerEntryOpen ? (
-                  <Button
-                    type="button"
-                    size="sm"
+                    className="min-h-11 sm:min-h-8 h-auto w-full py-2 sm:w-auto sm:py-1.5"
                     disabled={
                       busy !== null ||
-                      Boolean(invalidForSelectedComponent)
+                      Boolean(invalidCatRow)
                     }
-                    onClick={() => void submitMarks()}
+                    onClick={() => void submitMarks('cat')}
                     leadingIcon={
                       busy === 'submit' ? (
                         <LoaderCircle className="size-3.5 animate-spin" />
@@ -1455,34 +1513,36 @@ export function OnlineMarksEditor({
                   >
                     Submit CAT marks
                   </Button>
-                ) : null
-              ) : finalSubmitted ? (
+                ) : null}
+              </>
+            ) : trainerEntryOpen ? (
+              <>
+                {visibleComponent === 'all' && !catSubmitted && trainerCatEntryOpen ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="min-h-11 sm:min-h-8 h-auto w-full py-2 sm:w-auto sm:py-1.5"
+                    disabled={
+                      busy !== null ||
+                      Boolean(invalidCatRow)
+                    }
+                    onClick={() => void submitMarks('cat')}
+                    leadingIcon={
+                      busy === 'submit' ? (
+                        <LoaderCircle className="size-3.5 animate-spin" />
+                      ) : (
+                        <Send className="size-3.5" />
+                      )
+                    }
+                  >
+                    Submit CAT marks
+                  </Button>
+                ) : null}
                 <Button
                   type="button"
-                  variant="outline"
                   size="sm"
-                  disabled={busy !== null}
-                  onClick={handleRequestEditMarks}
-                  className="border-amber-400 bg-amber-50 text-amber-900 hover:bg-amber-100"
-                  leadingIcon={
-                    busy === 'reopen' ? (
-                      <LoaderCircle className="size-3.5 animate-spin" />
-                    ) : (
-                      <RotateCcw className="size-3.5 text-amber-700" />
-                    )
-                  }
-                >
-                  Revise Final Marks
-                </Button>
-              ) : !trainerExamEntryOpen ? (
-                <span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-900">
-                  <Lock className="size-3.5 text-amber-700" />
-                  Final Exam Entry closed by HOD
-                </span>
-              ) : trainerEntryOpen ? (
-                <Button
-                  type="button"
-                  size="sm"
+                  className="min-h-11 sm:min-h-8 h-auto w-full py-2 sm:w-auto sm:py-1.5"
                   disabled={
                     busy !== null ||
                     Boolean(invalid)
@@ -1498,10 +1558,10 @@ export function OnlineMarksEditor({
                 >
                   Submit Final Marks
                 </Button>
-              ) : null}
-            </>
-          ) : null}
-        </div>
+              </>
+            ) : null}
+          </>
+        ) : null}
       </div>
 
       {revisionDialogOpen ? (
@@ -1538,12 +1598,12 @@ export function OnlineMarksEditor({
               />
             </div>
 
-            <div className="mt-5 flex items-center justify-end gap-2">
+            <div className="mt-5 flex flex-col-reverse items-stretch gap-2 sm:flex-row sm:items-center sm:justify-end">
               <button
                 type="button"
                 disabled={busy !== null}
                 onClick={() => setRevisionDialogOpen(false)}
-                className="h-8.5 rounded-lg px-3 text-xs font-medium text-slate-500 hover:text-slate-900 transition"
+                className="min-h-11 sm:min-h-8 w-full sm:w-auto rounded-lg px-3.5 py-2 sm:py-1.5 text-xs font-medium text-slate-500 hover:text-slate-900 transition"
               >
                 Cancel
               </button>
@@ -1552,7 +1612,7 @@ export function OnlineMarksEditor({
                 size="sm"
                 disabled={busy !== null || revisionReason.trim().length < 3}
                 onClick={() => void reopenComponent()}
-                className="h-8.5 rounded-lg bg-amber-600 px-3.5 text-xs font-medium text-white shadow-2xs hover:bg-amber-700"
+                className="min-h-11 sm:min-h-8 h-auto w-full sm:w-auto rounded-lg bg-amber-600 px-3.5 py-2 sm:py-1.5 text-xs font-medium text-white shadow-2xs hover:bg-amber-700"
               >
                 {busy === 'reopen' ? <LoaderCircle className="mr-1.5 size-3.5 animate-spin" /> : null}
                 Unlock Marks
@@ -1586,12 +1646,12 @@ export function OnlineMarksEditor({
               Marks cannot be edited because the entry period has closed. Please see your Head of Department (HoD) to request reopening.
             </p>
 
-            <div className="mt-6 flex justify-end">
+            <div className="mt-6 flex flex-col sm:flex-row sm:justify-end">
               <Button
                 type="button"
                 size="sm"
                 onClick={() => setClosedNoticeDialogOpen(false)}
-                className="h-8.5 rounded-lg bg-slate-900 px-4 text-xs font-medium text-white hover:bg-slate-800"
+                className="min-h-11 sm:min-h-8 h-auto w-full sm:w-auto rounded-lg bg-slate-900 px-4 py-2 sm:py-1.5 text-xs font-medium text-white hover:bg-slate-800"
               >
                 Understood
               </Button>
@@ -1602,7 +1662,7 @@ export function OnlineMarksEditor({
 
       {submitConfirmType !== null ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+          <div className="w-full max-w-md max-h-[90dvh] overflow-y-auto rounded-2xl bg-white p-5 sm:p-6 shadow-2xl">
             <div className="flex items-start justify-between">
               <div>
                 <h3 className="text-base font-bold text-slate-900">
@@ -1693,12 +1753,12 @@ export function OnlineMarksEditor({
               </p>
             </div>
 
-            <div className="mt-5 flex items-center justify-end gap-2">
+            <div className="mt-5 flex flex-col-reverse items-stretch gap-2 sm:flex-row sm:items-center sm:justify-end">
               <button
                 type="button"
                 disabled={busy !== null}
                 onClick={() => setSubmitConfirmType(null)}
-                className="h-8.5 rounded-lg px-3.5 text-xs font-medium text-slate-500 hover:text-slate-900 transition"
+                className="min-h-11 sm:min-h-8 w-full sm:w-auto rounded-lg px-3.5 py-2 sm:py-1.5 text-xs font-medium text-slate-500 hover:text-slate-900 transition"
               >
                 Cancel
               </button>
@@ -1713,7 +1773,7 @@ export function OnlineMarksEditor({
                     void executeFinalSubmit();
                   }
                 }}
-                className="h-8.5 rounded-lg bg-[#0b4f4a] px-4 text-xs font-semibold text-white shadow-2xs hover:bg-[#083e3a]"
+                className="min-h-11 sm:min-h-8 h-auto w-full sm:w-auto rounded-lg bg-[#0b4f4a] px-4 py-2 sm:py-1.5 text-xs font-semibold text-white shadow-2xs hover:bg-[#083e3a]"
               >
                 {busy === 'submit' ? <LoaderCircle className="mr-1.5 size-3.5 animate-spin" /> : null}
                 Confirm & Submit (Mark AB)

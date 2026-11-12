@@ -61,7 +61,7 @@ export function TrainerAccessBulkPinAction({
         <button
           type="submit"
           disabled={pending || trainers.length === 0}
-          className="inline-flex min-h-9 w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-3 text-[11px] font-semibold text-white shadow-2xs transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-55 sm:w-auto"
+          className="inline-flex min-h-11 sm:min-h-9 h-auto w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2 sm:py-1.5 text-[11px] font-semibold text-white shadow-2xs transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-55 sm:w-auto"
         >
           {pending ? <LoaderCircle className="size-3.5 animate-spin" aria-hidden="true" /> : <KeyRound className="size-3.5" aria-hidden="true" />}
           {pending ? 'Generating PINs…' : 'Regenerate all PINs'}
@@ -83,7 +83,7 @@ export function TrainerAccessBulkPinAction({
                 <button
                   type="button"
                   onClick={downloadCsv}
-                  className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-border bg-white px-3 text-[11px] font-semibold text-text-secondary shadow-2xs transition hover:bg-surface-subtle"
+                  className="inline-flex min-h-11 sm:min-h-9 h-auto w-full sm:w-auto items-center justify-center gap-1.5 rounded-lg border border-border bg-white px-3 py-2 sm:py-1.5 text-[11px] font-semibold text-text-secondary shadow-2xs transition hover:bg-surface-subtle"
                 >
                   <Download className="size-3.5" aria-hidden="true" /> Download CSV
                 </button>
@@ -91,8 +91,8 @@ export function TrainerAccessBulkPinAction({
               <p className="text-[11px] leading-4 text-text-muted">Download and distribute these PINs now. They are shown only once and are not stored in the app. The CSV contains plain-text PINs; delete it after delivery.</p>
               <div className="max-h-72 divide-y divide-border overflow-y-auto rounded-lg border border-border bg-white">
                 {state.pins.map((grant) => (
-                  <div key={grant.trainerId} className="flex items-center justify-between gap-3 px-3 py-2.5">
-                    <div className="min-w-0">
+                  <div key={grant.trainerId} className="flex flex-wrap items-center justify-between gap-2.5 px-3 py-2.5">
+                    <div className="min-w-0 flex-1">
                       <p className="truncate text-xs font-semibold text-text-primary">{grant.fullName}</p>
                       <p className="truncate text-[10px] text-text-muted">{grant.email}</p>
                     </div>
@@ -102,7 +102,7 @@ export function TrainerAccessBulkPinAction({
                         type="button"
                         onClick={() => void copyPin(grant.trainerId, grant.pin)}
                         aria-label={`Copy PIN for ${grant.fullName}`}
-                        className="inline-flex size-8 items-center justify-center rounded-md border border-border text-text-muted transition hover:bg-surface-subtle hover:text-primary"
+                        className="inline-flex min-h-11 min-w-11 sm:min-h-8 sm:min-w-8 sm:size-8 items-center justify-center rounded-md border border-border text-text-muted transition hover:bg-surface-subtle hover:text-primary"
                       >
                         {copiedTrainerId === grant.trainerId
                           ? <Check className="size-3.5" aria-hidden="true" />

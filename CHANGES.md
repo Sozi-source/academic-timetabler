@@ -1,3 +1,39 @@
+### 2026-11-12: Mobile Action Responsiveness & External Trainer PIN Visibility Hardening
+
+**Summary:**
+- **Fixed Hidden External Trainer PIN Generation and Action Buttons on Mobile Viewports (< 1200px):**
+  - Root cause: On viewports below 1200px, `globals.css` converted table rows in `.trainer-access-register`, `.trainer-approvals-register`, and `.trainer-directory-table` into stacked cards with `overflow: hidden`, while table cells inherited fixed `h-11` (44px) from `DataTable`. Because the card's `::before` pseudo-element ("ACTIONS") consumed ~30px of vertical space, action buttons (`Generate PIN`, `Approve & Link`, etc.) were pushed below the 44px threshold and completely clipped out of view by the card container.
+  - Resolved in `globals.css` by overriding `height: auto !important; min-height: 0 !important;` on all transformed `td` elements and `td[data-label="Actions"]`, setting `overflow: visible !important;` and `max-height: none !important;` on table wrappers, and applying `.trainer-access-actions` flex layout with `width: 100%` and fluid wrapping.
+  - Added `.trainer-access-actions` class to `TrainerAccessTable` (`trainer-access-table.tsx`) and enhanced touch target sizes to `min-h-11 sm:min-h-8`.
+  - Hardened `TrainerAccessPinAction` and `TrainerAccessBulkPinAction` with responsive PIN display cards (`max-w-full sm:max-w-56`), flexible copy buttons, and touch-friendly button sizes (`min-h-11 sm:min-h-8`).
+  - Added `TrainerAccessPinAction` directly to the individual trainer profile page (`/trainers/[id]`), enabling HODs to generate external trainer PINs directly from the trainer's profile on both mobile and desktop.
+- **Fixed Markbook Submit Button Responsiveness and Layout Cramping on Mobile:**
+  - Resolved mobile horizontal overflow in `OnlineMarksEditor` (`online-marks-editor.tsx`) by replacing non-wrapping action bars with fluid `flex flex-col-reverse items-stretch gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end`.
+  - Added full mobile touch targets (`min-h-11 sm:min-h-8 w-full sm:w-auto py-2 sm:py-1.5`) across all download marksheet and submission buttons.
+  - Enabled direct CAT marks submission from "All marks" mode: when final exam entry is closed by HOD (`!trainerExamEntryOpen`) but CAT entry remains open, trainers can now directly submit CAT marks with dedicated CAT validation (`invalidCatRow`) without needing to switch tabs.
+  - Modernized revision unlock dialog and absence confirmation modals with responsive button footers (`flex-col-reverse items-stretch gap-2 sm:flex-row sm:items-center sm:justify-end`) and scrollable modal shells (`max-h-[90dvh]`).
+  - Hardened sibling submission components: `trainer-mark-entry-portal.tsx` and `submit-cat-on-behalf-button.tsx` to ensure uniform full-width mobile button layouts.
+- **Automated Verification:**
+  - Added unit and DOM regression test suite `src/tests/mobile-action-responsiveness.test.tsx` (5 tests passing).
+  - Vitest test suite confirmed clean: 139 test files (719 tests passing).
+  - Next.js 16 typecheck, ESLint, and Next.js 16 production build (`142 routes`) completed with zero errors.
+
+**Added:**
+- `src/tests/mobile-action-responsiveness.test.tsx`
+
+**Modified:**
+- `CHANGES.md`
+- `src/app/globals.css`
+- `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`
+- `src/app/(dashboard)/trainers/[id]/page.tsx`
+- `src/features/assessment/marks/submit-cat-on-behalf-button.tsx`
+- `src/features/assessment/trainer-mark-entry-portal.tsx`
+- `src/features/staff-assessment/online-marks-editor.tsx`
+- `src/features/trainer-access/trainer-access-action.tsx`
+- `src/features/trainer-access/trainer-access-bulk-pin-action.tsx`
+- `src/features/trainer-access/trainer-access-pin-action.tsx`
+- `src/features/trainer-access/trainer-access-table.tsx`
+
 ### 2026-11-11: Harden Assessment Roster Against Inactive Student Lifecycle Changes & Fix CAT Submission
 
 **Summary:**

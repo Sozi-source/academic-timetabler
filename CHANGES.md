@@ -1,3 +1,14 @@
+### 2026-11-12: Fix HOD CAT Submission on Behalf of Trainer
+
+**Summary:**
+- Fixed the HOD/system-admin CAT "submit on behalf" workflow by invoking the component submission RPC once for the selected markbook.
+- The database RPC already propagates CAT submission state to shared/equivalent sibling markbooks; repeated client-side calls could re-submit a sibling and return the generic failure message.
+- The single RPC call preserves the authenticated HOD as `submitted_by` and keeps sibling propagation atomic.
+
+**Modified:**
+- `src/features/assessment/marks/actions.ts`
+- `CHANGES.md`
+
 ### 2026-11-12: Mobile Action Responsiveness & External Trainer PIN Visibility Hardening
 
 **Summary:**

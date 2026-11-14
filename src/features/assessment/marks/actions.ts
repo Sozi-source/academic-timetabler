@@ -169,48 +169,26 @@ export async function submitCatOnBehalfAction(formData: FormData) {
   }
   if (roster.length === 0 || catByStudent.size === 0) redirect(`/assessment/marks/${assessmentId}?error=no-saved-cat`);
 
-  const nowIso = new Date().toISOString();
-  for (const targetId of targetEventIds) {
-    const targetRoster = roster.filter((r) => r.assessment_id === targetId);
-    const effectiveRoster = targetRoster.length > 0 ? targetRoster : roster;
-    const entries = effectiveRoster.map((r) => {
-      const cat = catByStudent.get(r.student_id) ?? null;
-      return { student_id: r.student_id, cat, cat_absent: cat === null };
-    });
+  // The component RPC owns sibling propagation. Submit the selected/root event
+  // once so the RPC can atomically record the HOD as submitted_by and sync all
+  // shared/equivalent sibling events. Calling it once per sibling caused the
+  // later calls to re-submit an already-finalized sibling and surface the
+  // generic "could not be submitted on behalf" error.
+  const rootRoster = roster.filter((r) => r.assessment_id === assessmentId);
+  const effectiveRoster = rootRoster.length > 0 ? rootRoster : roster;
+  const entries = effectiveRoster.map((r) => {
+    const cat = catByStudent.get(r.student_id) ?? null;
+    return { student_id: r.student_id, cat, cat_absent: cat === null };
+  });
 
-    const { error } = await supabase.rpc('save_assessment_online_component_marks', {
-      target_assessment_id: targetId,
-      target_component: 'cat',
-      target_entries: entries,
-      submit_component: true,
-    });
-    if (error) {
-      redirect(`/assessment/marks/${assessmentId}?error=cat-submit-on-behalf`);
-    }
-
-    await supabase
-      .from('assessment_events')
-      .update({ cat_marks_finalized_at: nowIso })
-      .eq('id', targetId);
-
-    // Maintain component submission records across all cohorts for this event
-    const { data: rosterCohorts } = await supabase
-      .from('assessment_roster')
-      .select('cohort_id')
-      .eq('assessment_id', targetId);
-
-    const cohortIds = [...new Set((rosterCohorts ?? []).map((r) => r.cohort_id))];
-    for (const cId of cohortIds.length > 0 ? cohortIds : [null]) {
-      await supabase
-        .from('assessment_mark_component_submissions')
-        .upsert({
-          assessment_id: targetId,
-          cohort_id: cId,
-          component_key: 'cat',
-        }, {
-          onConflict: 'assessment_id,coalesce(cohort_id, \'00000000-0000-0000-0000-000000000000\'::uuid),component_key',
-        });
-    }
+  const { error } = await supabase.rpc('save_assessment_online_component_marks', {
+    target_assessment_id: assessmentId,
+    target_component: 'cat',
+    target_entries: entries,
+    submit_component: true,
+  });
+  if (error) {
+    redirect(`/assessment/marks/${assessmentId}?error=cat-submit-on-behalf`);
   }
 
   revalidatePath('/assessment');

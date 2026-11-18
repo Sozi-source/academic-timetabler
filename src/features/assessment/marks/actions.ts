@@ -343,9 +343,8 @@ export async function toggleAssessmentExcludeFromAnalysisAction(formData: FormDa
   if (!parsed.success) return;
 
   const { assessmentId, exclude } = parsed.data;
-  const supabase = await createClient();
-
-  const { data: event } = await supabase
+  const admin = createAdminClient();
+  const { data: event } = await admin
     .from('assessment_events')
     .select('id, department_id')
     .eq('id', assessmentId)
@@ -355,7 +354,7 @@ export async function toggleAssessmentExcludeFromAnalysisAction(formData: FormDa
     redirect(`/assessment/marks/${assessmentId}?error=not-found`);
   }
 
-  const { error } = await supabase
+  const { error } = await admin
     .from('assessment_events')
     .update({ exclude_from_analysis: exclude === 'true' })
     .eq('id', assessmentId);

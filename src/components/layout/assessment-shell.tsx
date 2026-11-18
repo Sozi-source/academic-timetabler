@@ -154,7 +154,7 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                className="touch-target size-9 rounded-[0.65rem] border border-slate-200 bg-white text-slate-700 shadow-sm lg:hidden active:scale-95"
+                className="inline-flex size-9 items-center justify-center rounded-[0.65rem] border border-slate-200 bg-white text-slate-700 shadow-sm lg:hidden active:scale-95"
                 onClick={() => setMobileOpen(true)}
                 aria-label="Open navigation"
               >

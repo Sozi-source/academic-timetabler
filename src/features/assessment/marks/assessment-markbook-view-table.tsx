@@ -605,19 +605,19 @@ export function AssessmentMarkbookViewTable({
       {/* Candidate Marks Table */}
       <div className="overflow-x-auto rounded-xl border border-slate-300 bg-white shadow-2xs">
         {viewMode === 'cat' ? (
-          <table className="w-full min-w-[700px] text-left text-xs">
+          <table className="w-full min-w-[600px] text-left text-xs">
             <thead className="border-b border-slate-300 bg-slate-50 text-[11px] font-bold text-slate-700">
               <tr>
-                <th scope="col" className="w-12 px-3.5 py-2.5 text-center text-slate-500 whitespace-nowrap">No.</th>
-                <th scope="col" className="px-3.5 py-2.5 whitespace-nowrap min-w-[170px] text-slate-800">Admission No.</th>
-                <th scope="col" className="px-3.5 py-2.5 min-w-[240px] whitespace-nowrap text-slate-900">Student Full Name</th>
-                <th scope="col" className="px-3 py-2.5 whitespace-nowrap text-slate-700">Cohort</th>
-                <th scope="col" className="px-3 py-2.5 text-center whitespace-nowrap bg-amber-100/90 text-amber-950 font-black border-x border-amber-300">
+                <th scope="col" className="w-10 px-2.5 py-2.5 text-center text-slate-500 whitespace-nowrap">No.</th>
+                <th scope="col" className="px-3 py-2.5 whitespace-nowrap text-slate-800">Admission No.</th>
+                <th scope="col" className="px-3 py-2.5 min-w-[180px] whitespace-nowrap text-slate-900">Student Full Name</th>
+                <th scope="col" className="px-2.5 py-2.5 whitespace-nowrap text-slate-700">Cohort</th>
+                <th scope="col" className="px-2.5 py-2.5 text-center whitespace-nowrap bg-amber-100/90 text-amber-950 font-black border-x border-amber-300">
                   CAT Mark <span className="text-[10px] font-bold text-amber-800">/15</span>
                 </th>
-                <th scope="col" className="px-3 py-2.5 text-center whitespace-nowrap">CAT Status</th>
+                <th scope="col" className="px-2.5 py-2.5 text-center whitespace-nowrap">CAT Status</th>
                 {editable ? (
-                  <th scope="col" className="px-3 py-2.5 text-center whitespace-nowrap print:hidden">Action</th>
+                  <th scope="col" className="px-2.5 py-2.5 text-center whitespace-nowrap print:hidden">Action</th>
                 ) : null}
               </tr>
             </thead>
@@ -641,13 +641,13 @@ export function AssessmentMarkbookViewTable({
                         row.isCatMissing ? 'bg-amber-50/30' : row.isCatAbsent ? 'bg-rose-50/30' : ''
                       }`}
                     >
-                      <td className="px-3.5 py-2.5 text-center font-medium text-slate-400 whitespace-nowrap">
+                      <td className="px-2.5 py-2.5 text-center font-medium text-slate-400 whitespace-nowrap">
                         {idx + 1}.
                       </td>
-                      <td className="px-3.5 py-2.5 font-mono font-bold text-slate-950 whitespace-nowrap min-w-[170px]">
+                      <td className="px-3 py-2.5 font-mono font-bold text-slate-950 whitespace-nowrap">
                         {row.admissionNumber}
                       </td>
-                      <td className="px-3.5 py-2.5 font-semibold text-slate-900 whitespace-nowrap min-w-[240px]">
+                      <td className="px-3 py-2.5 font-semibold text-slate-900 whitespace-nowrap min-w-[180px]">
                         {row.fullName}
                       </td>
                       <td className="px-3 py-2.5 text-slate-600 whitespace-nowrap">
@@ -709,23 +709,23 @@ export function AssessmentMarkbookViewTable({
                         )}
                       </td>
                       {editable ? (
-                        <td className="px-3 py-2.5 text-center whitespace-nowrap print:hidden">
+                        <td className="px-2.5 py-2.5 text-center whitespace-nowrap print:hidden">
                           {editingStudentId === row.studentId ? (
-                            <div className="inline-flex items-center gap-1">
+                            <div className="inline-flex items-center gap-1 whitespace-nowrap">
                               <button
                                 type="button"
                                 disabled={isSaving}
                                 onClick={() => saveEditingRow(row.studentId, 'cat')}
-                                className="inline-flex h-7 items-center gap-1 rounded-md bg-emerald-600 px-2 text-[11px] font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 cursor-pointer"
+                                className="inline-flex h-7 shrink-0 items-center gap-1 whitespace-nowrap rounded-md bg-emerald-600 px-2 text-[11px] font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 cursor-pointer"
                               >
-                                <Save className="size-3" />
+                                <Save className="size-3 shrink-0" />
                                 <span>{isSaving ? 'Saving...' : 'Save'}</span>
                               </button>
                               <button
                                 type="button"
                                 disabled={isSaving}
                                 onClick={cancelEditingRow}
-                                className="inline-flex h-7 items-center rounded-md border border-slate-300 bg-white px-2 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                                className="inline-flex h-7 shrink-0 items-center whitespace-nowrap rounded-md border border-slate-300 bg-white px-2 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
                               >
                                 Cancel
                               </button>
@@ -734,9 +734,9 @@ export function AssessmentMarkbookViewTable({
                             <button
                               type="button"
                               onClick={() => startEditingRow(row.studentId, m, row.isCatAbsent)}
-                              className="inline-flex h-7 items-center gap-1 rounded-md border border-slate-300 bg-white px-2.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                              className="inline-flex h-7 shrink-0 items-center gap-1 whitespace-nowrap rounded-md border border-slate-300 bg-white px-2.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
                             >
-                              <Pencil className="size-3" />
+                              <Pencil className="size-3 shrink-0" />
                               <span>Edit</span>
                             </button>
                           )}
@@ -764,7 +764,7 @@ export function AssessmentMarkbookViewTable({
             ) : null}
           </table>
         ) : (
-          <table className="w-full min-w-[980px] text-left text-xs">
+          <table className="w-full min-w-[820px] text-left text-xs">
             <thead className="border-b border-slate-300 bg-slate-50 text-[11px] font-bold text-slate-700">
               {assessmentType === 'exam' ? (
                 <>
@@ -811,9 +811,9 @@ export function AssessmentMarkbookViewTable({
 
                   {/* Tier 2 Column Detail Header */}
                   <tr className="border-b border-slate-300 bg-slate-50 text-[11px] font-bold text-slate-700">
-                    <th scope="col" className="w-12 px-3.5 py-2.5 text-center text-slate-500 whitespace-nowrap">No.</th>
-                    <th scope="col" className="px-3.5 py-2.5 whitespace-nowrap min-w-[170px] text-slate-800">Admission No.</th>
-                    <th scope="col" className="px-3.5 py-2.5 min-w-[260px] whitespace-nowrap border-r-2 border-slate-300 text-slate-900">Student Full Name</th>
+                    <th scope="col" className="w-10 px-2.5 py-2.5 text-center text-slate-500 whitespace-nowrap">No.</th>
+                    <th scope="col" className="px-2.5 py-2.5 whitespace-nowrap text-slate-800">Admission No.</th>
+                    <th scope="col" className="px-2.5 py-2.5 min-w-[180px] whitespace-nowrap border-r-2 border-slate-300 text-slate-900">Student Full Name</th>
 
                     <th scope="col" className="px-2.5 py-2.5 text-center whitespace-nowrap">
                       Assignment <span className="text-[10px] font-normal text-slate-400">/5</span>
@@ -884,17 +884,17 @@ export function AssessmentMarkbookViewTable({
                       }`}
                     >
                       {/* Index */}
-                      <td className="px-3.5 py-2.5 text-center font-medium text-slate-400 whitespace-nowrap">
+                      <td className="px-2.5 py-2.5 text-center font-medium text-slate-400 whitespace-nowrap">
                         {idx + 1}.
                       </td>
 
                       {/* Admission No */}
-                      <td className="px-3.5 py-2.5 font-mono font-bold text-slate-950 whitespace-nowrap min-w-[170px]">
+                      <td className="px-2.5 py-2.5 font-mono font-bold text-slate-950 whitespace-nowrap">
                         {row.admissionNumber}
                       </td>
 
                       {/* Full Name with vertical boundary wall - guaranteed no wrapping */}
-                      <td className="px-3.5 py-2.5 font-semibold text-slate-900 whitespace-nowrap min-w-[260px] border-r-2 border-slate-200">
+                      <td className="px-2.5 py-2.5 font-semibold text-slate-900 whitespace-nowrap min-w-[180px] border-r-2 border-slate-200">
                         {row.fullName}
                       </td>
 
@@ -989,7 +989,7 @@ export function AssessmentMarkbookViewTable({
                             ) : row.hasCatMark ? (
                               <span className="text-slate-800 font-semibold">{formatMark(m?.cat)}</span>
                             ) : (
-                              <span className="rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 border border-amber-200" title="CAT mark not entered yet">
+                              <span className="inline-block whitespace-nowrap rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 border border-amber-200" title="CAT mark not entered yet">
                                 Pending
                               </span>
                             )}
@@ -1097,23 +1097,23 @@ export function AssessmentMarkbookViewTable({
                         </>
                       )}
                       {editable ? (
-                        <td className="px-3 py-2.5 text-center whitespace-nowrap border-l border-slate-200 print:hidden">
+                        <td className="px-2.5 py-2.5 text-center whitespace-nowrap border-l border-slate-200 print:hidden">
                           {editingStudentId === row.studentId ? (
-                            <div className="inline-flex items-center gap-1">
+                            <div className="inline-flex items-center gap-1 whitespace-nowrap">
                               <button
                                 type="button"
                                 disabled={isSaving}
                                 onClick={() => saveEditingRow(row.studentId, assessmentType === 'exam' ? 'all' : 'cat')}
-                                className="inline-flex h-7 items-center gap-1 rounded-md bg-emerald-600 px-2 text-[11px] font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 cursor-pointer"
+                                className="inline-flex h-7 shrink-0 items-center gap-1 whitespace-nowrap rounded-md bg-emerald-600 px-2 text-[11px] font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 cursor-pointer"
                               >
-                                <Save className="size-3" />
+                                <Save className="size-3 shrink-0" />
                                 <span>{isSaving ? 'Saving...' : 'Save'}</span>
                               </button>
                               <button
                                 type="button"
                                 disabled={isSaving}
                                 onClick={cancelEditingRow}
-                                className="inline-flex h-7 items-center rounded-md border border-slate-300 bg-white px-2 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                                className="inline-flex h-7 shrink-0 items-center whitespace-nowrap rounded-md border border-slate-300 bg-white px-2 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
                               >
                                 Cancel
                               </button>
@@ -1122,9 +1122,9 @@ export function AssessmentMarkbookViewTable({
                             <button
                               type="button"
                               onClick={() => startEditingRow(row.studentId, m, isCatAbsent)}
-                              className="inline-flex h-7 items-center gap-1 rounded-md border border-slate-300 bg-white px-2.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                              className="inline-flex h-7 shrink-0 items-center gap-1 whitespace-nowrap rounded-md border border-slate-300 bg-white px-2.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
                             >
-                              <Pencil className="size-3" />
+                              <Pencil className="size-3 shrink-0" />
                               <span>Edit</span>
                             </button>
                           )}

@@ -36,7 +36,13 @@ export default async function AssessmentMarkWorkflowPage({
   const { assessmentId } = await params;
   const query = await searchParams;
   const errorKey = typeof query.error === 'string' ? query.error : undefined;
-  const onBehalfError = errorKey ? ON_BEHALF_ERRORS[errorKey] : undefined;
+  const errorDetail = typeof query.detail === 'string' ? query.detail.trim() : '';
+  const baseOnBehalfError = errorKey ? ON_BEHALF_ERRORS[errorKey] : undefined;
+  const onBehalfError = baseOnBehalfError
+    ? errorDetail
+      ? `${baseOnBehalfError} (${errorDetail})`
+      : baseOnBehalfError
+    : undefined;
   const submittedOnBehalf = query.cat_submitted_on_behalf === '1';
   const initialCohort = typeof query.cohortId === 'string' ? query.cohortId : undefined;
   const [assessment, population, resultCount, componentSubmissionState, marksByStudent, catOnBehalf] = await Promise.all([

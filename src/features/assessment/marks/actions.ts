@@ -186,9 +186,10 @@ export async function submitCatOnBehalfAction(formData: FormData) {
   for (const p of popRes.data ?? []) {
     if (p.student_id) studentIds.add(p.student_id);
   }
+  const admin = createAdminClient();
   if (eventRes.data.unit_id && eventRes.data.academic_period_id) {
     const unifiedRoster = await getUnifiedUnitRoster({
-      supabase: createAdminClient(),
+      supabase: admin,
       unitId: eventRes.data.unit_id,
       academicPeriodId: eventRes.data.academic_period_id,
     });
@@ -197,6 +198,36 @@ export async function submitCatOnBehalfAction(formData: FormData) {
     }
   }
   if (studentIds.size === 0) redirect(`/assessment/marks/${assessmentId}?error=no-saved-cat`);
+
+  // Ensure all target students exist in assessment_roster for the root event
+  // so build_assessment_mark_component_entries never rejects reassigned/population students.
+  const existingRosterIds = new Set(rootRoster.map((r) => r.student_id));
+  const missingRosterStudentIds = Array.from(studentIds).filter((id) => !existingRosterIds.has(id));
+  if (missingRosterStudentIds.length > 0 && eventRes.data.unit_id && eventRes.data.academic_period_id) {
+    const { data: missingStudents } = await admin
+      .from('students')
+      .select('id, current_cohort_id, admission_cohort_id, lifecycle_status, academic_phase')
+      .in('id', missingRosterStudentIds);
+    const toInsert = (missingStudents ?? [])
+      .filter(
+        (s) =>
+          ['admitted', 'active'].includes((s.lifecycle_status ?? '').toLowerCase()) &&
+          (s.academic_phase ?? 'in_class').toLowerCase() === 'in_class',
+      )
+      .map((s) => ({
+        assessment_id: assessmentId,
+        student_id: s.id,
+        cohort_id: s.current_cohort_id ?? s.admission_cohort_id,
+        academic_period_id: eventRes.data.academic_period_id,
+        unit_id: eventRes.data.unit_id,
+        pre_assessment_status: 'expected',
+      }));
+    if (toInsert.length > 0) {
+      await admin
+        .from('assessment_roster')
+        .upsert(toInsert, { onConflict: 'assessment_id,student_id', ignoreDuplicates: true });
+    }
+  }
 
   const entries = Array.from(studentIds).map((studentId) => {
     const cat = catByStudent.get(studentId) ?? null;
@@ -210,7 +241,9 @@ export async function submitCatOnBehalfAction(formData: FormData) {
     submit_component: true,
   });
   if (error) {
-    redirect(`/assessment/marks/${assessmentId}?error=cat-submit-on-behalf`);
+    console.error('submitCatOnBehalfAction RPC failed:', error);
+    const detail = error.message ? `&detail=${encodeURIComponent(error.message)}` : '';
+    redirect(`/assessment/marks/${assessmentId}?error=cat-submit-on-behalf${detail}`);
   }
 
   revalidatePath('/assessment');

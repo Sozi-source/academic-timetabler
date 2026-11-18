@@ -1,3 +1,23 @@
+### 2026-11-18: Exclude Non-Exam / Testing Units from CAT & Exam Analysis
+
+**Summary:**
+- Added `supabase/migrations/20261118230500_exclude_assessment_from_analysis.sql` adding `exclude_from_analysis boolean not null default false` to `public.assessment_events`.
+- Added `toggleAssessmentExcludeFromAnalysisAction` (`src/features/assessment/marks/actions.ts`) and an **Exclude from Analysis / Include in Analysis** toggle button + banner on `/assessment/marks/[assessmentId]` (`src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`).
+- Updated `getAssessmentAnalysisBundles` (`src/features/assessment/analysis-queries.ts`) and `getActiveAssessmentPeriodReportData` (`src/features/assessment/reports/queries.ts`) to exclude markbooks with `exclude_from_analysis = true` from CAT & Exam analysis, consolidated period reports, and marksheet exports (with safe fallback if the migration is not yet pushed).
+
+**Manual Follow-Up:**
+- Run `supabase db push` (or apply `supabase/migrations/20261118230500_exclude_assessment_from_analysis.sql` to Supabase) before toggling exclusion in production.
+
+**Added:**
+- `supabase/migrations/20261118230500_exclude_assessment_from_analysis.sql`
+
+**Modified:**
+- `src/features/assessment/marks/actions.ts`
+- `src/features/assessment/analysis-queries.ts`
+- `src/features/assessment/reports/queries.ts`
+- `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`
+- `CHANGES.md`
+
 ### 2026-11-18: Enforce Active In-Class Student Filtering Across All Attendance & Markbook Lists
 
 **Summary:**

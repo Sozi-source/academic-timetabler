@@ -1,4 +1,4 @@
-import { ArrowLeft, BarChart3, CheckCircle2, FileSpreadsheet, FileText, UsersRound } from 'lucide-react';
+import { ArrowLeft, BarChart3, CheckCircle2, Eye, EyeOff, FileSpreadsheet, FileText, UsersRound } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -6,7 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/ui/page-header';
 import { DownloadAssessmentMarkbookButton } from '@/features/assessment/markbook-controls';
 import { getAssessmentById, getAssessmentPopulation } from '@/features/assessment/queries';
-import { unlockAssessmentMarkComponentAction } from '@/features/assessment/marks/actions';
+import {
+  toggleAssessmentExcludeFromAnalysisAction,
+  unlockAssessmentMarkComponentAction,
+} from '@/features/assessment/marks/actions';
 import {
   getAssessmentCandidateMarks,
   getAssessmentMarkComponentSubmissions,
@@ -22,6 +25,7 @@ const ON_BEHALF_ERRORS: Record<string, string> = {
   'cat-already-submitted': 'CAT marks for this markbook were already submitted.',
   'no-saved-cat': 'There are no saved CAT marks to submit for this markbook.',
   'cat-submit-on-behalf': 'CAT marks could not be submitted on behalf of the trainer. Please try again.',
+  'exclude-update-failed': 'Could not update analysis exclusion setting. Please ensure database migrations are up to date.',
   locked: 'This markbook is finalized and can no longer be changed.',
 };
 
@@ -58,6 +62,9 @@ export default async function AssessmentMarkWorkflowPage({
 
   const isComplete = Boolean(
     assessment.exam_marks_finalized_at || assessment.status === 'closed',
+  );
+  const excludedFromAnalysis = Boolean(
+    (assessment as unknown as { exclude_from_analysis?: boolean | null }).exclude_from_analysis,
   );
   const marksSubmitted = Boolean(assessment.marks_submitted_at);
   const isDraft = !isComplete && !marksSubmitted && resultCount > 0;
@@ -159,9 +166,39 @@ export default async function AssessmentMarkWorkflowPage({
               disabled={population.length === 0}
               marksSubmitted={marksSubmitted || isComplete}
             />
+            <form action={toggleAssessmentExcludeFromAnalysisAction} className="inline">
+              <input type="hidden" name="assessmentId" value={assessment.id} />
+              <input type="hidden" name="exclude" value={excludedFromAnalysis ? 'false' : 'true'} />
+              <button
+                type="submit"
+                className={
+                  excludedFromAnalysis
+                    ? 'inline-flex h-8 items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 text-xs font-semibold text-amber-900 shadow-2xs hover:bg-amber-100 cursor-pointer'
+                    : 'inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 cursor-pointer'
+                }
+              >
+                {excludedFromAnalysis ? (
+                  <>
+                    <Eye className="size-3.5 text-amber-700" />
+                    <span>Include in Analysis</span>
+                  </>
+                ) : (
+                  <>
+                    <EyeOff className="size-3.5 text-slate-500" />
+                    <span>Exclude from Analysis</span>
+                  </>
+                )}
+              </button>
+            </form>
           </div>
         }
       />
+
+      {excludedFromAnalysis ? (
+        <section className="rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-2.5 text-xs font-medium text-amber-900">
+          This markbook is currently <strong>excluded from CAT &amp; Exam analysis</strong> and consolidated period reports.
+        </section>
+      ) : null}
 
       {submittedOnBehalf ? (
         <section className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-800">

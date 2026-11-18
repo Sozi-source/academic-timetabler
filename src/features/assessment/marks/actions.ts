@@ -324,3 +324,50 @@ export async function updateHodCandidateMarksAction(
   revalidatePath(`/assessment/marks/${assessmentId}`);
   return { ok: true };
 }
+
+/**
+ * Toggles whether an assessment markbook (e.g. non-exam unit like Trade Project
+ * or testing data) is excluded from CAT & Exam analysis and period reports.
+ */
+export async function toggleAssessmentExcludeFromAnalysisAction(formData: FormData) {
+  const profile = await requireHodAccess();
+  const parsed = z
+    .object({
+      assessmentId: z.uuid(),
+      exclude: z.enum(['true', 'false']),
+    })
+    .safeParse({
+      assessmentId: formData.get('assessmentId'),
+      exclude: formData.get('exclude'),
+    });
+  if (!parsed.success) return;
+
+  const { assessmentId, exclude } = parsed.data;
+  const supabase = await createClient();
+
+  const { data: event } = await supabase
+    .from('assessment_events')
+    .select('id, department_id')
+    .eq('id', assessmentId)
+    .maybeSingle();
+
+  if (!event || (profile.activeDepartmentId && event.department_id !== profile.activeDepartmentId)) {
+    redirect(`/assessment/marks/${assessmentId}?error=not-found`);
+  }
+
+  const { error } = await supabase
+    .from('assessment_events')
+    .update({ exclude_from_analysis: exclude === 'true' })
+    .eq('id', assessmentId);
+
+  if (error) {
+    redirect(`/assessment/marks/${assessmentId}?error=exclude-update-failed`);
+  }
+
+  revalidatePath('/assessment');
+  revalidatePath('/assessment/analysis');
+  revalidatePath('/assessment/reports');
+  revalidatePath('/assessment/marks');
+  revalidatePath(`/assessment/marks/${assessmentId}`);
+  redirect(`/assessment/marks/${assessmentId}`);
+}

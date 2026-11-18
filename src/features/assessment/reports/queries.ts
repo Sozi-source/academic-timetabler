@@ -67,7 +67,21 @@ export async function getActiveAssessmentPeriodReportData(
     .eq('academic_period_id', period.id);
   if (eventsError) throw new Error(`Unable to load unit markbooks: ${eventsError.message}`);
 
-  const validEvents = (events ?? []).filter((e) => e.assessment_type === 'exam' || e.title === 'Unit Markbook');
+  const candidateEvents = (events ?? []).filter((e) => e.assessment_type === 'exam' || e.title === 'Unit Markbook');
+  const excludedIds = new Set<string>();
+  if (candidateEvents.length > 0) {
+    const { data: excludedRows, error: excludedError } = await admin
+      .from('assessment_events')
+      .select('id')
+      .in('id', candidateEvents.map((e) => e.id))
+      .eq('exclude_from_analysis', true);
+    if (!excludedError) {
+      for (const row of excludedRows ?? []) {
+        if (row.id) excludedIds.add(row.id);
+      }
+    }
+  }
+  const validEvents = candidateEvents.filter((e) => !excludedIds.has(e.id));
   if (!validEvents.length) {
     return {
       periodId: period.id,

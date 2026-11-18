@@ -596,6 +596,20 @@ export const getAssessmentAnalysisBundles =
         ),
       );
 
+    const excludedAssessmentIds = new Set<string>();
+    if (eventIds.length > 0) {
+      const { data: excludedRows, error: excludedError } = await supabase
+        .from('assessment_events')
+        .select('id')
+        .in('id', eventIds)
+        .eq('exclude_from_analysis', true);
+      if (!excludedError) {
+        for (const row of excludedRows ?? []) {
+          if (row.id) excludedAssessmentIds.add(row.id);
+        }
+      }
+    }
+
     const periodById =
       new Map(
         data.periods.map(
@@ -738,15 +752,21 @@ export const getAssessmentAnalysisBundles =
         eventGroups.values()
     ) {
       const sorted =
-        [...events].sort(
-          (
-            first,
-            second,
-          ) =>
-            first.id.localeCompare(
-              second.id,
-            ),
-        );
+        [...events]
+          .filter((event) => !excludedAssessmentIds.has(event.id))
+          .sort(
+            (
+              first,
+              second,
+            ) =>
+              first.id.localeCompare(
+                second.id,
+              ),
+          );
+
+      if (sorted.length === 0) {
+        continue;
+      }
 
       const first =
         sorted[0];

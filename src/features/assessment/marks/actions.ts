@@ -199,39 +199,39 @@ export async function submitCatOnBehalfAction(formData: FormData) {
   }
   if (studentIds.size === 0) redirect(`/assessment/marks/${assessmentId}?error=no-saved-cat`);
 
-  // Ensure all target students exist in assessment_roster for the root event
-  // so build_assessment_mark_component_entries never rejects reassigned/population students.
+  // Filter to active in-class students (matching save_assessment_online_component_marks)
+  // and ensure all of them exist in assessment_roster for the root event.
+  const { data: candidateStudents } = await admin
+    .from('students')
+    .select('id, current_cohort_id, admission_cohort_id, lifecycle_status, academic_phase')
+    .in('id', Array.from(studentIds));
+
+  const activeStudents = (candidateStudents ?? []).filter(
+    (s) =>
+      ['admitted', 'active'].includes((s.lifecycle_status ?? '').toLowerCase()) &&
+      (s.academic_phase ?? 'in_class').toLowerCase() === 'in_class',
+  );
+  if (activeStudents.length === 0) redirect(`/assessment/marks/${assessmentId}?error=no-saved-cat`);
+
   const existingRosterIds = new Set(rootRoster.map((r) => r.student_id));
-  const missingRosterStudentIds = Array.from(studentIds).filter((id) => !existingRosterIds.has(id));
-  if (missingRosterStudentIds.length > 0 && eventRes.data.unit_id && eventRes.data.academic_period_id) {
-    const { data: missingStudents } = await admin
-      .from('students')
-      .select('id, current_cohort_id, admission_cohort_id, lifecycle_status, academic_phase')
-      .in('id', missingRosterStudentIds);
-    const toInsert = (missingStudents ?? [])
-      .filter(
-        (s) =>
-          ['admitted', 'active'].includes((s.lifecycle_status ?? '').toLowerCase()) &&
-          (s.academic_phase ?? 'in_class').toLowerCase() === 'in_class',
-      )
-      .map((s) => ({
-        assessment_id: assessmentId,
-        student_id: s.id,
-        cohort_id: s.current_cohort_id ?? s.admission_cohort_id,
-        academic_period_id: eventRes.data.academic_period_id,
-        unit_id: eventRes.data.unit_id,
-        pre_assessment_status: 'expected',
-      }));
-    if (toInsert.length > 0) {
-      await admin
-        .from('assessment_roster')
-        .upsert(toInsert, { onConflict: 'assessment_id,student_id', ignoreDuplicates: true });
-    }
+  const missingRosterStudents = activeStudents.filter((s) => !existingRosterIds.has(s.id));
+  if (missingRosterStudents.length > 0 && eventRes.data.unit_id && eventRes.data.academic_period_id) {
+    const toInsert = missingRosterStudents.map((s) => ({
+      assessment_id: assessmentId,
+      student_id: s.id,
+      cohort_id: s.current_cohort_id ?? s.admission_cohort_id,
+      academic_period_id: eventRes.data.academic_period_id,
+      unit_id: eventRes.data.unit_id,
+      pre_assessment_status: 'expected',
+    }));
+    await admin
+      .from('assessment_roster')
+      .upsert(toInsert, { onConflict: 'assessment_id,student_id', ignoreDuplicates: true });
   }
 
-  const entries = Array.from(studentIds).map((studentId) => {
-    const cat = catByStudent.get(studentId) ?? null;
-    return { student_id: studentId, cat, cat_absent: cat === null };
+  const entries = activeStudents.map((s) => {
+    const cat = catByStudent.get(s.id) ?? null;
+    return { student_id: s.id, cat, cat_absent: cat === null };
   });
 
   const { error } = await supabase.rpc('save_assessment_online_component_marks', {

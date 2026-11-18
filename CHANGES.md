@@ -1,3 +1,19 @@
+### 2026-11-18: Fix CAT On-Behalf Submission Scope Error & Lock Single-Line Admission/Name Cells
+
+**Summary:**
+- Fixed `CAT marks could not be submitted on behalf of the trainer. (One or more students are outside this markbook scope.)` in `submitCatOnBehalfAction` (`src/features/assessment/marks/actions.ts`):
+  - Filtered `entries` to active `in_class` students (`lifecycle_status` in `['admitted', 'active']`, `academic_phase = 'in_class'`) matching `save_assessment_online_component_marks`, so inactive/dropped-out students in `assessment_population` (e.g., `dropped_out`) are not sent to the RPC after being excluded from `assessment_roster`.
+  - Pre-synced missing active `in_class` students (such as `student_class_assignments` students) into `assessment_roster` and surfaced the exact RPC `error.message` on failure.
+- Updated `AssessmentShell` (`src/components/layout/assessment-shell.tsx`) to remove `touch-target` from the mobile menu button so `lg:hidden` hides it on desktop.
+- Updated `AssessmentMarkbookViewTable` (`src/features/assessment/marks/assessment-markbook-view-table.tsx`) to enforce `whitespace-nowrap` and minimum widths (`min-w-[155px]` / `min-w-[210px]`) on Admission No., Student Full Name, `Pending` badges, and `Edit`/`Save`/`Cancel` buttons so none wrap onto a second line.
+
+**Modified:**
+- `src/features/assessment/marks/actions.ts`
+- `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`
+- `src/components/layout/assessment-shell.tsx`
+- `src/features/assessment/marks/assessment-markbook-view-table.tsx`
+- `CHANGES.md`
+
 ### 2026-11-18: Replace All Remaining `window.confirm` / `confirm` Popups with In-App `ConfirmDialog`
 
 **Summary:**

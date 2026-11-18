@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
+import { getUnifiedUnitRoster } from '@/features/academic-roster/unified-roster';
 import { getAssessmentById, getAssessmentPopulation } from '@/features/assessment/queries';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { resolveAssessmentIdsWithSiblings } from '@/features/staff-assessment/online-marks-query';
@@ -150,7 +151,7 @@ export async function submitCatOnBehalfAction(formData: FormData) {
   const targetEventIds = resolvedIds.length > 0 ? resolvedIds : [assessmentId];
 
   const [eventRes, rosterRes, draftRes, subRes] = await Promise.all([
-    supabase.from('assessment_events').select('department_id').eq('id', assessmentId).maybeSingle(),
+    supabase.from('assessment_events').select('department_id, unit_id, academic_period_id').eq('id', assessmentId).maybeSingle(),
     supabase.from('assessment_roster').select('assessment_id, student_id').in('assessment_id', targetEventIds),
     supabase.from('assessment_online_mark_drafts').select('student_id, cat_mark').in('assessment_id', targetEventIds),
     supabase.from('assessment_mark_component_submissions').select('id').in('assessment_id', targetEventIds).eq('component_key', 'cat').limit(1),
@@ -167,7 +168,7 @@ export async function submitCatOnBehalfAction(formData: FormData) {
   for (const d of draftRes.data ?? []) {
     if (d.student_id && d.cat_mark !== null) catByStudent.set(d.student_id, d.cat_mark);
   }
-  if (roster.length === 0 || catByStudent.size === 0) redirect(`/assessment/marks/${assessmentId}?error=no-saved-cat`);
+  if (catByStudent.size === 0) redirect(`/assessment/marks/${assessmentId}?error=no-saved-cat`);
 
   // The component RPC owns sibling propagation. Submit the selected/root event
   // once so the RPC can atomically record the HOD as submitted_by and sync all
@@ -176,9 +177,22 @@ export async function submitCatOnBehalfAction(formData: FormData) {
   // generic "could not be submitted on behalf" error.
   const rootRoster = roster.filter((r) => r.assessment_id === assessmentId);
   const effectiveRoster = rootRoster.length > 0 ? rootRoster : roster;
-  const entries = effectiveRoster.map((r) => {
-    const cat = catByStudent.get(r.student_id) ?? null;
-    return { student_id: r.student_id, cat, cat_absent: cat === null };
+  const studentIds = new Set(effectiveRoster.map((r) => r.student_id).filter(Boolean));
+  if (eventRes.data.unit_id && eventRes.data.academic_period_id) {
+    const unifiedRoster = await getUnifiedUnitRoster({
+      supabase: createAdminClient(),
+      unitId: eventRes.data.unit_id,
+      academicPeriodId: eventRes.data.academic_period_id,
+    });
+    for (const candidate of unifiedRoster.students) {
+      studentIds.add(candidate.studentId);
+    }
+  }
+  if (studentIds.size === 0) redirect(`/assessment/marks/${assessmentId}?error=no-saved-cat`);
+
+  const entries = Array.from(studentIds).map((studentId) => {
+    const cat = catByStudent.get(studentId) ?? null;
+    return { student_id: studentId, cat, cat_absent: cat === null };
   });
 
   const { error } = await supabase.rpc('save_assessment_online_component_marks', {

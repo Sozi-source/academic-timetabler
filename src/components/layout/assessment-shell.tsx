@@ -49,7 +49,7 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
   const initials = getInitials(profile.fullName) || 'HD';
 
   const sidebar = (
-    <aside className="flex h-full w-[var(--sidebar-width)] shrink-0 flex-col bg-[#081725] text-slate-100 lg:sticky lg:top-0 lg:h-dvh lg:self-start lg:overflow-y-auto border-r border-[#1e293b]">
+    <aside className="flex h-full w-[var(--sidebar-width)] shrink-0 flex-col bg-[#081725] text-slate-100 overflow-y-auto border-r border-[#1e293b]">
       {/* Brand Header */}
       <div className="border-b border-[#1e293b] px-4 py-4">
         <Link href="/dashboard" className="flex items-center gap-2.5 group">
@@ -136,7 +136,7 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
       <div className="fixed inset-x-0 top-0 z-[60] h-1 bg-sky-500" aria-hidden="true" />
 
       <div className="flex min-h-screen">
-        <div className="hidden lg:sticky lg:top-0 lg:block lg:h-dvh lg:shrink-0 lg:self-start">{sidebar}</div>
+        <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:block lg:w-[var(--sidebar-width)]">{sidebar}</div>
         {mobileOpen && (
           <div className="fixed inset-0 z-50 lg:hidden">
             <button
@@ -148,7 +148,7 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
             <div className="admin-mobile-drawer relative h-full w-[var(--sidebar-width)] max-w-[88vw]">{sidebar}</div>
           </div>
         )}
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 lg:pl-[var(--sidebar-width)]">
           {/* Header */}
           <header className="admin-shell-header sticky top-0 z-40 flex min-h-[var(--header-height)] items-center justify-between border-b border-border-soft bg-white/95 px-[var(--content-gutter)] shadow-sm backdrop-blur-xl">
             <div className="flex items-center gap-3">

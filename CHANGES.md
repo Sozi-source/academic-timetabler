@@ -1,3 +1,17 @@
+### 2026-11-18: Fix Assessment Sidebar Sticky/Fixed Positioning & Include Reassigned Students in CAT On-Behalf Counts
+
+**Summary:**
+- Replaced `overflow-x: hidden` with `overflow-x: clip` on `html` and `body` in `src/app/globals.css` so sticky sidebars/headers are never broken by an ancestor scroll container.
+- Updated `AssessmentShell` (`src/components/layout/assessment-shell.tsx`) to use a viewport-fixed desktop sidebar (`lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:w-[var(--sidebar-width)]`) with `lg:pl-[var(--sidebar-width)]` on the main content wrapper so the assessment marks sidebar stays pinned while scrolling.
+- Updated `getCatOnBehalfStatus` (`src/features/assessment/marks/pending-submissions.ts`) and `submitCatOnBehalfAction` (`src/features/assessment/marks/actions.ts`) to merge `getUnifiedUnitRoster`, ensuring individually reassigned students (`student_class_assignments`) are included in trainer pending/missing CAT counts and on-behalf submissions.
+
+**Modified:**
+- `src/app/globals.css`
+- `src/components/layout/assessment-shell.tsx`
+- `src/features/assessment/marks/pending-submissions.ts`
+- `src/features/assessment/marks/actions.ts`
+- `CHANGES.md`
+
 ### 2026-11-18: Clean Up Stray Commit Artifact & Complete Allocation-Scoped Population Passing
 
 **Summary:**

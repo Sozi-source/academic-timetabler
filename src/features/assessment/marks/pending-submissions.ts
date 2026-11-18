@@ -1,7 +1,9 @@
 import { cache } from 'react';
 
+import { getUnifiedUnitRoster } from '@/features/academic-roster/unified-roster';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { resolveAssessmentIdsWithSiblings } from '@/features/staff-assessment/online-marks-query';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 
 /**
@@ -183,7 +185,7 @@ export const getCatOnBehalfStatus = cache(async (assessmentId: string) => {
     loadDraftState(supabase, targetEventIds),
     supabase
       .from('assessment_events')
-      .select('id, cat_marks_finalized_at')
+      .select('id, unit_id, academic_period_id, cat_marks_finalized_at')
       .in('id', targetEventIds),
   ]);
 
@@ -199,6 +201,27 @@ export const getCatOnBehalfStatus = cache(async (assessmentId: string) => {
   for (const r of state.roster) {
     if (targetEventSet.has(r.assessment_id) && r.student_id && !rosterByStudent.has(r.student_id)) {
       rosterByStudent.set(r.student_id, r);
+    }
+  }
+
+  // Merge authoritative unified roster (includes individual student_class_assignments)
+  const rootEvent = (eventsRes.data ?? []).find((e) => e.id === assessmentId) ?? (eventsRes.data ?? [])[0];
+  if (rootEvent?.unit_id && rootEvent?.academic_period_id) {
+    const admin = createAdminClient();
+    const unifiedRoster = await getUnifiedUnitRoster({
+      supabase: admin,
+      unitId: rootEvent.unit_id,
+      academicPeriodId: rootEvent.academic_period_id,
+    });
+    for (const candidate of unifiedRoster.students) {
+      if (!rosterByStudent.has(candidate.studentId)) {
+        rosterByStudent.set(candidate.studentId, {
+          assessment_id: assessmentId,
+          student_id: candidate.studentId,
+          cat_absent: false,
+          pre_assessment_status: null,
+        });
+      }
     }
   }
 

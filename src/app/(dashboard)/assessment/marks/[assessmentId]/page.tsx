@@ -171,13 +171,14 @@ export default async function AssessmentMarkWorkflowPage({
       {catOnBehalf.canSubmitOnBehalf && !isComplete ? (
         <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
           <div>
-            <h2 className="text-sm font-semibold text-amber-900">CAT marks saved but not submitted</h2>
-            <p className="mt-1 text-xs leading-5 text-amber-800">
-              {catOnBehalf.trainerNames.length ? catOnBehalf.trainerNames.join(', ') : 'The trainer'} saved CAT marks for{' '}
-              <strong>{catOnBehalf.enteredCount}</strong> of <strong>{catOnBehalf.rosterCount}</strong> students but has not submitted them.
+            <h2 className="text-sm font-semibold text-amber-900">
               {catOnBehalf.missingCount > 0
-                ? ` ${catOnBehalf.missingCount} student(s) without a mark will be recorded as AB if you submit now.`
-                : ' All students have a mark recorded.'}
+                ? `${catOnBehalf.missingCount} student${catOnBehalf.missingCount === 1 ? '' : 's'} will be recorded absent — review?`
+                : 'CAT marks ready to submit'}
+            </h2>
+            <p className="mt-0.5 text-xs text-amber-800">
+              {catOnBehalf.trainerNames.length ? catOnBehalf.trainerNames.join(', ') : 'Trainer'} saved{' '}
+              <strong>{catOnBehalf.enteredCount}/{catOnBehalf.rosterCount}</strong> CAT marks (not submitted).
             </p>
           </div>
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
@@ -298,6 +299,8 @@ export default async function AssessmentMarkWorkflowPage({
 
       {/* Candidates Markbook Roster & Marks View */}
       <AssessmentMarkbookViewTable
+        assessmentId={assessment.id}
+        canEditMarks={!isComplete && !marksSubmitted}
         population={population}
         marksByStudent={marksByStudent}
         assessmentType={assessment.assessment_type}

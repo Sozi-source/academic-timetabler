@@ -1,13 +1,17 @@
 'use client';
 
-import { useId, useMemo, useState } from 'react';
-import { AlertCircle, CheckCircle2, ChevronDown, Filter, Printer, Search, Users, X } from 'lucide-react';
+import { useId, useMemo, useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { AlertCircle, CheckCircle2, ChevronDown, Filter, Pencil, Printer, Save, Search, Users, X } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import type { AssessmentCandidateRow } from '@/features/assessment/types';
+import { updateHodCandidateMarksAction } from './actions';
 import type { CandidateMarkRecord } from './types';
 
 interface AssessmentMarkbookViewTableProps {
+  assessmentId?: string;
+  canEditMarks?: boolean;
   population: AssessmentCandidateRow[];
   marksByStudent: Record<string, CandidateMarkRecord>;
   assessmentType: 'cat' | 'exam';
@@ -50,6 +54,8 @@ function getGradeBadgeClass(grade: string | null | undefined): string {
 }
 
 export function AssessmentMarkbookViewTable({
+  assessmentId,
+  canEditMarks = false,
   population,
   marksByStudent,
   assessmentType,
@@ -64,6 +70,19 @@ export function AssessmentMarkbookViewTable({
   initialStatus,
   initialView,
 }: AssessmentMarkbookViewTableProps) {
+  const router = useRouter();
+  const editable = Boolean(canEditMarks && assessmentId && !isComplete && !marksSubmitted);
+  const [isSaving, startSaving] = useTransition();
+  const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [draftValues, setDraftValues] = useState({
+    assignment: '',
+    presentation: '',
+    rat: '',
+    cat: '',
+    catAbsent: false,
+    exam: '',
+  });
   const searchInputId = useId();
   const cohortSelectId = useId();
   const statusSelectId = useId();
@@ -84,6 +103,71 @@ export function AssessmentMarkbookViewTable({
   });
   const [selectedStatus, setSelectedStatus] = useState<string>(initialStatus || 'all');
   const [viewMode, setViewMode] = useState<'all' | 'cat'>(initialView === 'cat' ? 'cat' : 'all');
+
+  function toInputStr(value: number | null | undefined): string {
+    return value === null || value === undefined ? '' : String(value);
+  }
+
+  function parseOptionalMark(raw: string): number | null {
+    const trimmed = raw.trim();
+    if (!trimmed) return null;
+    const parsed = Number(trimmed);
+    return Number.isFinite(parsed) ? parsed : Number.NaN;
+  }
+
+  function startEditingRow(studentId: string, marks: CandidateMarkRecord | null, catAbsent: boolean) {
+    setEditError(null);
+    setEditingStudentId(studentId);
+    setDraftValues({
+      assignment: toInputStr(marks?.assignment),
+      presentation: toInputStr(marks?.presentation),
+      rat: toInputStr(marks?.rat),
+      cat: catAbsent ? '' : toInputStr(marks?.cat),
+      catAbsent,
+      exam: toInputStr(marks?.exam),
+    });
+  }
+
+  function cancelEditingRow() {
+    setEditingStudentId(null);
+    setEditError(null);
+  }
+
+  function saveEditingRow(studentId: string, mode: 'cat' | 'all') {
+    if (!assessmentId) return;
+    setEditError(null);
+
+    const assignment = parseOptionalMark(draftValues.assignment);
+    const presentation = parseOptionalMark(draftValues.presentation);
+    const rat = parseOptionalMark(draftValues.rat);
+    const cat = draftValues.catAbsent ? null : parseOptionalMark(draftValues.cat);
+    const exam = parseOptionalMark(draftValues.exam);
+
+    if (
+      (mode === 'cat' && Number.isNaN(cat)) ||
+      (mode === 'all' && [assignment, presentation, rat, cat, exam].some((v) => Number.isNaN(v)))
+    ) {
+      setEditError('Enter valid numeric marks before saving.');
+      return;
+    }
+
+    startSaving(async () => {
+      const result = await updateHodCandidateMarksAction({
+        assessmentId,
+        studentId,
+        component: mode,
+        ...(mode === 'all'
+          ? { assignment, presentation, rat, cat, catAbsent: draftValues.catAbsent, exam }
+          : { cat, catAbsent: draftValues.catAbsent }),
+      });
+      if ('message' in result) {
+        setEditError(result.message);
+        return;
+      }
+      setEditingStudentId(null);
+      router.refresh();
+    });
+  }
 
   // Discover distinct cohorts present in this population
   const cohorts = useMemo(() => {
@@ -509,6 +593,15 @@ export function AssessmentMarkbookViewTable({
         </p>
       </div>
 
+      {editError ? (
+        <div className="flex items-center justify-between gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs font-semibold text-rose-800 print:hidden">
+          <span>{editError}</span>
+          <button type="button" onClick={() => setEditError(null)} className="rounded p-0.5 hover:bg-rose-100" aria-label="Dismiss error">
+            <X className="size-3.5" />
+          </button>
+        </div>
+      ) : null}
+
       {/* Candidate Marks Table */}
       <div className="overflow-x-auto rounded-xl border border-slate-300 bg-white shadow-2xs">
         {viewMode === 'cat' ? (
@@ -523,12 +616,15 @@ export function AssessmentMarkbookViewTable({
                   CAT Mark <span className="text-[10px] font-bold text-amber-800">/15</span>
                 </th>
                 <th scope="col" className="px-3 py-2.5 text-center whitespace-nowrap">CAT Status</th>
+                {editable ? (
+                  <th scope="col" className="px-3 py-2.5 text-center whitespace-nowrap print:hidden">Action</th>
+                ) : null}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredRows.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-xs text-slate-500">
+                  <td colSpan={editable ? 7 : 6} className="px-4 py-12 text-center text-xs text-slate-500">
                     <p className="font-semibold text-slate-700">No candidates match your filter criteria.</p>
                     <p className="mt-1 text-[11px] text-slate-400">
                       Try adjusting your search query or status filter above.
@@ -560,7 +656,32 @@ export function AssessmentMarkbookViewTable({
                         </span>
                       </td>
                       <td className="px-3 py-2.5 text-center bg-amber-50/70 border-x border-amber-200/90 font-mono font-bold tabular-nums">
-                        {row.isCatAbsent ? (
+                        {editingStudentId === row.studentId ? (
+                          <div className="inline-flex items-center gap-1.5">
+                            <input
+                              type="number"
+                              min={0}
+                              max={15}
+                              step="0.5"
+                              disabled={draftValues.catAbsent || isSaving}
+                              value={draftValues.cat}
+                              onChange={(e) => setDraftValues((v) => ({ ...v, cat: e.target.value }))}
+                              placeholder="0–15"
+                              aria-label={`CAT mark for ${row.fullName}`}
+                              className="h-7 w-16 rounded border border-amber-400 bg-white px-1.5 text-center font-mono text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:bg-slate-100 disabled:text-slate-400"
+                            />
+                            <label className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-700 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={draftValues.catAbsent}
+                                disabled={isSaving}
+                                onChange={(e) => setDraftValues((v) => ({ ...v, catAbsent: e.target.checked }))}
+                                className="rounded border-slate-300"
+                              />
+                              AB
+                            </label>
+                          </div>
+                        ) : row.isCatAbsent ? (
                           <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-bold text-rose-900 border border-rose-300">
                             AB
                           </span>
@@ -587,6 +708,40 @@ export function AssessmentMarkbookViewTable({
                           </span>
                         )}
                       </td>
+                      {editable ? (
+                        <td className="px-3 py-2.5 text-center whitespace-nowrap print:hidden">
+                          {editingStudentId === row.studentId ? (
+                            <div className="inline-flex items-center gap-1">
+                              <button
+                                type="button"
+                                disabled={isSaving}
+                                onClick={() => saveEditingRow(row.studentId, 'cat')}
+                                className="inline-flex h-7 items-center gap-1 rounded-md bg-emerald-600 px-2 text-[11px] font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 cursor-pointer"
+                              >
+                                <Save className="size-3" />
+                                <span>{isSaving ? 'Saving...' : 'Save'}</span>
+                              </button>
+                              <button
+                                type="button"
+                                disabled={isSaving}
+                                onClick={cancelEditingRow}
+                                className="inline-flex h-7 items-center rounded-md border border-slate-300 bg-white px-2 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => startEditingRow(row.studentId, m, row.isCatAbsent)}
+                              className="inline-flex h-7 items-center gap-1 rounded-md border border-slate-300 bg-white px-2.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                            >
+                              <Pencil className="size-3" />
+                              <span>Edit</span>
+                            </button>
+                          )}
+                        </td>
+                      ) : null}
                     </tr>
                   );
                 })
@@ -643,6 +798,15 @@ export function AssessmentMarkbookViewTable({
                     >
                       Final Aggregate
                     </th>
+                    {editable ? (
+                      <th
+                        rowSpan={2}
+                        scope="col"
+                        className="px-3 py-2 text-center bg-slate-50 border-l border-slate-200 text-slate-700 whitespace-nowrap print:hidden"
+                      >
+                        Action
+                      </th>
+                    ) : null}
                   </tr>
 
                   {/* Tier 2 Column Detail Header */}
@@ -682,6 +846,9 @@ export function AssessmentMarkbookViewTable({
                   </th>
                   <th scope="col" className="px-3 py-2.5 text-center whitespace-nowrap bg-amber-50/50">Grade</th>
                   <th scope="col" className="px-3 py-2.5 text-center whitespace-nowrap">Status</th>
+                  {editable ? (
+                    <th scope="col" className="px-3 py-2.5 text-center whitespace-nowrap print:hidden">Action</th>
+                  ) : null}
                 </tr>
               )}
             </thead>
@@ -690,7 +857,7 @@ export function AssessmentMarkbookViewTable({
               {filteredRows.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={assessmentType === 'exam' ? 10 : 6}
+                    colSpan={assessmentType === 'exam' ? (editable ? 11 : 10) : (editable ? 7 : 6)}
                     className="px-4 py-12 text-center text-xs text-slate-500"
                   >
                     <p className="font-semibold text-slate-700">No candidates match your filter criteria.</p>
@@ -735,22 +902,87 @@ export function AssessmentMarkbookViewTable({
                         <>
                           {/* Assignment /5 */}
                           <td className="px-2.5 py-2.5 text-center font-mono font-medium text-slate-800 tabular-nums">
-                            {formatMark(m?.assignment)}
+                            {editingStudentId === row.studentId ? (
+                              <input
+                                type="number"
+                                min={0}
+                                max={5}
+                                step="0.5"
+                                disabled={isSaving}
+                                value={draftValues.assignment}
+                                onChange={(e) => setDraftValues((v) => ({ ...v, assignment: e.target.value }))}
+                                aria-label={`Assignment mark for ${row.fullName}`}
+                                className="h-7 w-14 rounded border border-slate-300 bg-white px-1 text-center font-mono text-xs text-slate-900"
+                              />
+                            ) : (
+                              formatMark(m?.assignment)
+                            )}
                           </td>
 
                           {/* Presentation /10 */}
                           <td className="px-2.5 py-2.5 text-center font-mono font-medium text-slate-800 tabular-nums">
-                            {formatMark(m?.presentation)}
+                            {editingStudentId === row.studentId ? (
+                              <input
+                                type="number"
+                                min={0}
+                                max={10}
+                                step="0.5"
+                                disabled={isSaving}
+                                value={draftValues.presentation}
+                                onChange={(e) => setDraftValues((v) => ({ ...v, presentation: e.target.value }))}
+                                aria-label={`Presentation mark for ${row.fullName}`}
+                                className="h-7 w-14 rounded border border-slate-300 bg-white px-1 text-center font-mono text-xs text-slate-900"
+                              />
+                            ) : (
+                              formatMark(m?.presentation)
+                            )}
                           </td>
 
                           {/* RAT /15 */}
                           <td className="px-2.5 py-2.5 text-center font-mono font-medium text-slate-800 tabular-nums">
-                            {formatMark(m?.rat)}
+                            {editingStudentId === row.studentId ? (
+                              <input
+                                type="number"
+                                min={0}
+                                max={15}
+                                step="0.5"
+                                disabled={isSaving}
+                                value={draftValues.rat}
+                                onChange={(e) => setDraftValues((v) => ({ ...v, rat: e.target.value }))}
+                                aria-label={`RAT mark for ${row.fullName}`}
+                                className="h-7 w-14 rounded border border-slate-300 bg-white px-1 text-center font-mono text-xs text-slate-900"
+                              />
+                            ) : (
+                              formatMark(m?.rat)
+                            )}
                           </td>
 
                           {/* CAT /15 */}
                           <td className="px-2.5 py-2.5 text-center font-mono font-medium tabular-nums border-r border-slate-200">
-                            {isCatAbsent ? (
+                            {editingStudentId === row.studentId ? (
+                              <div className="inline-flex items-center gap-1">
+                                <input
+                                  type="number"
+                                  min={0}
+                                  max={15}
+                                  step="0.5"
+                                  disabled={draftValues.catAbsent || isSaving}
+                                  value={draftValues.cat}
+                                  onChange={(e) => setDraftValues((v) => ({ ...v, cat: e.target.value }))}
+                                  aria-label={`CAT mark for ${row.fullName}`}
+                                  className="h-7 w-14 rounded border border-amber-400 bg-white px-1 text-center font-mono text-xs text-slate-900 disabled:bg-slate-100"
+                                />
+                                <label className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-slate-700 cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={draftValues.catAbsent}
+                                    disabled={isSaving}
+                                    onChange={(e) => setDraftValues((v) => ({ ...v, catAbsent: e.target.checked }))}
+                                  />
+                                  AB
+                                </label>
+                              </div>
+                            ) : isCatAbsent ? (
                               <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-900 border border-amber-300">
                                 AB
                               </span>
@@ -765,7 +997,19 @@ export function AssessmentMarkbookViewTable({
 
                           {/* Exam /70 */}
                           <td className="px-2.5 py-2.5 text-center font-mono font-medium tabular-nums border-r border-slate-200">
-                            {isAbsent ? (
+                            {editingStudentId === row.studentId ? (
+                              <input
+                                type="number"
+                                min={0}
+                                max={70}
+                                step="0.5"
+                                disabled={isSaving}
+                                value={draftValues.exam}
+                                onChange={(e) => setDraftValues((v) => ({ ...v, exam: e.target.value }))}
+                                aria-label={`Exam mark for ${row.fullName}`}
+                                className="h-7 w-14 rounded border border-slate-300 bg-white px-1 text-center font-mono text-xs text-slate-900"
+                              />
+                            ) : isAbsent ? (
                               <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-bold text-rose-900 border border-rose-300">
                                 AB
                               </span>
@@ -852,6 +1096,40 @@ export function AssessmentMarkbookViewTable({
                           </td>
                         </>
                       )}
+                      {editable ? (
+                        <td className="px-3 py-2.5 text-center whitespace-nowrap border-l border-slate-200 print:hidden">
+                          {editingStudentId === row.studentId ? (
+                            <div className="inline-flex items-center gap-1">
+                              <button
+                                type="button"
+                                disabled={isSaving}
+                                onClick={() => saveEditingRow(row.studentId, assessmentType === 'exam' ? 'all' : 'cat')}
+                                className="inline-flex h-7 items-center gap-1 rounded-md bg-emerald-600 px-2 text-[11px] font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 cursor-pointer"
+                              >
+                                <Save className="size-3" />
+                                <span>{isSaving ? 'Saving...' : 'Save'}</span>
+                              </button>
+                              <button
+                                type="button"
+                                disabled={isSaving}
+                                onClick={cancelEditingRow}
+                                className="inline-flex h-7 items-center rounded-md border border-slate-300 bg-white px-2 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => startEditingRow(row.studentId, m, isCatAbsent)}
+                              className="inline-flex h-7 items-center gap-1 rounded-md border border-slate-300 bg-white px-2.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                            >
+                              <Pencil className="size-3" />
+                              <span>Edit</span>
+                            </button>
+                          )}
+                        </td>
+                      ) : null}
                     </tr>
                   );
                 })

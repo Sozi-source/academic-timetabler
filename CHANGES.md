@@ -1,3 +1,16 @@
+### 2026-11-18: Inline HOD Mark Editing & Concise Pending CAT Banner
+
+**Summary:**
+- Added `updateHodCandidateMarksAction` (`src/features/assessment/marks/actions.ts`) so HODs can enter or update marks (including CAT/AB and coursework/exam components) for individual skipped or reassigned students (such as Esther Mbugua) directly from `/assessment/marks/[assessmentId]`.
+- Added inline row editing (`Edit` / `Save` / `Cancel`) to `AssessmentMarkbookViewTable` (`src/features/assessment/marks/assessment-markbook-view-table.tsx`) in both CAT Focus and Full Markbook views when the markbook is not yet finalized/submitted.
+- Shortened the pending CAT banner in `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx` to a concise prompt (`"N student(s) will be recorded absent — review?"` + `"Trainer saved X/Y CAT marks (not submitted)."`).
+
+**Modified:**
+- `src/features/assessment/marks/actions.ts`
+- `src/features/assessment/marks/assessment-markbook-view-table.tsx`
+- `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`
+- `CHANGES.md`
+
 ### 2026-11-18: Merge `assessment_population` with `assessment_roster` in Pending & On-Behalf CAT Status
 
 **Summary:**

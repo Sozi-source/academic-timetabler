@@ -218,3 +218,76 @@ export async function submitCatOnBehalfAction(formData: FormData) {
   revalidatePath(`/assessment/marks/${assessmentId}`);
   redirect(`/assessment/marks/${assessmentId}?cat_submitted_on_behalf=1`);
 }
+
+const hodCandidateMarkSchema = z.object({
+  assessmentId: z.uuid(),
+  studentId: z.uuid(),
+  component: z.enum(['cat', 'all']),
+  assignment: z.number().min(0).max(5).nullable().optional(),
+  presentation: z.number().min(0).max(10).nullable().optional(),
+  rat: z.number().min(0).max(15).nullable().optional(),
+  cat: z.number().min(0).max(15).nullable().optional(),
+  catAbsent: z.boolean().optional(),
+  exam: z.number().min(0).max(70).nullable().optional(),
+});
+
+export type UpdateHodCandidateMarksInput = z.infer<typeof hodCandidateMarkSchema>;
+
+/**
+ * Allows an HOD to enter or update marks for an individual candidate (such as a
+ * reassigned/skipped student) directly from the markbook before finalization.
+ */
+export async function updateHodCandidateMarksAction(
+  input: UpdateHodCandidateMarksInput,
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  const profile = await requireHodAccess();
+  const parsed = hodCandidateMarkSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, message: parsed.error.issues[0]?.message || 'Invalid mark values.' };
+  }
+
+  const { assessmentId, studentId, component, assignment, presentation, rat, cat, catAbsent, exam } = parsed.data;
+  const supabase = await createClient();
+
+  const { data: event } = await supabase
+    .from('assessment_events')
+    .select('id, department_id, status, exam_marks_finalized_at')
+    .eq('id', assessmentId)
+    .maybeSingle();
+
+  if (!event || (profile.activeDepartmentId && event.department_id !== profile.activeDepartmentId)) {
+    return { ok: false, message: 'Assessment markbook was not found in your active department.' };
+  }
+  if (event.exam_marks_finalized_at || event.status === 'closed') {
+    return { ok: false, message: 'Finalized markbooks cannot be edited.' };
+  }
+
+  const entry =
+    component === 'cat'
+      ? { student_id: studentId, cat: catAbsent ? null : (cat ?? null), cat_absent: Boolean(catAbsent) }
+      : {
+          student_id: studentId,
+          assignment: assignment ?? null,
+          presentation: presentation ?? null,
+          rat: rat ?? null,
+          cat: catAbsent ? null : (cat ?? null),
+          cat_absent: Boolean(catAbsent),
+          exam: exam ?? null,
+        };
+
+  const { error } = await supabase.rpc('save_assessment_online_component_marks', {
+    target_assessment_id: assessmentId,
+    target_component: component,
+    target_entries: [entry],
+    submit_component: false,
+  });
+
+  if (error) {
+    return { ok: false, message: error.message || 'Unable to save candidate marks.' };
+  }
+
+  revalidatePath('/assessment');
+  revalidatePath('/assessment/marks');
+  revalidatePath(`/assessment/marks/${assessmentId}`);
+  return { ok: true };
+}

@@ -159,9 +159,10 @@ export const getAssessmentCandidateMarks = cache(
     const rosterMap = new Map<string, { catAbsent: boolean; isAbsent: boolean }>();
     for (const r of rosterResult.data ?? []) {
       if (r.student_id) {
+        const existing = rosterMap.get(r.student_id);
         rosterMap.set(r.student_id, {
-          catAbsent: Boolean(r.cat_absent),
-          isAbsent: r.pre_assessment_status === 'absent',
+          catAbsent: Boolean(existing?.catAbsent) || Boolean(r.cat_absent),
+          isAbsent: Boolean(existing?.isAbsent) || r.pre_assessment_status === 'absent',
         });
       }
     }

@@ -148,7 +148,7 @@ export async function getTrainerAttendanceWorkspace(
     .from('assessment_population')
     .select(`
       attendance_status,
-      student:students(id,admission_number,full_name),
+      student:students(id,admission_number,full_name,lifecycle_status,academic_phase),
       cohort:cohorts(name)
     `)
     .eq('assessment_event_id', assessmentId)
@@ -176,6 +176,10 @@ export async function getTrainerAttendanceWorkspace(
       const student = Array.isArray(row.student) ? row.student[0] : row.student;
       const cohort = Array.isArray(row.cohort) ? row.cohort[0] : row.cohort;
       if (!student) return [];
+      const lifecycle = (student.lifecycle_status ?? '').toLowerCase();
+      if (lifecycle && !['admitted', 'active'].includes(lifecycle)) return [];
+      const phase = (student.academic_phase ?? '').toLowerCase();
+      if (phase && phase !== 'in_class') return [];
 
       return [{
         id: student.id,

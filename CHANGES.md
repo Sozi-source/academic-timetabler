@@ -1,3 +1,30 @@
+### 2026-11-18: Enforce Active In-Class Student Filtering Across All Attendance & Markbook Lists
+
+**Summary:**
+- Audited and hardened all active attendance, mark-entry, and pending-submission lists so students who are not active (`lifecycle_status` not in `['admitted', 'active']`) or not in class (`academic_phase !== 'in_class'`, e.g., `dropped_out`, `deferred`, `suspended`, `attachment`) never appear on active class lists:
+  - `src/features/assessment/population-workspace.ts` (`extraStudents` fallback)
+  - `src/features/trainer-exam-attendance/queries.ts` (trainer exam attendance list)
+  - `src/features/assessment/queries.ts` (`assessment_roster` fallback in `getAssessmentPopulation`)
+  - `src/features/assessment/marks/pending-submissions.ts` (`loadDraftState`)
+
+**Modified:**
+- `src/features/assessment/population-workspace.ts`
+- `src/features/trainer-exam-attendance/queries.ts`
+- `src/features/assessment/queries.ts`
+- `src/features/assessment/marks/pending-submissions.ts`
+- `CHANGES.md`
+
+### 2026-11-18: Fix Sibling `cat_absent` Overwrite & Exclude Dropped-Out Students from Markbook Population
+
+**Summary:**
+- Fixed `getAssessmentCandidateMarks` (`src/features/assessment/marks/queries.ts`) overwriting `catAbsent: true` with `catAbsent: false` when merging `assessment_roster` rows across sibling assessment events (e.g., Esther Mbugua's `CND 1205` vs `DHN 1303` rows).
+- Updated `getAssessmentPopulation` (`src/features/assessment/queries.ts`) to exclude non-active or off-class students (`lifecycle_status` not in `['admitted', 'active']` or `academic_phase !== 'in_class'`, such as `dropped_out` student `CND/M-7922/IC/26`), matching `getUnifiedUnitRoster` and `save_assessment_online_component_marks`.
+
+**Modified:**
+- `src/features/assessment/marks/queries.ts`
+- `src/features/assessment/queries.ts`
+- `CHANGES.md`
+
 ### 2026-11-18: Fix CAT On-Behalf Submission Scope Error & Lock Single-Line Admission/Name Cells
 
 **Summary:**

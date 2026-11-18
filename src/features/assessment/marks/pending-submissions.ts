@@ -85,7 +85,28 @@ async function loadDraftState(supabase: SupabaseServerClient, assessmentIds: str
     }
   }
 
-  return { drafts, roster, submissions };
+  // Exclude non-active or off-class students (e.g., dropped_out, deferred, attachment)
+  const rosterStudentIds = [...new Set(roster.map((r) => r.student_id).filter(Boolean))];
+  const inactiveStudentIds = new Set<string>();
+  for (const ids of chunk(rosterStudentIds)) {
+    const { data: studentRows } = await supabase
+      .from('students')
+      .select('id, lifecycle_status, academic_phase')
+      .in('id', ids);
+    for (const st of studentRows ?? []) {
+      const lifecycle = (st.lifecycle_status ?? '').toLowerCase();
+      const phase = (st.academic_phase ?? '').toLowerCase();
+      if ((lifecycle && !['admitted', 'active'].includes(lifecycle)) || (phase && phase !== 'in_class')) {
+        inactiveStudentIds.add(st.id);
+      }
+    }
+  }
+
+  return {
+    drafts,
+    roster: inactiveStudentIds.size > 0 ? roster.filter((r) => !inactiveStudentIds.has(r.student_id)) : roster,
+    submissions,
+  };
 }
 
 type DraftState = Awaited<ReturnType<typeof loadDraftState>>;

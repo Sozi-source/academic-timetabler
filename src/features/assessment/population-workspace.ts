@@ -364,9 +364,15 @@ export const getAssessmentPopulationWorkspace =
     if (extraStudentIds.length > 0) {
       const { data: extraStudents } = await supabase
         .from('students')
-        .select('id, admission_number, full_name, current_cohort_id, cohort:cohorts(id, name)')
+        .select('id, admission_number, full_name, current_cohort_id, lifecycle_status, academic_phase, cohort:cohorts(id, name)')
         .in('id', extraStudentIds);
-      extraStudentRows = (extraStudents ?? []) as UnknownRow[];
+      extraStudentRows = ((extraStudents ?? []) as UnknownRow[]).filter((st) => {
+        const lifecycle = (asString(st.lifecycle_status) ?? '').toLowerCase();
+        if (lifecycle && !['admitted', 'active'].includes(lifecycle)) return false;
+        const phase = (asString(st.academic_phase) ?? '').toLowerCase();
+        if (phase && phase !== 'in_class') return false;
+        return true;
+      });
     }
 
     const extraStudentById = new Map(

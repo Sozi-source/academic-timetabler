@@ -300,7 +300,7 @@ export const getAssessmentPopulation = cache(async (assessmentId: string): Promi
       cat_absence_recommendation,
       exam_absence_reason,
       exam_absence_recommendation,
-      student:students(id, admission_number, full_name),
+      student:students(id, admission_number, full_name, lifecycle_status, academic_phase),
       cohort:cohorts(id, code, name)
     `)
     .in('assessment_event_id', targetEventIds)
@@ -311,9 +311,15 @@ export const getAssessmentPopulation = cache(async (assessmentId: string): Promi
   if (data && data.length > 0) {
     // Deduplicate candidate roster across sibling events to prevent doubled counts for shared units
     const studentMap = new Map<string, AssessmentCandidateRow>();
-    for (const raw of data as unknown as AssessmentCandidateRow[]) {
+    for (const raw of data as unknown as Array<AssessmentCandidateRow & {
+      student?: { id: string; admission_number: string; full_name: string; lifecycle_status?: string | null; academic_phase?: string | null } | null;
+    }>) {
       const studentId = raw.student?.id;
       if (!studentId) continue;
+      const lifecycle = (raw.student?.lifecycle_status ?? '').toLowerCase();
+      if (lifecycle && !['admitted', 'active'].includes(lifecycle)) continue;
+      const phase = (raw.student?.academic_phase ?? '').toLowerCase();
+      if (phase && phase !== 'in_class') continue;
       const existing = studentMap.get(studentId);
       if (!existing) {
         studentMap.set(studentId, raw);
@@ -338,7 +344,7 @@ export const getAssessmentPopulation = cache(async (assessmentId: string): Promi
       id,
       cat_absent,
       pre_assessment_status,
-      student:students(id, admission_number, full_name),
+      student:students(id, admission_number, full_name, lifecycle_status, academic_phase),
       cohort:cohorts(id, code, name)
     `)
     .in('assessment_id', targetEventIds)
@@ -353,6 +359,10 @@ export const getAssessmentPopulation = cache(async (assessmentId: string): Promi
     const cohort = Array.isArray(r.cohort) ? r.cohort[0] : r.cohort;
     const studentId = student?.id;
     if (!studentId) continue;
+    const lifecycle = (student.lifecycle_status ?? '').toLowerCase();
+    if (lifecycle && !['admitted', 'active'].includes(lifecycle)) continue;
+    const phase = (student.academic_phase ?? '').toLowerCase();
+    if (phase && phase !== 'in_class') continue;
     if (!rosterStudentMap.has(studentId)) {
       rosterStudentMap.set(studentId, {
         id: r.id,

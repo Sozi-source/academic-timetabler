@@ -150,9 +150,14 @@ export async function submitCatOnBehalfAction(formData: FormData) {
   const resolvedIds = await resolveAssessmentIdsWithSiblings(supabase, assessmentId);
   const targetEventIds = resolvedIds.length > 0 ? resolvedIds : [assessmentId];
 
-  const [eventRes, rosterRes, draftRes, subRes] = await Promise.all([
+  const [eventRes, rosterRes, popRes, draftRes, subRes] = await Promise.all([
     supabase.from('assessment_events').select('department_id, unit_id, academic_period_id').eq('id', assessmentId).maybeSingle(),
     supabase.from('assessment_roster').select('assessment_id, student_id').in('assessment_id', targetEventIds),
+    supabase
+      .from('assessment_population')
+      .select('assessment_event_id, student_id')
+      .in('assessment_event_id', targetEventIds)
+      .eq('population_status', 'expected'),
     supabase.from('assessment_online_mark_drafts').select('student_id, cat_mark').in('assessment_id', targetEventIds),
     supabase.from('assessment_mark_component_submissions').select('id').in('assessment_id', targetEventIds).eq('component_key', 'cat').limit(1),
   ]);
@@ -178,6 +183,9 @@ export async function submitCatOnBehalfAction(formData: FormData) {
   const rootRoster = roster.filter((r) => r.assessment_id === assessmentId);
   const effectiveRoster = rootRoster.length > 0 ? rootRoster : roster;
   const studentIds = new Set(effectiveRoster.map((r) => r.student_id).filter(Boolean));
+  for (const p of popRes.data ?? []) {
+    if (p.student_id) studentIds.add(p.student_id);
+  }
   if (eventRes.data.unit_id && eventRes.data.academic_period_id) {
     const unifiedRoster = await getUnifiedUnitRoster({
       supabase: createAdminClient(),

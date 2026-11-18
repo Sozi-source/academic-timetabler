@@ -49,12 +49,17 @@ async function loadDraftState(supabase: SupabaseServerClient, assessmentIds: str
   const submissions: Array<{ assessment_id: string; component_key: string }> = [];
 
   for (const ids of chunk(assessmentIds)) {
-    const [draftRes, rosterRes, subRes] = await Promise.all([
+    const [draftRes, rosterRes, popRes, subRes] = await Promise.all([
       supabase
         .from('assessment_online_mark_drafts')
         .select('assessment_id, student_id, cat_mark, exam_mark, updated_by, updated_at')
         .in('assessment_id', ids),
       supabase.from('assessment_roster').select('assessment_id, student_id, cat_absent, pre_assessment_status').in('assessment_id', ids),
+      supabase
+        .from('assessment_population')
+        .select('assessment_event_id, student_id, attendance_status')
+        .in('assessment_event_id', ids)
+        .eq('population_status', 'expected'),
       supabase.from('assessment_mark_component_submissions').select('assessment_id, component_key').in('assessment_id', ids),
     ]);
     if (draftRes.error) throw new Error(`Unable to load saved marks: ${draftRes.error.message}`);
@@ -64,13 +69,12 @@ async function loadDraftState(supabase: SupabaseServerClient, assessmentIds: str
     submissions.push(...(subRes.data ?? []));
 
     const rosterRows = rosterRes.data ?? [];
-    if (rosterRows.length === 0) {
-      const { data: popData } = await supabase
-        .from('assessment_population')
-        .select('assessment_event_id, student_id, attendance_status')
-        .in('assessment_event_id', ids)
-        .eq('population_status', 'expected');
-      for (const p of popData ?? []) {
+    const seen = new Set(rosterRows.map((r) => `${r.assessment_id}:${r.student_id}`));
+    roster.push(...rosterRows);
+    for (const p of popRes.data ?? []) {
+      const key = `${p.assessment_event_id}:${p.student_id}`;
+      if (!seen.has(key)) {
+        seen.add(key);
         roster.push({
           assessment_id: p.assessment_event_id,
           student_id: p.student_id,
@@ -78,8 +82,6 @@ async function loadDraftState(supabase: SupabaseServerClient, assessmentIds: str
           pre_assessment_status: p.attendance_status === 'absent' ? 'absent' : null,
         });
       }
-    } else {
-      roster.push(...rosterRows);
     }
   }
 

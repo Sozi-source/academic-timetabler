@@ -1,3 +1,15 @@
+### 2026-11-18: Merge `assessment_population` with `assessment_roster` in Pending & On-Behalf CAT Status
+
+**Summary:**
+- Fixed the remaining UI count mismatch (`19 of 21` / `2 missing` vs `22 Registered` / `Missing CAT: 3`) in `loadDraftState` (`src/features/assessment/marks/pending-submissions.ts`) and `submitCatOnBehalfAction` (`src/features/assessment/marks/actions.ts`).
+- Previously, `loadDraftState` only queried `assessment_population` when `assessment_roster` was empty; whenever `assessment_roster` had partial rows (`21`) and `assessment_population` had additional expected candidates (`22`), those extra candidates were omitted from `getCatOnBehalfStatus` and `getPendingMarkSubmissions`.
+- Both `loadDraftState` and `submitCatOnBehalfAction` now always merge `assessment_population` (`population_status = 'expected'`) alongside `assessment_roster` and `getUnifiedUnitRoster`.
+
+**Modified:**
+- `src/features/assessment/marks/pending-submissions.ts`
+- `src/features/assessment/marks/actions.ts`
+- `CHANGES.md`
+
 ### 2026-11-18: Fix Assessment Sidebar Sticky/Fixed Positioning & Include Reassigned Students in CAT On-Behalf Counts
 
 **Summary:**

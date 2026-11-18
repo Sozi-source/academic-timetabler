@@ -74,6 +74,7 @@ export default async function StaffOnlineMarksPage({
 
       getAssessmentPopulationWorkspace(
         targetAssessmentId,
+        allocationId,
       ),
 
       getStaffOnlineMarkState(

@@ -1,3 +1,16 @@
+### 2026-11-18: Include Individual Class Assignments in Unified Roster & Trainer Marks Entry
+
+**Summary:**
+- Fixed a gap where students assigned to another cohort's active class via `student_class_assignments` (e.g., retake/missed-unit students after suspension) appeared in attendance registers but were missing from trainer marks entry and assessment population workspaces when `allocationId` was omitted.
+- Updated `getUnifiedUnitRoster` (`src/features/academic-roster/unified-roster.ts`) to resolve `student_class_assignments` both when `allocationId` is provided and across the unit's `teaching_allocations` when `allocationId` is omitted.
+- Updated `getAssessmentPopulationWorkspace` (`src/features/assessment/population-workspace.ts`) and `/staff/units/[allocationId]/assessment/[assessmentId]/marks/page.tsx` to pass `allocationId` through to `getUnifiedUnitRoster`.
+
+**Modified:**
+- `src/features/academic-roster/unified-roster.ts`
+- `src/features/assessment/population-workspace.ts`
+- `src/app/(staff)/staff/units/[allocationId]/assessment/[assessmentId]/marks/page.tsx`
+- `CHANGES.md`
+
 ### 2026-11-18: CAT/Exam Marksheets ZIP Export, QA Export Pitfall Fixes & Analysis Engine Hardening
 
 **Summary:**

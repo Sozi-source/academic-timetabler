@@ -210,6 +210,7 @@ export const getAllocationPopulationWorkspace = cache(
 export const getAssessmentPopulationWorkspace =
   cache(async (
     assessmentId: string,
+    allocationId?: string,
   ): Promise<AssessmentPopulationWorkspace> => {
     if (assessmentId.startsWith('alloc-')) {
       const allocId = assessmentId.replace('alloc-', '');
@@ -343,6 +344,7 @@ export const getAssessmentPopulationWorkspace =
       supabase,
       unitId,
       academicPeriodId: periodId,
+      allocationId,
     });
 
     const discoveredCohortName =

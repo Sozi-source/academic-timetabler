@@ -169,7 +169,7 @@ export async function getUnifiedUnitRoster({
 
   const allocsQuery = supabase
     .from('teaching_allocations')
-    .select('cohort_id, participant_cohort_ids')
+    .select('id, cohort_id, participant_cohort_ids')
     .eq('academic_period_id', academicPeriodId);
 
   const regQuery = supabase
@@ -193,21 +193,36 @@ export async function getUnifiedUnitRoster({
     allUnitIds.length === 1 ? regQuery.eq('unit_id', allUnitIds[0]) : regQuery.in('unit_id', allUnitIds),
   ]);
 
-  // Explicit HOD assignments add only the selected student to this allocation.
+  // Explicit HOD assignments add only the selected student to this allocation
+  // (or to any allocation for the unit when called at the unit/markbook level).
   // The source registration remains in the student's home cohort and unit.
   const rosterRegistrations = [...(registrations ?? [])];
-  if (allocationId) {
+  const targetAssignmentAllocationIds = allocationId
+    ? [allocationId]
+    : Array.from(
+        new Set(
+          (otherAllocs ?? [])
+            .map((alloc: { id?: string | null }) => alloc?.id)
+            .filter((id: unknown): id is string => typeof id === 'string' && id.length > 0),
+        ),
+      );
+
+  if (targetAssignmentAllocationIds.length > 0) {
     try {
-      const { data: individualAssignments } = await supabase
+      const assignmentQuery = supabase
         .from('student_class_assignments')
         .select(`
           student_id,
           students!inner(id, admission_number, full_name, current_cohort_id, lifecycle_status, academic_phase),
           student_unit_registrations!inner(cohort_id, registration_status)
         `)
-        .eq('teaching_allocation_id', allocationId)
         .eq('academic_period_id', academicPeriodId)
         .eq('is_active', true);
+
+      const { data: individualAssignments } =
+        targetAssignmentAllocationIds.length === 1
+          ? await assignmentQuery.eq('teaching_allocation_id', targetAssignmentAllocationIds[0])
+          : await assignmentQuery.in('teaching_allocation_id', targetAssignmentAllocationIds);
 
       for (const assignment of individualAssignments ?? []) {
         const student = Array.isArray(assignment.students) ? assignment.students[0] : assignment.students;

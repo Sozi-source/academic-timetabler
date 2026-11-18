@@ -1,3 +1,20 @@
+### 2026-11-19: Fix PostgREST 1,000-Row Truncation, Archived Trainer Misattribution & Merged Analysis Tables
+
+**Summary:**
+- **Fixed silent 1,000-row truncation in CAT/Exam Analysis (`src/features/assessment/reports/queries.ts`):**
+  - Added paginated `fetchAllRows` (`.range(from, from + 999)`) for `assessment_population`, `assessment_results`, `assessment_online_mark_drafts`, `assessment_roster`, `assessment_mark_component_submissions`, and `student_period_reporting`. Previously, PostgREST truncated each query at 1,000 rows (out of ~2,939 population rows), silently dropping saved CAT drafts and causing units like **Biochemistry II** (all 12 sat) to show false "missed CAT" counts.
+  - Excluded students whose `student_period_reporting` status is `deferred` or `dropped_out` for the period.
+- **Fixed archived trainer misattribution (`src/features/assessment/reports/marksheets-zip-export.ts`, `src/features/assessment/reports/queries.ts`):**
+  - Prioritized `active` / `completed` `teaching_allocations` over `archived` / `draft` allocations so reassigned units (e.g., **Agricultural Production `CHN 2309`**, archived under Wilfred Osozi and active under Mary Kaganjo) only appear under the active trainer.
+- **Merged repeated Trainer & Unit cells in Word Analysis Reports (`src/features/assessment/reports/docx.ts`):**
+  - Grouped `catPerformance` and `examPerformance` by `(trainerName, canonicalUnitName, cohortId)` and applied `VerticalMergeType.RESTART` / `CONTINUE` across consecutive rows sharing the same trainer name and unit name.
+
+**Modified:**
+- `src/features/assessment/reports/queries.ts`
+- `src/features/assessment/reports/marksheets-zip-export.ts`
+- `src/features/assessment/reports/docx.ts`
+- `CHANGES.md`
+
 ### 2026-11-19: Deduplicate Shared/Equivalent Units Across Excel ZIP Marksheets & Period Reports
 
 **Summary:**

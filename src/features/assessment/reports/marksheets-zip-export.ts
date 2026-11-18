@@ -43,6 +43,7 @@ type AllocationRow = {
   trainer_id: string | null;
   cohort_id: string | null;
   participant_cohort_ids: string[] | null;
+  status: string | null;
 };
 
 type TrainerRow = {
@@ -167,7 +168,7 @@ export async function createAssessmentMarksheetsZip({
     allocationUnitIds.length > 0
       ? admin
           .from('teaching_allocations')
-          .select('unit_id,trainer_id,cohort_id,participant_cohort_ids')
+          .select('unit_id,trainer_id,cohort_id,participant_cohort_ids,status')
           .eq('academic_period_id', academicPeriodId)
           .in('unit_id', allocationUnitIds)
           .in('status', ['draft', 'active', 'completed', 'archived'])
@@ -188,9 +189,24 @@ export async function createAssessmentMarksheetsZip({
   const trainerById = new Map(trainers.map((trainer) => [trainer.id, trainer]));
 
   // Map unitId -> Map<trainerId, Set<cohortId>>
+  // Prefer active/completed allocations over archived/draft ones so reassigned
+  // units (e.g. archived previous trainer) never place sheets in the old trainer's folder.
+  const unitsWithLiveAllocation = new Set<string>();
+  for (const allocation of allocations) {
+    if (
+      allocation.unit_id &&
+      allocation.trainer_id &&
+      (allocation.status === 'active' || allocation.status === 'completed')
+    ) {
+      unitsWithLiveAllocation.add(allocation.unit_id);
+    }
+  }
+
   const trainerCohortsByUnit = new Map<string, Map<string, Set<string>>>();
   for (const allocation of allocations) {
     if (!allocation.unit_id || !allocation.trainer_id) continue;
+    const isLive = allocation.status === 'active' || allocation.status === 'completed';
+    if (unitsWithLiveAllocation.has(allocation.unit_id) && !isLive) continue;
     let byTrainer = trainerCohortsByUnit.get(allocation.unit_id);
     if (!byTrainer) {
       byTrainer = new Map<string, Set<string>>();

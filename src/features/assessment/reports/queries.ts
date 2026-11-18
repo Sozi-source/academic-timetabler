@@ -7,6 +7,34 @@ type Relation<T> = T | T[] | null;
 function one<T>(value: Relation<T>): T | null { return Array.isArray(value) ? value[0] ?? null : value; }
 function num(value: unknown) { return typeof value === 'number' && Number.isFinite(value) ? value : null; }
 
+const ALLOCATION_STATUS_PRIORITY: Record<string, number> = {
+  active: 0,
+  completed: 1,
+  draft: 2,
+  archived: 3,
+};
+
+function allocationStatusRank(status: string | null | undefined): number {
+  return ALLOCATION_STATUS_PRIORITY[(status ?? '').toLowerCase()] ?? 9;
+}
+
+const PAGE_SIZE = 1000;
+
+async function fetchAllRows<T>(
+  buildQuery: () => { range: (from: number, to: number) => PromiseLike<{ data: unknown; error: { message: string } | null }> },
+  label: string,
+): Promise<T[]> {
+  const out: T[] = [];
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const { data, error } = await buildQuery().range(from, from + PAGE_SIZE - 1);
+    if (error) throw new Error(`Unable to load ${label}: ${error.message}`);
+    const page = (data ?? []) as T[];
+    out.push(...page);
+    if (page.length < PAGE_SIZE) break;
+  }
+  return out;
+}
+
 export interface ReportStudentRow {
   eventId: string;
   unitId: string;
@@ -110,54 +138,147 @@ export async function getActiveAssessmentPeriodReportData(
     ...new Set([...unitIds, ...unitIds.flatMap((unitId) => siblingResolver.siblingsOf(unitId))]),
   ];
 
+  type PopulationRow = {
+    assessment_event_id: string;
+    student_id: string;
+    cohort_id: string | null;
+    attendance_status: 'pending' | 'present' | 'absent';
+    cat_absence_reason: string | null;
+    cat_absence_recommendation: string | null;
+    exam_absence_reason: string | null;
+    exam_absence_recommendation: string | null;
+    student: Relation<{
+      id: string;
+      admission_number: string;
+      full_name: string;
+      lifecycle_status?: string | null;
+      academic_phase?: string | null;
+    }>;
+    cohort: Relation<{ id: string; code: string; name: string }>;
+  };
+  type ResultRow = {
+    assessment_event_id: string;
+    student_id: string;
+    component_marks: Record<string, unknown> | null;
+    total_mark: number | null;
+    grade: string | null;
+  };
+  type AllocationRow = {
+    unit_id: string;
+    cohort_id: string | null;
+    participant_cohort_ids: string[] | null;
+    status: string | null;
+    trainer: Relation<{ full_name: string }>;
+  };
+  type DraftRow = {
+    assessment_id: string;
+    student_id: string;
+    assignment_mark: number | null;
+    presentation_mark: number | null;
+    rat_mark: number | null;
+    cat_mark: number | null;
+    exam_mark: number | null;
+    updated_at: string | null;
+  };
+  type RosterRow = {
+    assessment_id: string;
+    student_id: string;
+    cat_absent: boolean | null;
+    pre_assessment_status: string | null;
+  };
+  type ComponentSubmissionRow = {
+    assessment_id: string;
+    cohort_id: string | null;
+    component_key: string;
+  };
+  type PeriodReportingRow = {
+    student_id: string;
+    reporting_status: string | null;
+  };
+
   const [
-    { data: populations, error: populationError },
-    { data: results, error: resultsError },
-    { data: allocations, error: allocationError },
-    { data: drafts, error: draftsError },
-    { data: rosterRows, error: rosterError },
-    { data: componentSubmissions, error: componentSubmissionsError },
+    populations,
+    results,
+    allocations,
+    drafts,
+    rosterRows,
+    componentSubmissions,
+    periodReportingRows,
   ] = await Promise.all([
-    admin
-      .from('assessment_population')
-      .select(`
-        assessment_event_id,student_id,cohort_id,attendance_status,
-        cat_absence_reason,cat_absence_recommendation,exam_absence_reason,exam_absence_recommendation,
-        student:students(id,admission_number,full_name,lifecycle_status,academic_phase),cohort:cohorts(id,code,name)
-      `)
-      .in('assessment_event_id', eventIds)
-      .eq('population_status', 'expected'),
-    admin
-      .from('assessment_results')
-      .select('assessment_event_id,student_id,component_marks,total_mark,grade')
-      .in('assessment_event_id', eventIds),
-    admin
-      .from('teaching_allocations')
-      .select('unit_id,cohort_id,participant_cohort_ids,trainer:trainers(full_name)')
-      .eq('academic_period_id', period.id)
-      .in('unit_id', allocationUnitIds)
-      .in('status', ['draft', 'active', 'completed', 'archived']),
-    admin
-      .from('assessment_online_mark_drafts')
-      .select('assessment_id,student_id,assignment_mark,presentation_mark,rat_mark,cat_mark,exam_mark,updated_at')
-      .in('assessment_id', eventIds),
-    admin
-      .from('assessment_roster')
-      .select('assessment_id,student_id,cat_absent,pre_assessment_status')
-      .in('assessment_id', eventIds),
-    admin
-      .from('assessment_mark_component_submissions')
-      .select('assessment_id,cohort_id,component_key')
-      .in('assessment_id', eventIds)
-      .eq('component_key', 'cat'),
+    fetchAllRows<PopulationRow>(
+      () =>
+        admin
+          .from('assessment_population')
+          .select(`
+            assessment_event_id,student_id,cohort_id,attendance_status,
+            cat_absence_reason,cat_absence_recommendation,exam_absence_reason,exam_absence_recommendation,
+            student:students(id,admission_number,full_name,lifecycle_status,academic_phase),cohort:cohorts(id,code,name)
+          `)
+          .in('assessment_event_id', eventIds)
+          .eq('population_status', 'expected')
+          .order('id', { ascending: true }),
+      'assessment populations',
+    ),
+    fetchAllRows<ResultRow>(
+      () =>
+        admin
+          .from('assessment_results')
+          .select('assessment_event_id,student_id,component_marks,total_mark,grade')
+          .in('assessment_event_id', eventIds)
+          .order('id', { ascending: true }),
+      'assessment results',
+    ),
+    fetchAllRows<AllocationRow>(
+      () =>
+        admin
+          .from('teaching_allocations')
+          .select('unit_id,cohort_id,participant_cohort_ids,status,trainer:trainers(full_name)')
+          .eq('academic_period_id', period.id)
+          .in('unit_id', allocationUnitIds)
+          .in('status', ['draft', 'active', 'completed', 'archived'])
+          .order('id', { ascending: true }),
+      'trainers',
+    ),
+    fetchAllRows<DraftRow>(
+      () =>
+        admin
+          .from('assessment_online_mark_drafts')
+          .select('assessment_id,student_id,assignment_mark,presentation_mark,rat_mark,cat_mark,exam_mark,updated_at')
+          .in('assessment_id', eventIds)
+          .order('id', { ascending: true }),
+      'mark drafts',
+    ),
+    fetchAllRows<RosterRow>(
+      () =>
+        admin
+          .from('assessment_roster')
+          .select('assessment_id,student_id,cat_absent,pre_assessment_status')
+          .in('assessment_id', eventIds)
+          .order('id', { ascending: true }),
+      'assessment roster',
+    ),
+    fetchAllRows<ComponentSubmissionRow>(
+      () =>
+        admin
+          .from('assessment_mark_component_submissions')
+          .select('assessment_id,cohort_id,component_key')
+          .in('assessment_id', eventIds)
+          .eq('component_key', 'cat')
+          .order('id', { ascending: true }),
+      'submitted CAT marks',
+    ),
+    fetchAllRows<PeriodReportingRow>(
+      () =>
+        admin
+          .from('student_period_reporting')
+          .select('student_id,reporting_status')
+          .eq('academic_period_id', period.id)
+          .in('reporting_status', ['deferred', 'dropped_out']),
+      'period reporting',
+    ).catch(() => [] as PeriodReportingRow[]),
   ]);
 
-  if (populationError) throw new Error(`Unable to load assessment populations: ${populationError.message}`);
-  if (resultsError) throw new Error(`Unable to load assessment results: ${resultsError.message}`);
-  if (allocationError) throw new Error(`Unable to load trainers: ${allocationError.message}`);
-  if (draftsError) throw new Error(`Unable to load mark drafts: ${draftsError.message}`);
-  if (rosterError) throw new Error(`Unable to load assessment roster: ${rosterError.message}`);
-  if (componentSubmissionsError) throw new Error(`Unable to load submitted CAT marks: ${componentSubmissionsError.message}`);
+  const inactivePeriodStudents = new Set(periodReportingRows.map((r) => r.student_id));
 
   const eventMap = new Map(validEvents.map((event) => {
     const unit = one(event.unit as Relation<{ id: string; code: string; name: string }>);
@@ -181,11 +302,21 @@ export async function getActiveAssessmentPeriodReportData(
 
   const trainerMap = new Map<string, string>();
   const trainerByUnit = new Map<string, string>();
-  for (const allocation of allocations ?? []) {
-    const trainer = one(allocation.trainer as Relation<{ full_name: string }>);
-    const cohortIds = new Set<string>([allocation.cohort_id, ...((allocation.participant_cohort_ids as string[] | null) ?? [])].filter(Boolean));
-    for (const cohortId of cohortIds) trainerMap.set(`${allocation.unit_id}:${cohortId}`, trainer?.full_name ?? '');
-    if (trainer?.full_name && !trainerByUnit.has(allocation.unit_id)) trainerByUnit.set(allocation.unit_id, trainer.full_name);
+  // Sort so active > completed > draft > archived; never let archived overwrite active
+  const prioritizedAllocations = [...allocations].sort(
+    (a, b) => allocationStatusRank(a.status) - allocationStatusRank(b.status),
+  );
+  for (const allocation of prioritizedAllocations) {
+    const trainer = one(allocation.trainer);
+    if (!trainer?.full_name) continue;
+    const cohortIds = new Set<string>(
+      [allocation.cohort_id, ...(allocation.participant_cohort_ids ?? [])].filter((id): id is string => Boolean(id)),
+    );
+    for (const cohortId of cohortIds) {
+      const k = `${allocation.unit_id}:${cohortId}`;
+      if (!trainerMap.has(k)) trainerMap.set(k, trainer.full_name);
+    }
+    if (!trainerByUnit.has(allocation.unit_id)) trainerByUnit.set(allocation.unit_id, trainer.full_name);
   }
 
   /** Trainer for a unit/cohort, falling back to the trainer of a shared/equivalent sibling unit. */
@@ -219,6 +350,7 @@ export async function getActiveAssessmentPeriodReportData(
     if (lifecycle && !['admitted', 'active'].includes(lifecycle)) continue;
     const phase = (student.academic_phase ?? '').toLowerCase();
     if (phase && phase !== 'in_class') continue;
+    if (inactivePeriodStudents.has(student.id)) continue;
 
     // Candidate events that may hold this student's marks: the population event first,
     // then its shared/equivalent siblings (where the trainer actually entered the marks).

@@ -17,6 +17,8 @@ import {
   TableLayoutType,
   TableRow,
   TextRun,
+  VerticalAlign,
+  VerticalMergeType,
   WidthType,
 } from 'docx';
 
@@ -89,11 +91,15 @@ function cell(
     align?: (typeof AlignmentType)[keyof typeof AlignmentType];
     fill?: string;
     size?: number;
+    verticalMerge?: (typeof VerticalMergeType)[keyof typeof VerticalMergeType];
   } = {},
 ) {
   return new TableCell({
     borders,
     ...(options.fill ? { shading: { fill: options.fill } } : {}),
+    ...(options.verticalMerge
+      ? { verticalMerge: options.verticalMerge, verticalAlign: VerticalAlign.CENTER }
+      : {}),
     children: [
       new Paragraph({
         alignment: options.align ?? AlignmentType.LEFT,
@@ -250,7 +256,7 @@ function catParticipation(data: AssessmentPeriodReportData) {
 function catPerformance(data: AssessmentPeriodReportData) {
   const grouped = groupBy(
     data.rows,
-    (row) => `${row.trainerName}|${row.unitId}|${row.cohortId}`,
+    (row) => `${clean(row.trainerName)}|${row.unitName.trim().toLowerCase()}|${row.cohortId}`,
   );
 
   const rows: TableRow[] = [
@@ -263,19 +269,52 @@ function catPerformance(data: AssessmentPeriodReportData) {
   ];
 
   const sorted = [...grouped.values()].sort((a, b) => {
-    const aa = `${a[0]?.trainerName ?? ''}|${a[0]?.unitName ?? ''}|${a[0]?.cohortName ?? ''}`;
-    const bb = `${b[0]?.trainerName ?? ''}|${b[0]?.unitName ?? ''}|${b[0]?.cohortName ?? ''}`;
+    const aa = `${clean(a[0]?.trainerName)}|${a[0]?.unitName ?? ''}|${a[0]?.cohortName ?? ''}`;
+    const bb = `${clean(b[0]?.trainerName)}|${b[0]?.unitName ?? ''}|${b[0]?.cohortName ?? ''}`;
     return aa.localeCompare(bb);
   });
 
-  for (const items of sorted) {
+  let prevTrainerKey: string | null = null;
+  let prevUnitKey: string | null = null;
+
+  for (let i = 0; i < sorted.length; i++) {
+    const items = sorted[i];
     const first = items[0];
+    const trainerLabel = clean(first.trainerName);
+    const unitLabel = first.unitName.trim();
+    const trainerKey = trainerLabel.toLowerCase();
+    const unitKey = `${trainerKey}|${unitLabel.toLowerCase()}`;
+
+    const next = sorted[i + 1]?.[0];
+    const nextTrainerKey = next ? clean(next.trainerName).toLowerCase() : null;
+    const nextUnitKey = next ? `${nextTrainerKey}|${next.unitName.trim().toLowerCase()}` : null;
+
+    const trainerMerge =
+      trainerKey === prevTrainerKey
+        ? VerticalMergeType.CONTINUE
+        : trainerKey === nextTrainerKey
+          ? VerticalMergeType.RESTART
+          : undefined;
+    const unitMerge =
+      unitKey === prevUnitKey
+        ? VerticalMergeType.CONTINUE
+        : unitKey === nextUnitKey
+          ? VerticalMergeType.RESTART
+          : undefined;
+
+    prevTrainerKey = trainerKey;
+    prevUnitKey = unitKey;
+
     const sat = items.filter((row) => row.cat1 !== null);
     rows.push(
       new TableRow({
         children: [
-          cell(clean(first.trainerName)),
-          cell(first.unitName),
+          cell(trainerMerge === VerticalMergeType.CONTINUE ? '' : trainerLabel, {
+            verticalMerge: trainerMerge,
+          }),
+          cell(unitMerge === VerticalMergeType.CONTINUE ? '' : unitLabel, {
+            verticalMerge: unitMerge,
+          }),
           cell(first.cohortName),
           cell(sat.length),
           cell(items.length - sat.length),
@@ -466,7 +505,7 @@ function examParticipation(data: AssessmentPeriodReportData) {
 function examPerformance(data: AssessmentPeriodReportData) {
   const grouped = groupBy(
     data.rows,
-    (row) => `${row.trainerName}|${row.unitId}|${row.cohortId}`,
+    (row) => `${clean(row.trainerName)}|${row.unitName.trim().toLowerCase()}|${row.cohortId}`,
   );
 
   const rows: TableRow[] = [
@@ -490,13 +529,42 @@ function examPerformance(data: AssessmentPeriodReportData) {
   ];
 
   const sorted = [...grouped.values()].sort((a, b) => {
-    const aa = `${a[0]?.trainerName ?? ''}|${a[0]?.unitName ?? ''}|${a[0]?.cohortName ?? ''}`;
-    const bb = `${b[0]?.trainerName ?? ''}|${b[0]?.unitName ?? ''}|${b[0]?.cohortName ?? ''}`;
+    const aa = `${clean(a[0]?.trainerName)}|${a[0]?.unitName ?? ''}|${a[0]?.cohortName ?? ''}`;
+    const bb = `${clean(b[0]?.trainerName)}|${b[0]?.unitName ?? ''}|${b[0]?.cohortName ?? ''}`;
     return aa.localeCompare(bb);
   });
 
-  for (const items of sorted) {
+  let prevTrainerKey: string | null = null;
+  let prevUnitKey: string | null = null;
+
+  for (let i = 0; i < sorted.length; i++) {
+    const items = sorted[i];
     const first = items[0];
+    const trainerLabel = clean(first.trainerName);
+    const unitLabel = first.unitName.trim();
+    const trainerKey = trainerLabel.toLowerCase();
+    const unitKey = `${trainerKey}|${unitLabel.toLowerCase()}`;
+
+    const next = sorted[i + 1]?.[0];
+    const nextTrainerKey = next ? clean(next.trainerName).toLowerCase() : null;
+    const nextUnitKey = next ? `${nextTrainerKey}|${next.unitName.trim().toLowerCase()}` : null;
+
+    const trainerMerge =
+      trainerKey === prevTrainerKey
+        ? VerticalMergeType.CONTINUE
+        : trainerKey === nextTrainerKey
+          ? VerticalMergeType.RESTART
+          : undefined;
+    const unitMerge =
+      unitKey === prevUnitKey
+        ? VerticalMergeType.CONTINUE
+        : unitKey === nextUnitKey
+          ? VerticalMergeType.RESTART
+          : undefined;
+
+    prevTrainerKey = trainerKey;
+    prevUnitKey = unitKey;
+
     const present = items.filter((row) => row.attendance !== 'absent');
     const totals = present
       .map((row) => row.total)
@@ -507,8 +575,12 @@ function examPerformance(data: AssessmentPeriodReportData) {
     rows.push(
       new TableRow({
         children: [
-          cell(clean(first.trainerName)),
-          cell(first.unitName),
+          cell(trainerMerge === VerticalMergeType.CONTINUE ? '' : trainerLabel, {
+            verticalMerge: trainerMerge,
+          }),
+          cell(unitMerge === VerticalMergeType.CONTINUE ? '' : unitLabel, {
+            verticalMerge: unitMerge,
+          }),
           cell(first.cohortName),
           cell(present.length),
           cell(items.length - present.length),

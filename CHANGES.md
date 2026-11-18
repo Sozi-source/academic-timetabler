@@ -1,3 +1,18 @@
+### 2026-11-19: Deduplicate Shared/Equivalent Units Across Excel ZIP Marksheets & Period Reports
+
+**Summary:**
+- Added connected-component `groupKeyOf(unitId)` to `UnitSiblingResolver` (`src/features/assessment/unit-sibling-groups.ts`) so all units in a shared/equivalent class resolve to one canonical group key.
+- Updated `createAssessmentMarksheetsZip` (`src/features/assessment/reports/marksheets-zip-export.ts`) to deduplicate generation tasks by `(trainerId, marksheetType, siblingGroupKey)`, preferring the ready/direct-allocation unit code and merging cohort IDs so trainers receive **one** combined marksheet per shared class instead of identical copies (e.g., `CND 1105` + `DND 1105`, or `DCU 1104` + `DND 2107` + `DNDT 1101`).
+- Updated `getActiveAssessmentPeriodReportData` (`src/features/assessment/reports/queries.ts`) to deduplicate student rows by `(studentId, siblingGroupKey)` across shared/equivalent units so no student is repeated in Word analysis reports or consolidated marksheets.
+- Expanded `src/tests/unit-sibling-groups.test.ts` to verify `groupKeyOf`.
+
+**Modified:**
+- `src/features/assessment/unit-sibling-groups.ts`
+- `src/features/assessment/reports/marksheets-zip-export.ts`
+- `src/features/assessment/reports/queries.ts`
+- `src/tests/unit-sibling-groups.test.ts`
+- `CHANGES.md`
+
 ### 2026-11-19: Fix Sibling CAT Analysis False "Missed" Marks & Empty/Incomplete Trainer ZIP Folders
 
 **Summary:**

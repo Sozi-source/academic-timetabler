@@ -310,11 +310,26 @@ export async function getActiveAssessmentPeriodReportData(
     });
   }
 
+  const dedupedRows = new Map<string, ReportStudentRow>();
+  for (const row of rows) {
+    const key = `${row.studentId}:${siblingResolver.groupKeyOf(row.unitId)}`;
+    const existing = dedupedRows.get(key);
+    if (!existing) {
+      dedupedRows.set(key, row);
+    } else {
+      const existingScore = (existing.cat1 !== null ? 1 : 0) + (existing.exam !== null ? 2 : 0) + (existing.total !== null ? 1 : 0);
+      const nextScore = (row.cat1 !== null ? 1 : 0) + (row.exam !== null ? 2 : 0) + (row.total !== null ? 1 : 0);
+      if (nextScore > existingScore) {
+        dedupedRows.set(key, row);
+      }
+    }
+  }
+
   return {
     periodId: period.id,
     periodName: period.name,
     departmentName: profile.departmentName,
     periods: periodsList,
-    rows,
+    rows: Array.from(dedupedRows.values()),
   };
 }

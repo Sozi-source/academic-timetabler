@@ -25,6 +25,11 @@ export interface EquivalenceMemberLink {
 export interface UnitSiblingResolver {
   /** Units that share a class with `unitId` (never includes `unitId`). */
   siblingsOf(unitId: string): string[];
+  /**
+   * Canonical key for the shared/equivalent class component containing `unitId`.
+   * Any two units in the same shared/equivalent class produce the same key.
+   */
+  groupKeyOf(unitId: string): string;
 }
 
 export function buildUnitSiblingResolver(
@@ -72,8 +77,34 @@ export function buildUnitSiblingResolver(
     linkAll([...group]);
   }
 
+  // Compute deterministic connected-component canonical keys for deduplication
+  const componentKey = new Map<string, string>();
+  const visited = new Set<string>();
+  for (const startId of links.keys()) {
+    if (visited.has(startId)) continue;
+    const queue = [startId];
+    const members: string[] = [];
+    visited.add(startId);
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      members.push(current);
+      for (const next of links.get(current) ?? []) {
+        if (!visited.has(next)) {
+          visited.add(next);
+          queue.push(next);
+        }
+      }
+    }
+    members.sort();
+    const canonical = members[0];
+    for (const member of members) {
+      componentKey.set(member, canonical);
+    }
+  }
+
   return {
     siblingsOf: (unitId) => [...(links.get(unitId) ?? [])],
+    groupKeyOf: (unitId) => componentKey.get(unitId) ?? unitId,
   };
 }
 

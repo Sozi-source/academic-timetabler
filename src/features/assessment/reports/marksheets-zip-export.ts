@@ -222,9 +222,13 @@ export async function createAssessmentMarksheetsZip({
     marksheetType: 'cat' | 'final';
     ready: boolean;
     notReadyReason: string;
+    hasDirectAllocation: boolean;
   };
 
-  const tasks: GenerationTask[] = [];
+  // Deduplicate shared/equivalent sibling events per (trainerId, marksheetType, siblingGroupKey)
+  // so each trainer receives ONE combined marksheet per shared class instead of identical copies
+  // under each equivalent unit code (e.g. CND 1105 + DND 1105 Human Anatomy).
+  const dedupedTasks = new Map<string, GenerationTask>();
   const trainerFolders = new Set<string>();
 
   for (const event of validEvents) {
@@ -239,7 +243,9 @@ export async function createAssessmentMarksheetsZip({
         TERMINAL_WORKFLOW_STATUSES.has(event.operational_workflow_status ?? ''),
     );
 
-    let byTrainer = trainerCohortsByUnit.get(event.unit_id);
+    const directByTrainer = trainerCohortsByUnit.get(event.unit_id);
+    const hasDirectAllocation = Boolean(directByTrainer && directByTrainer.size > 0);
+    let byTrainer = directByTrainer;
     if (!byTrainer || byTrainer.size === 0) {
       // Shared / equivalent unit whose teaching_allocation is recorded under a sibling unit code
       const merged = new Map<string, Set<string>>();
@@ -280,6 +286,8 @@ export async function createAssessmentMarksheetsZip({
       });
     }
 
+    const groupKey = siblingResolver.groupKeyOf(event.unit_id);
+
     for (const entry of trainerEntries) {
       const trainerFolder = `${safePathSegment(entry.trainerName)}_${safePathSegment(entry.staffNumber)}`;
       trainerFolders.add(trainerFolder);
@@ -288,7 +296,7 @@ export async function createAssessmentMarksheetsZip({
         const ready = marksheetType === 'cat' ? catReady : finalReady;
         const notReadyReason =
           marksheetType === 'cat' ? 'CAT Marks Not Finalized' : 'Final Marks Not Submitted';
-        tasks.push({
+        const candidate: GenerationTask = {
           event,
           trainerId: entry.trainerId,
           staffNumber: entry.staffNumber,
@@ -296,14 +304,43 @@ export async function createAssessmentMarksheetsZip({
           trainerFolder,
           unitCode,
           unitName,
-          cohortIds: entry.cohortIds,
+          cohortIds: entry.cohortIds ? new Set(entry.cohortIds) : null,
           marksheetType,
           ready,
           notReadyReason,
-        });
+          hasDirectAllocation,
+        };
+
+        const dedupeKey = `${entry.trainerId}:${marksheetType}:${groupKey}`;
+        const existing = dedupedTasks.get(dedupeKey);
+        if (!existing) {
+          dedupedTasks.set(dedupeKey, candidate);
+        } else {
+          // Merge any cohort IDs across sibling allocations for this trainer
+          if (existing.cohortIds && candidate.cohortIds) {
+            for (const cid of candidate.cohortIds) existing.cohortIds.add(cid);
+          } else if (candidate.cohortIds && !existing.cohortIds) {
+            existing.cohortIds = new Set(candidate.cohortIds);
+          }
+
+          // Prefer ready task, then direct-allocation unit code, then alphabetically earlier unit code
+          const preferCandidate =
+            (candidate.ready && !existing.ready) ||
+            (candidate.ready === existing.ready && candidate.hasDirectAllocation && !existing.hasDirectAllocation) ||
+            (candidate.ready === existing.ready &&
+              candidate.hasDirectAllocation === existing.hasDirectAllocation &&
+              candidate.unitCode.localeCompare(existing.unitCode) < 0);
+
+          if (preferCandidate) {
+            candidate.cohortIds = existing.cohortIds;
+            dedupedTasks.set(dedupeKey, candidate);
+          }
+        }
       }
     }
   }
+
+  const tasks = Array.from(dedupedTasks.values());
 
   // Load each ready assessment_event bundle once in bounded batches
   const readyEventIds = [...new Set(tasks.filter((t) => t.ready).map((t) => t.event.id))];

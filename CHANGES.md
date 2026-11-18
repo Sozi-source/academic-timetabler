@@ -1,3 +1,35 @@
+### 2026-11-19: Fix Sibling CAT Analysis False "Missed" Marks & Empty/Incomplete Trainer ZIP Folders
+
+**Summary:**
+- Added shared/equivalent unit sibling resolver (`src/features/assessment/unit-sibling-groups.ts`) mirroring `save_assessment_online_component_marks` (confirmed shared offerings + approved unit equivalence groups).
+- **CAT Analysis false "missed" marks (`src/features/assessment/reports/queries.ts`):**
+  - Updated `getActiveAssessmentPeriodReportData` to look up CAT/exam marks, `cat_absent`, submission scopes, and trainer names across sibling assessment events (fixing 1,282 rows where students had CAT marks saved on an equivalent/shared sibling event but were reported as missed on their own unit event).
+  - Filtered out non-active and off-class students (`lifecycle_status` not in `['admitted', 'active']` or `academic_phase !== 'in_class'`).
+- **Trainer ZIP marksheets missing sheets / empty folders (`src/features/assessment/markbook-bundle.ts`, `src/features/assessment/reports/marksheets-zip-export.ts`):**
+  - Fixed `loadAssessmentMarkbookBundle` throwing `"Multiple assessment events exist for cohort ..."` when a cohort appeared in 2+ sibling events (affecting 102 root events); sibling cohort rows are now merged and deduplicated by `studentId`, and approved unit-equivalence siblings are included.
+  - Updated `createAssessmentMarksheetsZip` to resolve trainer ownership via shared/equivalent sibling allocations (fixing 55 finalized events that previously landed in `Unassigned_Trainer` instead of the trainer's folder) and to respect `exclude_from_analysis`.
+
+**Added:**
+- `src/features/assessment/unit-sibling-groups.ts`
+- `src/tests/unit-sibling-groups.test.ts`
+
+**Modified:**
+- `src/features/assessment/reports/queries.ts`
+- `src/features/assessment/markbook-bundle.ts`
+- `src/features/assessment/reports/marksheets-zip-export.ts`
+- `CHANGES.md`
+
+### 2026-11-18: Consolidate Submitted Component Unlock to Global HOD Controls
+
+**Summary:**
+- Removed per-cohort `Unlock CAT` / component buttons in `Submitted Components` on `/assessment/marks/[assessmentId]` (`src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`) and consolidated to one clean global `Unlock <COMPONENT>` (`cohortId="all"`) control per submitted component.
+- Also fixed `getAssessmentById` (`src/features/assessment/queries.ts`) by adding `exclude_from_analysis` to `assessmentSelection`.
+
+**Modified:**
+- `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`
+- `src/features/assessment/queries.ts`
+- `CHANGES.md`
+
 ### 2026-11-18: Exclude Non-Exam / Testing Units from CAT & Exam Analysis
 
 **Summary:**

@@ -134,26 +134,51 @@ export async function loadAssessmentMarkbookBundle({
 
   const relatedUnitIds = [unitId];
 
-  // Discover sibling unit IDs in the same shared offering
-  const { data: directOfferings } = await supabase
-    .from('unit_offerings')
-    .select('confirmed_shared_offering_id')
-    .eq('academic_period_id', periodId)
-    .eq('unit_id', unitId)
-    .not('confirmed_shared_offering_id', 'is', null);
+  // Discover sibling unit IDs in the same shared offering or approved equivalence group
+  const [{ data: directOfferings }, { data: eqMembers }] = await Promise.all([
+    supabase
+      .from('unit_offerings')
+      .select('confirmed_shared_offering_id')
+      .eq('academic_period_id', periodId)
+      .eq('unit_id', unitId)
+      .not('confirmed_shared_offering_id', 'is', null),
+    supabase
+      .from('unit_equivalence_members')
+      .select('equivalence_group_id')
+      .eq('unit_id', unitId)
+      .eq('status', 'approved'),
+  ]);
 
   const sharedOfferingId = directOfferings?.[0]?.confirmed_shared_offering_id;
-  if (sharedOfferingId) {
-    const { data: siblingOfferings } = await supabase
-      .from('unit_offerings')
-      .select('unit_id')
-      .eq('academic_period_id', periodId)
-      .eq('confirmed_shared_offering_id', sharedOfferingId);
+  const eqGroupIds = (eqMembers ?? [])
+    .map((m) => m.equivalence_group_id)
+    .filter((id): id is string => Boolean(id));
 
-    for (const off of siblingOfferings ?? []) {
-      if (off?.unit_id && !relatedUnitIds.includes(off.unit_id)) {
-        relatedUnitIds.push(off.unit_id);
-      }
+  const [siblingOfferingsRes, siblingEqRes] = await Promise.all([
+    sharedOfferingId
+      ? supabase
+          .from('unit_offerings')
+          .select('unit_id')
+          .eq('academic_period_id', periodId)
+          .eq('confirmed_shared_offering_id', sharedOfferingId)
+      : Promise.resolve({ data: [] as Array<{ unit_id: string | null }> }),
+    eqGroupIds.length > 0
+      ? supabase
+          .from('unit_equivalence_members')
+          .select('unit_id')
+          .in('equivalence_group_id', eqGroupIds)
+          .eq('status', 'approved')
+      : Promise.resolve({ data: [] as Array<{ unit_id: string | null }> }),
+  ]);
+
+  for (const off of siblingOfferingsRes.data ?? []) {
+    if (off?.unit_id && !relatedUnitIds.includes(off.unit_id)) {
+      relatedUnitIds.push(off.unit_id);
+    }
+  }
+  for (const mem of siblingEqRes.data ?? []) {
+    if (mem?.unit_id && !relatedUnitIds.includes(mem.unit_id)) {
+      relatedUnitIds.push(mem.unit_id);
     }
   }
 
@@ -528,16 +553,11 @@ export async function loadAssessmentMarkbookBundle({
         groupKey,
       );
 
-    if (
-      existing &&
-      existing.assessmentId !==
-        assessmentId
-    ) {
-      throw new Error(
-        `Multiple assessment events exist for cohort ${cohortName}. Consolidate the duplicate assessment events before generating the workbook.`,
-      );
-    }
-
+    // Shared / equivalent classes legitimately carry the same cohort under more than
+    // one assessment event (e.g. a cross-cohort student injected from the unified
+    // roster, or a cohort registered under both unit codes). Merge them into a single
+    // cohort sheet instead of failing the whole marksheet: the first event stays the
+    // sheet's anchor and students are de-duplicated.
     const group =
       existing ?? {
         assessmentId,
@@ -545,6 +565,16 @@ export async function loadAssessmentMarkbookBundle({
         cohortName,
         students: [],
       };
+
+    if (
+      group.students.some(
+        (candidate) =>
+          candidate.studentId ===
+          studentId,
+      )
+    ) {
+      continue;
+    }
 
     group.students.push({
       studentId,

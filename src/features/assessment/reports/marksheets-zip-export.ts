@@ -10,6 +10,7 @@ import {
   generateAssessmentMarkbook,
   type AssessmentMarkbookBundle,
 } from '@/features/assessment/markbook-generator';
+import { loadUnitSiblingResolver } from '@/features/assessment/unit-sibling-groups';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createZipArchive, safePathSegment, type ZipEntry } from '@/lib/zip-archive';
 
@@ -132,24 +133,43 @@ export async function createAssessmentMarksheetsZip({
   }
 
   const allEvents = rows<EventRow>(eventsResult.data, eventsResult.error, 'assessment events');
-  const validEvents = allEvents.filter(
+  const candidateEvents = allEvents.filter(
     (event) => event.assessment_type === 'exam' || event.title === 'Unit Markbook',
   );
+  const excludedIds = new Set<string>();
+  if (candidateEvents.length > 0) {
+    const { data: excludedRows, error: excludedError } = await admin
+      .from('assessment_events')
+      .select('id')
+      .in('id', candidateEvents.map((e) => e.id))
+      .eq('exclude_from_analysis', true);
+    if (!excludedError) {
+      for (const row of excludedRows ?? []) {
+        if (row.id) excludedIds.add(row.id);
+      }
+    }
+  }
+  const validEvents = candidateEvents.filter((event) => !excludedIds.has(event.id));
   if (validEvents.length === 0) {
     throw new Error('No unit markbooks found for the selected academic period.');
   }
 
+  const siblingResolver = await loadUnitSiblingResolver(admin, academicPeriodId);
   const unitIds = cleanUuidList(validEvents.map((event) => event.unit_id));
+  const allocationUnitIds = cleanUuidList([
+    ...unitIds,
+    ...unitIds.flatMap((unitId) => siblingResolver.siblingsOf(unitId)),
+  ]);
   const [unitsResult, allocationsResult] = await Promise.all([
     unitIds.length > 0
       ? admin.from('units').select('id,code,name').in('id', unitIds)
       : Promise.resolve({ data: [], error: null }),
-    unitIds.length > 0
+    allocationUnitIds.length > 0
       ? admin
           .from('teaching_allocations')
           .select('unit_id,trainer_id,cohort_id,participant_cohort_ids')
           .eq('academic_period_id', academicPeriodId)
-          .in('unit_id', unitIds)
+          .in('unit_id', allocationUnitIds)
           .in('status', ['draft', 'active', 'completed', 'archived'])
       : Promise.resolve({ data: [], error: null }),
   ]);
@@ -219,7 +239,24 @@ export async function createAssessmentMarksheetsZip({
         TERMINAL_WORKFLOW_STATUSES.has(event.operational_workflow_status ?? ''),
     );
 
-    const byTrainer = trainerCohortsByUnit.get(event.unit_id);
+    let byTrainer = trainerCohortsByUnit.get(event.unit_id);
+    if (!byTrainer || byTrainer.size === 0) {
+      // Shared / equivalent unit whose teaching_allocation is recorded under a sibling unit code
+      const merged = new Map<string, Set<string>>();
+      for (const siblingUnitId of siblingResolver.siblingsOf(event.unit_id)) {
+        const sibMap = trainerCohortsByUnit.get(siblingUnitId);
+        if (!sibMap) continue;
+        for (const [trainerId, cohorts] of sibMap.entries()) {
+          let set = merged.get(trainerId);
+          if (!set) {
+            set = new Set<string>();
+            merged.set(trainerId, set);
+          }
+          for (const cid of cohorts) set.add(cid);
+        }
+      }
+      if (merged.size > 0) byTrainer = merged;
+    }
     const trainerEntries: Array<{
       trainerId: string;
       staffNumber: string;

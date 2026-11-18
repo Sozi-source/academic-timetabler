@@ -261,25 +261,25 @@ export default async function AssessmentMarkWorkflowPage({
             ) : null}
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {componentSubmissionState.submissions.map((submission) => {
-              const cohort = Array.isArray(submission.cohort) ? submission.cohort[0] : submission.cohort;
-              const componentLabel = submission.component_key.toUpperCase();
-              const cohortLabel = cohort?.code || cohort?.name || 'All cohorts';
+            {Array.from(
+              new Set(componentSubmissionState.submissions.map((submission) => submission.component_key)),
+            ).map((componentKey) => {
+              const componentLabel = componentKey.toUpperCase();
               return (
                 <div
-                  key={submission.id}
+                  key={componentKey}
                   className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/80 py-1 pl-2.5 pr-1 shadow-2xs"
                 >
                   <div className="flex items-center gap-1.5 text-xs">
                     <span className="font-bold text-slate-900">{componentLabel}</span>
-                    <span className="rounded bg-slate-200/90 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-slate-700">
-                      {cohortLabel}
+                    <span className="rounded bg-slate-200/90 px-1.5 py-0.5 text-[11px] font-semibold text-slate-700">
+                      Submitted
                     </span>
                   </div>
                   <form action={unlockAssessmentMarkComponentAction} className="inline">
                     <input type="hidden" name="assessmentId" value={assessment.id} />
-                    <input type="hidden" name="cohortId" value={submission.cohort_id ?? 'all'} />
-                    <input type="hidden" name="component" value={submission.component_key} />
+                    <input type="hidden" name="cohortId" value="all" />
+                    <input type="hidden" name="component" value={componentKey} />
                     <button
                       type="submit"
                       disabled={!componentSubmissionState.canUnlock}

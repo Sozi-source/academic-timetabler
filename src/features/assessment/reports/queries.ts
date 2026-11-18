@@ -1,4 +1,5 @@
 import { requireHodAccess } from '@/features/auth/authorization';
+import { loadUnitSiblingResolver } from '@/features/assessment/unit-sibling-groups';
 import { calculateOnlineFinalTotal } from '@/features/staff-assessment/online-marks-domain';
 import { createAdminClient } from '@/lib/supabase/admin';
 
@@ -95,6 +96,20 @@ export async function getActiveAssessmentPeriodReportData(
   const eventIds = validEvents.map((event) => event.id);
   const unitIds = [...new Set(validEvents.map((event) => event.unit_id))];
 
+  // Shared / equivalent classes keep their marks on ONE root assessment event while
+  // every participating unit has its own event + population. Resolve siblings so
+  // marks and trainers recorded on a sibling event are never reported as "missed".
+  const siblingResolver = await loadUnitSiblingResolver(admin, period.id);
+  const eventIdByUnit = new Map(validEvents.map((event) => [event.unit_id, event.id]));
+  const siblingEventIdsOf = (event: { id: string; unit_id: string }) =>
+    siblingResolver
+      .siblingsOf(event.unit_id)
+      .map((unitId) => eventIdByUnit.get(unitId))
+      .filter((id): id is string => Boolean(id) && id !== event.id);
+  const allocationUnitIds = [
+    ...new Set([...unitIds, ...unitIds.flatMap((unitId) => siblingResolver.siblingsOf(unitId))]),
+  ];
+
   const [
     { data: populations, error: populationError },
     { data: results, error: resultsError },
@@ -108,7 +123,7 @@ export async function getActiveAssessmentPeriodReportData(
       .select(`
         assessment_event_id,student_id,cohort_id,attendance_status,
         cat_absence_reason,cat_absence_recommendation,exam_absence_reason,exam_absence_recommendation,
-        student:students(id,admission_number,full_name),cohort:cohorts(id,code,name)
+        student:students(id,admission_number,full_name,lifecycle_status,academic_phase),cohort:cohorts(id,code,name)
       `)
       .in('assessment_event_id', eventIds)
       .eq('population_status', 'expected'),
@@ -120,7 +135,7 @@ export async function getActiveAssessmentPeriodReportData(
       .from('teaching_allocations')
       .select('unit_id,cohort_id,participant_cohort_ids,trainer:trainers(full_name)')
       .eq('academic_period_id', period.id)
-      .in('unit_id', unitIds)
+      .in('unit_id', allocationUnitIds)
       .in('status', ['draft', 'active', 'completed', 'archived']),
     admin
       .from('assessment_online_mark_drafts')
@@ -165,29 +180,82 @@ export async function getActiveAssessmentPeriodReportData(
   const submittedCatScopes = new Set((componentSubmissions ?? []).map((submission) => `${submission.assessment_id}:${submission.cohort_id ?? 'all'}`));
 
   const trainerMap = new Map<string, string>();
+  const trainerByUnit = new Map<string, string>();
   for (const allocation of allocations ?? []) {
     const trainer = one(allocation.trainer as Relation<{ full_name: string }>);
     const cohortIds = new Set<string>([allocation.cohort_id, ...((allocation.participant_cohort_ids as string[] | null) ?? [])].filter(Boolean));
     for (const cohortId of cohortIds) trainerMap.set(`${allocation.unit_id}:${cohortId}`, trainer?.full_name ?? '');
+    if (trainer?.full_name && !trainerByUnit.has(allocation.unit_id)) trainerByUnit.set(allocation.unit_id, trainer.full_name);
   }
+
+  /** Trainer for a unit/cohort, falling back to the trainer of a shared/equivalent sibling unit. */
+  const resolveTrainerName = (unitId: string, cohortId: string) => {
+    const exact = trainerMap.get(`${unitId}:${cohortId}`);
+    if (exact) return exact;
+    const siblingUnits = siblingResolver.siblingsOf(unitId);
+    for (const siblingUnitId of siblingUnits) {
+      const viaCohort = trainerMap.get(`${siblingUnitId}:${cohortId}`);
+      if (viaCohort) return viaCohort;
+    }
+    return trainerByUnit.get(unitId) ?? siblingUnits.map((id) => trainerByUnit.get(id)).find(Boolean) ?? '';
+  };
 
   const rows: ReportStudentRow[] = [];
   for (const population of populations ?? []) {
-    const student = one(population.student as Relation<{ id: string; admission_number: string; full_name: string }>);
+    const student = one(
+      population.student as Relation<{
+        id: string;
+        admission_number: string;
+        full_name: string;
+        lifecycle_status?: string | null;
+        academic_phase?: string | null;
+      }>,
+    );
     const cohort = one(population.cohort as Relation<{ id: string; code: string; name: string }>);
     const event = eventMap.get(population.assessment_event_id);
     if (!student || !cohort || !event) continue;
 
-    const key = `${population.assessment_event_id}:${student.id}`;
+    const lifecycle = (student.lifecycle_status ?? '').toLowerCase();
+    if (lifecycle && !['admitted', 'active'].includes(lifecycle)) continue;
+    const phase = (student.academic_phase ?? '').toLowerCase();
+    if (phase && phase !== 'in_class') continue;
+
+    // Candidate events that may hold this student's marks: the population event first,
+    // then its shared/equivalent siblings (where the trainer actually entered the marks).
+    const populationEvent = { id: population.assessment_event_id, unit_id: event.unitId };
+    const candidateEventIds = [populationEvent.id, ...siblingEventIdsOf(populationEvent)];
+    const catOfResult = (candidateKey: string) => {
+      const m = (resultMap.get(candidateKey)?.component_marks ?? {}) as Record<string, unknown>;
+      return num(m.cat1) ?? num(m.cat);
+    };
+    const hasCat = (candidateId: string) => {
+      const candidateKey = `${candidateId}:${student.id}`;
+      return num(draftMap.get(candidateKey)?.cat_mark) !== null || catOfResult(candidateKey) !== null;
+    };
+    const hasAnyMarks = (candidateId: string) => {
+      const candidateKey = `${candidateId}:${student.id}`;
+      return draftMap.has(candidateKey) || resultMap.has(candidateKey);
+    };
+    const sourceEventId =
+      candidateEventIds.find(hasCat)
+      ?? candidateEventIds.find((candidateId) => rosterMap.get(`${candidateId}:${student.id}`)?.cat_absent)
+      ?? candidateEventIds.find(hasAnyMarks)
+      ?? populationEvent.id;
+
+    const key = `${sourceEventId}:${student.id}`;
     const result = resultMap.get(key);
     const draft = draftMap.get(key);
     const roster = rosterMap.get(key);
+    const ownRoster = rosterMap.get(`${population.assessment_event_id}:${student.id}`);
 
-    const isExamAbsent = population.attendance_status === 'absent' || roster?.pre_assessment_status === 'absent';
+    const isExamAbsent = population.attendance_status === 'absent' || ownRoster?.pre_assessment_status === 'absent' || roster?.pre_assessment_status === 'absent';
     const isCatAbsent = Boolean(roster?.cat_absent);
 
     const marks = (result?.component_marks ?? {}) as Record<string, unknown>;
-    const catWasSubmitted = submittedCatScopes.has(`${population.assessment_event_id}:${population.cohort_id ?? 'all'}`);
+    const catWasSubmitted = candidateEventIds.some((candidateId) =>
+      submittedCatScopes.has(`${candidateId}:${population.cohort_id ?? 'all'}`)
+      || submittedCatScopes.has(`${candidateId}:all`),
+    );
     const submittedDraftCat = catWasSubmitted ? num(draft?.cat_mark) : null;
 
     const assignment = num(marks.assignment) ?? num(draft?.assignment_mark);
@@ -221,7 +289,7 @@ export async function getActiveAssessmentPeriodReportData(
       unitId: event.unitId,
       unitCode: event.unitCode,
       unitName: event.unitName,
-      trainerName: trainerMap.get(`${event.unitId}:${cohort.id}`) ?? '',
+      trainerName: resolveTrainerName(event.unitId, cohort.id),
       studentId: student.id,
       admissionNumber: student.admission_number,
       fullName: student.full_name,

@@ -125,10 +125,10 @@ export default async function AssessmentReportsPage({ searchParams }: PageProps)
           </h2>
         </div>
 
-        <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-5">
           <ReportCard
             title="CAT Marks Report"
-            href="/api/assessment/reports/cat"
+            href={`/api/assessment/reports/cat?periodId=${encodeURIComponent(data.periodId)}`}
             ready={readiness.catReady}
             status={
               readiness.catReady
@@ -139,7 +139,7 @@ export default async function AssessmentReportsPage({ searchParams }: PageProps)
 
           <ReportCard
             title="Final Exam Broadsheet"
-            href="/api/assessment/reports/exam"
+            href={`/api/assessment/reports/exam?periodId=${encodeURIComponent(data.periodId)}`}
             ready={readiness.examReady}
             status={
               readiness.examReady
@@ -149,6 +149,43 @@ export default async function AssessmentReportsPage({ searchParams }: PageProps)
                   : 'Exam marks in progress.'
             }
           />
+
+          <div className="flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
+            <div>
+              <div className="flex items-start justify-between gap-3">
+                <h2 className="text-xs font-bold text-slate-900">Trainer Marksheets (ZIP)</h2>
+                <div className="flex size-7 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+                  <FileSpreadsheet className="size-3.5" />
+                </div>
+              </div>
+              <p className="mt-3 text-[11px] font-medium text-slate-600">
+                Download trainer folders with CAT &amp; Final marksheets plus manifest.
+              </p>
+            </div>
+            <div className="mt-4 pt-3 border-t border-slate-200 flex flex-wrap gap-1.5">
+              <a
+                href={`/api/assessment/markbooks/export-zip?academicPeriodId=${encodeURIComponent(data.periodId)}&type=both`}
+                className="inline-flex h-7 items-center gap-1 rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 shadow-2xs hover:bg-slate-50"
+              >
+                <Download className="size-3" />
+                Both
+              </a>
+              <a
+                href={`/api/assessment/markbooks/export-zip?academicPeriodId=${encodeURIComponent(data.periodId)}&type=cat`}
+                className="inline-flex h-7 items-center gap-1 rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 shadow-2xs hover:bg-slate-50"
+              >
+                <Download className="size-3" />
+                CAT
+              </a>
+              <a
+                href={`/api/assessment/markbooks/export-zip?academicPeriodId=${encodeURIComponent(data.periodId)}&type=final`}
+                className="inline-flex h-7 items-center gap-1 rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 shadow-2xs hover:bg-slate-50"
+              >
+                <Download className="size-3" />
+                Final
+              </a>
+            </div>
+          </div>
 
           <div className="flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
             <div>

@@ -41,6 +41,9 @@ function getGradeBadgeClass(grade: string | null | undefined): string {
   if (upper.includes('CREDIT')) {
     return 'bg-teal-50 text-teal-800 border border-teal-200 font-bold';
   }
+  if (upper.includes('SATISFACTORY')) {
+    return 'bg-sky-50 text-sky-800 border border-sky-200 font-bold';
+  }
   if (upper.includes('PASS')) {
     return 'bg-slate-100 text-slate-800 border border-slate-300 font-bold';
   }

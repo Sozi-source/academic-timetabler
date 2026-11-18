@@ -1,3 +1,34 @@
+### 2026-11-18: CAT/Exam Marksheets ZIP Export, QA Export Pitfall Fixes & Analysis Engine Hardening
+
+**Summary:**
+- **Shared ZIP Archive Utility (`src/lib/zip-archive.ts`):** Extracted `createZipArchive` and `safePathSegment` into a shared utility and re-exported them from `src/features/teaching-documents/zip-archive.ts`.
+- **QA Examination Pack Pitfall Fixes (`src/features/teaching-documents/qa-export.ts`):**
+  - Prevented trainer folder collisions by including `staffNumber` (`<TrainerName>_<StaffNumber>`).
+  - Prevented filename collisions across cohorts/units by including `unitCode` and `cohortName` in exported filenames.
+  - Fixed `QA_Index.xlsx` to output actual `cohortName` and `unitCode` values instead of hardcoded `'—'`.
+- **CAT / Exam Analysis Engine Hardening (`src/features/assessment/reports/queries.ts`, `/api/assessment/reports/cat`, `/api/assessment/reports/exam`):**
+  - Included `completed` and `archived` `teaching_allocations` when resolving trainer names for historical periods.
+  - Aligned fallback total calculation with `calculateOnlineFinalTotal` (requiring `cat` and `exam` while treating missing optional coursework as `0`) and ensured `isExamAbsent` explicitly clears `total` and sets `grade = 'ABSENT'`.
+  - Aligned 5-tier grading scale across report queries, Word export, and consolidated viewer (`>=75` A Distinction, `65-74` B Credit, `50-64` C Satisfactory, `40-49` D Pass, `<40` E Fail).
+  - Added optional `?periodId=...` support to `/api/assessment/reports/cat` and `/api/assessment/reports/exam`.
+- **Trainer Marksheets ZIP Export (`src/features/assessment/reports/marksheets-zip-export.ts`, `/api/assessment/markbooks/export-zip`, `src/app/(dashboard)/assessment/reports/page.tsx`):**
+  - Added `createAssessmentMarksheetsZip` to package finalized CAT and/or Final Exam marksheets into per-trainer folders (`<Trainer>_<StaffNo>/CAT Marksheets/` and `Exam Marksheets/`), scoped to each trainer's assigned cohorts, alongside `Marksheets_Index.xlsx`, `README.txt`, and ready department analysis `.docx` reports.
+  - Added `GET /api/assessment/markbooks/export-zip` and wired `Both`, `CAT`, and `Final` ZIP download buttons into the Examination Reports & Broadsheets Centre.
+
+**Added:**
+- `src/lib/zip-archive.ts`
+- `src/features/assessment/reports/marksheets-zip-export.ts`
+- `src/app/api/assessment/markbooks/export-zip/route.ts`
+
+**Modified:**
+- `src/features/teaching-documents/zip-archive.ts`
+- `src/features/teaching-documents/qa-export.ts`
+- `src/features/assessment/reports/queries.ts`
+- `src/app/api/assessment/reports/cat/route.ts`
+- `src/app/api/assessment/reports/exam/route.ts`
+- `src/app/(dashboard)/assessment/reports/page.tsx`
+- `CHANGES.md`
+
 ### 2026-11-12: Fix HOD CAT Submission on Behalf of Trainer
 
 **Summary:**

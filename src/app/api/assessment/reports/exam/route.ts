@@ -6,8 +6,9 @@ import { getAssessmentReportReadiness } from '@/features/assessment/reports/read
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
-  const data = await getActiveAssessmentPeriodReportData();
+export async function GET(request: Request) {
+  const periodId = new URL(request.url).searchParams.get('periodId')?.trim() || undefined;
+  const data = await getActiveAssessmentPeriodReportData(periodId);
   if (!data) return NextResponse.json({ error: 'No active academic period.' }, { status: 404 });
 
   const readiness = getAssessmentReportReadiness(data);

@@ -137,7 +137,7 @@ function gradeFor(score: number) {
   if (score >= 65) return 'B';
   if (score >= 50) return 'C';
   if (score >= 40) return 'D';
-  return 'F';
+  return 'E';
 }
 
 function mainHeader(departmentName: string) {

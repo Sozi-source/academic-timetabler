@@ -5,7 +5,7 @@ import ExcelJS from 'exceljs';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { createAdminClient } from '@/lib/supabase/admin';
 
-import { createZipArchive } from './zip-archive';
+import { createZipArchive, safePathSegment } from '@/lib/zip-archive';
 import {
   computeRecordOfWorkSummary,
   generateTVETCourseOutline,
@@ -75,17 +75,6 @@ const MAX_ARCHIVE_INPUT_BYTES = 200 * 1024 * 1024;
 function rows<T>(data: unknown, error: { message: string } | null, label: string): T[] {
   if (error) throw new Error(`Unable to load ${label}: ${error.message}`);
   return (data ?? []) as T[];
-}
-
-function safePathSegment(value: string): string {
-  const normalized = value
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-zA-Z0-9._-]+/g, '_')
-    .replace(/^\.+|\.+$/g, '')
-    .replace(/_+/g, '_')
-    .slice(0, 90);
-  return normalized || 'Unknown';
 }
 
 function fileExtension(fileName: string): string {
@@ -367,7 +356,7 @@ export async function createQaExaminationPack(
 
     const staffNumber = trainer.staff_number?.trim() || trainer.id.slice(0, 8);
     const trainerName = trainer.full_name?.trim() || 'Trainer';
-    const folder = safePathSegment(trainerName);
+    const folder = `${safePathSegment(trainerName)}_${safePathSegment(staffNumber)}`;
     folderByTrainer.set(trainer.id, folder);
 
     for (const documentType of qaDocumentTypes) {
@@ -388,7 +377,7 @@ export async function createQaExaminationPack(
             ? 'Schemes of Work'
             : 'Records of Work';
       const ext = revision ? fileExtension(revision.original_filename) : 'docx';
-      const relativePath = `${folder}/${directory}/${safePathSegment(unit.name)}.${ext}`;
+      const relativePath = `${folder}/${directory}/${safePathSegment(unit.code)}_${safePathSegment(unit.name)}_${safePathSegment(cohortName)}.${ext}`;
       lines.push({
         allocationId: allocation.id,
         trainerId: trainer.id,
@@ -540,8 +529,8 @@ export async function createQaExaminationPack(
   index.addRows(lines.map((line) => ({
     staffNumber: line.staffNumber,
     trainerName: line.trainerName,
-    cohortName: '—',
-    unitCode: '—',
+    cohortName: line.cohortName,
+    unitCode: line.unitCode,
     unitName: line.unitName,
     document: documentLabel(line.documentType),
     status: line.status,

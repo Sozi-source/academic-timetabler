@@ -107,7 +107,7 @@ export async function getActiveAssessmentPeriodReportData(
       .select('unit_id,cohort_id,participant_cohort_ids,trainer:trainers(full_name)')
       .eq('academic_period_id', period.id)
       .in('unit_id', unitIds)
-      .in('status', ['draft', 'active']),
+      .in('status', ['draft', 'active', 'completed', 'archived']),
     admin
       .from('assessment_online_mark_drafts')
       .select('assessment_id,student_id,assignment_mark,presentation_mark,rat_mark,cat_mark,exam_mark,updated_at')
@@ -182,22 +182,23 @@ export async function getActiveAssessmentPeriodReportData(
     const cat1 = isCatAbsent ? null : (submittedDraftCat ?? num(marks.cat1) ?? num(marks.cat) ?? num(draft?.cat_mark));
     const exam = isExamAbsent ? null : (num(marks.exam) ?? num(draft?.exam_mark));
 
-    let total = num(result?.total_mark) ?? num(marks.total);
-    if (total === null && !isExamAbsent && assignment !== null && presentation !== null && rat !== null && cat1 !== null && exam !== null) {
+    let total = isExamAbsent ? null : (num(result?.total_mark) ?? num(marks.total));
+    if (total === null && !isExamAbsent && cat1 !== null && exam !== null) {
       const calculated = calculateOnlineFinalTotal({ assignment, presentation, rat, cat: cat1, exam }, false);
       total = calculated !== null ? Math.round(calculated) : null;
     } else if (total !== null) {
       total = Math.round(total);
     }
 
-    let grade = typeof result?.grade === 'string' ? result.grade : null;
+    let grade = isExamAbsent ? 'ABSENT' : (typeof result?.grade === 'string' ? result.grade : null);
     if (!grade) {
       if (isExamAbsent) grade = 'ABSENT';
       else if (total !== null) {
         if (total >= 75) grade = 'DISTINCTION';
         else if (total >= 65) grade = 'CREDIT';
+        else if (total >= 50) grade = 'SATISFACTORY';
         else if (total >= 40) grade = 'PASS';
-        else grade = 'REFER';
+        else grade = 'FAIL';
       }
     }
 

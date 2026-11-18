@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { AlertTriangle, Loader2, Send, X } from 'lucide-react';
+import { AlertTriangle, GraduationCap, Loader2, Send, X } from 'lucide-react';
 
 import { submitCatOnBehalfAction } from './actions';
 
@@ -18,7 +18,7 @@ function ConfirmSubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-2xs transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+      className="inline-flex min-h-9 w-full sm:w-auto items-center justify-center gap-1.5 rounded-lg bg-[#0b7a64] px-4 py-1.5 text-xs font-bold text-white shadow-xs transition hover:bg-[#096452] disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
     >
       {pending ? <Loader2 className="size-3.5 animate-spin" aria-hidden="true" /> : <Send className="size-3.5" aria-hidden="true" />}
       <span>{pending ? 'Submitting…' : 'Confirm & Submit'}</span>
@@ -52,62 +52,71 @@ export function SubmitCatOnBehalfButton({ assessmentId, trainerLabel, missingCou
 
       {open ? (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-[1px]"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-[2px]"
           role="dialog"
           aria-modal="true"
           aria-labelledby="submit-cat-on-behalf-title"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) setOpen(false);
+          }}
         >
           <div
-            style={{ maxWidth: '25rem' }}
-            className="w-full rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xl"
+            style={{ maxWidth: '24rem' }}
+            className="relative w-full overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xl"
           >
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-2.5">
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  <Send className="size-4" aria-hidden="true" />
-                </span>
-                <div>
-                  <h3 id="submit-cat-on-behalf-title" className="text-sm font-bold text-slate-900">
-                    Submit CAT marks?
-                  </h3>
-                  <p className="text-xs text-slate-500">On behalf of {trainerLabel}</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                aria-label="Close confirmation"
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label="Close confirmation"
+              className="absolute right-3 top-3 rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
+            >
+              <X className="size-4" />
+            </button>
 
-            <div className="mt-4 space-y-3 text-xs text-slate-700">
+            <div className="px-5 pt-6 pb-5 text-center sm:px-6">
+              <div className="mx-auto flex justify-center">
+                <span className="flex size-12 items-center justify-center rounded-full bg-[#e6f6f2] text-[#0b4f4a] ring-1 ring-[#bfe8de]">
+                  <GraduationCap className="size-6" aria-hidden="true" />
+                </span>
+              </div>
+
+              <h3 id="submit-cat-on-behalf-title" className="mt-3 text-lg font-extrabold tracking-tight text-[#0b2545]">
+                Submit CAT Marks?
+              </h3>
+              <p className="mt-0.5 text-[11px] font-medium text-slate-500">
+                On behalf of {trainerLabel}
+              </p>
+
               {missingCount > 0 ? (
-                <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-amber-900">
-                  <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-600" aria-hidden="true" />
-                  <p>
-                    <strong>{missingCount}</strong> student{missingCount === 1 ? '' : 's'} without a CAT mark will be recorded as <strong>AB (absent)</strong>.
+                <div className="mt-3.5 flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50/80 px-3.5 py-2.5 text-left text-xs text-amber-950">
+                  <span className="flex shrink-0 items-center border-r border-amber-200/90 pr-3">
+                    <AlertTriangle className="size-5 text-amber-600" aria-hidden="true" />
+                  </span>
+                  <p className="leading-snug">
+                    <strong>{missingCount}</strong> student{missingCount === 1 ? '' : 's'} without a CAT mark will be recorded as{' '}
+                    <strong>AB (absent)</strong>.
                   </p>
                 </div>
               ) : null}
-              <p className="text-slate-600">
-                This submission will be recorded under your name. You can unlock it later if corrections are needed.
+
+              <p className="mt-3 text-xs text-slate-500">
+                You can unlock it later if corrections are needed.
               </p>
+
+              <form action={submitCatOnBehalfAction} className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-center sm:gap-2.5">
+                <input type="hidden" name="assessmentId" value={assessmentId} />
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="inline-flex min-h-9 w-full sm:w-auto sm:min-w-[6.5rem] items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-1.5 text-xs font-bold text-[#0b2545] transition hover:bg-slate-50 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <ConfirmSubmitButton />
+              </form>
             </div>
 
-            <form action={submitCatOnBehalfAction} className="mt-5 flex flex-wrap items-center justify-end gap-2">
-              <input type="hidden" name="assessmentId" value={assessmentId} />
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="inline-flex min-h-9 items-center justify-center rounded-lg border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
-              >
-                Cancel
-              </button>
-              <ConfirmSubmitButton />
-            </form>
+            <div className="h-1 w-full bg-gradient-to-r from-emerald-400/70 via-[#0b7a64] to-teal-400/70" aria-hidden="true" />
           </div>
         </div>
       ) : null}

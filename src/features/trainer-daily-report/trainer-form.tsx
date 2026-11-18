@@ -269,6 +269,7 @@ function PastUnrecordedBanner({
   const [isOpen, setIsOpen] = useState(true);
   const [submittingDate, setSubmittingDate] = useState<string | null>(null);
   const [dismissingDate, setDismissingDate] = useState<string | null>(null);
+  const [pendingDismissDate, setPendingDismissDate] = useState<string | null>(null);
 
   if (sessions.length === 0 && unsubmittedReports.length === 0) return null;
 
@@ -283,8 +284,6 @@ function PastUnrecordedBanner({
       setSubmittingDate(null);
     }
   }
-
-  const [pendingDismissDate, setPendingDismissDate] = useState<string | null>(null);
 
   function handleDismiss(dateStr: string) {
     if (!onDismissDate) return;

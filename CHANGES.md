@@ -1,3 +1,19 @@
+### 2026-11-18: Clean Up Stray Commit Artifact & Complete Allocation-Scoped Population Passing
+
+**Summary:**
+- Removed the accidental stray empty file `s.id)` committed in `8adbfe5`.
+- Passed `allocationId` to `getAssessmentPopulationWorkspace` in the remaining allocation-scoped assessment routes: `/staff/units/[allocationId]/assessment/[assessmentId]` and `/external-trainer/units/[allocationId]/assessment/[assessmentId]/marks`.
+- Added unit tests in `src/tests/unified-unit-roster.test.ts` verifying `student_class_assignments` resolution both with and without `allocationId`.
+
+**Modified:**
+- `src/app/(staff)/staff/units/[allocationId]/assessment/[assessmentId]/page.tsx`
+- `src/app/external-trainer/units/[allocationId]/assessment/[assessmentId]/marks/page.tsx`
+- `src/tests/unified-unit-roster.test.ts`
+- `CHANGES.md`
+
+**Removed:**
+- `s.id)`
+
 ### 2026-11-18: Include Individual Class Assignments in Unified Roster & Trainer Marks Entry
 
 **Summary:**

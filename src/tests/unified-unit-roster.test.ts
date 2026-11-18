@@ -523,4 +523,162 @@ describe('unified unit roster domain logic', () => {
     expect(roster.students).toEqual([]);
     expect(roster.cohortNames).toEqual(['DHN EMPTY']);
   });
+
+  it('includes individual student_class_assignments when allocationId is omitted or provided', async () => {
+    const createMockSupabase = () => {
+      let queriedAssignmentAllocations: unknown[] = [];
+      return {
+        getQueriedAssignmentAllocations: () => queriedAssignmentAllocations,
+        from: (table: string) => {
+          const filters: Array<{ op: string; col: string; val: unknown }> = [];
+          const query: any = {
+            select: () => query,
+            eq: (col: string, val: unknown) => {
+              filters.push({ op: 'eq', col, val });
+              return query;
+            },
+            in: (col: string, val: unknown) => {
+              filters.push({ op: 'in', col, val });
+              return query;
+            },
+            not: () => query,
+            maybeSingle: async () => {
+              if (table === 'teaching_allocations') {
+                return {
+                  data: {
+                    id: 'alloc-target',
+                    unit_id: 'unit-target',
+                    academic_period_id: 'period-1',
+                    cohort_id: 'cohort-target',
+                    participant_cohort_ids: [],
+                  },
+                  error: null,
+                };
+              }
+              return { data: null, error: null };
+            },
+            then: (resolve: any) => {
+              if (table === 'unit_offerings') {
+                return resolve({ data: [{ cohort_id: 'cohort-target' }], error: null });
+              }
+              if (table === 'teaching_allocations') {
+                return resolve({
+                  data: [{ id: 'alloc-target', cohort_id: 'cohort-target', participant_cohort_ids: [] }],
+                  error: null,
+                });
+              }
+              if (table === 'student_unit_registrations') {
+                return resolve({
+                  data: [
+                    {
+                      student_id: 'student-home',
+                      cohort_id: 'cohort-target',
+                      registration_status: 'registered',
+                      student: {
+                        id: 'student-home',
+                        admission_number: 'DHN/2026/001',
+                        full_name: 'Home Student',
+                        current_cohort_id: 'cohort-target',
+                        lifecycle_status: 'active',
+                        academic_phase: 'in_class',
+                      },
+                    },
+                  ],
+                  error: null,
+                });
+              }
+              if (table === 'student_class_assignments') {
+                const allocFilter = filters.find((f) => f.col === 'teaching_allocation_id');
+                queriedAssignmentAllocations = allocFilter
+                  ? Array.isArray(allocFilter.val)
+                    ? allocFilter.val
+                    : [allocFilter.val]
+                  : [];
+                return resolve({
+                  data: [
+                    {
+                      student_id: 'student-assigned',
+                      students: {
+                        id: 'student-assigned',
+                        admission_number: 'CHN/2025/010',
+                        full_name: 'Retake Student',
+                        current_cohort_id: 'cohort-retake',
+                        lifecycle_status: 'active',
+                        academic_phase: 'in_class',
+                      },
+                      student_unit_registrations: {
+                        cohort_id: 'cohort-retake',
+                        registration_status: 'registered',
+                      },
+                    },
+                  ],
+                  error: null,
+                });
+              }
+              if (table === 'cohorts') {
+                return resolve({
+                  data: [
+                    {
+                      id: 'cohort-target',
+                      name: 'DHN MAY 26',
+                      code: 'DHN-MAY-26',
+                      programme: {
+                        id: 'prog-dhn',
+                        name: 'Diploma in Nutrition',
+                        code: 'DHN',
+                        department: { id: 'dept-1', name: 'Nutrition' },
+                      },
+                    },
+                    {
+                      id: 'cohort-retake',
+                      name: 'CHN MAY 25',
+                      code: 'CHN-MAY-25',
+                      programme: {
+                        id: 'prog-chn',
+                        name: 'Certificate in Nutrition',
+                        code: 'CHN',
+                        department: { id: 'dept-1', name: 'Nutrition' },
+                      },
+                    },
+                  ],
+                  error: null,
+                });
+              }
+              return resolve({ data: [], error: null });
+            },
+          };
+          return query;
+        },
+      };
+    };
+
+    const mockWithoutAlloc = createMockSupabase();
+    const unitLevelRoster = await getUnifiedUnitRoster({
+      supabase: mockWithoutAlloc,
+      unitId: 'unit-target',
+      academicPeriodId: 'period-1',
+    });
+
+    expect(mockWithoutAlloc.getQueriedAssignmentAllocations()).toEqual(['alloc-target']);
+    expect(unitLevelRoster.totalCount).toBe(2);
+    expect(unitLevelRoster.students.map((s) => s.studentId)).toEqual([
+      'student-assigned',
+      'student-home',
+    ]);
+
+    const mockWithAlloc = createMockSupabase();
+    const allocLevelRoster = await getUnifiedUnitRoster({
+      supabase: mockWithAlloc,
+      unitId: 'unit-target',
+      academicPeriodId: 'period-1',
+      allocationId: 'alloc-target',
+    });
+
+    expect(mockWithAlloc.getQueriedAssignmentAllocations()).toEqual(['alloc-target']);
+    expect(allocLevelRoster.totalCount).toBe(2);
+    expect(allocLevelRoster.students.map((s) => s.studentId)).toEqual([
+      'student-assigned',
+      'student-home',
+    ]);
+  });
 });

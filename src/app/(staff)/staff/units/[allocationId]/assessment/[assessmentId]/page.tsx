@@ -58,6 +58,7 @@ export default async function StaffAssessmentPage({
   const population =
     await getAssessmentPopulationWorkspace(
       assessmentId,
+      allocationId,
     );
 
   const assessment =

@@ -29,7 +29,7 @@ export default async function ExternalTrainerMarksPage({ params }: PageProps) {
 
   const [access, population, markState, componentSubmissions] = await Promise.all([
     requireStaffAssessment({ profileId: profile.id, allocationId, assessmentId }),
-    getAssessmentPopulationWorkspace(targetAssessmentId),
+    getAssessmentPopulationWorkspace(targetAssessmentId, allocationId),
     getStaffOnlineMarkState(targetAssessmentId),
     getStaffOnlineMarkComponentSubmissions(targetAssessmentId),
   ]);

@@ -31,6 +31,7 @@ const assessmentSelection = `
   exam_marks_finalized_at,
   marks_submitted_at,
   trainer_entry_open,
+  exclude_from_analysis,
   academic_period:academic_periods(id, code, name),
   unit:units(id, code, name),
   cohort:cohorts(id, code, name)

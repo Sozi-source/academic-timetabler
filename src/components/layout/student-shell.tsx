@@ -164,7 +164,7 @@ export function StudentShell({ profile, children }: StudentShellProps) {
     <div className="min-h-screen bg-background">
       <div className="fixed inset-x-0 top-0 z-50 h-1 bg-institutional-yellow" />
       <div className="flex min-h-screen">
-        <div className="hidden lg:block">{sidebar}</div>
+        <div className="hidden lg:sticky lg:top-0 lg:block lg:h-dvh lg:shrink-0 lg:self-start">{sidebar}</div>
 
         {mobileOpen ? (
           <div className="fixed inset-0 z-40 lg:hidden">

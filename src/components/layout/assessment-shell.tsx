@@ -136,7 +136,7 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
       <div className="fixed inset-x-0 top-0 z-[60] h-1 bg-sky-500" aria-hidden="true" />
 
       <div className="flex min-h-screen">
-        <div className="hidden lg:block">{sidebar}</div>
+        <div className="hidden lg:sticky lg:top-0 lg:block lg:h-dvh lg:shrink-0 lg:self-start">{sidebar}</div>
         {mobileOpen && (
           <div className="fixed inset-0 z-50 lg:hidden">
             <button

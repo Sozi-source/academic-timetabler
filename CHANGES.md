@@ -9,6 +9,8 @@
 - `src/features/academic-roster/unified-roster.ts`
 - `src/features/assessment/population-workspace.ts`
 - `src/app/(staff)/staff/units/[allocationId]/assessment/[assessmentId]/marks/page.tsx`
+- `src/components/layout/assessment-shell.tsx`
+- `src/components/layout/student-shell.tsx`
 - `CHANGES.md`
 
 ### 2026-11-18: CAT/Exam Marksheets ZIP Export, QA Export Pitfall Fixes & Analysis Engine Hardening

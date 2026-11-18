@@ -1,8 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
+
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 import {
   batchRegisterOverrideUnits,
@@ -174,6 +176,10 @@ export function BatchUnitRegistration({
   const clearSelection = () => {
     setSelectedIds(new Set());
   };
+
+  const [confirmDropOpen, setConfirmDropOpen] = useState(false);
+  const dropBypassRef = useRef(false);
+  const dropButtonRef = useRef<HTMLButtonElement | null>(null);
 
   return (
     <div className="space-y-4 sm:space-y-5">
@@ -702,18 +708,36 @@ export function BatchUnitRegistration({
 
         <div className="sticky bottom-3 flex flex-wrap justify-end gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
           <button
+            ref={dropButtonRef}
             type="submit"
             formAction={dropUnconfirmedStudentUnits}
             onClick={(event) => {
-              if (!window.confirm('Mark the selected unconfirmed students’ unit registrations as dropped?')) {
-                event.preventDefault();
+              if (dropBypassRef.current) {
+                dropBypassRef.current = false;
+                return;
               }
+              event.preventDefault();
+              setConfirmDropOpen(true);
             }}
             disabled={!context.period || selectedIds.size === 0}
             className="inline-flex min-h-10 items-center justify-center rounded-full px-5 text-sm font-medium text-rose-400 transition hover:bg-rose-50 hover:text-rose-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Drop unconfirmed units
           </button>
+
+          <ConfirmDialog
+            open={confirmDropOpen}
+            variant="danger"
+            title="Drop unconfirmed unit registrations?"
+            description="Mark the selected unconfirmed students’ unit registrations as dropped?"
+            confirmLabel="Drop units"
+            onCancel={() => setConfirmDropOpen(false)}
+            onConfirm={() => {
+              setConfirmDropOpen(false);
+              dropBypassRef.current = true;
+              dropButtonRef.current?.click();
+            }}
+          />
 
           <button
             type="submit"

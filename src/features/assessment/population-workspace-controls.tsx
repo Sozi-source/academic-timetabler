@@ -6,6 +6,7 @@ import {
 import {
   useRouter,
 } from 'next/navigation';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export function GenerateAssessmentPopulationButton({
   assessmentId,
@@ -17,17 +18,10 @@ export function GenerateAssessmentPopulationButton({
   const router = useRouter();
   const [busy, setBusy] =
     useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
-  async function generate() {
-    if (
-      hasPopulation &&
-      !window.confirm(
-        'Refresh this assessment population from current registered students? Existing absence markings will be preserved where the student remains registered.',
-      )
-    ) {
-      return;
-    }
-
+  async function executeGenerate() {
+    setConfirmOpen(false);
     setBusy(true);
 
     try {
@@ -58,19 +52,39 @@ export function GenerateAssessmentPopulationButton({
     }
   }
 
+  function handleGenerateClick() {
+    if (hasPopulation) {
+      setConfirmOpen(true);
+      return;
+    }
+    void executeGenerate();
+  }
+
   return (
-    <button
-      type="button"
-      onClick={generate}
-      disabled={busy}
-      className="inline-flex h-9 items-center justify-center rounded-lg bg-header-blue px-3.5 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-    >
-      {busy
-        ? 'Generating...'
-        : hasPopulation
-          ? 'Refresh population'
-          : 'Generate population'}
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={handleGenerateClick}
+        disabled={busy}
+        className="inline-flex h-9 items-center justify-center rounded-lg bg-header-blue px-3.5 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {busy
+          ? 'Generating...'
+          : hasPopulation
+            ? 'Refresh population'
+            : 'Generate population'}
+      </button>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Refresh assessment population?"
+        description="Refresh this assessment population from current registered students? Existing absence markings will be preserved where the student remains registered."
+        confirmLabel="Refresh population"
+        pending={busy}
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={() => void executeGenerate()}
+      />
+    </>
   );
 }
 

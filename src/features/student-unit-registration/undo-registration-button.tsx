@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, RotateCcw } from 'lucide-react';
 
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { cn } from '@/lib/utils/cn';
 
 export interface UndoUnitRegistrationButtonProps {
@@ -29,17 +30,10 @@ export function UndoUnitRegistrationButton({
 }: UndoUnitRegistrationButtonProps) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   async function undo() {
-    const studentLabel = studentName ? `for ${studentName}` : 'for this student';
-    const confirmed = window.confirm(
-      `Unregister all units ${studentLabel}?\n\nThis will remove all registered units for this Academic Period and reset the student's status to 'Not registered'.`,
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
+    setConfirmOpen(false);
     setBusy(true);
 
     try {
@@ -90,25 +84,40 @@ export function UndoUnitRegistrationButton({
     md: 'h-9 px-3.5 text-xs',
   }[size];
 
+  const studentLabel = studentName ? `for ${studentName}` : 'for this student';
+
   return (
-    <button
-      type="button"
-      onClick={undo}
-      disabled={busy}
-      title={studentName ? `Unregister ${studentName}` : 'Unregister student units'}
-      className={cn(
-        'inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border font-semibold transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-60',
-        variantStyles,
-        sizeStyles,
-        className,
-      )}
-    >
-      {busy ? (
-        <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-      ) : (
-        <RotateCcw className="size-3.5" aria-hidden="true" />
-      )}
-      <span>{busy ? 'Unregistering...' : label}</span>
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={() => setConfirmOpen(true)}
+        disabled={busy}
+        title={studentName ? `Unregister ${studentName}` : 'Unregister student units'}
+        className={cn(
+          'inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border font-semibold transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-60',
+          variantStyles,
+          sizeStyles,
+          className,
+        )}
+      >
+        {busy ? (
+          <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+        ) : (
+          <RotateCcw className="size-3.5" aria-hidden="true" />
+        )}
+        <span>{busy ? 'Unregistering...' : label}</span>
+      </button>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        variant="danger"
+        title={`Unregister all units ${studentLabel}?`}
+        description="This will remove all registered units for this Academic Period and reset the student's status to 'Not registered'."
+        confirmLabel="Unregister"
+        pending={busy}
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={() => void undo()}
+      />
+    </>
   );
 }

@@ -16,6 +16,7 @@ import Link from 'next/link';
 import { useActionState, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
   Dialog,
   DialogContent,
@@ -283,11 +284,17 @@ function PastUnrecordedBanner({
     }
   }
 
-  async function handleDismiss(dateStr: string) {
+  const [pendingDismissDate, setPendingDismissDate] = useState<string | null>(null);
+
+  function handleDismiss(dateStr: string) {
     if (!onDismissDate) return;
-    if (!confirm(`Hide the ${dateStr} reminder? This just removes it from your list — it does not submit a report.`)) {
-      return;
-    }
+    setPendingDismissDate(dateStr);
+  }
+
+  async function confirmDismiss() {
+    if (!onDismissDate || !pendingDismissDate) return;
+    const dateStr = pendingDismissDate;
+    setPendingDismissDate(null);
     setDismissingDate(dateStr);
     try {
       await onDismissDate(dateStr);
@@ -378,6 +385,17 @@ function PastUnrecordedBanner({
               </div>
             </div>
           ))}
+
+          <ConfirmDialog
+            open={pendingDismissDate !== null}
+            variant="warning"
+            title={`Hide ${pendingDismissDate ?? ''} reminder?`}
+            description="This just removes it from your list — it does not submit a report."
+            confirmLabel="Hide reminder"
+            pending={dismissingDate !== null}
+            onCancel={() => setPendingDismissDate(null)}
+            onConfirm={() => void confirmDismiss()}
+          />
 
           {sessions.map((session) => (
             <div

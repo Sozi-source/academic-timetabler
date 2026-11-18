@@ -1,3 +1,31 @@
+### 2026-11-18: Replace All Remaining `window.confirm` / `confirm` Popups with In-App `ConfirmDialog`
+
+**Summary:**
+- Created reusable `ConfirmDialog` (`src/components/ui/confirm-dialog.tsx`) with `default`, `warning`, and `danger` variants, Escape/backdrop dismissal, and loading state.
+- Replaced all 10 remaining `window.confirm` / `confirm` browser popups across 8 components:
+  - `src/features/assessment/assessment-rule-release-controls.tsx`
+  - `src/features/assessment/population-workspace-controls.tsx`
+  - `src/features/student-unit-registration/batch-unit-registration.tsx`
+  - `src/features/student-unit-registration/student-unit-registration-lines.tsx`
+  - `src/features/student-unit-registration/undo-registration-button.tsx`
+  - `src/features/teaching-documents/clear-documents-button.tsx`
+  - `src/features/teaching-documents/record-of-work-manager.tsx`
+  - `src/features/trainer-daily-report/trainer-form.tsx`
+
+**Added:**
+- `src/components/ui/confirm-dialog.tsx`
+
+**Modified:**
+- `src/features/assessment/assessment-rule-release-controls.tsx`
+- `src/features/assessment/population-workspace-controls.tsx`
+- `src/features/student-unit-registration/batch-unit-registration.tsx`
+- `src/features/student-unit-registration/student-unit-registration-lines.tsx`
+- `src/features/student-unit-registration/undo-registration-button.tsx`
+- `src/features/teaching-documents/clear-documents-button.tsx`
+- `src/features/teaching-documents/record-of-work-manager.tsx`
+- `src/features/trainer-daily-report/trainer-form.tsx`
+- `CHANGES.md`
+
 ### 2026-11-18: Inline Formatted Confirmation Modal for Submit CAT on Behalf
 
 **Summary:**

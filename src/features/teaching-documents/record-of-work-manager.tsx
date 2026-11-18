@@ -12,6 +12,7 @@ import {
 
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
   addRecordOfWorkEntryAction,
   deleteRecordOfWorkEntryAction,
@@ -94,23 +95,17 @@ export function RecordOfWorkManager({
     });
   };
 
+  const [pendingAction, setPendingAction] = useState<
+    | { kind: 'delete'; entryId: string }
+    | { kind: 'generate' }
+    | null
+  >(null);
+
   const handleDeleteEntry = (entryId: string) => {
-    if (!confirm('Are you sure you want to remove this delivery log entry?')) return;
-    startTransition(async () => {
-      await deleteRecordOfWorkEntryAction(allocationId, entryId);
-    });
+    setPendingAction({ kind: 'delete', entryId });
   };
 
-  const handleAutoGenerateRoadmap = () => {
-    if (
-      entries.length > 0 &&
-      !confirm(
-        'Generating from Scheme of Work will replace/standardize current entries to the official 14-week schedule. Continue?'
-      )
-    ) {
-      return;
-    }
-
+  const executeAutoGenerate = () => {
     startTransition(async () => {
       const res = await generateRecordOfWorkFromSchemeAction(allocationId);
       if (res.ok) {
@@ -119,6 +114,27 @@ export function RecordOfWorkManager({
         setErrorMessage(res.error || 'Failed to generate from Scheme of Work.');
       }
     });
+  };
+
+  const handleAutoGenerateRoadmap = () => {
+    if (entries.length > 0) {
+      setPendingAction({ kind: 'generate' });
+      return;
+    }
+    executeAutoGenerate();
+  };
+
+  const handleConfirmAction = () => {
+    if (!pendingAction) return;
+    const action = pendingAction;
+    setPendingAction(null);
+    if (action.kind === 'delete') {
+      startTransition(async () => {
+        await deleteRecordOfWorkEntryAction(allocationId, action.entryId);
+      });
+      return;
+    }
+    executeAutoGenerate();
   };
 
   return (
@@ -414,6 +430,21 @@ export function RecordOfWorkManager({
           </div>
         )}
       </Card>
+
+      <ConfirmDialog
+        open={pendingAction !== null}
+        variant={pendingAction?.kind === 'delete' ? 'danger' : 'warning'}
+        title={pendingAction?.kind === 'delete' ? 'Remove delivery log entry?' : 'Regenerate 14-week roadmap?'}
+        description={
+          pendingAction?.kind === 'delete'
+            ? 'Are you sure you want to remove this delivery log entry?'
+            : 'Generating from Scheme of Work will replace/standardize current entries to the official 14-week schedule. Continue?'
+        }
+        confirmLabel={pendingAction?.kind === 'delete' ? 'Remove' : 'Continue'}
+        pending={isPending}
+        onCancel={() => setPendingAction(null)}
+        onConfirm={handleConfirmAction}
+      />
     </div>
   );
 }

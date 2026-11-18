@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from 'react';
 import { LoaderCircle, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,6 +33,11 @@ export function StudentUnitRegistrationLines({
   const [lines, setLines] = useState<RegistrationLine[]>([{ id: 0, stageId: '', unitId: '' }]);
   const [replacements, setReplacements] = useState<Record<string, string>>({});
   const [editing, setEditing] = useState<{ unitId: string; stageId: string; replacementId: string } | null>(null);
+  const [confirmDrop, setConfirmDrop] = useState<
+    | { kind: 'single'; unitId: string; academicPeriodId: string; unitCode: string }
+    | { kind: 'batch'; targets: string[]; message: string }
+    | null
+  >(null);
   const currentIds = useMemo(() => new Set(context.currentRegisteredUnitIds), [context.currentRegisteredUnitIds]);
   const chosenIds = new Set(lines.map((line) => line.unitId).filter(Boolean));
   const expectedIds = new Set(context.stageUnitIds[context.student.currentStageId ?? ''] ?? []);
@@ -77,18 +83,7 @@ export function StudentUnitRegistrationLines({
   };
 
   const handleDelete = (unitId: string, academicPeriodId: string, unitCode: string) => {
-    if (!window.confirm(`Are you sure you want to delete the unit registration for ${unitCode}? This will remove the student from this unit.`)) {
-      return;
-    }
-    setPendingUnitId(unitId);
-    startTransition(async () => {
-      const formData = new FormData();
-      formData.set('studentId', context.student.id);
-      formData.set('registrationUnitId', unitId);
-      formData.set('academicPeriodId', academicPeriodId);
-      if (returnCohort) formData.set('returnCohort', returnCohort);
-      await dropStudentUnitRegistration(formData);
-    });
+    setConfirmDrop({ kind: 'single', unitId, academicPeriodId, unitCode });
   };
 
   const handleBatchDelete = (unitIdsToDelete?: string[]) => {
@@ -105,7 +100,24 @@ export function StudentUnitRegistrationLines({
       ? `Are you sure you want to delete the unit registration for ${unitCodes}? This will remove the student from this unit.`
       : `Are you sure you want to delete ${count} unit registrations (${unitCodes})? This will remove the student from these units' markbook rosters.`;
 
-    if (!window.confirm(message)) {
+    setConfirmDrop({ kind: 'batch', targets, message });
+  };
+
+  const executeConfirmedDrop = () => {
+    if (!confirmDrop) return;
+    const action = confirmDrop;
+    setConfirmDrop(null);
+
+    if (action.kind === 'single') {
+      setPendingUnitId(action.unitId);
+      startTransition(async () => {
+        const formData = new FormData();
+        formData.set('studentId', context.student.id);
+        formData.set('registrationUnitId', action.unitId);
+        formData.set('academicPeriodId', action.academicPeriodId);
+        if (returnCohort) formData.set('returnCohort', returnCohort);
+        await dropStudentUnitRegistration(formData);
+      });
       return;
     }
 
@@ -113,7 +125,7 @@ export function StudentUnitRegistrationLines({
     startTransition(async () => {
       const formData = new FormData();
       formData.set('studentId', context.student.id);
-      for (const id of targets) {
+      for (const id of action.targets) {
         formData.append('unitIds', id);
       }
       formData.set('academicPeriodId', context.period.id);
@@ -416,6 +428,25 @@ export function StudentUnitRegistrationLines({
         </label>
       ) : null}
       <p className="text-[11px] text-text-muted">{currentIds.size + chosenIds.size} units will be registered for this academic period.</p>
+
+      <ConfirmDialog
+        open={confirmDrop !== null}
+        variant="danger"
+        title={
+          confirmDrop?.kind === 'single'
+            ? `Delete ${confirmDrop.unitCode} registration?`
+            : 'Delete unit registrations?'
+        }
+        description={
+          confirmDrop?.kind === 'single'
+            ? `Are you sure you want to delete the unit registration for ${confirmDrop.unitCode}? This will remove the student from this unit.`
+            : confirmDrop?.message ?? ''
+        }
+        confirmLabel="Delete"
+        pending={isPending}
+        onCancel={() => setConfirmDrop(null)}
+        onConfirm={executeConfirmedDrop}
+      />
     </div>
   );
 }

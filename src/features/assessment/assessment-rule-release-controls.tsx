@@ -15,6 +15,7 @@ import {
 import {
   Badge,
 } from '@/components/ui/badge';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 import {
   canFinaliseAssessment,
@@ -192,25 +193,20 @@ export function AssessmentRuleReleaseControls({
     }
   }
 
-  async function runTransition(
+  const [pendingTransition, setPendingTransition] = useState<'finalise' | 'publish' | null>(null);
+
+  function runTransition(
     type:
       | 'finalise'
       | 'publish',
   ) {
-    const label =
-      type ===
-      'finalise'
-        ? 'Finalise these assessment results?'
-        : 'Publish these finalised results?';
+    setPendingTransition(type);
+  }
 
-    if (
-      !window.confirm(
-        label,
-      )
-    ) {
-      return;
-    }
-
+  async function confirmTransition() {
+    if (!pendingTransition) return;
+    const type = pendingTransition;
+    setPendingTransition(null);
     setBusy(
       type,
     );
@@ -421,6 +417,20 @@ export function AssessmentRuleReleaseControls({
           ) : null}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={pendingTransition !== null}
+        title={pendingTransition === 'finalise' ? 'Finalise assessment results?' : 'Publish assessment results?'}
+        description={
+          pendingTransition === 'finalise'
+            ? 'This will lock the assessment results as finalised.'
+            : 'This will publish the finalised results so they are visible on student portals.'
+        }
+        confirmLabel={pendingTransition === 'finalise' ? 'Finalise' : 'Publish'}
+        pending={busy !== null}
+        onCancel={() => setPendingTransition(null)}
+        onConfirm={() => void confirmTransition()}
+      />
     </section>
   );
 }

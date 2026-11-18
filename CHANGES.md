@@ -1,3 +1,12 @@
+### 2026-11-18: Inline Formatted Confirmation Modal for Submit CAT on Behalf
+
+**Summary:**
+- Replaced the native `window.confirm` browser popup in `SubmitCatOnBehalfButton` (`src/features/assessment/marks/submit-cat-on-behalf-button.tsx`) with an in-app formatted confirmation dialog highlighting absent-marked students and unlockability.
+
+**Modified:**
+- `src/features/assessment/marks/submit-cat-on-behalf-button.tsx`
+- `CHANGES.md`
+
 ### 2026-11-18: Inline HOD Mark Editing & Concise Pending CAT Banner
 
 **Summary:**

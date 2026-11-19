@@ -39,7 +39,7 @@ export function TrainerAccessTable({
         id: 'trainer',
         header: 'Trainer',
         accessorFn: (record) => record.fullName,
-        size: 260,
+        minSize: 200,
         cell: ({ row }) => {
           const record = row.original;
 
@@ -47,11 +47,11 @@ export function TrainerAccessTable({
             <div className="min-w-0">
               <Link
                 href={`/trainers/${record.trainerId}`}
-                className="block truncate text-xs font-semibold text-text-primary transition hover:text-primary hover:underline"
+                className="block truncate text-xs font-semibold text-text-primary transition hover:text-primary hover:underline xl:text-sm"
               >
                 {record.fullName}
               </Link>
-              <p className="mt-0.5 truncate text-[10px] text-text-muted">
+              <p className="mt-0.5 truncate text-[11px] text-text-muted xl:text-xs">
                 {record.email ?? 'No email'}
               </p>
             </div>
@@ -62,7 +62,7 @@ export function TrainerAccessTable({
         id: 'email',
         header: 'Email',
         accessorFn: (record) => record.email ?? '',
-        size: 220,
+        minSize: 180,
         // Hidden by default (it is already shown under the name),
         // but available in the Columns menu and included in exports.
         cell: ({ getValue }) => getValue<string>() || '—',
@@ -71,17 +71,17 @@ export function TrainerAccessTable({
         id: 'workspace',
         header: 'Workspace details',
         accessorFn: (record) => trainerAccessDetail(record),
-        size: 300,
+        minSize: 200,
         cell: ({ row }) => {
           const record = row.original;
 
           return (
-            <div>
-              <p className="text-[11px] font-medium text-text-secondary">
+            <div className="min-w-0">
+              <p className="text-xs font-medium text-text-secondary">
                 {trainerAccessDetail(record)}
               </p>
               {record.profileRole ? (
-                <p className="mt-0.5 text-[10px] text-text-muted">
+                <p className="mt-0.5 text-[11px] text-text-muted">
                   Profile: {record.profileRole}
                 </p>
               ) : null}
@@ -96,7 +96,7 @@ export function TrainerAccessTable({
           record.accessState === 'linked'
             ? 'Active'
             : trainerAccessLabel(record.accessState),
-        size: 150,
+        minSize: 130,
         cell: ({ row, getValue }) => {
           const state = row.original.accessState;
 
@@ -123,30 +123,38 @@ export function TrainerAccessTable({
         header: 'Actions',
         enableSorting: false,
         enableHiding: false,
-        size: 300,
+        minSize: 220,
         cell: ({ row }) => {
           const record = row.original;
+          const canGenerateExternalPin =
+            variant === 'pin' &&
+            record.trainerActive &&
+            Boolean(record.email) &&
+            ['linked', 'ready_to_link', 'account_required'].includes(
+              record.accessState,
+            ) &&
+            record.profileRole !== 'hod' &&
+            record.profileRole !== 'system_admin';
 
           return (
-            <div className="trainer-access-actions flex w-full flex-wrap items-center justify-start gap-2 xl:justify-end">
+            <div className="trainer-access-actions flex w-full flex-wrap items-center justify-start gap-2 lg:flex-nowrap lg:justify-end">
               {canProvisionTrainerAccess(record.accessState) ? (
                 <TrainerAccessAction trainerId={record.trainerId} />
               ) : record.accessState === 'email_required' ? (
                 <Link
                   href={`/timetable/trainers/${record.trainerId}/edit`}
-                  className="inline-flex min-h-11 sm:min-h-8 items-center justify-center rounded-md border border-border bg-surface px-3 py-1.5 text-[11px] font-semibold text-primary transition hover:bg-surface-subtle"
+                  className="inline-flex min-h-11 sm:min-h-8 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-primary transition hover:bg-surface-subtle"
                 >
                   Add email
                 </Link>
               ) : null}
 
-              {variant === 'pin' &&
-              record.trainerActive &&
-              record.email &&
-              ['linked', 'ready_to_link', 'account_required'].includes(
-                record.accessState,
-              ) ? (
-                <TrainerAccessPinAction trainerId={record.trainerId} />
+              {canGenerateExternalPin ? (
+                <TrainerAccessPinAction
+                  trainerId={record.trainerId}
+                  trainerName={record.fullName}
+                  trainerEmail={record.email}
+                />
               ) : null}
 
               {variant === 'password' && record.email ? (
@@ -162,7 +170,7 @@ export function TrainerAccessTable({
 
               <Link
                 href={`/trainers/${record.trainerId}`}
-                className="inline-flex min-h-11 sm:min-h-8 items-center justify-center rounded-md border border-border-strong bg-surface px-3 py-1.5 text-[11px] font-medium text-text-secondary transition hover:bg-surface-subtle"
+                className="inline-flex min-h-11 sm:min-h-8 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary transition hover:bg-surface-subtle hover:text-text-primary"
               >
                 Profile
               </Link>
@@ -188,7 +196,7 @@ export function TrainerAccessTable({
       enableColumnToggle
       enableDensityToggle
       exportFileName={exportFileName}
-      stickyHeader
+      layout="auto"
       // Sits inside the register card, which already draws the border.
       className="rounded-none border-0 shadow-none"
     />

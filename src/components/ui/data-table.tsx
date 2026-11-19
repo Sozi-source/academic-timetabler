@@ -69,6 +69,11 @@ interface DataTableProps<TData, TValue> {
   maxHeightClassName?: string;
   /** Column ids hidden on first render. */
   initialHiddenColumns?: string[];
+  /**
+   * "fixed" (default) preserves rigid pixel widths from `column.size`.
+   * "auto" lets columns expand fluidly across wide viewports using optional minSize/maxSize hints.
+   */
+  layout?: 'fixed' | 'auto';
 }
 
 const SELECT_COLUMN_ID = '__select';
@@ -264,6 +269,7 @@ export function DataTable<TData, TValue>({
   stickyHeader = false,
   maxHeightClassName = 'max-h-[70vh]',
   initialHiddenColumns,
+  layout = 'fixed',
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] =
     useState<SortingState>([]);
@@ -345,6 +351,7 @@ export function DataTable<TData, TValue>({
       },
     },
     getRowId,
+    autoResetPageIndex: false,
     enableRowSelection,
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
@@ -356,6 +363,15 @@ export function DataTable<TData, TValue>({
     getPaginationRowModel:
       getPaginationRowModel(),
   });
+
+  const pageCount = table.getPageCount();
+  const currentPageIndex = table.getState().pagination.pageIndex;
+
+  useEffect(() => {
+    if (pageCount > 0 && currentPageIndex >= pageCount) {
+      table.setPageIndex(pageCount - 1);
+    }
+  }, [pageCount, currentPageIndex, table]);
 
   const rows = table.getRowModel().rows;
 
@@ -460,7 +476,12 @@ export function DataTable<TData, TValue>({
                 cn('overflow-y-auto', maxHeightClassName),
             )}
           >
-            <table className="w-full table-fixed border-collapse text-left">
+            <table
+              className={cn(
+                'w-full border-collapse text-left',
+                layout === 'auto' ? 'table-auto' : 'table-fixed',
+              )}
+            >
               <thead className="bg-surface-subtle">
                 {table
                   .getHeaderGroups()
@@ -478,9 +499,23 @@ export function DataTable<TData, TValue>({
                             header.column.getIsSorted();
 
                           const colSize = header.column.columnDef.size;
-                          const widthStyle = colSize
-                            ? { width: `${colSize}px`, minWidth: `${colSize}px`, maxWidth: header.column.columnDef.maxSize ? `${header.column.columnDef.maxSize}px` : `${colSize}px` }
-                            : undefined;
+                          const colMinSize = header.column.columnDef.minSize;
+                          const colMaxSize = header.column.columnDef.maxSize;
+                          const widthStyle =
+                            layout === 'auto'
+                              ? colMinSize || colMaxSize
+                                ? {
+                                    ...(colMinSize ? { minWidth: `${colMinSize}px` } : {}),
+                                    ...(colMaxSize ? { maxWidth: `${colMaxSize}px` } : {}),
+                                  }
+                                : undefined
+                              : colSize
+                                ? {
+                                    width: `${colSize}px`,
+                                    minWidth: `${colSize}px`,
+                                    maxWidth: colMaxSize ? `${colMaxSize}px` : `${colSize}px`,
+                                  }
+                                : undefined;
 
                           return (
                             <th
@@ -566,9 +601,23 @@ export function DataTable<TData, TValue>({
                       .getVisibleCells()
                       .map((cell) => {
                         const colSize = cell.column.columnDef.size;
-                        const widthStyle = colSize
-                          ? { width: `${colSize}px`, minWidth: `${colSize}px`, maxWidth: cell.column.columnDef.maxSize ? `${cell.column.columnDef.maxSize}px` : `${colSize}px` }
-                          : undefined;
+                        const colMinSize = cell.column.columnDef.minSize;
+                        const colMaxSize = cell.column.columnDef.maxSize;
+                        const widthStyle =
+                          layout === 'auto'
+                            ? colMinSize || colMaxSize
+                              ? {
+                                  ...(colMinSize ? { minWidth: `${colMinSize}px` } : {}),
+                                  ...(colMaxSize ? { maxWidth: `${colMaxSize}px` } : {}),
+                                }
+                              : undefined
+                            : colSize
+                              ? {
+                                  width: `${colSize}px`,
+                                  minWidth: `${colSize}px`,
+                                  maxWidth: colMaxSize ? `${colMaxSize}px` : `${colSize}px`,
+                                }
+                              : undefined;
 
                         return (
                           <td

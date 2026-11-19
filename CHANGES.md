@@ -1,3 +1,26 @@
+### 2026-11-19: Fix External Trainer PIN Generation Bounce & Large-Screen Responsiveness
+
+**Summary:**
+- **Eliminated PIN generation bounce & lost one-time PINs:**
+  - Set `autoResetPageIndex: false` (with safe page-count clamping) in `DataTable` (`src/components/ui/data-table.tsx`) so data refreshes never bounce pagination back to Page 1.
+  - Updated `TrainerAccessPinAction` (`src/features/trainer-access/trainer-access-pin-action.tsx`) to display generated 8-digit PINs and errors in a Radix `Dialog` modal with copy-PIN and copy-portal-link actions instead of expanding inline inside table cells.
+  - Scoped `revalidatePath('/trainers/access')` in `src/features/trainer-access/actions.ts` to only run when a single PIN action newly links a profile, allowed cross-department PIN generation to match the access register and bulk flow, and excluded HOD/system-admin profiles from external PIN triggers.
+- **Fixed Trainer Access page & table responsiveness across laptop and large screens:**
+  - Added optional `layout="auto"` to `DataTable` (`src/components/ui/data-table.tsx`) so `TrainerAccessTable` (`src/features/trainer-access/trainer-access-table.tsx`) scales fluidly from `1200px` to `1920px+` without fixed pixel `maxWidth` ceilings or nested `max-h-[70vh]` scroll traps.
+  - Refactored `TrainerAccessBulkPinAction` (`src/features/trainer-access/trainer-access-bulk-pin-action.tsx`) and `src/app/(dashboard)/trainers/access/page.tsx` so bulk PIN results render in a full-width responsive 1/2/3-column grid beneath the action bar, removed duplicate `.admin-screen` nesting, and cleaned up desktop table borders/header alignment in `src/app/globals.css`.
+
+**Modified:**
+- `src/features/trainer-access/actions.ts`
+- `src/features/trainer-access/trainer-access-pin-action.tsx`
+- `src/features/trainer-access/trainer-access-bulk-pin-action.tsx`
+- `src/features/trainer-access/trainer-access-table.tsx`
+- `src/features/trainer-access/trainer-access-action.tsx`
+- `src/components/ui/data-table.tsx`
+- `src/app/(dashboard)/trainers/access/page.tsx`
+- `src/app/(dashboard)/trainers/[id]/page.tsx`
+- `src/app/globals.css`
+- `CHANGES.md`
+
 ### 2026-11-19: Fix PostgREST 1,000-Row Truncation, Archived Trainer Misattribution & Merged Analysis Tables
 
 **Summary:**

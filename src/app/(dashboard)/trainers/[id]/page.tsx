@@ -178,8 +178,14 @@ export default async function TrainerDetailsPage({
 
           {trainer.isActive &&
           trainer.email &&
-          ['linked', 'ready_to_link', 'account_required'].includes(accessState) ? (
-            <TrainerAccessPinAction trainerId={trainer.id} />
+          ['linked', 'ready_to_link', 'account_required'].includes(accessState) &&
+          accessRecord?.profileRole !== 'hod' &&
+          accessRecord?.profileRole !== 'system_admin' ? (
+            <TrainerAccessPinAction
+              trainerId={trainer.id}
+              trainerName={trainer.fullName}
+              trainerEmail={trainer.email}
+            />
           ) : null}
 
           <Button

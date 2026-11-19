@@ -432,6 +432,13 @@ code, kbd, samp, pre {
 }
 
 /* Trainer lists switch to cards whenever the desktop shell leaves limited row width. */
+@media(min-width:1200px){
+  .trainer-access-register .overflow-x-auto,
+  .trainer-approvals-register .overflow-x-auto{border:0;border-radius:0}
+  .trainer-access-register thead th:last-child,
+  .trainer-approvals-register thead th:last-child{text-align:right}
+}
+
 @media(max-width:1199px){
   .trainer-access-register .overflow-x-auto,
   .trainer-approvals-register .overflow-x-auto,

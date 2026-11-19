@@ -118,8 +118,11 @@ export async function generateTrainerAccessPinAction(
   formData: FormData,
 ): Promise<TrainerAccessActionState> {
   try {
-    return await generateTrainerAccessPin(formData);
-  } catch {
+    return await generateTrainerAccessPin(formData, {
+      allowCrossDepartment: true,
+    });
+  } catch (error: unknown) {
+    console.error('[generateTrainerAccessPinAction] failed:', error);
     return { status: 'error', message: 'PIN generation could not be completed. Please try again.' };
   }
 }
@@ -186,7 +189,6 @@ export async function generateTrainerAccessPinsBulkAction(
 
     const pins = results.flatMap((result) => result.pin ? [result.pin] : []);
     const pinErrors = results.flatMap((result) => result.error ? [result.error] : []);
-    if (pins.length > 0) revalidatePath('/trainers/access');
 
     return {
       status: pins.length > 0 ? 'success' : 'error',
@@ -196,7 +198,8 @@ export async function generateTrainerAccessPinsBulkAction(
       pins,
       pinErrors,
     };
-  } catch {
+  } catch (error: unknown) {
+    console.error('[generateTrainerAccessPinsBulkAction] failed:', error);
     return { status: 'error', message: 'Bulk PIN generation could not be completed. Please try again.' };
   }
 }
@@ -229,6 +232,7 @@ async function generateTrainerAccessPin(
   }
 
   let profileId = trainer.profile_id;
+  let didLinkProfile = false;
   if (!profileId) {
     const { data: matchingProfile, error: profileLookupError } = await admin
       .from('profiles')
@@ -240,7 +244,12 @@ async function generateTrainerAccessPin(
 
     if (matchingProfile) {
       if (!matchingProfile.is_active || !['pending', 'trainer'].includes(matchingProfile.role)) {
-        return { status: 'error', message: 'The matching account cannot be linked as a trainer.' };
+        return {
+          status: 'error',
+          message: ['hod', 'system_admin'].includes(matchingProfile.role)
+            ? 'External PINs are only available for trainer accounts, not HOD or admin accounts.'
+            : 'The matching account cannot be linked as a trainer.',
+        };
       }
 
       const supabase = await createClient();
@@ -252,6 +261,7 @@ async function generateTrainerAccessPin(
       );
       if (error) return { status: 'error', message: error.message };
       profileId = matchingProfile.id;
+      didLinkProfile = true;
     } else {
       const { data: created, error } = await admin.auth.admin.createUser({
         email: trainer.email.trim().toLowerCase(),
@@ -263,6 +273,7 @@ async function generateTrainerAccessPin(
         return { status: 'error', message: error?.message ?? 'Unable to prepare trainer access.' };
       }
       profileId = created.user.id;
+      didLinkProfile = true;
     }
   }
 
@@ -272,8 +283,15 @@ async function generateTrainerAccessPin(
     .eq('id', profileId)
     .maybeSingle();
 
-  if (linkedProfileError || !profile || !profile.is_active || profile.role !== 'trainer' || !profile.email) {
+  if (linkedProfileError || !profile || !profile.is_active || !profile.email) {
     return { status: 'error', message: 'Trainer account is not linked and active. Review the trainer access register.' };
+  }
+
+  if (profile.role !== 'trainer') {
+    return {
+      status: 'error',
+      message: 'External PINs are only available for trainer accounts, not HOD or admin accounts.',
+    };
   }
 
   const pin = randomInt(0, 100_000_000).toString().padStart(8, '0');
@@ -290,7 +308,12 @@ async function generateTrainerAccessPin(
 
   if (pinError) return { status: 'error', message: `Unable to save trainer PIN: ${pinError.message}` };
 
-  revalidatePath('/trainers/access');
+  // Only revalidate when profile linkage actually changed so regenerating a PIN
+  // for an already-linked trainer does not bounce the page or table state.
+  if (didLinkProfile && !options.hod) {
+    revalidatePath('/trainers/access');
+  }
+
   return { status: 'success', message: 'Share this PIN with the trainer. It will not be shown again.', pin };
 }
 

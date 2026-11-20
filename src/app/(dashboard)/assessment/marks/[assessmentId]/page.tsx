@@ -25,6 +25,7 @@ const ON_BEHALF_ERRORS: Record<string, string> = {
   'cat-already-submitted': 'CAT marks for this markbook were already submitted.',
   'no-saved-cat': 'There are no saved CAT marks to submit for this markbook.',
   'cat-submit-on-behalf': 'CAT marks could not be submitted on behalf of the trainer. Please try again.',
+  'component-unlock': 'Could not unlock the submitted component. Please try again.',
   'exclude-update-failed': 'Could not update analysis exclusion setting. Please ensure database migrations are up to date.',
   locked: 'This markbook is finalized and can no longer be changed.',
 };
@@ -48,6 +49,7 @@ export default async function AssessmentMarkWorkflowPage({
       : baseOnBehalfError
     : undefined;
   const submittedOnBehalf = query.cat_submitted_on_behalf === '1';
+  const unlockedComponent = typeof query.component_unlocked === 'string' ? query.component_unlocked.trim() : '';
   const initialCohort = typeof query.cohortId === 'string' ? query.cohortId : undefined;
   const [assessment, population, resultCount, componentSubmissionState, marksByStudent, catOnBehalf] = await Promise.all([
     getAssessmentById(assessmentId),
@@ -203,6 +205,11 @@ export default async function AssessmentMarkWorkflowPage({
       {submittedOnBehalf ? (
         <section className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-800">
           CAT marks were submitted on behalf of the trainer. Unentered students were recorded as AB.
+        </section>
+      ) : null}
+      {unlockedComponent ? (
+        <section className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-800">
+          {unlockedComponent.toUpperCase()} marks were unlocked for editing.
         </section>
       ) : null}
       {onBehalfError ? (

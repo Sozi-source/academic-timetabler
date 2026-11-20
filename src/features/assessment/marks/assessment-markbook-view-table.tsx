@@ -1,13 +1,47 @@
 'use client';
 
-import { useId, useMemo, useState, useTransition } from 'react';
+import { useEffect, useId, useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { AlertCircle, CheckCircle2, ChevronDown, Filter, Pencil, Printer, Save, Search, Users, X } from 'lucide-react';
+import {
+  AlertCircle,
+  CheckCircle2,
+  ChevronDown,
+  Filter,
+  Pencil,
+  Printer,
+  RotateCcw,
+  Save,
+  Search,
+  TableProperties,
+  Users,
+  X,
+} from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import type { AssessmentCandidateRow } from '@/features/assessment/types';
-import { updateHodCandidateMarksAction } from './actions';
+import { bulkUpdateHodCandidateMarksAction, updateHodCandidateMarksAction } from './actions';
 import type { CandidateMarkRecord } from './types';
+
+type BulkMarkField = 'assignment' | 'presentation' | 'rat' | 'cat' | 'exam';
+
+interface RowDraftState {
+  assignment: string;
+  presentation: string;
+  rat: string;
+  cat: string;
+  catAbsent: boolean;
+  exam: string;
+}
+
+const FIELD_LIMITS: Record<BulkMarkField, { label: string; max: number }> = {
+  assignment: { label: 'Assignment', max: 5 },
+  presentation: { label: 'Presentation', max: 10 },
+  rat: { label: 'RAT', max: 15 },
+  cat: { label: 'CAT', max: 15 },
+  exam: { label: 'Exam', max: 70 },
+};
+
+const FULL_COLUMN_ORDER: readonly BulkMarkField[] = ['assignment', 'presentation', 'rat', 'cat', 'exam'];
 
 interface AssessmentMarkbookViewTableProps {
   assessmentId?: string;
@@ -75,7 +109,12 @@ export function AssessmentMarkbookViewTable({
   const [isSaving, startSaving] = useTransition();
   const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
   const [editError, setEditError] = useState<string | null>(null);
-  const [draftValues, setDraftValues] = useState({
+  const [bulkEditMode, setBulkEditMode] = useState(false);
+  const [bulkDrafts, setBulkDrafts] = useState<Record<string, RowDraftState>>({});
+  const [dirtyStudentIds, setDirtyStudentIds] = useState<Set<string>>(() => new Set());
+  const [bulkNotice, setBulkNotice] = useState<string | null>(null);
+  const tableContainerRef = useRef<HTMLDivElement | null>(null);
+  const [draftValues, setDraftValues] = useState<RowDraftState>({
     assignment: '',
     presentation: '',
     rat: '',
@@ -347,6 +386,269 @@ export function AssessmentMarkbookViewTable({
     });
   }, [rows, searchQuery, selectedCohort, selectedStatus]);
 
+  const effectiveBulkMode: 'cat' | 'all' = viewMode === 'cat' || assessmentType !== 'exam' ? 'cat' : 'all';
+  const dirtyCount = dirtyStudentIds.size;
+
+  useEffect(() => {
+    if (!bulkEditMode || dirtyCount === 0) return;
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [bulkEditMode, dirtyCount]);
+
+  function buildRowDraft(marks: CandidateMarkRecord | null, catAbsent: boolean): RowDraftState {
+    return {
+      assignment: toInputStr(marks?.assignment),
+      presentation: toInputStr(marks?.presentation),
+      rat: toInputStr(marks?.rat),
+      cat: catAbsent ? '' : toInputStr(marks?.cat),
+      catAbsent,
+      exam: toInputStr(marks?.exam),
+    };
+  }
+
+  function getBulkDraft(studentId: string, marks: CandidateMarkRecord | null, catAbsent: boolean): RowDraftState {
+    return bulkDrafts[studentId] ?? buildRowDraft(marks, catAbsent);
+  }
+
+  function isFieldInvalid(raw: string, field: BulkMarkField): boolean {
+    const trimmed = raw.trim();
+    if (!trimmed) return false;
+    const parsed = Number(trimmed);
+    return !Number.isFinite(parsed) || parsed < 0 || parsed > FIELD_LIMITS[field].max;
+  }
+
+  function updateBulkDraft(
+    studentId: string,
+    marks: CandidateMarkRecord | null,
+    catAbsent: boolean,
+    patch: Partial<RowDraftState>,
+  ) {
+    setEditError(null);
+    setBulkNotice(null);
+    setBulkDrafts((prev) => {
+      const base = prev[studentId] ?? buildRowDraft(marks, catAbsent);
+      return {
+        ...prev,
+        [studentId]: { ...base, ...patch },
+      };
+    });
+    setDirtyStudentIds((prev) => {
+      if (prev.has(studentId)) return prev;
+      const next = new Set(prev);
+      next.add(studentId);
+      return next;
+    });
+  }
+
+  function enterBulkEditMode() {
+    setEditingStudentId(null);
+    setEditError(null);
+    setBulkNotice(null);
+    setBulkDrafts({});
+    setDirtyStudentIds(new Set());
+    setBulkEditMode(true);
+  }
+
+  function exitBulkEditMode() {
+    if (dirtyStudentIds.size > 0) {
+      const confirmed = window.confirm(
+        `You have ${dirtyStudentIds.size} unsaved candidate mark change(s). Discard them and exit bulk edit mode?`,
+      );
+      if (!confirmed) return;
+    }
+    setBulkDrafts({});
+    setDirtyStudentIds(new Set());
+    setEditError(null);
+    setBulkEditMode(false);
+  }
+
+  function discardBulkChanges() {
+    setBulkDrafts({});
+    setDirtyStudentIds(new Set());
+    setEditError(null);
+    setBulkNotice(null);
+  }
+
+  function handleBulkKeyDown(
+    e: React.KeyboardEvent<HTMLInputElement>,
+    rowIdx: number,
+    col: BulkMarkField,
+  ) {
+    if (e.key !== 'Enter' && e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    e.preventDefault();
+    const container = tableContainerRef.current;
+    if (!container) return;
+    const step = e.key === 'ArrowUp' ? -1 : 1;
+    let targetIdx = rowIdx + step;
+    while (targetIdx >= 0 && targetIdx < filteredRows.length) {
+      const target = container.querySelector<HTMLInputElement>(
+        `input[data-bulk-row="${targetIdx}"][data-bulk-col="${col}"]`,
+      );
+      if (target && !target.disabled) {
+        target.focus();
+        target.select();
+        return;
+      }
+      targetIdx += step;
+    }
+  }
+
+  function handleBulkPaste(
+    e: React.ClipboardEvent<HTMLInputElement>,
+    startRowIdx: number,
+    startCol: BulkMarkField,
+    mode: 'cat' | 'all',
+  ) {
+    const text = e.clipboardData.getData('text');
+    if (!text || (!text.includes('\n') && !text.includes('\r') && !text.includes('\t'))) {
+      return;
+    }
+    e.preventDefault();
+    const rawLines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+    if (rawLines.length > 0 && rawLines[rawLines.length - 1] === '') {
+      rawLines.pop();
+    }
+    if (rawLines.length === 0) return;
+
+    const startColIndex = FULL_COLUMN_ORDER.indexOf(startCol);
+    const touchedIds: string[] = [];
+
+    setEditError(null);
+    setBulkNotice(null);
+    setBulkDrafts((prev) => {
+      const next = { ...prev };
+      for (let offset = 0; offset < rawLines.length; offset++) {
+        const targetRow = filteredRows[startRowIdx + offset];
+        if (!targetRow || !targetRow.studentId) break;
+        const cells = rawLines[offset].split('\t');
+        const current = next[targetRow.studentId] ?? buildRowDraft(targetRow.marks, targetRow.isCatAbsent);
+        const updated: RowDraftState = { ...current };
+
+        if (mode === 'cat' || cells.length === 1) {
+          const val = (cells[0] ?? '').trim();
+          if (startCol === 'cat') {
+            if (/^(ab|absent)$/i.test(val)) {
+              updated.catAbsent = true;
+              updated.cat = '';
+            } else {
+              updated.catAbsent = false;
+              updated.cat = val;
+            }
+          } else {
+            updated[startCol] = val;
+          }
+        } else {
+          for (let colOffset = 0; colOffset < cells.length; colOffset++) {
+            const colField = FULL_COLUMN_ORDER[startColIndex + colOffset];
+            if (!colField) break;
+            const val = (cells[colOffset] ?? '').trim();
+            if (colField === 'cat') {
+              if (/^(ab|absent)$/i.test(val)) {
+                updated.catAbsent = true;
+                updated.cat = '';
+              } else {
+                updated.catAbsent = false;
+                updated.cat = val;
+              }
+            } else {
+              updated[colField] = val;
+            }
+          }
+        }
+
+        next[targetRow.studentId] = updated;
+        touchedIds.push(targetRow.studentId);
+      }
+      return next;
+    });
+
+    if (touchedIds.length > 0) {
+      setDirtyStudentIds((prev) => {
+        const next = new Set(prev);
+        for (const id of touchedIds) next.add(id);
+        return next;
+      });
+    }
+  }
+
+  function saveAllBulkChanges(mode: 'cat' | 'all') {
+    if (!assessmentId || dirtyStudentIds.size === 0) return;
+    setEditError(null);
+    setBulkNotice(null);
+
+    const rowByStudent = new Map(rows.map((r) => [r.studentId, r]));
+    const entries: Array<{
+      studentId: string;
+      assignment?: number | null;
+      presentation?: number | null;
+      rat?: number | null;
+      cat?: number | null;
+      catAbsent?: boolean;
+      exam?: number | null;
+    }> = [];
+
+    const fieldsToValidate: readonly BulkMarkField[] = mode === 'cat' ? ['cat'] : FULL_COLUMN_ORDER;
+
+    for (const studentId of dirtyStudentIds) {
+      const row = rowByStudent.get(studentId);
+      const draft = bulkDrafts[studentId];
+      if (!row || !draft) continue;
+
+      for (const field of fieldsToValidate) {
+        if (field === 'cat' && draft.catAbsent) continue;
+        if (isFieldInvalid(draft[field], field)) {
+          setEditError(
+            `Invalid ${FIELD_LIMITS[field].label} mark for ${row.fullName} (${row.admissionNumber}). Enter a number between 0 and ${FIELD_LIMITS[field].max}.`,
+          );
+          return;
+        }
+      }
+
+      const cat = draft.catAbsent ? null : parseOptionalMark(draft.cat);
+      if (mode === 'cat') {
+        entries.push({
+          studentId,
+          cat,
+          catAbsent: draft.catAbsent,
+        });
+      } else {
+        entries.push({
+          studentId,
+          assignment: parseOptionalMark(draft.assignment),
+          presentation: parseOptionalMark(draft.presentation),
+          rat: parseOptionalMark(draft.rat),
+          cat,
+          catAbsent: draft.catAbsent,
+          exam: parseOptionalMark(draft.exam),
+        });
+      }
+    }
+
+    if (entries.length === 0) return;
+
+    startSaving(async () => {
+      const result = await bulkUpdateHodCandidateMarksAction({
+        assessmentId,
+        component: mode,
+        entries,
+      });
+      if ('message' in result) {
+        setEditError(result.message);
+        return;
+      }
+      setBulkDrafts({});
+      setDirtyStudentIds(new Set());
+      setBulkNotice(
+        `Saved marks for ${result.savedCount} candidate${result.savedCount === 1 ? '' : 's'}.`,
+      );
+      router.refresh();
+    });
+  }
+
   return (
     <section className="space-y-4">
       {/* Performance Summary & Quick Filters */}
@@ -562,12 +864,35 @@ export function AssessmentMarkbookViewTable({
           </div>
         </div>
 
-        {/* Right side: Count & Print */}
-        <div className="flex items-center gap-2 self-end sm:self-auto">
+        {/* Right side: Count, Bulk Edit & Print */}
+        <div className="flex flex-wrap items-center gap-2 self-end sm:self-auto">
           <span className="text-xs text-slate-500 whitespace-nowrap">
             Showing <strong className="text-slate-900">{filteredRows.length}</strong> of{' '}
             <strong className="text-slate-900">{population.length}</strong> candidates
           </span>
+          {editable ? (
+            bulkEditMode ? (
+              <button
+                type="button"
+                disabled={isSaving}
+                onClick={exitBulkEditMode}
+                className="inline-flex h-8.5 items-center gap-1.5 rounded-lg border border-slate-300 bg-slate-900 px-3 text-xs font-semibold text-white shadow-2xs hover:bg-slate-800 disabled:opacity-50 transition cursor-pointer"
+              >
+                <X className="size-3.5" />
+                <span>Exit Bulk Edit</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={enterBulkEditMode}
+                className="inline-flex h-8.5 items-center gap-1.5 rounded-lg border border-emerald-600 bg-emerald-600 px-3 text-xs font-semibold text-white shadow-2xs hover:bg-emerald-700 transition cursor-pointer"
+                title="Open direct mark entry fields for all visible students"
+              >
+                <TableProperties className="size-3.5" />
+                <span>Bulk Edit Marks</span>
+              </button>
+            )
+          ) : null}
           <button
             type="button"
             onClick={() => window.print()}
@@ -593,17 +918,83 @@ export function AssessmentMarkbookViewTable({
         </p>
       </div>
 
+      {bulkEditMode ? (
+        <div className="sticky top-2 z-20 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-emerald-300 bg-emerald-50/95 px-4 py-2.5 shadow-sm backdrop-blur print:hidden">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-950">
+                <TableProperties className="size-3.5 text-emerald-700" />
+                <span>
+                  Bulk Edit Mode — {effectiveBulkMode === 'cat' ? 'CAT Marks' : 'All Mark Components'}
+                </span>
+              </span>
+              {dirtyCount > 0 ? (
+                <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-900 border border-amber-300">
+                  {dirtyCount} unsaved {dirtyCount === 1 ? 'change' : 'changes'}
+                </span>
+              ) : (
+                <span className="inline-flex items-center rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-semibold text-emerald-800 border border-emerald-200">
+                  All changes saved
+                </span>
+              )}
+            </div>
+            <p className="mt-0.5 text-[11px] text-emerald-900/80">
+              Press <kbd className="rounded border border-emerald-300 bg-white px-1 font-mono text-[10px]">Enter</kbd> or{' '}
+              <kbd className="rounded border border-emerald-300 bg-white px-1 font-mono text-[10px]">↓</kbd> to jump to the next student · Paste a column from Excel to fill down
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={dirtyCount === 0 || isSaving}
+              onClick={discardBulkChanges}
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+            >
+              <RotateCcw className="size-3.5" />
+              <span>Discard</span>
+            </button>
+            <button
+              type="button"
+              disabled={dirtyCount === 0 || isSaving}
+              onClick={() => saveAllBulkChanges(effectiveBulkMode)}
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-emerald-700 px-3.5 text-xs font-semibold text-white shadow-2xs hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+            >
+              <Save className="size-3.5" />
+              <span>
+                {isSaving
+                  ? 'Saving...'
+                  : dirtyCount > 0
+                  ? `Save All Changes (${dirtyCount})`
+                  : 'Save All Changes'}
+              </span>
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {bulkNotice ? (
+        <div className="flex items-center justify-between gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-xs font-semibold text-emerald-800 print:hidden">
+          <span className="inline-flex items-center gap-1.5">
+            <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
+            <span>{bulkNotice}</span>
+          </span>
+          <button type="button" onClick={() => setBulkNotice(null)} className="rounded p-0.5 hover:bg-emerald-100 cursor-pointer" aria-label="Dismiss notice">
+            <X className="size-3.5" />
+          </button>
+        </div>
+      ) : null}
+
       {editError ? (
         <div className="flex items-center justify-between gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs font-semibold text-rose-800 print:hidden">
           <span>{editError}</span>
-          <button type="button" onClick={() => setEditError(null)} className="rounded p-0.5 hover:bg-rose-100" aria-label="Dismiss error">
+          <button type="button" onClick={() => setEditError(null)} className="rounded p-0.5 hover:bg-rose-100 cursor-pointer" aria-label="Dismiss error">
             <X className="size-3.5" />
           </button>
         </div>
       ) : null}
 
       {/* Candidate Marks Table */}
-      <div className="overflow-x-auto rounded-xl border border-slate-300 bg-white shadow-2xs">
+      <div ref={tableContainerRef} className="overflow-x-auto rounded-xl border border-slate-300 bg-white shadow-2xs">
         {viewMode === 'cat' ? (
           <table className="w-full min-w-[600px] text-left text-xs">
             <thead className="border-b border-slate-300 bg-slate-50 text-[11px] font-bold text-slate-700">
@@ -634,11 +1025,20 @@ export function AssessmentMarkbookViewTable({
               ) : (
                 filteredRows.map((row, idx) => {
                   const m = row.marks;
+                  const isDirty = bulkEditMode && dirtyStudentIds.has(row.studentId);
+                  const bulkRow = bulkEditMode ? getBulkDraft(row.studentId, m, row.isCatAbsent) : null;
+                  const catInvalid = bulkRow ? !bulkRow.catAbsent && isFieldInvalid(bulkRow.cat, 'cat') : false;
                   return (
                     <tr
                       key={row.rowId}
                       className={`transition-colors odd:bg-white even:bg-slate-50/60 hover:bg-amber-50/35 ${
-                        row.isCatMissing ? 'bg-amber-50/30' : row.isCatAbsent ? 'bg-rose-50/30' : ''
+                        isDirty
+                          ? 'bg-emerald-50/60!'
+                          : row.isCatMissing
+                          ? 'bg-amber-50/30'
+                          : row.isCatAbsent
+                          ? 'bg-rose-50/30'
+                          : ''
                       }`}
                     >
                       <td className="px-2.5 py-2.5 text-center font-medium text-slate-400 whitespace-nowrap">
@@ -656,7 +1056,49 @@ export function AssessmentMarkbookViewTable({
                         </span>
                       </td>
                       <td className="px-3 py-2.5 text-center bg-amber-50/70 border-x border-amber-200/90 font-mono font-bold tabular-nums">
-                        {editingStudentId === row.studentId ? (
+                        {bulkEditMode && bulkRow ? (
+                          <div className="inline-flex items-center gap-1.5">
+                            <input
+                              type="number"
+                              min={0}
+                              max={15}
+                              step="0.5"
+                              data-bulk-row={idx}
+                              data-bulk-col="cat"
+                              disabled={bulkRow.catAbsent || isSaving}
+                              value={bulkRow.cat}
+                              onChange={(e) =>
+                                updateBulkDraft(row.studentId, m, row.isCatAbsent, { cat: e.target.value })
+                              }
+                              onKeyDown={(e) => handleBulkKeyDown(e, idx, 'cat')}
+                              onPaste={(e) => handleBulkPaste(e, idx, 'cat', 'cat')}
+                              placeholder="0–15"
+                              aria-label={`CAT mark for ${row.fullName}`}
+                              className={`h-7 w-16 rounded border bg-white px-1.5 text-center font-mono text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 disabled:bg-slate-100 disabled:text-slate-400 ${
+                                catInvalid
+                                  ? 'border-rose-500 ring-1 ring-rose-400 focus:ring-rose-500'
+                                  : isDirty
+                                  ? 'border-emerald-500 focus:ring-emerald-500'
+                                  : 'border-amber-400 focus:ring-amber-500'
+                              }`}
+                            />
+                            <label className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-700 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={bulkRow.catAbsent}
+                                disabled={isSaving}
+                                onChange={(e) =>
+                                  updateBulkDraft(row.studentId, m, row.isCatAbsent, {
+                                    catAbsent: e.target.checked,
+                                    cat: e.target.checked ? '' : bulkRow.cat,
+                                  })
+                                }
+                                className="rounded border-slate-300"
+                              />
+                              AB
+                            </label>
+                          </div>
+                        ) : editingStudentId === row.studentId ? (
                           <div className="inline-flex items-center gap-1.5">
                             <input
                               type="number"
@@ -710,7 +1152,15 @@ export function AssessmentMarkbookViewTable({
                       </td>
                       {editable ? (
                         <td className="px-2.5 py-2.5 text-center whitespace-nowrap print:hidden">
-                          {editingStudentId === row.studentId ? (
+                          {bulkEditMode ? (
+                            isDirty ? (
+                              <span className="inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-900 border border-amber-300">
+                                Edited
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-medium text-slate-400">—</span>
+                            )
+                          ) : editingStudentId === row.studentId ? (
                             <div className="inline-flex items-center gap-1 whitespace-nowrap">
                               <button
                                 type="button"
@@ -875,12 +1325,36 @@ export function AssessmentMarkbookViewTable({
                     (assessmentType === 'exam' && isFinalized && (m?.exam === null || m?.exam === undefined));
                   const isCatAbsent =
                     row.isCatAbsent || (isFinalized && (m?.cat === null || m?.cat === undefined));
+                  const isDirty = bulkEditMode && dirtyStudentIds.has(row.studentId);
+                  const bulkRow = bulkEditMode ? getBulkDraft(row.studentId, m, isCatAbsent) : null;
+
+                  const bulkInputClass = (field: BulkMarkField, isCat = false) => {
+                    const invalid =
+                      bulkRow && !(field === 'cat' && bulkRow.catAbsent)
+                        ? isFieldInvalid(bulkRow[field], field)
+                        : false;
+                    return `h-7 w-14 rounded border bg-white px-1 text-center font-mono text-xs text-slate-900 focus:outline-none focus:ring-2 disabled:bg-slate-100 disabled:text-slate-400 ${
+                      invalid
+                        ? 'border-rose-500 ring-1 ring-rose-400 focus:ring-rose-500'
+                        : isDirty
+                        ? 'border-emerald-500 focus:ring-emerald-500'
+                        : isCat
+                        ? 'border-amber-400 focus:ring-amber-500'
+                        : 'border-slate-300 focus:ring-emerald-500'
+                    }`;
+                  };
 
                   return (
                     <tr
                       key={row.rowId}
                       className={`transition-colors odd:bg-white even:bg-slate-50/60 hover:bg-amber-50/35 ${
-                        isAbsent ? 'bg-rose-50/30' : row.isCatMissing ? 'bg-amber-50/20' : ''
+                        isDirty
+                          ? 'bg-emerald-50/60!'
+                          : isAbsent
+                          ? 'bg-rose-50/30'
+                          : row.isCatMissing
+                          ? 'bg-amber-50/20'
+                          : ''
                       }`}
                     >
                       {/* Index */}
@@ -902,7 +1376,25 @@ export function AssessmentMarkbookViewTable({
                         <>
                           {/* Assignment /5 */}
                           <td className="px-2.5 py-2.5 text-center font-mono font-medium text-slate-800 tabular-nums">
-                            {editingStudentId === row.studentId ? (
+                            {bulkEditMode && bulkRow ? (
+                              <input
+                                type="number"
+                                min={0}
+                                max={5}
+                                step="0.5"
+                                data-bulk-row={idx}
+                                data-bulk-col="assignment"
+                                disabled={isSaving}
+                                value={bulkRow.assignment}
+                                onChange={(e) =>
+                                  updateBulkDraft(row.studentId, m, isCatAbsent, { assignment: e.target.value })
+                                }
+                                onKeyDown={(e) => handleBulkKeyDown(e, idx, 'assignment')}
+                                onPaste={(e) => handleBulkPaste(e, idx, 'assignment', 'all')}
+                                aria-label={`Assignment mark for ${row.fullName}`}
+                                className={bulkInputClass('assignment')}
+                              />
+                            ) : editingStudentId === row.studentId ? (
                               <input
                                 type="number"
                                 min={0}
@@ -921,7 +1413,25 @@ export function AssessmentMarkbookViewTable({
 
                           {/* Presentation /10 */}
                           <td className="px-2.5 py-2.5 text-center font-mono font-medium text-slate-800 tabular-nums">
-                            {editingStudentId === row.studentId ? (
+                            {bulkEditMode && bulkRow ? (
+                              <input
+                                type="number"
+                                min={0}
+                                max={10}
+                                step="0.5"
+                                data-bulk-row={idx}
+                                data-bulk-col="presentation"
+                                disabled={isSaving}
+                                value={bulkRow.presentation}
+                                onChange={(e) =>
+                                  updateBulkDraft(row.studentId, m, isCatAbsent, { presentation: e.target.value })
+                                }
+                                onKeyDown={(e) => handleBulkKeyDown(e, idx, 'presentation')}
+                                onPaste={(e) => handleBulkPaste(e, idx, 'presentation', 'all')}
+                                aria-label={`Presentation mark for ${row.fullName}`}
+                                className={bulkInputClass('presentation')}
+                              />
+                            ) : editingStudentId === row.studentId ? (
                               <input
                                 type="number"
                                 min={0}
@@ -940,7 +1450,25 @@ export function AssessmentMarkbookViewTable({
 
                           {/* RAT /15 */}
                           <td className="px-2.5 py-2.5 text-center font-mono font-medium text-slate-800 tabular-nums">
-                            {editingStudentId === row.studentId ? (
+                            {bulkEditMode && bulkRow ? (
+                              <input
+                                type="number"
+                                min={0}
+                                max={15}
+                                step="0.5"
+                                data-bulk-row={idx}
+                                data-bulk-col="rat"
+                                disabled={isSaving}
+                                value={bulkRow.rat}
+                                onChange={(e) =>
+                                  updateBulkDraft(row.studentId, m, isCatAbsent, { rat: e.target.value })
+                                }
+                                onKeyDown={(e) => handleBulkKeyDown(e, idx, 'rat')}
+                                onPaste={(e) => handleBulkPaste(e, idx, 'rat', 'all')}
+                                aria-label={`RAT mark for ${row.fullName}`}
+                                className={bulkInputClass('rat')}
+                              />
+                            ) : editingStudentId === row.studentId ? (
                               <input
                                 type="number"
                                 min={0}
@@ -959,7 +1487,41 @@ export function AssessmentMarkbookViewTable({
 
                           {/* CAT /15 */}
                           <td className="px-2.5 py-2.5 text-center font-mono font-medium tabular-nums border-r border-slate-200">
-                            {editingStudentId === row.studentId ? (
+                            {bulkEditMode && bulkRow ? (
+                              <div className="inline-flex items-center gap-1">
+                                <input
+                                  type="number"
+                                  min={0}
+                                  max={15}
+                                  step="0.5"
+                                  data-bulk-row={idx}
+                                  data-bulk-col="cat"
+                                  disabled={bulkRow.catAbsent || isSaving}
+                                  value={bulkRow.cat}
+                                  onChange={(e) =>
+                                    updateBulkDraft(row.studentId, m, isCatAbsent, { cat: e.target.value })
+                                  }
+                                  onKeyDown={(e) => handleBulkKeyDown(e, idx, 'cat')}
+                                  onPaste={(e) => handleBulkPaste(e, idx, 'cat', 'all')}
+                                  aria-label={`CAT mark for ${row.fullName}`}
+                                  className={bulkInputClass('cat', true)}
+                                />
+                                <label className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-slate-700 cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={bulkRow.catAbsent}
+                                    disabled={isSaving}
+                                    onChange={(e) =>
+                                      updateBulkDraft(row.studentId, m, isCatAbsent, {
+                                        catAbsent: e.target.checked,
+                                        cat: e.target.checked ? '' : bulkRow.cat,
+                                      })
+                                    }
+                                  />
+                                  AB
+                                </label>
+                              </div>
+                            ) : editingStudentId === row.studentId ? (
                               <div className="inline-flex items-center gap-1">
                                 <input
                                   type="number"
@@ -997,7 +1559,25 @@ export function AssessmentMarkbookViewTable({
 
                           {/* Exam /70 */}
                           <td className="px-2.5 py-2.5 text-center font-mono font-medium tabular-nums border-r border-slate-200">
-                            {editingStudentId === row.studentId ? (
+                            {bulkEditMode && bulkRow ? (
+                              <input
+                                type="number"
+                                min={0}
+                                max={70}
+                                step="0.5"
+                                data-bulk-row={idx}
+                                data-bulk-col="exam"
+                                disabled={isSaving}
+                                value={bulkRow.exam}
+                                onChange={(e) =>
+                                  updateBulkDraft(row.studentId, m, isCatAbsent, { exam: e.target.value })
+                                }
+                                onKeyDown={(e) => handleBulkKeyDown(e, idx, 'exam')}
+                                onPaste={(e) => handleBulkPaste(e, idx, 'exam', 'all')}
+                                aria-label={`Exam mark for ${row.fullName}`}
+                                className={bulkInputClass('exam')}
+                              />
+                            ) : editingStudentId === row.studentId ? (
                               <input
                                 type="number"
                                 min={0}
@@ -1054,7 +1634,68 @@ export function AssessmentMarkbookViewTable({
                         <>
                           {/* CAT Mark — GOLDEN YELLOW SHADE */}
                           <td className="px-3 py-2.5 text-center bg-amber-50/70 border-x border-amber-200/90">
-                            {isAbsent || isCatAbsent ? (
+                            {bulkEditMode && bulkRow ? (
+                              <div className="inline-flex items-center gap-1.5">
+                                <input
+                                  type="number"
+                                  min={0}
+                                  max={15}
+                                  step="0.5"
+                                  data-bulk-row={idx}
+                                  data-bulk-col="cat"
+                                  disabled={bulkRow.catAbsent || isSaving}
+                                  value={bulkRow.cat}
+                                  onChange={(e) =>
+                                    updateBulkDraft(row.studentId, m, isCatAbsent, { cat: e.target.value })
+                                  }
+                                  onKeyDown={(e) => handleBulkKeyDown(e, idx, 'cat')}
+                                  onPaste={(e) => handleBulkPaste(e, idx, 'cat', 'cat')}
+                                  placeholder="0–15"
+                                  aria-label={`CAT mark for ${row.fullName}`}
+                                  className={bulkInputClass('cat', true)}
+                                />
+                                <label className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-700 cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={bulkRow.catAbsent}
+                                    disabled={isSaving}
+                                    onChange={(e) =>
+                                      updateBulkDraft(row.studentId, m, isCatAbsent, {
+                                        catAbsent: e.target.checked,
+                                        cat: e.target.checked ? '' : bulkRow.cat,
+                                      })
+                                    }
+                                    className="rounded border-slate-300"
+                                  />
+                                  AB
+                                </label>
+                              </div>
+                            ) : editingStudentId === row.studentId ? (
+                              <div className="inline-flex items-center gap-1.5">
+                                <input
+                                  type="number"
+                                  min={0}
+                                  max={15}
+                                  step="0.5"
+                                  disabled={draftValues.catAbsent || isSaving}
+                                  value={draftValues.cat}
+                                  onChange={(e) => setDraftValues((v) => ({ ...v, cat: e.target.value }))}
+                                  placeholder="0–15"
+                                  aria-label={`CAT mark for ${row.fullName}`}
+                                  className="h-7 w-16 rounded border border-amber-400 bg-white px-1.5 text-center font-mono text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:bg-slate-100 disabled:text-slate-400"
+                                />
+                                <label className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-700 cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={draftValues.catAbsent}
+                                    disabled={isSaving}
+                                    onChange={(e) => setDraftValues((v) => ({ ...v, catAbsent: e.target.checked }))}
+                                    className="rounded border-slate-300"
+                                  />
+                                  AB
+                                </label>
+                              </div>
+                            ) : isAbsent || isCatAbsent ? (
                               <span className="text-[11px] font-bold text-rose-700">AB</span>
                             ) : m?.cat !== null && m?.cat !== undefined ? (
                               <span className="text-xs font-black text-amber-950 font-mono tabular-nums">
@@ -1098,7 +1739,15 @@ export function AssessmentMarkbookViewTable({
                       )}
                       {editable ? (
                         <td className="px-2.5 py-2.5 text-center whitespace-nowrap border-l border-slate-200 print:hidden">
-                          {editingStudentId === row.studentId ? (
+                          {bulkEditMode ? (
+                            isDirty ? (
+                              <span className="inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-900 border border-amber-300">
+                                Edited
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-medium text-slate-400">—</span>
+                            )
+                          ) : editingStudentId === row.studentId ? (
                             <div className="inline-flex items-center gap-1 whitespace-nowrap">
                               <button
                                 type="button"

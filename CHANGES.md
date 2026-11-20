@@ -1,3 +1,42 @@
+### 2026-11-20: Add HOD/Admin Bulk Edit Marks Mode for On-Behalf Mark Entry
+
+**Summary:**
+- **Added `bulkUpdateHodCandidateMarksAction` (`src/features/assessment/marks/actions.ts`):**
+  - Batch-validates and saves up to 1,000 candidate mark updates in a single server action (with chunked `.in()` queries/upserts), enforcing `requireHodAccess()`, active-department tenant isolation, and finalized-markbook guards.
+  - Registers missing students on `assessment_roster`, syncs `cat_absent` across target and sibling/shared assessments, upserts `assessment_online_mark_drafts` (recording `updated_by` as the HOD/Admin), syncs sibling draft rows, and updates any pre-finalization `assessment_results.component_marks`.
+- **Added Bulk Edit Mode to `AssessmentMarkbookViewTable` (`src/features/assessment/marks/assessment-markbook-view-table.tsx`):**
+  - Added a **Bulk Edit Marks** toggle button (read-only by default, one click to open inputs for all visible candidates in both **CAT Focus** and **Full Markbook** modes without clicking Edit per student).
+  - Added spreadsheet-style keyboard navigation (`Enter` / `ArrowDown` / `ArrowUp` jumps down/up the same column, skipping disabled AB rows), multi-row/multi-column Excel paste (including `AB` recognition for CAT), live out-of-range validation, dirty-row tracking, `beforeunload` unsaved-changes guard, and a sticky **Save All Changes / Discard** bar.
+
+**Modified:**
+- `src/features/assessment/marks/actions.ts`
+- `src/features/assessment/marks/assessment-markbook-view-table.tsx`
+- `CHANGES.md`
+
+### 2026-11-20: Fix HOD/Admin Inline CAT Mark Saving & Unlock CAT Action
+
+**Summary:**
+- **Fixed HOD/Admin inline CAT mark edits silently failing to save (`src/features/assessment/marks/actions.ts`):**
+  - Updated `updateHodCandidateMarksAction` to persist HOD/Admin inline edits directly (after `requireHodAccess()`, active-department tenant isolation, and finalized-markbook checks) instead of routing through `save_assessment_online_component_marks`, whose `build_assessment_mark_component_entries` helper silently discarded new CAT marks whenever the `cat` component was already submitted for the student's cohort.
+  - Synchronized `assessment_roster.cat_absent`, `assessment_online_mark_drafts`, and any pre-finalization `assessment_results.component_marks` across sibling/shared assessments so saved marks immediately display instead of reverting to Pending.
+  - Added inline CAT input + AB checkbox support to the `assessmentType !== 'exam'` Full Markbook branch in `AssessmentMarkbookViewTable` (`src/features/assessment/marks/assessment-markbook-view-table.tsx`).
+- **Fixed "Unlock CAT" (and component unlock) not unlocking per-cohort submissions (`src/features/assessment/marks/actions.ts`, `supabase/migrations/20261120061500_fix_hod_cat_unlock_and_mark_edit.sql`):**
+  - Fixed `unlock_assessment_mark_component_submission` so `target_cohort_id IS NULL` ("all cohorts") deletes all per-cohort and global `assessment_mark_component_submissions` rows instead of matching only `cohort_id IS NULL`, and included confirmed shared offerings alongside approved unit equivalence groups.
+  - Added explicit admin-client deletion of matching `assessment_mark_component_submissions` rows in `unlockAssessmentMarkComponentAction` so unlocking works immediately across all siblings even before pushing the migration.
+  - Added `component_unlocked` confirmation and `component-unlock` error banners in `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`.
+
+**Added:**
+- `supabase/migrations/20261120061500_fix_hod_cat_unlock_and_mark_edit.sql`
+
+**Modified:**
+- `src/features/assessment/marks/actions.ts`
+- `src/features/assessment/marks/assessment-markbook-view-table.tsx`
+- `src/app/(dashboard)/assessment/marks/[assessmentId]/page.tsx`
+- `CHANGES.md`
+
+**Manual Follow-Up:**
+- Push `supabase/migrations/20261120061500_fix_hod_cat_unlock_and_mark_edit.sql` to Supabase (`supabase db push`) to update the `unlock_assessment_mark_component_submission` RPC in the database (the Next.js server actions already work immediately).
+
 ### 2026-11-19: Fix External Trainer PIN Generation Bounce & Large-Screen Responsiveness
 
 **Summary:**

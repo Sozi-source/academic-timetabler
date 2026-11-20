@@ -55,7 +55,6 @@ export default async function UnitEquivalencePage({ searchParams }: PageProps) {
         <span className="h-3.5 w-[3px] rounded-full bg-primary/60" aria-hidden="true" />
         <h2 className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary/80">Similarity Review Queue</h2>
       </div>
-      <p className="text-xs text-text-muted">Suggestions require explicit HOD review. Approving a match adds the selected units to an equivalence group; similarity alone never changes academic records.</p>
       {fuzzy.length === 0 ? <Alert>No fuzzy candidates require review.</Alert> : <div className="overflow-x-auto rounded-xl border border-border bg-surface"><table className="w-full min-w-[900px] text-left text-sm"><thead className="border-b border-border bg-surface-subtle text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted"><tr><th className="p-3">Unit</th><th className="p-3">Nearest title</th><th className="p-3">Similarity</th><th className="p-3">HOD review</th></tr></thead><tbody className="divide-y divide-border-soft">{fuzzy.map((row) => {
         const existingGroup = groups.find((group) => group.members.some((member) => member.unit_id === row.nearest_unit_id));
         return <tr key={row.unit_id}>

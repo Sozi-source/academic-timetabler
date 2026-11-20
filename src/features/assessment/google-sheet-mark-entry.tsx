@@ -87,9 +87,7 @@ export function GoogleSheetMarkEntry({ assessmentId }: { assessmentId: string })
       <div className="flex flex-wrap items-center gap-3 text-xs">
         {googleEmail ? (
           <p className="font-medium text-emerald-800">Connected to {googleEmail}</p>
-        ) : (
-          <p className="text-slate-600">Connect the college Google account to create sheets in its Drive.</p>
-        )}
+        ) : null}
         <Link
           href={`/api/assessment/google-auth/start?returnTo=${encodeURIComponent(`/assessment/marks/${assessmentId}`)}`}
           className="font-semibold text-primary underline"

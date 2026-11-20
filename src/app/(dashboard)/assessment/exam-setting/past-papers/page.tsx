@@ -157,7 +157,6 @@ export default async function PastPaperImportPage({
               <p className="mt-1">Run from <code>scripts/exam-engine</code>, then upload <code>out/papers.jsonl</code>. The matching <code>report.csv</code> is useful for local review; the JSONL carries each record&apos;s status and notes.</p>
             </div>
           </div>
-          <p className="mt-3 text-[11px] text-text-muted">Private department storage · maximum 45 MB and 1,000 paper records per batch. Original source documents are not modified by the importer.</p>
         </CardContent>
       </Card>
 
@@ -217,7 +216,6 @@ export default async function PastPaperImportPage({
             <div className="px-4 py-12 text-center">
               <Archive className="mx-auto size-8 text-text-muted" aria-hidden="true" />
               <p className="mt-2 text-sm font-semibold text-text-primary">Choose a batch to review</p>
-              <p className="mt-1 text-xs text-text-muted">Import a parser output file or select a recent batch.</p>
             </div>
           ) : (
             <>

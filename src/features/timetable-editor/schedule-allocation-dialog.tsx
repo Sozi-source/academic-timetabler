@@ -279,9 +279,6 @@ export function ScheduleAllocationDialog({
                           : `Only ${allocation.cohortCode}`}
                       </button>
                     </div>
-                    <p className="text-[11px] text-text-muted">
-                      Uncheck partner cohorts to schedule a standalone session for {allocation.cohortCode} without partner conflicts.
-                    </p>
                     <div className="flex flex-wrap gap-1.5 pt-0.5">
                       {availableCohorts.map((c) => {
                         const isSelected = selectedCohortIds.includes(c.id);

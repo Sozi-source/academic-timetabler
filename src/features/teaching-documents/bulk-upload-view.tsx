@@ -176,9 +176,6 @@ export function BulkUploadView() {
             </span>
             <span className="text-sm text-text-muted"> to upload in bulk</span>
           </div>
-          <p className="text-xs text-text-muted max-w-md">
-            The system will automatically parse and separate Course Outlines and Schemes of Work for each unit.
-          </p>
           <div className="flex items-center justify-center gap-3 text-xs text-text-muted pt-1">
             <span className="inline-flex items-center gap-1">
               <FileSpreadsheet className="size-3.5 text-emerald-600" />

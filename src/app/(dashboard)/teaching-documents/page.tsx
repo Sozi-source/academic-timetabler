@@ -143,9 +143,6 @@ export default async function TeachingDocumentsPage() {
           <p className="mt-3 text-xs font-bold text-text-primary group-hover:text-primary transition-colors">
             Curriculum Library
           </p>
-          <p className="mt-1 text-[11px] text-text-muted leading-relaxed">
-            Manage course outlines and schemes of work.
-          </p>
         </Link>
 
         <Link
@@ -157,9 +154,6 @@ export default async function TeachingDocumentsPage() {
           </div>
           <p className="mt-3 text-xs font-bold text-text-primary group-hover:text-primary transition-colors">
             Student Releases
-          </p>
-          <p className="mt-1 text-[11px] text-text-muted leading-relaxed">
-            Publish controlled documents to student portal.
           </p>
         </Link>
 
@@ -173,9 +167,6 @@ export default async function TeachingDocumentsPage() {
           <p className="mt-3 text-xs font-bold text-text-primary group-hover:text-amber-700 transition-colors">
             Review Queue
           </p>
-          <p className="mt-1 text-[11px] text-text-muted leading-relaxed">
-            Verify and approve trainer document uploads.
-          </p>
         </Link>
 
         <Link
@@ -187,9 +178,6 @@ export default async function TeachingDocumentsPage() {
           </div>
           <p className="mt-3 text-xs font-bold text-text-primary group-hover:text-primary transition-colors">
             Curriculum Upload
-          </p>
-          <p className="mt-1 text-[11px] text-text-muted leading-relaxed">
-            Upload Word (.docx) or Excel (.xlsx) course outlines and schemes.
           </p>
         </Link>
       </section>

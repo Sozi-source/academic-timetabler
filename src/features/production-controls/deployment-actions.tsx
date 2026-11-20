@@ -108,16 +108,6 @@ export function DeploymentCreateForm({
         />
       </div>
 
-      {!canDeployPilot ? (
-        <p className="mt-2 text-[10px] text-text-muted">
-          Pilot requires a Passed UAT run and a release candidate currently eligible for sign-off.
-        </p>
-      ) : !canDeployProduction ? (
-        <p className="mt-2 text-[10px] text-text-muted">
-          Production requires a valid go-live sign-off and no Critical/High operational incidents.
-        </p>
-      ) : null}
-
       {error ? <p className="mt-2 text-[10px] text-danger">{error}</p> : null}
 
       <div className="mt-3 flex justify-end">

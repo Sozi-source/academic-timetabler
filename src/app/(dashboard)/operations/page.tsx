@@ -277,9 +277,6 @@ export default async function OperationsPage() {
           <p className="mt-3 text-xs font-bold text-text-primary group-hover:text-primary-deep transition-colors">
             Attendance Oversight
           </p>
-          <p className="mt-1 text-[11px] text-text-muted">
-            Audit class attendance registers.
-          </p>
         </Link>
 
         <Link

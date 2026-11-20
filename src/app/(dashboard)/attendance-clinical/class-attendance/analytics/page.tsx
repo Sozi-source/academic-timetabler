@@ -192,9 +192,6 @@ export default async function AttendanceAnalyticsPage({
       <HodAttendanceView aggregates={aggregates} students={students} />
 
       <section className="rounded-xl border border-border bg-surface-subtle/60 px-4 py-3">
-        <p className="text-[10px] leading-4 text-text-muted">
-          College minimum attendance policy requires 80.0% attendance across completed sessions for examination clearance. Open or unmarked attendance never enters the denominator.
-        </p>
       </section>
     </div>
   );

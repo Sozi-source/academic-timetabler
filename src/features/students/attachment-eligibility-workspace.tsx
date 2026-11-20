@@ -334,9 +334,6 @@ export function AttachmentEligibilityWorkspace({
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">
               Curriculum Attachment Stage Rules ({rules.length})
             </h2>
-            <span className="text-[11px] text-slate-500">
-              Active in-class students in the stage immediately preceding attachment are auto-selected
-            </span>
           </div>
           <div className="flex flex-wrap gap-2">
             {rules.map((r) => (

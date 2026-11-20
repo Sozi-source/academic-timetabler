@@ -283,9 +283,6 @@ export function ResetTrainerPassword({
                     />
                   </div>
 
-                  <p className="text-[11px] text-text-muted leading-relaxed">
-                    Setting a temporary password auto-activates and confirms the trainer account. You can copy and provide it to the trainer directly.
-                  </p>
 
                   <div className="flex items-center justify-end gap-2.5 pt-2">
                     <Button type="button" variant="outline" size="sm" onClick={close} disabled={saving}>

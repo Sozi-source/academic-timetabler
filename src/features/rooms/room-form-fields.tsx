@@ -174,10 +174,6 @@ export function RoomFormFields({
               Accessible room
             </span>
 
-            <span className="mt-1 block text-xs leading-5 text-text-muted">
-              Suitable for learners and staff with
-              mobility or accessibility requirements.
-            </span>
           </span>
         </label>
 
@@ -196,10 +192,6 @@ export function RoomFormFields({
               Available for timetabling
             </span>
 
-            <span className="mt-1 block text-xs leading-5 text-text-muted">
-              Allow this room to be selected during
-              timetable generation and allocation.
-            </span>
           </span>
         </label>
       </div>

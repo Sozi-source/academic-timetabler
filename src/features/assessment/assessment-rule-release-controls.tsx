@@ -274,11 +274,6 @@ export function AssessmentRuleReleaseControls({
             )}
           </div>
 
-          <p className="mt-1 text-[11px] text-text-muted">
-            Maximum and pass marks apply
-            to this unit, Academic Period
-            and assessment type.
-          </p>
 
           <div className="mt-3 flex flex-wrap gap-2">
             <label className="block">

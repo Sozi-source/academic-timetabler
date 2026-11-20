@@ -111,7 +111,6 @@ export default async function ExamGeneratePage({ searchParams }: { searchParams:
                 </div>
               </fieldset>
               <GenerateSubmitButton disabled={!canGenerate} />
-              <p aria-live="polite" className="text-[11px] text-text-muted">Generation may take up to a minute. Keep this page open until the draft appears.</p>
               {!workspace.blueprints.length ? <p className="text-xs text-warning">No active blueprint. Activate a blueprint in Step 1 first.</p> : null}
               {!workspace.periods.length ? <p className="text-xs text-warning">Create an active or planned academic period before generating a paper.</p> : null}
               {!workspace.units.some((unit) => unit.sourcePaperCount > 0) ? <p className="text-xs text-warning">Import usable past papers for a unit before generating a paper.</p> : null}

@@ -231,9 +231,16 @@ export const getNextSemesterAttachmentData = cache(async (): Promise<NextSemeste
     const storedStageId = s.current_stage_id ?? cohort?.current_stage_id ?? null;
     const storedStage = storedStageId ? stageById.get(storedStageId) : null;
 
-    // Derive calendar stage from the student's current cohort intake_date (preserves deferred/resumed timelines)
-    // without modifying stored student/cohort staging.
-    const calendarSeq = computeCalendarStageSequence(cohort?.intake_date, activePeriodStartsOn);
+    // If a student has an individual stage different from their cohort's stage (e.g., held back / deferred
+    // in Y1S3 while their cohort is in Y2S1), respect their individual stage so they progress to Y2S1 next
+    // instead of skipping ahead to attachment. Otherwise derive calendar stage from current_cohort.intake_date
+    // so whole-cohort non-prerequisite unit swaps (e.g., DNDT-JAN-2026 in Y1S3 taking Y1S2 units) are included.
+    const hasIndividualStageOverride = Boolean(
+      s.current_stage_id && cohort?.current_stage_id && s.current_stage_id !== cohort.current_stage_id,
+    );
+    const calendarSeq = hasIndividualStageOverride
+      ? null
+      : computeCalendarStageSequence(cohort?.intake_date, activePeriodStartsOn);
     const calendarStage =
       calendarSeq !== null && s.programme_id
         ? stageByProgSeq.get(`${s.programme_id}:${calendarSeq}`) ?? null

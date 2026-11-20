@@ -62,9 +62,6 @@ export function UnassignAllocationForm({
           <p>
             Are you sure you want to unassign <span className="font-semibold text-text-primary">{unitLabel}</span> from the live draft?
           </p>
-          <p className="text-xs text-text-muted">
-            Its current draft sessions will be removed and it will return to the allocation queue. The published timetable will not change.
-          </p>
         </DialogBody>
         <DialogFooter className="mt-4 flex justify-end gap-2">
           <Button

@@ -158,9 +158,6 @@ export default async function AssessmentReportsPage({ searchParams }: PageProps)
                   <FileSpreadsheet className="size-3.5" />
                 </div>
               </div>
-              <p className="mt-3 text-[11px] font-medium text-slate-600">
-                Download trainer folders with CAT &amp; Final marksheets plus manifest.
-              </p>
             </div>
             <div className="mt-4 pt-3 border-t border-slate-200 flex flex-wrap gap-1.5">
               <a

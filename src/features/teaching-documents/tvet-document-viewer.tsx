@@ -427,9 +427,6 @@ export function TVETDocumentViewer({
               </div>
             )}
 
-            <p className="text-[11px] text-slate-500 leading-relaxed">
-              Upon submission, an official DOCX will be compiled, sealed, archived in private storage, and placed in the HOD review queue for verification.
-            </p>
 
             <DialogFooter className="gap-2 sm:gap-0">
               <Button

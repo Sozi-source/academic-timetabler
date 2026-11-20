@@ -522,9 +522,6 @@ export default async function AdminTrainerPortalViewPage({ params, searchParams 
               Teaching Documents
             </h2>
           </div>
-          <p className="text-xs text-text-muted">
-            Open individual unit workspaces via the Teaching Units tab to view schemes of work, course outlines, records of work, and CAT/exam registers for each allocated unit.
-          </p>
           {groupedUnits.length > 0 && (
             <div className="space-y-2">
               {groupedUnits.map((item) => (

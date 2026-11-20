@@ -213,7 +213,6 @@ export default async function ExamSettingPage({
               <div className="px-4 py-10 text-center">
                 <BookOpenCheck className="mx-auto size-8 text-text-muted" aria-hidden="true" />
                 <p className="mt-2 text-sm font-semibold text-text-primary">No blueprints yet</p>
-                <p className="mt-1 text-xs text-text-muted">Save a draft here to define the format used by the next workflow steps.</p>
               </div>
             ) : null}
           </div>

@@ -241,10 +241,6 @@ export function BatchActionDialogs({
             {/* 1. CONFIRM REPORTED */}
             {openAction === 'confirm_reported' && (
               <div className="space-y-3">
-                <p className="text-xs text-text-muted">
-                  Confirm physical reporting for these students. Their status will update to{' '}
-                  <strong className="text-emerald-700 font-semibold">Active</strong> and reporting will be logged for the active term.
-                </p>
                 <div>
                   <label htmlFor="batchEffectiveDate" className="block text-xs font-semibold text-text-secondary">
                     Reporting Date
@@ -277,9 +273,6 @@ export function BatchActionDialogs({
             {/* 2. DEFERRAL */}
             {openAction === 'defer' && (
               <div className="space-y-3">
-                <p className="text-xs text-text-muted">
-                  Formal deferral pauses the student&apos;s active registration. You must specify an effective date, return date, and reason.
-                </p>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label htmlFor="batchEffectiveDate" className="block text-xs font-semibold text-text-secondary">

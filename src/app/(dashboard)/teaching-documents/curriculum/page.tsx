@@ -158,9 +158,6 @@ export default async function CurriculumContentPage() {
           <div className="text-xs font-semibold text-text-primary">
             No curriculum published
           </div>
-          <p className="text-[11px] text-text-muted">
-            Upload an Excel workbook or Word ZIP archive — topics distribute automatically across 14 weeks.
-          </p>
           <div className="flex items-center justify-center gap-2">
             <Link
               href="/teaching-documents/curriculum/bulk-upload"

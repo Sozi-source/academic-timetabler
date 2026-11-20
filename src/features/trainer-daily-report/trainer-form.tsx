@@ -470,9 +470,6 @@ function ScheduledLessonsSection({
         <p className="mt-3 text-sm font-bold text-text-primary">
           No Scheduled Lessons
         </p>
-        <p className="mx-auto mt-1 max-w-xs text-[11px] text-text-muted">
-          Submit your activity log or concerns below to file a non-teaching day record.
-        </p>
       </section>
     );
   }

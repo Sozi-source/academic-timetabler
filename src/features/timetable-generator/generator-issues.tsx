@@ -115,13 +115,6 @@ export function GeneratorUnscheduledList({
         <h2 className="text-lg font-semibold text-text-primary">
           Unresolved sessions
         </h2>
-
-
-        {!exchangeSuggestionsEvaluated ? (
-          <p className="mt-2 text-xs leading-5 text-text-muted">
-            This fast post-exchange preview has not scanned for additional exchanges yet. Use Scan remaining smart repairs above when needed.
-          </p>
-        ) : null}
       </div>
 
       <div className="grid gap-3">
@@ -256,9 +249,6 @@ export function GeneratorUnscheduledList({
                         <h4 className="text-sm font-semibold text-text-primary">
                           Alternative placements
                         </h4>
-                        <p className="mt-1 text-xs leading-5 text-text-muted">
-                          These were found by relaxing this session&apos;s fixed day/time and searching every active, available room — review and apply manually.
-                        </p>
                       </div>
                     </div>
 
@@ -297,9 +287,6 @@ export function GeneratorUnscheduledList({
                         <h4 className="text-sm font-semibold text-text-primary">
                           Smart exchange repairs
                         </h4>
-                        <p className="mt-1 text-xs leading-5 text-text-muted">
-                          These equal-duration exchanges were simulated against the complete timetable. Only trainers in this department are considered.
-                        </p>
                       </div>
                     </div>
 

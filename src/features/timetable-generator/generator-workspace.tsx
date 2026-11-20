@@ -288,11 +288,6 @@ export function GeneratorWorkspace({
               Replace existing editable sessions
             </span>
 
-            <span className="mt-1 block text-xs leading-5 text-text-muted">
-              Draft and confirmed sessions may be
-              regenerated. Locked sessions will always
-              remain protected.
-            </span>
           </span>
         </label>
       </form>
@@ -451,9 +446,6 @@ export function GeneratorWorkspace({
               <div>
                 <p className="text-sm font-semibold text-text-primary">
                   Check for another repair
-                </p>
-                <p className="mt-1 text-xs leading-5 text-text-muted">
-                  The timetable has been updated quickly. Run the full smart scan only if unresolved sessions remain.
                 </p>
               </div>
               <input type="hidden" name="academicPeriodId" value={preview.academicPeriod.id} />

@@ -99,9 +99,6 @@ export function SubmitCatOnBehalfButton({ assessmentId, trainerLabel, missingCou
                 </div>
               ) : null}
 
-              <p className="mt-3 text-xs text-slate-500">
-                You can unlock it later if corrections are needed.
-              </p>
 
               <form action={submitCatOnBehalfAction} className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-center sm:gap-2.5">
                 <input type="hidden" name="assessmentId" value={assessmentId} />

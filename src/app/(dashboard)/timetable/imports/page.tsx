@@ -67,9 +67,6 @@ export default function BulkImportsPage() {
         title="Bulk imports"
         backHref="/timetable"
         backLabel="Timetabling"
-        context={
-          <span className="text-xs text-text-muted">Required fields only — extras are ignored.</span>
-        }
       />
 
       <section className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

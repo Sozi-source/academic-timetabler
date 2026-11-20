@@ -139,9 +139,6 @@ export function ProgressionForm({
         </Select>
       </label>
 
-      <p className="text-[0.6875rem] text-text-muted">
-        Select the status and reporting state, then save. No reason is required.
-      </p>
 
       <div className="flex justify-end border-t border-border pt-3">
         <Button

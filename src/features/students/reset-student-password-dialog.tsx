@@ -184,10 +184,6 @@ export function ResetStudentPasswordDialog({
                       )}
                     </button>
                   </div>
-                  <p className="text-[11px] text-text-muted">
-                    The student can log in using their admission number and this
-                    password.
-                  </p>
                   <Button type="button" onClick={close} className="w-full">
                     Close
                   </Button>
@@ -215,12 +211,6 @@ export function ResetStudentPasswordDialog({
                       autoComplete="off"
                       className="mt-1.5 h-10 w-full rounded-xl border border-border-strong bg-surface px-3 text-xs text-text-primary shadow-2xs placeholder:text-text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
                     />
-                    <p className="mt-1.5 text-[11px] text-text-muted leading-relaxed">
-                      If left blank, the system will generate a secure temporary
-                      password (e.g.{' '}
-                      <code className="font-mono">Icmhs@xxxx</code>) that you
-                      can copy.
-                    </p>
                   </div>
 
                   <div className="flex items-center justify-end gap-2.5 pt-1">

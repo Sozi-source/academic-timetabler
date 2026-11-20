@@ -46,9 +46,6 @@ export default async function UnitRegistrationPreviewPage({ params }: PageProps)
             </>
           )}
         />
-        <p className="rounded-lg border border-border bg-surface-subtle px-3 py-2 text-xs text-text-muted">
-          This preview matches the one-page registration form issued to the student.
-        </p>
       </div>
 
       <UnitRegistrationFormPreview context={context} />

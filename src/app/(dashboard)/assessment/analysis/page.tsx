@@ -300,14 +300,6 @@ export default async function AssessmentAnalysisPage() {
         </section>
       )}
 
-      <p className="text-[11px] leading-5 text-text-muted">
-        Means and pass rates use numeric
-        marks only. Explicit absences and
-        unresolved marks are excluded.
-        Pass rate appears only when the
-        assessment maximum and pass mark
-        are configured.
-      </p>
     </div>
   );
 }

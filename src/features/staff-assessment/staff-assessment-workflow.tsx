@@ -394,9 +394,6 @@ export function StaffAssessmentWorkflow({
               ) : null}
             </div>
 
-            <p className="mt-1 text-[11px] leading-5 text-text-muted">
-              Confirm the class list, enter marks, then submit.
-            </p>
           </div>
 
           <div className="flex flex-wrap gap-2">

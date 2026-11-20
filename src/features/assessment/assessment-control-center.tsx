@@ -7,7 +7,6 @@ import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
-  ChevronDown,
   ClipboardList,
   Clock,
   FileSpreadsheet,
@@ -19,13 +18,6 @@ import {
 
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/ui/page-header';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { AdminDepartmentMarksEntryControl } from './admin-department-marks-entry-control';
 import type {
   AssessmentControlCenterData,
@@ -567,10 +559,10 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                   {/* Mobile Action Link */}
                   <Link
                     href={`/assessment/marks/${unit.items[0]?.id ?? unit.unitId}`}
-                    className="inline-flex min-h-9 w-full items-center justify-center gap-1.5 rounded-lg border border-border bg-surface px-3 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-surface-subtle transition"
+                    className="inline-flex min-h-9 w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-primary px-3 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition"
                   >
-                    Open Markbook
-                    <ArrowRight className="size-3.5 text-slate-400" />
+                    <span>Open Markbook</span>
+                    <ArrowRight className="size-3.5 shrink-0" />
                   </Link>
                 </article>
               ))}
@@ -583,11 +575,11 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                   <tr>
                     <th className="px-4 py-3">Unit name & code</th>
                     <th className="px-3 py-3">Lead trainer</th>
-                    <th className="px-3 py-3 text-center">Candidates</th>
+                    <th className="px-3 py-3 text-center whitespace-nowrap">Candidates</th>
                     <th className="px-3 py-3 whitespace-nowrap">CAT milestone</th>
                     <th className="px-3 py-3 whitespace-nowrap">Final exam</th>
                     <th className="px-3 py-3 whitespace-nowrap">Status</th>
-                    <th className="px-4 py-3 text-right">Action</th>
+                    <th className="px-4 py-3 text-right whitespace-nowrap">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -699,53 +691,14 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                       </td>
 
                       {/* Action */}
-                      <td className="px-4 py-3 text-right">
-                        {unit.items.length <= 1 ? (
-                          <Link
-                            href={`/assessment/marks/${unit.items[0]?.id ?? unit.unitId}`}
-                            className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 transition"
-                          >
-                            Open Markbook
-                            <ArrowRight className="size-3 text-slate-400" />
-                          </Link>
-                        ) : (
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <button
-                                type="button"
-                                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 transition"
-                              >
-                                Open Markbook
-                                <ChevronDown className="size-3 text-slate-400" />
-                              </button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-56 p-1.5">
-                              <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                                Select Cohort Markbook
-                              </div>
-                              {unit.items.map((it) => (
-                                <DropdownMenuItem key={it.id} asChild>
-                                  <Link
-                                    href={`/assessment/marks/${unit.items[0]?.id ?? it.id}${it.cohortId ? `?cohortId=${encodeURIComponent(it.cohortId)}` : ''}`}
-                                    className="flex w-full items-center justify-between text-xs font-medium cursor-pointer"
-                                  >
-                                    <span>{it.cohortName}</span>
-                                    <span className="text-[10px] text-slate-400">{it.totalExpected} std</span>
-                                  </Link>
-                                </DropdownMenuItem>
-                              ))}
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem asChild>
-                                <Link
-                                  href={`/assessment/marks/${unit.items[0]?.id ?? unit.unitId}`}
-                                  className="flex w-full items-center text-xs font-bold text-primary cursor-pointer"
-                                >
-                                  Open Consolidated Markbook
-                                </Link>
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        )}
+                      <td className="px-4 py-3 text-right whitespace-nowrap">
+                        <Link
+                          href={`/assessment/marks/${unit.items[0]?.id ?? unit.unitId}`}
+                          className="inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-lg bg-primary px-3 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition"
+                        >
+                          <span>Open Markbook</span>
+                          <ArrowRight className="size-3.5 shrink-0" />
+                        </Link>
                       </td>
                     </tr>
                   ))}

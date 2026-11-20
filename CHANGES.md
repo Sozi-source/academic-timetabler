@@ -1,3 +1,27 @@
+### 2026-11-20: Add Next-Semester Attachment Eligibility List (Curriculum Auto-Generation + HOD Review)
+
+**Summary:**
+- **Added curriculum-driven attachment eligibility query (`src/features/students/attachment-eligibility.ts`):**
+  - Automatically discovers curriculum attachment stages (`programme_stages` + `programme_stage_units` matching attachment/practicum/fieldwork units) across all programmes in the HOD's active department and identifies active `in_class` students currently in the immediately preceding stage (`sequence_number - 1`).
+  - Surfaces readiness flags (transfer class assignments and referred/failed exam units) and provides all other active in-class students for manual HOD overrides.
+- **Added HOD review workspace & bulk transition (`src/features/students/attachment-eligibility-workspace.tsx`, `src/features/students/attachment-actions.ts`, `src/app/(dashboard)/students/attachment/page.tsx`):**
+  - Interactive review table with programme/cohort/status filters, curriculum rule chips, per-student approve/exclude checkboxes with exclusion reasons, manual override student picker, print view, and one-click bulk transition to `On Attachment` (advancing `current_stage_id` to the attachment stage).
+- **Added institutional Excel export (`src/app/api/students/attachment/export/route.ts`):**
+  - Exports the HOD-approved attachment list (including manual overrides and notes/flags) plus a Programme & Cohort Summary sheet via ExcelJS.
+- **Added sidebar navigation link (`src/components/layout/student-shell.tsx`):**
+  - Added **Attachment list** (`/students/attachment`) under Student Management.
+
+**Added:**
+- `src/features/students/attachment-eligibility.ts`
+- `src/features/students/attachment-actions.ts`
+- `src/features/students/attachment-eligibility-workspace.tsx`
+- `src/app/(dashboard)/students/attachment/page.tsx`
+- `src/app/api/students/attachment/export/route.ts`
+
+**Modified:**
+- `src/components/layout/student-shell.tsx`
+- `CHANGES.md`
+
 - **Fixed HOD/Admin markbook hiding roster-only / transfer students (`src/features/assessment/queries.ts`):**
   - Updated `getAssessmentPopulation` to merge `assessment_population` and `assessment_roster` in parallel across sibling events instead of returning early when `assessment_population` is non-empty. Previously, students present in `assessment_roster` (such as transfer / individually assigned students like Salome) were hidden on the admin markbook page whenever regular cohort students already existed in `assessment_population`.
 - **Polished `Open Markbook` button (`src/features/assessment/assessment-control-center.tsx`):**

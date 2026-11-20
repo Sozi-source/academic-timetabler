@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   BarChart3,
   BookOpenCheck,
+  Briefcase,
   GraduationCap,
   LayoutDashboard,
   LogOut,
@@ -44,6 +45,7 @@ const navigation: readonly StudentNavigationItem[] = [
   { label: 'Student onboarding', href: '/students/registry/import', icon: FileUp },
   { label: 'Update statuses', href: '/students/status', icon: RefreshCw },
   { label: 'Unit registration', href: '/students/unit-registration', icon: BookOpenCheck },
+  { label: 'Attachment list', href: '/students/attachment', icon: Briefcase },
   { label: 'Reports', href: '/students/reports', icon: BarChart3 },
 ];
 
@@ -53,7 +55,7 @@ const bottomTabs: readonly StudentNavigationItem[] = [
   navigation[0],
   navigation[1],
   navigation[4],
-  navigation[5],
+  navigation[6],
 ];
 
 function getInitials(fullName: string) {

@@ -42,6 +42,16 @@ function getEmploymentTypeLabel(employmentType: TrainerEmploymentType) {
   );
 }
 
+function getTrainerInitials(fullName: string): string {
+  const parts = fullName
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (parts.length === 0) return 'TR';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0] ?? ''}${parts[parts.length - 1][0] ?? ''}`.toUpperCase();
+}
+
 const columns: ColumnDef<Trainer>[] = [
   {
     accessorKey: 'fullName',
@@ -181,10 +191,98 @@ export function TrainerTable({ trainers }: TrainerTableProps) {
       emptyIcon={UserRound}
       emptyTitle={filtersActive ? 'No matching trainers' : 'No trainers registered'}
       emptyDescription={filtersActive ? 'Adjust or clear the filters.' : 'Add a trainer to begin.'}
-      initialPageSize={20}
-      enableColumnToggle
-      enableDensityToggle
+      initialPageSize={24}
       exportFileName="trainers"
+      renderCard={(trainer) => (
+        <article className="trainer-card">
+          <header className="trainer-card-header">
+            <div className="flex min-w-0 items-start gap-2.5">
+              <span
+                aria-hidden="true"
+                className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary-deep"
+              >
+                {getTrainerInitials(trainer.fullName)}
+              </span>
+              <div className="min-w-0">
+                <h3 className="truncate text-sm font-semibold text-text-primary">
+                  <Link
+                    href={`/trainers/${trainer.id}`}
+                    className="transition hover:text-primary hover:underline"
+                  >
+                    {trainer.fullName}
+                  </Link>
+                </h3>
+                {trainer.homeDepartment ? (
+                  <p className="mt-0.5 truncate text-xs text-text-muted">
+                    {trainer.homeDepartment}
+                  </p>
+                ) : null}
+                {trainer.specialization ? (
+                  <p className="mt-0.5 truncate text-[11px] text-text-muted">
+                    {trainer.specialization}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+
+            {!trainer.isActive ? (
+              <Badge variant="warning" className="shrink-0">
+                Inactive
+              </Badge>
+            ) : (
+              <Badge
+                variant={trainer.isTimetableAvailable ? 'success' : 'neutral'}
+                dot={trainer.isTimetableAvailable}
+                className="shrink-0"
+              >
+                {trainer.isTimetableAvailable ? 'Available' : 'Unavailable'}
+              </Badge>
+            )}
+          </header>
+
+          <div className="min-w-0 space-y-2.5">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Badge variant="neutral">
+                {getEmploymentTypeLabel(trainer.employmentType)}
+              </Badge>
+              <span className="inline-flex items-center rounded-md bg-surface-subtle px-2 py-0.5 text-[11px] font-semibold text-text-secondary">
+                {trainer.normalWeeklyHours}h/week
+              </span>
+            </div>
+
+            <form
+              action={setTrainerWorkloadRoleAction}
+              className="flex min-w-0 items-center gap-1.5"
+            >
+              <input type="hidden" name="id" value={trainer.id} />
+              <Select
+                name="workloadRole"
+                aria-label={`Workload role for ${trainer.fullName}`}
+                defaultValue={trainer.workloadRole}
+                className="h-9 min-w-0 flex-1 text-xs"
+              >
+                {workloadRoleOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}{option.target === null ? '' : ` · ${option.target}h`}
+                  </option>
+                ))}
+              </Select>
+              <Button type="submit" variant="outline" size="sm" className="min-h-9 shrink-0 px-2.5 py-1">
+                Save
+              </Button>
+            </form>
+          </div>
+
+          <footer className="flex items-center justify-end border-t border-border-soft pt-3">
+            <Link
+              href={`/trainers/${trainer.id}`}
+              className="inline-flex min-h-11 sm:min-h-8 items-center justify-center rounded-lg border border-border-strong bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary shadow-2xs transition hover:bg-surface-subtle hover:text-text-primary"
+            >
+              Profile
+            </Link>
+          </footer>
+        </article>
+      )}
       toolbarFilters={
         <div className="flex flex-wrap items-center gap-2">
           <Select

@@ -142,11 +142,13 @@ describe('mobile action responsiveness and trainer access PIN visibility', () =>
     expect(html).not.toContain('Submit CAT marks');
   });
 
-  it('renders Generate PIN buttons inside trainer-access-actions with touch-friendly responsive sizing', () => {
+  it('renders Generate PIN buttons inside responsive trainer-card articles with touch-friendly sizing', () => {
     const html = renderToStaticMarkup(
       <TrainerAccessTable records={sampleAccessRecords} variant="pin" />,
     );
 
+    expect(html).toContain('trainer-card-grid');
+    expect(html).toContain('<article class="trainer-card"');
     expect(html).toContain('trainer-access-actions');
     expect(html).toContain('Generate PIN');
     expect(html).toContain('Approve &amp; Link');
@@ -154,21 +156,20 @@ describe('mobile action responsiveness and trainer access PIN visibility', () =>
     expect(html).toContain('min-h-11 sm:min-h-8');
   });
 
-  it('overrides fixed DataTable heights and clipping on mobile card layout in globals.css', () => {
+  it('defines responsive multi-column trainer card grid and subgrid alignment in globals.css', () => {
     const globalsCss = readFileSync(
       resolve(process.cwd(), 'src/app/globals.css'),
       'utf8',
     );
-    const mobileBlockStart = globalsCss.indexOf('@media(max-width:1199px)');
-    expect(mobileBlockStart).toBeGreaterThan(-1);
-    const mobileBlockEnd = globalsCss.indexOf('/* Shell headers', mobileBlockStart);
-    expect(mobileBlockEnd).toBeGreaterThan(mobileBlockStart);
-    const mobileBlock = globalsCss.slice(mobileBlockStart, mobileBlockEnd);
+    const cardGridStart = globalsCss.indexOf('.trainer-card-grid');
+    expect(cardGridStart).toBeGreaterThan(-1);
+    const cardGridEnd = globalsCss.indexOf('/* Shell headers', cardGridStart);
+    expect(cardGridEnd).toBeGreaterThan(cardGridStart);
+    const cardGridBlock = globalsCss.slice(cardGridStart, cardGridEnd);
 
-    expect(mobileBlock).toContain('max-height:none!important');
-    expect(mobileBlock).toContain('overflow:visible!important');
-    expect(mobileBlock).toContain('height:auto!important;overflow:visible');
-    expect(mobileBlock).toContain('height:auto!important;min-height:0!important');
-    expect(mobileBlock).toContain('.trainer-access-register .trainer-access-actions');
+    expect(cardGridBlock).toContain('repeat(auto-fill, minmax(min(100%, 17.5rem), 1fr))');
+    expect(cardGridBlock).toContain('container: trainer-card / inline-size');
+    expect(cardGridBlock).toContain('grid-template-rows: subgrid');
+    expect(cardGridBlock).toContain('.trainer-access-actions');
   });
 });

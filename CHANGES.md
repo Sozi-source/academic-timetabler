@@ -1,8 +1,27 @@
+### 2026-11-20: Replace Stacked Trainer Lists with Responsive Multi-Column Medium Cards
+
+**Summary:**
+- **Added native card-grid rendering support to `DataTable` (`src/components/ui/data-table.tsx`):**
+  - Added optional `renderCard` and `cardGridClassName` props so card-based directories retain search, filters, CSV export, and pagination while automatically hiding table-only column/density controls.
+- **Replaced single-column `< 1200px` table-to-card CSS with a responsive multi-column card grid (`src/app/globals.css`):**
+  - Added `.trainer-card-grid` using `repeat(auto-fill, minmax(min(100%, 17.5rem), 1fr))` so cards automatically scale from 1 column on phones to 2, 3, 4+ columns as screen width increases, with `.trainer-card` using `container: trainer-card / inline-size` and CSS `subgrid` (with explicit `grid-template-rows: auto 1fr auto` fallback) for aligned headers, details, and action footers.
+- **Updated all trainer list pages to render medium responsive cards (`src/features/trainer-access/trainer-access-table.tsx`, `src/features/trainers/trainer-table.tsx`):**
+  - Applies across `/trainers/access`, `/trainers` (both Staff Workspace Access & Teaching Staff Directory), and `/timetable/trainers`, fixing stretched status badges and single-column overflow on laptops/tablets.
+- **Updated responsiveness unit tests (`src/tests/mobile-action-responsiveness.test.tsx`).**
+
+**Modified:**
+- `src/components/ui/data-table.tsx`
+- `src/app/globals.css`
+- `src/features/trainer-access/trainer-access-table.tsx`
+- `src/features/trainers/trainer-table.tsx`
+- `src/tests/mobile-action-responsiveness.test.tsx`
+- `CHANGES.md`
+
 ### 2026-11-20: Add Next-Semester Attachment Eligibility List (Curriculum Auto-Generation + HOD Review)
 
 **Summary:**
 - **Added curriculum-driven attachment eligibility query (`src/features/students/attachment-eligibility.ts`):**
-  - Automatically discovers curriculum attachment stages (`programme_stages` + `programme_stage_units` matching attachment/practicum/fieldwork units) across all programmes in the HOD's active department and identifies active `in_class` students currently in the immediately preceding stage (`sequence_number - 1`).
+  - Automatically discovers curriculum attachment stages (`programme_stages` + `programme_stage_units` matching attachment/practicum/fieldwork units) across all programmes in the HOD's active department and computes each active `in_class` student's calendar progression stage from `current_cohort.intake_date` to the active academic period (leaving stored student/cohort staging untouched). Cohorts taking non-prerequisite units from another stage (such as `DNDT-JAN-2026` in calendar stage `Y1S3` taking `Y1S2` units) are accurately included and clearly labeled `Y1S3 (units: Y1S2) → Y2S1`.
   - Surfaces readiness flags (transfer class assignments and referred/failed exam units) and provides all other active in-class students for manual HOD overrides.
 - **Added HOD review workspace & bulk transition (`src/features/students/attachment-eligibility-workspace.tsx`, `src/features/students/attachment-actions.ts`, `src/app/(dashboard)/students/attachment/page.tsx`):**
   - Interactive review table with programme/cohort/status filters, curriculum rule chips, per-student approve/exclude checkboxes with exclusion reasons, manual override student picker, print view, and one-click bulk transition to `On Attachment` (advancing `current_stage_id` to the attachment stage).

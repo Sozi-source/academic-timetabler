@@ -10,6 +10,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import {
+  Fragment,
   useEffect,
   useRef,
   useState,
@@ -74,6 +75,13 @@ interface DataTableProps<TData, TValue> {
    * "auto" lets columns expand fluidly across wide viewports using optional minSize/maxSize hints.
    */
   layout?: 'fixed' | 'auto';
+  /**
+   * When provided, renders rows in a responsive multi-column card grid instead of an HTML table,
+   * while preserving search, filters, CSV export, and pagination.
+   */
+  renderCard?: (row: TData) => ReactNode;
+  /** Optional extra classes for the card grid container when `renderCard` is set. */
+  cardGridClassName?: string;
 }
 
 const SELECT_COLUMN_ID = '__select';
@@ -270,6 +278,8 @@ export function DataTable<TData, TValue>({
   maxHeightClassName = 'max-h-[70vh]',
   initialHiddenColumns,
   layout = 'fixed',
+  renderCard,
+  cardGridClassName,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] =
     useState<SortingState>([]);
@@ -380,16 +390,18 @@ export function DataTable<TData, TValue>({
     .rows.map((row) => row.original);
 
   const compact = density === 'compact';
+  const showDensityToggle = enableDensityToggle && !renderCard;
+  const showColumnToggle = enableColumnToggle && !renderCard;
 
   const toolbarExtras =
     toolbarActions ||
-    enableColumnToggle ||
-    enableDensityToggle ||
+    showColumnToggle ||
+    showDensityToggle ||
     exportFileName ? (
       <>
         {toolbarActions}
 
-        {enableDensityToggle ? (
+        {showDensityToggle ? (
           <button
             type="button"
             aria-pressed={compact}
@@ -407,7 +419,7 @@ export function DataTable<TData, TValue>({
           </button>
         ) : null}
 
-        {enableColumnToggle ? (
+        {showColumnToggle ? (
           <ColumnMenu table={table} />
         ) : null}
 
@@ -466,6 +478,12 @@ export function DataTable<TData, TValue>({
             title={emptyTitle}
             description={emptyDescription}
           />
+        </div>
+      ) : renderCard ? (
+        <div className={cn('trainer-card-grid', cardGridClassName)}>
+          {rows.map((row) => (
+            <Fragment key={row.id}>{renderCard(row.original)}</Fragment>
+          ))}
         </div>
       ) : (
         <div className="w-full">

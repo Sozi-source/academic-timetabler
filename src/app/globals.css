@@ -431,63 +431,79 @@ code, kbd, samp, pre {
   .admin-screen table th,.admin-screen table td{padding:.625rem .75rem;white-space:nowrap}
 }
 
-/* Trainer lists switch to cards whenever the desktop shell leaves limited row width. */
-@media(min-width:1200px){
-  .trainer-access-register .overflow-x-auto,
-  .trainer-approvals-register .overflow-x-auto{border:0;border-radius:0}
-  .trainer-access-register thead th:last-child,
-  .trainer-approvals-register thead th:last-child{text-align:right}
+/* Responsive medium trainer card grids (auto-increasing columns by available container width). */
+.trainer-card-grid {
+  inline-size: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17.5rem), 1fr));
+  gap: 0.875rem;
+  padding: 0.875rem;
 }
 
-@media(max-width:1199px){
-  .trainer-access-register .overflow-x-auto,
-  .trainer-approvals-register .overflow-x-auto,
-  .trainer-directory-table .overflow-x-auto{overflow:visible!important;max-height:none!important;border:0;border-radius:0}
-  .trainer-access-register table,
-  .trainer-approvals-register table,
-  .trainer-directory-table table{width:100%;min-width:0;display:block;table-layout:auto}
-  .trainer-access-register thead,
-  .trainer-approvals-register thead,
-  .trainer-directory-table thead{display:none}
-  .trainer-access-register tbody,
-  .trainer-approvals-register tbody,
-  .trainer-directory-table tbody{display:grid;gap:.75rem;padding:.75rem}
-  .trainer-access-register tbody tr,
-  .trainer-approvals-register tbody tr,
-  .trainer-directory-table tbody tr{display:block;height:auto!important;overflow:visible;border:1px solid var(--border);border-radius:.75rem;background:var(--surface)}
-  .trainer-access-register tbody tr:hover,
-  .trainer-approvals-register tbody tr:hover,
-  .trainer-directory-table tbody tr:hover{background:var(--surface)}
-  .trainer-access-register tbody td,
-  .trainer-approvals-register tbody td,
-  .trainer-directory-table tbody td{display:grid;width:auto!important;min-width:0!important;max-width:none!important;height:auto!important;min-height:0!important;grid-template-columns:6.25rem minmax(0,1fr);align-items:start;gap:.5rem;padding:.625rem .75rem;white-space:normal;text-align:left}
-  .trainer-access-register tbody td::before,
-  .trainer-approvals-register tbody td::before,
-  .trainer-directory-table tbody td::before{content:attr(data-label);padding-top:.125rem;color:var(--text-muted);font-size:.625rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
-  .trainer-access-register tbody td[data-label="Trainer"],
-  .trainer-approvals-register tbody td[data-label="Trainer"],
-  .trainer-directory-table tbody td[data-label="Trainer"]{display:block}
-  .trainer-access-register tbody td[data-label="Trainer"]::before,
-  .trainer-approvals-register tbody td[data-label="Trainer"]::before,
-  .trainer-directory-table tbody td[data-label="Trainer"]::before{display:none}
-  .trainer-access-register tbody td[data-label="Actions"],
-  .trainer-approvals-register tbody td[data-label="Actions"]{display:block;height:auto!important;min-height:0!important;border-top:1px solid var(--border-soft)}
-  .trainer-access-register tbody td[data-label="Actions"]::before,
-  .trainer-approvals-register tbody td[data-label="Actions"]::before{display:block;margin-bottom:.5rem}
-  .trainer-access-register .trainer-access-actions,
-  .trainer-approvals-register .trainer-access-actions{display:flex;flex-wrap:wrap;justify-content:flex-start;align-items:flex-start;gap:.5rem;width:100%;white-space:normal}
-  .trainer-access-register .trainer-access-actions form,
-  .trainer-approvals-register .trainer-access-actions form{max-width:100%}
-  .trainer-access-register .trainer-access-actions button,
-  .trainer-access-register .trainer-access-actions a,
-  .trainer-approvals-register .trainer-access-actions button,
-  .trainer-approvals-register .trainer-access-actions a{max-width:100%;height:auto;white-space:normal}
-  .trainer-directory-table tbody td[data-label="Trainer"]{display:grid;grid-template-columns:6.25rem minmax(0,1fr)}
-  .trainer-directory-table tbody td[data-label="Trainer"]::before{display:block}
-  .trainer-directory-table tbody td[data-label="Actions"]{display:block}
-  .trainer-directory-table tbody td[data-label="Actions"]::before{display:none}
-  .trainer-directory-table tbody td form{flex-wrap:wrap}
-  .trainer-directory-table tbody td select{flex:1 1 9rem;max-width:100%}
+@media (min-width: 640px) {
+  .trainer-card-grid {
+    gap: 1rem;
+    padding: 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .trainer-card-grid {
+    padding: 1.25rem;
+  }
+}
+
+.trainer-card {
+  container: trainer-card / inline-size;
+  grid-row: span 3;
+  display: grid;
+  /* Same-cascade fallback before subgrid so headers, bodies, and footers align across rows. */
+  grid-template-rows: auto 1fr auto;
+  grid-template-rows: subgrid;
+  row-gap: 0.75rem;
+  min-inline-size: 0;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface);
+  padding: 1rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.trainer-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 4px 12px rgb(15 23 42 / 0.06);
+}
+
+.trainer-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.625rem;
+  min-inline-size: 0;
+}
+
+@container trainer-card (inline-size < 16rem) {
+  .trainer-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.trainer-access-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  inline-size: 100%;
+}
+
+.trainer-access-actions form {
+  max-inline-size: 100%;
+}
+
+.trainer-access-actions button,
+.trainer-access-actions a {
+  max-inline-size: 100%;
 }
 
 @media(max-width:1199px){

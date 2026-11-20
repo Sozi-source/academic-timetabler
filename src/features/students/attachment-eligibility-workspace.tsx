@@ -180,6 +180,7 @@ export function AttachmentEligibilityWorkspace({
       cohortName: student.cohortName,
       currentStageId: student.currentStageId,
       currentStageCode: student.currentStageCode,
+      unitDeliveryStageCode: null,
       attachmentStageId: chosenRule?.attachmentStageId ?? null,
       attachmentStageCode: chosenRule?.attachmentStageCode ?? 'Attachment',
       attachmentUnitCode: chosenRule?.attachmentUnitCode ?? 'ATT',
@@ -220,6 +221,7 @@ export function AttachmentEligibilityWorkspace({
       const payload = {
         rows: approvedCandidates.map((c) => {
           const notesParts: string[] = [];
+          if (c.unitDeliveryStageCode) notesParts.push(`Taking ${c.unitDeliveryStageCode} units`);
           if (c.isTransferStudent) notesParts.push('Transfer student');
           if (c.referredUnitCount > 0) notesParts.push(`${c.referredUnitCount} referred unit(s)`);
           if (manualNotes[c.studentId]) notesParts.push(manualNotes[c.studentId]);
@@ -662,6 +664,11 @@ export function AttachmentEligibilityWorkspace({
                       <td className="px-3 py-2.5 whitespace-nowrap">
                         <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 font-mono text-[11px] font-semibold text-slate-700">
                           {c.currentStageCode}
+                          {c.unitDeliveryStageCode ? (
+                            <span className="font-sans text-[10px] font-normal text-slate-500">
+                              (units: {c.unitDeliveryStageCode})
+                            </span>
+                          ) : null}
                           <ArrowRight className="size-3 text-slate-400" />
                           <span className="text-emerald-800">{c.attachmentStageCode}</span>
                         </span>

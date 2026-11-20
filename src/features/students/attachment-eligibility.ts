@@ -33,6 +33,8 @@ export interface AttachmentCandidate {
   cohortName: string;
   currentStageId: string | null;
   currentStageCode: string;
+  /** Stored stage when it differs from the intake-derived calendar stage (e.g., Y1S2 units in semester 3). */
+  unitDeliveryStageCode: string | null;
   attachmentStageId: string | null;
   attachmentStageCode: string;
   attachmentUnitCode: string;
@@ -70,6 +72,26 @@ function firstOf<T>(value: T | T[] | null | undefined): T | null {
   return value ?? null;
 }
 
+/**
+ * Computes a cohort's calendar semester number (1-indexed, 4-month terms: Jan/May/Sep)
+ * from its intake_date to the active academic period's start date.
+ * Does not modify stored student or cohort staging.
+ */
+function computeCalendarStageSequence(
+  intakeDate: string | null | undefined,
+  activePeriodStartsOn: string | null | undefined,
+): number | null {
+  if (!intakeDate || !activePeriodStartsOn) return null;
+  const intake = new Date(intakeDate);
+  const activeStart = new Date(activePeriodStartsOn);
+  if (Number.isNaN(intake.getTime()) || Number.isNaN(activeStart.getTime())) return null;
+  const monthsDiff =
+    (activeStart.getUTCFullYear() - intake.getUTCFullYear()) * 12 +
+    (activeStart.getUTCMonth() - intake.getUTCMonth());
+  const seq = Math.floor(monthsDiff / 4) + 1;
+  return seq >= 1 ? seq : 1;
+}
+
 export const getNextSemesterAttachmentData = cache(async (): Promise<NextSemesterAttachmentData> => {
   const profile = await requireHodAccess();
   if (!profile.activeDepartmentId) {
@@ -84,7 +106,14 @@ export const getNextSemesterAttachmentData = cache(async (): Promise<NextSemeste
   const supabase = await createClient();
   const departmentId = profile.activeDepartmentId;
 
-  const [programmesRes, stagesRes, stageUnitsRes, unitsRes, studentsRes] = await Promise.all([
+  const [activePeriodRes, programmesRes, stagesRes, stageUnitsRes, unitsRes, studentsRes] = await Promise.all([
+    supabase
+      .from('academic_periods')
+      .select('id, code, name, starts_on, status')
+      .eq('status', 'active')
+      .order('starts_on', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
     supabase
       .from('programmes')
       .select('id, code, name')
@@ -115,8 +144,8 @@ export const getNextSemesterAttachmentData = cache(async (): Promise<NextSemeste
         current_stage_id,
         lifecycle_status,
         academic_phase,
-        current_cohort:cohorts!students_current_cohort_id_fkey(id, code, name, current_stage_id),
-        admission_cohort:cohorts!students_admission_cohort_id_fkey(id, code, name, current_stage_id)
+        current_cohort:cohorts!students_current_cohort_id_fkey(id, code, name, intake_date, current_stage_id),
+        admission_cohort:cohorts!students_admission_cohort_id_fkey(id, code, name, intake_date, current_stage_id)
       `)
       .eq('department_id', departmentId)
       .in('lifecycle_status', ['admitted', 'active'])
@@ -128,6 +157,8 @@ export const getNextSemesterAttachmentData = cache(async (): Promise<NextSemeste
   if (stageUnitsRes.error) throw new Error(`Unable to load stage curriculum units: ${stageUnitsRes.error.message}`);
   if (unitsRes.error) throw new Error(`Unable to load curriculum units: ${unitsRes.error.message}`);
   if (studentsRes.error) throw new Error(`Unable to load active students: ${studentsRes.error.message}`);
+
+  const activePeriodStartsOn = activePeriodRes.data?.starts_on ?? null;
 
   const programmeById = new Map((programmesRes.data ?? []).map((p) => [p.id, p]));
   const stages = stagesRes.data ?? [];
@@ -186,6 +217,7 @@ export const getNextSemesterAttachmentData = cache(async (): Promise<NextSemeste
     cohortName: string;
     currentStageId: string | null;
     currentStageCode: string;
+    unitDeliveryStageCode: string | null;
     matchedRule: AttachmentStageRule | null;
   };
 
@@ -196,14 +228,28 @@ export const getNextSemesterAttachmentData = cache(async (): Promise<NextSemeste
     const curCohort = firstOf(s.current_cohort);
     const admCohort = firstOf(s.admission_cohort);
     const cohort = curCohort ?? admCohort;
-    const resolvedStageId = s.current_stage_id ?? cohort?.current_stage_id ?? null;
-    const resolvedStage = resolvedStageId ? stageById.get(resolvedStageId) : null;
-    const matchedRule = resolvedStageId ? ruleByPrecedingStageId.get(resolvedStageId) ?? null : null;
+    const storedStageId = s.current_stage_id ?? cohort?.current_stage_id ?? null;
+    const storedStage = storedStageId ? stageById.get(storedStageId) : null;
+
+    // Derive calendar stage from the student's current cohort intake_date (preserves deferred/resumed timelines)
+    // without modifying stored student/cohort staging.
+    const calendarSeq = computeCalendarStageSequence(cohort?.intake_date, activePeriodStartsOn);
+    const calendarStage =
+      calendarSeq !== null && s.programme_id
+        ? stageByProgSeq.get(`${s.programme_id}:${calendarSeq}`) ?? null
+        : null;
+
+    const effectiveStage = calendarStage ?? storedStage;
+    const effectiveStageId = effectiveStage?.id ?? storedStageId;
+    const matchedRule = effectiveStageId ? ruleByPrecedingStageId.get(effectiveStageId) ?? null : null;
 
     if (matchedRule) {
       matchedRule.dueCount += 1;
       dueStudentIds.push(s.id);
     }
+
+    const unitDeliveryStageCode =
+      storedStage && effectiveStage && storedStage.code !== effectiveStage.code ? storedStage.code : null;
 
     resolvedRows.push({
       studentId: s.id,
@@ -215,8 +261,9 @@ export const getNextSemesterAttachmentData = cache(async (): Promise<NextSemeste
       cohortId: cohort?.id ?? null,
       cohortCode: cohort?.code ?? '—',
       cohortName: cohort?.name ?? cohort?.code ?? 'Unassigned',
-      currentStageId: resolvedStageId,
-      currentStageCode: resolvedStage?.code ?? '—',
+      currentStageId: effectiveStageId,
+      currentStageCode: effectiveStage?.code ?? '—',
+      unitDeliveryStageCode,
       matchedRule,
     });
   }
@@ -266,6 +313,7 @@ export const getNextSemesterAttachmentData = cache(async (): Promise<NextSemeste
         cohortName: row.cohortName,
         currentStageId: row.currentStageId,
         currentStageCode: row.currentStageCode,
+        unitDeliveryStageCode: row.unitDeliveryStageCode,
         attachmentStageId: row.matchedRule.attachmentStageId,
         attachmentStageCode: row.matchedRule.attachmentStageCode,
         attachmentUnitCode: row.matchedRule.attachmentUnitCode,

@@ -116,11 +116,6 @@ export function GeneratorUnscheduledList({
           Unresolved sessions
         </h2>
 
-        <p className="mt-1 text-sm text-text-muted">
-          These requests could not be placed
-          automatically and require configuration or
-          manual review.
-        </p>
 
         {!exchangeSuggestionsEvaluated ? (
           <p className="mt-2 text-xs leading-5 text-text-muted">
@@ -384,10 +379,6 @@ export function GeneratorConflictList({
           Conflict report
         </h2>
 
-        <p className="mt-1 text-sm text-text-muted">
-          Review planning warnings and blocked
-          placements before publishing.
-        </p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">

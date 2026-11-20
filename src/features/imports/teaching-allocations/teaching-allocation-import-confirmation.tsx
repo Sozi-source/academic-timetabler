@@ -101,11 +101,6 @@ export function TeachingAllocationImportConfirmation({
           Confirm allocation import
         </h2>
 
-        <p className="mt-1 text-sm leading-6 text-text-muted">
-          Only rows marked Ready will be inserted.
-          The database will recheck trainer workload
-          and scheduling constraints transactionally.
-        </p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">

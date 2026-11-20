@@ -109,7 +109,6 @@ export function BulkUploadView() {
       <PageHeader
         eyebrow="Curriculum Management"
         title="Bulk Curriculum Upload"
-        description="Batch upload Course Outlines and Schemes of Work via Excel (.xlsx) or Word ZIP archives (.zip)."
         icon={UploadCloud}
         backHref="/teaching-documents/curriculum"
         backLabel="Back to Curriculum"

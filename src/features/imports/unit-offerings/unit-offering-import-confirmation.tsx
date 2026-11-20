@@ -101,11 +101,6 @@ export function UnitOfferingImportConfirmation({
             Import
           </h2>
 
-          <p className="mt-1 text-sm leading-6 text-text-muted">
-            Only valid staged rows will modify the
-            database. Invalid and duplicate rows
-            remain in the import audit history.
-          </p>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div className="rounded-xl border border-border bg-surface-subtle p-3">

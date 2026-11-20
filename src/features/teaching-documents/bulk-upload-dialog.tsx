@@ -130,9 +130,6 @@ export function BulkCourseOutlineUploadDialog() {
                   <h2 className="text-base font-bold text-text-primary">
                     Authoritative Bulk Curriculum Upload
                   </h2>
-                  <p className="text-xs text-text-muted">
-                    Upload course outlines and schemes of work together. Each detected document type is published separately.
-                  </p>
                 </div>
               </div>
               <button

@@ -79,11 +79,6 @@ export function ProgrammeStageManagement({
               Programme stages
             </h1>
 
-            <p className="mt-1 max-w-3xl text-sm leading-5 text-muted-foreground">
-              Review programme stages and confirm the curriculum
-              units attached to each stage. Student registration
-              uses these bindings to determine expected units.
-            </p>
           </div>
 
           <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-900">

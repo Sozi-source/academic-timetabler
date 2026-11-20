@@ -179,7 +179,7 @@ export default async function AttendanceAnalyticsPage({
 
       <section className="overflow-hidden rounded-xl border border-border bg-white">
         <div className="flex flex-wrap items-end justify-between gap-3 border-b border-border px-4 py-3">
-          <div><h2 className="text-sm font-bold text-text-primary">Students who missed class</h2><p className="mt-1 text-xs text-text-muted">Recorded absences and the units missed during the selected period.</p></div>
+          <div><h2 className="text-sm font-bold text-text-primary">Students who missed class</h2></div>
           <form className="flex flex-wrap items-end gap-2">
             <label className="grid gap-1 text-xs font-medium text-text-secondary">From<input name="startDate" type="date" defaultValue={startDate} className="h-9 rounded-md border border-border px-2" /></label>
             <label className="grid gap-1 text-xs font-medium text-text-secondary">To<input name="endDate" type="date" defaultValue={endDate} className="h-9 rounded-md border border-border px-2" /></label>

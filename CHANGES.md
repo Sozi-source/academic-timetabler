@@ -1,3 +1,10 @@
+### 2026-11-20: Purge Unnecessary Descriptive Sentences Across UI
+
+**Summary:**
+- **Removed 84 verbose descriptive subtitle sentences across 65 pages and feature components:**
+  - Removed redundant `PageHeader` string `description` sentences across assessment, exam-setting, attachment eligibility, imports, reporting, and teaching-document views.
+  - Removed redundant muted descriptive `<p>` subtitles beneath section headings (`Access register`, `Bulk PIN generation`, `Staff Workspace Access & Account Approvals`, import upload/confirmation panels, timetable generator/editor/publication sections, unit/curriculum/student-registration workspaces, and staff document cards) while preserving dynamic counts, status badges, error/empty states, and confirmation notices.
+
 ### 2026-11-20: Replace Stacked Trainer Lists with Responsive Multi-Column Medium Cards
 
 **Summary:**

@@ -72,9 +72,6 @@ export function IncidentCreateForm({
   return (
     <section className="rounded-xl border border-border bg-white p-4">
       <h2 className="text-sm font-bold text-text-primary">Log operational incident</h2>
-      <p className="mt-0.5 text-[10px] text-text-muted">
-        Pilot/Production issues only. Pre-release UAT issues remain in the Defect register.
-      </p>
 
       <div className="mt-3 grid gap-3 md:grid-cols-3">
         <select

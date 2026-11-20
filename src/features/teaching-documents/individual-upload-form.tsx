@@ -212,7 +212,6 @@ export function IndividualUploadForm({
       <PageHeader
         eyebrow="Teaching documents"
         title="Course Outline Upload"
-        description="Upload a Word (.docx) or Excel (.xlsx) course outline."
         icon={FileUp}
         backHref="/teaching-documents/curriculum"
         backLabel="Curriculum Content"

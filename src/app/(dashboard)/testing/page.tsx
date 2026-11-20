@@ -143,9 +143,6 @@ export default async function SystemTestingPage() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="text-sm font-bold text-text-primary">Automated release gate</h2>
-              <p className="mt-0.5 text-[11px] text-text-muted">
-                Current department production prerequisites.
-              </p>
             </div>
             <Badge variant={readiness.ready ? 'success' : 'danger'}>
               {readiness.ready
@@ -181,9 +178,6 @@ export default async function SystemTestingPage() {
       <section className="space-y-3">
         <div>
           <h2 className="text-sm font-bold text-text-primary">Module test entry points</h2>
-          <p className="mt-0.5 text-[11px] text-text-muted">
-            Ready to test means enough current data exists to exercise the workflow.
-          </p>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -219,9 +213,6 @@ export default async function SystemTestingPage() {
       <Card className="overflow-hidden">
         <div className="border-b border-border px-4 py-3">
           <h2 className="text-sm font-bold text-text-primary">UAT history</h2>
-          <p className="mt-0.5 text-[11px] text-text-muted">
-            Completed runs are immutable; repeat testing creates a new run.
-          </p>
         </div>
 
         {runs.length === 0 ? (

@@ -68,7 +68,6 @@ export default async function PastPaperImportPage({
       <PageHeader
         eyebrow="Exam setting · Step 2 of 5"
         title="Past-paper import and review"
-        description="Papers with clean parser results and a unique match between the parsed unit name and a department unit name register automatically. Paper unit codes are ignored for matching. Uncertain matches stay in review."
         icon={Archive}
         backHref="/assessment/exam-setting"
         backLabel="Blueprints"

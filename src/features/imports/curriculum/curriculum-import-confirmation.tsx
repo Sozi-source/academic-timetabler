@@ -55,9 +55,6 @@ export function CurriculumImportConfirmation({
     <section className="space-y-4 rounded-2xl border border-border bg-surface p-5">
       <div>
         <h2 className="font-semibold text-text-primary">Confirm curriculum import</h2>
-        <p className="mt-1 text-sm text-text-muted">
-          Curriculum import is blocked until every row is clean. This prevents partial curriculum structures.
-        </p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">

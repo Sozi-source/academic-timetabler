@@ -91,9 +91,6 @@ export function StageProgressionManager({
             Progress students
           </h1>
 
-          <p className="mt-1 text-sm text-muted-foreground">
-            Review the next stage and select who progresses.
-          </p>
         </div>
       </section>
 

@@ -105,7 +105,6 @@ export default async function DepartmentStudentUnitRegistrationPage({
 
       <Card className="p-4">
         <h2 className="text-sm font-medium text-text-primary">Manage unit registrations</h2>
-        <p className="mb-4 mt-1 text-xs text-text-muted">Review the student&apos;s registered units across academic periods, then add units for the active period.</p>
         <form action={registerStudentUnitsByDepartment} className="space-y-4">
           <input type="hidden" name="studentId" value={context.student.id} />
           {cohort ? <input type="hidden" name="returnCohort" value={cohort} /> : null}

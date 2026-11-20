@@ -15,7 +15,6 @@ export default async function StudentAttachmentEligibilityPage() {
       <PageHeader
         eyebrow="Student Lifecycle"
         title="Next semester attachment list"
-        description="Auto-generated from curriculum attachment stages with HOD review, manual overrides, Excel export, and bulk transition."
         icon={Briefcase}
         context={
           <Badge variant="neutral">

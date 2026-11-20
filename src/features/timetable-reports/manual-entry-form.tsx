@@ -18,7 +18,6 @@ export function ManualTrainerEntryForm({ academicPeriodId, options }: { academic
     <section className="rounded-2xl border border-primary/20 bg-primary-soft/20 p-4 shadow-sm">
       <div className="mb-4">
         <h2 className="font-semibold text-text-primary">Add an external-department unit</h2>
-        <p className="mt-1 text-xs text-text-muted">Add a unit directly to a trainer’s personal timetable when its owning department has not scheduled it in this system.</p>
       </div>
       <form action={action} className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         <input type="hidden" name="academicPeriodId" value={academicPeriodId} />

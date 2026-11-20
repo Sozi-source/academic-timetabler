@@ -520,9 +520,6 @@ export function AttachmentEligibilityWorkspace({
           <div className="flex items-center justify-between gap-2 mb-3">
             <div>
               <h3 className="text-xs font-bold text-slate-900">Add Exception Student Manually</h3>
-              <p className="text-[11px] text-slate-600">
-                Include an active student who is outside the automatic stage rule (e.g., deferred previous attachment or transfer).
-              </p>
             </div>
             <button
               type="button"
@@ -602,14 +599,13 @@ export function AttachmentEligibilityWorkspace({
       {/* Candidate Review Table */}
       <Card className="overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[820px] text-left text-xs">
+          <table className="w-full min-w-[680px] text-left text-xs">
             <thead className="border-b border-slate-200 bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-500">
               <tr>
-                <th className="w-10 px-3 py-3 text-center print:hidden">Approve</th>
-                <th className="w-10 px-2 py-3 text-center">No.</th>
+                <th className="w-14 px-3 py-3 text-center whitespace-nowrap print:hidden">Approve</th>
+                <th className="w-12 px-2 py-3 text-center whitespace-nowrap">No.</th>
                 <th className="px-3 py-3 whitespace-nowrap">Admission No.</th>
                 <th className="px-3 py-3 whitespace-nowrap">Student Full Name</th>
-                <th className="px-3 py-3 whitespace-nowrap">Programme &amp; Cohort</th>
                 <th className="px-3 py-3 whitespace-nowrap">Stage Progression</th>
                 <th className="px-3 py-3 whitespace-nowrap">Attachment Unit</th>
                 <th className="px-3 py-3 whitespace-nowrap">Flags / Notes</th>
@@ -618,7 +614,7 @@ export function AttachmentEligibilityWorkspace({
             <tbody className="divide-y divide-slate-100">
               {filteredCandidates.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center text-xs text-slate-500">
+                  <td colSpan={7} className="px-4 py-12 text-center text-xs text-slate-500">
                     <p className="font-semibold text-slate-700">No students match the current filters.</p>
                     <p className="mt-1 text-[11px] text-slate-400">
                       Adjust your search/filters or use &ldquo;Add Override&rdquo; to include a student manually.
@@ -644,7 +640,7 @@ export function AttachmentEligibilityWorkspace({
                           className="size-4 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
                         />
                       </td>
-                      <td className="px-2 py-2.5 text-center text-slate-400 font-medium">{idx + 1}.</td>
+                      <td className="px-2 py-2.5 text-center text-slate-400 font-medium whitespace-nowrap">{idx + 1}.</td>
                       <td className="px-3 py-2.5 font-mono font-bold text-slate-900 whitespace-nowrap">
                         {c.admissionNumber}
                       </td>
@@ -655,11 +651,6 @@ export function AttachmentEligibilityWorkspace({
                         >
                           {c.fullName}
                         </Link>
-                      </td>
-                      <td className="px-3 py-2.5 whitespace-nowrap">
-                        <span className="font-bold text-slate-800">{c.programmeCode}</span>
-                        <span className="mx-1.5 text-slate-300">·</span>
-                        <span className="text-slate-600">{c.cohortName}</span>
                       </td>
                       <td className="px-3 py-2.5 whitespace-nowrap">
                         <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 font-mono text-[11px] font-semibold text-slate-700">

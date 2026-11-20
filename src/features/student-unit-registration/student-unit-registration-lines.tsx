@@ -140,7 +140,6 @@ export function StudentUnitRegistrationLines({
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
           <div>
             <h2 className="text-sm font-medium text-text-primary">Registered units</h2>
-            <p className="mt-0.5 text-xs text-text-muted">Previous and current registrations are listed by academic period and curriculum stage.</p>
           </div>
           {currentRegistrations.length > 0 ? (
             <div className="flex flex-wrap items-center gap-2">

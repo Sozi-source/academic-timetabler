@@ -101,11 +101,6 @@ export function TrainerImportConfirmation({
           Confirm Trainer import
         </h2>
 
-        <p className="mt-1 text-sm leading-6 text-text-muted">
-          Only rows marked Ready will be inserted.
-          Invalid and duplicate rows will be retained
-          in the audit record and marked as skipped.
-        </p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">

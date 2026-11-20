@@ -64,7 +64,6 @@ export async function MasterDataImportReviewPage({
             ? `${label} import results`
             : `Review ${label} import`
         }
-        description="Review validated rows before confirming import."
         context={
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="neutral">
@@ -101,7 +100,6 @@ export async function MasterDataImportReviewPage({
         <MetricCard
           label="Workbook rows"
           value={String(batch.totalRows)}
-          description="All non-empty spreadsheet rows"
           icon={FileSpreadsheet}
           status="Total"
         />
@@ -112,21 +110,18 @@ export async function MasterDataImportReviewPage({
               ? batch.importedRows
               : batch.validRows,
           )}
-          description="Records that passed validation"
           icon={CheckCircle2}
           status={completed ? 'Imported' : 'Valid'}
         />
         <MetricCard
           label="Invalid rows"
           value={String(batch.invalidRows)}
-          description="Rows requiring correction"
           icon={AlertTriangle}
           status="Errors"
         />
         <MetricCard
           label="Duplicates"
           value={String(batch.duplicateRows)}
-          description="Workbook or database duplicates"
           icon={Copy}
           status="Skipped"
         />

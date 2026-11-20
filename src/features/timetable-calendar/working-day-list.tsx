@@ -44,10 +44,6 @@ export function WorkingDayList({
           No Working Days configured
         </h3>
 
-        <p className="mt-1 max-w-md text-xs leading-5 text-text-muted">
-          Set Monday to Friday automatically or add
-          individual teaching days.
-        </p>
       </div>
     );
   }

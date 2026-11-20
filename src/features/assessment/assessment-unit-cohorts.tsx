@@ -52,7 +52,6 @@ export function AssessmentUnitCohorts({ unit, periodName, periodId, cohorts }: A
       <section className="space-y-3 rounded-xl border border-border bg-surface p-4 shadow-2xs">
         <div>
           <h2 className="text-sm font-semibold text-slate-700">Choose a cohort</h2>
-          <p className="mt-0.5 text-xs text-slate-500">Select a cohort to show its currently registered students and available markbooks.</p>
         </div>
 
         {cohorts.length === 0 ? (

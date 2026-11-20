@@ -121,7 +121,6 @@ export default async function AssessmentAnalysisPage() {
           value={String(
             bundles.length,
           )}
-          description="Unit-level CAT and Exam groups"
           icon={ClipboardCheck}
           status="Total"
         />
@@ -131,7 +130,6 @@ export default async function AssessmentAnalysisPage() {
           value={String(
             analysed,
           )}
-          description="Assessment sets with numeric marks"
           icon={BarChart3}
           status="Results"
         />
@@ -141,7 +139,6 @@ export default async function AssessmentAnalysisPage() {
           value={String(
             totalRegistered,
           )}
-          description="Locked assessment population"
           icon={UsersRound}
           status="Population"
         />

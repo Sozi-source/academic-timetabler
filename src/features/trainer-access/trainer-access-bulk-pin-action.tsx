@@ -66,9 +66,6 @@ export function TrainerAccessBulkPinAction({
           <h3 className="text-xs font-semibold text-text-primary lg:text-sm">
             Bulk PIN generation
           </h3>
-          <p className="mt-1 max-w-3xl text-xs leading-5 text-text-muted">
-            Generate or replace one-time PINs for all {trainers.length} eligible external trainer{trainers.length === 1 ? '' : 's'} with a registered email. Existing PINs will stop working.
-          </p>
         </div>
 
         <form action={formAction} className="w-full shrink-0 sm:w-auto">
@@ -117,9 +114,6 @@ export function TrainerAccessBulkPinAction({
                 <div>
                   <p className="font-semibold text-text-primary">
                     One-time PIN list ({state.pins.length})
-                  </p>
-                  <p className="mt-0.5 text-[11px] leading-4 text-text-muted">
-                    Download and distribute these PINs now. They are shown only once and are not stored in plain text.
                   </p>
                 </div>
 

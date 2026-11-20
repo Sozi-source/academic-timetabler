@@ -97,9 +97,6 @@ export function TrainerImportUploadForm() {
               Use the standardized template
             </h2>
 
-            <p className="text-sm leading-6 text-text-muted">
-              Fill trainer records using the template structure, then upload the workbook.
-            </p>
 
             <TemplateDownloadLink
               entityType="trainers"

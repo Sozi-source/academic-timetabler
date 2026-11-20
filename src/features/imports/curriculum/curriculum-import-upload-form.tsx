@@ -43,9 +43,6 @@ export function CurriculumImportUploadForm() {
           </div>
           <div>
             <h2 className="font-semibold text-text-primary">Use the Curriculum template</h2>
-            <p className="mt-1 text-sm leading-6 text-text-muted">
-              Fixed Excel headers: Programme Code, Stage, Unit Code and Unit Name. CSV files are not accepted.
-            </p>
             <TemplateDownloadLink entityType="curriculum" label="Download Curriculum template" className="mt-3" />
           </div>
         </div>
@@ -54,9 +51,6 @@ export function CurriculumImportUploadForm() {
       <section className="space-y-4 rounded-2xl border border-border bg-surface p-5">
         <div>
           <h2 className="font-semibold text-text-primary">Upload workbook</h2>
-          <p className="mt-1 text-sm text-text-muted">
-            Existing units are matched by Programme Code + Unit Code before anything new is created.
-          </p>
         </div>
 
         <label htmlFor="curriculum-workbook" className="flex min-h-44 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-surface-subtle px-5 py-6 text-center transition hover:border-primary hover:bg-primary-subtle">

@@ -86,9 +86,6 @@ export function MasterDataImportConfirmation({
         <h2 className="font-semibold text-text-primary">
           Confirm import
         </h2>
-        <p className="mt-1 text-sm text-text-muted">
-          Only Ready rows will be inserted. Invalid and duplicate rows will be skipped safely.
-        </p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">

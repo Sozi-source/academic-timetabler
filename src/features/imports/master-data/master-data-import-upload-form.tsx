@@ -103,9 +103,6 @@ export function MasterDataImportUploadForm({
             <h2 className="font-semibold text-text-primary">
               Fixed-header template
             </h2>
-            <p className="text-sm leading-6 text-text-muted">
-              Keep headers unchanged. Fill required fields; optional fields may remain blank.
-            </p>
             <TemplateDownloadLink
               entityType={entity}
               label={`Download ${label} template`}

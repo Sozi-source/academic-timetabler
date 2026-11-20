@@ -75,9 +75,6 @@ export function DeploymentCreateForm({
     <section className="rounded-xl border border-border bg-white p-4">
       <div>
         <h2 className="text-sm font-bold text-text-primary">Record deployment</h2>
-        <p className="mt-0.5 text-[10px] text-text-muted">
-          Evidence only. Hosting deployment remains outside Academic Planner.
-        </p>
       </div>
 
       <div className="mt-3 grid gap-3 lg:grid-cols-[10rem_minmax(0,1fr)]">

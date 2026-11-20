@@ -574,9 +574,6 @@ export function BatchUnitRegistration({
               <h2 className="text-sm font-semibold text-slate-950">
                 Students
               </h2>
-              <p className="mt-0.5 text-xs text-slate-500">
-                Registration blockers are shown against each student.
-              </p>
             </div>
 
             {mode === 'cohort' && cohortId ? (

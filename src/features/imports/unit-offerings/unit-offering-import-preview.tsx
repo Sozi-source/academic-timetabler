@@ -259,9 +259,6 @@ export function UnitOfferingImportPreview({
                 Shared classes detected
               </h2>
 
-              <p className="mt-1 text-sm leading-6 text-text-muted">
-                Similar valid units are grouped automatically when their normalized names, delivery type, weekly sessions and duration agree. Every cohort still retains its official programme unit and code.
-              </p>
 
               <div className="mt-3 flex flex-wrap gap-2">
                 {detectedSharedGroups.map(
@@ -286,11 +283,6 @@ export function UnitOfferingImportPreview({
             Workbook rows
           </h2>
 
-          <p className="mt-1 text-sm text-text-muted">
-            Review database matches and
-            validation errors before the
-            import is confirmed.
-          </p>
         </div>
 
         <div className="w-full overflow-hidden">

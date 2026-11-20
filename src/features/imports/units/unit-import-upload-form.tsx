@@ -97,9 +97,6 @@ export function UnitImportUploadForm() {
               Use the Units template
             </h2>
 
-            <p className="text-sm leading-6 text-text-muted">
-              Use existing Programme Codes to link each unit to its programme.
-            </p>
 
             <TemplateDownloadLink
               entityType="units"

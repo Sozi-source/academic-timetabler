@@ -139,11 +139,6 @@ export default async function StudentProfilePage({
                 Confirm your details
               </h2>
 
-              <p className="mt-0.5 text-[11px] text-text-muted">
-                Contact the department if
-                your academic identity is
-                incorrect.
-              </p>
             </div>
           </div>
 

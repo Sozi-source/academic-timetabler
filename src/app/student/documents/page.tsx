@@ -76,9 +76,6 @@ export default async function StudentDocumentsPage() {
             <h1 className="text-xl font-bold text-text-primary sm:text-2xl">
               Documents & Notes
             </h1>
-            <p className="text-xs text-text-muted">
-              Course outlines and lecture notes published for {student.programmeName}
-            </p>
           </div>
 
           <Badge variant="neutral" className="px-3 py-1 font-mono text-xs">

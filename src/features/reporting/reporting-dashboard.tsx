@@ -119,7 +119,6 @@ export function ReportingDashboard({ data }: { data: DepartmentExecutiveReportDa
       <PageHeader
         eyebrow="Intelligence & Oversight"
         title="Department Academic Reports"
-        description="Comprehensive operational reporting and compliance scorecards across all academic pillars."
         icon={BarChart3}
         context={
           <div className="flex flex-wrap items-center gap-2">

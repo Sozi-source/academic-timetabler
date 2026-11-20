@@ -361,7 +361,6 @@ export default async function AdminTrainerPortalViewPage({ params, searchParams 
           <div className="flex items-center justify-between border-b border-border pb-3">
             <div>
               <h2 className="text-sm font-bold text-text-primary">Allocated Course Units ({groupedUnits.length})</h2>
-              <p className="text-xs text-text-muted">Consolidated teaching allocations and active markbook entries.</p>
             </div>
             <Badge variant="neutral" className="text-xs font-mono">{totalWeeklyHours} hrs/week</Badge>
           </div>

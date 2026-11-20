@@ -36,9 +36,6 @@ export function ConstraintWorkspace({
           <h2 className="text-sm font-semibold text-text-primary xl:text-base">
             Add constraint
           </h2>
-          <p className="mt-1 text-xs text-text-muted xl:text-sm">
-            Block exceptional room, class or institution periods. Trainer availability is managed separately.
-          </p>
         </div>
 
         <ConstraintForm

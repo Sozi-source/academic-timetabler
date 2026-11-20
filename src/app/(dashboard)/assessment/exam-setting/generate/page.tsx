@@ -57,7 +57,6 @@ export default async function ExamGeneratePage({ searchParams }: { searchParams:
       <PageHeader
         eyebrow="Exam setting · Step 4 of 5"
         title="Generate a new examination"
-        description="Build a complete draft from the full reviewed past-paper archive for one unit. Every generated question keeps its historical source link and is checked for wording overlap."
         icon={WandSparkles}
         backHref="/assessment/exam-setting/question-bank"
         backLabel="Question bank"

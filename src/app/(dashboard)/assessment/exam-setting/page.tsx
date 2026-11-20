@@ -52,7 +52,6 @@ export default async function ExamSettingPage({
       <PageHeader
         eyebrow="Exam setting · Step 1 of 5"
         title="Exam blueprints"
-        description="Set the paper structure before importing past papers or preparing a new examination."
         icon={BookOpenCheck}
         context={<Badge variant="info">{workspace.departmentName}</Badge>}
       />

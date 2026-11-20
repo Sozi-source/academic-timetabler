@@ -131,7 +131,6 @@ export function TrainerUnitMarkInvites({ unitId, unitName, periodId, periodName 
         <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white text-sky-700"><ShieldCheck className="size-5" /></span>
         <div>
           <h2 className="text-sm font-semibold text-slate-900">One trainer link for this unit</h2>
-          <p className="mt-0.5 text-xs text-slate-600">The trainer can switch between all available cohorts and submit each cohort separately.</p>
         </div>
       </div>
 

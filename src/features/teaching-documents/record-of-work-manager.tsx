@@ -241,9 +241,6 @@ export function RecordOfWorkManager({
               <h2 className="text-sm font-bold text-text-primary">
                 Log Teaching Session Delivery
               </h2>
-              <p className="text-[11px] text-text-muted">
-                Selecting a week auto-populates topics & specific learning outcomes from the Scheme of Work.
-              </p>
             </div>
             <Badge variant="success">Auto-Filled from Scheme</Badge>
           </div>

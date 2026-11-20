@@ -78,9 +78,6 @@ export default async function AcademicYearsPage() {
                   Create Academic Year
                 </h2>
 
-                <p className="mt-1 text-xs text-text-muted">
-                  New years begin in planned status.
-                </p>
               </div>
             </div>
           </CardHeader>

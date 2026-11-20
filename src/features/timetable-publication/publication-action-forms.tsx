@@ -59,9 +59,6 @@ export function PublishCurrentTimetableForm({
     <form action={action} className="rounded-2xl border border-border bg-surface p-5 shadow-sm">
       <input type="hidden" name="academicPeriodId" value={academicPeriodId} />
       <h2 className="font-semibold text-text-primary">Publish the current timetable</h2>
-      <p className="mt-1 text-sm text-text-muted">
-        The system will run every final check, publish the timetable as <strong>{nextVersionTitle}</strong>, and archive the former published version automatically.
-      </p>
       <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs leading-5 text-text-muted">
           No title, comment, review or separate approval step is required.

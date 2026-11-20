@@ -65,9 +65,6 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
             <h2 className="text-sm font-bold text-text-primary">
               Teaching Documents
             </h2>
-            <p className="text-xs text-text-muted">
-              Official unit files and submission statuses.
-            </p>
           </div>
           <Badge variant="success">Official</Badge>
         </div>
@@ -91,9 +88,6 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
                 )}
               </div>
               <h3 className="mt-3 text-sm font-bold text-text-primary">Course Outline</h3>
-              <p className="mt-1 text-[11px] leading-relaxed text-text-muted">
-                Outcomes, schedule, grading, and references.
-              </p>
               {coStatus?.status === 'returned' && coStatus.reviewNote && (
                 <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 p-2 text-[11px] text-amber-800 leading-snug">
                   <span className="font-semibold block text-[10px] uppercase tracking-wider text-amber-700">HOD Note:</span>
@@ -147,9 +141,6 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
                 )}
               </div>
               <h3 className="mt-3 text-sm font-bold text-text-primary">Scheme of Work</h3>
-              <p className="mt-1 text-[11px] leading-relaxed text-text-muted">
-                Weekly lessons, activities, and resources.
-              </p>
               {sowStatus?.status === 'returned' && sowStatus.reviewNote && (
                 <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 p-2 text-[11px] text-amber-800 leading-snug">
                   <span className="font-semibold block text-[10px] uppercase tracking-wider text-amber-700">HOD Note:</span>
@@ -255,9 +246,6 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
             <h2 className="text-sm font-bold text-text-primary">
               Attendance & Signing Sheets
             </h2>
-            <p className="text-xs text-text-muted">
-              Pre-populated registers with registered students.
-            </p>
           </div>
           <Badge variant="neutral">3 Sheets</Badge>
         </div>
@@ -275,9 +263,6 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
               <h3 className="mt-3 text-sm font-bold text-text-primary">
                 Class Attendance Sheet
               </h3>
-              <p className="mt-1 text-[11px] leading-relaxed text-text-muted">
-                Weekly lesson attendance roll for student signatures.
-              </p>
             </div>
             <div className="mt-4 pt-3 border-t border-border">
               <a
@@ -304,9 +289,6 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
               <h3 className="mt-3 text-sm font-bold text-text-primary">
                 CAT Attendance List
               </h3>
-              <p className="mt-1 text-[11px] leading-relaxed text-text-muted">
-                Candidate test attendance and signature roll.
-              </p>
             </div>
             <div className="mt-4 pt-3 border-t border-border">
               <a
@@ -333,9 +315,6 @@ export default async function StaffUnitDocumentsPage({ params }: PageProps) {
               <h3 className="mt-3 text-sm font-bold text-text-primary">
                 Exam Attendance List
               </h3>
-              <p className="mt-1 text-[11px] leading-relaxed text-text-muted">
-                Official candidate examination and script booklet register.
-              </p>
             </div>
             <div className="mt-4 pt-3 border-t border-border">
               <a

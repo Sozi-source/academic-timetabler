@@ -203,9 +203,6 @@ export function UnitFormFields({
           <h3 className="text-sm font-semibold text-text-primary">
             Teaching structure
           </h3>
-          <p className="mt-1 text-xs text-text-muted">
-            Define the weekly teaching requirement and room needs for the generator.
-          </p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
@@ -317,9 +314,6 @@ export function UnitFormFields({
           <h3 className="text-sm font-semibold text-text-primary">
             Timetable and status
           </h3>
-          <p className="mt-1 text-xs text-text-muted">
-            Configure timetable scheduling availability and active status for this unit.
-          </p>
         </div>
 
         <div className="flex flex-wrap gap-6">

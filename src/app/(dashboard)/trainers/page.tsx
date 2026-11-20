@@ -181,9 +181,6 @@ export default async function StaffManagementPage() {
               <h2 id="access-approvals-heading" className="text-sm font-bold text-text-primary">
                 Staff Workspace Access & Account Approvals
               </h2>
-              <p className="text-xs text-text-muted">
-                Link and approve registered trainers to access their personal staff workspace.
-              </p>
             </div>
           </div>
 

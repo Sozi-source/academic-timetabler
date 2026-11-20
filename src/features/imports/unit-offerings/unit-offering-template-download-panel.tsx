@@ -77,11 +77,6 @@ export function UnitOfferingTemplateDownloadPanel({
               Blank template
             </h2>
 
-            <p className="mt-1 text-xs leading-5 text-text-muted">
-              Download an empty standardized workbook
-              and enter the Semester Units on Offer
-              manually.
-            </p>
 
             <TemplateDownloadLink
               entityType="unit_offerings"
@@ -106,11 +101,6 @@ export function UnitOfferingTemplateDownloadPanel({
               Prefilled semester template
             </h2>
 
-            <p className="mt-1 text-xs leading-5 text-text-muted">
-              Generate a workbook from the programme
-              units you registered for each active
-              cohort&apos;s current stage.
-            </p>
 
             <label
               htmlFor="unit-offering-academic-period"

@@ -97,9 +97,6 @@ export function RoomImportUploadForm() {
               Use the Rooms template
             </h2>
 
-            <p className="text-sm leading-6 text-text-muted">
-              Fill room records using the template structure, then upload the workbook.
-            </p>
 
             <TemplateDownloadLink
               entityType="rooms"

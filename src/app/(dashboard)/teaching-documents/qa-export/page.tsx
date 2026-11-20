@@ -96,7 +96,6 @@ export default async function TeachingDocumentQaExportPage() {
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <div>
                 <h2 className="text-xs font-bold text-text-primary">Available periods</h2>
-                <p className="mt-0.5 text-[10px] text-text-muted">Approval coverage for the selected department</p>
               </div>
               <Badge variant="info">{data.periods.length} periods</Badge>
             </div>

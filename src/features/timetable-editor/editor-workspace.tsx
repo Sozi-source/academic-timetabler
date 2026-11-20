@@ -366,13 +366,6 @@ export function TimetableEditorWorkspace({
                 {data.missingAllocations.length})
               </h2>
 
-              <p className="mt-1 text-xs text-text-muted">
-                These allocations are not yet placed on the
-                grid. Click{' '}
-                <strong>Place on Timetable</strong> to assign
-                their Day, Slot, and Room directly from your
-                physical master timetable.
-              </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">

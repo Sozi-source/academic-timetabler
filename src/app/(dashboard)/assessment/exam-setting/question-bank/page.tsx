@@ -36,7 +36,6 @@ export default async function ExamQuestionBankPage({ searchParams }: { searchPar
       <PageHeader
         eyebrow="Exam setting · Step 3 of 5"
         title="Historical question bank"
-        description="Tag reviewed past-paper questions against the unit curriculum. Historical questions remain reference material and are never inserted verbatim into a new paper."
         icon={BookOpenCheck}
         backHref="/assessment/exam-setting/past-papers"
         backLabel="Past papers"

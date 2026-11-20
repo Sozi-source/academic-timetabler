@@ -97,9 +97,6 @@ export function TeachingAllocationImportUploadForm() {
               Use the standardized allocation template
             </h2>
 
-            <p className="text-sm leading-6 text-text-muted">
-              Use period, cohort, unit, trainer, and room codes. Identifiers are resolved automatically.
-            </p>
 
             <TemplateDownloadLink
               entityType="teaching_allocations"

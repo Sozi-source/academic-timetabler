@@ -93,9 +93,6 @@ export default async function TrainerAccessPage() {
               Access register
             </h2>
 
-            <p className="mt-0.5 text-xs text-text-muted">
-              Link trainer accounts and generate one-time shareable PINs for the external trainer portal.
-            </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">

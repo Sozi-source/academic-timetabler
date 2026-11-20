@@ -16,7 +16,6 @@ export function CurriculumImportPreview({ rows }: { rows: CurriculumImportStaged
     <section className="overflow-hidden rounded-2xl border border-border bg-surface">
       <div className="border-b border-border px-5 py-4">
         <h2 className="font-semibold text-text-primary">Curriculum review</h2>
-        <p className="mt-1 text-sm text-text-muted">Review matching and conflicts before committing.</p>
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full text-left text-sm">

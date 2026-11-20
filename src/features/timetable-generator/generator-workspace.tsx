@@ -356,12 +356,6 @@ export function GeneratorWorkspace({
             Generate the first timetable preview
           </h2>
 
-          <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-text-muted">
-            Select an Academic Period to evaluate
-            teaching allocations, working days, time
-            slots, trainer workload and room
-            availability.
-          </p>
         </section>
       ) : (
         <div className="space-y-8">

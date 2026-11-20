@@ -101,11 +101,6 @@ export function TeachingAllocationTable({
           No teaching allocations yet
         </h2>
 
-        <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-text-muted">
-          Import allocations from the standardized
-          workbook or register them individually before
-          generating a timetable.
-        </p>
       </div>
     );
   }

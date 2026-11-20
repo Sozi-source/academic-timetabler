@@ -246,11 +246,6 @@ function CalendarEmptyState() {
         No sessions generated
       </h3>
 
-      <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-text-muted">
-        Generate a preview after configuring teaching
-        allocations, working days, teaching slots,
-        trainers and rooms.
-      </p>
     </>
   );
 }

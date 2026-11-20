@@ -527,9 +527,6 @@ export function StaffAssessmentWorkflow({
               Class list
             </h2>
 
-            <p className="mt-1 text-[11px] text-text-muted">
-              Mark exam absences before entering marks.
-            </p>
           </div>
 
           <Badge variant="neutral">

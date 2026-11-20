@@ -98,9 +98,6 @@ export function CurriculumZipUploadDialog() {
                   <h2 className="text-sm font-bold text-text-primary">
                     Bulk Ingest TVET Course Outlines & Schemes
                   </h2>
-                  <p className="text-xs text-text-muted">
-                    Upload a .zip file containing raw Word (.docx), Excel (.xlsx), or text documents.
-                  </p>
                 </div>
               </div>
               <button

@@ -82,7 +82,6 @@ export function GoogleSheetMarkEntry({ assessmentId }: { assessmentId: string })
         <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white text-emerald-700"><Sheet className="size-5" /></span>
         <div>
           <h2 className="text-sm font-semibold text-slate-900">Trainer Google Sheet</h2>
-          <p className="mt-0.5 text-xs text-slate-600">Create a private roster sheet and share it with a trainer. Sync imports validated marks as drafts; review them before finalizing.</p>
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-3 text-xs">

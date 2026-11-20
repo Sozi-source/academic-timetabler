@@ -1,3 +1,6 @@
+- **Hardened `unlockAssessmentMarkComponentAction` (`src/features/assessment/marks/actions.ts`):**
+  - Removed the per-sibling `unlock_assessment_mark_component_submission` RPC loop (which failed and aborted on cross-department shared/equivalent siblings or when no `cohort_id IS NULL` lock row existed) and performed the unlock directly via `createAdminClient()` after `requireHodAccess()`, active-department tenant isolation, and finalized-markbook checks, with detailed error reporting.
+
 ### 2026-11-20: Add HOD/Admin Bulk Edit Marks Mode for On-Behalf Mark Entry
 
 **Summary:**

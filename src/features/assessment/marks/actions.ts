@@ -50,7 +50,7 @@ export async function saveAssessmentAttendanceAction(formData: FormData) {
 }
 
 export async function unlockAssessmentMarkComponentAction(formData: FormData) {
-  await requireHodAccess();
+  const profile = await requireHodAccess();
   const parsed = z.object({
     assessmentId: z.uuid(),
     cohortId: z.union([z.uuid(), z.literal('all')]),
@@ -63,66 +63,27 @@ export async function unlockAssessmentMarkComponentAction(formData: FormData) {
 
   if (!parsed.success) return;
   const { assessmentId, cohortId, component } = parsed.data;
-  const assessment = await getAssessmentById(assessmentId);
-  if (!assessment) redirect('/assessment/marks?error=not-found');
-
   const supabase = await createClient();
-  const resolvedIds = await resolveAssessmentIdsWithSiblings(supabase, assessmentId);
-  const targetEventIds = resolvedIds.length > 0 ? resolvedIds : [assessmentId];
-
   const admin = createAdminClient();
 
-  for (const targetId of targetEventIds) {
-    const { error } = await supabase.rpc('unlock_assessment_mark_component_submission', {
-      target_assessment_id: targetId,
-      target_cohort_id: cohortId === 'all' ? null : cohortId,
-      target_component_key: component,
-    });
-    if (error) {
-      redirect(`/assessment/marks/${assessmentId}?error=component-unlock`);
-    }
+  const { data: event, error: eventError } = await admin
+    .from('assessment_events')
+    .select('id, department_id, status, exam_marks_finalized_at')
+    .eq('id', assessmentId)
+    .maybeSingle();
 
-    if (component === 'cat') {
-      await admin
-        .from('assessment_events')
-        .update({
-          cat_marks_finalized_at: null,
-          marks_submitted_at: null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', targetId);
-    } else if (component === 'exam') {
-      await admin
-        .from('assessment_events')
-        .update({
-          exam_marks_finalized_at: null,
-          finalised_at: null,
-          marks_submitted_at: null,
-          status: 'open',
-          operational_workflow_status: 'open',
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', targetId);
-
-      let rosterQuery = admin
-        .from('assessment_roster')
-        .update({ pre_assessment_status: 'expected' })
-        .eq('assessment_id', targetId)
-        .eq('pre_assessment_status', 'absent');
-      if (cohortId !== 'all') {
-        rosterQuery = rosterQuery.eq('cohort_id', cohortId);
-      }
-      await rosterQuery;
-
-      await admin
-        .from('assessment_population')
-        .update({ attendance_status: 'present' })
-        .eq('assessment_event_id', targetId)
-        .eq('attendance_status', 'absent');
-    }
+  if (eventError || !event || (profile.activeDepartmentId && event.department_id !== profile.activeDepartmentId)) {
+    redirect('/assessment/marks?error=not-found');
+  }
+  if (component !== 'exam' && (event.exam_marks_finalized_at || event.status === 'closed')) {
+    redirect(`/assessment/marks/${assessmentId}?error=locked`);
   }
 
-  // Ensure per-cohort and global component submission lock rows are removed across all siblings.
+  const resolvedIds = await resolveAssessmentIdsWithSiblings(supabase, assessmentId);
+  const targetEventIds = resolvedIds.length > 0 ? resolvedIds : [assessmentId];
+  const now = new Date().toISOString();
+
+  // Remove per-cohort and global component submission lock rows across target + sibling events.
   let deleteSubmissionsQuery = admin
     .from('assessment_mark_component_submissions')
     .delete()
@@ -133,7 +94,64 @@ export async function unlockAssessmentMarkComponentAction(formData: FormData) {
   }
   const { error: deleteSubmissionsError } = await deleteSubmissionsQuery;
   if (deleteSubmissionsError) {
-    redirect(`/assessment/marks/${assessmentId}?error=component-unlock`);
+    console.error('unlockAssessmentMarkComponentAction delete failed:', deleteSubmissionsError);
+    const detail = deleteSubmissionsError.message
+      ? `&detail=${encodeURIComponent(deleteSubmissionsError.message)}`
+      : '';
+    redirect(`/assessment/marks/${assessmentId}?error=component-unlock${detail}`);
+  }
+
+  if (component === 'cat') {
+    const { error: eventUpdateError } = await admin
+      .from('assessment_events')
+      .update({
+        cat_marks_finalized_at: null,
+        marks_submitted_at: null,
+        updated_at: now,
+      })
+      .in('id', targetEventIds);
+    if (eventUpdateError) {
+      console.error('unlockAssessmentMarkComponentAction cat event update failed:', eventUpdateError);
+      const detail = eventUpdateError.message
+        ? `&detail=${encodeURIComponent(eventUpdateError.message)}`
+        : '';
+      redirect(`/assessment/marks/${assessmentId}?error=component-unlock${detail}`);
+    }
+  } else if (component === 'exam') {
+    const { error: eventUpdateError } = await admin
+      .from('assessment_events')
+      .update({
+        exam_marks_finalized_at: null,
+        finalised_at: null,
+        marks_submitted_at: null,
+        status: 'open',
+        operational_workflow_status: 'open',
+        updated_at: now,
+      })
+      .in('id', targetEventIds);
+    if (eventUpdateError) {
+      console.error('unlockAssessmentMarkComponentAction exam event update failed:', eventUpdateError);
+      const detail = eventUpdateError.message
+        ? `&detail=${encodeURIComponent(eventUpdateError.message)}`
+        : '';
+      redirect(`/assessment/marks/${assessmentId}?error=component-unlock${detail}`);
+    }
+
+    let rosterQuery = admin
+      .from('assessment_roster')
+      .update({ pre_assessment_status: 'expected' })
+      .in('assessment_id', targetEventIds)
+      .eq('pre_assessment_status', 'absent');
+    if (cohortId !== 'all') {
+      rosterQuery = rosterQuery.eq('cohort_id', cohortId);
+    }
+    await rosterQuery;
+
+    await admin
+      .from('assessment_population')
+      .update({ attendance_status: 'present' })
+      .in('assessment_event_id', targetEventIds)
+      .eq('attendance_status', 'absent');
   }
 
   revalidatePath('/assessment');

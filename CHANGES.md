@@ -1,3 +1,26 @@
+### 2026-11-20: Harden Trainer Marksheet Visibility & Auto-Sync for Individual Class Assignments (Transfer Students)
+
+**Summary:**
+- **Fixed cross-department & transfer student visibility on trainer marksheets (`supabase/migrations/20261120094000_harden_trainer_class_assignment_marksheet_visibility.sql`):**
+  - Added recursion-safe `SECURITY DEFINER` helper `public.trainer_has_class_assignment_for_student(uuid)` and updated `students_trainer_read`, `student_class_assignments_read`, and `student_unit_registrations_trainer_read` RLS policies so trainers (including cross-department trainers) can read students assigned to their `teaching_allocation_id` via `student_class_assignments`.
+  - Added `trigger_sync_student_class_assignment_roster` on `student_class_assignments` to automatically insert active in-class assigned students into `assessment_roster` for open markbooks on the target allocation's unit and period, plus an idempotent backfill for all existing active class assignments (including Salome `DND/J-7179/IC/26` on `DHN 3103` and `DHN 3104`).
+- **Hardened marksheet loaders (`src/features/assessment/population-workspace.ts`, `src/features/assessment/markbook-bundle.ts`, `src/features/assessment/trainer-mark-entry.ts`):**
+  - Passed `createAdminClient()` to `getUnifiedUnitRoster` in `getAssessmentPopulationWorkspace` and `loadAssessmentMarkbookBundle` (after caller access is verified) so cross-department trainers always see individually assigned transfer students in both the online marks editor and downloaded Excel markbooks.
+  - Updated `loadTrainerMarkSession` (`src/features/assessment/trainer-mark-entry.ts`) to fall back to the assessment-level invite scope when an assigned student's home `cohort_id` differs from the class's primary cohort.
+
+**Added:**
+- `supabase/migrations/20261120094000_harden_trainer_class_assignment_marksheet_visibility.sql`
+
+**Modified:**
+- `src/features/assessment/population-workspace.ts`
+- `src/features/assessment/markbook-bundle.ts`
+- `src/features/assessment/trainer-mark-entry.ts`
+- `CHANGES.md`
+
+**Manual Follow-Up:**
+- Run `npx supabase db push --linked` to apply the RLS policies, automated roster trigger, and `assessment_roster` backfill on Supabase.
+- If Salome is also attending equivalent classes for `DND 3204` (`DHN 3105`) and `DND 2302` (`CND 2302`), add her `student_class_assignments` records for those two classes (the new trigger will automatically sync her onto their marksheets).
+
 - **Hardened `unlockAssessmentMarkComponentAction` (`src/features/assessment/marks/actions.ts`):**
   - Removed the per-sibling `unlock_assessment_mark_component_submission` RPC loop (which failed and aborted on cross-department shared/equivalent siblings or when no `cohort_id IS NULL` lock row existed) and performed the unlock directly via `createAdminClient()` after `requireHodAccess()`, active-department tenant isolation, and finalized-markbook checks, with detailed error reporting.
 

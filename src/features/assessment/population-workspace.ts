@@ -119,9 +119,12 @@ export const getAllocationPopulationWorkspace = cache(
     const period = Array.isArray(alloc.period) ? alloc.period[0] : alloc.period;
 
     // Allocation documents and allocation-level marks use the unified unit
-    // roster across every cohort taking this unit.
+    // roster across every cohort taking this unit. Use the admin client after
+    // allocation access has been verified so cross-department trainers still
+    // see individually assigned transfer students (`student_class_assignments`).
+    const admin = createAdminClient();
     const roster = await getUnifiedUnitRoster({
-      supabase,
+      supabase: admin,
       allocationId: alloc.id,
       unitId: alloc.unit_id,
       academicPeriodId: alloc.academic_period_id,
@@ -339,9 +342,13 @@ export const getAssessmentPopulationWorkspace =
       ]),
     );
 
-    // Discover authoritative roster across all cohorts taking this unit
+    // Discover authoritative roster across all cohorts taking this unit.
+    // Use the admin client after assessment access has been verified so
+    // cross-department trainers still see individually assigned transfer
+    // students (`student_class_assignments`).
+    const rosterAdmin = createAdminClient();
     const roster = await getUnifiedUnitRoster({
-      supabase,
+      supabase: rosterAdmin,
       unitId,
       academicPeriodId: periodId,
       allocationId,
@@ -362,7 +369,7 @@ export const getAssessmentPopulationWorkspace =
 
     let extraStudentRows: UnknownRow[] = [];
     if (extraStudentIds.length > 0) {
-      const { data: extraStudents } = await supabase
+      const { data: extraStudents } = await rosterAdmin
         .from('students')
         .select('id, admission_number, full_name, current_cohort_id, lifecycle_status, academic_phase, cohort:cohorts(id, name)')
         .in('id', extraStudentIds);

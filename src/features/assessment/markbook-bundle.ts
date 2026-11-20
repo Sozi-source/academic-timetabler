@@ -1,6 +1,9 @@
 import {
   createClient,
 } from '@/lib/supabase/server';
+import {
+  createAdminClient,
+} from '@/lib/supabase/admin';
 
 import type {
   AssessmentMarkbookBundle,
@@ -318,7 +321,7 @@ export async function loadAssessmentMarkbookBundle({
   let rosterAugmentedCount = 0;
   try {
     const unifiedRoster = await getUnifiedUnitRoster({
-      supabase,
+      supabase: createAdminClient(),
       unitId,
       academicPeriodId: periodId,
     });

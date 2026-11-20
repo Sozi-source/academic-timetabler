@@ -97,6 +97,12 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
     const cohortNameById = new Map((cohortRows ?? []).map((cohort) => [cohort.id, cohort.name]));
     const eventById = new Map(eventRows.map((event) => [event.id, event]));
     const scopeByKey = new Map(scopeRows.map((scope) => [`${scope.assessment_id}:${scope.cohort_id ?? 'all'}`, scope]));
+    const scopeByAssessmentId = new Map<string, (typeof scopeRows)[number]>();
+    for (const scope of scopeRows) {
+      if (!scopeByAssessmentId.has(scope.assessment_id)) {
+        scopeByAssessmentId.set(scope.assessment_id, scope);
+      }
+    }
     const componentSubmissionByKey = new Map((componentSubmissionRows ?? []).map((row) => [`${row.assessment_id}:${row.cohort_id ?? 'all'}:${row.component_key}`, row.submitted_at]));
     const cohorts = new Map<string, {
       id: string | null;
@@ -111,7 +117,10 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
     const seenStudentIdsByCohort = new Map<string, Set<string>>();
 
     for (const roster of allRosterRows) {
-      const scope = scopeByKey.get(`${roster.assessment_id}:${roster.cohort_id ?? 'all'}`);
+      const scope =
+        scopeByKey.get(`${roster.assessment_id}:${roster.cohort_id ?? 'all'}`) ??
+        scopeByKey.get(`${roster.assessment_id}:all`) ??
+        scopeByAssessmentId.get(roster.assessment_id);
       const student = studentById.get(roster.student_id);
       const event = eventById.get(roster.assessment_id);
       if (!scope || !student || !event || event.assessment_type !== 'exam' || !event.population_locked_at) continue;

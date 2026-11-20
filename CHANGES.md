@@ -1,3 +1,8 @@
+- **Fixed HOD/Admin markbook hiding roster-only / transfer students (`src/features/assessment/queries.ts`):**
+  - Updated `getAssessmentPopulation` to merge `assessment_population` and `assessment_roster` in parallel across sibling events instead of returning early when `assessment_population` is non-empty. Previously, students present in `assessment_roster` (such as transfer / individually assigned students like Salome) were hidden on the admin markbook page whenever regular cohort students already existed in `assessment_population`.
+- **Polished `Open Markbook` button (`src/features/assessment/assessment-control-center.tsx`):**
+  - Replaced the redundant cohort dropdown on the Assessment Control Center `Open Markbook` action with a single-click primary green button (`bg-primary text-primary-foreground`, `whitespace-nowrap`) and prevented the `CANDIDATES` header from wrapping.
+
 ### 2026-11-20: Harden Trainer Marksheet Visibility & Auto-Sync for Individual Class Assignments (Transfer Students)
 
 **Summary:**

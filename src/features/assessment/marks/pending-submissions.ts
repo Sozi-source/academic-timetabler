@@ -156,26 +156,6 @@ async function loadDraftState(supabase: SupabaseServerClient, assessmentIds: str
   };
 }
 
-type DraftState = Awaited<ReturnType<typeof loadDraftState>>;
-
-/**
- * Counts roster students with a recorded result for a component: either a saved
- * mark, or an explicit AB the trainer has already set (CAT absence / exam absence).
- */
-function countRecorded(state: DraftState, assessmentId: string, component: 'cat' | 'exam') {
-  const markedStudents = new Set(
-    state.drafts
-      .filter((d) => d.assessment_id === assessmentId && (component === 'cat' ? d.cat_mark : d.exam_mark) !== null)
-      .map((d) => d.student_id),
-  );
-  const rosterRows = state.roster.filter((r) => r.assessment_id === assessmentId);
-  const recorded = rosterRows.filter((r) =>
-    markedStudents.has(r.student_id)
-    || (component === 'cat' ? Boolean(r.cat_absent) : r.pre_assessment_status === 'absent'),
-  ).length;
-  return { rosterCount: rosterRows.length, markedCount: markedStudents.size, recorded };
-}
-
 /** Lists every markbook in the HOD's active department with saved but unsubmitted CAT/Exam marks. */
 export const getPendingMarkSubmissions = cache(async (): Promise<PendingMarkSubmission[]> => {
   const profile = await requireHodAccess();
@@ -184,18 +164,21 @@ export const getPendingMarkSubmissions = cache(async (): Promise<PendingMarkSubm
 
   const { data: events, error } = await supabase
     .from('assessment_events')
-    .select('id, status, cat_marks_finalized_at, exam_marks_finalized_at, unit:units(code, name), academic_period:academic_periods(name)')
+    .select('id, status, exclude_from_analysis, cat_marks_finalized_at, exam_marks_finalized_at, unit:units(code, name), academic_period:academic_periods(name)')
     .eq('department_id', profile.activeDepartmentId)
     .is('exam_marks_finalized_at', null)
     .neq('status', 'closed');
   if (error) throw new Error(`Unable to load markbooks: ${error.message}`);
   if (!events?.length) return [];
 
-  const state = await loadDraftState(supabase, events.map((e) => e.id));
+  const activeEvents = events.filter((e) => !e.exclude_from_analysis);
+  if (activeEvents.length === 0) return [];
+
+  const state = await loadDraftState(supabase, activeEvents.map((e) => e.id));
   const { drafts, submissions } = state;
 
   const submitted = new Set(submissions.map((s) => `${s.assessment_id}:${s.component_key}`));
-  for (const event of events) {
+  for (const event of activeEvents) {
     if (event.cat_marks_finalized_at) {
       submitted.add(`${event.id}:cat`);
     }
@@ -209,7 +192,9 @@ export const getPendingMarkSubmissions = cache(async (): Promise<PendingMarkSubm
   }
 
   const pending: PendingMarkSubmission[] = [];
-  for (const event of events) {
+  const seenGroupComponent = new Set<string>();
+
+  for (const event of activeEvents) {
     const unit = Array.isArray(event.unit) ? event.unit[0] : event.unit;
     const period = Array.isArray(event.academic_period) ? event.academic_period[0] : event.academic_period;
     const eventDrafts = drafts.filter((d) => d.assessment_id === event.id);
@@ -220,7 +205,46 @@ export const getPendingMarkSubmissions = cache(async (): Promise<PendingMarkSubm
       if (component === 'exam' && !submitted.has(`${event.id}:cat`)) continue;
       const withMark = eventDrafts.filter((d) => (component === 'cat' ? d.cat_mark : d.exam_mark) !== null);
       if (withMark.length === 0) continue;
-      const counts = countRecorded(state, event.id, component);
+
+      // Check shared/equivalent sibling markbooks: if any sibling already submitted this
+      // component (e.g. DHN 3105 submitted CAT while DND 3204 received a late/transfer mark),
+      // do not flag the sibling as unsubmitted.
+      const siblingIds = await resolveAssessmentIdsWithSiblings(supabase, event.id);
+      const groupIds = siblingIds.length > 0 ? siblingIds : [event.id];
+      const groupKey = `${[...groupIds].sort().join(',')}:${component}`;
+      if (seenGroupComponent.has(groupKey)) continue;
+      if (groupIds.some((sid) => submitted.has(`${sid}:${component}`))) continue;
+      seenGroupComponent.add(groupKey);
+
+      const groupSet = new Set(groupIds);
+      const markedStudents = new Set(
+        state.drafts
+          .filter((d) => groupSet.has(d.assessment_id) && (component === 'cat' ? d.cat_mark : d.exam_mark) !== null)
+          .map((d) => d.student_id),
+      );
+      const rosterByStudent = new Map<string, (typeof state.roster)[number]>();
+      for (const r of state.roster) {
+        if (!groupSet.has(r.assessment_id)) continue;
+        const existing = rosterByStudent.get(r.student_id);
+        if (!existing) {
+          rosterByStudent.set(r.student_id, r);
+        } else {
+          rosterByStudent.set(r.student_id, {
+            ...existing,
+            cat_absent: Boolean(existing.cat_absent) || Boolean(r.cat_absent),
+            pre_assessment_status:
+              existing.pre_assessment_status === 'absent' || r.pre_assessment_status === 'absent'
+                ? 'absent'
+                : existing.pre_assessment_status,
+          });
+        }
+      }
+      const rosterRows = Array.from(rosterByStudent.values());
+      const recorded = rosterRows.filter(
+        (r) =>
+          markedStudents.has(r.student_id) ||
+          (component === 'cat' ? Boolean(r.cat_absent) : r.pre_assessment_status === 'absent'),
+      ).length;
 
       const names = [...new Set(withMark.map((d) => (d.updated_by ? trainerNameByProfile.get(d.updated_by) : undefined)).filter((v): v is string => Boolean(v)))];
       const lastSavedAt = withMark.map((d) => d.updated_at).filter((v): v is string => Boolean(v)).sort().at(-1) ?? null;
@@ -231,9 +255,9 @@ export const getPendingMarkSubmissions = cache(async (): Promise<PendingMarkSubm
         unitName: unit?.name ?? 'Unit',
         periodName: period?.name ?? '',
         component,
-        rosterCount: counts.rosterCount,
-        enteredCount: counts.recorded,
-        missingCount: Math.max(counts.rosterCount - counts.recorded, 0),
+        rosterCount: rosterRows.length,
+        enteredCount: recorded,
+        missingCount: Math.max(rosterRows.length - recorded, 0),
         trainerNames: names,
         lastSavedAt,
       });

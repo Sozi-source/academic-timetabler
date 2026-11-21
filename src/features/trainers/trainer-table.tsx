@@ -172,23 +172,6 @@ type TrainerState =
   | 'pending_access'
   | 'inactive';
 
-function getWorkloadRoleShortLabel(role: TrainerWorkloadRole): string {
-  switch (role) {
-    case 'hod':
-      return 'HOD';
-    case 'course_coordinator':
-      return 'Coordinator';
-    case 'full_time_trainer':
-      return 'Full-time';
-    case 'part_time':
-      return 'Part-time';
-    case 'external':
-      return 'External';
-    default:
-      return role;
-  }
-}
-
 export function TrainerTable({
   trainers,
   accessRecords = [],
@@ -260,32 +243,33 @@ export function TrainerTable({
             trainer.departmentId &&
             trainer.departmentId !== activeDepartmentId,
         );
+        const subtitle = isOtherDept && trainer.homeDepartment
+          ? `${trainer.homeDepartment} · ${trainer.email ?? 'No email'}`
+          : (trainer.email ?? trainer.homeDepartment ?? 'No email');
 
         return (
           <Link href={`/trainers/${trainer.id}`} className="trainer-card-link group">
             <article className="trainer-card-compact">
-              <header className="trainer-card-header">
-                <div className="flex min-w-0 items-start gap-2.5">
-                  <span
-                    aria-hidden="true"
-                    className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary-deep transition group-hover:bg-primary group-hover:text-white"
-                  >
-                    {getTrainerInitials(trainer.fullName)}
-                  </span>
-                  <div className="min-w-0">
-                    <h3 className="truncate text-sm font-semibold text-text-primary transition group-hover:text-primary">
-                      {trainer.fullName}
-                    </h3>
-                    <p className="mt-0.5 truncate text-xs text-text-muted">
-                      {trainer.email ?? trainer.homeDepartment ?? 'No email on file'}
-                    </p>
-                  </div>
+              <div className="flex min-w-0 items-center gap-2.5">
+                <span
+                  aria-hidden="true"
+                  className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary-deep transition group-hover:bg-primary group-hover:text-white"
+                >
+                  {getTrainerInitials(trainer.fullName)}
+                </span>
+                <div className="min-w-0">
+                  <h3 className="truncate text-sm font-semibold text-text-primary transition group-hover:text-primary">
+                    {trainer.fullName}
+                  </h3>
+                  <p className="mt-0.5 truncate text-xs text-text-muted">
+                    {subtitle}
+                  </p>
                 </div>
+              </div>
 
+              <div className="flex shrink-0 items-center gap-1.5">
                 {!trainer.isActive ? (
-                  <Badge variant="warning" className="shrink-0">
-                    Inactive
-                  </Badge>
+                  <Badge variant="warning">Inactive</Badge>
                 ) : accessState ? (
                   <Badge
                     variant={
@@ -295,7 +279,6 @@ export function TrainerTable({
                           ? 'primary'
                           : 'neutral'
                     }
-                    className="shrink-0"
                   >
                     {accessState === 'linked' ? (
                       <CheckCircle2 className="size-3" aria-hidden="true" />
@@ -306,48 +289,16 @@ export function TrainerTable({
                   <Badge
                     variant={trainer.isTimetableAvailable ? 'success' : 'neutral'}
                     dot={trainer.isTimetableAvailable}
-                    className="shrink-0"
                   >
                     {trainer.isTimetableAvailable ? 'Available' : 'Unavailable'}
                   </Badge>
                 )}
-              </header>
-
-              <footer className="flex items-center justify-between gap-2 border-t border-border-soft pt-2.5 text-[11px] text-text-muted">
-                <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-                  {isOtherDept ? (
-                    <span className="rounded-md border border-sky-200 bg-sky-50 px-2 py-0.5 font-semibold text-sky-800">
-                      {trainer.homeDepartment || 'Other Dept'}
-                    </span>
-                  ) : null}
-                  <span className="rounded-md bg-surface-subtle px-2 py-0.5 font-medium text-text-secondary">
-                    {getEmploymentTypeLabel(trainer.employmentType)}
-                  </span>
-                  <span className="rounded-md bg-surface-subtle px-2 py-0.5 font-medium text-text-secondary">
-                    {getWorkloadRoleShortLabel(trainer.workloadRole)} · {trainer.normalWeeklyHours}h
-                  </span>
-                  {trainer.isActive && hasAccessData ? (
-                    <span
-                      className={`inline-flex items-center gap-1 text-[11px] font-medium ${
-                        trainer.isTimetableAvailable ? 'text-emerald-700' : 'text-text-muted'
-                      }`}
-                    >
-                      <span
-                        aria-hidden="true"
-                        className={`size-1.5 rounded-full ${
-                          trainer.isTimetableAvailable ? 'bg-emerald-500' : 'bg-slate-300'
-                        }`}
-                      />
-                      {trainer.isTimetableAvailable ? 'Available' : 'Off timetable'}
-                    </span>
-                  ) : null}
-                </div>
 
                 <ChevronRight
                   aria-hidden="true"
                   className="size-4 shrink-0 text-text-subtle transition group-hover:translate-x-0.5 group-hover:text-primary"
                 />
-              </footer>
+              </div>
             </article>
           </Link>
         );

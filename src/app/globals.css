@@ -475,10 +475,7 @@ code, kbd, samp, pre {
 }
 
 .trainer-card-link {
-  grid-row: span 2;
-  display: grid;
-  grid-template-rows: auto auto;
-  grid-template-rows: subgrid;
+  display: block;
   min-inline-size: 0;
   border-radius: 0.75rem;
   text-decoration: none;
@@ -486,17 +483,16 @@ code, kbd, samp, pre {
 }
 
 .trainer-card-compact {
-  container: trainer-card / inline-size;
-  grid-row: span 2;
-  display: grid;
-  grid-template-rows: 1fr auto;
-  grid-template-rows: subgrid;
-  row-gap: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
   min-inline-size: 0;
+  block-size: 100%;
   border: 1px solid var(--border);
   border-radius: 0.75rem;
   background: var(--surface);
-  padding: 0.9375rem 1rem;
+  padding: 0.75rem 0.9375rem;
   transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
 

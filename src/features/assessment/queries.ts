@@ -291,7 +291,7 @@ export const getAssessmentPopulation = cache(async (assessmentId: string): Promi
   const resolvedIds = await resolveAssessmentIdsWithSiblings(supabase, assessmentId);
   const targetEventIds = resolvedIds.length > 0 ? resolvedIds : [assessmentId];
 
-  const [popResult, rosterResult] = await Promise.all([
+  const [popResult, rosterResult, eventsMetaRes] = await Promise.all([
     supabase
       .from('assessment_population')
       .select(`
@@ -319,10 +319,38 @@ export const getAssessmentPopulation = cache(async (assessmentId: string): Promi
       `)
       .in('assessment_id', targetEventIds)
       .order('created_at', { ascending: true }),
+    supabase
+      .from('assessment_events')
+      .select('id, academic_period_id, unit_id')
+      .in('id', targetEventIds),
   ]);
 
   if (popResult.error) throw new Error(`Unable to load assessment population: ${popResult.error.message}`);
   if (rosterResult.error) throw new Error(`Unable to load assessment population from roster: ${rosterResult.error.message}`);
+
+  // Also load active in-class students registered for any of these sibling units in the
+  // same academic period so late or carryover/retake registrations always appear on the markbook.
+  const periodIds = [...new Set((eventsMetaRes.data ?? []).map((e) => e.academic_period_id).filter((id): id is string => Boolean(id)))];
+  const unitIds = [...new Set((eventsMetaRes.data ?? []).map((e) => e.unit_id).filter((id): id is string => Boolean(id)))];
+  const regResult = periodIds.length > 0 && unitIds.length > 0
+    ? await supabase
+      .from('student_unit_registrations')
+      .select(`
+        id,
+        student:students!inner(
+          id,
+          admission_number,
+          full_name,
+          lifecycle_status,
+          academic_phase,
+          current_cohort:cohorts!students_current_cohort_id_fkey(id, code, name),
+          admission_cohort:cohorts!students_admission_cohort_id_fkey(id, code, name)
+        )
+      `)
+      .in('academic_period_id', periodIds)
+      .in('unit_id', unitIds)
+      .eq('registration_status', 'registered')
+    : { data: [], error: null };
 
   // Merge assessment_population and assessment_roster across all sibling events so
   // transfer / individually assigned / late-registered students in assessment_roster
@@ -365,6 +393,33 @@ export const getAssessmentPopulation = cache(async (assessmentId: string): Promi
       exam_absence_recommendation: null,
       student: student ?? null,
       cohort: cohort ?? null,
+    } as unknown as AssessmentCandidateRow);
+  }
+
+  for (const reg of regResult.data ?? []) {
+    const student = Array.isArray(reg.student) ? reg.student[0] : reg.student;
+    const studentId = student?.id;
+    if (!studentId || studentMap.has(studentId)) continue;
+    const lifecycle = (student.lifecycle_status ?? '').toLowerCase();
+    if (lifecycle && !['admitted', 'active'].includes(lifecycle)) continue;
+    const phase = (student.academic_phase ?? '').toLowerCase();
+    if (phase && phase !== 'in_class') continue;
+    const curCohort = Array.isArray(student.current_cohort) ? student.current_cohort[0] : student.current_cohort;
+    const admCohort = Array.isArray(student.admission_cohort) ? student.admission_cohort[0] : student.admission_cohort;
+    studentMap.set(studentId, {
+      id: reg.id,
+      population_status: 'expected' as const,
+      attendance_status: 'present' as const,
+      cat_absence_reason: null,
+      cat_absence_recommendation: null,
+      exam_absence_reason: null,
+      exam_absence_recommendation: null,
+      student: {
+        id: student.id,
+        admission_number: student.admission_number,
+        full_name: student.full_name,
+      },
+      cohort: curCohort ?? admCohort ?? null,
     } as unknown as AssessmentCandidateRow);
   }
 

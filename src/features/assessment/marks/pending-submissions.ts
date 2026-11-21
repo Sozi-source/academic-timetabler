@@ -35,12 +35,32 @@ export interface PendingMarkSubmission {
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
-const CHUNK_SIZE = 100;
+const CHUNK_SIZE = 50;
 
 function chunk<T>(items: T[]): T[][] {
   const out: T[][] = [];
   for (let i = 0; i < items.length; i += CHUNK_SIZE) out.push(items.slice(i, i + CHUNK_SIZE));
   return out;
+}
+
+async function fetchAllPaged<T>(
+  fetchPage: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>,
+  label: string,
+): Promise<T[]> {
+  const results: T[] = [];
+  const pageSize = 1000;
+  let offset = 0;
+
+  while (true) {
+    const { data, error } = await fetchPage(offset, offset + pageSize - 1);
+    if (error) throw new Error(`Unable to load ${label}: ${error.message}`);
+    if (!data || data.length === 0) break;
+    results.push(...data);
+    if (data.length < pageSize) break;
+    offset += pageSize;
+  }
+
+  return results;
 }
 
 async function loadDraftState(supabase: SupabaseServerClient, assessmentIds: string[]) {
@@ -49,29 +69,56 @@ async function loadDraftState(supabase: SupabaseServerClient, assessmentIds: str
   const submissions: Array<{ assessment_id: string; component_key: string }> = [];
 
   for (const ids of chunk(assessmentIds)) {
-    const [draftRes, rosterRes, popRes, subRes] = await Promise.all([
-      supabase
-        .from('assessment_online_mark_drafts')
-        .select('assessment_id, student_id, cat_mark, exam_mark, updated_by, updated_at')
-        .in('assessment_id', ids),
-      supabase.from('assessment_roster').select('assessment_id, student_id, cat_absent, pre_assessment_status').in('assessment_id', ids),
-      supabase
-        .from('assessment_population')
-        .select('assessment_event_id, student_id, attendance_status')
-        .in('assessment_event_id', ids)
-        .eq('population_status', 'expected'),
-      supabase.from('assessment_mark_component_submissions').select('assessment_id, component_key').in('assessment_id', ids),
+    const [draftRows, rosterRows, popRows, subRows] = await Promise.all([
+      fetchAllPaged(
+        (from, to) =>
+          supabase
+            .from('assessment_online_mark_drafts')
+            .select('id, assessment_id, student_id, cat_mark, exam_mark, updated_by, updated_at')
+            .in('assessment_id', ids)
+            .order('id', { ascending: true })
+            .range(from, to),
+        'saved marks',
+      ),
+      fetchAllPaged(
+        (from, to) =>
+          supabase
+            .from('assessment_roster')
+            .select('id, assessment_id, student_id, cat_absent, pre_assessment_status')
+            .in('assessment_id', ids)
+            .order('id', { ascending: true })
+            .range(from, to),
+        'assessment rosters',
+      ),
+      fetchAllPaged(
+        (from, to) =>
+          supabase
+            .from('assessment_population')
+            .select('id, assessment_event_id, student_id, attendance_status')
+            .in('assessment_event_id', ids)
+            .eq('population_status', 'expected')
+            .order('id', { ascending: true })
+            .range(from, to),
+        'assessment population',
+      ),
+      fetchAllPaged(
+        (from, to) =>
+          supabase
+            .from('assessment_mark_component_submissions')
+            .select('id, assessment_id, component_key')
+            .in('assessment_id', ids)
+            .order('id', { ascending: true })
+            .range(from, to),
+        'mark submissions',
+      ),
     ]);
-    if (draftRes.error) throw new Error(`Unable to load saved marks: ${draftRes.error.message}`);
-    if (rosterRes.error) throw new Error(`Unable to load assessment rosters: ${rosterRes.error.message}`);
-    if (subRes.error) throw new Error(`Unable to load mark submissions: ${subRes.error.message}`);
-    drafts.push(...(draftRes.data ?? []));
-    submissions.push(...(subRes.data ?? []));
 
-    const rosterRows = rosterRes.data ?? [];
+    drafts.push(...draftRows);
+    submissions.push(...subRows);
+
     const seen = new Set(rosterRows.map((r) => `${r.assessment_id}:${r.student_id}`));
     roster.push(...rosterRows);
-    for (const p of popRes.data ?? []) {
+    for (const p of popRows) {
       const key = `${p.assessment_event_id}:${p.student_id}`;
       if (!seen.has(key)) {
         seen.add(key);

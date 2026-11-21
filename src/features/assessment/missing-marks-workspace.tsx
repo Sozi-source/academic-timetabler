@@ -473,15 +473,15 @@ export function MissingMarksWorkspace({
       <Card className="overflow-hidden">
         <div className="overflow-x-auto">
           {viewMode === 'student' ? (
-            <table className="w-full min-w-[720px] text-left text-xs">
+            <table className="w-full border-collapse text-left text-xs [&_td]:whitespace-nowrap [&_td]:[overflow-wrap:normal] [&_th]:whitespace-nowrap [&_th]:[overflow-wrap:normal]">
               <thead className="border-b border-slate-200 bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-500">
                 <tr>
-                  <th className="w-12 px-3 py-3 text-center whitespace-nowrap">No.</th>
-                  <th className="px-3 py-3 whitespace-nowrap">Admission No.</th>
-                  <th className="px-3 py-3 whitespace-nowrap">Student Full Name</th>
-                  <th className="px-3 py-3 whitespace-nowrap">Cohort</th>
-                  <th className="px-3 py-3 whitespace-nowrap text-center">Units</th>
-                  <th className="px-3 py-3 whitespace-nowrap">Flagged Units (CAT / Exam)</th>
+                  <th className="w-12 px-3 py-3 text-center">No.</th>
+                  <th className="px-3 py-3">Admission No.</th>
+                  <th className="px-3 py-3">Student Full Name</th>
+                  <th className="px-3 py-3">Cohort</th>
+                  <th className="px-3 py-3 text-center">Units</th>
+                  <th className="px-3 py-3">Flagged Units (CAT / Exam)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -494,28 +494,28 @@ export function MissingMarksWorkspace({
                 ) : (
                   groupedByStudent.map((student, idx) => (
                     <tr key={student.studentId} className="hover:bg-slate-50/70">
-                      <td className="px-3 py-2.5 text-center font-medium text-slate-400 whitespace-nowrap">
+                      <td className="px-3 py-2.5 text-center font-medium text-slate-400">
                         {idx + 1}.
                       </td>
-                      <td className="px-3 py-2.5 font-mono font-bold text-slate-900 whitespace-nowrap">
+                      <td className="px-3 py-2.5 font-mono font-bold text-slate-900">
                         {student.admissionNumber}
                       </td>
-                      <td className="px-3 py-2.5 font-semibold text-slate-900 whitespace-nowrap">
+                      <td className="px-3 py-2.5 font-semibold text-slate-900">
                         <Link
                           href={`/students/registry/${student.studentId}/results`}
-                          className="hover:text-primary hover:underline"
+                          className="whitespace-nowrap hover:text-primary hover:underline"
                         >
                           {student.fullName}
                         </Link>
                       </td>
-                      <td className="px-3 py-2.5 text-slate-600 whitespace-nowrap">
+                      <td className="px-3 py-2.5 text-slate-600">
                         {student.cohortName}
                       </td>
-                      <td className="px-3 py-2.5 text-center whitespace-nowrap">
+                      <td className="px-3 py-2.5 text-center">
                         <Badge variant="neutral">{student.items.length}</Badge>
                       </td>
                       <td className="px-3 py-2.5">
-                        <div className="flex flex-wrap gap-1.5">
+                        <div className="flex flex-nowrap items-center gap-1.5">
                           {student.items.map((item) => {
                             const catLabel = formatComponentDisplay(
                               item.catStatus,
@@ -535,18 +535,18 @@ export function MissingMarksWorkspace({
                                 key={item.key}
                                 href={`/assessment/marks/${item.assessmentId}`}
                                 title={`${item.unitCode} — ${item.unitName} (Open Markbook)`}
-                                className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[11px] font-medium transition hover:shadow-2xs ${
+                                className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md border px-2 py-0.5 text-[11px] font-medium transition hover:shadow-2xs ${
                                   hasAbsent
                                     ? 'border-rose-200 bg-rose-50/80 text-rose-800 hover:bg-rose-100/80'
                                     : 'border-amber-200 bg-amber-50/80 text-amber-900 hover:bg-amber-100/80'
                                 }`}
                               >
-                                <span className="font-mono font-bold">{item.unitCode}</span>
-                                <span className="text-[10px] opacity-80">
+                                <span className="font-mono font-bold whitespace-nowrap">{item.unitCode}</span>
+                                <span className="text-[10px] opacity-80 whitespace-nowrap">
                                   CAT: {catLabel}
                                   {item.examSubmitted ? ` · Exam: ${examLabel}` : ''}
                                 </span>
-                                <ExternalLink className="size-2.5 opacity-60 print:hidden" aria-hidden="true" />
+                                <ExternalLink className="size-2.5 shrink-0 opacity-60 print:hidden" aria-hidden="true" />
                               </Link>
                             );
                           })}
@@ -558,16 +558,16 @@ export function MissingMarksWorkspace({
               </tbody>
             </table>
           ) : (
-            <table className="w-full min-w-[780px] text-left text-xs">
+            <table className="w-full border-collapse text-left text-xs [&_td]:whitespace-nowrap [&_td]:[overflow-wrap:normal] [&_th]:whitespace-nowrap [&_th]:[overflow-wrap:normal]">
               <thead className="border-b border-slate-200 bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-500">
                 <tr>
-                  <th className="w-12 px-3 py-3 text-center whitespace-nowrap">No.</th>
-                  <th className="px-3 py-3 whitespace-nowrap">Admission No.</th>
-                  <th className="px-3 py-3 whitespace-nowrap">Student Full Name</th>
-                  <th className="px-3 py-3 whitespace-nowrap">Unit</th>
-                  <th className="px-3 py-3 whitespace-nowrap text-center">CAT</th>
-                  <th className="px-3 py-3 whitespace-nowrap text-center">Exam</th>
-                  <th className="px-3 py-3 whitespace-nowrap text-right print:hidden">Action</th>
+                  <th className="w-12 px-3 py-3 text-center">No.</th>
+                  <th className="px-3 py-3">Admission No.</th>
+                  <th className="px-3 py-3">Student Full Name</th>
+                  <th className="px-3 py-3">Unit</th>
+                  <th className="px-3 py-3 text-center">CAT</th>
+                  <th className="px-3 py-3 text-center">Exam</th>
+                  <th className="px-3 py-3 text-right print:hidden">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -580,45 +580,45 @@ export function MissingMarksWorkspace({
                 ) : (
                   filteredRecords.map((r, idx) => (
                     <tr key={r.key} className="hover:bg-slate-50/70">
-                      <td className="px-3 py-2.5 text-center font-medium text-slate-400 whitespace-nowrap">
+                      <td className="px-3 py-2.5 text-center font-medium text-slate-400">
                         {idx + 1}.
                       </td>
-                      <td className="px-3 py-2.5 font-mono font-bold text-slate-900 whitespace-nowrap">
+                      <td className="px-3 py-2.5 font-mono font-bold text-slate-900">
                         {r.admissionNumber}
                       </td>
-                      <td className="px-3 py-2.5 font-semibold text-slate-900 whitespace-nowrap">
+                      <td className="px-3 py-2.5 font-semibold text-slate-900">
                         <Link
                           href={`/students/registry/${r.studentId}/results`}
-                          className="hover:text-primary hover:underline"
+                          className="whitespace-nowrap hover:text-primary hover:underline"
                         >
                           {r.fullName}
                         </Link>
                       </td>
                       <td className="px-3 py-2.5">
-                        <span className="font-mono text-[11px] font-bold text-slate-800">{r.unitCode}</span>
-                        <span className="ml-1.5 text-slate-600">{r.unitName}</span>
+                        <span className="font-mono text-[11px] font-bold text-slate-800 whitespace-nowrap">{r.unitCode}</span>
+                        <span className="ml-1.5 text-slate-600 whitespace-nowrap">{r.unitName}</span>
                       </td>
-                      <td className="px-3 py-2.5 text-center whitespace-nowrap">
+                      <td className="px-3 py-2.5 text-center">
                         <StatusPill
                           status={r.catStatus}
                           mark={r.catMark}
                           active={true}
                         />
                       </td>
-                      <td className="px-3 py-2.5 text-center whitespace-nowrap">
+                      <td className="px-3 py-2.5 text-center">
                         <StatusPill
                           status={r.examStatus}
                           mark={r.examMark}
                           active={r.examSubmitted}
                         />
                       </td>
-                      <td className="px-3 py-2.5 text-right whitespace-nowrap print:hidden">
+                      <td className="px-3 py-2.5 text-right print:hidden">
                         <Link
                           href={`/assessment/marks/${r.assessmentId}`}
-                          className="inline-flex h-7 items-center gap-1 rounded-md border border-border-strong bg-surface px-2.5 text-[11px] font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-primary"
+                          className="inline-flex h-7 items-center gap-1 whitespace-nowrap rounded-md border border-border-strong bg-surface px-2.5 text-[11px] font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-primary"
                         >
                           Markbook
-                          <ExternalLink className="size-3" aria-hidden="true" />
+                          <ExternalLink className="size-3 shrink-0" aria-hidden="true" />
                         </Link>
                       </td>
                     </tr>

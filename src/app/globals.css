@@ -474,6 +474,43 @@ code, kbd, samp, pre {
   box-shadow: 0 4px 12px rgb(15 23 42 / 0.06);
 }
 
+.trainer-card-link {
+  grid-row: span 2;
+  display: grid;
+  grid-template-rows: auto auto;
+  grid-template-rows: subgrid;
+  min-inline-size: 0;
+  border-radius: 0.75rem;
+  text-decoration: none;
+  outline: none;
+}
+
+.trainer-card-compact {
+  container: trainer-card / inline-size;
+  grid-row: span 2;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  grid-template-rows: subgrid;
+  row-gap: 0.75rem;
+  min-inline-size: 0;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface);
+  padding: 0.9375rem 1rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.trainer-card-link:hover .trainer-card-compact {
+  border-color: rgb(3 59 54 / 0.35);
+  box-shadow: 0 6px 16px rgb(15 23 42 / 0.07);
+  transform: translateY(-1px);
+}
+
+.trainer-card-link:focus-visible .trainer-card-compact {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgb(15 118 110 / 0.18);
+}
+
 .trainer-card-header {
   display: flex;
   align-items: flex-start;

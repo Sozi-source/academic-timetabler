@@ -10,10 +10,8 @@ import {
   Users,
 } from 'lucide-react';
 
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CrudModal } from '@/components/ui/crud-modal';
-import { MetricCard } from '@/components/ui/metric-card';
 import { PageHeader } from '@/components/ui/page-header';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { getWorkingDepartments } from '@/features/organization/queries';
@@ -21,7 +19,7 @@ import {
   summarizeTrainerAccess,
 } from '@/features/trainer-access/domain';
 import { getTrainerAccessRegister } from '@/features/trainer-access/queries';
-import { TrainerAccessTable } from '@/features/trainer-access/trainer-access-table';
+import { TrainerAccessBulkPinAction } from '@/features/trainer-access/trainer-access-bulk-pin-action';
 import { CreateTrainerForm } from '@/features/trainers/create-trainer-form';
 import { getTrainers } from '@/features/trainers/queries';
 import { TrainerTable } from '@/features/trainers/trainer-table';
@@ -47,9 +45,17 @@ export default async function StaffManagementPage() {
   );
 
   const summary = summarizeTrainerAccess(accessRecords);
+  const bulkPinTrainers = accessRecords.flatMap((record) =>
+    record.trainerActive &&
+    record.email &&
+    record.profileRole !== 'hod' &&
+    record.profileRole !== 'system_admin'
+      ? [{ trainerId: record.trainerId, fullName: record.fullName, email: record.email }]
+      : [],
+  );
 
   return (
-    <div className="trainer-management-screen space-y-7">
+    <div className="trainer-management-screen space-y-6">
       <PageHeader
         eyebrow="Institutional Personnel"
         title="Staff & Trainer Management"
@@ -64,12 +70,13 @@ export default async function StaffManagementPage() {
                 Availability
               </Link>
             </Button>
-            <Button asChild variant="outline" size="sm">
-              <Link href="/trainers/access">
-                <KeyRound className="size-4" aria-hidden="true" />
-                Trainer Access
-              </Link>
-            </Button>
+            <CrudModal
+              title="Bulk PIN Generation"
+              triggerLabel="Bulk PINs"
+              widthClassName="max-w-3xl"
+            >
+              <TrainerAccessBulkPinAction trainers={bulkPinTrainers} />
+            </CrudModal>
             <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
               <Link href="/timetable/trainers/import">
                 <Upload className="size-4" aria-hidden="true" />
@@ -170,35 +177,7 @@ export default async function StaffManagementPage() {
         </div>
       </section>
 
-      {/* 2. Workspace Access & Account Approvals Panel */}
-      <section aria-labelledby="access-approvals-heading" className="trainer-approvals-register overflow-hidden rounded-2xl border border-border bg-white shadow-xs">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-soft bg-surface-subtle/60 px-5 py-3.5">
-          <div className="flex items-center gap-2.5">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-[#033B36]/10 text-primary-deep">
-              <KeyRound className="size-4.5" aria-hidden="true" />
-            </span>
-            <div>
-              <h2 id="access-approvals-heading" className="text-sm font-bold text-text-primary">
-                Staff Workspace Access & Account Approvals
-              </h2>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="neutral">
-              {accessRecords.length} accounts recorded
-            </Badge>
-          </div>
-        </div>
-
-        <TrainerAccessTable
-          records={accessRecords}
-          variant="password"
-          exportFileName="staff-access-register"
-        />
-      </section>
-
-      {/* 3. Master Trainer Directory & Workload Table */}
+      {/* 2. Unified Staff & Trainer Directory */}
       <section aria-labelledby="trainer-directory-heading" className="space-y-3.5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 id="trainer-directory-heading" className="text-sm font-bold uppercase tracking-wider text-text-secondary">
@@ -207,7 +186,7 @@ export default async function StaffManagementPage() {
           <span className="text-xs text-text-muted font-medium">{trainers.length} Registered Trainers</span>
         </div>
 
-        <TrainerTable trainers={trainers} />
+        <TrainerTable trainers={trainers} accessRecords={accessRecords} />
       </section>
     </div>
   );

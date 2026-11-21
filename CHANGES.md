@@ -1,3 +1,7 @@
+- **Unified Staff & Trainer Directory into clickable whole-card links (`src/app/(dashboard)/trainers/page.tsx`, `src/features/trainers/trainer-table.tsx`, `src/app/globals.css`):**
+  - Removed the duplicate **Staff Workspace Access & Account Approvals** card grid from `/trainers` and moved **Bulk PIN Generation** into a compact modal button in the page header.
+  - Upgraded `TrainerTable` cards to sleek whole-card `<Link href="/trainers/[id]"><article className="trainer-card-compact">` links showing avatar, name, email, access/availability status badge, employment type, workload role & hours, and hover chevron — opening the trainer's full profile where password reset, PIN generation, approval/linking, availability, and teaching allocations all live together.
+
 - **Added instant loading skeletons across all Exam Control routes (`src/features/assessment/exam-control-skeleton.tsx` + `loading.tsx` files):**
   - Added reusable `ExamControlSkeleton` and wired Next.js App Router `loading.tsx` boundaries for `/assessment`, `/assessment/missing-marks`, `/assessment/marks/[assessmentId]`, `/assessment/analysis`, `/assessment/reports`, and `/assessment/exam-setting` so switching between Exam Control sheets transitions immediately with a matching KPI/toolbar/table skeleton instead of waiting on server queries.
 

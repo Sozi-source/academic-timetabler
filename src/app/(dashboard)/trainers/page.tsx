@@ -21,7 +21,7 @@ import {
 import { getTrainerAccessRegister } from '@/features/trainer-access/queries';
 import { TrainerAccessBulkPinAction } from '@/features/trainer-access/trainer-access-bulk-pin-action';
 import { CreateTrainerForm } from '@/features/trainers/create-trainer-form';
-import { getTrainers } from '@/features/trainers/queries';
+import { getTrainers, getTrainersByIds } from '@/features/trainers/queries';
 import { TrainerTable } from '@/features/trainers/trainer-table';
 
 export const dynamic = 'force-dynamic';
@@ -32,13 +32,28 @@ export const metadata: Metadata = {
 };
 
 export default async function StaffManagementPage() {
-  await requireHodAccess();
+  const profile = await requireHodAccess();
 
-  const [trainers, departments, accessRecords] = await Promise.all([
+  const [homeTrainers, departments, accessRecords] = await Promise.all([
     getTrainers(),
     getWorkingDepartments(),
     getTrainerAccessRegister(),
   ]);
+
+  // Include cross-department / service trainers authorized via getTrainerAccessRegister()
+  const homeTrainerIds = new Set(homeTrainers.map((t) => t.id));
+  const extraTrainerIds = accessRecords
+    .map((record) => record.trainerId)
+    .filter((id) => !homeTrainerIds.has(id));
+  const externalTrainers = extraTrainerIds.length > 0
+    ? await getTrainersByIds(extraTrainerIds)
+    : [];
+
+  const trainers = [...homeTrainers, ...externalTrainers].sort(
+    (a, b) =>
+      Number(b.isActive) - Number(a.isActive) ||
+      a.fullName.localeCompare(b.fullName),
+  );
 
   const availableTrainers = trainers.filter(
     (trainer) => trainer.isActive && trainer.isTimetableAvailable,
@@ -186,7 +201,11 @@ export default async function StaffManagementPage() {
           <span className="text-xs text-text-muted font-medium">{trainers.length} Registered Trainers</span>
         </div>
 
-        <TrainerTable trainers={trainers} accessRecords={accessRecords} />
+        <TrainerTable
+          trainers={trainers}
+          accessRecords={accessRecords}
+          activeDepartmentId={profile.activeDepartmentId ?? undefined}
+        />
       </section>
     </div>
   );

@@ -159,10 +159,13 @@ const columns: ColumnDef<Trainer>[] = [
 interface TrainerTableProps {
   trainers: Trainer[];
   accessRecords?: TrainerAccessRecord[];
+  activeDepartmentId?: string;
 }
 
 type TrainerState =
   | 'all'
+  | 'home_dept'
+  | 'other_dept'
   | 'available'
   | 'unavailable'
   | 'linked'
@@ -186,7 +189,11 @@ function getWorkloadRoleShortLabel(role: TrainerWorkloadRole): string {
   }
 }
 
-export function TrainerTable({ trainers, accessRecords = [] }: TrainerTableProps) {
+export function TrainerTable({
+  trainers,
+  accessRecords = [],
+  activeDepartmentId,
+}: TrainerTableProps) {
   const [employmentType, setEmploymentType] = useState<'all' | TrainerEmploymentType>('all');
   const [state, setState] = useState<TrainerState>('all');
 
@@ -196,6 +203,10 @@ export function TrainerTable({ trainers, accessRecords = [] }: TrainerTableProps
   );
 
   const hasAccessData = accessRecords.length > 0;
+  const hasOtherDeptTrainers = Boolean(
+    activeDepartmentId &&
+      trainers.some((t) => t.departmentId && t.departmentId !== activeDepartmentId),
+  );
 
   const filteredTrainers = useMemo(
     () =>
@@ -204,8 +215,15 @@ export function TrainerTable({ trainers, accessRecords = [] }: TrainerTableProps
           employmentType === 'all' || trainer.employmentType === employmentType;
 
         const access = accessByTrainerId.get(trainer.id);
+        const isOtherDept = Boolean(
+          activeDepartmentId &&
+            trainer.departmentId &&
+            trainer.departmentId !== activeDepartmentId,
+        );
         const matchesState =
           state === 'all' ||
+          (state === 'home_dept' && !isOtherDept) ||
+          (state === 'other_dept' && isOtherDept) ||
           (state === 'available' && trainer.isActive && trainer.isTimetableAvailable) ||
           (state === 'unavailable' && trainer.isActive && !trainer.isTimetableAvailable) ||
           (state === 'linked' && access?.accessState === 'linked') ||
@@ -217,7 +235,7 @@ export function TrainerTable({ trainers, accessRecords = [] }: TrainerTableProps
 
         return matchesEmployment && matchesState;
       }),
-    [accessByTrainerId, employmentType, state, trainers],
+    [accessByTrainerId, activeDepartmentId, employmentType, state, trainers],
   );
 
   const filtersActive = employmentType !== 'all' || state !== 'all';
@@ -237,6 +255,11 @@ export function TrainerTable({ trainers, accessRecords = [] }: TrainerTableProps
       renderCard={(trainer) => {
         const access = accessByTrainerId.get(trainer.id);
         const accessState = access?.accessState ?? null;
+        const isOtherDept = Boolean(
+          activeDepartmentId &&
+            trainer.departmentId &&
+            trainer.departmentId !== activeDepartmentId,
+        );
 
         return (
           <Link href={`/trainers/${trainer.id}`} className="trainer-card-link group">
@@ -292,6 +315,11 @@ export function TrainerTable({ trainers, accessRecords = [] }: TrainerTableProps
 
               <footer className="flex items-center justify-between gap-2 border-t border-border-soft pt-2.5 text-[11px] text-text-muted">
                 <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                  {isOtherDept ? (
+                    <span className="rounded-md border border-sky-200 bg-sky-50 px-2 py-0.5 font-semibold text-sky-800">
+                      {trainer.homeDepartment || 'Other Dept'}
+                    </span>
+                  ) : null}
                   <span className="rounded-md bg-surface-subtle px-2 py-0.5 font-medium text-text-secondary">
                     {getEmploymentTypeLabel(trainer.employmentType)}
                   </span>
@@ -345,6 +373,12 @@ export function TrainerTable({ trainers, accessRecords = [] }: TrainerTableProps
             className="h-9 w-40 text-[12px] xl:text-sm"
           >
             <option value="all">All states</option>
+            {hasOtherDeptTrainers ? (
+              <>
+                <option value="home_dept">My department</option>
+                <option value="other_dept">Other departments</option>
+              </>
+            ) : null}
             {hasAccessData ? (
               <>
                 <option value="linked">Portal active</option>

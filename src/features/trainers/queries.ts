@@ -1,5 +1,6 @@
 import { cache } from 'react';
 
+import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthenticatedProfile } from '@/features/auth/queries';
 
@@ -104,6 +105,34 @@ export const getTrainers = cache(
   },
 );
 
+/**
+ * Loads additional Trainer records by ID (e.g. cross-department service trainers
+ * already authorized via `get_trainer_access_register`) using the admin client.
+ */
+export const getTrainersByIds = cache(
+  async (ids: string[]): Promise<Trainer[]> => {
+    const uniqueIds = [...new Set(ids.filter(Boolean))];
+    if (uniqueIds.length === 0) return [];
+
+    const profile = await getAuthenticatedProfile();
+    if (!profile) return [];
+
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from('trainers')
+      .select(trainerSelection)
+      .in('id', uniqueIds)
+      .order('is_active', { ascending: false })
+      .order('full_name', { ascending: true });
+
+    if (error) {
+      throw new Error(`Unable to load cross-department trainers: ${error.message}`);
+    }
+
+    return ((data ?? []) as TrainerRow[]).map(mapTrainer);
+  },
+);
+
 export const getTrainerById = cache(
   async (
     id: string,
@@ -140,9 +169,28 @@ export const getTrainerById = cache(
       );
     }
 
-    return data
-      ? mapTrainer(data as TrainerRow)
-      : null;
+    if (data) {
+      return mapTrainer(data as TrainerRow);
+    }
+
+    // Fallback for cross-department service trainers teaching in this HOD's department
+    if (profile.role !== 'system_admin') {
+      const { data: registerRows } = await supabase.rpc('get_trainer_access_register');
+      const isAuthorizedExternal = Array.isArray(registerRows)
+        && registerRows.some((row: { trainer_id?: string }) => row.trainer_id === id);
+
+      if (isAuthorizedExternal) {
+        const admin = createAdminClient();
+        const { data: extData } = await admin
+          .from('trainers')
+          .select(trainerSelection)
+          .eq('id', id)
+          .maybeSingle();
+        if (extData) return mapTrainer(extData as TrainerRow);
+      }
+    }
+
+    return null;
   },
 );
 

@@ -238,14 +238,6 @@ export function TrainerTable({
       renderCard={(trainer) => {
         const access = accessByTrainerId.get(trainer.id);
         const accessState = access?.accessState ?? null;
-        const isOtherDept = Boolean(
-          activeDepartmentId &&
-            trainer.departmentId &&
-            trainer.departmentId !== activeDepartmentId,
-        );
-        const subtitle = isOtherDept && trainer.homeDepartment
-          ? `${trainer.homeDepartment} · ${trainer.email ?? 'No email'}`
-          : (trainer.email ?? trainer.homeDepartment ?? 'No email');
 
         return (
           <Link href={`/trainers/${trainer.id}`} className="trainer-card-link group">
@@ -253,18 +245,13 @@ export function TrainerTable({
               <div className="flex min-w-0 items-center gap-2.5">
                 <span
                   aria-hidden="true"
-                  className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary-deep transition group-hover:bg-primary group-hover:text-white"
+                  className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary-deep transition group-hover:bg-primary group-hover:text-white"
                 >
                   {getTrainerInitials(trainer.fullName)}
                 </span>
-                <div className="min-w-0">
-                  <h3 className="truncate text-sm font-semibold text-text-primary transition group-hover:text-primary">
-                    {trainer.fullName}
-                  </h3>
-                  <p className="mt-0.5 truncate text-xs text-text-muted">
-                    {subtitle}
-                  </p>
-                </div>
+                <h3 className="min-w-0 truncate text-sm font-semibold text-text-primary transition group-hover:text-primary">
+                  {trainer.fullName}
+                </h3>
               </div>
 
               <div className="flex shrink-0 items-center gap-1.5">

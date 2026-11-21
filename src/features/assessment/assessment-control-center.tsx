@@ -325,7 +325,7 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
   return (
     <div className="space-y-4 pb-10 text-slate-700">
       <PageHeader
-        title="Results & Exams Analysis"
+        title="Exam Control"
         icon={GraduationCap}
         context={
           <div className="flex flex-wrap items-center gap-2">

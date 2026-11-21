@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  UserX,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -31,6 +32,7 @@ const NAVIGATION_ITEMS = [
   { label: 'Overview', href: '/assessment', icon: LayoutDashboard },
   { label: 'Exam Setting', href: '/assessment/exam-setting', icon: BookOpenCheck },
   { label: 'CAT & Exam Analysis', href: '/assessment/analysis', icon: BarChart3 },
+  { label: 'Missing Marks', href: '/assessment/missing-marks', icon: UserX },
   { label: 'Reports', href: '/assessment/reports', icon: FileText },
 ] as const;
 
@@ -57,8 +59,8 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
             <GraduationCap className="size-4 text-sky-400" aria-hidden="true" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[0.72rem] font-bold leading-tight text-white tracking-tight">Results & Exams</p>
-            <p className="mt-0.5 truncate text-[0.64rem] font-medium text-slate-300">Academic Analytics</p>
+            <p className="truncate text-[0.72rem] font-bold leading-tight text-white tracking-tight">Exam Control</p>
+            <p className="mt-0.5 truncate text-[0.64rem] font-medium text-slate-300">Examination Centre</p>
           </div>
         </Link>
       </div>
@@ -162,7 +164,7 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
               </button>
               <div className="flex items-center gap-2">
                 <span className="h-4.5 w-1 rounded-full bg-sky-500" />
-                <p className="text-xs font-bold text-slate-900 sm:text-sm">Results & Exams</p>
+                <p className="text-xs font-bold text-slate-900 sm:text-sm">Exam Control</p>
                 <span className="hidden sm:inline text-slate-300">·</span>
                 <span className="hidden sm:inline text-xs font-medium text-slate-500">{profile.departmentName}</span>
               </div>

@@ -14,7 +14,7 @@ describe('Admin Portal Design Specification Verification', () => {
       'Academic Planning',
       'Unit Registration',
       'Quality Assurance',
-      'Grading & Results',
+      'Exam Control',
       'Reports',
       'Staff & Trainers',
       'Student Registry',
@@ -32,7 +32,7 @@ describe('Admin Portal Design Specification Verification', () => {
     expect(navMap.get('Academic Planning')).toBe('/timetable');
     expect(navMap.get('Unit Registration')).toBe('/students/unit-registration');
     expect(navMap.get('Quality Assurance')).toBe('/teaching-documents');
-    expect(navMap.get('Grading & Results')).toBe('/assessment');
+    expect(navMap.get('Exam Control')).toBe('/assessment');
     expect(navMap.get('Reports')).toBe('/timetable/reports');
     expect(navMap.get('Staff & Trainers')).toBe('/trainers');
     expect(navMap.get('Student Registry')).toBe('/students/registry');

@@ -1,3 +1,26 @@
+### 2026-11-21: Add Missing Marks & Absences Register + Rename Module to Exam Control
+
+**Summary:**
+- **Added Missing Marks & Absences HOD review workspace (`/assessment/missing-marks`):**
+  - Added paginated server query (`src/features/assessment/missing-marks.ts`) aggregating CAT absences (`AB`), Exam absences, and missing CAT/Exam marks across `assessment_population`, `assessment_roster`, `assessment_online_mark_drafts`, and `assessment_results` for the active department and selected academic period.
+  - Added interactive client workspace (`src/features/assessment/missing-marks-workspace.tsx`) with **By Student** (grouped) and **By Unit** (detailed) views, KPI summary cards, period/programme/cohort/unit/issue-type filters, an "Include unstarted units" toggle, direct **Markbook** & **Student Results** links, and print support.
+  - Added two-sheet institutional Excel export (`src/app/api/assessment/missing-marks/export/route.ts`) with **Student Summary** and **Detailed Records** sheets.
+- **Renamed Grading & Results / Results & Exams → Exam Control:**
+  - Updated `src/components/layout/admin-sidebar.tsx`, `src/components/layout/assessment-shell.tsx` (adding the **Missing Marks** nav link), `src/features/assessment/assessment-control-center.tsx`, and `src/tests/admin-dashboard-design.test.ts`.
+
+**Added:**
+- `src/features/assessment/missing-marks.ts`
+- `src/features/assessment/missing-marks-workspace.tsx`
+- `src/app/(dashboard)/assessment/missing-marks/page.tsx`
+- `src/app/api/assessment/missing-marks/export/route.ts`
+
+**Modified:**
+- `src/components/layout/assessment-shell.tsx`
+- `src/components/layout/admin-sidebar.tsx`
+- `src/features/assessment/assessment-control-center.tsx`
+- `src/tests/admin-dashboard-design.test.ts`
+- `CHANGES.md`
+
 ### 2026-11-20: Purge Unnecessary Descriptive Sentences Across UI
 
 **Summary:**

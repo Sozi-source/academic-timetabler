@@ -90,7 +90,7 @@ export const adminNavSections: AdminNavSection[] = [
         icon: ShieldCheck,
       },
       {
-        label: 'Grading & Results',
+        label: 'Exam Control',
         href: '/assessment',
         icon: BarChart2,
       },

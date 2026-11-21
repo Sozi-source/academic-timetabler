@@ -1,13 +1,12 @@
 'use client';
 
-import { useEffect, useId, useMemo, useRef, useState, useTransition } from 'react';
+import { Fragment, useEffect, useId, useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   AlertCircle,
   CheckCircle2,
   ChevronDown,
   Filter,
-  Pencil,
   Printer,
   RotateCcw,
   Save,
@@ -996,26 +995,23 @@ export function AssessmentMarkbookViewTable({
       {/* Candidate Marks Table */}
       <div ref={tableContainerRef} className="overflow-x-auto rounded-xl border border-slate-300 bg-white shadow-2xs">
         {viewMode === 'cat' ? (
-          <table className="w-full min-w-[600px] text-left text-xs">
+          <table className="w-full table-auto text-left text-xs">
             <thead className="border-b border-slate-300 bg-slate-50 text-[11px] font-bold text-slate-700">
               <tr>
-                <th scope="col" className="w-10 px-2.5 py-2.5 text-center text-slate-500 whitespace-nowrap">No.</th>
-                <th scope="col" className="px-3 py-2.5 min-w-[155px] whitespace-nowrap text-slate-800">Admission No.</th>
-                <th scope="col" className="px-3 py-2.5 min-w-[210px] whitespace-nowrap text-slate-900">Student Full Name</th>
-                <th scope="col" className="px-2.5 py-2.5 whitespace-nowrap text-slate-700">Cohort</th>
-                <th scope="col" className="px-2.5 py-2.5 text-center whitespace-nowrap bg-amber-100/90 text-amber-950 font-black border-x border-amber-300">
-                  CAT Mark <span className="text-[10px] font-bold text-amber-800">/15</span>
+                <th scope="col" className="w-9 px-2 py-2.5 text-center text-slate-500 whitespace-nowrap">No.</th>
+                <th scope="col" className="px-2 py-2.5 whitespace-nowrap text-slate-800">Adm No.</th>
+                <th scope="col" className="px-2 py-2.5 whitespace-nowrap text-slate-900">Student Name</th>
+                <th scope="col" className="px-2 py-2.5 whitespace-nowrap text-slate-700">Cohort</th>
+                <th scope="col" className="px-2 py-2.5 text-center whitespace-nowrap bg-amber-100/90 text-amber-950 font-black border-x border-amber-300">
+                  CAT <span className="text-[10px] font-bold text-amber-800">/15</span>
                 </th>
-                <th scope="col" className="px-2.5 py-2.5 text-center whitespace-nowrap">CAT Status</th>
-                {editable ? (
-                  <th scope="col" className="px-2.5 py-2.5 text-center whitespace-nowrap print:hidden">Action</th>
-                ) : null}
+                <th scope="col" className="px-2 py-2.5 text-center whitespace-nowrap">CAT Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredRows.length === 0 ? (
                 <tr>
-                  <td colSpan={editable ? 7 : 6} className="px-4 py-12 text-center text-xs text-slate-500">
+                  <td colSpan={6} className="px-4 py-12 text-center text-xs text-slate-500">
                     <p className="font-semibold text-slate-700">No candidates match your filter criteria.</p>
                     <p className="mt-1 text-[11px] text-slate-400">
                       Try adjusting your search query or status filter above.
@@ -1026,36 +1022,48 @@ export function AssessmentMarkbookViewTable({
                 filteredRows.map((row, idx) => {
                   const m = row.marks;
                   const isDirty = bulkEditMode && dirtyStudentIds.has(row.studentId);
+                  const isEditingThisRow = editingStudentId === row.studentId && !bulkEditMode;
+                  const canClickToEdit = editable && !bulkEditMode && !isEditingThisRow;
                   const bulkRow = bulkEditMode ? getBulkDraft(row.studentId, m, row.isCatAbsent) : null;
                   const catInvalid = bulkRow ? !bulkRow.catAbsent && isFieldInvalid(bulkRow.cat, 'cat') : false;
                   return (
-                    <tr
-                      key={row.rowId}
-                      className={`transition-colors odd:bg-white even:bg-slate-50/60 hover:bg-amber-50/35 ${
-                        isDirty
-                          ? 'bg-emerald-50/60!'
-                          : row.isCatMissing
-                          ? 'bg-amber-50/30'
-                          : row.isCatAbsent
-                          ? 'bg-rose-50/30'
-                          : ''
-                      }`}
-                    >
-                      <td className="px-2.5 py-2.5 text-center font-medium text-slate-400 whitespace-nowrap">
-                        {idx + 1}.
-                      </td>
-                      <td className="px-3 py-2.5 font-mono font-bold text-slate-950 whitespace-nowrap min-w-[155px]">
-                        {row.admissionNumber}
-                      </td>
-                      <td className="px-3 py-2.5 font-semibold text-slate-900 whitespace-nowrap min-w-[210px]">
-                        {row.fullName}
-                      </td>
-                      <td className="px-3 py-2.5 text-slate-600 whitespace-nowrap">
-                        <span className="rounded bg-slate-100 px-2 py-0.5 font-mono text-[11px] text-slate-700">
-                          {row.cohortName}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2.5 text-center bg-amber-50/70 border-x border-amber-200/90 font-mono font-bold tabular-nums">
+                    <Fragment key={row.rowId}>
+                      <tr
+                        onClick={
+                          canClickToEdit
+                            ? () => startEditingRow(row.studentId, m, row.isCatAbsent)
+                            : undefined
+                        }
+                        title={canClickToEdit ? 'Click row to edit marks' : undefined}
+                        className={`transition-colors odd:bg-white even:bg-slate-50/60 hover:bg-amber-50/35 ${
+                          canClickToEdit ? 'cursor-pointer' : ''
+                        } ${
+                          isEditingThisRow
+                            ? 'bg-emerald-50/50! ring-1 ring-inset ring-emerald-300'
+                            : isDirty
+                            ? 'bg-emerald-50/60!'
+                            : row.isCatMissing
+                            ? 'bg-amber-50/30'
+                            : row.isCatAbsent
+                            ? 'bg-rose-50/30'
+                            : ''
+                        }`}
+                      >
+                        <td className="px-2 py-2 text-center font-medium text-slate-400 whitespace-nowrap">
+                          {idx + 1}.
+                        </td>
+                        <td className="px-2 py-2 font-mono font-bold text-slate-950 whitespace-nowrap">
+                          {row.admissionNumber}
+                        </td>
+                        <td className="px-2 py-2 font-semibold text-slate-900 whitespace-nowrap">
+                          {row.fullName}
+                        </td>
+                        <td className="px-2 py-2 text-slate-600 whitespace-nowrap">
+                          <span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[11px] text-slate-700">
+                            {row.cohortName}
+                          </span>
+                        </td>
+                        <td className="px-2 py-2 text-center bg-amber-50/70 border-x border-amber-200/90 font-mono font-bold tabular-nums">
                         {bulkEditMode && bulkRow ? (
                           <div className="inline-flex items-center gap-1.5">
                             <input
@@ -1135,7 +1143,7 @@ export function AssessmentMarkbookViewTable({
                           <span className="text-amber-400 font-medium">—</span>
                         )}
                       </td>
-                      <td className="px-3 py-2.5 text-center whitespace-nowrap">
+                      <td className="px-2 py-2 text-center whitespace-nowrap">
                         {row.isCatAbsent ? (
                           <span className="inline-block rounded bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-700 border border-rose-200">
                             Absent (AB)
@@ -1150,23 +1158,20 @@ export function AssessmentMarkbookViewTable({
                           </span>
                         )}
                       </td>
-                      {editable ? (
-                        <td className="px-2.5 py-2.5 text-center whitespace-nowrap print:hidden">
-                          {bulkEditMode ? (
-                            isDirty ? (
-                              <span className="inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-900 border border-amber-300">
-                                Edited
-                              </span>
-                            ) : (
-                              <span className="text-[10px] font-medium text-slate-400">—</span>
-                            )
-                          ) : editingStudentId === row.studentId ? (
-                            <div className="inline-flex items-center gap-1 whitespace-nowrap">
+                    </tr>
+                    {isEditingThisRow ? (
+                      <tr className="bg-emerald-50/80 border-b border-emerald-200 print:hidden">
+                        <td colSpan={6} className="px-3 py-1.5">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <span className="text-[11px] font-semibold text-emerald-950">
+                              Editing {row.fullName} ({row.admissionNumber})
+                            </span>
+                            <div className="inline-flex items-center gap-1.5">
                               <button
                                 type="button"
                                 disabled={isSaving}
                                 onClick={() => saveEditingRow(row.studentId, 'cat')}
-                                className="inline-flex h-7 shrink-0 items-center gap-1 whitespace-nowrap rounded-md bg-emerald-600 px-2 text-[11px] font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 cursor-pointer"
+                                className="inline-flex h-7 shrink-0 items-center gap-1 whitespace-nowrap rounded-md bg-emerald-600 px-2.5 text-[11px] font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 cursor-pointer"
                               >
                                 <Save className="size-3 shrink-0" />
                                 <span>{isSaving ? 'Saving...' : 'Save'}</span>
@@ -1175,24 +1180,16 @@ export function AssessmentMarkbookViewTable({
                                 type="button"
                                 disabled={isSaving}
                                 onClick={cancelEditingRow}
-                                className="inline-flex h-7 shrink-0 items-center whitespace-nowrap rounded-md border border-slate-300 bg-white px-2 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                                className="inline-flex h-7 shrink-0 items-center whitespace-nowrap rounded-md border border-slate-300 bg-white px-2.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
                               >
                                 Cancel
                               </button>
                             </div>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => startEditingRow(row.studentId, m, row.isCatAbsent)}
-                              className="inline-flex h-7 shrink-0 items-center gap-1 whitespace-nowrap rounded-md border border-slate-300 bg-white px-2.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
-                            >
-                              <Pencil className="size-3 shrink-0" />
-                              <span>Edit</span>
-                            </button>
-                          )}
+                          </div>
                         </td>
-                      ) : null}
-                    </tr>
+                      </tr>
+                    ) : null}
+                  </Fragment>
                   );
                 })
               )}
@@ -1214,7 +1211,7 @@ export function AssessmentMarkbookViewTable({
             ) : null}
           </table>
         ) : (
-          <table className="w-full min-w-[820px] text-left text-xs">
+          <table className="w-full table-auto text-left text-xs">
             <thead className="border-b border-slate-300 bg-slate-50 text-[11px] font-bold text-slate-700">
               {assessmentType === 'exam' ? (
                 <>
@@ -1223,82 +1220,70 @@ export function AssessmentMarkbookViewTable({
                     <th
                       colSpan={3}
                       scope="colgroup"
-                      className="px-3.5 py-1.5 text-left bg-slate-100/90 border-r-2 border-slate-300 text-slate-800 whitespace-nowrap"
+                      className="px-2 py-1.5 text-left bg-slate-100/90 border-r-2 border-slate-300 text-slate-800 whitespace-nowrap"
                     >
-                      Candidate Details
+                      Candidate
                     </th>
                     <th
                       colSpan={4}
                       scope="colgroup"
-                      className="px-2.5 py-1.5 text-center bg-slate-50 border-r border-slate-200 text-slate-700"
+                      className="px-2 py-1.5 text-center bg-slate-50 border-r border-slate-200 text-slate-700 whitespace-nowrap"
                     >
-                      Continuous Assessment (Coursework · 30%)
+                      Coursework (30%)
                     </th>
                     <th
                       colSpan={1}
                       scope="colgroup"
-                      className="px-2.5 py-1.5 text-center bg-slate-100/80 border-r border-slate-200 text-slate-800"
+                      className="px-2 py-1.5 text-center bg-slate-100/80 border-r border-slate-200 text-slate-800 whitespace-nowrap"
                     >
-                      Final Exam (70%)
+                      Exam (70%)
                     </th>
                     <th
                       colSpan={2}
                       scope="colgroup"
-                      className="px-3 py-1.5 text-center bg-amber-100/90 border-l border-amber-300 text-amber-950 font-black shadow-2xs"
+                      className="px-2 py-1.5 text-center bg-amber-100/90 border-l border-amber-300 text-amber-950 font-black shadow-2xs whitespace-nowrap"
                     >
-                      Final Aggregate
+                      Final
                     </th>
-                    {editable ? (
-                      <th
-                        rowSpan={2}
-                        scope="col"
-                        className="px-3 py-2 text-center bg-slate-50 border-l border-slate-200 text-slate-700 whitespace-nowrap print:hidden"
-                      >
-                        Action
-                      </th>
-                    ) : null}
                   </tr>
 
                   {/* Tier 2 Column Detail Header */}
                   <tr className="border-b border-slate-300 bg-slate-50 text-[11px] font-bold text-slate-700">
-                    <th scope="col" className="w-10 px-2.5 py-2.5 text-center text-slate-500 whitespace-nowrap">No.</th>
-                    <th scope="col" className="px-2.5 py-2.5 min-w-[155px] whitespace-nowrap text-slate-800">Admission No.</th>
-                    <th scope="col" className="px-2.5 py-2.5 min-w-[210px] whitespace-nowrap border-r-2 border-slate-300 text-slate-900">Student Full Name</th>
+                    <th scope="col" className="w-8 px-1.5 py-2 text-center text-slate-500 whitespace-nowrap">No.</th>
+                    <th scope="col" className="px-2 py-2 whitespace-nowrap text-slate-800">Adm No.</th>
+                    <th scope="col" className="px-2 py-2 whitespace-nowrap border-r-2 border-slate-300 text-slate-900">Student Name</th>
 
-                    <th scope="col" className="px-2.5 py-2.5 text-center whitespace-nowrap">
-                      Assignment <span className="text-[10px] font-normal text-slate-400">/5</span>
+                    <th scope="col" className="px-1.5 py-2 text-center whitespace-nowrap">
+                      Assign <span className="text-[10px] font-normal text-slate-400">/5</span>
                     </th>
-                    <th scope="col" className="px-2.5 py-2.5 text-center whitespace-nowrap">
-                      Presentation <span className="text-[10px] font-normal text-slate-400">/10</span>
+                    <th scope="col" className="px-1.5 py-2 text-center whitespace-nowrap">
+                      Pres <span className="text-[10px] font-normal text-slate-400">/10</span>
                     </th>
-                    <th scope="col" className="px-2.5 py-2.5 text-center whitespace-nowrap">
+                    <th scope="col" className="px-1.5 py-2 text-center whitespace-nowrap">
                       RAT <span className="text-[10px] font-normal text-slate-400">/15</span>
                     </th>
-                    <th scope="col" className="px-2.5 py-2.5 text-center whitespace-nowrap border-r border-slate-200">
+                    <th scope="col" className="px-1.5 py-2 text-center whitespace-nowrap border-r border-slate-200">
                       CAT <span className="text-[10px] font-normal text-slate-400">/15</span>
                     </th>
-                    <th scope="col" className="px-2.5 py-2.5 text-center whitespace-nowrap border-r border-slate-200">
+                    <th scope="col" className="px-1.5 py-2 text-center whitespace-nowrap border-r border-slate-200">
                       Exam <span className="text-[10px] font-normal text-slate-400">/70</span>
                     </th>
-                    <th scope="col" className="px-2.5 py-2.5 text-center whitespace-nowrap bg-amber-100/90 text-amber-950 font-black border-x border-amber-300 shadow-2xs">
+                    <th scope="col" className="px-1.5 py-2 text-center whitespace-nowrap bg-amber-100/90 text-amber-950 font-black border-x border-amber-300 shadow-2xs">
                       Total <span className="text-[10px] font-bold text-amber-800">/{maxMark}</span>
                     </th>
-                    <th scope="col" className="px-3 py-2.5 text-center whitespace-nowrap bg-amber-50/50">Grade</th>
+                    <th scope="col" className="px-2 py-2 text-center whitespace-nowrap bg-amber-50/50">Grade</th>
                   </tr>
                 </>
               ) : (
                 <tr>
-                  <th scope="col" className="w-12 px-3.5 py-2.5 text-center text-slate-500 whitespace-nowrap">No.</th>
-                  <th scope="col" className="px-3.5 py-2.5 whitespace-nowrap min-w-[170px] text-slate-800">Admission No.</th>
-                  <th scope="col" className="px-3.5 py-2.5 min-w-[260px] whitespace-nowrap border-r-2 border-slate-300 text-slate-900">Student Full Name</th>
-                  <th scope="col" className="px-3 py-2.5 text-center whitespace-nowrap bg-amber-100/90 text-amber-950 font-black border-x border-amber-300">
-                    CAT Mark <span className="text-[10px] font-bold text-amber-800">/{maxMark}</span>
+                  <th scope="col" className="w-9 px-2 py-2 text-center text-slate-500 whitespace-nowrap">No.</th>
+                  <th scope="col" className="px-2 py-2 whitespace-nowrap text-slate-800">Adm No.</th>
+                  <th scope="col" className="px-2 py-2 whitespace-nowrap border-r-2 border-slate-300 text-slate-900">Student Name</th>
+                  <th scope="col" className="px-2 py-2 text-center whitespace-nowrap bg-amber-100/90 text-amber-950 font-black border-x border-amber-300">
+                    CAT <span className="text-[10px] font-bold text-amber-800">/{maxMark}</span>
                   </th>
-                  <th scope="col" className="px-3 py-2.5 text-center whitespace-nowrap bg-amber-50/50">Grade</th>
-                  <th scope="col" className="px-3 py-2.5 text-center whitespace-nowrap">Status</th>
-                  {editable ? (
-                    <th scope="col" className="px-3 py-2.5 text-center whitespace-nowrap print:hidden">Action</th>
-                  ) : null}
+                  <th scope="col" className="px-2 py-2 text-center whitespace-nowrap bg-amber-50/50">Grade</th>
+                  <th scope="col" className="px-2 py-2 text-center whitespace-nowrap">Status</th>
                 </tr>
               )}
             </thead>
@@ -1307,7 +1292,7 @@ export function AssessmentMarkbookViewTable({
               {filteredRows.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={assessmentType === 'exam' ? (editable ? 11 : 10) : (editable ? 7 : 6)}
+                    colSpan={assessmentType === 'exam' ? 10 : 6}
                     className="px-4 py-12 text-center text-xs text-slate-500"
                   >
                     <p className="font-semibold text-slate-700">No candidates match your filter criteria.</p>
@@ -1326,6 +1311,8 @@ export function AssessmentMarkbookViewTable({
                   const isCatAbsent =
                     row.isCatAbsent || (isFinalized && (m?.cat === null || m?.cat === undefined));
                   const isDirty = bulkEditMode && dirtyStudentIds.has(row.studentId);
+                  const isEditingThisRow = editingStudentId === row.studentId && !bulkEditMode;
+                  const canClickToEdit = editable && !bulkEditMode && !isEditingThisRow;
                   const bulkRow = bulkEditMode ? getBulkDraft(row.studentId, m, isCatAbsent) : null;
 
                   const bulkInputClass = (field: BulkMarkField, isCat = false) => {
@@ -1333,7 +1320,7 @@ export function AssessmentMarkbookViewTable({
                       bulkRow && !(field === 'cat' && bulkRow.catAbsent)
                         ? isFieldInvalid(bulkRow[field], field)
                         : false;
-                    return `h-7 w-14 rounded border bg-white px-1 text-center font-mono text-xs text-slate-900 focus:outline-none focus:ring-2 disabled:bg-slate-100 disabled:text-slate-400 ${
+                    return `h-7 w-12 rounded border bg-white px-1 text-center font-mono text-xs text-slate-900 focus:outline-none focus:ring-2 disabled:bg-slate-100 disabled:text-slate-400 ${
                       invalid
                         ? 'border-rose-500 ring-1 ring-rose-400 focus:ring-rose-500'
                         : isDirty
@@ -1345,32 +1332,42 @@ export function AssessmentMarkbookViewTable({
                   };
 
                   return (
-                    <tr
-                      key={row.rowId}
-                      className={`transition-colors odd:bg-white even:bg-slate-50/60 hover:bg-amber-50/35 ${
-                        isDirty
-                          ? 'bg-emerald-50/60!'
-                          : isAbsent
-                          ? 'bg-rose-50/30'
-                          : row.isCatMissing
-                          ? 'bg-amber-50/20'
-                          : ''
-                      }`}
-                    >
-                      {/* Index */}
-                      <td className="px-2.5 py-2.5 text-center font-medium text-slate-400 whitespace-nowrap">
-                        {idx + 1}.
-                      </td>
+                    <Fragment key={row.rowId}>
+                      <tr
+                        onClick={
+                          canClickToEdit
+                            ? () => startEditingRow(row.studentId, m, isCatAbsent)
+                            : undefined
+                        }
+                        title={canClickToEdit ? 'Click row to edit marks' : undefined}
+                        className={`transition-colors odd:bg-white even:bg-slate-50/60 hover:bg-amber-50/35 ${
+                          canClickToEdit ? 'cursor-pointer' : ''
+                        } ${
+                          isEditingThisRow
+                            ? 'bg-emerald-50/50! ring-1 ring-inset ring-emerald-300'
+                            : isDirty
+                            ? 'bg-emerald-50/60!'
+                            : isAbsent
+                            ? 'bg-rose-50/30'
+                            : row.isCatMissing
+                            ? 'bg-amber-50/20'
+                            : ''
+                        }`}
+                      >
+                        {/* Index */}
+                        <td className="px-1.5 py-2 text-center font-medium text-slate-400 whitespace-nowrap">
+                          {idx + 1}.
+                        </td>
 
-                      {/* Admission No */}
-                      <td className="px-2.5 py-2.5 font-mono font-bold text-slate-950 whitespace-nowrap min-w-[155px]">
-                        {row.admissionNumber}
-                      </td>
+                        {/* Admission No */}
+                        <td className="px-2 py-2 font-mono font-bold text-slate-950 whitespace-nowrap">
+                          {row.admissionNumber}
+                        </td>
 
-                      {/* Full Name with vertical boundary wall - guaranteed no wrapping */}
-                      <td className="px-2.5 py-2.5 font-semibold text-slate-900 whitespace-nowrap min-w-[210px] border-r-2 border-slate-200">
-                        {row.fullName}
-                      </td>
+                        {/* Full Name with vertical boundary wall */}
+                        <td className="px-2 py-2 font-semibold text-slate-900 whitespace-nowrap border-r-2 border-slate-200">
+                          {row.fullName}
+                        </td>
 
                       {assessmentType === 'exam' ? (
                         <>
@@ -1737,49 +1734,38 @@ export function AssessmentMarkbookViewTable({
                           </td>
                         </>
                       )}
-                      {editable ? (
-                        <td className="px-2.5 py-2.5 text-center whitespace-nowrap border-l border-slate-200 print:hidden">
-                          {bulkEditMode ? (
-                            isDirty ? (
-                              <span className="inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-900 border border-amber-300">
-                                Edited
+                      </tr>
+                      {isEditingThisRow ? (
+                        <tr className="bg-emerald-50/80 border-b border-emerald-200 print:hidden">
+                          <td colSpan={assessmentType === 'exam' ? 10 : 6} className="px-3 py-1.5">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <span className="text-[11px] font-semibold text-emerald-950">
+                                Editing {row.fullName} ({row.admissionNumber})
                               </span>
-                            ) : (
-                              <span className="text-[10px] font-medium text-slate-400">—</span>
-                            )
-                          ) : editingStudentId === row.studentId ? (
-                            <div className="inline-flex items-center gap-1 whitespace-nowrap">
-                              <button
-                                type="button"
-                                disabled={isSaving}
-                                onClick={() => saveEditingRow(row.studentId, assessmentType === 'exam' ? 'all' : 'cat')}
-                                className="inline-flex h-7 shrink-0 items-center gap-1 whitespace-nowrap rounded-md bg-emerald-600 px-2 text-[11px] font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 cursor-pointer"
-                              >
-                                <Save className="size-3 shrink-0" />
-                                <span>{isSaving ? 'Saving...' : 'Save'}</span>
-                              </button>
-                              <button
-                                type="button"
-                                disabled={isSaving}
-                                onClick={cancelEditingRow}
-                                className="inline-flex h-7 shrink-0 items-center whitespace-nowrap rounded-md border border-slate-300 bg-white px-2 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
-                              >
-                                Cancel
-                              </button>
+                              <div className="inline-flex items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  disabled={isSaving}
+                                  onClick={() => saveEditingRow(row.studentId, assessmentType === 'exam' ? 'all' : 'cat')}
+                                  className="inline-flex h-7 shrink-0 items-center gap-1 whitespace-nowrap rounded-md bg-emerald-600 px-2.5 text-[11px] font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 cursor-pointer"
+                                >
+                                  <Save className="size-3 shrink-0" />
+                                  <span>{isSaving ? 'Saving...' : 'Save'}</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={isSaving}
+                                  onClick={cancelEditingRow}
+                                  className="inline-flex h-7 shrink-0 items-center whitespace-nowrap rounded-md border border-slate-300 bg-white px-2.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
                             </div>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => startEditingRow(row.studentId, m, isCatAbsent)}
-                              className="inline-flex h-7 shrink-0 items-center gap-1 whitespace-nowrap rounded-md border border-slate-300 bg-white px-2.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
-                            >
-                              <Pencil className="size-3 shrink-0" />
-                              <span>Edit</span>
-                            </button>
-                          )}
-                        </td>
+                          </td>
+                        </tr>
                       ) : null}
-                    </tr>
+                    </Fragment>
                   );
                 })
               )}

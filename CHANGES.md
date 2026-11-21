@@ -1,3 +1,12 @@
+- **Reclaimed horizontal markbook space with clickable-row editing (`src/features/assessment/marks/assessment-markbook-view-table.tsx`):**
+  - Removed the dedicated `Action` / `Edit` column from both **CAT Focus** and **Full Markbook** tables and removed rigid `min-w-[...]` widths with tighter column padding & concise headers so the full markbook fits medium, laptop, desktop, and large screens without sideways scrolling.
+  - Clicking any student row opens inline editing for that student with a zero-width-cost inline Save/Cancel bar directly beneath the row.
+
+- **Fixed `Exclude from Analysis` across shared/equivalent sibling markbooks (`src/features/assessment/marks/actions.ts`, `src/features/assessment/missing-marks.ts`):**
+  - Updated `toggleAssessmentExcludeFromAnalysisAction` to resolve all shared/equivalent sibling markbooks (`resolveAssessmentIdsWithSiblings`) and update `exclude_from_analysis` across all of them in the active department, plus revalidate `/assessment/missing-marks`.
+  - Updated `getMissingMarksAndAbsencesData` to skip units excluded from analysis (e.g., non-examinable units like Trade Project).
+  - Cleared draft marks, CAT submissions, and absence flags on all 3 Trade Project markbooks (`DNDT 1305`, `CHN 2206`, `DHN 3205`) in `SEP-DEC-26` and marked all 3 `exclude_from_analysis = true`.
+
 ### 2026-11-21: Add Missing Marks & Absences Register + Rename Module to Exam Control
 
 **Summary:**

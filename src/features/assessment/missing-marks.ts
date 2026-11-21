@@ -263,7 +263,7 @@ export const getMissingMarksAndAbsencesData = cache(
       (chunk, from, to) =>
         admin
           .from('assessment_events')
-          .select('id, unit_id, department_id, cat_marks_finalized_at, exam_marks_finalized_at, marks_submitted_at')
+          .select('id, unit_id, department_id, exclude_from_analysis, cat_marks_finalized_at, exam_marks_finalized_at, marks_submitted_at')
           .eq('academic_period_id', selectedPeriod.id)
           .eq('title', 'Unit Markbook')
           .in('unit_id', chunk)
@@ -473,6 +473,9 @@ export const getMissingMarksAndAbsencesData = cache(
         null;
 
       if (!primaryEvent) continue;
+
+      // Skip non-examinable units excluded from analysis (e.g., Trade Project)
+      if (matchingEvents.some((ev) => Boolean(ev.exclude_from_analysis))) continue;
 
       let catMark: number | null = null;
       let examMark: number | null = null;

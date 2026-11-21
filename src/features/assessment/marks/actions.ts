@@ -900,10 +900,21 @@ export async function toggleAssessmentExcludeFromAnalysisAction(formData: FormDa
     redirect(`/assessment/marks/${assessmentId}?error=not-found`);
   }
 
+  // Sync exclude_from_analysis across all shared/equivalent sibling markbooks in this department
+  const siblingIds = await resolveAssessmentIdsWithSiblings(admin, assessmentId);
+  const candidateIds = siblingIds.length > 0 ? siblingIds : [assessmentId];
+  const { data: deptEvents } = await admin
+    .from('assessment_events')
+    .select('id')
+    .in('id', candidateIds)
+    .eq('department_id', event.department_id);
+  const targetIds = (deptEvents ?? []).map((row) => row.id);
+  const idsToUpdate = targetIds.length > 0 ? targetIds : [assessmentId];
+
   const { error } = await admin
     .from('assessment_events')
     .update({ exclude_from_analysis: exclude === 'true' })
-    .eq('id', assessmentId);
+    .in('id', idsToUpdate);
 
   if (error) {
     redirect(`/assessment/marks/${assessmentId}?error=exclude-update-failed`);
@@ -911,8 +922,11 @@ export async function toggleAssessmentExcludeFromAnalysisAction(formData: FormDa
 
   revalidatePath('/assessment');
   revalidatePath('/assessment/analysis');
+  revalidatePath('/assessment/missing-marks');
   revalidatePath('/assessment/reports');
   revalidatePath('/assessment/marks');
-  revalidatePath(`/assessment/marks/${assessmentId}`);
+  for (const id of idsToUpdate) {
+    revalidatePath(`/assessment/marks/${id}`);
+  }
   redirect(`/assessment/marks/${assessmentId}`);
 }

@@ -6,7 +6,6 @@ import {
   CircleOff,
   GraduationCap,
   Mail,
-  Pencil,
   Phone,
   Plus,
   ShieldCheck,
@@ -165,7 +164,7 @@ export default async function TrainerDetailsPage({
         },
       ]}
       actions={
-        <div className="flex flex-wrap items-start gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {accessState === 'linked' ? (
             <Badge variant="success">Portal Active</Badge>
           ) : accessState === 'ready_to_link' ? (
@@ -188,18 +187,6 @@ export default async function TrainerDetailsPage({
             />
           ) : null}
 
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className="min-h-11 sm:min-h-8 h-auto py-1.5 text-xs font-semibold"
-          >
-            <Link href={`/timetable/trainers/${trainer.id}/edit`}>
-              <Pencil className="mr-1.5 size-3.5" aria-hidden="true" />
-              Edit Profile
-            </Link>
-          </Button>
-
           {trainer.isActive ? (
             <form action={setTrainerTimetableAvailabilityAction}>
               <input type="hidden" name="id" value={trainer.id} />
@@ -212,7 +199,7 @@ export default async function TrainerDetailsPage({
                 type="submit"
                 variant="outline"
                 size="sm"
-                className="min-h-11 sm:min-h-8 h-auto py-1.5 text-xs font-semibold"
+                className="min-h-10 sm:min-h-8 sm:h-8 py-1 text-xs font-semibold"
                 title={
                   trainer.isTimetableAvailable
                     ? 'Mark unavailable for timetabling'
@@ -251,7 +238,7 @@ export default async function TrainerDetailsPage({
               type="submit"
               variant="outline"
               size="sm"
-              className="min-h-11 sm:min-h-8 h-auto py-1.5 text-xs font-semibold"
+              className="min-h-10 sm:min-h-8 sm:h-8 py-1 text-xs font-semibold"
               title={
                 trainer.isActive
                   ? 'Deactivate trainer record'

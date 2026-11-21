@@ -1,3 +1,6 @@
+- **Added instant loading skeletons across all Exam Control routes (`src/features/assessment/exam-control-skeleton.tsx` + `loading.tsx` files):**
+  - Added reusable `ExamControlSkeleton` and wired Next.js App Router `loading.tsx` boundaries for `/assessment`, `/assessment/missing-marks`, `/assessment/marks/[assessmentId]`, `/assessment/analysis`, `/assessment/reports`, and `/assessment/exam-setting` so switching between Exam Control sheets transitions immediately with a matching KPI/toolbar/table skeleton instead of waiting on server queries.
+
 - **Reclaimed horizontal markbook space with clickable-row editing (`src/features/assessment/marks/assessment-markbook-view-table.tsx`):**
   - Removed the dedicated `Action` / `Edit` column from both **CAT Focus** and **Full Markbook** tables and removed rigid `min-w-[...]` widths with tighter column padding & concise headers so the full markbook fits medium, laptop, desktop, and large screens without sideways scrolling.
   - Clicking any student row opens inline editing for that student with a zero-width-cost inline Save/Cancel bar directly beneath the row.

@@ -45,22 +45,26 @@ interface MissingMarksWorkspaceProps {
 function formatComponentDisplay(
   status: ComponentMarkStatus,
   mark: number | null,
-  markingStarted: boolean,
+  active: boolean,
 ): string {
+  if (!active) return '—';
   if (status === 'absent') return 'AB';
   if (status === 'present' && mark !== null) return String(mark);
-  return markingStarted ? 'Missing' : 'Pending';
+  return 'Missing';
 }
 
 function StatusPill({
   status,
   mark,
-  markingStarted,
+  active,
 }: {
   status: ComponentMarkStatus;
   mark: number | null;
-  markingStarted: boolean;
+  active: boolean;
 }) {
+  if (!active) {
+    return <span className="text-slate-300">—</span>;
+  }
   if (status === 'absent') {
     return (
       <span className="inline-flex items-center rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 text-[11px] font-bold text-rose-700">
@@ -75,16 +79,9 @@ function StatusPill({
       </span>
     );
   }
-  if (markingStarted) {
-    return (
-      <span className="inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
-        Missing
-      </span>
-    );
-  }
   return (
-    <span className="inline-flex items-center rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-500">
-      Pending
+    <span className="inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
+      Missing
     </span>
   );
 }
@@ -139,9 +136,9 @@ export function MissingMarksWorkspace({
       const catFlagged =
         r.catStatus === 'absent' ||
         (r.catStatus === 'missing' && (includeUnstarted || r.catMarkingStarted));
+      // Only flag Exam absences/missing marks once Exam marks have been submitted for that unit
       const examFlagged =
-        r.examStatus === 'absent' ||
-        (r.examStatus === 'missing' && (includeUnstarted || r.examMarkingStarted));
+        r.examSubmitted && (r.examStatus === 'absent' || r.examStatus === 'missing');
       return catFlagged || examFlagged;
     });
   }, [records, includeUnstarted]);
@@ -154,12 +151,13 @@ export function MissingMarksWorkspace({
       if (unitFilter !== 'all' && r.unitCode !== unitFilter) return false;
 
       const catMissingActive = r.catStatus === 'missing' && (includeUnstarted || r.catMarkingStarted);
-      const examMissingActive = r.examStatus === 'missing' && (includeUnstarted || r.examMarkingStarted);
+      const examAbsentActive = r.examSubmitted && r.examStatus === 'absent';
+      const examMissingActive = r.examSubmitted && r.examStatus === 'missing';
       const hasCatIssue = r.catStatus === 'absent' || catMissingActive;
-      const hasExamIssue = r.examStatus === 'absent' || examMissingActive;
+      const hasExamIssue = examAbsentActive || examMissingActive;
 
       if (issueFilter === 'cat_absent' && r.catStatus !== 'absent') return false;
-      if (issueFilter === 'exam_absent' && r.examStatus !== 'absent') return false;
+      if (issueFilter === 'exam_absent' && !examAbsentActive) return false;
       if (issueFilter === 'cat_missing' && !catMissingActive) return false;
       if (issueFilter === 'exam_missing' && !examMissingActive) return false;
       if (issueFilter === 'both' && !(hasCatIssue && hasExamIssue)) return false;
@@ -218,9 +216,9 @@ export function MissingMarksWorkspace({
     for (const r of filteredRecords) {
       studentIds.add(r.studentId);
       if (r.catStatus === 'absent') catAbsent += 1;
-      if (r.examStatus === 'absent') examAbsent += 1;
+      if (r.examSubmitted && r.examStatus === 'absent') examAbsent += 1;
       if (r.catStatus === 'missing' && (includeUnstarted || r.catMarkingStarted)) missingMarks += 1;
-      if (r.examStatus === 'missing' && (includeUnstarted || r.examMarkingStarted)) missingMarks += 1;
+      if (r.examSubmitted && r.examStatus === 'missing') missingMarks += 1;
     }
 
     return {
@@ -248,8 +246,8 @@ export function MissingMarksWorkspace({
             cohortName: r.cohortName,
             unitCode: r.unitCode,
             unitName: r.unitName,
-            catDisplay: formatComponentDisplay(r.catStatus, r.catMark, r.catMarkingStarted),
-            examDisplay: formatComponentDisplay(r.examStatus, r.examMark, r.examMarkingStarted),
+            catDisplay: formatComponentDisplay(r.catStatus, r.catMark, true),
+            examDisplay: formatComponentDisplay(r.examStatus, r.examMark, r.examSubmitted),
             notes: notesParts.join(' · '),
           };
         }),
@@ -522,14 +520,16 @@ export function MissingMarksWorkspace({
                             const catLabel = formatComponentDisplay(
                               item.catStatus,
                               item.catMark,
-                              item.catMarkingStarted,
+                              true,
                             );
                             const examLabel = formatComponentDisplay(
                               item.examStatus,
                               item.examMark,
-                              item.examMarkingStarted,
+                              item.examSubmitted,
                             );
-                            const hasAbsent = item.catStatus === 'absent' || item.examStatus === 'absent';
+                            const hasAbsent =
+                              item.catStatus === 'absent' ||
+                              (item.examSubmitted && item.examStatus === 'absent');
                             return (
                               <Link
                                 key={item.key}
@@ -543,7 +543,8 @@ export function MissingMarksWorkspace({
                               >
                                 <span className="font-mono font-bold">{item.unitCode}</span>
                                 <span className="text-[10px] opacity-80">
-                                  CAT: {catLabel} · Exam: {examLabel}
+                                  CAT: {catLabel}
+                                  {item.examSubmitted ? ` · Exam: ${examLabel}` : ''}
                                 </span>
                                 <ExternalLink className="size-2.5 opacity-60 print:hidden" aria-hidden="true" />
                               </Link>
@@ -601,14 +602,14 @@ export function MissingMarksWorkspace({
                         <StatusPill
                           status={r.catStatus}
                           mark={r.catMark}
-                          markingStarted={r.catMarkingStarted}
+                          active={true}
                         />
                       </td>
                       <td className="px-3 py-2.5 text-center whitespace-nowrap">
                         <StatusPill
                           status={r.examStatus}
                           mark={r.examMark}
-                          markingStarted={r.examMarkingStarted}
+                          active={r.examSubmitted}
                         />
                       </td>
                       <td className="px-3 py-2.5 text-right whitespace-nowrap print:hidden">

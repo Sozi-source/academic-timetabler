@@ -35,7 +35,7 @@ export interface MissingMarkRecord {
   examMark: number | null;
   examAbsenceReason: string | null;
   catMarkingStarted: boolean;
-  examMarkingStarted: boolean;
+  examSubmitted: boolean;
 }
 
 export interface MissingMarksPageData {
@@ -140,6 +140,7 @@ export const getMissingMarksAndAbsencesData = cache(
         cohort_id,
         cat_marks_finalized_at,
         exam_marks_finalized_at,
+        marks_submitted_at,
         unit:units(id, code, name, programme:programmes(id, code, name))
       `)
       .eq('department_id', departmentId)
@@ -162,7 +163,7 @@ export const getMissingMarksAndAbsencesData = cache(
     const eventIds = events.map((e) => e.id);
     const eventById = new Map(events.map((e) => [e.id, e]));
 
-    const [popRows, rosterRows, draftRows, resultRows] = await Promise.all([
+    const [popRows, rosterRows, draftRows, resultRows, submissionRows] = await Promise.all([
       fetchAllPaged(
         (from, to) =>
           supabase
@@ -221,15 +222,31 @@ export const getMissingMarksAndAbsencesData = cache(
             .range(from, to),
         'assessment results',
       ),
+      fetchAllPaged(
+        (from, to) =>
+          supabase
+            .from('assessment_mark_component_submissions')
+            .select('id, assessment_id, component_key')
+            .in('assessment_id', eventIds)
+            .order('id', { ascending: true })
+            .range(from, to),
+        'mark component submissions',
+      ),
     ]);
 
-    // Track per-event marking activity (whether at least 1 candidate has a CAT/Exam mark or absence)
+    // Track CAT marking activity and explicit Exam submission per assessment event
     const eventCatStarted = new Set<string>();
-    const eventExamStarted = new Set<string>();
+    const eventExamSubmitted = new Set<string>();
 
     for (const e of events) {
       if (e.cat_marks_finalized_at) eventCatStarted.add(e.id);
-      if (e.exam_marks_finalized_at) eventExamStarted.add(e.id);
+      if (e.exam_marks_finalized_at || e.marks_submitted_at) eventExamSubmitted.add(e.id);
+    }
+
+    for (const sub of submissionRows) {
+      if (!sub.assessment_id) continue;
+      if (sub.component_key === 'cat') eventCatStarted.add(sub.assessment_id);
+      if (sub.component_key === 'exam') eventExamSubmitted.add(sub.assessment_id);
     }
 
     type MarkState = {
@@ -260,7 +277,6 @@ export const getMissingMarksAndAbsencesData = cache(
       }
       if (exam !== null) {
         state.examMark = exam;
-        eventExamStarted.add(d.assessment_id);
       }
     }
 
@@ -279,7 +295,7 @@ export const getMissingMarksAndAbsencesData = cache(
       }
       if (exam !== null && state.examMark === null) {
         state.examMark = exam;
-        eventExamStarted.add(r.assessment_event_id);
+        eventExamSubmitted.add(r.assessment_event_id);
       }
       if (isExplicitAb(comps?.cat)) {
         state.resultCatAb = true;
@@ -287,7 +303,7 @@ export const getMissingMarksAndAbsencesData = cache(
       }
       if (isExplicitAb(comps?.exam) || isExplicitAb(r.grade)) {
         state.resultExamAb = true;
-        eventExamStarted.add(r.assessment_event_id);
+        eventExamSubmitted.add(r.assessment_event_id);
       }
     }
 
@@ -335,7 +351,6 @@ export const getMissingMarksAndAbsencesData = cache(
       const examAbsent = p.attendance_status === 'absent' || Boolean(p.exam_absence_reason);
       const catAbsent = Boolean(p.cat_absence_reason);
       if (catAbsent) eventCatStarted.add(p.assessment_event_id);
-      if (examAbsent) eventExamStarted.add(p.assessment_event_id);
 
       const existing = candidateMap.get(key);
       if (!existing) {
@@ -376,7 +391,6 @@ export const getMissingMarksAndAbsencesData = cache(
       const catAbsent = Boolean(r.cat_absent);
       const examAbsent = r.pre_assessment_status === 'absent';
       if (catAbsent) eventCatStarted.add(r.assessment_id);
-      if (examAbsent) eventExamStarted.add(r.assessment_id);
 
       const existing = candidateMap.get(key);
       if (!existing) {
@@ -449,7 +463,7 @@ export const getMissingMarksAndAbsencesData = cache(
         examMark,
         examAbsenceReason: entry.examAbsenceReason,
         catMarkingStarted: eventCatStarted.has(entry.assessmentId),
-        examMarkingStarted: eventExamStarted.has(entry.assessmentId),
+        examSubmitted: eventExamSubmitted.has(entry.assessmentId),
       };
 
       const existing = dedupedByStudentUnit.get(record.key);

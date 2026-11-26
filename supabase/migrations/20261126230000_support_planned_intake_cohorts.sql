@@ -13,7 +13,7 @@ security definer
 set search_path = ''
 as $$
 declare
-  active_department uuid := public.get_active_department_id();
+  active_department uuid := public.current_user_primary_department_id();
   inserted_count integer := 0;
   v_period_starts_on date;
   v_period_status text;

@@ -7,9 +7,14 @@ const path = '/timetable/teaching-allocations';
 
 export async function generateCurrentOfferingsAction(formData: FormData) {
   await requireHodAccess(); const period = String(formData.get('academicPeriodId') ?? '');
-  if (!period) throw new Error('Select an Academic Period.');
+  if (!period) {
+    redirect(`${path}?allocationError=${encodeURIComponent('Select an Academic Period.')}`);
+  }
   const db = await createClient(); const { data:generatedCount, error } = await db.rpc('generate_current_unit_offerings',{p_academic_period_id:period});
-  if (error) throw new Error(error.message);
+  if (error) {
+    const errQuery = new URLSearchParams({ period, allocationError: error.message });
+    redirect(`${path}?${errQuery.toString()}`);
+  }
   const query=new URLSearchParams({
     period,
     generated:'1',

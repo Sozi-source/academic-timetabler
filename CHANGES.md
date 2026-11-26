@@ -1,3 +1,26 @@
+### 2026-11-26: Fix Planned-Period Curriculum Trigger Validation & Allocation Action Errors
+
+**Summary:**
+- **Trigger Stage Validation Fix (`supabase/migrations/20261126223000_fix_planned_period_curriculum_stage_validation.sql`):**
+  - Updated `public.validate_unit_offering()` and `public.normalize_readiness_bulk_unit_offering_stage()` so `origin = 'curriculum'` recommendations inserted into a `planned` future period (e.g. `JAN-APR-27`) validate against `compute_cohort_stage_for_period(...)` instead of rejecting because `unit.academic_period_number <> cohort.current_academic_period_number`.
+  - Clamped `weekly_sessions` to `>= 1` in `public.generate_current_unit_offerings(uuid)`.
+- **Graceful Error Surfacing (`src/features/teaching-allocations/simple-allocation-actions.ts`, `src/app/(dashboard)/timetable/teaching-allocations/page.tsx`, `src/app/(dashboard)/timetable/teaching-allocations/error.tsx`):**
+  - Updated `generateCurrentOfferingsAction` to redirect with `?period=...&allocationError=...` instead of throwing an uncaught HTTP 500 server exception.
+  - Added query-error alerts in `teaching-allocations/page.tsx`, diagnostic digest/message output in `teaching-allocations/error.tsx`, and a server-render regression test (`src/tests/teaching-allocations/page-render.test.tsx`).
+
+**Added:**
+- `supabase/migrations/20261126223000_fix_planned_period_curriculum_stage_validation.sql`
+- `src/tests/teaching-allocations/page-render.test.tsx`
+
+**Modified:**
+- `src/features/teaching-allocations/simple-allocation-actions.ts`
+- `src/app/(dashboard)/timetable/teaching-allocations/page.tsx`
+- `src/app/(dashboard)/timetable/teaching-allocations/error.tsx`
+- `CHANGES.md`
+
+**Manual Follow-Up:**
+- Apply `supabase/migrations/20261126223000_fix_planned_period_curriculum_stage_validation.sql` (along with `20261126220000_fix_partial_generation_and_reserved_allocations.sql`) in Supabase before clicking **Generate offering recommendations** for `JAN-APR-27`.
+
 ### 2026-11-26: Partial Timetable Generation, Incremental Updates, & Provisional Slot Fixes
 
 **Summary:**

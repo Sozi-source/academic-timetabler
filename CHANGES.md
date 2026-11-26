@@ -4,6 +4,8 @@
 - **Timetable Cohort Availability (`src/features/cohorts/queries.ts`):**
   - Updated `getTimetableAvailableCohorts` to load both `active` and `planned` cohorts (`is_timetable_available = true`) so new future intake cohorts such as `CND-JAN-2027` and `DND-JAN-2027` are recognized by `getGeneratorSourceData()` during `JAN-APR-27` timetable generation.
   - Falls back to `plannedSize` when a future cohort has `actualSize === 0` and no enrolled live students yet.
+- **Allocation Screen Merged-Class Count & Cohort Display (`src/app/(dashboard)/timetable/teaching-allocations/page.tsx`, `src/tests/teaching-allocations/page-render.test.tsx`):**
+  - Updated `Units awaiting trainer`, `Allocated and blocked`, and `Reserve all unassigned (N)` to count collapsed teachable classes (with the merged cohort-unit breakdown in the card description) instead of unmerged cohort offering rows, and rendered all participating cohort codes in the `Cohort` column for shared classes.
 - **Planned Intake Offering Generation Guard (`supabase/migrations/20261126230000_support_planned_intake_cohorts.sql`, `supabase/migrations/20261126231500_fix_generate_offerings_department_helper.sql`):**
   - Updated `public.generate_current_unit_offerings(uuid)` so `planned` cohorts generate Stage 1 offerings when targeting a `planned` period (`JAN-APR-27`), while keeping `active` periods (`SEP-DEC-26`) restricted to `cohorts.status = 'active'` so future intakes never leak into the active timetable.
   - Fixed the department helper call in `public.generate_current_unit_offerings(uuid)` to use `public.current_user_primary_department_id()`.
@@ -18,8 +20,10 @@
 - `src/tests/cohorts/queries.test.ts`
 
 **Modified:**
+- `src/app/(dashboard)/timetable/teaching-allocations/page.tsx`
 - `src/features/cohorts/queries.ts`
 - `src/features/imports/unit-offerings/actions.ts`
+- `src/tests/teaching-allocations/page-render.test.tsx`
 - `CHANGES.md`
 
 **Manual Follow-Up:**

@@ -1,6 +1,8 @@
 ### 2026-11-27: Automatic Standing Timetable Setup Inheritance Across Semesters
 
 **Summary:**
+- **Fix Timetable Draft Save Column Mismatch (`supabase/migrations/20261127011500_fix_save_generated_timetable_draft_summary_col.sql`):**
+  - Updated `public.save_generated_timetable_draft(uuid, jsonb, jsonb)` to insert into `summary` (alongside `status`, `generation_strategy`, `overwrite_existing`, and `locked_session_count`) instead of the nonexistent `generation_summary` column on `timetable_generation_runs`.
 - **Merge Separated Same-Trainer Equivalents (`supabase/migrations/20261127010000_merge_same_trainer_separated_equivalents.sql`):**
   - Added `public.merge_same_trainer_separated_allocations(uuid, uuid)` and integrated it into `public.reconcile_previous_trainer_assignments(uuid)` using `canonical_shared_unit_title_for_unit(...)` so separated cohorts assigned to the same trainer (such as `DNDT JAN 27` joining already-assigned `First Aid`, `Diet Therapy II`, or `Principles of Food Processing` classes) merge cleanly into a single shared class without duplicating workload.
   - Backfilled planned future periods (`JAN-APR-27`).
@@ -14,6 +16,7 @@
 **Added:**
 - `supabase/migrations/20261127003000_auto_inherit_standing_timetable_setup.sql`
 - `supabase/migrations/20261127010000_merge_same_trainer_separated_equivalents.sql`
+- `supabase/migrations/20261127011500_fix_save_generated_timetable_draft_summary_col.sql`
 - `src/tests/timetable-calendar/auto-setup-sync.test.ts`
 
 **Modified:**

@@ -40,7 +40,25 @@ describe(
             'period-1',
           overwriteExisting:
             false,
+          autoAssignRooms:
+            false,
         });
+      },
+    );
+
+    it(
+      'parses the autoAssignRooms checkbox',
+      () => {
+        const formData = new FormData();
+        formData.set('academicPeriodId', 'period-1');
+        formData.set('autoAssignRooms', 'true');
+
+        const result = parseGeneratorRequest(formData);
+        expect(result.success).toBe(true);
+        if (!result.success) {
+          return;
+        }
+        expect(result.data.autoAssignRooms).toBe(true);
       },
     );
 

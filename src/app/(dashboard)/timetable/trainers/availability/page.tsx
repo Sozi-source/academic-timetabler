@@ -13,7 +13,10 @@ import {
   resetTrainerAvailabilityAction,
   saveTrainerAvailabilityAction,
 } from '@/features/trainers/availability-actions';
-import { initializeStandardCalendarAction } from '@/features/timetable-calendar/actions';
+import {
+  carryForwardTimetableSetupAction,
+  initializeStandardCalendarAction,
+} from '@/features/timetable-calendar/actions';
 import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
@@ -145,9 +148,10 @@ export default async function Page({
       ) : null}
 
       <Card className="p-3 xl:p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <form
           method="get"
-          className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end"
+          className="grid flex-1 gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end"
         >
           <label className="text-xs font-semibold text-text-primary xl:text-sm">
             Trainer
@@ -184,6 +188,25 @@ export default async function Page({
             Load
           </Button>
         </form>
+        {selectablePeriods.some((item) => item.id !== periodId && item.status === 'active') ? (
+          <form action={carryForwardTimetableSetupAction} className="flex flex-wrap items-end gap-2">
+            <input type="hidden" name="targetAcademicPeriodId" value={periodId} />
+            <input
+              type="hidden"
+              name="returnTo"
+              value={`/timetable/trainers/availability?trainer=${encodeURIComponent(trainerId)}&period=${encodeURIComponent(periodId)}`}
+            />
+            <input
+              type="hidden"
+              name="sourceAcademicPeriodId"
+              value={selectablePeriods.find((item) => item.id !== periodId && item.status === 'active')?.id ?? ''}
+            />
+            <Button type="submit" variant="outline" size="sm">
+              Copy from active period
+            </Button>
+          </form>
+        ) : null}
+        </div>
       </Card>
 
       {!calendarReady ? (

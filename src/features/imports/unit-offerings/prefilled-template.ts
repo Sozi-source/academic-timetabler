@@ -1,3 +1,4 @@
+import { computeCohortStageForPeriod } from '@/features/academic-periods/selection';
 import type {
   ImportTemplateSeedRow,
 } from '@/features/imports/template-generator';
@@ -6,12 +7,15 @@ export interface PrefilledAcademicPeriod {
   id: string;
   code: string;
   name: string;
+  startsOn?: string | null;
+  status?: string | null;
 }
 
 export interface PrefilledProgramme {
   id: string;
   code: string;
   name: string;
+  totalAcademicPeriods?: number | null;
 }
 
 export interface PrefilledCohort {
@@ -19,6 +23,8 @@ export interface PrefilledCohort {
   programmeId: string;
   code: string;
   name: string;
+  intakeDate?: string | null;
+  expectedCompletionDate?: string | null;
   currentAcademicPeriodNumber: number;
 }
 
@@ -141,9 +147,29 @@ ImportTemplateSeedRow[] {
       continue;
     }
 
+    if (
+      academicPeriod.startsOn &&
+      cohort.expectedCompletionDate &&
+      cohort.expectedCompletionDate < academicPeriod.startsOn
+    ) {
+      continue;
+    }
+
+    const derivedStage = academicPeriod.startsOn && cohort.intakeDate
+      ? computeCohortStageForPeriod({
+          intakeDate: cohort.intakeDate,
+          periodStartsOn: academicPeriod.startsOn,
+          totalAcademicPeriods: programme.totalAcademicPeriods ?? null,
+        })
+      : cohort.currentAcademicPeriodNumber;
+
+    if (derivedStage === null) {
+      continue;
+    }
+
     const matchingUnits =
       unitsByProgrammeStage.get(
-        `${cohort.programmeId}:${cohort.currentAcademicPeriodNumber}`,
+        `${cohort.programmeId}:${derivedStage}`,
       ) ?? [];
 
     const sortedUnits = [

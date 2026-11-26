@@ -4,7 +4,21 @@ import { cache } from 'react';
 
 import { createClient } from '@/lib/supabase/server';
 
-import type { SchedulingConstraintData } from './types';
+import type {
+  CalendarEventType,
+  ConstraintSubjectType,
+  SchedulingConstraintData,
+  TimetableCalendarEvent,
+} from './types';
+
+function isMissingTableError(error: { code?: string | null; message?: string | null } | null) {
+  if (!error) return false;
+  return (
+    error.code === '42P01' ||
+    error.code === 'PGRST205' ||
+    error.message?.includes('timetable_calendar_events') === true
+  );
+}
 
 export const getSchedulingConstraintData = cache(
   async (academicPeriodId: string): Promise<SchedulingConstraintData> => {
@@ -12,18 +26,23 @@ export const getSchedulingConstraintData = cache(
 
     const [
       constraintResult,
+      trainerResult,
       roomResult,
       cohortResult,
       dayResult,
       timeSlotResult,
+      eventResult,
     ] = await Promise.all([
       supabase
         .from('scheduling_constraints')
         .select('*')
         .eq('academic_period_id', academicPeriodId)
-        .neq('subject_type', 'trainer')
-        .eq('constraint_type', 'unavailable')
         .order('created_at', { ascending: false }),
+      supabase
+        .from('trainers')
+        .select('id, full_name')
+        .eq('is_active', true)
+        .order('full_name'),
       supabase
         .from('rooms')
         .select('id, code, name')
@@ -47,20 +66,32 @@ export const getSchedulingConstraintData = cache(
         .eq('is_enabled', true)
         .eq('slot_type', 'teaching')
         .order('sequence_number'),
+      supabase
+        .from('timetable_calendar_events')
+        .select('*')
+        .eq('academic_period_id', academicPeriodId)
+        .order('event_date', { ascending: true }),
     ]);
 
     const failure =
       constraintResult.error ??
+      trainerResult.error ??
       roomResult.error ??
       cohortResult.error ??
       dayResult.error ??
-      timeSlotResult.error;
+      timeSlotResult.error ??
+      (isMissingTableError(eventResult.error) ? null : eventResult.error);
 
     if (failure) {
       throw new Error(
         `Unable to load scheduling constraints: ${failure.message}`,
       );
     }
+
+    const trainers = (trainerResult.data ?? []).map((item) => ({
+      id: item.id,
+      label: item.full_name,
+    }));
 
     const rooms = (roomResult.data ?? []).map((item) => ({
       id: item.id,
@@ -89,18 +120,41 @@ export const getSchedulingConstraintData = cache(
     }));
 
     const labels = new Map<string, string>(
-      [...rooms, ...cohorts].map((item) => [item.id, item.label]),
+      [...trainers, ...rooms, ...cohorts].map((item) => [item.id, item.label]),
     );
 
     const dayLabels = new Map(
       workingDays.map((item) => [item.id, item.label]),
     );
 
+    const calendarEvents: TimetableCalendarEvent[] = (
+      isMissingTableError(eventResult.error) ? [] : (eventResult.data ?? [])
+    ).map((row) => ({
+      id: row.id,
+      academicPeriodId: row.academic_period_id,
+      title: row.title,
+      eventType: row.event_type as CalendarEventType,
+      eventDate: row.event_date,
+      startsAt: row.starts_at,
+      endsAt: row.ends_at,
+      scopeType: row.scope_type as ConstraintSubjectType,
+      scopeId: row.scope_id,
+      scopeLabel:
+        row.scope_type === 'institution'
+          ? 'Institution-wide'
+          : labels.get(row.scope_id ?? '') ?? 'Unknown record',
+      suspendsRegularClasses: Boolean(row.suspends_regular_classes),
+      notes: row.notes ?? null,
+      isActive: Boolean(row.is_active),
+    }));
+
     return {
+      trainers,
       rooms,
       cohorts,
       workingDays,
       timeSlots,
+      calendarEvents,
       constraints: (constraintResult.data ?? []).map((row) => ({
         id: row.id,
         academicPeriodId: row.academic_period_id,

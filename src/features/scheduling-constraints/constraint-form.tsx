@@ -8,21 +8,24 @@ import { Select } from '@/components/ui/select';
 import { createSchedulingConstraintAction } from './actions';
 import type {
   ConstraintOption,
+  ConstraintPriority,
+  ConstraintSubjectType,
+  ConstraintType,
   TimeSlotOption,
   WorkingDayOption,
 } from './types';
 
-type ConstraintTarget = 'room' | 'cohort' | 'institution';
-
 interface ConstraintFormProps {
   academicPeriodId: string;
+  trainers: ConstraintOption[];
   rooms: ConstraintOption[];
   cohorts: ConstraintOption[];
   workingDays: WorkingDayOption[];
   timeSlots: TimeSlotOption[];
 }
 
-const targetLabels: Record<ConstraintTarget, string> = {
+const targetLabels: Record<ConstraintSubjectType, string> = {
+  trainer: 'Trainer',
   room: 'Room',
   cohort: 'Class / cohort',
   institution: 'Institution',
@@ -30,19 +33,25 @@ const targetLabels: Record<ConstraintTarget, string> = {
 
 export function ConstraintForm({
   academicPeriodId,
+  trainers,
   rooms,
   cohorts,
   workingDays,
   timeSlots,
 }: ConstraintFormProps) {
   const [subjectType, setSubjectType] =
-    useState<ConstraintTarget>('room');
+    useState<ConstraintSubjectType>('room');
+  const [constraintType, setConstraintType] =
+    useState<ConstraintType>('unavailable');
+  const [priority, setPriority] =
+    useState<ConstraintPriority>('hard');
 
   const records = useMemo(() => {
+    if (subjectType === 'trainer') return trainers;
     if (subjectType === 'room') return rooms;
     if (subjectType === 'cohort') return cohorts;
     return [];
-  }, [cohorts, rooms, subjectType]);
+  }, [cohorts, rooms, subjectType, trainers]);
 
   const recordLabel = targetLabels[subjectType];
 
@@ -56,17 +65,16 @@ export function ConstraintForm({
         name="academicPeriodId"
         value={academicPeriodId}
       />
-      <input type="hidden" name="constraintType" value="unavailable" />
-      <input type="hidden" name="priority" value="hard" />
 
       <Field label="Applies to">
         <Select
           name="subjectType"
           value={subjectType}
           onChange={(event) =>
-            setSubjectType(event.target.value as ConstraintTarget)
+            setSubjectType(event.target.value as ConstraintSubjectType)
           }
         >
+          <option value="trainer">Trainer</option>
           <option value="room">Room</option>
           <option value="cohort">Class / cohort</option>
           <option value="institution">Institution-wide</option>
@@ -93,6 +101,34 @@ export function ConstraintForm({
             ))}
           </Select>
         )}
+      </Field>
+
+      <Field label="Rule type">
+        <Select
+          name="constraintType"
+          value={constraintType}
+          onChange={(event) =>
+            setConstraintType(event.target.value as ConstraintType)
+          }
+        >
+          <option value="unavailable">Unavailable / Blocked</option>
+          <option value="protected_day">Protected day (no classes)</option>
+          <option value="preferred">Preferred window</option>
+          <option value="required">Required window</option>
+        </Select>
+      </Field>
+
+      <Field label="Enforcement">
+        <Select
+          name="priority"
+          value={priority}
+          onChange={(event) =>
+            setPriority(event.target.value as ConstraintPriority)
+          }
+        >
+          <option value="hard">Hard (must obey)</option>
+          <option value="soft">Soft (preference / warning)</option>
+        </Select>
       </Field>
 
       <Field label="Working day">

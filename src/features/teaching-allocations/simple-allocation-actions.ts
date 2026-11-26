@@ -22,6 +22,41 @@ export async function generateCurrentOfferingsAction(formData: FormData) {
   redirect(`${path}?${query.toString()}`);
 }
 
+export async function combineMatchingUnitOfferingsAction(formData: FormData) {
+  await requireHodAccess();
+  const period = String(formData.get('academicPeriodId') ?? '').trim();
+  const returnPath = String(formData.get('returnTo') ?? '').trim();
+  if (!period) throw new Error('Select an Academic Period.');
+  const db = await createClient();
+  const { data, error } = await db.rpc('merge_matching_unit_offerings', {
+    p_academic_period_id: period,
+  });
+  if (error) {
+    const target = returnPath.startsWith('/timetable/unit-offerings') ? returnPath : path;
+    const query = new URLSearchParams({ period, allocationError: error.message, approvalError: error.message });
+    redirect(`${target}?${query.toString()}`);
+  }
+  const result = (data ?? {}) as {
+    mergedGroupCount?: number;
+    mergedUnitCount?: number;
+    skippedGroupCount?: number;
+  };
+  revalidatePath(path);
+  revalidatePath('/timetable/unit-offerings');
+  revalidatePath('/timetable/readiness');
+  revalidatePath('/timetable/generator');
+  revalidatePath('/timetable/editor');
+
+  const target = returnPath.startsWith('/timetable/unit-offerings') ? returnPath : path;
+  const query = new URLSearchParams({
+    period,
+    autoMerged: String(result.mergedGroupCount ?? 0),
+    mergedUnits: String(result.mergedUnitCount ?? 0),
+    mergeSkipped: String(result.skippedGroupCount ?? 0),
+  });
+  redirect(`${target}?${query.toString()}`);
+}
+
 export async function reconcilePreviousAssignmentsAction(formData: FormData) {
   await requireHodAccess();
   const period=String(formData.get('academicPeriodId')??'');
@@ -69,9 +104,56 @@ export async function assignOfferingAction(formData: FormData) {
   // Fetch source offering configuration before assigning
   const { data: offeringRecord } = await db
     .from('unit_offerings')
-    .select('id, cohort_id, unit_id, confirmed_shared_offering_id, is_full_day_session, session_duration_minutes, weekly_sessions, fixed_working_day_id, fixed_time_slot_id')
+    .select('id, academic_period_id, cohort_id, unit_id, confirmed_shared_offering_id, fixed_schedule_required, is_full_day_session, session_duration_minutes, weekly_sessions, fixed_working_day_id, fixed_time_slot_id, unit_offering_fixed_slots(working_day_id, time_slot_id)')
     .eq('id', offering)
     .maybeSingle();
+
+  // If this offering has an agreed fixed schedule (e.g. cross-dept service unit),
+  // automatically authorize those agreed slots in trainer_availability so the HOD
+  // does not have to check the same slots in two separate screens.
+  if (offeringRecord?.fixed_schedule_required) {
+    const { data: trainerRecord } = await db
+      .from('trainers')
+      .select('id, availability_mode')
+      .eq('id', trainer)
+      .maybeSingle();
+
+    if (trainerRecord?.availability_mode === 'selected_slots_only') {
+      const agreedPairs = new Map<string, { working_day_id: string; time_slot_id: string }>();
+      for (const slotRow of offeringRecord.unit_offering_fixed_slots ?? []) {
+        if (slotRow.working_day_id && slotRow.time_slot_id) {
+          agreedPairs.set(`${slotRow.working_day_id}:${slotRow.time_slot_id}`, {
+            working_day_id: slotRow.working_day_id,
+            time_slot_id: slotRow.time_slot_id,
+          });
+        }
+      }
+      if (offeringRecord.fixed_working_day_id && offeringRecord.fixed_time_slot_id) {
+        agreedPairs.set(
+          `${offeringRecord.fixed_working_day_id}:${offeringRecord.fixed_time_slot_id}`,
+          {
+            working_day_id: offeringRecord.fixed_working_day_id,
+            time_slot_id: offeringRecord.fixed_time_slot_id,
+          },
+        );
+      }
+
+      if (agreedPairs.size > 0) {
+        await db.from('trainer_availability').upsert(
+          [...agreedPairs.values()].map((pair) => ({
+            trainer_id: trainer,
+            academic_period_id: offeringRecord.academic_period_id,
+            working_day_id: pair.working_day_id,
+            time_slot_id: pair.time_slot_id,
+          })),
+          {
+            onConflict: 'trainer_id,academic_period_id,working_day_id,time_slot_id',
+            ignoreDuplicates: true,
+          },
+        );
+      }
+    }
+  }
 
   // Ensure the underlying unit(s) are active and timetable available
   if (offeringRecord?.unit_id) {
@@ -552,6 +634,37 @@ export async function setFixedScheduleAction(formData: FormData) {
       p_working_day_ids: workingDayIds,
       p_time_slot_ids: timeSlotIds,
     });
+
+    // 6. Keep selected_slots_only trainer availability aligned with agreed fixed slots
+    if (offering) {
+      const { data: allocatedRow } = await db
+        .from('teaching_allocations')
+        .select('trainer_id, trainers(availability_mode)')
+        .eq('academic_period_id', offering.academic_period_id)
+        .eq('cohort_id', offering.cohort_id)
+        .eq('unit_id', offering.unit_id)
+        .in('status', ['draft', 'active'])
+        .maybeSingle();
+
+      const trainerRelation = Array.isArray(allocatedRow?.trainers)
+        ? allocatedRow?.trainers[0]
+        : allocatedRow?.trainers;
+
+      if (allocatedRow?.trainer_id && trainerRelation?.availability_mode === 'selected_slots_only') {
+        await db.from('trainer_availability').upsert(
+          workingDayIds.map((wDayId, idx) => ({
+            trainer_id: allocatedRow.trainer_id,
+            academic_period_id: offering.academic_period_id,
+            working_day_id: wDayId,
+            time_slot_id: timeSlotIds[idx],
+          })),
+          {
+            onConflict: 'trainer_id,academic_period_id,working_day_id,time_slot_id',
+            ignoreDuplicates: true,
+          },
+        );
+      }
+    }
   }
 
   revalidatePath(path);

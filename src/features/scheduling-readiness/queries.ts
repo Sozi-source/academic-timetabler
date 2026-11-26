@@ -2,6 +2,7 @@ import { cache } from 'react';
 
 import { createClient } from '@/lib/supabase/server';
 import { allocationMatchesOffering } from '@/features/teaching-allocations/allocation-reconciliation';
+import { canonicalizeSharedUnitTitle } from '@/features/teaching-allocations/shared-class-matching';
 
 import { assessSchedulingReadiness } from './assessment';
 import type {
@@ -76,17 +77,25 @@ function first<T>(value: T[] | T | null): T | null {
   return value;
 }
 
-function mapParticipant(row: OfferingRow['teaching_offering_participants'][number]): ReadinessParticipant | null {
+function mapParticipant(
+  row: OfferingRow['teaching_offering_participants'][number],
+  liveCohortCounts: Map<string, number>,
+): ReadinessParticipant | null {
   const cohort = first(row.cohorts);
   const unit = first(row.units);
   if (!cohort || !unit) return null;
+
+  const liveCount = liveCohortCounts.get(cohort.id);
+  const cohortSize = liveCount !== undefined && liveCount > 0
+    ? liveCount
+    : cohort.actual_size;
 
   return {
     id: row.id,
     cohortId: cohort.id,
     cohortCode: cohort.code,
     cohortName: cohort.name,
-    cohortSize: cohort.actual_size,
+    cohortSize,
     cohortStatus: cohort.status,
     cohortTimetableAvailable: cohort.is_timetable_available,
     unitId: unit.id,
@@ -136,9 +145,10 @@ interface AllocationContextRow {
 function mapOffering(
   row: OfferingRow,
   allocations: AllocationContextRow[],
+  liveCohortCounts: Map<string, number>,
 ): ReadinessOffering {
   const participants = row.teaching_offering_participants
-    .map(mapParticipant)
+    .map((participant) => mapParticipant(participant, liveCohortCounts))
     .filter((participant): participant is ReadinessParticipant => participant !== null);
   const matchingAllocations = allocations.filter((allocation) =>
     allocationMatchesOffering({
@@ -209,7 +219,7 @@ export const getSchedulingReadiness = cache(async (
 ): Promise<SchedulingReadiness | null> => {
   const supabase = await createClient();
 
-  const [periodResult, offeringsResult, daysResult, slotsResult, trainersResult, roomsResult, allocationsResult] = await Promise.all([
+  const [periodResult, offeringsResult, daysResult, slotsResult, trainersResult, roomsResult, allocationsResult, studentCountsResult] = await Promise.all([
     supabase.from('academic_periods').select('id, code, name, status').eq('id', academicPeriodId).maybeSingle(),
     supabase.from('teaching_offerings').select(`
       id,
@@ -264,6 +274,7 @@ export const getSchedulingReadiness = cache(async (
       .eq('source_unit_offering.approval_status', 'approved')
       .eq('source_unit_offering.selection_state', 'included')
       .eq('source_unit_offering.is_timetable_enabled', true),
+    supabase.from('students').select('current_cohort_id').in('lifecycle_status', ['admitted', 'active']),
   ]);
 
   const firstError = periodResult.error ?? offeringsResult.error ?? daysResult.error ?? slotsResult.error ?? trainersResult.error ?? roomsResult.error ?? allocationsResult.error;
@@ -272,6 +283,16 @@ export const getSchedulingReadiness = cache(async (
   }
 
   if (!periodResult.data) return null;
+
+  const liveCohortCounts = new Map<string, number>();
+  for (const student of studentCountsResult.data ?? []) {
+    if (student.current_cohort_id) {
+      liveCohortCounts.set(
+        student.current_cohort_id,
+        (liveCohortCounts.get(student.current_cohort_id) ?? 0) + 1,
+      );
+    }
+  }
 
   const allocations = (allocationsResult.data ?? []) as unknown as AllocationContextRow[];
   const offerings = ((offeringsResult.data ?? []) as unknown as OfferingRow[])
@@ -284,7 +305,24 @@ export const getSchedulingReadiness = cache(async (
           && (!source.confirmed_shared_offering_id
             || source.confirmed_shared_offering_id === offering.id);
       }))
-    .map((offering) => mapOffering(offering, allocations));
+    .map((offering) => mapOffering(offering, allocations, liveCohortCounts));
+
+  // Detect enabled offerings sharing the same canonical subject title that are
+  // still running as separate single-cohort classes instead of one shared class.
+  const offeringsBySubject = new Map<string, { label: string; groupIds: Set<string> }>();
+  for (const offering of offerings) {
+    if (!offering.isTimetableEnabled || offering.sessionDurationMinutes >= 480) continue;
+    const key = canonicalizeSharedUnitTitle(offering.title);
+    if (!key) continue;
+    const entry = offeringsBySubject.get(key) ?? { label: offering.title, groupIds: new Set<string>() };
+    entry.groupIds.add(offering.id);
+    offeringsBySubject.set(key, entry);
+  }
+  const unmergedEquivalentTitles = [...offeringsBySubject.values()]
+    .filter((entry) => entry.groupIds.size > 1)
+    .map((entry) => entry.label)
+    .sort((a, b) => a.localeCompare(b));
+
   const assessment = assessSchedulingReadiness({
     academicPeriodStatus: periodResult.data.status,
     offerings,
@@ -292,6 +330,7 @@ export const getSchedulingReadiness = cache(async (
     teachingSlotCount: slotsResult.count ?? 0,
     availableTrainerCount: trainersResult.data?.length ?? 0,
     availableRoomCount: roomsResult.data?.length ?? 0,
+    unmergedEquivalentTitles,
   });
 
   const enabled = offerings.filter((offering) => offering.isTimetableEnabled);

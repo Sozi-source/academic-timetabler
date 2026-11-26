@@ -63,6 +63,12 @@ export function parseGeneratorRequest(
       'overwriteExisting',
     );
 
+  const autoAssignRooms =
+    readBoolean(
+      formData,
+      'autoAssignRooms',
+    );
+
   const fieldErrors:
   NonNullable<
     GeneratorActionState[
@@ -100,6 +106,7 @@ export function parseGeneratorRequest(
     data: {
       academicPeriodId,
       overwriteExisting,
+      autoAssignRooms,
     },
   };
 }

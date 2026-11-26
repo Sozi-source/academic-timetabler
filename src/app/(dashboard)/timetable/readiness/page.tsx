@@ -4,6 +4,11 @@ import { ClipboardCheck, Sparkles } from 'lucide-react';
 
 import { PageHeader } from '@/components/ui/page-header';
 import { getAcademicPeriods } from '@/features/academic-periods/queries';
+import {
+  isTimetableConfigurablePeriod,
+  prioritizeActiveAcademicPeriods,
+  resolveAcademicPeriodId,
+} from '@/features/academic-periods/selection';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { ReadinessDashboard } from '@/features/scheduling-readiness/readiness-dashboard';
 import { getSchedulingReadiness } from '@/features/scheduling-readiness/queries';
@@ -18,12 +23,10 @@ export const metadata: Metadata = {
 export default async function TimetableReadinessPage({ searchParams }: { searchParams: Promise<{ academicPeriodId?: string }> }) {
   await requireHodAccess();
   const [periods, params] = await Promise.all([getAcademicPeriods(), searchParams]);
-  const selectable = periods.filter(
-    (period) =>
-      period.academicYear.status === 'active' &&
-      ['planned', 'active'].includes(period.status),
+  const selectable = prioritizeActiveAcademicPeriods(
+    periods.filter((period) => isTimetableConfigurablePeriod(period)),
   );
-  const selectedId = params.academicPeriodId ?? selectable.find((period) => period.status === 'active')?.id ?? selectable[0]?.id;
+  const selectedId = resolveAcademicPeriodId(selectable, params.academicPeriodId);
 
   if (!selectedId) {
     redirect('/timetable/academic-periods');

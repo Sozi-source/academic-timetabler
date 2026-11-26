@@ -34,6 +34,7 @@ import type {
 export interface AutomaticPlannerOptions {
   allowSameAllocationMultipleSessionsPerDay?: boolean;
   candidateLimitPerRequest?: number;
+  autoAssignRooms?: boolean;
 }
 
 export interface UnscheduledPlanningSession {
@@ -473,7 +474,7 @@ function calculateDifficultyScore({
   );
 
   if (isOtherDepartmentTrainer) {
-    score += 500;
+    score += 80;
   }
 
   if (trainer?.availabilityMode === 'selected_slots_only') {
@@ -566,41 +567,36 @@ function calculateConstraintPriority({
   );
 
   const participantCohortCount = allocation.participantCohortIds?.length ?? 1;
-  const isLargeSharedClass = participantCohortCount >= 3;
   const isSharedClass = participantCohortCount >= 2;
 
-  // Level 7: Full day fixed sessions
+  // Order strictly by degrees of freedom: tightest time/cohort constraints first.
+  // Level 6: Full day fixed sessions
   if (isFullDay) {
-    return 7;
-  }
-
-  // Level 6: Other department / guest trainer with fixed slot or restricted availability (e.g. Brian Ondieki)
-  if (isOtherDepartmentTrainer && (hasFixedTimeAndDay || hasRestrictedAvailability)) {
     return 6;
   }
 
-  // Level 5: All multi-cohort shared classes (>= 2 cohorts, e.g. Nutrition in the Lifespan)
-  if (isSharedClass) {
+  // Level 5: Fixed schedule sessions (exact day + time slot, e.g. service units or agreed fixed slots)
+  if (hasFixedTimeAndDay) {
     return 5;
   }
 
-  // Level 4: Other department / guest trainers (always prioritized ahead of internal flexible trainers)
-  if (isOtherDepartmentTrainer) {
+  // Level 4: Multi-cohort shared classes (>= 2 cohorts)
+  if (isSharedClass) {
     return 4;
   }
 
-  // Level 3: Fixed schedule sessions (exact day + time slot)
-  if (hasFixedTimeAndDay) {
+  // Level 3: Trainers with restricted availability (selected slots only or narrow window)
+  if (hasRestrictedAvailability) {
     return 3;
   }
 
-  // Level 2: Internal trainers with restricted availability (selected slots only)
-  if (hasRestrictedAvailability) {
+  // Level 2: Partial fixed constraint (e.g. fixed day only or fixed slot only)
+  if (fixedTimeSlotId || fixedWorkingDayId) {
     return 2;
   }
 
-  // Level 1: Partial fixed constraint (e.g. fixed day only or fixed slot only)
-  if (fixedTimeSlotId || fixedWorkingDayId) {
+  // Level 1: Unpinned cross-department / guest trainer tie-breaker
+  if (isOtherDepartmentTrainer) {
     return 1;
   }
 
@@ -724,30 +720,64 @@ function hasAllocationOnDay({
   );
 }
 
+function getRoomTypePreferenceRank(
+  room: PlanningRoom,
+  allocation: PlanningAllocation,
+  unit?: PlanningUnit,
+): number {
+  if (unit?.preferredRoomType) {
+    return room.roomType === unit.preferredRoomType ? 0 : 1;
+  }
+  if (allocation.deliveryMode === 'practical') {
+    return room.roomType !== 'classroom' ? 0 : 1;
+  }
+  return room.roomType === 'classroom' ? 0 : 1;
+}
+
 function getEligibleRooms({
   allocation,
   rooms,
+  cohort,
+  unit,
+  autoAssignRooms = false,
 }: {
   allocation: PlanningAllocation;
   rooms: PlanningRoom[];
+  cohort?: PlanningCohort;
+  unit?: PlanningUnit;
+  autoAssignRooms?: boolean;
 }): Array<PlanningRoom | null> {
-  const availableRooms =
-    rooms.filter(
-      (room) =>
-        room.isActive &&
-        room.isTimetableAvailable,
-    );
+  const availableRooms = rooms.filter(
+    (room) => room.isActive && room.isTimetableAvailable,
+  );
 
-  if (
-    !allocation.preferredRoomId
-  ) {
+  if (allocation.preferredRoomId) {
+    return availableRooms.filter(
+      (room) => room.id === allocation.preferredRoomId,
+    );
+  }
+
+  if (!autoAssignRooms) {
     return [null];
   }
 
-  return availableRooms.filter(
-    (room) =>
-      room.id ===
-      allocation.preferredRoomId,
+  const requiredCapacity =
+    allocation.combinedCohortSize ?? cohort?.actualSize ?? 0;
+
+  const capacityFittingRooms = availableRooms.filter(
+    (room) => requiredCapacity <= 0 || room.capacity >= requiredCapacity,
+  );
+
+  if (capacityFittingRooms.length === 0) {
+    return [null];
+  }
+
+  return [...capacityFittingRooms].sort(
+    (first, second) =>
+      getRoomTypePreferenceRank(first, allocation, unit) -
+        getRoomTypePreferenceRank(second, allocation, unit) ||
+      first.capacity - second.capacity ||
+      first.name.localeCompare(second.name),
   );
 }
 
@@ -1018,6 +1048,118 @@ interface RelocationRepairResult {
   relocatedSessions: PlanningSession[];
 }
 
+function isSessionMovable(
+  session: PlanningSession,
+  allocationLookup: Map<string, PlanningAllocation>,
+): boolean {
+  if (session.isLocked || session.status === 'locked' || session.isExternal) {
+    return false;
+  }
+
+  const alloc = allocationLookup.get(session.teachingAllocationId);
+  const fixedSlot = alloc?.fixedTimeSlotIds?.[session.sessionNumber - 1];
+  const fixedDay =
+    alloc?.fixedWorkingDayIds?.[session.sessionNumber - 1] ??
+    alloc?.fixedWorkingDayId;
+  return !(fixedSlot && fixedDay);
+}
+
+function scoreCandidatesForExistingSession({
+  session,
+  activeSessions,
+  workingDays,
+  timeSlots,
+  rooms,
+  trainers,
+  cohorts,
+  units,
+  constraints,
+  candidateLimit,
+  allowSameDay,
+  allocationLookup,
+  previousSessions,
+  autoAssignRooms,
+}: {
+  session: PlanningSession;
+  activeSessions: PlanningSession[];
+  workingDays: PlanningWorkingDay[];
+  timeSlots: PlanningTimeSlot[];
+  rooms: PlanningRoom[];
+  trainers: PlanningTrainer[];
+  cohorts: PlanningCohort[];
+  units: PlanningUnit[];
+  constraints?: PlanningConstraint[];
+  candidateLimit: number;
+  allowSameDay: boolean;
+  allocationLookup: Map<string, PlanningAllocation>;
+  previousSessions?: PlanningSession[];
+  autoAssignRooms: boolean;
+}): PlacementScoreResult[] | null {
+  const alloc = allocationLookup.get(session.teachingAllocationId);
+  if (!alloc) {
+    return null;
+  }
+
+  const cohort = cohorts.find((c) => c.id === alloc.cohortId);
+  const unit = units.find((u) => u.id === alloc.unitId);
+  const eligibleRooms = getEligibleRooms({
+    allocation: alloc,
+    rooms,
+    cohort,
+    unit,
+    autoAssignRooms,
+  });
+
+  if (eligibleRooms.length === 0) {
+    return null;
+  }
+
+  const timeRanges = alloc.isFullDaySession
+    ? buildFullDayTimeRange({
+        timeSlots,
+        startTimeSlotId: alloc.fixedTimeSlotIds?.[0],
+        endTimeSlotId: alloc.fixedEndTimeSlotId,
+        durationMinutes: alloc.sessionDurationMinutes,
+      })
+    : buildContiguousTimeRanges({
+        timeSlots,
+        durationMinutes: alloc.sessionDurationMinutes,
+      });
+
+  if (timeRanges.length === 0) {
+    return null;
+  }
+
+  const candidateSessions = createCandidateSessions({
+    request: {
+      allocation: alloc,
+      sessionNumber: session.sessionNumber,
+      constraintPriority: 0,
+      difficultyScore: 0,
+    },
+    workingDays,
+    timeRanges,
+    rooms: eligibleRooms,
+    selectedSessions: activeSessions,
+    allowSameAllocationMultipleSessionsPerDay: allowSameDay,
+    previousSessions,
+    cohort,
+    allRooms: rooms,
+  }).slice(0, candidateLimit);
+
+  return scorePlacements({
+    candidates: candidateSessions,
+    existingSessions: activeSessions,
+    workingDays,
+    timeSlots,
+    trainers,
+    cohorts,
+    rooms,
+    units,
+    constraints,
+  });
+}
+
 function tryRelocationRepair({
   request,
   candidateScores,
@@ -1034,6 +1176,7 @@ function tryRelocationRepair({
   allowSameDay,
   allocationLookup,
   previousSessions,
+  autoAssignRooms = false,
 }: {
   request: SessionRequest;
   candidateScores: PlacementScoreResult[];
@@ -1050,15 +1193,18 @@ function tryRelocationRepair({
   allowSameDay: boolean;
   allocationLookup: Map<string, PlanningAllocation>;
   previousSessions?: PlanningSession[];
+  autoAssignRooms?: boolean;
 }): RelocationRepairResult | null {
   const selectedById = new Map(selectedSessions.map((s) => [s.id, s]));
 
   // Sort candidate placements by fewest blocked conflicts, then highest placement score
-  const sortedCandidates = [...candidateScores].sort((first, second) => {
-    const firstBlocked = first.conflicts.filter((c) => c.severity === 'blocked').length;
-    const secondBlocked = second.conflicts.filter((c) => c.severity === 'blocked').length;
-    return firstBlocked - secondBlocked || second.score - first.score;
-  });
+  const sortedCandidates = [...candidateScores]
+    .sort((first, second) => {
+      const firstBlocked = first.conflicts.filter((c) => c.severity === 'blocked').length;
+      const secondBlocked = second.conflicts.filter((c) => c.severity === 'blocked').length;
+      return firstBlocked - secondBlocked || second.score - first.score;
+    })
+    .slice(0, 20);
 
   for (const placementScore of sortedCandidates) {
     const blockedConflicts = placementScore.conflicts.filter((c) => c.severity === 'blocked');
@@ -1088,26 +1234,10 @@ function tryRelocationRepair({
 
     for (const id of conflictingIds) {
       const session = selectedById.get(id);
-      if (!session) {
-        // Conflict is with existing / locked / external session, cannot be moved
+      if (!session || !isSessionMovable(session, allocationLookup)) {
         canDisplace = false;
         break;
       }
-
-      if (session.isLocked || session.status === 'locked' || session.isExternal) {
-        canDisplace = false;
-        break;
-      }
-
-      // Check if this session has a user-fixed day and slot
-      const alloc = allocationLookup.get(session.teachingAllocationId);
-      const fixedSlot = alloc?.fixedTimeSlotIds?.[session.sessionNumber - 1];
-      const fixedDay = alloc?.fixedWorkingDayIds?.[session.sessionNumber - 1] ?? alloc?.fixedWorkingDayId;
-      if (fixedSlot && fixedDay) {
-        canDisplace = false;
-        break;
-      }
-
       displacedSessions.push(session);
     }
 
@@ -1136,7 +1266,7 @@ function tryRelocationRepair({
     }
 
     const normalizedPrimary = normalizeSelectedCandidate(placementScore.session);
-    let activeSessionsForRelocation = [
+    const activeSessionsForRelocation = [
       ...existingSessions,
       ...currentSessionsWithoutDisplaced,
       normalizedPrimary,
@@ -1147,80 +1277,123 @@ function tryRelocationRepair({
 
     // Try finding another valid time/room where both cohort and trainer are free
     for (const displaced of displacedSessions) {
-      const alloc = allocationLookup.get(displaced.teachingAllocationId);
-      if (!alloc) {
-        allDisplacedRelocated = false;
-        break;
-      }
-
-      const displacedRequest: SessionRequest = {
-        allocation: alloc,
-        sessionNumber: displaced.sessionNumber,
-        constraintPriority: 0,
-        difficultyScore: 0,
-      };
-
-      const eligibleRooms = getEligibleRooms({
-        allocation: alloc,
-        rooms,
-      });
-
-      if (eligibleRooms.length === 0) {
-        allDisplacedRelocated = false;
-        break;
-      }
-
-      const timeRanges = alloc.isFullDaySession
-        ? buildFullDayTimeRange({
-            timeSlots,
-            startTimeSlotId: alloc.fixedTimeSlotIds?.[0],
-            endTimeSlotId: alloc.fixedEndTimeSlotId,
-            durationMinutes: alloc.sessionDurationMinutes,
-          })
-        : buildContiguousTimeRanges({
-            timeSlots,
-            durationMinutes: alloc.sessionDurationMinutes,
-          });
-
-      if (timeRanges.length === 0) {
-        allDisplacedRelocated = false;
-        break;
-      }
-
-      const candidateSessions = createCandidateSessions({
-        request: displacedRequest,
-        workingDays,
-        timeRanges,
-        rooms: eligibleRooms,
-        selectedSessions: activeSessionsForRelocation,
-        allowSameAllocationMultipleSessionsPerDay: allowSameDay,
-        previousSessions,
-        cohort: cohorts.find((c) => c.id === alloc.cohortId),
-        allRooms: rooms,
-      }).slice(0, candidateLimit);
-
-      const relocationScores = scorePlacements({
-        candidates: candidateSessions,
-        existingSessions: activeSessionsForRelocation,
+      const relocationScores = scoreCandidatesForExistingSession({
+        session: displaced,
+        activeSessions: activeSessionsForRelocation,
         workingDays,
         timeSlots,
+        rooms,
         trainers,
         cohorts,
-        rooms,
         units,
         constraints,
+        candidateLimit,
+        allowSameDay,
+        allocationLookup,
+        previousSessions,
+        autoAssignRooms,
       });
+
+      if (!relocationScores) {
+        allDisplacedRelocated = false;
+        break;
+      }
 
       const bestRelocation = relocationScores.find((s) => s.isValid);
 
-      if (!bestRelocation) {
-        allDisplacedRelocated = false;
-        break;
+      if (bestRelocation) {
+        const normalizedRelocated = normalizeSelectedCandidate(bestRelocation.session);
+        newlyRelocated.push(normalizedRelocated);
+        activeSessionsForRelocation.push(normalizedRelocated);
+        continue;
       }
 
-      const normalizedRelocated = normalizeSelectedCandidate(bestRelocation.session);
-      newlyRelocated.push(normalizedRelocated);
-      activeSessionsForRelocation.push(normalizedRelocated);
+      // Depth-2 ejection chain: if moving 1 flexible blocker unlocks `displaced` and the blocker can move elsewhere
+      if (displacedSessions.length === 1) {
+        const chainCandidateScores = relocationScores.slice(0, 8);
+        let chainSucceeded = false;
+
+        for (const stepTwoCandidate of chainCandidateScores) {
+          const stepTwoBlocked = stepTwoCandidate.conflicts.filter((c) => c.severity === 'blocked');
+          const stepTwoBlockerIds = new Set<string>();
+          for (const conflict of stepTwoBlocked) {
+            for (const id of conflict.sessionIds) {
+              if (id !== stepTwoCandidate.session.id) {
+                stepTwoBlockerIds.add(id);
+              }
+            }
+          }
+
+          if (stepTwoBlockerIds.size !== 1) {
+            continue;
+          }
+
+          const [blockerId] = [...stepTwoBlockerIds];
+          const blockerSession = selectedById.get(blockerId);
+          if (
+            !blockerSession ||
+            displacedIds.has(blockerId) ||
+            !isSessionMovable(blockerSession, allocationLookup)
+          ) {
+            continue;
+          }
+
+          const sessionsWithoutBlocker = activeSessionsForRelocation.filter(
+            (s) => s.id !== blockerId,
+          );
+          const displacedValidityCheck = scorePlacement({
+            candidate: stepTwoCandidate.session,
+            existingSessions: sessionsWithoutBlocker,
+            workingDays,
+            timeSlots,
+            trainers,
+            cohorts,
+            rooms,
+            units,
+            constraints,
+          });
+
+          if (!displacedValidityCheck.isValid) {
+            continue;
+          }
+
+          const normalizedDisplaced = normalizeSelectedCandidate(stepTwoCandidate.session);
+          const blockerSearchPool = [...sessionsWithoutBlocker, normalizedDisplaced];
+          const blockerScores = scoreCandidatesForExistingSession({
+            session: blockerSession,
+            activeSessions: blockerSearchPool,
+            workingDays,
+            timeSlots,
+            rooms,
+            trainers,
+            cohorts,
+            units,
+            constraints,
+            candidateLimit,
+            allowSameDay,
+            allocationLookup,
+            previousSessions,
+            autoAssignRooms,
+          });
+
+          const bestBlockerRelocation = blockerScores?.find((s) => s.isValid);
+          if (!bestBlockerRelocation) {
+            continue;
+          }
+
+          const normalizedBlocker = normalizeSelectedCandidate(bestBlockerRelocation.session);
+          newlyRelocated.push(normalizedDisplaced, normalizedBlocker);
+          chainSucceeded = true;
+          break;
+        }
+
+        if (chainSucceeded) {
+          continue;
+        }
+      }
+
+      allDisplacedRelocated = false;
+      break;
     }
 
     if (allDisplacedRelocated) {
@@ -1734,6 +1907,9 @@ export function generateTimetablePlan(
       ?.allowSameAllocationMultipleSessionsPerDay ??
     false;
 
+  const autoAssignRooms =
+    input.options?.autoAssignRooms ?? false;
+
   for (const request of requests) {
     const {
       allocation,
@@ -1870,6 +2046,9 @@ export function generateTimetablePlan(
       getEligibleRooms({
         allocation,
         rooms: input.rooms,
+        cohort,
+        unit,
+        autoAssignRooms,
       });
 
     if (eligibleRooms.length === 0) {
@@ -1907,28 +2086,6 @@ export function generateTimetablePlan(
         0,
         candidateLimit,
       );
-
-    // TEMPORARY DIAGNOSTIC — remove after the zero-candidate investigation
-    // for allocation.id === '9a536347-96d6-415f-aee3-f9f7bc81e2b2' is done.
-    if (candidates.length === 0) {
-      console.error('[zero-candidates]', {
-        allocationId: allocation.id,
-        sessionNumber,
-        fixedWorkingDayId: allocation.fixedWorkingDayId,
-        fixedWorkingDayIds: allocation.fixedWorkingDayIds,
-        fixedTimeSlotIds: allocation.fixedTimeSlotIds,
-        isFullDaySession: allocation.isFullDaySession,
-        sessionDurationMinutes: allocation.sessionDurationMinutes,
-        preferredRoomId: allocation.preferredRoomId,
-        eligibleRoomsPassedIn: eligibleRooms.map((r) => r?.id ?? null),
-        workingDayIdsInScope: workingDays.map((d) => d.id),
-        timeRangesInScope: timeRanges.map((r) => ({
-          start: r.startTimeSlotId,
-          end: r.endTimeSlotId,
-          minutes: r.durationMinutes,
-        })),
-      });
-    }
 
     const scores =
       scorePlacements({
@@ -1977,6 +2134,7 @@ export function generateTimetablePlan(
         allowSameDay,
         allocationLookup,
         previousSessions: input.previousSessions,
+        autoAssignRooms,
       });
 
       if (repairResult) {

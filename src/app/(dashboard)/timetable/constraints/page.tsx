@@ -7,6 +7,11 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/ui/page-header';
 import { Select } from '@/components/ui/select';
 import { getAcademicPeriods } from '@/features/academic-periods/queries';
+import {
+  isTimetableConfigurablePeriod,
+  prioritizeActiveAcademicPeriods,
+  resolveAcademicPeriodId,
+} from '@/features/academic-periods/selection';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { ConstraintWorkspace } from '@/features/scheduling-constraints/constraint-workspace';
 import { getSchedulingConstraintData } from '@/features/scheduling-constraints/queries';
@@ -25,18 +30,14 @@ export default async function ConstraintsPage({
 }) {
   await requireHodAccess();
 
-  const periods = (await getAcademicPeriods()).filter(
-    (period) =>
-      period.academicYear.status === 'active' &&
-      (period.status === 'active' || period.status === 'planned'),
+  const periods = prioritizeActiveAcademicPeriods(
+    (await getAcademicPeriods()).filter((period) =>
+      isTimetableConfigurablePeriod(period),
+    ),
   );
 
   const params = await searchParams;
-  const selectedId =
-    params.academicPeriodId ??
-    periods.find((period) => period.status === 'active')?.id ??
-    periods[0]?.id ??
-    null;
+  const selectedId = resolveAcademicPeriodId(periods, params.academicPeriodId) || null;
 
   const selectedPeriod = periods.find((period) => period.id === selectedId);
   const data = selectedId

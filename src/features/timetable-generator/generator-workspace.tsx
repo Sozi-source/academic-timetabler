@@ -13,6 +13,7 @@ import {
   useActionState,
   useEffect,
   useRef,
+  useState,
 } from 'react';
 
 import {
@@ -143,6 +144,7 @@ export function GeneratorWorkspace({
     ? exchangeState.message
     : null;
   const exchangeStatusRef = useRef<HTMLDivElement>(null);
+  const [autoAssignRooms, setAutoAssignRooms] = useState(true);
 
   useEffect(() => {
     if (!exchangeState.message) {
@@ -274,22 +276,46 @@ export function GeneratorWorkspace({
           </Button>
         </div>
 
-        <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-surface-subtle px-4 py-3">
-          <input
-            type="checkbox"
-            name="overwriteExisting"
-            defaultChecked
-            disabled={pending}
-            className="mt-1 size-4 rounded border-border-strong"
-          />
+        <div className="mt-5 grid gap-3 md:grid-cols-2">
+          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-surface-subtle px-4 py-3">
+            <input
+              type="checkbox"
+              name="overwriteExisting"
+              defaultChecked
+              disabled={pending}
+              className="mt-1 size-4 rounded border-border-strong"
+            />
 
-          <span>
-            <span className="block text-sm font-semibold text-text-primary">
-              Replace existing editable sessions
+            <span>
+              <span className="block text-sm font-semibold text-text-primary">
+                Replace existing editable sessions
+              </span>
+              <span className="mt-0.5 block text-xs text-text-muted">
+                Preserves locked or attendance-recorded sessions while regenerating editable slots.
+              </span>
             </span>
+          </label>
 
-          </span>
-        </label>
+          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-surface-subtle px-4 py-3">
+            <input
+              type="checkbox"
+              name="autoAssignRooms"
+              checked={autoAssignRooms}
+              onChange={(event) => setAutoAssignRooms(event.target.checked)}
+              disabled={pending}
+              className="mt-1 size-4 rounded border-border-strong"
+            />
+
+            <span>
+              <span className="block text-sm font-semibold text-text-primary">
+                Auto-assign fitting rooms
+              </span>
+              <span className="mt-0.5 block text-xs text-text-muted">
+                Automatically picks capacity-fitting active rooms matching preferred room type when no preferred room is pinned.
+              </span>
+            </span>
+          </label>
+        </div>
       </form>
 
       <section className="rounded-2xl border border-danger/30 bg-danger-surface p-5">
@@ -450,6 +476,7 @@ export function GeneratorWorkspace({
               </div>
               <input type="hidden" name="academicPeriodId" value={preview.academicPeriod.id} />
               <input type="hidden" name="overwriteExisting" value="true" />
+              <input type="hidden" name="autoAssignRooms" value={autoAssignRooms ? 'true' : 'false'} />
               <Button
                 type="submit"
                 variant="outline"
@@ -519,6 +546,7 @@ export function GeneratorWorkspace({
               <form action={persistAction}>
                 <input type="hidden" name="academicPeriodId" value={preview.academicPeriod.id} />
                 <input type="hidden" name="overwriteExisting" value="true" />
+                <input type="hidden" name="autoAssignRooms" value={autoAssignRooms ? 'true' : 'false'} />
                 <Button
                   type="submit"
                   size="lg"

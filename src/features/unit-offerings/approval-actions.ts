@@ -17,24 +17,36 @@ interface OfferingApprovalResult {
   message: string | null;
 }
 
+function buildRedirectUrl(academicPeriodId: string, params: Record<string, string>) {
+  const search = new URLSearchParams();
+  if (academicPeriodId) search.set('period', academicPeriodId);
+  for (const [key, value] of Object.entries(params)) {
+    search.set(key, value);
+  }
+  return `${path}?${search.toString()}`;
+}
+
 export async function approveUnitOfferingsAction(formData: FormData) {
   await requireHodAccess();
+  const academicPeriodId = String(formData.get('academicPeriodId') ?? '').trim();
   const offeringIds = formData.getAll('offeringId').map(String).filter(Boolean);
-  if (offeringIds.length === 0) redirect(`${path}?approvalError=Select+at+least+one+offering`);
+  if (offeringIds.length === 0) {
+    redirect(buildRedirectUrl(academicPeriodId, { approvalError: 'Select at least one offering' }));
+  }
   const db = await createClient();
   const { data, error } = await db.rpc('set_unit_offering_approval', {
     p_offering_ids: offeringIds,
     p_approve: true,
     p_reason: null,
   });
-  if (error) redirect(`${path}?approvalError=${encodeURIComponent(error.message)}`);
+  if (error) redirect(buildRedirectUrl(academicPeriodId, { approvalError: error.message }));
 
   const result = data as OfferingApprovalResult;
 
   // Nothing was approved — surface the reason
   if (result.changed === 0) {
     const msg = result.message ?? 'No offerings could be included — they may belong to another department or have locked sessions.';
-    redirect(`${path}?approvalError=${encodeURIComponent(msg)}`);
+    redirect(buildRedirectUrl(academicPeriodId, { approvalError: msg }));
   }
 
   revalidatePath(path);
@@ -48,14 +60,18 @@ export async function approveUnitOfferingsAction(formData: FormData) {
 
   // Partial success: some were blocked but some succeeded
   if (result.blocked > 0 && result.message) {
-    redirect(`${path}?approved=${result.changed}&approvalWarning=${encodeURIComponent(result.message)}`);
+    redirect(buildRedirectUrl(academicPeriodId, {
+      approved: String(result.changed),
+      approvalWarning: result.message,
+    }));
   }
 
-  redirect(`${path}?approved=${result.changed}`);
+  redirect(buildRedirectUrl(academicPeriodId, { approved: String(result.changed) }));
 }
 
 export async function withdrawUnitOfferingAction(formData: FormData) {
   await requireHodAccess();
+  const academicPeriodId = String(formData.get('academicPeriodId') ?? '').trim();
   const rawOfferingIds = formData.getAll('offeringId').map(String).filter(Boolean);
   const singleOfferingId = String(formData.get('offeringId') ?? '');
   const offeringIds =
@@ -64,8 +80,9 @@ export async function withdrawUnitOfferingAction(formData: FormData) {
     String(formData.get('reason') ?? 'Excluded from active cohort teaching plan').trim() ||
     'Excluded from active cohort teaching plan';
 
-  if (offeringIds.length === 0)
-    redirect(`${path}?approvalError=${encodeURIComponent('Select at least one offering to withdraw')}`);
+  if (offeringIds.length === 0) {
+    redirect(buildRedirectUrl(academicPeriodId, { approvalError: 'Select at least one offering to withdraw' }));
+  }
 
   const db = await createClient();
   const { data, error } = await db.rpc('set_unit_offering_approval', {
@@ -73,7 +90,7 @@ export async function withdrawUnitOfferingAction(formData: FormData) {
     p_approve: false,
     p_reason: reason,
   });
-  if (error) redirect(`${path}?approvalError=${encodeURIComponent(error.message)}`);
+  if (error) redirect(buildRedirectUrl(academicPeriodId, { approvalError: error.message }));
 
   const result = data as OfferingApprovalResult;
 
@@ -82,7 +99,7 @@ export async function withdrawUnitOfferingAction(formData: FormData) {
     const msg =
       result.message ??
       'This offering could not be dropped — it has locked timetable sessions. Unlock all sessions for this unit before dropping it.';
-    redirect(`${path}?approvalError=${encodeURIComponent(msg)}`);
+    redirect(buildRedirectUrl(academicPeriodId, { approvalError: msg }));
   }
 
   revalidatePath(path);
@@ -96,10 +113,13 @@ export async function withdrawUnitOfferingAction(formData: FormData) {
 
   // Partial success: some blocked, some dropped
   if (result.blocked > 0 && result.message) {
-    redirect(`${path}?withdrawn=${result.changed}&approvalWarning=${encodeURIComponent(result.message)}`);
+    redirect(buildRedirectUrl(academicPeriodId, {
+      withdrawn: String(result.changed),
+      approvalWarning: result.message,
+    }));
   }
 
-  redirect(`${path}?withdrawn=${result.changed}`);
+  redirect(buildRedirectUrl(academicPeriodId, { withdrawn: String(result.changed) }));
 }
 
 export async function addCohortUnitOfferingAction(formData: FormData) {
@@ -109,7 +129,7 @@ export async function addCohortUnitOfferingAction(formData: FormData) {
   const unitId = String(formData.get('unitId') ?? '');
   const reason = String(formData.get('reason') ?? '').trim();
   if (!academicPeriodId || !cohortId || !unitId || reason.length < 3) {
-    redirect(`${path}?approvalError=${encodeURIComponent('Select a cohort and unit, and provide a reason')}`);
+    redirect(buildRedirectUrl(academicPeriodId, { approvalError: 'Select a cohort and unit, and provide a reason' }));
   }
   const db = await createClient();
   const { error } = await db.rpc('add_special_unit_offering', {
@@ -118,7 +138,7 @@ export async function addCohortUnitOfferingAction(formData: FormData) {
     selected_unit_id: unitId,
     selected_reason: reason,
   });
-  if (error) redirect(`${path}?approvalError=${encodeURIComponent(error.message)}`);
+  if (error) redirect(buildRedirectUrl(academicPeriodId, { approvalError: error.message }));
   revalidatePath(path);
   revalidatePath('/timetable/teaching-allocations');
   revalidatePath('/timetable/readiness');
@@ -127,5 +147,5 @@ export async function addCohortUnitOfferingAction(formData: FormData) {
   revalidatePath('/timetable/conflicts');
   revalidatePath('/timetable/published');
   revalidatePath('/timetable/reports');
-  redirect(`${path}?added=1`);
+  redirect(buildRedirectUrl(academicPeriodId, { added: '1' }));
 }

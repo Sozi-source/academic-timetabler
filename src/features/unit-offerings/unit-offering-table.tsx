@@ -11,6 +11,7 @@ import { approveUnitOfferingsAction, withdrawUnitOfferingAction } from './approv
 
 interface UnitOfferingTableProps {
   offerings: UnitOffering[];
+  academicPeriodId?: string;
 }
 
 type StateFilter =
@@ -89,7 +90,7 @@ function statePriority(offering: UnitOffering): number {
   }
 }
 
-export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
+export function UnitOfferingTable({ offerings, academicPeriodId = '' }: UnitOfferingTableProps) {
   const [search, setSearch] = useState('');
   const [programmeId, setProgrammeId] = useState('all');
   const [cohortId, setCohortId] = useState('all');
@@ -312,6 +313,7 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
       </section>
 
       <form action={approveUnitOfferingsAction} className="space-y-3">
+        <input type="hidden" name="academicPeriodId" value={academicPeriodId} />
         <input
           type="hidden"
           name="reason"
@@ -496,10 +498,12 @@ export function UnitOfferingTable({ offerings }: UnitOfferingTableProps) {
         {offerings.map((offering) => (
           <div key={offering.id}>
             <form id={`withdraw-${offering.id}`} action={withdrawUnitOfferingAction}>
+              <input type="hidden" name="academicPeriodId" value={academicPeriodId} />
               <input type="hidden" name="offeringId" value={offering.id} />
               <input type="hidden" name="reason" value="Dropped from cohort teaching plan for this academic period" />
             </form>
             <form id={`approve-${offering.id}`} action={approveUnitOfferingsAction}>
+              <input type="hidden" name="academicPeriodId" value={academicPeriodId} />
               <input type="hidden" name="offeringId" value={offering.id} />
             </form>
           </div>

@@ -84,6 +84,7 @@ export interface GeneratorProtectedTimetableSummary {
 export interface GeneratorRequest {
   academicPeriodId: string;
   overwriteExisting: boolean;
+  autoAssignRooms: boolean;
 }
 
 export interface GeneratorAcademicPeriodSummary {

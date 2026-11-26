@@ -1477,5 +1477,150 @@ describe('generateTimetablePlan', () => {
     const roomOverlap = result.conflicts.filter((c) => c.type === 'room_overlap');
     expect(roomOverlap).toHaveLength(0);
   });
+
+  it('auto-assigns capacity-fitting rooms matching preferred room type when autoAssignRooms is enabled', () => {
+    const input = createPlannerInput({
+      allocations: [
+        {
+          ...baseAllocation,
+          preferredRoomId: null,
+        },
+      ],
+    });
+    input.units[0] = {
+      ...input.units[0],
+      preferredRoomType: 'kitchen',
+    };
+    input.rooms.push({
+      id: 'room-kitchen',
+      code: 'KIT-1',
+      name: 'Training Kitchen',
+      roomType: 'kitchen',
+      capacity: 35,
+      isActive: true,
+      isTimetableAvailable: true,
+    });
+    input.options = { autoAssignRooms: true };
+
+    const result = generateTimetablePlan(input);
+
+    expect(result.unscheduled).toHaveLength(0);
+    expect(result.sessions).toHaveLength(1);
+    expect(result.sessions[0].roomId).toBe('room-kitchen');
+  });
+
+  it('resolves a 2-hop displacement chain so constrained sessions still succeed', () => {
+    const input = createPlannerInput();
+    input.timeSlots.push({
+      id: 'slot-4',
+      academicPeriodId: 'period-1',
+      code: 'S4',
+      name: '11:00–12:00',
+      slotType: 'teaching',
+      startsAt: '11:00:00',
+      endsAt: '12:00:00',
+      sequenceNumber: 4,
+      isEnabled: true,
+    });
+    input.cohorts.push(
+      { id: 'cohort-3', code: 'COH-3', name: 'Cohort Three', actualSize: 20, isTimetableAvailable: true },
+      { id: 'cohort-4', code: 'COH-4', name: 'Cohort Four', actualSize: 20, isTimetableAvailable: true },
+      { id: 'cohort-5', code: 'COH-5', name: 'Cohort Five', actualSize: 20, isTimetableAvailable: true },
+    );
+    input.trainers[0] = {
+      ...input.trainers[0],
+      availabilityMode: 'selected_slots_only',
+      availableSlots: [
+        { workingDayId: 'day-1', timeSlotId: 'slot-1' },
+        { workingDayId: 'day-1', timeSlotId: 'slot-2' },
+        { workingDayId: 'day-1', timeSlotId: 'slot-3' },
+        { workingDayId: 'day-1', timeSlotId: 'slot-4' },
+      ],
+    };
+    input.trainers.push({
+      id: 'trainer-3',
+      staffNumber: 'TR-003',
+      fullName: 'Trainer Three',
+      normalWeeklyHours: 20,
+      maximumWeeklyHours: 24,
+      maximumDailyHours: 6,
+      isActive: true,
+      isTimetableAvailable: true,
+      departmentId: 'department-1',
+      availabilityMode: 'selected_slots_only',
+      availableSlots: [
+        { workingDayId: 'day-1', timeSlotId: 'slot-1' },
+        { workingDayId: 'day-1', timeSlotId: 'slot-2' },
+      ],
+    });
+    input.rooms.push({
+      id: 'room-3',
+      code: 'R-3',
+      name: 'Room Three',
+      roomType: 'lecture_room',
+      capacity: 60,
+      isActive: true,
+      isTimetableAvailable: true,
+    });
+
+    // Existing locked session for trainer-2 at day-1 slot-1..2 so trainer-2 prefers adjacent day-1 slot-3..4 for alloc-b
+    input.existingSessions = [
+      {
+        id: 'locked-t2-morning',
+        academicPeriodId: 'period-1',
+        teachingAllocationId: 'alloc-locked-t2',
+        cohortId: 'cohort-5',
+        unitId: 'unit-2',
+        trainerId: 'trainer-2',
+        workingDayId: 'day-1',
+        startTimeSlotId: 'slot-1',
+        endTimeSlotId: 'slot-2',
+        roomId: 'room-2',
+        sessionNumber: 1,
+        deliveryMode: 'theory',
+        status: 'locked',
+        source: 'manual',
+        conflictState: 'clear',
+        isLocked: true,
+      },
+    ];
+
+    input.allocations = [
+      {
+        ...baseAllocation,
+        id: 'alloc-a',
+        cohortId: 'cohort-1',
+        participantCohortIds: ['cohort-1', 'cohort-2'],
+        combinedCohortSize: 50,
+        trainerId: 'trainer-1',
+        preferredRoomId: 'room-1',
+      },
+      {
+        ...baseAllocation,
+        id: 'alloc-b',
+        cohortId: 'cohort-3',
+        participantCohortIds: ['cohort-3', 'cohort-4'],
+        combinedCohortSize: 40,
+        trainerId: 'trainer-2',
+        unitId: 'unit-2',
+        preferredRoomId: 'room-1',
+      },
+      {
+        ...baseAllocation,
+        id: 'alloc-c',
+        cohortId: 'cohort-1',
+        participantCohortIds: ['cohort-1'],
+        combinedCohortSize: 30,
+        trainerId: 'trainer-3',
+        unitId: 'unit-2',
+        preferredRoomId: 'room-3',
+      },
+    ];
+
+    const result = generateTimetablePlan(input);
+
+    expect(result.unscheduled).toHaveLength(0);
+    expect(result.sessions).toHaveLength(3);
+  });
 });
 

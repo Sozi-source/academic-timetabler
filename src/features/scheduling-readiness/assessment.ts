@@ -11,6 +11,7 @@ export interface AssessReadinessInput {
   teachingSlotCount: number;
   availableTrainerCount: number;
   availableRoomCount: number;
+  unmergedEquivalentTitles?: string[];
 }
 
 function issue(
@@ -216,6 +217,20 @@ export function assessSchedulingReadiness(input: AssessReadinessInput) {
       'Review extra hours before publishing.',
       '/timetable/reports?report=workload',
       'Review hours',
+    ));
+  }
+
+  const unmergedEquivalents = input.unmergedEquivalentTitles ?? [];
+  if (unmergedEquivalents.length > 0) {
+    const previewNames = unmergedEquivalents.slice(0, 3).join(', ');
+    const suffix = unmergedEquivalents.length > 3 ? ` (+${unmergedEquivalents.length - 3} more)` : '';
+    issues.push(issue(
+      'unmerged-equivalent-offerings',
+      'warning',
+      `${unmergedEquivalents.length} equivalent subject${unmergedEquivalents.length === 1 ? '' : 's'} split across cohorts`,
+      `${previewNames}${suffix} appear across multiple cohorts without being combined into one shared class.`,
+      '/timetable/teaching-allocations',
+      'Combine shared classes',
     ));
   }
 

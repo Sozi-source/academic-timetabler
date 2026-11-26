@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { schedulingConstraintSchema } from '@/features/scheduling-constraints/validation';
+import {
+  schedulingConstraintSchema,
+  timetableCalendarEventSchema,
+} from '@/features/scheduling-constraints/validation';
 
 const valid = {
   academicPeriodId: '550e8400-e29b-41d4-a716-446655440000',
@@ -55,37 +58,65 @@ describe('schedulingConstraintSchema', () => {
     ).toBe(true);
   });
 
-  it('rejects trainer constraints', () => {
+  it('accepts trainer constraints', () => {
     expect(
       schedulingConstraintSchema.safeParse({
         ...valid,
         subjectType: 'trainer',
       }).success,
-    ).toBe(false);
+    ).toBe(true);
   });
 
-  it('rejects preferred and required rules', () => {
-    expect(
-      schedulingConstraintSchema.safeParse({
-        ...valid,
-        constraintType: 'preferred',
-      }).success,
-    ).toBe(false);
-
-    expect(
-      schedulingConstraintSchema.safeParse({
-        ...valid,
-        constraintType: 'required',
-      }).success,
-    ).toBe(false);
+  it('accepts preferred, required, and protected_day rules', () => {
+    for (const constraintType of ['preferred', 'required', 'protected_day'] as const) {
+      expect(
+        schedulingConstraintSchema.safeParse({
+          ...valid,
+          constraintType,
+        }).success,
+      ).toBe(true);
+    }
   });
 
-  it('rejects soft priority', () => {
+  it('accepts soft priority', () => {
     expect(
       schedulingConstraintSchema.safeParse({
         ...valid,
         priority: 'soft',
       }).success,
+    ).toBe(true);
+  });
+});
+
+describe('timetableCalendarEventSchema', () => {
+  const baseEvent = {
+    academicPeriodId: '550e8400-e29b-41d4-a716-446655440000',
+    title: 'Departmental Nutrition Seminar',
+    eventType: 'seminar' as const,
+    eventDate: '2027-02-12',
+    scopeType: 'institution' as const,
+    suspendsRegularClasses: true,
+    notes: 'Guest speaker symposium',
+  };
+
+  it('accepts an institution-wide unique calendar event without scopeId', () => {
+    expect(timetableCalendarEventSchema.safeParse(baseEvent).success).toBe(true);
+  });
+
+  it('requires scopeId for cohort, trainer, or room calendar events', () => {
+    expect(
+      timetableCalendarEventSchema.safeParse({
+        ...baseEvent,
+        scopeType: 'cohort',
+      }).success,
     ).toBe(false);
+
+    expect(
+      timetableCalendarEventSchema.safeParse({
+        ...baseEvent,
+        scopeType: 'cohort',
+        scopeId: '550e8400-e29b-41d4-a716-446655440004',
+      }).success,
+    ).toBe(true);
   });
 });

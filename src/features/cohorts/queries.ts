@@ -220,18 +220,24 @@ export const getTimetableAvailableCohorts =
       const supabase =
         await createClient();
 
-      const { data, error } =
-        await supabase
-          .from('cohorts')
-          .select(cohortSelection)
-          .eq('status', 'active')
-          .eq(
-            'is_timetable_available',
-            true,
-          )
-          .order('name', {
-            ascending: true,
-          });
+      const [{ data, error }, { data: studentRows }] =
+        await Promise.all([
+          supabase
+            .from('cohorts')
+            .select(cohortSelection)
+            .eq('status', 'active')
+            .eq(
+              'is_timetable_available',
+              true,
+            )
+            .order('name', {
+              ascending: true,
+            }),
+          supabase
+            .from('students')
+            .select('current_cohort_id')
+            .in('lifecycle_status', ['admitted', 'active']),
+        ]);
 
       if (error) {
         throw new Error(
@@ -239,9 +245,26 @@ export const getTimetableAvailableCohorts =
         );
       }
 
+      const liveCounts = new Map<string, number>();
+      for (const student of studentRows ?? []) {
+        if (student.current_cohort_id) {
+          liveCounts.set(
+            student.current_cohort_id,
+            (liveCounts.get(student.current_cohort_id) ?? 0) + 1,
+          );
+        }
+      }
+
       return (
         (data ?? []) as CohortRow[]
-      ).map(mapCohort).filter(
+      ).map((row) => {
+        const cohort = mapCohort(row);
+        const liveCount = liveCounts.get(row.id);
+        if (liveCount !== undefined && liveCount > 0) {
+          cohort.actualSize = liveCount;
+        }
+        return cohort;
+      }).filter(
         (cohort) =>
           cohort.status === 'active' &&
           cohort.isTimetableAvailable,

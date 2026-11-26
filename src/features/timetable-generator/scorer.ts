@@ -25,7 +25,9 @@ export type PlacementScoreFactor =
   | 'room_capacity'
   | 'trainer_compactness'
   | 'trainer_workload'
-  | 'morning_preference';
+  | 'morning_preference'
+  | 'cohort_compactness'
+  | 'session_spacing';
 
 export interface PlacementScoreAdjustment {
   factor: PlacementScoreFactor;
@@ -487,6 +489,232 @@ function getTrainerWorkloadAdjustment({
   };
 }
 
+function getSessionParticipantCohortIds(
+  session: PlanningSession,
+): string[] {
+  return session.participantCohortIds &&
+    session.participantCohortIds.length > 0
+    ? session.participantCohortIds
+    : [session.cohortId];
+}
+
+function getCohortCompactnessAdjustment({
+  candidate,
+  existingSessions,
+  timeSlots,
+}: Pick<
+  ScorePlacementInput,
+  'candidate' | 'existingSessions' | 'timeSlots'
+>): PlacementScoreAdjustment {
+  const candidateCohortIds = new Set(
+    getSessionParticipantCohortIds(candidate),
+  );
+  const timeSlotLookup = buildLookup(timeSlots);
+
+  let candidateInterval;
+  try {
+    candidateInterval = resolveMinuteInterval(
+      resolveSessionInterval({
+        session: candidate,
+        timeSlots: timeSlotLookup,
+      }),
+    );
+  } catch {
+    return {
+      factor: 'cohort_compactness',
+      points: 0,
+      message:
+        'Cohort daily compactness could not be calculated.',
+    };
+  }
+
+  const sameDayCohortSessions = existingSessions.filter(
+    (session) =>
+      isActiveSession(session) &&
+      session.workingDayId === candidate.workingDayId &&
+      getSessionParticipantCohortIds(session).some((id) =>
+        candidateCohortIds.has(id),
+      ),
+  );
+
+  if (sameDayCohortSessions.length === 0) {
+    return {
+      factor: 'cohort_compactness',
+      points: 1,
+      message:
+        'This starts a balanced teaching day for the cohort.',
+    };
+  }
+
+  const gaps: number[] = [];
+  let totalMinutesToday =
+    candidateInterval.endMinutes -
+    candidateInterval.startMinutes;
+
+  for (const session of sameDayCohortSessions) {
+    try {
+      const interval = resolveMinuteInterval(
+        resolveSessionInterval({
+          session,
+          timeSlots: timeSlotLookup,
+        }),
+      );
+      totalMinutesToday +=
+        interval.endMinutes - interval.startMinutes;
+
+      if (
+        candidateInterval.endMinutes <=
+        interval.startMinutes
+      ) {
+        gaps.push(
+          interval.startMinutes -
+            candidateInterval.endMinutes,
+        );
+      } else if (
+        interval.endMinutes <=
+        candidateInterval.startMinutes
+      ) {
+        gaps.push(
+          candidateInterval.startMinutes -
+            interval.endMinutes,
+        );
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  if (gaps.length === 0) {
+    return {
+      factor: 'cohort_compactness',
+      points: 0,
+      message:
+        'Cohort daily compactness had no non-overlapping comparison.',
+    };
+  }
+
+  const nearestGap = Math.min(...gaps);
+
+  if (nearestGap > 120) {
+    return {
+      factor: 'cohort_compactness',
+      points: -5,
+      message:
+        'The placement creates a long mid-day break for the cohort.',
+    };
+  }
+
+  if (totalMinutesToday > 360) {
+    return {
+      factor: 'cohort_compactness',
+      points: -4,
+      message:
+        'The cohort already has a heavy teaching load on this day.',
+    };
+  }
+
+  if (nearestGap <= 60) {
+    return {
+      factor: 'cohort_compactness',
+      points: 4,
+      message:
+        'The placement keeps the cohort daily schedule compact.',
+    };
+  }
+
+  return {
+    factor: 'cohort_compactness',
+    points: 0,
+    message:
+      'The cohort daily schedule remains balanced.',
+  };
+}
+
+function getSessionSpacingAdjustment({
+  candidate,
+  existingSessions,
+  workingDays,
+}: Pick<
+  ScorePlacementInput,
+  'candidate' | 'existingSessions' | 'workingDays'
+>): PlacementScoreAdjustment {
+  const peerSessions = existingSessions.filter(
+    (session) =>
+      isActiveSession(session) &&
+      session.id !== candidate.id &&
+      session.teachingAllocationId ===
+        candidate.teachingAllocationId,
+  );
+
+  if (peerSessions.length === 0) {
+    return {
+      factor: 'session_spacing',
+      points: 0,
+      message:
+        'First scheduled session for this allocation.',
+    };
+  }
+
+  const daySequenceById = new Map(
+    workingDays.map((day) => [day.id, day.sequenceNumber]),
+  );
+  const candidateDaySeq = daySequenceById.get(
+    candidate.workingDayId,
+  );
+
+  if (candidateDaySeq === undefined) {
+    return {
+      factor: 'session_spacing',
+      points: 0,
+      message:
+        'Session day spacing could not be resolved.',
+    };
+  }
+
+  const dayDiffs = peerSessions
+    .map((session) =>
+      daySequenceById.get(session.workingDayId),
+    )
+    .filter((seq): seq is number => seq !== undefined)
+    .map((seq) => Math.abs(candidateDaySeq - seq));
+
+  if (dayDiffs.length === 0) {
+    return {
+      factor: 'session_spacing',
+      points: 0,
+      message:
+        'Session day spacing could not be compared.',
+    };
+  }
+
+  const minDayDiff = Math.min(...dayDiffs);
+
+  if (minDayDiff === 0) {
+    return {
+      factor: 'session_spacing',
+      points: -8,
+      message:
+        'Places multiple sessions of the same allocation on one day.',
+    };
+  }
+
+  if (minDayDiff >= 2) {
+    return {
+      factor: 'session_spacing',
+      points: 4,
+      message:
+        'Spreads weekly sessions across non-adjacent days.',
+    };
+  }
+
+  return {
+    factor: 'session_spacing',
+    points: 0,
+    message:
+      'Places weekly sessions on adjacent teaching days.',
+  };
+}
+
 function getMorningAdjustment({
   candidate,
   timeSlots,
@@ -625,6 +853,12 @@ export function scorePlacement(
       input,
     ),
     getMorningAdjustment(input),
+    getCohortCompactnessAdjustment(
+      input,
+    ),
+    getSessionSpacingAdjustment(
+      input,
+    ),
   );
 
   const score = clampScore(

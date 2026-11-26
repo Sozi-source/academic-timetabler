@@ -27,12 +27,15 @@ interface AcademicPeriodRow {
   id: string;
   code: string;
   name: string;
+  starts_on: string;
+  status: string;
 }
 
 interface ProgrammeRow {
   id: string;
   code: string;
   name: string;
+  total_academic_periods: number | null;
 }
 
 interface CohortRow {
@@ -40,6 +43,8 @@ interface CohortRow {
   programme_id: string;
   code: string;
   name: string;
+  intake_date: string | null;
+  expected_completion_date: string | null;
   current_academic_period_number:
     number;
 }
@@ -104,7 +109,9 @@ export async function GET(
     .select(`
       id,
       code,
-      name
+      name,
+      starts_on,
+      status
     `)
     .eq('id', academicPeriodId)
     .maybeSingle();
@@ -143,7 +150,8 @@ export async function GET(
       .select(`
         id,
         code,
-        name
+        name,
+        total_academic_periods
       `)
       .eq('is_active', true)
       .eq(
@@ -158,6 +166,8 @@ export async function GET(
         programme_id,
         code,
         name,
+        intake_date,
+        expected_completion_date,
         current_academic_period_number
       `)
       .eq('status', 'active')
@@ -235,6 +245,8 @@ export async function GET(
           cohort.programme_id,
         code: cohort.code,
         name: cohort.name,
+        intakeDate: cohort.intake_date,
+        expectedCompletionDate: cohort.expected_completion_date,
         currentAcademicPeriodNumber:
           cohort.current_academic_period_number,
       }));
@@ -274,6 +286,8 @@ export async function GET(
         id: period.id,
         code: period.code,
         name: period.name,
+        startsOn: period.starts_on,
+        status: period.status,
       },
       programmes:
         programmes.map(
@@ -281,6 +295,7 @@ export async function GET(
             id: programme.id,
             code: programme.code,
             name: programme.name,
+            totalAcademicPeriods: programme.total_academic_periods,
           }),
         ),
       cohorts,

@@ -43,8 +43,33 @@ export interface SchedulingConstraint {
   isActive: boolean;
 }
 
+export type CalendarEventType =
+  | 'holiday'
+  | 'cat_exam'
+  | 'seminar'
+  | 'field_trip'
+  | 'custom';
+
+export interface TimetableCalendarEvent {
+  id: string;
+  academicPeriodId: string;
+  title: string;
+  eventType: CalendarEventType;
+  eventDate: string;
+  startsAt: string | null;
+  endsAt: string | null;
+  scopeType: ConstraintSubjectType;
+  scopeId: string | null;
+  scopeLabel: string;
+  suspendsRegularClasses: boolean;
+  notes: string | null;
+  isActive: boolean;
+}
+
 export interface SchedulingConstraintData {
   constraints: SchedulingConstraint[];
+  calendarEvents: TimetableCalendarEvent[];
+  trainers: ConstraintOption[];
   rooms: ConstraintOption[];
   cohorts: ConstraintOption[];
   workingDays: WorkingDayOption[];

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  computeCohortStageForPeriod,
+  isTimetableConfigurablePeriod,
   prioritizeActiveAcademicPeriods,
   resolveAcademicPeriodId,
 } from '@/features/academic-periods/selection';
@@ -25,5 +27,49 @@ describe('Academic Period selection', () => {
 
   it('keeps an explicitly selected planned period', () => {
     expect(resolveAcademicPeriodId(periods, 'period-2029')).toBe('period-2029');
+  });
+
+  it('allows cross-year planned periods while excluding closed or archived periods', () => {
+    expect(
+      isTimetableConfigurablePeriod({
+        id: 'p-planned',
+        status: 'planned',
+        academicYear: { status: 'planned' },
+      }),
+    ).toBe(true);
+
+    expect(
+      isTimetableConfigurablePeriod({
+        id: 'p-closed',
+        status: 'closed',
+        academicYear: { status: 'active' },
+      }),
+    ).toBe(false);
+
+    expect(
+      isTimetableConfigurablePeriod({
+        id: 'p-archived',
+        status: 'planned',
+        academicYear: { status: 'archived' },
+      }),
+    ).toBe(false);
+  });
+
+  it('computes future-period cohort stage from intake start and target period start without advancing prematurely', () => {
+    expect(
+      computeCohortStageForPeriod({
+        intakeDate: '2026-09-01',
+        periodStartsOn: '2027-01-04',
+        totalAcademicPeriods: 6,
+      }),
+    ).toBe(2);
+
+    expect(
+      computeCohortStageForPeriod({
+        intakeDate: '2025-01-06',
+        periodStartsOn: '2027-01-04',
+        totalAcademicPeriods: 6,
+      }),
+    ).toBeNull();
   });
 });

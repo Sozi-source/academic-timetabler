@@ -175,4 +175,23 @@ describe('assessSchedulingReadiness', () => {
     expect(result.isReady).toBe(true);
     expect(result.workloads[0].extraWeeklyHours).toBe(4);
   });
+
+  it('warns when equivalent units across cohorts are not yet merged into one shared offering', () => {
+    const result = assessSchedulingReadiness({
+      academicPeriodStatus: 'planned',
+      offerings: [offering()],
+      workingDayCount: 5,
+      teachingSlotCount: 3,
+      availableTrainerCount: 2,
+      availableRoomCount: 3,
+      unmergedEquivalentTitles: ['Communication Skills (2 unmerged classes)'],
+    });
+
+    expect(result.isReady).toBe(true);
+    const issue = result.issues.find(
+      (entry) => entry.id === 'unmerged-equivalent-offerings',
+    );
+    expect(issue?.severity).toBe('warning');
+    expect(issue?.description).toContain('Communication Skills (2 unmerged classes)');
+  });
 });

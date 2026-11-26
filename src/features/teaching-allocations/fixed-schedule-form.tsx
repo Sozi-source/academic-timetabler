@@ -66,6 +66,7 @@ export function FixedScheduleForm({
   );
 
   const secondSessionAvailable = weeklySessions >= 2;
+  const thirdSessionAvailable = weeklySessions >= 3;
 
   const orderedSlots = [...slots].sort(
     (first, second) => first.sequence_number - second.sequence_number,
@@ -80,6 +81,8 @@ export function FixedScheduleForm({
   const firstSavedDayId = fixedWorkingDayIds[0] ?? fixedDayId ?? '';
   const secondSavedDayId =
     fixedWorkingDayIds[1] ?? (fixedSlotIds[1] ? fixedDayId ?? '' : '');
+  const thirdSavedDayId =
+    fixedWorkingDayIds[2] ?? (fixedSlotIds[2] ? fixedDayId ?? '' : '');
 
   const savedPatterns = fixedSlotIds
     .map((slotId, index) => {
@@ -121,7 +124,7 @@ export function FixedScheduleForm({
                   : 'text-text-muted hover:text-text-primary'
               }`}
             >
-              Morning / Fixed (120 min)
+              Fixed weekly slots (120 min)
             </button>
             <button
               type="button"
@@ -238,6 +241,42 @@ export function FixedScheduleForm({
               ))}
             </select>
           </label>
+          {thirdSessionAvailable ? (
+            <>
+              <label className="text-xs font-medium text-text-muted">
+                Third day
+                <select
+                  name="thirdWorkingDayId"
+                  defaultValue={thirdSavedDayId}
+                  className="mt-1 h-8 w-full rounded-xl border border-border bg-surface px-2 text-xs text-text-primary disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={disabled}
+                >
+                  <option value="">Not fixed</option>
+                  {days.map((day) => (
+                    <option key={day.id} value={day.id}>
+                      {formatDay(day.day_of_week)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="text-xs font-medium text-text-muted">
+                Third session
+                <select
+                  name="thirdTimeSlotId"
+                  defaultValue={fixedSlotIds[2] ?? ''}
+                  className="mt-1 h-8 w-full rounded-xl border border-border bg-surface px-2 text-xs text-text-primary disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={disabled}
+                >
+                  <option value="">Not fixed</option>
+                  {slots.map((slot) => (
+                    <option key={slot.id} value={slot.id}>
+                      {slot.name} ({formatClock(slot.starts_at)}–{formatClock(slot.ends_at)})
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </>
+          ) : null}
           <button
             disabled={disabled}
             className="col-span-2 h-8 whitespace-nowrap rounded-xl border border-border bg-surface px-3 text-xs font-semibold text-text-primary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1"
@@ -259,7 +298,7 @@ export function FixedScheduleForm({
         <p className="text-xs text-text-muted">
           {scheduleMode === 'full_day'
             ? `Hospital full-day block (${fullDayLabel}, 8.0h trainer allocation).`
-            : 'Morning supervision check-in (120 min, 2.0h trainer allocation).'}
+            : 'Optional: pin exact weekly day and session (e.g. Mon 14:00–16:00).'}
         </p>
       )}
 

@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 
 import { requireHodAccess } from '@/features/auth/authorization';
 import { createClient } from '@/lib/supabase/server';
@@ -349,4 +350,41 @@ export async function setTimeSlotEnabledAction(
   }
 
   revalidateCalendarPages();
+}
+
+export async function carryForwardTimetableSetupAction(
+  formData: FormData,
+): Promise<void> {
+  await requireHodAccess();
+
+  const sourceResult = academicPeriodIdSchema.safeParse(
+    formData.get('sourceAcademicPeriodId'),
+  );
+  const targetResult = academicPeriodIdSchema.safeParse(
+    formData.get('targetAcademicPeriodId'),
+  );
+  const returnTo = String(formData.get('returnTo') ?? '').trim();
+
+  if (!sourceResult.success || !targetResult.success) {
+    throw new Error('Select valid source and target Academic Periods.');
+  }
+
+  if (sourceResult.data === targetResult.data) {
+    throw new Error('Choose a different source Academic Period.');
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc('carry_forward_timetable_setup', {
+    p_source_period_id: sourceResult.data,
+    p_target_period_id: targetResult.data,
+  });
+
+  if (error) {
+    throw new Error(getDatabaseErrorMessage(error.code, error.message));
+  }
+
+  revalidateCalendarPages();
+  if (returnTo && returnTo.startsWith('/timetable')) {
+    redirect(returnTo);
+  }
 }

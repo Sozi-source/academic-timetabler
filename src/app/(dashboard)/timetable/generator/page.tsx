@@ -13,7 +13,9 @@ import {
   getAcademicPeriods,
 } from '@/features/academic-periods/queries';
 import {
+  isTimetableConfigurablePeriod,
   prioritizeActiveAcademicPeriods,
+  resolveAcademicPeriodId,
 } from '@/features/academic-periods/selection';
 import {
   requireHodAccess,
@@ -33,32 +35,31 @@ export const metadata: Metadata = {
     'Automatically generate and review an institutional timetable before publication.',
 };
 
-export default async function TimetableGeneratorPage() {
+export default async function TimetableGeneratorPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ academicPeriodId?: string; period?: string }>;
+}) {
   await requireHodAccess();
 
-  const academicPeriods =
-    await getAcademicPeriods();
+  const [academicPeriods, query] = await Promise.all([
+    getAcademicPeriods(),
+    searchParams ?? Promise.resolve({}),
+  ]);
 
   const selectablePeriods =
     prioritizeActiveAcademicPeriods(
-      academicPeriods.filter(
-        (period) =>
-          period.academicYear.status === 'active' &&
-          (period.status === 'planned' ||
-            period.status === 'active'),
+      academicPeriods.filter((period) =>
+        isTimetableConfigurablePeriod(period),
       ),
     );
 
-  const activePeriod =
-    selectablePeriods.find(
-      (period) =>
-        period.status === 'active',
-    );
+  const requestedPeriodId =
+    (query as { academicPeriodId?: string; period?: string }).academicPeriodId ??
+    (query as { academicPeriodId?: string; period?: string }).period;
 
   const defaultPeriodId =
-    activePeriod?.id ??
-    selectablePeriods[0]?.id ??
-    null;
+    resolveAcademicPeriodId(selectablePeriods, requestedPeriodId) || null;
 
   const latestRun = defaultPeriodId
     ? await getLatestTimetableGenerationRun(defaultPeriodId)

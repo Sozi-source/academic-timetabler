@@ -203,6 +203,69 @@ describe('scorePlacement', () => {
       )?.severity,
     ).toBe('warning');
   });
+
+  it('rewards compact cohort days and spacing repeated weekly sessions onto non-adjacent days', () => {
+    const input = createConflictInput();
+    input.workingDays.push({
+      id: 'day-3',
+      academicPeriodId: 'period-1',
+      dayOfWeek: 'wednesday',
+      sequenceNumber: 3,
+      isEnabled: true,
+    });
+
+    const adjacentCohortResult = scorePlacement({
+      candidate: {
+        ...baseSession,
+        id: 'candidate-compact',
+        workingDayId: 'day-3',
+        startTimeSlotId: 'slot-3',
+        endTimeSlotId: 'slot-3',
+      },
+      existingSessions: [
+        {
+          ...baseSession,
+          id: 'cohort-morning-session',
+          teachingAllocationId: 'allocation-2',
+          trainerId: 'trainer-2',
+          unitId: 'unit-2',
+          roomId: 'room-2',
+          workingDayId: 'day-3',
+          startTimeSlotId: 'slot-1',
+          endTimeSlotId: 'slot-2',
+        },
+        {
+          ...baseSession,
+          id: 'same-unit-monday',
+          teachingAllocationId: 'allocation-1',
+          cohortId: 'cohort-2',
+          trainerId: 'trainer-2',
+          roomId: 'room-2',
+          workingDayId: 'day-1',
+          startTimeSlotId: 'slot-1',
+          endTimeSlotId: 'slot-2',
+        },
+      ],
+      workingDays: input.workingDays,
+      timeSlots: input.timeSlots,
+      trainers: input.trainers,
+      cohorts: input.cohorts,
+      rooms: input.rooms,
+      units: input.units,
+    });
+
+    expect(
+      adjacentCohortResult.adjustments.find(
+        (adjustment) => adjustment.factor === 'cohort_compactness',
+      )?.points,
+    ).toBeGreaterThan(0);
+
+    expect(
+      adjacentCohortResult.adjustments.find(
+        (adjustment) => adjustment.factor === 'session_spacing',
+      )?.points,
+    ).toBeGreaterThan(0);
+  });
 });
 
 describe('scorePlacements', () => {

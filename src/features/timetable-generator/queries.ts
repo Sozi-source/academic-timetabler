@@ -134,9 +134,7 @@ export const getGeneratorSchedulingConstraints = cache(async (
       is_active
     `)
     .eq('academic_period_id', academicPeriodId)
-    .eq('is_active', true)
-    .neq('subject_type', 'trainer')
-    .eq('constraint_type', 'unavailable');
+    .eq('is_active', true);
 
   if (error) {
     throw new Error(`Unable to load scheduling constraints: ${error.message}`);

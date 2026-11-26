@@ -5,7 +5,11 @@ import { revalidatePath } from 'next/cache';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { createClient } from '@/lib/supabase/server';
 
-import { constraintIdSchema, schedulingConstraintSchema } from './validation';
+import {
+  constraintIdSchema,
+  schedulingConstraintSchema,
+  timetableCalendarEventSchema,
+} from './validation';
 
 export async function createSchedulingConstraintAction(
   formData: FormData,
@@ -89,11 +93,11 @@ export async function createSchedulingConstraintAction(
       parsed.data.subjectType === 'institution'
         ? null
         : parsed.data.subjectId,
-    constraint_type: 'unavailable',
+    constraint_type: parsed.data.constraintType,
     working_day_id: parsed.data.workingDayId ?? null,
     starts_at: startsAt,
     ends_at: endsAt,
-    priority: 'hard',
+    priority: parsed.data.priority,
     reason,
   });
 
@@ -118,9 +122,7 @@ export async function toggleSchedulingConstraintAction(
   const { error } = await supabase
     .from('scheduling_constraints')
     .update({ is_active: isActive })
-    .eq('id', id)
-    .neq('subject_type', 'trainer')
-    .eq('constraint_type', 'unavailable');
+    .eq('id', id);
 
   if (error) {
     throw new Error(error.message);
@@ -142,9 +144,7 @@ export async function deleteSchedulingConstraintAction(
   const { error } = await supabase
     .from('scheduling_constraints')
     .delete()
-    .eq('id', id)
-    .neq('subject_type', 'trainer')
-    .eq('constraint_type', 'unavailable');
+    .eq('id', id);
 
   if (error) {
     throw new Error(error.message);
@@ -153,4 +153,120 @@ export async function deleteSchedulingConstraintAction(
   revalidatePath('/timetable/constraints');
   revalidatePath('/timetable/readiness');
   revalidatePath('/timetable/generator');
+}
+
+export async function createCalendarEventAction(
+  formData: FormData,
+): Promise<void> {
+  const profile = await requireHodAccess();
+
+  if (!profile.activeDepartmentId) {
+    throw new Error('Select a working department before adding an event.');
+  }
+
+  const parsed = timetableCalendarEventSchema.safeParse({
+    academicPeriodId: formData.get('academicPeriodId'),
+    title: formData.get('title'),
+    eventType: formData.get('eventType'),
+    eventDate: formData.get('eventDate'),
+    timeSlotId: formData.get('timeSlotId'),
+    scopeType: formData.get('scopeType'),
+    scopeId: formData.get('scopeId'),
+    suspendsRegularClasses: formData.get('suspendsRegularClasses') !== 'false',
+    notes: formData.get('notes'),
+  });
+
+  if (!parsed.success) {
+    throw new Error(
+      parsed.error.issues[0]?.message ?? 'Invalid unique event details.',
+    );
+  }
+
+  const supabase = await createClient();
+
+  let startsAt: string | null = null;
+  let endsAt: string | null = null;
+
+  if (parsed.data.timeSlotId) {
+    const { data: timeSlot, error: slotError } = await supabase
+      .from('time_slots')
+      .select('id, academic_period_id, starts_at, ends_at, is_enabled')
+      .eq('id', parsed.data.timeSlotId)
+      .maybeSingle();
+
+    if (slotError) {
+      throw new Error(slotError.message);
+    }
+
+    if (
+      !timeSlot ||
+      timeSlot.academic_period_id !== parsed.data.academicPeriodId ||
+      !timeSlot.is_enabled
+    ) {
+      throw new Error('Select a valid session for this Academic Period.');
+    }
+
+    startsAt = timeSlot.starts_at;
+    endsAt = timeSlot.ends_at;
+  }
+
+  const { error } = await supabase.from('timetable_calendar_events').insert({
+    academic_period_id: parsed.data.academicPeriodId,
+    department_id: profile.activeDepartmentId,
+    title: parsed.data.title,
+    event_type: parsed.data.eventType,
+    event_date: parsed.data.eventDate,
+    starts_at: startsAt,
+    ends_at: endsAt,
+    scope_type: parsed.data.scopeType,
+    scope_id:
+      parsed.data.scopeType === 'institution' ? null : parsed.data.scopeId,
+    suspends_regular_classes: parsed.data.suspendsRegularClasses,
+    notes: parsed.data.notes?.trim() || null,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath('/timetable/constraints');
+}
+
+export async function toggleCalendarEventAction(
+  formData: FormData,
+): Promise<void> {
+  await requireHodAccess();
+  const id = constraintIdSchema.parse(formData.get('id'));
+  const isActive = formData.get('isActive') === 'true';
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from('timetable_calendar_events')
+    .update({ is_active: isActive })
+    .eq('id', id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath('/timetable/constraints');
+}
+
+export async function deleteCalendarEventAction(
+  formData: FormData,
+): Promise<void> {
+  await requireHodAccess();
+  const id = constraintIdSchema.parse(formData.get('id'));
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from('timetable_calendar_events')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath('/timetable/constraints');
 }

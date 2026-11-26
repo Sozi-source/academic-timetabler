@@ -65,6 +65,7 @@ import type {
 
 export interface CreateGeneratorPreviewOptions {
   overwriteExisting?: boolean;
+  autoAssignRooms?: boolean;
   includeExchangeSuggestions?: boolean;
   generatedAt?: string;
 }
@@ -312,9 +313,11 @@ function mapExistingSession(
 export function createAutomaticPlannerInput({
   sourceData,
   overwriteExisting = false,
+  autoAssignRooms = false,
 }: {
   sourceData: GeneratorSourceData;
   overwriteExisting?: boolean;
+  autoAssignRooms?: boolean;
 }): AutomaticPlannerInput {
   const existingSessions =
     sourceData.existingSessions
@@ -376,6 +379,9 @@ export function createAutomaticPlannerInput({
       sourceData.units.map(
         mapUnit,
       ),
+    options: {
+      autoAssignRooms,
+    },
   };
 }
 
@@ -959,12 +965,14 @@ function mapUnscheduledSessions({
 export function createGeneratorPreview({
   sourceData,
   overwriteExisting = false,
+  autoAssignRooms = false,
   includeExchangeSuggestions = true,
   generatedAt =
     new Date().toISOString(),
 }: {
   sourceData: GeneratorSourceData;
   overwriteExisting?: boolean;
+  autoAssignRooms?: boolean;
   includeExchangeSuggestions?: boolean;
   generatedAt?: string;
 }): GeneratorPreview {
@@ -977,6 +985,7 @@ export function createGeneratorPreview({
     createAutomaticPlannerInput({
       sourceData,
       overwriteExisting,
+      autoAssignRooms,
     });
 
   const plannerResult =

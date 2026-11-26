@@ -203,6 +203,9 @@ export async function generateTimetablePreviewAction(
         overwriteExisting:
           parsed.data
             .overwriteExisting,
+        autoAssignRooms:
+          parsed.data
+            .autoAssignRooms,
       });
 
     if (!preview.readiness.isReady) {
@@ -599,6 +602,7 @@ export async function saveGeneratedTimetableDraftAction(
     const preview = createGeneratorPreview({
       sourceData,
       overwriteExisting: true,
+      autoAssignRooms: parsed.data.autoAssignRooms,
     });
 
     if (!preview.readiness.isReady) {

@@ -3,6 +3,11 @@ import { BarChart3 } from 'lucide-react';
 
 import { PageHeader } from '@/components/ui/page-header';
 import { getAcademicPeriods } from '@/features/academic-periods/queries';
+import {
+  isTimetableConfigurablePeriod,
+  prioritizeActiveAcademicPeriods,
+  resolveAcademicPeriodId,
+} from '@/features/academic-periods/selection';
 import { requireHodAccess } from '@/features/auth/authorization';
 import {
   getInstitutionTrainerTimetableReportsData,
@@ -36,16 +41,13 @@ export default async function TimetableReportsPage({
   searchParams: Promise<{ academicPeriodId?: string; report?: string }>;
 }) {
   await requireHodAccess();
-  const periods = (await getAcademicPeriods()).filter(
-    (period) =>
-      period.academicYear.status === 'active' &&
-      ['active', 'planned', 'closed'].includes(period.status),
+  const periods = prioritizeActiveAcademicPeriods(
+    (await getAcademicPeriods()).filter((period) =>
+      isTimetableConfigurablePeriod(period, { includeClosed: true }),
+    ),
   );
   const params = await searchParams;
-  const selectedId = params.academicPeriodId
-    ?? periods.find((period) => period.status === 'active')?.id
-    ?? periods[0]?.id
-    ?? null;
+  const selectedId = resolveAcademicPeriodId(periods, params.academicPeriodId) || null;
   const report: TimetableReportKind = isReportKind(params.report)
     ? params.report
     : 'master';

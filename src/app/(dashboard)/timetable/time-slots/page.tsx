@@ -32,6 +32,12 @@ import {
   getAcademicPeriods,
 } from '@/features/academic-periods/queries';
 import {
+  isTimetableConfigurablePeriod,
+  prioritizeActiveAcademicPeriods,
+  resolveAcademicPeriodId,
+} from '@/features/academic-periods/selection';
+import {
+  carryForwardTimetableSetupAction,
   initializeDefaultWorkingDaysAction,
   initializeStandardCalendarAction,
 } from '@/features/timetable-calendar/actions';
@@ -72,24 +78,18 @@ export default async function TimetableCalendarPage({
   const academicPeriods =
     await getAcademicPeriods();
 
-  const configurablePeriods =
-    academicPeriods.filter(
-      (academicPeriod) =>
-        academicPeriod.academicYear.status === 'active' &&
-        (academicPeriod.status === 'active' ||
-          academicPeriod.status === 'planned'),
-    );
+  const configurablePeriods = prioritizeActiveAcademicPeriods(
+    academicPeriods.filter((academicPeriod) =>
+      isTimetableConfigurablePeriod(academicPeriod),
+    ),
+  );
 
+  const selectedPeriodId = resolveAcademicPeriodId(configurablePeriods, period);
   const selectedPeriod =
     configurablePeriods.find(
       (academicPeriod) =>
-        academicPeriod.id === period,
+        academicPeriod.id === selectedPeriodId,
     ) ??
-    configurablePeriods.find(
-      (academicPeriod) =>
-        academicPeriod.status === 'active',
-    ) ??
-    configurablePeriods[0] ??
     null;
 
   const [workingDays, timeSlots] =
@@ -213,6 +213,29 @@ export default async function TimetableCalendarPage({
             {selectedPeriod ? (
               <div className="flex flex-wrap items-center gap-3 text-xs text-text-muted">
                 <form action={initializeStandardCalendarAction}><input type="hidden" name="academicPeriodId" value={selectedPeriod.id}/><Button type="submit" variant="outline" leadingIcon={<CalendarPlus className="size-4" aria-hidden="true"/>}>Use standard calendar</Button></form>
+                {academicPeriods.some((item) => item.id !== selectedPeriod.id && ['active', 'closed'].includes(item.status)) ? (
+                  <form action={carryForwardTimetableSetupAction} className="flex flex-wrap items-center gap-2">
+                    <input type="hidden" name="targetAcademicPeriodId" value={selectedPeriod.id} />
+                    <input type="hidden" name="returnTo" value={`/timetable/time-slots?period=${encodeURIComponent(selectedPeriod.id)}`} />
+                    <Select
+                      name="sourceAcademicPeriodId"
+                      aria-label="Copy calendar and trainer availability from period"
+                      defaultValue={academicPeriods.find((item) => item.id !== selectedPeriod.id && item.status === 'active')?.id ?? academicPeriods.find((item) => item.id !== selectedPeriod.id)?.id ?? ''}
+                      className="h-9 text-xs"
+                    >
+                      {academicPeriods
+                        .filter((item) => item.id !== selectedPeriod.id && ['active', 'closed'].includes(item.status))
+                        .map((item) => (
+                          <option key={item.id} value={item.id}>
+                            From {item.code}
+                          </option>
+                        ))}
+                    </Select>
+                    <Button type="submit" variant="outline" size="sm">
+                      Copy calendar &amp; availability
+                    </Button>
+                  </form>
+                ) : null}
                 <span>
                 Configuration applies only to{' '}
                 <span className="font-semibold text-text-secondary">

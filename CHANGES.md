@@ -1,3 +1,76 @@
+### 2026-11-26: Enterprise Next-Semester Preparation, Shared Classes, Full Constraints, & Upgraded Timetabler Engine
+
+**Summary:**
+- **Cross-Year Period Selection & Target-Period Readiness (`src/features/academic-periods/selection.ts`, timetable routes, `src/features/cohorts/queries.ts`, `src/features/scheduling-readiness/queries.ts`):**
+  - Replaced `status !== 'closed'` / active-only filtering with `isTimetableConfigurablePeriod` (`status IN ('active', 'planned')` inside non-closed/non-archived academic years), keeping `SEP-DEC-26` active by default while unlocking cross-year `JAN-APR-27` (`planned`) configuration across `/timetable/time-slots`, `/timetable/constraints`, `/timetable/readiness`, `/timetable/generator`, `/timetable/editor`, `/timetable/conflicts`, `/timetable/published`, `/timetable/reports`, and `/timetable/unit-offerings`.
+  - Added pure `computeCohortStageForPeriod` stage projection for planned periods so unit-offering generation and prefilled templates project future-semester stage without mutating `cohorts.current_academic_period_number` on the live semester.
+  - Overlaid live `admitted`/`active` student counts from `students` in `getTimetableAvailableCohorts` and `getSchedulingReadiness` so room capacity checks reflect actual cohort headcount.
+- **Database Migration & Carry-Forward Tools (`supabase/migrations/20261126180000_enterprise_next_semester_prep_and_shared_classes.sql`, `src/features/timetable-calendar/actions.ts`):**
+  - Fixed `confirm_shared_unit_offerings(uuid[])` to preserve canonical shared titles (`canonical_shared_unit_title_for_unit`) so `merge_matching_unit_offerings` reliably merges equivalent classes across programmes (`CND` + `DND`, etc.) and delivery types.
+  - Updated `generate_current_unit_offerings(uuid)` for `planned` future periods (computes stage via `compute_cohort_stage_for_period`, excludes completed cohorts past `expected_completion_date`, and auto-runs `merge_matching_unit_offerings`).
+  - Added `carry_forward_timetable_setup(uuid, uuid)` and `sync_agreed_fixed_slots_availability(uuid, uuid)`, plus UI carry-forward controls on `/timetable/time-slots` and `/timetable/trainers/availability`.
+  - Created `public.timetable_calendar_events` table (with RLS & grants) for date-scoped holidays, CATs, seminars, and field trips.
+- **Shared-Class Workflow & Fixed Agreed Service Slots (`src/features/teaching-allocations/`, `src/app/(dashboard)/timetable/teaching-allocations/page.tsx`, `src/features/scheduling-readiness/assessment.ts`):**
+  - Added 1-click **Combine equivalent classes** actions on `/timetable/unit-offerings` and `/timetable/teaching-allocations`, plus a non-blocking readiness warning (`unmerged-equivalent-offerings`) when unmerged equivalents remain.
+  - Expanded `FixedScheduleForm` to support 1st/2nd/3rd agreed weekly fixed 120-min slots (`Fixed weekly slots (120 min)`), enabled inline post-assignment fixed-slot editing on active trainer allocations, and auto-synced agreed fixed slots into `trainer_availability` for `selected_slots_only` external/service trainers.
+- **Full Scheduling Constraints & Unique Events (`src/features/scheduling-constraints/`, `src/features/timetable-generator/queries.ts`):**
+  - Unlocked all constraint subjects (`trainer`, `room`, `cohort`, `institution`), constraint rules (`unavailable`, `preferred`, `required`, `protected_day`), and priorities (`hard`, `soft`), removed the generator query filter excluding trainer/preference rules, and added CRUD management for `timetable_calendar_events` on `/timetable/constraints`.
+- **Upgraded Timetabler Solver & Pedagogical Scorer (`src/features/timetable-generator/`):**
+  - Simplified `calculateConstraintPriority` in `planner.ts` to strict degrees-of-freedom ordering (full-day fixed > exact fixed day+slot > multi-cohort shared class > restricted trainer availability > partial fixed > unpinned external tiebreak > flexible).
+  - Upgraded `tryRelocationRepair` with bounded depth-2 ejection-chain relocation (`isSessionMovable`, `scoreCandidatesForExistingSession`), removed temporary zero-candidate diagnostic `console.error`, and added opt-in capacity- and room-type-aware `autoAssignRooms` (exposed as a checked option on `/timetable/generator` and defaulted `false` in programmatic `generateTimetablePlan` calls for backward compatibility).
+  - Extended `scorer.ts` with `cohort_compactness` (avoiding long mid-day cohort gaps or overloaded single days) and `session_spacing` (rewarding non-adjacent weekly spacing).
+
+**Added:**
+- `supabase/migrations/20261126180000_enterprise_next_semester_prep_and_shared_classes.sql`
+
+**Modified:**
+- `src/features/academic-periods/selection.ts`
+- `src/app/(dashboard)/timetable/time-slots/page.tsx`
+- `src/app/(dashboard)/timetable/constraints/page.tsx`
+- `src/app/(dashboard)/timetable/readiness/page.tsx`
+- `src/app/(dashboard)/timetable/generator/page.tsx`
+- `src/app/(dashboard)/timetable/editor/page.tsx`
+- `src/app/(dashboard)/timetable/conflicts/page.tsx`
+- `src/app/(dashboard)/timetable/published/page.tsx`
+- `src/app/(dashboard)/timetable/reports/page.tsx`
+- `src/app/(dashboard)/timetable/unit-offerings/page.tsx`
+- `src/app/(dashboard)/timetable/trainers/availability/page.tsx`
+- `src/app/(dashboard)/timetable/teaching-allocations/page.tsx`
+- `src/features/unit-offerings/unit-offering-table.tsx`
+- `src/features/unit-offerings/approval-actions.ts`
+- `src/features/cohorts/queries.ts`
+- `src/features/scheduling-readiness/queries.ts`
+- `src/features/scheduling-readiness/assessment.ts`
+- `src/features/imports/unit-offerings/prefilled-template.ts`
+- `src/app/api/import-templates/unit_offerings/prefilled/route.ts`
+- `src/features/timetable-calendar/actions.ts`
+- `src/features/teaching-allocations/simple-allocation-actions.ts`
+- `src/features/teaching-allocations/fixed-schedule-form.tsx`
+- `src/features/scheduling-constraints/types.ts`
+- `src/features/scheduling-constraints/validation.ts`
+- `src/features/scheduling-constraints/queries.ts`
+- `src/features/scheduling-constraints/actions.ts`
+- `src/features/scheduling-constraints/constraint-form.tsx`
+- `src/features/scheduling-constraints/constraint-workspace.tsx`
+- `src/features/timetable-generator/queries.ts`
+- `src/features/timetable-generator/scorer.ts`
+- `src/features/timetable-generator/planner.ts`
+- `src/features/timetable-generator/data-adapter.ts`
+- `src/features/timetable-generator/actions.ts`
+- `src/features/timetable-generator/request-validation.ts`
+- `src/features/timetable-generator/server-types.ts`
+- `src/features/timetable-generator/generator-workspace.tsx`
+- `src/tests/scheduling-constraints/validation.test.ts`
+- `src/tests/academic-periods/selection.test.ts`
+- `src/tests/scheduling-readiness/assessment.test.ts`
+- `src/tests/timetable-generator/generator-action-validation.test.ts`
+- `src/tests/timetable-generator/scorer.test.ts`
+- `src/tests/timetable-generator/planner.test.ts`
+- `CHANGES.md`
+
+**Manual Follow-Up:**
+- Apply `supabase/migrations/20261126180000_enterprise_next_semester_prep_and_shared_classes.sql` to Supabase (`npx supabase db push --linked` or via the Supabase Dashboard SQL editor) before using next-semester (`JAN-APR-27`) carry-forward, shared-class auto-merging, and `timetable_calendar_events` in production.
+
 ### 2026-11-26: Exclude Unregistered Students from Attendance Sheets & Marksheets
 
 **Summary:**

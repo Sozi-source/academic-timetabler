@@ -1,3 +1,22 @@
+### 2026-11-27: Automatic Standing Timetable Setup Inheritance Across Semesters
+
+**Summary:**
+- **Database Auto-Inheritance & Backfill (`supabase/migrations/20261127003000_auto_inherit_standing_timetable_setup.sql`):**
+  - Refactored `public.carry_forward_timetable_setup(uuid, uuid)` around `public.copy_timetable_setup_internal(uuid, uuid, uuid)` to idempotently copy enabled `working_days`, `time_slots`, `trainer_availability`, and active `scheduling_constraints`.
+  - Added `AFTER INSERT ON public.academic_periods` trigger (`auto_inherit_standing_timetable_setup_trigger`) so every newly created `planned` period automatically inherits the canonical standing working days, time slots, trainer availability, and recurring scheduling constraints without manual setup.
+  - Added `public.propagate_timetable_setup_to_planned_periods(uuid)` and `public.sync_trainer_availability_to_future_periods(uuid, uuid)`, and backfilled `JAN-APR-27` and all future `planned` periods from the active `SEP-DEC-26` setup.
+- **Forward Propagation on Setup Edits (`src/features/timetable-calendar/actions.ts`, `src/features/trainers/availability-actions.ts`):**
+  - Updated calendar initialization/creation and trainer availability save actions to propagate standing teaching days, time slots, and trainer free times forward into upcoming `planned` periods automatically.
+
+**Added:**
+- `supabase/migrations/20261127003000_auto_inherit_standing_timetable_setup.sql`
+- `src/tests/timetable-calendar/auto-setup-sync.test.ts`
+
+**Modified:**
+- `src/features/timetable-calendar/actions.ts`
+- `src/features/trainers/availability-actions.ts`
+- `CHANGES.md`
+
 ### 2026-11-26: Support Future Planned Intake Cohorts (January 2027 CND & DND)
 
 **Summary:**

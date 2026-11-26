@@ -22,6 +22,24 @@ function revalidateCalendarPages() {
   revalidatePath('/timetable/time-slots');
   revalidatePath('/timetable/working-days');
   revalidatePath('/timetable/trainers/availability');
+  revalidatePath('/timetable/readiness');
+  revalidatePath('/timetable/generator');
+  revalidatePath('/timetable/teaching-allocations');
+}
+
+async function propagateCalendarSetupForward(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  periodId: string,
+) {
+  const { error } = await supabase.rpc(
+    'propagate_timetable_setup_to_planned_periods',
+    {
+      p_source_period_id: periodId,
+    },
+  );
+  if (error) {
+    throw new Error(getDatabaseErrorMessage(error.code, error.message));
+  }
 }
 
 export async function initializeStandardCalendarAction(formData: FormData): Promise<void> {
@@ -31,6 +49,7 @@ export async function initializeStandardCalendarAction(formData: FormData): Prom
   const supabase=await createClient();
   const {error}=await supabase.rpc('initialize_standard_timetable_calendar',{p_academic_period_id:periodResult.data});
   if(error) throw new Error(getDatabaseErrorMessage(error.code,error.message));
+  await propagateCalendarSetupForward(supabase, periodResult.data);
   revalidateCalendarPages();
 }
 
@@ -135,6 +154,7 @@ export async function initializeDefaultWorkingDaysAction(
     );
   }
 
+  await propagateCalendarSetupForward(supabase, periodResult.data);
   revalidateCalendarPages();
 }
 
@@ -190,6 +210,10 @@ export async function createWorkingDayAction(
     };
   }
 
+  await propagateCalendarSetupForward(
+    supabase,
+    parsed.data.academicPeriodId,
+  );
   revalidateCalendarPages();
 
   return {
@@ -263,6 +287,10 @@ export async function createTimeSlotAction(
     };
   }
 
+  await propagateCalendarSetupForward(
+    supabase,
+    parsed.data.academicPeriodId,
+  );
   revalidateCalendarPages();
 
   return {
@@ -293,12 +321,14 @@ export async function setWorkingDayEnabledAction(
 
   const supabase = await createClient();
 
-  const { error } = await supabase
+  const { data: updatedDay, error } = await supabase
     .from('working_days')
     .update({
       is_enabled: enabled,
     })
-    .eq('id', idResult.data);
+    .eq('id', idResult.data)
+    .select('academic_period_id')
+    .maybeSingle();
 
   if (error) {
     throw new Error(
@@ -309,6 +339,12 @@ export async function setWorkingDayEnabledAction(
     );
   }
 
+  if (enabled && updatedDay?.academic_period_id) {
+    await propagateCalendarSetupForward(
+      supabase,
+      updatedDay.academic_period_id,
+    );
+  }
   revalidateCalendarPages();
 }
 
@@ -333,12 +369,14 @@ export async function setTimeSlotEnabledAction(
 
   const supabase = await createClient();
 
-  const { error } = await supabase
+  const { data: updatedSlot, error } = await supabase
     .from('time_slots')
     .update({
       is_enabled: enabled,
     })
-    .eq('id', idResult.data);
+    .eq('id', idResult.data)
+    .select('academic_period_id')
+    .maybeSingle();
 
   if (error) {
     throw new Error(
@@ -349,6 +387,12 @@ export async function setTimeSlotEnabledAction(
     );
   }
 
+  if (enabled && updatedSlot?.academic_period_id) {
+    await propagateCalendarSetupForward(
+      supabase,
+      updatedSlot.academic_period_id,
+    );
+  }
   revalidateCalendarPages();
 }
 

@@ -129,6 +129,20 @@ export async function saveTrainerAvailabilityAction(formData: FormData) {
     throw new Error(trainerError.message);
   }
 
+  // Propagate this trainer's weekly free times to upcoming planned periods automatically
+  // so the HOD does not have to reconfigure availability per semester.
+  const { error: syncError } = await db.rpc(
+    'sync_trainer_availability_to_future_periods',
+    {
+      p_trainer_id: trainerId,
+      p_source_period_id: periodId,
+    },
+  );
+
+  if (syncError) {
+    throw new Error(syncError.message);
+  }
+
   revalidateAvailabilityPages();
 
   if (returnTo) {
@@ -169,6 +183,20 @@ export async function resetTrainerAvailabilityAction(formData: FormData) {
 
   if (trainerError) {
     throw new Error(trainerError.message);
+  }
+
+  // Propagate this trainer's weekly free times to upcoming planned periods automatically
+  // so the HOD does not have to reconfigure availability per semester.
+  const { error: syncError } = await db.rpc(
+    'sync_trainer_availability_to_future_periods',
+    {
+      p_trainer_id: trainerId,
+      p_source_period_id: periodId,
+    },
+  );
+
+  if (syncError) {
+    throw new Error(syncError.message);
   }
 
   revalidateAvailabilityPages();

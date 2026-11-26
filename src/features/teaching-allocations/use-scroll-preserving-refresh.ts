@@ -1,17 +1,22 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { startTransition, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 import type { InlineAllocationMutationState } from './inline-allocation-state';
 
-/** Refreshes the active route data in-place after an inline mutation while
- * keeping the user's current scroll position stable instead of jumping to y=0. */
+/** Preserves the user's scroll position across Next.js Server Action RSC
+ * revalidation commits without triggering an extra client router.refresh(). */
 export function useScrollPreservingRefresh(
   state: InlineAllocationMutationState,
 ) {
-  const router = useRouter();
+  const savedScrollYRef = useRef<number | null>(null);
   const lastSequenceRef = useRef(0);
+
+  function captureScrollPosition() {
+    if (typeof window !== 'undefined') {
+      savedScrollYRef.current = window.scrollY;
+    }
+  }
 
   useEffect(() => {
     if (
@@ -23,16 +28,17 @@ export function useScrollPreservingRefresh(
     }
 
     lastSequenceRef.current = state.sequence;
-    const savedScrollY = window.scrollY;
-
-    startTransition(() => {
-      router.refresh();
-    });
+    const savedScrollY = savedScrollYRef.current;
+    if (savedScrollY === null || typeof window === 'undefined') {
+      return;
+    }
 
     requestAnimationFrame(() => {
       if (Math.abs(window.scrollY - savedScrollY) > 4) {
         window.scrollTo({ top: savedScrollY, behavior: 'instant' });
       }
     });
-  }, [router, state.sequence, state.status]);
+  }, [state.sequence, state.status]);
+
+  return { captureScrollPosition };
 }

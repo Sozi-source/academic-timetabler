@@ -78,8 +78,10 @@ export function FixedScheduleForm({
   );
   const [isClearPending, startClearTransition] = useTransition();
 
-  useScrollPreservingRefresh(saveState);
-  useScrollPreservingRefresh(clearState);
+  const { captureScrollPosition: captureSaveScroll } =
+    useScrollPreservingRefresh(saveState);
+  const { captureScrollPosition: captureClearScroll } =
+    useScrollPreservingRefresh(clearState);
 
   const isBusy = disabled || isSavePending || isClearPending;
   const inlineError =
@@ -90,6 +92,7 @@ export function FixedScheduleForm({
         : null;
 
   function handleClearFixedSchedule() {
+    captureClearScroll();
     const fd = new FormData();
     fd.set('offeringId', offeringId);
     fd.set('academicPeriodId', academicPeriodId);
@@ -133,6 +136,7 @@ export function FixedScheduleForm({
   return (
     <form
       action={saveFormAction}
+      onSubmit={captureSaveScroll}
       className="space-y-2 rounded-xl border border-border bg-surface-subtle p-3"
     >
       <input type="hidden" name="offeringId" value={offeringId} />

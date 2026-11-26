@@ -51,11 +51,11 @@ export function ReserveOfferingForm({
     FormData
   >(reserveOfferingWithoutTrainerInlineAction, initialInlineAllocationState);
 
-  useScrollPreservingRefresh(state);
+  const { captureScrollPosition } = useScrollPreservingRefresh(state);
 
   return (
     <div className="space-y-1">
-      <form action={formAction}>
+      <form action={formAction} onSubmit={captureScrollPosition}>
         <input type="hidden" name="offeringId" value={offeringId} />
         <input type="hidden" name="academicPeriodId" value={academicPeriodId} />
         <ReserveButton reserved={isProvisionallyReserved} />

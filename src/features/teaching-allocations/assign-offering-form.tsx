@@ -52,7 +52,7 @@ export function AssignOfferingForm({
     FormData
   >(assignOfferingInlineAction, initialInlineAllocationState);
 
-  useScrollPreservingRefresh(state);
+  const { captureScrollPosition } = useScrollPreservingRefresh(state);
 
   const returnParams = new URLSearchParams();
   if (academicPeriodId) returnParams.set('period', academicPeriodId);
@@ -63,6 +63,7 @@ export function AssignOfferingForm({
     <div className="space-y-1.5">
       <form
         action={formAction}
+        onSubmit={captureScrollPosition}
         className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap"
       >
         <input type="hidden" name="offeringId" value={offeringId} />

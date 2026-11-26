@@ -37,9 +37,10 @@ export function UnassignAllocationForm({
   );
   const [isPending, startTransition] = useTransition();
 
-  useScrollPreservingRefresh(state);
+  const { captureScrollPosition } = useScrollPreservingRefresh(state);
 
   function handleConfirm(formData: FormData) {
+    captureScrollPosition();
     startTransition(async () => {
       const next = await unassignTeachingAllocationInlineAction(state, formData);
       setState(next);

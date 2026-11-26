@@ -111,7 +111,7 @@ async function performAssignOffering(
   // Fetch source offering configuration before assigning
   const { data: offeringRecord } = await db
     .from('unit_offerings')
-    .select('id, academic_period_id, cohort_id, unit_id, confirmed_shared_offering_id, fixed_schedule_required, is_full_day_session, session_duration_minutes, weekly_sessions, fixed_working_day_id, fixed_time_slot_id, unit_offering_fixed_slots(working_day_id, time_slot_id)')
+    .select('id, academic_period_id, cohort_id, unit_id, confirmed_shared_offering_id, fixed_schedule_required, is_full_day_session, session_duration_minutes, weekly_sessions, fixed_working_day_id, fixed_time_slot_id, unit_offering_fixed_slots(working_day_id, time_slot_id), units(is_active, is_timetable_available)')
     .eq('id', offering)
     .maybeSingle();
 
@@ -162,8 +162,14 @@ async function performAssignOffering(
     }
   }
 
-  // Ensure the underlying unit(s) are active and timetable available
-  if (offeringRecord?.unit_id) {
+  // Only repair unit availability flags when needed so normal assignments avoid extra DB writes
+  const unitRelation = Array.isArray(offeringRecord?.units)
+    ? offeringRecord?.units[0]
+    : offeringRecord?.units;
+  if (
+    offeringRecord?.unit_id &&
+    (unitRelation?.is_active === false || unitRelation?.is_timetable_available === false)
+  ) {
     await db
       .from('units')
       .update({
@@ -171,23 +177,6 @@ async function performAssignOffering(
         is_timetable_available: true,
       })
       .eq('id', offeringRecord.unit_id);
-  }
-
-  if (offeringRecord?.confirmed_shared_offering_id) {
-    const { data: participants } = await db
-      .from('unit_offerings')
-      .select('unit_id')
-      .eq('confirmed_shared_offering_id', offeringRecord.confirmed_shared_offering_id);
-    if (participants && participants.length > 0) {
-      const unitIds = participants.map((p) => p.unit_id).filter(Boolean);
-      await db
-        .from('units')
-        .update({
-          is_active: true,
-          is_timetable_available: true,
-        })
-        .in('id', unitIds);
-    }
   }
 
   const { data: assignResult, error } = await db.rpc('assign_unit_offering_authoritatively', {
@@ -212,57 +201,31 @@ async function performAssignOffering(
     (assignResult as { rescheduleRequired?: boolean } | null)?.rescheduleRequired,
   );
 
-  // Ensure teaching_allocations maintains consistent duration, fixed schedule, and mode
-  if (offeringRecord) {
-    if (offeringRecord.is_full_day_session) {
-      const allocUpdate = {
-        is_full_day_session: true,
-        session_duration_minutes: 480,
-        weekly_sessions: 1,
-        delivery_mode: 'clinical' as const,
-        fixed_working_day_id: offeringRecord.fixed_working_day_id,
-        fixed_working_day_ids: offeringRecord.fixed_working_day_id ? [offeringRecord.fixed_working_day_id] : [],
-        fixed_time_slot_ids: offeringRecord.fixed_time_slot_id ? [offeringRecord.fixed_time_slot_id] : [],
-        updated_at: new Date().toISOString(),
-      };
-      if (offeringRecord.confirmed_shared_offering_id) {
-        await db
-          .from('teaching_allocations')
-          .update(allocUpdate)
-          .eq('academic_period_id', period)
-          .eq('teaching_offering_id', offeringRecord.confirmed_shared_offering_id);
-      } else {
-        await db
-          .from('teaching_allocations')
-          .update(allocUpdate)
-          .eq('academic_period_id', period)
-          .eq('cohort_id', offeringRecord.cohort_id)
-          .eq('unit_id', offeringRecord.unit_id);
-      }
+  // Sync full-day clinical overrides when the unit offering specifies an 8-hour full-day block
+  if (offeringRecord?.is_full_day_session) {
+    const allocUpdate = {
+      is_full_day_session: true,
+      session_duration_minutes: 480,
+      weekly_sessions: 1,
+      delivery_mode: 'clinical' as const,
+      fixed_working_day_id: offeringRecord.fixed_working_day_id,
+      fixed_working_day_ids: offeringRecord.fixed_working_day_id ? [offeringRecord.fixed_working_day_id] : [],
+      fixed_time_slot_ids: offeringRecord.fixed_time_slot_id ? [offeringRecord.fixed_time_slot_id] : [],
+      updated_at: new Date().toISOString(),
+    };
+    if (offeringRecord.confirmed_shared_offering_id) {
+      await db
+        .from('teaching_allocations')
+        .update(allocUpdate)
+        .eq('academic_period_id', period)
+        .eq('teaching_offering_id', offeringRecord.confirmed_shared_offering_id);
     } else {
-      const sessionDuration = offeringRecord.session_duration_minutes ?? 120;
-      const weeklyCount = offeringRecord.weekly_sessions ?? 1;
-      const allocUpdate = {
-        is_full_day_session: false,
-        session_duration_minutes: sessionDuration,
-        weekly_sessions: weeklyCount,
-        delivery_mode: 'theory' as const,
-        updated_at: new Date().toISOString(),
-      };
-      if (offeringRecord.confirmed_shared_offering_id) {
-        await db
-          .from('teaching_allocations')
-          .update(allocUpdate)
-          .eq('academic_period_id', period)
-          .eq('teaching_offering_id', offeringRecord.confirmed_shared_offering_id);
-      } else {
-        await db
-          .from('teaching_allocations')
-          .update(allocUpdate)
-          .eq('academic_period_id', period)
-          .eq('cohort_id', offeringRecord.cohort_id)
-          .eq('unit_id', offeringRecord.unit_id);
-      }
+      await db
+        .from('teaching_allocations')
+        .update(allocUpdate)
+        .eq('academic_period_id', period)
+        .eq('cohort_id', offeringRecord.cohort_id)
+        .eq('unit_id', offeringRecord.unit_id);
     }
   }
 

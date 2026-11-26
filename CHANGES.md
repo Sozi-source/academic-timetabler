@@ -1,3 +1,35 @@
+### 2026-11-26: Exclude Unregistered Students from Attendance Sheets & Marksheets
+
+**Summary:**
+- **Database trigger, reconciliation cleanup, & RPC hardening (`supabase/migrations/20261126090000_exclude_unregistered_students_from_attendance_and_marksheets.sql`):**
+  - Added `public.related_unit_ids_for_period(uuid, uuid)` and `public.student_is_registered_for_unit_or_sibling(uuid, uuid, uuid)` to resolve active `'registered'` unit registrations across a unit, its shared offerings (`confirmed_shared_offering_id` / `teaching_offering_id`), approved equivalence siblings (`unit_equivalence_members`), and active `student_class_assignments`.
+  - Added `trigger_sync_student_unit_registration_removal` (`AFTER DELETE OR UPDATE OF registration_status` on `public.student_unit_registrations`) to immediately delete the student from `class_attendance_entries` (and recalculate `class_sessions.roster_count`) and from unsubmitted/unfinalized `assessment_roster`, `assessment_population`, and `assessment_online_mark_drafts` (when no committed `assessment_results` exist), plus a one-off cleanup for already-unregistered students.
+  - Hardened `ensure_unit_markbook_ready`, `save_assessment_online_component_marks`, `submit_assessment_online_marks`, `save_assessment_component_with_trainer_invite`, `get_department_class_attendance_workspace`, and `get_hod_class_attendance_workspace` to enforce active unit registration.
+- **Application-layer marksheet, export, & unregistration hardening:**
+  - Added `loadRegisteredStudentIdsForUnits` (`src/features/assessment/unit-sibling-groups.ts`) and wired it into `getAssessmentPopulationWorkspace` (`src/features/assessment/population-workspace.ts`), `loadTrainerMarkSession` (`src/features/assessment/trainer-mark-entry.ts`), `loadAssessmentMarkbookBundle` (`src/features/assessment/markbook-bundle.ts`), `getAssessmentPopulation` (`src/features/assessment/queries.ts`), and `getActiveAssessmentPeriodReportData` (`src/features/assessment/reports/queries.ts`) so unregistered students never appear on online marksheets, external trainer invite portals, Excel markbooks, signing sheets, or consolidated reports (while preserving committed `assessment_results` on finalized markbooks).
+  - Updated `getCatOnBehalfStatus` (`src/features/assessment/marks/pending-submissions.ts`) and `submitCatOnBehalfAction` (`src/features/assessment/marks/actions.ts`) to scope candidates strictly to active registered students.
+  - Extended `batchDropStudentUnitRegistrations` (`src/features/student-unit-registration/actions.ts`) to also clean up `assessment_online_mark_drafts` and `class_attendance_entries` (updating `class_sessions.roster_count`) and revalidate assessment, attendance, and staff routes.
+  - Added unit tests (`src/tests/unregistered-student-exclusion.test.ts`).
+
+**Added:**
+- `supabase/migrations/20261126090000_exclude_unregistered_students_from_attendance_and_marksheets.sql`
+- `src/tests/unregistered-student-exclusion.test.ts`
+
+**Modified:**
+- `src/features/assessment/unit-sibling-groups.ts`
+- `src/features/assessment/population-workspace.ts`
+- `src/features/assessment/trainer-mark-entry.ts`
+- `src/features/assessment/markbook-bundle.ts`
+- `src/features/assessment/queries.ts`
+- `src/features/assessment/reports/queries.ts`
+- `src/features/assessment/marks/pending-submissions.ts`
+- `src/features/assessment/marks/actions.ts`
+- `src/features/student-unit-registration/actions.ts`
+- `CHANGES.md`
+
+**Manual Follow-Up:**
+- Run `npx supabase db push --linked` (or apply `20261126090000_exclude_unregistered_students_from_attendance_and_marksheets.sql` to Supabase) so the registration-removal trigger, one-off stale-record cleanup, and updated RPCs are live in the database.
+
 - **Unified Staff & Trainer Directory into clickable whole-card links (`src/app/(dashboard)/trainers/page.tsx`, `src/features/trainers/trainer-table.tsx`, `src/app/globals.css`):**
   - Removed the duplicate **Staff Workspace Access & Account Approvals** card grid from `/trainers` and moved **Bulk PIN Generation** into a compact modal button in the page header.
   - Upgraded `TrainerTable` cards to sleek whole-card `<Link href="/trainers/[id]"><article className="trainer-card-compact">` links showing avatar, name, email, access/availability status badge, employment type, workload role & hours, and hover chevron — opening the trainer's full profile where password reset, PIN generation, approval/linking, availability, and teaching allocations all live together.

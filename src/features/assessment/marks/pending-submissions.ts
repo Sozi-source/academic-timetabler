@@ -299,6 +299,7 @@ export const getCatOnBehalfStatus = cache(async (assessmentId: string) => {
   }
 
   // Merge authoritative unified roster (includes individual student_class_assignments)
+  // and exclude students no longer actively registered for this unit.
   const rootEvent = (eventsRes.data ?? []).find((e) => e.id === assessmentId) ?? (eventsRes.data ?? [])[0];
   if (rootEvent?.unit_id && rootEvent?.academic_period_id) {
     const admin = createAdminClient();
@@ -307,6 +308,12 @@ export const getCatOnBehalfStatus = cache(async (assessmentId: string) => {
       unitId: rootEvent.unit_id,
       academicPeriodId: rootEvent.academic_period_id,
     });
+    const activeUnifiedIds = new Set(unifiedRoster.students.map((c) => c.studentId));
+    for (const sId of [...rosterByStudent.keys()]) {
+      if (!activeUnifiedIds.has(sId)) {
+        rosterByStudent.delete(sId);
+      }
+    }
     for (const candidate of unifiedRoster.students) {
       if (!rosterByStudent.has(candidate.studentId)) {
         rosterByStudent.set(candidate.studentId, {

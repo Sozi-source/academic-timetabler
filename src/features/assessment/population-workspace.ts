@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { compareAdmissionNumbers } from '@/features/students/admission-number-sort';
 import { getUnifiedUnitRoster } from '@/features/academic-roster/unified-roster';
+import { loadRegisteredStudentIdsForUnits } from '@/features/assessment/unit-sibling-groups';
 
 type UnknownRow = Record<string, unknown>;
 
@@ -367,19 +368,52 @@ export const getAssessmentPopulationWorkspace =
       .map((row) => asString(row.student_id))
       .filter((id): id is string => Boolean(id) && !candidateStudentIds.has(id));
 
+    const isLockedOrFinalized =
+      ['submitted', 'finalised', 'archived'].includes(asString(event.workflow_status) ?? '')
+      || Boolean(eventControl?.exam_marks_finalized_at)
+      || eventControl?.status === 'closed';
+
     let extraStudentRows: UnknownRow[] = [];
     if (extraStudentIds.length > 0) {
-      const { data: extraStudents } = await rosterAdmin
-        .from('students')
-        .select('id, admission_number, full_name, current_cohort_id, lifecycle_status, academic_phase, cohort:cohorts(id, name)')
-        .in('id', extraStudentIds);
-      extraStudentRows = ((extraStudents ?? []) as UnknownRow[]).filter((st) => {
-        const lifecycle = (asString(st.lifecycle_status) ?? '').toLowerCase();
-        if (lifecycle && !['admitted', 'active'].includes(lifecycle)) return false;
-        const phase = (asString(st.academic_phase) ?? '').toLowerCase();
-        if (phase && phase !== 'in_class') return false;
-        return true;
-      });
+      const [registeredExtraIds, committedExtraIds] = await Promise.all([
+        loadRegisteredStudentIdsForUnits(rosterAdmin, periodId, [unitId], extraStudentIds),
+        isLockedOrFinalized
+          ? rosterAdmin
+              .from('assessment_results')
+              .select('student_id')
+              .eq('assessment_event_id', assessmentId)
+              .in('student_id', extraStudentIds)
+              .then(({ data }) => new Set((data ?? []).map((r) => String(r.student_id))))
+          : Promise.resolve(new Set<string>()),
+      ]);
+
+      const reportingExtraIds = await rosterAdmin
+        .from('student_period_reporting')
+        .select('student_id, reporting_status')
+        .eq('academic_period_id', periodId)
+        .in('student_id', extraStudentIds)
+        .in('reporting_status', ['deferred', 'dropped_out'])
+        .then(({ data }) => new Set((data ?? []).map((r) => String(r.student_id))));
+
+      const allowedExtraIds = extraStudentIds.filter(
+        (id) =>
+          !reportingExtraIds.has(id)
+          && (registeredExtraIds.has(id) || committedExtraIds.has(id)),
+      );
+
+      if (allowedExtraIds.length > 0) {
+        const { data: extraStudents } = await rosterAdmin
+          .from('students')
+          .select('id, admission_number, full_name, current_cohort_id, lifecycle_status, academic_phase, cohort:cohorts(id, name)')
+          .in('id', allowedExtraIds);
+        extraStudentRows = ((extraStudents ?? []) as UnknownRow[]).filter((st) => {
+          const lifecycle = (asString(st.lifecycle_status) ?? '').toLowerCase();
+          if (lifecycle && !['admitted', 'active'].includes(lifecycle)) return false;
+          const phase = (asString(st.academic_phase) ?? '').toLowerCase();
+          if (phase && phase !== 'in_class') return false;
+          return true;
+        });
+      }
     }
 
     const extraStudentById = new Map(

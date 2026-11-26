@@ -257,16 +257,21 @@ export async function batchDropStudentUnitRegistrations(formData: FormData) {
       .eq('academic_period_id', targetPeriodId);
   }
 
-  // Also clean up markbook roster & population for the deleted units if no results exist
+  // Also clean up markbook roster, population, drafts, and attendance entries
+  // for the dropped units if no committed results exist.
   const { data: events } = await admin
     .from('assessment_events')
-    .select('id, unit_id')
+    .select('id, unit_id, status, exam_marks_finalized_at, marks_submitted_at')
     .eq('academic_period_id', targetPeriodId)
     .in('unit_id', uniqueUnitIds)
     .eq('assessment_type', 'exam');
 
   if (events && events.length > 0) {
     for (const event of events) {
+      if (event.status === 'closed' || event.exam_marks_finalized_at || event.marks_submitted_at) {
+        continue;
+      }
+
       const { data: results } = await admin
         .from('assessment_results')
         .select('id')
@@ -275,23 +280,64 @@ export async function batchDropStudentUnitRegistrations(formData: FormData) {
         .maybeSingle();
 
       if (!results) {
-        await admin
-          .from('assessment_roster')
-          .delete()
-          .eq('assessment_id', event.id)
-          .eq('student_id', studentId);
-
-        await admin
-          .from('assessment_population')
-          .delete()
-          .eq('assessment_event_id', event.id)
-          .eq('student_id', studentId);
+        await Promise.all([
+          admin
+            .from('assessment_roster')
+            .delete()
+            .eq('assessment_id', event.id)
+            .eq('student_id', studentId),
+          admin
+            .from('assessment_population')
+            .delete()
+            .eq('assessment_event_id', event.id)
+            .eq('student_id', studentId),
+          admin
+            .from('assessment_online_mark_drafts')
+            .delete()
+            .eq('assessment_id', event.id)
+            .eq('student_id', studentId),
+        ]);
       }
+    }
+  }
+
+  const { data: periodSessions } = await admin
+    .from('class_sessions')
+    .select('id')
+    .eq('academic_period_id', targetPeriodId)
+    .in('unit_id', uniqueUnitIds);
+
+  const periodSessionIds = (periodSessions ?? []).map((s) => s.id).filter(Boolean);
+  if (periodSessionIds.length > 0) {
+    const { data: deletedAttendance } = await admin
+      .from('class_attendance_entries')
+      .delete()
+      .eq('student_id', studentId)
+      .in('class_session_id', periodSessionIds)
+      .select('class_session_id');
+
+    const affectedSessionIds = [
+      ...new Set((deletedAttendance ?? []).map((row) => row.class_session_id).filter(Boolean)),
+    ];
+    for (const sessionId of affectedSessionIds) {
+      const { count } = await admin
+        .from('class_attendance_entries')
+        .select('id', { count: 'exact', head: true })
+        .eq('class_session_id', sessionId);
+      await admin
+        .from('class_sessions')
+        .update({ roster_count: count ?? 0, updated_at: new Date().toISOString() })
+        .eq('id', sessionId);
     }
   }
 
   revalidatePath(`/students/unit-registration/register/${studentId}`);
   revalidatePath('/students/unit-registration');
+  revalidatePath('/assessment');
+  revalidatePath('/assessment/marks');
+  revalidatePath('/assessment/reports');
+  revalidatePath('/attendance-clinical');
+  revalidatePath('/staff');
   const cohortQuery = returnCohort ? `&cohort=${encodeURIComponent(returnCohort)}` : '';
   redirect(`/students/unit-registration/register/${studentId}?deleted=${uniqueUnitIds.length}${cohortQuery}`);
 }

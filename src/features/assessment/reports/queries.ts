@@ -195,6 +195,10 @@ export async function getActiveAssessmentPeriodReportData(
     student_id: string;
     reporting_status: string | null;
   };
+  type RegistrationRow = {
+    student_id: string;
+    unit_id: string;
+  };
 
   const [
     populations,
@@ -204,6 +208,7 @@ export async function getActiveAssessmentPeriodReportData(
     rosterRows,
     componentSubmissions,
     periodReportingRows,
+    activeRegistrations,
   ] = await Promise.all([
     fetchAllRows<PopulationRow>(
       () =>
@@ -276,9 +281,30 @@ export async function getActiveAssessmentPeriodReportData(
           .in('reporting_status', ['deferred', 'dropped_out']),
       'period reporting',
     ).catch(() => [] as PeriodReportingRow[]),
+    fetchAllRows<RegistrationRow>(
+      () =>
+        admin
+          .from('student_unit_registrations')
+          .select('student_id,unit_id')
+          .eq('academic_period_id', period.id)
+          .eq('registration_status', 'registered')
+          .in('unit_id', allocationUnitIds)
+          .order('id', { ascending: true }),
+      'unit registrations',
+    ),
   ]);
 
   const inactivePeriodStudents = new Set(periodReportingRows.map((r) => r.student_id));
+  const registeredGroupKeysByStudent = new Map<string, Set<string>>();
+  for (const reg of activeRegistrations) {
+    if (!reg.student_id || !reg.unit_id) continue;
+    let groupKeys = registeredGroupKeysByStudent.get(reg.student_id);
+    if (!groupKeys) {
+      groupKeys = new Set<string>();
+      registeredGroupKeysByStudent.set(reg.student_id, groupKeys);
+    }
+    groupKeys.add(siblingResolver.groupKeyOf(reg.unit_id));
+  }
 
   const eventMap = new Map(validEvents.map((event) => {
     const unit = one(event.unit as Relation<{ id: string; code: string; name: string }>);
@@ -376,6 +402,10 @@ export async function getActiveAssessmentPeriodReportData(
 
     const key = `${sourceEventId}:${student.id}`;
     const result = resultMap.get(key);
+    const isRegisteredForGroup =
+      registeredGroupKeysByStudent.get(student.id)?.has(siblingResolver.groupKeyOf(event.unitId)) ?? false;
+    if (!isRegisteredForGroup && !result) continue;
+
     const draft = draftMap.get(key);
     const roster = rosterMap.get(key);
     const ownRoster = rosterMap.get(`${population.assessment_event_id}:${student.id}`);

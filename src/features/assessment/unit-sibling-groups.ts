@@ -130,3 +130,103 @@ export async function loadUnitSiblingResolver(
     (equivalence.data ?? []) as EquivalenceMemberLink[],
   );
 }
+
+/**
+ * Resolves the set of student IDs holding an active `'registered'` registration
+ * for any of `unitIds` or their shared/equivalent siblings in `academicPeriodId`
+ * (including active individual class assignments backed by a registered unit).
+ */
+export async function loadRegisteredStudentIdsForUnits(
+  admin: SupabaseClient,
+  academicPeriodId: string,
+  unitIds: string[],
+  candidateStudentIds?: string[],
+): Promise<Set<string>> {
+  const uniqueUnits = [...new Set(unitIds.filter(Boolean))];
+  if (!academicPeriodId || uniqueUnits.length === 0) {
+    return new Set();
+  }
+  if (candidateStudentIds && candidateStudentIds.length === 0) {
+    return new Set();
+  }
+
+  const siblingResolver = await loadUnitSiblingResolver(admin, academicPeriodId);
+  const allUnitIds = [
+    ...new Set([
+      ...uniqueUnits,
+      ...uniqueUnits.flatMap((unitId) => siblingResolver.siblingsOf(unitId)),
+    ]),
+  ];
+
+  const registeredIds = new Set<string>();
+  const PAGE_SIZE = 1000;
+
+  if (candidateStudentIds && candidateStudentIds.length > 0) {
+    const CHUNK_SIZE = 200;
+    for (let i = 0; i < candidateStudentIds.length; i += CHUNK_SIZE) {
+      const chunk = candidateStudentIds.slice(i, i + CHUNK_SIZE);
+      const { data, error } = await admin
+        .from('student_unit_registrations')
+        .select('student_id')
+        .eq('academic_period_id', academicPeriodId)
+        .eq('registration_status', 'registered')
+        .in('unit_id', allUnitIds)
+        .in('student_id', chunk);
+
+      if (error) {
+        throw new Error(`Unable to verify unit registrations: ${error.message}`);
+      }
+      for (const row of data ?? []) {
+        if (row.student_id) registeredIds.add(String(row.student_id));
+      }
+    }
+  } else {
+    for (let from = 0; ; from += PAGE_SIZE) {
+      const { data, error } = await admin
+        .from('student_unit_registrations')
+        .select('student_id')
+        .eq('academic_period_id', academicPeriodId)
+        .eq('registration_status', 'registered')
+        .in('unit_id', allUnitIds)
+        .order('id', { ascending: true })
+        .range(from, from + PAGE_SIZE - 1);
+
+      if (error) {
+        throw new Error(`Unable to verify unit registrations: ${error.message}`);
+      }
+      const page = data ?? [];
+      for (const row of page) {
+        if (row.student_id) registeredIds.add(String(row.student_id));
+      }
+      if (page.length < PAGE_SIZE) break;
+    }
+  }
+
+  // Also include active transfer / individual class assignments backed by a registered source unit
+  const { data: allocations } = await admin
+    .from('teaching_allocations')
+    .select('id')
+    .eq('academic_period_id', academicPeriodId)
+    .in('unit_id', allUnitIds);
+
+  const allocIds = (allocations ?? []).map((a) => a.id).filter(Boolean);
+  if (allocIds.length > 0) {
+    const { data: assignments } = await admin
+      .from('student_class_assignments')
+      .select('student_id, student_unit_registrations!inner(registration_status)')
+      .eq('academic_period_id', academicPeriodId)
+      .eq('is_active', true)
+      .in('teaching_allocation_id', allocIds);
+
+    for (const assignment of assignments ?? []) {
+      const reg = Array.isArray(assignment.student_unit_registrations)
+        ? assignment.student_unit_registrations[0]
+        : assignment.student_unit_registrations;
+      if (assignment.student_id && reg?.registration_status === 'registered') {
+        registeredIds.add(String(assignment.student_id));
+      }
+    }
+  }
+
+  return registeredIds;
+}

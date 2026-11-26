@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 
 import { createAdminClient } from '@/lib/supabase/admin';
+import { loadRegisteredStudentIdsForUnits } from './unit-sibling-groups';
 import type { TrainerMarkComponentKey, TrainerMarkComponentSubmissions, TrainerMarkEntryRow, TrainerMarkInviteRow } from './trainer-mark-entry-types';
 
 export function hashTrainerMarkToken(token: string): string {
@@ -66,16 +67,51 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
     const allRosterRows = rosterRows ?? [];
     const studentIds = [...new Set(allRosterRows.map((row) => row.student_id))];
     const cohortIds = [...new Set(allRosterRows.map((row) => row.cohort_id).filter((value): value is string => Boolean(value)))];
-    const [{ data: units, error: unitsError }, { data: periods, error: periodsError }, { data: students, error: studentsError }, { data: drafts, error: draftsError }, { data: cohortRows, error: cohortsError }, { data: componentSubmissionRows, error: componentSubmissionsError }] = await Promise.all([
+    const [{ data: units, error: unitsError }, { data: periods, error: periodsError }, { data: students, error: studentsError }, { data: drafts, error: draftsError }, { data: cohortRows, error: cohortsError }, { data: componentSubmissionRows, error: componentSubmissionsError }, { data: resultRows }] = await Promise.all([
       admin.from('units').select('id,code,name').in('id', [...new Set(eventRows.map((event) => event.unit_id))]),
       admin.from('academic_periods').select('id,name').in('id', [...new Set(eventRows.map((event) => event.academic_period_id))]),
-      studentIds.length ? admin.from('students').select('id,admission_number,full_name').in('id', studentIds) : Promise.resolve({ data: [], error: null }),
+      studentIds.length ? admin.from('students').select('id,admission_number,full_name,lifecycle_status,academic_phase').in('id', studentIds) : Promise.resolve({ data: [], error: null }),
       assessmentIds.length ? admin.from('assessment_online_mark_drafts').select('assessment_id,student_id,assignment_mark,presentation_mark,rat_mark,cat_mark,exam_mark').in('assessment_id', assessmentIds) : Promise.resolve({ data: [], error: null }),
       cohortIds.length ? admin.from('cohorts').select('id,name').in('id', cohortIds) : Promise.resolve({ data: [], error: null }),
       admin.from('assessment_mark_component_submissions').select('assessment_id,cohort_id,component_key,submitted_at').in('assessment_id', assessmentIds),
+      assessmentIds.length ? admin.from('assessment_results').select('assessment_event_id,student_id').in('assessment_event_id', assessmentIds) : Promise.resolve({ data: [], error: null }),
     ]);
     if (isMissingComponentSubmissionsTable(componentSubmissionsError)) throw componentSubmissionsMigrationError();
     if (unitsError || periodsError || studentsError || draftsError || cohortsError || componentSubmissionsError) throw new Error('Could not load the assigned unit roster.');
+
+    const registeredByPeriod = new Map<string, Set<string>>();
+    const inactiveReportingByPeriod = new Map<string, Set<string>>();
+    const periodUnitPairs = new Map<string, Set<string>>();
+    for (const ev of eventRows) {
+      if (!ev.academic_period_id || !ev.unit_id) continue;
+      const set = periodUnitPairs.get(ev.academic_period_id) ?? new Set<string>();
+      set.add(ev.unit_id);
+      periodUnitPairs.set(ev.academic_period_id, set);
+    }
+    await Promise.all(
+      [...periodUnitPairs.entries()].map(async ([periodId, uIds]) => {
+        const [regSet, repRes] = await Promise.all([
+          loadRegisteredStudentIdsForUnits(admin, periodId, [...uIds], studentIds),
+          studentIds.length
+            ? admin
+                .from('student_period_reporting')
+                .select('student_id')
+                .eq('academic_period_id', periodId)
+                .in('student_id', studentIds)
+                .in('reporting_status', ['deferred', 'dropped_out'])
+            : Promise.resolve({ data: [] as Array<{ student_id: string }> }),
+        ]);
+        registeredByPeriod.set(periodId, regSet);
+        inactiveReportingByPeriod.set(
+          periodId,
+          new Set((repRes.data ?? []).map((r) => String(r.student_id))),
+        );
+      }),
+    );
+    const committedResultKeys = new Set(
+      (resultRows ?? []).map((r) => `${r.assessment_event_id}:${r.student_id}`),
+    );
+
     const unitById = new Map((units ?? []).map((unit) => [unit.id, unit]));
     const periodNames = [...new Set((periods ?? []).map((period) => period.name))];
     const studentById = new Map((students ?? []).map((student) => [student.id, student]));
@@ -124,6 +160,15 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
       const student = studentById.get(roster.student_id);
       const event = eventById.get(roster.assessment_id);
       if (!scope || !student || !event || event.assessment_type !== 'exam' || !event.population_locked_at) continue;
+      const lifecycle = (student.lifecycle_status ?? '').toLowerCase();
+      if (lifecycle && !['admitted', 'active'].includes(lifecycle)) continue;
+      const phase = (student.academic_phase ?? '').toLowerCase();
+      if (phase && phase !== 'in_class') continue;
+      if (inactiveReportingByPeriod.get(event.academic_period_id)?.has(roster.student_id)) continue;
+      const isRegistered = registeredByPeriod.get(event.academic_period_id)?.has(roster.student_id) ?? false;
+      const hasCommittedResult = committedResultKeys.has(`${roster.assessment_id}:${roster.student_id}`);
+      if (!isRegistered && !hasCommittedResult) continue;
+
       const cohortKey = roster.cohort_id ?? 'all';
       if (!cohorts.has(cohortKey)) {
         cohorts.set(cohortKey, {
@@ -254,8 +299,8 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
   }
 
   const studentIds = rosterRows.map((row) => row.student_id as string);
-  const [{ data: students, error: studentsError }, { data: drafts, error: draftsError }, { data: componentRows, error: componentError }] = await Promise.all([
-    admin.from('students').select('id,admission_number,full_name').in('id', studentIds),
+  const [{ data: students, error: studentsError }, { data: drafts, error: draftsError }, { data: componentRows, error: componentError }, registeredStudentIds, inactiveReportingIds, { data: resultRows }] = await Promise.all([
+    admin.from('students').select('id,admission_number,full_name,lifecycle_status,academic_phase').in('id', studentIds),
     admin.from('assessment_online_mark_drafts')
       .select('student_id,assignment_mark,presentation_mark,rat_mark,cat_mark,exam_mark')
       .eq('assessment_id', invite.assessment_id),
@@ -263,10 +308,24 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
       .select('component_key,submitted_at')
       .eq('assessment_id', invite.assessment_id)
       .is('cohort_id', invite.cohort_id ?? null),
+    loadRegisteredStudentIdsForUnits(admin, event.academic_period_id, [event.unit_id], studentIds),
+    admin
+      .from('student_period_reporting')
+      .select('student_id')
+      .eq('academic_period_id', event.academic_period_id)
+      .in('student_id', studentIds)
+      .in('reporting_status', ['deferred', 'dropped_out'])
+      .then(({ data }) => new Set((data ?? []).map((r) => String(r.student_id)))),
+    admin
+      .from('assessment_results')
+      .select('student_id')
+      .eq('assessment_event_id', invite.assessment_id)
+      .in('student_id', studentIds),
   ]);
   if (isMissingComponentSubmissionsTable(componentError)) throw componentSubmissionsMigrationError();
   if (studentsError || draftsError || componentError) throw new Error('Could not load current draft marks.');
 
+  const committedStudentIds = new Set((resultRows ?? []).map((r) => String(r.student_id)));
   const studentById = new Map((students ?? []).map((student) => [student.id, student]));
   const draftByStudentId = new Map((drafts ?? []).map((draft) => [draft.student_id, draft]));
   const seenStudentIds = new Set<string>();
@@ -276,6 +335,12 @@ export async function loadTrainerMarkSession(invite: TrainerMarkInviteRow) {
     seenStudentIds.add(studentId);
     const student = studentById.get(studentId);
     if (!student) return [];
+    const lifecycle = (student.lifecycle_status ?? '').toLowerCase();
+    if (lifecycle && !['admitted', 'active'].includes(lifecycle)) return [];
+    const phase = (student.academic_phase ?? '').toLowerCase();
+    if (phase && phase !== 'in_class') return [];
+    if (inactiveReportingIds.has(studentId)) return [];
+    if (!registeredStudentIds.has(studentId) && !committedStudentIds.has(studentId)) return [];
     const draft = draftByStudentId.get(studentId);
     const attendanceStatus: TrainerMarkEntryRow['attendanceStatus'] =
       row.pre_assessment_status === 'absent' ? 'absent' : 'expected';

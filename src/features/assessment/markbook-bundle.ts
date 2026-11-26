@@ -15,6 +15,9 @@ import {
 import {
   getUnifiedUnitRoster,
 } from '@/features/academic-roster/unified-roster';
+import {
+  loadRegisteredStudentIdsForUnits,
+} from '@/features/assessment/unit-sibling-groups';
 
 type UnknownRow =
   Record<string, unknown>;
@@ -318,21 +321,51 @@ export async function loadAssessmentMarkbookBundle({
   // in-memory list so the downloaded markbook is always complete.
   // rosterAugmentedCount is returned so the download route can emit a warning
   // header, and the HOD knows to re-sync the roster after closing trainer entry.
+  // Filter out unregistered students from stale assessment_roster rows, while
+  // preserving committed results for finalized/closed markbooks, and augment
+  // with any newly registered students from the live unified roster.
   let rosterAugmentedCount = 0;
+  let filteredRosterRows = rosterRows;
   try {
-    const unifiedRoster = await getUnifiedUnitRoster({
-      supabase: createAdminClient(),
-      unitId,
-      academicPeriodId: periodId,
+    const admin = createAdminClient();
+    const [unifiedRoster, registeredIds, committedResultRows] = await Promise.all([
+      getUnifiedUnitRoster({
+        supabase: admin,
+        unitId,
+        academicPeriodId: periodId,
+      }),
+      loadRegisteredStudentIdsForUnits(admin, periodId, relatedUnitIds),
+      admin
+        .from('assessment_results')
+        .select('student_id')
+        .in('assessment_event_id', eventIds)
+        .then(({ data }) => data ?? []),
+    ]);
+
+    const unifiedStudentIds = new Set(unifiedRoster.students.map((st) => st.studentId));
+    const committedStudentIds = new Set(
+      committedResultRows.map((r) => asString(r.student_id)).filter((id): id is string => Boolean(id)),
+    );
+    const isFinalized = eventRows.some(
+      (ev) =>
+        ['submitted', 'finalised', 'archived'].includes(asString(ev.workflow_status) ?? '')
+        || Boolean(ev.exam_marks_finalized_at),
+    );
+
+    filteredRosterRows = rosterRows.filter((row) => {
+      const sId = asString(row.student_id);
+      if (!sId) return false;
+      if (unifiedStudentIds.has(sId) || registeredIds.has(sId)) return true;
+      return isFinalized && committedStudentIds.has(sId);
     });
 
     const existingStudentIds = new Set(
-      rosterRows.map((r) => asString(r.student_id)).filter(Boolean),
+      filteredRosterRows.map((r) => asString(r.student_id)).filter(Boolean),
     );
 
     for (const st of unifiedRoster.students) {
       if (!existingStudentIds.has(st.studentId)) {
-        rosterRows.push({
+        filteredRosterRows.push({
           id: st.studentId,
           assessment_id: resolvedAssessmentId,
           student_id: st.studentId,
@@ -357,7 +390,7 @@ export async function loadAssessmentMarkbookBundle({
   }
 
   if (
-    rosterRows.length === 0
+    filteredRosterRows.length === 0
   ) {
     throw new Error(
       'Generate the assessment population before downloading the markbook.',
@@ -367,7 +400,7 @@ export async function loadAssessmentMarkbookBundle({
   const studentIds =
     [
       ...new Set(
-        rosterRows
+        filteredRosterRows
           .map(
             (row) =>
               asString(
@@ -386,7 +419,7 @@ export async function loadAssessmentMarkbookBundle({
   const cohortIds =
     [
       ...new Set(
-        rosterRows
+        filteredRosterRows
           .map(
             (row) =>
               asString(
@@ -504,7 +537,7 @@ export async function loadAssessmentMarkbookBundle({
     );
 
   for (
-    const row of rosterRows
+    const row of filteredRosterRows
   ) {
     const studentId =
       asString(

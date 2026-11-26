@@ -215,12 +215,8 @@ export async function submitCatOnBehalfAction(formData: FormData) {
   // later calls to re-submit an already-finalized sibling and surface the
   // generic "could not be submitted on behalf" error.
   const rootRoster = roster.filter((r) => r.assessment_id === assessmentId);
-  const effectiveRoster = rootRoster.length > 0 ? rootRoster : roster;
-  const studentIds = new Set(effectiveRoster.map((r) => r.student_id).filter(Boolean));
-  for (const p of popRes.data ?? []) {
-    if (p.student_id) studentIds.add(p.student_id);
-  }
   const admin = createAdminClient();
+  const studentIds = new Set<string>();
   if (eventRes.data.unit_id && eventRes.data.academic_period_id) {
     const unifiedRoster = await getUnifiedUnitRoster({
       supabase: admin,
@@ -229,6 +225,14 @@ export async function submitCatOnBehalfAction(formData: FormData) {
     });
     for (const candidate of unifiedRoster.students) {
       studentIds.add(candidate.studentId);
+    }
+  } else {
+    const effectiveRoster = rootRoster.length > 0 ? rootRoster : roster;
+    for (const r of effectiveRoster) {
+      if (r.student_id) studentIds.add(r.student_id);
+    }
+    for (const p of popRes.data ?? []) {
+      if (p.student_id) studentIds.add(p.student_id);
     }
   }
   if (studentIds.size === 0) redirect(`/assessment/marks/${assessmentId}?error=no-saved-cat`);

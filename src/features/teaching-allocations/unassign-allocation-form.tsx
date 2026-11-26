@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { useFormStatus } from 'react-dom';
+import { useState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -12,22 +11,12 @@ import {
   DialogBody,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { unassignTeachingAllocationAction } from './simple-allocation-actions';
-
-function SubmitButton() {
-  const { pending } = useFormStatus();
-
-  return (
-    <Button
-      type="submit"
-      disabled={pending}
-      variant="outline"
-      className="border-danger-border bg-danger-surface text-danger hover:bg-danger-surface hover:border-danger/40 text-xs font-semibold h-9 rounded-xl transition-colors disabled:cursor-wait"
-    >
-      {pending ? 'Unassigning…' : 'Unassign trainer'}
-    </Button>
-  );
-}
+import {
+  initialInlineAllocationState,
+  type InlineAllocationMutationState,
+} from './inline-allocation-state';
+import { unassignTeachingAllocationInlineAction } from './simple-allocation-actions';
+import { useScrollPreservingRefresh } from './use-scroll-preserving-refresh';
 
 export function UnassignAllocationForm({
   allocationId,
@@ -43,6 +32,22 @@ export function UnassignAllocationForm({
   unitLabel: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [state, setState] = useState<InlineAllocationMutationState>(
+    initialInlineAllocationState,
+  );
+  const [isPending, startTransition] = useTransition();
+
+  useScrollPreservingRefresh(state);
+
+  function handleConfirm(formData: FormData) {
+    startTransition(async () => {
+      const next = await unassignTeachingAllocationInlineAction(state, formData);
+      setState(next);
+      if (next.status === 'success') {
+        setIsOpen(false);
+      }
+    });
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -62,25 +67,35 @@ export function UnassignAllocationForm({
           <p>
             Are you sure you want to unassign <span className="font-semibold text-text-primary">{unitLabel}</span> from the live draft?
           </p>
+          {state.status === 'error' && state.message ? (
+            <p role="alert" className="text-xs font-medium text-danger">
+              {state.message}
+            </p>
+          ) : null}
         </DialogBody>
         <DialogFooter className="mt-4 flex justify-end gap-2">
           <Button
             type="button"
             variant="outline"
+            disabled={isPending}
             onClick={() => setIsOpen(false)}
             className="text-xs font-semibold h-9 rounded-xl"
           >
             Cancel
           </Button>
-          <form
-            action={unassignTeachingAllocationAction}
-            onSubmit={() => setIsOpen(false)}
-          >
+          <form action={handleConfirm}>
             <input type="hidden" name="allocationId" value={allocationId} />
             <input type="hidden" name="academicPeriodId" value={academicPeriodId} />
             <input type="hidden" name="allocationTrainer" value={allocationTrainer} />
             <input type="hidden" name="allocationQuery" value={allocationQuery} />
-            <SubmitButton />
+            <Button
+              type="submit"
+              disabled={isPending}
+              variant="outline"
+              className="border-danger-border bg-danger-surface text-danger hover:bg-danger-surface hover:border-danger/40 text-xs font-semibold h-9 rounded-xl transition-colors disabled:cursor-wait"
+            >
+              {isPending ? 'Unassigning…' : 'Unassign trainer'}
+            </Button>
           </form>
         </DialogFooter>
       </DialogContent>

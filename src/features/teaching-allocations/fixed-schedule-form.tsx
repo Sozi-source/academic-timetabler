@@ -1,10 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useActionState, useState, useTransition } from 'react';
 import {
-  clearFixedScheduleAction,
-  setFixedScheduleAction,
+  initialInlineAllocationState,
+  type InlineAllocationMutationState,
+} from './inline-allocation-state';
+import {
+  clearFixedScheduleInlineAction,
+  setFixedScheduleInlineAction,
 } from './simple-allocation-actions';
+import { useScrollPreservingRefresh } from './use-scroll-preserving-refresh';
 
 interface FixedScheduleDay {
   id: string;
@@ -64,6 +69,36 @@ export function FixedScheduleForm({
   const [scheduleMode, setScheduleMode] = useState<'standard' | 'full_day'>(
     isClinicalRotation || isFullDaySession ? 'full_day' : 'standard',
   );
+  const [saveState, saveFormAction, isSavePending] = useActionState<
+    InlineAllocationMutationState,
+    FormData
+  >(setFixedScheduleInlineAction, initialInlineAllocationState);
+  const [clearState, setClearState] = useState<InlineAllocationMutationState>(
+    initialInlineAllocationState,
+  );
+  const [isClearPending, startClearTransition] = useTransition();
+
+  useScrollPreservingRefresh(saveState);
+  useScrollPreservingRefresh(clearState);
+
+  const isBusy = disabled || isSavePending || isClearPending;
+  const inlineError =
+    clearState.status === 'error'
+      ? clearState.message
+      : saveState.status === 'error'
+        ? saveState.message
+        : null;
+
+  function handleClearFixedSchedule() {
+    const fd = new FormData();
+    fd.set('offeringId', offeringId);
+    fd.set('academicPeriodId', academicPeriodId);
+    fd.set('searchQuery', searchQuery);
+    startClearTransition(async () => {
+      const next = await clearFixedScheduleInlineAction(clearState, fd);
+      setClearState(next);
+    });
+  }
 
   const secondSessionAvailable = weeklySessions >= 2;
   const thirdSessionAvailable = weeklySessions >= 3;
@@ -97,7 +132,7 @@ export function FixedScheduleForm({
 
   return (
     <form
-      action={setFixedScheduleAction}
+      action={saveFormAction}
       className="space-y-2 rounded-xl border border-border bg-surface-subtle p-3"
     >
       <input type="hidden" name="offeringId" value={offeringId} />
@@ -167,10 +202,10 @@ export function FixedScheduleForm({
             </div>
           </div>
           <button
-            disabled={disabled}
+            disabled={isBusy}
             className="h-8 whitespace-nowrap rounded-xl border border-border bg-surface px-3 text-xs font-semibold text-text-primary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Save full day
+            {isSavePending ? 'Saving…' : 'Save full day'}
           </button>
         </div>
       ) : (
@@ -278,10 +313,10 @@ export function FixedScheduleForm({
             </>
           ) : null}
           <button
-            disabled={disabled}
+            disabled={isBusy}
             className="col-span-2 h-8 whitespace-nowrap rounded-xl border border-border bg-surface px-3 text-xs font-semibold text-text-primary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1"
           >
-            Save fixed session
+            {isSavePending ? 'Saving…' : 'Save fixed session'}
           </button>
         </div>
       )}
@@ -305,15 +340,19 @@ export function FixedScheduleForm({
       {fullDay || savedPatterns.length > 0 ? (
         <div className="flex justify-end border-t border-border pt-2">
           <button
-            type="submit"
-            formAction={clearFixedScheduleAction}
-            formNoValidate
-            disabled={disabled}
+            type="button"
+            onClick={handleClearFixedSchedule}
+            disabled={isBusy}
             className="text-xs font-semibold text-danger hover:underline disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Undo fixed time
+            {isClearPending ? 'Removing…' : 'Undo fixed time'}
           </button>
         </div>
+      ) : null}
+      {inlineError ? (
+        <p role="alert" className="text-xs font-medium text-danger">
+          {inlineError}
+        </p>
       ) : null}
     </form>
   );

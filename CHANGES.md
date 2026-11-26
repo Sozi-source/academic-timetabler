@@ -4,6 +4,12 @@
 - **Timetable Cohort Availability (`src/features/cohorts/queries.ts`):**
   - Updated `getTimetableAvailableCohorts` to load both `active` and `planned` cohorts (`is_timetable_available = true`) so new future intake cohorts such as `CND-JAN-2027` and `DND-JAN-2027` are recognized by `getGeneratorSourceData()` during `JAN-APR-27` timetable generation.
   - Falls back to `plannedSize` when a future cohort has `actualSize === 0` and no enrolled live students yet.
+- **Shared Draft Allocation Consolidation & Authoritative Assignment Fix (`supabase/migrations/20261126234500_sync_shared_draft_allocations_and_authoritative_assign.sql`):**
+  - Added `public.sync_shared_class_draft_allocations(uuid)` and backfilled planned/active periods so unallocated `draft` allocations belonging to a `teaching_offerings` shared class collapse cleanly into one consolidated allocation row with `teaching_offering_id` and `participant_cohort_ids` set (instead of remaining duplicate solo draft rows).
+  - Updated `confirm_shared_unit_offerings(uuid[])`, `reserve_unit_offering_without_trainer(uuid)`, and `assign_unit_offering_authoritatively(uuid, uuid)` so assigning a trainer to a merged or unreserved offering never throws `"The exact trainer-pending allocation for this unit could not be found"`.
+- **Scroll-Preserving Inline Allocation Controls (`src/features/teaching-allocations/`):**
+  - Added inline server actions (`assignOfferingInlineAction`, `reserveOfferingWithoutTrainerInlineAction`, `unassignTeachingAllocationInlineAction`, `setFixedScheduleInlineAction`, `clearFixedScheduleInlineAction`) returning `InlineAllocationMutationState` instead of full-page `redirect(...)` navigations.
+  - Updated `AssignOfferingForm`, `ReserveOfferingForm`, `UnassignAllocationForm`, and `FixedScheduleForm` with `useScrollPreservingRefresh` (`router.refresh()` + scroll restoration) and inline error/availability feedback so assigning, reserving, unassigning, or pinning fixed times keeps the viewport in place without jumping to the top of the page.
 - **Allocation Screen Merged-Class Count & Cohort Display (`src/app/(dashboard)/timetable/teaching-allocations/page.tsx`, `src/tests/teaching-allocations/page-render.test.tsx`):**
   - Updated `Units awaiting trainer`, `Allocated and blocked`, and `Reserve all unassigned (N)` to count collapsed teachable classes (with the merged cohort-unit breakdown in the card description) instead of unmerged cohort offering rows, and rendered all participating cohort codes in the `Cohort` column for shared classes.
 - **Planned Intake Offering Generation Guard (`supabase/migrations/20261126230000_support_planned_intake_cohorts.sql`, `supabase/migrations/20261126231500_fix_generate_offerings_department_helper.sql`):**
@@ -17,17 +23,25 @@
 **Added:**
 - `supabase/migrations/20261126230000_support_planned_intake_cohorts.sql`
 - `supabase/migrations/20261126231500_fix_generate_offerings_department_helper.sql`
+- `supabase/migrations/20261126234500_sync_shared_draft_allocations_and_authoritative_assign.sql`
+- `src/features/teaching-allocations/inline-allocation-state.ts`
+- `src/features/teaching-allocations/use-scroll-preserving-refresh.ts`
+- `src/features/teaching-allocations/reserve-offering-form.tsx`
 - `src/tests/cohorts/queries.test.ts`
 
 **Modified:**
 - `src/app/(dashboard)/timetable/teaching-allocations/page.tsx`
+- `src/features/teaching-allocations/simple-allocation-actions.ts`
+- `src/features/teaching-allocations/assign-offering-form.tsx`
+- `src/features/teaching-allocations/unassign-allocation-form.tsx`
+- `src/features/teaching-allocations/fixed-schedule-form.tsx`
 - `src/features/cohorts/queries.ts`
 - `src/features/imports/unit-offerings/actions.ts`
 - `src/tests/teaching-allocations/page-render.test.tsx`
 - `CHANGES.md`
 
 **Manual Follow-Up:**
-- Apply `supabase/migrations/20261126230000_support_planned_intake_cohorts.sql` and `supabase/migrations/20261126231500_fix_generate_offerings_department_helper.sql` in Supabase, push/deploy the updated app, create `CND-JAN-2027` and `DND-JAN-2027` under **Cohorts**, and re-run **Generate offering recommendations** for `JAN-APR-27`.
+- Apply `supabase/migrations/20261126230000_support_planned_intake_cohorts.sql`, `supabase/migrations/20261126231500_fix_generate_offerings_department_helper.sql`, and `supabase/migrations/20261126234500_sync_shared_draft_allocations_and_authoritative_assign.sql` in Supabase, then assign trainers or reserve remaining open classes in **Simple teaching allocation** for `JAN-APR-27`.
 
 ### 2026-11-26: Fix Planned-Period Curriculum Trigger Validation & Allocation Action Errors
 

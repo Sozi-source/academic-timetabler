@@ -3,6 +3,8 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { createClient } from '@/lib/supabase/server';
+
+import type { InlineAllocationMutationState } from './inline-allocation-state';
 const path = '/timetable/teaching-allocations';
 
 export async function generateCurrentOfferingsAction(formData: FormData) {
@@ -91,20 +93,20 @@ export async function reconcilePreviousAssignmentsAction(formData: FormData) {
   redirect(`${path}?${query.toString()}`);
 }
 
-export async function assignOfferingAction(formData: FormData) {
+async function performAssignOffering(
+  formData: FormData,
+): Promise<Omit<InlineAllocationMutationState, 'sequence'>> {
   await requireHodAccess();
-  const offering=String(formData.get('offeringId')??'');
-  const trainer=String(formData.get('trainerId')??'');
-  const period=String(formData.get('academicPeriodId')??'');
-  const searchQuery=String(formData.get('searchQuery')??'').trim();
-  const query=new URLSearchParams();
-  if(period) query.set('period',period);
-  if(searchQuery) query.set('q',searchQuery);
+  const offering = String(formData.get('offeringId') ?? '');
+  const trainer = String(formData.get('trainerId') ?? '');
+  const period = String(formData.get('academicPeriodId') ?? '');
   if (!offering || !trainer) {
-    query.set('allocationError','Select a trainer before assigning the unit.');
-    redirect(`${path}?${query.toString()}`);
+    return {
+      status: 'error',
+      message: 'Select a trainer before assigning the unit.',
+    };
   }
-  const db=await createClient();
+  const db = await createClient();
 
   // Fetch source offering configuration before assigning
   const { data: offeringRecord } = await db
@@ -193,24 +195,22 @@ export async function assignOfferingAction(formData: FormData) {
     p_trainer_id: trainer,
   });
 
-  if(error) {
+  if (error) {
     const availabilityRequired = /available teaching time|available for every fixed teaching session/i.test(error.message);
-    query.set(
-      'allocationError',
-      availabilityRequired
+    return {
+      status: 'error',
+      message: availabilityRequired
         ? 'This trainer uses selected free times. Mark the required periods as available, save, then assign the unit again.'
         : error.message,
-    );
-    if (availabilityRequired) {
-      query.set('availabilityTrainer', trainer);
-      query.set('availabilityPeriod', period);
-    }
-    redirect(`${path}?${query.toString()}`);
+      availabilityRequired: availabilityRequired
+        ? { trainerId: trainer, periodId: period }
+        : undefined,
+    };
   }
 
-  if ((assignResult as { rescheduleRequired?: boolean } | null)?.rescheduleRequired) {
-    query.set('rescheduleNeeded', '1');
-  }
+  const rescheduleNeeded = Boolean(
+    (assignResult as { rescheduleRequired?: boolean } | null)?.rescheduleRequired,
+  );
 
   // Ensure teaching_allocations maintains consistent duration, fixed schedule, and mode
   if (offeringRecord) {
@@ -266,34 +266,94 @@ export async function assignOfferingAction(formData: FormData) {
     }
   }
 
-  query.set('assigned','1');
   revalidatePath(path);
   revalidatePath('/timetable/generator');
   revalidatePath('/timetable/readiness');
   revalidatePath('/timetable/reports');
+
+  return {
+    status: 'success',
+    rescheduleNeeded,
+  };
+}
+
+export async function assignOfferingInlineAction(
+  prevState: InlineAllocationMutationState,
+  formData: FormData,
+): Promise<InlineAllocationMutationState> {
+  const result = await performAssignOffering(formData);
+  return {
+    ...result,
+    sequence: prevState.sequence + 1,
+  };
+}
+
+export async function assignOfferingAction(formData: FormData) {
+  const period = String(formData.get('academicPeriodId') ?? '');
+  const searchQuery = String(formData.get('searchQuery') ?? '').trim();
+  const query = new URLSearchParams();
+  if (period) query.set('period', period);
+  if (searchQuery) query.set('q', searchQuery);
+
+  const result = await performAssignOffering(formData);
+  if (result.status === 'error') {
+    query.set('allocationError', result.message ?? 'The timetable change was not saved.');
+    if (result.availabilityRequired) {
+      query.set('availabilityTrainer', result.availabilityRequired.trainerId);
+      query.set('availabilityPeriod', result.availabilityRequired.periodId);
+    }
+    redirect(`${path}?${query.toString()}`);
+  }
+
+  if (result.rescheduleNeeded) {
+    query.set('rescheduleNeeded', '1');
+  }
+  query.set('assigned', '1');
   redirect(`${path}?${query.toString()}`);
 }
 
-export async function reserveOfferingWithoutTrainerAction(formData: FormData) {
+async function performReserveOfferingWithoutTrainer(
+  formData: FormData,
+): Promise<Omit<InlineAllocationMutationState, 'sequence'>> {
   await requireHodAccess();
-  const offering=String(formData.get('offeringId')??'');
-  const period=String(formData.get('academicPeriodId')??'');
-  const searchQuery=String(formData.get('searchQuery')??'').trim();
-  const query=new URLSearchParams();
-  if(period) query.set('period',period);
-  if(searchQuery) query.set('q',searchQuery);
-  if(!offering){
-    query.set('allocationError','The unit offering was not found.');
+  const offering = String(formData.get('offeringId') ?? '');
+  if (!offering) {
+    return { status: 'error', message: 'The unit offering was not found.' };
+  }
+  const db = await createClient();
+  const { error } = await db.rpc('reserve_unit_offering_without_trainer', {
+    p_offering_id: offering,
+  });
+  if (error) {
+    return { status: 'error', message: error.message };
+  }
+  revalidatePath(path);
+  revalidatePath('/timetable/generator');
+  revalidatePath('/timetable/readiness');
+  revalidatePath('/timetable/reports');
+  return { status: 'success' };
+}
+
+export async function reserveOfferingWithoutTrainerInlineAction(
+  prevState: InlineAllocationMutationState,
+  formData: FormData,
+): Promise<InlineAllocationMutationState> {
+  const result = await performReserveOfferingWithoutTrainer(formData);
+  return { ...result, sequence: prevState.sequence + 1 };
+}
+
+export async function reserveOfferingWithoutTrainerAction(formData: FormData) {
+  const period = String(formData.get('academicPeriodId') ?? '');
+  const searchQuery = String(formData.get('searchQuery') ?? '').trim();
+  const query = new URLSearchParams();
+  if (period) query.set('period', period);
+  if (searchQuery) query.set('q', searchQuery);
+  const result = await performReserveOfferingWithoutTrainer(formData);
+  if (result.status === 'error') {
+    query.set('allocationError', result.message ?? 'The timetable change was not saved.');
     redirect(`${path}?${query.toString()}`);
   }
-  const db=await createClient();
-  const {error}=await db.rpc('reserve_unit_offering_without_trainer',{p_offering_id:offering});
-  if(error){
-    query.set('allocationError',error.message);
-    redirect(`${path}?${query.toString()}`);
-  }
-  query.set('reservationSaved','1');
-  revalidatePath(path); revalidatePath('/timetable/generator'); revalidatePath('/timetable/readiness'); revalidatePath('/timetable/reports');
+  query.set('reservationSaved', '1');
   redirect(`${path}?${query.toString()}`);
 }
 
@@ -328,27 +388,21 @@ export async function reserveAllOpenOfferingsAction(formData: FormData) {
   redirect(`${path}?${query.toString()}`);
 }
 
-export async function unassignTeachingAllocationAction(formData: FormData) {
+async function performUnassignTeachingAllocation(
+  formData: FormData,
+): Promise<Omit<InlineAllocationMutationState, 'sequence'>> {
   await requireHodAccess();
-  const allocation=String(formData.get('allocationId')??'');
-  const period=String(formData.get('academicPeriodId')??'');
-  const allocationTrainer=String(formData.get('allocationTrainer')??'');
-  const allocationQuery=String(formData.get('allocationQuery')??'').trim();
-  const query=new URLSearchParams();
-  if(period) query.set('period',period);
-  if(allocationTrainer) query.set('allocationTrainer',allocationTrainer);
-  if(allocationQuery) query.set('allocationQ',allocationQuery);
-  if(!allocation){
-    query.set('unassignError','The teaching allocation was not found.');
-    redirect(`${path}?${query.toString()}`);
+  const allocation = String(formData.get('allocationId') ?? '');
+  if (!allocation) {
+    return { status: 'error', message: 'The teaching allocation was not found.' };
   }
-  const db=await createClient();
-  const {error}=await db.rpc('unassign_teaching_allocation',{p_allocation_id:allocation});
-  if(error){
-    query.set('unassignError',error.message);
-    redirect(`${path}?${query.toString()}`);
+  const db = await createClient();
+  const { error } = await db.rpc('unassign_teaching_allocation', {
+    p_allocation_id: allocation,
+  });
+  if (error) {
+    return { status: 'error', message: error.message };
   }
-  query.set('unassigned','1');
   revalidatePath(path);
   revalidatePath('/timetable/generator');
   revalidatePath('/timetable/editor');
@@ -356,6 +410,31 @@ export async function unassignTeachingAllocationAction(formData: FormData) {
   revalidatePath('/timetable/readiness');
   revalidatePath('/timetable/published');
   revalidatePath('/timetable/reports');
+  return { status: 'success' };
+}
+
+export async function unassignTeachingAllocationInlineAction(
+  prevState: InlineAllocationMutationState,
+  formData: FormData,
+): Promise<InlineAllocationMutationState> {
+  const result = await performUnassignTeachingAllocation(formData);
+  return { ...result, sequence: prevState.sequence + 1 };
+}
+
+export async function unassignTeachingAllocationAction(formData: FormData) {
+  const period = String(formData.get('academicPeriodId') ?? '');
+  const allocationTrainer = String(formData.get('allocationTrainer') ?? '');
+  const allocationQuery = String(formData.get('allocationQuery') ?? '').trim();
+  const query = new URLSearchParams();
+  if (period) query.set('period', period);
+  if (allocationTrainer) query.set('allocationTrainer', allocationTrainer);
+  if (allocationQuery) query.set('allocationQ', allocationQuery);
+  const result = await performUnassignTeachingAllocation(formData);
+  if (result.status === 'error') {
+    query.set('unassignError', result.message ?? 'The trainer was not unassigned.');
+    redirect(`${path}?${query.toString()}`);
+  }
+  query.set('unassigned', '1');
   redirect(`${path}?${query.toString()}`);
 }
 
@@ -443,28 +522,24 @@ export async function confirmSharedOfferingAction(formData: FormData) {
   redirect(query.size>0?`${path}?${query.toString()}`:path);
 }
 
-export async function setFixedScheduleAction(formData: FormData) {
+async function performSetFixedSchedule(
+  formData: FormData,
+): Promise<Omit<InlineAllocationMutationState, 'sequence'>> {
   await requireHodAccess();
-  const id=String(formData.get('offeringId')??'');
-  const period=String(formData.get('academicPeriodId')??'');
-  const searchQuery=String(formData.get('searchQuery')??'').trim();
-  const scheduleMode=String(formData.get('scheduleMode')??'standard');
-  const fullDay=String(formData.get('workingDayId')??'');
-  const firstDay=String(formData.get('firstWorkingDayId')??'');
-  const secondDay=String(formData.get('secondWorkingDayId')??'');
-  const thirdDay=String(formData.get('thirdWorkingDayId')??'');
-  const firstSlot=String(formData.get('firstTimeSlotId')??'');
-  const secondSlot=String(formData.get('secondTimeSlotId')??'');
-  const thirdSlot=String(formData.get('thirdTimeSlotId')??'');
-  const query=new URLSearchParams();
-  if(period) query.set('period',period);
-  if(searchQuery) query.set('q',searchQuery);
-  const fail=(message:string):never=>{
-    query.set('allocationError',message);
-    redirect(`${path}?${query.toString()}`);
-  };
-  if(!id) fail('The unit offering was not found.');
-  const db=await createClient();
+  const id = String(formData.get('offeringId') ?? '');
+  const period = String(formData.get('academicPeriodId') ?? '');
+  const scheduleMode = String(formData.get('scheduleMode') ?? 'standard');
+  const fullDay = String(formData.get('workingDayId') ?? '');
+  const firstDay = String(formData.get('firstWorkingDayId') ?? '');
+  const secondDay = String(formData.get('secondWorkingDayId') ?? '');
+  const thirdDay = String(formData.get('thirdWorkingDayId') ?? '');
+  const firstSlot = String(formData.get('firstTimeSlotId') ?? '');
+  const secondSlot = String(formData.get('secondTimeSlotId') ?? '');
+  const thirdSlot = String(formData.get('thirdTimeSlotId') ?? '');
+  if (!id) {
+    return { status: 'error', message: 'The unit offering was not found.' };
+  }
+  const db = await createClient();
 
   // Load target offering details
   const { data: offering } = await db
@@ -494,8 +569,10 @@ export async function setFixedScheduleAction(formData: FormData) {
       .eq('id', offering.unit_id);
   }
 
-  if(scheduleMode==='full_day'){
-    if(!fullDay) fail('Select the full-day rotation day.');
+  if (scheduleMode === 'full_day') {
+    if (!fullDay) {
+      return { status: 'error', message: 'Select the full-day rotation day.' };
+    }
 
     // 1. Fetch first and last teaching slots
     const { data: allSlots } = await db
@@ -522,7 +599,7 @@ export async function setFixedScheduleAction(formData: FormData) {
           working_day_id: fullDay,
           time_slot_id: slot.id,
           sequence_number: idx + 1,
-        }))
+        })),
       );
       await db.from('unit_offering_fixed_slots').insert(fixedSlotsToInsert);
     }
@@ -587,14 +664,24 @@ export async function setFixedScheduleAction(formData: FormData) {
       p_working_day_id: fullDay,
     });
   } else {
-    if(!firstDay||!firstSlot) fail('Select the first day and teaching session.');
-    if(Boolean(secondDay)!==Boolean(secondSlot)) fail('Select both the second day and second teaching session.');
-    if(Boolean(thirdDay)!==Boolean(thirdSlot)) fail('Select both the third day and third teaching session.');
-    if((thirdDay||thirdSlot)&&!(secondDay&&secondSlot)) fail('Set the second session before adding a third.');
-    const workingDayIds=[firstDay,secondDay,thirdDay].filter(Boolean);
-    const timeSlotIds=[firstSlot,secondSlot,thirdSlot].filter(Boolean);
-    const pairs=workingDayIds.map((day,index)=>`${day}:${timeSlotIds[index]}`);
-    if(new Set(pairs).size!==pairs.length) fail('Choose a different day or session for the second period.');
+    if (!firstDay || !firstSlot) {
+      return { status: 'error', message: 'Select the first day and teaching session.' };
+    }
+    if (Boolean(secondDay) !== Boolean(secondSlot)) {
+      return { status: 'error', message: 'Select both the second day and second teaching session.' };
+    }
+    if (Boolean(thirdDay) !== Boolean(thirdSlot)) {
+      return { status: 'error', message: 'Select both the third day and third teaching session.' };
+    }
+    if ((thirdDay || thirdSlot) && !(secondDay && secondSlot)) {
+      return { status: 'error', message: 'Set the second session before adding a third.' };
+    }
+    const workingDayIds = [firstDay, secondDay, thirdDay].filter(Boolean);
+    const timeSlotIds = [firstSlot, secondSlot, thirdSlot].filter(Boolean);
+    const pairs = workingDayIds.map((day, index) => `${day}:${timeSlotIds[index]}`);
+    if (new Set(pairs).size !== pairs.length) {
+      return { status: 'error', message: 'Choose a different day or session for the second period.' };
+    }
 
     // 1. Clear old fixed slots & insert new standard session slots
     await db
@@ -608,7 +695,7 @@ export async function setFixedScheduleAction(formData: FormData) {
         working_day_id: wDayId,
         time_slot_id: timeSlotIds[idx],
         sequence_number: idx + 1,
-      }))
+      })),
     );
     await db.from('unit_offering_fixed_slots').insert(fixedSlotsToInsert);
 
@@ -710,22 +797,40 @@ export async function setFixedScheduleAction(formData: FormData) {
   revalidatePath(path);
   revalidatePath('/timetable/readiness');
   revalidatePath('/timetable/generator');
-  redirect(query.size>0?`${path}?${query.toString()}`:path);
+  return { status: 'success' };
 }
 
-export async function clearFixedScheduleAction(formData: FormData) {
-  await requireHodAccess();
-  const id=String(formData.get('offeringId')??'');
-  const period=String(formData.get('academicPeriodId')??'');
-  const searchQuery=String(formData.get('searchQuery')??'').trim();
-  const query=new URLSearchParams();
-  if(period) query.set('period',period);
-  if(searchQuery) query.set('q',searchQuery);
-  if(!id){
-    query.set('allocationError','The unit offering was not found.');
+export async function setFixedScheduleInlineAction(
+  prevState: InlineAllocationMutationState,
+  formData: FormData,
+): Promise<InlineAllocationMutationState> {
+  const result = await performSetFixedSchedule(formData);
+  return { ...result, sequence: prevState.sequence + 1 };
+}
+
+export async function setFixedScheduleAction(formData: FormData) {
+  const period = String(formData.get('academicPeriodId') ?? '');
+  const searchQuery = String(formData.get('searchQuery') ?? '').trim();
+  const query = new URLSearchParams();
+  if (period) query.set('period', period);
+  if (searchQuery) query.set('q', searchQuery);
+  const result = await performSetFixedSchedule(formData);
+  if (result.status === 'error') {
+    query.set('allocationError', result.message ?? 'Unable to save fixed schedule.');
     redirect(`${path}?${query.toString()}`);
   }
-  const db=await createClient();
+  redirect(query.size > 0 ? `${path}?${query.toString()}` : path);
+}
+
+async function performClearFixedSchedule(
+  formData: FormData,
+): Promise<Omit<InlineAllocationMutationState, 'sequence'>> {
+  await requireHodAccess();
+  const id = String(formData.get('offeringId') ?? '');
+  if (!id) {
+    return { status: 'error', message: 'The unit offering was not found.' };
+  }
+  const db = await createClient();
 
   const { data: offering } = await db
     .from('unit_offerings')
@@ -771,5 +876,27 @@ export async function clearFixedScheduleAction(formData: FormData) {
   revalidatePath(path);
   revalidatePath('/timetable/readiness');
   revalidatePath('/timetable/generator');
-  redirect(query.size>0?`${path}?${query.toString()}`:path);
+  return { status: 'success' };
+}
+
+export async function clearFixedScheduleInlineAction(
+  prevState: InlineAllocationMutationState,
+  formData: FormData,
+): Promise<InlineAllocationMutationState> {
+  const result = await performClearFixedSchedule(formData);
+  return { ...result, sequence: prevState.sequence + 1 };
+}
+
+export async function clearFixedScheduleAction(formData: FormData) {
+  const period = String(formData.get('academicPeriodId') ?? '');
+  const searchQuery = String(formData.get('searchQuery') ?? '').trim();
+  const query = new URLSearchParams();
+  if (period) query.set('period', period);
+  if (searchQuery) query.set('q', searchQuery);
+  const result = await performClearFixedSchedule(formData);
+  if (result.status === 'error') {
+    query.set('allocationError', result.message ?? 'Unable to clear fixed schedule.');
+    redirect(`${path}?${query.toString()}`);
+  }
+  redirect(query.size > 0 ? `${path}?${query.toString()}` : path);
 }

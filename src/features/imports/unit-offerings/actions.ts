@@ -39,6 +39,7 @@ interface AcademicPeriodLookupRow {
   id: string;
   code: string;
   name: string;
+  status: string;
 }
 
 interface ProgrammeLookupRow {
@@ -328,7 +329,8 @@ export async function stageUnitOfferingImportAction(
       .select(`
         id,
         code,
-        name
+        name,
+        status
       `),
 
     supabase
@@ -576,11 +578,18 @@ export async function stageUnitOfferingImportAction(
     const cohort =
       cohortMatches[0];
 
-    if (cohort.status !== 'active') {
+    const cohortEligibleForPeriod =
+      academicPeriod.status === 'planned'
+        ? cohort.status === 'active' || cohort.status === 'planned'
+        : cohort.status === 'active';
+
+    if (!cohortEligibleForPeriod) {
       addFieldError(
         row,
         'cohortName',
-        'The selected cohort is not active.',
+        academicPeriod.status === 'planned'
+          ? 'The selected cohort must be active or planned.'
+          : 'The selected cohort is not active.',
       );
 
       continue;

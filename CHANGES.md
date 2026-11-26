@@ -1,3 +1,28 @@
+### 2026-11-26: Support Future Planned Intake Cohorts (January 2027 CND & DND)
+
+**Summary:**
+- **Timetable Cohort Availability (`src/features/cohorts/queries.ts`):**
+  - Updated `getTimetableAvailableCohorts` to load both `active` and `planned` cohorts (`is_timetable_available = true`) so new future intake cohorts such as `CND-JAN-2027` and `DND-JAN-2027` are recognized by `getGeneratorSourceData()` during `JAN-APR-27` timetable generation.
+  - Falls back to `plannedSize` when a future cohort has `actualSize === 0` and no enrolled live students yet.
+- **Planned Intake Offering Generation Guard (`supabase/migrations/20261126230000_support_planned_intake_cohorts.sql`):**
+  - Updated `public.generate_current_unit_offerings(uuid)` so `planned` cohorts generate Stage 1 offerings when targeting a `planned` period (`JAN-APR-27`), while keeping `active` periods (`SEP-DEC-26`) restricted to `cohorts.status = 'active'` so future intakes never leak into the active timetable.
+- **Offering Import Validation (`src/features/imports/unit-offerings/actions.ts`):**
+  - Allowed `planned` cohorts when importing Unit Offerings targeting a `planned` academic period while preserving the `active`-cohort requirement for active periods.
+- **Regression Coverage (`src/tests/cohorts/queries.test.ts`):**
+  - Added unit test coverage confirming `getTimetableAvailableCohorts` includes `active` and `planned` timetable-available cohorts, excludes completed cohorts, and applies live student counts or `plannedSize` fallbacks correctly.
+
+**Added:**
+- `supabase/migrations/20261126230000_support_planned_intake_cohorts.sql`
+- `src/tests/cohorts/queries.test.ts`
+
+**Modified:**
+- `src/features/cohorts/queries.ts`
+- `src/features/imports/unit-offerings/actions.ts`
+- `CHANGES.md`
+
+**Manual Follow-Up:**
+- Apply `supabase/migrations/20261126230000_support_planned_intake_cohorts.sql` in Supabase, push/deploy the updated app, create `CND-JAN-2027` and `DND-JAN-2027` under **Cohorts**, and re-run **Generate offering recommendations** for `JAN-APR-27`.
+
 ### 2026-11-26: Fix Planned-Period Curriculum Trigger Validation & Allocation Action Errors
 
 **Summary:**

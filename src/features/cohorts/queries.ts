@@ -225,7 +225,7 @@ export const getTimetableAvailableCohorts =
           supabase
             .from('cohorts')
             .select(cohortSelection)
-            .eq('status', 'active')
+            .in('status', ['active', 'planned'])
             .eq(
               'is_timetable_available',
               true,
@@ -262,11 +262,17 @@ export const getTimetableAvailableCohorts =
         const liveCount = liveCounts.get(row.id);
         if (liveCount !== undefined && liveCount > 0) {
           cohort.actualSize = liveCount;
+        } else if (
+          cohort.actualSize === 0 &&
+          cohort.plannedSize !== null &&
+          cohort.plannedSize > 0
+        ) {
+          cohort.actualSize = cohort.plannedSize;
         }
         return cohort;
       }).filter(
         (cohort) =>
-          cohort.status === 'active' &&
+          ['active', 'planned'].includes(cohort.status) &&
           cohort.isTimetableAvailable,
       );
     },

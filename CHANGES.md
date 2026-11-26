@@ -1,6 +1,9 @@
 ### 2026-11-27: Automatic Standing Timetable Setup Inheritance Across Semesters
 
 **Summary:**
+- **Merge Separated Same-Trainer Equivalents (`supabase/migrations/20261127010000_merge_same_trainer_separated_equivalents.sql`):**
+  - Added `public.merge_same_trainer_separated_allocations(uuid, uuid)` and integrated it into `public.reconcile_previous_trainer_assignments(uuid)` using `canonical_shared_unit_title_for_unit(...)` so separated cohorts assigned to the same trainer (such as `DNDT JAN 27` joining already-assigned `First Aid`, `Diet Therapy II`, or `Principles of Food Processing` classes) merge cleanly into a single shared class without duplicating workload.
+  - Backfilled planned future periods (`JAN-APR-27`).
 - **Database Auto-Inheritance & Backfill (`supabase/migrations/20261127003000_auto_inherit_standing_timetable_setup.sql`):**
   - Refactored `public.carry_forward_timetable_setup(uuid, uuid)` around `public.copy_timetable_setup_internal(uuid, uuid, uuid)` to idempotently copy enabled `working_days`, `time_slots`, `trainer_availability`, and active `scheduling_constraints`.
   - Added `AFTER INSERT ON public.academic_periods` trigger (`auto_inherit_standing_timetable_setup_trigger`) so every newly created `planned` period automatically inherits the canonical standing working days, time slots, trainer availability, and recurring scheduling constraints without manual setup.
@@ -10,6 +13,7 @@
 
 **Added:**
 - `supabase/migrations/20261127003000_auto_inherit_standing_timetable_setup.sql`
+- `supabase/migrations/20261127010000_merge_same_trainer_separated_equivalents.sql`
 - `src/tests/timetable-calendar/auto-setup-sync.test.ts`
 
 **Modified:**

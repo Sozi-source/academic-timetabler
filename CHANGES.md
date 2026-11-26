@@ -1,3 +1,32 @@
+### 2026-11-26: Partial Timetable Generation, Incremental Updates, & Provisional Slot Fixes
+
+**Summary:**
+- **Database Fix for Provisionally Reserved Allocations (`supabase/migrations/20261126220000_fix_partial_generation_and_reserved_allocations.sql`):**
+  - Updated `reserve_unit_offering_without_trainer(uuid)` to record `source_unit_offering_id`, `preferred_room_id`, and fixed-schedule columns (`fixed_working_day_id`, `fixed_working_day_ids`, `fixed_time_slot_ids`, `is_full_day_session`, `fixed_end_time_slot_id`) and backfilled `source_unit_offering_id` on existing trainer-pending `teaching_allocations` so reserved placeholders appear in both `/timetable/teaching-allocations` and `/timetable/generator`.
+  - Restricted `include_all_unassigned_unit_offerings(uuid)` to `approved` & `included` offerings.
+  - Hardened `assign_unit_offering_authoritatively(uuid, uuid)` so assigning a newly hired external trainer updates reserved sessions in-place when conflict-free, or clears stale placeholder sessions cleanly (`rescheduleRequired: true`) when availability clashes require incremental placement.
+- **Incremental Partial Save Preservation (`src/features/timetable-generator/actions.ts`, `src/features/timetable-generator/generator-workspace.tsx`):**
+  - Fixed `saveGeneratedTimetableDraftAction` and `GeneratorWorkspace` so unchecking **Replace existing editable sessions** (`overwriteExisting: false`) preserves previously scheduled unlocked department sessions alongside newly generated sessions instead of wiping existing placements on save.
+- **Partial Readiness & External-Trainer Allocation Ergonomics (`src/features/scheduling-readiness/`, `src/features/teaching-allocations/`, `src/app/(dashboard)/timetable/teaching-allocations/page.tsx`):**
+  - Updated `assessSchedulingReadiness` so having assigned or reserved units alongside unallocated external-trainer units emits a non-blocking `partial-trainers-pending` warning rather than blocking partial generation (while preserving the `missing-trainers` blocker when zero units are prepared).
+  - Added 1-click **Reserve all unassigned** (`reserveAllOpenOfferingsAction`) and inline `<AssignOfferingForm>` assignment directly on unassigned (`trainer_id: null`) rows in **Current trainer allocations**.
+
+**Added:**
+- `supabase/migrations/20261126220000_fix_partial_generation_and_reserved_allocations.sql`
+
+**Modified:**
+- `src/features/scheduling-readiness/assessment.ts`
+- `src/features/scheduling-readiness/readiness-dashboard.tsx`
+- `src/features/timetable-generator/actions.ts`
+- `src/features/timetable-generator/generator-workspace.tsx`
+- `src/features/teaching-allocations/simple-allocation-actions.ts`
+- `src/app/(dashboard)/timetable/teaching-allocations/page.tsx`
+- `src/tests/scheduling-readiness/assessment.test.ts`
+- `CHANGES.md`
+
+**Manual Follow-Up:**
+- Apply `supabase/migrations/20261126220000_fix_partial_generation_and_reserved_allocations.sql` to Supabase (`npx supabase db push --linked` or via the Supabase Dashboard SQL editor).
+
 ### 2026-11-26: Enterprise Next-Semester Preparation, Shared Classes, Full Constraints, & Upgraded Timetabler Engine
 
 **Summary:**

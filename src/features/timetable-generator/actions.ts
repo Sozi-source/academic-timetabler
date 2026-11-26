@@ -264,34 +264,28 @@ export async function generateTimetablePreviewAction(
       };
     }
 
+    const isIncrementalPreserve =
+      !parsed.data.overwriteExisting &&
+      preview.readiness.existingSessionCount > 0;
+
     if (
       unscheduledCount > 0 ||
       blockedCount > 0
     ) {
       return {
         status: 'success',
-        message:
-          `Timetable preview generated with ${scheduledCount} scheduled session${
-            scheduledCount === 1
-              ? ''
-              : 's'
-          } and ${unscheduledCount} unresolved session${
-            unscheduledCount === 1
-              ? ''
-              : 's'
-          }.`,
+        message: isIncrementalPreserve
+          ? `Incremental preview placed ${scheduledCount} new session${scheduledCount === 1 ? '' : 's'} around existing classes, with ${unscheduledCount} unresolved session${unscheduledCount === 1 ? '' : 's'}.`
+          : `Timetable preview generated with ${scheduledCount} scheduled session${scheduledCount === 1 ? '' : 's'} and ${unscheduledCount} unresolved session${unscheduledCount === 1 ? '' : 's'}.`,
         preview,
       };
     }
 
     return {
       status: 'success',
-      message:
-        `Timetable preview generated successfully with ${scheduledCount} session${
-          scheduledCount === 1
-            ? ''
-            : 's'
-        }.`,
+      message: isIncrementalPreserve
+        ? `Incremental preview scheduled ${scheduledCount} new session${scheduledCount === 1 ? '' : 's'} while preserving existing placed classes. Select Save draft timetable to keep both.`
+        : `Timetable preview generated successfully with ${scheduledCount} session${scheduledCount === 1 ? '' : 's'}.`,
       preview,
     };
   }
@@ -601,7 +595,7 @@ export async function saveGeneratedTimetableDraftAction(
 
     const preview = createGeneratorPreview({
       sourceData,
-      overwriteExisting: true,
+      overwriteExisting: parsed.data.overwriteExisting,
       autoAssignRooms: parsed.data.autoAssignRooms,
     });
 
@@ -671,27 +665,64 @@ export async function saveGeneratedTimetableDraftAction(
         .neq('session_duration_minutes', 480);
     }
 
-    const payload = preview.sessions.map((session) => ({
-      academicPeriodId: session.academicPeriodId,
-      teachingAllocationId: session.teachingAllocationId,
-      cohortId: session.cohortId,
-      unitId: session.unitId,
-      trainerId: session.trainerId,
-      workingDayId: session.workingDayId,
-      startTimeSlotId: session.startTimeSlotId,
-      endTimeSlotId: session.endTimeSlotId,
-      roomId: session.roomId,
-      sessionNumber: session.sessionNumber,
-      deliveryMode: session.deliveryMode,
-      isLocked: session.isLocked,
-    }));
+    const activeAllocationsById = new Map(
+      sourceData.allocations.map((allocation) => [allocation.id, allocation]),
+    );
+
+    const preservedUnlockedPayload = !parsed.data.overwriteExisting
+      ? sourceData.existingSessions
+          .filter(
+            (row) =>
+              !row.is_external &&
+              !row.is_locked &&
+              row.status !== 'locked' &&
+              row.status !== 'cancelled' &&
+              row.has_attendance !== true &&
+              activeAllocationsById.has(row.teaching_allocation_id),
+          )
+          .map((row) => {
+            const allocation = activeAllocationsById.get(row.teaching_allocation_id);
+            return {
+              academicPeriodId: row.academic_period_id,
+              teachingAllocationId: row.teaching_allocation_id,
+              cohortId: row.cohort_id,
+              unitId: row.unit_id,
+              trainerId: allocation?.trainerId ?? row.trainer_id,
+              workingDayId: row.working_day_id,
+              startTimeSlotId: row.start_time_slot_id,
+              endTimeSlotId: row.end_time_slot_id,
+              roomId: row.room_id,
+              sessionNumber: row.session_number,
+              deliveryMode: row.delivery_mode,
+              isLocked: false,
+            };
+          })
+      : [];
+
+    const payload = [
+      ...preservedUnlockedPayload,
+      ...preview.sessions.map((session) => ({
+        academicPeriodId: session.academicPeriodId,
+        teachingAllocationId: session.teachingAllocationId,
+        cohortId: session.cohortId,
+        unitId: session.unitId,
+        trainerId: session.trainerId,
+        workingDayId: session.workingDayId,
+        startTimeSlotId: session.startTimeSlotId,
+        endTimeSlotId: session.endTimeSlotId,
+        roomId: session.roomId,
+        sessionNumber: session.sessionNumber,
+        deliveryMode: session.deliveryMode,
+        isLocked: session.isLocked,
+      })),
+    ];
 
     const { data, error } = await supabase.rpc('save_generated_timetable_draft', {
       target_academic_period_id: parsed.data.academicPeriodId,
       generated_sessions: payload,
       generation_summary: {
-        requestedSessionCount: preview.statistics.requestedSessionCount,
-        scheduledSessionCount: preview.statistics.scheduledSessionCount,
+        requestedSessionCount: preview.statistics.requestedSessionCount + preservedUnlockedPayload.length,
+        scheduledSessionCount: payload.length,
         unscheduledSessionCount: preview.statistics.unscheduledSessionCount,
         conflictCount: preview.statistics.conflictCount,
         blockedConflictCount: preview.statistics.blockedConflictCount,

@@ -113,18 +113,32 @@ export function assessSchedulingReadiness(input: AssessReadinessInput) {
     issues.push(issue('no-trainers', 'blocker', 'No timetable-available trainers', 'Activate at least one trainer for timetable allocation.', '/timetable/trainers', 'Manage trainers'));
   }
 
+  const hasPreparedOffering = enabled.some(
+    (offering) => Boolean(offering.trainerId) || offering.isProvisionalReservation,
+  );
   const missingTrainer = enabled.filter(
     (offering) => !offering.trainerId && !offering.isProvisionalReservation,
   );
   if (missingTrainer.length > 0) {
-    issues.push(issue(
-      'missing-trainers',
-      'blocker',
-      `${missingTrainer.length} unit${missingTrainer.length === 1 ? '' : 's'} ${missingTrainer.length === 1 ? 'needs a trainer' : 'need trainers'}`,
-      'Assign trainers or include units as unassigned.',
-      '/timetable/teaching-allocations',
-      'Assign trainers',
-    ));
+    if (!hasPreparedOffering) {
+      issues.push(issue(
+        'missing-trainers',
+        'blocker',
+        `${missingTrainer.length} unit${missingTrainer.length === 1 ? '' : 's'} ${missingTrainer.length === 1 ? 'needs a trainer' : 'need trainers'}`,
+        'Assign trainers or include units as unassigned.',
+        '/timetable/teaching-allocations',
+        'Assign trainers',
+      ));
+    } else {
+      issues.push(issue(
+        'partial-trainers-pending',
+        'warning',
+        `${missingTrainer.length} unit${missingTrainer.length === 1 ? '' : 's'} awaiting trainer assignment`,
+        'Partial timetable generation can proceed now for allocated or reserved units; assign remaining external trainers later or include them as unassigned placeholders.',
+        '/timetable/teaching-allocations',
+        'Assign or reserve',
+      ));
+    }
   }
 
   const reservedWithoutTrainer = enabled.filter(

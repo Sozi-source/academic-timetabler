@@ -194,4 +194,30 @@ describe('assessSchedulingReadiness', () => {
     expect(issue?.severity).toBe('warning');
     expect(issue?.description).toContain('Communication Skills (2 unmerged classes)');
   });
+
+  it('allows partial timetable readiness with a warning when some offerings already have trainers while others await external trainers', () => {
+    const result = assessSchedulingReadiness({
+      academicPeriodStatus: 'planned',
+      offerings: [
+        offering(),
+        offering({
+          id: 'offering-awaiting-external',
+          title: 'External Unit',
+          trainerId: null,
+          trainerName: null,
+          isProvisionalReservation: false,
+        }),
+      ],
+      workingDayCount: 5,
+      teachingSlotCount: 3,
+      availableTrainerCount: 2,
+      availableRoomCount: 3,
+    });
+
+    expect(result.isReady).toBe(true);
+    expect(result.blockerCount).toBe(0);
+    expect(
+      result.issues.find((entry) => entry.id === 'partial-trainers-pending')?.severity,
+    ).toBe('warning');
+  });
 });

@@ -144,6 +144,7 @@ export function GeneratorWorkspace({
     ? exchangeState.message
     : null;
   const exchangeStatusRef = useRef<HTMLDivElement>(null);
+  const [overwriteExisting, setOverwriteExisting] = useState(true);
   const [autoAssignRooms, setAutoAssignRooms] = useState(true);
 
   useEffect(() => {
@@ -281,7 +282,8 @@ export function GeneratorWorkspace({
             <input
               type="checkbox"
               name="overwriteExisting"
-              defaultChecked
+              checked={overwriteExisting}
+              onChange={(event) => setOverwriteExisting(event.target.checked)}
               disabled={pending}
               className="mt-1 size-4 rounded border-border-strong"
             />
@@ -291,7 +293,7 @@ export function GeneratorWorkspace({
                 Replace existing editable sessions
               </span>
               <span className="mt-0.5 block text-xs text-text-muted">
-                Preserves locked or attendance-recorded sessions while regenerating editable slots.
+                Uncheck when adding newly hired external trainers to a partial timetable so existing scheduled classes stay in place.
               </span>
             </span>
           </label>
@@ -475,7 +477,7 @@ export function GeneratorWorkspace({
                 </p>
               </div>
               <input type="hidden" name="academicPeriodId" value={preview.academicPeriod.id} />
-              <input type="hidden" name="overwriteExisting" value="true" />
+              <input type="hidden" name="overwriteExisting" value={overwriteExisting ? 'true' : 'false'} />
               <input type="hidden" name="autoAssignRooms" value={autoAssignRooms ? 'true' : 'false'} />
               <Button
                 type="submit"
@@ -545,7 +547,7 @@ export function GeneratorWorkspace({
               </div>
               <form action={persistAction}>
                 <input type="hidden" name="academicPeriodId" value={preview.academicPeriod.id} />
-                <input type="hidden" name="overwriteExisting" value="true" />
+                <input type="hidden" name="overwriteExisting" value={overwriteExisting ? 'true' : 'false'} />
                 <input type="hidden" name="autoAssignRooms" value={autoAssignRooms ? 'true' : 'false'} />
                 <Button
                   type="submit"

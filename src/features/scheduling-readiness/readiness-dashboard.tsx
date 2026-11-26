@@ -34,7 +34,9 @@ function primaryOfferingState(status: string, enabled: boolean) {
 }
 
 export function ReadinessDashboard({ readiness }: { readiness: SchedulingReadiness }) {
-  const hasMissingTrainerBlocker = readiness.issues.some((issue) => issue.id === 'missing-trainers');
+  const hasMissingTrainerBlocker = readiness.issues.some(
+    (issue) => issue.id === 'missing-trainers' || issue.id === 'partial-trainers-pending',
+  );
 
   return (
     <div className="space-y-4">

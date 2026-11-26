@@ -183,7 +183,7 @@ export async function assignOfferingAction(formData: FormData) {
     }
   }
 
-  const { error } = await db.rpc('assign_unit_offering_authoritatively', {
+  const { data: assignResult, error } = await db.rpc('assign_unit_offering_authoritatively', {
     p_offering_id: offering,
     p_trainer_id: trainer,
   });
@@ -201,6 +201,10 @@ export async function assignOfferingAction(formData: FormData) {
       query.set('availabilityPeriod', period);
     }
     redirect(`${path}?${query.toString()}`);
+  }
+
+  if ((assignResult as { rescheduleRequired?: boolean } | null)?.rescheduleRequired) {
+    query.set('rescheduleNeeded', '1');
   }
 
   // Ensure teaching_allocations maintains consistent duration, fixed schedule, and mode
@@ -285,6 +289,37 @@ export async function reserveOfferingWithoutTrainerAction(formData: FormData) {
   }
   query.set('reservationSaved','1');
   revalidatePath(path); revalidatePath('/timetable/generator'); revalidatePath('/timetable/readiness'); revalidatePath('/timetable/reports');
+  redirect(`${path}?${query.toString()}`);
+}
+
+export async function reserveAllOpenOfferingsAction(formData: FormData) {
+  await requireHodAccess();
+  const period = String(formData.get('academicPeriodId') ?? '').trim();
+  const searchQuery = String(formData.get('searchQuery') ?? '').trim();
+  const query = new URLSearchParams();
+  if (period) query.set('period', period);
+  if (searchQuery) query.set('q', searchQuery);
+  if (!period) {
+    query.set('allocationError', 'Select an Academic Period first.');
+    redirect(`${path}?${query.toString()}`);
+  }
+
+  const db = await createClient();
+  const { data, error } = await db.rpc('include_all_unassigned_unit_offerings', {
+    p_academic_period_id: period,
+  });
+
+  if (error) {
+    query.set('allocationError', error.message);
+    redirect(`${path}?${query.toString()}`);
+  }
+
+  const result = (data ?? {}) as { includedAllocationCount?: number };
+  query.set('bulkReserved', String(result.includedAllocationCount ?? 0));
+  revalidatePath(path);
+  revalidatePath('/timetable/generator');
+  revalidatePath('/timetable/readiness');
+  revalidatePath('/timetable/reports');
   redirect(`${path}?${query.toString()}`);
 }
 

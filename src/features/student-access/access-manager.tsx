@@ -14,6 +14,15 @@ import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
   formatStudentPortalAccessTime,
   studentPortalAccessStatus,
   studentPortalAccessStatusLabel,
@@ -244,51 +253,51 @@ export function StudentPortalAccessManager({
 
       {/* Student List Table */}
       <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xs">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="border-b border-slate-200 bg-slate-50 text-[11px] font-bold text-slate-600">
-              <tr>
-                <th className="px-4 py-2.5">Student</th>
-                <th className="px-3 py-2.5">Programme</th>
-                <th className="px-3 py-2.5">Cohort</th>
-                <th className="px-3 py-2.5 text-center">Activation Status</th>
-                <th className="px-3 py-2.5 text-center">Last Sign In</th>
-                <th className="px-4 py-2.5 text-right">Account Controls</th>
-              </tr>
-            </thead>
+        <TableContainer embedded label="Student portal access">
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead>Admission No</TableHead>
+                <TableHead>Student</TableHead>
+                <TableHead>Programme</TableHead>
+                <TableHead>Cohort</TableHead>
+                <TableHead className="text-center">Activation Status</TableHead>
+                <TableHead className="text-center">Last Sign In</TableHead>
+                <TableHead className="text-right">Account Controls</TableHead>
+              </TableRow>
+            </TableHeader>
 
-            <tbody className="divide-y divide-slate-200">
+            <TableBody>
               {visibleRows.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-xs font-medium text-slate-600">
+                <TableRow className="hover:bg-transparent">
+                  <TableCell colSpan={7} className="py-8 text-center text-xs font-medium text-text-muted">
                     No students match this view.
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ) : (
                 visibleRows.map((row) => {
                   const status = studentPortalAccessStatus(row);
                   const isBusyState = busy === `state:${row.studentId}`;
 
                   return (
-                    <tr key={row.studentId} className="transition hover:bg-slate-50/50">
-                      {/* Student Name & Adm */}
-                      <td className="px-4 py-3">
-                        <p className="font-bold text-slate-900">{row.fullName}</p>
-                        <p className="text-[11px] font-semibold text-slate-700">{row.admissionNumber}</p>
-                      </td>
+                    <TableRow key={row.studentId}>
+                      <TableCell className="font-mono text-xs font-semibold text-text-secondary">
+                        {row.admissionNumber}
+                      </TableCell>
 
-                      {/* Programme */}
-                      <td className="px-3 py-3 font-medium text-slate-800">
+                      <TableCell className="font-semibold text-text-primary">
+                        {row.fullName}
+                      </TableCell>
+
+                      <TableCell className="text-text-secondary">
                         {row.programmeCode}
-                      </td>
+                      </TableCell>
 
-                      {/* Cohort */}
-                      <td className="px-3 py-3 font-medium text-slate-800">
+                      <TableCell className="text-text-secondary">
                         {row.cohortName}
-                      </td>
+                      </TableCell>
 
-                      {/* Access Status */}
-                      <td className="px-3 py-3 text-center">
+                      <TableCell className="text-center">
                         <Badge
                           variant="neutral"
                           className={
@@ -303,16 +312,14 @@ export function StudentPortalAccessManager({
                         >
                           {status === 'not_issued' ? 'Not Activated' : studentPortalAccessStatusLabel(status)}
                         </Badge>
-                      </td>
+                      </TableCell>
 
-                      {/* Last Login */}
-                      <td className="px-3 py-3 text-center text-[11px] font-medium text-slate-700">
+                      <TableCell className="text-center text-xs text-text-secondary">
                         {formatStudentPortalAccessTime(row.lastLoginAt)}
-                      </td>
+                      </TableCell>
 
-                      {/* Actions */}
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
+                      <TableCell className="text-right">
+                        <div className="inline-flex items-center justify-end gap-1.5">
                           {row.hasCredential ? (
                             <Button
                               type="button"
@@ -334,19 +341,19 @@ export function StudentPortalAccessManager({
                               {row.isActive ? 'Disable Access' : 'Enable Access'}
                             </Button>
                           ) : (
-                            <span className="text-[11px] font-semibold text-slate-600 italic">
+                            <span className="text-xs font-semibold text-text-muted italic">
                               Pending Activation
                             </span>
                           )}
                         </div>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   );
                 })
               )}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
+        </TableContainer>
       </section>
 
       <p className="flex items-center gap-1.5 text-[11px] text-slate-500">

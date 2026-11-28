@@ -25,6 +25,15 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { commitReportingSyncAction, previewReportingSyncAction } from './actions';
 import type {
   ReconciledReportingItem,
@@ -467,11 +476,11 @@ export function ReportingSyncDialog({ trigger, onSuccess }: ReportingSyncDialogP
               </div>
 
               {/* Student Table */}
-              <div className="max-h-[300px] overflow-y-auto rounded-xl border border-border bg-surface shadow-2xs">
-                <table className="w-full text-left text-xs">
-                  <thead className="sticky top-0 z-10 border-b border-border bg-surface-subtle text-[10px] font-bold uppercase tracking-wider text-text-muted">
-                    <tr>
-                      <th className="w-10 px-3 py-2">
+              <TableContainer label="Reporting sync preview" className="max-h-[300px] overflow-y-auto shadow-2xs">
+                <Table>
+                  <TableHeader className="sticky top-0 z-10">
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead className="w-10">
                         {filterState === 'ready' && readyItems.length > 0 && (
                           <input
                             type="checkbox"
@@ -482,33 +491,31 @@ export function ReportingSyncDialog({ trigger, onSuccess }: ReportingSyncDialogP
                             className="size-3.5 rounded border-border text-primary cursor-pointer"
                           />
                         )}
-                      </th>
-                      <th className="px-3 py-2">Admission No</th>
-                      <th className="px-3 py-2">Student Name</th>
-                      <th className="px-3 py-2">Cohort</th>
-                      <th className="px-3 py-2 text-right">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
+                      </TableHead>
+                      <TableHead>Admission No</TableHead>
+                      <TableHead>Student Name</TableHead>
+                      <TableHead>Cohort</TableHead>
+                      <TableHead className="text-right">Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {filteredItems.length === 0 ? (
-                      <tr>
-                        <td colSpan={5} className="p-6 text-center text-text-muted">
+                      <TableRow className="hover:bg-transparent">
+                        <TableCell colSpan={5} className="p-6 text-center text-text-muted">
                           No items in this category.
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ) : (
                       filteredItems.map((item) => {
                         const isSelectable = item.matchState === 'ready' && item.studentId;
                         const isChecked = item.studentId ? selectedStudentIds.has(item.studentId) : false;
 
                         return (
-                          <tr
+                          <TableRow
                             key={item.id}
-                            className={`hover:bg-surface-subtle/50 transition ${
-                              isChecked ? 'bg-primary-subtle/20' : ''
-                            }`}
+                            className={isChecked ? 'bg-primary-subtle/20' : undefined}
                           >
-                            <td className="px-3 py-2">
+                            <TableCell>
                               {isSelectable ? (
                                 <input
                                   type="checkbox"
@@ -517,17 +524,17 @@ export function ReportingSyncDialog({ trigger, onSuccess }: ReportingSyncDialogP
                                   className="size-3.5 rounded border-border text-primary cursor-pointer"
                                 />
                               ) : null}
-                            </td>
-                            <td className="px-3 py-2 font-mono font-bold text-text-primary whitespace-nowrap">
+                            </TableCell>
+                            <TableCell className="font-mono font-bold text-text-primary">
                               {item.admissionNumber}
-                            </td>
-                            <td className="px-3 py-2 font-medium text-text-primary">
+                            </TableCell>
+                            <TableCell className="font-medium text-text-primary">
                               {item.studentName ?? (
                                 <span className="italic text-text-muted">Not recognized</span>
                               )}
-                            </td>
-                            <td className="px-3 py-2 text-text-muted">{item.cohortName ?? '-'}</td>
-                            <td className="px-3 py-2 text-right">
+                            </TableCell>
+                            <TableCell className="text-text-muted">{item.cohortName ?? '-'}</TableCell>
+                            <TableCell className="text-right">
                               {item.matchState === 'ready' && (
                                 <Badge variant="success" className="text-[10px]">
                                   Ready to Activate
@@ -543,14 +550,14 @@ export function ReportingSyncDialog({ trigger, onSuccess }: ReportingSyncDialogP
                                   Unmatched
                                 </Badge>
                               )}
-                            </td>
-                          </tr>
+                            </TableCell>
+                          </TableRow>
                         );
                       })
                     )}
-                  </tbody>
-                </table>
-              </div>
+                  </TableBody>
+                </Table>
+              </TableContainer>
 
               {/* Effective Date & Action Controls */}
               <div className="flex flex-wrap items-center justify-between gap-3 pt-2">

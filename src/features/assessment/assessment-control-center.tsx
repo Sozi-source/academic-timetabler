@@ -18,6 +18,15 @@ import {
 
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/ui/page-header';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { AdminDepartmentMarksEntryControl } from './admin-department-marks-entry-control';
 import type {
   AssessmentControlCenterData,
@@ -55,23 +64,21 @@ function StatusPill({
   }[variant];
 
   return (
-    <div className="inline-flex flex-col items-start whitespace-nowrap">
-      <span
-        className={`inline-flex h-6 items-center gap-1.5 rounded-full border px-2.5 text-[11px] font-semibold whitespace-nowrap shadow-2xs ${styles}`}
-      >
-        {icon === 'check' ? (
-          <CheckCircle2 className="size-3 shrink-0 text-emerald-600" aria-hidden="true" />
-        ) : icon === 'clock' ? (
-          <Clock className="size-3 shrink-0 text-amber-600" aria-hidden="true" />
-        ) : icon === 'lock' ? (
-          <Lock className="size-3 shrink-0 text-slate-400" aria-hidden="true" />
-        ) : (
-          <span className={`size-1.5 shrink-0 rounded-full ${dotStyles}`} aria-hidden="true" />
-        )}
-        <span>{label}</span>
-      </span>
-      {subtext ? <span className="mt-0.5 text-[10px] text-slate-400">{subtext}</span> : null}
-    </div>
+    <span
+      title={subtext ?? undefined}
+      className={`inline-flex h-6 items-center gap-1.5 rounded-full border px-2.5 text-[11px] font-semibold whitespace-nowrap shadow-2xs ${styles}`}
+    >
+      {icon === 'check' ? (
+        <CheckCircle2 className="size-3 shrink-0 text-emerald-600" aria-hidden="true" />
+      ) : icon === 'clock' ? (
+        <Clock className="size-3 shrink-0 text-amber-600" aria-hidden="true" />
+      ) : icon === 'lock' ? (
+        <Lock className="size-3 shrink-0 text-slate-400" aria-hidden="true" />
+      ) : (
+        <span className={`size-1.5 shrink-0 rounded-full ${dotStyles}`} aria-hidden="true" />
+      )}
+      <span>{label}</span>
+    </span>
   );
 }
 
@@ -569,56 +576,46 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
             </div>
 
             {/* Desktop Table (md and up) */}
-            <div className="hidden overflow-x-auto md:block">
-              <table className="w-full min-w-[840px] text-left text-xs">
-                <thead className="border-b border-border bg-surface-subtle text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                  <tr>
-                    <th className="px-4 py-3">Unit name & code</th>
-                    <th className="px-3 py-3">Lead trainer</th>
-                    <th className="px-3 py-3 text-center whitespace-nowrap">Candidates</th>
-                    <th className="px-3 py-3 whitespace-nowrap">CAT milestone</th>
-                    <th className="px-3 py-3 whitespace-nowrap">Final exam</th>
-                    <th className="px-3 py-3 whitespace-nowrap">Status</th>
-                    <th className="px-4 py-3 text-right whitespace-nowrap">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
+            <TableContainer embedded label="Assessment unit deliverables" className="hidden md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead>Unit</TableHead>
+                    <TableHead>Lead trainer</TableHead>
+                    <TableHead className="text-center">Candidates</TableHead>
+                    <TableHead>CAT milestone</TableHead>
+                    <TableHead>Final exam</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {filteredUnits.map((unit) => (
-                    <tr key={unit.key} className="transition-colors hover:bg-surface-subtle/50">
-                      {/* Unit name & code */}
-                      <td className="px-4 py-3">
+                    <TableRow key={unit.key}>
+                      <TableCell title={unit.unitCode}>
                         <Link
                           href={`/assessment/marks/${unit.items[0]?.id ?? unit.unitId}`}
-                          className="font-semibold text-slate-900 leading-snug hover:text-primary transition hover:underline"
+                          className="font-semibold text-text-primary transition hover:text-primary hover:underline"
                         >
                           {unit.unitName}
                         </Link>
-                        <div className="mt-0.5 font-mono text-[11px] font-medium text-slate-400">
-                          {unit.unitCode}
-                        </div>
-                      </td>
+                      </TableCell>
 
-                      {/* Lead Trainer */}
-                      <td className="px-3 py-3">
+                      <TableCell>
                         {unit.trainerNames.length > 0 ? (
-                          <span className="font-medium text-slate-700 text-xs" title={unit.trainerNames.join(', ')}>
+                          <span className="font-medium text-text-secondary" title={unit.trainerNames.join(', ')}>
                             {unit.trainerNames.join(', ')}
                           </span>
                         ) : (
-                          <span className="text-xs text-slate-400 italic">Unassigned</span>
+                          <span className="text-text-muted italic">Unassigned</span>
                         )}
-                      </td>
+                      </TableCell>
 
-                      {/* Candidates Count */}
-                      <td className="px-3 py-3 text-center">
-                        <span className="font-semibold tabular-nums text-slate-800 text-xs">
-                          {unit.registrationCount}
-                        </span>
-                        <span className="ml-1 text-[11px] text-slate-400">students</span>
-                      </td>
+                      <TableCell className="text-center font-semibold tabular-nums text-text-primary">
+                        {unit.registrationCount}
+                      </TableCell>
 
-                      {/* CAT Milestone */}
-                      <td className="px-3 py-3 whitespace-nowrap">
+                      <TableCell>
                         {unit.catStatus === 'Submitted' ? (
                           <StatusPill
                             label="Submitted"
@@ -643,10 +640,9 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                         ) : (
                           <StatusPill label="Not Started" variant="neutral" icon="dot" />
                         )}
-                      </td>
+                      </TableCell>
 
-                      {/* Final Exam Milestone */}
-                      <td className="px-3 py-3 whitespace-nowrap">
+                      <TableCell>
                         {unit.examStatus === 'Submitted' ? (
                           <StatusPill
                             label="Submitted"
@@ -665,10 +661,9 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                         ) : (
                           <StatusPill label="Not Started" variant="neutral" icon="dot" />
                         )}
-                      </td>
+                      </TableCell>
 
-                      {/* Workflow Status */}
-                      <td className="px-3 py-3 whitespace-nowrap">
+                      <TableCell>
                         <StatusPill
                           label={unit.workflowStatus}
                           variant={
@@ -688,10 +683,9 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                                 : 'dot'
                           }
                         />
-                      </td>
+                      </TableCell>
 
-                      {/* Action */}
-                      <td className="px-4 py-3 text-right whitespace-nowrap">
+                      <TableCell className="text-right">
                         <Link
                           href={`/assessment/marks/${unit.items[0]?.id ?? unit.unitId}`}
                           className="inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-lg bg-primary px-3 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition"
@@ -699,12 +693,12 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                           <span>Open Markbook</span>
                           <ArrowRight className="size-3.5 shrink-0" />
                         </Link>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                </TableBody>
+              </Table>
+            </TableContainer>
           </>
         )}
       </section>

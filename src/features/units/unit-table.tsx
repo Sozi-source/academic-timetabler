@@ -55,48 +55,39 @@ const columns: ColumnDef<Unit>[] = [
   {
     accessorKey: 'name',
     header: 'Unit',
-    size: 220,
-    minSize: 190,
-    maxSize: 240,
     cell: ({ row }) => (
-      <div className="min-w-0 max-w-full pr-3">
-        <Link
-          href={`/timetable/units/${row.original.id}/edit`}
-          className="max-w-[220px] whitespace-normal break-words font-semibold leading-5 text-primary hover:underline"
-        >
-          {row.original.name}
-        </Link>
-
-        <p className="mt-1 text-[10px] leading-4 text-text-muted">
-          {row.original.code}
-          {row.original.shortName
-            ? ` · ${row.original.shortName}`
-            : ''}
-        </p>
-      </div>
+      <Link
+        href={`/timetable/units/${row.original.id}/edit`}
+        title={row.original.code}
+        className="font-semibold text-primary hover:underline"
+      >
+        {row.original.name}
+      </Link>
     ),
   },
-  
+  {
+    accessorKey: 'code',
+    header: 'Code',
+    cell: ({ row }) => (
+      <span className="font-mono text-xs text-text-secondary">
+        {row.original.code}
+      </span>
+    ),
+  },
   {
     id: 'programme',
     accessorFn: (row) =>
       row.programme?.code ?? '',
     header: 'Programme',
-    size: 92,
-    minSize: 84,
-    maxSize: 104,
     cell: ({ row }) => (
-      <span className="whitespace-normal break-words text-sm font-semibold text-text-primary">
-        {row.original.programme?.code ?? '-'}
+      <span className="font-semibold text-text-primary">
+        {row.original.programme?.code ?? '—'}
       </span>
     ),
   },
   {
     accessorKey: 'category',
     header: 'Category',
-    size: 96,
-    minSize: 88,
-    maxSize: 108,
     cell: ({ row }) => (
       <Badge variant="neutral">
         {getCategoryLabel(row.original.category)}
@@ -106,27 +97,23 @@ const columns: ColumnDef<Unit>[] = [
   {
     accessorKey: 'academicPeriodNumber',
     header: 'Y/S',
-    size: 88,
-    minSize: 82,
-    maxSize: 96,
     cell: ({ row }) => (
-      <span className="whitespace-normal break-words text-sm font-medium text-text-primary">
-        Period {row.original.academicPeriodNumber}
+      <span className="font-medium text-text-primary">
+        {formatStudyPeriod(row.original.academicPeriodNumber)}
       </span>
     ),
   },
   {
+    id: 'contactHours',
     header: 'Contact hours',
-    size: 108,
-    minSize: 96,
-    maxSize: 118,
+    accessorFn: (row) => row.theoryHours + row.practicalHours,
     cell: ({ row }) => {
       const hours =
         row.original.theoryHours +
         row.original.practicalHours;
 
       return (
-        <span className="whitespace-normal break-words text-sm font-medium text-text-primary">
+        <span className="font-medium text-text-primary">
           {hours} {hours === 1 ? 'hr' : 'hrs'}
         </span>
       );
@@ -139,9 +126,6 @@ const columns: ColumnDef<Unit>[] = [
         ? 'available'
         : 'unavailable',
     header: 'Timetable',
-    size: 118,
-    minSize: 108,
-    maxSize: 128,
     cell: ({ row }) => (
       <Badge
         variant={
@@ -166,9 +150,6 @@ const columns: ColumnDef<Unit>[] = [
         ? 'active'
         : 'inactive',
     header: 'Status',
-    size: 96,
-    minSize: 88,
-    maxSize: 108,
     cell: ({ row }) => (
       <Badge
         variant={
@@ -437,6 +418,7 @@ export function UnitTable({
           : 'Register curriculum units before creating teaching allocations.'
       }
       initialPageSize={10}
+      initialHiddenColumns={['code']}
       enableColumnToggle
       enableDensityToggle
       exportFileName="curriculum-units"

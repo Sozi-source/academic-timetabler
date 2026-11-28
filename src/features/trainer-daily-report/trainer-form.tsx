@@ -18,6 +18,15 @@ import { useRouter } from 'next/navigation';
 
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -698,10 +707,44 @@ function AbsenteesTableSection({ lessons }: { lessons: TrainerDailyReportLesson[
           return <article key={`${s.studentId}-${s.unitCode}`} className="px-4 py-3"><div className="flex items-center justify-between gap-3"><div className="min-w-0"><p className="truncate text-xs font-semibold text-text-primary" title={s.fullName}>{formatStudentTwoNames(s.fullName)}</p><p className="mt-0.5 font-mono text-[9.5px] text-text-muted">{s.admissionNumber}</p></div>{s.note ? (isKnownCircumstance ? <span className="max-w-[145px] shrink-0 truncate rounded-full border border-rose-200/70 bg-rose-50 px-2 py-1 text-[9.5px] font-semibold text-rose-900">{s.note}</span> : <span className="max-w-[145px] shrink-0 truncate text-[10px] italic text-text-muted">{s.note}</span>) : <span className="shrink-0 rounded-full bg-rose-50 px-2 py-1 text-[9.5px] font-medium text-rose-700">Absent</span>}</div><div className="mt-1.5 flex min-w-0 items-center gap-1.5 text-[10px] text-text-muted"><span className="truncate">{s.cohortName}</span><span>·</span><span className="truncate">{s.unitName}</span></div></article>;
         })}
       </div>
-      <div className="hidden overflow-x-auto sm:block">
-        <table className="w-full text-left text-xs"><thead className="border-b border-rose-100 bg-rose-50/40 text-[9.5px] font-semibold uppercase tracking-[0.1em] text-rose-900/80"><tr><th className="px-4 py-2.5">Student</th><th className="px-4 py-2.5">Class</th><th className="px-4 py-2.5">Unit</th><th className="px-4 py-2.5">Remarks</th></tr></thead><tbody className="divide-y divide-border/60">
-          {allAbsentees.map((s) => { const isKnownCircumstance = (ABSENT_CIRCUMSTANCES as readonly string[]).includes(s.note || ''); return <tr key={`${s.studentId}-${s.unitCode}`} className="transition-colors hover:bg-slate-50/50"><td className="px-4 py-2.5"><p className="text-xs font-semibold text-text-primary" title={s.fullName}>{formatStudentTwoNames(s.fullName)}</p><p className="mt-0.5 font-mono text-[9.5px] text-text-muted">{s.admissionNumber}</p></td><td className="px-4 py-2.5 text-[11px] text-text-secondary">{s.cohortName}</td><td className="px-4 py-2.5"><p className="text-[11px] font-medium text-text-primary">{s.unitName}</p>{s.unitCode ? <p className="font-mono text-[9.5px] text-text-muted">{s.unitCode}</p> : null}</td><td className="px-4 py-2.5">{s.note ? (isKnownCircumstance ? <span className="rounded-full border border-rose-200/70 bg-rose-50 px-2 py-1 text-[9.5px] font-semibold text-rose-900">{s.note}</span> : <span className="text-[10px] italic text-text-muted">{s.note}</span>) : <span className="text-[10px] text-text-muted/60">—</span>}</td></tr>; })}
-        </tbody></table>
+      <div className="hidden sm:block">
+        <TableContainer embedded label="Today's absentees">
+          <Table>
+            <TableHeader className="bg-rose-50/40">
+              <TableRow className="hover:bg-transparent">
+                <TableHead>Admission No.</TableHead>
+                <TableHead>Student</TableHead>
+                <TableHead>Class</TableHead>
+                <TableHead>Unit</TableHead>
+                <TableHead>Remarks</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {allAbsentees.map((s) => {
+                const isKnownCircumstance = (ABSENT_CIRCUMSTANCES as readonly string[]).includes(s.note || '');
+                return (
+                  <TableRow key={`${s.studentId}-${s.unitCode}`}>
+                    <TableCell className="font-mono text-xs text-text-muted">{s.admissionNumber}</TableCell>
+                    <TableCell className="font-semibold text-text-primary" title={s.fullName}>{formatStudentTwoNames(s.fullName)}</TableCell>
+                    <TableCell className="text-text-secondary">{s.cohortName}</TableCell>
+                    <TableCell className="font-medium text-text-primary" title={s.unitCode ?? undefined}>{s.unitName}</TableCell>
+                    <TableCell>
+                      {s.note ? (
+                        isKnownCircumstance ? (
+                          <span className="rounded-full border border-rose-200/70 bg-rose-50 px-2 py-0.5 text-[10px] font-semibold text-rose-900">{s.note}</span>
+                        ) : (
+                          <span className="text-xs italic text-text-muted">{s.note}</span>
+                        )
+                      ) : (
+                        <span className="text-xs text-text-muted/60">—</span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </div>
     </section>
   );

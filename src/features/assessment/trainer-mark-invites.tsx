@@ -4,6 +4,15 @@ import { Ban, ShieldCheck } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 interface TrainerInvite {
   id: string;
@@ -118,38 +127,38 @@ export function TrainerMarkInvites({ assessmentId }: { assessmentId: string }) {
           <h3 className="text-xs font-semibold text-slate-800">Trainer marks for HOD review</h3>
         </div>
         {loading ? <p className="text-xs text-slate-500">Loading trainer marks...</p> : reviewMarks.length === 0 ? <p className="text-xs text-slate-500">No trainer marks have been saved yet.</p> : (
-          <div className="max-h-[28rem] overflow-auto rounded-lg border border-slate-200 bg-white">
-            <table className="w-full min-w-[850px] text-left text-[11px]">
-              <thead className="sticky top-0 border-b border-slate-200 bg-slate-50 text-[10px] font-bold uppercase tracking-wide text-slate-500">
-                <tr>
-                  <th className="px-3 py-2">Student</th>
-                  <th className="px-3 py-2">Admission No.</th>
-                  <th className="px-3 py-2">Trainer</th>
-                  <th className="px-3 py-2 text-center">Assignment /5</th>
-                  <th className="px-3 py-2 text-center">Presentation /10</th>
-                  <th className="px-3 py-2 text-center">RAT /15</th>
-                  <th className="px-3 py-2 text-center">CAT /15</th>
-                  <th className="px-3 py-2 text-center">Exam /70</th>
-                  <th className="px-3 py-2">Review status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
+          <TableContainer label="Trainer marks for HOD review" className="max-h-[28rem] overflow-y-auto shadow-none">
+            <Table>
+              <TableHeader className="sticky top-0 z-10">
+                <TableRow className="hover:bg-transparent">
+                  <TableHead>Student</TableHead>
+                  <TableHead>Admission No.</TableHead>
+                  <TableHead>Trainer</TableHead>
+                  <TableHead className="text-center">Assignment /5</TableHead>
+                  <TableHead className="text-center">Presentation /10</TableHead>
+                  <TableHead className="text-center">RAT /15</TableHead>
+                  <TableHead className="text-center">CAT /15</TableHead>
+                  <TableHead className="text-center">Exam /70</TableHead>
+                  <TableHead>Review status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {reviewMarks.map((mark) => (
-                  <tr key={mark.student_id}>
-                    <td className="px-3 py-2 font-medium text-slate-800">{mark.student?.full_name ?? 'Unknown student'}</td>
-                    <td className="px-3 py-2 text-slate-600">{mark.student?.admission_number ?? '—'}</td>
-                    <td className="px-3 py-2 text-slate-600">{mark.trainer?.trainer_name ?? 'Trainer'}</td>
+                  <TableRow key={mark.student_id}>
+                    <TableCell className="font-semibold text-text-primary">{mark.student?.full_name ?? 'Unknown student'}</TableCell>
+                    <TableCell className="font-mono text-text-secondary">{mark.student?.admission_number ?? '—'}</TableCell>
+                    <TableCell className="text-text-secondary">{mark.trainer?.trainer_name ?? 'Trainer'}</TableCell>
                     {[mark.assignment_mark, mark.presentation_mark, mark.rat_mark, mark.cat_mark, mark.exam_mark].map((value, index) => (
-                      <td key={index} className="px-3 py-2 text-center font-semibold text-slate-800">{value ?? '—'}</td>
+                      <TableCell key={index} className="text-center font-mono font-semibold text-text-primary">{value ?? '—'}</TableCell>
                     ))}
-                    <td className="px-3 py-2">
+                    <TableCell>
                       {mark.submittedComponents.length ? <span className="font-semibold text-emerald-700">{mark.submittedComponents.map((component) => component.toUpperCase()).join(', ')} submitted</span> : mark.trainer?.submitted_at ? <span className="font-semibold text-emerald-700">Submitted</span> : <span className="text-amber-700">Draft</span>}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
+          </TableContainer>
         )}
       </div>
     </section>

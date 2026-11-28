@@ -63,15 +63,18 @@ const columns: ColumnDef<TimeSlot>[] = [
     accessorKey: 'name',
     header: 'Time Slot',
     cell: ({ row }) => (
-      <div className="min-w-0">
-        <p className="font-semibold text-text-primary">
-          {row.original.name}
-        </p>
-
-        <p className="mt-1 text-xs text-text-muted">
-          {row.original.code}
-        </p>
-      </div>
+      <span className="font-semibold text-text-primary" title={row.original.code}>
+        {row.original.name}
+      </span>
+    ),
+  },
+  {
+    accessorKey: 'code',
+    header: 'Code',
+    cell: ({ row }) => (
+      <span className="font-mono text-xs text-text-secondary">
+        {row.original.code}
+      </span>
     ),
   },
   {
@@ -95,7 +98,7 @@ const columns: ColumnDef<TimeSlot>[] = [
       `${row.startsAt} ${row.endsAt}`,
     header: 'Time',
     cell: ({ row }) => (
-      <span className="whitespace-normal break-words font-medium text-text-primary">
+      <span className="font-medium text-text-primary">
         {formatTime(row.original.startsAt)}
         {' to '}
         {formatTime(row.original.endsAt)}
@@ -189,6 +192,7 @@ export function TimeSlotTable({
       emptyTitle="No Time Slots configured"
       emptyDescription="Create teaching, break and lunch slots for the selected Academic Period."
       initialPageSize={20}
+      initialHiddenColumns={['code']}
       enableColumnToggle
       enableDensityToggle
       exportFileName="time-slots"

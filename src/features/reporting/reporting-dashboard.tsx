@@ -20,6 +20,15 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import type {
   DepartmentExecutiveReportData,
   ReportingPillar,
@@ -359,40 +368,40 @@ export function ReportingDashboard({ data }: { data: DepartmentExecutiveReportDa
           </div>
 
           <Card className="overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[760px] text-left text-xs">
-                <thead className="border-b border-border bg-surface-subtle text-[10px] font-bold uppercase tracking-wider text-text-muted">
-                  <tr>
-                    <th className="px-4 py-3">Trainer</th>
-                    <th className="px-3 py-3">Role</th>
-                    <th className="px-3 py-3">Target / Wk</th>
-                    <th className="px-3 py-3">Allocated Hrs</th>
-                    <th className="px-3 py-3">Timetabled Hrs</th>
-                    <th className="px-3 py-3">Assigned Units</th>
-                    <th className="px-3 py-3">Workload Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
+            <TableContainer embedded label="Trainer workload report">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead>Trainer</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Target / Wk</TableHead>
+                    <TableHead>Allocated Hrs</TableHead>
+                    <TableHead>Timetabled Hrs</TableHead>
+                    <TableHead>Assigned Units</TableHead>
+                    <TableHead>Workload Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {filteredWorkload.map((w) => (
-                    <tr key={w.trainerId} className="hover:bg-surface-subtle/50">
-                      <td className="px-4 py-3 font-semibold text-text-primary">{w.trainerName}</td>
-                      <td className="px-3 py-3 text-text-secondary">{w.role}</td>
-                      <td className="px-3 py-3 font-medium text-text-muted">{w.normalTargetHours} hrs</td>
-                      <td className="px-3 py-3 font-bold text-text-primary">{w.allocatedHours} hrs</td>
-                      <td className="px-3 py-3 text-text-secondary">{w.scheduledHours} hrs</td>
-                      <td className="px-3 py-3">
-                        <div className="flex flex-wrap gap-1">
+                    <TableRow key={w.trainerId}>
+                      <TableCell className="font-semibold text-text-primary">{w.trainerName}</TableCell>
+                      <TableCell className="text-text-secondary">{w.role}</TableCell>
+                      <TableCell className="font-medium text-text-muted">{w.normalTargetHours} hrs</TableCell>
+                      <TableCell className="font-bold text-text-primary">{w.allocatedHours} hrs</TableCell>
+                      <TableCell className="text-text-secondary">{w.scheduledHours} hrs</TableCell>
+                      <TableCell>
+                        <div className="inline-flex items-center gap-1">
                           {w.allocatedUnitCodes.map((c) => (
-                            <span key={c} className="rounded bg-surface-subtle px-1.5 py-0.5 text-[10px] font-medium">
+                            <span key={c} className="rounded bg-surface-subtle px-1.5 py-0.5 text-[11px] font-medium">
                               {c}
                             </span>
                           ))}
                           {w.allocatedUnitCodes.length === 0 && (
-                            <span className="text-[11px] text-text-muted italic">None</span>
+                            <span className="text-xs text-text-muted italic">None</span>
                           )}
                         </div>
-                      </td>
-                      <td className="px-3 py-3">
+                      </TableCell>
+                      <TableCell>
                         {w.workloadStatus === 'overload' ? (
                           <Badge variant="warning">Overload (+{w.allocatedHours - w.normalTargetHours}h)</Badge>
                         ) : w.workloadStatus === 'underload' ? (
@@ -400,12 +409,12 @@ export function ReportingDashboard({ data }: { data: DepartmentExecutiveReportDa
                         ) : (
                           <Badge variant="success">Optimal</Badge>
                         )}
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Card>
         </div>
       )}
@@ -433,38 +442,38 @@ export function ReportingDashboard({ data }: { data: DepartmentExecutiveReportDa
           </div>
 
           <Card className="overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[760px] text-left text-xs">
-                <thead className="border-b border-border bg-surface-subtle text-[10px] font-bold uppercase tracking-wider text-text-muted">
-                  <tr>
-                    <th className="px-4 py-3">Unit</th>
-                    <th className="px-3 py-3">Cohort</th>
-                    <th className="px-3 py-3">Assigned Trainer</th>
-                    <th className="px-3 py-3">Weekly Hours</th>
-                    <th className="px-3 py-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
+            <TableContainer embedded label="Teaching allocations report">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead>Unit</TableHead>
+                    <TableHead>Cohort</TableHead>
+                    <TableHead>Assigned Trainer</TableHead>
+                    <TableHead>Weekly Hours</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {filteredAllocations.map((a) => (
-                    <tr key={a.id} className="hover:bg-surface-subtle/50">
-                      <td className="px-4 py-3 font-semibold text-text-primary">
-                        {a.unitCode} · <span className="font-normal text-text-secondary">{a.unitName}</span>
-                      </td>
-                      <td className="px-3 py-3 text-text-secondary">{a.cohortName}</td>
-                      <td className="px-3 py-3 font-medium text-text-primary">
+                    <TableRow key={a.id}>
+                      <TableCell className="font-semibold text-text-primary" title={a.unitCode}>
+                        {a.unitName}
+                      </TableCell>
+                      <TableCell className="text-text-secondary">{a.cohortName}</TableCell>
+                      <TableCell className="font-medium text-text-primary">
                         {a.trainerName ?? <span className="text-danger font-semibold">Unassigned</span>}
-                      </td>
-                      <td className="px-3 py-3 text-text-muted">{a.weeklyHours} hrs/wk</td>
-                      <td className="px-3 py-3">
+                      </TableCell>
+                      <TableCell className="text-text-muted">{a.weeklyHours} hrs/wk</TableCell>
+                      <TableCell>
                         <Badge variant={a.trainerName ? 'success' : 'danger'}>
                           {a.trainerName ? 'Allocated' : 'Unallocated'}
                         </Badge>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Card>
         </div>
       )}
@@ -492,62 +501,62 @@ export function ReportingDashboard({ data }: { data: DepartmentExecutiveReportDa
           </div>
 
           <Card className="overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[760px] text-left text-xs">
-                <thead className="border-b border-border bg-surface-subtle text-[10px] font-bold uppercase tracking-wider text-text-muted">
-                  <tr>
-                    <th className="px-4 py-3">Unit</th>
-                    <th className="px-3 py-3">Population</th>
-                    <th className="px-3 py-3">Source</th>
-                    <th className="px-3 py-3">CAT Status</th>
-                    <th className="px-3 py-3">Final Exam</th>
-                    <th className="px-3 py-3">Missing Marks</th>
-                    <th className="px-3 py-3">Publication</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
+            <TableContainer embedded label="Assessment completion report">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead>Unit</TableHead>
+                    <TableHead>Population</TableHead>
+                    <TableHead>Source</TableHead>
+                    <TableHead>CAT Status</TableHead>
+                    <TableHead>Final Exam</TableHead>
+                    <TableHead>Missing Marks</TableHead>
+                    <TableHead>Publication</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {filteredAssessments.map((ev) => (
-                    <tr key={ev.id} className="hover:bg-surface-subtle/50">
-                      <td className="px-4 py-3 font-semibold text-text-primary">
+                    <TableRow key={ev.id}>
+                      <TableCell className="font-semibold text-text-primary" title={ev.unitCode}>
                         <Link href={`/assessment/marks/${ev.id}`} className="hover:underline hover:text-primary">
-                          {ev.unitCode} · {ev.unitName}
+                          {ev.unitName}
                         </Link>
-                      </td>
-                      <td className="px-3 py-3 text-text-secondary">
+                      </TableCell>
+                      <TableCell className="text-text-secondary">
                         {ev.populationCount} {ev.isPopulationLocked ? '🔒' : '🔓'}
-                      </td>
-                      <td className="px-3 py-3">
+                      </TableCell>
+                      <TableCell>
                         <Badge variant={ev.marksSource === 'excel' ? 'institutional' : ev.marksSource === 'online' ? 'info' : 'neutral'}>
                           {ev.marksSource}
                         </Badge>
-                      </td>
-                      <td className="px-3 py-3">
+                      </TableCell>
+                      <TableCell>
                         <Badge variant={ev.isCatFinalized ? 'success' : 'neutral'}>
                           {ev.isCatFinalized ? 'Complete' : 'Pending'}
                         </Badge>
-                      </td>
-                      <td className="px-3 py-3">
+                      </TableCell>
+                      <TableCell>
                         <Badge variant={ev.isExamFinalized ? 'success' : 'neutral'}>
                           {ev.isExamFinalized ? 'Complete' : 'Pending'}
                         </Badge>
-                      </td>
-                      <td className="px-3 py-3">
+                      </TableCell>
+                      <TableCell>
                         {ev.missingMarksCount > 0 ? (
                           <span className="font-bold text-danger">{ev.missingMarksCount} missing</span>
                         ) : (
                           <span className="text-success font-semibold">0 missing</span>
                         )}
-                      </td>
-                      <td className="px-3 py-3">
+                      </TableCell>
+                      <TableCell>
                         <Badge variant={ev.isPublished ? 'success' : 'neutral'}>
                           {ev.isPublished ? 'Published' : 'Unpublished'}
                         </Badge>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Card>
         </div>
       )}
@@ -569,31 +578,31 @@ export function ReportingDashboard({ data }: { data: DepartmentExecutiveReportDa
           </div>
 
           <Card className="overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[760px] text-left text-xs">
-                <thead className="border-b border-border bg-surface-subtle text-[10px] font-bold uppercase tracking-wider text-text-muted">
-                  <tr>
-                    <th className="px-4 py-3">Cohort</th>
-                    <th className="px-3 py-3">Programme</th>
-                    <th className="px-3 py-3">Stage</th>
-                    <th className="px-3 py-3">Eligible Students</th>
-                    <th className="px-3 py-3">Pre-registered</th>
-                    <th className="px-3 py-3">Confirmed</th>
-                    <th className="px-3 py-3">Registration Rate</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
+            <TableContainer embedded label="Registration completion report">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead>Cohort</TableHead>
+                    <TableHead>Programme</TableHead>
+                    <TableHead>Stage</TableHead>
+                    <TableHead>Eligible Students</TableHead>
+                    <TableHead>Pre-registered</TableHead>
+                    <TableHead>Confirmed</TableHead>
+                    <TableHead>Registration Rate</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {filteredRegistration.map((r) => (
-                    <tr key={r.cohortId} className="hover:bg-surface-subtle/50">
-                      <td className="px-4 py-3 font-semibold text-text-primary">{r.cohortName}</td>
-                      <td className="px-3 py-3 text-text-secondary">{r.programmeName}</td>
-                      <td className="px-3 py-3 text-text-muted">{r.stageName}</td>
-                      <td className="px-3 py-3 font-bold text-text-primary">{r.eligibleStudentCount}</td>
-                      <td className="px-3 py-3 text-text-secondary">{r.preRegisteredCount}</td>
-                      <td className="px-3 py-3 text-success font-semibold">{r.confirmedCount}</td>
-                      <td className="px-3 py-3">
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 h-1.5 w-16 bg-surface-subtle rounded-full overflow-hidden">
+                    <TableRow key={r.cohortId}>
+                      <TableCell className="font-semibold text-text-primary">{r.cohortName}</TableCell>
+                      <TableCell className="text-text-secondary">{r.programmeName}</TableCell>
+                      <TableCell className="text-text-muted">{r.stageName}</TableCell>
+                      <TableCell className="font-bold text-text-primary">{r.eligibleStudentCount}</TableCell>
+                      <TableCell className="text-text-secondary">{r.preRegisteredCount}</TableCell>
+                      <TableCell className="text-success font-semibold">{r.confirmedCount}</TableCell>
+                      <TableCell>
+                        <div className="inline-flex items-center gap-2">
+                          <div className="h-1.5 w-16 bg-surface-subtle rounded-full overflow-hidden">
                             <div
                               style={{ width: `${r.registrationRate}%` }}
                               className="h-full bg-primary"
@@ -601,12 +610,12 @@ export function ReportingDashboard({ data }: { data: DepartmentExecutiveReportDa
                           </div>
                           <span className="font-bold text-text-primary">{r.registrationRate}%</span>
                         </div>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Card>
         </div>
       )}
@@ -634,40 +643,42 @@ export function ReportingDashboard({ data }: { data: DepartmentExecutiveReportDa
           </div>
 
           <Card className="overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[760px] text-left text-xs">
-                <thead className="border-b border-border bg-surface-subtle text-[10px] font-bold uppercase tracking-wider text-text-muted">
-                  <tr>
-                    <th className="px-4 py-3">Unit</th>
-                    <th className="px-3 py-3">Cohort</th>
-                    <th className="px-3 py-3">Trainer</th>
-                    <th className="px-3 py-3">Sessions Held</th>
-                    <th className="px-3 py-3">Present / Absent</th>
-                    <th className="px-3 py-3">Avg Attendance Rate</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
+            <TableContainer embedded label="Class attendance report">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead>Unit</TableHead>
+                    <TableHead>Cohort</TableHead>
+                    <TableHead>Trainer</TableHead>
+                    <TableHead>Sessions Held</TableHead>
+                    <TableHead>Present / Absent</TableHead>
+                    <TableHead>Avg Attendance Rate</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {filteredAttendance.map((att, idx) => (
-                    <tr key={`${att.unitId}-${idx}`} className="hover:bg-surface-subtle/50">
-                      <td className="px-4 py-3 font-semibold text-text-primary">{att.unitCode} · {att.unitName}</td>
-                      <td className="px-3 py-3 text-text-secondary">{att.cohortName}</td>
-                      <td className="px-3 py-3 text-text-primary">{att.trainerName}</td>
-                      <td className="px-3 py-3 text-text-muted">
-                        {att.completedSessions} / {att.totalSessionsScheduled} completed
-                      </td>
-                      <td className="px-3 py-3">
+                    <TableRow key={`${att.unitId}-${idx}`}>
+                      <TableCell className="font-semibold text-text-primary" title={att.unitCode}>
+                        {att.unitName}
+                      </TableCell>
+                      <TableCell className="text-text-secondary">{att.cohortName}</TableCell>
+                      <TableCell className="text-text-primary">{att.trainerName}</TableCell>
+                      <TableCell className="text-text-muted">
+                        {att.completedSessions} / {att.totalSessionsScheduled}
+                      </TableCell>
+                      <TableCell>
                         <span className="text-success font-semibold">{att.totalPresentCount} P</span> · <span className="text-danger font-semibold">{att.totalAbsentCount} A</span>
-                      </td>
-                      <td className="px-3 py-3">
+                      </TableCell>
+                      <TableCell>
                         <Badge variant={att.averageAttendanceRate >= 75 ? 'success' : 'warning'}>
                           {att.averageAttendanceRate}%
                         </Badge>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Card>
         </div>
       )}
@@ -689,49 +700,51 @@ export function ReportingDashboard({ data }: { data: DepartmentExecutiveReportDa
           </div>
 
           <Card className="overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[760px] text-left text-xs">
-                <thead className="border-b border-border bg-surface-subtle text-[10px] font-bold uppercase tracking-wider text-text-muted">
-                  <tr>
-                    <th className="px-4 py-3">Unit</th>
-                    <th className="px-3 py-3">Trainer</th>
-                    <th className="px-2 py-3 text-center">Attendance Sheet</th>
-                    <th className="px-2 py-3 text-center">Course Outline</th>
-                    <th className="px-2 py-3 text-center">Scheme of Work</th>
-                    <th className="px-2 py-3 text-center">Record of Work</th>
-                    <th className="px-3 py-3 text-right">Compliance</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
+            <TableContainer embedded label="Teaching documents compliance">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead>Unit</TableHead>
+                    <TableHead>Cohort</TableHead>
+                    <TableHead>Trainer</TableHead>
+                    <TableHead className="text-center">Attendance Sheet</TableHead>
+                    <TableHead className="text-center">Course Outline</TableHead>
+                    <TableHead className="text-center">Scheme of Work</TableHead>
+                    <TableHead className="text-center">Record of Work</TableHead>
+                    <TableHead className="text-right">Compliance</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {filteredDocuments.map((doc) => {
                     const badgeFor = (st: string) => {
                       if (st === 'approved') return <Badge variant="success">Approved</Badge>;
                       if (st === 'submitted') return <Badge variant="warning">Submitted</Badge>;
                       if (st === 'draft') return <Badge variant="neutral">Draft</Badge>;
-                      return <span className="text-[10px] text-text-muted italic">—</span>;
+                      return <span className="text-xs text-text-muted italic">—</span>;
                     };
 
                     return (
-                      <tr key={doc.allocationId} className="hover:bg-surface-subtle/50">
-                        <td className="px-4 py-3 font-semibold text-text-primary">
-                          {doc.unitCode} · <span className="font-normal text-text-secondary">{doc.cohortName}</span>
-                        </td>
-                        <td className="px-3 py-3 text-text-primary">{doc.trainerName}</td>
-                        <td className="px-2 py-3 text-center">{badgeFor(doc.attendanceSheetStatus)}</td>
-                        <td className="px-2 py-3 text-center">{badgeFor(doc.courseOutlineStatus)}</td>
-                        <td className="px-2 py-3 text-center">{badgeFor(doc.schemeOfWorkStatus)}</td>
-                        <td className="px-2 py-3 text-center">{badgeFor(doc.recordOfWorkStatus)}</td>
-                        <td className="px-3 py-3 text-right">
+                      <TableRow key={doc.allocationId}>
+                        <TableCell className="font-semibold text-text-primary" title={doc.unitCode}>
+                          {doc.unitName}
+                        </TableCell>
+                        <TableCell className="text-text-secondary">{doc.cohortName}</TableCell>
+                        <TableCell className="text-text-primary">{doc.trainerName}</TableCell>
+                        <TableCell className="text-center">{badgeFor(doc.attendanceSheetStatus)}</TableCell>
+                        <TableCell className="text-center">{badgeFor(doc.courseOutlineStatus)}</TableCell>
+                        <TableCell className="text-center">{badgeFor(doc.schemeOfWorkStatus)}</TableCell>
+                        <TableCell className="text-center">{badgeFor(doc.recordOfWorkStatus)}</TableCell>
+                        <TableCell className="text-right">
                           <span className={`font-bold ${doc.complianceRate === 100 ? 'text-success' : 'text-text-primary'}`}>
                             {doc.complianceRate}%
                           </span>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     );
                   })}
-                </tbody>
-              </table>
-            </div>
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Card>
         </div>
       )}

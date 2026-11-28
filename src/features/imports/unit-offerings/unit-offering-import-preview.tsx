@@ -6,6 +6,16 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+
 import type {
   NormalizedUnitOfferingImportRow,
   UnitOfferingImportStagedRow,
@@ -285,224 +295,116 @@ export function UnitOfferingImportPreview({
 
         </div>
 
-        <div className="w-full overflow-hidden">
-          <table className="min-w-[1180px] w-full border-collapse text-left text-sm">
-            <thead className="bg-surface-subtle text-xs uppercase tracking-wide text-text-muted">
-              <tr>
-                <th className="px-3 py-2.5">
-                  Row
-                </th>
-                <th className="px-3 py-2.5">
-                  Status
-                </th>
-                <th className="px-3 py-2.5">
-                  Academic Period
-                </th>
-                <th className="px-3 py-2.5">
-                  Programme
-                </th>
-                <th className="px-3 py-2.5">
-                  Cohort
-                </th>
-                <th className="px-3 py-2.5">
-                  Unit
-                </th>
-                <th className="px-3 py-2.5">
-                  Delivery
-                </th>
-                <th className="px-3 py-2.5">
-                  Shared class
-                </th>
-                <th className="px-3 py-2.5">
-                  Operation
-                </th>
-                <th className="px-3 py-2.5">
-                  Validation
-                </th>
-              </tr>
-            </thead>
+        <TableContainer embedded label="Unit offering workbook rows">
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead>Row</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Academic Period</TableHead>
+                <TableHead>Programme</TableHead>
+                <TableHead>Cohort</TableHead>
+                <TableHead>Unit</TableHead>
+                <TableHead>Delivery</TableHead>
+                <TableHead>Shared class</TableHead>
+                <TableHead>Operation</TableHead>
+                <TableHead>Validation</TableHead>
+              </TableRow>
+            </TableHeader>
 
-            <tbody className="divide-y divide-border">
+            <TableBody>
               {rows.map((row) => {
-                const normalized =
-                  getNormalizedRow(row);
-
-                const operation =
-                  getOperationDisplay(
-                    normalized,
-                  );
-
-                const errors =
-                  getErrorMessages(row);
+                const normalized = getNormalizedRow(row);
+                const operation = getOperationDisplay(normalized);
+                const errors = getErrorMessages(row);
 
                 return (
-                  <tr
-                    key={row.id}
-                    className="align-top"
-                  >
-                    <td className="whitespace-nowrap px-4 py-4 font-mono text-xs text-text-muted">
+                  <TableRow key={row.id}>
+                    <TableCell className="font-mono text-xs text-text-muted">
                       {row.sourceRowNumber}
-                    </td>
+                    </TableCell>
 
-                    <td className="px-4 py-4">
+                    <TableCell>
                       <span
-                        className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${getStatusClassName(
+                        className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold ${getStatusClassName(
                           row.status,
                         )}`}
                       >
-                        {getStatusLabel(
-                          row.status,
-                        )}
+                        {getStatusLabel(row.status)}
                       </span>
-                    </td>
+                    </TableCell>
 
-                    <td className="px-4 py-4 text-text-secondary">
-                      {normalized.academicPeriod ??
-                        '—'}
-                    </td>
+                    <TableCell className="text-text-secondary">
+                      {normalized.academicPeriod ?? '—'}
+                    </TableCell>
 
-                    <td className="px-4 py-4">
-                      <p className="font-medium text-text-primary">
-                        {normalized.programmeName ??
-                          '—'}
-                      </p>
-                    </td>
+                    <TableCell className="font-medium text-text-primary">
+                      {normalized.programmeName ?? '—'}
+                    </TableCell>
 
-                    <td className="px-4 py-4 text-text-secondary">
-                      {normalized.cohortName ??
-                        '—'}
-                    </td>
+                    <TableCell className="text-text-secondary">
+                      {normalized.cohortName ?? '—'}
+                    </TableCell>
 
-                    <td className="px-4 py-4">
-                      <p className="font-medium text-text-primary">
-                        {normalized.unitName ??
-                          '—'}
-                      </p>
-
-                      {normalized.unitCode ? (
-                        <p className="mt-1 font-mono text-xs text-text-muted">
-                          {normalized.unitCode}
-                        </p>
+                    <TableCell title={normalized.unitCode ?? undefined}>
+                      <span className="font-medium text-text-primary">
+                        {normalized.unitName ?? '—'}
+                      </span>
+                      {normalized.masterUnitOperation === 'create' ? (
+                        <span className="ml-1.5 text-xs font-semibold text-primary">· New unit</span>
+                      ) : normalized.masterUnitOperation === 'reactivate' ? (
+                        <span className="ml-1.5 text-xs font-semibold text-warning">· Reactivate</span>
                       ) : null}
+                    </TableCell>
 
-                      {normalized.masterUnitOperation ===
-                      'create' ? (
-                        <p className="mt-1 text-xs font-semibold text-primary">
-                          Master Unit will be created
-                        </p>
-                      ) : normalized.masterUnitOperation ===
-                        'reactivate' ? (
-                        <p className="mt-1 text-xs font-semibold text-warning">
-                          Master Unit will be reactivated
-                        </p>
-                      ) : null}
-                    </td>
+                    <TableCell className="text-text-secondary">
+                      {normalized.offeringType ?? '—'}
+                      {normalized.weeklySessions
+                        ? ` · ${normalized.weeklySessions}×${normalized.sessionDurationMinutes}m`
+                        : ''}
+                    </TableCell>
 
-                    <td className="px-4 py-4 text-text-secondary">
-                      <p>
-                        {normalized.offeringType ??
-                          '—'}
-                      </p>
-
-                      {normalized.weeklySessions ? (
-                        <p className="mt-1 text-xs text-text-muted">
-                          {
-                            normalized.weeklySessions
-                          }{' '}
-                          session(s) ·{' '}
-                          {
-                            normalized.sessionDurationMinutes
-                          }{' '}
-                          min
-                        </p>
-                      ) : null}
-                    </td>
-
-                    <td className="px-4 py-4">
+                    <TableCell>
                       {normalized.sharedClassKey ? (
-                        <div className="space-y-1.5">
-                          <span className="inline-flex rounded-full border border-primary/20 bg-primary-subtle px-2.5 py-1 font-mono text-xs font-semibold text-primary">
-                            {
-                              normalized.sharedClassKey
-                            }
-                          </span>
-
-                          <p className="text-xs text-text-muted">
-                            {normalized.sharedClassSource ===
-                            'automatic'
-                              ? 'Automatically detected'
-                              : 'Workbook override'}
-                          </p>
-                        </div>
-                      ) : (
-                        <div>
-                          <span className="text-text-muted">
-                            Independent
-                          </span>
-
-                          {normalized.sharedClassSource ===
-                          'independent' ? (
-                            <p className="mt-1 text-xs text-warning">
-                              Forced separate in workbook
-                            </p>
-                          ) : null}
-                        </div>
-                      )}
-                    </td>
-
-                    <td className="px-4 py-4">
-                      {operation ? (
-                        <div
-                          className={`flex items-center gap-2 text-xs font-semibold ${operation.className}`}
-                        >
-                          <operation.icon
-                            className="size-4"
-                            aria-hidden="true"
-                          />
-
-                          {operation.label}
-                        </div>
+                        <span className="inline-flex rounded-full border border-primary/20 bg-primary-subtle px-2 py-0.5 font-mono text-xs font-semibold text-primary">
+                          {normalized.sharedClassKey}
+                        </span>
                       ) : (
                         <span className="text-text-muted">
-                          —
+                          {normalized.sharedClassSource === 'independent' ? 'Independent (forced)' : 'Independent'}
                         </span>
                       )}
-                    </td>
+                    </TableCell>
 
-                    <td className="max-w-sm px-4 py-4">
+                    <TableCell>
+                      {operation ? (
+                        <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${operation.className}`}>
+                          <operation.icon className="size-3.5" aria-hidden="true" />
+                          {operation.label}
+                        </span>
+                      ) : (
+                        <span className="text-text-muted">—</span>
+                      )}
+                    </TableCell>
+
+                    <TableCell>
                       {errors.length > 0 ? (
-                        <div className="space-y-2 text-xs leading-5 text-danger">
-                          {errors.map(
-                            (error) => (
-                              <div
-                                key={error}
-                                className="flex items-start gap-2"
-                              >
-                                <AlertTriangle
-                                  className="mt-0.5 size-3.5 shrink-0"
-                                  aria-hidden="true"
-                                />
-
-                                <span>
-                                  {error}
-                                </span>
-                              </div>
-                            ),
-                          )}
-                        </div>
+                        <span className="inline-flex items-center gap-1.5 text-xs text-danger">
+                          <AlertTriangle className="size-3.5 shrink-0" aria-hidden="true" />
+                          <span>{errors.join(' · ')}</span>
+                        </span>
                       ) : (
                         <span className="text-xs font-medium text-success">
-                          Database relationships
-                          resolved
+                          Database relationships resolved
                         </span>
                       )}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
+        </TableContainer>
       </section>
     </div>
   );

@@ -20,6 +20,15 @@ import { useMemo, useState, useTransition } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { MetricCard } from '@/components/ui/metric-card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 import { transitionStudentsToAttachmentAction } from './attachment-actions';
 import type {
@@ -595,40 +604,38 @@ export function AttachmentEligibilityWorkspace({
 
       {/* Candidate Review Table */}
       <Card className="overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[680px] text-left text-xs">
-            <thead className="border-b border-slate-200 bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-              <tr>
-                <th className="w-14 px-3 py-3 text-center whitespace-nowrap print:hidden">Approve</th>
-                <th className="w-12 px-2 py-3 text-center whitespace-nowrap">No.</th>
-                <th className="px-3 py-3 whitespace-nowrap">Admission No.</th>
-                <th className="px-3 py-3 whitespace-nowrap">Student Full Name</th>
-                <th className="px-3 py-3 whitespace-nowrap">Stage Progression</th>
-                <th className="px-3 py-3 whitespace-nowrap">Attachment Unit</th>
-                <th className="px-3 py-3 whitespace-nowrap">Flags / Notes</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
+        <TableContainer embedded label="Attachment eligibility candidates">
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="w-14 text-center print:hidden">Approve</TableHead>
+                <TableHead className="w-12 text-center">No.</TableHead>
+                <TableHead>Admission No.</TableHead>
+                <TableHead>Student Full Name</TableHead>
+                <TableHead>Stage Progression</TableHead>
+                <TableHead>Attachment Unit</TableHead>
+                <TableHead>Flags / Notes</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {filteredCandidates.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-xs text-slate-500">
-                    <p className="font-semibold text-slate-700">No students match the current filters.</p>
-                    <p className="mt-1 text-[11px] text-slate-400">
+                <TableRow className="hover:bg-transparent">
+                  <TableCell colSpan={7} className="py-12 text-center text-xs text-text-muted">
+                    <p className="font-semibold text-text-primary">No students match the current filters.</p>
+                    <p className="mt-1 text-[11px] text-text-muted">
                       Adjust your search/filters or use &ldquo;Add Override&rdquo; to include a student manually.
                     </p>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ) : (
                 filteredCandidates.map((c, idx) => {
                   const isExcluded = excludedIds.has(c.studentId);
                   return (
-                    <tr
+                    <TableRow
                       key={c.studentId}
-                      className={`transition-colors ${
-                        isExcluded ? 'bg-slate-50/80 opacity-60 print:hidden' : 'hover:bg-slate-50/70'
-                      }`}
+                      className={isExcluded ? 'bg-surface-subtle opacity-60 print:hidden' : undefined}
                     >
-                      <td className="px-3 py-2.5 text-center print:hidden">
+                      <TableCell className="text-center print:hidden">
                         <input
                           type="checkbox"
                           checked={!isExcluded}
@@ -636,20 +643,20 @@ export function AttachmentEligibilityWorkspace({
                           aria-label={`Approve ${c.fullName} for attachment`}
                           className="size-4 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
                         />
-                      </td>
-                      <td className="px-2 py-2.5 text-center text-slate-400 font-medium whitespace-nowrap">{idx + 1}.</td>
-                      <td className="px-3 py-2.5 font-mono font-bold text-slate-900 whitespace-nowrap">
+                      </TableCell>
+                      <TableCell className="text-center text-text-muted">{idx + 1}.</TableCell>
+                      <TableCell className="font-mono font-bold text-text-primary">
                         {c.admissionNumber}
-                      </td>
-                      <td className="px-3 py-2.5 font-semibold text-slate-900 whitespace-nowrap">
+                      </TableCell>
+                      <TableCell className="font-semibold text-text-primary">
                         <Link
                           href={`/students/registry/${c.studentId}`}
                           className="hover:text-primary hover:underline"
                         >
                           {c.fullName}
                         </Link>
-                      </td>
-                      <td className="px-3 py-2.5 whitespace-nowrap">
+                      </TableCell>
+                      <TableCell>
                         <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 font-mono text-[11px] font-semibold text-slate-700">
                           {c.currentStageCode}
                           {c.unitDeliveryStageCode ? (
@@ -660,15 +667,12 @@ export function AttachmentEligibilityWorkspace({
                           <ArrowRight className="size-3 text-slate-400" />
                           <span className="text-emerald-800">{c.attachmentStageCode}</span>
                         </span>
-                      </td>
-                      <td className="px-3 py-2.5">
-                        <span className="font-mono text-[11px] font-semibold text-slate-700">
-                          {c.attachmentUnitCode}
-                        </span>
-                        <span className="ml-1.5 text-slate-600">{c.attachmentUnitName}</span>
-                      </td>
-                      <td className="px-3 py-2.5">
-                        <div className="flex flex-wrap items-center gap-1.5">
+                      </TableCell>
+                      <TableCell className="text-text-secondary" title={c.attachmentUnitCode}>
+                        {c.attachmentUnitName}
+                      </TableCell>
+                      <TableCell>
+                        <div className="inline-flex items-center gap-1.5">
                           {c.source === 'manual' ? (
                             <span className="inline-flex items-center gap-1 rounded bg-sky-50 px-1.5 py-0.5 text-[10px] font-bold text-sky-800 border border-sky-200">
                               Manual
@@ -710,14 +714,14 @@ export function AttachmentEligibilityWorkspace({
                             <span className="text-[11px] text-emerald-700 font-medium">Eligible</span>
                           ) : null}
                         </div>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   );
                 })
               )}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Card>
     </div>
   );

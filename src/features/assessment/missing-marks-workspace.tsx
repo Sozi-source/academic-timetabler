@@ -17,6 +17,15 @@ import { useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { MetricCard } from '@/components/ui/metric-card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { compareAdmissionNumbers } from '@/features/students/admission-number-sort';
 
 import type {
@@ -471,64 +480,51 @@ export function MissingMarksWorkspace({
 
       {/* Main Content */}
       <Card className="overflow-hidden">
-        <div className="overflow-x-auto">
+        <TableContainer embedded label="Missing marks and absences">
           {viewMode === 'student' ? (
-            <table className="w-full table-auto border-collapse text-left text-xs">
-              <thead className="border-b border-slate-200 bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                <tr>
-                  <th className="w-12 px-3 py-3 text-center whitespace-nowrap" style={{ whiteSpace: 'nowrap', overflowWrap: 'normal' }}>No.</th>
-                  <th className="px-3 py-3 whitespace-nowrap" style={{ whiteSpace: 'nowrap', overflowWrap: 'normal' }}>Admission No.</th>
-                  <th className="px-3 py-3 whitespace-nowrap" style={{ whiteSpace: 'nowrap', overflowWrap: 'normal' }}>Student Full Name</th>
-                  <th className="px-3 py-3 whitespace-nowrap" style={{ whiteSpace: 'nowrap', overflowWrap: 'normal' }}>Cohort</th>
-                  <th className="px-3 py-3 text-center whitespace-nowrap" style={{ whiteSpace: 'nowrap', overflowWrap: 'normal' }}>Units</th>
-                  <th className="px-3 py-3 whitespace-nowrap" style={{ whiteSpace: 'nowrap', overflowWrap: 'normal' }}>Flagged Units (CAT / Exam)</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-12 text-center">No.</TableHead>
+                  <TableHead>Admission No.</TableHead>
+                  <TableHead>Student Full Name</TableHead>
+                  <TableHead>Cohort</TableHead>
+                  <TableHead className="text-center">Units</TableHead>
+                  <TableHead>Flagged Units (CAT / Exam)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {groupedByStudent.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="px-4 py-12 text-center text-xs text-slate-500">
+                  <TableRow className="hover:bg-transparent">
+                    <TableCell colSpan={6} className="py-12 text-center text-xs text-text-muted">
                       No missing marks or absences match the current filters.
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   groupedByStudent.map((student, idx) => (
-                    <tr key={student.studentId} className="align-top hover:bg-slate-50/70">
-                      <td
-                        className="px-3 py-2.5 text-center font-medium text-slate-400 whitespace-nowrap"
-                        style={{ whiteSpace: 'nowrap', overflowWrap: 'normal', wordBreak: 'normal' }}
-                      >
+                    <TableRow key={student.studentId}>
+                      <TableCell className="text-center text-text-muted">
                         {idx + 1}.
-                      </td>
-                      <td
-                        className="px-3 py-2.5 font-mono font-bold text-slate-900 whitespace-nowrap"
-                        style={{ whiteSpace: 'nowrap', overflowWrap: 'normal', wordBreak: 'normal' }}
-                      >
+                      </TableCell>
+                      <TableCell className="font-mono font-bold text-text-primary">
                         {student.admissionNumber}
-                      </td>
-                      <td
-                        className="px-3 py-2.5 font-semibold text-slate-900 whitespace-nowrap"
-                        style={{ whiteSpace: 'nowrap', overflowWrap: 'normal', wordBreak: 'normal' }}
-                      >
+                      </TableCell>
+                      <TableCell className="font-semibold text-text-primary">
                         <Link
                           href={`/students/registry/${student.studentId}/results`}
-                          className="whitespace-nowrap hover:text-primary hover:underline"
-                          style={{ whiteSpace: 'nowrap', overflowWrap: 'normal', wordBreak: 'normal' }}
+                          className="hover:text-primary hover:underline"
                         >
                           {student.fullName}
                         </Link>
-                      </td>
-                      <td
-                        className="px-3 py-2.5 text-slate-600 whitespace-nowrap"
-                        style={{ whiteSpace: 'nowrap', overflowWrap: 'normal', wordBreak: 'normal' }}
-                      >
+                      </TableCell>
+                      <TableCell className="text-text-secondary">
                         {student.cohortName}
-                      </td>
-                      <td className="px-3 py-2.5 text-center whitespace-nowrap">
+                      </TableCell>
+                      <TableCell className="text-center">
                         <Badge variant="neutral">{student.items.length}</Badge>
-                      </td>
-                      <td className="px-3 py-2.5">
-                        <div className="flex flex-col items-start gap-1">
+                      </TableCell>
+                      <TableCell>
+                        <div className="inline-flex items-center gap-1.5">
                           {student.items.map((item) => {
                             const catLabel = formatComponentDisplay(
                               item.catStatus,
@@ -553,10 +549,9 @@ export function MissingMarksWorkspace({
                                     ? 'border-rose-200 bg-rose-50/80 text-rose-800 hover:bg-rose-100/80'
                                     : 'border-amber-200 bg-amber-50/80 text-amber-900 hover:bg-amber-100/80'
                                 }`}
-                                style={{ whiteSpace: 'nowrap', overflowWrap: 'normal' }}
                               >
-                                <span className="font-mono font-bold whitespace-nowrap">{item.unitCode}</span>
-                                <span className="text-[10px] opacity-80 whitespace-nowrap">
+                                <span className="font-mono font-bold">{item.unitCode}</span>
+                                <span className="text-[10px] opacity-80">
                                   CAT: {catLabel}
                                   {item.examSubmitted ? ` · Exam: ${examLabel}` : ''}
                                 </span>
@@ -565,81 +560,67 @@ export function MissingMarksWorkspace({
                             );
                           })}
                         </div>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           ) : (
-            <table className="w-full table-auto border-collapse text-left text-xs">
-              <thead className="border-b border-slate-200 bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                <tr>
-                  <th className="w-12 px-3 py-3 text-center whitespace-nowrap" style={{ whiteSpace: 'nowrap', overflowWrap: 'normal' }}>No.</th>
-                  <th className="px-3 py-3 whitespace-nowrap" style={{ whiteSpace: 'nowrap', overflowWrap: 'normal' }}>Admission No.</th>
-                  <th className="px-3 py-3 whitespace-nowrap" style={{ whiteSpace: 'nowrap', overflowWrap: 'normal' }}>Student Full Name</th>
-                  <th className="px-3 py-3 whitespace-nowrap" style={{ whiteSpace: 'nowrap', overflowWrap: 'normal' }}>Unit</th>
-                  <th className="px-3 py-3 text-center whitespace-nowrap" style={{ whiteSpace: 'nowrap', overflowWrap: 'normal' }}>CAT</th>
-                  <th className="px-3 py-3 text-center whitespace-nowrap" style={{ whiteSpace: 'nowrap', overflowWrap: 'normal' }}>Exam</th>
-                  <th className="px-3 py-3 text-right whitespace-nowrap print:hidden" style={{ whiteSpace: 'nowrap', overflowWrap: 'normal' }}>Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-12 text-center">No.</TableHead>
+                  <TableHead>Admission No.</TableHead>
+                  <TableHead>Student Full Name</TableHead>
+                  <TableHead>Unit</TableHead>
+                  <TableHead className="text-center">CAT</TableHead>
+                  <TableHead className="text-center">Exam</TableHead>
+                  <TableHead className="text-right print:hidden">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {filteredRecords.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="px-4 py-12 text-center text-xs text-slate-500">
+                  <TableRow className="hover:bg-transparent">
+                    <TableCell colSpan={7} className="py-12 text-center text-xs text-text-muted">
                       No missing marks or absences match the current filters.
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   filteredRecords.map((r, idx) => (
-                    <tr key={r.key} className="hover:bg-slate-50/70">
-                      <td
-                        className="px-3 py-2.5 text-center font-medium text-slate-400 whitespace-nowrap"
-                        style={{ whiteSpace: 'nowrap', overflowWrap: 'normal', wordBreak: 'normal' }}
-                      >
+                    <TableRow key={r.key}>
+                      <TableCell className="text-center text-text-muted">
                         {idx + 1}.
-                      </td>
-                      <td
-                        className="px-3 py-2.5 font-mono font-bold text-slate-900 whitespace-nowrap"
-                        style={{ whiteSpace: 'nowrap', overflowWrap: 'normal', wordBreak: 'normal' }}
-                      >
+                      </TableCell>
+                      <TableCell className="font-mono font-bold text-text-primary">
                         {r.admissionNumber}
-                      </td>
-                      <td
-                        className="px-3 py-2.5 font-semibold text-slate-900 whitespace-nowrap"
-                        style={{ whiteSpace: 'nowrap', overflowWrap: 'normal', wordBreak: 'normal' }}
-                      >
+                      </TableCell>
+                      <TableCell className="font-semibold text-text-primary">
                         <Link
                           href={`/students/registry/${r.studentId}/results`}
-                          className="whitespace-nowrap hover:text-primary hover:underline"
-                          style={{ whiteSpace: 'nowrap', overflowWrap: 'normal', wordBreak: 'normal' }}
+                          className="hover:text-primary hover:underline"
                         >
                           {r.fullName}
                         </Link>
-                      </td>
-                      <td
-                        className="px-3 py-2.5 whitespace-nowrap"
-                        style={{ whiteSpace: 'nowrap', overflowWrap: 'normal', wordBreak: 'normal' }}
-                      >
-                        <span className="font-mono text-[11px] font-bold text-slate-800 whitespace-nowrap">{r.unitCode}</span>
-                        <span className="ml-1.5 text-slate-600 whitespace-nowrap">{r.unitName}</span>
-                      </td>
-                      <td className="px-3 py-2.5 text-center whitespace-nowrap">
+                      </TableCell>
+                      <TableCell className="text-text-secondary" title={r.unitCode}>
+                        {r.unitName}
+                      </TableCell>
+                      <TableCell className="text-center">
                         <StatusPill
                           status={r.catStatus}
                           mark={r.catMark}
                           active={true}
                         />
-                      </td>
-                      <td className="px-3 py-2.5 text-center whitespace-nowrap">
+                      </TableCell>
+                      <TableCell className="text-center">
                         <StatusPill
                           status={r.examStatus}
                           mark={r.examMark}
                           active={r.examSubmitted}
                         />
-                      </td>
-                      <td className="px-3 py-2.5 text-right whitespace-nowrap print:hidden">
+                      </TableCell>
+                      <TableCell className="text-right print:hidden">
                         <Link
                           href={`/assessment/marks/${r.assessmentId}`}
                           className="inline-flex h-7 items-center gap-1 whitespace-nowrap rounded-md border border-border-strong bg-surface px-2.5 text-[11px] font-semibold text-text-secondary transition hover:bg-surface-subtle hover:text-primary"
@@ -647,14 +628,14 @@ export function MissingMarksWorkspace({
                           Markbook
                           <ExternalLink className="size-3 shrink-0" aria-hidden="true" />
                         </Link>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           )}
-        </div>
+        </TableContainer>
       </Card>
     </div>
   );

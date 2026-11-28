@@ -1233,22 +1233,22 @@ export function OnlineMarksEditor({
                     key={row.student.studentId}
                     className="align-middle transition hover:bg-[#fbf9f1]"
                   >
-                    <td className="px-3 py-2.5">
-                      <p className="text-xs font-bold text-slate-900 line-clamp-1">
+                    <td className="whitespace-nowrap px-3 py-2.5">
+                      <p className="text-xs font-bold text-slate-900 whitespace-nowrap">
                         {row.student.fullName}
                       </p>
-                      <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-slate-700">
+                      <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-700">
                         <span className="font-mono whitespace-nowrap">{row.student.admissionNumber}</span>
+                        {row.isAbsent ? (
+                          <Badge variant="warning" className="rounded-none text-[9px] font-bold">
+                            Exam absent (AB)
+                          </Badge>
+                        ) : row.fields.cat.isAbsent ? (
+                          <Badge variant="warning" className="rounded-none text-[9px] font-bold">
+                            CAT absent (AB)
+                          </Badge>
+                        ) : null}
                       </div>
-                      {row.isAbsent ? (
-                        <Badge variant="warning" className="mt-0.5 rounded-none text-[9px] font-bold">
-                          Exam absent (AB)
-                        </Badge>
-                      ) : row.fields.cat.isAbsent ? (
-                        <Badge variant="warning" className="mt-0.5 rounded-none text-[9px] font-bold">
-                          CAT absent (AB)
-                        </Badge>
-                      ) : null}
                     </td>
 
                     {onlineMarkComponents.map(({ key }, colIndex) => {

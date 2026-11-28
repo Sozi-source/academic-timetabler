@@ -10,6 +10,15 @@ import {
   PageHeader,
 } from '@/components/ui/page-header';
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
   requireHodAccess,
 } from '@/features/auth/authorization';
 import {
@@ -191,161 +200,132 @@ export default async function CurriculumContentPage() {
             </p>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-left text-sm">
-              <thead className="border-b border-border bg-surface-subtle text-xs text-text-muted">
-                <tr>
-                  <th className="px-4 py-3 font-semibold">
-                    Unit
-                  </th>
-                  <th className="px-4 py-3 font-semibold">
-                    Course Outline
-                  </th>
-                  <th className="px-4 py-3 font-semibold">
-                    Scheme of Work
-                  </th>
-                </tr>
-              </thead>
+          <TableContainer embedded label="Curriculum library">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead>Unit</TableHead>
+                  <TableHead>Course Outline</TableHead>
+                  <TableHead>Scheme of Work</TableHead>
+                </TableRow>
+              </TableHeader>
 
-              <tbody className="divide-y divide-border">
+              <TableBody>
                 {rows.map(
                   (row) => (
-                    <tr
-                      key={
-                        row.unitId
-                      }
-                      className="align-top"
-                    >
-                      <td className="px-4 py-4">
-                        <div className="font-semibold text-text-primary">
-                          {
-                            row.unitCode
-                          }
-                        </div>
-                        <div className="mt-0.5 text-xs text-text-muted">
-                          {
-                            row.unitName
-                          }
-                        </div>
-                      </td>
+                    <TableRow key={row.unitId}>
+                      <TableCell
+                        className="font-semibold text-text-primary"
+                        title={row.unitCode}
+                      >
+                        {row.unitName}
+                      </TableCell>
 
                       {/* Course Outline Column (Master Syllabus) */}
-                      <td className="px-4 py-4">
+                      <TableCell>
                         {row.courseOutline ? (
-                          <div className="space-y-2">
-                            <div className="text-xs font-semibold text-success">
+                          <div className="inline-flex items-center gap-3 text-xs">
+                            <span
+                              className="font-semibold text-success"
+                              title={row.courseOutline.sourceFileName ?? undefined}
+                            >
                               v{row.courseOutline.versionNumber} Active
-                            </div>
+                            </span>
 
-                            <div className="flex flex-wrap gap-2 text-xs">
-                              <Link
-                                href={`/teaching-documents/curriculum/individual-upload?unitId=${row.unitId}&documentType=course_outline`}
-                                className="font-semibold text-primary hover:underline"
-                              >
-                                Replace Course Outline
-                              </Link>
-
-                              <Link
-                                href={`/teaching-documents/curriculum/library/${row.unitId}/course_outline`}
-                                className="font-semibold text-text-secondary hover:underline"
-                              >
-                                History
-                              </Link>
-
-                              <form action={retireCurriculumDocumentV54}>
-                                <input
-                                  type="hidden"
-                                  name="documentId"
-                                  value={row.courseOutline.id}
-                                />
-                                <button
-                                  type="submit"
-                                  className="font-semibold text-text-muted hover:text-danger"
-                                >
-                                  Retire
-                                </button>
-                              </form>
-                            </div>
-
-                            {row.courseOutline.sourceFileName ? (
-                              <div className="max-w-[260px] truncate text-[10px] text-text-muted">
-                                {row.courseOutline.sourceFileName}
-                              </div>
-                            ) : null}
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-start gap-2">
-                            <span className="text-xs text-text-muted">Missing</span>
                             <Link
                               href={`/teaching-documents/curriculum/individual-upload?unitId=${row.unitId}&documentType=course_outline`}
                               className="font-semibold text-primary hover:underline"
                             >
-                              Upload Course Outline
+                              Replace
+                            </Link>
+
+                            <Link
+                              href={`/teaching-documents/curriculum/library/${row.unitId}/course_outline`}
+                              className="font-semibold text-text-secondary hover:underline"
+                            >
+                              History
+                            </Link>
+
+                            <form action={retireCurriculumDocumentV54} className="inline">
+                              <input
+                                type="hidden"
+                                name="documentId"
+                                value={row.courseOutline.id}
+                              />
+                              <button
+                                type="submit"
+                                className="font-semibold text-text-muted hover:text-danger"
+                              >
+                                Retire
+                              </button>
+                            </form>
+                          </div>
+                        ) : (
+                          <div className="inline-flex items-center gap-3 text-xs">
+                            <span className="text-text-muted">Missing</span>
+                            <Link
+                              href={`/teaching-documents/curriculum/individual-upload?unitId=${row.unitId}&documentType=course_outline`}
+                              className="font-semibold text-primary hover:underline"
+                            >
+                              Upload
                             </Link>
                           </div>
                         )}
-                      </td>
+                      </TableCell>
 
                       {/* 14-Week Scheme of Work Column (Auto-Generated from Course Outline) */}
-                      <td className="px-4 py-4">
+                      <TableCell>
                         {row.scheme ? (
-                          <div className="space-y-2">
-                            <div className="text-xs font-semibold text-primary">
-                              v{row.scheme.versionNumber} Custom Scheme
-                            </div>
+                          <div className="inline-flex items-center gap-3 text-xs">
+                            <span
+                              className="font-semibold text-primary"
+                              title={row.scheme.sourceFileName ?? undefined}
+                            >
+                              v{row.scheme.versionNumber} Custom
+                            </span>
 
-                            <div className="flex flex-wrap gap-2 text-xs">
-                              <Link
-                                href={`/teaching-documents/curriculum/library/${row.unitId}/scheme_of_work`}
-                                className="font-semibold text-text-secondary hover:underline"
+                            <Link
+                              href={`/teaching-documents/curriculum/library/${row.unitId}/scheme_of_work`}
+                              className="font-semibold text-text-secondary hover:underline"
+                            >
+                              History
+                            </Link>
+
+                            <form action={retireCurriculumDocumentV54} className="inline">
+                              <input
+                                type="hidden"
+                                name="documentId"
+                                value={row.scheme.id}
+                              />
+                              <button
+                                type="submit"
+                                className="font-semibold text-text-muted hover:text-danger"
+                                title="Retire custom scheme to use auto-generated scheme from Course Outline"
                               >
-                                History
-                              </Link>
-
-                              <form action={retireCurriculumDocumentV54}>
-                                <input
-                                  type="hidden"
-                                  name="documentId"
-                                  value={row.scheme.id}
-                                />
-                                <button
-                                  type="submit"
-                                  className="font-semibold text-text-muted hover:text-danger"
-                                  title="Retire custom scheme to use auto-generated scheme from Course Outline"
-                                >
-                                  Retire Custom
-                                </button>
-                              </form>
-                            </div>
-
-                            {row.scheme.sourceFileName ? (
-                              <div className="max-w-[260px] truncate text-[10px] text-text-muted">
-                                {row.scheme.sourceFileName}
-                              </div>
-                            ) : null}
+                                Retire
+                              </button>
+                            </form>
                           </div>
                         ) : row.courseOutline ? (
-                          <div className="space-y-1.5">
-                            <div className="inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700 border border-emerald-200">
-                              <CheckCircle2 className="size-3 text-emerald-600 shrink-0" />
-                              Auto-Generated (Ready)
-                            </div>
-                            <div className="text-[11px] text-text-muted">
-                              14-week schedule derived from v{row.courseOutline.versionNumber} Course Outline with CAT & exam milestones
-                            </div>
-                          </div>
+                          <span
+                            className="inline-flex items-center gap-1.5 rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700"
+                            title={`14-week schedule derived from v${row.courseOutline.versionNumber} Course Outline`}
+                          >
+                            <CheckCircle2 className="size-3 shrink-0 text-emerald-600" />
+                            Auto-Generated
+                          </span>
                         ) : (
-                          <div className="text-xs text-text-muted">
+                          <span className="text-xs text-text-muted">
                             Requires Course Outline
-                          </div>
+                          </span>
                         )}
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ),
                 )}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
+          </TableContainer>
         </section>
       )}
     </div>

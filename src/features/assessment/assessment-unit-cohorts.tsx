@@ -4,6 +4,16 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, UsersRound } from 'lucide-react';
 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+
 interface UnitCohort {
   id: string;
   code: string;
@@ -101,27 +111,26 @@ export function AssessmentUnitCohorts({ unit, periodName, periodId, cohorts }: A
             </div>
           </div>
 
-          <div className="max-h-[34rem] overflow-auto rounded-lg border border-border">
-            <table className="w-full min-w-[560px] table-fixed text-left text-xs">
-              <colgroup><col className="w-14" /><col className="w-[32%]" /><col /></colgroup>
-              <thead className="sticky top-0 border-b border-border bg-surface-subtle text-[10px] font-medium uppercase tracking-wide text-slate-500">
-                <tr>
-                  <th className="px-3 py-2.5">No.</th>
-                  <th className="px-3 py-2.5">Admission number</th>
-                  <th className="px-3 py-2.5">Student name</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
+          <TableContainer label="Registered students" className="max-h-[34rem] overflow-y-auto shadow-none">
+            <Table>
+              <TableHeader className="sticky top-0 z-10">
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-14">No.</TableHead>
+                  <TableHead>Admission number</TableHead>
+                  <TableHead>Student name</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {selectedCohort.students.map((student, index) => (
-                  <tr key={student.id} className="hover:bg-surface-subtle/50">
-                    <td className="px-3 py-2.5 tabular-nums text-slate-400">{index + 1}</td>
-                    <td className="whitespace-nowrap px-3 py-2.5 font-medium text-slate-600">{student.admissionNumber}</td>
-                    <td className="truncate px-3 py-2.5 text-slate-600" title={student.fullName}>{student.fullName}</td>
-                  </tr>
+                  <TableRow key={student.id}>
+                    <TableCell className="tabular-nums text-text-muted">{index + 1}</TableCell>
+                    <TableCell className="font-mono text-text-secondary">{student.admissionNumber}</TableCell>
+                    <TableCell className="font-semibold text-text-primary">{student.fullName}</TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
+          </TableContainer>
         </section>
       ) : null}
     </div>

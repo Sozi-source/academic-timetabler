@@ -61,24 +61,32 @@ const columns: ColumnDef<Trainer>[] = [
     accessorKey: 'fullName',
     header: 'Trainer',
     cell: ({ row }) => (
-      <div className="min-w-0">
-        <Link
-          href={`/trainers/${row.original.id}`}
-          className="break-words text-[12px] font-semibold text-text-primary transition hover:text-primary hover:underline xl:text-sm block"
-        >
-          {row.original.fullName}
-        </Link>
-        {row.original.homeDepartment ? (
-          <p className="mt-0.5 break-words text-[10px] text-text-muted xl:text-xs">
-            {row.original.homeDepartment}
-          </p>
-        ) : null}
-        {row.original.specialization ? (
-          <p className="mt-0.5 break-words text-[10px] text-text-muted xl:text-xs">
-            {row.original.specialization}
-          </p>
-        ) : null}
-      </div>
+      <Link
+        href={`/trainers/${row.original.id}`}
+        className="font-semibold text-text-primary transition hover:text-primary hover:underline"
+      >
+        {row.original.fullName}
+      </Link>
+    ),
+  },
+  {
+    id: 'department',
+    accessorFn: (row) => row.homeDepartment ?? '',
+    header: 'Department',
+    cell: ({ row }) => (
+      <span className="text-text-secondary">
+        {row.original.homeDepartment || '—'}
+      </span>
+    ),
+  },
+  {
+    id: 'specialization',
+    accessorFn: (row) => row.specialization ?? '',
+    header: 'Specialization',
+    cell: ({ row }) => (
+      <span className="text-text-secondary">
+        {row.original.specialization || '—'}
+      </span>
     ),
   },
   {
@@ -93,29 +101,25 @@ const columns: ColumnDef<Trainer>[] = [
     accessorFn: (row) => row.workloadRole,
     header: 'Role / load',
     cell: ({ row }) => (
-      <div className="min-w-0">
-        <form action={setTrainerWorkloadRoleAction} className="flex min-w-0 items-center gap-1.5">
-          <input type="hidden" name="id" value={row.original.id} />
-          <Select
-            name="workloadRole"
-            aria-label={`Workload role for ${row.original.fullName}`}
-            defaultValue={row.original.workloadRole}
-            className="h-8 min-w-0 max-w-[12rem] text-[11px] xl:h-9 xl:text-xs"
-          >
-            {workloadRoleOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}{option.target === null ? '' : ` · ${option.target}h`}
-              </option>
-            ))}
-          </Select>
-          <Button type="submit" variant="outline" size="sm" className="min-h-8 px-2 py-1">
-            Save
-          </Button>
-        </form>
-        <p className="mt-1 text-[10px] font-medium text-text-muted xl:text-xs">
-          {row.original.normalWeeklyHours}h/week
-        </p>
-      </div>
+      <form action={setTrainerWorkloadRoleAction} className="inline-flex items-center gap-1.5">
+        <input type="hidden" name="id" value={row.original.id} />
+        <Select
+          name="workloadRole"
+          aria-label={`Workload role for ${row.original.fullName}`}
+          defaultValue={row.original.workloadRole}
+          className="h-8 w-auto text-xs"
+        >
+          {workloadRoleOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}{option.target === null ? '' : ` · ${option.target}h`}
+            </option>
+          ))}
+        </Select>
+        <Button type="submit" variant="outline" size="sm" className="min-h-8 px-2 py-1">
+          Save
+        </Button>
+        <span className="text-xs text-text-muted">{row.original.normalWeeklyHours}h/wk</span>
+      </form>
     ),
   },
   {
@@ -234,6 +238,7 @@ export function TrainerTable({
       emptyTitle={filtersActive ? 'No matching trainers' : 'No trainers registered'}
       emptyDescription={filtersActive ? 'Adjust or clear the filters.' : 'Add a trainer to begin.'}
       initialPageSize={24}
+      initialHiddenColumns={['department', 'specialization']}
       exportFileName="trainers"
       renderCard={(trainer) => {
         const access = accessByTrainerId.get(trainer.id);

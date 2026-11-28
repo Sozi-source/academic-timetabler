@@ -844,11 +844,11 @@ export function ConsolidatedMarksheetViewer({
                     {cohortData.units.map((unit) => (
                       <th
                         key={unit.id}
-                        className="px-2.5 py-2.5 text-center min-w-[95px] whitespace-nowrap border-r border-slate-200/80 bg-slate-50/80"
+                        className="px-2.5 py-2.5 text-center whitespace-nowrap border-r border-slate-200/80 bg-slate-50/80"
                         title={`${unit.code} - ${unit.name}`}
                       >
                         <div className="font-extrabold text-slate-900">{unit.code}</div>
-                        <div className="text-[9px] font-medium text-slate-500 max-w-[110px] truncate mx-auto">
+                        <div className="text-[10px] font-medium text-slate-500 whitespace-nowrap">
                           {unit.name}
                         </div>
                       </th>

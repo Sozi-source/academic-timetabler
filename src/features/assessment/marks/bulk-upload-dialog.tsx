@@ -24,6 +24,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import type {
   BulkMarksValidationSummary,
   MatchedBulkStudentResult,
@@ -372,46 +381,46 @@ export function BulkUploadDialog({
                     Matched Students Preview ({summary.matchedCount})
                   </p>
                 </div>
-                <div className="max-h-60 overflow-x-auto rounded-xl border border-slate-200 bg-white">
-                  <table className="w-full text-left text-xs">
-                    <thead className="sticky top-0 border-b border-slate-200 bg-slate-50 text-[11px] font-bold text-slate-600">
-                      <tr>
-                        <th className="px-3 py-2 text-center">No.</th>
-                        <th className="px-3 py-2">Admission No.</th>
-                        <th className="px-3 py-2">Student Name</th>
-                        <th className="px-2.5 py-2 text-center">Assig /5</th>
-                        <th className="px-2.5 py-2 text-center">Pres /10</th>
-                        <th className="px-2.5 py-2 text-center">RAT /15</th>
-                        <th className="px-2.5 py-2 text-center">CAT /15</th>
-                        <th className="px-2.5 py-2 text-center">Exam /70</th>
-                        <th className="px-2.5 py-2 text-center">Total /100</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 font-mono text-[11px]">
+                <TableContainer label="Matched students preview" className="max-h-60 overflow-y-auto shadow-none">
+                  <Table>
+                    <TableHeader className="sticky top-0 z-10">
+                      <TableRow className="hover:bg-transparent">
+                        <TableHead className="text-center">No.</TableHead>
+                        <TableHead>Admission No.</TableHead>
+                        <TableHead>Student Name</TableHead>
+                        <TableHead className="text-center">Assig /5</TableHead>
+                        <TableHead className="text-center">Pres /10</TableHead>
+                        <TableHead className="text-center">RAT /15</TableHead>
+                        <TableHead className="text-center">CAT /15</TableHead>
+                        <TableHead className="text-center">Exam /70</TableHead>
+                        <TableHead className="text-center">Total /100</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody className="font-mono text-xs">
                       {summary.matched.map((row, idx) => (
-                        <tr key={row.studentId} className="hover:bg-slate-50/50">
-                          <td className="px-3 py-1.5 text-center font-sans text-slate-400">
+                        <TableRow key={row.studentId}>
+                          <TableCell className="text-center font-sans text-text-muted">
                             {idx + 1}
-                          </td>
-                          <td className="px-3 py-1.5 font-sans font-semibold text-slate-900">
+                          </TableCell>
+                          <TableCell className="font-sans font-semibold text-text-primary">
                             {row.admissionNumber}
-                          </td>
-                          <td className="px-3 py-1.5 font-sans text-slate-800">
+                          </TableCell>
+                          <TableCell className="font-sans text-text-primary">
                             {row.fullName}
-                          </td>
-                          <td className="px-2.5 py-1.5 text-center text-slate-700">
+                          </TableCell>
+                          <TableCell className="text-center text-text-secondary">
                             {row.assignment ?? '—'}
-                          </td>
-                          <td className="px-2.5 py-1.5 text-center text-slate-700">
+                          </TableCell>
+                          <TableCell className="text-center text-text-secondary">
                             {row.presentation ?? '—'}
-                          </td>
-                          <td className="px-2.5 py-1.5 text-center text-slate-700">
+                          </TableCell>
+                          <TableCell className="text-center text-text-secondary">
                             {row.rat ?? '—'}
-                          </td>
-                          <td className="px-2.5 py-1.5 text-center text-slate-700">
+                          </TableCell>
+                          <TableCell className="text-center text-text-secondary">
                             {row.cat ?? '—'}
-                          </td>
-                          <td className="px-2.5 py-1.5 text-center">
+                          </TableCell>
+                          <TableCell className="text-center">
                             {row.attendanceStatus === 'absent' ? (
                               <span className="rounded bg-slate-100 px-1 py-0.5 text-[10px] font-sans font-bold text-slate-700">
                                 AB
@@ -419,15 +428,15 @@ export function BulkUploadDialog({
                             ) : (
                               row.exam ?? '—'
                             )}
-                          </td>
-                          <td className="px-2.5 py-1.5 text-center font-bold text-slate-900">
+                          </TableCell>
+                          <TableCell className="text-center font-bold text-text-primary">
                             {row.finalTotal ?? '—'}
-                          </td>
-                        </tr>
+                          </TableCell>
+                        </TableRow>
                       ))}
-                    </tbody>
-                  </table>
-                </div>
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               </div>
             </div>
           )}

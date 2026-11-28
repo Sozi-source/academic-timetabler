@@ -10,6 +10,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 import { batchDropStudentUnitRegistrations, dropStudentUnitRegistration } from './actions';
 import type { DepartmentRegistrationEditor } from './types';
@@ -190,20 +199,11 @@ export function StudentUnitRegistrationLines({
           ) : null}
         </div>
         {context.registrationHistory.length ? (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] table-fixed text-left text-xs">
-              <colgroup>
-                <col className="w-10" />
-                <col className="w-[17%]" />
-                <col className="w-[16%]" />
-                <col className="w-[14%]" />
-                <col className="w-[27%]" />
-                <col className="w-[15%]" />
-                <col className="w-[7%]" />
-              </colgroup>
-              <thead className="border-b border-border bg-surface-subtle text-[10px] font-medium uppercase tracking-wide text-text-muted">
-                <tr>
-                  <th className="w-10 px-3 py-2.5 text-center">
+          <TableContainer embedded label="Registration history">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-10 text-center">
                     {currentRegistrations.length > 0 ? (
                       <input
                         type="checkbox"
@@ -216,16 +216,16 @@ export function StudentUnitRegistrationLines({
                         className="size-3.5 rounded border-border text-primary focus:ring-primary"
                       />
                     ) : null}
-                  </th>
-                  <th className="px-3 py-2.5">Academic year</th>
-                  <th className="px-3 py-2.5">Student stage</th>
-                  <th className="px-3 py-2.5">Unit code</th>
-                  <th className="px-3 py-2.5">Unit name</th>
-                  <th className="px-3 py-2.5">Status</th>
-                  <th className="px-3 py-2.5"><span className="sr-only">Actions</span></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
+                  </TableHead>
+                  <TableHead>Academic year</TableHead>
+                  <TableHead>Student stage</TableHead>
+                  <TableHead>Unit code</TableHead>
+                  <TableHead>Unit name</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead><span className="sr-only">Actions</span></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {context.registrationHistory.map((registration) => {
                   const isCurrent = registration.academicPeriodId === context.period.id && registration.registrationStatus === 'registered';
                   const isEditing = editing?.unitId === registration.unitId && isCurrent;
@@ -236,7 +236,7 @@ export function StudentUnitRegistrationLines({
                   const rowUnits = context.units.filter((unit) => unit.stageId === stageId && (!occupiedIds.has(unit.id) || unit.id === registration.unitId) && (!chosenIds.has(unit.id) || unit.id === registration.unitId));
 
                   return (
-                    <tr
+                    <TableRow
                       key={`${registration.academicPeriodId}:${registration.unitId}`}
                       className={
                         isSelected
@@ -246,7 +246,7 @@ export function StudentUnitRegistrationLines({
                             : undefined
                       }
                     >
-                      <td className="w-10 px-3 py-2.5 text-center">
+                      <TableCell className="w-10 text-center">
                         {isCurrent ? (
                           <input
                             type="checkbox"
@@ -256,28 +256,28 @@ export function StudentUnitRegistrationLines({
                             className="size-3.5 rounded border-border text-primary focus:ring-primary"
                           />
                         ) : null}
-                      </td>
-                      <td className="px-3 py-2.5 text-text-secondary">{registration.academicPeriodName}</td>
-                      <td className="px-3 py-2.5 text-text-secondary">
+                      </TableCell>
+                      <TableCell className="text-text-secondary">{registration.academicPeriodName}</TableCell>
+                      <TableCell className="text-text-secondary">
                         {isEditing ? (
                           <select aria-label="Edit unit stage" value={editing.stageId} onChange={(event) => setEditing({ ...editing, stageId: event.target.value, replacementId: '' })} className="h-8 w-full rounded-md border border-border bg-surface px-2 text-xs">
                             <option value="">Select stage</option>
                             {context.stageOptions.map((stage) => <option key={stage.id} value={stage.id}>{stage.name}</option>)}
                           </select>
                         ) : replacement?.stageName ?? registration.stageName}
-                      </td>
-                      <td className="px-3 py-2.5 font-mono text-text-secondary">{isEditing ? registration.unitCode : replacement?.code ?? registration.unitCode}</td>
-                      <td className="px-3 py-2.5 text-text-primary">
+                      </TableCell>
+                      <TableCell className="font-mono text-text-secondary">{isEditing ? registration.unitCode : replacement?.code ?? registration.unitCode}</TableCell>
+                      <TableCell className="text-text-primary">
                         {isEditing ? (
                           <select aria-label="Edit registered unit" value={editing.replacementId} onChange={(event) => setEditing({ ...editing, replacementId: event.target.value })} className="h-8 w-full rounded-md border border-border bg-surface px-2 text-xs" disabled={!editing.stageId}>
                             <option value="">Select unit</option>
                             {rowUnits.map((unit) => <option key={unit.id} value={unit.id}>{unit.code} · {unit.name}</option>)}
                           </select>
                         ) : replacement?.name ?? registration.unitName}
-                      </td>
-                      <td className="px-3 py-2.5">
+                      </TableCell>
+                      <TableCell>
                         {isEditing ? (
-                          <div className="flex items-center gap-2">
+                          <div className="inline-flex items-center gap-2">
                             <button type="button" disabled={!editing.replacementId} onClick={() => { setReplacements((current) => ({ ...current, [registration.unitId]: editing.replacementId })); setEditing(null); }} className="font-medium text-primary disabled:opacity-40">Apply</button>
                             <button type="button" onClick={() => setEditing(null)} className="text-text-muted hover:text-text-primary">Cancel</button>
                           </div>
@@ -287,10 +287,10 @@ export function StudentUnitRegistrationLines({
                             {registration.registrationStatus.replaceAll('_', ' ')}
                           </span>
                         )}
-                      </td>
-                      <td className="px-3 py-2.5 text-right">
+                      </TableCell>
+                      <TableCell className="text-right">
                         {isCurrent && !isEditing ? (
-                          <div className="flex items-center justify-end">
+                          <div className="inline-flex items-center justify-end">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <button
@@ -343,13 +343,13 @@ export function StudentUnitRegistrationLines({
                             </DropdownMenu>
                           </div>
                         ) : null}
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   );
                 })}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
+          </TableContainer>
         ) : (
           <p className="px-4 py-5 text-xs text-text-muted">No previous unit registrations are recorded for this student.</p>
         )}
@@ -364,60 +364,49 @@ export function StudentUnitRegistrationLines({
         </div>
         <input type="hidden" name="academicPeriodId" value={context.period.id} />
         {selectedCurrentIds.map((unitId) => <input key={unitId} type="hidden" name="unitIds" value={unitId} />)}
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[760px] table-fixed text-left text-xs">
-            <colgroup>
-              <col className="w-[19%]" />
-              <col className="w-[18%]" />
-              <col className="w-[16%]" />
-              <col className="w-[32%]" />
-              <col className="w-[15%]" />
-            </colgroup>
-            <thead className="border-b border-border bg-surface-subtle text-[10px] font-medium uppercase tracking-wide text-text-muted">
-              <tr>
-                <th className="px-3 py-2.5">Academic year</th>
-                <th className="px-3 py-2.5">Student stage</th>
-                <th className="px-3 py-2.5">Unit code</th>
-                <th className="px-3 py-2.5">Unit name</th>
-                <th className="px-3 py-2.5">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
+        <TableContainer embedded label="Add units to registration">
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead>Student stage</TableHead>
+                <TableHead>Unit</TableHead>
+                <TableHead>Unit name</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {lines.map((line) => {
                 const stageUnits = context.units.filter((unit) => unit.stageId === line.stageId && !currentIds.has(unit.id));
                 const unit = context.units.find((candidate) => candidate.id === line.unitId);
                 const otherChosenIds = new Set(lines.filter((other) => other.id !== line.id).map((other) => other.unitId));
                 return (
-                  <tr key={line.id}>
-                    <td className="px-3 py-2">
-                      <span className="mb-1 block text-[10px] text-text-muted">{context.period.name}</span>
-                    </td>
-                    <td className="px-3 py-2">
-                      <select aria-label="Unit stage" value={line.stageId} onChange={(event) => updateLine(line.id, { stageId: event.target.value, unitId: '' })} className="h-9 w-full rounded-md border border-border bg-surface px-2 text-xs">
+                  <TableRow key={line.id}>
+                    <TableCell>
+                      <select aria-label="Unit stage" value={line.stageId} onChange={(event) => updateLine(line.id, { stageId: event.target.value, unitId: '' })} className="h-9 w-full min-w-36 rounded-md border border-border bg-surface px-2 text-xs">
                         <option value="">Select stage</option>
                         {context.stageOptions.map((stage) => <option key={stage.id} value={stage.id}>{stage.name}</option>)}
                       </select>
-                    </td>
-                    <td className="px-3 py-2">
-                      <select aria-label="Unit to add" value={line.unitId} onChange={(event) => updateLine(line.id, { unitId: event.target.value })} className="h-9 w-full rounded-md border border-border bg-surface px-2 text-xs disabled:bg-surface-subtle" disabled={!line.stageId} required={Boolean(line.stageId)}>
+                    </TableCell>
+                    <TableCell>
+                      <select aria-label="Unit to add" value={line.unitId} onChange={(event) => updateLine(line.id, { unitId: event.target.value })} className="h-9 w-full min-w-44 rounded-md border border-border bg-surface px-2 text-xs disabled:bg-surface-subtle" disabled={!line.stageId} required={Boolean(line.stageId)}>
                         <option value="">Select unit</option>
                         {stageUnits.filter((candidate) => !otherChosenIds.has(candidate.id)).map((candidate) => <option key={candidate.id} value={candidate.id}>{candidate.code} · {candidate.name}</option>)}
                       </select>
                       {line.unitId ? <input type="hidden" name="unitIds" value={line.unitId} /> : null}
-                    </td>
-                    <td className="px-3 py-2 text-text-primary">{unit?.name ?? '—'}</td>
-                    <td className="px-3 py-2">
-                      <div className="flex items-center justify-between gap-2 text-text-muted">
+                    </TableCell>
+                    <TableCell className="text-text-primary">{unit?.name ?? '—'}</TableCell>
+                    <TableCell>
+                      <div className="inline-flex items-center justify-between gap-3 text-text-muted">
                         <span>{line.unitId ? 'Ready to add' : 'Choose unit'}</span>
                         {lines.length > 1 ? <button type="button" aria-label="Remove unit line" onClick={() => setLines((current) => current.filter((other) => other.id !== line.id))} className="text-text-muted hover:text-danger">Remove</button> : null}
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
+        </TableContainer>
       </section>
 
       {hasOffStageSelection ? (

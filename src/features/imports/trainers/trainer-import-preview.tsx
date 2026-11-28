@@ -7,6 +7,15 @@ import {
 import {
   Badge,
 } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 import type {
   TrainerImportStagedRow,
@@ -101,108 +110,66 @@ export function TrainerImportPreview({
   rows: TrainerImportStagedRow[];
 }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-      <div className="w-full overflow-hidden">
-        <table className="w-full table-fixed border-collapse text-left text-sm">
-          <thead className="bg-surface-subtle text-xs uppercase tracking-wide text-text-muted">
-            <tr>
-              <th className="px-3 py-2.5">
-                Row
-              </th>
-              <th className="px-3 py-2.5">
-                Trainer
-              </th>
-              <th className="px-3 py-2.5">
-                School / Department
-              </th>
-              <th className="px-3 py-2.5">
-                Employment
-              </th>
-              <th className="px-3 py-2.5">
-                Workload
-              </th>
-              <th className="px-3 py-2.5">
-                Status
-              </th>
-              <th className="px-3 py-2.5">
-                Validation result
-              </th>
-            </tr>
-          </thead>
+    <TableContainer label="Trainer import preview">
+      <Table>
+        <TableHeader>
+          <TableRow className="hover:bg-transparent">
+            <TableHead>Row</TableHead>
+            <TableHead>Staff No.</TableHead>
+            <TableHead>Trainer</TableHead>
+            <TableHead>School / Department</TableHead>
+            <TableHead>Employment</TableHead>
+            <TableHead>Workload</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Validation result</TableHead>
+          </TableRow>
+        </TableHeader>
 
-          <tbody className="divide-y divide-border-soft">
-            {rows.map((row) => {
-              const trainer =
-                row.normalizedData;
+        <TableBody>
+          {rows.map((row) => {
+            const trainer = row.normalizedData;
 
-              return (
-                <tr key={row.id}>
-                  <td className="whitespace-nowrap px-4 py-4 font-medium text-text-primary">
-                    {row.sourceRowNumber}
-                  </td>
-
-                  <td className="min-w-64 px-4 py-4">
-                    <p className="font-semibold text-text-primary">
-                      {'fullName' in trainer
-                        ? trainer.fullName
-                        : String(
-                            row.sourceData[
-                              'Full Name'
-                            ] ?? 'Unnamed trainer',
-                          )}
-                    </p>
-
-                    <p className="mt-1 text-xs text-text-muted">
-                      {'staffNumber' in trainer
-                        ? trainer.staffNumber
-                        : String(
-                            row.sourceData[
-                              'Staff Number'
-                            ] ?? '',
-                          )}
-                    </p>
-                  </td>
-
-                  <td className="whitespace-nowrap px-4 py-4 text-text-secondary">
-                    {'departmentCode' in trainer
-                      ? trainer.departmentCode
-                      : String(
-                          row.sourceData[
-                            'School / Department Code'
-                          ] ?? '—',
-                        )}
-                  </td>
-
-                  <td className="whitespace-nowrap px-4 py-4 text-text-secondary">
-                    {'employmentType' in trainer
-                      ? trainer.employmentType
-                      : String(
-                          row.sourceData[
-                            'Employment Type'
-                          ] ?? '',
-                        )}
-                  </td>
-
-                  <td className="whitespace-nowrap px-4 py-4 text-text-secondary">
-                    {'normalWeeklyHours' in trainer
-                      ? `${trainer.normalWeeklyHours}h target / ${trainer.maximumDailyHours}h daily limit`
-                      : '—'}
-                  </td>
-
-                  <td className="whitespace-nowrap px-4 py-4">
-                    {getStatusBadge(row.status)}
-                  </td>
-
-                  <td className="min-w-72 px-4 py-4 text-sm text-text-muted">
-                    {getErrorText(row) ||
-                      'No validation issues.'}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
+            return (
+              <TableRow key={row.id}>
+                <TableCell className="font-medium text-text-primary">
+                  {row.sourceRowNumber}
+                </TableCell>
+                <TableCell className="font-mono text-xs text-text-muted">
+                  {'staffNumber' in trainer
+                    ? trainer.staffNumber
+                    : String(row.sourceData['Staff Number'] ?? '')}
+                </TableCell>
+                <TableCell className="font-semibold text-text-primary">
+                  {'fullName' in trainer
+                    ? trainer.fullName
+                    : String(row.sourceData['Full Name'] ?? 'Unnamed trainer')}
+                </TableCell>
+                <TableCell className="text-text-secondary">
+                  {'departmentCode' in trainer
+                    ? trainer.departmentCode
+                    : String(row.sourceData['School / Department Code'] ?? '—')}
+                </TableCell>
+                <TableCell className="text-text-secondary">
+                  {'employmentType' in trainer
+                    ? trainer.employmentType
+                    : String(row.sourceData['Employment Type'] ?? '')}
+                </TableCell>
+                <TableCell className="text-text-secondary">
+                  {'normalWeeklyHours' in trainer
+                    ? `${trainer.normalWeeklyHours}h target / ${trainer.maximumDailyHours}h daily limit`
+                    : '—'}
+                </TableCell>
+                <TableCell>
+                  {getStatusBadge(row.status)}
+                </TableCell>
+                <TableCell className="text-text-muted">
+                  {getErrorText(row) || 'No validation issues.'}
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }

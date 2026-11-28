@@ -13,6 +13,15 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
   attendanceRateLabel,
   COLLEGE_MINIMUM_ATTENDANCE_PERCENT,
   getAttendanceBadgeVariant,
@@ -263,62 +272,60 @@ export function HodAttendanceView({
             />
           ) : (
             <div className="overflow-hidden rounded-xl border border-border bg-white shadow-2xs">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-[11px]">
-                  <thead className="border-b border-border bg-surface-subtle text-[9px] font-bold uppercase tracking-wider text-text-muted">
-                    <tr>
-                      <th className="px-3.5 py-2.5">Admission No</th>
-                      <th className="px-3.5 py-2.5">Student Name</th>
-                      <th className="px-3 py-2.5">Cohort</th>
-                      <th className="px-3.5 py-2.5">Unit</th>
-                      <th className="px-2.5 py-2.5 text-center">Completed</th>
-                      <th className="px-2.5 py-2.5 text-center">Present</th>
-                      <th className="px-2.5 py-2.5 text-center">Absent</th>
-                      <th className="px-3.5 py-2.5 text-right">Attendance Rate</th>
-                    </tr>
-                  </thead>
+              <TableContainer embedded label="Student attendance analytics">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead>Admission No</TableHead>
+                      <TableHead>Student Name</TableHead>
+                      <TableHead>Cohort</TableHead>
+                      <TableHead>Unit</TableHead>
+                      <TableHead className="text-center">Completed</TableHead>
+                      <TableHead className="text-center">Present</TableHead>
+                      <TableHead className="text-center">Absent</TableHead>
+                      <TableHead className="text-right">Attendance Rate</TableHead>
+                    </TableRow>
+                  </TableHeader>
 
-                  <tbody className="divide-y divide-border">
+                  <TableBody>
                     {filteredStudents.map((s, idx) => {
                       const standing = getAttendanceStanding(s.attendanceRate);
                       const isAtRisk = standing === 'at_risk';
 
                       return (
-                        <tr
+                        <TableRow
                           key={`${s.studentId}-${s.unitId}-${idx}`}
-                          className={`transition-colors hover:bg-slate-50/50 ${
-                            isAtRisk ? 'bg-rose-50/30' : ''
-                          }`}
+                          className={isAtRisk ? 'bg-rose-50/30' : undefined}
                         >
-                          <td className="px-3.5 py-2.5 font-mono text-[11px] text-text-secondary whitespace-nowrap">
+                          <TableCell className="font-mono text-xs text-text-secondary">
                             {s.admissionNumber || '—'}
-                          </td>
+                          </TableCell>
 
-                          <td className="px-3.5 py-2.5 font-semibold text-text-primary">
+                          <TableCell className="font-semibold text-text-primary">
                             {s.fullName}
-                          </td>
+                          </TableCell>
 
-                          <td className="px-3 py-2.5 text-text-muted text-[10.5px]">
+                          <TableCell className="text-text-secondary">
                             {s.cohortName}
-                          </td>
+                          </TableCell>
 
-                          <td className="px-3.5 py-2.5 font-medium text-text-primary">
+                          <TableCell className="font-medium text-text-primary">
                             {s.unitName}
-                          </td>
+                          </TableCell>
 
-                          <td className="px-2.5 py-2.5 text-center font-mono text-text-secondary">
+                          <TableCell className="text-center font-mono text-text-secondary">
                             {s.completedSessions}
-                          </td>
+                          </TableCell>
 
-                          <td className="px-2.5 py-2.5 text-center">
-                            <span className="inline-block min-w-[20px] rounded bg-emerald-50 px-1 py-0.5 font-mono font-bold text-emerald-700">
+                          <TableCell className="text-center">
+                            <span className="inline-block min-w-[20px] rounded bg-emerald-50 px-1.5 py-0.5 font-mono font-bold text-emerald-700">
                               {s.presentCount}
                             </span>
-                          </td>
+                          </TableCell>
 
-                          <td className="px-2.5 py-2.5 text-center">
+                          <TableCell className="text-center">
                             <span
-                              className={`inline-block min-w-[20px] rounded px-1 py-0.5 font-mono font-bold ${
+                              className={`inline-block min-w-[20px] rounded px-1.5 py-0.5 font-mono font-bold ${
                                 s.absentCount > 0
                                   ? 'bg-rose-100 text-rose-700'
                                   : 'bg-slate-100 text-slate-600'
@@ -326,12 +333,12 @@ export function HodAttendanceView({
                             >
                               {s.absentCount}
                             </span>
-                          </td>
+                          </TableCell>
 
-                          <td className="px-3.5 py-2.5 text-right">
+                          <TableCell className="text-right">
                             <div className="inline-flex items-center gap-1.5">
                               {isAtRisk ? (
-                                <span className="inline-flex items-center gap-1 rounded-md border border-rose-200 bg-rose-100 px-2 py-0.5 font-mono text-[10.5px] font-bold text-rose-800">
+                                <span className="inline-flex items-center gap-1 rounded-md border border-rose-200 bg-rose-100 px-2 py-0.5 font-mono text-[11px] font-bold text-rose-800">
                                   <AlertTriangle className="size-3 text-rose-600" />
                                   {attendanceRateLabel(s.attendanceRate)} · At Risk
                                 </span>
@@ -342,15 +349,15 @@ export function HodAttendanceView({
                                 </Badge>
                               )}
                             </div>
-                          </td>
-                        </tr>
+                          </TableCell>
+                        </TableRow>
                       );
                     })}
-                  </tbody>
-                </table>
-              </div>
+                  </TableBody>
+                </Table>
+              </TableContainer>
 
-              <div className="border-t border-border bg-surface-subtle/50 px-4 py-2.5 text-[10.5px] text-text-muted flex items-center justify-between">
+              <div className="border-t border-border bg-surface-subtle/50 px-4 py-2.5 text-xs text-text-muted flex items-center justify-between">
                 <span>
                   Showing {filteredStudents.length} of {students.length} student record{students.length === 1 ? '' : 's'}
                 </span>
@@ -371,56 +378,57 @@ export function HodAttendanceView({
               description="Analytics will appear after trainers complete class attendance in the active academic period."
             />
           ) : (
-            <div className="overflow-hidden rounded-xl border border-border bg-white shadow-2xs">
-              <div className="hidden border-b border-border bg-surface-subtle px-4 py-2.5 text-[10px] font-bold uppercase tracking-wide text-text-muted lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(8rem,.7fr)_minmax(8rem,.7fr)_6rem_7rem_7rem_7rem] lg:gap-3">
-                <span>Unit</span>
-                <span>Cohort</span>
-                <span>Trainer</span>
-                <span className="text-center">Sessions</span>
-                <span className="text-center">Present</span>
-                <span className="text-center">Absent</span>
-                <span className="text-right">Rate</span>
-              </div>
+            <TableContainer label="Unit attendance overview">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead>Unit</TableHead>
+                    <TableHead>Cohort</TableHead>
+                    <TableHead>Trainer</TableHead>
+                    <TableHead className="text-center">Sessions</TableHead>
+                    <TableHead className="text-center">Present</TableHead>
+                    <TableHead className="text-center">Absent</TableHead>
+                    <TableHead className="text-right">Rate</TableHead>
+                  </TableRow>
+                </TableHeader>
 
-              <div className="divide-y divide-border">
-                {aggregates.map((item) => (
-                  <article
-                    key={`${item.cohortId}:${item.unitId}:${item.trainerId}`}
-                    className="grid gap-2 px-4 py-3 lg:grid-cols-[minmax(0,1.1fr)_minmax(8rem,.7fr)_minmax(8rem,.7fr)_6rem_7rem_7rem_7rem] lg:items-center lg:gap-3 hover:bg-slate-50/50 transition-colors"
-                  >
-                    <p className="text-xs font-semibold text-text-primary">
-                      {item.unitName}
-                    </p>
+                <TableBody>
+                  {aggregates.map((item) => (
+                    <TableRow key={`${item.cohortId}:${item.unitId}:${item.trainerId}`}>
+                      <TableCell className="font-semibold text-text-primary">
+                        {item.unitName}
+                      </TableCell>
 
-                    <p className="text-[11px] text-text-secondary">
-                      {item.cohortName}
-                    </p>
+                      <TableCell className="text-text-secondary">
+                        {item.cohortName}
+                      </TableCell>
 
-                    <p className="text-[11px] text-text-secondary">
-                      {item.trainerName}
-                    </p>
+                      <TableCell className="text-text-secondary">
+                        {item.trainerName}
+                      </TableCell>
 
-                    <p className="text-[11px] font-mono text-center text-text-primary">
-                      {item.completedSessions}
-                    </p>
+                      <TableCell className="text-center font-mono text-text-primary">
+                        {item.completedSessions}
+                      </TableCell>
 
-                    <p className="text-[11px] font-mono text-center font-bold text-emerald-700">
-                      {item.presentCount}
-                    </p>
+                      <TableCell className="text-center font-mono font-bold text-emerald-700">
+                        {item.presentCount}
+                      </TableCell>
 
-                    <p className="text-[11px] font-mono text-center font-bold text-rose-700">
-                      {item.absentCount}
-                    </p>
+                      <TableCell className="text-center font-mono font-bold text-rose-700">
+                        {item.absentCount}
+                      </TableCell>
 
-                    <div className="lg:text-right">
-                      <Badge variant={getAttendanceBadgeVariant(item.attendanceRate)}>
-                        {attendanceRateLabel(item.attendanceRate)}
-                      </Badge>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </div>
+                      <TableCell className="text-right">
+                        <Badge variant={getAttendanceBadgeVariant(item.attendanceRate)}>
+                          {attendanceRateLabel(item.attendanceRate)}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
           )}
         </div>
       )}

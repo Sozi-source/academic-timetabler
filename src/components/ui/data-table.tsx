@@ -71,8 +71,8 @@ interface DataTableProps<TData, TValue> {
   /** Column ids hidden on first render. */
   initialHiddenColumns?: string[];
   /**
-   * "fixed" (default) preserves rigid pixel widths from `column.size`.
-   * "auto" lets columns expand fluidly across wide viewports using optional minSize/maxSize hints.
+   * "auto" (default) lets columns size naturally to their single-line content without wrapping or truncation.
+   * "fixed" preserves explicit column pixel widths when explicitly requested.
    */
   layout?: 'fixed' | 'auto';
   /**
@@ -277,7 +277,7 @@ export function DataTable<TData, TValue>({
   stickyHeader = false,
   maxHeightClassName = 'max-h-[70vh]',
   initialHiddenColumns,
-  layout = 'fixed',
+  layout = 'auto',
   renderCard,
   cardGridClassName,
 }: DataTableProps<TData, TValue>) {
@@ -488,19 +488,24 @@ export function DataTable<TData, TValue>({
       ) : (
         <div className="w-full">
           <div
+            tabIndex={0}
+            role="region"
+            aria-label="Data table"
+            data-table-scroll="true"
             className={cn(
-              'min-h-[140px] w-full overflow-x-auto',
+              'min-h-[140px] w-full overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20',
               stickyHeader &&
                 cn('overflow-y-auto', maxHeightClassName),
             )}
           >
             <table
+              data-ui-table="true"
               className={cn(
-                'w-full border-collapse text-left',
+                'w-full border-collapse text-left tabular-nums',
                 layout === 'auto' ? 'table-auto' : 'table-fixed',
               )}
             >
-              <thead className="bg-surface-subtle">
+              <thead className="border-b border-border bg-surface-subtle">
                 {table
                   .getHeaderGroups()
                   .map((headerGroup) => (
@@ -521,11 +526,8 @@ export function DataTable<TData, TValue>({
                           const colMaxSize = header.column.columnDef.maxSize;
                           const widthStyle =
                             layout === 'auto'
-                              ? colMinSize || colMaxSize
-                                ? {
-                                    ...(colMinSize ? { minWidth: `${colMinSize}px` } : {}),
-                                    ...(colMaxSize ? { maxWidth: `${colMaxSize}px` } : {}),
-                                  }
+                              ? colMinSize
+                                ? { minWidth: `${colMinSize}px` }
                                 : undefined
                               : colSize
                                 ? {
@@ -548,7 +550,7 @@ export function DataTable<TData, TValue>({
                                     : undefined
                               }
                               className={cn(
-                                'min-w-0 break-words px-2.5 text-[10px] font-bold uppercase tracking-[0.14em] text-text-primary xl:px-3',
+                                'whitespace-nowrap px-3 text-[11px] font-bold uppercase tracking-[0.08em] text-text-secondary [overflow-wrap:normal] [word-break:normal]',
                                 compact ? 'py-1.5' : 'py-2.5',
                                 stickyHeader &&
                                   'sticky top-0 z-10 bg-surface-subtle shadow-[inset_0_-1px_0_var(--border)]',
@@ -564,7 +566,7 @@ export function DataTable<TData, TValue>({
                                       : undefined
                                   }
                                   className={cn(
-                                    'inline-flex max-w-full items-center gap-1 text-left',
+                                    'inline-flex items-center gap-1 whitespace-nowrap text-left',
                                     canSort &&
                                       'cursor-pointer transition hover:text-primary',
                                   )}
@@ -578,18 +580,18 @@ export function DataTable<TData, TValue>({
                                   {canSort ? (
                                     sorted === 'asc' ? (
                                       <ChevronUp
-                                        className="size-3.5"
+                                        className="size-3.5 shrink-0"
                                         aria-hidden="true"
                                       />
                                     ) : sorted ===
                                       'desc' ? (
                                       <ChevronDown
-                                        className="size-3.5"
+                                        className="size-3.5 shrink-0"
                                         aria-hidden="true"
                                       />
                                     ) : (
                                       <ChevronsUpDown
-                                        className="size-3.5 text-text-subtle"
+                                        className="size-3.5 shrink-0 text-text-subtle"
                                         aria-hidden="true"
                                       />
                                     )
@@ -604,7 +606,7 @@ export function DataTable<TData, TValue>({
                   ))}
               </thead>
 
-              <tbody>
+              <tbody className="divide-y divide-border-soft">
                 {rows.map((row) => (
                   <tr
                     key={row.id}
@@ -613,7 +615,7 @@ export function DataTable<TData, TValue>({
                         ? 'selected'
                         : undefined
                     }
-                    className="border-b border-border-soft transition last:border-b-0 hover:bg-surface-subtle/70 data-[state=selected]:bg-primary-subtle"
+                    className="transition-colors hover:bg-surface-subtle/70 data-[state=selected]:bg-primary-subtle"
                   >
                     {row
                       .getVisibleCells()
@@ -623,11 +625,8 @@ export function DataTable<TData, TValue>({
                         const colMaxSize = cell.column.columnDef.maxSize;
                         const widthStyle =
                           layout === 'auto'
-                            ? colMinSize || colMaxSize
-                              ? {
-                                  ...(colMinSize ? { minWidth: `${colMinSize}px` } : {}),
-                                  ...(colMaxSize ? { maxWidth: `${colMaxSize}px` } : {}),
-                                }
+                            ? colMinSize
+                              ? { minWidth: `${colMinSize}px` }
                               : undefined
                             : colSize
                               ? {
@@ -645,8 +644,8 @@ export function DataTable<TData, TValue>({
                               : cell.column.id === 'actions' ? 'Actions' : cell.column.id}
                             style={widthStyle}
                             className={cn(
-                              'min-w-0 break-words px-2.5 align-middle text-[12px] font-medium leading-5 text-text-primary xl:px-3 xl:text-[13px]',
-                              compact ? 'h-8 py-1' : 'h-11 py-2.5',
+                              'whitespace-nowrap px-3 align-middle text-[13px] font-medium leading-5 text-text-primary [overflow-wrap:normal] [word-break:normal]',
+                              compact ? 'h-9 py-1.5' : 'h-11 py-2.5',
                             )}
                           >
                             {flexRender(

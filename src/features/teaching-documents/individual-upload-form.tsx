@@ -19,6 +19,15 @@ import { Card } from '@/components/ui/card';
 import { Combobox, type ComboboxOption } from '@/components/ui/combobox';
 import { PageHeader } from '@/components/ui/page-header';
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
   parseIndividualCurriculumAction,
   publishIndividualCurriculumAction,
   type IndividualTopicItem,
@@ -453,32 +462,32 @@ export function IndividualUploadForm({
               Weekly Topics Breakdown ({topics.length} items)
             </h4>
 
-            <div className="overflow-x-auto rounded-xl border border-border">
-              <table className="w-full min-w-[500px] text-xs">
-                <thead className="bg-surface-subtle border-b border-border text-text-muted">
-                  <tr>
-                    <th className="px-3 py-2 text-center w-12 font-bold">#</th>
-                    <th className="px-3 py-2 text-left w-2/5 font-bold">Topic Title</th>
-                    <th className="px-3 py-2 text-left font-bold">Sub-topics / Coverage</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
+            <TableContainer label="Weekly topics breakdown" className="shadow-none">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="w-12 text-center">#</TableHead>
+                    <TableHead>Topic Title</TableHead>
+                    <TableHead>Sub-topics / Coverage</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {topics.map((t, idx) => (
-                    <tr key={idx} className="hover:bg-surface-subtle/50 transition">
-                      <td className="px-3 py-2.5 text-center font-bold text-slate-800">
+                    <TableRow key={idx}>
+                      <TableCell className="text-center font-bold text-text-primary">
                         {t.sequence}
-                      </td>
-                      <td className="px-3 py-2.5 font-bold text-slate-900 leading-snug">
+                      </TableCell>
+                      <TableCell className="font-bold text-text-primary">
                         {t.topicTitle}
-                      </td>
-                      <td className="px-3 py-2.5 text-slate-700 leading-relaxed">
+                      </TableCell>
+                      <TableCell className="text-text-secondary">
                         {t.subTopics || '—'}
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                </TableBody>
+              </Table>
+            </TableContainer>
           </div>
 
           {issues.length > 0 && (

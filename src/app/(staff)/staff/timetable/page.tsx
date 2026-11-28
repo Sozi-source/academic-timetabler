@@ -195,7 +195,7 @@ export default async function StaffTimetablePage() {
                                           </span>
                                         </div>
                                         {session.cohortNames.length > 0 && (
-                                          <p className="mt-0.5 text-[10px] font-medium text-slate-700 truncate" title={session.cohortNames.join(', ')}>
+                                          <p className="mt-0.5 text-[10px] font-medium text-slate-700">
                                             {session.cohortNames.join(' · ')}
                                           </p>
                                         )}

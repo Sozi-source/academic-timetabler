@@ -1,8 +1,16 @@
-import type { ReactNode } from 'react';
 import { Ban, CheckCircle2, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 import {
   createCalendarEventAction,
@@ -80,54 +88,51 @@ export function ConstraintWorkspace({
             No constraints configured for this Academic Period.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-left text-xs xl:text-sm">
-              <thead className="bg-surface-subtle text-text-secondary">
-                <tr>
-                  <Th>Subject</Th>
-                  <Th>Rule</Th>
-                  <Th>When</Th>
-                  <Th>Reason</Th>
-                  <Th>Status</Th>
-                  <Th>Actions</Th>
-                </tr>
-              </thead>
+          <TableContainer embedded label="Constraint register">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead>Subject</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Rule</TableHead>
+                  <TableHead>When</TableHead>
+                  <TableHead>Reason</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
 
-              <tbody>
+              <TableBody>
                 {data.constraints.map((item) => (
-                  <tr key={item.id} className="border-t border-border">
-                    <Td>
-                      <div className="font-medium text-text-primary">
-                        {item.subjectLabel}
-                      </div>
-                      <div className="mt-0.5 text-[11px] text-text-muted xl:text-xs">
-                        {subjectLabels[item.subjectType]}
-                      </div>
-                    </Td>
+                  <TableRow key={item.id}>
+                    <TableCell className="font-semibold text-text-primary">
+                      {item.subjectLabel}
+                    </TableCell>
 
-                    <Td>
-                      <div className="font-medium text-text-primary">
-                        {constraintTypeLabels[item.constraintType]}
-                      </div>
-                      <div className="mt-0.5 text-[11px] text-text-muted xl:text-xs capitalize">
-                        {item.priority}
-                      </div>
-                    </Td>
+                    <TableCell className="text-text-secondary">
+                      {subjectLabels[item.subjectType]}
+                    </TableCell>
 
-                    <Td>{formatWhen(item, data.timeSlots)}</Td>
+                    <TableCell className="text-text-primary">
+                      {constraintTypeLabels[item.constraintType]} · <span className="capitalize text-text-muted">{item.priority}</span>
+                    </TableCell>
 
-                    <Td className="max-w-[18rem] text-text-secondary">
+                    <TableCell className="text-text-secondary">
+                      {formatWhen(item, data.timeSlots)}
+                    </TableCell>
+
+                    <TableCell className="text-text-secondary">
                       {formatReason(item)}
-                    </Td>
+                    </TableCell>
 
-                    <Td>
-                      <span className="text-[11px] font-medium text-text-muted xl:text-xs">
+                    <TableCell>
+                      <span className="text-xs font-medium text-text-muted">
                         {item.isActive ? 'Active' : 'Disabled'}
                       </span>
-                    </Td>
+                    </TableCell>
 
-                    <Td>
-                      <div className="flex items-center gap-1.5">
+                    <TableCell className="text-right">
+                      <div className="inline-flex items-center justify-end gap-1.5">
                         <form action={toggleSchedulingConstraintAction}>
                           <input type="hidden" name="id" value={item.id} />
                           <input
@@ -159,18 +164,18 @@ export function ConstraintWorkspace({
                             size="icon"
                             aria-label="Delete constraint"
                             title="Delete constraint"
-                            className="size-9 text-danger"
+                            className="size-8 text-danger"
                           >
                             <Trash2 className="size-3.5" />
                           </Button>
                         </form>
                       </div>
-                    </Td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
+          </TableContainer>
         )}
       </Card>
 
@@ -300,40 +305,38 @@ export function ConstraintWorkspace({
             No unique date events configured for this Academic Period.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-left text-xs xl:text-sm">
-              <thead className="bg-surface-subtle text-text-secondary">
-                <tr>
-                  <Th>Event</Th>
-                  <Th>Date &amp; time</Th>
-                  <Th>Scope</Th>
-                  <Th>Status</Th>
-                  <Th>Actions</Th>
-                </tr>
-              </thead>
-              <tbody>
+          <TableContainer embedded label="Unique events and exceptions">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead>Event</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Date &amp; time</TableHead>
+                  <TableHead>Scope</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {data.calendarEvents.map((ev) => (
-                  <tr key={ev.id} className="border-t border-border">
-                    <Td>
-                      <div className="font-medium text-text-primary">{ev.title}</div>
-                      <div className="mt-0.5 text-[11px] text-text-muted xl:text-xs">
-                        {eventTypeLabels[ev.eventType]} · {ev.suspendsRegularClasses ? 'Suspends classes' : 'Advisory'}
-                      </div>
-                    </Td>
-                    <Td>
-                      <div className="font-medium text-text-primary">{ev.eventDate}</div>
-                      <div className="mt-0.5 text-[11px] text-text-muted xl:text-xs">
-                        {ev.startsAt && ev.endsAt ? `${ev.startsAt.slice(0, 5)}-${ev.endsAt.slice(0, 5)}` : 'All day'}
-                      </div>
-                    </Td>
-                    <Td>{ev.scopeLabel}</Td>
-                    <Td>
-                      <span className="text-[11px] font-medium text-text-muted xl:text-xs">
+                  <TableRow key={ev.id}>
+                    <TableCell className="font-semibold text-text-primary">
+                      {ev.title}
+                    </TableCell>
+                    <TableCell className="text-text-secondary">
+                      {eventTypeLabels[ev.eventType]} · {ev.suspendsRegularClasses ? 'Suspends classes' : 'Advisory'}
+                    </TableCell>
+                    <TableCell className="text-text-secondary">
+                      {ev.eventDate} · {ev.startsAt && ev.endsAt ? `${ev.startsAt.slice(0, 5)}–${ev.endsAt.slice(0, 5)}` : 'All day'}
+                    </TableCell>
+                    <TableCell className="text-text-secondary">{ev.scopeLabel}</TableCell>
+                    <TableCell>
+                      <span className="text-xs font-medium text-text-muted">
                         {ev.isActive ? 'Active' : 'Disabled'}
                       </span>
-                    </Td>
-                    <Td>
-                      <div className="flex items-center gap-1.5">
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="inline-flex items-center justify-end gap-1.5">
                         <form action={toggleCalendarEventAction}>
                           <input type="hidden" name="id" value={ev.id} />
                           <input type="hidden" name="isActive" value={String(!ev.isActive)} />
@@ -343,17 +346,17 @@ export function ConstraintWorkspace({
                         </form>
                         <form action={deleteCalendarEventAction}>
                           <input type="hidden" name="id" value={ev.id} />
-                          <Button type="submit" variant="ghost" size="icon" aria-label="Delete event" className="size-9 text-danger">
+                          <Button type="submit" variant="ghost" size="icon" aria-label="Delete event" className="size-8 text-danger">
                             <Trash2 className="size-3.5" />
                           </Button>
                         </form>
                       </div>
-                    </Td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
+          </TableContainer>
         )}
       </Card>
     </div>
@@ -377,14 +380,7 @@ function formatWhen(
   const day = item.workingDayLabel ?? 'Any day';
 
   if (!item.startsAt || !item.endsAt) {
-    return (
-      <div>
-        <div className="font-medium text-text-primary">{day}</div>
-        <div className="mt-0.5 text-[11px] text-text-muted xl:text-xs">
-          All day
-        </div>
-      </div>
-    );
+    return `${day} · All day`;
   }
 
   const startsAt = item.startsAt.slice(0, 5);
@@ -393,30 +389,5 @@ function formatWhen(
     (slot) => slot.startsAt === startsAt && slot.endsAt === endsAt,
   );
 
-  return (
-    <div>
-      <div className="font-medium text-text-primary">{day}</div>
-      <div className="mt-0.5 text-[11px] text-text-muted xl:text-xs">
-        {session?.label ?? `${startsAt}-${endsAt}`}
-      </div>
-    </div>
-  );
-}
-
-function Th({ children }: { children: ReactNode }) {
-  return <th className="px-3 py-2.5 font-semibold">{children}</th>;
-}
-
-function Td({
-  children,
-  className = '',
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  return (
-    <td className={`px-3 py-2.5 align-middle ${className}`}>
-      {children}
-    </td>
-  );
+  return `${day} · ${session?.label ?? `${startsAt}–${endsAt}`}`;
 }

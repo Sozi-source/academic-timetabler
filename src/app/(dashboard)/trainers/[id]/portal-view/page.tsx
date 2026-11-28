@@ -299,7 +299,7 @@ export default async function AdminTrainerPortalViewPage({ params, searchParams 
                                             <span className="capitalize text-[10px] text-text-muted">{session.deliveryMode}</span>
                                           </div>
                                           {session.cohortNames.length > 0 && (
-                                            <p className="mt-0.5 text-[10px] text-text-muted truncate">{session.cohortNames.join(' · ')}</p>
+                                            <p className="mt-0.5 text-[10px] text-text-muted">{session.cohortNames.join(' · ')}</p>
                                           )}
                                         </div>
                                       ))}

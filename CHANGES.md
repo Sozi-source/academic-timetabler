@@ -1,3 +1,75 @@
+### 2026-11-28: Uniform Single-Line Data Tables & Row Decluttering Across System
+
+**Summary:**
+- **Shared Table Primitives (`src/components/ui/table.tsx`):**
+  - Added `TableContainer`, `Table`, `TableHeader`, `TableBody`, `TableFooter`, `TableRow`, `TableHead`, and `TableCell` using `table-auto`, `whitespace-nowrap`, `tabular-nums`, keyboard-focusable horizontal scroll regions (`tabIndex={0}`, `role="region"`), and uniform border/typography tokens.
+- **DataTable & Global CSS Enforcement (`src/components/ui/data-table.tsx`, `src/app/globals.css`):**
+  - Switched `DataTable` default `layout` from `'fixed'` to `'auto'`, replaced `min-w-0 break-words` with `whitespace-nowrap [overflow-wrap:normal] [word-break:normal]`, and aligned header/cell typography with `Table`.
+  - Scoped `.admin-screen` `overflow-wrap: anywhere` rules out of `table` descendants and avoided double borders on `[data-table-scroll="true"]` containers.
+- **Row Decluttering & Anti-Truncation Cleanup:**
+  - Removed redundant stacked lines and obvious context fields (such as repeated period/semester names, unit codes stacked beneath unit titles, repeated programme/cohort labels, and staff numbers/descriptions) across `DataTable` views (`academic-period-table`, `cohort-table`, `programme-table`, `room-table`, `unit-table`, `trainer-table`, `student-registry-table`, `time-slot-table`, `trainer-access-table`), moving optional metadata (`code`, `teachingDates`, `awardingBody`, `department`, `specialization`, `profileRole`) into toggleable columns or `title` attributes.
+  - Standardized all workspace, reporting, assessment, attendance, curriculum, student registration, daily report, and import preview tables onto `TableContainer`/`Table` and removed `truncate` / `line-clamp-*` / `table-fixed` clipping on table cells.
+
+**Added:**
+- `src/components/ui/table.tsx`
+
+**Modified:**
+- `src/app/globals.css`
+- `src/components/ui/data-table.tsx`
+- `src/app/(dashboard)/attendance-clinical/class-attendance/analytics/page.tsx`
+- `src/app/(dashboard)/students/registry/[studentId]/results/page.tsx`
+- `src/app/(dashboard)/teaching-documents/curriculum/page.tsx`
+- `src/app/(dashboard)/timetable/teaching-allocations/page.tsx`
+- `src/app/(dashboard)/timetable/trainers/availability/page.tsx`
+- `src/app/(dashboard)/timetable/unit-equivalence/page.tsx`
+- `src/app/(dashboard)/trainers/[id]/portal-view/page.tsx`
+- `src/app/(staff)/staff/timetable/page.tsx`
+- `src/features/academic-periods/academic-period-table.tsx`
+- `src/features/academic-years/academic-year-list.tsx`
+- `src/features/assessment/assessment-control-center.tsx`
+- `src/features/assessment/assessment-unit-cohorts.tsx`
+- `src/features/assessment/marks/bulk-upload-dialog.tsx`
+- `src/features/assessment/marks/pending-mark-submissions-panel.tsx`
+- `src/features/assessment/missing-marks-workspace.tsx`
+- `src/features/assessment/reports/consolidated-marksheet-viewer.tsx`
+- `src/features/assessment/trainer-mark-invites.tsx`
+- `src/features/attendance-analytics/hod-attendance-view.tsx`
+- `src/features/cohorts/cohort-table.tsx`
+- `src/features/imports/curriculum/curriculum-import-preview.tsx`
+- `src/features/imports/master-data/master-data-import-preview.tsx`
+- `src/features/imports/rooms/room-import-preview.tsx`
+- `src/features/imports/teaching-allocations/teaching-allocation-import-preview.tsx`
+- `src/features/imports/trainers/trainer-import-preview.tsx`
+- `src/features/imports/unit-offerings/unit-offering-import-preview.tsx`
+- `src/features/imports/units/unit-import-preview.tsx`
+- `src/features/programmes/programme-table.tsx`
+- `src/features/reporting/reporting-dashboard.tsx`
+- `src/features/rooms/room-table.tsx`
+- `src/features/scheduling-constraints/constraint-workspace.tsx`
+- `src/features/staff-assessment/online-marks-editor.tsx`
+- `src/features/student-access/access-manager.tsx`
+- `src/features/student-reporting-sync/reporting-sync-dialog.tsx`
+- `src/features/student-unit-registration/student-unit-registration-lines.tsx`
+- `src/features/students/attachment-eligibility-workspace.tsx`
+- `src/features/students/student-registry-table.tsx`
+- `src/features/teaching-allocations/teaching-allocation-table.tsx`
+- `src/features/teaching-documents/curriculum-zip-upload-dialog.tsx`
+- `src/features/teaching-documents/individual-upload-form.tsx`
+- `src/features/teaching-documents/record-of-work-manager.tsx`
+- `src/features/teaching-documents/record-of-work-online/manager.tsx`
+- `src/features/timetable-calendar/time-slot-table.tsx`
+- `src/features/timetable-generator/generator-master-grid.tsx`
+- `src/features/timetable-generator/generator-session-table.tsx`
+- `src/features/timetable-publication/publication-workspace.tsx`
+- `src/features/timetable-reports/report-workspace.tsx`
+- `src/features/trainer-access/trainer-access-table.tsx`
+- `src/features/trainer-daily-report/hod-report-list.tsx`
+- `src/features/trainer-daily-report/trainer-form.tsx`
+- `src/features/trainers/trainer-table.tsx`
+- `src/features/unit-offerings/unit-offering-table.tsx`
+- `src/features/units/unit-table.tsx`
+- `CHANGES.md`
+
 ### 2026-11-27: Automatic Standing Timetable Setup Inheritance Across Semesters
 
 **Summary:**

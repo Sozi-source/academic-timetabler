@@ -191,27 +191,16 @@ export function StudentRegistryTable({
         id: 'student',
         header: 'Student',
         accessorFn: (student) => student.full_name ?? '',
-        size: 240,
         cell: ({ row }) => {
           const student = row.original;
 
           return (
-            <div className="min-w-0">
-              <Link
-                href={`/students/registry/${student.id}`}
-                className="block truncate text-xs font-semibold text-text-primary transition hover:text-primary hover:underline"
-              >
-                {student.full_name}
-              </Link>
-              {student.programme?.code ? (
-                <p className="mt-0.5 truncate text-[10px] text-text-muted">
-                  {student.programme.code}
-                  {student.current_cohort?.name
-                    ? ` · ${student.current_cohort.name}`
-                    : ''}
-                </p>
-              ) : null}
-            </div>
+            <Link
+              href={`/students/registry/${student.id}`}
+              className="font-semibold text-text-primary transition hover:text-primary hover:underline"
+            >
+              {student.full_name}
+            </Link>
           );
         },
       },
@@ -305,9 +294,8 @@ export function StudentRegistryTable({
         id: 'email',
         header: 'Email',
         accessorFn: (student) => student.email ?? '',
-        size: 200,
         cell: ({ getValue }) => (
-          <span className="truncate text-xs text-text-secondary">
+          <span className="text-text-secondary">
             {getValue<string>() || '—'}
           </span>
         ),

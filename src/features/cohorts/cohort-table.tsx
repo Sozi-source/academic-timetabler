@@ -81,7 +81,7 @@ const columns: ColumnDef<Cohort>[] = [
     header: 'Cohort',
     cell: ({ row }) => (
       <span
-        className="font-semibold text-text-primary text-[12px] sm:text-[13px] xl:text-sm"
+        className="font-semibold text-text-primary"
         title={row.original.code}
       >
         {row.original.name}
@@ -94,7 +94,7 @@ const columns: ColumnDef<Cohort>[] = [
       row.programme?.code ?? '',
     header: 'Programme',
     cell: ({ row }) => (
-      <span className="inline-flex min-w-0 break-words font-semibold text-text-primary">
+      <span className="font-semibold text-text-primary">
         {row.original.programme?.code ?? '—'}
       </span>
     ),
@@ -105,33 +105,28 @@ const columns: ColumnDef<Cohort>[] = [
       row.currentAcademicPeriodNumber,
     header: 'Y/S',
     cell: ({ row }) => (
-      <span className="whitespace-nowrap text-xs font-semibold text-text-primary sm:text-[13px] xl:text-sm">
+      <span className="font-semibold text-text-primary">
         {formatStudyPeriod(
           row.original.currentAcademicPeriodNumber,
         )}
       </span>
     ),
-  },{
+  },
+  {
     id: 'enrolment',
     accessorFn: (row) =>
       row.actualSize,
     header: 'Enrolment',
     cell: ({ row }) => (
-      <div className="min-w-0 max-w-full">
-        <p className="inline-flex items-center gap-2 font-medium text-text-primary">
-          <Users
-            className="size-4 text-text-muted"
-            aria-hidden="true"
-          />
-          {row.original.actualSize}
-        </p>
-
-        <p className="mt-1 text-xs text-text-muted">
-          {row.original.plannedSize
-            ? `Planned ${row.original.plannedSize}`
-            : 'No planned limit'}
-        </p>
-      </div>
+      <span className="inline-flex items-center gap-1.5 font-medium text-text-primary">
+        <Users
+          className="size-3.5 text-text-muted"
+          aria-hidden="true"
+        />
+        {row.original.plannedSize
+          ? `${row.original.actualSize} / ${row.original.plannedSize}`
+          : row.original.actualSize}
+      </span>
     ),
   },
   {

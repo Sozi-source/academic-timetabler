@@ -9,6 +9,15 @@ import {
 
 import { Badge } from '@/components/ui/badge';
 import { MetricCard } from '@/components/ui/metric-card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 import { TimetableReportActions } from './report-actions';
 import { getMasterSessionPresentation } from './master-presentation';
@@ -35,64 +44,72 @@ function SessionTable({
   manualEntryOptions?: ManualEntryOptions;
 }) {
   return (
-    <div className="w-full overflow-hidden">
-      <table className="w-full table-fixed border-collapse text-left text-sm">
-        <thead className="bg-surface-subtle text-xs uppercase tracking-wide text-text-muted">
-          <tr>
-            <th className="px-3 py-2.5">Day & time</th>
-            <th className="px-3 py-2.5">Unit</th>
-            <th className="px-3 py-2.5">Cohort</th>
-            <th className="px-3 py-2.5">Trainer</th>
-            <th className="px-3 py-2.5">{master ? 'Venue' : 'Room'}</th>
-            <th className="px-3 py-2.5">Status</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-border">
+    <TableContainer embedded label="Timetable sessions report">
+      <Table>
+        <TableHeader>
+          <TableRow className="hover:bg-transparent">
+            <TableHead>Day &amp; time</TableHead>
+            <TableHead>Unit</TableHead>
+            <TableHead>Cohort</TableHead>
+            <TableHead>Trainer</TableHead>
+            <TableHead>{master ? 'Venue' : 'Room'}</TableHead>
+            <TableHead>Status</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {rows.map((row) => {
             const presentation = getMasterSessionPresentation(row);
+            const isExternalDept =
+              !master &&
+              row.departmentName &&
+              row.departmentCode?.toUpperCase() !== 'HND' &&
+              row.departmentName?.toUpperCase() !== 'HND';
 
             return (
-              <tr key={row.sessionId} className={master ? 'align-middle' : 'align-top'}>
-              <td className="px-4 py-3 font-medium text-text-primary">
-                {row.day}
-                <div className="mt-0.5 text-xs font-normal text-text-muted">
-                  {row.startsAt}–{row.endsAt}
-                </div>
-              </td>
-              <td className="px-3 py-2.5">
-                <div className="text-sm font-medium text-text-primary leading-snug">{row.unitName}</div>
-                {!master ? <div className="text-xs text-text-muted">{row.unitCode}</div> : null}
-                {!master && row.departmentName && row.departmentCode?.toUpperCase() !== 'HND' && row.departmentName?.toUpperCase() !== 'HND' ? (
-                  <div className="mt-1 text-xs font-medium text-primary">
-                    {row.departmentCode ? `${row.departmentCode} · ` : ''}{row.departmentName}
+              <TableRow key={row.sessionId}>
+                <TableCell className="font-semibold text-text-primary">
+                  {row.day} · {row.startsAt}–{row.endsAt}
+                </TableCell>
+                <TableCell title={row.unitCode}>
+                  <span className="font-semibold text-text-primary">{row.unitName}</span>
+                  {isExternalDept ? (
+                    <span className="ml-1.5 rounded bg-primary-soft px-1.5 py-0.5 text-[10px] font-semibold text-primary">
+                      {row.departmentCode ?? row.departmentName}
+                    </span>
+                  ) : null}
+                </TableCell>
+                <TableCell className="text-text-secondary">{row.cohort}</TableCell>
+                <TableCell className="text-text-secondary">
+                  {row.trainerId ? (
+                    <span className="font-medium text-text-primary">{row.trainer}</span>
+                  ) : (
+                    <Badge variant="warning">Unassigned</Badge>
+                  )}
+                </TableCell>
+                <TableCell className={master ? 'italic text-text-muted' : 'text-text-secondary'}>
+                  <div className="inline-flex items-center gap-2">
+                    <span>{master ? presentation.venue : formatVenueLabel(row.roomCode, row.roomName)}</span>
+                    {!master && row.status === 'manual' && academicPeriodId && manualEntryOptions ? (
+                      <ManualVenueEditor
+                        entryId={row.sessionId}
+                        academicPeriodId={academicPeriodId}
+                        rooms={manualEntryOptions.rooms}
+                        currentRoomCode={row.roomCode}
+                      />
+                    ) : null}
                   </div>
-                ) : null}
-              </td>
-              <td className="px-4 py-3 text-text-secondary">{row.cohort}</td>
-              <td className="px-4 py-3 text-text-secondary">
-                {row.trainerId ? <span className={master ? 'text-sm font-medium' : undefined}>{row.trainer}</span> : (
-                  <Badge variant="warning">Unassigned</Badge>
-                )}
-              </td>
-              <td className={master ? 'px-3 py-2.5 text-xs italic text-text-muted' : 'px-3 py-2.5 text-text-secondary'}>
-                <div>{master ? presentation.venue : formatVenueLabel(row.roomCode, row.roomName)}</div>
-                {!master && row.status === 'manual' && academicPeriodId && manualEntryOptions ? (
-                  <div className="mt-2">
-                    <ManualVenueEditor entryId={row.sessionId} academicPeriodId={academicPeriodId} rooms={manualEntryOptions.rooms} currentRoomCode={row.roomCode} />
-                  </div>
-                ) : null}
-              </td>
-              <td className="px-3 py-2.5">
-                <Badge variant={row.isLocked ? 'warning' : row.status === 'confirmed' ? 'success' : 'neutral'}>
-                  {row.isLocked ? 'Locked' : row.status === 'confirmed' ? 'Confirmed' : row.status === 'draft' ? 'Scheduled' : row.status}
-                </Badge>
-              </td>
-              </tr>
+                </TableCell>
+                <TableCell>
+                  <Badge variant={row.isLocked ? 'warning' : row.status === 'confirmed' ? 'success' : 'neutral'}>
+                    {row.isLocked ? 'Locked' : row.status === 'confirmed' ? 'Confirmed' : row.status === 'draft' ? 'Scheduled' : row.status}
+                  </Badge>
+                </TableCell>
+              </TableRow>
             );
           })}
-        </tbody>
-      </table>
-    </div>
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }
 
@@ -136,40 +153,44 @@ function GroupedReport({ groups, academicPeriodId, manualEntryOptions }: {
 
 function WorkloadReport({ groups }: { groups: TimetableReportGroup[] }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
-      <div className="w-full overflow-hidden">
-        <table className="w-full table-fixed border-collapse text-left text-sm">
-          <thead className="bg-surface-subtle text-xs uppercase tracking-wide text-text-muted">
-            <tr>
-              <th className="px-3 py-2.5">Trainer</th>
-              <th className="px-3 py-2.5">Sessions</th>
-              <th className="px-3 py-2.5">Target</th>
-              <th className="px-3 py-2.5">Allocated</th>
-              <th className="px-3 py-2.5">Scheduled</th>
-              <th className="px-3 py-2.5">Extra</th>
-              <th className="px-3 py-2.5">Status</th>
-              <th className="px-3 py-2.5">Coverage</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {groups.map((group) => (
-              <tr key={group.key}>
-                <td className="break-words px-3 py-2.5 font-semibold text-text-primary">{group.label}</td>
-                <td className="px-3 py-2.5 text-text-secondary">{group.sessionCount}</td>
-                <td className="px-3 py-2.5 text-text-secondary">{group.targetHours ?? 0}h</td>
-                <td className="px-3 py-2.5 font-semibold text-text-primary">{group.allocatedHours ?? group.contactHours}h</td>
-                <td className="px-3 py-2.5 font-semibold text-primary">{group.contactHours}h</td>
-                <td className={`px-3 py-2.5 font-semibold ${(group.extraHours ?? 0) > 0 ? 'text-warning' : 'text-text-muted'}`}>{(group.extraHours ?? 0) > 0 ? `+${group.extraHours}h` : '0'}</td>
-                <td className="px-3 py-2.5"><Badge variant={(group.extraHours ?? 0) > 0 ? 'warning' : 'success'}>{(group.extraHours ?? 0) > 0 ? 'Extra hours' : 'Within target'}</Badge></td>
-                <td className="px-3 py-2.5 text-xs text-text-secondary">
-                  {new Set(group.rows.map((row) => row.cohort)).size} cohorts · {new Set(group.rows.map((row) => row.unitCode)).size} units
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <TableContainer label="Trainer workload report">
+      <Table>
+        <TableHeader>
+          <TableRow className="hover:bg-transparent">
+            <TableHead>Trainer</TableHead>
+            <TableHead>Sessions</TableHead>
+            <TableHead>Target</TableHead>
+            <TableHead>Allocated</TableHead>
+            <TableHead>Scheduled</TableHead>
+            <TableHead>Extra</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Coverage</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {groups.map((group) => (
+            <TableRow key={group.key}>
+              <TableCell className="font-semibold text-text-primary">{group.label}</TableCell>
+              <TableCell className="text-text-secondary">{group.sessionCount}</TableCell>
+              <TableCell className="text-text-secondary">{group.targetHours ?? 0}h</TableCell>
+              <TableCell className="font-semibold text-text-primary">{group.allocatedHours ?? group.contactHours}h</TableCell>
+              <TableCell className="font-semibold text-primary">{group.contactHours}h</TableCell>
+              <TableCell className={`font-semibold ${(group.extraHours ?? 0) > 0 ? 'text-warning' : 'text-text-muted'}`}>
+                {(group.extraHours ?? 0) > 0 ? `+${group.extraHours}h` : '0'}
+              </TableCell>
+              <TableCell>
+                <Badge variant={(group.extraHours ?? 0) > 0 ? 'warning' : 'success'}>
+                  {(group.extraHours ?? 0) > 0 ? 'Extra hours' : 'Within target'}
+                </Badge>
+              </TableCell>
+              <TableCell className="text-xs text-text-secondary">
+                {new Set(group.rows.map((row) => row.cohort)).size} cohorts · {new Set(group.rows.map((row) => row.unitCode)).size} units
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }
 

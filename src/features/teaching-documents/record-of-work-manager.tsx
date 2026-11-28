@@ -14,6 +14,15 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
   addRecordOfWorkEntryAction,
   deleteRecordOfWorkEntryAction,
   generateRecordOfWorkFromSchemeAction,
@@ -367,49 +376,45 @@ export function RecordOfWorkManager({
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-left text-xs">
-              <thead className="border-b border-border bg-surface-subtle text-[10px] font-bold uppercase tracking-wider text-text-muted">
-                <tr>
-                  <th className="px-3 py-2.5 w-16 text-center">Week</th>
-                  <th className="px-3 py-2.5 w-28">Date</th>
-                  <th className="px-4 py-2.5">Work Covered</th>
-                  <th className="px-3 py-2.5">Specific Outcomes Achieved</th>
-                  <th className="px-3 py-2.5 w-36">Mode of Delivery</th>
-                  <th className="px-3 py-2.5 w-32">Remarks</th>
-                  <th className="px-3 py-2.5 w-16 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
+          <TableContainer embedded label="Record of work entries">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-16 text-center">Week</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Work Covered</TableHead>
+                  <TableHead>Specific Outcomes Achieved</TableHead>
+                  <TableHead>Mode of Delivery</TableHead>
+                  <TableHead>Remarks</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {sortedEntries.map((entry) => (
-                  <tr key={entry.id} className="hover:bg-surface-subtle/50">
-                    <td className="px-3 py-3 text-center font-bold text-text-primary">
+                  <TableRow key={entry.id}>
+                    <TableCell className="text-center font-bold text-text-primary">
                       W{entry.weekNumber}
-                    </td>
-                    <td className="px-3 py-3 font-medium text-text-secondary whitespace-nowrap">
+                    </TableCell>
+                    <TableCell className="font-medium text-text-secondary">
                       {entry.sessionDate}
-                    </td>
-                    <td className="px-4 py-3 font-semibold text-text-primary">
+                    </TableCell>
+                    <TableCell className="font-semibold text-text-primary">
                       {entry.workCovered}
-                    </td>
-                    <td className="px-3 py-3 text-text-secondary">
-                      <ul className="list-disc pl-3.5 space-y-1 text-[11px]">
-                        {parseSLOOutcomes(entry.outcomesAchieved).map((point, pIdx) => (
-                          <li key={pIdx} className="leading-tight">{point}</li>
-                        ))}
-                      </ul>
-                    </td>
-                    <td className="px-3 py-3 text-text-secondary font-medium text-[11px]">
+                    </TableCell>
+                    <TableCell className="text-text-secondary">
+                      {parseSLOOutcomes(entry.outcomesAchieved).join(' · ') || '—'}
+                    </TableCell>
+                    <TableCell className="text-text-secondary">
                       {resolveRecordOfWorkDeliveryMode(
                         entry.weekNumber,
                         entry.workCovered,
                         entry.deliveryMode || entry.attendanceSummary
                       )}
-                    </td>
-                    <td className="px-3 py-3 text-text-muted text-[11px]">
-                      {entry.remarks}
-                    </td>
-                    <td className="px-3 py-3 text-right">
+                    </TableCell>
+                    <TableCell className="text-text-muted">
+                      {entry.remarks || '—'}
+                    </TableCell>
+                    <TableCell className="text-right">
                       <button
                         type="button"
                         onClick={() => handleDeleteEntry(entry.id)}
@@ -419,12 +424,12 @@ export function RecordOfWorkManager({
                       >
                         <Trash2 className="size-3.5" />
                       </button>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
+          </TableContainer>
         )}
       </Card>
 

@@ -1,6 +1,16 @@
 import Link from 'next/link';
 import { AlertCircle } from 'lucide-react';
 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+
 import type { PendingMarkSubmission } from './pending-submissions';
 
 const dateFormatter = new Intl.DateTimeFormat('en-KE', {
@@ -22,47 +32,45 @@ export function PendingMarkSubmissionsPanel({ items }: { items: PendingMarkSubmi
         </h2>
       </div>
 
-      <div className="mt-3 overflow-x-auto rounded-lg border border-amber-200 bg-white">
-        <table className="w-full min-w-[640px] text-left text-xs">
-          <thead className="border-b border-amber-100 bg-amber-50/70 text-[11px] font-bold text-slate-600">
-            <tr>
-              <th className="px-3 py-2">Unit</th>
-              <th className="px-3 py-2">Component</th>
-              <th className="px-3 py-2">Trainer</th>
-              <th className="px-3 py-2 text-center">Recorded</th>
-              <th className="px-3 py-2">Last saved</th>
-              <th className="px-3 py-2 text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
+      <TableContainer label="Saved markbooks pending submission" className="mt-3 border-amber-200 shadow-none">
+        <Table>
+          <TableHeader className="border-amber-100 bg-amber-50/70">
+            <TableRow className="hover:bg-transparent">
+              <TableHead>Unit</TableHead>
+              <TableHead>Component</TableHead>
+              <TableHead>Trainer</TableHead>
+              <TableHead className="text-center">Recorded</TableHead>
+              <TableHead>Last saved</TableHead>
+              <TableHead className="text-right">Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {items.map((item) => (
-              <tr key={`${item.assessmentId}-${item.component}`}>
-                <td className="px-3 py-2">
-                  <span className="font-mono font-semibold text-slate-900">{item.unitCode}</span>{' '}
-                  <span className="text-slate-600">{item.unitName}</span>
-                  {item.periodName ? <span className="block text-[11px] text-slate-400">{item.periodName}</span> : null}
-                </td>
-                <td className="px-3 py-2 font-semibold text-slate-800">{item.component === 'cat' ? 'CAT' : 'Exam'}</td>
-                <td className="px-3 py-2 text-slate-700">{item.trainerNames.join(', ') || '—'}</td>
-                <td className="px-3 py-2 text-center">
+              <TableRow key={`${item.assessmentId}-${item.component}`}>
+                <TableCell className="font-semibold text-text-primary" title={item.unitCode}>
+                  {item.unitName}
+                </TableCell>
+                <TableCell className="font-semibold text-text-primary">{item.component === 'cat' ? 'CAT' : 'Exam'}</TableCell>
+                <TableCell className="text-text-secondary">{item.trainerNames.join(', ') || '—'}</TableCell>
+                <TableCell className="text-center">
                   <span className={item.missingCount > 0 ? 'font-semibold text-amber-800' : 'font-semibold text-emerald-700'}>
                     {item.enteredCount}/{item.rosterCount}
                   </span>
                   {item.missingCount > 0 ? (
                     <Link
                       href={`/assessment/marks/${item.assessmentId}?status=cat-missing&component=cat`}
-                      className="mt-0.5 block text-[10px] font-bold text-amber-700 hover:text-amber-900 hover:underline"
+                      className="ml-1.5 text-[11px] font-bold text-amber-700 hover:text-amber-900 hover:underline"
                       title="View candidates missing marks"
                     >
-                      {item.missingCount} missing
+                      ({item.missingCount} missing)
                     </Link>
                   ) : null}
-                </td>
-                <td className="px-3 py-2 text-slate-500">
+                </TableCell>
+                <TableCell className="text-text-muted">
                   {item.lastSavedAt ? dateFormatter.format(new Date(item.lastSavedAt)) : '—'}
-                </td>
-                <td className="px-3 py-2 text-right">
-                  <div className="flex items-center justify-end gap-1.5">
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="inline-flex items-center justify-end gap-1.5">
                     {item.missingCount > 0 ? (
                       <Link
                         href={`/assessment/marks/${item.assessmentId}?status=cat-missing&component=cat`}
@@ -78,12 +86,12 @@ export function PendingMarkSubmissionsPanel({ items }: { items: PendingMarkSubmi
                       Open markbook
                     </Link>
                   </div>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </TableContainer>
     </section>
   );
 }

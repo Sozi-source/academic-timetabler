@@ -8,6 +8,15 @@ import {
   Badge,
 } from '@/components/ui/badge';
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
   roomTypeOptions,
 } from '@/features/rooms/types';
 
@@ -106,132 +115,70 @@ export function RoomImportPreview({
   rows: RoomImportStagedRow[];
 }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-      <div className="w-full overflow-hidden">
-        <table className="w-full table-fixed border-collapse text-left text-sm">
-          <thead className="bg-surface-subtle text-xs uppercase tracking-wide text-text-muted">
-            <tr>
-              <th className="px-3 py-2.5">
-                Row
-              </th>
+    <TableContainer label="Room import preview">
+      <Table>
+        <TableHeader>
+          <TableRow className="hover:bg-transparent">
+            <TableHead>Row</TableHead>
+            <TableHead>Code</TableHead>
+            <TableHead>Room</TableHead>
+            <TableHead>Type</TableHead>
+            <TableHead>Capacity</TableHead>
+            <TableHead>Location</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Validation result</TableHead>
+          </TableRow>
+        </TableHeader>
 
-              <th className="px-3 py-2.5">
-                Room
-              </th>
+        <TableBody>
+          {rows.map((row) => {
+            const room = row.normalizedData;
+            const roomCode =
+              'code' in room
+                ? room.code
+                : String(row.sourceData['Room Code'] ?? '');
+            const roomName =
+              'name' in room
+                ? room.name
+                : String(row.sourceData['Room Name'] ?? 'Unnamed room');
 
-              <th className="px-3 py-2.5">
-                Type
-              </th>
-
-              <th className="px-3 py-2.5">
-                Capacity
-              </th>
-
-              <th className="px-3 py-2.5">
-                Location
-              </th>
-
-              <th className="px-3 py-2.5">
-                Status
-              </th>
-
-              <th className="px-3 py-2.5">
-                Validation result
-              </th>
-            </tr>
-          </thead>
-
-          <tbody className="divide-y divide-border-soft">
-            {rows.map((row) => {
-              const room =
-                row.normalizedData;
-
-              const roomCode =
-                'code' in room
-                  ? room.code
-                  : String(
-                      row.sourceData[
-                        'Room Code'
-                      ] ?? '',
-                    );
-
-              const roomName =
-                'name' in room
-                  ? room.name
-                  : String(
-                      row.sourceData[
-                        'Room Name'
-                      ] ??
-                        'Unnamed room',
-                    );
-
-              return (
-                <tr key={row.id}>
-                  <td className="whitespace-nowrap px-4 py-4 font-medium text-text-primary">
-                    {row.sourceRowNumber}
-                  </td>
-
-                  <td className="min-w-56 px-4 py-4">
-                    <p className="font-semibold text-text-primary">
-                      {roomName}
-                    </p>
-
-                    <p className="mt-1 text-xs text-text-muted">
-                      {roomCode}
-                    </p>
-                  </td>
-
-                  <td className="whitespace-nowrap px-4 py-4 text-text-secondary">
-                    {'roomType' in room
-                      ? getRoomTypeLabel(
-                          room.roomType,
-                        )
-                      : String(
-                          row.sourceData[
-                            'Room Type'
-                          ] ?? '',
-                        )}
-                  </td>
-
-                  <td className="whitespace-nowrap px-4 py-4 text-text-secondary">
-                    {'capacity' in room
-                      ? room.capacity
-                      : String(
-                          row.sourceData[
-                            'Capacity'
-                          ] ?? '—',
-                        )}
-                  </td>
-
-                  <td className="min-w-44 px-4 py-4 text-text-secondary">
-                    {'building' in room ||
-                    'floor' in room
-                      ? [
-                          room.building,
-                          room.floor,
-                        ]
-                          .filter(Boolean)
-                          .join(' · ') ||
-                        'Not provided'
-                      : 'Not provided'}
-                  </td>
-
-                  <td className="whitespace-nowrap px-4 py-4">
-                    {getStatusBadge(
-                      row.status,
-                    )}
-                  </td>
-
-                  <td className="min-w-72 px-4 py-4 text-text-muted">
-                    {getErrorText(row) ||
-                      'No validation issues.'}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
+            return (
+              <TableRow key={row.id}>
+                <TableCell className="font-medium text-text-primary">
+                  {row.sourceRowNumber}
+                </TableCell>
+                <TableCell className="font-mono text-xs text-text-muted">
+                  {roomCode || '—'}
+                </TableCell>
+                <TableCell className="font-semibold text-text-primary">
+                  {roomName}
+                </TableCell>
+                <TableCell className="text-text-secondary">
+                  {'roomType' in room
+                    ? getRoomTypeLabel(room.roomType)
+                    : String(row.sourceData['Room Type'] ?? '')}
+                </TableCell>
+                <TableCell className="text-text-secondary">
+                  {'capacity' in room
+                    ? room.capacity
+                    : String(row.sourceData['Capacity'] ?? '—')}
+                </TableCell>
+                <TableCell className="text-text-secondary">
+                  {'building' in room || 'floor' in room
+                    ? [room.building, room.floor].filter(Boolean).join(' · ') || 'Not provided'
+                    : 'Not provided'}
+                </TableCell>
+                <TableCell>
+                  {getStatusBadge(row.status)}
+                </TableCell>
+                <TableCell className="text-text-muted">
+                  {getErrorText(row) || 'No validation issues.'}
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }

@@ -5,6 +5,15 @@ import {
 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 import type {
   MasterDataImportEntity,
@@ -54,80 +63,77 @@ export function MasterDataImportPreview({
   rows: MasterDataImportStagedRow[];
 }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-      <div className="w-full overflow-hidden">
-        <table className="w-full table-fixed border-collapse text-left text-sm">
-          <thead className="bg-surface-subtle text-xs uppercase tracking-wide text-text-muted">
-            <tr>
-              <th className="px-3 py-2.5">Row</th>
-              <th className="px-3 py-2.5">
-                {entity === 'programmes' ? 'Programme' : 'Cohort'}
-              </th>
-              {entity === 'cohorts' ? (
-                <th className="px-3 py-2.5">Programme</th>
-              ) : null}
-              <th className="px-3 py-2.5">Status</th>
-              <th className="px-3 py-2.5">Validation result</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border-soft">
-            {rows.map((row) => {
-              const record = row.normalizedData;
-              const errors = [
-                ...Object.values(row.fieldErrors).flat(),
-                ...row.rowErrors,
-              ].join(' ');
+    <TableContainer label="Master data import preview">
+      <Table>
+        <TableHeader>
+          <TableRow className="hover:bg-transparent">
+            <TableHead>Row</TableHead>
+            <TableHead>
+              {entity === 'programmes' ? 'Programme' : 'Cohort'}
+            </TableHead>
+            <TableHead>Code</TableHead>
+            {entity === 'cohorts' ? (
+              <TableHead>Programme</TableHead>
+            ) : null}
+            <TableHead>Status</TableHead>
+            <TableHead>Validation result</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.map((row) => {
+            const record = row.normalizedData;
+            const errors = [
+              ...Object.values(row.fieldErrors).flat(),
+              ...row.rowErrors,
+            ].join(' ');
 
-              return (
-                <tr key={row.id}>
-                  <td className="whitespace-nowrap px-4 py-4 font-medium">
-                    {row.sourceRowNumber}
-                  </td>
-                  <td className="min-w-56 px-4 py-4">
-                    <p className="font-semibold text-text-primary">
-                      {String(
-                        record.name ??
-                        row.sourceData[
-                          entity === 'programmes'
-                            ? 'Programme Name'
-                            : 'Cohort Name'
-                        ] ??
-                        'Unnamed record',
-                      )}
-                    </p>
-                    <p className="mt-1 text-xs text-text-muted">
-                      {String(
-                        record.code ??
-                        row.sourceData[
-                          entity === 'programmes'
-                            ? 'Programme Code'
-                            : 'Cohort Code'
-                        ] ??
-                        'Generated after validation',
-                      )}
-                    </p>
-                  </td>
-                  {entity === 'cohorts' ? (
-                    <td className="whitespace-nowrap px-4 py-4 text-text-secondary">
-                      {String(
-                        record.programmeCode ??
-                        row.sourceData['Programme Code'] ??
-                        '—',
-                      )}
-                    </td>
-                  ) : null}
-                  <td className="whitespace-nowrap px-4 py-4">
-                    {statusBadge(row.status)}
-                  </td>
-                  <td className="min-w-72 px-4 py-4 text-text-muted">
-                    {errors || 'No validation issues.'}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
+            return (
+              <TableRow key={row.id}>
+                <TableCell className="font-medium">
+                  {row.sourceRowNumber}
+                </TableCell>
+                <TableCell className="font-semibold text-text-primary">
+                  {String(
+                    record.name ??
+                    row.sourceData[
+                      entity === 'programmes'
+                        ? 'Programme Name'
+                        : 'Cohort Name'
+                    ] ??
+                    'Unnamed record',
+                  )}
+                </TableCell>
+                <TableCell className="font-mono text-xs text-text-muted">
+                  {String(
+                    record.code ??
+                    row.sourceData[
+                      entity === 'programmes'
+                        ? 'Programme Code'
+                        : 'Cohort Code'
+                    ] ??
+                    '—',
+                  )}
+                </TableCell>
+                {entity === 'cohorts' ? (
+                  <TableCell className="text-text-secondary">
+                    {String(
+                      record.programmeCode ??
+                      row.sourceData['Programme Code'] ??
+                      '—',
+                    )}
+                  </TableCell>
+                ) : null}
+                <TableCell>
+                  {statusBadge(row.status)}
+                </TableCell>
+                <TableCell className="text-text-muted">
+                  {errors || 'No validation issues.'}
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }

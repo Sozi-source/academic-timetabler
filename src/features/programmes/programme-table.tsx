@@ -75,37 +75,38 @@ const columns: ColumnDef<Programme>[] = [
     accessorKey: 'name',
     header: 'Programme',
     cell: ({ row }) => (
-      <div className="min-w-0">
-        <p className="font-semibold leading-5 text-text-primary [overflow-wrap:normal] break-normal">
-          {row.original.name}
-        </p>
-
-        <p className="mt-1 text-xs text-text-muted">
-          {row.original.code}
-          {row.original.shortName
-            ? ` · ${row.original.shortName}`
-            : ''}
-        </p>
-      </div>
+      <span className="font-semibold text-text-primary" title={row.original.shortName ?? row.original.code}>
+        {row.original.name}
+      </span>
+    ),
+  },
+  {
+    accessorKey: 'code',
+    header: 'Code',
+    cell: ({ row }) => (
+      <span className="font-mono text-xs font-semibold text-text-secondary">
+        {row.original.code}
+      </span>
     ),
   },
   {
     accessorKey: 'awardLevel',
     header: 'Award',
     cell: ({ row }) => (
-      <div className="min-w-0">
-        <Badge variant="neutral">
-          {getAwardLevelLabel(
-            row.original.awardLevel,
-          )}
-        </Badge>
-
-        {row.original.awardingBody ? (
-          <p className="mt-2 text-xs text-text-muted">
-            {row.original.awardingBody}
-          </p>
-        ) : null}
-      </div>
+      <Badge variant="neutral">
+        {getAwardLevelLabel(
+          row.original.awardLevel,
+        )}
+      </Badge>
+    ),
+  },
+  {
+    accessorKey: 'awardingBody',
+    header: 'Awarding body',
+    cell: ({ row }) => (
+      <span className="text-text-secondary">
+        {row.original.awardingBody || '—'}
+      </span>
     ),
   },
   {
@@ -114,20 +115,22 @@ const columns: ColumnDef<Programme>[] = [
       row.durationValue,
     header: 'Duration',
     cell: ({ row }) => (
-      <div className="min-w-0">
-        <p className="inline-flex items-center gap-2 font-medium text-text-primary">
-          <Timer
-            className="size-4 text-text-muted"
-            aria-hidden="true"
-          />
-          {formatDuration(row.original)}
-        </p>
-
-        <p className="mt-1 text-xs text-text-muted">
-          {row.original.totalAcademicPeriods}{' '}
-          Academic Periods
-        </p>
-      </div>
+      <span className="inline-flex items-center gap-1.5 font-medium text-text-primary">
+        <Timer
+          className="size-3.5 text-text-muted"
+          aria-hidden="true"
+        />
+        {formatDuration(row.original)}
+      </span>
+    ),
+  },
+  {
+    accessorKey: 'totalAcademicPeriods',
+    header: 'Periods',
+    cell: ({ row }) => (
+      <span className="text-text-secondary">
+        {row.original.totalAcademicPeriods}
+      </span>
     ),
   },
   {
@@ -400,6 +403,7 @@ export function ProgrammeTable({
           : 'Register academic programmes before creating cohorts, curriculum units and teaching allocations.'
       }
       initialPageSize={20}
+      initialHiddenColumns={['awardingBody', 'totalAcademicPeriods']}
       enableColumnToggle
       enableDensityToggle
       exportFileName="programmes"

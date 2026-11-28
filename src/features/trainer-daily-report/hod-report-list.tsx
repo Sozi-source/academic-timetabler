@@ -10,6 +10,15 @@ import {
   formatStudentTwoNames,
   getAbsenteeColumnClass,
 } from './domain';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import type { DepartmentDailyReportWorkspace, TrainerDailyReportLesson } from './types';
 
 function AbsenteeList({
@@ -109,70 +118,63 @@ export function HodDailyReportList({
             </p>
           </header>
 
-          <div className="hidden sm:block overflow-x-auto">
-            <table className="w-full min-w-[850px] text-left text-[11px] table-fixed">
-              <thead className="bg-surface-subtle text-[9px] font-semibold uppercase tracking-wide text-text-muted border-b border-border">
-                <tr>
-                  <th className="w-[230px] px-3.5 py-2.5">Unit & Time</th>
-                  <th className="w-[60px] px-2 py-2.5 text-center">Present</th>
-                  <th className="w-[60px] px-2 py-2.5 text-center">Absent</th>
-                  <th className="px-3.5 py-2.5">Absentees</th>
-                </tr>
-              </thead>
+          <div className="hidden sm:block">
+            <TableContainer embedded label="Daily report lessons">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead>Unit</TableHead>
+                    <TableHead>Time</TableHead>
+                    <TableHead className="text-center">Present</TableHead>
+                    <TableHead className="text-center">Absent</TableHead>
+                    <TableHead>Absentees</TableHead>
+                  </TableRow>
+                </TableHeader>
 
-              <tbody className="divide-y divide-border">
-                {report.lessons.map((lesson) => (
-                  <tr key={lesson.scheduledSessionId} className="hover:bg-slate-50/40 transition-colors">
-                    <td className="px-3.5 py-3 align-top text-text-primary">
-                      <div className="font-semibold text-xs leading-snug">
+                <TableBody>
+                  {report.lessons.map((lesson) => (
+                    <TableRow key={lesson.scheduledSessionId}>
+                      <TableCell className="font-semibold text-text-primary" title={lesson.unitCode ?? undefined}>
                         {lesson.unitName}
-                      </div>
-                      {lesson.unitCode ? (
-                        <div className="mt-0.5 font-mono text-[11px] font-medium text-text-secondary">
-                          {lesson.unitCode}
-                        </div>
-                      ) : null}
-                      <div className="mt-1 flex items-center gap-1.5 font-mono text-[10.5px] text-text-muted">
-                        <Clock className="size-3 text-text-muted/70 shrink-0" />
-                        <span>
-                          {formatDailyReportTime(lesson.startsAt)}–{formatDailyReportTime(lesson.endsAt)}
+                      </TableCell>
+                      <TableCell className="font-mono text-xs text-text-muted">
+                        {formatDailyReportTime(lesson.startsAt)}–{formatDailyReportTime(lesson.endsAt)}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span className="inline-block min-w-[24px] rounded bg-emerald-50 px-1.5 py-0.5 font-mono text-xs font-bold text-emerald-700">
+                          {lesson.presentCount}
                         </span>
-                      </div>
-                    </td>
-                    <td className="px-2 py-3 text-center align-top">
-                      <span className="inline-block min-w-[24px] rounded bg-emerald-50 px-1.5 py-0.5 font-mono text-[10.5px] font-bold text-emerald-700">
-                        {lesson.presentCount}
-                      </span>
-                    </td>
-                    <td className="px-2 py-3 text-center align-top">
-                      <span
-                        className={`inline-block min-w-[24px] rounded px-1.5 py-0.5 font-mono text-[10.5px] font-bold ${
-                          lesson.absentCount > 0
-                            ? 'bg-rose-100 text-rose-700'
-                            : 'bg-slate-100 text-slate-600'
-                        }`}
-                      >
-                        {lesson.absentCount}
-                      </span>
-                    </td>
-                    <td className="px-3.5 py-3 align-top">
-                      <AbsenteeList absentees={lesson.absentees} />
-                    </td>
-                  </tr>
-                ))}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span
+                          className={`inline-block min-w-[24px] rounded px-1.5 py-0.5 font-mono text-xs font-bold ${
+                            lesson.absentCount > 0
+                              ? 'bg-rose-100 text-rose-700'
+                              : 'bg-slate-100 text-slate-600'
+                          }`}
+                        >
+                          {lesson.absentCount}
+                        </span>
+                      </TableCell>
+                      <TableCell className="whitespace-normal">
+                        <AbsenteeList absentees={lesson.absentees} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
 
-                {report.lessons.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={4}
-                      className="px-3 py-3 text-center text-text-muted"
-                    >
-                      No scheduled lesson in this department.
-                    </td>
-                  </tr>
-                ) : null}
-              </tbody>
-            </table>
+                  {report.lessons.length === 0 ? (
+                    <TableRow className="hover:bg-transparent">
+                      <TableCell
+                        colSpan={5}
+                        className="py-4 text-center text-text-muted"
+                      >
+                        No scheduled lesson in this department.
+                      </TableCell>
+                    </TableRow>
+                  ) : null}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </div>
 
           {/* Native-app card list — no horizontal scroll on small screens. */}

@@ -4,6 +4,15 @@ import { notFound } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { FastTab } from '@/components/ui/fast-tab';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { requireHodAccess } from '@/features/auth/authorization';
 import { getStudentPortalResults } from '@/features/student-portal/queries';
 import { getStudentById } from '@/features/students/queries';
@@ -110,24 +119,24 @@ export default async function StudentResultsAdminPage({
                           Unit Examinations
                         </h3>
                       </div>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs">
-                          <thead className="border-b border-border bg-surface-subtle text-[11px] font-bold text-text-muted">
-                            <tr>
-                              <th className="px-4 py-2.5">Unit</th>
-                              <th className="px-3 py-2.5 text-center">Assgn /5</th>
-                              <th className="px-3 py-2.5 text-center">Pres /10</th>
-                              <th className="px-3 py-2.5 text-center">RAT /15</th>
-                              <th className="px-3 py-2.5 text-center">CAT /15</th>
-                              <th className="px-3 py-2.5 text-center">RAT/CAT</th>
-                              <th className="px-3 py-2.5 text-center">Exam /70</th>
-                              <th className="px-3 py-2.5 text-center font-bold text-text-primary">
+                      <TableContainer embedded label="Unit examinations">
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="hover:bg-transparent">
+                              <TableHead>Unit</TableHead>
+                              <TableHead className="text-center">Assgn /5</TableHead>
+                              <TableHead className="text-center">Pres /10</TableHead>
+                              <TableHead className="text-center">RAT /15</TableHead>
+                              <TableHead className="text-center">CAT /15</TableHead>
+                              <TableHead className="text-center">RAT/CAT</TableHead>
+                              <TableHead className="text-center">Exam /70</TableHead>
+                              <TableHead className="text-center text-text-primary">
                                 Total /100
-                              </th>
-                              <th className="px-3 py-2.5 text-center">Grade</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-border-soft">
+                              </TableHead>
+                              <TableHead className="text-center">Grade</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
                             {examResults.map((result) => {
                               const grade = gradeLabel(
                                 result.mark,
@@ -135,45 +144,39 @@ export default async function StudentResultsAdminPage({
                               );
                               const comps = result.componentMarks;
                               return (
-                                <tr
-                                  key={result.id}
-                                  className="transition hover:bg-surface-subtle/60"
-                                >
-                                  <td className="px-4 py-2.5">
-                                    <p className="font-semibold leading-snug text-text-primary">
-                                      {result.unitName}
-                                    </p>
-                                  </td>
-                                  <td className="px-3 py-2.5 text-center font-mono text-text-secondary">
+                                <TableRow key={result.id}>
+                                  <TableCell className="font-semibold text-text-primary">
+                                    {result.unitName}
+                                  </TableCell>
+                                  <TableCell className="text-center font-mono text-text-secondary">
                                     {fmt(comps?.assignment ?? null)}
-                                  </td>
-                                  <td className="px-3 py-2.5 text-center font-mono text-text-secondary">
+                                  </TableCell>
+                                  <TableCell className="text-center font-mono text-text-secondary">
                                     {fmt(comps?.presentation ?? null)}
-                                  </td>
-                                  <td className="px-3 py-2.5 text-center font-mono text-text-secondary">
+                                  </TableCell>
+                                  <TableCell className="text-center font-mono text-text-secondary">
                                     {fmt(comps?.rat ?? null)}
-                                  </td>
-                                  <td className="px-3 py-2.5 text-center font-mono text-text-secondary">
+                                  </TableCell>
+                                  <TableCell className="text-center font-mono text-text-secondary">
                                     {fmt(comps?.cat ?? null)}
-                                  </td>
-                                  <td className="px-3 py-2.5 text-center font-mono text-text-muted">
+                                  </TableCell>
+                                  <TableCell className="text-center font-mono text-text-muted">
                                     {fmt(comps?.ratCatAverage ?? null)}
-                                  </td>
-                                  <td className="px-3 py-2.5 text-center font-mono text-text-secondary">
+                                  </TableCell>
+                                  <TableCell className="text-center font-mono text-text-secondary">
                                     {fmt(comps?.exam ?? null)}
-                                  </td>
-                                  <td className="px-3 py-2.5 text-center">
+                                  </TableCell>
+                                  <TableCell className="text-center">
                                     <span className="font-mono text-sm font-bold text-text-primary">
                                       {result.mark !== null ? result.mark : '—'}
                                     </span>
                                     {result.maximumMark ? (
-                                      <span className="text-[10px] font-medium text-text-muted">
-                                        {' '}
-                                        /{result.maximumMark}
+                                      <span className="text-[11px] font-medium text-text-muted">
+                                        {' '}/{result.maximumMark}
                                       </span>
                                     ) : null}
-                                  </td>
-                                  <td className="px-3 py-2.5 text-center">
+                                  </TableCell>
+                                  <TableCell className="text-center">
                                     {result.mark !== null ? (
                                       <Badge
                                         variant={grade.variant}
@@ -182,17 +185,17 @@ export default async function StudentResultsAdminPage({
                                         {grade.label}
                                       </Badge>
                                     ) : (
-                                      <span className="text-[10px] font-bold text-text-muted">
+                                      <span className="text-[11px] font-bold text-text-muted">
                                         —
                                       </span>
                                     )}
-                                  </td>
-                                </tr>
+                                  </TableCell>
+                                </TableRow>
                               );
                             })}
-                          </tbody>
-                        </table>
-                      </div>
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
                     </Card>
                   )}
 
@@ -205,37 +208,34 @@ export default async function StudentResultsAdminPage({
                           Continuous Assessment Tests (CAT)
                         </h3>
                       </div>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs">
-                          <thead className="border-b border-border bg-surface-subtle text-[11px] font-bold text-text-muted">
-                            <tr>
-                              <th className="px-4 py-2.5">Unit</th>
-                              <th className="px-3 py-2.5 text-center">Mark</th>
-                              <th className="px-3 py-2.5 text-center">Maximum</th>
-                              <th className="px-3 py-2.5 text-center">Grade</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-border-soft">
+                      <TableContainer embedded label="Continuous assessment tests">
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="hover:bg-transparent">
+                              <TableHead>Unit</TableHead>
+                              <TableHead className="text-center">Mark</TableHead>
+                              <TableHead className="text-center">Maximum</TableHead>
+                              <TableHead className="text-center">Grade</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
                             {catResults.map((result) => {
                               const grade = gradeLabel(
                                 result.mark,
                                 result.maximumMark,
                               );
                               return (
-                                <tr
-                                  key={result.id}
-                                  className="transition hover:bg-surface-subtle/60"
-                                >
-                                  <td className="px-4 py-2.5 font-semibold text-text-primary">
+                                <TableRow key={result.id}>
+                                  <TableCell className="font-semibold text-text-primary">
                                     {result.unitName}
-                                  </td>
-                                  <td className="px-3 py-2.5 text-center font-mono font-bold text-text-primary">
+                                  </TableCell>
+                                  <TableCell className="text-center font-mono font-bold text-text-primary">
                                     {result.mark !== null ? result.mark : '—'}
-                                  </td>
-                                  <td className="px-3 py-2.5 text-center font-mono font-medium text-text-secondary">
+                                  </TableCell>
+                                  <TableCell className="text-center font-mono font-medium text-text-secondary">
                                     {result.maximumMark ?? '—'}
-                                  </td>
-                                  <td className="px-3 py-2.5 text-center">
+                                  </TableCell>
+                                  <TableCell className="text-center">
                                     {result.mark !== null ? (
                                       <Badge
                                         variant={grade.variant}
@@ -244,17 +244,17 @@ export default async function StudentResultsAdminPage({
                                         {grade.label}
                                       </Badge>
                                     ) : (
-                                      <span className="text-[10px] font-bold text-text-muted">
+                                      <span className="text-[11px] font-bold text-text-muted">
                                         —
                                       </span>
                                     )}
-                                  </td>
-                                </tr>
+                                  </TableCell>
+                                </TableRow>
                               );
                             })}
-                          </tbody>
-                        </table>
-                      </div>
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
                     </Card>
                   )}
                 </div>

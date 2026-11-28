@@ -10,6 +10,15 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import type { UnitCurriculumDefinition } from './curriculum-registry';
 import {
   commitIngestedCurriculumAction,
@@ -157,38 +166,38 @@ export function CurriculumZipUploadDialog() {
                   <Badge variant="success">Standardised to TVET 14-Weeks</Badge>
                 </div>
 
-                <div className="max-h-60 overflow-y-auto rounded-lg border border-border">
-                  <table className="w-full text-left text-xs">
-                    <thead className="border-b border-border bg-surface-subtle text-[10px] font-bold uppercase text-text-muted">
-                      <tr>
-                        <th className="p-2.5">Unit Code</th>
-                        <th className="p-2.5">Unit Title</th>
-                        <th className="p-2.5 text-center">Topics</th>
-                        <th className="p-2.5 text-center">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
+                <TableContainer label="Detected curriculum units" className="max-h-60 overflow-y-auto">
+                  <Table>
+                    <TableHeader className="sticky top-0 z-10">
+                      <TableRow className="hover:bg-transparent">
+                        <TableHead>Unit Code</TableHead>
+                        <TableHead>Unit Title</TableHead>
+                        <TableHead className="text-center">Topics</TableHead>
+                        <TableHead className="text-center">Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
                       {extractedUnits.map((u, i) => (
-                        <tr key={i} className="hover:bg-surface-subtle/50">
-                          <td className="p-2.5 font-bold text-text-primary">
+                        <TableRow key={i}>
+                          <TableCell className="font-bold text-text-primary">
                             {u.unitCode}
-                          </td>
-                          <td className="p-2.5 font-medium text-text-secondary truncate max-w-[200px]">
+                          </TableCell>
+                          <TableCell className="font-medium text-text-secondary">
                             {u.unitName}
-                          </td>
-                          <td className="p-2.5 text-center text-text-muted">
+                          </TableCell>
+                          <TableCell className="text-center text-text-muted">
                             {u.weeklySchedule?.length ?? 14} Weeks
-                          </td>
-                          <td className="p-2.5 text-center">
-                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-success">
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <span className="inline-flex items-center gap-1 text-xs font-semibold text-success">
                               <FileCheck2 className="size-3" /> Ready
                             </span>
-                          </td>
-                        </tr>
+                          </TableCell>
+                        </TableRow>
                       ))}
-                    </tbody>
-                  </table>
-                </div>
+                    </TableBody>
+                  </Table>
+                </TableContainer>
 
                 <div className="flex items-center justify-end gap-2 pt-2">
                   <button

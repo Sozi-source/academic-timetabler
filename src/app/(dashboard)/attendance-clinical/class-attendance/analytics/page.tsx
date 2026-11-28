@@ -18,6 +18,15 @@ import {
   PageHeader,
 } from '@/components/ui/page-header';
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
   attendanceRate,
   attendanceRateLabel,
 } from '@/features/attendance-analytics/domain';
@@ -186,7 +195,7 @@ export default async function AttendanceAnalyticsPage({
             <button className="h-9 rounded-md bg-primary px-3 text-xs font-semibold text-white" type="submit">Filter</button>
           </form>
         </div>
-        {missedClasses.length ? <div className="overflow-x-auto"><table className="w-full min-w-[650px] text-left text-xs"><thead className="bg-surface-subtle text-text-muted"><tr><th className="px-4 py-2.5">Date</th><th className="px-3 py-2.5">Admission no.</th><th className="px-3 py-2.5">Student</th><th className="px-3 py-2.5">Cohort</th><th className="px-3 py-2.5">Unit missed</th></tr></thead><tbody className="divide-y divide-border">{missedClasses.map((row, index) => <tr key={`${row.admissionNumber}-${row.sessionDate}-${row.unitCode}-${index}`}><td className="px-4 py-2.5">{row.sessionDate}</td><td className="px-3 py-2.5">{row.admissionNumber}</td><td className="px-3 py-2.5 font-semibold text-text-primary">{row.fullName}</td><td className="px-3 py-2.5">{row.cohortName}</td><td className="px-3 py-2.5">{row.unitCode} {row.unitName}</td></tr>)}</tbody></table></div> : <p className="px-4 py-6 text-center text-xs text-text-muted">No recorded absences from {startDate} to {endDate}.</p>}
+        {missedClasses.length ? <TableContainer embedded label="Students who missed class"><Table><TableHeader><TableRow className="hover:bg-transparent"><TableHead>Date</TableHead><TableHead>Admission no.</TableHead><TableHead>Student</TableHead><TableHead>Cohort</TableHead><TableHead>Unit missed</TableHead></TableRow></TableHeader><TableBody>{missedClasses.map((row, index) => <TableRow key={`${row.admissionNumber}-${row.sessionDate}-${row.unitCode}-${index}`}><TableCell>{row.sessionDate}</TableCell><TableCell className="font-mono text-text-secondary">{row.admissionNumber}</TableCell><TableCell className="font-semibold text-text-primary">{row.fullName}</TableCell><TableCell className="text-text-secondary">{row.cohortName}</TableCell><TableCell title={row.unitCode}>{row.unitName}</TableCell></TableRow>)}</TableBody></Table></TableContainer> : <p className="px-4 py-6 text-center text-xs text-text-muted">No recorded absences from {startDate} to {endDate}.</p>}
       </section>
 
       <HodAttendanceView aggregates={aggregates} students={students} />

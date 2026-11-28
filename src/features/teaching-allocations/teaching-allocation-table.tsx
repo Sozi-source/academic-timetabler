@@ -1,15 +1,15 @@
-import {
-  BookOpen,
-  Building2,
-  CalendarDays,
-  Clock3,
-  GraduationCap,
-  UserRound,
-} from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 
+import { Badge } from '@/components/ui/badge';
 import {
-  Badge,
-} from '@/components/ui/badge';
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 import type {
   TeachingAllocation,
@@ -80,8 +80,8 @@ function formatWeeklyHours(
   const totalHours = totalMinutes / 60;
 
   return Number.isInteger(totalHours)
-    ? `${totalHours} hrs/week`
-    : `${totalHours.toFixed(1)} hrs/week`;
+    ? `${totalHours} hrs/wk`
+    : `${totalHours.toFixed(1)} hrs/wk`;
 }
 
 export function TeachingAllocationTable({
@@ -100,245 +100,71 @@ export function TeachingAllocationTable({
         <h2 className="mt-4 font-semibold text-text-primary">
           No teaching allocations yet
         </h2>
-
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-      <div className="w-full overflow-hidden">
-        <table className="w-full table-fixed border-collapse text-left text-sm">
-          <thead className="bg-surface-subtle text-xs uppercase tracking-[0.08em] text-text-muted">
-            <tr>
-              <th className="px-3 py-2.5">
-                Allocation
-              </th>
+    <TableContainer label="Teaching allocations">
+      <Table>
+        <TableHeader>
+          <TableRow className="hover:bg-transparent">
+            <TableHead>Unit</TableHead>
+            <TableHead>Cohort</TableHead>
+            <TableHead>Trainer</TableHead>
+            <TableHead>Delivery</TableHead>
+            <TableHead>Load</TableHead>
+            <TableHead>Room</TableHead>
+            <TableHead>Status</TableHead>
+          </TableRow>
+        </TableHeader>
 
-              <th className="px-3 py-2.5">
-                Academic Period
-              </th>
-
-              <th className="px-3 py-2.5">
-                Cohort
-              </th>
-
-              <th className="px-3 py-2.5">
-                Trainer
-              </th>
-
-              <th className="px-3 py-2.5">
-                Delivery
-              </th>
-
-              <th className="px-3 py-2.5">
-                Room
-              </th>
-
-              <th className="px-3 py-2.5">
-                Status
-              </th>
-            </tr>
-          </thead>
-
-          <tbody className="divide-y divide-border-soft">
-            {allocations.map((allocation) => (
-              <tr
-                key={allocation.id}
-                className="align-top transition hover:bg-surface-subtle"
+        <TableBody>
+          {allocations.map((allocation) => (
+            <TableRow key={allocation.id}>
+              <TableCell
+                className="font-semibold text-text-primary"
+                title={allocation.unit?.code ?? undefined}
               >
-                <td className="min-w-64 px-3 py-2.5">
-                  <div className="flex items-start gap-3">
-                    <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
-                      <BookOpen
-                        className="size-4"
-                        aria-hidden="true"
-                      />
-                    </div>
+                {allocation.unit?.name ?? 'Unknown unit'}
+              </TableCell>
 
-                    <div>
-                      <p className="font-semibold text-text-primary">
-                        {allocation.unit?.name ??
-                          'Unknown unit'}
-                      </p>
+              <TableCell className="text-text-secondary">
+                {allocation.cohort?.name ?? 'Unknown cohort'}
+              </TableCell>
 
-                      <p className="mt-1 text-xs text-text-muted">
-                        {allocation.unit?.code ??
-                          'No unit code'}
-                      </p>
+              <TableCell className="text-text-primary">
+                {allocation.trainer?.fullName ?? 'Unassigned'}
+              </TableCell>
 
-                      <div className="mt-2 flex flex-wrap gap-1.5">
-                        <Badge variant="neutral">
-                          {getDeliveryModeLabel(
-                            allocation.deliveryMode,
-                          )}
-                        </Badge>
+              <TableCell>
+                <Badge variant="neutral">
+                  {getDeliveryModeLabel(allocation.deliveryMode)}
+                </Badge>
+              </TableCell>
 
-                        <Badge variant="neutral">
-                          {allocation.weeklySessions}{' '}
-                          session
-                          {allocation.weeklySessions === 1
-                            ? ''
-                            : 's'}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                </td>
+              <TableCell className="text-text-secondary">
+                {formatWeeklyHours(allocation)} · {allocation.weeklySessions}×{allocation.sessionDurationMinutes}m
+              </TableCell>
 
-                <td className="min-w-52 px-3 py-2.5">
-                  <div className="flex items-start gap-2">
-                    <CalendarDays
-                      className="mt-0.5 size-4 shrink-0 text-text-subtle"
-                      aria-hidden="true"
-                    />
+              <TableCell className="text-text-secondary">
+                {allocation.preferredRoom?.name ?? 'Auto'}
+              </TableCell>
 
-                    <div>
-                      <p className="font-medium text-text-primary">
-                        {allocation.academicPeriod
-                          ?.name ??
-                          'Unknown period'}
-                      </p>
-
-                      <p className="mt-1 text-xs text-text-muted">
-                        {allocation.academicPeriod
-                          ?.code ?? 'No code'}
-                      </p>
-                    </div>
-                  </div>
-                </td>
-
-                <td className="min-w-52 px-3 py-2.5">
-                  <div className="flex items-start gap-2">
-                    <GraduationCap
-                      className="mt-0.5 size-4 shrink-0 text-text-subtle"
-                      aria-hidden="true"
-                    />
-
-                    <div>
-                      <p className="font-medium text-text-primary">
-                        {allocation.cohort?.name ??
-                          'Unknown cohort'}
-                      </p>
-
-                      <p className="mt-1 text-xs text-text-muted">
-                        {allocation.cohort?.code ??
-                          'No cohort code'}
-                      </p>
-
-                      <p className="mt-1 text-xs text-text-muted">
-                        {allocation.cohort
-                          ?.actualSize ?? 0}{' '}
-                        learner
-                        {allocation.cohort
-                          ?.actualSize === 1
-                          ? ''
-                          : 's'}
-                      </p>
-                    </div>
-                  </div>
-                </td>
-
-                <td className="min-w-52 px-3 py-2.5">
-                  <div className="flex items-start gap-2">
-                    <UserRound
-                      className="mt-0.5 size-4 shrink-0 text-text-subtle"
-                      aria-hidden="true"
-                    />
-
-                    <div>
-                      <p className="font-medium text-text-primary">
-                        {allocation.trainer
-                          ?.fullName ??
-                          'Unknown trainer'}
-                      </p>
-
-                      <p className="mt-1 text-xs text-text-muted">
-                        {allocation.trainer
-                          ?.staffNumber ??
-                          'No staff number'}
-                      </p>
-                    </div>
-                  </div>
-                </td>
-
-                <td className="min-w-44 px-3 py-2.5">
-                  <div className="flex items-start gap-2">
-                    <Clock3
-                      className="mt-0.5 size-4 shrink-0 text-text-subtle"
-                      aria-hidden="true"
-                    />
-
-                    <div>
-                      <p className="font-medium text-text-primary">
-                        {formatWeeklyHours(
-                          allocation,
-                        )}
-                      </p>
-
-                      <p className="mt-1 text-xs text-text-muted">
-                        {
-                          allocation.sessionDurationMinutes
-                        }{' '}
-                        minutes per session
-                      </p>
-                    </div>
-                  </div>
-                </td>
-
-                <td className="min-w-48 px-3 py-2.5">
-                  <div className="flex items-start gap-2">
-                    <Building2
-                      className="mt-0.5 size-4 shrink-0 text-text-subtle"
-                      aria-hidden="true"
-                    />
-
-                    <div>
-                      <p className="font-medium text-text-primary">
-                        {allocation.preferredRoom
-                          ?.name ??
-                          'No preferred room'}
-                      </p>
-
-                      <p className="mt-1 text-xs text-text-muted">
-                        {allocation.preferredRoom
-                          ?.code ??
-                          'Generator may assign a room'}
-                      </p>
-                    </div>
-                  </div>
-                </td>
-
-                <td className="min-w-36 px-3 py-2.5">
-                  <div className="flex flex-col items-start gap-2">
-                    <Badge
-                      variant={getStatusVariant(
-                        allocation.status,
-                      )}
-                    >
-                      {getStatusLabel(
-                        allocation.status,
-                      )}
-                    </Badge>
-
-                    <Badge
-                      variant={
-                        allocation.isTimetableEnabled
-                          ? 'success'
-                          : 'neutral'
-                      }
-                    >
-                      {allocation.isTimetableEnabled
-                        ? 'Timetable enabled'
-                        : 'Not enabled'}
-                    </Badge>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+              <TableCell>
+                <div className="inline-flex items-center gap-1.5">
+                  <Badge variant={getStatusVariant(allocation.status)}>
+                    {getStatusLabel(allocation.status)}
+                  </Badge>
+                  {!allocation.isTimetableEnabled ? (
+                    <Badge variant="neutral">Disabled</Badge>
+                  ) : null}
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }

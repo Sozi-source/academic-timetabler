@@ -18,6 +18,15 @@ import {
   submitOnlineRecordOfWorkAction,
 } from './actions';
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
   initialRecordOfWorkActionState,
   type OnlineRecordOfWorkContext,
   type OnlineRecordOfWorkEntry,
@@ -371,46 +380,44 @@ export function OnlineRecordOfWorkManager({ context }: { context: OnlineRecordOf
 
           {/* B. DESKTOP MASTER TABLE (>= md) */}
           <section className="hidden md:block overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-left text-xs min-w-[720px]">
-                <thead>
-                  <tr className="bg-slate-900 text-white text-[10px] font-bold uppercase tracking-wider">
-                    <th className="px-3.5 py-2.5 w-[14%]">Date & Week</th>
-                    <th className="px-3 py-2.5 w-[11%]">Time</th>
-                    <th className="px-3.5 py-2.5 w-[33%]">Work / Topic Covered</th>
-                    <th className="px-3.5 py-2.5 w-[28%]">Outcomes Achieved</th>
-                    <th className="px-3 py-2.5 w-[14%] text-center">Status / Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200">
+            <TableContainer embedded label="Online record of work">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead>Date</TableHead>
+                    <TableHead>Week</TableHead>
+                    <TableHead>Time</TableHead>
+                    <TableHead>Work / Topic Covered</TableHead>
+                    <TableHead>Outcomes Achieved</TableHead>
+                    <TableHead className="text-center">Status / Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {/* Submitted Entries */}
                   {submitted.map((entry, idx) => (
-                    <tr key={entry.id} className={idx % 2 === 0 ? 'bg-white align-top' : 'bg-slate-50/40 align-top'}>
-                      <td className="px-3.5 py-3 font-bold text-slate-900">
+                    <TableRow key={entry.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'}>
+                      <TableCell className="font-bold text-text-primary">
                         {prettyDate(entry.sessionDate)}
-                        <span className="block text-[10px] font-medium text-slate-500">
-                          Week {entry.weekNumber ?? '—'}
-                        </span>
-                      </td>
-                      <td className="px-3 py-3 text-slate-600 font-medium whitespace-nowrap">
+                      </TableCell>
+                      <TableCell className="text-text-secondary">
+                        W{entry.weekNumber ?? '—'}
+                      </TableCell>
+                      <TableCell className="font-medium text-text-secondary">
                         {entry.timeLabel}
-                      </td>
-                      <td className="px-3.5 py-3 text-slate-900 leading-snug">
-                        <p className="font-semibold">{entry.workCovered}</p>
-                        {entry.remarks && (
-                          <p className="mt-0.5 text-[11px] text-slate-500 italic">Remark: {entry.remarks}</p>
-                        )}
-                      </td>
-                      <td className="px-3.5 py-3 text-slate-700 leading-relaxed whitespace-pre-line">
-                        {entry.outcomesAchieved}
-                      </td>
-                      <td className="px-3 py-3 text-center align-middle">
+                      </TableCell>
+                      <TableCell className="font-semibold text-text-primary" title={entry.remarks ?? undefined}>
+                        {entry.workCovered}
+                      </TableCell>
+                      <TableCell className="text-text-secondary">
+                        {entry.outcomesAchieved.replace(/\s*\n+\s*/g, ' · ')}
+                      </TableCell>
+                      <TableCell className="text-center">
                         <span className="inline-flex items-center gap-1 rounded bg-teal-50 px-2 py-0.5 text-[10px] font-bold text-teal-800 border border-teal-200">
                           <CheckCircle2 className="size-3 text-teal-700" />
                           Recorded
                         </span>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))}
 
                   {/* Pending Occurrences */}
@@ -419,34 +426,32 @@ export function OnlineRecordOfWorkManager({ context }: { context: OnlineRecordOf
                     if (isSubmitted) return null;
 
                     return (
-                      <tr
+                      <TableRow
                         key={occ.occurrenceKey}
                         className={cn(
-                          'align-top transition',
                           occ.timingStatus === 'today'
                             ? 'bg-amber-50/40'
                             : (submitted.length + idx) % 2 === 0
-                            ? 'bg-white'
-                            : 'bg-slate-50/40'
+                              ? 'bg-white'
+                              : 'bg-slate-50/40',
                         )}
                       >
-                        <td className="px-3.5 py-3 font-bold text-slate-900">
+                        <TableCell className="font-bold text-text-primary">
                           {prettyDate(occ.sessionDate)}
-                          <span className="block text-[10px] font-medium text-slate-500">
-                            Week {occ.weekNumber}
-                          </span>
-                        </td>
-                        <td className="px-3 py-3 text-slate-600 font-medium whitespace-nowrap">
+                        </TableCell>
+                        <TableCell className="text-text-secondary">
+                          W{occ.weekNumber}
+                        </TableCell>
+                        <TableCell className="font-medium text-text-secondary">
                           {occ.timeLabel}
-                        </td>
-                        <td className="px-3.5 py-3 text-slate-700 leading-snug">
-                          <p className="font-medium text-slate-800">{occ.topicSuggestion || '—'}</p>
-                          <span className="text-[10px] text-slate-400 italic">(Planned)</span>
-                        </td>
-                        <td className="px-3.5 py-3 text-slate-600 leading-relaxed whitespace-pre-line">
-                          {occ.objectivesSuggestion || '—'}
-                        </td>
-                        <td className="px-3 py-3 text-center align-middle">
+                        </TableCell>
+                        <TableCell className="font-medium text-text-primary">
+                          {occ.topicSuggestion || '—'} <span className="text-xs font-normal text-text-muted italic">(Planned)</span>
+                        </TableCell>
+                        <TableCell className="text-text-secondary">
+                          {occ.objectivesSuggestion ? occ.objectivesSuggestion.replace(/\s*\n+\s*/g, ' · ') : '—'}
+                        </TableCell>
+                        <TableCell className="text-center">
                           {occ.canSubmit ? (
                             <button
                               type="button"
@@ -467,13 +472,13 @@ export function OnlineRecordOfWorkManager({ context }: { context: OnlineRecordOf
                               Scheduled
                             </button>
                           )}
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     );
                   })}
-                </tbody>
-              </table>
-            </div>
+                </TableBody>
+              </Table>
+            </TableContainer>
           </section>
         </>
       )}

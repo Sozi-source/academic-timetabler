@@ -49,55 +49,44 @@ export function TrainerAccessTable({
         id: 'trainer',
         header: 'Trainer',
         accessorFn: (record) => record.fullName,
-        minSize: 200,
-        cell: ({ row }) => {
-          const record = row.original;
-
-          return (
-            <div className="min-w-0">
-              <Link
-                href={`/trainers/${record.trainerId}`}
-                className="block truncate text-xs font-semibold text-text-primary transition hover:text-primary hover:underline xl:text-sm"
-              >
-                {record.fullName}
-              </Link>
-              <p className="mt-0.5 truncate text-[11px] text-text-muted xl:text-xs">
-                {record.email ?? 'No email'}
-              </p>
-            </div>
-          );
-        },
+        cell: ({ row }) => (
+          <Link
+            href={`/trainers/${row.original.trainerId}`}
+            className="font-semibold text-text-primary transition hover:text-primary hover:underline"
+          >
+            {row.original.fullName}
+          </Link>
+        ),
       },
       {
         id: 'email',
         header: 'Email',
         accessorFn: (record) => record.email ?? '',
-        minSize: 180,
-        // Hidden by default (it is already shown under the name),
-        // but available in the Columns menu and included in exports.
-        cell: ({ getValue }) => getValue<string>() || '—',
+        cell: ({ getValue }) => (
+          <span className="text-text-secondary">
+            {getValue<string>() || '—'}
+          </span>
+        ),
       },
       {
         id: 'workspace',
         header: 'Workspace details',
         accessorFn: (record) => trainerAccessDetail(record),
-        minSize: 200,
-        cell: ({ row }) => {
-          const record = row.original;
-
-          return (
-            <div className="min-w-0">
-              <p className="text-xs font-medium text-text-secondary">
-                {trainerAccessDetail(record)}
-              </p>
-              {record.profileRole ? (
-                <p className="mt-0.5 text-[11px] text-text-muted">
-                  Profile: {record.profileRole}
-                </p>
-              ) : null}
-            </div>
-          );
-        },
+        cell: ({ row }) => (
+          <span className="text-text-secondary">
+            {trainerAccessDetail(row.original)}
+          </span>
+        ),
+      },
+      {
+        id: 'profileRole',
+        header: 'Profile role',
+        accessorFn: (record) => record.profileRole ?? '',
+        cell: ({ row }) => (
+          <span className="text-text-secondary">
+            {row.original.profileRole || '—'}
+          </span>
+        ),
       },
       {
         id: 'status',
@@ -202,7 +191,8 @@ export function TrainerAccessTable({
       emptyTitle="No trainers found"
       emptyDescription="Register trainers before provisioning access."
       initialPageSize={24}
-      initialHiddenColumns={['email']}
+      initialHiddenColumns={['profileRole']}
+      enableColumnToggle
       exportFileName={exportFileName}
       layout="auto"
       // Sits inside the register card, which already draws the border.

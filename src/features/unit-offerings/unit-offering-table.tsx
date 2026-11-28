@@ -5,6 +5,15 @@ import { useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 import type { UnitOffering } from './types';
 import { approveUnitOfferingsAction, withdrawUnitOfferingAction } from './approval-actions';
@@ -373,11 +382,11 @@ export function UnitOfferingTable({ offerings, academicPeriodId = '' }: UnitOffe
               <p className="mt-1 text-xs text-text-muted">Adjust the filters.</p>
             </div>
           ) : (
-            <div className="w-full overflow-hidden">
-              <table className="w-full table-fixed border-collapse text-left">
-                <thead className="border-b border-border bg-surface-subtle">
-                  <tr>
-                    <th className="w-[5%] px-3 py-2.5 text-center">
+            <TableContainer embedded label="Units on offer">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="w-10 text-center">
                       <input
                         type="checkbox"
                         checked={allVisibleSelected}
@@ -388,22 +397,22 @@ export function UnitOfferingTable({ offerings, academicPeriodId = '' }: UnitOffe
                         aria-label="Select all visible units"
                         className="size-3.5 cursor-pointer rounded border-border-strong text-primary accent-primary"
                       />
-                    </th>
-                    <th className="w-[29%] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">Unit</th>
-                    <th className="w-[26%] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">Class</th>
-                    <th className="w-[18%] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">Sessions</th>
-                    <th className="w-[22%] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border-soft">
+                    </TableHead>
+                    <TableHead>Unit</TableHead>
+                    <TableHead>Class</TableHead>
+                    <TableHead>Sessions</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {filtered.map((offering) => {
-                    const programme = offering.cohort?.programme ?? offering.unit?.programme;
                     const isDropped = offering.approvalStatus === 'withdrawn' || offering.selectionState === 'excluded';
                     const isApproved = offering.approvalStatus === 'approved' && offering.selectionState === 'included';
 
                     return (
-                      <tr key={offering.id} className="align-middle transition hover:bg-surface-subtle/60">
-                        <td className="px-3 py-2.5 text-center">
+                      <TableRow key={offering.id}>
+                        <TableCell className="text-center">
                           <input
                             name="offeringId"
                             value={offering.id}
@@ -419,38 +428,35 @@ export function UnitOfferingTable({ offerings, academicPeriodId = '' }: UnitOffe
                             aria-label={`Select ${offering.unit?.name ?? 'unit'} for ${offering.cohort?.name ?? 'cohort'}`}
                             className="size-4 cursor-pointer rounded border-border-strong text-primary accent-primary"
                           />
-                        </td>
-                        <td className="px-3 py-2.5">
-                          <p className="break-words text-[12px] font-semibold leading-5 text-text-primary xl:text-sm">
-                            {offering.unit?.name ?? '—'}
-                          </p>
-                          <p className="mt-0.5 text-[10px] text-text-muted xl:text-xs">
-                            {offering.unit?.code ?? '—'} · {titleCase(offering.offeringType)}
-                          </p>
-                        </td>
+                        </TableCell>
+                        <TableCell
+                          className="font-semibold text-text-primary"
+                          title={offering.unit?.code ? `${offering.unit.code} · ${titleCase(offering.offeringType)}` : undefined}
+                        >
+                          {offering.unit?.name ?? '—'}
+                        </TableCell>
 
-                        <td className="px-3 py-2.5">
-                          <p className="break-words text-[12px] font-medium leading-5 text-text-primary xl:text-sm">
-                            {offering.cohort?.name ?? '—'}
-                          </p>
-                        </td>
+                        <TableCell className="text-text-secondary">
+                          {offering.cohort?.name ?? '—'}
+                        </TableCell>
 
-                        <td className="px-3 py-2.5 text-[12px] text-text-secondary xl:text-sm">
-                          <p>
-                            {offering.weeklySessions ?? '—'} × {offering.sessionDurationMinutes ?? '—'} min
-                          </p>
-                        </td>
+                        <TableCell className="text-text-secondary">
+                          {offering.weeklySessions ?? '—'} × {offering.sessionDurationMinutes ?? '—'} min
+                        </TableCell>
 
-                        <td className="px-3 py-2.5">
-                          <span className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold xl:text-xs ${stateClass(offering)}`}>
+                        <TableCell>
+                          <span className={`inline-flex rounded-full border px-2 py-0.5 text-[11px] font-semibold ${stateClass(offering)}`}>
                             {stateLabel(offering)}
                           </span>
-                          <div className="mt-1 flex items-center gap-2">
+                        </TableCell>
+
+                        <TableCell className="text-right">
+                          <div className="inline-flex items-center justify-end gap-2">
                             {isApproved ? (
                               <button
                                 form={`withdraw-${offering.id}`}
                                 type="submit"
-                                className="text-[11px] font-medium text-rose-600 hover:underline"
+                                className="text-xs font-medium text-rose-600 hover:underline"
                               >
                                 Drop
                               </button>
@@ -458,7 +464,7 @@ export function UnitOfferingTable({ offerings, academicPeriodId = '' }: UnitOffe
                               <button
                                 form={`approve-${offering.id}`}
                                 type="submit"
-                                className="text-[11px] font-medium text-emerald-700 hover:underline"
+                                className="text-xs font-medium text-emerald-700 hover:underline"
                               >
                                 Include
                               </button>
@@ -467,28 +473,28 @@ export function UnitOfferingTable({ offerings, academicPeriodId = '' }: UnitOffe
                                 <button
                                   form={`approve-${offering.id}`}
                                   type="submit"
-                                  className="text-[11px] font-semibold text-emerald-700 hover:underline"
+                                  className="text-xs font-semibold text-emerald-700 hover:underline"
                                 >
                                   Approve
                                 </button>
-                                <span className="text-[10px] text-text-muted">·</span>
+                                <span className="text-xs text-text-muted">·</span>
                                 <button
                                   form={`withdraw-${offering.id}`}
                                   type="submit"
-                                  className="text-[11px] font-medium text-rose-600 hover:underline"
+                                  className="text-xs font-medium text-rose-600 hover:underline"
                                 >
                                   Drop
                                 </button>
                               </>
                             )}
                           </div>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     );
                   })}
-                </tbody>
-              </table>
-            </div>
+                </TableBody>
+              </Table>
+            </TableContainer>
           )}
         </section>
       </form>

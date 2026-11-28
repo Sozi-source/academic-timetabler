@@ -39,19 +39,23 @@ const columns: ColumnDef<Room>[] = [
     accessorKey: 'code',
     header: 'Room',
     cell: ({ row }) => (
-      <div className="min-w-0">
-        <p className="text-[12px] font-semibold text-text-primary xl:text-sm">
-          {row.original.code}
-          {row.original.name && row.original.name !== row.original.code
-            ? ` · ${row.original.name}`
-            : ''}
-        </p>
-        {(row.original.building || row.original.floorLabel) ? (
-          <p className="mt-0.5 text-[10px] text-text-muted xl:text-xs">
-            {[row.original.building, row.original.floorLabel].filter(Boolean).join(' · ')}
-          </p>
-        ) : null}
-      </div>
+      <span className="font-semibold text-text-primary">
+        {row.original.code}
+        {row.original.name && row.original.name !== row.original.code
+          ? ` · ${row.original.name}`
+          : ''}
+      </span>
+    ),
+  },
+  {
+    id: 'location',
+    accessorFn: (row) =>
+      [row.building, row.floorLabel].filter(Boolean).join(' · '),
+    header: 'Location',
+    cell: ({ row }) => (
+      <span className="text-text-secondary">
+        {[row.original.building, row.original.floorLabel].filter(Boolean).join(' · ') || '—'}
+      </span>
     ),
   },
   {
@@ -65,18 +69,15 @@ const columns: ColumnDef<Room>[] = [
     accessorKey: 'capacity',
     header: 'Capacity',
     cell: ({ row }) => (
-      <div className="min-w-0">
-        <span className="inline-flex items-center gap-1.5 text-[12px] font-medium text-text-primary xl:text-sm">
-          <Users className="size-3.5 text-text-muted" aria-hidden="true" />
-          {row.original.capacity}
-        </span>
+      <span className="inline-flex items-center gap-1.5 font-medium text-text-primary">
+        <Users className="size-3.5 text-text-muted" aria-hidden="true" />
+        {row.original.capacity}
         {row.original.isAccessible ? (
-          <p className="mt-0.5 inline-flex items-center gap-1 text-[10px] text-text-muted xl:text-xs">
-            <Accessibility className="size-3" aria-hidden="true" />
-            Accessible
-          </p>
+          <span title="Wheelchair accessible" className="inline-flex items-center text-primary">
+            <Accessibility className="size-3.5" aria-hidden="true" />
+          </span>
         ) : null}
-      </div>
+      </span>
     ),
   },
   {

@@ -401,11 +401,15 @@ code, kbd, samp, pre {
 }
 
 /* Tables: Business Central ERP list page and FastTab layout */
-.admin-screen .overflow-x-auto{
+.admin-screen .overflow-x-auto:not([data-table-scroll="true"]){
   scrollbar-width:thin;
   -webkit-overflow-scrolling:touch;
   border-radius:var(--radius-lg);
   border:1px solid var(--border);
+}
+.admin-screen [data-table-scroll="true"]{
+  scrollbar-width:thin;
+  -webkit-overflow-scrolling:touch;
 }
 .admin-screen table{
   font-size:.8125rem;
@@ -416,9 +420,9 @@ code, kbd, samp, pre {
   border-bottom:1px solid var(--border);
   color:var(--text-secondary);
   font-size:0.6875rem;
-  font-weight:600;
+  font-weight:700;
   text-transform:uppercase;
-  letter-spacing:0.05em;
+  letter-spacing:0.08em;
 }
 .admin-screen table tbody tr{
   border-bottom:1px solid var(--border-soft);
@@ -426,6 +430,12 @@ code, kbd, samp, pre {
 }
 .admin-screen table tbody tr:hover{
   background-color:rgba(0, 117, 106, 0.035);
+}
+.admin-screen table[data-ui-table="true"] th,
+.admin-screen table[data-ui-table="true"] td{
+  white-space:nowrap;
+  overflow-wrap:normal;
+  word-break:normal;
 }
 @media(max-width:639px){
   .admin-screen table th,.admin-screen table td{padding:.625rem .75rem;white-space:nowrap}
@@ -599,7 +609,7 @@ code, kbd, samp, pre {
   }
 }
 
-/* Prevent long record names and codes from widening a grid on phones. */
-.admin-screen :is(h1, h2, h3, h4, p, span, td, th, label) {
+/* Prevent long record names and codes from widening a grid on phones (excluding tables, which stay single-line and scroll). */
+.admin-screen :is(h1, h2, h3, h4, p, span, label):not(table *) {
   overflow-wrap: anywhere;
 }

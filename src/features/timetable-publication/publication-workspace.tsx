@@ -9,6 +9,15 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { MetricCard } from '@/components/ui/metric-card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 import {
   PublishCurrentTimetableForm,
@@ -37,12 +46,34 @@ function VersionSnapshot({ version }: { version: TimetableVersion }) {
     <details className="mt-3 border-t border-border-soft pt-3">
       <summary className="cursor-pointer text-xs font-semibold text-primary">View snapshot and audit history</summary>
       <div className="mt-3 grid gap-4 xl:grid-cols-[1.5fr_1fr]">
-        <div className="w-full overflow-hidden rounded-xl border border-border">
-          <table className="w-full table-fixed text-left text-xs">
-            <thead className="bg-surface-subtle text-text-muted"><tr><th className="px-3 py-2">Day/time</th><th className="px-3 py-2">Cohort</th><th className="px-3 py-2">Unit</th><th className="px-3 py-2">Trainer</th><th className="px-3 py-2">Room</th></tr></thead>
-            <tbody>{version.snapshot.map((session) => <tr key={session.id} className="border-t border-border"><td className="px-3 py-2 capitalize">{session.day}<br/>{session.startTime.slice(0,5)}–{session.endTime.slice(0,5)}</td><td className="px-3 py-2">{session.cohortName}</td><td className="px-3 py-2">{session.unitCode} · {session.unitName}</td><td className="px-3 py-2">{session.trainerId ? session.trainerName : <Badge variant="warning">Unassigned</Badge>}</td><td className="px-3 py-2">{session.roomCode ?? 'No room assigned'}</td></tr>)}</tbody>
-          </table>
-        </div>
+        <TableContainer label="Timetable version snapshot">
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead>Day &amp; time</TableHead>
+                <TableHead>Cohort</TableHead>
+                <TableHead>Unit</TableHead>
+                <TableHead>Trainer</TableHead>
+                <TableHead>Room</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {version.snapshot.map((session) => (
+                <TableRow key={session.id}>
+                  <TableCell className="capitalize">
+                    {session.day} · {session.startTime.slice(0, 5)}–{session.endTime.slice(0, 5)}
+                  </TableCell>
+                  <TableCell>{session.cohortName}</TableCell>
+                  <TableCell title={session.unitCode}>{session.unitName}</TableCell>
+                  <TableCell>
+                    {session.trainerId ? session.trainerName : <Badge variant="warning">Unassigned</Badge>}
+                  </TableCell>
+                  <TableCell>{session.roomCode ?? 'No room assigned'}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
         <div className="space-y-2">{version.events.map((event) => <div key={event.id} className="rounded-xl bg-surface-subtle p-3 text-xs"><p className="font-semibold capitalize text-text-primary">{event.eventType.replace('_', ' ')}</p><p className="mt-1 text-text-muted">{event.fromStatus ? `${event.fromStatus} → ` : ''}{event.toStatus} · {new Date(event.performedAt).toLocaleString()}</p>{event.note ? <p className="mt-1 text-text-secondary">{event.note}</p> : null}</div>)}</div>
       </div>
     </details>
@@ -56,7 +87,7 @@ function HistoryRow({ version }: { version: TimetableVersion }) {
         <div className="flex min-w-0 items-center gap-2.5">
           {statusBadge(version.status)}
           <span className="text-xs font-semibold text-text-muted">V{version.versionNumber}</span>
-          <span className="truncate text-sm font-medium text-text-primary">{version.title}</span>
+          <span className="text-sm font-medium text-text-primary">{version.title}</span>
         </div>
         <div className="flex shrink-0 items-center gap-3 text-xs text-text-muted">
           <span>{version.sessionCount} sessions</span>

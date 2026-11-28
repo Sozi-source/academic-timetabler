@@ -67,30 +67,30 @@ const columns: ColumnDef<AcademicPeriod>[] = [
     accessorKey: 'name',
     header: 'Academic Period',
     cell: ({ row }) => (
-      <p className="font-medium text-text-primary" title={row.original.code}>
+      <span className="font-semibold text-text-primary" title={row.original.code}>
         {row.original.name}
-      </p>
+      </span>
     ),
   },
   {
     id: 'periodDates',
     accessorFn: (row) => `${row.startsOn} ${row.endsOn}`,
     header: 'Period dates',
-    cell: ({ row }) => {
-      const period = `${formatDate(row.original.startsOn)} – ${formatDate(row.original.endsOn)}`;
-      const teaching = `${formatDate(row.original.teachingStartsOn)} – ${formatDate(row.original.teachingEndsOn)}`;
-      const differs =
-        row.original.teachingStartsOn !== row.original.startsOn ||
-        row.original.teachingEndsOn !== row.original.endsOn;
-      return (
-        <div className="min-w-0">
-          <p className="text-sm text-text-primary">{period}</p>
-          {differs ? (
-            <p className="mt-0.5 text-[11px] text-text-muted">Teaching: {teaching}</p>
-          ) : null}
-        </div>
-      );
-    },
+    cell: ({ row }) => (
+      <span className="text-text-secondary">
+        {formatDate(row.original.startsOn)} – {formatDate(row.original.endsOn)}
+      </span>
+    ),
+  },
+  {
+    id: 'teachingDates',
+    accessorFn: (row) => `${row.teachingStartsOn} ${row.teachingEndsOn}`,
+    header: 'Teaching dates',
+    cell: ({ row }) => (
+      <span className="text-text-secondary">
+        {formatDate(row.original.teachingStartsOn)} – {formatDate(row.original.teachingEndsOn)}
+      </span>
+    ),
   },
   {
     accessorKey: 'status',
@@ -226,6 +226,7 @@ export function AcademicPeriodTable({
           : 'Create the first Academic Period to define the teaching and timetable calendar.'
       }
       initialPageSize={10}
+      initialHiddenColumns={['teachingDates']}
       enableColumnToggle
       enableDensityToggle
       exportFileName="academic-periods"

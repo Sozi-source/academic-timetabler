@@ -6,6 +6,15 @@ import { Card } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
 import { Select } from '@/components/ui/select';
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
   prioritizeActiveAcademicPeriods,
   resolveAcademicPeriodId,
 } from '@/features/academic-periods/selection';
@@ -251,36 +260,36 @@ export default async function Page({
             <input type="hidden" name="academicPeriodId" value={periodId} />
             <input type="hidden" name="returnTo" value={params.returnTo ?? ''} />
 
-            <div className="overflow-x-auto rounded-xl border border-border">
-              <table className="w-full min-w-[620px] text-xs xl:text-sm">
-                <thead className="bg-surface-subtle text-text-secondary">
-                  <tr>
-                    <th className="px-3 py-2.5 text-left font-semibold">Day</th>
+            <TableContainer label="Trainer availability matrix">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead>Day</TableHead>
                     {slotList.map((slot) => (
-                      <th
+                      <TableHead
                         key={slot.id}
-                        className="px-3 py-2.5 text-center font-semibold"
+                        className="text-center"
                       >
-                        <div>{slot.name}</div>
-                        <div className="mt-0.5 text-[10px] font-normal text-text-muted xl:text-[11px]">
-                          {slot.starts_at.slice(0, 5)}-{slot.ends_at.slice(0, 5)}
-                        </div>
-                      </th>
+                        <span>{slot.name}</span>{' '}
+                        <span className="font-normal text-text-muted">
+                          ({slot.starts_at.slice(0, 5)}–{slot.ends_at.slice(0, 5)})
+                        </span>
+                      </TableHead>
                     ))}
-                  </tr>
-                </thead>
-                <tbody>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {dayList.map((day) => (
-                    <tr key={day.id} className="border-t border-border">
-                      <th className="px-3 py-3 text-left font-semibold capitalize text-text-primary">
+                    <TableRow key={day.id}>
+                      <TableHead scope="row" className="text-left capitalize text-text-primary">
                         {day.day_of_week}
-                      </th>
+                      </TableHead>
                       {slotList.map((slot) => {
                         const value = `${day.id}:${slot.id}`;
                         const checked = usesStandardWeek || selected.has(value);
 
                         return (
-                          <td key={slot.id} className="px-3 py-3 text-center">
+                          <TableCell key={slot.id} className="text-center">
                             <label className="inline-flex cursor-pointer items-center justify-center">
                               <input
                                 type="checkbox"
@@ -293,14 +302,14 @@ export default async function Page({
                                 {day.day_of_week} {slot.name} available
                               </span>
                             </label>
-                          </td>
+                          </TableCell>
                         );
                       })}
-                    </tr>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                </TableBody>
+              </Table>
+            </TableContainer>
 
             <div className="mt-3 flex justify-end">
               <Button type="submit">Save availability</Button>

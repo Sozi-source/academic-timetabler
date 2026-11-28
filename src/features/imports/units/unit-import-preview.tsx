@@ -8,6 +8,15 @@ import {
   Badge,
 } from '@/components/ui/badge';
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
   unitCategoryOptions,
 } from '@/features/units/types';
 import {
@@ -124,162 +133,84 @@ export function UnitImportPreview({
   rows: UnitImportStagedRow[];
 }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-      <div className="w-full overflow-hidden">
-        <table className="w-full table-fixed border-collapse text-left text-sm">
-          <thead className="bg-surface-subtle text-xs uppercase tracking-wide text-text-muted">
-            <tr>
-              <th className="px-3 py-2.5">
-                Row
-              </th>
+    <TableContainer label="Unit import preview">
+      <Table>
+        <TableHeader>
+          <TableRow className="hover:bg-transparent">
+            <TableHead>Row</TableHead>
+            <TableHead>Code</TableHead>
+            <TableHead>Unit</TableHead>
+            <TableHead>Programme</TableHead>
+            <TableHead>Category</TableHead>
+            <TableHead>Y/S</TableHead>
+            <TableHead>Contact hours</TableHead>
+            <TableHead>Room preference</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Validation result</TableHead>
+          </TableRow>
+        </TableHeader>
 
-              <th className="px-3 py-2.5">
-                Unit
-              </th>
+        <TableBody>
+          {rows.map((row) => {
+            const unit = row.normalizedData;
+            const unitName =
+              'name' in unit
+                ? unit.name
+                : String(row.sourceData['Unit Name'] ?? 'Unnamed unit');
+            const unitCode =
+              'code' in unit
+                ? unit.code
+                : String(row.sourceData['Unit Code'] ?? '');
 
-              <th className="px-3 py-2.5">
-                Programme
-              </th>
-
-              <th className="px-3 py-2.5">
-                Category
-              </th>
-
-              <th className="px-3 py-2.5">
-                Period
-              </th>
-
-              <th className="px-3 py-2.5">
-                Contact hours
-              </th>
-
-              <th className="px-3 py-2.5">
-                Room preference
-              </th>
-
-              <th className="px-3 py-2.5">
-                Status
-              </th>
-
-              <th className="px-3 py-2.5">
-                Validation result
-              </th>
-            </tr>
-          </thead>
-
-          <tbody className="divide-y divide-border-soft">
-            {rows.map((row) => {
-              const unit =
-                row.normalizedData;
-
-              const unitName =
-                'name' in unit
-                  ? unit.name
-                  : String(
-                      row.sourceData[
-                        'Unit Name'
-                      ] ?? 'Unnamed unit',
-                    );
-
-              const unitCode =
-                'code' in unit
-                  ? unit.code
-                  : String(
-                      row.sourceData[
-                        'Unit Code'
-                      ] ?? '',
-                    );
-
-              return (
-                <tr key={row.id}>
-                  <td className="whitespace-nowrap px-4 py-4 font-medium text-text-primary">
-                    {row.sourceRowNumber}
-                  </td>
-
-                  <td className="min-w-64 px-4 py-4">
-                    <p className="font-semibold text-text-primary">
-                      {unitName}
-                    </p>
-
-                    <p className="mt-1 text-xs text-text-muted">
-                      {unitCode}
-                    </p>
-                  </td>
-
-                  <td className="whitespace-nowrap px-4 py-4 text-text-secondary">
-                    {'programmeCode' in unit
-                      ? unit.programmeCode
-                      : String(
-                          row.sourceData[
-                            'Programme Code'
-                          ] ?? '',
-                        )}
-                  </td>
-
-                  <td className="whitespace-nowrap px-4 py-4">
-                    {'category' in unit
-                      ? (
-                          <Badge variant="neutral">
-                            {getCategoryLabel(
-                              unit.category,
-                            )}
-                          </Badge>
-                        )
-                      : '—'}
-                  </td>
-
-                  <td className="whitespace-nowrap px-4 py-4 text-text-secondary">
-                    {'academicPeriodNumber' in unit
-                      ? `Period ${unit.academicPeriodNumber}`
-                      : '—'}
-                  </td>
-
-                  <td className="min-w-48 px-4 py-4 text-text-secondary">
-                    {'theoryHours' in unit
-                      ? (
-                          <>
-                            <p>
-                              Theory: {unit.theoryHours}
-                            </p>
-
-                            <p className="mt-1 text-xs text-text-muted">
-                              Practical: {unit.practicalHours}
-                              {' · '}
-                              {unit.weeklySessions} session
-                              {unit.weeklySessions === 1
-                                ? ''
-                                : 's'}
-                              /week
-                            </p>
-                          </>
-                        )
-                      : '—'}
-                  </td>
-
-                  <td className="min-w-44 px-4 py-4 text-text-secondary">
-                    {'preferredRoomType' in unit
-                      ? getRoomTypeLabel(
-                          unit.preferredRoomType,
-                        )
-                      : 'No preference'}
-                  </td>
-
-                  <td className="whitespace-nowrap px-4 py-4">
-                    {getStatusBadge(
-                      row.status,
-                    )}
-                  </td>
-
-                  <td className="min-w-80 px-4 py-4 text-text-muted">
-                    {getErrorText(row) ||
-                      'No validation issues.'}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
+            return (
+              <TableRow key={row.id}>
+                <TableCell className="font-medium text-text-primary">
+                  {row.sourceRowNumber}
+                </TableCell>
+                <TableCell className="font-mono text-xs text-text-muted">
+                  {unitCode || '—'}
+                </TableCell>
+                <TableCell className="font-semibold text-text-primary">
+                  {unitName}
+                </TableCell>
+                <TableCell className="text-text-secondary">
+                  {'programmeCode' in unit
+                    ? unit.programmeCode
+                    : String(row.sourceData['Programme Code'] ?? '')}
+                </TableCell>
+                <TableCell>
+                  {'category' in unit ? (
+                    <Badge variant="neutral">
+                      {getCategoryLabel(unit.category)}
+                    </Badge>
+                  ) : '—'}
+                </TableCell>
+                <TableCell className="text-text-secondary">
+                  {'academicPeriodNumber' in unit
+                    ? `Period ${unit.academicPeriodNumber}`
+                    : '—'}
+                </TableCell>
+                <TableCell className="text-text-secondary">
+                  {'theoryHours' in unit
+                    ? `T:${unit.theoryHours} · P:${unit.practicalHours} · ${unit.weeklySessions}s/wk`
+                    : '—'}
+                </TableCell>
+                <TableCell className="text-text-secondary">
+                  {'preferredRoomType' in unit
+                    ? getRoomTypeLabel(unit.preferredRoomType)
+                    : 'No preference'}
+                </TableCell>
+                <TableCell>
+                  {getStatusBadge(row.status)}
+                </TableCell>
+                <TableCell className="text-text-muted">
+                  {getErrorText(row) || 'No validation issues.'}
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }

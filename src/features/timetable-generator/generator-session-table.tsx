@@ -1,26 +1,20 @@
+import { Clock3 } from 'lucide-react';
+
+import { Badge } from '@/components/ui/badge';
 import {
-  BookOpen,
-  Building2,
-  Clock3,
-  GraduationCap,
-  UserRound,
-} from 'lucide-react';
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
-import {
-  Badge,
-} from '@/components/ui/badge';
+import type { GeneratorPreviewSession } from './server-types';
 
-import type {
-  GeneratorPreviewSession,
-} from './server-types';
-
-function formatDay(
-  value: string,
-) {
-  return (
-    value.charAt(0).toUpperCase() +
-    value.slice(1)
-  );
+function formatDay(value: string) {
+  return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
 export function GeneratorSessionTable({
@@ -36,199 +30,90 @@ export function GeneratorSessionTable({
     );
   }
 
-  const orderedSessions =
-    [...sessions].sort(
-      (first, second) =>
-        first.workingDayName.localeCompare(
-          second.workingDayName,
-        ) ||
-        first.startsAt.localeCompare(
-          second.startsAt,
-        ) ||
-        first.cohortCode.localeCompare(
-          second.cohortCode,
-        ),
-    );
+  const orderedSessions = [...sessions].sort(
+    (first, second) =>
+      first.workingDayName.localeCompare(second.workingDayName) ||
+      first.startsAt.localeCompare(second.startsAt) ||
+      first.cohortCode.localeCompare(second.cohortCode),
+  );
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-      <div className="w-full overflow-hidden">
-        <table className="w-full table-fixed border-collapse text-left text-sm">
-          <thead className="bg-surface-subtle text-xs font-semibold uppercase tracking-wide text-text-muted">
-            <tr>
-              <th className="px-3 py-2.5">
-                Day and time
-              </th>
+    <TableContainer label="Generated timetable sessions">
+      <Table>
+        <TableHeader>
+          <TableRow className="hover:bg-transparent">
+            <TableHead>Day &amp; time</TableHead>
+            <TableHead>Unit</TableHead>
+            <TableHead>Cohort</TableHead>
+            <TableHead>Trainer</TableHead>
+            <TableHead>Room</TableHead>
+            <TableHead>Mode</TableHead>
+          </TableRow>
+        </TableHeader>
 
-              <th className="px-3 py-2.5">
-                Unit
-              </th>
+        <TableBody>
+          {orderedSessions.map((session) => {
+            const cohortLabel =
+              session.participantCohortCount > 1
+                ? `${session.participantCohortCodes.join(' + ')}${
+                    session.participantCohortCount > session.participantCohortCodes.length
+                      ? ` +${session.participantCohortCount - session.participantCohortCodes.length}`
+                      : ''
+                  }`
+                : session.cohortName;
 
-              <th className="px-3 py-2.5">
-                Cohort
-              </th>
+            return (
+              <TableRow
+                key={session.id}
+                className={
+                  session.trainerId && session.roomId
+                    ? undefined
+                    : 'bg-warning-surface hover:bg-warning-surface/70'
+                }
+              >
+                <TableCell className="font-semibold text-text-primary">
+                  {formatDay(session.workingDayName)} · {session.startsAt}–{session.endsAt}
+                </TableCell>
 
-              <th className="px-3 py-2.5">
-                Trainer
-              </th>
-
-              <th className="px-3 py-2.5">
-                Room
-              </th>
-
-              <th className="px-3 py-2.5">
-                Session
-              </th>
-            </tr>
-          </thead>
-
-          <tbody className="divide-y divide-border-soft">
-            {orderedSessions.map(
-              (session) => (
-                <tr
-                  key={session.id}
-                  className={`align-top transition ${session.trainerId && session.roomId ? 'hover:bg-surface-subtle' : 'bg-warning-surface hover:bg-warning-surface/70'}`}
+                <TableCell
+                  className="font-semibold text-text-primary"
+                  title={session.unitCode}
                 >
-                  <td className="min-w-0 px-3 py-2.5">
-                    <div className="flex items-start gap-1.5">
-                      <Clock3
-                        className="mt-0.5 size-3.5 shrink-0 text-text-subtle"
-                        aria-hidden="true"
-                      />
+                  {session.unitName}
+                </TableCell>
 
-                      <div>
-                        <p className="text-sm font-semibold text-text-primary">
-                          {formatDay(
-                            session.workingDayName,
-                          )}
-                        </p>
+                <TableCell className="text-text-secondary">
+                  {cohortLabel}
+                </TableCell>
 
-                        <p className="mt-0.5 text-xs text-text-muted">
-                          {session.startsAt}–
-                          {session.endsAt}
-                        </p>
+                <TableCell>
+                  {session.trainerId ? (
+                    <span className="text-text-primary">{session.trainerName}</span>
+                  ) : (
+                    <Badge variant="warning">Unassigned</Badge>
+                  )}
+                </TableCell>
 
-                        <p className="mt-0.5 text-xs text-text-muted">
-                          {
-                            session.durationMinutes
-                          }{' '}
-                          min
-                        </p>
-                      </div>
-                    </div>
-                  </td>
+                <TableCell>
+                  {session.roomId ? (
+                    <span className="text-text-secondary">{session.roomName}</span>
+                  ) : (
+                    <Badge variant="warning">No room</Badge>
+                  )}
+                </TableCell>
 
-                  <td className="min-w-0 px-3 py-2.5">
-                    <div className="flex items-start gap-1.5">
-                      <BookOpen
-                        className="mt-0.5 size-3.5 shrink-0 text-text-subtle"
-                        aria-hidden="true"
-                      />
-
-                      <div>
-                        <p className="text-sm font-semibold text-text-primary">
-                          {session.unitName}
-                        </p>
-
-                        <p className="mt-0.5 text-xs text-text-muted">
-                          {session.unitCode}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-
-                  <td className="min-w-0 px-3 py-2.5">
-                    <div className="flex items-start gap-1.5">
-                      <GraduationCap
-                        className="mt-0.5 size-3.5 shrink-0 text-text-subtle"
-                        aria-hidden="true"
-                      />
-
-                      <div>
-                        <p className="text-sm font-medium text-text-primary">
-                          {session.cohortName}
-                        </p>
-
-                        <p className="mt-0.5 text-xs text-text-muted">
-                          {session.cohortCode}
-                        </p>
-
-                        {session.participantCohortCount > 1 ? (
-                          <p className="mt-0.5 text-xs font-medium text-primary">
-                            Shared class ·{' '}
-                            {session.participantCohortCodes.join(' + ')}
-                            {session.participantCohortCount > session.participantCohortCodes.length
-                              ? ` +${session.participantCohortCount - session.participantCohortCodes.length} more`
-                              : ''}
-                          </p>
-                        ) : null}
-                      </div>
-                    </div>
-                  </td>
-
-                  <td className="min-w-0 px-3 py-2.5">
-                    <div className="flex items-start gap-1.5">
-                      <UserRound
-                        className={`mt-0.5 size-3.5 shrink-0 ${session.trainerId ? 'text-text-subtle' : 'text-warning'}`}
-                        aria-hidden="true"
-                      />
-
-                      <div>
-                        {session.trainerId ? (
-                          <p className="text-sm font-medium text-text-primary">
-                            {session.trainerName}
-                          </p>
-                        ) : (
-                          <Badge variant="warning">
-                            Unassigned
-                          </Badge>
-                        )}
-
-                        <p className="mt-0.5 text-xs text-text-muted">
-                          {
-                            session.trainerStaffNumber ?? 'Assign before publication'
-                          }
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-
-                  <td className="min-w-0 px-3 py-2.5">
-                    <div className="flex items-start gap-1.5">
-                      <Building2
-                        className={`mt-0.5 size-3.5 shrink-0 ${session.roomId ? 'text-text-subtle' : 'text-warning'}`}
-                        aria-hidden="true"
-                      />
-
-                      <div>
-                        {session.roomId ? <p className="text-sm font-medium text-text-primary">{session.roomName}</p> : <Badge variant="warning">No room</Badge>}
-
-                        <p className="mt-0.5 text-xs text-text-muted">
-                          {session.roomCode ?? 'Assign later'}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-
-                  <td className="min-w-0 px-3 py-2.5">
-                    <div className="flex flex-col items-start gap-1.5">
-                      <Badge variant="neutral">
-                        Session{' '}
-                        {session.sessionNumber}
-                      </Badge>
-
-                      <Badge variant="success">
-                        {session.deliveryMode}
-                      </Badge>
-                    </div>
-                  </td>
-                </tr>
-              ),
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+                <TableCell>
+                  <div className="inline-flex items-center gap-1.5">
+                    <Badge variant="neutral">S{session.sessionNumber}</Badge>
+                    <Badge variant="success">{session.deliveryMode}</Badge>
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }
 
@@ -236,16 +121,12 @@ function CalendarEmptyState() {
   return (
     <>
       <div className="mx-auto flex size-11 items-center justify-center rounded-xl bg-primary-soft text-primary">
-        <Clock3
-          className="size-5"
-          aria-hidden="true"
-        />
+        <Clock3 className="size-5" aria-hidden="true" />
       </div>
 
       <h3 className="mt-4 font-semibold text-text-primary">
         No sessions generated
       </h3>
-
     </>
   );
 }

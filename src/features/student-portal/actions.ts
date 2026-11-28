@@ -142,15 +142,17 @@ export async function verifyStudentProfile(formData: FormData) {
     kcseIndexNumber: formData.get('kcseIndexNumber'),
     nationalIdNumber: formData.get('nationalIdNumber'),
     phoneNumber: formData.get('phoneNumber'),
+    birthCertificateEntryNumber: formData.get('birthCertificateEntryNumber'),
     email: formData.get('email'),
   });
 
   if (!parsed.success) {
-    redirect('/student/profile?error=invalid');
+    const msg = parsed.error.issues[0]?.message ?? 'invalid';
+    redirect(`/student/profile?error=${encodeURIComponent(msg)}`);
   }
 
-  const kcseRaw = parsed.data.kcseIndexNumber?.replace(/\s+/g, '') || null;
-  const kcse = kcseRaw && /^\d{11}$/.test(kcseRaw)
+  const kcseRaw = parsed.data.kcseIndexNumber.replace(/\s+/g, '');
+  const kcse = /^\d{11}$/.test(kcseRaw)
     ? `${kcseRaw.slice(0, 8)}/${kcseRaw.slice(8)}`
     : kcseRaw;
 
@@ -159,8 +161,9 @@ export async function verifyStudentProfile(formData: FormData) {
   const payload = {
     full_name: parsed.data.fullName,
     kcse_index_number: kcse,
-    national_id_number: parsed.data.nationalIdNumber?.replace(/\s+/g, '') || null,
-    phone_number: parsed.data.phoneNumber || null,
+    national_id_number: parsed.data.nationalIdNumber.replace(/\s+/g, ''),
+    phone_number: parsed.data.phoneNumber,
+    birth_certificate_entry_number: parsed.data.birthCertificateEntryNumber,
     email: parsed.data.email || null,
     details_verified_at: new Date().toISOString(),
   };
@@ -180,6 +183,7 @@ export async function verifyStudentProfile(formData: FormData) {
     kcse_index_number: payload.kcse_index_number,
     national_id_number: payload.national_id_number,
     phone_number: payload.phone_number,
+    birth_certificate_entry_number: payload.birth_certificate_entry_number,
     email: payload.email,
   });
 

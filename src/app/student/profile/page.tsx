@@ -24,6 +24,7 @@ import {
 import {
   verifyStudentProfile,
 } from '@/features/student-portal/actions';
+import { getMissingKnecBiodataFields } from '@/features/student-portal/profile';
 import {
   getStudentPortalIdentity,
   getStudentPortalProfileDetails,
@@ -76,6 +77,16 @@ export default async function StudentProfilePage({
     );
   }
 
+  const missingKnecFields = getMissingKnecBiodataFields(profile);
+  const errorMessage =
+    parameters.error === 'save'
+      ? 'Profile could not be saved. Review the entered details.'
+      : parameters.error && parameters.error !== 'invalid'
+        ? parameters.error
+        : parameters.error === 'invalid'
+          ? 'Please enter valid values for all required fields.'
+          : null;
+
   return (
     <StudentPortalShell
       student={
@@ -118,10 +129,16 @@ export default async function StudentProfilePage({
           </div>
         ) : null}
 
-        {parameters.error ? (
+        {errorMessage ? (
           <div className="rounded-lg border border-danger-border bg-danger-surface px-3 py-2.5 text-[11px] text-danger">
-            Profile could not be saved.
-            Review the entered details.
+            {errorMessage}
+          </div>
+        ) : null}
+
+        {missingKnecFields.length > 0 ? (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-[11px] text-amber-900">
+            <strong>Required before KNEC Module I booking:</strong> Complete{' '}
+            {missingKnecFields.join(', ')}. These details stay strictly in your profile and are not printed on KNEC clearance forms.
           </div>
         ) : null}
 
@@ -182,52 +199,63 @@ export default async function StudentProfilePage({
             </label>
 
             <label className="text-xs font-semibold text-text-primary">
-              KCSE index number
+              KCSE index number <span className="text-rose-600" aria-hidden="true">*</span>
               <Input
                 name="kcseIndexNumber"
-                defaultValue={
-                  profile.kcseIndexNumber ??
-                  ''
-                }
+                defaultValue={profile.kcseIndexNumber ?? ''}
                 placeholder="12345678/001"
+                required
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={false}
                 className="mt-1 h-9"
               />
             </label>
 
             <label className="text-xs font-semibold text-text-primary">
-              National ID number
+              National ID number <span className="text-rose-600" aria-hidden="true">*</span>
               <Input
                 name="nationalIdNumber"
-                defaultValue={
-                  profile.nationalIdNumber ??
-                  ''
-                }
+                defaultValue={profile.nationalIdNumber ?? ''}
                 inputMode="numeric"
+                required
+                autoCorrect="off"
+                spellCheck={false}
                 className="mt-1 h-9"
               />
             </label>
 
             <label className="text-xs font-semibold text-text-primary">
-              Phone number
+              Phone number <span className="text-rose-600" aria-hidden="true">*</span>
               <Input
                 name="phoneNumber"
-                defaultValue={
-                  profile.phoneNumber ??
-                  ''
-                }
+                type="tel"
+                defaultValue={profile.phoneNumber ?? ''}
+                required
                 className="mt-1 h-9"
               />
             </label>
 
             <label className="text-xs font-semibold text-text-primary">
+              Birth certificate entry number <span className="text-rose-600" aria-hidden="true">*</span>
+              <Input
+                name="birthCertificateEntryNumber"
+                defaultValue={profile.birthCertificateEntryNumber ?? ''}
+                placeholder="e.g. 0945123456"
+                required
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={false}
+                className="mt-1 h-9"
+              />
+            </label>
+
+            <label className="text-xs font-semibold text-text-primary md:col-span-2">
               Email
               <Input
                 name="email"
                 type="email"
-                defaultValue={
-                  profile.email ??
-                  ''
-                }
+                defaultValue={profile.email ?? ''}
                 className="mt-1 h-9"
               />
             </label>

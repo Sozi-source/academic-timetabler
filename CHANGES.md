@@ -1,3 +1,61 @@
+### 2026-11-28: KNEC Module I Biodata Enforcement, Confidential Clearance Privacy & Bulk KNEC Index Number Import
+
+**Summary:**
+- **Database Schema (`supabase/migrations/20261128153000_knec_biodata_and_bulk_index_support.sql`):**
+  - Added `birth_certificate_entry_number text` (with lookup index) on `public.students` and `birth_certificate_entry_number text` on `public.student_profile_verifications` to capture KNEC Module I registration biodata.
+- **Upfront Student Profile Enforcement (`src/features/student-portal/`, `src/app/student/page.tsx`, `src/app/student/profile/page.tsx`):**
+  - Required `kcseIndexNumber`, `nationalIdNumber`, `phoneNumber`, and `birthCertificateEntryNumber` in `studentProfileSchema`, exposed `getMissingKnecBiodataFields`, persisted `birth_certificate_entry_number` on verification, and added an ongoing warning banner on `/student` prompting completion before booking opens.
+- **Module I Booking Gate & Clearance Privacy (`src/features/knec/student-actions.ts`, `student-knec-booking-client.tsx`, `booking-form-preview.tsx`, `booking-pdf.tsx`):**
+  - Enforced complete Student Profile biodata before submitting any **Module I** booking (`moduleNumber === 1`), switched KNEC Index Number on `/student/knec` to read-only (issued post-registration by Registrar/HOD), and kept `kcseIndexNumber`, `nationalIdNumber`, `phoneNumber`, and `birthCertificateEntryNumber` strictly excluded from the printable clearance preview and downloadable PDF.
+- **Registrar KNEC Portal Registration Roll Export & Bulk Index Number Assignment (`src/app/api/assessment/knec/export-roll/route.ts`, `src/features/knec/index-import.ts`, `actions.ts`, `hod-knec-console.tsx`):**
+  - Added HOD `.xlsx` registration roll export containing student confidential biodata + booked modules/papers for uploading to the KNEC portal, plus bulk `.xlsx`/`.csv` upload and inline batch KNEC index number editing (`Series & Bookings` tab) that syncs `students.knec_index_number` and series bookings back into the system.
+
+**Added / Modified:**
+- `supabase/migrations/20261128153000_knec_biodata_and_bulk_index_support.sql`
+- `src/features/student-portal/types.ts`, `profile.ts`, `queries.ts`, `actions.ts`
+- `src/app/student/page.tsx`, `src/app/student/profile/page.tsx`
+- `src/features/knec/types.ts`, `queries.ts`, `student-actions.ts`, `student-knec-booking-client.tsx`, `index-import.ts`, `actions.ts`, `hod-knec-console.tsx`
+- `src/app/api/assessment/knec/export-roll/route.ts`
+- `src/tests/knec-booking-domain.test.ts`
+
+---
+
+### 2026-11-28: KNEC Examination Booking Engine, Clearance PDF & Student Progress Tracking
+
+**Summary:**
+- **Database Schema & Authoritative KNEC Seed (`supabase/migrations/20261128144000_knec_booking_and_progress_engine.sql`):**
+  - Added `students.knec_index_number` and multi-department RLS-protected tables: `knec_modules`, `knec_papers`, `knec_programme_module_rules`, `knec_exam_series`, `student_knec_module_statuses`, `student_knec_bookings`, and `student_knec_booking_papers`.
+  - Seeded full KNEC paper catalogs from `KNEC Data/Nutrition KNEC Papers (1).xlsx` plus `1905/207` and `2916/307` Trade Projects (and `1903`/`2913` Food Processing references), programme rules (`CHN/CND`, `DHN/DND`, and `DHNT/DNDT` Certificate + Diploma II/III transition), and exam series (`March 2026`, `July 2026`, `November 2026`, `March 2027`). Pushed migration cleanly via `npx supabase db push` and backfilled all `284` matched students from `KNEC Data/Students KNEC Progress.xlsx` (`968` module statuses, `62` November 2026 bookings, `367` booked paper rows, and `77` omitted completed/graduated baselines).
+- **KNEC Domain, Historical Importer, Queries & Actions (`src/features/knec/`):**
+  - Built `domain.ts`, `types.ts`, `historical-import.ts`, `queries.ts`, `student-actions.ts`, and `actions.ts` supporting student series/paper booking, HOD clearance workflow, KNEC index tracking, per-paper result entry (`passed`/`referred`/`absent`) that updates module progression, and reusable `.xlsx` progress imports.
+- **Official Clearance Form & PDF (`src/features/knec/booking-form-preview.tsx`, `booking-pdf.tsx`, `src/app/api/student/knec/form/route.ts`):**
+  - Added printable clearance preview & downloadable A4 `@react-pdf/renderer` PDF including KNEC Index No., Exam Series, booked modules/papers, and sequential signoff cards for HOD, Accounts, Registrar, Principal, and Managing Director.
+- **Student Portal & HOD Monitoring UI (`src/app/student/knec/page.tsx`, `src/app/(dashboard)/assessment/knec/page.tsx`):**
+  - Added `/student/knec` to `StudentPortalShell` and `/assessment/knec` (`KNEC Progress`) to `AssessmentShell` with uniform `TableContainer`/`Table` views, series management, resit/module overrides, paper result entry, CSV export, and Excel sync.
+- **Tests (`src/tests/knec-booking-domain.test.ts`):**
+  - Added unit tests covering equivalence tracks, historical sheet parsing, progression transitions, and PDF generation.
+
+**Added:**
+- `supabase/migrations/20261128144000_knec_booking_and_progress_engine.sql`
+- `src/features/knec/types.ts`
+- `src/features/knec/domain.ts`
+- `src/features/knec/historical-import.ts`
+- `src/features/knec/queries.ts`
+- `src/features/knec/student-actions.ts`
+- `src/features/knec/actions.ts`
+- `src/features/knec/booking-form-preview.tsx`
+- `src/features/knec/booking-pdf.tsx`
+- `src/features/knec/student-knec-booking-client.tsx`
+- `src/features/knec/hod-knec-console.tsx`
+- `src/app/api/student/knec/form/route.ts`
+- `src/app/student/knec/page.tsx`
+- `src/app/(dashboard)/assessment/knec/page.tsx`
+- `src/tests/knec-booking-domain.test.ts`
+
+**Modified:**
+- `src/components/student/student-portal-shell.tsx`
+- `src/components/layout/assessment-shell.tsx`
+
 ### 2026-11-28: Improve Assessment Reports Data Sync, Mark Provenance & Initialization Integrity
 
 **Summary:**

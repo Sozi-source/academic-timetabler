@@ -2,6 +2,7 @@
 
 import {
   ArrowLeft,
+  Award,
   BarChart3,
   BookOpenCheck,
   FileText,
@@ -34,6 +35,11 @@ const NAVIGATION_ITEMS = [
   { label: 'CAT & Exam Analysis', shortLabel: 'Analysis', href: '/assessment/analysis', icon: BarChart3 },
   { label: 'Missing Marks', shortLabel: 'Missing', href: '/assessment/missing-marks', icon: UserX },
   { label: 'Reports', shortLabel: 'Reports', href: '/assessment/reports', icon: FileText },
+] as const;
+
+const SIDEBAR_ITEMS = [
+  ...NAVIGATION_ITEMS,
+  { label: 'KNEC Progress', shortLabel: 'KNEC', href: '/assessment/knec', icon: Award },
 ] as const;
 
 function getInitials(fullName: string) {
@@ -82,7 +88,7 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
           <div>
             <p className="mb-1.5 px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-300">Analysis & Reports</p>
             <div className="space-y-1">
-              {NAVIGATION_ITEMS.map((item) => {
+              {SIDEBAR_ITEMS.map((item) => {
                 const active = pathname === item.href || (item.href !== '/assessment' && pathname.startsWith(item.href));
                 const Icon = item.icon;
                 return (

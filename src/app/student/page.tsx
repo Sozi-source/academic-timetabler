@@ -13,7 +13,10 @@ import { redirect } from 'next/navigation';
 import { StudentPortalShell } from '@/components/student/student-portal-shell';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { getStudentPortalAttendance } from '@/features/attendance-analytics/queries';
+import {
+  getStudentPortalAttendance,
+} from '@/features/attendance-analytics/queries';
+import { getMissingKnecBiodataFields } from '@/features/student-portal/profile';
 import {
   activeStudentUnits,
   studentRegistrationLabel,
@@ -24,6 +27,7 @@ import {
   getActiveStudentPortalPeriod,
   getStudentPortalDocuments,
   getStudentPortalIdentity,
+  getStudentPortalProfileDetails,
   getStudentPortalRegistrationContext,
   getStudentPortalTimetable,
 } from '@/features/student-portal/queries';
@@ -37,18 +41,21 @@ export default async function StudentPortalPage() {
     redirect('/student/login');
   }
 
-  const [student, period, registration, timetable, documents, attendance] = await Promise.all([
+  const [student, period, registration, timetable, documents, attendance, profileDetails] = await Promise.all([
     getStudentPortalIdentity(session.studentId).catch(() => null),
     getActiveStudentPortalPeriod().catch(() => null),
     getStudentPortalRegistrationContext(session.studentId).catch(() => null),
     getStudentPortalTimetable(session.studentId).catch(() => []),
     getStudentPortalDocuments(session.studentId).catch(() => []),
     getStudentPortalAttendance(session.studentId).catch(() => null),
+    getStudentPortalProfileDetails(session.studentId).catch(() => null),
   ]);
 
   if (!student || !registration) {
     redirect('/student/login');
   }
+
+  const missingBiodata = getMissingKnecBiodataFields(profileDetails);
 
   const units = activeStudentUnits(registration.units);
   const missedLessons = (attendance?.sessions ?? []).filter((s) => s.status === 'absent');
@@ -128,16 +135,22 @@ export default async function StudentPortalPage() {
         </section>
 
         {/* Verification Alert Banner */}
-        {!student.detailsVerifiedAt && (
+        {(!student.detailsVerifiedAt || missingBiodata.length > 0) && (
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200/90 bg-amber-50/80 p-3.5 shadow-2xs">
             <div className="flex items-center gap-3">
               <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-900 font-bold shadow-2xs">
                 <UserRound className="size-4" aria-hidden="true" />
               </span>
               <div>
-                <p className="text-xs font-bold text-amber-950">Profile Verification Required</p>
+                <p className="text-xs font-bold text-amber-950">
+                  {missingBiodata.length > 0
+                    ? 'Required Biodata Incomplete (Needed Before KNEC Registration)'
+                    : 'Profile Verification Required'}
+                </p>
                 <p className="text-[11px] text-amber-800">
-                  Please review and confirm your student biodata and contact details.
+                  {missingBiodata.length > 0
+                    ? `Please update your profile with: ${missingBiodata.join(', ')}.`
+                    : 'Please review and confirm your student biodata and contact details.'}
                 </p>
               </div>
             </div>
@@ -146,7 +159,7 @@ export default async function StudentPortalPage() {
               href="/student/profile"
               className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-amber-900 px-3 text-[11px] font-bold text-white shadow-xs transition hover:bg-amber-950 active:scale-95"
             >
-              <span>Verify Profile</span>
+              <span>{missingBiodata.length > 0 ? 'Complete Profile' : 'Verify Profile'}</span>
               <ChevronRight className="size-3.5" />
             </Link>
           </div>

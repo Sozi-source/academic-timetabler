@@ -1412,7 +1412,7 @@ export async function getStudentPortalProfileDetails(
         'students',
       )
       .select(
-        'admission_number, full_name, kcse_index_number, national_id_number, phone_number, email, details_verified_at',
+        'admission_number, full_name, kcse_index_number, national_id_number, phone_number, birth_certificate_entry_number, email, details_verified_at',
       )
       .eq(
         'id',
@@ -1447,6 +1447,10 @@ export async function getStudentPortalProfileDetails(
         null,
     phoneNumber:
       data.phone_number as
+        string |
+        null,
+    birthCertificateEntryNumber:
+      data.birth_certificate_entry_number as
         string |
         null,
     email:

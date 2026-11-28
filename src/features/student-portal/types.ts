@@ -113,6 +113,7 @@ export interface StudentPortalProfileDetails {
   kcseIndexNumber: string | null;
   nationalIdNumber: string | null;
   phoneNumber: string | null;
+  birthCertificateEntryNumber: string | null;
   email: string | null;
   detailsVerifiedAt: string | null;
 }

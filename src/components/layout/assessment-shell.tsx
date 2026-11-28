@@ -29,11 +29,11 @@ interface AssessmentShellProps {
 }
 
 const NAVIGATION_ITEMS = [
-  { label: 'Overview', href: '/assessment', icon: LayoutDashboard },
-  { label: 'Exam Setting', href: '/assessment/exam-setting', icon: BookOpenCheck },
-  { label: 'CAT & Exam Analysis', href: '/assessment/analysis', icon: BarChart3 },
-  { label: 'Missing Marks', href: '/assessment/missing-marks', icon: UserX },
-  { label: 'Reports', href: '/assessment/reports', icon: FileText },
+  { label: 'Overview', shortLabel: 'Overview', href: '/assessment', icon: LayoutDashboard },
+  { label: 'Exam Setting', shortLabel: 'Setting', href: '/assessment/exam-setting', icon: BookOpenCheck },
+  { label: 'CAT & Exam Analysis', shortLabel: 'Analysis', href: '/assessment/analysis', icon: BarChart3 },
+  { label: 'Missing Marks', shortLabel: 'Missing', href: '/assessment/missing-marks', icon: UserX },
+  { label: 'Reports', shortLabel: 'Reports', href: '/assessment/reports', icon: FileText },
 ] as const;
 
 function getInitials(fullName: string) {
@@ -190,7 +190,9 @@ export function AssessmentShell({ profile, children }: AssessmentShellProps) {
         items={[
           { label: 'Hub', href: '/dashboard', icon: ArrowLeft, isActive: false },
           ...NAVIGATION_ITEMS.map((item) => ({
-            ...item,
+            label: item.shortLabel,
+            href: item.href,
+            icon: item.icon,
             isActive: pathname === item.href || (item.href !== '/assessment' && pathname.startsWith(item.href)),
           })),
         ]}

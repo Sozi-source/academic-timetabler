@@ -280,8 +280,11 @@ export function StudentPortalShell({
         </main>
 
         {/* Mobile Bottom Bar Navigation */}
-        <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_rgba(11,79,74,.08)] backdrop-blur-xl lg:hidden">
-          <div className="mx-auto grid h-[3.625rem] max-w-md grid-cols-5">
+        <nav
+          aria-label="Quick navigation"
+          className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom,0px)] pl-[env(safe-area-inset-left,0px)] pr-[env(safe-area-inset-right,0px)] shadow-[0_-8px_30px_rgba(11,79,74,.08)] backdrop-blur-xl lg:hidden print:hidden"
+        >
+          <div className="mx-auto grid min-h-[3.5rem] max-w-md grid-cols-5">
             {MOBILE_NAV_ITEMS.map((item) => {
               const active = isRouteActive(item.href, item.tabKey);
               const Icon = item.icon;
@@ -290,26 +293,27 @@ export function StudentPortalShell({
                 <Link
                   key={item.href}
                   href={href}
+                  aria-current={active ? 'page' : undefined}
                   className={cn(
-                    'relative flex flex-col items-center justify-center gap-1 text-[10px] font-bold transition active:scale-95',
-                    active ? 'text-primary' : 'text-text-muted hover:text-text-primary'
+                    'relative flex min-h-12 min-w-0 w-full flex-col items-center justify-center gap-1 overflow-hidden px-1 py-1.5 text-[10px] leading-tight transition active:scale-95',
+                    active ? 'font-bold text-primary' : 'font-medium text-text-muted hover:text-text-primary'
                   )}
                 >
                   <NavigationProgress />
-                  {active && <span className="absolute top-0 h-0.5 w-8 rounded-full bg-[#ffd400]" />}
-                  <Icon className={cn('size-4.5', active && 'stroke-[2.2]')} />
-                  <span className="max-w-[4.5rem] truncate">{item.label}</span>
+                  {active && <span aria-hidden="true" className="absolute top-0 h-0.5 w-8 rounded-full bg-[#ffd400]" />}
+                  <Icon aria-hidden="true" className={cn('size-4.5 shrink-0', active && 'stroke-[2.2]')} />
+                  <span className="block w-full max-w-full truncate text-center">{item.label}</span>
                 </Link>
               );
             })}
             <button
               type="button"
               onClick={() => setMobileOpen(true)}
-              className="flex flex-col items-center justify-center gap-1 text-[10px] font-bold text-text-muted transition active:scale-95"
+              className="flex min-h-12 min-w-0 w-full flex-col items-center justify-center gap-1 overflow-hidden px-1 py-1.5 text-[10px] font-medium leading-tight text-text-muted transition active:scale-95"
               aria-label="Open more navigation"
             >
-              <Menu className="size-4.5" />
-              <span>More</span>
+              <Menu className="size-4.5 shrink-0" aria-hidden="true" />
+              <span className="block w-full max-w-full truncate text-center">More</span>
             </button>
           </div>
         </nav>

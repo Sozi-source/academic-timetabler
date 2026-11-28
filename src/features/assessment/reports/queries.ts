@@ -68,6 +68,55 @@ export interface AssessmentPeriodReportData {
   rows: ReportStudentRow[];
 }
 
+function rowMarkCompleteness(row: ReportStudentRow): number {
+  return (
+    (row.cat1 !== null ? 1 : 0) +
+    (row.exam !== null ? 2 : 0) +
+    (row.total !== null ? 1 : 0) +
+    (row.rat !== null || row.assignment !== null || row.presentation !== null ? 0.5 : 0)
+  );
+}
+
+/**
+ * Deduplicate sibling rows representing the same shared/equivalent class for a student.
+ * Mark completeness comes first, then exact unit registration breaks ties so students in a cohort
+ * stay aligned on their actual registered unit codes rather than arbitrary population row ordering.
+ */
+export function deduplicateSiblingReportRows(
+  rows: ReportStudentRow[],
+  groupKeyOf: (unitId: string) => string,
+  registeredUnitIdsByStudent: ReadonlyMap<string, ReadonlySet<string>>,
+): ReportStudentRow[] {
+  const dedupedRows = new Map<string, ReportStudentRow>();
+  for (const row of rows) {
+    const key = `${row.studentId}:${groupKeyOf(row.unitId)}`;
+    const existing = dedupedRows.get(key);
+    if (!existing) {
+      dedupedRows.set(key, row);
+      continue;
+    }
+
+    const existingScore = rowMarkCompleteness(existing);
+    const nextScore = rowMarkCompleteness(row);
+    if (nextScore !== existingScore) {
+      if (nextScore > existingScore) dedupedRows.set(key, row);
+      continue;
+    }
+
+    const existingRegistered = registeredUnitIdsByStudent.get(existing.studentId)?.has(existing.unitId) ? 1 : 0;
+    const nextRegistered = registeredUnitIdsByStudent.get(row.studentId)?.has(row.unitId) ? 1 : 0;
+    if (nextRegistered !== existingRegistered) {
+      if (nextRegistered > existingRegistered) dedupedRows.set(key, row);
+      continue;
+    }
+
+    if (row.unitCode.localeCompare(existing.unitCode) < 0) {
+      dedupedRows.set(key, row);
+    }
+  }
+  return Array.from(dedupedRows.values());
+}
+
 export async function getActiveAssessmentPeriodReportData(
   targetPeriodId?: string,
 ): Promise<AssessmentPeriodReportData | null> {
@@ -296,6 +345,7 @@ export async function getActiveAssessmentPeriodReportData(
 
   const inactivePeriodStudents = new Set(periodReportingRows.map((r) => r.student_id));
   const registeredGroupKeysByStudent = new Map<string, Set<string>>();
+  const registeredUnitIdsByStudent = new Map<string, Set<string>>();
   for (const reg of activeRegistrations) {
     if (!reg.student_id || !reg.unit_id) continue;
     let groupKeys = registeredGroupKeysByStudent.get(reg.student_id);
@@ -304,6 +354,13 @@ export async function getActiveAssessmentPeriodReportData(
       registeredGroupKeysByStudent.set(reg.student_id, groupKeys);
     }
     groupKeys.add(siblingResolver.groupKeyOf(reg.unit_id));
+
+    let registeredUnits = registeredUnitIdsByStudent.get(reg.student_id);
+    if (!registeredUnits) {
+      registeredUnits = new Set<string>();
+      registeredUnitIdsByStudent.set(reg.student_id, registeredUnits);
+    }
+    registeredUnits.add(reg.unit_id);
   }
 
   const eventMap = new Map(validEvents.map((event) => {
@@ -472,26 +529,11 @@ export async function getActiveAssessmentPeriodReportData(
     });
   }
 
-  const dedupedRows = new Map<string, ReportStudentRow>();
-  for (const row of rows) {
-    const key = `${row.studentId}:${siblingResolver.groupKeyOf(row.unitId)}`;
-    const existing = dedupedRows.get(key);
-    if (!existing) {
-      dedupedRows.set(key, row);
-    } else {
-      const existingScore = (existing.cat1 !== null ? 1 : 0) + (existing.exam !== null ? 2 : 0) + (existing.total !== null ? 1 : 0);
-      const nextScore = (row.cat1 !== null ? 1 : 0) + (row.exam !== null ? 2 : 0) + (row.total !== null ? 1 : 0);
-      if (nextScore > existingScore) {
-        dedupedRows.set(key, row);
-      }
-    }
-  }
-
   return {
     periodId: period.id,
     periodName: period.name,
     departmentName: profile.departmentName,
     periods: periodsList,
-    rows: Array.from(dedupedRows.values()),
+    rows: deduplicateSiblingReportRows(rows, siblingResolver.groupKeyOf, registeredUnitIdsByStudent),
   };
 }

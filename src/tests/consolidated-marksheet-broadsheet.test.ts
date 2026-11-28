@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { ReportStudentRow } from '@/features/assessment/reports/queries';
+import { deduplicateSiblingReportRows, type ReportStudentRow } from '@/features/assessment/reports/queries';
 
 describe('Consolidated Marksheets & Broadsheet Matrix Logic', () => {
   const sampleRows: ReportStudentRow[] = [
@@ -194,5 +194,70 @@ describe('Consolidated Marksheets & Broadsheet Matrix Logic', () => {
     // Unit 2 in Cohort A: (70 + 30) / 2 = 50
     const unit2Avg = Math.round((unit2Marks.reduce((a, b) => a + b, 0) / unit2Marks.length) * 10) / 10;
     expect(unit2Avg).toBe(50);
+  });
+});
+
+describe('deduplicateSiblingReportRows', () => {
+  const baseRow = (overrides: Partial<ReportStudentRow>): ReportStudentRow => ({
+    eventId: 'ev-1',
+    unitId: 'unit-chn',
+    unitCode: 'CHN 2204',
+    unitName: 'Nutrition in the Lifespan',
+    trainerName: 'Trainer A',
+    studentId: 'stu-1',
+    admissionNumber: 'CHN/001',
+    fullName: 'Student One',
+    cohortId: 'cohort-chn',
+    cohortName: 'CHN MAY 25',
+    attendance: 'present',
+    catReason: '',
+    catRecommendation: '',
+    examReason: '',
+    examRecommendation: '',
+    assignment: 4,
+    presentation: 8,
+    rat: 12,
+    cat1: 13,
+    exam: null,
+    total: null,
+    grade: null,
+    ...overrides,
+  });
+
+  it('prefers the student exact registered unit over earlier sibling rows when mark completeness ties', () => {
+    const groupKeyOf = (unitId: string) =>
+      ['unit-chn', 'unit-cnd', 'unit-dnd'].includes(unitId) ? 'group-lifespan' : unitId;
+
+    const rows: ReportStudentRow[] = [
+      // Sibling rows appear first in population order for student 1 and student 2
+      baseRow({ studentId: 'stu-1', admissionNumber: 'CHN/001', unitId: 'unit-cnd', unitCode: 'CND 2104', eventId: 'ev-cnd' }),
+      baseRow({ studentId: 'stu-1', admissionNumber: 'CHN/001', unitId: 'unit-chn', unitCode: 'CHN 2204', eventId: 'ev-chn' }),
+      baseRow({ studentId: 'stu-2', admissionNumber: 'CHN/002', unitId: 'unit-dnd', unitCode: 'DND 2104', eventId: 'ev-dnd' }),
+      baseRow({ studentId: 'stu-2', admissionNumber: 'CHN/002', unitId: 'unit-chn', unitCode: 'CHN 2204', eventId: 'ev-chn' }),
+    ];
+
+    const registeredUnitIdsByStudent = new Map<string, Set<string>>([
+      ['stu-1', new Set(['unit-chn'])],
+      ['stu-2', new Set(['unit-chn'])],
+    ]);
+
+    const deduped = deduplicateSiblingReportRows(rows, groupKeyOf, registeredUnitIdsByStudent);
+    expect(deduped).toHaveLength(2);
+    expect(deduped.map((r) => r.unitCode)).toEqual(['CHN 2204', 'CHN 2204']);
+  });
+
+  it('keeps mark completeness higher priority than registration tie-breaking', () => {
+    const groupKeyOf = () => 'group-shared';
+    const rows: ReportStudentRow[] = [
+      baseRow({ unitId: 'unit-chn', unitCode: 'CHN 2204', cat1: null, rat: null, assignment: null, presentation: null }),
+      baseRow({ unitId: 'unit-cnd', unitCode: 'CND 2104', cat1: 12, exam: 50, total: 80 }),
+    ];
+    const registeredUnitIdsByStudent = new Map<string, Set<string>>([
+      ['stu-1', new Set(['unit-chn'])],
+    ]);
+
+    const deduped = deduplicateSiblingReportRows(rows, groupKeyOf, registeredUnitIdsByStudent);
+    expect(deduped).toHaveLength(1);
+    expect(deduped[0]?.unitCode).toBe('CND 2104');
   });
 });

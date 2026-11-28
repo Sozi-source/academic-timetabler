@@ -38,35 +38,49 @@ export function MobileBottomNav({
     <nav
       aria-label="Quick navigation"
       className={cn(
-        'fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 pb-[env(safe-area-inset-bottom,0px)] shadow-[0_-4px_16px_rgb(15,23,42,0.06)] backdrop-blur-lg lg:hidden',
+        'fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 pb-[env(safe-area-inset-bottom,0px)] pl-[env(safe-area-inset-left,0px)] pr-[env(safe-area-inset-right,0px)] shadow-[0_-4px_16px_rgb(15,23,42,0.06)] backdrop-blur-lg lg:hidden print:hidden',
         className,
       )}
     >
-      <div className="grid" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>
+      <div className="grid w-full" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>
         {items.map((item) => {
           const Icon = item.icon;
           const content = (
             <>
-              <Icon className="size-5" aria-hidden="true" />
-              <span className="truncate px-1">{item.label}</span>
+              {item.isActive ? (
+                <span aria-hidden="true" className="absolute top-0 h-0.5 w-6 rounded-full bg-current" />
+              ) : null}
+              <Icon className="size-5 shrink-0" aria-hidden="true" />
+              <span className="block w-full max-w-full truncate text-center leading-tight">{item.label}</span>
             </>
           );
 
           const tabClassName = cn(
-            'flex flex-col items-center gap-0.5 py-2 text-[10px] font-bold transition active:bg-gray-50',
-            item.isActive ? activeClassName : 'text-slate-600 hover:text-slate-900',
+            'relative flex min-h-12 min-w-0 w-full flex-col items-center justify-center gap-0.5 overflow-hidden px-1 py-1.5 text-[10px] leading-tight transition active:bg-gray-50',
+            item.isActive ? cn('font-bold', activeClassName) : 'font-medium text-slate-600 hover:text-slate-900',
           );
 
           if (item.href) {
             return (
-              <Link key={item.href} href={item.href} className={tabClassName} aria-current={item.isActive ? 'page' : undefined}>
+              <Link
+                key={item.href}
+                href={item.href}
+                className={tabClassName}
+                aria-current={item.isActive ? 'page' : undefined}
+              >
                 {content}
               </Link>
             );
           }
 
           return (
-            <button key={item.label} type="button" onClick={item.onClick} className={tabClassName}>
+            <button
+              key={item.label}
+              type="button"
+              onClick={item.onClick}
+              className={tabClassName}
+              aria-current={item.isActive ? 'page' : undefined}
+            >
               {content}
             </button>
           );

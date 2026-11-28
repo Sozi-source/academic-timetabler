@@ -1,3 +1,35 @@
+### 2026-11-28: Fix Overlapping Mobile Bottom Tab Items Across Shells
+
+**Summary:**
+- **Shared Mobile Bottom Navigation (`src/components/layout/mobile-bottom-nav.tsx`):**
+  - Bounded each grid tab item with `min-w-0 w-full min-h-12 overflow-hidden px-1 py-1.5` and constrained label `<span>` elements with `block w-full max-w-full truncate text-center leading-tight` so labels can no longer overflow out of `minmax(0, 1fr)` grid tracks onto neighboring tabs.
+  - Added `shrink-0` on icons, `aria-current="page"` support on active button tabs, an active top indicator bar alongside weight/color for WCAG 1.4.1 non-color active differentiation, horizontal safe-area insets, and `print:hidden`.
+- **Assessment, Staff, Student & External Trainer Shells (`assessment-shell.tsx`, `staff-shell.tsx`, `student-portal-shell.tsx`, `external-trainer-navigation.tsx`, `globals.css`):**
+  - Added concise `shortLabel` values (`Overview`, `Setting`, `Analysis`, `Missing`, `Reports`) in `AssessmentShell` mobile bottom tabs (keeping full multi-word labels in the desktop sidebar).
+  - Applied `min-w-0 w-full min-h-12 overflow-hidden` and `block w-full max-w-full truncate text-center` (replacing fixed heights and fixed pixel/rem label caps that could exceed narrow grid columns) plus safe-area insets and `aria-current="page"` in `StaffShell` and `StudentPortalShell`, and `min-w-0` + `truncate` in `ExternalTrainerNavigation`.
+  - Added `scroll-padding-bottom` below `1024px` in `src/app/globals.css` so keyboard focus stays clear of fixed bottom tab bars.
+
+**Modified:**
+- `src/components/layout/mobile-bottom-nav.tsx`
+- `src/components/layout/assessment-shell.tsx`
+- `src/components/staff/staff-shell.tsx`
+- `src/components/student/student-portal-shell.tsx`
+- `src/features/trainer-access/external-trainer-navigation.tsx`
+- `src/app/globals.css`
+
+### 2026-11-28: Preserve Student Registered Unit Identity in Assessment Reports Deduplication
+
+**Summary:**
+- **Shared-Unit Report Deduplication (`src/features/assessment/reports/queries.ts`):**
+  - Added `deduplicateSiblingReportRows()` and tracked `registeredUnitIdsByStudent` from `student_unit_registrations` in `getActiveAssessmentPeriodReportData()`.
+  - When multiple sibling unit rows in a shared/equivalent class carry identical mark completeness, deduplication now breaks ties in favor of the student's actual registered `unit_id` (and deterministically by `unitCode` otherwise) instead of arbitrary `assessment_population.id` ordering. This prevents cohorts in `Per Cohort Broadsheet Matrix` and `Per Unit Consolidated Marksheet` from splitting registered units across random sibling unit codes while continuing to pull marks from the shared `sourceEventId`.
+- **Unit Tests (`src/tests/consolidated-marksheet-broadsheet.test.ts`):**
+  - Added tests verifying exact registered-unit tie-breaking and mark-completeness priority in `deduplicateSiblingReportRows`.
+
+**Modified:**
+- `src/features/assessment/reports/queries.ts`
+- `src/tests/consolidated-marksheet-broadsheet.test.ts`
+
 ### 2026-11-28: Uniform Single-Line Data Tables & Row Decluttering Across System
 
 **Summary:**

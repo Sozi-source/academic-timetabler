@@ -613,3 +613,10 @@ code, kbd, samp, pre {
 .admin-screen :is(h1, h2, h3, h4, p, span, label):not(table *) {
   overflow-wrap: anywhere;
 }
+
+/* Keep keyboard-focused elements clear of fixed mobile bottom navigation bars. */
+@media (max-width: 1023px) {
+  html {
+    scroll-padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+  }
+}

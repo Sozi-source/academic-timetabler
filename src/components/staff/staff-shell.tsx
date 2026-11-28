@@ -289,8 +289,11 @@ export function StaffShell({ profile, children }: StaffShellProps) {
         </main>
 
         {/* Mobile Bottom Navigation Bar (Clean & Professional) */}
-        <nav className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-sm lg:hidden print:hidden">
-          <div className="grid h-[3.625rem] max-w-md grid-cols-4 mx-auto">
+        <nav
+          aria-label="Quick navigation"
+          className="fixed bottom-0 inset-x-0 z-40 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom,0px)] pl-[env(safe-area-inset-left,0px)] pr-[env(safe-area-inset-right,0px)] shadow-sm backdrop-blur-md lg:hidden print:hidden"
+        >
+          <div className="mx-auto grid min-h-[3.5rem] max-w-md grid-cols-4">
             {MOBILE_BOTTOM_NAV.map((item) => {
               const isActive = item.exact
                 ? pathname === item.href
@@ -301,27 +304,37 @@ export function StaffShell({ profile, children }: StaffShellProps) {
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-current={isActive ? 'page' : undefined}
                   className={cn(
-                    'flex flex-col items-center justify-center gap-0.5 transition-colors',
+                    'relative flex min-h-12 min-w-0 w-full flex-col items-center justify-center gap-0.5 overflow-hidden px-1 py-1.5 transition-colors',
                     isActive
                       ? 'text-primary font-bold'
                       : 'text-slate-500 hover:text-slate-800 font-medium'
                   )}
                 >
                   <NavigationProgress />
+                  {isActive ? (
+                    <span aria-hidden="true" className="absolute top-0 h-0.5 w-6 rounded-full bg-current" />
+                  ) : null}
                   <Icon
+                    aria-hidden="true"
                     className={cn(
-                      'size-5',
+                      'size-5 shrink-0',
                       isActive ? 'text-primary stroke-[2.2]' : 'text-slate-400'
                     )}
                   />
-                  <span className="text-[10px] tracking-tight truncate max-w-[64px]">{item.label}</span>
+                  <span className="block w-full max-w-full truncate text-center text-[10px] leading-tight tracking-tight">{item.label}</span>
                 </Link>
               );
             })}
-            <button type="button" onClick={() => setMobileOpen(true)} className="flex flex-col items-center justify-center gap-0.5 text-text-muted transition active:scale-95" aria-label="Open more navigation">
-              <Menu className="size-5" />
-              <span className="text-[10px] font-medium">More</span>
+            <button
+              type="button"
+              onClick={() => setMobileOpen(true)}
+              className="flex min-h-12 min-w-0 w-full flex-col items-center justify-center gap-0.5 overflow-hidden px-1 py-1.5 text-text-muted transition active:scale-95"
+              aria-label="Open more navigation"
+            >
+              <Menu className="size-5 shrink-0" aria-hidden="true" />
+              <span className="block w-full max-w-full truncate text-center text-[10px] font-medium leading-tight">More</span>
             </button>
           </div>
         </nav>

@@ -26,14 +26,14 @@ export function ExternalTrainerNavigation() {
             href={item.href}
             aria-current={active ? 'page' : undefined}
             className={cn(
-              'inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl px-3 text-xs font-semibold transition lg:min-h-10 lg:flex-none lg:rounded-lg',
+              'inline-flex min-h-12 min-w-0 flex-1 items-center justify-center gap-2 overflow-hidden rounded-xl px-3 text-xs font-semibold transition lg:min-h-10 lg:flex-none lg:rounded-lg',
               active
                 ? 'bg-primary text-white shadow-sm'
                 : 'text-[#5a6e69] hover:bg-[#f3f0e8] hover:text-[#1c3a34]',
             )}
           >
-            <Icon className="size-4" aria-hidden="true" />
-            {item.label}
+            <Icon className="size-4 shrink-0" aria-hidden="true" />
+            <span className="truncate">{item.label}</span>
           </Link>
         );
       })}

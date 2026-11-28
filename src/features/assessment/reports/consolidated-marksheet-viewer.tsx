@@ -375,7 +375,30 @@ export function ConsolidatedMarksheetViewer({
     let refer = 0;
     let absent = 0;
 
+    let catSubmittedCount = 0;
+    let catDraftCount = 0;
+    let examDraftCount = 0;
+    let examCommittedCount = 0;
+    const trainerNames = new Set<string>();
+    const trainerHomeDepartments = new Set<string>();
+
     for (const r of allUnitRows) {
+      if (r.trainerName) trainerNames.add(r.trainerName);
+      if (
+        r.trainerHomeDepartment &&
+        r.trainerHomeDepartment.trim().toLowerCase() !== data.departmentName.trim().toLowerCase()
+      ) {
+        trainerHomeDepartments.add(r.trainerHomeDepartment.trim());
+      }
+      if (r.cat1 !== null) {
+        if (r.catSource === 'draft') catDraftCount += 1;
+        else catSubmittedCount += 1;
+      }
+      if (r.exam !== null) {
+        if (r.examSource === 'draft') examDraftCount += 1;
+        else examCommittedCount += 1;
+      }
+
       if (r.attendance === 'absent') {
         absent += 1;
         continue;
@@ -424,6 +447,12 @@ export function ConsolidatedMarksheetViewer({
         satCount: allUnitRows.length - absent,
         absentCount: absent,
         markedCount: countTotal,
+        catSubmittedCount,
+        catDraftCount,
+        examDraftCount,
+        examCommittedCount,
+        trainerSummary: Array.from(trainerNames).join(', '),
+        trainerHomeDepartment: Array.from(trainerHomeDepartments).join(', '),
         meanAssignment: countAssign > 0 ? Math.round(sumAssign / countAssign) : null,
         meanPresentation: countPres > 0 ? Math.round(sumPres / countPres) : null,
         meanRat: countRat > 0 ? Math.round(sumRat / countRat) : null,
@@ -437,7 +466,7 @@ export function ConsolidatedMarksheetViewer({
         refer,
       },
     };
-  }, [activeUnit, data.rows]);
+  }, [activeUnit, data.departmentName, data.rows]);
 
   // Filtered rows in Unit Consolidated Marksheet
   const filteredUnitRows = useMemo(() => {
@@ -1038,7 +1067,14 @@ export function ConsolidatedMarksheetViewer({
                     {unitData.stats.totalEnrolled} Candidates
                   </p>
                   <p className="text-[11px] text-slate-500">
-                    Across {unitData.cohorts.length} cohort{unitData.cohorts.length === 1 ? '' : 's'}
+                    {unitData.stats.trainerSummary
+                      ? `${unitData.stats.trainerSummary}${
+                          unitData.stats.trainerHomeDepartment &&
+                          unitData.stats.trainerHomeDepartment.toLowerCase() !== data.departmentName.toLowerCase()
+                            ? ` (${unitData.stats.trainerHomeDepartment})`
+                            : ''
+                        }`
+                      : `Across ${unitData.cohorts.length} cohort${unitData.cohorts.length === 1 ? '' : 's'}`}
                   </p>
                 </div>
 
@@ -1075,6 +1111,12 @@ export function ConsolidatedMarksheetViewer({
                     {unitData.stats.refer > 0 ? (
                       <span className="rounded bg-amber-50 px-2 py-0.5 text-amber-800 border border-amber-200">
                         Refer: {unitData.stats.refer}
+                      </span>
+                    ) : null}
+                    {unitData.stats.catSubmittedCount + unitData.stats.catDraftCount > 0 ? (
+                      <span className="rounded bg-sky-50 px-2 py-0.5 text-sky-800 border border-sky-200">
+                        CAT: {unitData.stats.catSubmittedCount} sub
+                        {unitData.stats.catDraftCount > 0 ? ` · ${unitData.stats.catDraftCount} draft` : ''}
                       </span>
                     ) : null}
                   </div>

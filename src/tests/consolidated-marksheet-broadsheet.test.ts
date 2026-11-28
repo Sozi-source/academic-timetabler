@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { deduplicateSiblingReportRows, type ReportStudentRow } from '@/features/assessment/reports/queries';
+import {
+  deduplicateSiblingReportRows,
+  type ReportStudentRow,
+} from '@/features/assessment/reports/queries';
+import { getAssessmentReportReadiness } from '@/features/assessment/reports/readiness';
 
 describe('Consolidated Marksheets & Broadsheet Matrix Logic', () => {
   const sampleRows: ReportStudentRow[] = [
@@ -259,5 +263,56 @@ describe('deduplicateSiblingReportRows', () => {
     const deduped = deduplicateSiblingReportRows(rows, groupKeyOf, registeredUnitIdsByStudent);
     expect(deduped).toHaveLength(1);
     expect(deduped[0]?.unitCode).toBe('CND 2104');
+  });
+});
+
+describe('getAssessmentReportReadiness provenance breakdown', () => {
+  it('distinguishes submitted/committed CATs from unsaved drafts without changing legacy readiness', () => {
+    const base: ReportStudentRow = {
+      eventId: 'ev-1',
+      unitId: 'u-1',
+      unitCode: 'DND 1103',
+      unitName: 'Sample Unit',
+      trainerName: 'Lilian Wairimu Njeri',
+      trainerHomeDepartment: 'Health Records and Information Management',
+      studentId: 's-1',
+      admissionNumber: 'DND/001',
+      fullName: 'Student One',
+      cohortId: 'c-1',
+      cohortName: 'DND SEPT 26',
+      attendance: 'present',
+      catReason: '',
+      catRecommendation: '',
+      examReason: '',
+      examRecommendation: '',
+      assignment: null,
+      presentation: null,
+      rat: null,
+      cat1: 12,
+      exam: null,
+      total: null,
+      grade: null,
+      catSource: 'submitted',
+      examSource: 'none',
+    };
+
+    const readiness = getAssessmentReportReadiness({
+      periodId: 'p-1',
+      periodName: 'September-December 2026',
+      departmentName: 'Human Nutrition and Dietetics',
+      periods: [{ id: 'p-1', name: 'September-December 2026', status: 'active' }],
+      rows: [
+        base,
+        { ...base, studentId: 's-2', cat1: 11, catSource: 'draft' },
+        { ...base, studentId: 's-3', cat1: null, catSource: 'none' },
+      ],
+    });
+
+    expect(readiness.catMarkedRows).toBe(2);
+    expect(readiness.catSubmittedRows).toBe(1);
+    expect(readiness.catDraftRows).toBe(1);
+    expect(readiness.catMissingRows).toBe(1);
+    expect(readiness.catReady).toBe(true);
+    expect(readiness.examReady).toBe(false);
   });
 });

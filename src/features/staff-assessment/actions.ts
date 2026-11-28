@@ -18,24 +18,25 @@ export async function initializeUnitAssessmentAction(formData: FormData) {
 
   const admin = createAdminClient();
 
-  // Find department from unit or allocation
+  // Find department from unit, its programme, or the allocation cohort
   const { data: unit } = await admin
     .from('units')
-    .select('department_id')
+    .select('department_id, programme:programmes(department_id)')
     .eq('id', unitId)
     .maybeSingle();
 
-  let departmentId = unit?.department_id;
+  const unitProgramme = Array.isArray(unit?.programme) ? unit.programme[0] : unit?.programme;
+  let departmentId = unit?.department_id ?? unitProgramme?.department_id;
 
   if (!departmentId) {
     const { data: alloc } = await admin
       .from('teaching_allocations')
-      .select('department_id, cohort:cohorts(department_id)')
+      .select('cohort:cohorts(department_id)')
       .eq('id', allocationId)
       .maybeSingle();
 
     const cohort = Array.isArray(alloc?.cohort) ? alloc.cohort[0] : alloc?.cohort;
-    departmentId = alloc?.department_id ?? cohort?.department_id;
+    departmentId = cohort?.department_id;
   }
 
   if (!departmentId) {

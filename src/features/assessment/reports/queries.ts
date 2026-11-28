@@ -35,12 +35,15 @@ async function fetchAllRows<T>(
   return out;
 }
 
+export type MarkProvenanceSource = 'committed' | 'submitted' | 'draft' | 'absent' | 'none';
+
 export interface ReportStudentRow {
   eventId: string;
   unitId: string;
   unitCode: string;
   unitName: string;
   trainerName: string;
+  trainerHomeDepartment?: string;
   studentId: string;
   admissionNumber: string;
   fullName: string;
@@ -58,6 +61,8 @@ export interface ReportStudentRow {
   exam: number | null;
   total: number | null;
   grade: string | null;
+  catSource?: MarkProvenanceSource;
+  examSource?: Exclude<MarkProvenanceSource, 'submitted'>;
 }
 
 export interface AssessmentPeriodReportData {
@@ -217,7 +222,7 @@ export async function getActiveAssessmentPeriodReportData(
     cohort_id: string | null;
     participant_cohort_ids: string[] | null;
     status: string | null;
-    trainer: Relation<{ full_name: string }>;
+    trainer: Relation<{ full_name: string; home_department?: string | null }>;
   };
   type DraftRow = {
     assessment_id: string;
@@ -248,6 +253,13 @@ export async function getActiveAssessmentPeriodReportData(
     student_id: string;
     unit_id: string;
   };
+  type RegistrationCandidateRow = {
+    student_id: string;
+    unit_id: string;
+    cohort_id: string | null;
+    student: PopulationRow['student'];
+    cohort: PopulationRow['cohort'];
+  };
 
   const [
     populations,
@@ -258,6 +270,7 @@ export async function getActiveAssessmentPeriodReportData(
     componentSubmissions,
     periodReportingRows,
     activeRegistrations,
+    registrationCandidates,
   ] = await Promise.all([
     fetchAllRows<PopulationRow>(
       () =>
@@ -286,7 +299,7 @@ export async function getActiveAssessmentPeriodReportData(
       () =>
         admin
           .from('teaching_allocations')
-          .select('unit_id,cohort_id,participant_cohort_ids,status,trainer:trainers(full_name)')
+          .select('unit_id,cohort_id,participant_cohort_ids,status,trainer:trainers(full_name,home_department)')
           .eq('academic_period_id', period.id)
           .in('unit_id', allocationUnitIds)
           .in('status', ['draft', 'active', 'completed', 'archived'])
@@ -341,6 +354,21 @@ export async function getActiveAssessmentPeriodReportData(
           .order('id', { ascending: true }),
       'unit registrations',
     ),
+    fetchAllRows<RegistrationCandidateRow>(
+      () =>
+        admin
+          .from('assessment_registration_candidates')
+          .select(`
+            student_id,unit_id,cohort_id,
+            student:students(id,admission_number,full_name,lifecycle_status,academic_phase),
+            cohort:cohorts(id,code,name)
+          `)
+          .eq('academic_period_id', period.id)
+          .eq('registration_status', 'registered')
+          .in('unit_id', unitIds)
+          .order('student_id', { ascending: true }),
+      'registration candidates',
+    ).catch(() => [] as RegistrationCandidateRow[]),
   ]);
 
   const inactivePeriodStudents = new Set(periodReportingRows.map((r) => r.student_id));
@@ -383,8 +411,8 @@ export async function getActiveAssessmentPeriodReportData(
   const rosterMap = new Map((rosterRows ?? []).map((r) => [`${r.assessment_id}:${r.student_id}`, r]));
   const submittedCatScopes = new Set((componentSubmissions ?? []).map((submission) => `${submission.assessment_id}:${submission.cohort_id ?? 'all'}`));
 
-  const trainerMap = new Map<string, string>();
-  const trainerByUnit = new Map<string, string>();
+  const trainerMap = new Map<string, { fullName: string; homeDepartment: string }>();
+  const trainerByUnit = new Map<string, { fullName: string; homeDepartment: string }>();
   // Sort so active > completed > draft > archived; never let archived overwrite active
   const prioritizedAllocations = [...allocations].sort(
     (a, b) => allocationStatusRank(a.status) - allocationStatusRank(b.status),
@@ -392,18 +420,22 @@ export async function getActiveAssessmentPeriodReportData(
   for (const allocation of prioritizedAllocations) {
     const trainer = one(allocation.trainer);
     if (!trainer?.full_name) continue;
+    const trainerInfo = {
+      fullName: trainer.full_name,
+      homeDepartment: trainer.home_department?.trim() ?? '',
+    };
     const cohortIds = new Set<string>(
       [allocation.cohort_id, ...(allocation.participant_cohort_ids ?? [])].filter((id): id is string => Boolean(id)),
     );
     for (const cohortId of cohortIds) {
       const k = `${allocation.unit_id}:${cohortId}`;
-      if (!trainerMap.has(k)) trainerMap.set(k, trainer.full_name);
+      if (!trainerMap.has(k)) trainerMap.set(k, trainerInfo);
     }
-    if (!trainerByUnit.has(allocation.unit_id)) trainerByUnit.set(allocation.unit_id, trainer.full_name);
+    if (!trainerByUnit.has(allocation.unit_id)) trainerByUnit.set(allocation.unit_id, trainerInfo);
   }
 
-  /** Trainer for a unit/cohort, falling back to the trainer of a shared/equivalent sibling unit. */
-  const resolveTrainerName = (unitId: string, cohortId: string) => {
+  /** Trainer name and home department for a unit/cohort, falling back to shared/equivalent sibling units. */
+  const resolveTrainerInfo = (unitId: string, cohortId: string) => {
     const exact = trainerMap.get(`${unitId}:${cohortId}`);
     if (exact) return exact;
     const siblingUnits = siblingResolver.siblingsOf(unitId);
@@ -411,11 +443,45 @@ export async function getActiveAssessmentPeriodReportData(
       const viaCohort = trainerMap.get(`${siblingUnitId}:${cohortId}`);
       if (viaCohort) return viaCohort;
     }
-    return trainerByUnit.get(unitId) ?? siblingUnits.map((id) => trainerByUnit.get(id)).find(Boolean) ?? '';
+    return (
+      trainerByUnit.get(unitId)
+      ?? siblingUnits.map((id) => trainerByUnit.get(id)).find(Boolean)
+      ?? { fullName: '', homeDepartment: '' }
+    );
   };
 
+  // Fill in registered active candidates whose assessment_population snapshot is missing so
+  // Control Center and Consolidated Reports stay synchronized without mutating existing population rows.
+  const populatedKeys = new Set<string>();
+  for (const pop of populations ?? []) {
+    const event = eventMap.get(pop.assessment_event_id);
+    if (event) {
+      populatedKeys.add(`${pop.student_id}:${siblingResolver.groupKeyOf(event.unitId)}`);
+    }
+  }
+  const effectivePopulations: PopulationRow[] = [...(populations ?? [])];
+  for (const cand of registrationCandidates) {
+    const eventId = eventIdByUnit.get(cand.unit_id);
+    if (!eventId) continue;
+    const groupKey = `${cand.student_id}:${siblingResolver.groupKeyOf(cand.unit_id)}`;
+    if (populatedKeys.has(groupKey)) continue;
+    populatedKeys.add(groupKey);
+    effectivePopulations.push({
+      assessment_event_id: eventId,
+      student_id: cand.student_id,
+      cohort_id: cand.cohort_id,
+      attendance_status: 'pending',
+      cat_absence_reason: null,
+      cat_absence_recommendation: null,
+      exam_absence_reason: null,
+      exam_absence_recommendation: null,
+      student: cand.student,
+      cohort: cand.cohort,
+    });
+  }
+
   const rows: ReportStudentRow[] = [];
-  for (const population of populations ?? []) {
+  for (const population of effectivePopulations) {
     const student = one(
       population.student as Relation<{
         id: string;
@@ -480,8 +546,28 @@ export async function getActiveAssessmentPeriodReportData(
     const assignment = num(marks.assignment) ?? num(draft?.assignment_mark);
     const presentation = num(marks.presentation) ?? num(draft?.presentation_mark);
     const rat = num(marks.rat) ?? num(draft?.rat_mark);
-    const cat1 = isCatAbsent ? null : (submittedDraftCat ?? num(marks.cat1) ?? num(marks.cat) ?? num(draft?.cat_mark));
-    const exam = isExamAbsent ? null : (num(marks.exam) ?? num(draft?.exam_mark));
+    const committedCat = num(marks.cat1) ?? num(marks.cat);
+    const cat1 = isCatAbsent ? null : (submittedDraftCat ?? committedCat ?? num(draft?.cat_mark));
+    const committedExam = num(marks.exam);
+    const exam = isExamAbsent ? null : (committedExam ?? num(draft?.exam_mark));
+
+    const catSource: MarkProvenanceSource = isCatAbsent
+      ? 'absent'
+      : committedCat !== null
+        ? 'committed'
+        : submittedDraftCat !== null
+          ? 'submitted'
+          : cat1 !== null
+            ? 'draft'
+            : 'none';
+    const examSource: Exclude<MarkProvenanceSource, 'submitted'> = isExamAbsent
+      ? 'absent'
+      : (num(result?.total_mark) !== null || committedExam !== null || num(marks.total) !== null)
+        ? 'committed'
+        : exam !== null
+          ? 'draft'
+          : 'none';
+    const trainerInfo = resolveTrainerInfo(event.unitId, cohort.id);
 
     let total = isExamAbsent ? null : (num(result?.total_mark) ?? num(marks.total));
     if (total === null && !isExamAbsent && cat1 !== null && exam !== null) {
@@ -508,7 +594,8 @@ export async function getActiveAssessmentPeriodReportData(
       unitId: event.unitId,
       unitCode: event.unitCode,
       unitName: event.unitName,
-      trainerName: resolveTrainerName(event.unitId, cohort.id),
+      trainerName: trainerInfo.fullName,
+      trainerHomeDepartment: trainerInfo.homeDepartment || undefined,
       studentId: student.id,
       admissionNumber: student.admission_number,
       fullName: student.full_name,
@@ -526,6 +613,8 @@ export async function getActiveAssessmentPeriodReportData(
       exam,
       total,
       grade,
+      catSource,
+      examSource,
     });
   }
 

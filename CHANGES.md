@@ -1,3 +1,23 @@
+### 2026-11-28: Improve Assessment Reports Data Sync, Mark Provenance & Initialization Integrity
+
+**Summary:**
+- **Fix Assessment Initialization Query (`src/features/staff-assessment/actions.ts`):**
+  - Removed the invalid `teaching_allocations.department_id` column lookup in `initializeUnitAssessmentAction()` (which failed with Postgres error `42703`) and resolved department ID in order: `units.department_id` -> `programmes.department_id` -> `teaching_allocations.cohort.department_id` -> default fallback.
+- **Canonical Registration Sync, Mark Provenance & External Trainer Visibility (`src/features/assessment/reports/queries.ts`, `readiness.ts`, `reports/page.tsx`, `consolidated-marksheet-viewer.tsx`):**
+  - Supplemented `assessment_population` snapshots with registered active candidates from `assessment_registration_candidates` when a registered student is missing from a unit's snapshot, keeping existing `assessment_population` rows and attendance records untouched while eliminating drift between Control Center and Reports.
+  - Added optional `catSource`, `examSource`, and `trainerHomeDepartment` metadata onto `ReportStudentRow` and provenance breakdown metrics (`catSubmittedRows`, `catDraftRows`, `examCommittedRows`, `examDraftRows`) on `getAssessmentReportReadiness()`.
+  - Surfaced CAT submitted vs. draft counts on the `CAT Marks Report` card and Per-Unit telemetry, alongside external trainer home-department context (`trainerName (homeDepartment)`), without changing mark calculations or crowding table rows.
+- **Tests (`src/tests/consolidated-marksheet-broadsheet.test.ts`):**
+  - Added unit tests for `getAssessmentReportReadiness` submitted vs. draft provenance counters.
+
+**Modified:**
+- `src/features/staff-assessment/actions.ts`
+- `src/features/assessment/reports/queries.ts`
+- `src/features/assessment/reports/readiness.ts`
+- `src/app/(dashboard)/assessment/reports/page.tsx`
+- `src/features/assessment/reports/consolidated-marksheet-viewer.tsx`
+- `src/tests/consolidated-marksheet-broadsheet.test.ts`
+
 ### 2026-11-28: Fix Overlapping Mobile Bottom Tab Items Across Shells
 
 **Summary:**

@@ -132,7 +132,9 @@ export default async function AssessmentReportsPage({ searchParams }: PageProps)
             ready={readiness.catReady}
             status={
               readiness.catReady
-                ? `${readiness.catMarkedRows} marks in ${readiness.unitCount} units.`
+                ? readiness.catDraftRows > 0
+                  ? `${readiness.catMarkedRows} marks in ${readiness.unitCount} units (${readiness.catSubmittedRows} submitted, ${readiness.catDraftRows} draft).`
+                  : `${readiness.catMarkedRows} marks in ${readiness.unitCount} units.`
                 : 'No committed CAT marks.'
             }
           />

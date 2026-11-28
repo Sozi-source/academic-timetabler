@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, ArrowUpRight } from 'lucide-react';
 
 import {
   Table,
@@ -81,9 +81,12 @@ export function PendingMarkSubmissionsPanel({ items }: { items: PendingMarkSubmi
                     ) : null}
                     <Link
                       href={`/assessment/marks/${item.assessmentId}`}
-                      className="inline-flex h-7 items-center rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
+                      aria-label={`Open markbook for ${item.unitName}`}
+                      title={`Open markbook for ${item.unitName}`}
+                      className="inline-flex h-7 items-center gap-1 rounded-md border border-border-strong bg-surface px-2.5 text-[11px] font-semibold text-text-secondary transition hover:border-primary/40 hover:bg-surface-subtle hover:text-primary"
                     >
-                      Open markbook
+                      <span>Open</span>
+                      <ArrowUpRight className="size-3 shrink-0" aria-hidden="true" />
                     </Link>
                   </div>
                 </TableCell>

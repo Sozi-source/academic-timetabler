@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
-  ArrowRight,
+  ArrowUpRight,
   CheckCircle2,
   ClipboardList,
   Clock,
@@ -566,10 +566,11 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                   {/* Mobile Action Link */}
                   <Link
                     href={`/assessment/marks/${unit.items[0]?.id ?? unit.unitId}`}
-                    className="inline-flex min-h-9 w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-primary px-3 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition"
+                    aria-label={`Open markbook for ${unit.unitName}`}
+                    className="inline-flex min-h-9 w-full items-center justify-center gap-1 whitespace-nowrap rounded-lg border border-border-strong bg-surface px-3 text-xs font-semibold text-text-secondary transition hover:border-primary/40 hover:bg-surface-subtle hover:text-primary"
                   >
-                    <span>Open Markbook</span>
-                    <ArrowRight className="size-3.5 shrink-0" />
+                    <span>Open</span>
+                    <ArrowUpRight className="size-3.5 shrink-0" aria-hidden="true" />
                   </Link>
                 </article>
               ))}
@@ -688,10 +689,12 @@ export function AssessmentControlCenter({ data }: { data: AssessmentControlCente
                       <TableCell className="text-right">
                         <Link
                           href={`/assessment/marks/${unit.items[0]?.id ?? unit.unitId}`}
-                          className="inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-lg bg-primary px-3 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition"
+                          aria-label={`Open markbook for ${unit.unitName}`}
+                          title={`Open markbook for ${unit.unitName}`}
+                          className="inline-flex h-8 items-center gap-1 whitespace-nowrap rounded-lg border border-border-strong bg-surface px-2.5 text-xs font-semibold text-text-secondary transition hover:border-primary/40 hover:bg-surface-subtle hover:text-primary"
                         >
-                          <span>Open Markbook</span>
-                          <ArrowRight className="size-3.5 shrink-0" />
+                          <span>Open</span>
+                          <ArrowUpRight className="size-3.5 shrink-0" aria-hidden="true" />
                         </Link>
                       </TableCell>
                     </TableRow>
